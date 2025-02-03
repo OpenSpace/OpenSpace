@@ -1,0 +1,32 @@
+-- With Non-uniform Size
+-- This example creates a box grid with a non-uniform size. The size has been set so the
+-- box is two times larger in the Y-direction.
+--
+-- The `Size` values are given in meters, and here the box is scaled up by a factor of
+-- 100. So, the box will have a size of 100 times the `Size` values.
+
+local Node = {
+  Identifier = "RenderableBoxGrid_Example_Size",
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 100
+    }
+  },
+  Renderable = {
+    Type = "RenderableBoxGrid",
+    Size = { 1.0, 2.0, 1.0 }
+  },
+  GUI = {
+    Name = "RenderableBoxGrid - Non-uniform Size",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

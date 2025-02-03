@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,8 +35,7 @@ namespace {
         "ShouldInterpolate",
         "Should Interpolate",
         "If this value is set to 'true', an interpolation is applied between the given "
-        "keyframes. If this value is set to 'false', the interpolation is not applied",
-        // @VISIBILITY(3.2)
+        "keyframes. If this value is set to 'false', the interpolation is not applied.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -108,14 +107,8 @@ glm::dmat3 TimelineRotation::matrix(const UpdateData& data) const {
         return glm::dmat3(glm::slerp(prevRot, nextRot, t));
     }
     else {
-        if (prevTime <= now && now < nextTime) {
-            return prev->data->matrix(data);
-        }
-        else if (nextTime <= now) {
-            return next->data->matrix(data);
-        }
+        return now < nextTime ? prev->data->matrix(data) : next->data->matrix(data);
     }
-    return glm::dmat3(0.0);
 }
 
 } // namespace openspace

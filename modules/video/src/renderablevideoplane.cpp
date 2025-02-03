@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -74,20 +74,19 @@ void RenderableVideoPlane::update(const UpdateData& data) {
         return;
     }
 
-    // Shape the vidoe based on the aspect ration of the film
-    glm::vec2 textureDim = glm::vec2(_videoPlayer.frameTexture()->dimensions());
+    // Shape the plane based on the aspect ratio of the video
+    const glm::vec2 textureDim = glm::vec2(_videoPlayer.frameTexture()->dimensions());
     if (_textureDimensions != textureDim) {
-        float aspectRatio = textureDim.x / textureDim.y;
-        float planeAspectRatio = _size.value().x / _size.value().y;
+        const float aspectRatio = textureDim.x / textureDim.y;
+        const float planeAspectRatio = _size.value().x / _size.value().y;
 
         if (std::abs(planeAspectRatio - aspectRatio) >
             std::numeric_limits<float>::epsilon())
         {
-            glm::vec2 newSize =
-                aspectRatio > 0.f ?
-                glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
-                glm::vec2(_size.value().x, _size.value().y * aspectRatio);
-            _size = newSize;
+            const double scale = _size.value().y;
+            _size = aspectRatio > 0.f ?
+                glm::vec2(scale * aspectRatio, scale) :
+                glm::vec2(scale, scale * aspectRatio);
         }
 
         _textureDimensions = textureDim;

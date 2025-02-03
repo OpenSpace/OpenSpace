@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -63,7 +63,7 @@ struct Action {
     /// current OpenSpace instance. If it is `No`, it is synchronized to other OpenSpace
     /// instances, for example other nodes in a cluster environment, or to other OpenSpace
     /// instances using a parallel connection
-    IsLocal isLocal = IsLocal::Yes;
+    IsLocal isLocal = IsLocal::No;
 };
 
 } // namespace openspace::interaction

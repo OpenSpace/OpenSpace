@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -79,12 +79,12 @@ private:
 
     ghoul::opengl::ProgramObject* _programObject = nullptr;
     ghoul::opengl::ProgramObject* _fboProgramObject = nullptr;
-    UniformCache(sunPos, modelTransform, modelViewProjectionTransform, hasBaseMap,
+    UniformCache(sun_pos, modelTransform, modelViewProjectionTransform, hasBaseMap,
         hasHeightMap, heightExaggeration, meridianShift, ambientBrightness,
-        projectionFading, baseTexture, projectionTexture, heightTexture)
-        _mainUniformCache;
+        projectionFading, baseTexture, projectionTexture,
+        heightTexture) _mainUniformCache;
 
-    UniformCache(projectionTexture, projectorMatrix, modelTransform, boresight,
+    UniformCache(projectionTexture, ProjectorMatrix, ModelTransform, boresight,
         radius, segments) _fboUniformCache;
 
     std::unique_ptr<ghoul::opengl::Texture> _baseTexture;

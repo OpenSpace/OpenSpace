@@ -59,5 +59,12 @@
       "eyeseparation": 0.065,
       "pos": { "x": 0.0, "y": 0.0, "z": 0.0 }
     }
-  ]
+  ],
+  "meta": {
+    "author": "OpenSpace Team",
+    "description": "Two windows for a side-by-side dual-monitor configuration, where the right-side monitor can be considered a projector. Primary 1920x1080 window with menu and text overlays minus rendering, and a secondary 1920x1080 fullscreen window with planar projection rendering without menu or text overlays.",
+    "license": "MIT License",
+    "name": "Side Projector + GUI",
+    "version": "1.0"
+  }
 }

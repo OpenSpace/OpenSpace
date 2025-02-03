@@ -6,7 +6,8 @@ local Layer = {
   Identifier = "WAC_Utah",
   Name = "WAC [Utah]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("wac_utah.wms"),
+  ZIndex = 10,
+  FilePath = asset.resource("wac_utah.wms"),
   Settings = { Gamma = 0.84 },
   Description = [[Lunar Reconnaissance Orbiter Camera (LROC) Wide Angle Camera (WAC)
     aboard the Lunar Reconnaissance Orbiter (LRO) has allowed the instrument team to
@@ -45,7 +46,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "WAC [Utah]",
-  Version = "2.0",
   Description = [[Wide Angle Color map of the Moon. This map is hosted on the OpenSpace
     server in Utah]],
   Author = "USGS",

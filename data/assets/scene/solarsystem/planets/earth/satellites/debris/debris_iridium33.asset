@@ -2,13 +2,13 @@ local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
-local omm = asset.syncedResource({
+local omm = asset.resource({
   Name = "Satellite OMM Data (Iridium 33 Debris)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_iridium-33-debris",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=iridium-33-debris&FORMAT=kvn",
   Filename = "iridium-33-debris.txt",
-  Override = true
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -21,7 +21,8 @@ local DebrisIridium = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.8, 0.0, 0.3 },
-    Fade = 1.5,
+    TrailFade = 5,
+    PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },
@@ -46,7 +47,6 @@ asset.export(DebrisIridium)
 
 asset.meta = {
   Name = "Satellites Debris - Iridium 33 Debris",
-  Version = "1.0",
   Description = "Satellites asset for Debris - Iridium 33 Debris. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

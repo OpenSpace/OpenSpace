@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,12 +43,19 @@
 #include <modules/base/rendering/grids/renderablegrid.h>
 #include <modules/base/rendering/grids/renderableradialgrid.h>
 #include <modules/base/rendering/grids/renderablesphericalgrid.h>
+#include <modules/base/rendering/pointcloud/renderableinterpolatedpoints.h>
+#include <modules/base/rendering/pointcloud/renderablepointcloud.h>
+#include <modules/base/rendering/pointcloud/renderablepolygoncloud.h>
+#include <modules/base/rendering/pointcloud/sizemappingcomponent.h>
 #include <modules/base/rendering/renderablecartesianaxes.h>
 #include <modules/base/rendering/renderabledisc.h>
+#include <modules/base/rendering/renderabledistancelabel.h>
 #include <modules/base/rendering/renderablelabel.h>
 #include <modules/base/rendering/renderablemodel.h>
+#include <modules/base/rendering/renderablenodearrow.h>
 #include <modules/base/rendering/renderablenodeline.h>
-#include <modules/base/rendering/renderablesphere.h>
+#include <modules/base/rendering/renderablesphereimagelocal.h>
+#include <modules/base/rendering/renderablesphereimageonline.h>
 #include <modules/base/rendering/renderabletrailorbit.h>
 #include <modules/base/rendering/renderabletrailtrajectory.h>
 #include <modules/base/rendering/renderableplaneimagelocal.h>
@@ -132,21 +139,31 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableBoxGrid>("RenderableBoxGrid");
     fRenderable->registerClass<RenderableCartesianAxes>("RenderableCartesianAxes");
     fRenderable->registerClass<RenderableDisc>("RenderableDisc");
+    fRenderable->registerClass<RenderableDistanceLabel>("RenderableDistanceLabel");
     fRenderable->registerClass<RenderableGrid>("RenderableGrid");
     fRenderable->registerClass<RenderableLabel>("RenderableLabel");
     fRenderable->registerClass<RenderableModel>("RenderableModel");
+    fRenderable->registerClass<RenderableNodeArrow>("RenderableNodeArrow");
     fRenderable->registerClass<RenderableNodeLine>("RenderableNodeLine");
     fRenderable->registerClass<RenderablePlaneImageLocal>("RenderablePlaneImageLocal");
     fRenderable->registerClass<RenderablePlaneImageOnline>("RenderablePlaneImageOnline");
     fRenderable->registerClass<RenderablePlaneTimeVaryingImage>(
         "RenderablePlaneTimeVaryingImage"
     );
+    fRenderable->registerClass<RenderableInterpolatedPoints>(
+        "RenderableInterpolatedPoints"
+    );
+    fRenderable->registerClass<RenderablePointCloud>("RenderablePointCloud");
+    fRenderable->registerClass<RenderablePolygonCloud>("RenderablePolygonCloud");
     fRenderable->registerClass<RenderablePrism>("RenderablePrism");
     fRenderable->registerClass<RenderableTimeVaryingSphere>(
         "RenderableTimeVaryingSphere"
     );
     fRenderable->registerClass<RenderableRadialGrid>("RenderableRadialGrid");
-    fRenderable->registerClass<RenderableSphere>("RenderableSphere");
+    fRenderable->registerClass<RenderableSphereImageLocal>("RenderableSphereImageLocal");
+    fRenderable->registerClass<RenderableSphereImageOnline>(
+        "RenderableSphereImageOnline"
+    );
     fRenderable->registerClass<RenderableSphericalGrid>("RenderableSphericalGrid");
     fRenderable->registerClass<RenderableTrailOrbit>("RenderableTrailOrbit");
     fRenderable->registerClass<RenderableTrailTrajectory>("RenderableTrailTrajectory");
@@ -215,21 +232,28 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderableBoxGrid::Documentation(),
         RenderableCartesianAxes::Documentation(),
         RenderableDisc::Documentation(),
+        RenderableDistanceLabel::Documentation(),
         RenderableGrid::Documentation(),
+        RenderableInterpolatedPoints::Documentation(),
         RenderableLabel::Documentation(),
         RenderableModel::Documentation(),
+        RenderableNodeArrow::Documentation(),
         RenderableNodeLine::Documentation(),
-        RenderablePlane::Documentation(),
         RenderablePlaneImageLocal::Documentation(),
         RenderablePlaneImageOnline::Documentation(),
         RenderablePlaneTimeVaryingImage::Documentation(),
+        RenderablePointCloud::Documentation(),
+        RenderablePolygonCloud::Documentation(),
         RenderablePrism::Documentation(),
         RenderableRadialGrid::Documentation(),
-        RenderableSphere::Documentation(),
+        RenderableSphereImageLocal::Documentation(),
+        RenderableSphereImageOnline::Documentation(),
         RenderableSphericalGrid::Documentation(),
         RenderableTimeVaryingSphere::Documentation(),
         RenderableTrailOrbit::Documentation(),
         RenderableTrailTrajectory::Documentation(),
+
+        SizeMappingComponent::Documentation(),
 
         ScreenSpaceDashboard::Documentation(),
         ScreenSpaceFramebuffer::Documentation(),

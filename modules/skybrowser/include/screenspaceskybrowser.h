@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,13 +43,14 @@ public:
     bool initializeGL() override;
     bool deinitializeGL() override;
     glm::mat4 scaleMatrix() override;
-    void render() override;
+    void render(const RenderData& renderData) override;
     void update() override;
 
     float opacity() const noexcept override;
     glm::dvec2 fineTuneVector(const glm::dvec2& drag);
     bool isInitialized() const;
     bool isPointingSpacecraft() const;
+    bool shouldUpdateWhileTargetAnimates() const;
 
     double setVerticalFovWithScroll(float scroll);
     void setIdInBrowser() const;
@@ -71,6 +72,7 @@ private:
     properties::FloatProperty _textureQuality;
     properties::BoolProperty _isHidden;
     properties::BoolProperty _isPointingSpacecraft;
+    properties::BoolProperty _updateDuringTargetAnimation;
     std::vector<std::unique_ptr<properties::Vec3Property>> _displayCopies;
     std::vector<std::unique_ptr<properties::BoolProperty>> _showDisplayCopies;
 

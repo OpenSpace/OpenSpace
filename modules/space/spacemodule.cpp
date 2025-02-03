@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,9 +24,9 @@
 
 #include <modules/space/spacemodule.h>
 
-#include <modules/space/labelscomponent.h>
 #include <modules/space/rendering/renderableconstellationbounds.h>
 #include <modules/space/rendering/renderableconstellationlines.h>
+#include <modules/space/rendering/renderableeclipsecone.h>
 #include <modules/space/rendering/renderablefluxnodes.h>
 #include <modules/space/rendering/renderablehabitablezone.h>
 #include <modules/space/rendering/renderableorbitalkepler.h>
@@ -45,6 +45,7 @@
 #include <openspace/util/coordinateconversion.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/spicemanager.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
 
@@ -55,14 +56,25 @@ namespace {
         "ShowExceptions",
         "Show Exceptions",
         "If enabled, errors from SPICE will be thrown and show up in the log. If "
-        "disabled, the errors will be ignored silently",
+        "disabled, the errors will be ignored silently.",
         openspace::properties::Property::Visibility::Developer
     };
+
+    struct [[codegen::Dictionary(SpaceModule)]] Parameters {
+        // [[codegen::verbatim(SpiceExceptionInfo.description)]]
+        std::optional<bool> showExceptions;
+    };
+#include "spacemodule_codegen.cpp"
+
 } // namespace
 
 namespace openspace {
 
 ghoul::opengl::ProgramObjectManager SpaceModule::ProgramObjectManager;
+
+documentation::Documentation SpaceModule::Documentation() {
+    return codegen::doc<Parameters>("module_space");
+}
 
 SpaceModule::SpaceModule()
     : OpenSpaceModule(Name)
@@ -85,6 +97,7 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     fRenderable->registerClass<RenderableConstellationLines>(
         "RenderableConstellationLines"
     );
+    fRenderable->registerClass<RenderableEclipseCone>("RenderableEclipseCone");
     fRenderable->registerClass<RenderableFluxNodes>("RenderableFluxNodes");
     fRenderable->registerClass<RenderableHabitableZone>("RenderableHabitableZone");
     fRenderable->registerClass<RenderableRings>("RenderableRings");
@@ -107,9 +120,8 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 
     fRotation->registerClass<SpiceRotation>("SpiceRotation");
 
-    if (dictionary.hasValue<bool>(SpiceExceptionInfo.identifier)) {
-        _showSpiceExceptions = dictionary.value<bool>(SpiceExceptionInfo.identifier);
-    }
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _showSpiceExceptions = p.showExceptions.value_or(_showSpiceExceptions);
 }
 
 void SpaceModule::internalDeinitializeGL() {
@@ -122,6 +134,7 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
         KeplerTranslation::Documentation(),
         RenderableConstellationBounds::Documentation(),
         RenderableConstellationLines::Documentation(),
+        RenderableEclipseCone::Documentation(),
         RenderableFluxNodes::Documentation(),
         RenderableHabitableZone::Documentation(),
         RenderableRings::Documentation(),
@@ -130,18 +143,20 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
         RenderableTravelSpeed::Documentation(),
         SpiceRotation::Documentation(),
         SpiceTranslation::Documentation(),
-        LabelsComponent::Documentation(),
         GPTranslation::Documentation()
     };
 }
 
 scripting::LuaLibrary SpaceModule::luaLibrary() const {
     return {
-        "space",
-        {
+        .name = "space",
+        .functions = {
             codegen::lua::ConvertFromRaDec,
             codegen::lua::ConvertToRaDec,
             codegen::lua::ReadKeplerFile
+        },
+        .scripts = {
+            absPath("${MODULE_SPACE}/scripts/spice.lua")
         }
     };
 }

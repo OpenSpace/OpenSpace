@@ -1,6 +1,9 @@
 -- Create a state machine with a few different states. The state machine can be controlled through
 -- the scripting commands from the state machine module.
 
+asset.require("scene/solarsystem/planets/earth/earth")
+asset.require("scene/digitaluniverse/constellations")
+
 local function targetNode(nodeIdentifier)
   return [[
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
@@ -71,3 +74,14 @@ asset.onInitialize(function()
 
   openspace.statemachine.createStateMachine(States, Transitions, "Earth")
 end)
+
+
+
+asset.meta = {
+  Name = "State Machine",
+  Description = [[Example of how to create a state machine in OpenSpace, where each
+    state and transition between states may trigger different behaviors.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

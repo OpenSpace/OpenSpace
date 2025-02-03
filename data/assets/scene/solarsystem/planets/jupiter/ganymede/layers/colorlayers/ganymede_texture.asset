@@ -2,7 +2,7 @@ local globe = asset.require("../../ganymede")
 
 
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Name = "Ganymede Textures",
   Type = "HttpSynchronization",
   Identifier = "ganymede_textures",
@@ -13,7 +13,9 @@ local texturesPath = asset.syncedResource({
 local Layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "ganymede.jpg",
-  Enabled = asset.enabled
+  Enabled = asset.enabled,
+  ZIndex = 5,
+  CacheSettings = { Enabled = false }
 }
 
 
@@ -31,7 +33,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Ganymede Texutre",
-  Version = "1.0",
   Description = "Default jpg texture for Ganymede",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

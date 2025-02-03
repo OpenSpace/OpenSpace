@@ -1,5 +1,6 @@
 local transforms = asset.require("./transforms")
-local kernel = asset.require("./kernels")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -9,17 +10,21 @@ local Miranda = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MIRANDA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels.ID.Miranda,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 471600, 468000, 466000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 471600, 468000, 466000 }
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major", "moon_major_uranus" },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_major",
+    "moon_major_uranus"
+  },
   GUI = {
     Name = "Miranda",
     Path = "/Solar System/Planets/Uranus/Major Moons/Miranda"
@@ -33,14 +38,19 @@ local MirandaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MIRANDA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels.ID.Miranda,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 1.413479,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus", "moonTrail_major_uranus" },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_major_uranus"
+  },
   GUI = {
     Name = "Miranda Trail",
     Path = "/Solar System/Planets/Uranus/Major Moons/Miranda"
@@ -51,8 +61,8 @@ local MirandaLabel = {
   Identifier = "MirandaLabel",
   Parent = Miranda.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Miranda",
     FontSize = 70.0,
     Size = 7.4,
@@ -67,8 +77,7 @@ local MirandaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Miranda Label",
-    Path = "/Solar System/Planets/Uranus/Major Moons/Miranda",
-    Description = "Label for Uranus' moon Miranda"
+    Path = "/Solar System/Planets/Uranus/Major Moons/Miranda"
   }
 }
 
@@ -78,17 +87,21 @@ local Ariel = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ARIEL",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels.ID.Ariel,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1162000, 1156000, 1155000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1162000, 1156000, 1155000 }
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major", "moon_major_uranus" },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_major",
+    "moon_major_uranus"
+  },
   GUI = {
     Name = "Ariel",
     Path = "/Solar System/Planets/Uranus/Major Moons/Ariel"
@@ -102,14 +115,19 @@ local ArielTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ARIEL",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels.ID.Ariel,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 2.520379,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus", "moonTrail_major_uranus" },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_major_uranus"
+  },
   GUI = {
     Name = "Ariel Trail",
     Path = "/Solar System/Planets/Uranus/Major Moons/Ariel"
@@ -120,8 +138,8 @@ local ArielLabel = {
   Identifier = "ArielLabel",
   Parent = Ariel.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Ariel",
     FontSize = 70.0,
     Size = 7.4,
@@ -136,8 +154,7 @@ local ArielLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Ariel Label",
-    Path = "/Solar System/Planets/Uranus/Major Moons/Ariel",
-    Description = "Label for Uranus' moon Ariel"
+    Path = "/Solar System/Planets/Uranus/Major Moons/Ariel"
   }
 }
 
@@ -147,17 +164,21 @@ local Umbriel = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "UMBRIEL",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels.ID.Umbriel,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1169400, 1169400, 1169400 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1169400, 1169400, 1169400 }
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major", "moon_major_uranus" },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_major",
+    "moon_major_uranus"
+  },
   GUI = {
     Name = "Umbriel",
     Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel"
@@ -171,14 +192,19 @@ local UmbrielTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "UMBRIEL",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels.ID.Umbriel,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 4.144177,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus", "moonTrail_major_uranus" },
+  Tag = {
+     "moonTrail_solarSystem",
+     "moonTrail_giants",
+     "moonTrail_uranus",
+     "moonTrail_major_uranus"
+  },
   GUI = {
     Name = "Umbriel Trail",
     Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel"
@@ -189,8 +215,8 @@ local UmbrielLabel = {
   Identifier = "UmbrielLabel",
   Parent = Umbriel.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Umbriel",
     FontSize = 70.0,
     Size = 7.4,
@@ -205,8 +231,7 @@ local UmbrielLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Umbriel Label",
-    Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel",
-    Description = "Label for Uranus' moon Umbriel"
+    Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel"
   }
 }
 
@@ -216,17 +241,21 @@ local Titania = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "TITANIA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels.ID.Titania,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1576800, 1576800, 1576800 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1576800, 1576800, 1576800 }
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major", "moon_major_uranus" },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_major",
+    "moon_major_uranus"
+  },
   GUI = {
     Name = "Titania",
     Path = "/Solar System/Planets/Uranus/Major Moons/Titania"
@@ -240,14 +269,19 @@ local TitaniaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "TITANIA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels.ID.Titania,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 8.705872,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus", "moonTrail_major_uranus" },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_major_uranus"
+  },
   GUI = {
     Name = "Titania Trail",
     Path = "/Solar System/Planets/Uranus/Major Moons/Titania"
@@ -258,8 +292,8 @@ local TitaniaLabel = {
   Identifier = "TitaniaLabel",
   Parent = Titania.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Titania",
     FontSize = 70.0,
     Size = 7.4,
@@ -274,8 +308,7 @@ local TitaniaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Titania Label",
-    Path = "/Solar System/Planets/Uranus/Major Moons/Titania",
-    Description = "Label for Uranus' moon Titania"
+    Path = "/Solar System/Planets/Uranus/Major Moons/Titania"
   }
 }
 
@@ -285,17 +318,21 @@ local Oberon = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "OBERON",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels.ID.Oberon,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1522800, 1522800, 1522800 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1522800, 1522800, 1522800 }
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major", "moon_major_uranus" },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_major",
+    "moon_major_uranus"
+  },
   GUI = {
     Name = "Oberon",
     Path = "/Solar System/Planets/Uranus/Major Moons/Oberon"
@@ -309,14 +346,19 @@ local OberonTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "OBERON",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels.ID.Oberon,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 13.463239,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus", "moonTrail_major_uranus" },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_major_uranus"
+  },
   GUI = {
     Name = "Oberon Trail",
     Path = "/Solar System/Planets/Uranus/Major Moons/Oberon"
@@ -327,8 +369,8 @@ local OberonLabel = {
   Identifier = "OberonLabel",
   Parent = Oberon.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Oberon",
     FontSize = 70.0,
     Size = 7.4,
@@ -343,21 +385,19 @@ local OberonLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Oberon Label",
-    Path = "/Solar System/Planets/Uranus/Major Moons/Oberon",
-    Description = "Label for Uranus' moon Oberon"
+    Path = "/Solar System/Planets/Uranus/Major Moons/Oberon"
   }
 }
-
 
 local UranusMajorMoonsOn = {
   Identifier = "os.solarsystem.UranusMajorMoonsOn",
   Name = "Turn ON major moons and trails",
   Command = [[
-    local trails = openspace.getProperty("{moonTrail_major_uranus}.Renderable.Enabled")
-    local trails_fade = openspace.getProperty("{moonTrail_major_uranus}.Renderable.Fade")
+    local trails = openspace.property("{moonTrail_major_uranus}.Renderable.Enabled")
+    local trails_fade = openspace.property("{moonTrail_major_uranus}.Renderable.Fade")
 
-    local moons = openspace.getProperty("{moon_major_uranus}.Renderable.Enabled")
-    local moons_fade = openspace.getProperty("{moon_major_uranus}.Renderable.Fade")
+    local moons = openspace.property("{moon_major_uranus}.Renderable.Enabled")
+    local moons_fade = openspace.property("{moon_major_uranus}.Renderable.Fade")
 
     for i, v in pairs(trails_fade) do
       openspace.setPropertyValueSingle(trails[i], true)
@@ -371,18 +411,18 @@ local UranusMajorMoonsOn = {
   ]],
   Documentation = "Turn ON Uranus's major moons and their trails",
   GuiPath = "/Solar System/Uranus",
-  IsLocal = true
+  IsLocal = false
 }
 
 local UranusMajorMoonsOff = {
   Identifier = "os.solarsystem.UranusMajorMoonsOff",
   Name = "Turn OFF majors moon and trails",
   Command = [[
-    local trails = openspace.getProperty("{moonTrail_major_uranus}.Renderable.Enabled")
-    local trails_fade = openspace.getProperty("{moonTrail_major_uranus}.Renderable.Fade")
+    local trails = openspace.property("{moonTrail_major_uranus}.Renderable.Enabled")
+    local trails_fade = openspace.property("{moonTrail_major_uranus}.Renderable.Fade")
 
-    local moons = openspace.getProperty("{moon_major_uranus}.Renderable.Enabled")
-    local moons_fade = openspace.getProperty("{moon_major_uranus}.Renderable.Fade")
+    local moons = openspace.property("{moon_major_uranus}.Renderable.Enabled")
+    local moons_fade = openspace.property("{moon_major_uranus}.Renderable.Fade")
 
     for i, v in pairs(trails_fade) do
       openspace.setPropertyValueSingle(
@@ -406,14 +446,11 @@ local UranusMajorMoonsOff = {
   ]],
   Documentation = "Turn OFF Uranus's major moons and their trails",
   GuiPath = "/Solar System/Uranus",
-  IsLocal = true
+  IsLocal = false
 }
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.ura111)
-
-
   openspace.addSceneGraphNode(Miranda)
   openspace.addSceneGraphNode(MirandaTrail)
   openspace.addSceneGraphNode(MirandaLabel)
@@ -461,9 +498,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(OberonLabel)
   openspace.removeSceneGraphNode(OberonTrail)
   openspace.removeSceneGraphNode(Oberon)
-
-
-  openspace.spice.unloadKernel(kernel.ura111)
 end)
 
 asset.export(Miranda)
@@ -485,9 +519,9 @@ asset.export("UranusMajorMoonsOn", UranusMajorMoonsOn.Identifier)
 asset.export("UranusMajorMoonsOff", UranusMajorMoonsOff.Identifier)
 
 
+
 asset.meta = {
   Name = "Uranus Marjor Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Uranus' major moons: Miranda, Ariel,
     Umbriel, Titania, and Oberon. Blank globes and SPICE trails are generated for each
     moon]],

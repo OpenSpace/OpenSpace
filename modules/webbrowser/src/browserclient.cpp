@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,8 @@
 #include <modules/webbrowser/include/webrenderhandler.h>
 #include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <ghoul/misc/assert.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 
 namespace openspace {
 
@@ -43,6 +45,7 @@ BrowserClient::BrowserClient(WebRenderHandler* handler,
     _lifeSpanHandler = browserLauncher;
     _requestHandler = browserLauncher;
     _contextMenuHandler = new BrowserClient::NoContextMenuHandler;
+    _displayHandler = new BrowserClient::DisplayHandler;
 }
 
 CefRefPtr<CefContextMenuHandler> BrowserClient::GetContextMenuHandler() {
@@ -65,6 +68,10 @@ CefRefPtr<CefKeyboardHandler> BrowserClient::GetKeyboardHandler() {
     return _keyboardHandler;
 }
 
+CefRefPtr<CefDisplayHandler> BrowserClient::GetDisplayHandler() {
+    return _displayHandler;
+}
+
 bool BrowserClient::NoContextMenuHandler::RunContextMenu(CefRefPtr<CefBrowser>,
                                                          CefRefPtr<CefFrame>,
                                                          CefRefPtr<CefContextMenuParams>,
@@ -75,4 +82,64 @@ bool BrowserClient::NoContextMenuHandler::RunContextMenu(CefRefPtr<CefBrowser>,
     return true;
 }
 
+bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser>, CefCursorHandle,
+                                                   cef_cursor_type_t type,
+                                                   const CefCursorInfo&)
+{
+    WindowDelegate::Cursor newCursor;
+    switch (type) {
+        case cef_cursor_type_t::CT_POINTER:
+            newCursor = WindowDelegate::Cursor::Arrow;
+            break;
+        case cef_cursor_type_t::CT_IBEAM:
+            newCursor = WindowDelegate::Cursor::IBeam;
+            break;
+        case cef_cursor_type_t::CT_CROSS:
+            newCursor = WindowDelegate::Cursor::CrossHair;
+            break;
+        case cef_cursor_type_t::CT_HAND:
+            newCursor = WindowDelegate::Cursor::PointingHand;
+            break;
+        case cef_cursor_type_t::CT_EASTWESTRESIZE:
+        case cef_cursor_type_t::CT_COLUMNRESIZE:
+        case cef_cursor_type_t::CT_EASTRESIZE:
+        case cef_cursor_type_t::CT_WESTRESIZE:
+            newCursor = WindowDelegate::Cursor::ResizeEW;
+            break;
+        case cef_cursor_type_t::CT_NORTHSOUTHRESIZE:
+        case cef_cursor_type_t::CT_ROWRESIZE:
+        case cef_cursor_type_t::CT_NORTHRESIZE:
+        case cef_cursor_type_t::CT_SOUTHRESIZE:
+            newCursor = WindowDelegate::Cursor::ResizeNS;
+            break;
+        case cef_cursor_type_t::CT_NORTHWESTSOUTHEASTRESIZE:
+        case cef_cursor_type_t::CT_SOUTHEASTRESIZE:
+        case cef_cursor_type_t::CT_NORTHWESTRESIZE:
+            newCursor = WindowDelegate::Cursor::ResizeNWSE;
+            break;
+        case cef_cursor_type_t::CT_NORTHEASTSOUTHWESTRESIZE:
+        case cef_cursor_type_t::CT_SOUTHWESTRESIZE:
+        case cef_cursor_type_t::CT_NORTHEASTRESIZE:
+            newCursor = WindowDelegate::Cursor::ResizeNESW;
+            break;
+        case cef_cursor_type_t::CT_MOVE:
+            newCursor = WindowDelegate::Cursor::ResizeAll;
+            break;
+        case cef_cursor_type_t::CT_NOTALLOWED:
+            newCursor = WindowDelegate::Cursor::NotAllowed;
+            break;
+        case cef_cursor_type_t::CT_GRAB:
+        case cef_cursor_type_t::CT_GRABBING:
+            // There is no "grabbing" cursors in GLFW, so for now the pointing hand to
+            // make web objects that use drag-n-drop look more interactive.
+            // @TODO (emmbr, 2024-12-09) Add custom cursors for these cases
+            newCursor = WindowDelegate::Cursor::PointingHand;
+            break;
+        default:
+            newCursor = WindowDelegate::Cursor::Arrow;
+            break;
+    }
+    global::windowDelegate->setMouseCursor(newCursor);
+    return false;
+}
 } // namespace openspace

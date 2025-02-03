@@ -2,13 +2,13 @@ local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
-local omm = asset.syncedResource({
+local omm = asset.resource({
   Name = "Satellite OMM Data (Active)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_active",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=active&FORMAT=kvn",
   Filename = "active.txt",
-  Override = true
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -21,7 +21,8 @@ local ActiveSatellites = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.45, 0.25, 0.45 },
-    Fade = 1.5,
+    TrailFade = 5,
+    PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },
@@ -47,7 +48,6 @@ asset.export(ActiveSatellites)
 
 asset.meta = {
   Name = "Satellites Active",
-  Version = "1.0",
   Description = "Satellites that employ active communication. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

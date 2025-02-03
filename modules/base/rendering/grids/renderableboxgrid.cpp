@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,31 +39,28 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the color of the grid lines that are rendered",
-        // @VISIBILITY(1.17)
+        "The color used for the grid lines.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the spherical grid",
+        "The width of the grid lines. The larger number, the thicker the lines.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Grid Size",
-        "This value species the size of each dimensions of the box",
+        "The size of each dimension of the box, in meters.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
-        "Labels",
-        "Labels",
-        "The labels for the grid"
-    };
-
+    // A RenderableBoxGrid creates a 3D box that is rendered using grid lines.
+    //
+    // Per default the box is given a uniform size of 1x1x1 meters. It can then be scaled
+    // to the desired size. Alternatively, the size in each dimension can be specified.
     struct [[codegen::Dictionary(RenderableBoxGrid)]] Parameters {
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
@@ -73,10 +70,6 @@ namespace {
 
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<glm::vec3> size;
-
-        // [[codegen::verbatim(LabelsInfo.description)]]
-        std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("space_labelscomponent")]];
     };
 #include "renderableboxgrid_codegen.cpp"
 } // namespace
@@ -107,25 +100,10 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     _size = p.size.value_or(_size);
     _size.onChange([this]() { _gridIsDirty = true; });
     addProperty(_size);
-
-    if (p.labels.has_value()) {
-        _labels = std::make_unique<LabelsComponent>(*p.labels);
-        _hasLabels = true;
-        addPropertySubOwner(_labels.get());
-        // Fading of the labels should also depend on the fading of the renderable
-        _labels->setParentFadeable(this);
-    }
 }
 
 bool RenderableBoxGrid::isReady() const {
-    return _hasLabels ? _gridProgram && _labels->isReady() : _gridProgram != nullptr;
-}
-
-void RenderableBoxGrid::initialize() {
-    if (_hasLabels) {
-        _labels->initialize();
-        _labels->loadLabels();
-    }
+    return _gridProgram != nullptr;
 }
 
 void RenderableBoxGrid::initializeGL() {
@@ -165,21 +143,14 @@ void RenderableBoxGrid::deinitializeGL() {
     _gridProgram = nullptr;
 }
 
-void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
+void RenderableBoxGrid::render(const RenderData& data, RendererTasks&) {
     _gridProgram->activate();
 
-    glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
-    const glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
-
-    const glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewTransform;
+    auto [modelTransform, modelViewTransform, modelViewProjectionTransform] =
+        calcAllTransforms(data);
 
     _gridProgram->setUniform("modelViewTransform", modelViewTransform);
-    _gridProgram->setUniform("MVPTransform", modelViewProjectionMatrix);
+    _gridProgram->setUniform("MVPTransform", modelViewProjectionTransform);
     _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
@@ -204,31 +175,6 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
     global::renderEngine->openglStateCache().resetDepthState();
-
-    // Draw labels
-    if (_hasLabels && _labels->enabled()) {
-        const glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
-        const glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
-        glm::vec3 right = glm::cross(viewDirection, lookup);
-        const glm::vec3 up = glm::cross(right, viewDirection);
-
-        const glm::dmat4 worldToModelTransform = glm::inverse(modelTransform);
-        glm::vec3 orthoRight = glm::normalize(
-            glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
-        );
-
-        if (orthoRight == glm::vec3(0.0)) {
-            glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
-            right = glm::cross(viewDirection, otherVector);
-            orthoRight = glm::normalize(
-                glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
-            );
-        }
-        const glm::vec3 orthoUp = glm::normalize(
-            glm::vec3(worldToModelTransform * glm::dvec4(up, 0.0))
-        );
-        _labels->render(data, modelViewProjectionMatrix, orthoRight, orthoUp);
-    }
 }
 
 void RenderableBoxGrid::update(const UpdateData&) {

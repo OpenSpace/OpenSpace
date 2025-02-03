@@ -2,11 +2,11 @@ local globe = asset.require("../../mars")
 
 
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Name = "Mars Textures",
   Type = "HttpSynchronization",
   Identifier = "mars_textures",
-  Version = 1
+  Version = 3
 })
 
 
@@ -14,8 +14,10 @@ local Layer = {
   Identifier = "Mars_Texture",
   Name = "Mars Texture",
   Enabled = asset.enabled,
-  FilePath = texturesPath .. "mars.jpg",
-  Description = "Default jpg texture for Mars"
+  ZIndex = 5,
+  FilePath = texturesPath .. "mars.png",
+  Description = "Default jpg texture for Mars",
+  CacheSettings = { Enabled = false }
 }
 
 
@@ -33,7 +35,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Mars Texutre",
-  Version = "1.0",
   Description = "Jpg texture for Mars, available for offline use",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

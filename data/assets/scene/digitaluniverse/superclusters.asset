@@ -1,11 +1,11 @@
-local textures = asset.syncedResource({
-  Name = "Galaxy Superclusters Textures",
+local textures = asset.resource({
+  Name = "Point Textures",
   Type = "HttpSynchronization",
-  Identifier = "digitaluniverse_superclusters_textures",
-  Version = 2
+  Identifier = "digitaluniverse_point_textures",
+  Version = 1
 })
 
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Galaxy Superclusters Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_superclusters_speck",
@@ -16,8 +16,9 @@ local speck = asset.syncedResource({
 local Object = {
   Identifier = "GalaxySuperclusters",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = false,
+    File = speck .. "superclust.speck",
     Labels = {
       Enabled = true,
       File = speck .. "superclust.label",
@@ -27,24 +28,26 @@ local Object = {
       Unit = "Mpc"
     },
     DrawElements = false,
-    Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
-    File = speck .. "superclust.speck",
-    Texture = textures .. "point3A.png",
+    Texture = {
+      File = textures .. "point3A.png",
+    },
     Unit = "Mpc",
-    ScaleFactor = 531.0,
-    -- BillboardMinMaxSize = { 0.0, 7.2 },
-    EnablePixelSizeControl = true
+    SizeSettings = {
+      ScaleExponent = 23.1,
+      MaxSize = 0.2,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
-    Name = "Galaxy Superclusters",
-    Path = "/Universe/Galaxies",
-    Description = [[Census: 33 labels. DU Version 1.3.<br> The superclusters dataset
-      is a set of labels that mark the major galaxy superclusters in the local universe.
-      They correspond to, and should be viewed with, the Abell clusters. Astronomers
-      estimate there are 10 million superclusters in the observable universe.
-      (Description from URL) <br><br> Data Reference: Superclusters of Abell and X-ray
-      clusters (Einasto+, 2001)]]
+    Name = "Supercluster Labels",
+    Path = "/Universe/Deep Sky Surveys",
+    Description = [[The superclusters dataset is a set of labels that mark the major
+      galaxy superclusters in the local universe. They correspond to, and should be viewed
+      with, the Abell clusters. Astronomers estimate there are 10 million superclusters in
+      the observable universe. Often, they carry constellation names because they are
+      viewed in those constellations from our night-sky perspective. Census: 33
+      supercluster labels.]]
   }
 }
 
@@ -63,8 +66,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Galaxy Superclusters",
-  Version = "2.1",
-  Description = "Digital Universe asset for Galaxy Superclusters",
+  Description = Object.GUI.Description,
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

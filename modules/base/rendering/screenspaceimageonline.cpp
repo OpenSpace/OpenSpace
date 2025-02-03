@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,20 +36,23 @@
 #include <optional>
 
 namespace {
+    constexpr std::string_view _loggerCat = "ScreenSpaceImageOnline";
+
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "URL",
         "Image URL",
-        "Sets the URL of the texture that is displayed on this screen space plane. If "
-        "this value is changed, the image at the new path will automatically be loaded "
-        "and displayed. The size of the image will also automatically set the default "
-        "size of this plane",
-        // @VISIBILITY(2.4)
+        "The URL of the texture to be displayed on this screen space plane. If changed, "
+        "the image at the new path will automatically be loaded and displayed. The "
+        "default size of the plane will be set based on the size of the image.",
         openspace::properties::Property::Visibility::User
     };
 
+    // This `ScreenSpaceRenderable` can be used to display an image from a web URL.
+    //
+    // To load an image from a local file on disk, see
+    // [`ScreenSpaceImageLocal`](#base_screenspace_image_local).
     struct [[codegen::Dictionary(ScreenSpaceImageOnline)]] Parameters {
-        // Specifies the GUI name of the ScreenspaceImage
-        std::optional<std::string> name;
+        std::optional<std::string> identifier;
 
         // [[codegen::verbatim(TextureInfo.description)]]
         std::optional<std::string> url [[codegen::key("URL")]];
@@ -70,15 +73,8 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    std::string identifier;
-    if (dictionary.hasValue<std::string>(KeyIdentifier)) {
-        identifier = dictionary.value<std::string>(KeyIdentifier);
-    }
-    else {
-        identifier = "ScreenSpaceImageOnline";
-    }
-    identifier = makeUniqueIdentifier(identifier);
-    setIdentifier(std::move(identifier));
+    std::string identifier = p.identifier.value_or("ScreenSpaceImageOnline");
+    setIdentifier(makeUniqueIdentifier(std::move(identifier)));
 
     _texturePath.onChange([this]() { _textureIsDirty = true; });
     _texturePath = p.url.value_or(_texturePath);
@@ -105,13 +101,12 @@ void ScreenSpaceImageOnline::update() {
         }
 
         if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
-            DownloadManager::MemoryFile imageFile = _imageFuture.get();
+            const DownloadManager::MemoryFile imageFile = _imageFuture.get();
 
             if (imageFile.corrupted) {
-                LERRORC(
-                    "ScreenSpaceImageOnline",
-                    fmt::format("Error loading image from URL '{}'", _texturePath)
-                );
+                LERROR(std::format(
+                    "Error loading image from URL '{}'", _texturePath.value()
+                ));
                 return;
             }
 
@@ -156,16 +151,12 @@ std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageTo
     return global::downloadManager->fetchFile(
         url,
         [url](const DownloadManager::MemoryFile&) {
-            LDEBUGC(
-                "ScreenSpaceImageOnline",
-                "Download to memory finished for screen space image"
-            );
+            LDEBUG("Download to memory finished for screen space image");
         },
         [url](const std::string& err) {
-            LDEBUGC(
-                "ScreenSpaceImageOnline",
-                "Download to memory failed for screen space image: " + err
-            );
+            LDEBUG(std::format(
+                "Download to memory failed for screen space image: {}", err
+            ));
         }
     );
 }

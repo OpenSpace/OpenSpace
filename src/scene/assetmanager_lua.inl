@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,6 +42,18 @@ namespace {
 }
 
 /**
+ * Removes all assets that are currently loaded
+ */
+[[codegen::luawrap]] void removeAll() {
+    using namespace openspace;
+    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().rootAssets();
+    std::reverse(as.begin(), as.end());
+    for (const Asset* asset : as) {
+        global::openSpaceEngine->assetManager().remove(asset->path().string());
+    }
+}
+
+/**
  * Returns true if the referenced asset already has been loaded. Otherwise false is
  * returned. The parameter to this function is the path of the asset that should be
  * tested.
@@ -61,13 +73,28 @@ namespace {
  * Returns the paths to all loaded assets, loaded directly or indirectly, as a table
  * containing the paths to all loaded assets.
  */
-[[codegen::luawrap]] std::vector<std::string> allAssets() {
+[[codegen::luawrap]] std::vector<std::filesystem::path> allAssets() {
     using namespace openspace;
     std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
-    std::vector<std::string> res;
+    std::vector<std::filesystem::path> res;
     res.reserve(as.size());
     for (const Asset* a : as) {
-        res.push_back(a->path().string());
+        res.push_back(a->path());
+    }
+    return res;
+}
+
+/**
+ * Returns the paths to all loaded root assets, which are assets that are loaded directly
+ * either through a profile or by calling the `openspace.asset.add` method.
+ */
+[[codegen::luawrap]] std::vector<std::filesystem::path> rootAssets() {
+    using namespace openspace;
+    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().rootAssets();
+    std::vector<std::filesystem::path> res;
+    res.reserve(as.size());
+    for (const Asset* a : as) {
+        res.push_back(a->path());
     }
     return res;
 }

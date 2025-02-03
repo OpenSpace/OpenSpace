@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <ghoul/glm.h>
 #include <glm/gtx/std_based_type.hpp>
 #include <array>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -50,8 +51,8 @@ class KameleonWrapper {
 public:
     enum class Model {
         OpenGGCM,
-        BATSRUS,        // Magnetosphere
-        ENLIL,          // Heliosphere
+        BATSRUS, // Magnetosphere
+        ENLIL, // Heliosphere
         MAS,
         Adapt3D,
         SWMF,
@@ -78,10 +79,10 @@ public:
 
     using Fieldlines = std::vector<std::vector<LinePoint>>;
 
-    explicit KameleonWrapper(const std::string& filename);
+    explicit KameleonWrapper(const std::filesystem::path& filename);
     ~KameleonWrapper();
 
-    bool open(const std::string& filename);
+    bool open(const std::filesystem::path& filename);
     void close();
 
     float* uniformSampledValues(const std::string& var,

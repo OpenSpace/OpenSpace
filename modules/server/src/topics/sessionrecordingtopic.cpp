@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,7 +51,7 @@ SessionRecordingTopic::SessionRecordingTopic() {
 
 SessionRecordingTopic::~SessionRecordingTopic() {
     if (_stateCallbackHandle != UnsetOnChangeHandle) {
-        global::sessionRecording->removeStateChangeCallback(_stateCallbackHandle);
+        global::sessionRecordingHandler->removeStateChangeCallback(_stateCallbackHandle);
     }
 }
 
@@ -78,7 +78,8 @@ void SessionRecordingTopic::handleJson(const nlohmann::json& json) {
         if (!json.at(PropertiesKey).is_array()) {
             LERROR("Properties must be an array of strings");
         }
-        nlohmann::json requestedProperties = json.at(PropertiesKey).get<nlohmann::json>();
+        const nlohmann::json requestedProperties =
+            json.at(PropertiesKey).get<nlohmann::json>();
         for (const auto& p : requestedProperties) {
             if (!p.is_string()) {
                 _isDone = true;
@@ -98,10 +99,10 @@ void SessionRecordingTopic::handleJson(const nlohmann::json& json) {
     sendJsonData();
 
     if (event == SubscribeEvent && _sendState) {
-        _stateCallbackHandle = global::sessionRecording->addStateChangeCallback(
+        _stateCallbackHandle = global::sessionRecordingHandler->addStateChangeCallback(
             [this]() {
-                interaction::SessionRecording::SessionState currentState =
-                    global::sessionRecording->state();
+                const interaction::SessionRecordingHandler::SessionState currentState =
+                    global::sessionRecordingHandler->state();
                 if (currentState != _lastState) {
                     sendJsonData();
                     _lastState = currentState;
@@ -113,18 +114,17 @@ void SessionRecordingTopic::handleJson(const nlohmann::json& json) {
 
 void SessionRecordingTopic::sendJsonData() {
     json stateJson;
-    using SessionRecording = openspace::interaction::SessionRecording;
+    using SessionRecordingHandler = interaction::SessionRecordingHandler;
     if (_sendState) {
-        SessionRecording::SessionState state = global::sessionRecording->state();
         std::string stateString;
-        switch (state) {
-            case SessionRecording::SessionState::Recording:
+        switch (global::sessionRecordingHandler->state()) {
+            case SessionRecordingHandler::SessionState::Recording:
                 stateString = "recording";
                 break;
-            case SessionRecording::SessionState::Playback:
+            case SessionRecordingHandler::SessionState::Playback:
                 stateString = "playing";
                 break;
-            case SessionRecording::SessionState::PlaybackPaused:
+            case SessionRecordingHandler::SessionState::PlaybackPaused:
                 stateString = "playing-paused";
                 break;
             default:
@@ -134,7 +134,7 @@ void SessionRecordingTopic::sendJsonData() {
         stateJson[StateKey] = stateString;
     };
     if (_sendFiles) {
-        stateJson[FilesKey] = global::sessionRecording->playbackList();
+        stateJson[FilesKey] = global::sessionRecordingHandler->playbackList();
     }
     if (!stateJson.empty()) {
         _connection->sendJson(wrappedPayload(stateJson));

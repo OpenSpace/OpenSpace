@@ -1,10 +1,10 @@
 local transforms = asset.require("./transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
-
-local BennuBodyId = 2101955
 
 local OsirisRexTrailEarth = {
   Identifier = "OsirisRexTrailEarth",
@@ -13,9 +13,9 @@ local OsirisRexTrailEarth = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "OSIRIS-REX",
-      Frame = "IAU_EARTH",
-      Observer = "EARTH"
+      Target = kernels.Frame.OsirisRex,
+      Frame = coreKernels.Frame.Earth,
+      Observer = coreKernels.ID.Earth
     },
     Color = { 0.9, 0.9, 0.0 },
     StartTime = "2016 SEP 8 23:05:00.50",
@@ -35,8 +35,8 @@ local OsirisRexTrailSolarSystem = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "OSIRIS-REX",
-      Observer = "SSB"
+      Target = kernels.ID.OsirisRex,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.2, 0.9, 0.2 },
     StartTime = "2016 SEP 8 23:05:00.50",
@@ -56,8 +56,8 @@ local OsirisRexTrailBennu = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "OSIRIS-REX",
-      Observer = BennuBodyId
+      Target = kernels.ID.OsirisRex,
+      Observer = kernels.ID.Bennu
     },
     Color = { 0.9, 0.2, 0.9 },
     StartTime = "2018 SEP 4 00:00:00",

@@ -6,8 +6,9 @@ local Layer = {
   Identifier = "HiRISE-LS-DEM",
   Name = "HiRISE Local Set DEM",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("hirisels.wms"),
-  TilePixelSize = 512,
+  ZIndex = 50,
+  FilePath = asset.resource("hirisels.wms"),
+  TilePixelSize = 129,
   Description = [[HiRISE (High Resolution Imaging Science Experiment) is the most
     powerful camera ever sent to another planet, one of six instruments onboard the
     Mars Reconnaissance Orbiter. We launched in 2005, arrived at Mars in 2006 and have
@@ -36,7 +37,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "HiRISE Local Set DEM",
-  Version = "1.1",
   Description = [[HiRISE DEM layer for corresponding Local Set imager. This map is hosted
     by ESRI]],
   Author = "USGS",

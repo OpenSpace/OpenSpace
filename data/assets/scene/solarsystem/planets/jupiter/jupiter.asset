@@ -1,6 +1,6 @@
-asset.require("spice/base")
 asset.require("./trail")
 local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -10,20 +10,18 @@ local Jupiter = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "JUPITER",
-      Observer = "JUPITER BARYCENTER"
+      Target = coreKernels.ID.Jupiter,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_JUPITER",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.Jupiter,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = { 71492000.0, 71492000.0, 66854000.0 },
-    SegmentsPerPatch = 64,
-    Layers = {},
     ShadowGroup = {
       Sources = {
         { Name = "Sun", Radius = 696300000 },
@@ -46,8 +44,8 @@ local JupiterLabel = {
   Identifier = "JupiterLabel",
   Parent = Jupiter.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Jupiter",
     FontSize = 70.0,
     Size = 8.75,
@@ -84,7 +82,6 @@ asset.export(JupiterLabel)
 
 asset.meta = {
   Name = "Jupiter",
-  Version = "1.1",
   Description = "Jupiter globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

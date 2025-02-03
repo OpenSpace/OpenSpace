@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,7 +31,7 @@ namespace openspace {
 
 /**
  * This class is an interface for all things fadeable in the software; things that need
- * a fade and opacity property, which will be combined into a final opacity value
+ * a fade and opacity property, which will be combined into a final opacity value.
  *
  * A Fadeable can also be dependent on the fade value from a specified parent fadeable,
  * so that it fades out together with the parent

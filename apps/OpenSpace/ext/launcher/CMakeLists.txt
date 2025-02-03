@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2023                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -27,6 +27,7 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/set_openspace_compile_settings.cmake
 set(HEADER_FILES
   include/filesystemaccess.h
   include/launcherwindow.h
+  include/settingsdialog.h
   include/profile/actiondialog.h
   include/profile/additionalscriptsdialog.h
   include/profile/assetsdialog.h
@@ -55,6 +56,7 @@ set(HEADER_FILES
 set(SOURCE_FILES
   src/launcherwindow.cpp
   src/filesystemaccess.cpp
+  src/settingsdialog.cpp
   src/profile/actiondialog.cpp
   src/profile/additionalscriptsdialog.cpp
   src/profile/assetsdialog.cpp

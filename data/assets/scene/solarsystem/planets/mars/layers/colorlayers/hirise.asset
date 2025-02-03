@@ -6,7 +6,8 @@ local Layer = {
   Identifier = "HiRISE-PSP",
   Name = "HiRISE",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("hirise.vrt"),
+  ZIndex = 70,
+  FilePath = asset.resource("hirise.vrt"),
   BlendMode = "Color",
   Settings = {
     Gamma = 1.0,
@@ -40,7 +41,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "HiRISE",
-  Version = "1.1",
   Description = [[Updated HiRISE layer for Mars with raw unselected imagery. This map is
     hosted by ESRI]],
   Author = "esri_astro",

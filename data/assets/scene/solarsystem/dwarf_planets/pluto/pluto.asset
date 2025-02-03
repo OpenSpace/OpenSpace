@@ -1,10 +1,10 @@
 local transforms = asset.require("./transforms")
-asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 asset.require("./trail")
 
 
 
-local labelsPath = asset.syncedResource({
+local labelsPath = asset.resource({
   Name = "Pluto Labels",
   Type = "HttpSynchronization",
   Identifier = "pluto_labels",
@@ -18,20 +18,18 @@ local Pluto = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PLUTO",
-      Observer = "PLUTO BARYCENTER"
+      Target = coreKernels.ID.Pluto,
+      Observer = coreKernels.ID.PlutoBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_PLUTO",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.Pluto,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = { 1173000, 1173000, 1173000 },
-    SegmentsPerPatch = 64,
-    Layers = {},
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "pluto.labels",
@@ -55,8 +53,8 @@ local PlutoLabel = {
   Identifier = "PlutoLabel",
   Parent = Pluto.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Pluto",
     FontSize = 70.0,
     Size = 9.10,
@@ -94,7 +92,6 @@ asset.export(PlutoLabel)
 
 asset.meta = {
   Name = "Pluto",
-  Version = "1.0",
   Description = "Pluto globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

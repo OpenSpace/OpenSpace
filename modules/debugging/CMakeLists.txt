@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2023                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -26,16 +26,16 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   debuggingmodule.h
-  rendering/renderabledebugplane.h
   rendering/debugrenderer.h
+  rendering/screenspacedebugplane.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   debuggingmodule.cpp
   debuggingmodule_lua.inl
-  rendering/renderabledebugplane.cpp
   rendering/debugrenderer.cpp
+  rendering/screenspacedebugplane.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

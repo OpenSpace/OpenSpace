@@ -22,7 +22,6 @@ asset.export("SetupLaunch", SetupLaunch.Identifier)
 
 asset.meta = {
   Name = "Actions - Artemis",
-  Version = "1.0",
   Description = "Actions related to the Artemis mission",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

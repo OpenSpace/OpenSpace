@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,7 +53,6 @@ public:
     void update(const UpdateData& data) override;
 
 private:
-    double calculateLightTravelTime(glm::dvec3 startPosition, glm::dvec3 targetPosition);
     void calculateVerticesPositions();
     void calculateDirectionVector();
     void updateVertexData();
@@ -77,15 +76,15 @@ private:
 
     glm::dvec3 _sourcePosition;
     glm::dvec3 _targetPosition;
-    double _lightTravelTime;
+    double _travelTime = 0.0;
     glm::dvec3 _directionVector;
     double _initiationTime = -1.0;
     double _arrivalTime;
     double _timeSinceStart = -1.0;
 
     ghoul::opengl::ProgramObject* _shaderProgram = nullptr;
-    // The vertex attribute location for position
-    // must correlate to layout location in vertex shader
+    // The vertex attribute location for position must correlate to layout location in
+    // vertex shader
     GLuint _vaoId = 0;
     GLuint _vBufferId = 0;
 };

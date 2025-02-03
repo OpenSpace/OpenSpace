@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,6 +43,7 @@ class ResourceSynchronization;
  * loaded in OpenSpace. Most actions of this class are operating in a two-step process
  * where first the intent of an action is registered, which is then executed in the next
  * call to the #update function.
+ *
  * All assets are loading through the same Lua state.
  */
 class AssetManager {
@@ -82,7 +83,7 @@ public:
      */
     void update();
 
-    scripting::LuaLibrary luaLibrary();
+    static scripting::LuaLibrary luaLibrary();
 
     /**
      * Returns all assets that have been loaded by the AssetManager. The order of the
@@ -92,7 +93,24 @@ public:
      */
     std::vector<const Asset*> allAssets() const;
 
+    /**
+     * Returns all root assets, which are assets that have been loaded directly from the
+     * profile or by calling the #add method.
+     *
+     * \return A list of all root assets
+     */
+    std::vector<const Asset*> rootAssets() const;
+
     std::vector<const ResourceSynchronization*> allSynchronizations() const;
+
+    /**
+     * Returns whether the provided \p asset has been loaded directly by the user or
+     * loaded through a profile file.
+     *
+     * \param asset The asset that should be tested
+     * \return Whether the \p asset has been loaded directly or included in a profile
+     */
+    bool isRootAsset(const Asset* asset) const;
 
     /**
      * Loads the provided \p asset as a child of the provided \p parent. Loading an asset
@@ -103,6 +121,7 @@ public:
      * \param asset The asset that should be loaded
      * \param parent The parent of the loaded asset file or `nullptr` if the asset is a
      *        root asset
+     *
      * \pre \p asset must not be a nullptr
      */
     bool loadAsset(Asset* asset, Asset* parent);
@@ -113,6 +132,7 @@ public:
      * will not actually get destroyed until the next #update call to the AssetManager.
      *
      * \param asset The asset that should get unloaded
+     *
      * \pre \p asset must not be a nullptr
      */
     void unloadAsset(Asset* asset);
@@ -134,21 +154,29 @@ public:
     void callOnDeinitialize(Asset* asset) const;
 
 private:
-    /// Creates and registers all of the callback functions that the asset is expected to
-    /// call in the file, for example the `localResource`, `require`, etc.
+    /**
+     * Creates and registers all of the callback functions that the asset is expected to
+     * call in the file, for example the `localResource`, `require`, etc.
+     */
     void setUpAssetLuaTable(Asset* asset);
 
-    /// Returns the loaded Asset by either trying to load the asset at the provided path
-    /// or returning a previously loaded copy
+    /**
+     * Returns the loaded Asset by either trying to load the asset at the provided path
+     * or returning a previously loaded copy.
+     */
     Asset* retrieveAsset(const std::filesystem::path& path,
         const std::filesystem::path& retriever,
         std::optional<bool> explicitEnable = std::nullopt);
 
-    /// Setup the asset table of the provided asset in the shared Lua state
+    /**
+     * Setup the asset table of the provided asset in the shared Lua state.
+     */
     void setCurrentAsset(Asset* asset);
 
-    /// Takes the asset path, determines the type of path (relative to base, relative to
-    /// root or absolute and returns fully formed path
+    /**
+     * Takes the asset path, determines the type of path (relative to base, relative to
+     * root or absolute and returns fully formed path.
+     */
     std::filesystem::path generateAssetPath(const std::filesystem::path& baseDirectory,
         const std::string& assetPath) const;
 
@@ -187,6 +215,7 @@ private:
     /// Authoritative list over all ResourceSynchronizations that have been requested by
     /// any asset
     std::unordered_map<std::string, std::unique_ptr<SyncItem>> _synchronizations;
+
     /// The list of ResourceSynchronizations that were not finished in the last update
     /// call
     std::vector<SyncItem*> _unfinishedSynchronizations;

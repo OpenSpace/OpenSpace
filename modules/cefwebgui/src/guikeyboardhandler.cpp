@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,6 +33,13 @@ GUIKeyboardHandler::GUIKeyboardHandler() {
 
     global::callback::keyboard->emplace_back(
         [this](Key, KeyModifier, KeyAction, IsGuiWindow isGuiWindow) -> bool {
+            const bool previous = _keyConsumed;
+            _keyConsumed = false;
+            return isGuiWindow ? previous : false;
+        }
+    );
+    global::callback::character->emplace_back(
+        [this](unsigned int, KeyModifier, IsGuiWindow isGuiWindow) -> bool {
             const bool previous = _keyConsumed;
             _keyConsumed = false;
             return isGuiWindow ? previous : false;

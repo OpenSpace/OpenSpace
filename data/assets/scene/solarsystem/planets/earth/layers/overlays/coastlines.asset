@@ -4,7 +4,7 @@ local globe = asset.require("../../earth")
 
 local Layer = {
   Identifier = "Coastlines",
-  FilePath = asset.localResource("coastlines.wms"),
+  FilePath = asset.resource("coastlines.wms"),
   Enabled = asset.enabled
 }
 
@@ -23,7 +23,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Earth Coastlines Layer",
-  Version = "1.0",
   Description = "Coastlines layer for Earth globe",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

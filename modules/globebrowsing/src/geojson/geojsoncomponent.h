@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -61,7 +61,7 @@ class RenderableGlobe;
 
 /**
  * A component representing a collection of globe geometry features, whose details
- * are read from a GeoJson file
+ * are read from a GeoJson file.
  */
 class GeoJsonComponent : public properties::PropertyOwner, public Fadeable {
 public:
@@ -82,9 +82,9 @@ public:
 
 private:
     /**
-     * Small helper class whose purpose is to encapsulate properties related to a
-     * specific geomoetry feature, and allow things like flying to or fadin out
-     * individual subfeatures
+     * Small helper class whose purpose is to encapsulate properties related to a specific
+     * geomoetry feature, and allow things like flying to or fadin out individual
+     * subfeatures.
      */
     class SubFeatureProps : public properties::PropertyOwner, public Fadeable {
     public:
@@ -98,11 +98,11 @@ private:
     };
 
     void readFile();
-    void parseSingleFeature(const geos::io::GeoJSONFeature& feature);
+    void parseSingleFeature(const geos::io::GeoJSONFeature& feature, int indexInFile);
 
     /**
-     * Add meta properties to the feature, to allow things like flying to it,
-     * identifying its location, etc
+     * Add meta properties to the feature, to allow things like flying to it, identifying
+     * its location, etc.
      */
     void addMetaPropertiesToFeature(SubFeatureProps& feature, int index,
         const geos::geom::Geometry* geometry);
@@ -114,6 +114,8 @@ private:
      * overview of all features in the collection.
      */
     void flyToFeature(std::optional<int> index = std::nullopt) const;
+
+    void triggerDeletion() const;
 
     std::vector<GlobeGeometryFeature> _geometryFeatures;
 
@@ -139,12 +141,14 @@ private:
 
     bool _dataIsDirty = true;
     bool _heightOffsetIsDirty = false;
-    bool _dataIsInitialized = false;
     bool _textureIsDirty = false;
 
     properties::Vec2Property _centerLatLong;
     float _bboxDiagonalSize = 0.f;
     properties::TriggerProperty _flyToFeature;
+
+    properties::PropertyOwner _deletePropertyOwner;
+    properties::TriggerProperty _deleteThisComponent;
 
     std::vector<std::unique_ptr<LightSource>> _lightSources;
     std::unique_ptr<LightSource> _defaultLightSource;

@@ -2,44 +2,44 @@ local FadeUpTrails = {
   Identifier = "os.FadeUpTrails",
   Name = "Show all trails",
   Command = [[
-    local capList = openspace.getProperty("Scene.*Trail.Renderable.Fade")
+    local capList = openspace.property("Scene.*Trail.Renderable.Fade")
     for _,v in ipairs(capList) do
       openspace.setPropertyValueSingle(v, 1, 2)
     end
-    local list = openspace.getProperty("Scene.*trail.Renderable.Fade")
+    local list = openspace.property("Scene.*trail.Renderable.Fade")
     for _,v in ipairs(list) do
       openspace.setPropertyValueSingle(v, 1, 2)
     end
   ]],
   Documentation = "Fade up all enabled trails in the Scene",
   GuiPath = "/Trails",
-  IsLocal = true
+  IsLocal = false
 }
 
 local FadeDownTrails = {
   Identifier = "os.FadeDownTrails",
   Name = "Hide all trails",
   Command = [[
-    local capList = openspace.getProperty("Scene.*Trail.Renderable.Fade")
+    local capList = openspace.property("Scene.*Trail.Renderable.Fade")
     for _,v in ipairs(capList) do
       openspace.setPropertyValueSingle(v, 0, 2)
     end
-    local list = openspace.getProperty("Scene.*trail.Renderable.Fade")
+    local list = openspace.property("Scene.*trail.Renderable.Fade")
     for _,v in ipairs(list) do
       openspace.setPropertyValueSingle(v, 0, 2)
     end
   ]],
   Documentation = "Fade down all enabled trails in the Scene",
   GuiPath = "/Trails",
-  IsLocal = true
+  IsLocal = false
 }
 
 local ToggleTrails = {
   Identifier = "os.ToggleTrails",
   Name = "Toggle all trails",
   Command = [[
-    local capList = openspace.getProperty("*Trail.Renderable.Fade")
-    local list = openspace.getProperty("*trail.Renderable.Fade")
+    local capList = openspace.property("*Trail.Renderable.Fade")
+    local list = openspace.property("*trail.Renderable.Fade")
     if (#capList == 0) and (#list == 0) then
       openspace.printWarning("No trails to toggle")
     else
@@ -49,18 +49,48 @@ local ToggleTrails = {
       else
         prop = list[1]
       end
-      local currentFade = openspace.getPropertyValue(prop)
+      local currentFade = openspace.propertyValue(prop)
       local newFade = 0
       if currentFade < 1 then
         newFade = 1
       end
       openspace.setPropertyValue("Scene.*Trail.Renderable.Fade", newFade, 2)
       openspace.setPropertyValue("Scene.*trail.Renderable.Fade", newFade, 2)
+      openspace.setPropertyValue("Scene.*TrailEarth.Renderable.Fade", newFade, 2)
     end
   ]],
   Documentation = "Toggle fade for all trails in the Scene",
   GuiPath = "/Trails",
-  IsLocal = true
+  IsLocal = false
+}
+
+local ToggleTrailsInstant = {
+  Identifier = "os.ToggleTrailsInstant",
+  Name = "Toggle all trails instantly",
+  Command = [[
+    local capList = openspace.property("*Trail.Renderable.Fade")
+    local list = openspace.property("*trail.Renderable.Fade")
+    if (#capList == 0) and (#list == 0) then
+      openspace.printWarning("No trails to toggle")
+    else
+      local prop
+      if #capList > 0 then
+        prop = capList[1]
+      else
+        prop = list[1]
+      end
+      local currentFade = openspace.propertyValue(prop)
+      local newFade = 0
+      if currentFade < 1 then
+        newFade = 1
+      end
+      openspace.setPropertyValue("Scene.*Trail.Renderable.Fade", newFade)
+      openspace.setPropertyValue("Scene.*trail.Renderable.Fade", newFade)
+    end
+  ]],
+  Documentation = "Toggle fade instantly for all trails in the Scene",
+  GuiPath = "/Trails",
+  IsLocal = false
 }
 
 
@@ -68,9 +98,11 @@ asset.onInitialize(function()
   openspace.action.registerAction(FadeUpTrails)
   openspace.action.registerAction(FadeDownTrails)
   openspace.action.registerAction(ToggleTrails)
+  openspace.action.registerAction(ToggleTrailsInstant)
 end)
 
 asset.onDeinitialize(function()
+  openspace.action.removeAction(ToggleTrailsInstant)
   openspace.action.removeAction(ToggleTrails)
   openspace.action.removeAction(FadeDownTrails)
   openspace.action.removeAction(FadeUpTrails)
@@ -79,3 +111,4 @@ end)
 asset.export("FadeUpTrails", FadeUpTrails.Identifier)
 asset.export("FadeDownTrails", FadeDownTrails.Identifier)
 asset.export("ToggleTrails", ToggleTrails.Identifier)
+asset.export("ToggleTrailsInstant", ToggleTrailsInstant.Identifier)

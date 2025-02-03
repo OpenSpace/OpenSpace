@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 #include <modules/globebrowsing/src/rawtile.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
+#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <numeric>
 
 namespace {
@@ -38,7 +39,7 @@ namespace {
         "CpuAllocatedTileData",
         "CPU allocated tile data (MB)",
         "This value denotes the amount of RAM memory (in MB) that this tile cache is "
-        "utilizing",
+        "utilizing.",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -46,7 +47,7 @@ namespace {
         "GpuAllocatedTileData",
         "GPU allocated tile data (MB)",
         "This value denotes the amount of GPU memory (in MB) that this tile cache is "
-        "utilizing",
+        "utilizing.",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -211,22 +212,33 @@ void MemoryAwareTileCache::TextureContainer::reset() {
 
     _textures.clear();
     _freeTexture = 0;
-    for (size_t i = 0; i < _numTextures; ++i) {
+
+    using namespace ghoul::systemcapabilities;
+
+    const ghoul::opengl::Texture::FilterMode mode =
+        OpenGLCap.gpuVendor() == OpenGLCapabilitiesComponent::Vendor::AmdATI ?
+        ghoul::opengl::Texture::FilterMode::Linear :
+        ghoul::opengl::Texture::FilterMode::AnisotropicMipMap;
+
+    for (size_t i = 0; i < _numTextures; i++) {
+        ZoneScopedN("Texture");
+
         using namespace ghoul::opengl;
+
         std::unique_ptr<Texture> tex = std::make_unique<Texture>(
             _initData.dimensions,
             GL_TEXTURE_2D,
             _initData.ghoulTextureFormat,
             toGlTextureFormat(_initData.glType, _initData.ghoulTextureFormat),
             _initData.glType,
-            Texture::FilterMode::Linear,
+            mode,
             Texture::WrappingMode::ClampToEdge,
             Texture::AllocateData(_initData.shouldAllocateDataOnCPU)
         );
 
         tex->setDataOwnership(Texture::TakeOwnership::Yes);
+        tex->setFilter(mode);
         tex->uploadTexture();
-        tex->setFilter(Texture::FilterMode::Linear);
 
         _textures.push_back(std::move(tex));
     }
@@ -321,7 +333,7 @@ void MemoryAwareTileCache::createDefaultTextureContainers() {
     ZoneScoped;
 
     for (const layers::Group& gi : layers::Groups) {
-        TileTextureInitData initData = tileTextureInitData(gi.id, true);
+        const TileTextureInitData initData = tileTextureInitData(gi.id);
         assureTextureContainerExists(initData);
     }
 }
@@ -331,13 +343,13 @@ void MemoryAwareTileCache::assureTextureContainerExists(
 {
     ZoneScoped;
 
-    TileTextureInitData::HashKey initDataKey = initData.hashKey;
+    const TileTextureInitData::HashKey initDataKey = initData.hashKey;
     if (_textureContainerMap.find(initDataKey) == _textureContainerMap.end()) {
         // For now create 500 textures of this type
         _textureContainerMap.emplace(initDataKey,
             TextureContainerTileCache(
                 std::make_unique<TextureContainer>(initData, 500),
-                std::make_unique<TileCache>(std::numeric_limits<std::size_t>::max())
+                std::make_unique<TileCache>(std::numeric_limits<size_t>::max())
             )
         );
     }
@@ -419,7 +431,7 @@ ghoul::opengl::Texture* MemoryAwareTileCache::texture(const TileTextureInitData&
 {
     // if this texture type does not exist among the texture containers
     // it needs to be created
-    TileTextureInitData::HashKey initDataKey = initData.hashKey;
+    const TileTextureInitData::HashKey initDataKey = initData.hashKey;
     assureTextureContainerExists(initData);
     // Now we know that the texture container exists,
     // check if there are any unused textures
@@ -427,7 +439,7 @@ ghoul::opengl::Texture* MemoryAwareTileCache::texture(const TileTextureInitData&
         _textureContainerMap[initDataKey].first->getTextureIfFree();
     // Second option. No more textures available. Pop from the LRU cache
     if (!texture) {
-        Tile oldTile = _textureContainerMap[initDataKey].second->popLRU().second;
+        const Tile oldTile = _textureContainerMap[initDataKey].second->popLRU().second;
         // Use the old tile's texture
         texture = oldTile.texture;
     }
@@ -459,22 +471,31 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key, RawTile rawTile
             }
         }
         else {
-            size_t previousExpectedDataSize = tex->expectedPixelDataSize();
+            const size_t previousExpectedDataSize = tex->expectedPixelDataSize();
             ghoul_assert(
                 tex->dataOwnership(),
                 "Texture must have ownership of old data to avoid leaks"
             );
             tex->setPixelData(rawTile.imageData.release(), Texture::TakeOwnership::Yes);
             rawTile.imageData = nullptr;
-            [[ maybe_unused ]] size_t expectedDataSize = tex->expectedPixelDataSize();
+            [[maybe_unused]] const size_t expectedSize = tex->expectedPixelDataSize();
             const size_t numBytes = rawTile.textureInitData->totalNumBytes;
-            ghoul_assert(expectedDataSize == numBytes, "Pixel data size is incorrect");
+            ghoul_assert(expectedSize == numBytes, "Pixel data size is incorrect");
             _numTextureBytesAllocatedOnCPU += numBytes - previousExpectedDataSize;
             tex->reUploadTexture();
         }
-        tex->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+        // Hi there, I know someone will be tempted to change this to a Linear filtering
+        // mode at some point. This will introduce rendering artifacts when looking at the
+        // globe at oblique angles (see #2752)
+        using namespace ghoul::systemcapabilities;
+        const ghoul::opengl::Texture::FilterMode mode =
+            OpenGLCap.gpuVendor() == OpenGLCapabilitiesComponent::Vendor::AmdATI ?
+            ghoul::opengl::Texture::FilterMode::Linear :
+            ghoul::opengl::Texture::FilterMode::AnisotropicMipMap;
+
+        tex->setFilter(mode);
         Tile tile{ tex, std::move(rawTile.tileMetaData), Tile::Status::OK };
-        TileTextureInitData::HashKey initDataKey = initData.hashKey;
+        const TileTextureInitData::HashKey initDataKey = initData.hashKey;
         _textureContainerMap[initDataKey].second->put(std::move(key), std::move(tile));
     }
 }
@@ -522,7 +543,7 @@ size_t MemoryAwareTileCache::cpuAllocatedDataSize() const {
             const TextureContainer& textureContainer = *p.second.first;
             const TileTextureInitData& initData = textureContainer.tileTextureInitData();
             if (initData.shouldAllocateDataOnCPU) {
-                size_t bytesPerTexture = initData.totalNumBytes;
+                const size_t bytesPerTexture = initData.totalNumBytes;
                 return s + bytesPerTexture * textureContainer.size();
             }
             return s;

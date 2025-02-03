@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,13 +34,13 @@ out vec3 vs_gNormal;
 out float vs_screenSpaceDepth;
 out vec2 vs_st;
 
-uniform mat4 modelViewProjectionTransform;
+uniform mat4 modelViewProjection;
 uniform mat4 modelViewTransform;
 
 
 void main() {
   vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
-  vec4 positionClipSpace = modelViewProjectionTransform * position;
+  vec4 positionClipSpace = modelViewProjection * position;
   vec4 positionScreenSpace = z_normalization(positionClipSpace);
 
   gl_Position = positionScreenSpace;

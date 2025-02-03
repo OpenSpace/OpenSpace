@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,11 +36,12 @@
 #include "profile/propertiesdialog.h"
 #include "profile/timedialog.h"
 #include <openspace/scene/profile.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <QDialogButtonBox>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QTextEdit>
 #include <QVBoxLayout>
@@ -51,7 +52,7 @@
 using namespace openspace;
 
 namespace {
-    QString labelText(size_t size, QString title) {
+    QString labelText(size_t size, const QString& title) {
         QString label;
         if (size > 0) {
             label = title + " (" + QString::number(size) + ")";
@@ -65,7 +66,7 @@ namespace {
     std::string summarizeAssets(const std::vector<std::string>& assets) {
         std::string results;
         for (const std::string& a : assets) {
-            results += a + '\n';
+            results += std::format("{}<br>", a);
         }
         return results;
     }
@@ -74,14 +75,14 @@ namespace {
                                      const std::vector<Profile::Action>& actions)
     {
         std::string results;
-        for (Profile::Keybinding k : keybindings) {
+        for (const Profile::Keybinding& k : keybindings) {
             const auto it = std::find_if(
                 actions.cbegin(), actions.cend(),
                 [id = k.action](const Profile::Action& a) { return a.identifier == id; }
             );
 
             std::string name = it != actions.end() ? it->name : "Unknown action";
-            results += fmt::format("{} ({})\n", name, ghoul::to_string(k.key));
+            results += std::format("{} ({})<br>", name, ghoul::to_string(k.key));
         }
         return results;
     }
@@ -89,17 +90,17 @@ namespace {
     std::string summarizeProperties(const std::vector<Profile::Property>& properties) {
         std::string results;
         for (openspace::Profile::Property p : properties) {
-            results += fmt::format("{} = {}\n", p.name, p.value);
+            results += std::format("{} = {}<br>", p.name, p.value);
         }
         return results;
     }
 } // namespace
 
-ProfileEdit::ProfileEdit(Profile& profile, const std::string& profileName, 
-                         std::string assetBasePath,
-                         std::string userAssetBasePath,
-                         std::string builtInProfileBasePath,
-                         std::string profileBasePath,
+ProfileEdit::ProfileEdit(Profile& profile, const std::string& profileName,
+                         std::filesystem::path assetBasePath,
+                         std::filesystem::path userAssetBasePath,
+                         std::filesystem::path builtInProfileBasePath,
+                         std::filesystem::path profileBasePath,
                          QWidget* parent)
     : QDialog(parent)
     , _profile(profile)
@@ -125,6 +126,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         container->addWidget(profileLabel);
 
         _profileEdit = new QLineEdit(QString::fromStdString(profileName));
+        _profileEdit->setPlaceholderText("required");
         container->addWidget(_profileEdit);
 
         QPushButton* duplicateButton = new QPushButton("Duplicate Profile");
@@ -146,16 +148,18 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         _propertiesLabel->setWordWrap(true);
         container->addWidget(_propertiesLabel, 0, 0);
 
+        _propertiesEdit = new QTextEdit;
+        _propertiesEdit->setReadOnly(true);
+        _propertiesEdit->setAccessibleName("Property value settings");
+        container->addWidget(_propertiesEdit, 1, 0, 1, 3);
+
         QPushButton* editProperties = new QPushButton("Edit");
         connect(
             editProperties, &QPushButton::clicked,
             this, &ProfileEdit::openProperties
         );
+        editProperties->setAccessibleName("Edit properties");
         container->addWidget(editProperties, 0, 2);
-
-        _propertiesEdit = new QTextEdit;
-        _propertiesEdit->setReadOnly(true);
-        container->addWidget(_propertiesEdit, 1, 0, 1, 3);
 
         leftLayout->addLayout(container);
     }
@@ -169,13 +173,15 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         _assetsLabel->setWordWrap(true);
         container->addWidget(_assetsLabel, 0, 0);
 
-        QPushButton* assetsProperties = new QPushButton("Edit");
-        connect(assetsProperties, &QPushButton::clicked, this, &ProfileEdit::openAssets);
-        container->addWidget(assetsProperties, 0, 2);
-
         _assetsEdit = new QTextEdit;
         _assetsEdit->setReadOnly(true);
+        _assetsEdit->setAccessibleName("Loaded assets");
         container->addWidget(_assetsEdit, 1, 0, 1, 3);
+
+        QPushButton* assetsProperties = new QPushButton("Edit");
+        connect(assetsProperties, &QPushButton::clicked, this, &ProfileEdit::openAssets);
+        assetsProperties->setAccessibleName("Edit assets");
+        container->addWidget(assetsProperties, 0, 2);
 
         leftLayout->addLayout(container);
     }
@@ -188,16 +194,18 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         _keybindingsLabel->setObjectName("heading");
         container->addWidget(_keybindingsLabel, 0, 0);
 
+        _keybindingsEdit = new QTextEdit;
+        _keybindingsEdit->setReadOnly(true);
+        _keybindingsEdit->setAccessibleName("Loaded action and keybindings");
+        container->addWidget(_keybindingsEdit, 1, 0, 1, 3);
+
         QPushButton* keybindingsProperties = new QPushButton("Edit");
         connect(
             keybindingsProperties, &QPushButton::clicked,
             this, &ProfileEdit::openKeybindings
         );
+        keybindingsProperties->setAccessibleName("Edit actions and keybindings");
         container->addWidget(keybindingsProperties, 0, 2);
-
-        _keybindingsEdit = new QTextEdit;
-        _keybindingsEdit->setReadOnly(true);
-        container->addWidget(_keybindingsEdit, 1, 0, 1, 3);
 
         leftLayout->addLayout(container);
     }
@@ -216,6 +224,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         QPushButton* metaEdit = new QPushButton("Edit");
         connect(metaEdit, &QPushButton::clicked, this, &ProfileEdit::openMeta);
         metaEdit->setLayoutDirection(Qt::RightToLeft);
+        metaEdit->setAccessibleName("Edit metadata");
         container->addWidget(metaEdit);
         rightLayout->addLayout(container);
     }
@@ -233,6 +242,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
             this, &ProfileEdit::openMarkNodes
         );
         interestingNodesEdit->setLayoutDirection(Qt::RightToLeft);
+        interestingNodesEdit->setAccessibleName("Edit interesting nodes");
         container->addWidget(interestingNodesEdit);
         rightLayout->addLayout(container);
     }
@@ -250,6 +260,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
             this, &ProfileEdit::openDeltaTimes
         );
         deltaTimesEdit->setLayoutDirection(Qt::RightToLeft);
+        deltaTimesEdit->setAccessibleName("Edit simulation time increments");
         container->addWidget(deltaTimesEdit);
         rightLayout->addLayout(container);
     }
@@ -264,6 +275,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         QPushButton* cameraEdit = new QPushButton("Edit");
         connect(cameraEdit, &QPushButton::clicked, this, &ProfileEdit::openCamera);
         cameraEdit->setLayoutDirection(Qt::RightToLeft);
+        cameraEdit->setAccessibleName("Edit camera");
         container->addWidget(cameraEdit);
         rightLayout->addLayout(container);
     }
@@ -278,6 +290,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         QPushButton* timeEdit = new QPushButton("Edit");
         connect(timeEdit, &QPushButton::clicked, this, &ProfileEdit::openTime);
         timeEdit->setLayoutDirection(Qt::RightToLeft);
+        timeEdit->setAccessibleName("Edit time");
         container->addWidget(timeEdit);
         rightLayout->addLayout(container);
     }
@@ -292,6 +305,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         QPushButton* modulesEdit = new QPushButton("Edit");
         connect(modulesEdit, &QPushButton::clicked, this, &ProfileEdit::openModules);
         modulesEdit->setLayoutDirection(Qt::RightToLeft);
+        modulesEdit->setAccessibleName("Edit modules");
         container->addWidget(modulesEdit);
         rightLayout->addLayout(container);
     }
@@ -309,6 +323,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
             this, &ProfileEdit::openAddedScripts
         );
         additionalScriptsEdit->setLayoutDirection(Qt::RightToLeft);
+        additionalScriptsEdit->setAccessibleName("Edit additional scripts");
         container->addWidget(additionalScriptsEdit);
         rightLayout->addLayout(container);
     }
@@ -319,11 +334,6 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
 
     {
         QBoxLayout* footer = new QHBoxLayout;
-        _errorMsg = new QLabel;
-        _errorMsg->setObjectName("error-message");
-        _errorMsg->setWordWrap(true);
-        footer->addWidget(_errorMsg);
-
         QDialogButtonBox* buttons = new QDialogButtonBox;
         buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
         connect(buttons, &QDialogButtonBox::accepted, this, &ProfileEdit::approved);
@@ -360,7 +370,6 @@ void ProfileEdit::initSummaryTextForEachCategory() {
 }
 
 void ProfileEdit::duplicateProfile() {
-    _errorMsg->clear();
     std::string profile = _profileEdit->text().toStdString();
     if (profile.empty()) {
         return;
@@ -368,10 +377,10 @@ void ProfileEdit::duplicateProfile() {
 
     constexpr char Separator = '_';
     int version = 0;
-    if (size_t it = profile.rfind(Separator); it != std::string::npos) {
+    if (const size_t it = profile.rfind(Separator);  it != std::string::npos) {
         // If the value exists, we have a profile that potentially already has a version
         // number attached to it
-        std::string versionStr = profile.substr(it + 1);
+        const std::string versionStr = profile.substr(it + 1);
         try {
             version = std::stoi(versionStr);
 
@@ -392,29 +401,28 @@ void ProfileEdit::duplicateProfile() {
     while (true) {
         version++;
 
-        std::string candidate = profile + Separator + std::to_string(version);
-        std::string candidatePath = _profileBasePath + candidate + ".profile";
+        const std::string candidate = std::format("{}{}{}", profile, Separator, version);
+        const std::string candidatePath = std::format(
+            "{}{}.profile", _profileBasePath, candidate
+        );
 
         if (!std::filesystem::exists(candidatePath)) {
-            _profileEdit->setText(QString::fromStdString(std::move(candidate)));
+            _profileEdit->setText(QString::fromStdString(candidate));
             return;
         }
     }
 }
 
 void ProfileEdit::openMeta() {
-    _errorMsg->clear();
     MetaDialog(this, &_profile.meta).exec();
 }
 
 void ProfileEdit::openModules() {
-    _errorMsg->clear();
     ModulesDialog(this, &_profile.modules).exec();
     _modulesLabel->setText(labelText(_profile.modules.size(), "Modules"));
 }
 
 void ProfileEdit::openProperties() {
-    _errorMsg->clear();
     PropertiesDialog(this, &_profile.properties).exec();
     _propertiesLabel->setText(labelText(_profile.properties.size(), "Properties"));
     _propertiesEdit->setText(
@@ -423,7 +431,6 @@ void ProfileEdit::openProperties() {
 }
 
 void ProfileEdit::openKeybindings() {
-    _errorMsg->clear();
     ActionDialog(this, &_profile.actions, &_profile.keybindings).exec();
     _keybindingsLabel->setText(labelText(_profile.keybindings.size(), "Keybindings"));
     _keybindingsEdit->setText(QString::fromStdString(
@@ -432,19 +439,16 @@ void ProfileEdit::openKeybindings() {
 }
 
 void ProfileEdit::openAssets() {
-    _errorMsg->clear();
     AssetsDialog(this, &_profile, _assetBasePath, _userAssetBasePath).exec();
     _assetsLabel->setText(labelText(_profile.assets.size(), "Assets"));
     _assetsEdit->setText(QString::fromStdString(summarizeAssets(_profile.assets)));
 }
 
 void ProfileEdit::openTime() {
-    _errorMsg->clear();
     TimeDialog(this, &_profile.time).exec();
 }
 
 void ProfileEdit::openDeltaTimes() {
-    _errorMsg->clear();
     DeltaTimesDialog(this, &_profile.deltaTimes).exec();
     _deltaTimesLabel->setText(
         labelText(_profile.deltaTimes.size(), "Simulation Time Increments")
@@ -452,17 +456,14 @@ void ProfileEdit::openDeltaTimes() {
 }
 
 void ProfileEdit::openAddedScripts() {
-    _errorMsg->clear();
     AdditionalScriptsDialog(this, &_profile.additionalScripts).exec();
 }
 
 void ProfileEdit::openCamera() {
-    _errorMsg->clear();
     CameraDialog(this, &_profile.camera).exec();
 }
 
 void ProfileEdit::openMarkNodes() {
-    _errorMsg->clear();
     MarkNodesDialog(this, &_profile.markNodes).exec();
     _interestingNodesLabel->setText(
         labelText(_profile.markNodes.size(), "Mark Interesting Nodes")
@@ -477,31 +478,29 @@ std::string ProfileEdit::specifiedFilename() const {
     return _profileEdit->text().toStdString();
 }
 
-void ProfileEdit::cancel() {
-    _saveSelected = false;
-    reject();
-}
-
 void ProfileEdit::approved() {
     std::string profileName = _profileEdit->text().toStdString();
     if (profileName.empty()) {
-        _errorMsg->setText("Profile name must be specified");
+        QMessageBox::critical(this, "No profile name", "Profile name must be specified");
+        _profileEdit->setFocus();
         return;
     }
 
-    std::filesystem::path p = fmt::format(
+    const std::filesystem::path p = std::format(
         "{}/{}.profile", _builtInProfilesPath, profileName
     );
     if (std::filesystem::exists(p)) {
         // The filename exists in the OpenSpace-provided folder, so we don't want to allow
         // a user to overwrite it
-        _errorMsg->setText(
-            "This is a read-only profile. Click 'Duplicate' or rename & save"
+        QMessageBox::critical(
+            this,
+            "Reserved profile name",
+            "This is a read-only profile. Click 'Duplicate' or rename profile and save"
         );
+        _profileEdit->setFocus();
     }
     else {
         _saveSelected = true;
-        _errorMsg->setText("");
         accept();
     }
 }
@@ -513,3 +512,36 @@ void ProfileEdit::keyPressEvent(QKeyEvent* evt) {
     QDialog::keyPressEvent(evt);
 }
 
+
+void ProfileEdit::reject()  {
+    // We hijack the reject (i.e., exit window) and emit the signal. The actual shutdown
+    // of the window comes at a later stage.
+    emit raiseExitWindow();
+}
+
+void ProfileEdit::closeWithoutSaving() {
+    _saveSelected = false;
+    QDialog::reject();
+}
+
+void ProfileEdit::promptUserOfUnsavedChanges() {
+    QMessageBox msgBox;
+    msgBox.setText("There are unsaved changes");
+    msgBox.setInformativeText("Do you want to save your changes");
+    msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Save);
+    int ret = msgBox.exec();
+
+    switch (ret) {
+        case QMessageBox::Save:
+            approved();
+            break;
+        case QMessageBox::Discard:
+            closeWithoutSaving();
+            break;
+        case QMessageBox::Cancel:
+            break;
+        default:
+            break;
+    }
+}

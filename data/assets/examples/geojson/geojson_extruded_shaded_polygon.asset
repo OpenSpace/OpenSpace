@@ -1,9 +1,9 @@
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local data = asset.syncedResource({
+local data = asset.resource({
   Name = "GeoJSON Example Africa",
   Type = "UrlSynchronization",
   Identifier = "geojson_example_polygon_extruded_africa",
@@ -43,7 +43,6 @@ asset.export(ExamplePolygon)
 
 asset.meta = {
   Name = "GeoJson Example - Extruded and Shaded Polygon",
-  Version = "1.0",
   Description = [[GeoJson example asset demonstrating how to apply shading from light
     sources on polygons]],
   Author = "OpenSpace Team",

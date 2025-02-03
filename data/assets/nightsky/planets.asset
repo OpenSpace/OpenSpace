@@ -6,7 +6,7 @@ local saturn = asset.require("scene/solarsystem/planets/saturn/transforms")
 
 
 
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Night Sky Planet Textures",
   Type = "HttpSynchronization",
   Identifier = "night_sky_planet_textures",
@@ -30,7 +30,10 @@ local Mercury = {
   Tag = { "nightsky_billboard" },
   GUI = {
     Name = "Night Sky Mercury",
-    Path = "/Other/Night Sky/Planets"
+    Description = [[A night sky version of the planet Mercury, making it visible as
+      a bright object on the sky (textured representation).]],
+    Path = "/Night Sky/Planets",
+    OrderingNumber = 1
   }
 }
 
@@ -50,7 +53,10 @@ local Venus = {
   Tag = { "nightsky_billboard" },
   GUI = {
     Name = "Night Sky Venus",
-    Path = "/Other/Night Sky/Planets"
+    Description = [[A night sky version of the planet Venus, making it visible as
+      a bright object on the sky (textured representation).]],
+    Path = "/Night Sky/Planets",
+    OrderingNumber = 2
   }
 }
 
@@ -70,7 +76,8 @@ local Mars = {
   Tag = { "nightsky_billboard" },
   GUI = {
     Name = "Night Sky Mars",
-    Path = "/Other/Night Sky/Planets"
+    Path = "/Night Sky/Planets",
+    OrderingNumber = 4
   }
 }
 
@@ -90,7 +97,10 @@ local Jupiter = {
   Tag = { "nightsky_billboard" },
   GUI = {
     Name = "Night Sky Jupiter",
-    Path = "/Other/Night Sky/Planets"
+    Description = [[A night sky version of the planet Jupiter, making it visible as
+      a bright object on the sky (textured representation).]],
+    Path = "/Night Sky/Planets",
+    OrderingNumber = 5
   }
 }
 
@@ -110,7 +120,10 @@ local Saturn = {
   Tag = { "nightsky_billboard" },
   GUI = {
     Name = "Night Sky Saturn",
-    Path = "/Other/Night Sky/Planets"
+    Description = [[A night sky version of the planet Saturn, making it visible as
+      a bright object on the sky (textured representation).]],
+    Path = "/Night Sky/Planets",
+    OrderingNumber = 6
   }
 }
 
@@ -146,7 +159,6 @@ local HideNightSkyPlanets = {
   IsLocal = false
 }
 
-
 local ToggleNightSkyPlanets = {
   Identifier = "os.nightsky.ToggleNightSkyPlanets",
   Name = "Toggle night sky planets",
@@ -156,7 +168,7 @@ local ToggleNightSkyPlanets = {
     openspace.toggleFade("Scene.NightSkyMars.Renderable")
     openspace.toggleFade("Scene.NightSkyJupiter.Renderable")
     openspace.toggleFade("Scene.NightSkySaturn.Renderable")
-    local scale = openspace.getPropertyValue("Scene.Moon.Scale.Scale")
+    local scale = openspace.propertyValue("Scene.Moon.Scale.Scale")
     if (scale > 1) then
       openspace.setPropertyValueSingle("Scene.Moon.Scale.Scale", 1.0)
     else
@@ -167,6 +179,7 @@ local ToggleNightSkyPlanets = {
   GuiPath = "/Night Sky/Planets",
   IsLocal = false
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Mercury)
@@ -198,3 +211,14 @@ asset.export(Saturn)
 asset.export("ShowNightSkyPlanets", ShowNightSkyPlanets.Identifier)
 asset.export("HideNightSkyPlanets", HideNightSkyPlanets.Identifier)
 asset.export("ToggleNightSkyPlanets", ToggleNightSkyPlanets.Identifier)
+
+
+
+asset.meta = {
+  Name = "Night Sky Planets",
+  Description = [[A collection of night sky versions of the planets Mercury, Venus,
+    Mars, Jupiter and Saturn, including actions to toggle, hide and show them.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

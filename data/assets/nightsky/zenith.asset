@@ -2,7 +2,7 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Zenith Textures",
   Type = "HttpSynchronization",
   Identifier = "zenith_textures",
@@ -33,7 +33,7 @@ local ZenithPosition = {
   },
   GUI = {
     Name = "Zenith Position",
-    Path = "/Other/Points",
+    Path = "/Night Sky/Coordinate Systems/Altitude-Azimuth",
     Hidden = true
   }
 }
@@ -58,7 +58,10 @@ local ZenithDot = {
   },
   GUI = {
     Name = "Zenith",
-    Path = "/Other/Points"
+    Description = [[A dot representation of the Local Zenith, based on the camera's
+      current position on a planet. Use the provided show or toggle action to move it
+      between planets. The default is Earth.]],
+    Path = "/Night Sky/Coordinate Systems/Altitude-Azimuth"
   }
 }
 
@@ -103,6 +106,7 @@ local ToggleZenith = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ZenithPosition)
   openspace.addSceneGraphNode(ZenithDot)
@@ -124,3 +128,14 @@ asset.export(ZenithDot)
 asset.export("ShowZenith", ShowZenith.Identifier)
 asset.export("HideZenith", HideZenith.Identifier)
 asset.export("ToggleZenith", ToggleZenith.Identifier)
+
+
+
+asset.meta = {
+  Name = "Zenith",
+  Description = [[A dot representation of the Local Zenith (based on the current
+    camera positon), including actions to toggle, hide and show it.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

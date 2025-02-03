@@ -1,16 +1,16 @@
 asset.require("scene/solarsystem/heliosphere/2012/reset_loop_action")
-local transforms = asset.require("scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere")
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms_gsm_sm")
 
 
 
-local transferFunctions = asset.syncedResource({
+local transferFunctions = asset.resource({
   Name = "Fieldlines Transfer Functions",
   Type = "HttpSynchronization",
   Identifier = "sun_earth_event_july_2012-fieldlines_transferfunctions",
   Version = 2
 })
 
-local fieldlineData = asset.syncedResource({
+local fieldlineData = asset.resource({
   Name = "Fieldlines Data BATSRUS",
   Type = "HttpSynchronization",
   Identifier = "sun_earth_event_july_2012-batsrus",
@@ -59,7 +59,7 @@ local InteractionSphere = 6380000  -- A value slightly bigger than earth radius
 ----------------------LUTZ's JULY TRACES-------------------------
 local BatsrusJ12OpenClosed = {
   Identifier = "FL_BATSRUS_J12_OpenClosed",
-  Parent = transforms.GSMReferenceFrame.Identifier,
+  Parent = transforms.GeocentricSolarMagnetospheric.Identifier,
   InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
@@ -89,7 +89,7 @@ local BatsrusJ12OpenClosed = {
 --------------------- VELOCITY FLOWLINES ------------------------
 local BatsrusJ12FlowLines = {
   Identifier = "FL_BATSRUS_J12_FlowLines",
-  Parent = transforms.GSMReferenceFrame.Identifier,
+  Parent = transforms.GeocentricSolarMagnetospheric.Identifier,
   InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
@@ -116,12 +116,12 @@ local BatsrusJ12FlowLines = {
 --------------------- Ashers seedpoints ------------------------
 local BatsrusAsherStaticSeedsFlowLines = {
   Identifier = "FL_BATSRUS_ASHER_STATIC_SSEDS_FlowLines",
-  Parent = transforms.GSMReferenceFrame.Identifier,
+  Parent = transforms.GeocentricSolarMagnetospheric.Identifier,
   InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
-    SourceFolder = unzippedDataDestination.asherStatic,
     Enabled = false,
+    SourceFolder = unzippedDataDestination.asherStatic,
     InputFileType = "Osfls",
     ColorTablePaths = {
       batsrusTemperatureColorTable,
@@ -165,7 +165,6 @@ asset.export(BatsrusAsherStaticSeedsFlowLines)
 
 asset.meta = {
   Name = "Fieldlines from Batsrus model of 2012 event",
-  Version = "1.0",
   Description = "Magnetic fieldlines from Batsrus model for a 2012 CME event",
   Author = "CCMC",
   URL = "",

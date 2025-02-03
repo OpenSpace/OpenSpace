@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,7 +38,7 @@ namespace {
         "IsEnabled",
         "Enabled",
         "If this value is 'false', this dashboard will be invisible, regardless of the "
-        "state of the individual components",
+        "state of the individual components.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -46,8 +46,7 @@ namespace {
         "StartPositionOffset",
         "Start Position Offset",
         "A 2D vector controlling where the dashboard rendering starts. Adding an offset "
-        "in x and y-direction on screen",
-        // @VISIBILITY(2.75)
+        "in x and y-direction on screen.",
         openspace::properties::Property::Visibility::User
     };
 } // namespace
@@ -57,9 +56,7 @@ namespace openspace {
 Dashboard::Dashboard()
     : properties::PropertyOwner({ "Dashboard" })
     , _isEnabled(EnabledInfo, true)
-    , _startPositionOffset(
-        properties::IVec2Property(StartPositionOffsetInfo, glm::ivec2(10, -25))
-    )
+    , _startPositionOffset(StartPositionOffsetInfo, glm::ivec2(10, -10))
 {
     addProperty(_isEnabled);
     addProperty(_startPositionOffset);
@@ -151,13 +148,23 @@ glm::vec2 Dashboard::getStartPositionOffset() {
     return _startPositionOffset.value();
 }
 
+std::vector<DashboardItem*> Dashboard::dashboardItems() const {
+    std::vector<DashboardItem*> result;
+    result.reserve(_items.size());
+    for (const std::unique_ptr<DashboardItem>& d : _items) {
+        result.push_back(d.get());
+    }
+    return result;
+}
+
 scripting::LuaLibrary Dashboard::luaLibrary() {
     return {
         "dashboard",
         {
             codegen::lua::AddDashboardItem,
             codegen::lua::RemoveDashboardItem,
-            codegen::lua::ClearDashboardItems
+            codegen::lua::ClearDashboardItems,
+            codegen::lua::DashboardItems
         }
     };
 }

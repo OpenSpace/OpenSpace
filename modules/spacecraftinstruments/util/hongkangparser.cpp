@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,14 +26,13 @@
 
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <modules/spacecraftinstruments/util/instrumentdecoder.h>
-
 #include <openspace/util/spicemanager.h>
-
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/stringhelper.h>
 #include <filesystem>
 #include <fstream>
 
@@ -60,7 +59,7 @@ namespace {
 
 namespace openspace {
 
-HongKangParser::HongKangParser(std::string name, std::string fileName,
+HongKangParser::HongKangParser(std::string name, std::filesystem::path fileName,
                                std::string spacecraft,
                                const ghoul::Dictionary& translationDictionary,
                                std::vector<std::string> potentialTargets)
@@ -81,11 +80,11 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
                 continue;
             }
 
-            ghoul::Dictionary typeDictionary =
+            const ghoul::Dictionary typeDictionary =
                 translationDictionary.value<ghoul::Dictionary>(decoderType);
             // for each playbook call -> create a Decoder object
             for (std::string_view key : typeDictionary.keys()) {
-                const std::string& currentKey = fmt::format("{}.{}", decoderType, key);
+                const std::string& currentKey = std::format("{}.{}", decoderType, key);
 
                 ghoul::Dictionary decoderDictionary;
                 if (translationDictionary.hasValue<ghoul::Dictionary>(currentKey)) {
@@ -109,12 +108,7 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
 
 std::string HongKangParser::findPlaybookSpecifiedTarget(std::string line) {
     //remembto add this lua later...
-    std::transform(
-        line.begin(),
-        line.end(),
-        line.begin(),
-        [](char v) { return static_cast<char>(toupper(v)); }
-    );
+    line = ghoul::toUpperCase(line);
     const std::vector<std::string>& ptarg = _potentialTargets;
     std::string target;
     for (const std::string& p : ptarg) {
@@ -136,7 +130,7 @@ bool HongKangParser::create() {
     const bool hasObserver = SpiceManager::ref().hasNaifId(_spacecraft);
     if (!hasObserver) {
         throw ghoul::RuntimeError(
-            fmt::format("SPICE has no observer: '{}' in kernel pool", _spacecraft),
+            std::format("SPICE has no observer '{}' in kernel pool", _spacecraft),
             "HongKangParser"
         );
     }
@@ -146,12 +140,7 @@ bool HongKangParser::create() {
             "HongKangParser"
         );
     }
-    size_t position = _fileName.find_last_of('.') + 1;
-    if (position == 0 || position == std::string::npos) {
-        return true;
-    }
-
-    if (std::filesystem::path(_fileName).extension() != ".txt") {
+    if (_fileName.extension() != ".txt") {
         return true;
     }
 
@@ -170,9 +159,9 @@ bool HongKangParser::create() {
 
     std::string line;
     while (!file.eof()) {
-        std::getline(file, line);
+        ghoul::getline(file, line);
 
-        std::string event = line.substr(0, line.find_first_of(' '));
+        const std::string event = line.substr(0, line.find_first_of(' '));
 
         const auto it = _fileTranslation.find(event);
         const bool foundEvent = (it != _fileTranslation.end());
@@ -198,7 +187,7 @@ bool HongKangParser::create() {
                 // fill image
                 Image image = {
                     .timeRange = TimeRange(time, time + Exposure),
-                    .path = _defaultCaptureImage.string(),
+                    .path = _defaultCaptureImage,
                     .activeInstruments = std::move(cameraSpiceID),
                     .target = cameraTarget,
                     .isPlaceholder = true,
@@ -212,13 +201,13 @@ bool HongKangParser::create() {
                     _targetTimes.emplace_back(time, image.target);
                 }
 
-                // store actual image in map. All targets get _only_ their corresp. subset
-                _subsetMap[image.target]._subset.push_back(image);
                 // compute and store the range for each subset
                 _subsetMap[image.target]._range.include(time);
+                // store actual image in map. All targets get _only_ their corresp. subset
+                _subsetMap[image.target]._subset.push_back(std::move(image));
             }
             if (it->second->decoderType() == "SCANNER") { // SCANNER START
-                double scanStart = time;
+                const double scanStart = time;
 
                 InstrumentDecoder* scanner = static_cast<InstrumentDecoder*>(
                     it->second.get()
@@ -226,18 +215,20 @@ bool HongKangParser::create() {
                 const std::string& endNominal = scanner->stopCommand();
 
                 // store current position in file
-                std::streampos len = file.tellg();
+                const std::streampos len = file.tellg();
                 std::string linePeek;
                 while (!file.eof()) {
                     // continue grabbing next line until we find what we need
                     getline(file, linePeek);
                     if (linePeek.find(endNominal) != std::string::npos) {
                         met = linePeek.substr(25, 9);
-                        double scanStop = ephemerisTimeFromMissionElapsedTime(
+                        const double scanStop = ephemerisTimeFromMissionElapsedTime(
                             met,
                             _metRef
                         );
-                        std::string scannerTarget = findPlaybookSpecifiedTarget(line);
+                        const std::string scannerTarget = findPlaybookSpecifiedTarget(
+                            line
+                        );
 
                         TimeRange scanRange = TimeRange(scanStart, scanStop);
                         ghoul_assert(scanRange.isDefined(), "Invalid time range");
@@ -245,8 +236,8 @@ bool HongKangParser::create() {
 
                         // store individual image
                         Image image = {
-                            .timeRange = scanRange,
-                            .path = _defaultCaptureImage.string(),
+                            .timeRange = std::move(scanRange),
+                            .path = _defaultCaptureImage,
                             .activeInstruments = it->second->translations(),
                             .target = cameraTarget,
                             .isPlaceholder = true,
@@ -267,7 +258,7 @@ bool HongKangParser::create() {
                 // end of capture sequence for camera, store end time of this sequence
                 TimeRange cameraRange = TimeRange(captureStart, time);
                 ghoul_assert(cameraRange.isDefined(), "Invalid time range");
-                _instrumentTimes.emplace_back(previousCamera, cameraRange);
+                _instrumentTimes.emplace_back(previousCamera, std::move(cameraRange));
                 captureStart = -1;
             }
         }

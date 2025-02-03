@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -73,6 +73,8 @@ public:
 protected:
     properties::OptionProperty _blendMode;
 
+    properties::StringProperty _text;
+
     float unit(int unit) const;
 
     std::string_view toString(int unit) const;
@@ -91,8 +93,6 @@ private:
     properties::FloatProperty _fontSize;
     properties::FloatProperty _size;
     properties::IVec2Property _minMaxSize;
-
-    properties::StringProperty _text;
 
     properties::BoolProperty _enableFadingEffect;
     properties::Vec2Property _fadeWidths;

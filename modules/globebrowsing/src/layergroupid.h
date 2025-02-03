@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -78,68 +78,72 @@ constexpr std::array<Group, 5> Groups = {
 
 struct Layer {
     enum class ID {
-        DefaultTileLayer = 0,
-        SingleImageTileLayer,
-        ImageSequenceTileLayer,
-        SizeReferenceTileLayer,
-        TemporalTileLayer,
-        TileIndexTileLayer,
-        ByIndexTileLayer,
-        ByLevelTileLayer,
+        DefaultTileProvider = 0,
+        SingleImageProvider,
+        ImageSequenceTileProvider,
+        SizeReferenceTileProvider,
+        TemporalTileProvider,
+        TileIndexTileProvider,
+        TileProviderByDate,
+        TileProviderByIndex,
+        TileProviderByLevel,
         SolidColor,
-        SpoutImageTileLayer,
-        VideoTileLayer,
-        Unknown
+        SpoutImageProvider,
+        VideoTileProvider
     };
 
     ID id;
     std::string_view identifier;
 };
 
-constexpr std::array<Layer, 11> Layers = {
+constexpr std::array<Layer, 12> Layers = {
     Layer {
-        .id = Layer::ID::DefaultTileLayer,
-        .identifier = "DefaultTileLayer"
+        .id = Layer::ID::DefaultTileProvider,
+        .identifier = "DefaultTileProvider"
     },
     Layer {
-        .id = Layer::ID::SingleImageTileLayer,
-        .identifier = "SingleImageTileLayer"
+        .id = Layer::ID::SingleImageProvider,
+        .identifier = "SingleImageProvider"
     },
     Layer {
-        .id = Layer::ID::ImageSequenceTileLayer,
-        .identifier = "ImageSequenceTileLayer"
+        .id = Layer::ID::ImageSequenceTileProvider,
+        .identifier = "ImageSequenceTileProvider"
     },
     Layer {
-        .id = Layer::ID::SizeReferenceTileLayer,
-        .identifier = "SizeReferenceTileLayer"
+        .id = Layer::ID::SizeReferenceTileProvider,
+        .identifier = "SizeReferenceTileProvider"
     },
     Layer {
-        .id = Layer::ID::TemporalTileLayer,
-        .identifier = "TemporalTileLayer"
+        .id = Layer::ID::TemporalTileProvider,
+        .identifier = "TemporalTileProvider"
     },
     Layer {
-        .id = Layer::ID::TileIndexTileLayer,
-        .identifier = "TileIndexTileLayer"
+        .id = Layer::ID::TileIndexTileProvider,
+        .identifier = "TileIndexTileProvider"
     },
     Layer {
-        .id = Layer::ID::ByIndexTileLayer,
-        .identifier = "ByIndexTileLayer"
+        .id = Layer::ID::TileProviderByDate,
+        .identifier = "TileProviderByDate"
     },
     Layer {
-        .id = Layer::ID::ByLevelTileLayer,
-        .identifier = "ByLevelTileLayer"
+        .id = Layer::ID::TileProviderByIndex,
+        .identifier = "TileProviderByIndex"
+    },
+    Layer {
+        .id = Layer::ID::TileProviderByLevel,
+        .identifier = "TileProviderByLevel"
     },
     Layer {
         .id = Layer::ID::SolidColor,
         .identifier = "SolidColor"
     },
     Layer {
-        .id = Layer::ID::SpoutImageTileLayer,
-        .identifier = "SpoutImageTileLayer"
+        .id = Layer::ID::SpoutImageProvider,
+        .identifier = "SpoutImageProvider"
     },
     Layer {
-        .id = Layer::ID::VideoTileLayer,
-        .identifier = "VideoTileLayer"
+        .id = Layer::ID::VideoTileProvider,
+        .identifier = "VideoTileProvider"
     }
 };
 
@@ -206,9 +210,15 @@ constexpr openspace::globebrowsing::layers::Layer::ID from_string(std::string_vi
             return li.identifier == string;
         }
     );
-    return it != openspace::globebrowsing::layers::Layers.end() ?
-        it->id :
-        openspace::globebrowsing::layers::Layer::ID::Unknown;
+
+    if (it != openspace::globebrowsing::layers::Layers.end()) {
+        return it->id;
+    }
+    else {
+        throw ghoul::RuntimeError(std::format(
+            "Could not find Layer of type '{}'", string
+        ));
+    }
 }
 
 template <>
@@ -221,9 +231,15 @@ constexpr openspace::globebrowsing::layers::Group::ID from_string(std::string_vi
             return gi.identifier == string;
         }
     );
-    return it != openspace::globebrowsing::layers::Groups.end() ?
-        it->id :
-        openspace::globebrowsing::layers::Group::ID::Unknown;
+
+    if (it != openspace::globebrowsing::layers::Groups.end()) {
+        return it->id;
+    }
+    else {
+        throw ghoul::RuntimeError(std::format(
+            "Could not find Group of type '{}'", string
+        ));
+    }
 }
 
 template <>

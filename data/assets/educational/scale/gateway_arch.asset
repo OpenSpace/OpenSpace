@@ -1,19 +1,17 @@
 local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
-local sunAsset = asset.require("scene/solarsystem/sun/sun")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local modelFolder = asset.syncedResource({
+local modelFolder = asset.resource({
   Name = "Scale Gateway Arch",
-  Type = "UrlSynchronization",
+  Type = "HttpSynchronization",
   Identifier = "scale_model_gateway_arch",
-  Url = "https://wms.openspace.amnh.org/static/sync/url/scalemodels/GatewayArch_fbx.osmodel",
-  Filename = "GatewayArch_fbx.osmodel",
-  Override = false
+  Version = 2
 })
 
 
-local Location = { 38.624880, -90.184939 }
+local Location = { 38.624640, -90.184940 }
 
 local ScaleModel = {
   Identifier = "Scale_GatewayArch",
@@ -36,17 +34,19 @@ local ScaleModel = {
     },
     Scale = {
       Type = "StaticScale",
-      Scale = 0.5
+      Scale = 1.1
     }
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = modelFolder .. "GatewayArch_fbx.osmodel",
+    GeometryFile = modelFolder .. "GatewayArch.osmodel",
     RotationVector = { 0.0, 157.0, 0.0 },
-    LightSources = { sunAsset.LightSource }
+    LightSources = { sunAsset.LightSource },
+    ModelScale = "Centimeter"
   },
   GUI = {
     Name = "Gateway Arch",
+    Description = "The arch monument is 192 m (630 ft) tall.",
     Path = "/Scale Objects"
   }
 }
@@ -90,3 +90,14 @@ end)
 asset.export(ScaleModel)
 asset.export("UpdatePositionAction", UpdatePositionAction.Identifier)
 asset.export("ResetPositionAction", ResetPositionAction.Identifier)
+
+
+asset.meta = {
+  Name = "Scale Model - Gateway Arch",
+  Description = [[A 1:1 scale model of the Gateway Arch. Per default it is placed at its
+    actual position in Saint Louis, Missouri. But the asset also includes actions to move
+    it to a position under the camera, or back to its original position.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

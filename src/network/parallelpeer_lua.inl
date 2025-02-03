@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,23 @@
 
 namespace {
 
+[[codegen::luawrap]] void joinServer(std::string port, std::string address,
+                                     std::string serverName, std::string password,
+                                     std::string hostpassword = "",
+                                     std::string name = "Anonymous") {
+    using namespace openspace;
+    if (global::windowDelegate->isMaster()) {
+        ParallelPeer* peer = global::parallelPeer;
+        peer->setPort(std::move(port));
+        peer->setAddress(std::move(address));
+        peer->setPassword(std::move(password));
+        peer->setHostPassword(std::move(hostpassword));
+        peer->setServerName(std::move(serverName));
+        peer->setName(std::move(name));
+        peer->connect();
+    }
+}
+
 // Connect to parallel.
 [[codegen::luawrap]] void connect() {
     using namespace openspace;
@@ -36,7 +53,7 @@ namespace {
 [[codegen::luawrap]] void disconnect() {
     using namespace openspace;
     if (global::windowDelegate->isMaster()) {
-        global::parallelPeer->connect();
+        global::parallelPeer->disconnect();
     }
 }
 

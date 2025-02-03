@@ -2,7 +2,7 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Ecliptic Band Textures",
   Type = "HttpSynchronization",
   Identifier = "ecliptic_band_textures",
@@ -11,9 +11,9 @@ local textures = asset.syncedResource({
 
 
 local EclipticRotationMatrix = {
-    -0.05487554,  0.4941095, -0.8676661,
-    -0.9938214,  -0.1109906, -0.0003515167,
-    -0.09647644,  0.8622859,  0.4971472
+  -0.05487554,  0.4941095, -0.8676661,
+  -0.9938214,  -0.1109906, -0.0003515167,
+  -0.09647644,  0.8622859,  0.4971472
 }
 
 local EclipticLine = {
@@ -22,7 +22,7 @@ local EclipticLine = {
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = 4.28601E17
+      Scale = 9.46377307652E17
     },
     Rotation = {
       Type = "StaticRotation",
@@ -32,15 +32,15 @@ local EclipticLine = {
   Renderable = {
     Type = "RenderableRadialGrid",
     Opacity = 0.8,
-    Color = { 1.0, 1.0, 1.0 },
-    LineWidth = 3.0,
+    Color = { 0.5, 0.24, 0.24 },
+    LineWidth = 4.0,
     GridSegments = { 1, 1 },
-    Radii = { 0.5, 0.5 },
     Enabled = asset.enabled
   },
   GUI = {
-    Name = "Ecliptic Line",
-    Path = "/Other/Lines"
+    Name = "Ecliptic",
+    Description = "A line representation of the Ecliptic plane.",
+    Path = "/Night Sky/Coordinate Systems/Ecliptic"
   }
 }
 
@@ -54,9 +54,9 @@ local EclipticBand = {
     }
   },
   Renderable = {
-    Type = "RenderableSphere",
+    Type = "RenderableSphereImageLocal",
     Texture = textures .. "band2x.png",
-    Size = 4.28601E17,
+    Size = 9.46377307652E17,
     Segments = 50,
     DisableFadeInOut = true,
     Orientation = "Inside",
@@ -65,7 +65,8 @@ local EclipticBand = {
   },
   GUI = {
     Name = "Ecliptic Band",
-    Path = "/Other/Lines"
+    Description = "A band representation of the Ecliptic plane.",
+    Path = "/Night Sky/Coordinate Systems/Ecliptic"
   }
 }
 
@@ -158,3 +159,14 @@ asset.export("ToggleEclipticLine", ToggleEclipticLine.Identifier)
 asset.export("ShowEclipticBand", ShowEclipticBand.Identifier)
 asset.export("HideEclipticBand", HideEclipticBand.Identifier)
 asset.export("ToggleEclipticBand", ToggleEclipticBand.Identifier)
+
+
+
+asset.meta = {
+  Name = "Ecliptic Band/Line",
+  Description = [[A line and band representation of the Ecliptic plane, including actions
+    to toggle, hide and show each of them.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

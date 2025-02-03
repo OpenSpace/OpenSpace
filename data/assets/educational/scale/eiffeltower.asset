@@ -1,9 +1,9 @@
 local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
-local sunAsset = asset.require("scene/solarsystem/sun/sun")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local modelFolder = asset.syncedResource({
+local modelFolder = asset.resource({
   Name = "Scale Eiffel Tower",
   Type = "HttpSynchronization",
   Identifier = "scale_model_eiffel_tower",
@@ -31,10 +31,6 @@ local ScaleModel = {
       Globe = earthAsset.Earth.Identifier,
       Latitude = Location[1],
       Longitude = Location[2]
-    },
-    Scale = {
-      Type = "StaticScale",
-      Scale = 4.38
     }
   },
   Renderable = {
@@ -42,10 +38,11 @@ local ScaleModel = {
     GeometryFile = modelFolder .. "eiffeltower.osmodel",
     RotationVector = { 0.0, 45.0, 0.0 },
     LightSources = { sunAsset.LightSource },
-    ModelScale = "Centimeter"
+    ModelScale = 0.0438
   },
   GUI = {
     Name = "Eiffel Tower",
+    Description = "The tower is 330 m (1,083 ft) tall.",
     Path = "/Scale Objects"
   }
 }
@@ -89,3 +86,14 @@ end)
 asset.export(ScaleModel)
 asset.export("UpdatePositionAction", UpdatePositionAction.Identifier)
 asset.export("ResetPositionAction", ResetPositionAction.Identifier)
+
+
+asset.meta = {
+  Name = "Scale Model - Eiffel Tower",
+  Description = [[A 1:1 scale model of the Eiffel Tower. Per default it is placed at
+    its actual position in Paris, France. But the asset also includes actions to move it
+    to a position under the camera, or back to its original position.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

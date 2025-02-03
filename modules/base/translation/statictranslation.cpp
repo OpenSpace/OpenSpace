@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,8 +32,7 @@ namespace {
         "Position",
         "Position",
         "This value is used as a static offset (in meters) that is applied to the scene "
-        "graph node that this transformation is attached to relative to its parent",
-        // @VISIBILITY(2.25)
+        "graph node that this transformation is attached to relative to its parent.",
         openspace::properties::Property::Visibility::User
     };
 

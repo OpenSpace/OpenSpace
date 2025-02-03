@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -36,15 +37,10 @@
 #include <optional>
 
 namespace {
-    constexpr std::array<const char*, 2> UniformNames = {
-        "modelViewProjectionTransform", "vs_color"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Segments",
-        "The number of segments the shape of the prism should have",
-        // @VISIBILITY(2.8)
+        "The number of segments the shape of the prism should have.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -52,16 +48,14 @@ namespace {
         "NumLines",
         "Number of Lines",
         "The number of lines connecting the two shapes of the prism. They will be evenly "
-        "distributed around the bounding circle that makes up the shape of the prism",
-        // @VISIBILITY(2.8)
+        "distributed around the bounding circle that makes up the shape of the prism.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
         "Radius",
         "Radius",
-        "The radius of the prism's shape in meters",
-        // @VISIBILITY(2.8)
+        "The radius of the prism's shape in meters.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -69,48 +63,30 @@ namespace {
         "BaseRadius",
         "Base Radius",
         "The radius of the base of the prism's shape, in meters. By default it is given "
-        "the same radius as the outer shape",
-        // @VISIBILITY(2.8)
+        "the same radius as the outer shape.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width",
-        // @VISIBILITY(2.0)
+        "The width of the lines. The larger number, the thicker the lines.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB color for the line",
-        // @VISIBILITY(1.2)
+        "The RGB color of the line.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LengthInfo = {
         "Length",
         "Length",
-        "The length of the prism in meters",
-        // @VISIBILITY(2.8)
+        "The length of the prism in meters.",
         openspace::properties::Property::Visibility::User
     };
-
-    // Generate vertices around the unit circle on the XY-plane
-    std::vector<float> unitCircleVertices(int sectorCount) {
-        std::vector<float> vertices;
-        vertices.reserve(2 * sectorCount);
-        float sectorStep = glm::two_pi<float>() / sectorCount;
-
-        for (int i = 0; i < sectorCount; ++i) {
-            float sectorAngle = i * sectorStep;
-            vertices.push_back(cos(sectorAngle)); // x
-            vertices.push_back(sin(sectorAngle)); // y
-        }
-        return vertices;
-    }
 
     struct [[codegen::Dictionary(RenderablePrism)]] Parameters {
         // [[codegen::verbatim(SegmentsInfo.description)]]
@@ -203,7 +179,7 @@ void RenderablePrism::initializeGL() {
         absPath("${MODULE_BASE}/shaders/prism_vs.glsl"),
         absPath("${MODULE_BASE}/shaders/prism_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 
     glGenVertexArrays(1, &_vaoId);
     glGenBuffers(1, &_vboId);
@@ -236,17 +212,16 @@ void RenderablePrism::updateVertexData() {
     _vertexArray.clear();
     _indexArray.clear();
 
+    using namespace rendering::helper;
+
     // Get unit circle vertices on the XY-plane
-    std::vector<float> unitVertices = unitCircleVertices(_nShapeSegments);
-    std::vector<float> unitVerticesLines = unitCircleVertices(_nLines);
+    std::vector<VertexXYZ> unitVertices = createRingXYZ(_nShapeSegments.value(), 1.f);
+    std::vector<VertexXYZ> unitVerticesLines = createRingXYZ(_nLines.value(), 1.f);
 
     // Put base vertices into array
-    for (int j = 0, k = 0;
-        j < _nShapeSegments && k < static_cast<int>(unitVertices.size());
-        ++j, k += 2)
-    {
-        float ux = unitVertices[k];
-        float uy = unitVertices[k + 1];
+    for (int j = 0; j < _nShapeSegments; j++) {
+        const float ux = unitVertices[j].xyz[0];
+        const float uy = unitVertices[j].xyz[1];
 
         _vertexArray.push_back(ux * _baseRadius); // x
         _vertexArray.push_back(uy * _baseRadius); // y
@@ -254,12 +229,9 @@ void RenderablePrism::updateVertexData() {
     }
 
     // Put top shape vertices into array
-    for (int j = 0, k = 0;
-        j < _nShapeSegments && k < static_cast<int>(unitVertices.size());
-        ++j, k += 2)
-    {
-        float ux = unitVertices[k];
-        float uy = unitVertices[k + 1];
+    for (int j = 0; j < _nShapeSegments; j++) {
+        const float ux = unitVertices[j].xyz[0];
+        const float uy = unitVertices[j].xyz[1];
 
         _vertexArray.push_back(ux * _radius); // x
         _vertexArray.push_back(uy * _radius); // y
@@ -280,12 +252,9 @@ void RenderablePrism::updateVertexData() {
         _vertexArray.push_back(_length);
     }
     else {
-        for (int j = 0, k = 0;
-             j < _nLines && k < static_cast<int>(unitVerticesLines.size());
-             ++j, k += 2)
-        {
-            float ux = unitVerticesLines[k];
-            float uy = unitVerticesLines[k + 1];
+        for (int j = 0; j < _nLines; j++) {
+            const float ux = unitVerticesLines[j].xyz[0];
+            const float uy = unitVerticesLines[j].xyz[1];
 
             // Base
             _vertexArray.push_back(ux * _baseRadius); // x
@@ -304,7 +273,7 @@ void RenderablePrism::updateVertexData() {
         _nShapeSegments.value() <= std::numeric_limits<uint8_t>::max(),
         "Too many shape segments"
     );
-    for (uint8_t i = 0; i < _nShapeSegments; ++i) {
+    for (uint8_t i = 0; i < _nShapeSegments; i++) {
         _indexArray.push_back(i);
     }
 
@@ -312,12 +281,12 @@ void RenderablePrism::updateVertexData() {
     _indexArray.push_back(255);
 
     // Indices for Top shape
-    for (int i = _nShapeSegments; i < 2 * _nShapeSegments; ++i) {
+    for (int i = _nShapeSegments; i < 2 * _nShapeSegments; i++) {
         _indexArray.push_back(static_cast<uint8_t>(i));
     }
 
     // Indices for connecting lines
-    for (int i = 0, k = 0; i < _nLines; ++i, k += 2) {
+    for (int i = 0, k = 0; i < _nLines; i++, k += 2) {
         // Reset
         _indexArray.push_back(255);
 
@@ -348,17 +317,14 @@ void RenderablePrism::render(const RenderData& data, RendererTasks&) {
     _shader->activate();
 
     // Model transform and view transform needs to be in double precision
-    glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-    glm::mat4 modelViewProjectionTransform =
-        data.camera.projectionMatrix() *
-        glm::mat4(data.camera.combinedViewMatrix() * modelTransform);
+    const glm::dmat4 modelViewProjectionTransform =
+        calcModelViewProjectionTransform(data);
 
     // Uniforms
-    _shader->setUniform(_uniformCache.modelViewProjection, modelViewProjectionTransform);
+    _shader->setUniform(
+        _uniformCache.modelViewProjectionTransform,
+        glm::mat4(modelViewProjectionTransform)
+    );
     _shader->setUniform(_uniformCache.color, glm::vec4(_lineColor.value(), opacity()));
 
     // Render
@@ -384,7 +350,7 @@ void RenderablePrism::render(const RenderData& data, RendererTasks&) {
 void RenderablePrism::update(const UpdateData& data) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
     if (_prismIsDirty) {
         updateVertexData();

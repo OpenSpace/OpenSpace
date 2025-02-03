@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 
@@ -100,7 +101,7 @@ void MultiresVolumeRaycaster::preRaycast(const RaycastData& data,
                                          ghoul::opengl::ProgramObject& program)
 {
     std::string id = std::to_string(data.id);
-    //program.setUniform("opacity_" + std::to_string(id), visible ? 1.0f : 0.0f);
+    //program.setUniform("opacity_" + std::to_string(id), visible ? 1.f : 0.f);
     program.setUniform("stepSizeCoefficient_" + id, _stepSizeCoefficient);
 
     _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
@@ -173,20 +174,20 @@ void MultiresVolumeRaycaster::postRaycast(const RaycastData&,
     _tfUnit = nullptr;
 }
 
-std::string MultiresVolumeRaycaster::boundsVertexShaderPath() const {
-    return std::string(GlslBoundsVsPath);
+std::filesystem::path MultiresVolumeRaycaster::boundsVertexShaderPath() const {
+    return absPath(GlslBoundsVsPath);
 }
 
-std::string MultiresVolumeRaycaster::boundsFragmentShaderPath() const {
-    return std::string(GlslBoundsFsPath);
+std::filesystem::path MultiresVolumeRaycaster::boundsFragmentShaderPath() const {
+    return absPath(GlslBoundsFsPath);
 }
 
-std::string MultiresVolumeRaycaster::raycasterPath() const {
-    return std::string(GlslRaycastPath);
+std::filesystem::path MultiresVolumeRaycaster::raycasterPath() const {
+    return absPath(GlslRaycastPath);
 }
 
-std::string MultiresVolumeRaycaster::helperPath() const {
-    return std::string(GlslHelperPath); // no helper file
+std::filesystem::path MultiresVolumeRaycaster::helperPath() const {
+    return absPath(GlslHelperPath); // no helper file
 }
 
 void MultiresVolumeRaycaster::setModelTransform(glm::mat4 transform) {

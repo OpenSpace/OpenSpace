@@ -9,8 +9,13 @@ QLabel#heading {
   font-size: 12pt;
 }
 
-QLabel#error-message {
-  color: rgb(221, 17, 17);
+QPushButton:focus,
+QTextEdit:focus,
+QTabWidget:focus,
+QCheckBox:focus,
+QComboBox:focus {
+  outline: none;
+  border: 2px solid rgb(61, 189, 238);
 }
 
 /*
@@ -22,7 +27,7 @@ LauncherWindow  QLabel {
 }
 
 LauncherWindow  QLabel#label_choose, QLabel#label_options {
-  color: #dddddd;
+  color: rgb(255, 255, 255);
   font-size: 10pt;
 }
 
@@ -30,11 +35,15 @@ LauncherWindow  QLabel#clear {
   background-color: rgba(0, 0, 0, 0%);
 }
 
+LauncherWindow  QLabel#version-info {
+  font-size: 10pt;
+  color: #dfdfdf;
+}
+
 LauncherWindow  QComboBox#config {
-  background: rgb(96, 96, 96);
-  border: 1px solid rgb(128, 128, 128);
-  border-radius: 3px;
-  border-color: rgb(225, 225, 225);
+  background: rgb(86, 86, 86);
+  border: 1px solid rgb(225, 225, 225);
+  border-radius: 2px;
   padding: 1px 18px 1px 3px;
   min-width: 14em;
   font-size: 10pt;
@@ -44,7 +53,7 @@ LauncherWindow  QComboBox#config {
 }
 
 LauncherWindow  QComboBox#config:hover {
-  background: rgb(120, 120, 120);
+  background: rgb(110, 110, 110);
 }
 
 LauncherWindow  QComboBox#config:disabled {
@@ -52,26 +61,25 @@ LauncherWindow  QComboBox#config:disabled {
   color: rgb(225, 225, 225);
 }
 
-LauncherWindow  QPushButton#large {
-  background: rgb(128, 128, 128);
+LauncherWindow  QPushButton#start {
+  background: rgb(96, 96, 96);
+  border: 2px solid rgb(225, 225, 225);
   border-radius: 2px;
   border-style: outset;
-  border-width: 2px;
-  border-color: rgb(225, 225, 225);
   font-size: 16pt;
   font-weight: bold;
-  color: rgb(239, 239, 239);
+  letter-spacing: 1px;
+  color: rgb(255, 255, 255);
 }
-LauncherWindow  QPushButton#large:hover {
-  background: rgb(150, 150, 150);
+LauncherWindow  QPushButton#start:hover {
+  background: rgb(120, 120, 120);
 }
 
 LauncherWindow  QPushButton#small {
-  background: rgb(96, 96, 96);
+  background: rgb(86, 86, 86);
+  border: 1px solid rgb(225, 225, 225);
   border-radius: 2px;
   border-style: outset;
-  border-width: 1px;
-  border-color: rgb(225, 225, 225);
   min-height: 1em;
   font-size: 10pt;
   font-weight: bold;
@@ -79,14 +87,34 @@ LauncherWindow  QPushButton#small {
 }
 
 LauncherWindow  QPushButton#small:hover {
-  background: rgb(120, 120, 120);
+  background: rgb(110, 110, 110);
 }
 
 LauncherWindow  QPushButton#small:disabled {
-  color: rgb(180, 180, 180);
-  background: rgb(160, 160, 160);
+  background: rgb(204, 204, 204);
+  color: rgb(86, 86, 86);
 }
 
+LauncherWindow  QPushButton#settings {
+  border-image: url(:/images/cogwheel);
+  background-repeat: no-repeat;
+}
+
+LauncherWindow  QPushButton#settings:hover {
+  border-image: url(:/images/cogwheel-highlight);
+}
+
+LauncherWindow QPushButton#small:focus,
+LauncherWindow QPushButton#start:focus,
+LauncherWindow QComboBox#config:focus
+{
+  outline: none;
+  border: 2px solid rgb(61, 189, 238);
+}
+
+LauncherWindow QPushButton#settings:focus {
+  outline: 2px solid rgb(61, 189, 238);
+}
 /*
  * ProfileEdit
  */
@@ -150,12 +178,7 @@ DeltaTimesDialog  QListWidget {
 /*
  * Camera
  */
-CameraDialog  QLabel#error-message {
-  min-width: 10em;
-}
-
 CameraDialog  QLabel#camera-description {
-  color:rgb(96, 96, 96);
   margin: 1em;
   margin-top: 0.2em;
   margin-bottom: 0.4em;
@@ -183,10 +206,6 @@ HorizonsDialog  QLabel#thin {
   font-weight: normal;
 }
 
-HorizonsDialog  QLabel#error {
-  color: rgb(221, 17, 17);
-}
-
 HorizonsDialog  QLabel#normal {
   color: rgb(0, 0, 0);
 }
@@ -203,4 +222,18 @@ WindowControl QLabel#info {
 WindowControl QLabel#notice {
   font-weight: normal;
   font-size: 11pt;
+}
+
+/*
+ * Settings
+ */
+SettingsDialog QLabel#information {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 8pt;
+}
+
+SettingsDialog QComboBox#dropdown:focus {
+  outline: none;
+  border: 2px solid rgb(61, 189, 238);
 }

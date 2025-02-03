@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -104,14 +104,13 @@ struct TileMetaData {
     std::array<float, 4> maxValues;
     std::array<float, 4> minValues;
     std::array<bool, 4> hasMissingData;
-    bool allMissingData = false;
     uint8_t nValues = 0;
 };
 
 
 
 /**
- * Defines a status and may have a Texture and TileMetaData
+ * Defines a status and may have a Texture and TileMetaData.
  */
 class Tile {
 public:
@@ -119,29 +118,21 @@ public:
      * Describe if this Tile is good for usage (OK) or otherwise the reason why it is not.
      */
     enum class Status {
-        /**
-         * E.g when texture data is not currently in memory.
-         * texture and tileMetaData are both null
-         */
+        /// E.g when texture data is not currently in memory.
+        /// `texture` and `tileMetaData` are both `nullptr`
         Unavailable,
 
-        /**
-         * Can be set by `TileProvider`s if the requested `TileIndex` is undefined for
-         * that particular provider.
-         * texture and metaData are both null
-         */
+        /// Can be set by `TileProvider`s if the requested `TileIndex` is undefined for
+        /// that particular provider.
+        /// `texture` and `metaData` are both `nullptr`
         OutOfRange,
 
-        /**
-         * An IO Error happend
-         * texture and metaData are both null
-         */
+        /// An IO Error happend
+        /// `texture` and `metaData` are both `nullptr`
         IOError,
 
-        /**
-         * The Texture is uploaded to the GPU and good for usage.
-         * texture is defined. metaData may be defined.
-         */
+        /// The Texture is uploaded to the GPU and good for usage.
+        /// `texture` is defined. `metaData` may be defined.
         OK
     };
 

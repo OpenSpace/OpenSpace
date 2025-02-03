@@ -1,10 +1,5 @@
---voyager/mission.asset
-
--- Source:  http://pluto.jhuapl.edu/Mission/index.php
--- Many of the values (especially days of the month if 01 or 30 or 31  and  hh::mm::ss if all 0)
--- are approximate and need fixing
-
 local Mission = {
+  Identifier = "JWST",
   Name = "James Webb Space Telescope",
   Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2016/12/jwst_mission_logo/16561412-4-eng-GB/JWST_mission_logo_pillars.png",
   Description = "The James Webb Space Telescope (sometimes called JWST or Webb) is an orbiting infrared observatory that will complement and extend the discoveries of the Hubble Space Telescope, with longer wavelength coverage and greatly improved sensitivity. The longer wavelengths enable Webb to look much closer to the beginning of time and to hunt for the unobserved formation of the first galaxies, as well as to look inside dust clouds where stars and planetary systems are forming today.",
@@ -20,7 +15,7 @@ local Mission = {
       Date = "2022 JAN 24 00:00:00",
       Description = "When you ask an astronomer about the James Webb Space Telescope's orbit, they'll tell you something that sounds like it came from a science-fiction novel. The Webb won't be orbiting the Earth - instead we will send it almost a million miles out into space to a place called 'L2'. L2 is short-hand for the second Lagrange Point, a wonderful accident of gravity and orbital mechanics, and the perfect place to park the Webb telescope in space. There are five so-called 'Lagrange Points' - areas where gravity from the sun and Earth balance the orbital motion of a satellite. Putting a spacecraft at any of these points allows it to stay in a fixed position relative to the Earth and sun with a minimal amount of energy needed for course correction.",
       Image = "https://www.nasa.gov/images/content/463480main_lagrange_point_lg_1.jpg",
-      Link = "https://www.nasa.gov/topics/universe/features/webb-l2.html",
+      Link = "https://www.nasa.gov/topics/universe/features/webb-l2.html"
     },
     {
       Name = "NIRCam detected the first photons",
@@ -50,7 +45,7 @@ local Mission = {
   Phases = {
     {
       Name = "Launch",
-      TimeRange = { Start = "2021 DEC 25 12:20:00", End = "2021 DEC 25 12:47:00" },
+      TimeRange = { Start = "2021 DEC 25 12:20:00", End = "2021 DEC 25 12:47:00" }
     },
     {
       Name = "Preparation for science operations",
@@ -96,5 +91,5 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.unloadMission(Mission.Name)
+  openspace.unloadMission(Mission)
 end)

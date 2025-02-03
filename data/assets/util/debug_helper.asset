@@ -123,6 +123,7 @@ local function registerCartesianAxes(axesAsset, specification)
   registerNode(axesAsset, addCartesianAxes, generateAxesIdentifier, specification)
 end
 
+
 asset.export("addGrid", addGrid)
 asset.export("registerGrid", registerGrid)
 

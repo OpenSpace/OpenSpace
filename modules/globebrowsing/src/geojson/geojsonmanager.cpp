@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,16 +36,6 @@ namespace {
 
 namespace openspace::globebrowsing {
 
-documentation::Documentation GeoJsonManager::Documentation() {
-    using namespace documentation;
-    return {
-        "GeoJsonManager",
-        "globebrowsing_geojsonmanager",
-        {}
-    };
-}
-
-// TODO: Gui name and description
 GeoJsonManager::GeoJsonManager() : properties::PropertyOwner({ "GeoJson" }) {}
 
 void GeoJsonManager::initialize(RenderableGlobe* globe) {
@@ -60,7 +50,7 @@ void GeoJsonManager::deinitializeGL() {
 }
 
 bool GeoJsonManager::isReady() const {
-    bool isReady = std::all_of(
+    const bool isReady = std::all_of(
         std::begin(_geoJsonObjects),
         std::end(_geoJsonObjects),
         [](const std::unique_ptr<GeoJsonComponent>& g) {
@@ -74,14 +64,7 @@ void GeoJsonManager::addGeoJsonLayer(const ghoul::Dictionary& layerDict) {
     ZoneScoped;
 
     try {
-        // Parse dictionary
-        documentation::testSpecificationAndThrow(
-            GeoJsonComponent::Documentation(),
-            layerDict,
-            "GeoJsonComponent"
-        );
-
-        std::string identifier = layerDict.value<std::string>("Identifier");
+        const std::string identifier = layerDict.value<std::string>("Identifier");
         if (hasPropertySubOwner(identifier)) {
             LERROR("GeoJson layer with identifier '" + identifier + "' already exists");
             return;
@@ -108,15 +91,12 @@ void GeoJsonManager::addGeoJsonLayer(const ghoul::Dictionary& layerDict) {
 void GeoJsonManager::deleteLayer(const std::string& layerIdentifier) {
     ZoneScoped;
 
-    for (auto it = _geoJsonObjects.begin(); it != _geoJsonObjects.end(); ++it) {
+    for (auto it = _geoJsonObjects.begin(); it != _geoJsonObjects.end(); it++) {
         if (it->get()->identifier() == layerIdentifier) {
-            // we need to make a copy as the layerIdentifier is only a reference
-            // which will no longer be valid once it is deleted
-            std::string id = layerIdentifier;
+            LINFO("Deleting GeoJson layer: " + layerIdentifier);
             removePropertySubOwner(it->get());
             (*it)->deinitializeGL();
             _geoJsonObjects.erase(it);
-            LINFO("Deleted GeoJson layer " + id);
             return;
         }
     }

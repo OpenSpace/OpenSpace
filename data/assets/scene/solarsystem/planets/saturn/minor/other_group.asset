@@ -1,5 +1,8 @@
 local transforms = asset.require("../transforms")
 local kernels = asset.require("../kernels")
+local kernels415 = asset.require("../kernels415")
+local kernels452 = asset.require("../kernels452")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -9,15 +12,13 @@ local Aegaeon = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "AEGAEON",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Aegaeon,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 500, 500, 500 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 500, 500, 500 }
   },
   Tag = {
     "moon_solarSystem",
@@ -40,8 +41,8 @@ local AegaeonTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "AEGAEON",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Aegaeon,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.80812,
@@ -51,6 +52,7 @@ local AegaeonTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_other",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -64,8 +66,8 @@ local AegaeonLabel = {
   Identifier = "AegaeonLabel",
   Parent = Aegaeon.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Aegaeon",
     FontSize = 70.0,
     Size = 5.5,
@@ -77,11 +79,16 @@ local AegaeonLabel = {
     FadeDistances = { 250.0, 1500.0 },
     FadeWidths = { 100.0, 1500.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
   GUI = {
     Name = "Aegaeon Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Aegaeon",
-    Description = "Label for Saturn's moon Aegaeon (Other group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Aegaeon"
   }
 }
 
@@ -91,15 +98,13 @@ local Methone = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "METHONE",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Methone,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3200, 3200, 3200 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3200, 3200, 3200 }
   },
   Tag = {
     "moon_solarSystem",
@@ -122,8 +127,8 @@ local MethoneTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "METHONE",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Methone,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1.00957,
@@ -133,6 +138,7 @@ local MethoneTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_other",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -146,8 +152,8 @@ local MethoneLabel = {
   Identifier = "MethoneLabel",
   Parent = Methone.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Methone",
     FontSize = 70.0,
     Size = 5.5,
@@ -159,11 +165,16 @@ local MethoneLabel = {
     FadeDistances = { 250.0, 1500.0 },
     FadeWidths = { 100.0, 1500.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
   GUI = {
     Name = "Methone Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Methone",
-    Description = "Label for Saturn's moon Methone (Other group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Methone"
   }
 }
 
@@ -173,15 +184,13 @@ local Anthe = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ANTHE",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Anthe,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1800, 1800, 1800 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1800, 1800, 1800 }
   },
   Tag = {
     "moon_solarSystem",
@@ -204,8 +213,8 @@ local AntheTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ANTHE",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Anthe,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1.05089,
@@ -215,6 +224,7 @@ local AntheTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_other",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -228,8 +238,8 @@ local AntheLabel = {
   Identifier = "AntheLabel",
   Parent = Anthe.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Anthe",
     FontSize = 70.0,
     Size = 5.5,
@@ -241,11 +251,16 @@ local AntheLabel = {
     FadeDistances = { 250.0, 1500.0 },
     FadeWidths = { 100.0, 1500.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
   GUI = {
     Name = "Anthe Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Anthe",
-    Description = "Label for Saturn's moon Anthe (Other group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Anthe"
   }
 }
 
@@ -255,15 +270,13 @@ local Pallene = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PALLENE",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Pallene,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -286,8 +299,8 @@ local PalleneTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PALLENE",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Pallene,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1.370218,
@@ -297,6 +310,7 @@ local PalleneTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_other",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -310,8 +324,8 @@ local PalleneLabel = {
   Identifier = "PalleneLabel",
   Parent = Pallene.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Pallene",
     FontSize = 70.0,
     Size = 5.5,
@@ -323,11 +337,16 @@ local PalleneLabel = {
     FadeDistances = { 250.0, 1500.0 },
     FadeWidths = { 100.0, 1500.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
   GUI = {
     Name = "Pallene Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Pallene",
-    Description = "Label for Saturn's moon Pallene (Other group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Pallene"
   }
 }
 
@@ -337,15 +356,13 @@ local Telesto = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "TELESTO",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Telesto,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 33000, 24000, 20000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 33000, 24000, 20000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -368,8 +385,8 @@ local TelestoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "TELESTO",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels415.ID.Telesto,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1.887802,
@@ -379,6 +396,7 @@ local TelestoTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_other",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -392,8 +410,8 @@ local TelestoLabel = {
   Identifier = "TelestoLabel",
   Parent = Telesto.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Telesto",
     FontSize = 70.0,
     Size = 5.5,
@@ -405,11 +423,16 @@ local TelestoLabel = {
     FadeDistances = { 250.0, 1500.0 },
     FadeWidths = { 100.0, 1500.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
   GUI = {
     Name = "Telesto Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Telesto",
-    Description = "Label for Saturn's moon Telesto (Other group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Telesto"
   }
 }
 
@@ -419,15 +442,13 @@ local Calypso = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CALYPSO",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels.ID.Calypso,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 30000, 23000, 14000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 30000, 23000, 14000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -450,8 +471,8 @@ local CalypsoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CALYPSO",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels.ID.Calypso,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1.887802,
@@ -461,6 +482,7 @@ local CalypsoTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_other",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -474,8 +496,8 @@ local CalypsoLabel = {
   Identifier = "CalypsoLabel",
   Parent = Calypso.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Calypso",
     FontSize = 70.0,
     Size = 5.5,
@@ -487,11 +509,16 @@ local CalypsoLabel = {
     FadeDistances = { 250.0, 1500.0 },
     FadeWidths = { 100.0, 1500.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
   GUI = {
     Name = "Calypso Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Calypso",
-    Description = "Label for Saturn's moon Calypso (Other group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Calypso"
   }
 }
 
@@ -501,15 +528,13 @@ local Helene = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HELENE",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels.ID.Helene,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 43000, 38000, 26000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 43000, 38000, 26000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -532,8 +557,8 @@ local HeleneTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HELENE",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels.ID.Helene,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 2.736915,
@@ -543,6 +568,7 @@ local HeleneTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_other",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -556,8 +582,8 @@ local HeleneLabel = {
   Identifier = "HeleneLabel",
   Parent = Helene.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Helene",
     FontSize = 70.0,
     Size = 5.5,
@@ -569,11 +595,16 @@ local HeleneLabel = {
     FadeDistances = { 250.0, 1500.0 },
     FadeWidths = { 100.0, 1500.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
   GUI = {
     Name = "Helene Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Helene",
-    Description = "Label for Saturn's moon Helene (Other group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Helene"
   }
 }
 
@@ -583,15 +614,13 @@ local Polydeuces = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "POLYDEUCES",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels.ID.Polydeuces,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 2000, 1000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 2000, 1000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -614,8 +643,8 @@ local PolydeucesTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "POLYDEUCES",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels.ID.Polydeuces,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 2.736915,
@@ -625,6 +654,7 @@ local PolydeucesTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_other",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -638,8 +668,8 @@ local PolydeucesLabel = {
   Identifier = "PolydeucesLabel",
   Parent = Polydeuces.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Polydeuces",
     FontSize = 70.0,
     Size = 5.5,
@@ -651,11 +681,16 @@ local PolydeucesLabel = {
     FadeDistances = { 250.0, 1500.0 },
     FadeWidths = { 100.0, 1500.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
   GUI = {
     Name = "Polydeuces Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Polydeuces",
-    Description = "Label for Saturn's moon Polydeuces (Other group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Polydeuces"
   }
 }
 
@@ -665,15 +700,13 @@ local S2004S24 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65070",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S24,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -696,8 +729,8 @@ local S2004S24Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65070",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S24,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1293.85,
@@ -707,6 +740,7 @@ local S2004S24Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_other",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -720,8 +754,8 @@ local S2004S24Label = {
   Identifier = "S2004S24Label",
   Parent = S2004S24.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2004 S 24",
     FontSize = 70.0,
     Size = 5.5,
@@ -733,21 +767,21 @@ local S2004S24Label = {
     FadeDistances = { 250.0, 1500.0 },
     FadeWidths = { 100.0, 1500.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
   GUI = {
     Name = "S/2004 S 24 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/S2004S24",
-    Description = "Label for Saturn's moon S/2004 S 24 (Other group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/S2004S24"
   }
 }
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.sat415)
-  openspace.spice.loadKernel(kernels.sat441)
-  openspace.spice.loadKernel(kernels.sat452)
-
-
   openspace.addSceneGraphNode(Aegaeon)
   openspace.addSceneGraphNode(AegaeonTrail)
   openspace.addSceneGraphNode(AegaeonLabel)
@@ -821,12 +855,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(S2004S24Label)
   openspace.removeSceneGraphNode(S2004S24Trail)
   openspace.removeSceneGraphNode(S2004S24)
-
-
-  openspace.spice.unloadKernel(kernels.sat452)
-  openspace.spice.unloadKernel(kernels.sat441)
-  openspace.spice.unloadKernel(kernels.sat415)
-
 end)
 
 asset.export(Aegaeon)
@@ -869,7 +897,6 @@ asset.export(S2004S24Label)
 
 asset.meta = {
   Name = "Saturn Other Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Saturn's Other Group moons: Aegaeon,
     Methone, Anthe, Pallene, Telesto, Calypso, Helene, Polydeuces. Blank globes and SPICE
     trails are generated for each moon]],

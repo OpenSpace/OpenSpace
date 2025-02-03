@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,7 +37,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "Decides if this module should be enabled"
+        "Decides if this module should be enabled."
     };
 
     struct [[codegen::Dictionary(VideoModule)]] Parameters {
@@ -49,6 +49,10 @@ namespace {
 } // namespace
 
 namespace openspace {
+
+documentation::Documentation VideoModule::Documentation() {
+    return codegen::doc<Parameters>("module_video");
+}
 
 VideoModule::VideoModule()
     : OpenSpaceModule(VideoModule::Name)
@@ -65,7 +69,7 @@ void VideoModule::internalInitialize(const ghoul::Dictionary& dict) {
     ghoul::TemplateFactory<globebrowsing::TileProvider>* fTileProvider =
         FactoryManager::ref().factory<globebrowsing::TileProvider>();
     ghoul_assert(fTileProvider, "TileProvider factory was not created");
-    fTileProvider->registerClass<globebrowsing::VideoTileProvider>("VideoTileLayer");
+    fTileProvider->registerClass<globebrowsing::VideoTileProvider>("VideoTileProvider");
 
     ghoul::TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
@@ -85,8 +89,7 @@ std::vector<documentation::Documentation> VideoModule::documentations() const {
         RenderableVideoPlane::Documentation(),
         RenderableVideoSphere::Documentation(),
         ScreenSpaceVideo::Documentation(),
-        globebrowsing::VideoTileProvider::Documentation(),
-        VideoPlayer::Documentation()
+        globebrowsing::VideoTileProvider::Documentation()
     };
 }
 

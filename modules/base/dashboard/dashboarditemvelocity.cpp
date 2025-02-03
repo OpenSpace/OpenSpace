@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,7 +45,7 @@ namespace {
         "Simplification",
         "If this value is enabled, the velocity is displayed in nuanced units, such as "
         "m/s, AU/s, light years / s etc. If this value is disabled, the unit can be "
-        "explicitly requested",
+        "explicitly requested.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -53,29 +53,17 @@ namespace {
         "RequestedUnit",
         "Requested Unit",
         "If the simplification is disabled, this distance unit is used for the velocity "
-        "display",
+        "display.",
         openspace::properties::Property::Visibility::User
     };
-
-    std::vector<std::string> unitList() {
-        std::vector<std::string> res(openspace::DistanceUnits.size());
-        std::transform(
-            openspace::DistanceUnits.begin(),
-            openspace::DistanceUnits.end(),
-            res.begin(),
-            [](openspace::DistanceUnit unit) {
-                return std::string(nameForDistanceUnit(unit));
-            }
-        );
-        return res;
-    }
 
     struct [[codegen::Dictionary(DashboardItemVelocity)]] Parameters {
         // [[codegen::verbatim(SimplificationInfo.description)]]
         std::optional<bool> simplification;
 
         // [[codegen::verbatim(RequestedUnitInfo.description)]]
-        std::optional<std::string> requestedUnit [[codegen::inlist(unitList())]];
+        std::optional<std::string> requestedUnit
+            [[codegen::inlist(openspace::distanceUnitList())]];
     };
 #include "dashboarditemvelocity_codegen.cpp"
 
@@ -106,7 +94,7 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
     });
     addProperty(_doSimplification);
 
-    for (DistanceUnit u : DistanceUnits) {
+    for (const DistanceUnit u : DistanceUnits) {
         _requestedUnit.addOption(
             static_cast<int>(u),
             std::string(nameForDistanceUnit(u))
@@ -114,7 +102,7 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
     }
     _requestedUnit = static_cast<int>(DistanceUnit::Meter);
     if (p.requestedUnit.has_value()) {
-        DistanceUnit unit = distanceUnitFromString(p.requestedUnit->c_str());
+        const DistanceUnit unit = distanceUnitFromString(*p.requestedUnit);
         _requestedUnit = static_cast<int>(unit);
     }
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
@@ -142,14 +130,12 @@ void DashboardItemVelocity::render(glm::vec2& penPosition) {
         dist = std::pair(convertedD, nameForDistanceUnit(unit, convertedD != 1.0));
     }
 
+    penPosition.y -= _font->height();
     RenderFont(
         *_font,
         penPosition,
-        fmt::format(
-            "Camera velocity: {:.4f} {}/s", dist.first, dist.second
-        )
+        std::format("Camera velocity: {:.4f} {}/s", dist.first, dist.second)
     );
-    penPosition.y -= _font->height();
 
     _prevPosition = currentPos;
 }
@@ -163,13 +149,13 @@ glm::vec2 DashboardItemVelocity::size() const {
         dist = simplifyDistance(d);
     }
     else {
-        DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
-        double convertedD = convertMeters(d, unit);
+        const DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
+        const double convertedD = convertMeters(d, unit);
         dist = std::pair(convertedD, nameForDistanceUnit(unit, convertedD != 1.0));
     }
 
     return _font->boundingBox(
-        fmt::format("Camera velocity: {} {}/s", dist.first, dist.second)
+        std::format("Camera velocity: {} {}/s", dist.first, dist.second)
     );
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,10 +45,27 @@ namespace {
     constexpr std::string_view _loggerCat = "Path";
     constexpr float LengthEpsilon = 1e-5f;
 
-    // TODO: where should this documentation be?
-    // It's nice to have these to interpret the dictionary when creating the path, but
-    // maybe it's not really necessary
+    // A PathInstruction is a table describing the specification for a camera path.
+    // It is used as an input to the `openspace.pathnavigation.createPath` function.
+    //
+    // There are two types of paths that can be created, as specified by the required
+    // TargetType parameter: 'Node' or 'NavigationState'. The difference is what kind
+    // of target the path is created for, a scene graph node or a specific navigation
+    // state for the camera.
+    //
+    // Depending on the type, the parameters that can be specified are a bit different.
+    // A 'NavigationState' already contains all details for the camera position, so no
+    // other details may be specified. For a 'Node' instruction, only a 'Target' node is
+    // required, but a 'Height' or 'Position' may also be specified. If both a position
+    // and height is specified, the height value will be ignored.
+    //
+    // For 'Node' paths it is also possible to specify whether the target camera state
+    // at the end of the flight should take the up direction of the target node into
+    // account. Note that for this to give an effect on the path, rolling motions have
+    // to be enabled.
     struct [[codegen::Dictionary(PathInstruction)]] Parameters {
+        // The type of the instruction. Decides what other parameters are
+        // handled/available
         enum class TargetType {
             Node,
             NavigationState
@@ -59,7 +76,7 @@ namespace {
         std::optional<float> duration;
 
         // (Node): The target node of the camera path. Not optional for 'Node'
-        // instructions
+        // type instructions
         std::optional<std::string> target;
 
         // (Node): An optional position in relation to the target node, in model
@@ -74,7 +91,7 @@ namespace {
         std::optional<bool> useTargetUpDirection;
 
         // (NavigationState): A navigation state that will be the target
-        // of this path segment
+        // of the resulting path
         std::optional<ghoul::Dictionary> navigationState
             [[codegen::reference("core_navigation_state")]];
 
@@ -96,9 +113,14 @@ namespace {
 
 namespace openspace::interaction {
 
-Path::Path(Waypoint start, Waypoint end, Type type,
-           std::optional<double> duration)
-    : _start(start), _end(end), _type(type)
+documentation::Documentation Path::Documentation() {
+    return codegen::doc<Parameters>("core_path_instruction");
+}
+
+Path::Path(Waypoint start, Waypoint end, Type type, std::optional<float> duration)
+    : _start(std::move(start))
+    , _end(std::move(end))
+    , _type(type)
 {
     switch (_type) {
         case Type::AvoidCollision:
@@ -111,46 +133,74 @@ Path::Path(Waypoint start, Waypoint end, Type type,
         case Type::ZoomOutOverview:
             _curve = std::make_unique<ZoomOutOverviewCurve>(_start, _end);
             break;
-        default:
-            LERROR("Could not create curve. Type does not exist");
-            throw ghoul::MissingCaseException();
     }
 
     _prevPose = _start.pose();
 
-    // Compute speed factor to match any given duration, by traversing the path and
-    // computing how much faster/slower it should be
+    // Estimate how long time the camera path will take to traverse
+    constexpr double dt = 0.05; // 20 fps
+    while (!hasReachedEnd()) {
+        traversePath(dt);
+    }
+    float estimatedDuration = _progressedTime;
+    resetPlaybackVariables();
+
+    // We now know how long it took to traverse the path. Use that to compute the
+    // speed factor to match any given duration
     _speedFactorFromDuration = 1.0;
     if (duration.has_value()) {
-        constexpr double dt = 0.05; // 20 fps
-        while (!hasReachedEnd()) {
-            traversePath(dt);
+        if (*duration > 0.0) {
+            _speedFactorFromDuration = estimatedDuration / *duration;
+            estimatedDuration = *duration;
         }
-
-        // We now know how long it took to traverse the path. Use that
-        _speedFactorFromDuration = _progressedTime / *duration;
-        resetPlaybackVariables();
+        else {
+            // A duration of zero means infinite speed. Handle this explicity
+            _speedFactorFromDuration = std::numeric_limits<float>::infinity();
+            estimatedDuration = 0.f;
+        }
     }
+    _expectedDuration = estimatedDuration;
 }
 
-Waypoint Path::startPoint() const { return _start; }
+Waypoint Path::startPoint() const {
+    return _start;
+}
 
-Waypoint Path::endPoint() const { return _end; }
+Waypoint Path::endPoint() const {
+    return _end;
+}
 
-double Path::pathLength() const { return _curve->length(); }
+double Path::pathLength() const {
+    return _curve->length();
+}
+
+double Path::remainingDistance() const {
+    return pathLength() - _traveledDistance;
+}
+
+float Path::estimatedRemainingTime(float speedScale) const {
+    return _expectedDuration / speedScale - _progressedTime;
+}
 
 std::vector<glm::dvec3> Path::controlPoints() const {
     return _curve->points();
 }
 
 CameraPose Path::traversePath(double dt, float speedScale) {
+    if (std::isinf(_speedFactorFromDuration)) {
+        _shouldQuit = true;
+        _prevPose = _start.pose();
+        _traveledDistance = pathLength();
+        return _end.pose();
+    }
+
     double speed = speedAlongPath(_traveledDistance);
     speed *= static_cast<double>(speedScale);
-    double displacement = dt * speed;
+    const double displacement = dt * speed;
 
     const double prevDistance = _traveledDistance;
 
-    _progressedTime += dt;
+    _progressedTime += static_cast<float>(dt);
     _traveledDistance += displacement;
 
     CameraPose newPose;
@@ -181,7 +231,7 @@ void Path::quitPath() {
 }
 
 std::string Path::currentAnchor() const {
-    bool pastHalfway = (_traveledDistance / pathLength()) > 0.5;
+    const bool pastHalfway = (_traveledDistance / pathLength()) > 0.5;
     return (pastHalfway) ? _end.nodeIdentifier() : _start.nodeIdentifier();
 }
 
@@ -193,10 +243,10 @@ bool Path::hasReachedEnd() const {
     // @TODO (emmbr, 2022-11-07) Handle linear paths separately, as they might
     // abort prematurely due to the "isPositionFinished" condition
 
-    bool isPositionFinished = (_traveledDistance / pathLength()) >= 1.0;
+    const bool isPositionFinished = (_traveledDistance / pathLength()) >= 1.0;
 
     constexpr double RotationEpsilon = 0.0001;
-    bool isRotationFinished = ghoul::isSameOrientation(
+    const bool isRotationFinished = ghoul::isSameOrientation(
         _prevPose.rotation,
         _end.rotation(),
         RotationEpsilon
@@ -230,8 +280,8 @@ CameraPose Path::linearInterpolatedPose(double distance, double displacement) {
         const glm::dvec3 lineDir = glm::normalize(prevPosToEnd);
         pose.position = _prevPose.position - displacement * lineDir;
 
-        double newRemainingDistance = glm::length(pose.position - _end.position());
-        double diff = remainingDistance - newRemainingDistance;
+        const double newRemainingDistance = glm::length(pose.position - _end.position());
+        const double diff = remainingDistance - newRemainingDistance;
         // Avoid remaining distances close to zero, or even negative
         if (relativeDistance > 0.5 && diff < LengthEpsilon) {
             // The positions are too large, so we are not making progress because of
@@ -283,7 +333,7 @@ glm::dquat Path::easedSlerpRotation(double t) const {
     return glm::slerp(_start.rotation(), _end.rotation(), tScaled);
 }
 
-glm::dquat Path::linearPathRotation(double t) const {
+glm::dquat Path::linearPathRotation(double) const {
     const glm::dvec3 a = ghoul::viewDirection(_start.rotation());
     const glm::dvec3 b = ghoul::viewDirection(_end.rotation());
     const double angle = std::acos(glm::dot(a, b)); // assumes length 1.0 for a & b
@@ -292,7 +342,7 @@ glm::dquat Path::linearPathRotation(double t) const {
     double factor = 5.0 / glm::half_pi<double>();
     factor *= global::navigationHandler->pathNavigator().linearRotationSpeedFactor();
 
-    double turnDuration = std::max(angle * factor, 1.0); // Always at least 1 second
+    const double turnDuration = std::max(angle * factor, 1.0); // Always at least 1 second
     const double time = glm::clamp(_progressedTime / turnDuration, 0.0, 1.0);
     return easedSlerpRotation(time);
 
@@ -305,8 +355,8 @@ glm::dquat Path::linearPathRotation(double t) const {
     //const double tHalf = 0.5;
     //if (t < tHalf) {
     //    // Interpolate to look at target
-    //    const glm::dvec3 halfWayPosition = _curve->positionAt(tHalf);
-    //    const glm::dquat q = ghoul::lookAtQuaternion(halfWayPosition, endNodePos, endUp);
+    //    const glm::dvec3 halfWayPos = _curve->positionAt(tHalf);
+    //    const glm::dquat q = ghoul::lookAtQuaternion(halfWayPos, endNodePos, endUp);
 
     //    const double tScaled = ghoul::sineEaseInOut(t / tHalf);
     //    return glm::slerp(_start.rotation(), q, tScaled);
@@ -325,13 +375,18 @@ glm::dquat Path::linearPathRotation(double t) const {
 
     //if (distanceToEnd < closingUpDistance) {
     //    // Interpolate to target rotation
-    //    const double tScaled = ghoul::sineEaseInOut(1.0 - distanceToEnd / closingUpDistance);
+    //    const double tScaled =
+    //        ghoul::sineEaseInOut(1.0 - distanceToEnd / closingUpDistance);
 
     //    // Compute a position in front of the camera at the end orientation
     //    const double inFrontDistance = glm::distance(_end.position(), endNodePos);
     //    const glm::dvec3 viewDir = ghoul::viewDirection(_end.rotation());
     //    const glm::dvec3 inFrontOfEnd = _end.position() + inFrontDistance * viewDir;
-    //    const glm::dvec3 lookAtPos = ghoul::interpolateLinear(tScaled, endNodePos, inFrontOfEnd);
+    //    const glm::dvec3 lookAtPos = ghoul::interpolateLinear(
+    //        tScaled,
+    //        endNodePos,
+    //        inFrontOfEnd
+    //    );
     //    return ghoul::lookAtQuaternion(_prevPose.position, lookAtPos, endUp);
     //}
 
@@ -383,10 +438,10 @@ glm::dquat Path::lookAtTargetsRotation(double t) const {
     // camera, but just the "hint" up vector for the lookAt. This leads to fast rolling
     // when the up vector gets close to the camera's forward vector. Should be improved
     // so any rolling is spread out over the entire motion instead
-    double tUp = ghoul::sineEaseInOut(t);
-    glm::dvec3 startUp = _start.rotation() * glm::dvec3(0.0, 1.0, 0.0);
-    glm::dvec3 endUp = _end.rotation() * glm::dvec3(0.0, 1.0, 0.0);
-    glm::dvec3 up = ghoul::interpolateLinear(tUp, startUp, endUp);
+    const double tUp = ghoul::sineEaseInOut(t);
+    const glm::dvec3 startUp = _start.rotation() * glm::dvec3(0.0, 1.0, 0.0);
+    const glm::dvec3 endUp = _end.rotation() * glm::dvec3(0.0, 1.0, 0.0);
+    const glm::dvec3 up = ghoul::interpolateLinear(tUp, startUp, endUp);
 
     return ghoul::lookAtQuaternion(_curve->positionAt(t), lookAtPos, up);
 }
@@ -398,7 +453,7 @@ double Path::speedAlongPath(double traveledDistance) const {
     // Set speed based on distance to closest node
     const double distanceToEndNode = glm::distance(_prevPose.position, endNodePos);
     const double distanceToStartNode = glm::distance(_prevPose.position, startNodePos);
-    bool isCloserToEnd = distanceToEndNode < distanceToStartNode;
+    const bool isCloserToEnd = (distanceToEndNode < distanceToStartNode);
 
     const glm::dvec3 closestPos = isCloserToEnd ? endNodePos : startNodePos;
     const double distanceToClosestNode = glm::distance(closestPos, _prevPose.position);
@@ -491,7 +546,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
 
     const std::optional<float> duration = p.duration;
 
-    Path::Type type;
+    Path::Type type = Path::Type::Linear;
     if (forceType.has_value()) {
         type = *forceType;
     }
@@ -502,7 +557,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
         type = global::navigationHandler->pathNavigator().defaultPathType();
     }
 
-    bool hasStart = p.startState.has_value();
+    const bool hasStart = p.startState.has_value();
     const Waypoint startPoint = hasStart ?
         Waypoint(NavigationState(p.startState.value())) :
         interaction::waypointFromCamera();
@@ -517,6 +572,14 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
             const NavigationState navigationState =
                 NavigationState(p.navigationState.value());
 
+            const SceneGraphNode* targetNode = sceneGraphNode(navigationState.anchor);
+            if (!targetNode) {
+                throw ghoul::RuntimeError(std::format(
+                    "Could not find anchor node '{}' in provided navigation state",
+                    navigationState.anchor
+                ));
+            }
+
             waypoints = { Waypoint(navigationState) };
             break;
         }
@@ -529,19 +592,19 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
             const SceneGraphNode* targetNode = sceneGraphNode(nodeIdentifier);
 
             if (!targetNode) {
-                throw ghoul::RuntimeError(fmt::format(
+                throw ghoul::RuntimeError(std::format(
                     "Could not find target node '{}'", nodeIdentifier
                 ));
             }
 
-            interaction::NodeCameraStateSpec info {
+            const interaction::NodeCameraStateSpec info {
                 nodeIdentifier,
                 p.position,
                 p.height,
                 p.useTargetUpDirection.value_or(false)
             };
 
-            double startToTargetCenterDistance = glm::distance(
+            const double startToTargetCenterDistance = glm::distance(
                 startPoint.position(),
                 targetNode->worldPosition()
             );
@@ -549,7 +612,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
             // Use a linear path if camera start is within the bounding sphere
             const PathNavigator& navigator = global::navigationHandler->pathNavigator();
             const double bs = navigator.findValidBoundingSphere(targetNode);
-            bool withinTargetBoundingSphere = startToTargetCenterDistance < bs;
+            const bool withinTargetBoundingSphere = (startToTargetCenterDistance < bs);
             if (withinTargetBoundingSphere) {
                 LINFO(
                     "Camera is within the bounding sphere of the target node. "
@@ -558,12 +621,10 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
                 type = Path::Type::Linear;
             }
 
-            bool isLinear = type == Path::Type::Linear;
+            const bool isLinear = type == Path::Type::Linear;
             waypoints = { computeWaypointFromNodeInfo(info, startPoint, isLinear) };
             break;
         }
-        default:
-            throw ghoul::MissingCaseException();
     }
 
     // @TODO (emmbr) Allow for an instruction to represent a list of multiple waypoints

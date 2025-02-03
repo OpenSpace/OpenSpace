@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -80,6 +80,7 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
     UniformCache(projectionTexture, depthTexture, needShadowMap, ProjectorMatrix,
         ModelTransform, boresight) _fboUniformCache;
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _depthFboProgramObject;
     UniformCache(ProjectorMatrix, ModelTransform) _depthFboUniformCache;
 

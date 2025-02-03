@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,7 @@
 namespace openspace {
 
 bool DefaultBrowserLauncher::OnBeforePopup(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
-                                           [[ maybe_unused ]] const CefString& targetUrl,
+                                           [[maybe_unused]] const CefString& targetUrl,
                                            const CefString&,
                                            CefLifeSpanHandler::WindowOpenDisposition,
                                            bool, const CefPopupFeatures&, CefWindowInfo&,

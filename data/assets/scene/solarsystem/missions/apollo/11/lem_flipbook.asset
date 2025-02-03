@@ -9,13 +9,12 @@ local flipbookCount = 19
 
 local flipbook = nil
 
-local vrts = asset.syncedResource({
+local vrts = asset.resource({
   Name = "Apollo 11 Flipbook",
   Type = "HttpSynchronization",
   Identifier = "apollo_11_flipbook",
   Version = 1
 })
-
 
 
 asset.onInitialize(function()
@@ -42,7 +41,6 @@ asset.onInitialize(function()
     IsLocal = false
   })
 end)
-
 
 asset.onDeinitialize(function()
   flipbook = nil

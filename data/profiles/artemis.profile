@@ -74,11 +74,6 @@
       "value": "{0.5, 0.5, 0.5}"
     },
     {
-      "name": "Scene.MoonTrail.Renderable.Appearance.Fade",
-      "type": "setPropertyValueSingle",
-      "value": "4.0"
-    },
-    {
       "name": "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_NOAA20_Combo.Enabled",
       "type": "setPropertyValueSingle",
       "value": "true"

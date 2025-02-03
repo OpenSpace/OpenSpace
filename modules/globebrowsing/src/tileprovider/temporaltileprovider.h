@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,8 +39,9 @@ namespace openspace::globebrowsing {
  * filepath to a Openspace Temporal dataset description file. This is an xml-file that
  * defines the same meta data as the GDAL wms description
  * (http://www.gdal.org/frmt_wms.html), but augmented with some extra tags describing the
- * temporal properties of the dataset. See
- * `TemporalTileProvider::TemporalXMLTags`
+ * temporal properties of the dataset.
+ *
+ * \sa TemporalTileProvider::TemporalXMLTags
  */
 class TemporalTileProvider : public TileProvider {
 public:

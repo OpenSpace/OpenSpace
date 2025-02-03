@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -62,26 +62,26 @@ public:
 
     /**
      * Initialization method that will register a token of the form
-     * `${MODULE_<<NAME>>}` for a specific `<<NAME>>` that
-     * is set in the OpenSpaceModule constructor. This method will call the
-     * internalInitialize method for further customization for each subclass.
+     * `${MODULE_<<NAME>>}` for a specific `<<NAME>>` that is set in the OpenSpaceModule
+     * constructor. This method will call the #internalInitialize method for further
+     * customization for each subclass.
      */
     void initialize(const ghoul::Dictionary& configuration);
 
     /**
-     * This method calls the internalInitializeGL method for further customization for
+     * This method calls the #internalInitializeGL method for further customization for
      * each subclass.
      */
     void initializeGL();
 
     /**
-     * Empty deinitialization method that will call the internalDeinitialize method for
+     * Empty deinitialization method that will call the #internalDeinitialize method for
      * module-specific customization.
      */
     void deinitialize();
 
     /**
-     * This method will call the internalDeinitializeGL method for each subclass.
+     * This method will call the #internalDeinitializeGL method for each subclass.
      */
     void deinitializeGL();
 
@@ -91,6 +91,12 @@ public:
      * \return A list of Documentation classes that are valid for this OpenSapceModule
      */
     virtual std::vector<documentation::Documentation> documentations() const;
+
+    /**
+     * Returns the documentation that describes the parameters that can be passed to the
+     * initialize function of this module.
+     */
+    static documentation::Documentation Documentation();
 
     /**
      * Returns the Lua library with functions defined by this OpenSpaceModule. The default
@@ -122,15 +128,14 @@ public:
      * Returns the list of required OpenGL extensions for this OpenSpaceModule. Unless
      * overwritten, this function returns an empty list.
      *
-     * \return The list of required OpenGL extensions necessary to use this
-     *         OpenSpaceModule
+     * \return The list of required OpenGL extensions necessary to use this module
      */
     virtual std::vector<std::string> requiredOpenGLExtensions() const;
 
 protected:
     /**
-     * Customization point for each derived class. The internalInitialize method is called
-     * by the initialize method.
+     * Customization point for each derived class. The #internalInitialize method is
+     * called by the initialize method.
      *
      * \param configuration The configuration options that were read from the
      *        configuration file
@@ -138,21 +143,21 @@ protected:
     virtual void internalInitialize(const ghoul::Dictionary& configuration);
 
     /**
-     * Customization point for each derived class. The internalInitializeGL method is
-     * called by the initializeGL method at a time when a valid OpenGL state is
+     * Customization point for each derived class. The #internalInitializeGL method is
+     * called by the #initializeGL method at a time when a valid OpenGL state is
      * guaranteed.
      */
     virtual void internalInitializeGL();
 
     /**
-     * Customization point for each derived class. The internalDeinitialize method is
+     * Customization point for each derived class. The #internalDeinitialize method is
      * called by the deinitialize method.
      */
     virtual void internalDeinitialize();
 
     /**
-     * Customization point for each derived class. The internalDeinitializeGL method is
-     * called by the deinitializeGL method at a time when a valid OpenGL state is
+     * Customization point for each derived class. The #internalDeinitializeGL method is
+     * called by the #deinitializeGL method at a time when a valid OpenGL state is
      * guaranteed.
      */
     virtual void internalDeinitializeGL();

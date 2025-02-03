@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -61,7 +61,7 @@ public:
 
     struct DataMessage {
         DataMessage() = default;
-        DataMessage(datamessagestructures::Type t, double timestamp, std::vector<char> c);
+        DataMessage(datamessagestructures::Type t, double time, std::vector<char> c);
 
         datamessagestructures::Type type;
         double timestamp;
@@ -70,7 +70,7 @@ public:
 
     class ConnectionLostError : public ghoul::RuntimeError {
     public:
-        explicit ConnectionLostError(bool shouldLogError = true);
+        explicit ConnectionLostError(bool shouldLogError_ = true);
 
         bool shouldLogError;
     };
@@ -86,7 +86,7 @@ public:
     ParallelConnection::Message receiveMessage();
 
     // Gonna do some UTF-like magic once we reach 255 to introduce a second byte or so
-    static constexpr uint8_t ProtocolVersion = 6;
+    static constexpr uint8_t ProtocolVersion = 7;
 
 private:
     std::unique_ptr<ghoul::io::TcpSocket> _socket;

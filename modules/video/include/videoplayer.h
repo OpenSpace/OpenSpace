@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -67,7 +67,7 @@ public:
     const std::unique_ptr<ghoul::opengl::Texture>& frameTexture() const;
     bool isInitialized() const;
 
-    void reset();
+    void reload();
     void destroy();
     void update();
 
@@ -123,12 +123,12 @@ private:
     properties::TriggerProperty _play;
     properties::TriggerProperty _pause;
     properties::TriggerProperty _goToStart;
-    properties::TriggerProperty _reset;
+    properties::TriggerProperty _reload;
     properties::BoolProperty _playAudio;
     properties::BoolProperty _loopVideo;
 
     // Video properties. Try to read all these values from the video
-    std::string _videoFile;
+    std::filesystem::path _videoFile;
     double _currentVideoTime = 0.0;
     double _fps = 24.0; // If when we read it it is 0, use 24 fps
     double _videoDuration = 0.0;

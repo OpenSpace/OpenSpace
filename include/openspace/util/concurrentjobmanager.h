@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,9 +34,9 @@ namespace openspace {
 
 template <typename T> struct Job;
 
-/*
+/**
  * Templated Concurrent Job Manager
- * This class is used execute specific jobs on one (1) parallell thread
+ * This class is used execute specific jobs on one (1) parallel thread
  */
 template<typename P>
 class ConcurrentJobManager {

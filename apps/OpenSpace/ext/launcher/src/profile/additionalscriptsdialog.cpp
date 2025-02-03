@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 #include "profile/line.h"
 #include "profile/scriptlogdialog.h"
 #include <openspace/scene/profile.h>
+#include <ghoul/misc/stringhelper.h>
 #include <QDialogButtonBox>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -44,11 +45,12 @@ AdditionalScriptsDialog::AdditionalScriptsDialog(QWidget* parent,
     setWindowTitle("Additional Scripts");
     createWidgets();
 
-    std::string scriptText = std::accumulate(
+    const std::string scriptText = std::accumulate(
         _scriptsData.begin(), _scriptsData.end(),
-        std::string(), [](std::string lhs, std::string rhs) { return lhs + rhs + '\n'; }
+        std::string(),
+        [](std::string lhs, const std::string& rhs) { return lhs + rhs + '\n'; }
     );
-    _textScripts->setText(QString::fromStdString(std::move(scriptText)));
+    _textScripts->setText(QString::fromStdString(scriptText));
     _textScripts->moveCursor(QTextCursor::MoveOperation::End);
 }
 
@@ -62,6 +64,7 @@ void AdditionalScriptsDialog::createWidgets() {
 
     _textScripts = new QTextEdit;
     _textScripts->setAcceptRichText(false);
+    _textScripts->setTabChangesFocus(true);
     layout->addWidget(_textScripts, 1);
 
     _chooseScriptsButton = new QPushButton("Choose Scripts");
@@ -93,7 +96,7 @@ void AdditionalScriptsDialog::parseScript() {
     std::istringstream iss(_textScripts->toPlainText().toStdString());
     while (!iss.eof()) {
         std::string s;
-        std::getline(iss, s);
+        ghoul::getline(iss, s);
         additionalScripts.push_back(std::move(s));
     }
     *_scripts = std::move(additionalScripts);
@@ -101,16 +104,18 @@ void AdditionalScriptsDialog::parseScript() {
 }
 
 void AdditionalScriptsDialog::chooseScripts() {
-    ScriptlogDialog d(this);
+    ScriptLogDialog d = ScriptLogDialog(this);
     connect(
-        &d, &ScriptlogDialog::scriptsSelected,
+        &d, &ScriptLogDialog::scriptsSelected,
         this, &AdditionalScriptsDialog::appendScriptsToTextfield
     );
     d.exec();
 }
 
-void AdditionalScriptsDialog::appendScriptsToTextfield(std::vector<std::string> scripts) {
-    for (std::string script : scripts) {
-        _textScripts->append(QString::fromStdString(std::move(script)));
+void AdditionalScriptsDialog::appendScriptsToTextfield(
+                                                  const std::vector<std::string>& scripts)
+{
+    for (const std::string& script : scripts) {
+        _textScripts->append(QString::fromStdString(script));
     }
 }

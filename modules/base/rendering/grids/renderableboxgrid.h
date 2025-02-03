@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,6 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/space/labelscomponent.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -44,7 +43,6 @@ class RenderableBoxGrid : public Renderable {
 public:
     RenderableBoxGrid(const ghoul::Dictionary& dictionary);
 
-    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
 
@@ -73,10 +71,6 @@ protected:
 
     GLenum _mode = GL_LINE_STRIP;
     std::vector<Vertex> _varray;
-
-    // Labels
-    bool _hasLabels = false;
-    std::unique_ptr<LabelsComponent> _labels;
 };
 
 }// namespace openspace

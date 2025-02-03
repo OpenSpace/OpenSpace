@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2023                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -28,6 +28,11 @@ function (set_openspace_compile_settings target)
   set(MSVC_WARNINGS
     "/MP"       # Multi-threading support
     "/W4"       # Highest warning level
+    "/w44062"   # missing case label
+    "/w44289"   # using for-loop variable outside of loop
+    "/w44296"   # expression is always true/false
+    "/w45041"   # out-of-line definition for constexpr data is deprecated
+    "/w45204"   # virtual class has non-virtual trivial destructor
     "/wd4127"   # conditional expression is constant [raised by: websocketpp]
     "/wd4201"   # nonstandard extension used : nameless struct/union  [raised by: GLM]
     "/wd5030"   # attribute 'attribute' is not recognized  [raised by: codegen]
@@ -140,6 +145,7 @@ function (set_openspace_compile_settings target)
     "-Wno-attributes"
     "-Wno-deprecated-enum-enum-conversion"
     "-Wno-missing-braces"
+    "-Wno-sign-compare"
     "-Wno-unknown-attributes"
   )
 
@@ -177,6 +183,7 @@ function (set_openspace_compile_settings target)
     "-Wno-float-equal"
     "-Wno-long-long"
     "-Wno-missing-field-initializers"
+    "-Wno-sign-compare"
     "-Wno-unknown-attributes"
     "-Wno-write-strings"
   )
@@ -185,10 +192,13 @@ function (set_openspace_compile_settings target)
     target_compile_options(${target} PRIVATE ${MSVC_WARNINGS})
 
     # Boost as of 1.64 still uses unary_function unless we define this
-    target_compile_definitions(${target} PRIVATE "_HAS_AUTO_PTR_ETC")
-    target_compile_definitions(${target} PRIVATE "NOMINMAX")
-    target_compile_definitions(${target} PRIVATE "WIN32_LEAN_AND_MEAN")
-    target_compile_definitions(${target} PRIVATE "VC_EXTRALEAN")
+    target_compile_definitions(${target}
+      PRIVATE "_HAS_AUTO_PTR_ETC"
+      PUBLIC "_CRT_SECURE_NO_WARNINGS"
+      PRIVATE "NOMINMAX"
+      PRIVATE "WIN32_LEAN_AND_MEAN"
+      PRIVATE "VC_EXTRALEAN"
+    )
   elseif (NOT LINUX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     # Apple has "deprecated" OpenGL and offers nothing but warnings instead
     target_compile_definitions(${target} PRIVATE "GL_SILENCE_DEPRECATION")

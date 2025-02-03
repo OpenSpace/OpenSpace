@@ -103,7 +103,6 @@ if(OS_LINUX)
     -fno-rtti                       # Disable real-time type information
     -fno-threadsafe-statics         # Don't generate thread-safe statics
     -fvisibility-inlines-hidden     # Give hidden visibility to inlined class member functions
-    -std=gnu++14                    # Use the C++14 language standard including GNU extensions
     -Wsign-compare                  # Warn about mixed signed/unsigned type comparisons
     )
   list(APPEND CEF_COMPILER_FLAGS_DEBUG

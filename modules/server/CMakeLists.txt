@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2023                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -33,9 +33,12 @@ set(HEADER_FILES
   include/serverinterface.h
   include/topics/authorizationtopic.h
   include/topics/bouncetopic.h
+  include/topics/camerapathtopic.h
   include/topics/cameratopic.h
   include/topics/documentationtopic.h
   include/topics/enginemodetopic.h
+  include/topics/errorlogtopic.h
+  include/topics/eventtopic.h
   include/topics/flightcontrollertopic.h
   include/topics/getpropertytopic.h
   include/topics/luascripttopic.h
@@ -60,9 +63,12 @@ set(SOURCE_FILES
   src/serverinterface.cpp
   src/topics/authorizationtopic.cpp
   src/topics/bouncetopic.cpp
+  src/topics/camerapathtopic.cpp
   src/topics/cameratopic.cpp
   src/topics/documentationtopic.cpp
   src/topics/enginemodetopic.cpp
+  src/topics/errorlogtopic.cpp
+  src/topics/eventtopic.cpp
   src/topics/flightcontrollertopic.cpp
   src/topics/getpropertytopic.cpp
   src/topics/luascripttopic.cpp

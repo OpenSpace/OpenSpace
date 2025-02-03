@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,8 +52,7 @@ namespace {
         "SourceType",
         "Source Type",
         "The type of position that is used as the source to calculate the distance. The "
-        "default value is 'Camera'",
-        // @VISIBILITY(2.67)
+        "default value is 'Camera'.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -61,8 +60,7 @@ namespace {
         "SourceNodeName",
         "Source Node Name",
         "If a scene graph node is selected as type, this value specifies the name of the "
-        "node that is to be used as the source for computing the distance",
-        // @VISIBILITY(2.67)
+        "node that is to be used as the source for computing the distance.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -70,8 +68,7 @@ namespace {
         "DestinationType",
         "Destination Type",
         "The type of position that is used as the destination to calculate the distance. "
-        "The default value for this is 'Focus'",
-        // @VISIBILITY(2.67)
+        "The default value for this is 'Focus'.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -79,8 +76,7 @@ namespace {
         "DestinationNodeName",
         "Destination Node Name",
         "If a scene graph node is selected as type, this value specifies the name of the "
-        "node that is to be used as the destination for computing the distance",
-        // @VISIBILITY(2.33)
+        "node that is to be used as the destination for computing the distance.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -89,15 +85,16 @@ namespace {
         "Simplification",
         "If this value is enabled, the distance is displayed in nuanced units, such as "
         "km, AU, light years, parsecs, etc. If this value is disabled, the unit can be "
-        "explicitly requested",
-        openspace::properties::Property::Visibility::User
+        "explicitly requested.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
         "RequestedUnit",
         "Requested Unit",
         "If the simplification is disabled, this distance unit is used as a destination "
-        "to convert the meters into"
+        "to convert the meters into.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {
@@ -105,22 +102,9 @@ namespace {
         "Format String",
         "The format string that is used for formatting the distance string.  This format "
         "receives four parameters:  The name of the source, the name of the destination "
-        "the value of the distance and the unit of the distance",
+        "the value of the distance and the unit of the distance.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
-
-    std::vector<std::string> unitList() {
-        std::vector<std::string> res(openspace::DistanceUnits.size());
-        std::transform(
-            openspace::DistanceUnits.begin(),
-            openspace::DistanceUnits.end(),
-            res.begin(),
-            [](openspace::DistanceUnit unit) {
-                return std::string(nameForDistanceUnit(unit));
-            }
-        );
-        return res;
-    }
 
     struct [[codegen::Dictionary(DashboardItemDistance)]] Parameters {
         enum class [[codegen::map(Type)]] TypeInfo {
@@ -146,7 +130,8 @@ namespace {
         std::optional<bool> simplification;
 
         // [[codegen::verbatim(RequestedUnitInfo.description)]]
-        std::optional<std::string> requestedUnit [[codegen::inlist(unitList())]];
+        std::optional<std::string> requestedUnit
+            [[codegen::inlist(openspace::distanceUnitList())]];
 
         // [[codegen::verbatim(FormatStringInfo.description)]]
         std::optional<std::string> formatString;
@@ -257,16 +242,9 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     addProperty(_destination.nodeName);
 
     _doSimplification = p.simplification.value_or(_doSimplification);
-    _doSimplification.onChange([this]() {
-        _requestedUnit.setVisibility(
-            _doSimplification ?
-            properties::Property::Visibility::Hidden :
-            properties::Property::Visibility::User
-        );
-    });
     addProperty(_doSimplification);
 
-    for (DistanceUnit u : DistanceUnits) {
+    for (const DistanceUnit u : DistanceUnits) {
         _requestedUnit.addOption(
             static_cast<int>(u),
             std::string(nameForDistanceUnit(u))
@@ -274,10 +252,9 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     }
     _requestedUnit = static_cast<int>(DistanceUnit::Meter);
     if (p.requestedUnit.has_value()) {
-        DistanceUnit unit = distanceUnitFromString(p.requestedUnit->c_str());
+        const DistanceUnit unit = distanceUnitFromString(*p.requestedUnit);
         _requestedUnit = static_cast<int>(unit);
     }
-    _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
     addProperty(_requestedUnit);
 
     _formatString = p.formatString.value_or(_formatString);
@@ -323,9 +300,9 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
             const glm::dvec3 thisPos = mainComp.node->worldPosition();
 
             const glm::dvec3 dir = glm::normalize(otherPos - thisPos);
-            glm::dvec3 dirLength = dir * glm::dvec3(mainComp.node->boundingSphere());
+            const glm::dvec3 dirLen = dir * glm::dvec3(mainComp.node->boundingSphere());
 
-            return { thisPos + dirLength, "surface of " + mainComp.node->guiName() };
+            return { thisPos + dirLen, "surface of " + mainComp.node->guiName() };
         }
         case Type::Focus: {
             const SceneGraphNode* anchor =
@@ -369,19 +346,25 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
 
     std::fill(_buffer.begin(), _buffer.end(), char(0));
     try {
-        char* end = fmt::format_to(
+        // @CPP26(abock): This can be replaced with std::runtime_format
+        char* end = std::vformat_to(
             _buffer.data(),
-            fmt::runtime(_formatString.value()),
-            sourceInfo.second, destinationInfo.second, dist.first, dist.second
+            _formatString.value(),
+            std::make_format_args(
+                sourceInfo.second,
+                destinationInfo.second,
+                dist.first,
+                dist.second
+            )
         );
 
-        std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
-        RenderFont(*_font, penPosition, text);
+        penPosition.y -= _font->height();
+        const std::string_view t = std::string_view(_buffer.data(), end - _buffer.data());
+        RenderFont(*_font, penPosition, t);
     }
-    catch (const fmt::format_error&) {
+    catch (const std::format_error&) {
         LERRORC("DashboardItemDate", "Illegal format string");
     }
-    penPosition.y -= _font->height();
 }
 
 glm::vec2 DashboardItemDistance::size() const {
@@ -393,13 +376,13 @@ glm::vec2 DashboardItemDistance::size() const {
         dist = simplifyDistance(d);
     }
     else {
-        DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
-        double convertedD = convertMeters(d, unit);
+        const DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
+        const double convertedD = convertMeters(d, unit);
         dist = std::pair(convertedD, nameForDistanceUnit(unit, convertedD != 1.0));
     }
 
     return _font->boundingBox(
-        fmt::format("Distance from focus: {} {}", dist.first, dist.second)
+        std::format("Distance from focus: {} {}", dist.first, dist.second)
     );
 }
 
