@@ -1259,6 +1259,16 @@ void OpenSpaceEngine::drawOverlays() {
 
     viewportChanged();
 
+    for (const std::function<void()>& func : *global::callback::draw2D) {
+        ZoneScopedN("[Module] draw2D");
+#ifdef TRACY_ENABLE
+        TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
+        TracyPlot("VRAM", static_cast<int64_t>(vramInUse()));
+#endif // TRACY_ENABLE
+
+        func();
+    }
+
     const bool isGuiWindow =
         global::windowDelegate->hasGuiWindow() ?
         global::windowDelegate->isGuiWindow() :
@@ -1268,16 +1278,6 @@ void OpenSpaceEngine::drawOverlays() {
         global::renderEngine->renderOverlays(_shutdown);
         global::luaConsole->render();
         global::sessionRecordingHandler->render();
-    }
-
-    for (const std::function<void()>& func : *global::callback::draw2D) {
-        ZoneScopedN("[Module] draw2D");
-#ifdef TRACY_ENABLE
-        TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
-        TracyPlot("VRAM", static_cast<int64_t>(vramInUse()));
-#endif // TRACY_ENABLE
-
-        func();
     }
 
     LTRACE("OpenSpaceEngine::drawOverlays(end)");
