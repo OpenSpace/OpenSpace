@@ -178,7 +178,7 @@ void NodesTelemetry::update(const Camera* camera) {
             _distancePrecision = _precisionProperties.lowDistancePrecision;
         }
 
-        bool dataWasUpdated = updateData(camera, i, angleMode, includeElevation);
+        const bool dataWasUpdated = updateData(camera, i, angleMode, includeElevation);
 
         if (dataWasUpdated) {
             sendData(i);
@@ -195,6 +195,7 @@ bool NodesTelemetry::updateData(const Camera*) {
     return false;
 }
 void NodesTelemetry::sendData() {}
+
 
 bool NodesTelemetry::updateData(const Camera* camera, int nodeIndex,
                                TelemetryModule::AngleCalculationMode angleCalculationMode,

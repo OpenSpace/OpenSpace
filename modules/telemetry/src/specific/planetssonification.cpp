@@ -395,7 +395,7 @@ void PlanetsSonification::update(const Camera* camera) {
     // The compare planets and planets overview sonifications depend on this
     // sonification. If any of them are enabled, then this sonificaiton sends planetary
     // data to the Open Sound Control receiver, even if this sonificaiton is disabled.
-    // @NOTE (malej 2024-11-28): Enabeling any combination of these three sonifications
+    // @NOTE (malej 2024-11-28): Enabling any combination of these three sonifications
     // at the same time is not supported, only one will be used by SuperCollider
     const TelemetryBase* compare = module->telemetry("PlanetsCompareSonification");
     if (!compare) {
@@ -439,7 +439,7 @@ void PlanetsSonification::update(const Camera* camera) {
             _distancePrecision = _precisionProperties.lowDistancePrecision;
         }
 
-        bool dataWasUpdated = updateData(camera, i, angleMode, includeElevation);
+        const bool dataWasUpdated = updateData(camera, i, angleMode, includeElevation);
 
         // Only send data if something new has happened
         if (dataWasUpdated) {
@@ -452,7 +452,7 @@ void PlanetsSonification::stop() {
     _toggleAll = false;
 }
 
-void PlanetsSonification::addPlanet(ghoul::Dictionary dict) {
+void PlanetsSonification::addPlanet(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
     DataBody planet = DataBody(p.name);
 
@@ -543,6 +543,7 @@ bool PlanetsSonification::updateData(const Camera*) {
     return false;
 }
 void PlanetsSonification::sendData() {}
+
 
 bool PlanetsSonification::updateData(const Camera* camera, int planetIndex,
                                TelemetryModule::AngleCalculationMode angleCalculationMode,

@@ -38,7 +38,7 @@ namespace scripting { struct LuaLibrary; }
 class NodesTelemetry : public TelemetryBase {
 public:
     NodesTelemetry(const std::string& ip, int port);
-    virtual ~NodesTelemetry() override = default;
+    ~NodesTelemetry() override = default;
 
     /**
      * Main update function to gather telemetry information from a list of scene graph
@@ -47,7 +47,7 @@ public:
      *
      * \param camera The camera in the scene
      */
-    virtual void update(const Camera* camera) override;
+    void update(const Camera* camera) override;
 
     /**
      * Add the given node to the list of nodes to gather telemetry data for.
@@ -81,20 +81,20 @@ private:
 
     /**
      * For this telemetry, a more advanced custom updateData function is needed with
-     * additional arguments. Therefor, this implementation is left empty and the update
+     * additional arguments. Therefore, this implementation is left empty and the update
      * function is overriden to use the custom updateData function instead.
      *
      * \param camera The camera in the scene (not used in this case)
      * \return Always return `false` (this function is empty)
      */
-    virtual bool updateData(const Camera*) override;
+    bool updateData(const Camera*) override;
 
     /**
      * For this telemetry, a more advanced custom sendData function is needed with
-     * additional arguments. Therefor, this implementation is left empty and the update
+     * additional arguments. Therefore, this implementation is left empty and the update
      * function is overriden to use the custom updateData function instead.
      */
-    virtual void sendData() override;
+    void sendData() override;
 
     /**
      * Update telemetry data (distance, horizontal angle, vertical angle) for the given

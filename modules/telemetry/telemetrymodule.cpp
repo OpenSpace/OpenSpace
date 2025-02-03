@@ -207,6 +207,12 @@ void TelemetryModule::internalInitialize(const ghoul::Dictionary& dictionary) {
             // Tell the telemetry thread that a new frame is starting
             syncToMain.notify_one();
         });
+
+        // When the program shuts down, make sure this module turns itself off.
+        // If the module is turned on while the scene is being destroyed, then it will crash.
+        global::callback::deinitialize->emplace_back([this]() {
+            _enabled = false;
+        });
     }
 }
 

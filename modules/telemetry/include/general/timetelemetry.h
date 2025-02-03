@@ -35,7 +35,7 @@ namespace openspace {
 class TimeTelemetry : public TelemetryBase {
 public:
     TimeTelemetry(const std::string& ip, int port);
-    virtual ~TimeTelemetry() override = default;
+    ~TimeTelemetry() override = default;
 
 private:
     /**
@@ -44,14 +44,14 @@ private:
      * \param camera The camera in the scene (not used in this case)
      * \return `true` if the data is new compared to before, otherwise `false`
      */
-    virtual bool updateData(const Camera*) override;
+    bool updateData(const Camera*) override;
 
     /**
      * Send the current time telemetry information to the Open Sound Control receiver. The
      * order of sent data is as follows: Time speed, unit of time speed, and current
      * simulation time in J2000 number of seconds.
      */
-    virtual void sendData() override;
+    void sendData() override;
 
     struct PrecisionProperties : properties::PropertyOwner {
         PrecisionProperties(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);

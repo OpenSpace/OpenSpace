@@ -37,7 +37,7 @@ namespace scripting { struct LuaLibrary; }
 class PlanetsSonification : public TelemetryBase {
 public:
     PlanetsSonification(const std::string& ip, int port);
-    virtual ~PlanetsSonification() override = default;
+    ~PlanetsSonification() override = default;
 
     /**
      * Main update function to gather planets telemetry information (distance, horizontal
@@ -47,19 +47,19 @@ public:
      *
      * \param camera The camera in the scene
      */
-    virtual void update(const Camera* camera) override;
+    void update(const Camera* camera) override;
 
     /**
      * Function to stop the sonification.
      */
-    virtual void stop() override;
+    void stop() override;
 
     /**
      * Add the given planet information to the list of planets and their moons.
      *
      * \param dict The planet that should be added
      */
-    void addPlanet(ghoul::Dictionary dict);
+    void addPlanet(const ghoul::Dictionary& dict);
 
     /**
      * Returns the Lua library that contains all Lua functions available to change the
@@ -94,7 +94,6 @@ private:
      *                    and rings.
      *
      * \param planetIndex The index of the planet to create the settings blob for
-     *
      * \return An osc::Blob object with current sonification settings for the indicated
      *         planet
      */
@@ -102,20 +101,20 @@ private:
 
     /**
      * For this sonification, a more advanced custom updateData function is needed with
-     * additional arguments. Therefor, this implementation is left empty and the update
+     * additional arguments. Therefore, this implementation is left empty and the update
      * function is overriden to use the custom updateData function instead.
      *
      * \param camera The camera in the scene (not used in this case)
      * \return Always return `false` (this function is empty)
      */
-    virtual bool updateData(const Camera*) override;
+    bool updateData(const Camera*) override;
 
     /**
      * For this sonification, a more advanced custom sendData function is needed with
-     * additional arguments. Therefor, this implementation is left empty and the update
+     * additional arguments. Therefore, this implementation is left empty and the update
      * function is overriden to use the custom updateData function instead.
      */
-    virtual void sendData() override;
+    void sendData() override;
 
     /**
      * Update the distance and angle information for the given planet.

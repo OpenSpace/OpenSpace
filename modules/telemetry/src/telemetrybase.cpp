@@ -69,7 +69,7 @@ void TelemetryBase::update(const Camera* camera) {
         return;
     }
 
-    bool dataWasUpdated = updateData(camera);
+    const bool dataWasUpdated = updateData(camera);
 
     if (dataWasUpdated) {
         sendData();

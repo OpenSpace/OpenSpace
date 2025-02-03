@@ -35,12 +35,12 @@ namespace openspace {
 class PlanetsCompareSonification : public TelemetryBase {
 public:
     PlanetsCompareSonification(const std::string& ip, int port);
-    virtual ~PlanetsCompareSonification() override = default;
+    ~PlanetsCompareSonification() override = default;
 
     /**
      * Function to stop the sonification.
      */
-    virtual void stop() override;
+    void stop() override;
 
 private:
     /**
@@ -58,14 +58,14 @@ private:
      * \param camera The camera in the scene (not used in this case)
      * \return `true` if the data was updated, otherwise `false`
      */
-    virtual bool updateData(const Camera*) override;
+    bool updateData(const Camera*) override;
 
     /**
      * Send current compare planets sonification settings to the Open Sound Control
      * receiver. The order of sent data is as follows: Name of the first selected planet,
      * name of the second selected planet, and compare planets settings.
      */
-    virtual void sendData() override;
+    void sendData() override;
 
     /**
      * Function that gets called when either the first or second planet selection

@@ -34,7 +34,7 @@ namespace openspace {
 class AngleModeTelemetry : public TelemetryBase {
 public:
     AngleModeTelemetry(const std::string& ip, int port);
-    virtual ~AngleModeTelemetry() override = default;
+    ~AngleModeTelemetry() override = default;
 
 private:
     /**
@@ -44,14 +44,14 @@ private:
      * \param camera The camera in the scene (not used in this case)
      * \return `true` if the data is new compared to before, otherwise `false`
      */
-    virtual bool updateData(const Camera*) override;
+    bool updateData(const Camera*) override;
 
     /**
      * Send the current angle settings telemetry information to the Open Sound Control
      * receiver. The order of sent data is as follows: Angle calculation mode, and whether
      * the elevation angle is included or not.
      */
-    virtual void sendData() override;
+    void sendData() override;
 
     TelemetryModule::AngleCalculationMode _angleMode =
         TelemetryModule::AngleCalculationMode::Horizontal;

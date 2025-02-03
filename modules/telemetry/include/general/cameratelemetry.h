@@ -35,7 +35,7 @@ namespace openspace {
 class CameraTelemetry : public TelemetryBase {
 public:
     CameraTelemetry(const std::string& ip, int port);
-    virtual ~CameraTelemetry() override = default;
+    ~CameraTelemetry() override = default;
 
 private:
     /**
@@ -44,14 +44,14 @@ private:
      * \param camera The camera in the scene
      * \return `true` if the data is new compared to before, otherwise `false`
      */
-    virtual bool updateData(const Camera* camera) override;
+    bool updateData(const Camera* camera) override;
 
     /**
      * Send the current camera telemetry information to the Open Sound Control
      * receiver. The order of sent data is as follows: Camera position (x, y, z), rotation
      * quaternion (w, x, y z), speed, and speed distance unit.
      */
-    virtual void sendData() override;
+    void sendData() override;
 
     struct PrecisionProperties : properties::PropertyOwner {
         PrecisionProperties(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
