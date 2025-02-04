@@ -42,7 +42,8 @@ create_new_module(
   ${SOURCE_FILES}
 )
 
-add_subdirectory(ext/osc SYSTEM)
+begin_dependency("oscpack")
+add_subdirectory(ext/oscpack SYSTEM)
 set_target_properties(oscpack PROPERTIES FOLDER "External")
 
 if (MSVC)
@@ -52,5 +53,6 @@ else ()
   target_compile_options(oscpack PRIVATE "-w")
 endif ()
 
-target_include_directories(openspace-module-opensoundcontrol SYSTEM PRIVATE ext ext/osc)
+target_include_directories(openspace-module-opensoundcontrol SYSTEM PRIVATE ext/oscpack)
 target_link_libraries(openspace-module-opensoundcontrol PRIVATE oscpack)
+end_dependency("oscpack")

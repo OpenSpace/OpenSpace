@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_MODULE_OPENSOUNDCONTROL___OPENSOUNDCONTROLCONNECTION___H__
 #define __OPENSPACE_MODULE_OPENSOUNDCONTROL___OPENSOUNDCONTROLCONNECTION___H__
 
-#include <modules/opensoundcontrol/ext/osc/ip/UdpSocket.h>
-#include <modules/opensoundcontrol/ext/osc/osc/OscOutboundPacketStream.h>
+#include <modules/opensoundcontrol/ext/oscpack/ip/UdpSocket.h>
+#include <modules/opensoundcontrol/ext/oscpack/osc/OscOutboundPacketStream.h>
 #include <string>
 #include <variant>
 #include <vector>
