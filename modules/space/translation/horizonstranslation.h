@@ -87,7 +87,7 @@ private:
     bool loadCachedFile(const std::filesystem::path& file);
     void saveCachedFile(const std::filesystem::path& file) const;
 
-    properties::StringListProperty _horizonsTextFiles;
+    properties::StringListProperty _horizonsFiles;
     ghoul::lua::LuaState _state;
     Timeline<glm::dvec3> _timeline;
 };
