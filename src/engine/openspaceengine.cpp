@@ -1259,6 +1259,16 @@ void OpenSpaceEngine::drawOverlays() {
 
     viewportChanged();
 
+    const bool isGuiWindow =
+        global::windowDelegate->hasGuiWindow() ?
+        global::windowDelegate->isGuiWindow() :
+        true;
+
+    if (isGuiWindow) {
+        global::renderEngine->renderOverlays(_shutdown);
+        global::sessionRecordingHandler->render();
+    }
+
     for (const std::function<void()>& func : *global::callback::draw2D) {
         ZoneScopedN("[Module] draw2D");
 #ifdef TRACY_ENABLE
@@ -1269,15 +1279,9 @@ void OpenSpaceEngine::drawOverlays() {
         func();
     }
 
-    const bool isGuiWindow =
-        global::windowDelegate->hasGuiWindow() ?
-        global::windowDelegate->isGuiWindow() :
-        true;
 
     if (isGuiWindow) {
-        global::renderEngine->renderOverlays(_shutdown);
         global::luaConsole->render();
-        global::sessionRecordingHandler->render();
     }
 
     LTRACE("OpenSpaceEngine::drawOverlays(end)");
