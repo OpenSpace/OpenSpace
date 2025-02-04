@@ -63,17 +63,6 @@ void openspace::properties::TemplateProperty<T>::setValue(T val) {
 }
 
 template <typename T>
-std::any TemplateProperty<T>::get() const {
-    return std::any(_value);
-}
-
-template <typename T>
-void TemplateProperty<T>::set(std::any value) {
-    T v = std::any_cast<T>(std::move(value));
-    setValue(v);
-}
-
-template <typename T>
 const std::type_info& TemplateProperty<T>::type() const {
     return typeid(T);
 }

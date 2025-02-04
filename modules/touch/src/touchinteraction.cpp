@@ -1167,20 +1167,20 @@ void TouchInteraction::resetAfterInput() {
 
 // Reset all property values to default
 void TouchInteraction::resetPropertiesToDefault() {
-    _unitTest.set(false);
-    _disableZoom.set(false);
-    _disableRoll.set(false);
-    _maxTapTime.set(300);
-    _deceleratesPerSecond.set(240);
-    _touchScreenSize.set(55.f);
-    _tapZoomFactor.set(0.2f);
-    _pinchZoomFactor.set(0.01f);
-    _rollAngleThreshold.set(0.025f);
-    _zoomSensitivityExponential.set(1.025f);
-    _inputStillThreshold.set(0.0005f);
-    _centroidStillThreshold.set(0.0018f);
-    _interpretPan.set(0.015f);
-    _friction.set(glm::vec4(0.025f, 0.025f, 0.02f, 0.02f));
+    _unitTest = false;
+    _disableZoom = false;
+    _disableRoll = false;
+    _maxTapTime= 300;
+    _deceleratesPerSecond = 240;
+    _touchScreenSize = 55.f;
+    _tapZoomFactor = 0.2f;
+    _pinchZoomFactor = 0.01f;
+    _rollAngleThreshold = 0.025f;
+    _zoomSensitivityExponential = 1.025f;
+    _inputStillThreshold = 0.0005f;
+    _centroidStillThreshold = 0.0018f;
+    _interpretPan = 0.015f;
+    _friction = glm::vec4(0.025f, 0.025f, 0.02f, 0.02f);
 }
 
 void TouchInteraction::resetVelocities() {

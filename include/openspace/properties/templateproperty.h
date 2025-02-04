@@ -75,21 +75,6 @@ public:
     virtual std::string_view className() const override = 0;
 
     /**
-     * Returns the stored value packed into a `std::any` object.
-     *
-     * \return The stored value packed into a `std::any` object
-     */
-    virtual std::any get() const override;
-
-    /**
-     * Sets the value from the provided ghoul::any object. If the types between `T` and
-     * `value` disagree, an error is logged and the stored value remains unchanged.
-     *
-     * \param value The value that is used to set this Property
-     */
-    virtual void set(std::any value) final;
-
-    /**
      * Returns the `std::type_info` describing the template parameter `T`. It can be used
      * to test against a ghoul::any value before trying to assign it.
      *

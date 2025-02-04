@@ -54,7 +54,6 @@ public:
 
     using TemplateProperty<T>::operator=;
 
-    void setInterpolationTarget(std::any value) override;
     void setLuaInterpolationTarget(lua_State* state) override;
 
     void interpolateValue(float t,
