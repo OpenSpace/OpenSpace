@@ -264,7 +264,7 @@ namespace {
             // all its children. Depending on the 'Type' of the scaling, this can either
             // be a static scaling or a time-varying one
             std::optional<ghoul::Dictionary> scale
-                [[codegen::reference("core_transform_scaling")]];
+                [[codegen::reference("core_transform_scale")]];
         };
 
         // This describes a set of transformations that are applied to this scene graph
