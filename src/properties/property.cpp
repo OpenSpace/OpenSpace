@@ -81,12 +81,6 @@ std::string Property::uri() const {
     return !ownerUri.empty() ? std::format("{}.{}", ownerUri, _identifier) : "";
 }
 
-bool Property::getLuaValue(lua_State*) const {
-    return false;
-}
-
-void Property::setLuaValue(lua_State*) {}
-
 const std::type_info& Property::type() const {
     return typeid(void);
 }

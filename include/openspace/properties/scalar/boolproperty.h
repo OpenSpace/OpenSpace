@@ -40,11 +40,13 @@ public:
     std::string_view className() const override;
     int typeLua() const override;
 
+    PropertyValue getLuaValue() const override;
+    void setLuaValue(PropertyValue value) override;
+
+
     using TemplateProperty<bool>::operator=;
 
 protected:
-    bool fromLuaConversion(lua_State* state) const override;
-    void toLuaConversion(lua_State* state) const override;
     std::string toStringConversion() const override;
 };
 

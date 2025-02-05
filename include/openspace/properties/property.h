@@ -129,6 +129,10 @@ public:
     constexpr static OnChangeHandle OnChangeHandleAll =
         std::numeric_limits<OnChangeHandle>::max();
 
+    // This type encapsulates all possible value types that could be passed into the
+    // `setValue` and `getValue` functions
+    using PropertyValue = std::variant<bool, double, std::string, ghoul::Dictionary>;
+
     /**
      * The constructor for the property. The \p info (see PropertyInfo) contains
      * necessary information for this Property. PropertyInfo::identifier needs to be
@@ -143,7 +147,7 @@ public:
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
      */
-    Property(PropertyInfo info);
+    explicit Property(PropertyInfo info);
 
     /**
      * The destructor taking care of deallocating all unused memory. This method will not
@@ -178,7 +182,7 @@ public:
      * \param state The Lua state to which the value will be encoded
      * \return `true` if the encoding succeeded, `false` otherwise
      */
-    virtual bool getLuaValue(lua_State* state) const;
+    virtual PropertyValue getLuaValue() const = 0;
 
     /**
      * This method sets the value encapsulated by this Property by deserializing the value
@@ -190,7 +194,7 @@ public:
      *
      * \param state The Lua state from which the value will be decoded
      */
-    virtual void setLuaValue(lua_State* state);
+    virtual void setLuaValue(PropertyValue state) = 0;
 
     /**
      * Returns the Lua type that will be put onto the stack in the Property::getLua method

@@ -68,18 +68,6 @@ const std::type_info& TemplateProperty<T>::type() const {
 }
 
 template <typename T>
-bool TemplateProperty<T>::getLuaValue(lua_State* state) const {
-    toLuaConversion(state);
-    return true;
-}
-
-template <typename T>
-void TemplateProperty<T>::setLuaValue(lua_State* state) {
-    T thisValue = fromLuaConversion(state);
-    set(std::any(thisValue));
-}
-
-template <typename T>
 std::string TemplateProperty<T>::stringValue() const {
     return toStringConversion();
 }

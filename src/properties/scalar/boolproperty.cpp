@@ -26,6 +26,7 @@
 
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/exception.h>
 
 namespace openspace::properties {
 
@@ -41,12 +42,18 @@ int BoolProperty::typeLua() const {
     return LUA_TBOOLEAN;
 }
 
-bool BoolProperty::fromLuaConversion(lua_State* state) const {
-    return ghoul::lua::value<bool>(state);
+Property::PropertyValue BoolProperty::getLuaValue() const {
+    return _value;
 }
 
-void BoolProperty::toLuaConversion(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+void BoolProperty::setLuaValue(PropertyValue value) {
+    if (!std::holds_alternative<bool>(value)) {
+        throw ghoul::RuntimeError(std::format(
+            "Expected type 'bool' for property '{}'", uri()
+        ));
+    }
+
+    _value = std::get<bool>(value);
 }
 
 std::string BoolProperty::toStringConversion() const {
