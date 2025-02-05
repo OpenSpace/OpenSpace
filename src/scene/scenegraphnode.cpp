@@ -193,12 +193,12 @@ namespace {
         openspace::properties::Property::Visibility::Hidden
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GuiFocussableInfo = {
-        "IsFocussable",
-        "Focussable Hint",
-        "This value serves as a hint to determine if it makes sense to focus the camera "
-        "on this scene graph node. It only serves as a hint and does not actually "
-        "prevent the focussing. The default value is `true`.",
+    constexpr openspace::properties::Property::PropertyInfo GuiFocusableInfo = {
+        "IsFocusable",
+        "Focusable Hint",
+        "This value serves as a hint to the user interface to determine if it makes "
+        "sense to focus the camera on this scene graph node. It only serves as a hint "
+        "and does not actually prevent the focussing. The default value is `true`.",
         openspace::properties::Property::Visibility::Hidden
     };
 
@@ -337,7 +337,7 @@ namespace {
             // not display, for example, barycenters
             std::optional<bool> hidden;
 
-            // [[codegen::verbatim(FocussableInfo.description)]]
+            // [[codegen::verbatim(GuiFocusableInfo.description)]]
             std::optional<bool> focussable;
 
             // If this value is specified, the scene graph node will be ordered in
@@ -383,30 +383,30 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
         if (p.gui->name.has_value()) {
             result->setGuiName(*p.gui->name);
-            result->_guiDisplayName = result->guiName();
+            result->_gui.displayName = result->guiName();
         }
 
         if (p.gui->description.has_value()) {
             result->setDescription(*p.gui->description);
-            result->_guiDescription = result->description();
+            result->_gui.description = result->description();
         }
 
         if (p.gui->hidden.has_value()) {
-            result->_guiHidden = *p.gui->hidden;
+            result->_gui.hidden = *p.gui->hidden;
         }
 
         if (p.gui->path.has_value()) {
             if (!p.gui->path->starts_with('/')) {
                 throw ghoul::RuntimeError("GuiPath must start with /");
             }
-            result->_guiPath = *p.gui->path;
+            result->_gui.path = *p.gui->path;
         }
 
-        result->_useGuiOrdering = p.gui->orderingNumber.has_value();
+        result->_gui.useOrdering = p.gui->orderingNumber.has_value();
         if (p.gui->orderingNumber.has_value()) {
-            result->_guiOrderingNumber = *p.gui->orderingNumber;
+            result->_gui.useOrdering = *p.gui->orderingNumber;
         }
-        result->_guiFocussable = p.gui->focussable.value_or(result->_guiFocussable);
+        result->_gui.focusable = p.gui->focussable.value_or(result->_gui.focusable);
     }
 
     result->_boundingSphere = p.boundingSphere.value_or(result->_boundingSphere);
@@ -545,15 +545,27 @@ documentation::Documentation SceneGraphNode::Documentation() {
 
 ghoul::opengl::ProgramObject* SceneGraphNode::_debugSphereProgram = nullptr;
 
+SceneGraphNode::Gui::Gui()
+    : properties::PropertyOwner({ "GUI" })
+    , hidden(GuiHiddenInfo, false)
+    , path(GuiPathInfo, "/")
+    , displayName(GuiNameInfo)
+    , description(GuiDescriptionInfo)
+    , focusable(GuiFocusableInfo, true)
+    , useOrdering(UseGuiOrderInfo, false)
+    , orderingNumber(GuiOrderInfo, 0.f)
+{
+    addProperty(displayName);
+    addProperty(description);
+    addProperty(hidden);
+    addProperty(path);
+    addProperty(orderingNumber);
+    addProperty(useOrdering);
+    addProperty(focusable);
+}
+
 SceneGraphNode::SceneGraphNode()
     : properties::PropertyOwner({ "" })
-    , _guiHidden(GuiHiddenInfo, false)
-    , _guiPath(GuiPathInfo, "/")
-    , _guiDisplayName(GuiNameInfo)
-    , _guiDescription(GuiDescriptionInfo)
-    , _useGuiOrdering(UseGuiOrderInfo, false)
-    , _guiFocussable(GuiFocussableInfo, true)
-    , _guiOrderingNumber(GuiOrderInfo, 0.f)
     , _transform {
         ghoul::mm_unique_ptr<Translation>(
             global::memoryManager->PersistentMemory.alloc<StaticTranslation>()
@@ -631,13 +643,8 @@ SceneGraphNode::SceneGraphNode()
 
     addProperty(_supportsDirectInteraction);
 
-    addProperty(_guiDisplayName);
-    addProperty(_guiDescription);
-    addProperty(_guiHidden);
-    addProperty(_guiPath);
-    addProperty(_guiOrderingNumber);
-    addProperty(_useGuiOrdering);
-    addProperty(_guiFocussable);
+
+    addPropertySubOwner(_gui);
 }
 
 SceneGraphNode::~SceneGraphNode() {}
@@ -1175,15 +1182,15 @@ glm::dvec3 SceneGraphNode::worldScale() const {
 }
 
 std::string SceneGraphNode::guiPath() const {
-    return _guiPath;
+    return _gui.path;
 }
 
 bool SceneGraphNode::hasGuiHintHidden() const {
-    return _guiHidden;
+    return _gui.hidden;
 }
 
 void SceneGraphNode::setGuiHintHidden(bool value) {
-    _guiHidden = value;
+    _gui.hidden = value;
 }
 
 glm::dvec3 SceneGraphNode::calculateWorldPosition() const {

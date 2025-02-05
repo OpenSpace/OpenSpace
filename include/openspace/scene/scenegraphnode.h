@@ -173,16 +173,20 @@ private:
 
     ghoul::mm_unique_ptr<Renderable> _renderable;
 
-    // If this value is 'true' GUIs are asked to hide this node from collections, as it
-    // might be a node that is not very interesting (for example barycenters)
-    properties::BoolProperty _guiHidden;
 
-    properties::StringProperty _guiPath;
-    properties::StringProperty _guiDisplayName;
-    properties::StringProperty _guiDescription;
-    properties::BoolProperty _useGuiOrdering;
-    properties::BoolProperty _guiFocussable;
-    properties::FloatProperty _guiOrderingNumber;
+    struct Gui : public properties::PropertyOwner {
+        Gui();
+
+        properties::BoolProperty hidden;
+        properties::StringProperty path;
+        properties::StringProperty displayName;
+        properties::StringProperty description;
+        properties::BoolProperty focusable;
+        properties::BoolProperty useOrdering;
+        properties::FloatProperty orderingNumber;
+    };
+    Gui _gui;
+
 
     // Transformation defined by translation, rotation and scale
     struct {
