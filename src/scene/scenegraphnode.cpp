@@ -146,39 +146,39 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiPathInfo = {
-        "GuiPath",
-        "Gui Path",
+        "Path",
+        "Path",
         "This is the path for the scene graph node in the gui example: "
         "/Solar System/Planets/Earth.",
         openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiNameInfo = {
-        "GuiName",
-        "Gui Name",
+        "Name",
+        "Name",
         "This is the name for the scene graph node in the gui. Example: Earth.",
         openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiDescriptionInfo = {
-        "GuiDescription",
-        "Gui Description",
+        "Description",
+        "Description",
         "This is the description for the scene graph node to be shown in the gui. "
         "Example: Earth is a special place.",
         openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiHiddenInfo = {
-        "GuiHidden",
-        "Gui Hidden",
+        "Hidden",
+        "Hidden",
         "This represents if the scene graph node should be shown in the gui. "
         "Example: false.",
         openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiOrderInfo = {
-        "GuiOrderingNumber",
-        "Gui Ordering Number",
+        "OrderingNumber",
+        "Ordering Number",
         "This is an optional numerical value that will affect the sorting of this scene "
         "graph node in relation to its neighbors in the GUI. Nodes with the same value "
         "will be sorted alphabetically.",
@@ -186,7 +186,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseGuiOrderInfo = {
-        "UseGuiOrdering",
+        "UseOrdering",
         "Use Gui Ordering",
         "If true, use the 'GuiOrderingNumber' to place this scene graph node in a "
         "sorted way in relation to its neighbors in the GUI",
