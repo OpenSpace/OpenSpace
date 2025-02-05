@@ -22,70 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/factorymanager.h>
+#ifndef __OPENSPACE_MODULE_BASE___MULTIROTATION___H__
+#define __OPENSPACE_MODULE_BASE___MULTIROTATION___H__
 
-#include <openspace/documentation/documentationengine.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/rendering/dashboarditem.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scene/lightsource.h>
 #include <openspace/scene/rotation.h>
-#include <openspace/scene/scale.h>
-#include <openspace/scene/timeframe.h>
-#include <openspace/scene/translation.h>
-#include <openspace/util/resourcesynchronization.h>
-#include <openspace/util/task.h>
-#include <sstream>
+
+#include <vector>
 
 namespace openspace {
 
-FactoryManager* FactoryManager::_manager = nullptr;
+struct UpdateData;
 
-FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
-    : ghoul::RuntimeError("Could not find TemplateFactory for type '" + t + "'")
-    , type(std::move(t))
-{
-    ghoul_assert(!type.empty(), "Type must not be empty");
-}
+namespace documentation { struct Documentation; }
 
-FactoryManager::FactoryManager() {}
+class MultiRotation : public Rotation {
+public:
+    MultiRotation(const ghoul::Dictionary& dictionary);
 
-void FactoryManager::initialize() {
-    ghoul_assert(!_manager, "Factory Manager must not have been initialized");
+    glm::dmat3 matrix(const UpdateData& data) const override;
+    static documentation::Documentation Documentation();
 
-    _manager = new FactoryManager;
-    _manager->addFactory<DashboardItem>("DashboardItem");
-    _manager->addFactory<LightSource>("LightSource");
-    _manager->addFactory<Renderable>("Renderable");
-    _manager->addFactory<ResourceSynchronization>("ResourceSynchronization");
-    _manager->addFactory<Rotation>("Rotation");
-    _manager->addFactory<Scale>("Scale");
-    _manager->addFactory<ScreenSpaceRenderable>("ScreenSpaceRenderable");
-    _manager->addFactory<Task>("Task");
-    _manager->addFactory<TimeFrame>("TimeFrame");
-    _manager->addFactory<Translation>("Translation");
-}
+private:
+    std::vector<ghoul::mm_unique_ptr<Rotation>> _rotations;
+};
 
-void FactoryManager::deinitialize() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
+} // namespace openspace
 
-    delete _manager;
-    _manager = nullptr;
-}
-
-bool FactoryManager::isInitialized() {
-    return _manager != nullptr;
-}
-
-FactoryManager& FactoryManager::ref() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
-
-    return *_manager;
-}
-
-const std::vector<FactoryManager::FactoryInfo>& FactoryManager::factories() const {
-    return _factories;
-}
-
-}  // namespace openspace
+#endif // __OPENSPACE_MODULE_BASE___MULTIROTATION___H__

@@ -22,70 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/factorymanager.h>
+#include <modules/base/rotation/multirotation.h>
 
-#include <openspace/documentation/documentationengine.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/rendering/dashboarditem.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scene/lightsource.h>
-#include <openspace/scene/rotation.h>
-#include <openspace/scene/scale.h>
-#include <openspace/scene/timeframe.h>
-#include <openspace/scene/translation.h>
-#include <openspace/util/resourcesynchronization.h>
-#include <openspace/util/task.h>
-#include <sstream>
+#include <openspace/documentation/verifier.h>
+#include <openspace/util/updatestructures.h>
+#include <openspace/util/time.h>
+#include <optional>
+
+namespace {
+    // This Rotation type combines multiple individual rotations that are applied one
+    // after the other. The rotations are applied in the order in which they are specified
+    // in the `Rotations` key.
+    struct [[codegen::Dictionary(MultiRotation)]] Parameters {
+        // The list of rotations that are applied one after the other
+        std::vector<ghoul::Dictionary> rotations
+            [[codegen::reference("core_transform_rotation")]];
+    };
+#include "multirotation_codegen.cpp"
+} // namespace
 
 namespace openspace {
 
-FactoryManager* FactoryManager::_manager = nullptr;
-
-FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
-    : ghoul::RuntimeError("Could not find TemplateFactory for type '" + t + "'")
-    , type(std::move(t))
-{
-    ghoul_assert(!type.empty(), "Type must not be empty");
+documentation::Documentation MultiRotation::Documentation() {
+    return codegen::doc<Parameters>("base_transform_rotation_multi");
 }
 
-FactoryManager::FactoryManager() {}
+MultiRotation::MultiRotation(const ghoul::Dictionary& dictionary) {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-void FactoryManager::initialize() {
-    ghoul_assert(!_manager, "Factory Manager must not have been initialized");
-
-    _manager = new FactoryManager;
-    _manager->addFactory<DashboardItem>("DashboardItem");
-    _manager->addFactory<LightSource>("LightSource");
-    _manager->addFactory<Renderable>("Renderable");
-    _manager->addFactory<ResourceSynchronization>("ResourceSynchronization");
-    _manager->addFactory<Rotation>("Rotation");
-    _manager->addFactory<Scale>("Scale");
-    _manager->addFactory<ScreenSpaceRenderable>("ScreenSpaceRenderable");
-    _manager->addFactory<Task>("Task");
-    _manager->addFactory<TimeFrame>("TimeFrame");
-    _manager->addFactory<Translation>("Translation");
+    int i = 0;
+    for (const ghoul::Dictionary& rot : p.rotations) {
+        ghoul::mm_unique_ptr<Rotation> rotation = Rotation::createFromDictionary(rot);
+        rotation->setGuiName(std::format("{}: {}", i, rotation->guiName()));
+        rotation->setIdentifier(std::format("{}_{}", i, rotation->identifier()));
+        addPropertySubOwner(rotation.get());
+        _rotations.push_back(std::move(rotation));
+        i++;
+    }
 }
 
-void FactoryManager::deinitialize() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
-
-    delete _manager;
-    _manager = nullptr;
+glm::dmat3 MultiRotation::matrix(const UpdateData& data) const {
+    glm::dmat3 res = glm::dmat3(1.0);
+    for (const ghoul::mm_unique_ptr<Rotation>& rot : _rotations) {
+        res *= rot->matrix(data);
+    }
+    return res;
 }
 
-bool FactoryManager::isInitialized() {
-    return _manager != nullptr;
-}
-
-FactoryManager& FactoryManager::ref() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
-
-    return *_manager;
-}
-
-const std::vector<FactoryManager::FactoryInfo>& FactoryManager::factories() const {
-    return _factories;
-}
-
-}  // namespace openspace
+} // namespace openspace

@@ -22,70 +22,51 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/factorymanager.h>
+#include <modules/base/scale/multiscale.h>
 
-#include <openspace/documentation/documentationengine.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/rendering/dashboarditem.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scene/lightsource.h>
-#include <openspace/scene/rotation.h>
-#include <openspace/scene/scale.h>
-#include <openspace/scene/timeframe.h>
-#include <openspace/scene/translation.h>
-#include <openspace/util/resourcesynchronization.h>
-#include <openspace/util/task.h>
-#include <sstream>
+#include <openspace/documentation/verifier.h>
+#include <openspace/util/time.h>
+#include <openspace/util/updatestructures.h>
+#include <optional>
+
+namespace {
+    // This Scale type combines multiple individual scale operations that are applied one
+    // after the other.
+    struct [[codegen::Dictionary(MultiScale)]] Parameters {
+        // The list of scales that are applied one after the other
+        std::vector<ghoul::Dictionary> scales
+            [[codegen::reference("core_transform_scaling")]];
+    };
+#include "multiscale_codegen.cpp"
+} // namespace
 
 namespace openspace {
 
-FactoryManager* FactoryManager::_manager = nullptr;
-
-FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
-    : ghoul::RuntimeError("Could not find TemplateFactory for type '" + t + "'")
-    , type(std::move(t))
-{
-    ghoul_assert(!type.empty(), "Type must not be empty");
+documentation::Documentation MultiScale::Documentation() {
+    return codegen::doc<Parameters>("base_scale_multi");
 }
 
-FactoryManager::FactoryManager() {}
+MultiScale::MultiScale(const ghoul::Dictionary& dictionary) {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-void FactoryManager::initialize() {
-    ghoul_assert(!_manager, "Factory Manager must not have been initialized");
-
-    _manager = new FactoryManager;
-    _manager->addFactory<DashboardItem>("DashboardItem");
-    _manager->addFactory<LightSource>("LightSource");
-    _manager->addFactory<Renderable>("Renderable");
-    _manager->addFactory<ResourceSynchronization>("ResourceSynchronization");
-    _manager->addFactory<Rotation>("Rotation");
-    _manager->addFactory<Scale>("Scale");
-    _manager->addFactory<ScreenSpaceRenderable>("ScreenSpaceRenderable");
-    _manager->addFactory<Task>("Task");
-    _manager->addFactory<TimeFrame>("TimeFrame");
-    _manager->addFactory<Translation>("Translation");
+    int i = 0;
+    for (const ghoul::Dictionary& s : p.scales) {
+        ghoul::mm_unique_ptr<Scale> scale = Scale::createFromDictionary(s);
+        scale->setGuiName(std::format("{}: {}", i, scale->guiName()));
+        scale->setIdentifier(std::format("{}_{}", i, scale->identifier()));
+        addPropertySubOwner(scale.get());
+        _scales.push_back(std::move(scale));
+        i++;
+    }
 }
 
-void FactoryManager::deinitialize() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
-
-    delete _manager;
-    _manager = nullptr;
+glm::dvec3 MultiScale::scaleValue(const UpdateData& data) const {
+    glm::dvec3 res = glm::dvec3(1.0);
+    for (const ghoul::mm_unique_ptr<Scale>& scale : _scales) {
+        res *= scale->scaleValue(data);
+    }
+    return res;
 }
 
-bool FactoryManager::isInitialized() {
-    return _manager != nullptr;
-}
-
-FactoryManager& FactoryManager::ref() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
-
-    return *_manager;
-}
-
-const std::vector<FactoryManager::FactoryInfo>& FactoryManager::factories() const {
-    return _factories;
-}
-
-}  // namespace openspace
+} // namespace openspace

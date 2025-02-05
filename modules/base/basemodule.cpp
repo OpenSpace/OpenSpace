@@ -70,14 +70,17 @@
 #include <modules/base/rotation/constantrotation.h>
 #include <modules/base/rotation/fixedrotation.h>
 #include <modules/base/rotation/luarotation.h>
+#include <modules/base/rotation/multirotation.h>
 #include <modules/base/rotation/staticrotation.h>
 #include <modules/base/rotation/timelinerotation.h>
 #include <modules/base/scale/luascale.h>
+#include <modules/base/scale/multiscale.h>
 #include <modules/base/scale/nonuniformstaticscale.h>
 #include <modules/base/scale/staticscale.h>
 #include <modules/base/scale/timedependentscale.h>
 #include <modules/base/translation/timelinetranslation.h>
 #include <modules/base/translation/luatranslation.h>
+#include <modules/base/translation/multitranslation.h>
 #include <modules/base/translation/statictranslation.h>
 #include <modules/base/timeframe/timeframeinterval.h>
 #include <modules/base/timeframe/timeframeunion.h>
@@ -97,8 +100,6 @@ ghoul::opengl::TextureManager BaseModule::TextureManager;
 BaseModule::BaseModule() : OpenSpaceModule(BaseModule::Name) {}
 
 void BaseModule::internalInitialize(const ghoul::Dictionary&) {
-    FactoryManager::ref().addFactory<ScreenSpaceRenderable>("ScreenSpaceRenderable");
-
     ghoul::TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
@@ -107,6 +108,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fSsRenderable->registerClass<ScreenSpaceImageLocal>("ScreenSpaceImageLocal");
     fSsRenderable->registerClass<ScreenSpaceImageOnline>("ScreenSpaceImageOnline");
     fSsRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
+
 
     ghoul::TemplateFactory<DashboardItem>* fDashboard =
         FactoryManager::ref().factory<DashboardItem>();
@@ -131,6 +133,15 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fDashboard->registerClass<DashboardItemSpacing>("DashboardItemSpacing");
     fDashboard->registerClass<DashboardItemText>("DashboardItemText");
     fDashboard->registerClass<DashboardItemVelocity>("DashboardItemVelocity");
+
+
+    ghoul::TemplateFactory<LightSource>* fLightSource =
+        FactoryManager::ref().factory<LightSource>();
+    ghoul_assert(fLightSource, "Light Source factory was not created");
+
+    fLightSource->registerClass<CameraLightSource>("CameraLightSource");
+    fLightSource->registerClass<SceneGraphLightSource>("SceneGraphLightSource");
+
 
     ghoul::TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
@@ -168,13 +179,6 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableTrailOrbit>("RenderableTrailOrbit");
     fRenderable->registerClass<RenderableTrailTrajectory>("RenderableTrailTrajectory");
 
-    ghoul::TemplateFactory<Translation>* fTranslation =
-        FactoryManager::ref().factory<Translation>();
-    ghoul_assert(fTranslation, "Ephemeris factory was not created");
-
-    fTranslation->registerClass<TimelineTranslation>("TimelineTranslation");
-    fTranslation->registerClass<LuaTranslation>("LuaTranslation");
-    fTranslation->registerClass<StaticTranslation>("StaticTranslation");
 
     ghoul::TemplateFactory<Rotation>* fRotation =
         FactoryManager::ref().factory<Rotation>();
@@ -183,6 +187,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRotation->registerClass<ConstantRotation>("ConstantRotation");
     fRotation->registerClass<FixedRotation>("FixedRotation");
     fRotation->registerClass<LuaRotation>("LuaRotation");
+    fRotation->registerClass<MultiRotation>("MultiRotation");
     fRotation->registerClass<StaticRotation>("StaticRotation");
     fRotation->registerClass<TimelineRotation>("TimelineRotation");
 
@@ -191,9 +196,11 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fScale, "Scale factory was not created");
 
     fScale->registerClass<LuaScale>("LuaScale");
+    fScale->registerClass<MultiScale>("MultiScale");
     fScale->registerClass<NonUniformStaticScale>("NonUniformStaticScale");
     fScale->registerClass<StaticScale>("StaticScale");
     fScale->registerClass<TimeDependentScale>("TimeDependentScale");
+
 
     ghoul::TemplateFactory<TimeFrame>* fTimeFrame =
         FactoryManager::ref().factory<TimeFrame>();
@@ -202,12 +209,15 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fTimeFrame->registerClass<TimeFrameInterval>("TimeFrameInterval");
     fTimeFrame->registerClass<TimeFrameUnion>("TimeFrameUnion");
 
-    ghoul::TemplateFactory<LightSource>* fLightSource =
-        FactoryManager::ref().factory<LightSource>();
-    ghoul_assert(fLightSource, "Light Source factory was not created");
 
-    fLightSource->registerClass<CameraLightSource>("CameraLightSource");
-    fLightSource->registerClass<SceneGraphLightSource>("SceneGraphLightSource");
+    ghoul::TemplateFactory<Translation>* fTranslation =
+        FactoryManager::ref().factory<Translation>();
+    ghoul_assert(fTranslation, "Ephemeris factory was not created");
+
+    fTranslation->registerClass<TimelineTranslation>("TimelineTranslation");
+    fTranslation->registerClass<LuaTranslation>("LuaTranslation");
+    fTranslation->registerClass<MultiTranslation>("MultiTranslation");
+    fTranslation->registerClass<StaticTranslation>("StaticTranslation");
 }
 
 void BaseModule::internalDeinitializeGL() {
@@ -228,6 +238,9 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         DashboardItemSpacing::Documentation(),
         DashboardItemText::Documentation(),
         DashboardItemVelocity::Documentation(),
+
+        CameraLightSource::Documentation(),
+        SceneGraphLightSource::Documentation(),
 
         RenderableBoxGrid::Documentation(),
         RenderableCartesianAxes::Documentation(),
@@ -263,23 +276,23 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         ConstantRotation::Documentation(),
         FixedRotation::Documentation(),
         LuaRotation::Documentation(),
+        MultiRotation::Documentation(),
         StaticRotation::Documentation(),
         TimelineRotation::Documentation(),
 
         LuaScale::Documentation(),
+        MultiScale::Documentation(),
         NonUniformStaticScale::Documentation(),
         StaticScale::Documentation(),
         TimeDependentScale::Documentation(),
 
-        LuaTranslation::Documentation(),
-        StaticTranslation::Documentation(),
-        TimelineTranslation::Documentation(),
-
         TimeFrameInterval::Documentation(),
         TimeFrameUnion::Documentation(),
 
-        CameraLightSource::Documentation(),
-        SceneGraphLightSource::Documentation()
+        LuaTranslation::Documentation(),
+        MultiTranslation::Documentation(),
+        StaticTranslation::Documentation(),
+        TimelineTranslation::Documentation()
     };
 }
 
