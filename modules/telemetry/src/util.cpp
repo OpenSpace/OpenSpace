@@ -122,8 +122,7 @@ double calculateAngleTo(const Camera* camera, glm::dvec3 nodePosition,
             glm::normalize(cameraUpVector)
         );
     }
-    else if (angleCalculationMode == TelemetryModule::AngleCalculationMode::Circular)
-    {
+    else if (angleCalculationMode == TelemetryModule::AngleCalculationMode::Circular) {
         // Calculate the angle from the camera, to the node, within the camera view plane.
         // The camera view plane is the plane of the camera up direction + camera left
         // direction (i.e. the negative camera right direction), with the negative camera
