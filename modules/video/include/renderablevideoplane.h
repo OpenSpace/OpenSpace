@@ -35,7 +35,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableVideoPlane : public RenderablePlane {
 public:
-    RenderableVideoPlane(const ghoul::Dictionary& dictionary);
+    explicit RenderableVideoPlane(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;

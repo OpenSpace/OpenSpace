@@ -38,7 +38,7 @@ namespace openspace {
  */
 class TexturePlane : public TextureCygnet {
 public:
-    TexturePlane(const ghoul::Dictionary& dictionary);
+    explicit TexturePlane(const ghoul::Dictionary& dictionary);
     virtual ~TexturePlane() = default;
 
     void initializeGL() override;

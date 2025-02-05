@@ -35,8 +35,8 @@ namespace documentation { struct Documentation; }
 
 class TimeFrameUnion : public TimeFrame {
 public:
-    TimeFrameUnion() = default;
-    TimeFrameUnion(const ghoul::Dictionary& dictionary);
+    explicit TimeFrameUnion(const ghoul::Dictionary& dictionary);
+
     bool isActive(const Time&) const override;
 
     static documentation::Documentation Documentation();

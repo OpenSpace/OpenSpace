@@ -37,9 +37,10 @@ namespace documentation { struct Documentation; }
 
 class MultiRotation : public Rotation {
 public:
-    MultiRotation(const ghoul::Dictionary& dictionary);
+    explicit MultiRotation(const ghoul::Dictionary& dictionary);
 
     glm::dmat3 matrix(const UpdateData& data) const override;
+
     static documentation::Documentation Documentation();
 
 private:

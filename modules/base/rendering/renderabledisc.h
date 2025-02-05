@@ -42,7 +42,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableDisc : public Renderable {
 public:
-    RenderableDisc(const ghoul::Dictionary& dictionary);
+    explicit RenderableDisc(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;

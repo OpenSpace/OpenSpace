@@ -38,8 +38,8 @@ namespace documentation { struct Documentation; }
 
 class TimeFrameInterval : public TimeFrame {
 public:
-    TimeFrameInterval();
-    TimeFrameInterval(const ghoul::Dictionary& dictionary);
+    explicit TimeFrameInterval(const ghoul::Dictionary& dictionary);
+
     bool isActive(const Time&) const override;
 
     static documentation::Documentation Documentation();

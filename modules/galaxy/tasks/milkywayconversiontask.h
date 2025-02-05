@@ -40,7 +40,7 @@ namespace documentation { struct Documentation; }
  */
 class MilkywayConversionTask : public Task {
 public:
-    MilkywayConversionTask(const ghoul::Dictionary& dictionary);
+    explicit MilkywayConversionTask(const ghoul::Dictionary& dictionary);
     ~MilkywayConversionTask() override = default;
     std::string description() override;
     void perform(const Task::ProgressCallback& onProgress) override;

@@ -38,7 +38,7 @@ namespace documentation { struct Documentation; }
 
 class DashboardItemGlobeLocation : public DashboardTextItem {
 public:
-    DashboardItemGlobeLocation(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemGlobeLocation(const ghoul::Dictionary& dictionary);
     ~DashboardItemGlobeLocation() override = default;
 
     void render(glm::vec2& penPosition) override;

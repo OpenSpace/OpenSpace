@@ -38,7 +38,7 @@ namespace documentation { struct Documentation; }
 
 class DashboardItemFramerate : public DashboardTextItem {
 public:
-    DashboardItemFramerate(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemFramerate(const ghoul::Dictionary& dictionary);
 
     void render(glm::vec2& penPosition) override;
     glm::vec2 size() const override;

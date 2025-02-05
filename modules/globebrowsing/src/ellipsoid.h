@@ -56,7 +56,7 @@ public:
     /**
      * \param radii defines three radii for the Ellipsoid
      */
-    Ellipsoid(glm::dvec3 radii = glm::dvec3(1.0));
+    explicit Ellipsoid(glm::dvec3 radii = glm::dvec3(1.0));
 
     /**
      * Scales a point along the geocentric normal and places it on the surface of the

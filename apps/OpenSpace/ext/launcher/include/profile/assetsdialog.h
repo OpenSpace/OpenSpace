@@ -41,7 +41,7 @@ public:
      *
      * \param parent The parent object of this object
      */
-    SearchProxyModel(QObject* parent = nullptr);
+    explicit SearchProxyModel(QObject* parent = nullptr);
 
 public slots:
     /**

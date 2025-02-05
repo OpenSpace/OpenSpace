@@ -39,7 +39,7 @@ namespace documentation { struct Documentation; }
 
 class DashboardItemVelocity : public DashboardTextItem {
 public:
-    DashboardItemVelocity(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemVelocity(const ghoul::Dictionary& dictionary);
     ~DashboardItemVelocity() override = default;
 
     void render(glm::vec2& penPosition) override;

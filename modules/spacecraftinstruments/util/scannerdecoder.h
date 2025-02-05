@@ -33,7 +33,7 @@ namespace openspace {
 
 class ScannerDecoder : public Decoder {
 public:
-    ScannerDecoder(const ghoul::Dictionary& dictionary);
+    explicit ScannerDecoder(const ghoul::Dictionary& dictionary);
 
     virtual const std::string& decoderType() const override;
     const std::vector<std::string>& spiceIDs() const;

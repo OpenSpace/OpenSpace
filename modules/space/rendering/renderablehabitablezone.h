@@ -36,7 +36,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableHabitableZone : public RenderableDisc {
 public:
-    RenderableHabitableZone(const ghoul::Dictionary& dictionary);
+    explicit RenderableHabitableZone(const ghoul::Dictionary& dictionary);
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 

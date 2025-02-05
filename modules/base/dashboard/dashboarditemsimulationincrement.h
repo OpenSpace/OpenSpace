@@ -37,7 +37,7 @@ namespace documentation { struct Documentation; }
 
 class DashboardItemSimulationIncrement : public DashboardTextItem {
 public:
-    DashboardItemSimulationIncrement(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemSimulationIncrement(const ghoul::Dictionary& dictionary);
     ~DashboardItemSimulationIncrement() override = default;
 
     void render(glm::vec2& penPosition) override;

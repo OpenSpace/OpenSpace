@@ -38,7 +38,7 @@ namespace documentation { struct Documentation; }
 
 class ScreenSpaceImageOnline : public ScreenSpaceRenderable {
 public:
-    ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary);
     virtual ~ScreenSpaceImageOnline() override;
 
     bool deinitializeGL() override;

@@ -46,7 +46,7 @@ struct UpdateData;
 
 class RenderableEclipseCone : public Renderable {
 public:
-    RenderableEclipseCone(const ghoul::Dictionary& dictionary);
+    explicit RenderableEclipseCone(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;

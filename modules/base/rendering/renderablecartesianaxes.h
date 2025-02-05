@@ -42,7 +42,7 @@ namespace openspace {
 
 class RenderableCartesianAxes : public Renderable {
 public:
-    RenderableCartesianAxes(const ghoul::Dictionary& dictionary);
+    explicit RenderableCartesianAxes(const ghoul::Dictionary& dictionary);
     ~RenderableCartesianAxes() override = default;
 
     void initializeGL() override;

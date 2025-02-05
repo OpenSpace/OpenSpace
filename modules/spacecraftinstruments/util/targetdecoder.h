@@ -31,7 +31,7 @@ namespace openspace {
 
 class TargetDecoder : public Decoder {
 public:
-    TargetDecoder(const ghoul::Dictionary& dictionary);
+    explicit TargetDecoder(const ghoul::Dictionary& dictionary);
 
     virtual const std::string& decoderType() const override;
     virtual const std::vector<std::string>& translations() const override;

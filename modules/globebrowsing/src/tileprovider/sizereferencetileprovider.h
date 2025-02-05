@@ -31,7 +31,7 @@ namespace openspace::globebrowsing {
 
 class SizeReferenceTileProvider : public TextTileProvider {
 public:
-    SizeReferenceTileProvider(const ghoul::Dictionary& dictionary);
+    explicit SizeReferenceTileProvider(const ghoul::Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
     Tile::Status tileStatus(const TileIndex& index) override final;

@@ -33,7 +33,7 @@ namespace openspace::globebrowsing {
 
 class ImageSequenceTileProvider : public TileProvider {
 public:
-    ImageSequenceTileProvider(const ghoul::Dictionary& dictionary);
+    explicit ImageSequenceTileProvider(const ghoul::Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
     Tile::Status tileStatus(const TileIndex& index) override final;

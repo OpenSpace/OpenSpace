@@ -39,8 +39,8 @@ namespace openspace {
 class TransferFunction {
 public:
     using TfChangedCallback = std::function<void (const TransferFunction&)>;
-
-    TransferFunction(const std::filesystem::path& filepath,
+    
+    explicit TransferFunction(const std::filesystem::path& filepath,
         TfChangedCallback tfChangedCallback = TfChangedCallback());
     ~TransferFunction();
 

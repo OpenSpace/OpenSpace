@@ -37,7 +37,7 @@ class RenderableGlobe;
 
 class GlobeRotation : public Rotation {
 public:
-    GlobeRotation(const ghoul::Dictionary& dictionary);
+    explicit GlobeRotation(const ghoul::Dictionary& dictionary);
 
     void update(const UpdateData& data) override;
     glm::dmat3 matrix(const UpdateData& data) const override;

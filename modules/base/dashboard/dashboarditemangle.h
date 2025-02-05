@@ -39,7 +39,7 @@ namespace documentation { struct Documentation; }
 
 class DashboardItemAngle : public DashboardTextItem {
 public:
-    DashboardItemAngle(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemAngle(const ghoul::Dictionary& dictionary);
     ~DashboardItemAngle() override = default;
 
     void render(glm::vec2& penPosition) override;

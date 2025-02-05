@@ -48,10 +48,10 @@ enum class PlaybackMode {
 };
 
 class VideoPlayer : public properties::PropertyOwner, public Syncable {
-BooleanType(PauseAfterSeek);
-
 public:
-    VideoPlayer(const ghoul::Dictionary& dictionary);
+    BooleanType(PauseAfterSeek);
+
+    explicit VideoPlayer(const ghoul::Dictionary& dictionary);
     ~VideoPlayer() override;
 
     void initialize();

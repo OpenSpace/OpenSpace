@@ -35,7 +35,7 @@ namespace documentation { struct Documentation; }
 
 class MultiTranslation : public Translation {
 public:
-    MultiTranslation(const ghoul::Dictionary& dictionary);
+    explicit MultiTranslation(const ghoul::Dictionary& dictionary);
 
     glm::dvec3 position(const UpdateData& data) const override;
     static documentation::Documentation Documentation();

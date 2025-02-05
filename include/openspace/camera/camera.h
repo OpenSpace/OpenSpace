@@ -154,10 +154,9 @@ public:
     static constexpr glm::dvec3 UpDirectionCameraSpace = glm::dvec3(0.0, 1.0, 0.0);
 
 private:
-
-    SyncData<glm::dvec3> _position = glm::dvec3(1.0, 1.0, 1.0);
-    SyncData<glm::dquat> _rotation  = glm::dquat(glm::dvec3(1.0, 1.0, 1.0));
-    SyncData<float> _scaling = 1.f;
+    SyncData<glm::dvec3> _position = SyncData<glm::dvec3>(glm::dvec3(1.0, 1.0, 1.0));
+    SyncData<glm::dquat> _rotation  = SyncData<glm::dquat>(glm::dvec3(1.0, 1.0, 1.0));
+    SyncData<float> _scaling = SyncData<float>(1.f);
     SceneGraphNode* _parent = nullptr;
 
     float _atmosphereDimmingFactor = 1.f;

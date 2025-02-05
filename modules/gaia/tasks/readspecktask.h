@@ -36,7 +36,7 @@ namespace documentation { struct Documentation; }
 
 class ReadSpeckTask : public Task {
 public:
-    ReadSpeckTask(const ghoul::Dictionary& dictionary);
+    explicit ReadSpeckTask(const ghoul::Dictionary& dictionary);
     ~ReadSpeckTask() override = default;
 
     std::string description() override;

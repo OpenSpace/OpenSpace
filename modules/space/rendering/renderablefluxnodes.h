@@ -42,7 +42,7 @@ namespace openspace {
 
 class RenderableFluxNodes : public Renderable {
 public:
-    RenderableFluxNodes(const ghoul::Dictionary& dictionary);
+    explicit RenderableFluxNodes(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;

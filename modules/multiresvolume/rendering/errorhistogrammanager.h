@@ -37,7 +37,7 @@ class TSP;
 
 class ErrorHistogramManager {
 public:
-    ErrorHistogramManager(TSP* tsp);
+    explicit ErrorHistogramManager(TSP* tsp);
     ~ErrorHistogramManager() = default;
 
     bool buildHistograms(int numBins);

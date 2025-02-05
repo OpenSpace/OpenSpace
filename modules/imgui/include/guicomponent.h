@@ -40,7 +40,7 @@ public:
     /**
      * Constructor that initializes this components member variables.
      */
-    GuiComponent(std::string identifier, std::string guiName = "");
+    explicit GuiComponent(std::string identifier, std::string guiName = "");
 
     /**
      * Returns if this component is enabled, that is, if it is currently active and

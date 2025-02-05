@@ -41,7 +41,7 @@ namespace documentation { struct Documentation; }
 
 class RenderablePlaneTimeVaryingImage : public RenderablePlane {
 public:
-    RenderablePlaneTimeVaryingImage(const ghoul::Dictionary& dictionary);
+    explicit RenderablePlaneTimeVaryingImage(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;

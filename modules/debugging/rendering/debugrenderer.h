@@ -55,7 +55,7 @@ public:
     /**
      * Instantiate a new DebugRenderer with a custom shader program.
      */
-    DebugRenderer(std::unique_ptr<ghoul::opengl::ProgramObject> programObject);
+    explicit DebugRenderer(std::unique_ptr<ghoul::opengl::ProgramObject> programObject);
     ~DebugRenderer() = default;
 
     /**

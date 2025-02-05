@@ -38,18 +38,18 @@ namespace documentation { struct Documentation; }
 
 class DashboardItem : public properties::PropertyOwner {
 public:
-    static documentation::Documentation Documentation();
-
     static std::unique_ptr<DashboardItem> createFromDictionary(
         const ghoul::Dictionary& dictionary
     );
 
-    DashboardItem(const ghoul::Dictionary& dictionary);
+    explicit DashboardItem(const ghoul::Dictionary& dictionary);
 
     bool isEnabled() const;
     virtual void render(glm::vec2& penPosition) = 0;
 
     virtual glm::vec2 size() const = 0;
+
+    static documentation::Documentation Documentation();
 
 protected:
     properties::BoolProperty _enabled;

@@ -50,7 +50,7 @@ struct UpdateData;
 
 class RenderableModelProjection : public Renderable {
 public:
-    RenderableModelProjection(const ghoul::Dictionary& dictionary);
+    explicit RenderableModelProjection(const ghoul::Dictionary& dictionary);
     ~RenderableModelProjection() override;
 
     void initializeGL() override;

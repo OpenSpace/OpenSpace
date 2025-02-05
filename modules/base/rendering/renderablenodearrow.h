@@ -46,7 +46,7 @@ class Translation;
  */
 class RenderableNodeArrow : public Renderable {
 public:
-    RenderableNodeArrow(const ghoul::Dictionary& dictionary);
+    explicit RenderableNodeArrow(const ghoul::Dictionary& dictionary);
     ~RenderableNodeArrow() override = default;
 
     void initializeGL() override;
@@ -60,6 +60,7 @@ public:
 private:
     struct Shading : properties::PropertyOwner {
         Shading();
+
         properties::BoolProperty enabled;
         properties::FloatProperty ambientIntensity;
         properties::FloatProperty diffuseIntensity;

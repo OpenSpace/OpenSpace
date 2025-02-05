@@ -41,7 +41,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableSphericalGrid : public Renderable {
 public:
-    RenderableSphericalGrid(const ghoul::Dictionary& dictionary);
+    explicit RenderableSphericalGrid(const ghoul::Dictionary& dictionary);
     ~RenderableSphericalGrid() override = default;
 
     void initialize() override;

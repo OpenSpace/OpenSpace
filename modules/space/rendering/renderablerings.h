@@ -46,7 +46,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableRings : public Renderable {
 public:
-    RenderableRings(const ghoul::Dictionary& dictionary);
+    explicit RenderableRings(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;

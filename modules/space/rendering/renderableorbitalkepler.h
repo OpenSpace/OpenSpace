@@ -42,7 +42,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableOrbitalKepler : public Renderable {
 public:
-    RenderableOrbitalKepler(const ghoul::Dictionary& dictionary);
+    explicit RenderableOrbitalKepler(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;

@@ -44,7 +44,7 @@ namespace openspace::kameleonvolume {
 
 class KameleonVolumeReader {
 public:
-    KameleonVolumeReader(std::filesystem::path path);
+    explicit KameleonVolumeReader(std::filesystem::path path);
     ~KameleonVolumeReader();
 
     std::unique_ptr<volume::RawVolume<float>> readFloatVolume(

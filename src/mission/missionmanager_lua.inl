@@ -27,7 +27,7 @@
 // Load mission phases from file.
 [[codegen::luawrap]] void loadMission(ghoul::Dictionary mission) {
     // TODO: Check if mission table is valid
-    openspace::global::missionManager->loadMission(mission);
+    openspace::global::missionManager->loadMission(openspace::Mission(mission));
 }
 
 // Unloads a previously loaded mission.

@@ -33,7 +33,8 @@ namespace documentation { struct Documentation; }
 
 class MultiScale : public Scale {
 public:
-    MultiScale(const ghoul::Dictionary& dictionary);
+    explicit MultiScale(const ghoul::Dictionary& dictionary);
+
     glm::dvec3 scaleValue(const UpdateData& data) const override;
 
     static documentation::Documentation Documentation();

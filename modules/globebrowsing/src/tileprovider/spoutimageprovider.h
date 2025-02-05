@@ -33,7 +33,7 @@ namespace openspace::globebrowsing {
 
 class SpoutImageProvider : public TileProvider {
 public:
-    SpoutImageProvider(const ghoul::Dictionary& dictionary);
+    explicit SpoutImageProvider(const ghoul::Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
     Tile::Status tileStatus(const TileIndex& index) override final;

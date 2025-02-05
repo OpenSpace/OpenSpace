@@ -53,7 +53,7 @@ private:
 
 class MultiThreadedSceneInitializer final : public SceneInitializer {
 public:
-    MultiThreadedSceneInitializer(unsigned int nThreads);
+    explicit MultiThreadedSceneInitializer(unsigned int nThreads);
 
     void initializeNode(SceneGraphNode* node) override;
     std::vector<SceneGraphNode*> takeInitializedNodes() override;

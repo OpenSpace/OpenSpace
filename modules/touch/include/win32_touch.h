@@ -31,7 +31,7 @@ namespace openspace {
 
 class Win32TouchHook {
 public:
-    Win32TouchHook(void* nativeWindow);
+    explicit Win32TouchHook(void* nativeWindow);
     ~Win32TouchHook();
 };
 

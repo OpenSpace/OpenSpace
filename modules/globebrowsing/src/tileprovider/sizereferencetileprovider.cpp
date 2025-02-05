@@ -56,11 +56,11 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
 
     if (p.radii.has_value()) {
         if (std::holds_alternative<glm::dvec3>(*p.radii)) {
-            _ellipsoid = std::get<glm::dvec3>(*p.radii);
+            _ellipsoid = Ellipsoid(std::get<glm::dvec3>(*p.radii));
         }
         else {
             const double r = std::get<double>(*p.radii);
-            _ellipsoid = glm::dvec3(r, r, r);
+            _ellipsoid = Ellipsoid(glm::dvec3(r, r, r));
         }
     }
 }

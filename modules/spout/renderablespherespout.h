@@ -37,7 +37,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableSphereSpout : public RenderableSphere {
 public:
-    RenderableSphereSpout(const ghoul::Dictionary& dictionary);
+    explicit RenderableSphereSpout(const ghoul::Dictionary& dictionary);
 
     void deinitializeGL() override;
     void update(const UpdateData& data) override;
