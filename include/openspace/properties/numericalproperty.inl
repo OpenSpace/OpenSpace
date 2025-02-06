@@ -157,14 +157,6 @@ std::string NumericalProperty<T>::jsonValue() const {
 }
 
 template <typename T>
-void NumericalProperty<T>::setInterpolationTarget(std::any value) {
-    T v = std::any_cast<T>(std::move(value));
-
-    _interpolationStart = TemplateProperty<T>::_value;
-    _interpolationEnd = std::move(v);
-}
-
-template <typename T>
 void NumericalProperty<T>::setLuaInterpolationTarget(lua_State* state) {
     T targetValue = fromLuaConversion(state);
     _interpolationStart = TemplateProperty<T>::_value;

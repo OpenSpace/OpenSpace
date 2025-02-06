@@ -38,10 +38,6 @@ void TriggerProperty::setLuaValue(lua_State*) {
     notifyChangeListeners();
 }
 
-void TriggerProperty::set(std::any) {
-    notifyChangeListeners();
-}
-
 void TriggerProperty::trigger() {
     notifyChangeListeners();
 }
