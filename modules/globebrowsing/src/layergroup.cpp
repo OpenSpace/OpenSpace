@@ -221,7 +221,7 @@ void LayerGroup::moveLayer(int oldPosition, int newPosition) {
     ghoul_assert(!_layers.empty(), "The list should not be empty at this point");
     if (newLayerPos == _layers.begin()) {
         // If the layer is moved to the first spot in the list
-        Layer* nextLayer = (_layers.begin() + 1)->get();
+        Layer* nextLayer = _layers.begin()->get();
         layer->setZIndex(nextLayer->zIndex());
     }
     else if (newLayerPos == _layers.end()) {
