@@ -109,7 +109,7 @@ void FindLastClosedFieldlinesTask::perform(
         std::unique_ptr<ccmc::Kameleon> kameleon =
             kameleonHelper::createKameleonObject(cdfPath.string());
         ccmc::Tracer tracer(kameleon.get());
-
+        tracer.setInnerBoundary(1.5f);
 
         FieldlinesState state;
         const std::string& modelname = kameleon->getModelName();
@@ -142,7 +142,7 @@ void FindLastClosedFieldlinesTask::perform(
             }
         }
         std::vector<ccmc::Fieldline> fieldlines =
-            tracer.getLastClosedFieldlines(_numberOfPointsOnBoundary, 1, 10.0, 300);
+            tracer.getLastClosedFieldlines(_numberOfPointsOnBoundary, 1, 5.1, 300);
 
         for (ccmc::Fieldline line : fieldlines) {
             std::vector<glm::vec3> vertices;
@@ -154,6 +154,16 @@ void FindLastClosedFieldlinesTask::perform(
         }
 
         fls::addExtraQuantities(&*kameleon, variableNames, magVariableNames, state);
+        switch (state.model()) {
+        case fls::Model::Batsrus:
+            state.scalePositions(fls::ReToMeter);
+            break;
+        case fls::Model::Enlil:
+            state.convertLatLonToCartesian(fls::AuToMeter);
+            break;
+        default:
+            break;
+        }
         std::string fileName = cdfPath.stem().string() + "_lastClosedFieldlines";
         state.saveStateToJson(_outputFolder.string() + fileName);
         state.saveStateToOsfls(_outputFolder.string() + fileName);
