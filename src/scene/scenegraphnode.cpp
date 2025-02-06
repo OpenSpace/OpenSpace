@@ -269,7 +269,9 @@ namespace {
 
         // This describes a set of transformations that are applied to this scene graph
         // node and all of its children. There are only three possible values
-        // corresponding to a 'Translation', a 'Rotation', and a 'Scale'
+        // corresponding to a 'Translation', a 'Rotation', and a 'Scale'. The combined
+        // transformation will be computed by first applying the 'Scale', followed by the
+        // 'Rotation', and then the 'Translation'.
         std::optional<Transform> transform;
 
         // This value is a multiplication factor for the interaction sphere that
