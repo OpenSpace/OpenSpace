@@ -89,6 +89,8 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
+option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
+
 if (MSVC)
   option(OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION "Raise exceptions when encountering Inf's or Nan's in floating point numbers" OFF)
 
@@ -193,7 +195,6 @@ if (MSVC AND TARGET OpenSpace)
 endif ()
 
 
-option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
 if (OPENSPACE_HAVE_TESTS)
   add_subdirectory(support/coding/codegen/tests)
   set_target_properties(run_test_codegen PROPERTIES FOLDER "Unit Tests/support")
