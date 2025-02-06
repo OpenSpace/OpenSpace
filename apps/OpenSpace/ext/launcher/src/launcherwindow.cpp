@@ -520,24 +520,23 @@ void LauncherWindow::populateProfilesList(const std::string& preset) {
     ++_userAssetCount;
 
     // Add all the files with the .profile extension to the dropdown
-    std::vector<fs::directory_entry> profiles;
-    for (const fs::directory_entry& p : fs::directory_iterator(_userProfilePath)) {
-        if (p.path().extension() != ".profile") {
-            continue;
-        }
-        profiles.push_back(p);
-        ++_userAssetCount;
-    }
-    std::sort(profiles.begin(), profiles.end());
-    for (const fs::directory_entry& profile : profiles) {
-        const std::filesystem::path& path = profile.path();
+    std::vector<fs::path> profiles = ghoul::filesystem::walkDirectory(
+        _userProfilePath,
+        true,
+        true,
+        [](const fs::path& p) { return p.extension() == ".profile"; }
+    );
+    _userAssetCount += static_cast<int>(profiles.size());
+    for (const fs::path& profile : profiles) {
+        fs::path relPath = fs::relative(profile, _userProfilePath);
+        relPath.replace_extension();
         _profileBox->addItem(
-            QString::fromStdString(path.stem().string()),
-            QString::fromStdString(path.string())
+            QString::fromStdString(relPath.string()),
+            QString::fromStdString(profile.string())
         );
 
         // Add tooltip
-        std::optional<Profile> p = loadProfileFromFile(this, path);
+        std::optional<Profile> p = loadProfileFromFile(this, profile);
         const int idx = _profileBox->count() - 1;
         if (p.has_value() && (*p).meta.has_value()) {
             const std::optional<std::string>& d = p->meta.value().description;
@@ -557,25 +556,24 @@ void LauncherWindow::populateProfilesList(const std::string& preset) {
     ++_userAssetCount;
 
     // Add all the files with the .profile extension to the dropdown
-    profiles.clear();
-    for (const fs::directory_entry& path : fs::directory_iterator(_profilePath)) {
-        if (path.path().extension() != ".profile") {
-            continue;
-        }
-        profiles.push_back(path);
-    }
-    std::sort(profiles.begin(), profiles.end());
+    profiles = ghoul::filesystem::walkDirectory(
+        _profilePath,
+        true,
+        true,
+        [](const fs::path& p) { return p.extension() == ".profile"; }
+    );
 
     // Add sorted items to list
-    for (const fs::directory_entry& profile : profiles) {
-        const std::filesystem::path& path = profile.path();
+    for (const fs::path& profile : profiles) {
+        fs::path relPath = fs::relative(profile, _profilePath);
+        relPath.replace_extension();
         _profileBox->addItem(
-            QString::fromStdString(path.stem().string()),
-            QString::fromStdString(path.string())
+            QString::fromStdString(relPath.string()),
+            QString::fromStdString(profile.string())
         );
 
         // Add toooltip
-        std::optional<Profile> p = loadProfileFromFile(this, path);
+        std::optional<Profile> p = loadProfileFromFile(this, profile);
         const int idx = _profileBox->count() - 1;
         if (p.has_value() && (*p).meta.has_value()) {
             const std::optional<std::string>& d = p->meta.value().description;
@@ -609,17 +607,13 @@ void LauncherWindow::populateProfilesList(const std::string& preset) {
 }
 
 // Returns 'true' if the file was a configuration file, 'false' otherwise
-bool handleConfigurationFile(QComboBox& box, const std::filesystem::directory_entry& p) {
-    const bool isJson = p.path().extension() == ".json";
-    if (!isJson) {
-        return false;
-    }
-    box.addItem(QString::fromStdString(p.path().filename().string()));
+bool handleConfigurationFile(QComboBox& box, const std::filesystem::path& p) {
+    box.addItem(QString::fromStdString(p.filename().string()));
 
     // Add tooltip
     std::string tooltipDescription = "(no description available)";
     try {
-        sgct::config::Cluster cluster = sgct::readConfig(p.path());
+        sgct::config::Cluster cluster = sgct::readConfig(p);
         if (cluster.meta && cluster.meta->description.has_value()) {
             tooltipDescription = *cluster.meta->description;
         }
@@ -658,14 +652,15 @@ void LauncherWindow::populateWindowConfigsList(const std::string& preset) {
     _preDefinedConfigStartingIdx++;
 
     // Sort files
-    std::vector<fs::directory_entry> files;
-    for (const fs::directory_entry& p : fs::directory_iterator(_userConfigPath)) {
-        files.push_back(p);
-    }
-    std::sort(files.begin(), files.end());
+    std::vector<fs::path> files = ghoul::filesystem::walkDirectory(
+        _userConfigPath,
+        true,
+        true,
+        [](const fs::path& p) { return p.extension() == ".json"; }
+    );;
 
     // Add all the files with the .json extension to the dropdown
-    for (const fs::directory_entry& p : files) {
+    for (const fs::path& p : files) {
         const bool isConfigFile = handleConfigurationFile(*_windowConfigBox, p);
         if (isConfigFile) {
             _userConfigCount++;
@@ -679,14 +674,14 @@ void LauncherWindow::populateWindowConfigsList(const std::string& preset) {
     _preDefinedConfigStartingIdx++;
 
     if (std::filesystem::exists(_configPath)) {
-        // Sort files
-        files.clear();
-        for (const fs::directory_entry& p : fs::directory_iterator(_configPath)) {
-            files.push_back(p);
-        }
-        std::sort(files.begin(), files.end());
+        files = ghoul::filesystem::walkDirectory(
+            _configPath,
+            true,
+            true,
+            [](const fs::path& p) { return p.extension() == ".json"; }
+        );
         // Add all the files with the .json extension to the dropdown
-        for (const fs::directory_entry& p : files) {
+        for (const fs::path& p : files) {
             handleConfigurationFile(*_windowConfigBox, p);
         }
     }
