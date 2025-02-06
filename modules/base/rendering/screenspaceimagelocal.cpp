@@ -77,7 +77,7 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
 
     _texturePath.onChange([this]() {
         if (!std::filesystem::is_regular_file(absPath(_texturePath))) {
-            LWARNINGC(
+            LERRORC(
                 "ScreenSpaceImageLocal",
                 std::format(
                     "Image '{}' did not exist for '{}'", _texturePath.value(), _identifier
@@ -95,7 +95,7 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
             _texturePath = absPath(*p.texturePath).string();
         }
         else {
-            LWARNINGC(
+            LERRORC(
                 "ScreenSpaceImageLocal",
                 std::format(
                     "Image '{}' did not exist for '{}'", *p.texturePath, _identifier
