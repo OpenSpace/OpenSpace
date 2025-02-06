@@ -43,7 +43,6 @@ public:
     PropertyValue getLuaValue() const override;
     void setLuaValue(PropertyValue value) override;
 
-
     using TemplateProperty<bool>::operator=;
 
 protected:
