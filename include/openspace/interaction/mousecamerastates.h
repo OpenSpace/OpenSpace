@@ -43,6 +43,8 @@ public:
 
 private:
     bool _isMouseButtonInverted = false;
+
+    double _currentSensitivityRamp = 1.0;
 };
 
 } // namespace openspace::interaction
