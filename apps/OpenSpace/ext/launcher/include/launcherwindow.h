@@ -81,14 +81,6 @@ public:
     std::string selectedWindowConfig() const;
 
     /**
-      * Returns `true` if the window configuration filename selected in the combo box
-      * is a file in the user configurations section.
-      *
-      * \return `true` if window configuration is a user configuration file
-      */
-    bool isUserConfigSelected() const;
-
-    /**
      * Handles keypresses while the Qt launcher window is open.
      *
      * \param evt QKeyEevent object of the key press event
@@ -117,7 +109,6 @@ private:
     const std::filesystem::path _profilePath;
     const std::filesystem::path _userProfilePath;
     bool _shouldLaunch = false;
-    int _userConfigCount = 0;
     int _preDefinedConfigStartingIdx = 0;
     const std::string _sgctConfigName;
 

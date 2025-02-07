@@ -441,8 +441,8 @@ void LauncherWindow::setBackgroundImage(const std::filesystem::path& syncPath) {
     // Now we know which folder to use, we will pick an image at random
     std::vector<std::filesystem::path> files = ghoul::filesystem::walkDirectory(
         latest.path,
-        false,
-        false,
+        ghoul::filesystem::Recursive::No,
+        ghoul::filesystem::Sorted::No,
         [](const std::filesystem::path& p) {
             return p.extension() == ".png" && p.filename() != "overlay.png";
         }
@@ -486,8 +486,8 @@ void LauncherWindow::populateProfilesList(const std::string& preset) {
     // Add all the files with the .profile extension to the dropdown
     std::vector<std::filesystem::path> profiles = ghoul::filesystem::walkDirectory(
         _userProfilePath,
-        true,
-        true,
+        ghoul::filesystem::Recursive::Yes,
+        ghoul::filesystem::Sorted::Yes,
         [](const std::filesystem::path& p) { return p.extension() == ".profile"; }
     );
     for (const std::filesystem::path& profile : profiles) {
@@ -518,8 +518,8 @@ void LauncherWindow::populateProfilesList(const std::string& preset) {
     // Add all the files with the .profile extension to the dropdown
     profiles = ghoul::filesystem::walkDirectory(
         _profilePath,
-        true,
-        true,
+        ghoul::filesystem::Recursive::Yes,
+        ghoul::filesystem::Sorted::Yes,
         [](const std::filesystem::path& p) { return p.extension() == ".profile"; }
     );
 
@@ -573,21 +573,18 @@ void LauncherWindow::populateWindowConfigsList(const std::string& preset) {
     );
     _windowConfigBox->clear();
 
-    _userConfigCount = 0;
     _preDefinedConfigStartingIdx = 0;
     _windowConfigBox->addItem(QString::fromStdString("--- User Configurations ---"));
     const QStandardItemModel* model =
         qobject_cast<const QStandardItemModel*>(_windowConfigBox->model());
 
-    model->item(_userConfigCount)->setEnabled(false);
-    _userConfigCount++;
+    model->item(0)->setEnabled(false);
     _preDefinedConfigStartingIdx++;
 
-    // Sort files
     std::vector<std::filesystem::path> files = ghoul::filesystem::walkDirectory(
         _userConfigPath,
-        true,
-        true,
+        ghoul::filesystem::Recursive::Yes,
+        ghoul::filesystem::Sorted::Yes,
         [](const std::filesystem::path& p) { return p.extension() == ".json"; }
     );
 
@@ -595,20 +592,19 @@ void LauncherWindow::populateWindowConfigsList(const std::string& preset) {
     for (const std::filesystem::path& p : files) {
         const bool isConfigFile = handleConfigurationFile(*_windowConfigBox, p, _userConfigPath);
         if (isConfigFile) {
-            _userConfigCount++;
             _preDefinedConfigStartingIdx++;
         }
     }
     _windowConfigBox->addItem(QString::fromStdString("--- OpenSpace Configurations ---"));
     model = qobject_cast<const QStandardItemModel*>(_windowConfigBox->model());
-    model->item(_userConfigCount)->setEnabled(false);
+    model->item(_windowConfigBox->count() - 1)->setEnabled(false);
     _preDefinedConfigStartingIdx++;
 
     if (std::filesystem::exists(_configPath)) {
         files = ghoul::filesystem::walkDirectory(
             _configPath,
-            true,
-            true,
+            ghoul::filesystem::Recursive::Yes,
+            ghoul::filesystem::Sorted::Yes,
             [](const std::filesystem::path& p) {
                 return p.extension() == ".json" && p.filename() != "sgct.schema.json";
             }
@@ -652,7 +648,6 @@ void LauncherWindow::populateWindowConfigsList(const std::string& preset) {
         );
         // Increment the user config count because there is an additional option added
         // before the user config options
-        _userConfigCount++;
         _preDefinedConfigStartingIdx++;
         _windowConfigBox->setCurrentIndex(WindowConfigBoxIndexSgctCfgDefault + 1);
     }
@@ -946,11 +941,6 @@ std::string LauncherWindow::selectedWindowConfig() const {
     else {
         return _windowConfigBox->currentData().toString().toStdString();
     }
-}
-
-bool LauncherWindow::isUserConfigSelected() const {
-    const int selectedIndex = _windowConfigBox->currentIndex();
-    return (selectedIndex <= _userConfigCount);
 }
 
 void LauncherWindow::keyPressEvent(QKeyEvent* evt) {
