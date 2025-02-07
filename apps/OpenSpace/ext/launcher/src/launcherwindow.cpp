@@ -26,7 +26,6 @@
 
 #include "profile/profileedit.h"
 #include "settingsdialog.h"
-
 #include <openspace/openspace.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -573,13 +572,11 @@ void LauncherWindow::populateWindowConfigsList(const std::string& preset) {
     );
     _windowConfigBox->clear();
 
-    _preDefinedConfigStartingIdx = 0;
     _windowConfigBox->addItem(QString::fromStdString("--- User Configurations ---"));
     const QStandardItemModel* model =
         qobject_cast<const QStandardItemModel*>(_windowConfigBox->model());
 
     model->item(0)->setEnabled(false);
-    _preDefinedConfigStartingIdx++;
 
     std::vector<std::filesystem::path> files = ghoul::filesystem::walkDirectory(
         _userConfigPath,
@@ -590,15 +587,11 @@ void LauncherWindow::populateWindowConfigsList(const std::string& preset) {
 
     // Add all the files with the .json extension to the dropdown
     for (const std::filesystem::path& p : files) {
-        const bool isConfigFile = handleConfigurationFile(*_windowConfigBox, p, _userConfigPath);
-        if (isConfigFile) {
-            _preDefinedConfigStartingIdx++;
-        }
+        handleConfigurationFile(*_windowConfigBox, p, _userConfigPath);
     }
     _windowConfigBox->addItem(QString::fromStdString("--- OpenSpace Configurations ---"));
     model = qobject_cast<const QStandardItemModel*>(_windowConfigBox->model());
     model->item(_windowConfigBox->count() - 1)->setEnabled(false);
-    _preDefinedConfigStartingIdx++;
 
     if (std::filesystem::exists(_configPath)) {
         files = ghoul::filesystem::walkDirectory(
@@ -648,7 +641,6 @@ void LauncherWindow::populateWindowConfigsList(const std::string& preset) {
         );
         // Increment the user config count because there is an additional option added
         // before the user config options
-        _preDefinedConfigStartingIdx++;
         _windowConfigBox->setCurrentIndex(WindowConfigBoxIndexSgctCfgDefault + 1);
     }
     connect(
@@ -662,20 +654,20 @@ void LauncherWindow::populateWindowConfigsList(const std::string& preset) {
 }
 
 void LauncherWindow::onNewWindowConfigSelection(int newIndex) {
-    const std::filesystem::path pathSelected = absPath(selectedWindowConfig());
+    const std::string pathSelected = selectedWindowConfig();
     if (newIndex == WindowConfigBoxIndexSgctCfgDefault) {
+        // The first entry is the value read from the openspace.cfg file
         _editWindowButton->setEnabled(false);
         _editWindowButton->setToolTip(
             "Cannot edit the 'Default' configuration since it is not a file"
         );
     }
-    else if (newIndex >= _preDefinedConfigStartingIdx) {
+    else if (pathSelected.starts_with(_configPath.string())) {
+        // If the configuration is a default configuration, we don't allow editing
         _editWindowButton->setEnabled(false);
         _editWindowButton->setToolTip(
-            QString::fromStdString(std::format(
-                "Cannot edit '{}' since it is one of the configuration "
-                "files provided in the OpenSpace installation", pathSelected
-            ))
+            "Cannot edit since the selected configuration is one of the files provided "
+            "by OpenSpace"
         );
     }
     else {

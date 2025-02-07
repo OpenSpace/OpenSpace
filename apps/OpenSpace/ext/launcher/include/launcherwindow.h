@@ -109,7 +109,6 @@ private:
     const std::filesystem::path _profilePath;
     const std::filesystem::path _userProfilePath;
     bool _shouldLaunch = false;
-    int _preDefinedConfigStartingIdx = 0;
     const std::string _sgctConfigName;
 
     QComboBox* _profileBox = nullptr;

@@ -1387,17 +1387,17 @@ int main(int argc, char* argv[]) {
             );
         }
 
-        LauncherWindow win = LauncherWindow(
+        LauncherWindow launcher = LauncherWindow(
             !commandlineArguments.profile.has_value(),
             *global::configuration,
             !commandlineArguments.windowConfig.has_value(),
             std::move(windowCfgPreset),
             nullptr
         );
-        win.show();
+        launcher.show();
         QApplication::exec();
 
-        if (!win.wasLaunchSelected()) {
+        if (!launcher.wasLaunchSelected()) {
             exit(EXIT_SUCCESS);
         }
         glfwInit();
@@ -1442,10 +1442,10 @@ int main(int argc, char* argv[]) {
             size
         );
 
-        global::configuration->profile = win.selectedProfile();
+        global::configuration->profile = launcher.selectedProfile();
         std::tie(windowConfiguration, isGeneratedWindowConfig) =
             selectedSgctProfileFromLauncher(
-                win,
+                launcher,
                 commandlineArguments.windowConfig.has_value(),
                 windowConfiguration,
                 labelFromCfgFile
