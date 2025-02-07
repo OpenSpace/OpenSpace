@@ -25,6 +25,7 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/set_openspace_compile_settings.cmake)
 
 set(HEADER_FILES
+  include/backgroundimage.h
   include/filesystemaccess.h
   include/launcherwindow.h
   include/settingsdialog.h
@@ -54,6 +55,7 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
+  src/backgroundimage.cpp
   src/launcherwindow.cpp
   src/filesystemaccess.cpp
   src/settingsdialog.cpp

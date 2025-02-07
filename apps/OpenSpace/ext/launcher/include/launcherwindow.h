@@ -38,7 +38,6 @@
 namespace openspace { struct Configuration; }
 
 class QComboBox;
-class QLabel;
 
 class LauncherWindow final : public QMainWindow {
 Q_OBJECT
@@ -88,8 +87,7 @@ public:
     void keyPressEvent(QKeyEvent* evt) override;
 
 private:
-    QWidget* createCentralWidget();
-    void setBackgroundImage(const std::filesystem::path& syncPath);
+    QWidget* createCentralWidget(std::filesystem::path syncFolder);
 
     void openProfileEditor(const std::string& profile, bool isUserProfile);
     void openWindowEditor(const std::string& winCfg, bool isUserWinCfg);
@@ -113,7 +111,6 @@ private:
 
     QComboBox* _profileBox = nullptr;
     QComboBox* _windowConfigBox = nullptr;
-    QLabel* _backgroundImage = nullptr;
     QPushButton* _editWindowButton = nullptr;
 };
 #endif // __OPENSPACE_UI_LAUNCHER___LAUNCHERWINDOW___H__

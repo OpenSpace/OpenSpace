@@ -25,6 +25,7 @@
 #include "launcherwindow.h"
 
 #include "profile/profileedit.h"
+#include "backgroundimage.h"
 #include "settingsdialog.h"
 #include <openspace/openspace.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -35,13 +36,11 @@
 #include <QKeyEvent>
 #include <QLabel>
 #include <QMessageBox>
-#include <QPainter>
 #include <QPushButton>
 #include <QStandardItemModel>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <random>
 
 #ifdef WIN32
 #include <Windows.h>
@@ -184,6 +183,8 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
                                bool sgctConfigEnabled, std::string sgctConfigName,
                                QWidget* parent)
     : QMainWindow(parent)
+    // The extra `/ ""` at the end here is necessary as we assume the paths to have a
+    // terminating `/` character at the end
     , _assetPath(absPath(globalConfig.pathTokens.at("ASSETS")) / "")
     , _userAssetPath(absPath(globalConfig.pathTokens.at("USER_ASSETS")) / "")
     , _configPath(absPath(globalConfig.pathTokens.at("CONFIG")) / "")
@@ -213,7 +214,10 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
         setStyleSheet(styleSheet);
     }
 
-    setCentralWidget(createCentralWidget());
+    QWidget* central = createCentralWidget(
+        absPath(globalConfig.pathTokens.at("SYNC") + "/http/launcher_images")
+    );
+    setCentralWidget(central);
     QPushButton* startButton = centralWidget()->findChild<QPushButton*>("start");
     if (startButton) {
         startButton->setFocus(Qt::OtherFocusReason);
@@ -226,26 +230,12 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
     populateWindowConfigsList(_sgctConfigName);
     // Trigger currentIndexChanged so the preview file read is performed
     _windowConfigBox->currentIndexChanged(_windowConfigBox->currentIndex());
-
-    const std::filesystem::path p = absPath(
-        globalConfig.pathTokens.at("SYNC") + "/http/launcher_images"
-    );
-    if (std::filesystem::exists(p)) {
-        try {
-            setBackgroundImage(p);
-        }
-        catch (const std::exception& e) {
-            std::cerr << "Error occurrred while reading background images: " << e.what();
-        }
-    }
 }
 
-QWidget* LauncherWindow::createCentralWidget() {
+QWidget* LauncherWindow::createCentralWidget(std::filesystem::path syncFolder) {
     QWidget* centralWidget = new QWidget;
 
-    _backgroundImage = new QLabel(centralWidget);
-    _backgroundImage->setGeometry(geometry::BackgroundImage);
-    _backgroundImage->setPixmap(QPixmap(":/images/launcher-background.png"));
+    new BackgroundImage(geometry::BackgroundImage, syncFolder, centralWidget);
 
     QLabel* logoImage = new QLabel(centralWidget);
     logoImage->setObjectName("clear");
@@ -406,63 +396,6 @@ QWidget* LauncherWindow::createCentralWidget() {
     settingsButton->setAccessibleName("Settings");
 
     return centralWidget;
-}
-
-void LauncherWindow::setBackgroundImage(const std::filesystem::path& syncPath) {
-    namespace fs = std::filesystem;
-
-    // First, we iterate through all folders in the launcher_images sync folder and we get
-    // the folder with the highest number
-    struct {
-        fs::directory_entry path;
-        int version = -1;
-    } latest;
-    for (const fs::directory_entry& p : fs::directory_iterator(syncPath)) {
-        if (!p.is_directory()) {
-            continue;
-        }
-        const std::string versionStr = p.path().stem().string();
-        // All folder names in the sync folder should only be a digit, so we should be
-        // find to just convert it here
-        const int version = std::stoi(versionStr);
-
-        if (version > latest.version) {
-            latest.version = version;
-            latest.path = p;
-        }
-    }
-
-    if (latest.version == -1) {
-        // The sync folder existed, but nothing was in there. Kinda weird, but still
-        return;
-    }
-
-    // Now we know which folder to use, we will pick an image at random
-    std::vector<std::filesystem::path> files = ghoul::filesystem::walkDirectory(
-        latest.path,
-        ghoul::filesystem::Recursive::No,
-        ghoul::filesystem::Sorted::No,
-        [](const std::filesystem::path& p) {
-            return p.extension() == ".png" && p.filename() != "overlay.png";
-        }
-    );
-    std::random_device rd;
-    std::mt19937 g(rd());
-    std::shuffle(files.begin(), files.end(), g);
-
-    // There better be at least one file left, but just in in case
-    if (!files.empty()) {
-        // Take the selected image and overpaint the overlay increasing the contrast
-        std::string image = files.front().string();
-        QPixmap pixmap = QPixmap(QString::fromStdString(image));
-        QPainter painter = QPainter(&pixmap);
-        painter.setOpacity(0.7);
-        QPixmap overlay = QPixmap(QString::fromStdString(
-            std::format("{}/overlay.png", latest.path.path())
-        ));
-        painter.drawPixmap(pixmap.rect(), overlay);
-        _backgroundImage->setPixmap(pixmap);
-    }
 }
 
 void LauncherWindow::populateProfilesList(const std::string& preset) {
