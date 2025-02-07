@@ -607,8 +607,11 @@ void LauncherWindow::populateProfilesList(const std::string& preset) {
 }
 
 // Returns 'true' if the file was a configuration file, 'false' otherwise
-bool handleConfigurationFile(QComboBox& box, const std::filesystem::path& p) {
-    box.addItem(QString::fromStdString(p.filename().string()));
+bool handleConfigurationFile(QComboBox& box, const std::filesystem::path& p, const std::filesystem::path& rel) {
+    std::filesystem::path relPath = std::filesystem::relative(p, rel);
+    relPath.replace_extension();
+
+    box.addItem(QString::fromStdString(relPath.string()));
 
     // Add tooltip
     std::string tooltipDescription = "(no description available)";
@@ -661,7 +664,7 @@ void LauncherWindow::populateWindowConfigsList(const std::string& preset) {
 
     // Add all the files with the .json extension to the dropdown
     for (const fs::path& p : files) {
-        const bool isConfigFile = handleConfigurationFile(*_windowConfigBox, p);
+        const bool isConfigFile = handleConfigurationFile(*_windowConfigBox, p, _userConfigPath);
         if (isConfigFile) {
             _userConfigCount++;
             _userConfigStartingIdx++;
@@ -682,7 +685,7 @@ void LauncherWindow::populateWindowConfigsList(const std::string& preset) {
         );
         // Add all the files with the .json extension to the dropdown
         for (const fs::path& p : files) {
-            handleConfigurationFile(*_windowConfigBox, p);
+            handleConfigurationFile(*_windowConfigBox, p, _configPath);
         }
     }
     else {
