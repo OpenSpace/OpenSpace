@@ -111,6 +111,7 @@ private:
 
     QComboBox* _profileBox = nullptr;
     QComboBox* _windowConfigBox = nullptr;
+    QPushButton* _editProfileButton = nullptr;
     QPushButton* _editWindowButton = nullptr;
 };
 #endif // __OPENSPACE_UI_LAUNCHER___LAUNCHERWINDOW___H__

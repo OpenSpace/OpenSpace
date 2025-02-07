@@ -251,9 +251,18 @@ QWidget* LauncherWindow::createCentralWidget(std::filesystem::path syncFolder) {
     _profileBox->setGeometry(geometry::ProfileBox);
     _profileBox->setAccessibleName("Choose profile");
 
-    QPushButton* editProfileButton = new QPushButton("Edit", centralWidget);
     connect(
-        editProfileButton,
+        _profileBox,
+        QOverload<int>::of(&QComboBox::currentIndexChanged),
+        [this]() {
+            const std::string path = _profileBox->currentData().toString().toStdString();
+            _editProfileButton->setEnabled(std::filesystem::exists(path));
+        }
+    );
+
+    _editProfileButton = new QPushButton("Edit", centralWidget);
+    connect(
+        _editProfileButton,
         &QPushButton::released,
         [this]() {
             const std::string selection = _profileBox->currentText().toStdString();
@@ -267,11 +276,11 @@ QWidget* LauncherWindow::createCentralWidget(std::filesystem::path syncFolder) {
             openProfileEditor(selection, isUserProfile);
         }
     );
-    editProfileButton->setObjectName("small");
-    editProfileButton->setGeometry(geometry::EditProfileButton);
-    editProfileButton->setCursor(Qt::PointingHandCursor);
-    editProfileButton->setAutoDefault(true);
-    editProfileButton->setAccessibleName("Edit profile");
+    _editProfileButton->setObjectName("small");
+    _editProfileButton->setGeometry(geometry::EditProfileButton);
+    _editProfileButton->setCursor(Qt::PointingHandCursor);
+    _editProfileButton->setAutoDefault(true);
+    _editProfileButton->setAccessibleName("Edit profile");
 
     QPushButton* newProfileButton = new QPushButton("New", centralWidget);
     connect(
@@ -479,16 +488,12 @@ void LauncherWindow::populateProfilesList(const std::string& preset) {
     // Try to find the requested profile and set it as the current one
     int idx = _profileBox->findText(QString::fromStdString(preset));
     if (idx == -1) {
-        // We didn't find the preset, so the user probably specified a path in the
-        // configuration file that doesn't match any value in the list
-        _profileBox->addItem(QString::fromStdString("--- Configuration File ---"));
+        _profileBox->addItem(QString::fromStdString(std::format(
+            "Profile '{}' not found", preset
+        )));
         model = qobject_cast<const QStandardItemModel*>(_profileBox->model());
         model->item(_profileBox->count() - 1)->setEnabled(false);
-
-        _profileBox->addItem(
-            QString::fromStdString(preset),
-            QString::fromStdString(preset)
-        );
+        _editProfileButton->setEnabled(false);
         idx = _profileBox->count() - 1;
     }
 
