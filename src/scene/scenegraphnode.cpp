@@ -193,9 +193,9 @@ namespace {
         openspace::properties::Property::Visibility::Hidden
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GuiFocussableInfo = {
-        "IsFocussable",
-        "Focussable Hint",
+    constexpr openspace::properties::Property::PropertyInfo GuiFocusableInfo = {
+        "IsFocusable",
+        "Focusable Hint",
         "This value serves as a hint to determine if it makes sense to focus the camera "
         "on this scene graph node. It only serves as a hint and does not actually "
         "prevent the focussing. The default value is `true`.",
@@ -337,8 +337,8 @@ namespace {
             // not display, for example, barycenters
             std::optional<bool> hidden;
 
-            // [[codegen::verbatim(FocussableInfo.description)]]
-            std::optional<bool> focussable;
+            // [[codegen::verbatim(GuiFocusableInfo.description)]]
+            std::optional<bool> focusable;
 
             // If this value is specified, the scene graph node will be ordered in
             // relation to its neighbors in the GUI based on this value, so that nodes
@@ -406,7 +406,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         if (p.gui->orderingNumber.has_value()) {
             result->_guiOrderingNumber = *p.gui->orderingNumber;
         }
-        result->_guiFocussable = p.gui->focussable.value_or(result->_guiFocussable);
+        result->_guiFocusable = p.gui->focusable.value_or(result->_guiFocusable);
     }
 
     result->_boundingSphere = p.boundingSphere.value_or(result->_boundingSphere);
@@ -552,7 +552,7 @@ SceneGraphNode::SceneGraphNode()
     , _guiDisplayName(GuiNameInfo)
     , _guiDescription(GuiDescriptionInfo)
     , _useGuiOrdering(UseGuiOrderInfo, false)
-    , _guiFocussable(GuiFocussableInfo, true)
+    , _guiFocusable(GuiFocusableInfo, true)
     , _guiOrderingNumber(GuiOrderInfo, 0.f)
     , _transform {
         ghoul::mm_unique_ptr<Translation>(
@@ -637,7 +637,7 @@ SceneGraphNode::SceneGraphNode()
     addProperty(_guiPath);
     addProperty(_guiOrderingNumber);
     addProperty(_useGuiOrdering);
-    addProperty(_guiFocussable);
+    addProperty(_guiFocusable);
 }
 
 SceneGraphNode::~SceneGraphNode() {}
