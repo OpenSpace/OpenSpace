@@ -27,11 +27,10 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <ghoul/logging/logmanager.h>
-
-#include "audiomodule_lua.inl"
-
 #include <soloud.h>
 #include <soloud_wav.h>
+
+#include "audiomodule_lua.inl"
 
 namespace {
     constexpr std::string_view _loggerCat = "AudioModule";
