@@ -27,6 +27,7 @@
 #include "profile/profileedit.h"
 #include "backgroundimage.h"
 #include "settingsdialog.h"
+#include "splitcombobox.h"
 #include <openspace/openspace.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -223,11 +224,11 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
         startButton->setFocus(Qt::OtherFocusReason);
     }
 
-    populateProfilesList(globalConfig.profile);
+    _profileBox->populateList(globalConfig.profile);
     _profileBox->setEnabled(profileEnabled);
 
     _windowConfigBox->setEnabled(sgctConfigEnabled);
-    populateWindowConfigsList(_sgctConfigName);
+    _windowConfigBox->populateList(_sgctConfigName);
     // Trigger currentIndexChanged so the preview file read is performed
     _windowConfigBox->currentIndexChanged(_windowConfigBox->currentIndex());
 }
@@ -246,17 +247,35 @@ QWidget* LauncherWindow::createCentralWidget(std::filesystem::path syncFolder) {
     labelChoose->setGeometry(geometry::ChooseLabel);
     labelChoose->setObjectName("label_choose");
 
-    _profileBox = new QComboBox(centralWidget);
+    _profileBox = new SplitComboBox(
+        centralWidget,
+        _userProfilePath,
+        "--- User Profiles ---",
+        _profilePath,
+        "--- OpenSpace Profiles ---",
+        "",
+        [](const std::filesystem::path& p) { return p.extension() == ".profile"; },
+        [](const std::filesystem::path& p) {
+            try {
+                Profile profile(p);
+                if (profile.meta.has_value() && profile.meta->description.has_value()) {
+                    return *profile.meta->description;
+                }
+            }
+            catch (...) {}
+            return std::string();
+        }
+    );
     _profileBox->setObjectName("config");
     _profileBox->setGeometry(geometry::ProfileBox);
     _profileBox->setAccessibleName("Choose profile");
 
     connect(
         _profileBox,
-        QOverload<int>::of(&QComboBox::currentIndexChanged),
-        [this]() {
-            const std::string path = _profileBox->currentData().toString().toStdString();
-            _editProfileButton->setEnabled(std::filesystem::exists(path));
+        &SplitComboBox::selectionChanged,
+        [this](std::optional<std::string> selection) {
+            ghoul_assert(selection.has_value(), "No special item in the profiles");
+            _editProfileButton->setEnabled(std::filesystem::exists(*selection));
         }
     );
 
@@ -265,8 +284,7 @@ QWidget* LauncherWindow::createCentralWidget(std::filesystem::path syncFolder) {
         _editProfileButton,
         &QPushButton::released,
         [this]() {
-            const std::string selection = _profileBox->currentText().toStdString();
-            const std::string path = _profileBox->currentData().toString().toStdString();
+            auto [selection, path] = _profileBox->currentSelection();
             ghoul_assert(std::filesystem::exists(path), "Path not found");
             const bool isUserProfile = path.starts_with(_userProfilePath.string());
             ghoul_assert(
@@ -298,7 +316,29 @@ QWidget* LauncherWindow::createCentralWidget(std::filesystem::path syncFolder) {
     optionsLabel->setGeometry(geometry::OptionsLabel);
     optionsLabel->setObjectName("label_options");
 
-    _windowConfigBox = new QComboBox(centralWidget);
+    _windowConfigBox = new SplitComboBox(
+        centralWidget,
+        _userConfigPath,
+        "--- User Configurations ---",
+        _configPath,
+        "--- OpenSpace Configuration ---",
+        _sgctConfigName,
+        [](const std::filesystem::path& p) {
+            // @TODO (abock, 2025-02-10) Remove once the schema is baked into the code
+            return p.extension() == ".json" && p.filename() != "sgct.schema.json";
+        },
+        [](const std::filesystem::path& p) {
+            try {
+                sgct::config::Cluster cluster = sgct::readConfig(p);
+                if (cluster.meta && cluster.meta->description.has_value()) {
+                    return *cluster.meta->description;
+                }
+            }
+            catch (...) {}
+            return std::string();
+        }
+
+    );
     _windowConfigBox->setObjectName("config");
     _windowConfigBox->setGeometry(geometry::WindowConfigBox);
     _windowConfigBox->setAccessibleName("Select window configuration");
@@ -342,7 +382,8 @@ QWidget* LauncherWindow::createCentralWidget(std::filesystem::path syncFolder) {
         startButton,
         &QPushButton::released,
         [this]() {
-            if (_profileBox->currentText().isEmpty()) {
+            auto [selection, path] = _profileBox->currentSelection();
+            if (selection.empty()) {
                 QMessageBox::critical(
                     this,
                     "Empty Profile",
@@ -386,11 +427,11 @@ QWidget* LauncherWindow::createCentralWidget(std::filesystem::path syncFolder) {
                     saveSettings(s, findSettings());
 
                     if (s.profile.has_value()) {
-                        populateProfilesList(*s.profile);
+                        _profileBox->populateList(*s.profile);
                     }
 
                     if (s.configuration.has_value()) {
-                        populateWindowConfigsList(*s.configuration);
+                        _windowConfigBox->populateList(*s.configuration);
                     }
                 }
             );
@@ -405,190 +446,6 @@ QWidget* LauncherWindow::createCentralWidget(std::filesystem::path syncFolder) {
     settingsButton->setAccessibleName("Settings");
 
     return centralWidget;
-}
-
-void LauncherWindow::populateProfilesList(const std::string& preset) {
-    _profileBox->clear();
-
-    if (!std::filesystem::exists(_profilePath)) {
-        LINFOC(
-            "LauncherWindow",
-            std::format("Could not find profile folder '{}'", _profilePath)
-        );
-        return;
-    }
-
-    _profileBox->addItem(QString::fromStdString("--- User Profiles ---"));
-    const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(
-        _profileBox->model()
-    );
-    model->item(0)->setEnabled(false);
-
-    // Add all the files with the .profile extension to the dropdown
-    std::vector<std::filesystem::path> profiles = ghoul::filesystem::walkDirectory(
-        _userProfilePath,
-        ghoul::filesystem::Recursive::Yes,
-        ghoul::filesystem::Sorted::Yes,
-        [](const std::filesystem::path& p) { return p.extension() == ".profile"; }
-    );
-    for (const std::filesystem::path& profile : profiles) {
-        std::filesystem::path relPath =
-            std::filesystem::relative(profile, _userProfilePath);
-        relPath.replace_extension();
-        _profileBox->addItem(
-            QString::fromStdString(relPath.string()),
-            QString::fromStdString(profile.string())
-        );
-
-        // Add tooltip
-        std::optional<Profile> p = loadProfile(this, profile);
-        const int idx = _profileBox->count() - 1;
-        if (p.has_value() && p->meta.has_value() && p->meta->description.has_value()) {
-            // Tooltip has to be 'rich text' to linebreak properly
-            const QString tooltip = QString::fromStdString(std::format(
-                "<p>{}</p>", *p->meta->description
-            ));
-            _profileBox->setItemData(idx, tooltip, Qt::ToolTipRole);
-        }
-    }
-
-    _profileBox->addItem(QString::fromStdString("--- OpenSpace Profiles ---"));
-    model = qobject_cast<const QStandardItemModel*>(_profileBox->model());
-    model->item(_profileBox->count() - 1)->setEnabled(false);
-
-    // Add all the files with the .profile extension to the dropdown
-    profiles = ghoul::filesystem::walkDirectory(
-        _profilePath,
-        ghoul::filesystem::Recursive::Yes,
-        ghoul::filesystem::Sorted::Yes,
-        [](const std::filesystem::path& p) { return p.extension() == ".profile"; }
-    );
-
-    // Add sorted items to list
-    for (const std::filesystem::path& profile : profiles) {
-        std::filesystem::path relPath = std::filesystem::relative(profile, _profilePath);
-        relPath.replace_extension();
-        _profileBox->addItem(
-            QString::fromStdString(relPath.string()),
-            QString::fromStdString(profile.string())
-        );
-
-        // Add tooltip
-        std::optional<Profile> p = loadProfile(this, profile);
-        const int idx = _profileBox->count() - 1;
-        if (p.has_value() && p->meta.has_value() && p->meta->description.has_value()) {
-            // Tooltip has to be 'rich text' to linebreak properly
-            const QString tooltip = QString::fromStdString(std::format(
-                "<p>{}</p>", *p->meta->description
-            ));
-            _profileBox->setItemData(idx, tooltip, Qt::ToolTipRole);
-        }
-    }
-
-    // Try to find the requested profile and set it as the current one
-    int idx = _profileBox->findText(QString::fromStdString(preset));
-    if (idx == -1) {
-        _profileBox->addItem(QString::fromStdString(std::format(
-            "Profile '{}' not found", preset
-        )));
-        model = qobject_cast<const QStandardItemModel*>(_profileBox->model());
-        model->item(_profileBox->count() - 1)->setEnabled(false);
-        _editProfileButton->setEnabled(false);
-        idx = _profileBox->count() - 1;
-    }
-
-    _profileBox->setCurrentIndex(idx);
-}
-
-void LauncherWindow::populateWindowConfigsList(const std::string& preset) {
-    // Disconnect the signal for new window config selection during population process
-    disconnect(
-        _windowConfigBox,
-        QOverload<int>::of(&QComboBox::currentIndexChanged),
-        nullptr,
-        nullptr
-    );
-    _windowConfigBox->clear();
-
-    _windowConfigBox->addItem(QString::fromStdString("--- User Configurations ---"));
-    const QStandardItemModel* model =
-        qobject_cast<const QStandardItemModel*>(_windowConfigBox->model());
-
-    model->item(0)->setEnabled(false);
-
-    std::vector<std::filesystem::path> files = ghoul::filesystem::walkDirectory(
-        _userConfigPath,
-        ghoul::filesystem::Recursive::Yes,
-        ghoul::filesystem::Sorted::Yes,
-        [](const std::filesystem::path& p) { return p.extension() == ".json"; }
-    );
-
-    // Add all the files with the .json extension to the dropdown
-    for (const std::filesystem::path& p : files) {
-        handleConfigurationFile(*_windowConfigBox, p, _userConfigPath);
-    }
-    _windowConfigBox->addItem(QString::fromStdString("--- OpenSpace Configurations ---"));
-    model = qobject_cast<const QStandardItemModel*>(_windowConfigBox->model());
-    model->item(_windowConfigBox->count() - 1)->setEnabled(false);
-
-    if (std::filesystem::exists(_configPath)) {
-        files = ghoul::filesystem::walkDirectory(
-            _configPath,
-            ghoul::filesystem::Recursive::Yes,
-            ghoul::filesystem::Sorted::Yes,
-            [](const std::filesystem::path& p) {
-                return p.extension() == ".json" && p.filename() != "sgct.schema.json";
-            }
-        );
-        // Add all the files with the .json extension to the dropdown
-        for (const std::filesystem::path& p : files) {
-            handleConfigurationFile(*_windowConfigBox, p, _configPath);
-        }
-    }
-    else {
-        LINFOC(
-            "LauncherWindow",
-            std::format("Could not find config folder '{}'", _configPath)
-        );
-    }
-
-    // Always add the .cfg SGCT default as first item
-    _windowConfigBox->insertItem(
-        WindowConfigBoxIndexSgctCfgDefault,
-        QString::fromStdString(_sgctConfigName)
-    );
-    const QString defaultTip =
-        "<p>The basic default configuration specified in the .cfg file</p>";
-    _windowConfigBox->setItemData(
-        WindowConfigBoxIndexSgctCfgDefault,
-        defaultTip,
-        Qt::ToolTipRole
-    );
-    // Try to find the requested configuration file and set it as the current one. As we
-    // have support for function-generated configuration files that will not be in the
-    // list we need to add a preset that doesn't exist a file for
-    const int idx = _windowConfigBox->findText(QString::fromStdString(preset));
-    if (idx != -1) {
-        _windowConfigBox->setCurrentIndex(idx);
-    }
-    else {
-        // Add the requested preset at the top
-        _windowConfigBox->insertItem(
-            WindowConfigBoxIndexSgctCfgDefault + 1,
-            QString::fromStdString(preset)
-        );
-        // Increment the user config count because there is an additional option added
-        // before the user config options
-        _windowConfigBox->setCurrentIndex(WindowConfigBoxIndexSgctCfgDefault + 1);
-    }
-    connect(
-        _windowConfigBox,
-        QOverload<int>::of(&QComboBox::currentIndexChanged),
-        this,
-        &LauncherWindow::onNewWindowConfigSelection
-    );
-    // Call combobox selected callback to refresh the file status of the current selection
-    onNewWindowConfigSelection(_windowConfigBox->currentIndex());
 }
 
 void LauncherWindow::onNewWindowConfigSelection(int newIndex) {
@@ -722,11 +579,11 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
             );
         }
 
-        populateProfilesList(editor.specifiedFilename());
+        _profileBox->populateList(editor.specifiedFilename());
     }
     else {
-        const std::string current = _profileBox->currentText().toStdString();
-        populateProfilesList(current);
+        auto [selection, path] = _profileBox->currentSelection();
+        _profileBox->populateList(selection);
     }
 }
 
@@ -854,7 +711,7 @@ void LauncherWindow::handleReturnFromWindowEditor(const sgct::config::Cluster& c
         savePath,
         saveWindowCfgPath
     );
-    populateWindowConfigsList(p.string());
+    _windowConfigBox->populateList(p.string());
 }
 
 bool LauncherWindow::wasLaunchSelected() const {
@@ -863,17 +720,11 @@ bool LauncherWindow::wasLaunchSelected() const {
 
 std::string LauncherWindow::selectedProfile() const {
     // The user data stores the full path to the profile
-    return _profileBox->currentData().toString().toStdString();
+    return std::get<1>(_profileBox->currentSelection());
 }
 
 std::string LauncherWindow::selectedWindowConfig() const {
-    const int idx = _windowConfigBox->currentIndex();
-    if (idx == WindowConfigBoxIndexSgctCfgDefault) {
-        return _sgctConfigName;
-    }
-    else {
-        return _windowConfigBox->currentData().toString().toStdString();
-    }
+    return std::get<1>(_windowConfigBox->currentSelection());
 }
 
 void LauncherWindow::keyPressEvent(QKeyEvent* evt) {

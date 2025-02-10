@@ -28,6 +28,7 @@
 #include <QComboBox>
 
 #include <filesystem>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -36,20 +37,26 @@ Q_OBJECT
 public:
     SplitComboBox(QWidget* parent, std::filesystem::path userPath, std::string userHeader,
         std::filesystem::path hardcodedPath, std::string hardcodedHeader,
+        std::string specialFirst,
         std::function<bool(const std::filesystem::path&)> fileFilter,
         std::function<std::string(const std::filesystem::path&)> createTooltip);
 
     void populateList(const std::string& preset);
 
-signals:
-    void selectionChanged(std::string selection);
+    std::pair<std::string, std::string> currentSelection() const;
 
+signals:
+    // Sends the path to the selection or `std::nullopt` iff there was a special non-file
+    // entry at the top and that one has been selected
+    void selectionChanged(std::optional<std::string> selection);
 
 private:
     std::filesystem::path _userPath;
     std::string _userHeader;
     std::filesystem::path _hardCodedPath;
     std::string _hardCodedHeader;
+
+    std::string _specialFirst;
 
     std::function<bool(const std::filesystem::path&)> _fileFilter;
     std::function<std::string(const std::filesystem::path&)> _createTooltip;

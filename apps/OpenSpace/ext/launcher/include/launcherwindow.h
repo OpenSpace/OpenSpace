@@ -35,6 +35,8 @@
 #include <filesystem>
 #include <optional>
 
+class SplitComboBox;
+
 namespace openspace { struct Configuration; }
 
 class QComboBox;
@@ -94,8 +96,6 @@ private:
     void editRefusalDialog(const std::string& title, const std::string& msg,
         const std::string& detailedText);
 
-    void populateProfilesList(const std::string& preset);
-    void populateWindowConfigsList(const std::string& preset);
     void handleReturnFromWindowEditor(const sgct::config::Cluster& cluster,
         std::filesystem::path savePath, const std::filesystem::path& saveWindowCfgPath);
     void onNewWindowConfigSelection(int newIndex);
@@ -109,8 +109,8 @@ private:
     bool _shouldLaunch = false;
     const std::string _sgctConfigName;
 
-    QComboBox* _profileBox = nullptr;
-    QComboBox* _windowConfigBox = nullptr;
+    SplitComboBox* _profileBox = nullptr;
+    SplitComboBox* _windowConfigBox = nullptr;
     QPushButton* _editProfileButton = nullptr;
     QPushButton* _editWindowButton = nullptr;
 };
