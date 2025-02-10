@@ -686,6 +686,9 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
             "{}{}.profile", savePath, editor.specifiedFilename()
         );
 
+        // The user might specify subdirectories in the name which we want to create
+        std::filesystem::create_directories(std::filesystem::path(path).parent_path());
+
         try {
             std::ofstream outFile;
             outFile.exceptions(std::ofstream::badbit | std::ofstream::failbit);
