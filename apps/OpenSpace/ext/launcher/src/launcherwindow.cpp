@@ -32,7 +32,6 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <sgct/config.h>
-#include <QComboBox>
 #include <QFile>
 #include <QKeyEvent>
 #include <QLabel>
@@ -99,76 +98,6 @@ namespace {
         );
     } // namespace geometry
 
-    std::optional<Profile> loadProfile(QWidget* parent, std::filesystem::path filename) {
-        // Verify that the file actually exists
-        if (!std::filesystem::exists(filename)) {
-            QMessageBox::critical(
-                parent,
-                "Exception",
-                QString::fromStdString(std::format(
-                    "Could not open profile file '{}'", filename
-                ))
-            );
-
-            return std::nullopt;
-        }
-
-        try {
-            return Profile(filename);
-        }
-        catch (const Profile::ParsingError& e) {
-            QMessageBox::critical(
-                parent,
-                "Exception",
-                QString::fromStdString(std::format(
-                    "ParsingError exception in '{}': {}, {}",
-                    filename, e.component, e.message
-                ))
-            );
-            return std::nullopt;
-        }
-        catch (const ghoul::RuntimeError& e) {
-            QMessageBox::critical(
-                parent,
-                "Exception",
-                QString::fromStdString(std::format(
-                    "RuntimeError exception in '{}', component {}: {}",
-                    filename, e.component, e.message
-                ))
-            );
-            return std::nullopt;
-        }
-    }
-
-    // Returns 'true' if the file was a configuration file, 'false' otherwise
-    bool handleConfigurationFile(QComboBox& box, const std::filesystem::path& p,
-                                 const std::filesystem::path& rel)
-    {
-        std::filesystem::path relPath = std::filesystem::relative(p, rel);
-        relPath.replace_extension();
-
-        box.addItem(
-            QString::fromStdString(relPath.string()),
-            QString::fromStdString(p.string())
-        );
-
-        // Add tooltip
-        std::string tooltipDescription = "(no description available)";
-        try {
-            sgct::config::Cluster cluster = sgct::readConfig(p);
-            if (cluster.meta && cluster.meta->description.has_value()) {
-                tooltipDescription = *cluster.meta->description;
-            }
-        }
-        catch (const sgct::Error&) {}
-        const QString toolTip = QString::fromStdString(
-            std::format("<p>{}</p>", tooltipDescription)
-        );
-        box.setItemData(box.count() - 1, toolTip, Qt::ToolTipRole);
-
-        return true;
-    }
-
     bool versionCheck(const sgct::config::GeneratorVersion& v) {
         return
             v.versionCheck(versionMin) ||
@@ -215,69 +144,36 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
         setStyleSheet(styleSheet);
     }
 
-    QWidget* central = createCentralWidget(
-        absPath(globalConfig.pathTokens.at("SYNC") + "/http/launcher_images")
-    );
-    setCentralWidget(central);
-    QPushButton* startButton = centralWidget()->findChild<QPushButton*>("start");
-    if (startButton) {
-        startButton->setFocus(Qt::OtherFocusReason);
-    }
-
-    _profileBox->populateList(globalConfig.profile);
-    _profileBox->setEnabled(profileEnabled);
-
-    _windowConfigBox->setEnabled(sgctConfigEnabled);
-    _windowConfigBox->populateList(_sgctConfigName);
-    // Trigger currentIndexChanged so the preview file read is performed
-    _windowConfigBox->currentIndexChanged(_windowConfigBox->currentIndex());
-}
-
-QWidget* LauncherWindow::createCentralWidget(std::filesystem::path syncFolder) {
     QWidget* centralWidget = new QWidget;
 
-    new BackgroundImage(geometry::BackgroundImage, syncFolder, centralWidget);
+    {
+        // Yes, this looks weird, but we just create the image here and pass the central
+        // widget as the parent. This will assign the BackgroundImage as a child of the
+        // central widget, thus making it appear and also be destroyed at the end
+        new BackgroundImage(
+            geometry::BackgroundImage,
+            absPath(globalConfig.pathTokens.at("SYNC") + "/http/launcher_images"),
+            centralWidget
+        );
+    }
+    
+    {
+        QLabel* logoImage = new QLabel(centralWidget);
+        logoImage->setObjectName("clear");
+        logoImage->setGeometry(geometry::LogoImage);
+        logoImage->setPixmap(QPixmap(":/images/openspace-horiz-logo-small.png"));
+    }
 
-    QLabel* logoImage = new QLabel(centralWidget);
-    logoImage->setObjectName("clear");
-    logoImage->setGeometry(geometry::LogoImage);
-    logoImage->setPixmap(QPixmap(":/images/openspace-horiz-logo-small.png"));
 
-    QLabel* labelChoose = new QLabel("Choose Profile", centralWidget);
-    labelChoose->setGeometry(geometry::ChooseLabel);
-    labelChoose->setObjectName("label_choose");
+    //
+    // Profile chooser
+    //
 
-    _profileBox = new SplitComboBox(
-        centralWidget,
-        _userProfilePath,
-        "--- User Profiles ---",
-        _profilePath,
-        "--- OpenSpace Profiles ---",
-        "",
-        [](const std::filesystem::path& p) { return p.extension() == ".profile"; },
-        [](const std::filesystem::path& p) {
-            try {
-                Profile profile(p);
-                if (profile.meta.has_value() && profile.meta->description.has_value()) {
-                    return *profile.meta->description;
-                }
-            }
-            catch (...) {}
-            return std::string();
-        }
-    );
-    _profileBox->setObjectName("config");
-    _profileBox->setGeometry(geometry::ProfileBox);
-    _profileBox->setAccessibleName("Choose profile");
-
-    connect(
-        _profileBox,
-        &SplitComboBox::selectionChanged,
-        [this](std::optional<std::string> selection) {
-            ghoul_assert(selection.has_value(), "No special item in the profiles");
-            _editProfileButton->setEnabled(std::filesystem::exists(*selection));
-        }
-    );
+    {
+        QLabel* labelChoose = new QLabel("Choose Profile", centralWidget);
+        labelChoose->setGeometry(geometry::ChooseLabel);
+        labelChoose->setObjectName("label_choose");
+    }
 
     _editProfileButton = new QPushButton("Edit", centralWidget);
     connect(
@@ -300,21 +196,134 @@ QWidget* LauncherWindow::createCentralWidget(std::filesystem::path syncFolder) {
     _editProfileButton->setAutoDefault(true);
     _editProfileButton->setAccessibleName("Edit profile");
 
-    QPushButton* newProfileButton = new QPushButton("New", centralWidget);
-    connect(
-        newProfileButton,
-        &QPushButton::released,
-        [this]() { openProfileEditor("", true); }
-    );
-    newProfileButton->setObjectName("small");
-    newProfileButton->setGeometry(geometry::NewProfileButton);
-    newProfileButton->setCursor(Qt::PointingHandCursor);
-    newProfileButton->setAutoDefault(true);
-    newProfileButton->setAccessibleName("New profile");
+    {
+        QPushButton* newProfileButton = new QPushButton("New", centralWidget);
+        connect(
+            newProfileButton,
+            &QPushButton::released,
+            [this]() { openProfileEditor("", true); }
+        );
+        newProfileButton->setObjectName("small");
+        newProfileButton->setGeometry(geometry::NewProfileButton);
+        newProfileButton->setCursor(Qt::PointingHandCursor);
+        newProfileButton->setAutoDefault(true);
+        newProfileButton->setAccessibleName("New profile");
+    }
 
-    QLabel* optionsLabel = new QLabel("Window Options", centralWidget);
-    optionsLabel->setGeometry(geometry::OptionsLabel);
-    optionsLabel->setObjectName("label_options");
+    // Creating the profile box _after_ the Edit and New buttons as the comboboxes
+    // `selectionChanged` signal will trigger that will try to make changes to the edit
+    // button
+    _profileBox = new SplitComboBox(
+        centralWidget,
+        _userProfilePath,
+        "--- User Profiles ---",
+        _profilePath,
+        "--- OpenSpace Profiles ---",
+        "",
+        [](const std::filesystem::path& p) { return p.extension() == ".profile"; },
+        [](const std::filesystem::path& p) {
+            try {
+                Profile profile(p);
+                if (profile.meta.has_value() && profile.meta->description.has_value()) {
+                    return *profile.meta->description;
+                }
+            }
+            catch (...) {}
+            return std::string();
+        }
+    );
+    _profileBox->setObjectName("config");
+    _profileBox->setGeometry(geometry::ProfileBox);
+    _profileBox->setAccessibleName("Choose profile");
+    connect(
+        _profileBox,
+        &SplitComboBox::selectionChanged,
+        [this](std::optional<std::string> selection) {
+            ghoul_assert(selection.has_value(), "No special item in the profiles");
+            if (selection.has_value()) {
+                // Having the `if` statement here to satisfy the MSVC code analysis
+                _editProfileButton->setEnabled(std::filesystem::exists(*selection));
+            }
+        }
+    );
+    _profileBox->populateList(globalConfig.profile);
+    _profileBox->setEnabled(profileEnabled);
+
+
+
+    //
+    // Window configuration chooser
+    //
+
+    {
+        QLabel* optionsLabel = new QLabel("Window Options", centralWidget);
+        optionsLabel->setGeometry(geometry::OptionsLabel);
+        optionsLabel->setObjectName("label_options");
+    }
+
+    _editWindowButton = new QPushButton("Edit", centralWidget);
+    connect(
+        _editWindowButton,
+        &QPushButton::released,
+        [this]() {
+            const std::string path = selectedWindowConfig();
+            ghoul_assert(std::filesystem::is_regular_file(path), "Path not found");
+            const bool isUserConfig = path.starts_with(_userConfigPath.string());
+            ghoul_assert(
+                isUserConfig || path.starts_with(_configPath.string()),
+                "Misshapen config path. Must be in config or user/config folder"
+            );
+            openWindowEditor(path, isUserConfig);
+        }
+    );
+    _editWindowButton->setVisible(true);
+    _editWindowButton->setObjectName("small");
+    _editWindowButton->setGeometry(geometry::EditWindowButton);
+    _editWindowButton->setCursor(Qt::PointingHandCursor);
+    _editWindowButton->setAutoDefault(true);
+    _editWindowButton->setAccessibleName("Edit window configuration");
+
+    {
+        QPushButton* newWindowButton = new QPushButton("New", centralWidget);
+        connect(
+            newWindowButton,
+            &QPushButton::released,
+            [this]() { openWindowEditor("", true); }
+        );
+        newWindowButton->setObjectName("small");
+        newWindowButton->setGeometry(geometry::NewWindowButton);
+        newWindowButton->setCursor(Qt::PointingHandCursor);
+        newWindowButton->setAutoDefault(true);
+        newWindowButton->setAccessibleName("New window configuration");
+    }
+
+    {
+        QPushButton* startButton = new QPushButton("START", centralWidget);
+        connect(
+            startButton,
+            &QPushButton::released,
+            [this]() {
+                auto [selection, path] = _profileBox->currentSelection();
+                if (selection.empty()) {
+                    QMessageBox::critical(
+                        this,
+                        "Empty Profile",
+                        "Cannot launch with an empty profile"
+                    );
+                }
+                else {
+                    _shouldLaunch = true;
+                    close();
+                }
+            }
+        );
+        startButton->setObjectName("start");
+        startButton->setGeometry(geometry::StartButton);
+        startButton->setCursor(Qt::PointingHandCursor);
+        startButton->setAutoDefault(true);
+        startButton->setAccessibleName("Start OpenSpace");
+        startButton->setFocus(Qt::OtherFocusReason);
+    }
 
     _windowConfigBox = new SplitComboBox(
         centralWidget,
@@ -342,148 +351,104 @@ QWidget* LauncherWindow::createCentralWidget(std::filesystem::path syncFolder) {
     _windowConfigBox->setObjectName("config");
     _windowConfigBox->setGeometry(geometry::WindowConfigBox);
     _windowConfigBox->setAccessibleName("Select window configuration");
-
-    _editWindowButton = new QPushButton("Edit", centralWidget);
+    _windowConfigBox->setEnabled(sgctConfigEnabled);
     connect(
-        _editWindowButton,
-        &QPushButton::released,
-        [this]() {
-            const std::string path = selectedWindowConfig();
-            ghoul_assert(std::filesystem::is_regular_file(path), "Path not found");
-            const bool isUserConfig = path.starts_with(_userConfigPath.string());
-            ghoul_assert(
-                isUserConfig || path.starts_with(_configPath.string()),
-                "Misshapen config path. Must be in config or user/config folder"
-            );
-            openWindowEditor(path, isUserConfig);
-        }
-    );
-    _editWindowButton->setVisible(true);
-    _editWindowButton->setObjectName("small");
-    _editWindowButton->setGeometry(geometry::EditWindowButton);
-    _editWindowButton->setCursor(Qt::PointingHandCursor);
-    _editWindowButton->setAutoDefault(true);
-    _editWindowButton->setAccessibleName("Edit window configuration");
-
-    QPushButton* newWindowButton = new QPushButton("New", centralWidget);
-    connect(
-        newWindowButton,
-        &QPushButton::released,
-        [this]() { openWindowEditor("", true); }
-    );
-    newWindowButton->setObjectName("small");
-    newWindowButton->setGeometry(geometry::NewWindowButton);
-    newWindowButton->setCursor(Qt::PointingHandCursor);
-    newWindowButton->setAutoDefault(true);
-    newWindowButton->setAccessibleName("New window configuration");
-
-    QPushButton* startButton = new QPushButton("START", centralWidget);
-    connect(
-        startButton,
-        &QPushButton::released,
-        [this]() {
-            auto [selection, path] = _profileBox->currentSelection();
-            if (selection.empty()) {
-                QMessageBox::critical(
-                    this,
-                    "Empty Profile",
-                    "Cannot launch with an empty profile"
+        _windowConfigBox,
+        &SplitComboBox::selectionChanged,
+        [this](std::optional<std::string> selection) {
+            if (!selection.has_value()) {
+                // The first entry is the value read from the openspace.cfg file
+                _editWindowButton->setEnabled(false);
+                _editWindowButton->setToolTip(
+                    "Cannot edit the default configuration since it is not a file"
+                );
+            }
+            else if (selection->starts_with(_configPath.string())) {
+                // If the configuration is a default configuration, we don't allow editing
+                _editWindowButton->setEnabled(false);
+                _editWindowButton->setToolTip(
+                    "Cannot edit since the selected configuration is one of the files "
+                    "provided by OpenSpace"
                 );
             }
             else {
-                _shouldLaunch = true;
-                close();
-            }
-        }
-    );
-    startButton->setObjectName("start");
-    startButton->setGeometry(geometry::StartButton);
-    startButton->setCursor(Qt::PointingHandCursor);
-    startButton->setAutoDefault(true);
-    startButton->setAccessibleName("Start OpenSpace");
-
-    QLabel* versionLabel = new QLabel(centralWidget);
-    versionLabel->setVisible(true);
-    versionLabel->setText(
-        QString::fromStdString(std::string(openspace::OPENSPACE_VERSION_STRING_FULL))
-    );
-    versionLabel->setObjectName("version-info");
-    versionLabel->setGeometry(geometry::VersionString);
-
-    QPushButton* settingsButton = new QPushButton(centralWidget);
-    connect(
-        settingsButton,
-        &QPushButton::released,
-        [this]() {
-            using namespace openspace;
-
-            Settings settings = loadSettings();
-
-            SettingsDialog dialog(std::move(settings), this);
-            connect(
-                &dialog,
-                &SettingsDialog::saveSettings,
-                [this](Settings s) {
-                    saveSettings(s, findSettings());
-
-                    if (s.profile.has_value()) {
-                        _profileBox->populateList(*s.profile);
-                    }
-
-                    if (s.configuration.has_value()) {
-                        _windowConfigBox->populateList(*s.configuration);
+                try {
+                    sgct::config::Cluster c = sgct::readConfig(*selection);
+                    if (!c.generator || !versionCheck(*c.generator)) {
+                        _editWindowButton->setEnabled(false);
+                        _editWindowButton->setToolTip(QString::fromStdString(std::format(
+                            "This file does not meet the minimum required version of {}.",
+                            versionMin.versionString()
+                        )));
+                        return;
                     }
                 }
-            );
-
-            dialog.exec();
-        }
-    );
-    settingsButton->setObjectName("settings");
-    settingsButton->setGeometry(geometry::SettingsButton);
-    settingsButton->setIconSize(QSize(SettingsIconSize, SettingsIconSize));
-    settingsButton->setAutoDefault(true);
-    settingsButton->setAccessibleName("Settings");
-
-    return centralWidget;
-}
-
-void LauncherWindow::onNewWindowConfigSelection(int newIndex) {
-    const std::string pathSelected = selectedWindowConfig();
-    if (newIndex == WindowConfigBoxIndexSgctCfgDefault) {
-        // The first entry is the value read from the openspace.cfg file
-        _editWindowButton->setEnabled(false);
-        _editWindowButton->setToolTip(
-            "Cannot edit the 'Default' configuration since it is not a file"
-        );
-    }
-    else if (pathSelected.starts_with(_configPath.string())) {
-        // If the configuration is a default configuration, we don't allow editing
-        _editWindowButton->setEnabled(false);
-        _editWindowButton->setToolTip(
-            "Cannot edit since the selected configuration is one of the files provided "
-            "by OpenSpace"
-        );
-    }
-    else {
-        try {
-            sgct::config::Cluster c = sgct::readConfig(pathSelected);
-            if (!c.generator || !versionCheck(*c.generator)) {
-                _editWindowButton->setEnabled(false);
-                _editWindowButton->setToolTip(QString::fromStdString(std::format(
-                    "This file does not meet the minimum required version of {}.",
-                    versionMin.versionString()
-                )));
-                return;
+                catch (const std::runtime_error&) {
+                    // Ignore an exception here because clicking the edit button will
+                    // bring up an explanatory error message
+                }
+                _editWindowButton->setEnabled(true);
+                _editWindowButton->setToolTip("");
             }
         }
-        catch (const std::runtime_error&) {
-            // Ignore an exception here because clicking the edit button will
-            // bring up an explanatory error message
-        }
-        _editWindowButton->setEnabled(true);
-        _editWindowButton->setToolTip("");
+    );
+    _windowConfigBox->populateList(_sgctConfigName);
+    // Trigger currentIndexChanged so the preview file read is performed
+    _windowConfigBox->currentIndexChanged(_windowConfigBox->currentIndex());
+
+
+    //
+    // Misc other elements
+    //
+
+    {
+        QLabel* versionLabel = new QLabel(centralWidget);
+        versionLabel->setVisible(true);
+        versionLabel->setText(
+            QString::fromStdString(std::string(openspace::OPENSPACE_VERSION_STRING_FULL))
+        );
+        versionLabel->setObjectName("version-info");
+        versionLabel->setGeometry(geometry::VersionString);
     }
+
+    {
+        QPushButton* settingsButton = new QPushButton(centralWidget);
+        connect(
+            settingsButton,
+            &QPushButton::released,
+            [this]() {
+                using namespace openspace;
+
+                Settings settings = loadSettings();
+
+                SettingsDialog dialog(std::move(settings), this);
+                connect(
+                    &dialog,
+                    &SettingsDialog::saveSettings,
+                    [this](Settings s) {
+                        saveSettings(s, findSettings());
+
+                        if (s.profile.has_value()) {
+                            _profileBox->populateList(*s.profile);
+                        }
+
+                        if (s.configuration.has_value()) {
+                            _windowConfigBox->populateList(*s.configuration);
+                        }
+                    }
+                );
+
+                dialog.exec();
+            }
+        );
+        settingsButton->setObjectName("settings");
+        settingsButton->setGeometry(geometry::SettingsButton);
+        settingsButton->setIconSize(QSize(SettingsIconSize, SettingsIconSize));
+        settingsButton->setAutoDefault(true);
+        settingsButton->setAccessibleName("Settings");
+    }
+
+    setCentralWidget(centralWidget);
 }
 
 void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserProfile) {
@@ -496,8 +461,41 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
     else {
         // Otherwise, we want to load that profile
         std::string fullProfilePath = std::format("{}{}.profile", savePath, profile);
-        p = loadProfile(this, std::move(fullProfilePath));
-        if (!p.has_value()) {
+        // Verify that the file actually exists
+        if (!std::filesystem::exists(fullProfilePath)) {
+            QMessageBox::critical(
+                this,
+                "Exception",
+                QString::fromStdString(std::format(
+                    "Could not open profile file '{}'", fullProfilePath
+                ))
+            );
+            return;
+        }
+
+        try {
+            p = Profile(fullProfilePath);
+        }
+        catch (const Profile::ParsingError& e) {
+            QMessageBox::critical(
+                this,
+                "Exception",
+                QString::fromStdString(std::format(
+                    "ParsingError exception in '{}': {}, {}",
+                    fullProfilePath, e.component, e.message
+                ))
+            );
+            return;
+        }
+        catch (const ghoul::RuntimeError& e) {
+            QMessageBox::critical(
+                this,
+                "Exception",
+                QString::fromStdString(std::format(
+                    "RuntimeError exception in '{}', component {}: {}",
+                    fullProfilePath, e.component, e.message
+                ))
+            );
             return;
         }
     }

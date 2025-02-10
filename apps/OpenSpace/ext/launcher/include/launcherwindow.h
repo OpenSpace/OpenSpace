@@ -39,8 +39,6 @@ class SplitComboBox;
 
 namespace openspace { struct Configuration; }
 
-class QComboBox;
-
 class LauncherWindow final : public QMainWindow {
 Q_OBJECT
 public:
@@ -89,8 +87,6 @@ public:
     void keyPressEvent(QKeyEvent* evt) override;
 
 private:
-    QWidget* createCentralWidget(std::filesystem::path syncFolder);
-
     void openProfileEditor(const std::string& profile, bool isUserProfile);
     void openWindowEditor(const std::string& winCfg, bool isUserWinCfg);
     void editRefusalDialog(const std::string& title, const std::string& msg,
@@ -98,7 +94,6 @@ private:
 
     void handleReturnFromWindowEditor(const sgct::config::Cluster& cluster,
         std::filesystem::path savePath, const std::filesystem::path& saveWindowCfgPath);
-    void onNewWindowConfigSelection(int newIndex);
 
     const std::filesystem::path _assetPath;
     const std::filesystem::path _userAssetPath;
