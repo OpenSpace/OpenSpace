@@ -39,9 +39,9 @@ class SettingsWidget;
 class QBoxLayout;
 class QWidget;
 
-const sgct::config::GeneratorVersion versionMin { "SgctWindowConfig", 1, 1 };
-const sgct::config::GeneratorVersion versionLegacy18 { "OpenSpace", 0, 18 };
-const sgct::config::GeneratorVersion versionLegacy19 { "OpenSpace", 0, 19 };
+const sgct::config::GeneratorVersion VersionMin { "SgctWindowConfig", 1, 1 };
+const sgct::config::GeneratorVersion VersionLegacy18 { "OpenSpace", 0, 18 };
+const sgct::config::GeneratorVersion VersionLegacy19 { "OpenSpace", 0, 19 };
 
 class SgctEdit final : public QDialog {
 Q_OBJECT

@@ -50,11 +50,9 @@ public:
      * \param sgctConfigEnabled `true` if window selection combo box will be enabled
      * \param sgctConfigName The name of the sgct configuration function used to generate
      *        window config (blank if file is used)
-     * \param parent The parent that contains this (and possibly other) children in the
-     *        tree structure.
      */
     LauncherWindow(bool profileEnabled, const openspace::Configuration& globalConfig,
-        bool sgctConfigEnabled, std::string sgctConfigName, QWidget* parent);
+        bool sgctConfigEnabled, std::string sgctConfigName);
 
     /**
       * Returns whether "Start OpenSpace" was chosen when this window closed.
@@ -86,9 +84,36 @@ public:
      */
     void keyPressEvent(QKeyEvent* evt) override;
 
+private slots:
+    // Open the profile editor to the currently selected profile
+    void editProfile();
+
+    // Open the profile editor to a new empty profile
+    void newProfile();
+
+    // A new profile has been selected. In this case `selection` is guaranteed to have a
+    // value
+    void selectProfile(std::optional<std::string> selection);
+
+    // Open the window configuration on the currently selected file
+    void editConfiguration();
+
+    // Open the window configuration on a new empty configuration
+    void newConfiguration();
+
+    // A new configuration has been selected. `selection` might be `std::nullopt` if the
+    // newly selected configuration was the value provided in the openspace.cfg file
+    void selectConfiguration(std::optional<std::string> selection);
+
+    // The main start button has been pressed
+    void start();
+
+    // Open the settings dialog window
+    void openSettings();
+
 private:
+    // Actually open the profile editor
     void openProfileEditor(const std::string& profile, bool isUserProfile);
-    void openWindowEditor(const std::string& winCfg);
 
     void handleReturnFromWindowEditor(const sgct::config::Cluster& cluster,
         std::filesystem::path savePath);
@@ -103,7 +128,6 @@ private:
     const std::filesystem::path _profilePath;
     const std::filesystem::path _userProfilePath;
     bool _shouldLaunch = false;
-    const std::string _sgctConfigName;
 
     SplitComboBox* _profileBox = nullptr;
     SplitComboBox* _windowConfigBox = nullptr;
