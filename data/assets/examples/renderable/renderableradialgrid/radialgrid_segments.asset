@@ -1,0 +1,24 @@
+-- Custom Grid Segments
+-- This example adds a circular grid with 10 segments in the radial direction and 1
+-- segment in the angular direction. 1 here means that we do not split the grid into
+-- smaller segments in the angular direction.
+
+local Node = {
+  Identifier = "RenderableRadialGrid_Example_Segments",
+  Renderable = {
+    Type = "RenderableRadialGrid",
+    GridSegments = { 10, 1 }
+  },
+  GUI = {
+    Name = "RenderableRadialGrid - Segments",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
