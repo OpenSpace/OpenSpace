@@ -88,12 +88,13 @@ public:
 
 private:
     void openProfileEditor(const std::string& profile, bool isUserProfile);
-    void openWindowEditor(const std::string& winCfg, bool isUserWinCfg);
-    void editRefusalDialog(const std::string& title, const std::string& msg,
-        const std::string& detailedText);
+    void openWindowEditor(const std::string& winCfg);
 
     void handleReturnFromWindowEditor(const sgct::config::Cluster& cluster,
-        std::filesystem::path savePath, const std::filesystem::path& saveWindowCfgPath);
+        std::filesystem::path savePath);
+
+    // Returns true if a valid profile and window configuration has been chosen
+    bool hasValidSelection() const;
 
     const std::filesystem::path _assetPath;
     const std::filesystem::path _userAssetPath;
@@ -108,5 +109,6 @@ private:
     SplitComboBox* _windowConfigBox = nullptr;
     QPushButton* _editProfileButton = nullptr;
     QPushButton* _editWindowButton = nullptr;
+    QPushButton* _startButton = nullptr;
 };
 #endif // __OPENSPACE_UI_LAUNCHER___LAUNCHERWINDOW___H__

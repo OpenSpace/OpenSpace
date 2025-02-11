@@ -79,10 +79,10 @@ SgctEdit::SgctEdit(QWidget* parent, std::filesystem::path userConfigPath)
 }
 
 SgctEdit::SgctEdit(sgct::config::Cluster& cluster, std::string configName,
-                   std::filesystem::path& configBasePath, QWidget* parent)
+                   std::filesystem::path configBasePath, QWidget* parent)
     : QDialog(parent)
     , _cluster(cluster)
-    , _userConfigPath(configBasePath)
+    , _userConfigPath(std::move(configBasePath))
     , _configurationFilename(std::move(configName))
     , _didImportValues(true)
 {

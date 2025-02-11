@@ -67,7 +67,7 @@ public:
      * \param parent Pointer to parent Qt widget
      */
     SgctEdit(sgct::config::Cluster& cluster, std::string configName,
-        std::filesystem::path& configBasePath, QWidget* parent);
+        std::filesystem::path configBasePath, QWidget* parent);
 
     /**
      * Returns the saved filename.

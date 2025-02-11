@@ -98,6 +98,18 @@ namespace {
         );
     } // namespace geometry
 
+
+    void editRefusalDialog(QWidget* parent, const std::string& title,
+                           const std::string& msg, const std::string& detailedText = "")
+    {
+        QMessageBox msgBox(parent);
+        msgBox.setText(QString::fromStdString(msg));
+        msgBox.setWindowTitle(QString::fromStdString(title));
+        msgBox.setDetailedText(QString::fromStdString(detailedText));
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.exec();
+    }
+
     bool versionCheck(const sgct::config::GeneratorVersion& v) {
         return
             v.versionCheck(versionMin) ||
@@ -105,8 +117,6 @@ namespace {
             v == versionLegacy19;
     }
 } // namespace
-
-using namespace openspace;
 
 LauncherWindow::LauncherWindow(bool profileEnabled,
                                const Configuration& globalConfig,
@@ -163,6 +173,37 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
         logoImage->setGeometry(geometry::LogoImage);
         logoImage->setPixmap(QPixmap(":/images/openspace-horiz-logo-small.png"));
     }
+
+
+    //
+    // Start button
+    //
+
+    _startButton = new QPushButton("START", centralWidget);
+    connect(
+        _startButton,
+        &QPushButton::released,
+        [this]() {
+            auto [selection, path] = _profileBox->currentSelection();
+            if (selection.empty()) {
+                QMessageBox::critical(
+                    this,
+                    "Empty Profile",
+                    "Cannot launch with an empty profile"
+                );
+            }
+            else {
+                _shouldLaunch = true;
+                close();
+            }
+        }
+    );
+    _startButton->setObjectName("start");
+    _startButton->setGeometry(geometry::StartButton);
+    _startButton->setCursor(Qt::PointingHandCursor);
+    _startButton->setAutoDefault(true);
+    _startButton->setAccessibleName("Start OpenSpace");
+    _startButton->setFocus(Qt::OtherFocusReason);
 
 
     //
@@ -268,12 +309,8 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
         [this]() {
             const std::string path = selectedWindowConfig();
             ghoul_assert(std::filesystem::is_regular_file(path), "Path not found");
-            const bool isUserConfig = path.starts_with(_userConfigPath.string());
-            ghoul_assert(
-                isUserConfig || path.starts_with(_configPath.string()),
-                "Misshapen config path. Must be in config or user/config folder"
-            );
-            openWindowEditor(path, isUserConfig);
+            ghoul_assert(path.starts_with(_userConfigPath.string()), "No user config");
+            openWindowEditor(path);
         }
     );
     _editWindowButton->setVisible(true);
@@ -288,41 +325,19 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
         connect(
             newWindowButton,
             &QPushButton::released,
-            [this]() { openWindowEditor("", true); }
+            [this]() {
+                SgctEdit editor = SgctEdit(this, _userConfigPath);
+                int ret = editor.exec();
+                if (ret == QDialog::DialogCode::Accepted) {
+                    handleReturnFromWindowEditor(editor.cluster(), editor.saveFilename());
+                }
+            }
         );
         newWindowButton->setObjectName("small");
         newWindowButton->setGeometry(geometry::NewWindowButton);
         newWindowButton->setCursor(Qt::PointingHandCursor);
         newWindowButton->setAutoDefault(true);
         newWindowButton->setAccessibleName("New window configuration");
-    }
-
-    {
-        QPushButton* startButton = new QPushButton("START", centralWidget);
-        connect(
-            startButton,
-            &QPushButton::released,
-            [this]() {
-                auto [selection, path] = _profileBox->currentSelection();
-                if (selection.empty()) {
-                    QMessageBox::critical(
-                        this,
-                        "Empty Profile",
-                        "Cannot launch with an empty profile"
-                    );
-                }
-                else {
-                    _shouldLaunch = true;
-                    close();
-                }
-            }
-        );
-        startButton->setObjectName("start");
-        startButton->setGeometry(geometry::StartButton);
-        startButton->setCursor(Qt::PointingHandCursor);
-        startButton->setAutoDefault(true);
-        startButton->setAccessibleName("Start OpenSpace");
-        startButton->setFocus(Qt::OtherFocusReason);
     }
 
     _windowConfigBox = new SplitComboBox(
@@ -398,30 +413,29 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
 
 
     //
-    // Misc other elements
+    // Version information
     //
-
     {
         QLabel* versionLabel = new QLabel(centralWidget);
         versionLabel->setVisible(true);
         versionLabel->setText(
-            QString::fromStdString(std::string(openspace::OPENSPACE_VERSION_STRING_FULL))
+            QString::fromStdString(std::string(OPENSPACE_VERSION_STRING_FULL))
         );
         versionLabel->setObjectName("version-info");
         versionLabel->setGeometry(geometry::VersionString);
     }
 
+    //
+    // Settings button
+    //
     {
         QPushButton* settingsButton = new QPushButton(centralWidget);
         connect(
             settingsButton,
             &QPushButton::released,
             [this]() {
-                using namespace openspace;
-
                 Settings settings = loadSettings();
-
-                SettingsDialog dialog(std::move(settings), this);
+                SettingsDialog dialog = SettingsDialog(std::move(settings), this);
                 connect(
                     &dialog,
                     &SettingsDialog::saveSettings,
@@ -579,137 +593,96 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
 
         _profileBox->populateList(editor.specifiedFilename());
     }
-    else {
-        auto [selection, path] = _profileBox->currentSelection();
-        _profileBox->populateList(selection);
-    }
 }
 
-void LauncherWindow::editRefusalDialog(const std::string& title, const std::string& msg,
-                                       const std::string& detailedText)
-{
-    QMessageBox msgBox(this);
-    msgBox.setText(QString::fromStdString(msg));
-    msgBox.setWindowTitle(QString::fromStdString(title));
-    msgBox.setDetailedText(QString::fromStdString(detailedText));
-    msgBox.setIcon(QMessageBox::Warning);
-    msgBox.exec();
-}
-
-void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinCfg) {
-    std::filesystem::path saveWindowPath = isUserWinCfg ? _userConfigPath : _configPath;
+void LauncherWindow::openWindowEditor(const std::string& winCfg) {
+    ghoul_assert(!winCfg.empty(), "There must be a configuration to edit");
     int ret = QDialog::DialogCode::Rejected;
-    if (winCfg.empty()) {
-        SgctEdit editor(this, _userConfigPath);
-        ret = editor.exec();
-        if (ret == QDialog::DialogCode::Accepted) {
-            handleReturnFromWindowEditor(
-                editor.cluster(),
-                editor.saveFilename(),
-                saveWindowPath
-            );
-        }
+    sgct::config::Cluster cluster;
+    try {
+        cluster = sgct::readConfig(winCfg);
     }
-    else {
-        try {
-            sgct::config::Cluster cluster;
-            try {
-                cluster = sgct::readConfig(winCfg);
-            }
-            catch (const std::runtime_error& e) {
-                // Re-throw an SGCT error exception with the runtime exception message
-                throw std::runtime_error(std::format(
-                    "Importing of this configuration file failed because of a "
-                    "problem detected in the readConfig function:\n\n{}", e.what()
-                ));
-            }
+    catch (const std::runtime_error& e) {
+        // Re-throw an SGCT error exception with the runtime exception message
+        throw std::runtime_error(std::format(
+            "Importing of this configuration file failed because of a "
+            "problem detected in the readConfig function:\n\n{}", e.what()
+        ));
+    }
 
-            assert(cluster.generator);
-            std::string err = sgct::validateConfigAgainstSchema(
-                winCfg,
-                _configPath / "schema/sgct.schema.json"
-            );
-            if (!err.empty()) {
-                editRefusalDialog(
-                    "Format Validation Error",
-                    std::format("Parsing error found in file '{}'", winCfg),
-                    std::format(
-                        "{}\n\nThis configuration file is unable to generate a proper "
-                        "display",
-                        err
-                    )
-                );
-                return;
-            }
+    assert(cluster.generator);
+    std::string err = sgct::validateConfigAgainstSchema(
+        winCfg,
+        _configPath / "schema/sgct.schema.json"
+    );
+    if (!err.empty()) {
+        editRefusalDialog(
+            this,
+            "Format Validation Error",
+            std::format("Parsing error found in file '{}'", winCfg),
+            std::format(
+                "{}\n\nThis configuration file is unable to generate a proper "
+                "display",
+                err
+            )
+        );
+        return;
+    }
 
-            if (versionCheck(*cluster.generator)) {
-                SgctEdit editor = SgctEdit(
-                    cluster,
-                    winCfg,
-                    saveWindowPath,
-                    this
-                );
-                ret = editor.exec();
-                if (ret == QDialog::DialogCode::Accepted) {
-                    handleReturnFromWindowEditor(
-                        editor.cluster(),
-                        editor.saveFilename(),
-                        saveWindowPath
-                    );
-                }
-            }
-            else {
-                editRefusalDialog(
-                    "File Format Version Error",
-                    std::format(
-                        "File '{}' does not meet the minimum required version of {}",
-                        winCfg, versionMin.versionString()
-                    ),
-                    ""
-                );
-            }
-        }
-        catch (const std::runtime_error& e) {
-            editRefusalDialog(
-                "Format Validation Error",
-                std::format("Parsing error found in file '{}'", winCfg),
-                e.what()
-            );
-        }
+    if (!versionCheck(*cluster.generator)) {
+        editRefusalDialog(
+            this,
+            "File Format Version Error",
+            std::format(
+                "File '{}' does not meet the minimum required version of {}",
+                winCfg, versionMin.versionString()
+            )
+        );
+        return;
+    }
+
+    SgctEdit editor = SgctEdit(cluster, winCfg, _userConfigPath, this);
+    ret = editor.exec();
+    if (ret == QDialog::DialogCode::Accepted) {
+        handleReturnFromWindowEditor(editor.cluster(), editor.saveFilename());
     }
 }
 
 void LauncherWindow::handleReturnFromWindowEditor(const sgct::config::Cluster& cluster,
-                                                  std::filesystem::path savePath,
-                                           const std::filesystem::path& saveWindowCfgPath)
+                                                  std::filesystem::path savePath)
 {
-    savePath.replace_extension(".json");
+    std::ofstream outFile;
+    outFile.open(savePath, std::ofstream::out);
 
-    try {
-        std::ofstream outFile;
-        outFile.open(savePath, std::ofstream::out);
+    if (outFile.good()) {
         sgct::config::GeneratorVersion genEntry = versionMin;
-        outFile << sgct::serializeConfig(
-            cluster,
-            genEntry
-        );
+        outFile << sgct::serializeConfig(cluster, genEntry);
     }
-    catch (const std::ofstream::failure& e) {
+    else {
         QMessageBox::critical(
             this,
             "Exception",
             QString::fromStdString(std::format(
-                "Error writing data to file '{}': {}", savePath, e.what()
+                "Error writing data to file '{}'", savePath
             ))
         );
     }
 
     // Truncate path to convert this back to path relative to _userConfigPath
-    const std::filesystem::path p = std::filesystem::proximate(
-        savePath,
-        saveWindowCfgPath
-    );
+    std::filesystem::path p = std::filesystem::proximate(savePath, _userConfigPath);
+
+    // Remove the file extension as the drop down menu only displays the raw names
+    p.replace_extension();
     _windowConfigBox->populateList(p.string());
+}
+
+bool LauncherWindow::hasValidSelection() const {
+    std::string profilePath = std::get<1>(_profileBox->currentSelection());
+    std::string configPath = std::get<1>(_windowConfigBox->currentSelection());
+
+    return true;
+    
+
 }
 
 bool LauncherWindow::wasLaunchSelected() const {
