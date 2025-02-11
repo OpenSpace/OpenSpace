@@ -84,7 +84,7 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
-    , _size(SizeInfo, glm::vec3(1.f), glm::vec3(1.f), glm::vec3(100.f))
+    , _size(SizeInfo, glm::vec3(1.f), glm::vec3(0.0001f), glm::vec3(100.f))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
