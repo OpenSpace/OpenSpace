@@ -1,6 +1,6 @@
 -- Custom Grid Segments
 -- This example adds a circular grid with 10 segments in the radial direction and 1
--- segments in the angular direction. 1 here means that we do not split the grid into
+-- segment in the angular direction. 1 here means that we do not split the grid into
 -- smaller segments in the angular direction.
 
 local Node = {

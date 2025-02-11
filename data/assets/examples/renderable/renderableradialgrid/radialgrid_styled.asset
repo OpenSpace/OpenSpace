@@ -1,6 +1,6 @@
 -- Styled
--- This example adds a circular grid with a specific color and line width. Note that the
--- size is set to whatever is default.
+-- This example adds a circular grid with a specific color and line width. Note that we
+-- keep the size at its default value.
 
 local Node = {
   Identifier = "RenderableRadialGrid_Example_Styled",

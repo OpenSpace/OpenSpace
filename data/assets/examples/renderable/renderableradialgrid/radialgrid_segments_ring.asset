@@ -1,7 +1,7 @@
 -- Ring
 -- The `RenderableRadialGrid` can also be used to create a simple ring. This is done by
 -- setting the number of segments in each direction to 1 and make sure the inner radius
--- is zero (which is default).
+-- is zero (which is the default).
 
 local Node = {
   Identifier = "RenderableRadialGrid_Example_Ring",
