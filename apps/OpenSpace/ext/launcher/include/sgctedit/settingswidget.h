@@ -134,13 +134,16 @@ signals:
 
 private:
     void showUiOnFirstWindowClicked(bool checked);
-    void firstWindowGraphicsSelectionChanged(const QString& text);
 
-    sgct::quat _orientationValue = sgct::quat(0.f, 0.f, 0.f, 0.f);
     QCheckBox* _checkBoxVsync = nullptr;
     QCheckBox* _showUiOnFirstWindow = nullptr;
     QComboBox* _firstWindowGraphicsSelection = nullptr;
     QBoxLayout* _firstWindowSelectionLayout = nullptr;
+
+    QLineEdit* _linePitch = nullptr;
+    QLineEdit* _lineRoll = nullptr;
+    QLineEdit* _lineYaw = nullptr;
+
     int _stateOfUiOnFirstWindowPreviousCount = 1;
     bool _stateOfUiOnFirstWindowWhenDisabled = false;
 };

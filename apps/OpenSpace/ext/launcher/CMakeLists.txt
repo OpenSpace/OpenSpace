@@ -49,7 +49,6 @@ set(HEADER_FILES
   include/profile/propertiesdialog.h
   include/sgctedit/displaywindowunion.h
   include/sgctedit/monitorbox.h
-  include/sgctedit/orientationdialog.h
   include/sgctedit/settingswidget.h
   include/sgctedit/sgctedit.h
   include/sgctedit/windowcontrol.h
@@ -81,7 +80,6 @@ set(SOURCE_FILES
   src/sgctedit/sgctedit.cpp
   src/sgctedit/displaywindowunion.cpp
   src/sgctedit/monitorbox.cpp
-  src/sgctedit/orientationdialog.cpp
   src/sgctedit/settingswidget.cpp
   src/sgctedit/windowcontrol.cpp
 )

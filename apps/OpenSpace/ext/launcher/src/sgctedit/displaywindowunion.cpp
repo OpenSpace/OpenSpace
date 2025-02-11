@@ -39,12 +39,7 @@ DisplayWindowUnion::DisplayWindowUnion(const std::vector<QRect>& monitorSizeList
                                        bool resetToDefault, QWidget* parent)
     : QWidget(parent)
 {
-    createWidgets(
-        nMaxWindows,
-        monitorSizeList,
-        windowColors,
-        resetToDefault
-    );
+    createWidgets(nMaxWindows, monitorSizeList, windowColors, resetToDefault);
     showWindows();
 }
 

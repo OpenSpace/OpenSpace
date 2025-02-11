@@ -24,23 +24,22 @@
 
 #include "sgctedit/settingswidget.h"
 
-#include "sgctedit/orientationdialog.h"
 #include <QCheckBox>
+#include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
 
 SettingsWidget::SettingsWidget(sgct::quat orientation, QWidget* parent)
     : QWidget(parent)
-    , _orientationValue(std::move(orientation))
-    , _showUiOnFirstWindow(new QCheckBox(
-        "Show user interface only on first window using graphics:"
-    ))
-    , _firstWindowGraphicsSelection(new QComboBox)
-    , _firstWindowSelectionLayout(new QHBoxLayout)
 {
     QBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
-    
+
+    //
+    // Show UI in specific window
+    _showUiOnFirstWindow = new QCheckBox(
+        "Show user interface only on first window using graphics:"
+    );
     _showUiOnFirstWindow->setChecked(false);
     _showUiOnFirstWindow->setEnabled(false);
     _showUiOnFirstWindow->setToolTip(
@@ -50,6 +49,7 @@ SettingsWidget::SettingsWidget(sgct::quat orientation, QWidget* parent)
         "not show the user interface"
     );
 
+    _firstWindowGraphicsSelection = new QComboBox;
     _firstWindowGraphicsSelection->setToolTip(
         "Select the contents of the first window to match one of the other windows"
     );
@@ -59,35 +59,90 @@ SettingsWidget::SettingsWidget(sgct::quat orientation, QWidget* parent)
         this, &SettingsWidget::showUiOnFirstWindowClicked
     );
 
+    _firstWindowSelectionLayout = new QHBoxLayout;
     _firstWindowSelectionLayout->addWidget(_showUiOnFirstWindow);
     _firstWindowSelectionLayout->addWidget(_firstWindowGraphicsSelection);
     _firstWindowSelectionLayout->addStretch();
     layout->addLayout(_firstWindowSelectionLayout);
 
+
+    //
+    // VSync settings
     _checkBoxVsync = new QCheckBox("Enable VSync");
     _checkBoxVsync->setToolTip(
         "If enabled the framerate will be locked to the refresh rate of the monitor"
     );
     layout->addWidget(_checkBoxVsync);
     
-    QPushButton* orientationButton = new QPushButton("Global Orientation");
-    orientationButton->setToolTip(
-        "Opens a separate dialog for setting the pitch, yaw, and roll of the camera\n"
-        "(the orientation applies to all viewports)"
-    );
-    orientationButton->setFocusPolicy(Qt::NoFocus);
-    layout->addWidget(orientationButton);
-    connect(
-        orientationButton, &QPushButton::released,
-        [this]() {
-            OrientationDialog _orientationDialog(_orientationValue, this);
-            _orientationDialog.exec();
-        }
-    );
+
+    //
+    // Orientation specification
+    QWidget* orientationContainer = new QWidget;
+    layout->addWidget(orientationContainer);
+    QGridLayout* layoutWindow = new QGridLayout(orientationContainer);
+
+    glm::quat q = glm::quat(orientation.w, orientation.x, orientation.y, orientation.z);
+
+    {
+        const QString pitchTip = "Pitch or elevation: negative numbers tilt the camera "
+            "downwards; positive numbers tilt upwards.\nThe allowed range is [-90, 90].";
+
+        QLabel* labelPitch = new QLabel("Pitch");
+        labelPitch->setToolTip(pitchTip);
+        layoutWindow->addWidget(labelPitch, 0, 0);
+
+        _linePitch = new QLineEdit;
+        _linePitch->setText(QString::number(glm::degrees(glm::pitch(q))));
+        _linePitch->setToolTip(pitchTip);
+        QDoubleValidator* validatorPitch = new QDoubleValidator(-90.0, 90.0, 15);
+        validatorPitch->setNotation(QDoubleValidator::StandardNotation);
+        _linePitch->setValidator(validatorPitch);
+        layoutWindow->addWidget(_linePitch, 0, 1);
+    }
+    {
+        const QString rollTip = "Roll or bank: negative numbers rotate the camera "
+            "counter-clockwise; positive numbers clockwise.\nThe allowed range is "
+            "[-180, 180].";
+
+        QLabel* labelRoll = new QLabel("Roll");
+        labelRoll->setToolTip(rollTip);
+        layoutWindow->addWidget(labelRoll, 1, 0);
+
+        _lineRoll = new QLineEdit;
+        _lineRoll->setText(QString::number(glm::degrees(glm::roll(q))));
+        _lineRoll->setToolTip(rollTip);
+        QDoubleValidator* validatorRoll = new QDoubleValidator(-360.0, 360.0, 15);
+        validatorRoll->setNotation(QDoubleValidator::StandardNotation);
+        _lineRoll->setValidator(validatorRoll);
+        layoutWindow->addWidget(_lineRoll, 1, 1);
+    }
+    {
+        const QString yawTip = "Yaw, heading, or azimuth: negative numbers pan the "
+            "camera to the left; positive numbers pan to the\nright. The allowed range "
+            "is [-360, 360].";
+
+        QLabel* labelYaw = new QLabel;
+        labelYaw->setText("Yaw");
+        labelYaw->setToolTip(yawTip);
+        layoutWindow->addWidget(labelYaw, 2, 0);
+
+        _lineYaw = new QLineEdit;
+        _lineYaw->setText(QString::number(glm::degrees(glm::yaw(q))));
+        _lineYaw->setToolTip(yawTip);
+        QDoubleValidator* validatorYaw = new QDoubleValidator(-180.0, 180.0, 15, this);
+        validatorYaw->setNotation(QDoubleValidator::StandardNotation);
+        _lineYaw->setValidator(validatorYaw);
+        layoutWindow->addWidget(_lineYaw, 2, 1);
+    }
 }
 
 sgct::quat SettingsWidget::orientation() const {
-    return _orientationValue;
+    // Reconstitute the quaternion
+    const float pitch = glm::radians(_linePitch->text().toFloat());
+    const float yaw = glm::radians(_lineYaw->text().toFloat());
+    const float roll = glm::radians(_lineRoll->text().toFloat());
+    glm::quat q = glm::quat(glm::vec3(pitch, yaw, roll));
+    return sgct::quat(q.x, q.y, q.z, q.w);
 }
 
 bool SettingsWidget::vsync() const {
@@ -125,7 +180,7 @@ void SettingsWidget::nWindowsDisplayedChanged(int newCount) {
     int graphicsSelect = _firstWindowGraphicsSelection->currentIndex();
     graphicsSelect = std::max(0, graphicsSelect);
 
-    QList<QString> graphicsOptions = {"None (GUI only)"};
+    QList<QString> graphicsOptions = { "None (GUI only)" };
     for (int i = CountOneWindow; i <= newCount; i++) {
         graphicsOptions.append("Window " + QString::number(i));
     }

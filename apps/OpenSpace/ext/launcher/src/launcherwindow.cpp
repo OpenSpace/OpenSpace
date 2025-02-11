@@ -118,8 +118,7 @@ namespace {
     }
 } // namespace
 
-LauncherWindow::LauncherWindow(bool profileEnabled,
-                               const Configuration& globalConfig,
+LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalConfig,
                                bool sgctConfigEnabled, std::string sgctConfigName)
     // The extra `/ ""` at the end here is necessary as we assume the paths to have a
     // terminating `/` character at the end

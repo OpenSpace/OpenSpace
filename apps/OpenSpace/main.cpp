@@ -1063,69 +1063,6 @@ void setSgctDelegateFunctions() {
     };
 }
 
-std::string setWindowConfigPresetForGui(const std::string& labelFromCfgFile,
-                                        bool haveCliSGCTConfig)
-{
-    openspace::Configuration& config = *global::configuration;
-
-    std::string preset;
-    const bool sgctCfgFileSpecifiedByLua = !config.sgctConfigNameInitialized.empty();
-    if (haveCliSGCTConfig) {
-        preset = std::format("{} (from CLI)", config.windowConfiguration);
-    }
-    else if (sgctCfgFileSpecifiedByLua) {
-        preset = config.sgctConfigNameInitialized + labelFromCfgFile;
-    }
-    else {
-        preset = config.windowConfiguration;
-    }
-    return preset;
-}
-
-std::pair<std::string, bool> selectedSgctProfileFromLauncher(LauncherWindow& lw,
-                                                             bool hasCliSGCTConfig,
-                                                   const std::string& windowConfiguration,
-                                                      const std::string& labelFromCfgFile)
-{
-    std::string config = windowConfiguration;
-    bool isGeneratedConfig = false;
-    if (!hasCliSGCTConfig) {
-        config = lw.selectedWindowConfig();
-        if (config.find(labelFromCfgFile) != std::string::npos) {
-            if (config.find("sgct.config") == std::string::npos) {
-                config = config.substr(0, config.length() - labelFromCfgFile.length());
-            }
-            else {
-                config = windowConfiguration;
-                isGeneratedConfig = true;
-            }
-        }
-        else {
-            const std::filesystem::path c = absPath(config);
-
-            std::filesystem::path cj = c;
-            cj.replace_extension(".json");
-
-            if (c.extension().empty()) {
-                if (std::filesystem::exists(cj)) {
-                    config += ".json";
-                }
-                else {
-                    throw ghoul::RuntimeError(std::format(
-                        "Error loading configuration file '{}'. File could not be found",
-                        config
-                    ));
-                }
-            }
-            else {
-                // user customized SGCT config
-            }
-        }
-        global::configuration->windowConfiguration = config;
-    }
-    return { config, isGeneratedConfig };
-}
-
 } // namespace
 
 
@@ -1350,12 +1287,20 @@ int main(int argc, char* argv[]) {
 
     // Call profile GUI
     const std::string labelFromCfgFile = " (from .cfg)";
-    std::string windowCfgPreset = setWindowConfigPresetForGui(
-        labelFromCfgFile,
-        commandlineArguments.windowConfig.has_value()
-    );
+    std::string windowCfgPreset;
+    if (commandlineArguments.windowConfig.has_value()) {
+        windowCfgPreset = std::format(
+            "{} (from CLI)", global::configuration->windowConfiguration
+        );
+    }
+    else if (!global::configuration->sgctConfigNameInitialized.empty()) {
+        windowCfgPreset =
+            global::configuration->sgctConfigNameInitialized + labelFromCfgFile;
+    }
+    else {
+        windowCfgPreset = global::configuration->windowConfiguration;
+    }
 
-    //TODO consider LFATAL if ${USER} doens't exist rather then recurisve create.
     global::openSpaceEngine->createUserDirectoriesIfNecessary();
 
     // (abock, 2020-12-07)  For some reason on Apple the keyboard handler in CEF will call
@@ -1391,8 +1336,7 @@ int main(int argc, char* argv[]) {
             !commandlineArguments.profile.has_value(),
             *global::configuration,
             !commandlineArguments.windowConfig.has_value(),
-            std::move(windowCfgPreset),
-            nullptr
+            std::move(windowCfgPreset)
         );
         launcher.show();
         QApplication::exec();
@@ -1443,13 +1387,43 @@ int main(int argc, char* argv[]) {
         );
 
         global::configuration->profile = launcher.selectedProfile();
-        std::tie(windowConfiguration, isGeneratedWindowConfig) =
-            selectedSgctProfileFromLauncher(
-                launcher,
-                commandlineArguments.windowConfig.has_value(),
-                windowConfiguration,
-                labelFromCfgFile
-            );
+
+        std::string config = windowConfiguration;
+        isGeneratedWindowConfig = false;
+        if (!commandlineArguments.windowConfig.has_value()) {
+            config = launcher.selectedWindowConfig();
+            if (config.find(labelFromCfgFile) != std::string::npos) {
+                if (config.find("sgct.config") == std::string::npos) {
+                    config = config.substr(0, config.length() - labelFromCfgFile.length());
+                }
+                else {
+                    config = windowConfiguration;
+                    isGeneratedWindowConfig = true;
+                }
+            }
+            else {
+                const std::filesystem::path c = absPath(config);
+
+                std::filesystem::path cj = c;
+                cj.replace_extension(".json");
+
+                if (c.extension().empty()) {
+                    if (std::filesystem::exists(cj)) {
+                        config += ".json";
+                    }
+                    else {
+                        throw ghoul::RuntimeError(std::format(
+                            "Error loading configuration file '{}'. File could not be found",
+                            config
+                        ));
+                    }
+                }
+                else {
+                    // user customized SGCT config
+                }
+            }
+            global::configuration->windowConfiguration = config;
+        }
     }
     else {
         glfwInit();

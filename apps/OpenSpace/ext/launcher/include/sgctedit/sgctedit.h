@@ -83,6 +83,7 @@ public:
      */
     sgct::config::Cluster cluster() const;
 
+private slots:
     /**
      * Called when the number of windows that should be displayed changes.
      *
@@ -105,18 +106,9 @@ public:
     void firstWindowGraphicsSelectionChanged(const QString& text);
 
 private:
-    std::vector<QRect> createMonitorInfoSet();
     void createWidgets(const std::vector<QRect>& monitorSizes, unsigned int nWindows,
         bool setToDefaults);
     void generateConfiguration();
-    void generateConfigSetupVsync();
-    void generateConfigUsers();
-    void generateConfigAddresses(sgct::config::Node& node);
-    void generateConfigResizeWindowsAccordingToSelected(sgct::config::Node& node);
-    void generateConfigIndividualWindowSettings(sgct::config::Node& node);
-    void setupProjectionTypeInGui(sgct::config::Viewport& vPort, WindowControl* wCtrl);
-    void setupStateOfUiOnFirstWindow(size_t nWindows);
-    void deleteFromTags(sgct::config::Window& window);
 
     void save();
     void apply();
@@ -125,18 +117,9 @@ private:
     SettingsWidget* _settingsWidget = nullptr;
     sgct::config::Cluster _cluster;
     const std::filesystem::path _userConfigPath;
-    const std::array<QColor, 4> _colorsForWindows = {
-        QColor(0x2B, 0x9E, 0xC3),
-        QColor(0xFC, 0xAB, 0x10),
-        QColor(0x44, 0xAF, 0x69),
-        QColor(0xF8, 0x33, 0x3C)
-    };
+
     std::string _configurationFilename;
 
-    QBoxLayout* _layoutButtonBox = nullptr;
-    QPushButton* _saveButton = nullptr;
-    QPushButton* _cancelButton = nullptr;
-    QPushButton* _applyButton = nullptr;
     std::string _saveTarget;
     bool _didImportValues = false;
 };

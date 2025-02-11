@@ -27,7 +27,6 @@
 #include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
 #include "sgctedit/displaywindowunion.h"
-#include "sgctedit/monitorbox.h"
 #include <QCheckBox>
 #include <QComboBox>
 #include <QGridLayout>

@@ -51,7 +51,7 @@ MonitorBox::MonitorBox(QRect widgetDims, const std::vector<QRect>& monitorResolu
     const QRectF monitorArrangement = computeUnion(monitorResolutions);
     
     const float aspectRatio = monitorArrangement.width() / monitorArrangement.height();
-    if (aspectRatio > 1.0) {
+    if (aspectRatio > 1.f) {
         const float borderMargin = 2.f * MarginFractionWidgetSize * widgetDims.width();
         widgetDims.setHeight(widgetDims.width() / aspectRatio + borderMargin);
     }
@@ -83,7 +83,7 @@ void MonitorBox::paintEvent(QPaintEvent*) {
 
     //
     // Draw widget border
-    constexpr int Radius = 10;
+    constexpr float Radius = 10.f;
     painter.setPen(QPen(Qt::gray, 4));
     painter.drawRoundedRect(0, 0, width() - 1, height() - 1, Radius, Radius);
 
@@ -95,12 +95,13 @@ void MonitorBox::paintEvent(QPaintEvent*) {
         painter.drawRect(_windowRendering[i]);
     }
 
+    //
     // Draw & fill monitors over the out-of-bounds regions
     painter.setPen(QPen(Qt::black, 2));
     painter.setBrush(Qt::NoBrush);
 
     for (size_t i = 0; i < _monitorDimensionsScaled.size(); i++) {
-        const QColor Grey = QColor(0xDD, 0xDD, 0xDD);
+        constexpr QColor Grey = QColor(221, 221, 221);
 
         painter.drawRect(_monitorDimensionsScaled[i]);
         painter.fillRect(_monitorDimensionsScaled[i], QBrush(Grey, Qt::SolidPattern));
