@@ -1262,9 +1262,6 @@ int main(int argc, char* argv[]) {
             global::configuration->bypassLauncher = *commandlineArguments.bypassLauncher;
         }
 
-        // Determining SGCT configuration file
-        LDEBUG("SGCT Configuration file: " + global::configuration->windowConfiguration);
-
         windowConfiguration = global::configuration->windowConfiguration;
     }
     catch (const documentation::SpecificationError& e) {
@@ -1452,7 +1449,10 @@ int main(int argc, char* argv[]) {
     // as well as the configuration file that sgct is supposed to use
     arguments.insert(arguments.begin(), argv[0]);
     arguments.insert(arguments.begin() + 1, "-config");
-    arguments.insert(arguments.begin() + 2, absPath(windowConfiguration).string());
+    arguments.insert(
+        arguments.begin() + 2,
+        absPath(global::configuration->windowConfiguration).string()
+    );
 
     // Need to set this before the creation of the sgct::Engine
 
@@ -1464,6 +1464,12 @@ int main(int argc, char* argv[]) {
 #ifdef __APPLE__
     glfwWindowHint(GLFW_STENCIL_BITS, 8);
 #endif
+
+    // Determining SGCT configuration file
+    LINFO(std::format(
+        "SGCT Configuration file: {}", absPath(global::configuration->windowConfiguration)
+    ));
+
 
     LDEBUG("Creating SGCT Engine");
     std::vector<std::string> arg(argv + 1, argv + argc);
