@@ -1398,27 +1398,6 @@ int main(int argc, char* argv[]) {
                     isGeneratedWindowConfig = true;
                 }
             }
-            else {
-                const std::filesystem::path c = absPath(config);
-
-                std::filesystem::path cj = c;
-                cj.replace_extension(".json");
-
-                if (c.extension().empty()) {
-                    if (std::filesystem::exists(cj)) {
-                        config += ".json";
-                    }
-                    else {
-                        throw ghoul::RuntimeError(std::format(
-                            "Error loading configuration file '{}'. File could not be found",
-                            config
-                        ));
-                    }
-                }
-                else {
-                    // user customized SGCT config
-                }
-            }
             global::configuration->windowConfiguration = config;
         }
     }

@@ -98,23 +98,21 @@ namespace {
     }
 } // namespace
 
-SgctEdit::SgctEdit(QWidget* parent, std::filesystem::path userConfigPath)
-    : QDialog(parent)
-    , _userConfigPath(std::move(userConfigPath))
-{
-    setWindowTitle("Window Configuration Editor");
-    createWidgets(createMonitorInfoSet(), 1, true);
-}
-
-SgctEdit::SgctEdit(sgct::config::Cluster& cluster, std::string configName,
+SgctEdit::SgctEdit(const sgct::config::Cluster& cluster, std::string configName,
                    std::filesystem::path configBasePath, QWidget* parent)
     : QDialog(parent)
     , _cluster(cluster)
     , _userConfigPath(std::move(configBasePath))
     , _configurationFilename(std::move(configName))
-    , _didImportValues(true)
+    , _didImportValues(!_configurationFilename.empty())
 {
     setWindowTitle("Window Configuration Editor");
+
+    if (_cluster.nodes.empty()) {
+        createWidgets(createMonitorInfoSet(), 1, true);
+        return;
+    }
+
     const size_t nWindows = _cluster.nodes.front().windows.size();
     std::vector<QRect> monitorSizes = createMonitorInfoSet();
     createWidgets(monitorSizes, static_cast<unsigned int>(nWindows), false);
@@ -347,6 +345,9 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
 
     //
     // Orientation specification
+    QLabel* labelOrientation = new QLabel("Orientation");
+    settingsLayout->addWidget(labelOrientation);
+
     QWidget* orientationContainer = new QWidget;
     settingsLayout->addWidget(orientationContainer);
     QGridLayout* layoutWindow = new QGridLayout(orientationContainer);

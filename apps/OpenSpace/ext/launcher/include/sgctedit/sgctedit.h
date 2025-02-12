@@ -47,16 +47,6 @@ Q_OBJECT
 public:
     /**
      * Constructor for SgctEdit class, the underlying class for the full window
-     * configuration editor. Used when creating a new config.
-     *
-     * \param parent The Qt QWidget parent object
-     * \param userConfigPath A string containing the file path of the user config
-     *        directory where all window configs are stored
-     */
-    SgctEdit(QWidget* parent, std::filesystem::path userConfigPath);
-
-    /**
-     * Constructor for SgctEdit class, the underlying class for the full window
      * configuration editor. Used when editing an existing config.
      *
      * \param cluster The #sgct::config::Cluster object containing all data of the
@@ -65,7 +55,7 @@ public:
      * \param configBasePath The path to the folder where default config files reside
      * \param parent Pointer to parent Qt widget
      */
-    SgctEdit(sgct::config::Cluster& cluster, std::string configName,
+    SgctEdit(const sgct::config::Cluster& cluster, std::string configName,
         std::filesystem::path configBasePath, QWidget* parent);
 
     /**

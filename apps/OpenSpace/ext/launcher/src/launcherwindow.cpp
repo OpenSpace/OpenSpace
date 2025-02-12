@@ -487,7 +487,7 @@ void LauncherWindow::editConfiguration() {
 }
 
 void LauncherWindow::newConfiguration() {
-    SgctEdit editor = SgctEdit(this, _userConfigPath);
+    SgctEdit editor = SgctEdit(sgct::config::Cluster(), "", _userConfigPath, this);
     int ret = editor.exec();
     if (ret == QDialog::DialogCode::Accepted) {
         handleReturnFromWindowEditor(editor.cluster(), editor.saveFilename());
