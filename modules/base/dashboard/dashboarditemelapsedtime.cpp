@@ -147,17 +147,15 @@ void DashboardItemElapsedTime::render(glm::vec2& penPosition) {
         using namespace std::chrono;
 
         const TimeUnit lowestTime = TimeUnit(_lowestTimeUnit.value());
-        const std::string_view lowestUnitS = nameForTimeUnit(lowestTime, false);
-        const std::string_view lowestUnitP = nameForTimeUnit(lowestTime, true);
 
         const std::vector<std::pair<double, std::string_view>> ts = splitTime(delta);
         std::string time;
         for (const std::pair<double, std::string_view>& t : ts) {
-            time += std::format("{} {} ", t.first, t.second);
-            if (t.second == lowestUnitS || t.second == lowestUnitP) {
+            if (timeUnitFromString(t.second) < lowestTime) {
                 // We have reached the lowest unit the user was interested in
                 break;
             }
+            time += std::format("{} {} ", t.first, t.second);
         }
 
         // Remove the " " at the end
