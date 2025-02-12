@@ -27,6 +27,7 @@
 #include <sgctedit/displaywindowunion.h>
 #include <sgctedit/monitorbox.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/assert.h>
 #include <QApplication>
 #include <QCheckBox>
 #include <QComboBox>
@@ -529,8 +530,17 @@ void SgctEdit::apply() {
 }
 
 void SgctEdit::generateConfiguration() {
-    _cluster.scene = sgct::config::Scene();
-    _cluster.scene->orientation = orientation();
+    // Reconstitute the quaternion if the provided values are not 0
+    const float pitch = glm::radians(_linePitch->text().toFloat());
+    const float yaw = glm::radians(_lineYaw->text().toFloat());
+    const float roll = glm::radians(_lineRoll->text().toFloat());
+    if (pitch != 0.f && yaw != 0.f && roll != 0.f) {
+        glm::quat q = glm::quat(glm::vec3(pitch, yaw, roll));
+        _cluster.scene = {
+            .orientation = sgct::quat(q.x, q.y, q.z, q.w)
+        };
+    }
+
     if (_cluster.nodes.empty()) {
         _cluster.nodes.emplace_back();
     }
@@ -556,9 +566,10 @@ void SgctEdit::generateConfiguration() {
     if (!_didImportValues) {
         //
         // Generate users
-        sgct::config::User user;
-        user.eyeSeparation = 0.065f;
-        user.position = { 0.f, 0.f, 0.f };
+        sgct::config::User user = {
+            .eyeSeparation = 0.065f,
+            .position = sgct::vec3{ 0.f, 0.f, 0.f }
+        };
         _cluster.users = { user };
 
         //
@@ -604,7 +615,11 @@ void SgctEdit::generateConfiguration() {
         };
         for (const std::string_view tag : Tags) {
             node.windows[i].tags.erase(
-                std::remove(node.windows[i].tags.begin(), node.windows[i].tags.end(), tag),
+                std::remove(
+                    node.windows[i].tags.begin(),
+                    node.windows[i].tags.end(),
+                    tag
+                ),
                 node.windows[i].tags.end()
             );
         }
@@ -614,24 +629,26 @@ void SgctEdit::generateConfiguration() {
         if ((_showUiOnFirstWindow->isChecked() && _showUiOnFirstWindow->isEnabled())) {
             if (i == 0) {
                 node.windows[i].tags.emplace_back("GUI");
-                const int selectedGraphics = _firstWindowGraphicsSelection->currentIndex();
+                const int selected = _firstWindowGraphicsSelection->currentIndex();
+                ghoul_assert(selected != -1, "Graphics selection should not be empty");
+                ghoul_assert(
+                    selected <= static_cast<int>(node.windows.size()),
+                    "Invalid selected index"
+                );
 
-                if (selectedGraphics == 0) {
+                if (selected == 0) {
                     node.windows[i].viewports.back().isTracked = false;
                     node.windows[i].tags.emplace_back("GUI_No_Render");
                 }
-                else if (selectedGraphics > 0 &&
-                    selectedGraphics <= static_cast<int>(node.windows.size()))
-                {
+                else {
                     node.windows[i].tags.emplace_back(
-                        "GUI_Render_Win" + std::to_string(selectedGraphics)
+                        "GUI_Render_Win" + std::to_string(selected)
                     );
                     // Set first window viewport to mirror the selected window's viewport
-                    node.windows[i].viewports =
-                        node.windows[(selectedGraphics - 1)].viewports;
+                    node.windows[i].viewports = node.windows[(selected - 1)].viewports;
                 }
                 node.windows[i].draw2D = true;
-                node.windows[i].draw3D = (selectedGraphics > 0);
+                node.windows[i].draw3D = (selected > 0);
             }
             else {
                 node.windows[i].draw2D = false;
@@ -705,13 +722,4 @@ void SgctEdit::nWindowsDisplayedChanged(int newCount) {
         _firstWindowGraphicsSelection->setEnabled(_showUiOnFirstWindow->isChecked());
     }
     _stateOfUiOnFirstWindowPreviousCount = newCount;
-}
-
-sgct::quat SgctEdit::orientation() const {
-    // Reconstitute the quaternion
-    const float pitch = glm::radians(_linePitch->text().toFloat());
-    const float yaw = glm::radians(_lineYaw->text().toFloat());
-    const float roll = glm::radians(_lineRoll->text().toFloat());
-    glm::quat q = glm::quat(glm::vec3(pitch, yaw, roll));
-    return sgct::quat(q.x, q.y, q.z, q.w);
 }

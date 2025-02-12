@@ -109,8 +109,6 @@ private:
         bool setToDefaults);
     void generateConfiguration();
 
-    sgct::quat orientation() const;
-
     void save();
     void apply();
 
