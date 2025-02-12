@@ -35,7 +35,6 @@
 #include <string>
 
 class DisplayWindowUnion;
-class SettingsWidget;
 class QBoxLayout;
 class QWidget;
 
@@ -110,11 +109,27 @@ private:
         bool setToDefaults);
     void generateConfiguration();
 
+    sgct::quat orientation() const;
+
     void save();
     void apply();
 
     DisplayWindowUnion* _displayWidget = nullptr;
-    SettingsWidget* _settingsWidget = nullptr;
+
+    // Settings
+    QCheckBox* _checkBoxVsync = nullptr;
+    QCheckBox* _showUiOnFirstWindow = nullptr;
+    QComboBox* _firstWindowGraphicsSelection = nullptr;
+    QBoxLayout* _firstWindowSelectionLayout = nullptr;
+
+    QLineEdit* _linePitch = nullptr;
+    QLineEdit* _lineRoll = nullptr;
+    QLineEdit* _lineYaw = nullptr;
+
+    int _stateOfUiOnFirstWindowPreviousCount = 1;
+    bool _stateOfUiOnFirstWindowWhenDisabled = false;
+
+
     sgct::config::Cluster _cluster;
     const std::filesystem::path _userConfigPath;
 
