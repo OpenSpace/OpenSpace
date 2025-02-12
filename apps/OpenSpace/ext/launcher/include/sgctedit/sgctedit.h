@@ -120,7 +120,6 @@ private:
     QCheckBox* _checkBoxVsync = nullptr;
     QCheckBox* _showUiOnFirstWindow = nullptr;
     QComboBox* _firstWindowGraphicsSelection = nullptr;
-    QBoxLayout* _firstWindowSelectionLayout = nullptr;
 
     QLineEdit* _linePitch = nullptr;
     QLineEdit* _lineRoll = nullptr;

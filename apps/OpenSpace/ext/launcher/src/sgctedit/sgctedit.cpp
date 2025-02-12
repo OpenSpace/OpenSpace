@@ -197,7 +197,7 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, std::string configName,
 
     for (size_t i = 0; i < nWindows; i++) {
         sgct::config::Window& w = _cluster.nodes.front().windows[i];
-        //First window needs to have "GUI" tag if this mode is set
+        // First window needs to have "GUI" tag if this mode is set
         if (i == 0) {
             firstWindowGuiIsEnabled =
                 std::find(w.tags.begin(), w.tags.end(), "GUI") != w.tags.end();
@@ -290,11 +290,11 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
             monitorBox, &MonitorBox::nWindowsDisplayedChanged
         );
 
-        displayLayout->addWidget(_displayWidget);
-
         for (unsigned int i = 0; i < nWindows; i++) {
             _displayWidget->addWindow();
         }
+
+        displayLayout->addWidget(_displayWidget);
 
         layout->addWidget(displayFrame);
     }
@@ -304,6 +304,8 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
     layout->addWidget(settingsContainer);
     QBoxLayout* settingsLayout = new QVBoxLayout(settingsContainer);
     settingsLayout->setContentsMargins(0, 0, 0, 0);
+
+    QBoxLayout* firstWindowSelectionLayout = new QHBoxLayout;
 
     //
     // Show UI in specific window
@@ -318,6 +320,7 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
         "this first window. The remaining windows will render\nnormally but they will "
         "not show the user interface"
     );
+    firstWindowSelectionLayout->addWidget(_showUiOnFirstWindow);
 
     _firstWindowGraphicsSelection = new QComboBox;
     _firstWindowGraphicsSelection->setToolTip(
@@ -328,12 +331,8 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
         _showUiOnFirstWindow, &QCheckBox::clicked,
         _firstWindowGraphicsSelection, &QComboBox::setEnabled
     );
-
-    _firstWindowSelectionLayout = new QHBoxLayout;
-    _firstWindowSelectionLayout->addWidget(_showUiOnFirstWindow);
-    _firstWindowSelectionLayout->addWidget(_firstWindowGraphicsSelection);
-    _firstWindowSelectionLayout->addStretch();
-    settingsLayout->addLayout(_firstWindowSelectionLayout);
+    firstWindowSelectionLayout->addWidget(_firstWindowGraphicsSelection);
+    settingsLayout->addLayout(firstWindowSelectionLayout);
 
 
     //
@@ -422,6 +421,8 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
         &SgctEdit::firstWindowGuiOptionClicked
     ); 
 
+    //
+    // Button box
     {
         QHBoxLayout* layoutButtonBox = new QHBoxLayout;
         layoutButtonBox->addStretch(1);
@@ -541,11 +542,11 @@ void SgctEdit::generateConfiguration() {
         if (!_cluster.settings || !_cluster.settings->display ||
             !_cluster.settings->display->swapInterval)
         {
-            sgct::config::Settings::Display display;
-            display.swapInterval = 1;
-            sgct::config::Settings settings;
-            settings.display = display;
-            _cluster.settings = settings;
+            _cluster.settings = sgct::config::Settings {
+                .display = sgct::config::Settings::Display {
+                    .swapInterval = 1
+                }
+            };
         }
     }
     else {
@@ -672,8 +673,7 @@ void SgctEdit::nWindowsDisplayedChanged(int newCount) {
 
     constexpr int CountOneWindow = 1;
     constexpr int CountTwoWindows = 2;
-    int graphicsSelect = _firstWindowGraphicsSelection->currentIndex();
-    graphicsSelect = std::max(0, graphicsSelect);
+    int graphicsSelect = std::max(0, _firstWindowGraphicsSelection->currentIndex());
 
     QList<QString> graphicsOptions = { "None (GUI only)" };
     for (int i = CountOneWindow; i <= newCount; i++) {
