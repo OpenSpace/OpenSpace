@@ -159,7 +159,7 @@ void DashboardItemElapsedTime::render(glm::vec2& penPosition) {
         }
 
         // Remove the " " at the end
-        time = time.substr(0, time.size() - 2);
+        time = time.substr(0, time.size() - 1);
 
         RenderFont(
             *_font,
