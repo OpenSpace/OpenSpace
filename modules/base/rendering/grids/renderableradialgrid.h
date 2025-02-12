@@ -44,7 +44,7 @@ namespace openspace {
 
 class RenderableRadialGrid : public Renderable {
 public:
-    RenderableRadialGrid(const ghoul::Dictionary& dictionary);
+    explicit RenderableRadialGrid(const ghoul::Dictionary& dictionary);
     ~RenderableRadialGrid() override = default;
 
     void initialize() override;
@@ -60,7 +60,7 @@ public:
 
 protected:
     struct GeometryData {
-        GeometryData(GLenum renderMode);
+        explicit GeometryData(GLenum renderMode);
         GeometryData(GeometryData&& other) noexcept;
         GeometryData& operator=(const GeometryData& other) = delete;
         GeometryData& operator=(GeometryData&& other) noexcept;

@@ -34,6 +34,7 @@ namespace openspace::gui {
 class GuiGIBSComponent : public GuiComponent {
 public:
     GuiGIBSComponent();
+
     void render() override;
 };
 

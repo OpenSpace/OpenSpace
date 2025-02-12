@@ -214,6 +214,7 @@ protected:
 
     struct Texture : properties::PropertyOwner {
         Texture();
+
         properties::BoolProperty enabled;
         properties::BoolProperty allowCompression;
         properties::BoolProperty useAlphaChannel;

@@ -22,26 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VISLAB___VISLABMODULE___H__
-#define __OPENSPACE_MODULE_VISLAB___VISLABMODULE___H__
+#include <modules/base/rotation/multirotation.h>
 
-#include <openspace/util/openspacemodule.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
+#include <openspace/util/updatestructures.h>
+#include <openspace/util/time.h>
+#include <optional>
+
+namespace {
+    // This Rotation type combines multiple individual rotations that are applied one
+    // after the other. The rotations are applied in the order in which they are specified
+    // in the `Rotations` key.
+    struct [[codegen::Dictionary(MultiRotation)]] Parameters {
+        // The list of rotations that are applied one after the other
+        std::vector<ghoul::Dictionary> rotations
+            [[codegen::reference("core_transform_rotation")]];
+    };
+#include "multirotation_codegen.cpp"
+} // namespace
 
 namespace openspace {
 
-class VisLabModule : public OpenSpaceModule {
-public:
-    constexpr static const char* Name = "VisLab";
+documentation::Documentation MultiRotation::Documentation() {
+    return codegen::doc<Parameters>("base_transform_rotation_multi");
+}
 
-    VisLabModule();
+MultiRotation::MultiRotation(const ghoul::Dictionary& dictionary) {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    std::vector<documentation::Documentation> documentations() const override;
+    int i = 0;
+    for (const ghoul::Dictionary& rot : p.rotations) {
+        ghoul::mm_unique_ptr<Rotation> rotation = Rotation::createFromDictionary(rot);
+        rotation->setGuiName(std::format("{}: {}", i, rotation->guiName()));
+        rotation->setIdentifier(std::format("{}_{}", i, rotation->identifier()));
+        addPropertySubOwner(rotation.get());
+        _rotations.push_back(std::move(rotation));
+        i++;
+    }
+}
 
-
-private:
-    void internalInitialize(const ghoul::Dictionary&) override;
-};
+glm::dmat3 MultiRotation::matrix(const UpdateData& data) const {
+    glm::dmat3 res = glm::dmat3(1.0);
+    for (const ghoul::mm_unique_ptr<Rotation>& rot : _rotations) {
+        res *= rot->matrix(data);
+    }
+    return res;
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_VISLAB___VISLABMODULE___H__

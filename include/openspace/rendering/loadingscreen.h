@@ -127,6 +127,10 @@ private:
         glm::vec2 ur = glm::vec2(0.f);
 
         std::chrono::system_clock::time_point finishedTime;
+
+#ifdef LOADINGSCREEN_DEBUGGING
+        bool exhaustedSearch = false;
+#endif // LOADINGSCREEN_DEBUGGING
     };
     std::vector<Item> _items;
     std::mutex _itemsMutex;

@@ -384,7 +384,10 @@ void SkyBrowserModule::disableHoverCircle(bool useScript) {
             global::scriptEngine->queueScript(script);
         }
         else {
-            _hoverCircle->renderable()->property("Fade")->set(0.f);
+            properties::Property* prop = _hoverCircle->renderable()->property("Fade");
+            properties::FloatProperty* floatProp = dynamic_cast<properties::FloatProperty*>(prop);
+            ghoul_assert(floatProp, "Fade property is not a float property");
+            *floatProp = 0.f;
         }
     }
 }

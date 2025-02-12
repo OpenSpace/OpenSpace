@@ -43,7 +43,7 @@ class TransferFunction;
 class IswaCygnet : public Renderable {
 
 public:
-    IswaCygnet(const ghoul::Dictionary& dictionary);
+    explicit IswaCygnet(const ghoul::Dictionary& dictionary);
     virtual ~IswaCygnet();
 
     void initializeGL() override;

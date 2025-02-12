@@ -68,7 +68,7 @@ public:
      *        time range
      * \throw RuntimeError If neither subphases or a time range is specified
      */
-    MissionPhase(const ghoul::Dictionary& dictionary);
+    explicit MissionPhase(const ghoul::Dictionary& dictionary);
 
     /**
      * Returns the name of the MissionPhase.

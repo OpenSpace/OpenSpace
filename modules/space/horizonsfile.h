@@ -102,7 +102,7 @@ struct HorizonsResult {
 class HorizonsFile {
 public:
     HorizonsFile() = default;
-    HorizonsFile(std::filesystem::path file);
+    explicit HorizonsFile(std::filesystem::path file);
     HorizonsFile(std::filesystem::path filePath, std::string result);
 
     void setFile(std::filesystem::path file);

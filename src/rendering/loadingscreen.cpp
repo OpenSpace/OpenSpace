@@ -49,15 +49,16 @@
 #include <thread>
 #include <unordered_set>
 
-
 namespace {
     constexpr float LoadingFontSize = 25.f;
     constexpr float MessageFontSize = 22.f;
     constexpr float ItemFontSize = 10.f;
     constexpr float LogFontSize = 10.f;
 
-    constexpr glm::vec2 LogoCenter = glm::vec2(0.f, 0.525f);  // in NDC
-    constexpr glm::vec2 LogoSize = glm::vec2(0.275f, 0.275);  // in NDC
+    constexpr int PreventOverlapThreshold = 1280; // in horizontal pixel size
+
+    constexpr glm::vec2 LogoCenter = glm::vec2(0.f, 0.65f);  // in NDC
+    constexpr glm::vec2 LogoSize = glm::vec2(0.2f, 0.2f);  // in NDC
 
     constexpr glm::vec4 ItemStatusColorStarted = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
     constexpr glm::vec4 ItemStatusColorInitializing = glm::vec4(0.7f, 0.7f, 0.f, 1.f);
@@ -296,14 +297,20 @@ void LoadingScreen::render() {
 
     const float screenAspectRatio = static_cast<float>(res.x) / static_cast<float>(res.y);
 
+    // We need to have a fudge factor for smaller screens or we end up testing all loading
+    // texts successfully against the logo as it takes up such a large portion of the
+    // screen. We don't want to incrase the size though and cap it at a screen size of
+    // 1920 pixels horizontally
+    const float sizeAdjustment = std::min(static_cast<float>(res.x) / 1920.f, 1.f);
+
     const float textureAspectRatio = static_cast<float>(_logoTexture->dimensions().x) /
         static_cast<float>(_logoTexture->dimensions().y);
 
     ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(res);
 
     const glm::vec2 size = glm::vec2(
-        LogoSize.x,
-        LogoSize.y * textureAspectRatio * screenAspectRatio
+        LogoSize.x * sizeAdjustment,
+        LogoSize.y * textureAspectRatio * screenAspectRatio * sizeAdjustment
     );
 
     //
@@ -344,13 +351,13 @@ void LoadingScreen::render() {
         headline.substr(0, headline.size() - 2)
     );
 
-    const glm::vec2 loadingLl = glm::vec2(
+    const glm::vec2 loadLl = glm::vec2(
         res.x / 2.f - bbox.x / 2.f,
         res.y * LoadingTextPosition
     );
-    const glm::vec2 loadingUr = loadingLl + bbox;
+    const glm::vec2 loadUr = loadLl + bbox;
 
-    renderer.render(*_loadingFont, loadingLl, headline);
+    renderer.render(*_loadingFont, loadLl, headline);
 
     glm::vec2 messageLl = glm::vec2(0.f);
     glm::vec2 messageUr = glm::vec2(0.f);
@@ -389,8 +396,14 @@ void LoadingScreen::render() {
 
         const auto now = std::chrono::system_clock::now();
 
-        const glm::vec2 logoLl = glm::vec2(LogoCenter.x - size.x,  LogoCenter.y - size.y);
-        const glm::vec2 logoUr = glm::vec2(LogoCenter.x + size.x,  LogoCenter.y + size.y);
+        const glm::vec2 logoLl = ndcToScreen(
+            glm::vec2(LogoCenter.x - size.x,  LogoCenter.y - size.y),
+            res
+        );
+        const glm::vec2 logoUr = ndcToScreen(
+            glm::vec2(LogoCenter.x + size.x,  LogoCenter.y + size.y),
+            res
+        );
 
         for (Item& item : _items) {
             if (!item.hasLocation) {
@@ -417,15 +430,8 @@ void LoadingScreen::render() {
                     ur = ll + b;
 
                     // Test against logo and text
-                    const bool logoOverlap = rectOverlaps(
-                        ndcToScreen(logoLl, res), ndcToScreen(logoUr, res),
-                        ll, ur
-                    );
-
-                    const bool loadingOverlap = rectOverlaps(
-                        loadingLl, loadingUr,
-                        ll, ur
-                    );
+                    const bool logoOverlap = rectOverlaps(logoLl, logoUr, ll, ur);
+                    const bool loadingOverlap = rectOverlaps(loadLl, loadUr, ll, ur);
 
                     const bool messageOverlap = _showMessage ?
                         rectOverlaps(messageLl, messageUr, ll, ur) :
@@ -436,6 +442,13 @@ void LoadingScreen::render() {
                         false;
 
                     if (logoOverlap || loadingOverlap || messageOverlap || logOverlap) {
+                        // We don't want to have an overlap with any of these if we have a
+                        // big enough window resolution. If we have a too small screen,
+                        // there might not be enough space left to fix everything and we
+                        // would get an infinite loop here
+                        if (res.x >= PreventOverlapThreshold) {
+                            --i;
+                        }
                         continue;
                     }
 

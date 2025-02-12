@@ -94,6 +94,12 @@ namespace {
         "The labels for the grid."
     };
 
+    // This `Renderable` can be used to create a planar grid, to for example illustrate
+    // distances in 3D space.
+    //
+    // The grid is created by specifying a size and how many segments to split each
+    // dimension into. A secondary color can be used to highlight grid lines with a
+    // given interval.
     struct [[codegen::Dictionary(RenderableGrid)]] Parameters {
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];

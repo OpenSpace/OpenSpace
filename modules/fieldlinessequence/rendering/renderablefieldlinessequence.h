@@ -41,7 +41,7 @@ namespace openspace {
 
 class RenderableFieldlinesSequence : public Renderable {
 public:
-    RenderableFieldlinesSequence(const ghoul::Dictionary& dictionary);
+    explicit RenderableFieldlinesSequence(const ghoul::Dictionary& dictionary);
     void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;

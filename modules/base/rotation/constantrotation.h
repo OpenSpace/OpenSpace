@@ -36,7 +36,7 @@ namespace documentation { struct Documentation; }
 
 class ConstantRotation : public Rotation {
 public:
-    ConstantRotation(const ghoul::Dictionary& dictionary);
+    explicit ConstantRotation(const ghoul::Dictionary& dictionary);
 
     glm::dmat3 matrix(const UpdateData& data) const override;
 

@@ -27,7 +27,6 @@
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/easing.h>
-#include <any>
 #include <functional>
 #include <string>
 #include <string_view>
@@ -144,7 +143,7 @@ public:
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
      */
-    Property(PropertyInfo info);
+    explicit Property(PropertyInfo info);
 
     /**
      * The destructor taking care of deallocating all unused memory. This method will not
@@ -160,27 +159,6 @@ public:
      * \return The class name of the Property
      */
     virtual std::string_view className() const = 0;
-
-    /**
-     * This method returns the encapsulated value of the Property to the caller. The type
-     * that is returned is determined by the type function and is up to the developer of
-     * the derived class. The default implementation returns an empty ghoul::any object.
-     *
-     * \return The value that is encapsulated by this Property, or an empty ghoul::any
-     *         object if the method was not overritten.
-     */
-    virtual std::any get() const;
-
-    /**
-     * Sets the value encapsulated by this Property to the \p value passed to this
-     * function. It is the caller's responsibility to ensure that the type contained in
-     * \p value is compatible with the concrete subclass of the Property. The method
-     * Property::type will return the desired type for the Property. The default
-     * implementation of this method ignores the input.
-     *
-     * \param value The new value that should be stored in this Property
-     */
-    virtual void set(std::any value);
 
     /**
      * This method returns the type that is requested by this Property for the set method.
@@ -447,7 +425,6 @@ public:
     virtual std::string jsonValue() const;
 
     /// Interpolation methods
-    virtual void setInterpolationTarget(std::any value);
     virtual void setLuaInterpolationTarget(lua_State* state);
 
     virtual void interpolateValue(float t,

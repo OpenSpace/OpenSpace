@@ -37,7 +37,8 @@ namespace documentation { struct Documentation; }
 
 class TimeDependentScale : public Scale {
 public:
-    TimeDependentScale(const ghoul::Dictionary& dictionary);
+    explicit TimeDependentScale(const ghoul::Dictionary& dictionary);
+
     glm::dvec3 scaleValue(const UpdateData& data) const override;
 
     static documentation::Documentation Documentation();

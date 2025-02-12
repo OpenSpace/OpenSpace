@@ -60,6 +60,7 @@ public:
     void applyRoll();
     glm::dvec3 rightVector() const;
     glm::dvec3 upVector() const;
+
 private:
     properties::FloatProperty _crossHairSize;
     properties::FloatProperty _showRectangleThreshold;

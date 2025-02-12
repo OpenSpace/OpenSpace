@@ -641,7 +641,7 @@ void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& wor
 
 IODescription RawTileDataReader::ioDescription(const TileIndex& tileIndex) const {
     IODescription io;
-    io.read.region = highestResPixelRegion(tileIndex, _padfTransform);
+    io.read.region = highestResPixelRegion(GeodeticPatch(tileIndex), _padfTransform);
 
     // write region starts in origin
     io.write.region.start = glm::ivec2(0);

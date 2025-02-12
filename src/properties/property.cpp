@@ -81,15 +81,9 @@ std::string Property::uri() const {
     return !ownerUri.empty() ? std::format("{}.{}", ownerUri, _identifier) : "";
 }
 
-std::any Property::get() const {
-    return std::any();
-}
-
 bool Property::getLuaValue(lua_State*) const {
     return false;
 }
-
-void Property::set(std::any) {}
 
 void Property::setLuaValue(lua_State*) {}
 
@@ -325,7 +319,6 @@ std::string Property::generateAdditionalJsonDescription() const {
     return "{}";
 }
 
-void Property::setInterpolationTarget(std::any) {}
 void Property::setLuaInterpolationTarget(lua_State*) {}
 void Property::interpolateValue(float, ghoul::EasingFunc<float>) {}
 

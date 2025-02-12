@@ -45,7 +45,7 @@ public:
         ODD = 1
     };
 
-    AtlasManager(TSP* tsp);
+    explicit AtlasManager(TSP* tsp);
     ~AtlasManager() = default;
 
     void updateAtlas(BufferIndex bufferIndex, std::vector<int>& brickIndices);

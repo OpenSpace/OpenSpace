@@ -46,7 +46,7 @@ template<class T>
 class SyncData : public Syncable {
 public:
     SyncData() = default;
-    SyncData(const T& val);
+    explicit SyncData(const T& val);
     SyncData(const SyncData<T>& o);
 
     /**

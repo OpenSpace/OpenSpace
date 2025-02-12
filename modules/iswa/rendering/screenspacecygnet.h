@@ -33,7 +33,7 @@ namespace openspace {
 
 class ScreenSpaceCygnet : public ScreenSpaceImageOnline {
 public:
-    ScreenSpaceCygnet(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceCygnet(const ghoul::Dictionary& dictionary);
     ~ScreenSpaceCygnet() = default;
 
     virtual void update() override;

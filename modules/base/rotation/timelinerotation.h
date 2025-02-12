@@ -38,7 +38,8 @@ namespace documentation { struct Documentation; }
 
 class TimelineRotation : public Rotation {
 public:
-    TimelineRotation(const ghoul::Dictionary& dictionary);
+    explicit TimelineRotation(const ghoul::Dictionary& dictionary);
+
     glm::dmat3 matrix(const UpdateData& data) const override;
     static documentation::Documentation Documentation();
 

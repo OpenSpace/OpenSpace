@@ -32,7 +32,6 @@
 
 namespace openspace {
 
-
 class VersionChecker {
 public:
     struct SemanticVersion {

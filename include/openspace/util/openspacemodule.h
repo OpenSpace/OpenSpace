@@ -55,7 +55,7 @@ public:
      *
      * \pre \p name must not be empty
      */
-    OpenSpaceModule(std::string name);
+    explicit OpenSpaceModule(std::string name);
 
     /// Default destructor
     virtual ~OpenSpaceModule() override = default;

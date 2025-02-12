@@ -193,6 +193,15 @@ namespace {
         openspace::properties::Property::Visibility::Hidden
     };
 
+    constexpr openspace::properties::Property::PropertyInfo GuiFocusableInfo = {
+        "IsFocusable",
+        "Focusable Hint",
+        "This value serves as a hint to determine if it makes sense to focus the camera "
+        "on this scene graph node. It only serves as a hint and does not actually "
+        "prevent the focussing. The default value is `true`.",
+        openspace::properties::Property::Visibility::Hidden
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ShowDebugSphereInfo = {
         "ShowDebugSphere",
         "Show Debug Sphere",
@@ -264,12 +273,14 @@ namespace {
             // all its children. Depending on the 'Type' of the scaling, this can either
             // be a static scaling or a time-varying one
             std::optional<ghoul::Dictionary> scale
-                [[codegen::reference("core_transform_scaling")]];
+                [[codegen::reference("core_transform_scale")]];
         };
 
         // This describes a set of transformations that are applied to this scene graph
         // node and all of its children. There are only three possible values
-        // corresponding to a 'Translation', a 'Rotation', and a 'Scale'
+        // corresponding to a 'Translation', a 'Rotation', and a 'Scale'. The combined
+        // transformation will be computed by first applying the 'Scale', followed by the
+        // 'Rotation', and then the 'Translation'.
         std::optional<Transform> transform;
 
         // This value is a multiplication factor for the interaction sphere that
@@ -327,6 +338,9 @@ namespace {
             // scene graph node. This is most useful to trim collective lists of nodes and
             // not display, for example, barycenters
             std::optional<bool> hidden;
+
+            // [[codegen::verbatim(GuiFocusableInfo.description)]]
+            std::optional<bool> focusable;
 
             // If this value is specified, the scene graph node will be ordered in
             // relation to its neighbors in the GUI based on this value, so that nodes
@@ -394,6 +408,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         if (p.gui->orderingNumber.has_value()) {
             result->_guiOrderingNumber = *p.gui->orderingNumber;
         }
+        result->_guiFocusable = p.gui->focusable.value_or(result->_guiFocusable);
     }
 
     result->_boundingSphere = p.boundingSphere.value_or(result->_boundingSphere);
@@ -539,6 +554,7 @@ SceneGraphNode::SceneGraphNode()
     , _guiDisplayName(GuiNameInfo)
     , _guiDescription(GuiDescriptionInfo)
     , _useGuiOrdering(UseGuiOrderInfo, false)
+    , _guiFocusable(GuiFocusableInfo, true)
     , _guiOrderingNumber(GuiOrderInfo, 0.f)
     , _transform {
         ghoul::mm_unique_ptr<Translation>(
@@ -623,6 +639,7 @@ SceneGraphNode::SceneGraphNode()
     addProperty(_guiPath);
     addProperty(_guiOrderingNumber);
     addProperty(_useGuiOrdering);
+    addProperty(_guiFocusable);
 }
 
 SceneGraphNode::~SceneGraphNode() {}

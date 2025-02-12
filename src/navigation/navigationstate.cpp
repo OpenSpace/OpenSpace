@@ -44,7 +44,7 @@ namespace {
     // the actual camera position or view direction.
     //
     // To get the current navigation state of the camera, use the
-    // `openspace.navigation.getNavigationState()` function in the Scripting API.
+    // `openspace.navigation.navigationState()` function in the Scripting API.
     //
     // Note that when loading a NavigationState, the visuals may be different depending
     // on what the simulation timestamp is, as the relative positions of objects in the

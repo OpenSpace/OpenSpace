@@ -45,7 +45,7 @@ namespace documentation { struct Documentation; }
  */
 class RenderableConstellationBounds : public RenderableConstellationsBase {
 public:
-    RenderableConstellationBounds(const ghoul::Dictionary& dictionary);
+    explicit RenderableConstellationBounds(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;

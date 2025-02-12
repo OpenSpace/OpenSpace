@@ -34,7 +34,7 @@ namespace openspace::kameleonvolume {
 
 class KameleonMetadataToJsonTask : public Task {
 public:
-    KameleonMetadataToJsonTask(const ghoul::Dictionary& dictionary);
+    explicit KameleonMetadataToJsonTask(const ghoul::Dictionary& dictionary);
 
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;

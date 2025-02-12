@@ -43,7 +43,7 @@ struct RaycastData;
 
 class ToyVolumeRaycaster : public VolumeRaycaster {
 public:
-    ToyVolumeRaycaster(glm::vec4 color);
+    explicit ToyVolumeRaycaster(glm::vec4 color);
     ~ToyVolumeRaycaster() override = default;
 
     void initialize();

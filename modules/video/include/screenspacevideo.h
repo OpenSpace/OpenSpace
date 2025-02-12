@@ -38,7 +38,7 @@ namespace documentation { struct Documentation; }
 
 class ScreenSpaceVideo : public ScreenSpaceRenderable {
 public:
-    ScreenSpaceVideo(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceVideo(const ghoul::Dictionary& dictionary);
 
     bool initializeGL() override;
     bool deinitializeGL() override;

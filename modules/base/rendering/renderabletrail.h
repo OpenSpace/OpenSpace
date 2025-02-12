@@ -78,6 +78,7 @@ public:
 
     struct Appearance : properties::PropertyOwner {
         Appearance();
+
         /// Specifies the base color of the line before fading
         properties::Vec3Property lineColor;
         /// Settings that enables or disables the line fading

@@ -44,7 +44,6 @@ public:
     static bool isInitialized();
     static TransformationManager& ref();
 
-
     glm::dmat3 frameTransformationMatrix(const std::string& from, const std::string& to,
         double ephemerisTime) const;
 

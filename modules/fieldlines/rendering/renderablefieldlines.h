@@ -43,7 +43,7 @@ struct LinePoint;
 
 class RenderableFieldlines : public Renderable {
 public:
-    RenderableFieldlines(const ghoul::Dictionary& dictionary);
+    explicit RenderableFieldlines(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -57,7 +57,6 @@ private:
     typedef std::vector<LinePoint> Line;
 
     void initializeDefaultPropertyValues();
-    std::vector<Line> getFieldlinesData();
     void loadSeedPoints();
     void loadSeedPointsFromFile();
     void loadSeedPointsFromTable();

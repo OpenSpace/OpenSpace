@@ -85,18 +85,6 @@ bool TimeFrameInterval::isActive(const Time& time) const {
     return true;
 }
 
-TimeFrameInterval::TimeFrameInterval()
-    : _hasStart(HasStartInfo, false)
-    , _start(StartInfo, 0, 0, 1E9)
-    , _hasEnd(HasEndInfo, false)
-    , _end(EndInfo, 0, 0, 1E9)
-{
-    addProperty(_hasStart);
-    addProperty(_start);
-    addProperty(_hasEnd);
-    addProperty(_end);
-}
-
 TimeFrameInterval::TimeFrameInterval(const ghoul::Dictionary& dictionary)
     : _hasStart(HasStartInfo, false)
     , _start(StartInfo, 0, 0, 1E9)

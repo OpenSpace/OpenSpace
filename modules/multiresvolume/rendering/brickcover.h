@@ -29,7 +29,7 @@ namespace openspace {
 
 struct BrickCover {
     BrickCover();
-    BrickCover(int numBricks);
+    explicit BrickCover(int numBricks);
 
     BrickCover split(bool x, bool y, bool z) const;
 

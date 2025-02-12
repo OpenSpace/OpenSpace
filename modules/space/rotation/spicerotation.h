@@ -37,7 +37,7 @@ namespace documentation { struct Documentation; }
 
 class SpiceRotation : public Rotation {
 public:
-    SpiceRotation(const ghoul::Dictionary& dictionary);
+    explicit SpiceRotation(const ghoul::Dictionary& dictionary);
 
     const glm::dmat3& matrix() const;
     glm::dmat3 matrix(const UpdateData& data) const override;

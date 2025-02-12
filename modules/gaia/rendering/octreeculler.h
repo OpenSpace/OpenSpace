@@ -45,7 +45,7 @@ public:
      * \param viewFrustum This is the view space in normalized device coordinates space.
      *        Hence it is an axis aligned bounding box and not a real frustum
      */
-    OctreeCuller(globebrowsing::AABB3 viewFrustum);
+    explicit OctreeCuller(globebrowsing::AABB3 viewFrustum);
 
     ~OctreeCuller() = default;
 

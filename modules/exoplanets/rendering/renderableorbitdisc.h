@@ -45,7 +45,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableOrbitDisc : public Renderable {
 public:
-    RenderableOrbitDisc(const ghoul::Dictionary& dictionary);
+    explicit RenderableOrbitDisc(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;

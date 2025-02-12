@@ -122,7 +122,7 @@ namespace {
 namespace openspace::globebrowsing {
 
 documentation::Documentation GlobeTranslation::Documentation() {
-    return codegen::doc<Parameters>("space_translation_globetranslation");
+    return codegen::doc<Parameters>("globebrowsing_translation_globetranslation");
 }
 
 GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)

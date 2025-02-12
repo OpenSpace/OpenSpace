@@ -1266,7 +1266,6 @@ void OpenSpaceEngine::drawOverlays() {
 
     if (isGuiWindow) {
         global::renderEngine->renderOverlays(_shutdown);
-        global::luaConsole->render();
         global::sessionRecordingHandler->render();
     }
 
@@ -1278,6 +1277,11 @@ void OpenSpaceEngine::drawOverlays() {
 #endif // TRACY_ENABLE
 
         func();
+    }
+
+
+    if (isGuiWindow) {
+        global::luaConsole->render();
     }
 
     LTRACE("OpenSpaceEngine::drawOverlays(end)");
@@ -1517,16 +1521,6 @@ void OpenSpaceEngine::touchExitCallback(TouchInput input) {
 }
 
 void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
-    const ghoul::lua::LuaState s;
-    const std::filesystem::path path = absPath("${SCRIPTS}/drag_drop_handler.lua");
-    const std::string p = path.string();
-    int status = luaL_loadfile(s, p.c_str());
-    if (status != LUA_OK) {
-        const std::string error = lua_tostring(s, -1);
-        LERROR(error);
-        return;
-    }
-
 #ifdef WIN32
     if (file.extension() == ".lnk") {
         LDEBUG(std::format("Replacing shell link path '{}'", file));
@@ -1534,33 +1528,84 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
     }
 #endif // WIN32
 
-    ghoul::lua::push(s, file);
-    lua_setglobal(s, "filename");
+    const ghoul::lua::LuaState s;
 
-    std::filesystem::path basename = file.filename();
-    ghoul::lua::push(s, std::move(basename));
-    lua_setglobal(s, "basename");
+    // This function will handle a specific file by providing the Lua script with
+    // information about the dropped file and then executing the drag_drop handler. The
+    // function returns whether the file was a valid drop target
+    auto handleFile = [&s](std::filesystem::path f) -> bool {
+        const std::filesystem::path path = absPath("${SCRIPTS}/drag_drop_handler.lua");
+        const std::string p = path.string();
+        int status = luaL_loadfile(s, p.c_str());
+        if (status != LUA_OK) {
+            const std::string error = lua_tostring(s, -1);
+            LERROR(error);
+            return false;
+        }
 
-    std::string extension = file.extension().string();
-    extension = ghoul::toLowerCase(extension);
+#ifdef WIN32
+        if (f.extension() == ".lnk") {
+            LDEBUG(std::format("Replacing shell link path '{}'", f));
+            f = FileSys.resolveShellLink(f);
+        }
+#endif // WIN32
 
-    ghoul::lua::push(s, extension);
-    lua_setglobal(s, "extension");
+        ghoul::lua::push(s, f);
+        lua_setglobal(s, "filename");
 
-    status = lua_pcall(s, 0, 1, 0);
-    if (status != LUA_OK) {
-        const std::string error = lua_tostring(s, -1);
-        LERROR(error);
-        return;
+        std::filesystem::path basename = f.filename();
+        ghoul::lua::push(s, std::move(basename));
+        lua_setglobal(s, "basename");
+
+        std::string extension = f.extension().string();
+        extension = ghoul::toLowerCase(extension);
+
+        ghoul::lua::push(s, extension);
+        lua_setglobal(s, "extension");
+
+        int callStatus = lua_pcall(s, 0, 1, 0);
+        if (callStatus != LUA_OK) {
+            const std::string error = lua_tostring(s, -1);
+            LERROR(error);
+        }
+
+        if (ghoul::lua::hasValue<std::string>(s)) {
+            std::string script = ghoul::lua::value<std::string>(s);
+            global::scriptEngine->queueScript(std::move(script));
+            lua_settop(s, 0);
+            return true;
+        }
+        else {
+            lua_settop(s, 0);
+            return false;
+        }
+    };
+
+    if (std::filesystem::is_regular_file(file)) {
+        // If we have a single file, we can just execute it directly
+        const bool success = handleFile(file);
+        if (!success) {
+            LWARNING(std::format("Unhandled file dropped: {}", file));
+        }
     }
-
-    if (lua_isnil(s, -1)) {
-        LWARNING(std::format("Unhandled file dropped: {}", file));
-        return;
+    else if (std::filesystem::is_directory(file)) {
+        // If the file is a directory, we want to recursively get all files and handle
+        // each of the files contained in the directory
+        std::vector<std::filesystem::path> files = ghoul::filesystem::walkDirectory(
+            file,
+            true,
+            false,
+            [](const std::filesystem::path& f) {
+                return std::filesystem::is_regular_file(f);
+            }
+        );
+        for (const std::filesystem::path& f : files) {
+            // We ignore the return value here on purpose as we don't want to spam the log
+            // with potential uninteresting messages about every file that was not a valid
+            // target for a drag and drop operation
+            handleFile(f);
+        }
     }
-
-    std::string script = ghoul::lua::value<std::string>(s);
-    global::scriptEngine->queueScript(std::move(script));
 }
 
 std::vector<std::byte> OpenSpaceEngine::encode() {

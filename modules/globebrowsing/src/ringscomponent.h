@@ -56,7 +56,7 @@ public:
         GeometryAndShading
     };
 
-    RingsComponent(const ghoul::Dictionary& dictionary);
+    explicit RingsComponent(const ghoul::Dictionary& dictionary);
 
     void initialize();
     void initializeGL();

@@ -48,7 +48,7 @@ class ScreenSpaceFramebuffer : public ScreenSpaceRenderable {
 public:
     using RenderFunction = std::function<void()>;
 
-    ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary = ghoul::Dictionary());
+    explicit ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary);
     virtual ~ScreenSpaceFramebuffer() override;
 
     bool initializeGL() override;

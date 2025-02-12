@@ -36,7 +36,7 @@ template <typename T> class RawVolume;
 template <typename VoxelType>
 class RawVolumeWriter {
 public:
-    RawVolumeWriter(std::filesystem::path path, size_t bufferSize = 1024);
+    explicit RawVolumeWriter(std::filesystem::path path, size_t bufferSize = 1024);
 
     void setPath(std::filesystem::path path);
     glm::uvec3 dimensions() const;

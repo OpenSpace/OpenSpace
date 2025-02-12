@@ -50,6 +50,7 @@ set(HEADER_FILES
   rendering/pointcloud/sizemappingcomponent.h
   rendering/renderablecartesianaxes.h
   rendering/renderabledisc.h
+  rendering/renderabledistancelabel.h
   rendering/renderablelabel.h
   rendering/renderablemodel.h
   rendering/renderablenodearrow.h
@@ -75,14 +76,17 @@ set(HEADER_FILES
   rotation/constantrotation.h
   rotation/fixedrotation.h
   rotation/luarotation.h
+  rotation/multirotation.h
   rotation/staticrotation.h
   scale/luascale.h
+  scale/multiscale.h
   scale/nonuniformstaticscale.h
   scale/staticscale.h
   scale/timedependentscale.h
   timeframe/timeframeinterval.h
   timeframe/timeframeunion.h
   translation/luatranslation.h
+  translation/multitranslation.h
   translation/statictranslation.h
   translation/timelinetranslation.h
 )
@@ -114,6 +118,7 @@ set(SOURCE_FILES
   rendering/pointcloud/sizemappingcomponent.cpp
   rendering/renderablecartesianaxes.cpp
   rendering/renderabledisc.cpp
+  rendering/renderabledistancelabel.cpp
   rendering/renderablelabel.cpp
   rendering/renderablemodel.cpp
   rendering/renderablenodearrow.cpp
@@ -140,14 +145,17 @@ set(SOURCE_FILES
   rotation/constantrotation.cpp
   rotation/fixedrotation.cpp
   rotation/luarotation.cpp
+  rotation/multirotation.cpp
   rotation/staticrotation.cpp
   scale/luascale.cpp
+  scale/multiscale.cpp
   scale/nonuniformstaticscale.cpp
   scale/staticscale.cpp
   scale/timedependentscale.cpp
   timeframe/timeframeinterval.cpp
   timeframe/timeframeunion.cpp
   translation/luatranslation.cpp
+  translation/multitranslation.cpp
   translation/statictranslation.cpp
   translation/timelinetranslation.cpp
 )

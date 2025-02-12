@@ -39,7 +39,7 @@ struct TileProvider;
  * Convenience class for dealing with multiple `Layer`s.
  */
 struct LayerGroup : public properties::PropertyOwner {
-    LayerGroup(layers::Group group);
+    explicit LayerGroup(layers::Group group);
 
     void initialize();
     void deinitialize();

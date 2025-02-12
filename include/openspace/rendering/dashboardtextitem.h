@@ -39,10 +39,10 @@ namespace documentation { struct Documentation; }
 
 class DashboardTextItem : public DashboardItem {
 public:
-    static documentation::Documentation Documentation();
-
-    DashboardTextItem(const ghoul::Dictionary& dictionary, float fontSize = 10.f,
+    explicit DashboardTextItem(const ghoul::Dictionary& dictionary, float fontSize = 10.f,
         const std::string& fontName = "Mono");
+
+    static documentation::Documentation Documentation();
 
 protected:
     properties::StringProperty _fontName;

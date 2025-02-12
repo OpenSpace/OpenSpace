@@ -44,7 +44,7 @@ class Envelope;
 
 class TransferFunctionHandler : public properties::PropertyOwner {
 public:
-    TransferFunctionHandler(properties::StringProperty prop);
+    explicit TransferFunctionHandler(properties::StringProperty prop);
 
     void initialize();
 

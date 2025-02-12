@@ -89,6 +89,8 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
+option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
+
 if (MSVC)
   option(OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION "Raise exceptions when encountering Inf's or Nan's in floating point numbers" OFF)
 
@@ -183,11 +185,6 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/modules")
 end_header("End: Configuring Modules")
 
 
-add_subdirectory(support/coding/codegen/tests)
-set_target_properties(run_test_codegen PROPERTIES FOLDER "Unit Tests/support")
-set_target_properties(codegentest PROPERTIES FOLDER "Unit Tests")
-
-
 begin_header("Configuring Applications")
 add_subdirectory(apps)
 end_header("End: Configuring Applications")
@@ -198,8 +195,11 @@ if (MSVC AND TARGET OpenSpace)
 endif ()
 
 
-option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
 if (OPENSPACE_HAVE_TESTS)
+  add_subdirectory(support/coding/codegen/tests)
+  set_target_properties(run_test_codegen PROPERTIES FOLDER "Unit Tests/support")
+  set_target_properties(codegentest PROPERTIES FOLDER "Unit Tests")
+
   begin_header("Generating OpenSpace unit test")
   add_subdirectory(tests)
   end_header()

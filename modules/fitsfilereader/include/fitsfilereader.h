@@ -60,7 +60,7 @@ struct TableData {
 
 class FitsFileReader {
 public:
-    FitsFileReader(bool verboseMode);
+    explicit FitsFileReader(bool verboseMode);
     ~FitsFileReader();
 
     template<typename T>

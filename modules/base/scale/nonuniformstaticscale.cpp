@@ -56,7 +56,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation NonUniformStaticScale::Documentation() {
-    return codegen::doc<Parameters>("base_scale_nonuniformstatic");
+    return codegen::doc<Parameters>("base_transform_scale_nonuniformstatic");
 }
 
 NonUniformStaticScale::NonUniformStaticScale(const ghoul::Dictionary& dictionary)

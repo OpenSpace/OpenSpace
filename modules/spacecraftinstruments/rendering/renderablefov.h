@@ -47,7 +47,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableFov : public Renderable {
 public:
-    RenderableFov(const ghoul::Dictionary& dictionary);
+    explicit RenderableFov(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;

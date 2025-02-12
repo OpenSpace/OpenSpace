@@ -1,0 +1,24 @@
+-- Ring
+-- The `RenderableRadialGrid` can also be used to create a simple ring. This is done by
+-- setting the number of segments in each direction to 1 and make sure the inner radius
+-- is zero (which is the default).
+
+local Node = {
+  Identifier = "RenderableRadialGrid_Example_Ring",
+  Renderable = {
+    Type = "RenderableRadialGrid",
+    GridSegments = { 1, 1 }
+  },
+  GUI = {
+    Name = "RenderableRadialGrid - Ring",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

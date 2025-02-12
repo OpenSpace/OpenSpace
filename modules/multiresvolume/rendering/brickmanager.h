@@ -37,7 +37,7 @@ class BrickManager {
 public:
     enum BUFFER_INDEX { EVEN = 0, ODD = 1 };
 
-    BrickManager(TSP* tsp);
+    explicit BrickManager(TSP* tsp);
     ~BrickManager();
 
     bool readHeader();

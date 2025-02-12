@@ -56,7 +56,7 @@ struct LinePoint;
 
 class RenderableLabel : public Renderable {
 public:
-    RenderableLabel(const ghoul::Dictionary& dictionary);
+    explicit RenderableLabel(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;
@@ -72,6 +72,8 @@ public:
 
 protected:
     properties::OptionProperty _blendMode;
+
+    properties::StringProperty _text;
 
     float unit(int unit) const;
 
@@ -91,8 +93,6 @@ private:
     properties::FloatProperty _fontSize;
     properties::FloatProperty _size;
     properties::IVec2Property _minMaxSize;
-
-    properties::StringProperty _text;
 
     properties::BoolProperty _enableFadingEffect;
     properties::Vec2Property _fadeWidths;

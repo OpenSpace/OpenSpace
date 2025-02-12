@@ -47,7 +47,7 @@ enum class Type : uint32_t {
 
 struct CameraKeyframe {
     CameraKeyframe() = default;
-    CameraKeyframe(const std::vector<char>& buffer) {
+    explicit CameraKeyframe(const std::vector<char>& buffer) {
         deserialize(buffer);
     }
     CameraKeyframe(glm::dvec3 pos, glm::dquat rot, std::string focusNode,

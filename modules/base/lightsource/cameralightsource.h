@@ -37,12 +37,12 @@ namespace documentation { struct Documentation; }
 class CameraLightSource : public LightSource {
 public:
     CameraLightSource();
-    CameraLightSource(const ghoul::Dictionary& dictionary);
-
-    static documentation::Documentation Documentation();
+    explicit CameraLightSource(const ghoul::Dictionary& dictionary);
 
     glm::vec3 directionViewSpace(const RenderData& renderData) const override;
     float intensity() const override;
+
+    static documentation::Documentation Documentation();
 
 private:
     properties::FloatProperty _intensity;

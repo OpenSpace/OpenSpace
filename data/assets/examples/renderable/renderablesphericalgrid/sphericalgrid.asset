@@ -1,0 +1,27 @@
+-- Basic
+-- This example adds a spherical grid with a radius of 100 meters.
+
+local Node = {
+  Identifier = "RenderableSphericalGrid_Example",
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 100.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableSphericalGrid"
+  },
+  GUI = {
+    Name = "RenderableSphericalGrid - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

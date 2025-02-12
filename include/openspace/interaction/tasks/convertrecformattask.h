@@ -40,10 +40,13 @@ public:
         ToAscii = 0,
         ToBinary
     };
-    ConvertRecFormatTask(const ghoul::Dictionary& dictionary);
+
+    explicit ConvertRecFormatTask(const ghoul::Dictionary& dictionary);
     ~ConvertRecFormatTask() override = default;
+
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
+
     static documentation::Documentation documentation();
 
 private:

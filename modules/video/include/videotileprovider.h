@@ -43,7 +43,7 @@ namespace openspace::globebrowsing {
 
 class VideoTileProvider : public TileProvider {
 public:
-    VideoTileProvider(const ghoul::Dictionary& dictionary);
+    explicit VideoTileProvider(const ghoul::Dictionary& dictionary);
     ~VideoTileProvider() override;
 
     void update() override final;

@@ -40,7 +40,7 @@ public:
 
     GeodeticPatch(const GeodeticPatch& patch) = default;
 
-    GeodeticPatch(const TileIndex& tileIndex);
+    explicit GeodeticPatch(const TileIndex& tileIndex);
 
     void setCenter(Geodetic2 center);
     void setHalfSize(Geodetic2 halfSize);

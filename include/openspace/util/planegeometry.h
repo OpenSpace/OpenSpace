@@ -32,8 +32,8 @@ namespace openspace {
 
 class PlaneGeometry {
 public:
-    PlaneGeometry(glm::vec2 size);
-    PlaneGeometry(float size);
+    explicit PlaneGeometry(glm::vec2 size);
+    explicit PlaneGeometry(float size);
 
     ~PlaneGeometry();
 

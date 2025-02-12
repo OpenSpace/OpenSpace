@@ -22,29 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VISLAB___RENDERABLEDISTANCELABEL___H__
-#define __OPENSPACE_MODULE_VISLAB___RENDERABLEDISTANCELABEL___H__
+#include <modules/base/translation/multitranslation.h>
 
-#include <modules/base/rendering/renderablelabel.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
+#include <openspace/util/updatestructures.h>
+#include <openspace/util/time.h>
+#include <optional>
+
+namespace {
+    // This Translation type combines multiple translations that are applied one after the
+    // other.
+    struct [[codegen::Dictionary(MultiTranslation)]] Parameters {
+        // The list of translations that are applied one after the other
+        std::vector<ghoul::Dictionary> translations
+            [[codegen::reference("core_transform_translation")]];
+    };
+#include "multitranslation_codegen.cpp"
+} // namespace
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+documentation::Documentation MultiTranslation::Documentation() {
+    return codegen::doc<Parameters>("base_transform_translation_multi");
+}
 
-class RenderableDistanceLabel : public RenderableLabel {
-public:
-     RenderableDistanceLabel(const ghoul::Dictionary& dictionary);
+MultiTranslation::MultiTranslation(const ghoul::Dictionary& dictionary) {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-     void update(const UpdateData& data) override;
-     static documentation::Documentation Documentation();
+    int i = 0;
+    for (const ghoul::Dictionary& trans : p.translations) {
+        ghoul::mm_unique_ptr<Translation> translation =
+            Translation::createFromDictionary(trans);
+        translation->setGuiName(std::format("{}: {}", i, translation->guiName()));
+        translation->setIdentifier(std::format("{}_{}", i, translation->identifier()));
+        addPropertySubOwner(translation.get());
+        _translations.push_back(std::move(translation));
+        i++;
+    }
+}
 
-private:
-     properties::StringProperty _nodelineId;
-     properties::IntProperty _distanceUnit;
-     properties::StringProperty _customUnitDescriptor;
-     bool _errorThrown = false;
-};
+glm::dvec3 MultiTranslation::position(const UpdateData& data) const {
+    glm::dvec3 res = glm::dvec3(1.0);
+    for (const ghoul::mm_unique_ptr<Translation>& rot : _translations) {
+        res += rot->position(data);
+    }
+    return res;
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_VISLAB___RENDERABLEDISTANCELABEL___H__

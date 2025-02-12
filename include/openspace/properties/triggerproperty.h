@@ -62,14 +62,6 @@ public:
     void setLuaValue(lua_State* state) override;
 
     /**
-     * Silently ignores any value that is passed into this function and will trigger the
-     * listeners regardless of the value
-     *
-     * \param value The ignored value
-     */
-    void set(std::any value) override;
-
-    /**
      * Triggers this TriggerProperty.
      */
     void trigger();

@@ -84,7 +84,7 @@ public:
         std::string time;
     };
 
-    Scene(std::unique_ptr<SceneInitializer> initializer);
+    explicit Scene(std::unique_ptr<SceneInitializer> initializer);
     virtual ~Scene() override;
 
     /**

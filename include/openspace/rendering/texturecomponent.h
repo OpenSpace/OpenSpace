@@ -36,7 +36,7 @@ namespace openspace {
 class TextureComponent {
 public:
     // nDimensions must be 1, 2, 3
-    TextureComponent(int nDimensions);
+    explicit TextureComponent(int nDimensions);
 
     const ghoul::opengl::Texture* texture() const;
     ghoul::opengl::Texture* texture();

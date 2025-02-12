@@ -42,7 +42,7 @@ namespace openspace {
 
 class RenderableGrid : public Renderable {
 public:
-    RenderableGrid(const ghoul::Dictionary& dictionary);
+    explicit RenderableGrid(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;

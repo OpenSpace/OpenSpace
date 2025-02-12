@@ -46,7 +46,7 @@ struct UpdateData;
 
 class RenderablePlaneProjection : public Renderable {
 public:
-    RenderablePlaneProjection(const ghoul::Dictionary& dictionary);
+    explicit RenderablePlaneProjection(const ghoul::Dictionary& dictionary);
     ~RenderablePlaneProjection() override = default;
 
     void initializeGL() override;

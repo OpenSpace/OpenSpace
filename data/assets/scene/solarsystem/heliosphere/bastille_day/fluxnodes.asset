@@ -15,7 +15,7 @@ local fluxNodesBinaries = asset.resource({
 -- FluxNodes from binaries
 local Fluxnodes = {
   Identifier = "MAS-MHD-FluxNodes-bastille-day-2000",
-  Parent = heliosphereTransforms.HEEQ180ReferenceFrame.Identifier,
+  Parent = heliosphereTransforms.HeliocentricEarthEquatorial180.Identifier,
   -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
   -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
   InteractionSphere = 695700000.0,

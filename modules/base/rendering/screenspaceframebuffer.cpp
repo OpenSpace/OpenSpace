@@ -164,7 +164,7 @@ void ScreenSpaceFramebuffer::setSize(glm::vec4 size) {
     _size = std::move(size);
 }
 
-void ScreenSpaceFramebuffer::addRenderFunction(std::function<void()> renderFunction) {
+void ScreenSpaceFramebuffer::addRenderFunction(RenderFunction renderFunction) {
     _renderFunctions.push_back(std::move(renderFunction));
 }
 

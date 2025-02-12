@@ -39,7 +39,7 @@ namespace documentation { struct Documentation; }
 
 class RenderablePlaneImageLocal : public RenderablePlane {
 public:
-    RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary);
+    explicit RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;

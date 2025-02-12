@@ -22,30 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/vislab/vislabmodule.h>
+#ifndef __OPENSPACE_MODULE_BASE___MULTIROTATION___H__
+#define __OPENSPACE_MODULE_BASE___MULTIROTATION___H__
 
-#include <modules/vislab/rendering/renderabledistancelabel.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
+#include <openspace/scene/rotation.h>
+
+#include <vector>
 
 namespace openspace {
 
-VisLabModule::VisLabModule() : OpenSpaceModule(Name) {}
+struct UpdateData;
 
-void VisLabModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Renderable>* renderableFactory =
-        FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(renderableFactory, "No renderable factory existed");
+namespace documentation { struct Documentation; }
 
-    renderableFactory->registerClass<RenderableDistanceLabel>("RenderableDistanceLabel");
-}
+class MultiRotation : public Rotation {
+public:
+    explicit MultiRotation(const ghoul::Dictionary& dictionary);
 
-std::vector<documentation::Documentation>VisLabModule::documentations() const {
-    return {
-        RenderableDistanceLabel::Documentation()
-    };
-}
+    glm::dmat3 matrix(const UpdateData& data) const override;
+
+    static documentation::Documentation Documentation();
+
+private:
+    std::vector<ghoul::mm_unique_ptr<Rotation>> _rotations;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_BASE___MULTIROTATION___H__
