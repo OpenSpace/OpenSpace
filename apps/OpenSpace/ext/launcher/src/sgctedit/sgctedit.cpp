@@ -26,19 +26,20 @@
 
 #include <sgctedit/displaywindowunion.h>
 #include <sgctedit/monitorbox.h>
+#include <sgctedit/windowcontrol.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 #include <QApplication>
 #include <QCheckBox>
+#include <QColor>
 #include <QComboBox>
 #include <QFileDialog>
-#include <QFrame>
 #include <QLabel>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QScreen>
 #include <QVBoxLayout>
-#include <filesystem>
+#include <fstream>
 
 namespace {
     constexpr QRect MonitorWidgetSize = QRect(0, 0, 500, 500);
@@ -98,17 +99,31 @@ namespace {
     }
 } // namespace
 
-SgctEdit::SgctEdit(const sgct::config::Cluster& cluster, std::string configName,
+SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
                    std::filesystem::path configBasePath, QWidget* parent)
     : QDialog(parent)
-    , _cluster(cluster)
+    , _cluster(std::move(cluster))
     , _userConfigPath(std::move(configBasePath))
     , _configurationFilename(std::move(configName))
-    , _didImportValues(!_configurationFilename.empty())
 {
     setWindowTitle("Window Configuration Editor");
 
     if (_cluster.nodes.empty()) {
+        _cluster.nodes.emplace_back();
+        sgct::config::Node& node = _cluster.nodes.back();
+
+        sgct::config::User user = {
+            .eyeSeparation = 0.065f,
+            .position = sgct::vec3{ 0.f, 0.f, 0.f }
+        };
+        _cluster.users = { user };
+
+        //
+        // Generate addresses
+        _cluster.masterAddress = "localhost";
+        node.address = "localhost";
+        node.port = 20401;
+
         createWidgets(createMonitorInfoSet(), 1, true);
         return;
     }
@@ -319,6 +334,10 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
         "this first window. The remaining windows will render\nnormally but they will "
         "not show the user interface"
     );
+    connect(
+        _showUiOnFirstWindow, &QCheckBox::clicked,
+        this, &SgctEdit::firstWindowGuiOptionClicked
+    );
     firstWindowSelectionLayout->addWidget(_showUiOnFirstWindow);
 
     _firstWindowGraphicsSelection = new QComboBox;
@@ -331,6 +350,7 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
         _firstWindowGraphicsSelection, &QComboBox::setEnabled
     );
     firstWindowSelectionLayout->addWidget(_firstWindowGraphicsSelection);
+    firstWindowSelectionLayout->addStretch();
     settingsLayout->addLayout(firstWindowSelectionLayout);
 
 
@@ -411,17 +431,10 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
         this, &SgctEdit::nWindowsDisplayedChanged
     );
     connect(
-        _firstWindowGraphicsSelection,
-        &QComboBox::currentTextChanged,
-        this,
-        &SgctEdit::firstWindowGraphicsSelectionChanged
+        _firstWindowGraphicsSelection, &QComboBox::currentTextChanged,
+        this, &SgctEdit::firstWindowGraphicsSelectionChanged
     ); 
-    connect(
-        _showUiOnFirstWindow,
-        &QCheckBox::clicked,
-        this,
-        &SgctEdit::firstWindowGuiOptionClicked
-    ); 
+
 
     //
     // Button box
@@ -439,10 +452,10 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
         connect(cancelButton, &QPushButton::released, this, &SgctEdit::reject);
         layoutButtonBox->addWidget(cancelButton);
 
-        QPushButton* saveButton = new QPushButton(_didImportValues ? "Save" : "Save as");
+        QPushButton* saveButton = new QPushButton("Save");
         saveButton->setToolTip("Save configuration changes");
         saveButton->setFocusPolicy(Qt::NoFocus);
-        connect(saveButton, &QPushButton::released, this, &SgctEdit::save);
+        connect(saveButton, &QPushButton::released, this, &SgctEdit::saveCluster);
         layoutButtonBox->addWidget(saveButton);
 
         QPushButton* applyButton = new QPushButton("Apply Without Saving");
@@ -456,11 +469,12 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
 }
 
 std::filesystem::path SgctEdit::saveFilename() const {
-    return _saveTarget;
+    return _configurationFilename;
 }
 
-void SgctEdit::save() {
+void SgctEdit::saveCluster() {
     generateConfiguration();
+
     if (hasWindowIssues(_cluster)) {
         const int ret = QMessageBox::warning(
             this,
@@ -477,11 +491,7 @@ void SgctEdit::save() {
         }
     }
 
-    if (_didImportValues) {
-        _saveTarget = _configurationFilename;
-        accept();
-    }
-    else {
+    if (_configurationFilename.empty()) {
         const QString fileName = QFileDialog::getSaveFileName(
             this,
             "Save Window Configuration File",
@@ -493,41 +503,41 @@ void SgctEdit::save() {
             , QFileDialog::DontUseNativeDialog
 #endif // __linux__
         );
-        if (!fileName.isEmpty()) {
-            _saveTarget = fileName.toStdString();
-            accept();
+        if (fileName.isEmpty()) {
+            return;
         }
+
+        _configurationFilename = fileName.toStdString();
+    }
+
+    ghoul_assert(!_configurationFilename.empty(), "Filename must not be empty");
+
+    // Save the cluster configuration
+    std::ofstream outFile;
+    outFile.open(_configurationFilename, std::ofstream::out);
+    if (outFile.good()) {
+        sgct::config::GeneratorVersion genEntry = VersionMin;
+        outFile << sgct::serializeConfig(_cluster, genEntry);
+        accept();
+    }
+    else {
+        QMessageBox::critical(
+            this,
+            "Exception",
+            QString::fromStdString(std::format(
+                "Error writing data to file '{}'", _configurationFilename
+            ))
+        );
     }
 }
 
 void SgctEdit::apply() {
-    generateConfiguration();
-    if (hasWindowIssues(_cluster)) {
-        const int ret = QMessageBox::warning(
-            this,
-            "Window Sizes Incompatible",
-            "Window sizes for multiple windows have to be strictly ordered, meaning that "
-            "the size of window 1 has to be bigger in each dimension than window 2, "
-            "window 2 has to be bigger than window 3 (if it exists), and window 3 has to "
-            "be bigger than window 4.\nOtherwise, rendering errors might occur.\n\nAre "
-            "you sure you want to continue?",
-            QMessageBox::Yes | QMessageBox::No
-        );
-        if (ret == QMessageBox::No) {
-            return;
-        }
+    std::filesystem::path userTmp = _userConfigPath / "temp";
+    if (!std::filesystem::is_directory(absPath(userTmp))) {
+        std::filesystem::create_directories(absPath(userTmp));
     }
-
-    std::string userCfgTempDir = _userConfigPath.string();
-    if (userCfgTempDir.back() != '/') {
-        userCfgTempDir += '/';
-    }
-    userCfgTempDir += "temp";
-    if (!std::filesystem::is_directory(absPath(userCfgTempDir))) {
-        std::filesystem::create_directories(absPath(userCfgTempDir));
-    }
-    _saveTarget = userCfgTempDir + "/apply-without-saving.json";
-    accept();
+    _configurationFilename = (userTmp / "apply-without-saving.json").string();
+    saveCluster();
 }
 
 void SgctEdit::generateConfiguration() {
@@ -563,23 +573,6 @@ void SgctEdit::generateConfiguration() {
     else {
         _cluster.settings = std::nullopt;
     }
-
-    if (!_didImportValues) {
-        //
-        // Generate users
-        sgct::config::User user = {
-            .eyeSeparation = 0.065f,
-            .position = sgct::vec3{ 0.f, 0.f, 0.f }
-        };
-        _cluster.users = { user };
-
-        //
-        // Generate addresses
-        _cluster.masterAddress = "localhost";
-        node.address = "localhost";
-        node.port = 20401;
-    }
-
 
     //
     // Resize windows according to selected
@@ -659,11 +652,7 @@ void SgctEdit::generateConfiguration() {
     }
 }
 
-sgct::config::Cluster SgctEdit::cluster() const {
-    return _cluster;
-}
-
-void SgctEdit::firstWindowGraphicsSelectionChanged(const QString&) {
+void SgctEdit::firstWindowGraphicsSelectionChanged() {
     if ((_showUiOnFirstWindow->isChecked() && _showUiOnFirstWindow->isEnabled())) {
         const int newSetting = _firstWindowGraphicsSelection->currentIndex();
         _displayWidget->activeWindowControls()[0]->setVisibilityOfProjectionGui(
@@ -674,7 +663,7 @@ void SgctEdit::firstWindowGraphicsSelectionChanged(const QString&) {
 
 void SgctEdit::firstWindowGuiOptionClicked(bool checked) {
     if (checked) {
-        firstWindowGraphicsSelectionChanged("");
+        firstWindowGraphicsSelectionChanged();
     }
     else {
         _displayWidget->activeWindowControls()[0]->setVisibilityOfProjectionGui(true);
@@ -686,12 +675,11 @@ void SgctEdit::nWindowsDisplayedChanged(int newCount) {
         _displayWidget->activeWindowControls()[0]->setVisibilityOfProjectionGui(true);
     }
     else {
-        firstWindowGraphicsSelectionChanged("");
+        firstWindowGraphicsSelectionChanged();
     }
 
     constexpr int CountOneWindow = 1;
     constexpr int CountTwoWindows = 2;
-    int graphicsSelect = std::max(0, _firstWindowGraphicsSelection->currentIndex());
 
     QList<QString> graphicsOptions = { "None (GUI only)" };
     for (int i = CountOneWindow; i <= newCount; i++) {
@@ -701,6 +689,7 @@ void SgctEdit::nWindowsDisplayedChanged(int newCount) {
     _firstWindowGraphicsSelection->addItems(graphicsOptions);
     _showUiOnFirstWindow->setEnabled(newCount > CountOneWindow);
     _firstWindowGraphicsSelection->setEnabled(newCount > CountOneWindow);
+    int graphicsSelect = std::max(0, _firstWindowGraphicsSelection->currentIndex());
     if (graphicsSelect > newCount) {
         graphicsSelect = newCount;
     }

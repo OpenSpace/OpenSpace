@@ -482,7 +482,7 @@ void LauncherWindow::editConfiguration() {
     SgctEdit editor = SgctEdit(cluster, path, _userConfigPath, this);
     ret = editor.exec();
     if (ret == QDialog::DialogCode::Accepted) {
-        handleReturnFromWindowEditor(editor.cluster(), editor.saveFilename());
+        handleReturnFromWindowEditor(editor.saveFilename());
     }
 }
 
@@ -490,7 +490,7 @@ void LauncherWindow::newConfiguration() {
     SgctEdit editor = SgctEdit(sgct::config::Cluster(), "", _userConfigPath, this);
     int ret = editor.exec();
     if (ret == QDialog::DialogCode::Accepted) {
-        handleReturnFromWindowEditor(editor.cluster(), editor.saveFilename());
+        handleReturnFromWindowEditor(editor.saveFilename());
     }
 }
 
@@ -661,26 +661,7 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
     }
 }
 
-void LauncherWindow::handleReturnFromWindowEditor(const sgct::config::Cluster& cluster,
-                                                  std::filesystem::path savePath)
-{
-    std::ofstream outFile;
-    outFile.open(savePath, std::ofstream::out);
-
-    if (outFile.good()) {
-        sgct::config::GeneratorVersion genEntry = VersionMin;
-        outFile << sgct::serializeConfig(cluster, genEntry);
-    }
-    else {
-        QMessageBox::critical(
-            this,
-            "Exception",
-            QString::fromStdString(std::format(
-                "Error writing data to file '{}'", savePath
-            ))
-        );
-    }
-
+void LauncherWindow::handleReturnFromWindowEditor(std::filesystem::path savePath) {
     // Truncate path to convert this back to path relative to _userConfigPath
     std::filesystem::path p = std::filesystem::proximate(savePath, _userConfigPath);
 

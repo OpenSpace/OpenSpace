@@ -115,8 +115,7 @@ private:
     // Actually open the profile editor
     void openProfileEditor(const std::string& profile, bool isUserProfile);
 
-    void handleReturnFromWindowEditor(const sgct::config::Cluster& cluster,
-        std::filesystem::path savePath);
+    void handleReturnFromWindowEditor(std::filesystem::path savePath);
 
     // Returns true if a valid profile and window configuration has been chosen
     bool hasValidSelection() const;

@@ -28,15 +28,13 @@
 #include <QDialog>
 
 #include <sgct/config.h>
-#include <sgctedit/windowcontrol.h>
-#include <QColor>
-#include <array>
 #include <filesystem>
 #include <string>
 
 class DisplayWindowUnion;
-class QBoxLayout;
-class QWidget;
+class QCheckBox;
+class QComboBox;
+class QLineEdit;
 
 const sgct::config::GeneratorVersion VersionMin { "SgctWindowConfig", 1, 1 };
 const sgct::config::GeneratorVersion VersionLegacy18 { "OpenSpace", 0, 18 };
@@ -55,7 +53,7 @@ public:
      * \param configBasePath The path to the folder where default config files reside
      * \param parent Pointer to parent Qt widget
      */
-    SgctEdit(const sgct::config::Cluster& cluster, std::string configName,
+    SgctEdit(sgct::config::Cluster cluster, std::string configName,
         std::filesystem::path configBasePath, QWidget* parent);
 
     /**
@@ -64,13 +62,6 @@ public:
      * \return The saved filename in std::string
      */
     std::filesystem::path saveFilename() const;
-
-    /**
-     * Returns the generated Cluster object.
-     *
-     * \return The generated Cluster object
-     */
-    sgct::config::Cluster cluster() const;
 
 private slots:
     /**
@@ -89,17 +80,15 @@ private slots:
 
     /**
      * Called when the QComboBox is selected and has a new value
-     *
-     * \param text The QString of the selected value
      */
-    void firstWindowGraphicsSelectionChanged(const QString& text);
+    void firstWindowGraphicsSelectionChanged();
 
 private:
     void createWidgets(const std::vector<QRect>& monitorSizes, unsigned int nWindows,
         bool setToDefaults);
     void generateConfiguration();
 
-    void save();
+    void saveCluster();
     void apply();
 
     DisplayWindowUnion* _displayWidget = nullptr;
@@ -116,14 +105,10 @@ private:
     int _stateOfUiOnFirstWindowPreviousCount = 1;
     bool _stateOfUiOnFirstWindowWhenDisabled = false;
 
-
     sgct::config::Cluster _cluster;
     const std::filesystem::path _userConfigPath;
 
     std::string _configurationFilename;
-
-    std::string _saveTarget;
-    bool _didImportValues = false;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___SGCTEDIT___H__
