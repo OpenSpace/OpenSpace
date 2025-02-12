@@ -114,6 +114,7 @@ DashboardItemElapsedTime::DashboardItemElapsedTime(const ghoul::Dictionary& dict
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _formatString = p.formatString.value_or(_formatString);
+    addProperty(_formatString);
 
     _referenceTime.onChange([this]() {
         _referenceJ2000 = Time::convertTime(_referenceTime);
