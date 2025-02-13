@@ -108,26 +108,6 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
 {
     setWindowTitle("Window Configuration Editor");
 
-    if (_cluster.nodes.empty()) {
-        _cluster.nodes.emplace_back();
-        sgct::config::Node& node = _cluster.nodes.back();
-
-        sgct::config::User user = {
-            .eyeSeparation = 0.065f,
-            .position = sgct::vec3{ 0.f, 0.f, 0.f }
-        };
-        _cluster.users = { user };
-
-        //
-        // Generate addresses
-        _cluster.masterAddress = "localhost";
-        node.address = "localhost";
-        node.port = 20401;
-
-        createWidgets(createMonitorInfoSet(), 1, true);
-        return;
-    }
-
     const size_t nWindows = _cluster.nodes.front().windows.size();
     std::vector<QRect> monitorSizes = createMonitorInfoSet();
     createWidgets(monitorSizes, static_cast<unsigned int>(nWindows), false);
@@ -293,6 +273,7 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
             MaxNumberWindows,
             ColorsForWindows,
             setToDefaults,
+            nWindows,
             this
         );
         connect(
@@ -303,11 +284,6 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
             _displayWidget, &DisplayWindowUnion::nWindowsChanged,
             monitorBox, &MonitorBox::nWindowsDisplayedChanged
         );
-
-        for (unsigned int i = 0; i < nWindows; i++) {
-            _displayWidget->addWindow();
-        }
-
         displayLayout->addWidget(_displayWidget);
 
         layout->addWidget(displayFrame);

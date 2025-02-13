@@ -36,11 +36,15 @@
 DisplayWindowUnion::DisplayWindowUnion(const std::vector<QRect>& monitorSizeList,
                                        int nMaxWindows,
                                        const std::array<QColor, 4>& windowColors,
-                                       bool resetToDefault, QWidget* parent)
+                                       bool resetToDefault, int nWindows, QWidget* parent)
     : QWidget(parent)
 {
     createWidgets(nMaxWindows, monitorSizeList, windowColors, resetToDefault);
     showWindows();
+
+    for (int i = 0; i < nWindows; i++) {
+        addWindow();
+    }
 }
 
 void DisplayWindowUnion::createWidgets(int nMaxWindows,

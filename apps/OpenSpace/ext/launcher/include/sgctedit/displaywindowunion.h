@@ -54,7 +54,7 @@ public:
      */
     DisplayWindowUnion(const std::vector<QRect>& monitorSizeList,
         int nMaxWindows, const std::array<QColor, 4>& windowColors, bool resetToDefault,
-        QWidget* parent = nullptr);
+        int nWindows, QWidget* parent = nullptr);
 
     /**
      * Returns a vector of pointers to the WindowControl objects for all visible windows.
