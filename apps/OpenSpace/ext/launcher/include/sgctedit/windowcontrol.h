@@ -58,13 +58,11 @@ public:
      * \param windowIndex The zero-based window index
      * \param monitorDims Vector of monitor dimensions in QRect form
      * \param winColor A QColor object for this window's unique color
-     * \param resetToDefault If this is `true`, the widgets will be initialized to their
-     *        default values
      * \param parent The parent widget
      */
     WindowControl(int monitorIndex, int windowIndex,
         const std::vector<QRect>& monitorDims, const QColor& winColor,
-        bool resetToDefault, QWidget* parent);
+        QWidget* parent);
 
     /**
      * Makes the window label at top of a window control column visible.

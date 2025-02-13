@@ -27,6 +27,7 @@
 
 #include <QWidget>
 
+#include <sgct/config.h>
 #include <vector>
 
 class QFrame;
@@ -53,8 +54,11 @@ public:
      * \param parent The parent to which this widget belongs
      */
     DisplayWindowUnion(const std::vector<QRect>& monitorSizeList,
-        int nMaxWindows, const std::array<QColor, 4>& windowColors, bool resetToDefault,
+        int nMaxWindows, const std::array<QColor, 4>& windowColors,
         int nWindows, QWidget* parent = nullptr);
+
+    void initialize(const std::vector<QRect>& monitorSizeList,
+        const sgct::config::Cluster& cluster);
 
     /**
      * Returns a vector of pointers to the WindowControl objects for all visible windows.
@@ -62,14 +66,6 @@ public:
      * \return The vector of pointers of WindowControl objects
      */
     std::vector<WindowControl*> activeWindowControls() const;
-
-    /**
-     * Returns a vector of pointers to the WindowControl objects for all windows, whether
-     * they are visible or not.
-     *
-     * \return The vector of pointers of all WindowControl objects
-     */
-    std::vector<WindowControl*>& windowControls();
 
     /**
      * When called will add a new window to the set of windows, which will, in turn, send
@@ -110,12 +106,12 @@ signals:
 
 private:
     void createWidgets(int nMaxWindows, const std::vector<QRect>& monitorResolutions,
-        std::array<QColor, 4> windowColors, bool resetToDefault);
+        std::array<QColor, 4> windowColors);
     void showWindows();
 
     unsigned int _nWindowsDisplayed = 0;
 
-    std::vector<WindowControl*> _windowControl;
+    std::vector<WindowControl*> _windowControls;
     QPushButton* _addWindowButton = nullptr;
     QPushButton* _removeWindowButton = nullptr;
     std::vector<QFrame*> _frameBorderLines;

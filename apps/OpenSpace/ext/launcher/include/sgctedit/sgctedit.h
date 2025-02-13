@@ -84,8 +84,7 @@ private slots:
     void firstWindowGraphicsSelectionChanged();
 
 private:
-    void createWidgets(const std::vector<QRect>& monitorSizes, unsigned int nWindows,
-        bool setToDefaults);
+    void createWidgets(unsigned int nWindows);
     void generateConfiguration();
 
     void saveCluster();

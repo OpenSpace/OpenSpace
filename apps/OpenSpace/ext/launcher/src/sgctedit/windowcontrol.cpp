@@ -87,7 +87,7 @@ namespace {
 
 WindowControl::WindowControl(int monitorIndex, int windowIndex,
                              const std::vector<QRect>& monitorDims,
-                             const QColor& winColor, bool resetToDefault, QWidget* parent)
+                             const QColor& winColor, QWidget* parent)
     : QWidget(parent)
     , _monitorIndexDefault(monitorIndex)
     , _windowIndex(windowIndex)
@@ -96,9 +96,7 @@ WindowControl::WindowControl(int monitorIndex, int windowIndex,
     , _unlockIcon(":/images/outline_unlocked.png")
 {
     createWidgets(winColor);
-    if (resetToDefault) {
-        resetToDefaults();
-    }
+    resetToDefaults();
 }
 
 void WindowControl::createWidgets(const QColor& windowColor) {

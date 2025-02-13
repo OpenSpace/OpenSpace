@@ -33,13 +33,18 @@
 #include <array>
 #include <string>
 
+namespace {
+    template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+    template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+} // namespace
+
 DisplayWindowUnion::DisplayWindowUnion(const std::vector<QRect>& monitorSizeList,
                                        int nMaxWindows,
                                        const std::array<QColor, 4>& windowColors,
-                                       bool resetToDefault, int nWindows, QWidget* parent)
+                                       int nWindows, QWidget* parent)
     : QWidget(parent)
 {
-    createWidgets(nMaxWindows, monitorSizeList, windowColors, resetToDefault);
+    createWidgets(nMaxWindows, monitorSizeList, windowColors);
     showWindows();
 
     for (int i = 0; i < nWindows; i++) {
@@ -47,10 +52,85 @@ DisplayWindowUnion::DisplayWindowUnion(const std::vector<QRect>& monitorSizeList
     }
 }
 
+void DisplayWindowUnion::initialize(const std::vector<QRect>& monitorSizeList,
+                                    const sgct::config::Cluster& cluster)
+{
+    const size_t nWindows = cluster.nodes.front().windows.size();
+    const size_t existingWindowsControlSize = _windowControls.size();
+    for (size_t i = 0; i < nWindows; i++) {
+        const sgct::config::Window& w = cluster.nodes.front().windows[i];
+        WindowControl* wCtrl = _windowControls[i];
+        if (i < existingWindowsControlSize && wCtrl) {
+            unsigned int monitorNum = 0;
+            if (w.monitor.has_value()) {
+                monitorNum = static_cast<unsigned int>(*w.monitor);
+                if (monitorNum > (monitorSizeList.size() - 1)) {
+                    monitorNum = 0;
+                }
+            }
+            unsigned int posX = 0;
+            unsigned int posY = 0;
+            wCtrl->setMonitorSelection(monitorNum);
+            if (w.pos.has_value()) {
+                posX = w.pos->x;
+                posY = w.pos->y;
+                // Convert offsets to coordinates relative to the selected monitor bounds,
+                // since window offsets are stored n the sgct config file relative to the
+                // coordinates of the total "canvas" of all displays
+                if (monitorSizeList.size() > monitorNum) {
+                    posX -= monitorSizeList[monitorNum].x();
+                    posY -= monitorSizeList[monitorNum].y();
+                }
+            }
+            const QRectF newDims = QRectF(posX, posY, w.size.x, w.size.y);
+            wCtrl->setDimensions(newDims);
+            if (w.name.has_value()) {
+                wCtrl->setWindowName(*w.name);
+            }
+            if (w.isDecorated.has_value()) {
+                wCtrl->setDecorationState(*w.isDecorated);
+            }
+            wCtrl->setSpoutOutputState(w.spout.has_value() && w.spout->enabled);
+        }
+        std::visit(overloaded{
+            [&](const sgct::config::CylindricalProjection& p) {
+                if (p.quality.has_value() && p.heightOffset.has_value()) {
+                    wCtrl->setProjectionCylindrical(*p.quality, *p.heightOffset);
+                }
+            },
+            [&](const sgct::config::EquirectangularProjection& p) {
+                if (p.quality.has_value()) {
+                    wCtrl->setProjectionEquirectangular(*p.quality);
+                }
+            },
+            [&](const sgct::config::FisheyeProjection& p) {
+                if (p.quality.has_value()) {
+                    wCtrl->setProjectionFisheye(*p.quality);
+                }
+            },
+            [&](const sgct::config::PlanarProjection& p) {
+                wCtrl->setProjectionPlanar(
+                    std::abs(p.fov.left) + std::abs(p.fov.right),
+                    std::abs(p.fov.up) + std::abs(p.fov.down)
+                );
+            },
+            [&](const sgct::config::SphericalMirrorProjection& p) {
+                if (p.quality.has_value()) {
+                    wCtrl->setProjectionSphericalMirror(*p.quality);
+                }
+            },
+            [&](const sgct::config::NoProjection&) {},
+            [&](const sgct::config::ProjectionPlane&) {},
+            [&](const sgct::config::CubemapProjection&) {},
+            },
+            w.viewports.back().projection
+        );
+    }
+}
+
 void DisplayWindowUnion::createWidgets(int nMaxWindows,
                                        const std::vector<QRect>& monitorResolutions,
-                                       std::array<QColor, 4> windowColors,
-                                       bool resetToDefault)
+                                       std::array<QColor, 4> windowColors)
 {
     // Add all window controls (some will be hidden from GUI initially)
     for (int i = 0; i < nMaxWindows; i++) {
@@ -62,10 +142,9 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows,
             i,
             monitorResolutions,
             windowColors[i],
-            resetToDefault,
             this
         );
-        _windowControl.push_back(ctrl);
+        _windowControls.push_back(ctrl);
 
         connect(
             ctrl, &WindowControl::windowChanged,
@@ -114,7 +193,7 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows,
     layoutWindows->setContentsMargins(0, 0, 0, 0);
     layoutWindows->setSpacing(0);
     for (int i = 0; i < nMaxWindows; i++) {
-        layoutWindows->addWidget(_windowControl[i]);
+        layoutWindows->addWidget(_windowControls[i]);
         if (i < (nMaxWindows - 1)) {
             QFrame* frameForNextWindow = new QFrame;
             frameForNextWindow->setFrameShape(QFrame::VLine);
@@ -130,18 +209,14 @@ std::vector<WindowControl*> DisplayWindowUnion::activeWindowControls() const {
     std::vector<WindowControl*> res;
     res.reserve(_nWindowsDisplayed);
     for (unsigned int i = 0; i < _nWindowsDisplayed; i++) {
-        res.push_back(_windowControl[i]);
+        res.push_back(_windowControls[i]);
     }
     return res;
 }
 
-std::vector<WindowControl*>& DisplayWindowUnion::windowControls() {
-    return _windowControl;
-}
-
 void DisplayWindowUnion::addWindow() {
-    if (_nWindowsDisplayed < _windowControl.size()) {
-        _windowControl[_nWindowsDisplayed]->resetToDefaults();
+    if (_nWindowsDisplayed < _windowControls.size()) {
+        _windowControls[_nWindowsDisplayed]->resetToDefaults();
         _nWindowsDisplayed++;
         showWindows();
     }
@@ -159,15 +234,15 @@ unsigned int DisplayWindowUnion::numWindowsDisplayed() const {
 }
 
 void DisplayWindowUnion::showWindows() {
-    for (size_t i = 0; i < _windowControl.size(); i++) {
-        _windowControl[i]->setVisible(i < _nWindowsDisplayed);
+    for (size_t i = 0; i < _windowControls.size(); i++) {
+        _windowControls[i]->setVisible(i < _nWindowsDisplayed);
     }
     for (size_t i = 0; i < _frameBorderLines.size(); i++) {
         _frameBorderLines[i]->setVisible(i < (_nWindowsDisplayed - 1));
     }
     _removeWindowButton->setEnabled(_nWindowsDisplayed > 1);
-    _addWindowButton->setEnabled(_nWindowsDisplayed != _windowControl.size());
-    for (WindowControl* w : _windowControl) {
+    _addWindowButton->setEnabled(_nWindowsDisplayed != _windowControls.size());
+    for (WindowControl* w : _windowControls) {
         w->showWindowLabel(_nWindowsDisplayed > 1);
     }
     emit nWindowsChanged(_nWindowsDisplayed);

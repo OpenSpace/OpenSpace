@@ -52,9 +52,6 @@ namespace {
         QColor(248, 51, 60)
     };
 
-    template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-    template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
-
     // Returns true if the windows are not ordered correctly. 'Correct' in this means that
     // there is a smaller window defined before a bigger one
     // This check is only necessary until
@@ -109,78 +106,7 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
     setWindowTitle("Window Configuration Editor");
 
     const size_t nWindows = _cluster.nodes.front().windows.size();
-    std::vector<QRect> monitorSizes = createMonitorInfoSet();
-    createWidgets(monitorSizes, static_cast<unsigned int>(nWindows), false);
-    const size_t existingWindowsControlSize = _displayWidget->windowControls().size();
-    for (size_t i = 0; i < nWindows; i++) {
-        sgct::config::Window& w = _cluster.nodes.front().windows[i];
-        WindowControl* wCtrl = _displayWidget->windowControls()[i];
-        if (i < existingWindowsControlSize && wCtrl) {
-            unsigned int monitorNum = 0;
-            if (w.monitor.has_value()) {
-                monitorNum = static_cast<unsigned int>(*w.monitor);
-                if (monitorNum > (monitorSizes.size() - 1)) {
-                    monitorNum = 0;
-                }
-            }
-            unsigned int posX = 0;
-            unsigned int posY = 0;
-            wCtrl->setMonitorSelection(monitorNum);
-            if (w.pos.has_value()) {
-                posX = w.pos->x;
-                posY = w.pos->y;
-                // Convert offsets to coordinates relative to the selected monitor bounds,
-                // since window offsets are stored n the sgct config file relative to the
-                // coordinates of the total "canvas" of all displays
-                if (monitorSizes.size() > monitorNum) {
-                    posX -= monitorSizes[monitorNum].x();
-                    posY -= monitorSizes[monitorNum].y();
-                }
-            }
-            const QRectF newDims = QRectF(posX, posY, w.size.x, w.size.y);
-            wCtrl->setDimensions(newDims);
-            if (w.name.has_value()) {
-                wCtrl->setWindowName(*w.name);
-            }
-            if (w.isDecorated.has_value()) {
-                wCtrl->setDecorationState(*w.isDecorated);
-            }
-            wCtrl->setSpoutOutputState(w.spout.has_value() && w.spout->enabled);
-        }
-        std::visit(overloaded {
-            [&](const sgct::config::CylindricalProjection& p) {
-                if (p.quality.has_value() && p.heightOffset.has_value()) {
-                    wCtrl->setProjectionCylindrical(*p.quality, *p.heightOffset);
-                }
-            },
-            [&](const sgct::config::EquirectangularProjection& p) {
-                if (p.quality.has_value()) {
-                    wCtrl->setProjectionEquirectangular(*p.quality);
-                }
-            },
-            [&](const sgct::config::FisheyeProjection& p) {
-                if (p.quality.has_value()) {
-                    wCtrl->setProjectionFisheye(*p.quality);
-                }
-            },
-            [&](const sgct::config::PlanarProjection& p) {
-                wCtrl->setProjectionPlanar(
-                    std::abs(p.fov.left) + std::abs(p.fov.right),
-                    std::abs(p.fov.up) + std::abs(p.fov.down)
-                );
-            },
-            [&](const sgct::config::SphericalMirrorProjection& p) {
-                if (p.quality.has_value()) {
-                    wCtrl->setProjectionSphericalMirror(*p.quality);
-                }
-            },
-            [&](const sgct::config::NoProjection&) {},
-            [&](const sgct::config::ProjectionPlane&) {},
-            [&](const sgct::config::CubemapProjection&) {},
-            },
-            w.viewports.back().projection
-        );
-    }
+    createWidgets(static_cast<unsigned int>(nWindows));
 
     //
     // Setup state of UI on first window
@@ -241,9 +167,9 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
     );
 }
 
-void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
-                             unsigned int nWindows, bool setToDefaults)
-{
+void SgctEdit::createWidgets(unsigned int nWindows) {
+    std::vector<QRect> monitorSizes = createMonitorInfoSet();
+
     QBoxLayout* layout = new QVBoxLayout(this);
     layout->setSizeConstraint(QLayout::SetFixedSize);
 
@@ -272,7 +198,6 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
             monitorSizes,
             MaxNumberWindows,
             ColorsForWindows,
-            setToDefaults,
             nWindows,
             this
         );
@@ -284,6 +209,7 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
             _displayWidget, &DisplayWindowUnion::nWindowsChanged,
             monitorBox, &MonitorBox::nWindowsDisplayedChanged
         );
+        _displayWidget->initialize(monitorSizes, _cluster);
         displayLayout->addWidget(_displayWidget);
 
         layout->addWidget(displayFrame);
