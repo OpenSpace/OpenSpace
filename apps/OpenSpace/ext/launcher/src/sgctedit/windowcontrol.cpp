@@ -66,7 +66,7 @@ namespace {
         QRectF(150.f, 150.f, 1280.f, 720.f)
     };
 
-    constexpr int LineEditWidthFixedWindowSize = 64;
+    constexpr int LineEditWidthFixedWindowSize = 95;
     constexpr float DefaultFovLongEdge = 80.f;
     constexpr float DefaultFovShortEdge = 50.534f;
     constexpr float DefaultHeightOffset = 0.f;
