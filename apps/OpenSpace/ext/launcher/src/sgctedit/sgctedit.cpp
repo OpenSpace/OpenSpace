@@ -105,11 +105,11 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
 {
     setWindowTitle("Window Configuration Editor");
 
-    const size_t nWindows = _cluster.nodes.front().windows.size();
-    createWidgets(static_cast<unsigned int>(nWindows));
+    createWidgets();
 
     //
     // Setup state of UI on first window
+    const size_t nWindows = _cluster.nodes.front().windows.size();
     bool firstWindowGuiIsEnabled = (nWindows > 1);
     int graphicsSelectionForFirstWindow = 0;
     int nGuiRenderTagsFound = 0;
@@ -167,7 +167,7 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
     );
 }
 
-void SgctEdit::createWidgets(unsigned int nWindows) {
+void SgctEdit::createWidgets() {
     std::vector<QRect> monitorSizes = createMonitorInfoSet();
 
     QBoxLayout* layout = new QVBoxLayout(this);
@@ -198,7 +198,6 @@ void SgctEdit::createWidgets(unsigned int nWindows) {
             monitorSizes,
             MaxNumberWindows,
             ColorsForWindows,
-            nWindows,
             this
         );
         connect(

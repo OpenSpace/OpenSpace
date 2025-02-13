@@ -84,7 +84,7 @@ private slots:
     void firstWindowGraphicsSelectionChanged();
 
 private:
-    void createWidgets(unsigned int nWindows);
+    void createWidgets();
     void generateConfiguration();
 
     void saveCluster();

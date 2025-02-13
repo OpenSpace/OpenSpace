@@ -53,9 +53,9 @@ public:
      *        initialized to their default values
      * \param parent The parent to which this widget belongs
      */
-    DisplayWindowUnion(const std::vector<QRect>& monitorSizeList,
+    DisplayWindowUnion(const std::vector<QRect>& monitorResolutions,
         int nMaxWindows, const std::array<QColor, 4>& windowColors,
-        int nWindows, QWidget* parent = nullptr);
+        QWidget* parent = nullptr);
 
     void initialize(const std::vector<QRect>& monitorSizeList,
         const sgct::config::Cluster& cluster);
@@ -79,14 +79,6 @@ public:
      */
     void removeWindow();
 
-    /**
-     * Returns the number of windows that are displayed (there can be more window
-     * objects than are currently displayed).
-     *
-     * \return The number of displayed windows in the current configuration
-     */
-    unsigned int numWindowsDisplayed() const;
-
 signals:
     /**
      * This signal is emitted when a window has changed.
@@ -105,8 +97,6 @@ signals:
     void nWindowsChanged(int newCount);
 
 private:
-    void createWidgets(int nMaxWindows, const std::vector<QRect>& monitorResolutions,
-        std::array<QColor, 4> windowColors);
     void showWindows();
 
     unsigned int _nWindowsDisplayed = 0;
