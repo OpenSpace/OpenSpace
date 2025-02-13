@@ -22,58 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___MONITORBOX___H__
-#define __OPENSPACE_UI_LAUNCHER___MONITORBOX___H__
+#include "windowcolors.h"
 
-#include <QWidget>
+#include <ghoul/misc/assert.h>
 
-#include <QColor>
-#include <array>
-#include <vector>
+QColor colorForWindow(int idx) {
+    constexpr std::array<QColor, 4> Hardcoded = {
+        QColor(43, 158, 195),
+        QColor(252, 171, 16),
+        QColor(68, 175, 105),
+        QColor(248, 51, 60)
+    };
 
-class MonitorBox final : public QWidget {
-Q_OBJECT
-public:
-    /**
-     * Constructor for MonitorBox class, which displays the system's monitor(s), their
-     * relative position and size, and window(s) that they contain.
-     *
-     * \param widgetDims The size of the display widget in pixels, stored in QRect
-     * \param monitorResolution A vector containing the monitor's maximum display size in
-     *        pixels in a QRect object
-     * \param parent The parent which to which this MonitorBox belongs
-     */
-    MonitorBox(QRect widgetDims, const std::vector<QRect>& monitorResolutions,
-        QWidget* parent = nullptr);
+    ghoul_assert(idx >= 0, "idx must be non-negative");
 
-public slots:
-    /**
-     * Called when window dimensions or monitor location have changed, requiring redraw.
-     * This will also map the window resolution into the scaled resolution of the display
-     * widget.
-     *
-     * \param monitorIdx The zero-based monitor index (primary monitor is 0)
-     * \param windowIdx The zero-based window index
-     * \param dimension Dimensions (pixels) of window to be mapped in QRect
-     */
-    void windowDimensionsChanged(unsigned int monitorIdx, unsigned int windowIdx,
-        const QRectF& dimension);
-
-    /**
-     * Called when the number of windows that should be displayed changes.
-     *
-     * \param nWindows The new number of windows included
-     */
-    void nWindowsDisplayedChanged(int nWindows);
-
-protected:
-    void paintEvent(QPaintEvent* event) override;
-
-private:
-    std::vector<QRectF> _monitorDimensionsScaled;
-    std::vector<QRectF> _windowRendering;
-    int _nWindows = 0;
-    float _monitorScaleFactor = 1.f;
-};
-
-#endif // __OPENSPACE_UI_LAUNCHER___MONITORBOX___H__
+    if (idx < 4) {
+        return Hardcoded[idx];
+    }
+    else {
+        // If someone asks for a color of an index greater than what we have, we generate
+        // them by multiplying some prime numbers together
+        const int r = (idx * 31 * 3083) % 256;
+        const int g = (idx * 43 * 4273) % 256;
+        const int b = (idx * 59 * 5857) % 256;
+        return QColor(r, g, b);
+    }
+}

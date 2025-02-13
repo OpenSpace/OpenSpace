@@ -57,12 +57,10 @@ public:
      *        resides in
      * \param windowIndex The zero-based window index
      * \param monitorDims Vector of monitor dimensions in QRect form
-     * \param winColor A QColor object for this window's unique color
      * \param parent The parent widget
      */
     WindowControl(int monitorIndex, int windowIndex,
-        const std::vector<QRect>& monitorDims, const QColor& winColor,
-        QWidget* parent);
+        const std::vector<QRect>& monitorDims, QWidget* parent);
 
     /**
      * Makes the window label at top of a window control column visible.
@@ -189,7 +187,7 @@ signals:
     void windowChanged(int monitorIndex, int windowIndex, const QRectF& newDimensions);
 
 private:
-    void createWidgets(const QColor& windowColor);
+    void createWidgets();
     QWidget* createPlanarWidget();
     QWidget* createFisheyeWidget();
     QWidget* createSphericalMirrorWidget();

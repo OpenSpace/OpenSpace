@@ -30,6 +30,7 @@ set(HEADER_FILES
   include/launcherwindow.h
   include/settingsdialog.h
   include/splitcombobox.h
+  include/windowcolors.h
   include/profile/actiondialog.h
   include/profile/additionalscriptsdialog.h
   include/profile/assetsdialog.h
@@ -59,6 +60,7 @@ set(SOURCE_FILES
   src/filesystemaccess.cpp
   src/settingsdialog.cpp
   src/splitcombobox.cpp
+  src/windowcolors.cpp
   src/profile/actiondialog.cpp
   src/profile/additionalscriptsdialog.cpp
   src/profile/assetsdialog.cpp

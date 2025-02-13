@@ -40,9 +40,7 @@ namespace {
 } // namespace
 
 DisplayWindowUnion::DisplayWindowUnion(const std::vector<QRect>& monitorResolutions,
-                                       int nMaxWindows,
-                                       const std::array<QColor, 4>& windowColors,
-                                       QWidget* parent)
+                                       int nMaxWindows, QWidget* parent)
     : QWidget(parent)
 {
     // Add all window controls (some will be hidden from GUI initially)
@@ -54,7 +52,6 @@ DisplayWindowUnion::DisplayWindowUnion(const std::vector<QRect>& monitorResoluti
             monitorNumForThisWindow,
             i,
             monitorResolutions,
-            windowColors[i],
             this
         );
         _windowControls.push_back(ctrl);

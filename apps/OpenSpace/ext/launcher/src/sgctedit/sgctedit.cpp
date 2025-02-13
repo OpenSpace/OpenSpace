@@ -42,15 +42,7 @@
 #include <fstream>
 
 namespace {
-    constexpr QRect MonitorWidgetSize = QRect(0, 0, 500, 500);
     constexpr int MaxNumberWindows = 4;
-
-    const std::array<QColor, 4> ColorsForWindows = {
-        QColor(43, 158, 195),
-        QColor(252, 171, 16),
-        QColor(68, 175, 105),
-        QColor(248, 51, 60)
-    };
 
     // Returns true if the windows are not ordered correctly. 'Correct' in this means that
     // there is a smaller window defined before a bigger one
@@ -113,7 +105,7 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
     bool firstWindowGuiIsEnabled = (nWindows > 1);
     int graphicsSelectionForFirstWindow = 0;
     int nGuiRenderTagsFound = 0;
-    nWindowsDisplayedChanged(static_cast<int>(nWindows));
+    //nWindowsDisplayedChanged(static_cast<int>(nWindows));
 
     for (size_t i = 0; i < nWindows; i++) {
         sgct::config::Window& w = _cluster.nodes.front().windows[i];
@@ -181,25 +173,16 @@ void SgctEdit::createWidgets() {
     //
     // Monitor widget at the top of the window
     {
-        MonitorBox* monitorBox = new MonitorBox(
-            MonitorWidgetSize,
-            monitorSizes,
-            MaxNumberWindows,
-            ColorsForWindows,
-            this
-        );
+        constexpr QRect MonitorWidgetSize = QRect(0, 0, 500, 500);
+
+        MonitorBox* monitorBox = new MonitorBox(MonitorWidgetSize, monitorSizes);
         layout->addWidget(monitorBox, 0, Qt::AlignCenter);
 
         QFrame* displayFrame = new QFrame;
         displayFrame->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
 
         QBoxLayout* displayLayout = new QVBoxLayout(displayFrame);
-        _displayWidget = new DisplayWindowUnion(
-            monitorSizes,
-            MaxNumberWindows,
-            ColorsForWindows,
-            this
-        );
+        _displayWidget = new DisplayWindowUnion(monitorSizes, MaxNumberWindows, this);
         connect(
             _displayWidget, &DisplayWindowUnion::windowChanged,
             monitorBox, &MonitorBox::windowDimensionsChanged

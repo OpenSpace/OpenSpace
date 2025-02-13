@@ -22,58 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___MONITORBOX___H__
-#define __OPENSPACE_UI_LAUNCHER___MONITORBOX___H__
-
-#include <QWidget>
+#ifndef __OPENSPACE_UI_LAUNCHER___WINDOWCOLORS___H__
+#define __OPENSPACE_UI_LAUNCHER___WINDOWCOLORS___H__
 
 #include <QColor>
-#include <array>
-#include <vector>
 
-class MonitorBox final : public QWidget {
-Q_OBJECT
-public:
-    /**
-     * Constructor for MonitorBox class, which displays the system's monitor(s), their
-     * relative position and size, and window(s) that they contain.
-     *
-     * \param widgetDims The size of the display widget in pixels, stored in QRect
-     * \param monitorResolution A vector containing the monitor's maximum display size in
-     *        pixels in a QRect object
-     * \param parent The parent which to which this MonitorBox belongs
-     */
-    MonitorBox(QRect widgetDims, const std::vector<QRect>& monitorResolutions,
-        QWidget* parent = nullptr);
+/**
+ * This function returns the color that a component should use for a specific window. This
+ * Function will always return the same color for the same index.
+ *
+ * \param idx The index of the window for which the color should be calculated
+ * \return The color for the provided window index
+ *
+ * \pre \p idx must be non-negative
+ */
+QColor colorForWindow(int idx);
 
-public slots:
-    /**
-     * Called when window dimensions or monitor location have changed, requiring redraw.
-     * This will also map the window resolution into the scaled resolution of the display
-     * widget.
-     *
-     * \param monitorIdx The zero-based monitor index (primary monitor is 0)
-     * \param windowIdx The zero-based window index
-     * \param dimension Dimensions (pixels) of window to be mapped in QRect
-     */
-    void windowDimensionsChanged(unsigned int monitorIdx, unsigned int windowIdx,
-        const QRectF& dimension);
-
-    /**
-     * Called when the number of windows that should be displayed changes.
-     *
-     * \param nWindows The new number of windows included
-     */
-    void nWindowsDisplayedChanged(int nWindows);
-
-protected:
-    void paintEvent(QPaintEvent* event) override;
-
-private:
-    std::vector<QRectF> _monitorDimensionsScaled;
-    std::vector<QRectF> _windowRendering;
-    int _nWindows = 0;
-    float _monitorScaleFactor = 1.f;
-};
-
-#endif // __OPENSPACE_UI_LAUNCHER___MONITORBOX___H__
+#endif // __OPENSPACE_UI_LAUNCHER___WINDOWCOLORS___H__

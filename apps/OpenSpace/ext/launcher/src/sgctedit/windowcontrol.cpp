@@ -27,6 +27,7 @@
 #include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
 #include "sgctedit/displaywindowunion.h"
+#include "windowcolors.h"
 #include <QCheckBox>
 #include <QComboBox>
 #include <QGridLayout>
@@ -86,8 +87,7 @@ namespace {
 } // namespace
 
 WindowControl::WindowControl(int monitorIndex, int windowIndex,
-                             const std::vector<QRect>& monitorDims,
-                             const QColor& winColor, QWidget* parent)
+                             const std::vector<QRect>& monitorDims, QWidget* parent)
     : QWidget(parent)
     , _monitorIndexDefault(monitorIndex)
     , _windowIndex(windowIndex)
@@ -95,11 +95,11 @@ WindowControl::WindowControl(int monitorIndex, int windowIndex,
     , _lockIcon(":/images/outline_locked.png")
     , _unlockIcon(":/images/outline_unlocked.png")
 {
-    createWidgets(winColor);
+    createWidgets();
     resetToDefaults();
 }
 
-void WindowControl::createWidgets(const QColor& windowColor) {
+void WindowControl::createWidgets() {
     //      Col 0      Col 1    Col 2     Col 3    Col 4    Col 5   Col 6   Col 7
     //  *----------*----------*-------*----------*-------*--------*-------*-------*
     //  |                                   Window {n}                            | R0
@@ -119,6 +119,7 @@ void WindowControl::createWidgets(const QColor& windowColor) {
     layout->setRowStretch(8, 1);
     
     _windowNumber = new QLabel("Window " + QString::number(_windowIndex + 1));
+    QColor windowColor = colorForWindow(_windowIndex);
     _windowNumber->setStyleSheet(QString::fromStdString(std::format(
         "QLabel {{ color : #{:02x}{:02x}{:02x}; }}",
         windowColor.red(), windowColor.green(), windowColor.blue()
@@ -370,7 +371,7 @@ QWidget* WindowControl::createPlanarWidget() {
         "This projection type is the 'regular' projection with a horizontal and a "
         "vertical field of view, given in degrees. The wider the field of view, the "
         "more content is shown at the same time, but everything becomes smaller. Very "
-        "large values will introduce distorions on the corners"
+        "large values will introduce distortions on the corners"
     );
     _planar.labelInfo->setObjectName("info");
     _planar.labelInfo->setWordWrap(true);
