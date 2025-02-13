@@ -157,8 +157,7 @@ void DisplayWindowUnion::initialize(const std::vector<QRect>& monitorSizeList,
                 posY -= monitorSizeList[monitorNum].y();
             }
         }
-        const QRectF newDims = QRectF(posX, posY, w.size.x, w.size.y);
-        wCtrl->setDimensions(newDims);
+        wCtrl->setDimensions(posX, posY, w.size.x, w.size.y);
 
         //
         // Get Window name

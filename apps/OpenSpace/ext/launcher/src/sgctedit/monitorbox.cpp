@@ -28,7 +28,7 @@
 #include "windowcolors.h"
 #include <QPainter>
 
-MonitorBox::MonitorBox(QRect widgetDims, const std::vector<QRect>& monitorResolutions,
+MonitorBox::MonitorBox(QRect widgetSize, const std::vector<QRect>& monitorResolutions,
                        QWidget* parent)
     : QWidget(parent)
 {
@@ -45,15 +45,15 @@ MonitorBox::MonitorBox(QRect widgetDims, const std::vector<QRect>& monitorResolu
     // Set the size of the widget according to the aspect ratio of the total size
     const float aspectRatio = monitorArrangement.width() / monitorArrangement.height();
     if (aspectRatio > 1.f) {
-        const float borderMargin = 2.f * MarginFractionWidgetSize * widgetDims.width();
-        widgetDims.setHeight(widgetDims.width() / aspectRatio + borderMargin);
+        const float borderMargin = 2.f * MarginFractionWidgetSize * widgetSize.width();
+        widgetSize.setHeight(widgetSize.width() / aspectRatio + borderMargin);
     }
     else {
-        const float borderMargin = 2.f * MarginFractionWidgetSize * widgetDims.height();
-        widgetDims.setWidth(widgetDims.height() * aspectRatio + borderMargin);
+        const float borderMargin = 2.f * MarginFractionWidgetSize * widgetSize.height();
+        widgetSize.setWidth(widgetSize.height() * aspectRatio + borderMargin);
     }
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    setFixedSize(widgetDims.width(), widgetDims.height());
+    setFixedSize(widgetSize.width(), widgetSize.height());
     
     //
     // Map monitor resolution to widget coordinates
@@ -102,7 +102,7 @@ void MonitorBox::paintEvent(QPaintEvent*) {
 
     //
     // Draw widget border
-    constexpr float RectRadius = 10.f;
+    constexpr double RectRadius = 10.0;
     painter.setPen(QPen(Qt::gray, 4));
     painter.drawRoundedRect(0, 0, width() - 1, height() - 1, RectRadius, RectRadius);
 
@@ -125,28 +125,29 @@ void MonitorBox::paintEvent(QPaintEvent*) {
         painter.drawRect(_monitorDimensionsScaled[i]);
         painter.fillRect(_monitorDimensionsScaled[i], QBrush(Grey, Qt::SolidPattern));
 
+        // We only want to render the "Primary" if there are multiple windows
         if (_monitorDimensionsScaled.size() > 1 && i == 0) {
-            // We only want to render the "Primary" if there are multiple windows
             const QPointF textPos = QPointF(
                 _monitorDimensionsScaled[i].left() + 4.0,
                 _monitorDimensionsScaled[i].top() + 24.0
             );
-            QFont f("Arial");
+            QFont f = QFont("Arial");
             f.setPixelSize(24);
             painter.setFont(f);
             painter.drawText(textPos, "Primary");
         }
     }
 
+    //
     // Draw window number(s) first for darker contrast, then window(s) over both
     // out-of-bounds and monitors
     for (int i = 0; i < _nWindows; i++) {
-        QPointF p = QPointF(
-            _windowRendering[i].left() + 5.0,
-            _windowRendering[i].bottom() - 5.0
+        const double x = _windowRendering[i].left() + 5.0;
+        const double y = _windowRendering[i].bottom() - 5.0;
+        const QPointF p = QPointF(
+            std::clamp(x, 0.0, static_cast<double>(size().width()) - 10.0),
+            std::clamp(y, 20.0, static_cast<double>(size().height()))
         );
-        p.setX(std::clamp(p.x(), 0.0, static_cast<double>(size().width()) - 10.0));
-        p.setY(std::clamp(p.y(), 20.0, static_cast<double>(size().height())));
         painter.drawText(p, QString::number(i + 1));
     }
 

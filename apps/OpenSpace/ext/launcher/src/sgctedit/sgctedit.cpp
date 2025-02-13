@@ -69,19 +69,17 @@ namespace {
     }
 
     std::vector<QRect> createMonitorInfoSet() {
-        const QList<QScreen*> screens = qApp->screens();
-        const int nScreensManaged = std::min(static_cast<int>(screens.length()), 4);
         std::vector<QRect> monitorSizes;
-        for (int s = 0; s < nScreensManaged; ++s) {
-            const QSize size = screens[s]->size();
-            const QRect geometry = screens[s]->availableGeometry();
+        for (QScreen* screen : qApp->screens()) {
+            const QSize size = screen->size();
+            const QRect geometry = screen->availableGeometry();
             const int actualWidth = std::max(size.width(), geometry.width());
             const int actualHeight = std::max(size.height(), geometry.height());
             monitorSizes.emplace_back(
                 geometry.x(),
                 geometry.y(),
-                static_cast<int>(actualWidth * screens[s]->devicePixelRatio()),
-                static_cast<int>(actualHeight * screens[s]->devicePixelRatio())
+                static_cast<int>(actualWidth * screen->devicePixelRatio()),
+                static_cast<int>(actualHeight * screen->devicePixelRatio())
             );
         }
         return monitorSizes;
@@ -105,7 +103,6 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
     bool firstWindowGuiIsEnabled = (nWindows > 1);
     int graphicsSelectionForFirstWindow = 0;
     int nGuiRenderTagsFound = 0;
-    //nWindowsDisplayedChanged(static_cast<int>(nWindows));
 
     for (size_t i = 0; i < nWindows; i++) {
         sgct::config::Window& w = _cluster.nodes.front().windows[i];
@@ -118,7 +115,7 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
                 graphicsSelectionForFirstWindow = 0;
                 nGuiRenderTagsFound++;
             }
-            for (int winNum = 0; winNum <= 4; ++winNum) {
+            for (int winNum = 0; winNum <= 4; winNum++) {
                 const std::string searchTag = "GUI_Render_Win" + std::to_string(winNum);
                 if (std::find(w.tags.begin(), w.tags.end(), searchTag) != w.tags.end()) {
                     graphicsSelectionForFirstWindow = winNum;
@@ -461,7 +458,7 @@ void SgctEdit::generateConfiguration() {
     //
     // Resize windows according to selected
     std::vector<WindowControl*> windowControls = _displayWidget->activeWindowControls();
-    for (size_t wIdx = 0; wIdx < windowControls.size(); ++wIdx) {
+    for (size_t wIdx = 0; wIdx < windowControls.size(); wIdx++) {
         if (node.windows.size() <= wIdx) {
             node.windows.emplace_back();
         }

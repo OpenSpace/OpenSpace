@@ -41,14 +41,6 @@ class QSpinBox;
 class WindowControl final : public QWidget {
 Q_OBJECT
 public:
-    enum class ProjectionIndices {
-        Planar = 0,
-        Fisheye,
-        SphericalMirror,
-        Cylindrical,
-        Equirectangular
-    };
-
     /**
      * Constructor for WindowControl class, which contains settings and configuration for
      * individual windows.
@@ -79,7 +71,7 @@ public:
      *
      * \param newDims The x, y dimensions to set the window to
      */
-    void setDimensions(QRectF newDims);
+    void setDimensions(int x, int y, int width, int height);
 
     /**
      * Sets the monitor selection combobox.
@@ -175,19 +167,10 @@ public:
      */
     void setVisibilityOfProjectionGui(bool enable);
 
-    /**
-     * Returns an #sgct::config::Projections struct containing the projection information
-     * for this window.
-     *
-     * \return The object containing the projection information
-     */
-    sgct::config::Projections generateProjectionInformation() const;
-
 signals:
     void windowChanged(int monitorIndex, int windowIndex, const QRectF& newDimensions);
 
 private:
-    void createWidgets();
     QWidget* createPlanarWidget();
     QWidget* createFisheyeWidget();
     QWidget* createSphericalMirrorWidget();
@@ -204,7 +187,6 @@ private:
     void onFovLockClicked();
 
     void updatePlanarLockedFov();
-    void setQualityComboBoxFromLinesResolution(int lines, QComboBox* combo);
 
     static constexpr float IdealAspectRatio = 16.f / 9.f;
     float _aspectRatioSize = IdealAspectRatio;
@@ -214,7 +196,7 @@ private:
     bool _aspectRatioLocked = false;
     bool _fovLocked = true;
     std::vector<QRect> _monitorResolutions;
-    QRectF _windowDimensions;
+    QRect _windowDimensions;
 
     QLabel* _windowNumber = nullptr;
     QLineEdit* _windowName = nullptr;

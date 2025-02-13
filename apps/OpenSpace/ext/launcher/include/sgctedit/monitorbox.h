@@ -38,12 +38,12 @@ public:
      * Constructor for MonitorBox class, which displays the system's monitor(s), their
      * relative position and size, and window(s) that they contain.
      *
-     * \param widgetDims The size of the display widget in pixels, stored in QRect
-     * \param monitorResolution A vector containing the monitor's maximum display size in
-     *        pixels in a QRect object
+     * \param widgetSize The size of the display widget in pixels
+     * \param monitorResolution A vector containing each monitor's maximum display size in
+     *        pixels
      * \param parent The parent which to which this MonitorBox belongs
      */
-    MonitorBox(QRect widgetDims, const std::vector<QRect>& monitorResolutions,
+    MonitorBox(QRect widgetSize, const std::vector<QRect>& monitorResolutions,
         QWidget* parent = nullptr);
 
 public slots:
