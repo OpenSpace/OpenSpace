@@ -22,62 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___SGCTEDIT___H__
-#define __OPENSPACE_UI_LAUNCHER___SGCTEDIT___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___BACKGROUNDIMAGE___H__
+#define __OPENSPACE_UI_LAUNCHER___BACKGROUNDIMAGE___H__
 
-#include <QDialog>
+#include <QLabel>
 
-#include <sgct/config.h>
 #include <filesystem>
-#include <string>
 
-class DisplayWindowUnion;
-class QCheckBox;
-class QComboBox;
-class QLineEdit;
-
-const sgct::config::GeneratorVersion VersionMin { "SgctWindowConfig", 1, 1 };
-const sgct::config::GeneratorVersion VersionLegacy18 { "OpenSpace", 0, 18 };
-const sgct::config::GeneratorVersion VersionLegacy19 { "OpenSpace", 0, 19 };
-
-class SgctEdit final : public QDialog {
+class BackgroundImage final : public QLabel {
 Q_OBJECT
 public:
-    /**
-     * Constructor for SgctEdit class, the underlying class for the full window
-     * configuration editor. Used when editing an existing config.
-     *
-     * \param cluster The #sgct::config::Cluster object containing all data of the
-     *                imported window cluster configuration.
-     * \param configName The name of the window configuration filename
-     * \param configBasePath The path to the folder where default config files reside
-     * \param parent Pointer to parent Qt widget
-     */
-    SgctEdit(sgct::config::Cluster cluster, std::string configName,
-        std::filesystem::path configBasePath, QWidget* parent);
-
-    /**
-     * Returns the saved filename.
-     *
-     * \return The saved filename in std::string
-     */
-    std::filesystem::path saveFilename() const;
-
-private:
-    void saveCluster();
-    void apply();
-
-    DisplayWindowUnion* _displayWidget = nullptr;
-
-    QCheckBox* _checkBoxVsync = nullptr;
-    QLineEdit* _linePitch = nullptr;
-    QLineEdit* _lineRoll = nullptr;
-    QLineEdit* _lineYaw = nullptr;
-
-    sgct::config::Cluster _cluster;
-    const std::filesystem::path _userConfigPath;
-
-    std::string _configurationFilename;
+    BackgroundImage(QRect size, const std::filesystem::path& syncFolder,
+        QWidget* parent = nullptr);
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___SGCTEDIT___H__
+#endif // __OPENSPACE_UI_LAUNCHER___BACKGROUNDIMAGE___H__

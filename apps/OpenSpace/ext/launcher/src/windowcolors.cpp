@@ -22,62 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___SGCTEDIT___H__
-#define __OPENSPACE_UI_LAUNCHER___SGCTEDIT___H__
+#include "windowcolors.h"
 
-#include <QDialog>
+#include <ghoul/misc/assert.h>
 
-#include <sgct/config.h>
-#include <filesystem>
-#include <string>
+QColor colorForWindow(int idx) {
+    constexpr std::array<QColor, 4> Hardcoded = {
+        QColor(43, 158, 195),
+        QColor(252, 171, 16),
+        QColor(68, 175, 105),
+        QColor(248, 51, 60)
+    };
 
-class DisplayWindowUnion;
-class QCheckBox;
-class QComboBox;
-class QLineEdit;
+    ghoul_assert(idx >= 0, "idx must be non-negative");
 
-const sgct::config::GeneratorVersion VersionMin { "SgctWindowConfig", 1, 1 };
-const sgct::config::GeneratorVersion VersionLegacy18 { "OpenSpace", 0, 18 };
-const sgct::config::GeneratorVersion VersionLegacy19 { "OpenSpace", 0, 19 };
-
-class SgctEdit final : public QDialog {
-Q_OBJECT
-public:
-    /**
-     * Constructor for SgctEdit class, the underlying class for the full window
-     * configuration editor. Used when editing an existing config.
-     *
-     * \param cluster The #sgct::config::Cluster object containing all data of the
-     *                imported window cluster configuration.
-     * \param configName The name of the window configuration filename
-     * \param configBasePath The path to the folder where default config files reside
-     * \param parent Pointer to parent Qt widget
-     */
-    SgctEdit(sgct::config::Cluster cluster, std::string configName,
-        std::filesystem::path configBasePath, QWidget* parent);
-
-    /**
-     * Returns the saved filename.
-     *
-     * \return The saved filename in std::string
-     */
-    std::filesystem::path saveFilename() const;
-
-private:
-    void saveCluster();
-    void apply();
-
-    DisplayWindowUnion* _displayWidget = nullptr;
-
-    QCheckBox* _checkBoxVsync = nullptr;
-    QLineEdit* _linePitch = nullptr;
-    QLineEdit* _lineRoll = nullptr;
-    QLineEdit* _lineYaw = nullptr;
-
-    sgct::config::Cluster _cluster;
-    const std::filesystem::path _userConfigPath;
-
-    std::string _configurationFilename;
-};
-
-#endif // __OPENSPACE_UI_LAUNCHER___SGCTEDIT___H__
+    if (idx < 4) {
+        return Hardcoded[idx];
+    }
+    else {
+        // If someone asks for a color of an index greater than what we have, we generate
+        // them by multiplying some prime numbers together
+        const int r = (idx * 31 * 3083) % 256;
+        const int g = (idx * 43 * 4273) % 256;
+        const int b = (idx * 59 * 5857) % 256;
+        return QColor(r, g, b);
+    }
+}

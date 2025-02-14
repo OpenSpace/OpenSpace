@@ -22,35 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___ORIENTATIONDIALOG___H__
-#define __OPENSPACE_UI_LAUNCHER___ORIENTATIONDIALOG___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___WINDOWCOLORS___H__
+#define __OPENSPACE_UI_LAUNCHER___WINDOWCOLORS___H__
 
-#include <QDialog>
+#include <QColor>
 
-#include <sgct/math.h>
+/**
+ * This function returns the color that a component should use for a specific window. This
+ * Function will always return the same color for the same index.
+ *
+ * \param idx The index of the window for which the color should be calculated
+ * \return The color for the provided window index
+ *
+ * \pre \p idx must be non-negative
+ */
+QColor colorForWindow(int idx);
 
-class QLineEdit;
-class QWidget;
-
-class OrientationDialog final : public QDialog {
-Q_OBJECT
-public:
-    /**
-     * Constructor for OrientationDialog object which contains the input text boxes for
-     * orientation x,y,z values,
-     *
-     * \param orientation The x,y,z angles in degrees contained in sgct::quat object
-     * \param parent Pointer to Qt QWidget parent object
-     */
-    OrientationDialog(sgct::quat& orientation, QWidget* parent);
-
-private:
-    void ok();
-
-    QLineEdit* _linePitch = nullptr;
-    QLineEdit* _lineRoll = nullptr;
-    QLineEdit* _lineYaw = nullptr;
-    sgct::quat& _orientationValue;
-};
-
-#endif // __OPENSPACE_UI_LAUNCHER___ORIENTATIONDIALOG___H__
+#endif // __OPENSPACE_UI_LAUNCHER___WINDOWCOLORS___H__
