@@ -181,6 +181,7 @@ private:
     properties::StringProperty _guiDisplayName;
     properties::StringProperty _guiDescription;
     properties::BoolProperty _useGuiOrdering;
+    properties::BoolProperty _guiFocusable;
     properties::FloatProperty _guiOrderingNumber;
 
     // Transformation defined by translation, rotation and scale

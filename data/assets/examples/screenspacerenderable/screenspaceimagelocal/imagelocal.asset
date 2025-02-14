@@ -1,0 +1,18 @@
+-- Basic
+-- Create a screenspace image plane that shows the content of a local image file on disk.
+-- In this case we use a test image from the OpenSpace/data folder.
+
+local Object = {
+  Type = "ScreenSpaceImageLocal",
+  Identifier = "ScreenSpaceImageLocal_Example",
+  TexturePath = openspace.absPath("${DATA}/test3.jpg"),
+  Name = "ScreenSpaceImageLocal Example - Basic"
+}
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(Object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Object)
+end)
