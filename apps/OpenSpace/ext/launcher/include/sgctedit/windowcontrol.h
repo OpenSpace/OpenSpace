@@ -100,6 +100,9 @@ public:
      */
     void setSpoutOutputState(bool shouldSpoutOutput);
 
+    void setRender2D(bool state);
+    void setRender3D(bool state);
+
     /**
      * Generates window configuration (sgct::config::Window struct) based on the
      * GUI settings.
@@ -159,14 +162,6 @@ public:
      */
     void setProjectionEquirectangular(int quality);
 
-    /**
-     * Controls the visibility of all projection controls, including those that are only
-     * shown when the projection type is set to certain values.
-     *
-     * \param enable `true` if the projections controls should be visible
-     */
-    void setVisibilityOfProjectionGui(bool enable);
-
 signals:
     void windowChanged(int monitorIndex, int windowIndex, const QRectF& newDimensions);
 
@@ -206,9 +201,11 @@ private:
     QSpinBox* _offsetX = nullptr;
     QSpinBox* _offsetY = nullptr;
     QCheckBox* _windowDecoration = nullptr;
-    QComboBox* _projectionType = nullptr;
-    QLabel* _projectionLabel = nullptr;
     QCheckBox* _spoutOutput = nullptr;
+    QCheckBox* _render2D = nullptr;
+    QCheckBox* _render3D = nullptr;
+    QFrame* _projectionGroup = nullptr;
+    QComboBox* _projectionType = nullptr;
 
     struct {
         QWidget* widget = nullptr;

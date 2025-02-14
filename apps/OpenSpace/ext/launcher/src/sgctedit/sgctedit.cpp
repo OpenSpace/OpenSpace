@@ -95,68 +95,6 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
 {
     setWindowTitle("Window Configuration Editor");
 
-    createWidgets();
-
-    //
-    // Setup state of UI on first window
-    const size_t nWindows = _cluster.nodes.front().windows.size();
-    bool firstWindowGuiIsEnabled = (nWindows > 1);
-    int graphicsSelectionForFirstWindow = 0;
-    int nGuiRenderTagsFound = 0;
-
-    for (size_t i = 0; i < nWindows; i++) {
-        sgct::config::Window& w = _cluster.nodes.front().windows[i];
-        // First window needs to have "GUI" tag if this mode is set
-        if (i == 0) {
-            firstWindowGuiIsEnabled =
-                std::find(w.tags.begin(), w.tags.end(), "GUI") != w.tags.end();
-            if (std::find(w.tags.begin(), w.tags.end(), "GUI_No_Render") != w.tags.end())
-            {
-                graphicsSelectionForFirstWindow = 0;
-                nGuiRenderTagsFound++;
-            }
-            for (int winNum = 0; winNum <= 4; winNum++) {
-                const std::string searchTag = "GUI_Render_Win" + std::to_string(winNum);
-                if (std::find(w.tags.begin(), w.tags.end(), searchTag) != w.tags.end()) {
-                    graphicsSelectionForFirstWindow = winNum;
-                    nGuiRenderTagsFound++;
-                }
-            }
-        }
-        // If first window only renders 2D, and all subsequent windows do not, then
-        // will enable the checkbox option for showing GUI only on first window
-        if (w.draw2D.has_value()) {
-            firstWindowGuiIsEnabled &= (i == 0) ? *w.draw2D : !*w.draw2D;
-        }
-        else {
-            firstWindowGuiIsEnabled = false;
-        }
-    }
-
-    if ((nGuiRenderTagsFound > 1) ||
-        (graphicsSelectionForFirstWindow > static_cast<int>(nWindows)))
-    {
-        graphicsSelectionForFirstWindow = 0;
-    }
-
-    _showUiOnFirstWindow->setChecked(firstWindowGuiIsEnabled);
-    if (firstWindowGuiIsEnabled) {
-        // Call these again in order to ensure that GUI is configured correctly based on
-        // the values read from the config file
-        _showUiOnFirstWindow->setEnabled(true);
-        _firstWindowGraphicsSelection->setEnabled(true);
-        nWindowsDisplayedChanged(static_cast<int>(nWindows));
-    }
-    _firstWindowGraphicsSelection->setCurrentIndex(graphicsSelectionForFirstWindow);
-
-    _checkBoxVsync->setChecked(
-        _cluster.settings.has_value() &&
-        _cluster.settings->display.has_value() &&
-        _cluster.settings->display->swapInterval
-    );
-}
-
-void SgctEdit::createWidgets() {
     std::vector<QRect> monitorSizes = createMonitorInfoSet();
 
     QBoxLayout* layout = new QVBoxLayout(this);
@@ -200,46 +138,17 @@ void SgctEdit::createWidgets() {
     QBoxLayout* settingsLayout = new QVBoxLayout(settingsContainer);
     settingsLayout->setContentsMargins(0, 0, 0, 0);
 
-    QBoxLayout* firstWindowSelectionLayout = new QHBoxLayout;
-
-    //
-    // Show UI in specific window
-    _showUiOnFirstWindow = new QCheckBox(
-        "Show user interface only on first window using graphics:"
-    );
-    _showUiOnFirstWindow->setChecked(false);
-    _showUiOnFirstWindow->setEnabled(false);
-    _showUiOnFirstWindow->setToolTip(
-        "If enabled the first window is marked as a GUI window resulting in the user "
-        "interface only being shown\non that window and the rendering is suppressed on "
-        "this first window. The remaining windows will render\nnormally but they will "
-        "not show the user interface"
-    );
-    connect(
-        _showUiOnFirstWindow, &QCheckBox::clicked,
-        this, &SgctEdit::firstWindowGuiOptionClicked
-    );
-    firstWindowSelectionLayout->addWidget(_showUiOnFirstWindow);
-
-    _firstWindowGraphicsSelection = new QComboBox;
-    _firstWindowGraphicsSelection->setToolTip(
-        "Select the contents of the first window to match one of the other windows"
-    );
-    _firstWindowGraphicsSelection->setFixedWidth(150);
-    connect(
-        _showUiOnFirstWindow, &QCheckBox::clicked,
-        _firstWindowGraphicsSelection, &QComboBox::setEnabled
-    );
-    firstWindowSelectionLayout->addWidget(_firstWindowGraphicsSelection);
-    firstWindowSelectionLayout->addStretch();
-    settingsLayout->addLayout(firstWindowSelectionLayout);
-
 
     //
     // VSync settings
     _checkBoxVsync = new QCheckBox("Enable VSync");
     _checkBoxVsync->setToolTip(
         "If enabled the framerate will be locked to the refresh rate of the monitor"
+    );
+    _checkBoxVsync->setChecked(
+        _cluster.settings.has_value() &&
+        _cluster.settings->display.has_value() &&
+        _cluster.settings->display->swapInterval
     );
     settingsLayout->addWidget(_checkBoxVsync);
 
@@ -307,15 +216,6 @@ void SgctEdit::createWidgets() {
         layoutWindow->addWidget(_lineYaw, 2, 1);
     }
     
-    connect(
-        _displayWidget, &DisplayWindowUnion::nWindowsChanged,
-        this, &SgctEdit::nWindowsDisplayedChanged
-    );
-    connect(
-        _firstWindowGraphicsSelection, &QComboBox::currentTextChanged,
-        this, &SgctEdit::firstWindowGraphicsSelectionChanged
-    ); 
-
 
     //
     // Button box
@@ -473,124 +373,8 @@ void SgctEdit::generateConfiguration() {
     //
     // Generate individual window settings
     for (size_t i = 0; i < node.windows.size(); i++) {
-        // First apply default settings to each window...
-        node.windows[i].id = static_cast<int>(i);
-        node.windows[i].draw2D = true;
-        node.windows[i].draw3D = true;
+        // First apply default settings to each window
+        node.windows[i].id = static_cast<int8_t>(i);
         node.windows[i].viewports.back().isTracked = true;
-
-        // Remove tags
-        constexpr std::array<std::string_view, 6> Tags = {
-            "GUI",
-            "GUI_No_Render",
-            "GUI_Render_Win1",
-            "GUI_Render_Win2",
-            "GUI_Render_Win3",
-            "GUI_Render_Win4"
-        };
-        for (const std::string_view tag : Tags) {
-            node.windows[i].tags.erase(
-                std::remove(
-                    node.windows[i].tags.begin(),
-                    node.windows[i].tags.end(),
-                    tag
-                ),
-                node.windows[i].tags.end()
-            );
-        }
-
-        // If "show UI on first window" option is enabled, then modify the settings
-        // depending on if this is the first window or not
-        if ((_showUiOnFirstWindow->isChecked() && _showUiOnFirstWindow->isEnabled())) {
-            if (i == 0) {
-                node.windows[i].tags.emplace_back("GUI");
-                const int selected = _firstWindowGraphicsSelection->currentIndex();
-                ghoul_assert(selected != -1, "Graphics selection should not be empty");
-                ghoul_assert(
-                    selected <= static_cast<int>(node.windows.size()),
-                    "Invalid selected index"
-                );
-
-                if (selected == 0) {
-                    node.windows[i].viewports.back().isTracked = false;
-                    node.windows[i].tags.emplace_back("GUI_No_Render");
-                }
-                else {
-                    node.windows[i].tags.emplace_back(
-                        "GUI_Render_Win" + std::to_string(selected)
-                    );
-                    // Set first window viewport to mirror the selected window's viewport
-                    node.windows[i].viewports = node.windows[(selected - 1)].viewports;
-                }
-                node.windows[i].draw2D = true;
-                node.windows[i].draw3D = (selected > 0);
-            }
-            else {
-                node.windows[i].draw2D = false;
-                node.windows[i].draw3D = true;
-            }
-        }
     }
-}
-
-void SgctEdit::firstWindowGraphicsSelectionChanged() {
-    if ((_showUiOnFirstWindow->isChecked() && _showUiOnFirstWindow->isEnabled())) {
-        const int newSetting = _firstWindowGraphicsSelection->currentIndex();
-        _displayWidget->activeWindowControls()[0]->setVisibilityOfProjectionGui(
-            newSetting == 1
-        );
-    }
-}
-
-void SgctEdit::firstWindowGuiOptionClicked(bool checked) {
-    if (checked) {
-        firstWindowGraphicsSelectionChanged();
-    }
-    else {
-        _displayWidget->activeWindowControls()[0]->setVisibilityOfProjectionGui(true);
-    }
-}
-
-void SgctEdit::nWindowsDisplayedChanged(int newCount) {
-    if (newCount == 1) {
-        _displayWidget->activeWindowControls()[0]->setVisibilityOfProjectionGui(true);
-    }
-    else {
-        firstWindowGraphicsSelectionChanged();
-    }
-
-    constexpr int CountOneWindow = 1;
-    constexpr int CountTwoWindows = 2;
-
-    QList<QString> graphicsOptions = { "None (GUI only)" };
-    for (int i = CountOneWindow; i <= newCount; i++) {
-        graphicsOptions.append("Window " + QString::number(i));
-    }
-    _firstWindowGraphicsSelection->clear();
-    _firstWindowGraphicsSelection->addItems(graphicsOptions);
-    _showUiOnFirstWindow->setEnabled(newCount > CountOneWindow);
-    _firstWindowGraphicsSelection->setEnabled(newCount > CountOneWindow);
-    int graphicsSelect = std::max(0, _firstWindowGraphicsSelection->currentIndex());
-    if (graphicsSelect > newCount) {
-        graphicsSelect = newCount;
-    }
-    _firstWindowGraphicsSelection->setCurrentIndex(graphicsSelect);
-
-    if (newCount == CountOneWindow) {
-        _stateOfUiOnFirstWindowWhenDisabled = _showUiOnFirstWindow->isChecked();
-        _showUiOnFirstWindow->setChecked(false);
-        _firstWindowGraphicsSelection->setEnabled(false);
-    }
-    else if (newCount == CountTwoWindows &&
-        _stateOfUiOnFirstWindowPreviousCount == CountOneWindow)
-    {
-        if (_stateOfUiOnFirstWindowWhenDisabled) {
-            _showUiOnFirstWindow->setChecked(true);
-        }
-        _firstWindowGraphicsSelection->setEnabled(_showUiOnFirstWindow->isChecked());
-    }
-    else {
-        _firstWindowGraphicsSelection->setEnabled(_showUiOnFirstWindow->isChecked());
-    }
-    _stateOfUiOnFirstWindowPreviousCount = newCount;
 }

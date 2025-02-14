@@ -63,28 +63,7 @@ public:
      */
     std::filesystem::path saveFilename() const;
 
-private slots:
-    /**
-     * Called when the number of windows that should be displayed changes.
-     *
-     * \param newCount The new number of windows included
-     */
-    void nWindowsDisplayedChanged(int newCount);
-
-    /**
-     * Called when the checkbox for GUI only on first window is clicked.
-     *
-     * \param checked `true` if GUI is selected for first window only.
-     */
-    void firstWindowGuiOptionClicked(bool checked);
-
-    /**
-     * Called when the QComboBox is selected and has a new value
-     */
-    void firstWindowGraphicsSelectionChanged();
-
 private:
-    void createWidgets();
     void generateConfiguration();
 
     void saveCluster();
@@ -92,17 +71,10 @@ private:
 
     DisplayWindowUnion* _displayWidget = nullptr;
 
-    // Settings
     QCheckBox* _checkBoxVsync = nullptr;
-    QCheckBox* _showUiOnFirstWindow = nullptr;
-    QComboBox* _firstWindowGraphicsSelection = nullptr;
-
     QLineEdit* _linePitch = nullptr;
     QLineEdit* _lineRoll = nullptr;
     QLineEdit* _lineYaw = nullptr;
-
-    int _stateOfUiOnFirstWindowPreviousCount = 1;
-    bool _stateOfUiOnFirstWindowWhenDisabled = false;
 
     sgct::config::Cluster _cluster;
     const std::filesystem::path _userConfigPath;

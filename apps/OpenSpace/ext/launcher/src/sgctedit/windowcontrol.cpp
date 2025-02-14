@@ -115,8 +115,8 @@ WindowControl::WindowControl(int monitorIndex, int windowIndex,
     //  | Monitor  * DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD> | R2
     //  | Size     * [xxxxxx] *    x  * [yyyyyy] *  px   * <lock> * < Set to      | R3
     //  | Offset   * [xxxxxx] *    ,  * [yyyyyy] *  px   *        *   Fullscreen> | R4
-    //  | [] Window Decoration                                                    | R5
-    //  | [] Spout Output                                                         | R6
+    //  | [] Window Decoration                    [] Render 2D                    | R5
+    //  | [] Spout Output                         [] Render 3D                    | R6
     //  | ~~~~~~~~~~~~~~~~~~~~~~~~~Projection components~~~~~~~~~~~~~~~~~~~~~~~~~ | R7
     //  *----------*----------*-------*----------*-------*--------*-------*-------*
 
@@ -307,7 +307,7 @@ WindowControl::WindowControl(int monitorIndex, int windowIndex,
             "If disabled, the window will not have a border frame or title bar, and no\n "
             "controls for minimizing/maximizing, resizing, or closing the window"
         );
-        layout->addWidget(_windowDecoration, 5, 0, 1, 8);
+        layout->addWidget(_windowDecoration, 5, 0, 1, 4);
     }
 
     //
@@ -320,30 +320,47 @@ WindowControl::WindowControl(int monitorIndex, int windowIndex,
             "images available to other real-time applications on the same machine for "
             "further processing"
         );
-        layout->addWidget(_spoutOutput);
+        layout->addWidget(_spoutOutput, 6, 0, 1, 4);
+    }
+
+    //
+    // Render 2D & 3D
+    {
+        _render2D = new QCheckBox("Render Overlays");
+        _render2D->setToolTip(
+            "Determines whether any overlays should be\nrendered on this window. "
+            "Overlays in this case are\nthe user interface, dashboard information, and "
+            "other\nelements that are only useful for a pilot."
+        );
+        layout->addWidget(_render2D, 5, 4, 1, 4);
+
+        _render3D = new QCheckBox("Render Scene");
+        _render3D->setToolTip(
+            "Determines whether the main 3D scene should be\nrendered on this window. "
+            "This contains anything that is not the overlay\nlike 3D models, the "
+            "planets, stars etc."
+        );
+        connect(
+            _render3D, &QCheckBox::clicked,
+            [this](bool checked) {
+                _projectionGroup->setVisible(checked);
+            }
+        );
+        layout->addWidget(_render3D, 6, 4, 1, 4);
     }
 
     //
     // Projections
     {
-        QFrame* projectionGroup = new QFrame;
-        projectionGroup->setVisible(true);
-        projectionGroup->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+        _projectionGroup = new QFrame;
+        _projectionGroup->setVisible(true);
+        _projectionGroup->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
 
         //
         // Projection combobox
-        QBoxLayout* projectionLayout = new QVBoxLayout(projectionGroup);
+        QBoxLayout* projectionLayout = new QVBoxLayout(_projectionGroup);
         projectionLayout->setContentsMargins(0, 0, 0, 0);
         projectionLayout->setSpacing(0);
-        _projectionLabel = new QLabel(
-            "Projection information not shown while user interface is set to display "
-            "on the first window only"
-        );
-        _projectionLabel->setWordWrap(true);
-        _projectionLabel->setObjectName("notice");
-        _projectionLabel->setVisible(false);
-        _projectionLabel->setEnabled(false);
-        projectionLayout->addWidget(_projectionLabel);
 
         _projectionType = new QComboBox;
         _projectionType->addItems({
@@ -376,7 +393,7 @@ WindowControl::WindowControl(int monitorIndex, int windowIndex,
         // We need to trigger this once to ensure that all of the defaults are correct
         onProjectionChanged(0);
 
-        layout->addWidget(projectionGroup, 7, 0, 1, 8);
+        layout->addWidget(_projectionGroup, 7, 0, 1, 8);
     }
 
     resetToDefaults();
@@ -647,6 +664,8 @@ void WindowControl::resetToDefaults() {
     }
     _windowDecoration->setChecked(true);
     _spoutOutput->setChecked(false);
+    _render2D->setChecked(true);
+    _render3D->setChecked(true);
     _projectionType->setCurrentIndex(static_cast<int>(ProjectionIndices::Planar));
     _planar.fovV->setValue(DefaultFovLongEdge);
     _planar.fovV->setValue(DefaultFovShortEdge);
@@ -686,6 +705,14 @@ void WindowControl::setSpoutOutputState(bool shouldSpoutOutput) {
     _spoutOutput->setChecked(shouldSpoutOutput);
 }
 
+void WindowControl::setRender2D(bool state) {
+    _render2D->setChecked(state);
+}
+
+void WindowControl::setRender3D(bool state) {
+    _render3D->setChecked(state);
+}
+
 void WindowControl::generateWindowInformation(sgct::config::Window& window) const {
     window.size = { _sizeX->value(), _sizeY->value() };
     window.monitor = _monitor->currentIndex();
@@ -694,14 +721,29 @@ void WindowControl::generateWindowInformation(sgct::config::Window& window) cons
         resolution.x() + _offsetX->value(),
         resolution.y() + _offsetY->value()
     );
+    window.draw2D = _render2D->isChecked();
+    window.draw3D = _render3D->isChecked();
+    window.isDecorated = _windowDecoration->isChecked();
+    if (_spoutOutput->isChecked()) {
+        window.spout = sgct::config::Window::Spout{
+            .enabled = true
+        };
+    }
+    if (!_windowName->text().isEmpty()) {
+        window.name = _windowName->text().toStdString();
+    }
+
+    // The rest of this function is just specifying the rendering, which we can skip if we
+    // don't want to render 3D anyway
+    if (!window.draw3D) {
+        return;
+    }
 
     sgct::config::Viewport vp;
     vp.isTracked = true;
     vp.position = sgct::vec2(0.f, 0.f);
     vp.size = sgct::vec2(1.f, 1.f);
 
-    //
-    // Projection information
     switch (static_cast<ProjectionIndices>(_projectionType->currentIndex())) {
         case ProjectionIndices::Fisheye:
             vp.projection = sgct::config::FisheyeProjection {
@@ -743,22 +785,10 @@ void WindowControl::generateWindowInformation(sgct::config::Window& window) cons
                 vp.projection = projection;
                 break;
             }
-        default:
-            throw ghoul::MissingCaseException();
     }
 
     window.viewports.clear();
     window.viewports.push_back(vp);
-    
-    window.isDecorated = _windowDecoration->isChecked();
-    if (_spoutOutput->isChecked()) {
-        window.spout = sgct::config::Window::Spout {
-            .enabled = true
-        };
-    }
-    if (!_windowName->text().isEmpty()) {
-        window.name = _windowName->text().toStdString();
-    }
 }
 
 void WindowControl::setProjectionPlanar(float hfov, float vfov) {
@@ -790,23 +820,6 @@ void WindowControl::setProjectionEquirectangular(int quality) {
     _projectionType->setCurrentIndex(
         static_cast<int>(ProjectionIndices::Equirectangular)
     );
-}
-
-void WindowControl::setVisibilityOfProjectionGui(bool enable) {
-    _projectionType->setVisible(enable);
-
-    if (enable) {
-        onProjectionChanged(_projectionType->currentIndex());
-    }
-    else {
-        _planar.widget->setVisible(enable);
-        _fisheye.widget->setVisible(enable);
-        _sphericalMirror.widget->setVisible(enable);
-        _cylindrical.widget->setVisible(enable);
-        _equirectangular.widget->setVisible(enable);
-    }
-
-    _projectionLabel->setVisible(!enable);
 }
 
 void WindowControl::onSizeXChanged(int newValue) {

@@ -176,6 +176,15 @@ void DisplayWindowUnion::initialize(const std::vector<QRect>& monitorSizeList,
         wCtrl->setSpoutOutputState(w.spout.has_value() && w.spout->enabled);
 
         //
+        // Get render states
+        if (w.draw2D.has_value()) {
+            wCtrl->setRender2D(*w.draw2D);
+        }
+        if (w.draw3D.has_value()) {
+            wCtrl->setRender3D(*w.draw3D);
+        }
+
+        //
         // Get projection-based settings depending on the projection in the window
         std::visit(overloaded{
             [&](const sgct::config::CylindricalProjection& p) {
