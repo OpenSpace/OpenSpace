@@ -37,8 +37,8 @@ std::string_view ShortProperty::className() const {
     return "ShortProperty";
 }
 
-int ShortProperty::typeLua() const {
-    return LUA_TNUMBER;
+ghoul::lua::LuaTypes ShortProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Number;
 }
 
 } // namespace openspace::properties
