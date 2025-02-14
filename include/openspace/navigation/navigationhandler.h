@@ -89,6 +89,7 @@ public:
     bool isKeyFrameInteractionEnabled() const;
     float jumpToFadeDuration() const;
     float interpolationTime() const;
+    float fadeJumpThreshold() const;
 
     // Callback functions
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
@@ -210,6 +211,7 @@ private:
     properties::BoolProperty _disableJoystickInputs;
     properties::BoolProperty _useKeyFrameInteraction;
     properties::FloatProperty _jumpToFadeDuration;
+    properties::FloatProperty _fadeJumpThreshold;
 };
 
 } // namespace openspace::interaction
