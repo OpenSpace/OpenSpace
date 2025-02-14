@@ -21,6 +21,7 @@ local Object = {
     Enabled = false,
     File = data .. "bound_20.dat",
     NamesFile = data .. "constellations.dat",
+    Color = { 0.30, 0.28, 0.19 }
     -- Selection = zodiacs
   },
   Transform = {
