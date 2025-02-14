@@ -219,9 +219,6 @@ asset.onInitialize(function()
   openspace.action.registerAction(ToggleNativeUi)
   openspace.bindKey("F1", ToggleNativeUi.Identifier)
 
-  openspace.action.registerAction(ToggleShutdown)
-  openspace.bindKey("ESC", ToggleShutdown.Identifier)
-
   openspace.action.registerAction(TakeScreenshot)
   openspace.bindKey("F12", TakeScreenshot.Identifier)
   openspace.bindKey("PRINT_SCREEN", TakeScreenshot.Identifier)
@@ -245,7 +242,7 @@ asset.onInitialize(function()
   openspace.bindKey("B", FadeToBlack.Identifier)
 
   openspace.action.registerAction(ToggleMainGui)
-  openspace.bindKey("TAB", ToggleMainGui.Identifier)
+  openspace.bindKey("F2", ToggleMainGui.Identifier)
 
   openspace.action.registerAction(ToggleOverlays)
   openspace.bindKey("Shift+TAB", ToggleOverlays.Identifier)
@@ -315,7 +312,7 @@ asset.onDeinitialize(function()
   openspace.clearKey("Shift+TAB")
   openspace.action.removeAction(ToggleOverlays)
 
-  openspace.clearKey("TAB")
+  openspace.clearKey("F2")
   openspace.action.removeAction(ToggleMainGui)
 
   openspace.clearKey("B")
@@ -339,9 +336,6 @@ asset.onDeinitialize(function()
   openspace.clearKey("F12")
   openspace.clearKey("PRINT_SCREEN")
   openspace.action.removeAction(TakeScreenshot)
-
-  openspace.clearKey("ESC")
-  openspace.action.removeAction(ToggleShutdown)
 
   openspace.clearKey("F1")
   openspace.action.removeAction(ToggleNativeUi)
