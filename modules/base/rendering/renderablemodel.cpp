@@ -351,26 +351,15 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         if (std::holds_alternative<float>(*p.animationTimeScale)) {
             _animationTimeScale = std::get<float>(*p.animationTimeScale);
         }
-        else if (std::holds_alternative<std::string>(*p.animationTimeScale))
-        {
+        else if (std::holds_alternative<std::string>(*p.animationTimeScale)) {
             const std::string stringUnit = std::get<std::string>(*p.animationTimeScale);
 
-            // Find matching unit name in list of supported unit names
-            TimeUnit timeUnit;
-            bool wasFound = false;
-            for (int i = 0; i < TimeUnitNamesSingular.size(); ++i) {
-                if (stringUnit == TimeUnitNamesSingular[i]) {
-                    wasFound = true;
-                    timeUnit = TimeUnits[i];
-                }
+            try {
+                TimeUnit timeUnit = timeUnitFromString(stringUnit);
+                _animationTimeScale =
+                    static_cast<double>(convertTime(1.0, timeUnit, TimeUnit::Second));
             }
-
-            if (wasFound) {
-                _animationTimeScale = static_cast<double>(
-                    convertTime(1.0, timeUnit, TimeUnit::Second)
-                );
-            }
-            else {
+            catch (const ghoul::MissingCaseException& e) {
                 std::string message = std::format("The given unit name '{}' does not "
                     "match any currently supported unit names", stringUnit);
                 LERROR(message);
