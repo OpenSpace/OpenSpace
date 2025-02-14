@@ -100,11 +100,6 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
     QBoxLayout* layout = new QVBoxLayout(this);
     layout->setSizeConstraint(QLayout::SetFixedSize);
 
-    sgct::quat orientation = sgct::quat(0.f, 0.f, 0.f, 0.f);
-    if (_cluster.scene.has_value() && _cluster.scene->orientation.has_value()) {
-        orientation = *_cluster.scene->orientation;
-    }
-
     //
     // Monitor widget at the top of the window
     {
@@ -116,7 +111,6 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
         QFrame* displayFrame = new QFrame;
         displayFrame->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
 
-        QBoxLayout* displayLayout = new QVBoxLayout(displayFrame);
         _displayWidget = new DisplayWindowUnion(monitorSizes, MaxNumberWindows, this);
         connect(
             _displayWidget, &DisplayWindowUnion::windowChanged,
@@ -126,10 +120,10 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
             _displayWidget, &DisplayWindowUnion::nWindowsChanged,
             monitorBox, &MonitorBox::nWindowsDisplayedChanged
         );
+        // We initialize the widget after making the connections so that the monitorbox
+        // widget will get informed about the windows and their sizes automatically
         _displayWidget->initialize(monitorSizes, _cluster);
-        displayLayout->addWidget(_displayWidget);
-
-        layout->addWidget(displayFrame);
+        layout->addWidget(_displayWidget);
     }
 
 
@@ -162,6 +156,10 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
     settingsLayout->addWidget(orientationContainer);
     QGridLayout* layoutWindow = new QGridLayout(orientationContainer);
 
+    sgct::quat orientation = sgct::quat(0.f, 0.f, 0.f, 0.f);
+    if (_cluster.scene.has_value() && _cluster.scene->orientation.has_value()) {
+        orientation = *_cluster.scene->orientation;
+    }
     glm::quat q = glm::quat(orientation.w, orientation.x, orientation.y, orientation.z);
 
     {
@@ -254,7 +252,48 @@ std::filesystem::path SgctEdit::saveFilename() const {
 }
 
 void SgctEdit::saveCluster() {
-    generateConfiguration();
+    //
+    // Generate configuration
+    // Reconstitute the quaternion if the provided values are not 0
+    const float pitch = glm::radians(_linePitch->text().toFloat());
+    const float yaw = glm::radians(_lineYaw->text().toFloat());
+    const float roll = glm::radians(_lineRoll->text().toFloat());
+    if (pitch != 0.f && yaw != 0.f && roll != 0.f) {
+        glm::quat q = glm::quat(glm::vec3(pitch, yaw, roll));
+        _cluster.scene = {
+            .orientation = sgct::quat(q.x, q.y, q.z, q.w)
+        };
+    }
+
+    ghoul_assert(!_cluster.nodes.empty(), "There must be at least one node");
+    sgct::config::Node& node = _cluster.nodes.back();
+
+    //
+    // Generate vsync setup
+    if (_checkBoxVsync->isChecked()) {
+        if (!_cluster.settings || !_cluster.settings->display ||
+            !_cluster.settings->display->swapInterval)
+        {
+            _cluster.settings = sgct::config::Settings{
+                .display = sgct::config::Settings::Display {
+                    .swapInterval = 1
+                }
+            };
+        }
+    }
+    else {
+        _cluster.settings = std::nullopt;
+    }
+
+    _displayWidget->applyWindowSettings(node.windows);
+
+    //
+    // Generate individual window settings
+    for (size_t i = 0; i < node.windows.size(); i++) {
+        // First apply default settings to each window
+        node.windows[i].id = static_cast<int8_t>(i);
+        node.windows[i].viewports.back().isTracked = true;
+    }
 
     if (hasWindowIssues(_cluster)) {
         const int ret = QMessageBox::warning(
@@ -291,9 +330,10 @@ void SgctEdit::saveCluster() {
         _configurationFilename = fileName.toStdString();
     }
 
-    ghoul_assert(!_configurationFilename.empty(), "Filename must not be empty");
 
+    //
     // Save the cluster configuration
+    ghoul_assert(!_configurationFilename.empty(), "Filename must not be empty");
     std::ofstream outFile;
     outFile.open(_configurationFilename, std::ofstream::out);
     if (outFile.good()) {
@@ -319,62 +359,4 @@ void SgctEdit::apply() {
     }
     _configurationFilename = (userTmp / "apply-without-saving.json").string();
     saveCluster();
-}
-
-void SgctEdit::generateConfiguration() {
-    // Reconstitute the quaternion if the provided values are not 0
-    const float pitch = glm::radians(_linePitch->text().toFloat());
-    const float yaw = glm::radians(_lineYaw->text().toFloat());
-    const float roll = glm::radians(_lineRoll->text().toFloat());
-    if (pitch != 0.f && yaw != 0.f && roll != 0.f) {
-        glm::quat q = glm::quat(glm::vec3(pitch, yaw, roll));
-        _cluster.scene = {
-            .orientation = sgct::quat(q.x, q.y, q.z, q.w)
-        };
-    }
-
-    if (_cluster.nodes.empty()) {
-        _cluster.nodes.emplace_back();
-    }
-    sgct::config::Node& node = _cluster.nodes.back();
-
-    //
-    // Generate vsync setup
-    if (_checkBoxVsync->isChecked()) {
-        if (!_cluster.settings || !_cluster.settings->display ||
-            !_cluster.settings->display->swapInterval)
-        {
-            _cluster.settings = sgct::config::Settings {
-                .display = sgct::config::Settings::Display {
-                    .swapInterval = 1
-                }
-            };
-        }
-    }
-    else {
-        _cluster.settings = std::nullopt;
-    }
-
-    //
-    // Resize windows according to selected
-    std::vector<WindowControl*> windowControls = _displayWidget->activeWindowControls();
-    for (size_t wIdx = 0; wIdx < windowControls.size(); wIdx++) {
-        if (node.windows.size() <= wIdx) {
-            node.windows.emplace_back();
-        }
-        if (windowControls[wIdx]) {
-            windowControls[wIdx]->generateWindowInformation(node.windows[wIdx]);
-        }
-    }
-    while (node.windows.size() > windowControls.size()) {
-        node.windows.pop_back();
-    }
-
-    //
-    // Generate individual window settings
-    for (size_t i = 0; i < node.windows.size(); i++) {
-        // First apply default settings to each window
-        node.windows[i].id = static_cast<int8_t>(i);
-        node.windows[i].viewports.back().isTracked = true;
-    }
 }

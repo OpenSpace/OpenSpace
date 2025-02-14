@@ -56,12 +56,7 @@ public:
     void initialize(const std::vector<QRect>& monitorSizeList,
         const sgct::config::Cluster& cluster);
 
-    /**
-     * Returns a vector of pointers to the WindowControl objects for all visible windows.
-     *
-     * \return The vector of pointers of WindowControl objects
-     */
-    std::vector<WindowControl*> activeWindowControls() const;
+    void applyWindowSettings(std::vector<sgct::config::Window>& windows);
 
     /**
      * When called will add a new window to the set of windows, which will, in turn, send
@@ -93,7 +88,7 @@ signals:
     void nWindowsChanged(int newCount);
 
 private:
-    void showWindows();
+    void updateWindows();
 
     unsigned int _nWindowsDisplayed = 0;
 

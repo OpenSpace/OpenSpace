@@ -45,21 +45,13 @@ DisplayWindowUnion::DisplayWindowUnion(const std::vector<QRect>& monitorResoluti
 {
     // Add all window controls (some will be hidden from GUI initially)
     for (int i = 0; i < nMaxWindows; i++) {
-        const int monitorNumForThisWindow =
-            (monitorResolutions.size() > 1 && i >= 2) ? 1 : 0;
-
-        WindowControl* ctrl = new WindowControl(
-            monitorNumForThisWindow,
-            i,
-            monitorResolutions,
-            this
-        );
-        _windowControls.push_back(ctrl);
-
+        const int monitorIdx = (monitorResolutions.size() > 1 && i >= 2) ? 1 : 0;
+        WindowControl* ctrl = new WindowControl(monitorIdx, i, monitorResolutions, this);
         connect(
             ctrl, &WindowControl::windowChanged,
             this, &DisplayWindowUnion::windowChanged
         );
+        _windowControls.push_back(ctrl);
     }
 
     QBoxLayout* layout = new QVBoxLayout(this);
@@ -94,25 +86,28 @@ DisplayWindowUnion::DisplayWindowUnion(const std::vector<QRect>& monitorResoluti
         layout->addLayout(layoutMonButton);
     }
 
-    QFrame* line = new QFrame;
-    line->setFrameShape(QFrame::HLine);
-    line->setFrameShadow(QFrame::Sunken);
-    layout->addWidget(line);
-
-    QBoxLayout* layoutWindows = new QHBoxLayout;
-    layoutWindows->setContentsMargins(0, 0, 0, 0);
-    layoutWindows->setSpacing(0);
-    for (int i = 0; i < nMaxWindows; i++) {
-        layoutWindows->addWidget(_windowControls[i]);
-        if (i < (nMaxWindows - 1)) {
-            QFrame* frameForNextWindow = new QFrame;
-            frameForNextWindow->setFrameShape(QFrame::VLine);
-            _frameBorderLines.push_back(frameForNextWindow);
-            layoutWindows->addWidget(frameForNextWindow);
-        }
+    {
+        QFrame* line = new QFrame;
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        layout->addWidget(line);
     }
-    layout->addLayout(layoutWindows);
-    layout->addStretch();
+
+    {
+        QBoxLayout* layoutWindows = new QHBoxLayout;
+        layoutWindows->setContentsMargins(0, 0, 0, 0);
+        layoutWindows->setSpacing(0);
+        for (int i = 0; i < nMaxWindows; i++) {
+            layoutWindows->addWidget(_windowControls[i]);
+            if (i < (nMaxWindows - 1)) {
+                QFrame* frameForNextWindow = new QFrame;
+                frameForNextWindow->setFrameShape(QFrame::VLine);
+                _frameBorderLines.push_back(frameForNextWindow);
+                layoutWindows->addWidget(frameForNextWindow);
+            }
+        }
+        layout->addLayout(layoutWindows);
+    }
 }
 
 void DisplayWindowUnion::initialize(const std::vector<QRect>& monitorSizeList,
@@ -222,31 +217,30 @@ void DisplayWindowUnion::initialize(const std::vector<QRect>& monitorSizeList,
     }
 }
 
-std::vector<WindowControl*> DisplayWindowUnion::activeWindowControls() const {
-    std::vector<WindowControl*> res;
-    res.reserve(_nWindowsDisplayed);
-    for (unsigned int i = 0; i < _nWindowsDisplayed; i++) {
-        res.push_back(_windowControls[i]);
+void DisplayWindowUnion::applyWindowSettings(std::vector<sgct::config::Window>& windows) {
+    windows.resize(_nWindowsDisplayed);
+    for (size_t wIdx = 0; wIdx < _nWindowsDisplayed; wIdx++) {
+        ghoul_assert(_windowControls[wIdx], "No window control");
+        _windowControls[wIdx]->generateWindowInformation(windows[wIdx]);
     }
-    return res;
 }
 
 void DisplayWindowUnion::addWindow() {
     if (_nWindowsDisplayed < _windowControls.size()) {
         _windowControls[_nWindowsDisplayed]->resetToDefaults();
         _nWindowsDisplayed++;
-        showWindows();
+        updateWindows();
     }
 }
 
 void DisplayWindowUnion::removeWindow() {
     if (_nWindowsDisplayed > 1) {
         _nWindowsDisplayed--;
-        showWindows();
+        updateWindows();
     }
 }
 
-void DisplayWindowUnion::showWindows() {
+void DisplayWindowUnion::updateWindows() {
     for (size_t i = 0; i < _windowControls.size(); i++) {
         _windowControls[i]->setVisible(i < _nWindowsDisplayed);
     }
@@ -258,5 +252,6 @@ void DisplayWindowUnion::showWindows() {
     for (WindowControl* w : _windowControls) {
         w->showWindowLabel(_nWindowsDisplayed > 1);
     }
+
     emit nWindowsChanged(_nWindowsDisplayed);
 }

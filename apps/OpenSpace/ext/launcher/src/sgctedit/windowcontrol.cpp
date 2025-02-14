@@ -39,13 +39,17 @@
 #include <numbers>
 
 namespace {
-    const QList<QString> QualityTypes = {
-        "Low (256)", "Medium (512)", "High (1K)", "1.5K (1536)", "2K (2048)", "4K (4096)",
-        "8K (8192)", "16K (16384)", "32K (32768)", "64K (65536)"
-    };
-
-    constexpr std::array<int, 10> QualityValues = {
-        256, 512, 1024, 1536, 2048, 4096, 8192, 16384, 32768, 65536
+    std::array<std::pair<int, std::string>, 10> Quality = {
+        std::pair{ 256, "Low (256)" },
+        std::pair{ 512, "Medium (512)" },
+        std::pair{ 1024, "High (1K)" },
+        std::pair{ 1536, "1.5K (1536)" },
+        std::pair{ 2048, "2K (2048)" },
+        std::pair{ 4096, "4K (4096)" },
+        std::pair{ 8192, "8K (8192)" },
+        std::pair{ 16384, "16K (16384)" },
+        std::pair{ 32768, "32K (32768)" },
+        std::pair{ 65536, "64K (65536)" }
     };
 
     constexpr std::array<QRect, 4> DefaultWindowSizes = {
@@ -89,14 +93,24 @@ namespace {
         return monitorNames;
     }
 
-    void setQualityComboBoxFromLinesResolution(int lines, QComboBox& combo) {
-        for (unsigned int v = 0; v < QualityTypes.size(); v++) {
-            if (lines == QualityValues[v]) {
-                combo.setCurrentIndex(v);
-                break;
-            }
+    QStringList qualityList() {
+        QStringList res;
+        for (const std::pair<int, std::string>& p : Quality) {
+            res.append(QString::fromStdString(p.second));
         }
+        return res;
     }
+
+    int indexForQuality(int quality) {
+        auto it = std::find_if(
+            Quality.cbegin(),
+            Quality.cend(),
+            [quality](const std::pair<int, std::string>& p) { return p.first == quality; }
+        );
+        ghoul_assert(it != Quality.cend(), "Combobox has too many values");
+        return std::distance(Quality.cbegin(), it);
+    }
+
 } // namespace
 
 WindowControl::WindowControl(int monitorIndex, int windowIndex,
@@ -505,7 +519,7 @@ QWidget* WindowControl::createFisheyeWidget() {
     layout->addWidget(_fisheye.labelQuality, 1, 0);
 
     _fisheye.quality = new QComboBox;
-    _fisheye.quality->addItems(QualityTypes);
+    _fisheye.quality->addItems(qualityList());
     _fisheye.quality->setToolTip(qualityTip);
     _fisheye.quality->setCurrentIndex(2);
     layout->addWidget(_fisheye.quality, 1, 1);
@@ -541,7 +555,7 @@ QWidget* WindowControl::createSphericalMirrorWidget() {
     layout->addWidget(_sphericalMirror.labelQuality, 1, 0);
 
     _sphericalMirror.quality = new QComboBox;
-    _sphericalMirror.quality->addItems(QualityTypes);
+    _sphericalMirror.quality->addItems(qualityList());
     _sphericalMirror.quality->setToolTip(qualityTip);
     _sphericalMirror.quality->setCurrentIndex(2);
     layout->addWidget(_sphericalMirror.quality, 1, 1);
@@ -578,7 +592,7 @@ QWidget* WindowControl::createCylindricalWidget() {
     layout->addWidget(_cylindrical.labelQuality, 1, 0);
 
     _cylindrical.quality = new QComboBox;
-    _cylindrical.quality->addItems(QualityTypes);
+    _cylindrical.quality->addItems(qualityList());
     _cylindrical.quality->setToolTip(qualityTip);
     _cylindrical.quality->setCurrentIndex(2);
     layout->addWidget(_cylindrical.quality, 1, 1);
@@ -631,7 +645,7 @@ QWidget* WindowControl::createEquirectangularWidget() {
     layout->addWidget(_equirectangular.labelQuality, 1, 0);
 
     _equirectangular.quality = new QComboBox;
-    _equirectangular.quality->addItems(QualityTypes);
+    _equirectangular.quality->addItems(qualityList());
     _equirectangular.quality->setToolTip(qualityTip);
     _equirectangular.quality->setCurrentIndex(2);
     layout->addWidget(_equirectangular.quality, 1, 1);
@@ -748,24 +762,24 @@ void WindowControl::generateWindowInformation(sgct::config::Window& window) cons
         case ProjectionIndices::Fisheye:
             vp.projection = sgct::config::FisheyeProjection {
                 .fov = 180.f,
-                .quality = QualityValues[_fisheye.quality->currentIndex()],
+                .quality = Quality[_fisheye.quality->currentIndex()].first,
                 .tilt = 0.f
             };
             break;
         case ProjectionIndices::SphericalMirror:
             vp.projection = sgct::config::SphericalMirrorProjection {
-                .quality = QualityValues[_sphericalMirror.quality->currentIndex()]
+                .quality = Quality[_sphericalMirror.quality->currentIndex()].first
             };
             break;
         case ProjectionIndices::Cylindrical:
             vp.projection = sgct::config::CylindricalProjection {
-                .quality = QualityValues[_cylindrical.quality->currentIndex()],
+                .quality = Quality[_cylindrical.quality->currentIndex()].first,
                 .heightOffset = static_cast<float>(_cylindrical.heightOffset->value())
             };
             break;
         case ProjectionIndices::Equirectangular:
             vp.projection = sgct::config::EquirectangularProjection {
-                .quality = QualityValues[_equirectangular.quality->currentIndex()]
+                .quality = Quality[_equirectangular.quality->currentIndex()].first
             };
             break;
         case ProjectionIndices::Planar:
@@ -798,25 +812,25 @@ void WindowControl::setProjectionPlanar(float hfov, float vfov) {
 }
 
 void WindowControl::setProjectionFisheye(int quality) {
-    setQualityComboBoxFromLinesResolution(quality, *_fisheye.quality);
+    _fisheye.quality->setCurrentIndex(indexForQuality(quality));
     _projectionType->setCurrentIndex(static_cast<int>(ProjectionIndices::Fisheye));
 }
 
 void WindowControl::setProjectionSphericalMirror(int quality) {
-    setQualityComboBoxFromLinesResolution(quality, *_sphericalMirror.quality);
+    _sphericalMirror.quality->setCurrentIndex(indexForQuality(quality));
     _projectionType->setCurrentIndex(
         static_cast<int>(ProjectionIndices::SphericalMirror)
     );
 }
 
 void WindowControl::setProjectionCylindrical(int quality, float heightOffset) {
-    setQualityComboBoxFromLinesResolution(quality, *_cylindrical.quality);
+    _cylindrical.quality->setCurrentIndex(indexForQuality(quality));
     _cylindrical.heightOffset->setValue(heightOffset);
     _projectionType->setCurrentIndex(static_cast<int>(ProjectionIndices::Cylindrical));
 }
 
 void WindowControl::setProjectionEquirectangular(int quality) {
-    setQualityComboBoxFromLinesResolution(quality, *_equirectangular.quality);
+    _equirectangular.quality->setCurrentIndex(indexForQuality(quality));
     _projectionType->setCurrentIndex(
         static_cast<int>(ProjectionIndices::Equirectangular)
     );
@@ -896,14 +910,10 @@ void WindowControl::onAspectRatioLockClicked() {
 
 void WindowControl::onFovLockClicked() {
     _fovLocked = !_fovLocked;
+    _planar.fovH->setEnabled(!_fovLocked);
+    _planar.fovV->setEnabled(!_fovLocked);
     if (_fovLocked) {
-        _planar.fovH->setEnabled(false);
-        _planar.fovV->setEnabled(false);
         updatePlanarLockedFov();
-    }
-    else {
-        _planar.fovH->setEnabled(true);
-        _planar.fovV->setEnabled(true);
     }
     _planar.buttonLockFov->setIcon(_fovLocked ? _lockIcon : _unlockIcon);
 }

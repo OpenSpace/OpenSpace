@@ -64,8 +64,6 @@ public:
     std::filesystem::path saveFilename() const;
 
 private:
-    void generateConfiguration();
-
     void saveCluster();
     void apply();
 
