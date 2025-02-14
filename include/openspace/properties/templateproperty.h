@@ -67,14 +67,6 @@ public:
     TemplateProperty(Property::PropertyInfo info, T value);
 
     /**
-     * Returns the class name for this TemplateProperty. This method has to be specialized
-     * for each new type.
-     *
-     * \return The class name for the TemplateProperty
-     */
-    virtual std::string_view className() const override = 0;
-
-    /**
      * Returns the `std::type_info` describing the template parameter `T`. It can be used
      * to test against a ghoul::any value before trying to assign it.
      *
@@ -99,9 +91,6 @@ public:
      * \param state The Lua state from which the value will be decoded
      */
     virtual void setLuaValue(lua_State* state) override;
-
-    /// \see Property::typeLua
-    virtual int typeLua() const override = 0;
 
     /**
      * This method encodes the stored value into a std::string object. The resulting

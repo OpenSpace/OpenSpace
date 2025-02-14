@@ -91,8 +91,8 @@ const std::type_info& Property::type() const {
     return typeid(void);
 }
 
-int Property::typeLua() const {
-    return LUA_TNIL;
+ghoul::lua::LuaTypes Property::typeLua() const {
+    return ghoul::lua::LuaTypes::None;
 }
 
 std::string Property::stringValue() const {

@@ -37,8 +37,8 @@ std::string_view DoubleProperty::className() const {
     return "DoubleProperty";
 }
 
-int DoubleProperty::typeLua() const {
-    return LUA_TNUMBER;
+ghoul::lua::LuaTypes DoubleProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Number;
 }
 
 } // namespace openspace::properties

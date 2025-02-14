@@ -41,8 +41,8 @@ std::string_view DoubleListProperty::className() const {
     return "DoubleListProperty";
 }
 
-int DoubleListProperty::typeLua() const {
-    return LUA_TTABLE;
+ghoul::lua::LuaTypes DoubleListProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Table;
 }
 
 std::string DoubleListProperty::toStringConversion() const {
