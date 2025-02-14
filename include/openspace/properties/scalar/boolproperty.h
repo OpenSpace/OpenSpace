@@ -38,7 +38,7 @@ public:
     BoolProperty(Property::PropertyInfo info, bool value = false);
 
     std::string_view className() const override;
-    int typeLua() const override;
+    ghoul::lua::LuaTypes typeLua() const override;
 
     using TemplateProperty<bool>::operator=;
 

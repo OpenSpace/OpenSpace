@@ -41,8 +41,8 @@ std::string_view StringListProperty::className() const {
     return "StringListProperty";
 }
 
-int StringListProperty::typeLua() const {
-    return LUA_TTABLE;
+ghoul::lua::LuaTypes StringListProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Table;
 }
 
 std::string StringListProperty::toStringConversion() const {

@@ -45,8 +45,8 @@ std::string_view UVec4Property::className() const {
     return "UVec4Property";
 }
 
-int UVec4Property::typeLua() const {
-    return LUA_TTABLE;
+ghoul::lua::LuaTypes UVec4Property::typeLua() const {
+    return ghoul::lua::LuaTypes::Table;
 }
 
 } // namespace openspace::properties

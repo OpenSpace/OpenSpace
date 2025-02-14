@@ -40,7 +40,7 @@ public:
         glm::dvec2 stepValue = glm::dvec2(0.01));
 
     std::string_view className() const override;
-    int typeLua() const override;
+    ghoul::lua::LuaTypes typeLua() const override;
 
     using TemplateProperty<glm::dvec2>::operator=;
 };
