@@ -114,14 +114,6 @@ bool ScreenSpaceDashboard::initializeGL() {
     return true;
 }
 
-bool ScreenSpaceDashboard::deinitializeGL() {
-    return ScreenSpaceFramebuffer::deinitializeGL();
-}
-
-bool ScreenSpaceDashboard::isReady() const {
-    return ScreenSpaceFramebuffer::isReady();
-}
-
 void ScreenSpaceDashboard::update() {
     if (global::windowDelegate->windowHasResized()) {
         const glm::ivec2 size = global::windowDelegate->currentDrawBufferResolution();

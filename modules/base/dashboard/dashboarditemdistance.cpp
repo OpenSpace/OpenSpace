@@ -268,7 +268,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
                                                                Component& otherComp) const
 {
     if ((mainComp.type == Type::Node) || (mainComp.type == Type::NodeSurface)) {
-        if (!mainComp.node) {
+        if (!mainComp.node) [[unlikely]] {
             mainComp.node = global::renderEngine->scene()->sceneGraphNode(
                 mainComp.nodeName
             );

@@ -401,8 +401,7 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
 
     std::vector<Parameters> result;
 
-    std::ifstream f;
-    f.open(file);
+    std::ifstream f = std::ifstream(file);
 
     int lineNum = 1;
 
@@ -518,8 +517,7 @@ std::vector<Parameters> readOmmFile(const std::filesystem::path& file) {
 
     std::vector<Parameters> result;
 
-    std::ifstream f;
-    f.open(file);
+    std::ifstream f = std::ifstream(file);
 
     int lineNum = 1;
     std::optional<Parameters> current = std::nullopt;
@@ -611,8 +609,7 @@ std::vector<Parameters> readSbdbFile(const std::filesystem::path& file) {
 
     ghoul_assert(std::filesystem::is_regular_file(file), "File must exist");
 
-    std::ifstream f;
-    f.open(file);
+    std::ifstream f = std::ifstream(file);
 
     std::string line;
     ghoul::getline(f, line);
@@ -670,7 +667,7 @@ std::vector<Parameters> readSbdbFile(const std::filesystem::path& file) {
 }
 
 void saveCache(const std::vector<Parameters>& params, const std::filesystem::path& file) {
-    std::ofstream stream(file, std::ofstream::binary);
+    std::ofstream stream = std::ofstream(file, std::ofstream::binary);
 
     stream.write(reinterpret_cast<const char*>(&CurrentCacheVersion), sizeof(int8_t));
 
@@ -700,7 +697,7 @@ void saveCache(const std::vector<Parameters>& params, const std::filesystem::pat
 }
 
 std::optional<std::vector<Parameters>> loadCache(const std::filesystem::path& file) {
-    std::ifstream stream(file, std::ifstream::binary);
+    std::ifstream stream = std::ifstream(file, std::ifstream::binary);
 
     int8_t version = 0;
     stream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));

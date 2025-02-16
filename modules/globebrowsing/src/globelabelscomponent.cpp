@@ -322,7 +322,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
         return;
     }
 
-    const bool loadSuccess = loadLabelsData(absPath(*p.fileName));
+    const bool loadSuccess = loadLabelsData(*p.fileName);
     if (!loadSuccess) {
         return;
     }

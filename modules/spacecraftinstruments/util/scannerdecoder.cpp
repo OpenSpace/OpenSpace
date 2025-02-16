@@ -26,10 +26,6 @@
 
 #include <ghoul/misc/dictionary.h>
 
-namespace {
-    std::string Type = "SCANNER";
-} // namespace
-
 namespace openspace {
 
 ScannerDecoder::ScannerDecoder(const ghoul::Dictionary& dictionary) {
@@ -38,7 +34,7 @@ ScannerDecoder::ScannerDecoder(const ghoul::Dictionary& dictionary) {
     }
 }
 const std::string& ScannerDecoder::decoderType() const {
-    return Type;
+    return "SCANNER";
 }
 
 const std::vector<std::string>& ScannerDecoder::spiceIDs() const {

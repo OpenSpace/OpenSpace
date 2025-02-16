@@ -110,7 +110,7 @@ DashboardItemPropertyValue::DashboardItemPropertyValue(
 void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
     ZoneScoped;
 
-    if (_propertyIsDirty) {
+    if (_propertyIsDirty) [[unlikely]] {
         _property = openspace::property(_propertyUri);
         _propertyIsDirty = false;
     }

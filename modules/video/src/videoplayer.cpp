@@ -37,7 +37,6 @@
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/openglstatecache.h>
 
-
 namespace {
     constexpr std::string_view _loggerCat = "VideoPlayer";
 
@@ -99,6 +98,20 @@ namespace {
         "end of the video."
     };
 
+    bool checkMpvError(int status) {
+        if (status < 0) {
+            LERROR(std::format("Libmpv API error: {}", mpv_error_string(status)));
+            return false;
+        }
+        return true;
+    }
+
+    void* getOpenGLProcAddress(void*, const char* name) {
+        return reinterpret_cast<void*>(
+            openspace::global::windowDelegate->openGLProcedureAddress(name)
+        );
+    }
+
     struct [[codegen::Dictionary(VideoPlayer)]] Parameters {
         // [[codegen::verbatim(VideoInfo.description)]]
         std::filesystem::path video;
@@ -128,23 +141,6 @@ namespace {
 } // namespace
 
 namespace openspace {
-
-namespace {
-
-bool checkMpvError(int status) {
-    if (status < 0) {
-        LERROR(std::format("Libmpv API error: {}", mpv_error_string(status)));
-        return false;
-    }
-    return true;
-}
-
-void* getOpenGLProcAddress(void*, const char* name) {
-    return reinterpret_cast<void*>(
-        global::windowDelegate->openGLProcedureAddress(name)
-    );
-}
-} // namespace
 
 void VideoPlayer::onMpvRenderUpdate(void* ctx) {
     // The wakeup flag is set here to enable the mpv_render_context_render
@@ -546,7 +542,7 @@ void VideoPlayer::renderFrame() {
     // details. This function fills the fbo and texture with data, after it
     // we can get the data on the GPU, not the CPU
     const int fboInt = static_cast<int>(_fbo);
-    mpv_opengl_fbo mpfbo{
+    mpv_opengl_fbo mpfbo {
         fboInt,
         _videoResolution.x,
         _videoResolution.y,

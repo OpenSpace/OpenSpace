@@ -246,7 +246,7 @@ std::vector<Image> ImageSequencer::imagePaths(const std::string& projectee,
     std::copy_if(
         prev,
         curr,
-        back_inserter(captures),
+        std::back_inserter(captures),
         [instrument](const Image& i) { return i.activeInstruments[0] == instrument; }
     );
 

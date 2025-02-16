@@ -35,7 +35,7 @@ public:
     explicit PlaneGeometry(glm::vec2 size);
     explicit PlaneGeometry(float size);
 
-    ~PlaneGeometry();
+    ~PlaneGeometry() = default;
 
     void initialize();
     void deinitialize();
