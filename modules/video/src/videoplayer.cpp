@@ -151,12 +151,7 @@ void VideoPlayer::onMpvRenderUpdate(void* ctx) {
 }
 
 void VideoPlayer::observePropertyMpv(MpvKey key) {
-    mpv_observe_property(
-        _mpvHandle,
-        static_cast<uint64_t>(key),
-        keys[key],
-        formats[key]
-    );
+    mpv_observe_property(_mpvHandle, static_cast<uint64_t>(key), keys[key], formats[key]);
 }
 
 void VideoPlayer::setPropertyStringMpv(const char* name, const char* value) {
@@ -410,13 +405,13 @@ void VideoPlayer::initializeMpv() {
         LINFO("mpv init failed");
     }
 
-    mpv_opengl_init_params gl_init_params{ getOpenGLProcAddress, nullptr };
+    mpv_opengl_init_params gl_init_params { getOpenGLProcAddress, nullptr };
     int adv = 1; // Use libmpv advanced mode since we will use the update callback
     // Decouple mpv from waiting to get the correct fps. Use with flag video-timing-offset
     // set to 0
     int blockTime = 0;
 
-    mpv_render_param params[]{
+    mpv_render_param params[] = {
         { MPV_RENDER_PARAM_API_TYPE, const_cast<char*>(MPV_RENDER_API_TYPE_OPENGL) },
         { MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &gl_init_params },
         { MPV_RENDER_PARAM_ADVANCED_CONTROL, &adv },
@@ -435,11 +430,7 @@ void VideoPlayer::initializeMpv() {
     // request a new frame to be rendered.
     // (Separate from the normal event handling mechanism for the sake of
     //  users which run OpenGL on a different thread.)
-    mpv_render_context_set_update_callback(
-        _mpvRenderContext,
-        onMpvRenderUpdate,
-        this
-    );
+    mpv_render_context_set_update_callback(_mpvRenderContext, onMpvRenderUpdate, this);
 
     // Load file
     const std::string file = _videoFile.string();
@@ -451,10 +442,10 @@ void VideoPlayer::initializeMpv() {
     }
 
     glGenFramebuffers(1, &_fbo);
-    //Create FBO to render video into
+    // Create FBO to render video into
     createTexture(_videoResolution);
 
-    //Observe video parameters
+    // Observe video parameters
     observePropertyMpv(MpvKey::Duration);
     observePropertyMpv(MpvKey::Meta);
     observePropertyMpv(MpvKey::Height);
@@ -542,7 +533,7 @@ void VideoPlayer::renderFrame() {
     // details. This function fills the fbo and texture with data, after it
     // we can get the data on the GPU, not the CPU
     const int fboInt = static_cast<int>(_fbo);
-    mpv_opengl_fbo mpfbo {
+    mpv_opengl_fbo mpfbo = {
         fboInt,
         _videoResolution.x,
         _videoResolution.y,
@@ -684,7 +675,6 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             // Each time a size property is updated, it means libmpv is updating the video
             // so we have to re-render the first frame to show it
             renderFrame();
-
             break;
         }
         case MpvKey::Width: {
@@ -704,7 +694,6 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             // Each time a size property is updated, it means libmpv is updating the video
             // so we have to re-render the first frame to show it
             renderFrame();
-
             break;
         }
         case MpvKey::Time: {
@@ -899,9 +888,7 @@ void VideoPlayer::resizeTexture(glm::ivec2 size) {
         _videoResolution = size;
         LINFO(std::format("Resizing texture: width: {} height: {}", size.x, size.y));
 
-        // Delete texture
         _frameTexture = nullptr;
-
         createTexture(size);
     }
 }
