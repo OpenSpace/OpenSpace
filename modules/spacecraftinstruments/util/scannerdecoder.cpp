@@ -33,7 +33,8 @@ ScannerDecoder::ScannerDecoder(const ghoul::Dictionary& dictionary) {
         _spiceIDs.push_back(dictionary.value<std::string>(std::to_string(k + 1)));
     }
 }
-const std::string& ScannerDecoder::decoderType() const {
+
+std::string_view ScannerDecoder::decoderType() const {
     return "SCANNER";
 }
 

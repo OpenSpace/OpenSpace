@@ -38,7 +38,7 @@ TargetDecoder::TargetDecoder(const ghoul::Dictionary& dictionary) {
     }
 }
 
-const std::string& TargetDecoder::decoderType() const {
+std::string_view TargetDecoder::decoderType() const {
     return "TARGET";
 }
 
