@@ -46,9 +46,7 @@ public:
     virtual ~ScreenSpaceDashboard() override = default;
 
     bool initializeGL() override;
-    bool deinitializeGL() override;
 
-    bool isReady() const override;
     void update() override;
 
     Dashboard& dashboard();

@@ -146,7 +146,7 @@ bool HongKangParser::create() {
 
     std::ifstream file;
     file.exceptions(std::ofstream::failbit | std::ofstream::badbit);
-    file.open(absPath(_fileName));
+    file.open(_fileName);
 
     constexpr double Exposure = 0.01;
 

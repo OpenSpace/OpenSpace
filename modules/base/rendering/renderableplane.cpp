@@ -155,7 +155,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 
     _blendMode.addOptions({
         { static_cast<int>(BlendMode::Normal), "Normal" },
-        { static_cast<int>(BlendMode::Additive), "Additive"}
+        { static_cast<int>(BlendMode::Additive), "Additive" }
     });
     _blendMode.onChange([this]() {
         const BlendMode m = static_cast<BlendMode>(_blendMode.value());
@@ -306,12 +306,12 @@ void RenderablePlane::unbindTexture() {}
 void RenderablePlane::update(const UpdateData&) {
     ZoneScoped;
 
-    if (_shader->isDirty()) {
+    if (_shader->isDirty()) [[unlikely]] {
         _shader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
 
-    if (_planeIsDirty) {
+    if (_planeIsDirty) [[unlikely]] {
         createPlane();
     }
 }

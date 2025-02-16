@@ -105,7 +105,7 @@ TimeDependentScale::TimeDependentScale(const ghoul::Dictionary& dictionary)
 }
 
 glm::dvec3 TimeDependentScale::scaleValue(const UpdateData& data) const {
-    if (_cachedReferenceDirty) {
+    if (_cachedReferenceDirty) [[unlikely]] {
         _cachedReference = Time::convertTime(_referenceDate);
         _cachedReferenceDirty = false;
     }

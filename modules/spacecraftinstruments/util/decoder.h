@@ -41,7 +41,7 @@ public:
 
     virtual ~Decoder() = default;
 
-    virtual const std::string& decoderType() const = 0;
+    virtual std::string_view decoderType() const = 0;
     virtual const std::vector<std::string>& translations() const = 0;
 
 protected:

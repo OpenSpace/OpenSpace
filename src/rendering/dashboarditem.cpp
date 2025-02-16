@@ -42,12 +42,17 @@ namespace {
     };
 
     struct [[codegen::Dictionary(DashboardItem)]] Parameters {
+        // Determines the type of the DashbordItem that should be created
         std::string type;
 
+        // The unique identifier for this DashboardItem
         std::string identifier [[codegen::identifier()]];
 
+        // The name for the DashboardItem that is used when showing it in the user
+        // interface
         std::optional<std::string> guiName;
 
+        // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
     };
 #include "dashboarditem_codegen.cpp"

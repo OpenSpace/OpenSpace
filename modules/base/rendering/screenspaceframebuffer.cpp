@@ -150,14 +150,7 @@ void ScreenSpaceFramebuffer::render(const RenderData& renderData) {
 }
 
 bool ScreenSpaceFramebuffer::isReady() const {
-    bool ready = true;
-    if (!_shader) {
-        ready &= false;
-    }
-    if (!_texture) {
-        ready &= false;
-    }
-    return ready;
+    return _shader && _texture;
 }
 
 void ScreenSpaceFramebuffer::setSize(glm::vec4 size) {

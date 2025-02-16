@@ -38,18 +38,17 @@ class SceneGraphNode;
  * This class still needs some more love. Suggested improvements:
  * - Accessors should return constant references to double precision class members.
  * - Remove the scaling variable (What is it used for?)
- * - Remove the maxFov and sinMaxfov variables. Redundant since the fov is embedded
- * within the perspective projection matrix.
- * - Remove focusposition, part of the integration with the scale graph. The
- * "focus position" should not be needed since we assume the camera is always
- * positioned relative to its origin. When orbiting another object (not in origin),
- * the focus position should probably be handled outside the camera class
- * (interaction handler) since it does not affect the state of the camera
- * (only how it interacts).
- * - The class might need some more reasonable accessors depending on use cases.
- * (up vector world space?)
- * - Make clear which function returns a combined view matrix (things that are
- * dependent on the separate sgct nodes).
+ * - Remove the maxFov and sinMaxfov variables. Redundant since the fov is embedded within
+ *   the perspective projection matrix
+ * - Remove focusposition, part of the integration with the scale graph. The "focus
+ *   position" should not be needed since we assume the camera is always positioned
+ *   relative to its origin. When orbiting another object (not in origin), the focus
+ *   position should probably be handled outside the camera class (interaction handler)
+ *   since it does not affect the state of the camera (only how it interacts)
+ * - The class might need some more reasonable accessors depending on use cases. (up
+ *   vector world space?)
+ * - Make clear which function returns a combined view matrix (things that are dependent
+ *   on the separate sgct nodes).
  */
 class Camera {
 public:

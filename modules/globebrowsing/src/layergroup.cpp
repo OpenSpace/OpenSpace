@@ -240,8 +240,8 @@ void LayerGroup::moveLayer(int oldPosition, int newPosition) {
     _layers.insert(newLayerPos, std::move(layer));
     ghoul_assert(
         std::is_sorted(
-            _layers.begin(),
-            _layers.end(),
+            _layers.cbegin(),
+            _layers.cend(),
             [](const std::unique_ptr<Layer>& a, const std::unique_ptr<Layer>& b) {
                 return a->zIndex() < b->zIndex();
             }

@@ -73,8 +73,7 @@ private:
     void renderConstellations(const RenderData& data, const glm::dmat4& modelViewMatrix,
         const glm::dmat4& projectionMatrix);
 
-    bool loadData();
-    bool readSpeckFile();
+    void loadData();
 
     /**
      * Callback method that gets triggered when `_constellationSelection` changes.

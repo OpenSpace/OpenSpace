@@ -201,7 +201,7 @@ void RenderablePolygonCloud::renderToTexture(GLuint textureToRenderTo,
     glDeleteFramebuffers(1, &textureFBO);
 }
 
-void RenderablePolygonCloud::renderPolygonGeometry(GLuint vao) {
+void RenderablePolygonCloud::renderPolygonGeometry(GLuint vao) const {
     std::unique_ptr<ghoul::opengl::ProgramObject> program =
         ghoul::opengl::ProgramObject::Build(
             "RenderablePointCloud_Polygon",

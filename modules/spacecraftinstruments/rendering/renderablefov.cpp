@@ -454,7 +454,7 @@ void RenderableFov::deinitializeGL() {
 }
 
 bool RenderableFov::isReady() const {
-    return _program != nullptr && !_instrument.bounds.empty();
+    return _program && !_instrument.bounds.empty();
 }
 
 // Orthogonal projection next to planets surface

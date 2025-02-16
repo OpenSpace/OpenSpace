@@ -40,11 +40,6 @@
 #include <optional>
 
 namespace {
-    constexpr std::array<const char*, 6> UniformNames = {
-        "modelViewProjectionTransform", "opacity", "width", "transferFunctionTexture",
-        "conservativeBounds", "showOptimistic"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo EffectiveTemperatureInfo = {
         "EffectiveTemperature",
         "Effective Temperature",
@@ -161,7 +156,7 @@ void RenderableHabitableZone::render(const RenderData& data, RendererTasks&) {
     glDepthMask(false);
     glDisable(GL_CULL_FACE);
 
-    _plane->render();
+    _plane.render();
 
     _shader->deactivate();
 
@@ -177,11 +172,11 @@ void RenderableHabitableZone::initializeShader() {
         absPath("${MODULE_SPACE}/shaders/habitablezone_vs.glsl"),
         absPath("${MODULE_SPACE}/shaders/habitablezone_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+    updateUniformLocations();
 }
 
 void RenderableHabitableZone::updateUniformLocations() {
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 void RenderableHabitableZone::computeZone() {

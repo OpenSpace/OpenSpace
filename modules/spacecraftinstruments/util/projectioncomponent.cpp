@@ -42,7 +42,7 @@
 #include <optional>
 
 namespace {
-    constexpr std::string_view placeholderFile = "${DATA}/placeholder.png";
+    constexpr std::string_view PlaceholderFile = "${DATA}/placeholder.png";
 
     constexpr std::string_view _loggerCat = "ProjectionComponent";
 
@@ -355,7 +355,7 @@ bool ProjectionComponent::initializeGL() {
     using ghoul::opengl::Texture;
 
     std::unique_ptr<Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
-        absPath(placeholderFile),
+        absPath(PlaceholderFile),
         2
     );
     if (texture) {
@@ -418,7 +418,7 @@ void ProjectionComponent::imageProjectBegin() {
     // keep handle to the current bound FBO
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 
-    if (_textureSizeDirty) {
+    if (_textureSizeDirty) [[unlikely]] {
         glm::ivec2 size = _textureSize;
         LDEBUG(std::format("Changing texture size to ({}, {})", size.x, size.y));
 
@@ -802,12 +802,7 @@ float ProjectionComponent::projectionFading() const {
 }
 
 ghoul::opengl::Texture& ProjectionComponent::projectionTexture() const {
-    if (_dilation.isEnabled) {
-        return *_dilation.texture;
-    }
-    else {
-        return *_projectionTexture;
-    }
+    return _dilation.isEnabled ? *_dilation.texture : *_projectionTexture;
 }
 
 std::string ProjectionComponent::projectorId() const {
@@ -873,7 +868,7 @@ void ProjectionComponent::generateMipMap() {
 
 std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTexture(
                                                  const std::filesystem::path& texturePath,
-                                                           bool isPlaceholder)
+                                                                       bool isPlaceholder)
 {
     using ghoul::opengl::Texture;
 

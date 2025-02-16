@@ -113,7 +113,7 @@ RenderableConstellationBounds::RenderableConstellationBounds(
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     // Avoid reading files here, instead do it in multithreaded initialize()
-    _vertexFilename = absPath(p.file).string();
+    _vertexFilename = p.file.string();
     _vertexFilename.onChange([this](){ loadData(); });
     addProperty(_vertexFilename);
 
@@ -132,16 +132,16 @@ void RenderableConstellationBounds::initialize() {
         std::set<std::string> selectedConstellations;
 
         for (const std::string& s : _assetSelection) {
-            auto it = std::find(options.begin(), options.end(), s);
-            if (it == options.end()) {
+            auto it = std::find(options.cbegin(), options.cend(), s);
+            if (it == options.cend()) {
                 // Test if the provided name was an identifier instead of the full name
                 it = std::find(
-                    options.begin(),
-                    options.end(),
+                    options.cbegin(),
+                    options.cend(),
                     constellationFullName(s)
                 );
 
-                if (it == options.end()) {
+                if (it == options.cend()) {
                     // The user has specified a constellation name that doesn't exist
                     LWARNING(std::format(
                         "Option '{}' not found in list of constellations", s
@@ -165,6 +165,8 @@ void RenderableConstellationBounds::initializeGL() {
         absPath("${MODULE_SPACE}/shaders/constellationbounds_vs.glsl"),
         absPath("${MODULE_SPACE}/shaders/constellationbounds_fs.glsl")
     );
+
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
     glGenVertexArrays(1, &_vao);
     glBindVertexArray(_vao);
@@ -210,17 +212,17 @@ bool RenderableConstellationBounds::isReady() const {
 void RenderableConstellationBounds::render(const RenderData& data, RendererTasks& tasks) {
     _program->activate();
 
-    _program->setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
-    _program->setUniform("objpos", glm::vec4(data.modelTransform.translation, 0.f));
-    _program->setUniform("camrot", glm::mat4(data.camera.viewRotationMatrix()));
-    _program->setUniform("scaling", glm::vec2(1.f, 0.f));
+    _program->setUniform(_uniformCache.campos, glm::vec4(data.camera.positionVec3(), 1.f));
+    _program->setUniform(_uniformCache.objpos, glm::vec4(data.modelTransform.translation, 0.f));
+    _program->setUniform(_uniformCache.camrot, glm::mat4(data.camera.viewRotationMatrix()));
+    _program->setUniform(_uniformCache.scaling, glm::vec2(1.f, 0.f));
 
     const glm::dmat4 modelTransform = calcModelTransform(data);
 
-    _program->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _program->setUniform("ModelTransform", glm::mat4(modelTransform));
-    _program->setUniform("color", _color);
-    _program->setUniform("opacity", opacity());
+    _program->setUniform(_uniformCache.ViewProjection, data.camera.viewProjectionMatrix());
+    _program->setUniform(_uniformCache.ModelTransform, glm::mat4(modelTransform));
+    _program->setUniform(_uniformCache.color, _color);
+    _program->setUniform(_uniformCache.opacity, opacity());
 
     glLineWidth(_lineWidth);
 
@@ -250,14 +252,12 @@ bool RenderableConstellationBounds::loadVertexFile() {
     }
 
     std::filesystem::path fileName = absPath(_vertexFilename);
-    std::ifstream file;
-    file.open(fileName);
+    std::ifstream file = std::ifstream(fileName);
     if (!file.good()) {
         return false;
     }
 
     ConstellationBound currentBound;
-    currentBound.constellationAbbreviation = "";
 
     std::string currentLine;
     int currentLineNumber = 1;

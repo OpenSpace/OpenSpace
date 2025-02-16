@@ -50,14 +50,11 @@ void GeoJsonManager::deinitializeGL() {
 }
 
 bool GeoJsonManager::isReady() const {
-    const bool isReady = std::all_of(
-        std::begin(_geoJsonObjects),
-        std::end(_geoJsonObjects),
-        [](const std::unique_ptr<GeoJsonComponent>& g) {
-            return g->isReady();
-        }
+    return std::all_of(
+        _geoJsonObjects.cbegin(),
+        _geoJsonObjects.cend(),
+        std::mem_fn(&GeoJsonComponent::isReady)
     );
-    return isReady;
 }
 
 void GeoJsonManager::addGeoJsonLayer(const ghoul::Dictionary& layerDict) {

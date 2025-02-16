@@ -176,8 +176,7 @@ void GlobeRotation::setUpdateVariables() {
     requireUpdate();
 }
 
-glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitude) const
-{
+glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitude) const {
     ghoul_assert(_globeNode, "Globe cannot be nullptr");
 
     GlobeBrowsingModule* mod = global::moduleEngine->module<GlobeBrowsingModule>();
@@ -218,7 +217,7 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
         _matrixIsDirty = true;
     }
 
-    if (!_matrixIsDirty) {
+    if (!_matrixIsDirty) [[likely]] {
         return _matrix;
     }
 

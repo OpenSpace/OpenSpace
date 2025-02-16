@@ -101,7 +101,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemElapsedTime::Documentation() {
-    return codegen::doc<Parameters>("base_dashboarditem_elapsedtime");
+    return codegen::doc<Parameters>(
+        "base_dashboarditem_elapsedtime",
+        DashboardTextItem::Documentation()
+    );
 }
 
 DashboardItemElapsedTime::DashboardItemElapsedTime(const ghoul::Dictionary& dictionary)

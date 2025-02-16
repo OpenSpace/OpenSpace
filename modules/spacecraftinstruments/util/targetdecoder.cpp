@@ -26,10 +26,6 @@
 
 #include <ghoul/misc/dictionary.h>
 
-namespace {
-    std::string Type = "TARGET";
-} // namespace
-
 namespace openspace {
 
 TargetDecoder::TargetDecoder(const ghoul::Dictionary& dictionary) {
@@ -42,8 +38,8 @@ TargetDecoder::TargetDecoder(const ghoul::Dictionary& dictionary) {
     }
 }
 
-const std::string& TargetDecoder::decoderType() const {
-    return Type;
+std::string_view TargetDecoder::decoderType() const {
+    return "TARGET";
 }
 
 const std::vector<std::string>& TargetDecoder::translations() const {

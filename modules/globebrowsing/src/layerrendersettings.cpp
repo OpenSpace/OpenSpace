@@ -87,7 +87,7 @@ void LayerRenderSettings::onChange(const std::function<void()>& callback) {
 
 float LayerRenderSettings::performLayerSettings(float value) const {
     return
-        ((glm::sign(value) * glm::pow(glm::abs(value), gamma) * multiplier) + offset);
+        ((glm::sign(value) * std::pow(std::abs(value), gamma) * multiplier) + offset);
 }
 
 glm::vec4 LayerRenderSettings::performLayerSettings(const glm::vec4& currentValue) const {

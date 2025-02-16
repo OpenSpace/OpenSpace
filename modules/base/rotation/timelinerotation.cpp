@@ -68,9 +68,7 @@ TimelineRotation::TimelineRotation(const ghoul::Dictionary& dictionary)
         ghoul::mm_unique_ptr<Rotation> rotation = Rotation::createFromDictionary(
             kf.second
         );
-        if (rotation) {
-            _timeline.addKeyframe(t, std::move(rotation));
-        }
+        _timeline.addKeyframe(t, std::move(rotation));
     }
 
     _shouldInterpolate = p.shouldInterpolate.value_or(_shouldInterpolate);

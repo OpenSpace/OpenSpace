@@ -164,7 +164,7 @@ RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderableRadialGrid::isReady() const {
-    return _hasLabels ? _gridProgram && _labels->isReady() : _gridProgram != nullptr;
+    return _gridProgram && _hasLabels ? _labels->isReady() : true;
 }
 
 void RenderableRadialGrid::initialize() {
@@ -258,7 +258,7 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableRadialGrid::update(const UpdateData&) {
-    if (!_gridIsDirty) {
+    if (!_gridIsDirty) [[likely]] {
         return;
     }
 

@@ -66,7 +66,6 @@ namespace {
             [[codegen::inlist(openspace::distanceUnitList())]];
     };
 #include "dashboarditemvelocity_codegen.cpp"
-
 } // namespace
 
 namespace openspace {
@@ -117,7 +116,6 @@ void DashboardItemVelocity::render(glm::vec2& penPosition) {
     const double speedPerFrame = glm::length(dt);
 
     const double secondsPerFrame = global::windowDelegate->averageDeltaTime();
-
     const double speedPerSecond = speedPerFrame / secondsPerFrame;
 
     std::pair<double, std::string_view> dist;

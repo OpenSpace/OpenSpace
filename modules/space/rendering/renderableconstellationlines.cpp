@@ -43,10 +43,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableConstellationLines";
 
-    constexpr std::array<const char*, 4> UniformNames = {
-        "modelViewTransform", "projectionTransform", "opacity", "color"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
         "File",
         "Constellation Data File Path",
@@ -143,7 +139,7 @@ RenderableConstellationLines::RenderableConstellationLines(
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     // Avoid reading files here, instead do it in multithreaded initialize()
-    _speckFile = absPath(p.file).string();
+    _speckFile = p.file.string();
     _speckFile.onChange([this]() { loadData(); });
     addProperty(_speckFile);
 
@@ -218,16 +214,16 @@ void RenderableConstellationLines::initialize() {
         std::set<std::string> selectedConstellations;
 
         for (const std::string& s : _assetSelection) {
-            auto it = std::find(options.begin(), options.end(), s);
-            if (it == options.end()) {
+            auto it = std::find(options.cbegin(), options.cend(), s);
+            if (it == options.cend()) {
                 // Test if the provided name was an identifier instead of the full name
                 it = std::find(
-                    options.begin(),
-                    options.end(),
+                    options.cbegin(),
+                    options.cend(),
                     constellationFullName(s)
                 );
 
-                if (it == options.end()) {
+                if (it == options.cend()) {
                     // The user has specified a constellation name that doesn't exist
                     LWARNING(std::format(
                         "Option '{}' not found in list of constellations", s
@@ -252,7 +248,7 @@ void RenderableConstellationLines::initializeGL() {
         absPath("${MODULE_SPACE}/shaders/constellationlines_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
     createConstellations();
 }
@@ -327,29 +323,22 @@ void RenderableConstellationLines::render(const RenderData& data, RendererTasks&
 void RenderableConstellationLines::update(const UpdateData&) {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
     }
 }
 
-bool RenderableConstellationLines::loadData() {
-    const bool success = readSpeckFile();
-    if (!success) {
-        throw ghoul::RuntimeError("Error loading data");
-    }
-    return success;
-}
-
-bool RenderableConstellationLines::readSpeckFile() {
+void RenderableConstellationLines::loadData() {
     if (_speckFile.value().empty()) {
-        return false;
+        throw ghoul::RuntimeError("Error loading data");
     }
     std::filesystem::path fileName = absPath(_speckFile);
 
     LINFO(std::format("Loading Speck file '{}'", fileName));
     std::ifstream file(fileName);
     if (!file.good()) {
-        LERROR(std::format("Failed to open Speck file '{}'", fileName));
-        return false;
+        throw ghoul::RuntimeError(std::format(
+            "Failed to open Speck file '{}'", fileName
+        ));
     }
 
     const float scale = static_cast<float>(toMeter(_constellationUnit));
@@ -460,12 +449,10 @@ bool RenderableConstellationLines::readSpeckFile() {
             _renderingConstellationsMap.insert({ lineIndex++, constellationLine });
         }
         else {
-            return false;
+            throw ghoul::RuntimeError("Error parsing file");
         }
     }
     setBoundingSphere(maxRadius);
-
-    return true;
 }
 
 void RenderableConstellationLines::createConstellations() {

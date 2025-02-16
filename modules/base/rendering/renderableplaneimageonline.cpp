@@ -115,7 +115,7 @@ void RenderablePlaneImageOnline::bindTexture() {
 void RenderablePlaneImageOnline::update(const UpdateData& data) {
     RenderablePlane::update(data);
 
-    if (!_textureIsDirty) {
+    if (!_textureIsDirty) [[unlikely]] {
         return;
     }
 

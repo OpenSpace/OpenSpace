@@ -165,7 +165,7 @@ void HttpSynchronization::createSyncFile(bool isFullySynchronized) const {
     std::filesystem::create_directories(dir);
 
     dir.replace_extension("ossync");
-    std::ofstream syncFile(dir, std::ofstream::out);
+    std::ofstream syncFile = std::ofstream(dir, std::ofstream::out);
 
     syncFile << std::format(
         "{}\n{}\n",
@@ -193,7 +193,7 @@ bool HttpSynchronization::isEachFileDownloaded() {
     }
 
     // Read contents of file
-    std::ifstream file(path);
+    std::ifstream file = std::ifstream(path);
     std::string line;
 
     file >> line;
