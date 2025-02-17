@@ -27,14 +27,13 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturewriter.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
-#include <ghoul/opengl/texture.h>
 #include <filesystem>
 #include <format>
 #include <numbers>
+#include <stb_image_write.h>
 #include "SpiceUsr.h"
 #include "SpiceZpr.h"
 
@@ -45,6 +44,8 @@ namespace {
     constexpr std::string_view TimeStringFormat = "YYYY MON DD HR:MN:SC.###";
     constexpr unsigned int TimeStringLength = 41;
     constexpr double ToDegrees = 180.0 / std::numbers::pi;
+    constexpr int DebugMaxVariants = 100;
+    constexpr bool DebugMode = true;
 
     // Offset spice Id to not collide with any existing NAIF id. This is the first NAIF ID
     // for the variants
@@ -103,23 +104,34 @@ ImpactCorridorTask::ImpactCorridorTask(const ghoul::Dictionary& dictionary) {
 }
 
 int pixelIndex(int pixelW, int pixelH, int nChannels, int imageWidth, int imageHeight) {
+    if (pixelH < 0) {
+        pixelH = std::abs(pixelH);
+
+        // Mirror in the 0 longitude line (Greenwich)
+        int greenwich = static_cast<int>(std::round(imageWidth / 2.0));
+        pixelW = greenwich + (greenwich - pixelW);
+
+    }
+    else if (pixelH >= imageHeight) {
+        pixelH = imageHeight - (pixelH - imageHeight);
+
+        // Mirror in the 0 longitude line (Greenwich)
+        int greenwich = static_cast<int>(std::round(imageWidth / 2.0));
+        pixelW = greenwich + (greenwich - pixelW);
+    }
+
     if (pixelW < 0) {
         // Go over to the left side of the international daytime line
+        pixelW = imageWidth - std::abs(pixelW);
     }
     else if (pixelW >= imageWidth) {
         // Go over to the right side of the international daytime line
+        pixelW = pixelW - imageWidth;
     }
 
-    if (pixelH < 0) {
-        // Go over to the other side of the pole
-    }
-    else if (pixelH >= imageHeight) {
-        // Go over to the other side of the pole
-    }
-
-    int pixelIndex = nChannels * (pixelW - 1) + nChannels * imageWidth * (pixelH - 1);
+    int pixelIndex = nChannels * pixelW + nChannels * imageWidth * pixelH;
     if (pixelIndex < 0 || pixelIndex >= (imageWidth * imageHeight * nChannels) ) {
-        LERROR("Pixel index out of bounds");
+        throw ghoul::lua::LuaError("Pixel index out of bounds");
     }
     return pixelIndex;
 }
@@ -168,6 +180,10 @@ void ImpactCorridorTask::perform(const Task::ProgressCallback & progressCallback
     for (const auto& variantKernel :
          std::filesystem::directory_iterator(_kernelDirectory))
     {
+        if (DebugMode && counterVariants > DebugMaxVariants) {
+            break;
+        }
+
         variantNAIFName = std::to_string(variantId);
 
         // Load the kernel file for this variant
@@ -205,7 +221,7 @@ void ImpactCorridorTask::perform(const Task::ProgressCallback & progressCallback
         // Then take the start of that timerange and convert it to a string, this gives
         // the time of impact
         timout_c(
-            impactStart,          // Time in J2000 seconds
+            impactStart,             // Time in J2000 seconds
             TimeStringFormat.data(), // Format for the output string
             TimeStringLength,        // Length of the output string plus 1
             impactTime               // Result
@@ -214,7 +230,7 @@ void ImpactCorridorTask::perform(const Task::ProgressCallback & progressCallback
         // Get the cartesian X, Y, Z position of the variant at the impact time
         spkpos_c(
             variantNAIFName.c_str(),        // Target body name to check position for
-            impactStart,                 // Time  in J2000 seconds
+            impactStart,                    // Time  in J2000 seconds
             "IAU_EARTH",                    // Reference frame of output position vector
             "NONE",                         // Aberration correction flag
             "EARTH",                        // Observing body name, reference frame of output position
@@ -232,13 +248,16 @@ void ImpactCorridorTask::perform(const Task::ProgressCallback & progressCallback
         impactLatitudeDegree = impactLatitude * ToDegrees;
         impactLongitudeDegree = impactLongitude * ToDegrees;
 
+        // Flip the y axis for the image, north is up
+        impactLatitudeDegree *= -1;
+
         // Add the result to the list of impact coordinates, this will be used to create
         // the impact corridor image map later
         _impactCoordinates.push_back({
             .id = variantId,
             .time = impactTime,
             .latitude = impactLatitudeDegree,
-            .longitude =impactLongitudeDegree
+            .longitude = impactLongitudeDegree
         });
 
         // Reset
@@ -258,26 +277,23 @@ void ImpactCorridorTask::perform(const Task::ProgressCallback & progressCallback
 
     // Tools to plot the impact coordinates on the image
     // @TODO: Make these parameters configurable
-    int brushSize = 15; // Somewhere between 15 and 20 is good
-    int brushSaturation = 100; // Tweak this to get a good result
-    int halfBrush = static_cast<int>(std::round(brushSize / 2.0));
+    const int brushSize = 16; // Somewhere between 15 and 20 is good
+    const int brushSaturation = 100; // Tweak this to get a good result
+    const int halfBrush = static_cast<int>(std::round(brushSize / 2.0));
 
     // Plot all impact coordinates on the image
     int impactCounter = 0;
     for (const ImpactCoordinate& impact : _impactCoordinates) {
         // Find the pixel in the texture data list for the impact
-        double longitudeNorm = (impactLatitudeDegree + 180.0) / 360.0;
-        double latitudeNorm = (impactLatitudeDegree + 90.0) / 180.0;
-        int pixelW = static_cast<int>(std::round(longitudeNorm * _imageWidth));
+        double latitudeNorm = (impact.latitude + 90.0) / 180.0;
+        double longitudeNorm = (impact.longitude + 180.0) / 360.0;
         int pixelH = static_cast<int>(std::round(latitudeNorm * _imageHeight));
+        int pixelW = static_cast<int>(std::round(longitudeNorm * _imageWidth));
 
         // Draw a circle around the impact point
-        int index = 0;
-        double distance = 0.0;
-        int saturation = 0;
         for (int w = -halfBrush; w < halfBrush; w++) {
             for (int h = -halfBrush; h < halfBrush; h++) {
-                index = pixelIndex(
+                int index = pixelIndex(
                     pixelW + w,
                     pixelH + h,
                     NChannels,
@@ -286,9 +302,9 @@ void ImpactCorridorTask::perform(const Task::ProgressCallback & progressCallback
                 );
 
                 // Get the eucledian distance from the center of the brush and calculate
-                // the total saturation for this pizel
-                distance = std::sqrt(w * w + h * h);
-                saturation = static_cast<int>(std::round(
+                // the total saturation for this pixel
+                double distance = std::sqrt(w * w + h * h);
+                int saturation = static_cast<int>(std::round(
                     std::max(brushSaturation * (1.0 - distance / halfBrush), 0.0)
                 ));
 
@@ -310,28 +326,14 @@ void ImpactCorridorTask::perform(const Task::ProgressCallback & progressCallback
     // @TODO: Use the night layer image to estimate impact risk due to population density
 
     // Create and save the resulting impact map image
-    using Texture = ghoul::opengl::Texture;
-    Texture textureFromData = Texture(
+    stbi_write_png(
+        _outputFilename.string().c_str(),
+        _imageWidth,
+        _imageHeight,
+        NChannels,
         reinterpret_cast<void*>(image.data()),
-        glm::uvec3(_imageWidth, _imageHeight, 1),
-        GL_TEXTURE_2D,
-        Texture::Format::RGBA
+        0
     );
-    textureFromData.setDataOwnership(Texture::TakeOwnership::No);
-
-    try {
-        ghoul::io::TextureWriter::ref().saveTexture(
-            textureFromData,
-            _outputFilename.string()
-        );
-    }
-    catch (const ghoul::io::TextureWriter::MissingWriterException& e) {
-        // This should not happen, as we know .png is a supported format
-        throw ghoul::lua::LuaError(e.message);
-    }
-    catch (const std::filesystem::filesystem_error& e) {
-        LERROR(std::format("Exception: {}", e.what()));
-    }
 
     // Estimate the impact probability, to compare with the expected value
     LINFO(std::format(
