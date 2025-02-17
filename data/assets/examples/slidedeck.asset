@@ -65,8 +65,11 @@ end)
 
 
 asset.onDeinitialize(function()
-  openspace.clearKey("KP_6")
   openspace.clearKey("KP_4")
+  openspace.action.removeAction("slide_deck.prevslide")
+  openspace.clearKey("KP_6")
+  openspace.action.removeAction("slide_deck.nextslide")
   openspace.clearKey("KP_0")
+  openspace.action.removeAction("slide_deck.toggleslides")
   helper.removeDeck(deck)
 end)
