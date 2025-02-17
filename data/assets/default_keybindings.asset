@@ -309,9 +309,6 @@ asset.onDeinitialize(function()
   openspace.clearKey("Alt+R")
   openspace.action.removeAction(ToggleMasterRendering)
 
-  openspace.clearKey("Shift+TAB")
-  openspace.action.removeAction(ToggleOverlays)
-
   openspace.clearKey("F2")
   openspace.action.removeAction(ToggleMainGui)
 
