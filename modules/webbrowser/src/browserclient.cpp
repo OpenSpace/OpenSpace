@@ -32,7 +32,10 @@
 #include <openspace/engine/windowdelegate.h>
 
 namespace openspace {
+    bool BrowserClient::_hasFocus = false; // Define the static member variable
+}
 
+namespace openspace {
 BrowserClient::BrowserClient(WebRenderHandler* handler,
                              WebKeyboardHandler* keyboardHandler)
     : _renderHandler(handler)
@@ -46,6 +49,9 @@ BrowserClient::BrowserClient(WebRenderHandler* handler,
     _requestHandler = browserLauncher;
     _contextMenuHandler = new BrowserClient::NoContextMenuHandler;
     _displayHandler = new BrowserClient::DisplayHandler;
+    _loadHandler = new BrowserClient::LoadHandler;
+    _focusHandler = new BrowserClient::FocusHandler;
+
 }
 
 CefRefPtr<CefContextMenuHandler> BrowserClient::GetContextMenuHandler() {
@@ -71,6 +77,15 @@ CefRefPtr<CefKeyboardHandler> BrowserClient::GetKeyboardHandler() {
 CefRefPtr<CefDisplayHandler> BrowserClient::GetDisplayHandler() {
     return _displayHandler;
 }
+
+CefRefPtr<CefLoadHandler> BrowserClient::GetLoadHandler() {
+    return _loadHandler;
+}
+
+CefRefPtr<CefFocusHandler> BrowserClient::GetFocusHandler() {
+    return _focusHandler;
+}
+
 
 bool BrowserClient::NoContextMenuHandler::RunContextMenu(CefRefPtr<CefBrowser>,
                                                          CefRefPtr<CefFrame>,
@@ -142,4 +157,5 @@ bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser>, CefCur
     global::windowDelegate->setMouseCursor(newCursor);
     return false;
 }
+
 } // namespace openspace
