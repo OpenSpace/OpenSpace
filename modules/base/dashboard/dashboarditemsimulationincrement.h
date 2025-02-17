@@ -40,7 +40,7 @@ public:
     explicit DashboardItemSimulationIncrement(const ghoul::Dictionary& dictionary);
     ~DashboardItemSimulationIncrement() override = default;
 
-    void render(glm::vec2& penPosition) override;
+    void update() override;
     glm::vec2 size() const override;
 
     static documentation::Documentation Documentation();

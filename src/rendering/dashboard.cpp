@@ -49,6 +49,15 @@ namespace {
         "in x and y-direction on screen.",
         openspace::properties::Property::Visibility::User
     };
+
+    constexpr openspace::properties::Property::PropertyInfo RefreshRateInfo = {
+        "RefreshRate",
+        "Refresh Rate (in ms)",
+        "If this value is bigger than 0, the value represents the number of milliseconds "
+        "between refreshs of the dashboard items. If the value is 0 the dashbaord is "
+        "refreshed at the same rate as the main rendering.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
 } // namespace
 
 namespace openspace {
@@ -57,9 +66,12 @@ Dashboard::Dashboard()
     : properties::PropertyOwner({ "Dashboard" })
     , _isEnabled(EnabledInfo, true)
     , _startPositionOffset(StartPositionOffsetInfo, glm::ivec2(10, -10))
+    , _refreshRate(RefreshRateInfo, 0, 0, 1000)
+    , _lastRefresh(std::chrono::high_resolution_clock::now())
 {
     addProperty(_isEnabled);
     addProperty(_startPositionOffset);
+    addProperty(_refreshRate);
 }
 
 void Dashboard::addDashboardItem(std::unique_ptr<DashboardItem> item) {
@@ -137,8 +149,18 @@ void Dashboard::render(glm::vec2& penPosition) {
         return;
     }
 
+    auto now = std::chrono::high_resolution_clock::now();
+    // count returns values in nanoseconds, _refreshRate is in milliseconds
+    const bool needsUpdate = (now - _lastRefresh).count() > _refreshRate * 1e6;
+    if (needsUpdate) {
+        _lastRefresh = now;
+    }
+
     for (const std::unique_ptr<DashboardItem>& item : _items) {
         if (item->isEnabled()) {
+            if (needsUpdate) {
+                item->update();
+            }
             item->render(penPosition);
         }
     }

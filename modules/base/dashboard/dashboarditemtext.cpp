@@ -28,8 +28,6 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/font/font.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
 #include <ghoul/misc/profiling.h>
 #include <optional>
 
@@ -66,11 +64,8 @@ DashboardItemText::DashboardItemText(const ghoul::Dictionary& dictionary)
     addProperty(_text);
 }
 
-void DashboardItemText::render(glm::vec2& penPosition) {
-    ZoneScoped;
-
-    penPosition.y -= _font->height();
-    RenderFont(*_font, penPosition, _text.value());
+void DashboardItemText::update() {
+    _buffer = _text.value();
 }
 
 glm::vec2 DashboardItemText::size() const {

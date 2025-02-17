@@ -34,8 +34,6 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/distanceconversion.h>
 #include <ghoul/font/font.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 
@@ -109,15 +107,15 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
     addProperty(_requestedUnit);
 }
 
-void DashboardItemVelocity::render(glm::vec2& penPosition) {
+void DashboardItemVelocity::update() {
     ZoneScoped;
 
     const glm::dvec3 currentPos = global::renderEngine->scene()->camera()->positionVec3();
     const glm::dvec3 dt = currentPos - _prevPosition;
+    _prevPosition = currentPos;
+
     const double speedPerFrame = glm::length(dt);
-
     const double secondsPerFrame = global::windowDelegate->averageDeltaTime();
-
     const double speedPerSecond = speedPerFrame / secondsPerFrame;
 
     std::pair<double, std::string_view> dist;
@@ -130,14 +128,7 @@ void DashboardItemVelocity::render(glm::vec2& penPosition) {
         dist = std::pair(convertedD, nameForDistanceUnit(unit, convertedD != 1.0));
     }
 
-    penPosition.y -= _font->height();
-    RenderFont(
-        *_font,
-        penPosition,
-        std::format("Camera velocity: {:.4f} {}/s", dist.first, dist.second)
-    );
-
-    _prevPosition = currentPos;
+    _buffer = std::format("Camera velocity: {:.4f} {}/s", dist.first, dist.second);
 }
 
 glm::vec2 DashboardItemVelocity::size() const {

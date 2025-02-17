@@ -45,6 +45,7 @@ public:
     explicit DashboardItem(const ghoul::Dictionary& dictionary);
 
     bool isEnabled() const;
+    virtual void update() = 0;
     virtual void render(glm::vec2& penPosition) = 0;
 
     virtual glm::vec2 size() const = 0;

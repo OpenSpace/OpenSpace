@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <ghoul/glm.h>
@@ -63,8 +64,10 @@ public:
 private:
     properties::BoolProperty _isEnabled;
     properties::IVec2Property _startPositionOffset;
+    properties::IntProperty _refreshRate;
 
     std::vector<std::unique_ptr<DashboardItem>> _items;
+    std::chrono::high_resolution_clock::time_point _lastRefresh;
 };
 
 } // openspace
