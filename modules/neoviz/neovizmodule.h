@@ -29,11 +29,19 @@
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
+
 class NEOvizModule : public OpenSpaceModule {
 public:
     constexpr static const char* Name = "NEOviz";
 
     NEOvizModule();
+    virtual ~NEOvizModule() = default;
+
+    std::vector<documentation::Documentation> documentations() const override;
+
+private:
+    void internalInitialize(const ghoul::Dictionary&) override;
 };
 
 } // namespace openspace

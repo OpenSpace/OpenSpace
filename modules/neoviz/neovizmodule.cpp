@@ -24,8 +24,27 @@
 
 #include <modules/neoviz/neovizmodule.h>
 
+#include <modules/neoviz/tasks/impactcorridortask.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/util/factorymanager.h>
+#include <ghoul/misc/templatefactory.h>
+
 namespace openspace {
 
 NEOvizModule::NEOvizModule() : OpenSpaceModule(Name) {}
+
+std::vector<documentation::Documentation> NEOvizModule::documentations() const {
+    using namespace neoviz;
+
+    return { ImpactCorridorTask::documentation() };
+}
+
+void NEOvizModule::internalInitialize(const ghoul::Dictionary&) {
+    using namespace neoviz;
+
+    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
+    ghoul_assert(fTask, "No task factory existed");
+    fTask->registerClass<ImpactCorridorTask>("ImpactCorridorTask");
+}
 
 } // namespace openspace

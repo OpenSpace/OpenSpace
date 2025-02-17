@@ -42,8 +42,21 @@ public:
     static documentation::Documentation documentation();
 
 private:
-    std::filesystem::path _inputPath;
-    std::filesystem::path _outputPath;
+    struct ImpactCoordinate {
+        int id = 0;
+        std::string time;
+        double latitude = 0.0;  // Degrees
+        double longitude = 0.0;
+    };
+
+    std::filesystem::path _kernelDirectory;
+    std::filesystem::path _outputFilename;
+    int _impactDistance;
+    std::string _timeIntervalStart;
+    std::string _timeIntervalEnd;
+    std::vector<ImpactCoordinate> _impactCoordinates;
+    int _imageWidth;
+    int _imageHeight;
 };
 
 } // namespace openspace::neoviz
