@@ -29,6 +29,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <ghoul/opengl/programobjectmanager.h>
+#include <ghoul/opengl/texturemanager.h>
 
 namespace openspace {
 
@@ -43,6 +44,7 @@ public:
     static documentation::Documentation Documentation();
 
     static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
+    static ghoul::opengl::TextureManager TextureManager;
 
 private:
     void internalInitialize(const ghoul::Dictionary&) override;

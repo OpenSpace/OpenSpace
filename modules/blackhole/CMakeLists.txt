@@ -36,6 +36,12 @@ set(SOURCE_FILES
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
+set(SHADER_FILES
+  shaders/gradiant_vs.glsl
+  shaders/gradiant_fs.glsl
+)
+source_group("Shader Files" FILES ${SHADER_FILES})
+
 create_new_module(
     "BlackHole"
   black_hole_module

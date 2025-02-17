@@ -42,6 +42,7 @@ namespace {
 namespace openspace {
 
 ghoul::opengl::ProgramObjectManager BlackHoleModule::ProgramObjectManager;
+ghoul::opengl::TextureManager BlackHoleModule::TextureManager;
 
 documentation::Documentation BlackHoleModule::Documentation() {
     return codegen::doc<Parameters>("module_black_hole");
