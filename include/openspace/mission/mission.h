@@ -78,6 +78,13 @@ public:
     const std::string& name() const;
 
     /**
+     * Returns the unique identifier of the MissionPhase.
+     *
+     * \return The unique identifier of the MissionPhase
+     */
+    const std::string& identifier() const;
+
+    /**
      * Returns the TimeRange of the MissionPhase.
      *
      * \return The TimeRange of the MissionPhase
@@ -168,6 +175,8 @@ protected:
 
     /// The name of the MissionPhase
     std::string _name;
+    /// The identifier of the MissionPhase
+    std::string _identifier;
     /// The description of the MissionPhase
     std::string _description;
     /// The range in time that is covered by this MissionPhase
