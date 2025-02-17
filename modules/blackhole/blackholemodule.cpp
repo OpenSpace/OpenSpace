@@ -24,6 +24,10 @@
 
 #include <modules/blackhole/blackholemodule.h>
 
+#include <modules/blackhole/rendering/renderableblackhole.h>
+#include <openspace/util/factorymanager.h>
+#include <ghoul/misc/templatefactory.h>
+
 namespace {
     constexpr std::string_view _loggerCat = "BlackHoleModule";
 
@@ -32,9 +36,12 @@ namespace {
     };
 
 #include "blackholemodule_codegen.cpp"
+#include <ghoul/opengl/programobjectmanager.h>
 } // namespace
 
 namespace openspace {
+
+ghoul::opengl::ProgramObjectManager BlackHoleModule::ProgramObjectManager;
 
 documentation::Documentation BlackHoleModule::Documentation() {
     return codegen::doc<Parameters>("module_black_hole");
@@ -48,6 +55,13 @@ BlackHoleModule::~BlackHoleModule() {}
 
 void BlackHoleModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "Renderable factory was not created");
+
+    fRenderable->registerClass<RenderableBlackHole>("RenderableBlackHole");
+
 }
 
 void BlackHoleModule::internalDeinitializeGL() {}

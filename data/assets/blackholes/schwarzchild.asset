@@ -1,0 +1,18 @@
+local Node = {
+    Identifier = "Blackhole_Example",
+    Renderable = {
+        Type = "RenderableBlackHole",
+      },
+      GUI = {
+          Name = "Schwarzchild Blackhole - Example",
+          Path = "/Blackholes"
+        }
+  }
+
+  asset.onInitialize(function()
+    openspace.addSceneGraphNode(Node)
+  end)
+
+  asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(Node)end
+  )

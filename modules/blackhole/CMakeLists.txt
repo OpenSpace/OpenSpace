@@ -26,11 +26,13 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   blackholemodule.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableblackhole.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   blackholemodule.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableblackhole.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

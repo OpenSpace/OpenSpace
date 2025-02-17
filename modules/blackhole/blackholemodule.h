@@ -28,6 +28,7 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <openspace/documentation/documentation.h>
+#include <ghoul/opengl/programobjectmanager.h>
 
 namespace openspace {
 
@@ -40,6 +41,8 @@ public:
     std::vector<documentation::Documentation> documentations() const override;
 
     static documentation::Documentation Documentation();
+
+    static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
 
 private:
     void internalInitialize(const ghoul::Dictionary&) override;
