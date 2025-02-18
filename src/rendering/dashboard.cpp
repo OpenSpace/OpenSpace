@@ -53,9 +53,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RefreshRateInfo = {
         "RefreshRate",
         "Refresh Rate (in ms)",
-        "If this value is bigger than 0, the value represents the number of milliseconds "
-        "between refreshs of the dashboard items. If the value is 0 the dashbaord is "
-        "refreshed at the same rate as the main rendering.",
+        "The number of milliseconds between refreshes of the dashboard items. If the value is 0 
+        "the dashboard is refreshed at the same rate as the main rendering.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
