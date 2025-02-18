@@ -244,9 +244,6 @@ asset.onInitialize(function()
   openspace.action.registerAction(ToggleMainGui)
   openspace.bindKey("F2", ToggleMainGui.Identifier)
 
-  openspace.action.registerAction(ToggleOverlays)
-  openspace.bindKey("Shift+TAB", ToggleOverlays.Identifier)
-
   openspace.action.registerAction(ToggleMasterRendering)
   openspace.bindKey("Alt+R", ToggleMasterRendering.Identifier)
 
