@@ -42,7 +42,7 @@ public:
     explicit DashboardItemVelocity(const ghoul::Dictionary& dictionary);
     ~DashboardItemVelocity() override = default;
 
-    void render(glm::vec2& penPosition) override;
+    void update() override;
 
     glm::vec2 size() const override;
 

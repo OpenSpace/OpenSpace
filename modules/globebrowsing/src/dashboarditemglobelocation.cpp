@@ -136,11 +136,11 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
     addProperty(_significantDigits);
 
     _font = global::fontManager->font(_fontName, _fontSize);
-    _buffer.resize(128);
+    _localBuffer.resize(128);
     updateFormatString();
 }
 
-void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
+void DashboardItemGlobeLocation::update() {
     ZoneScoped;
 
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
@@ -152,14 +152,14 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
 
     std::pair<double, std::string_view> dist = simplifyDistance(altitude);
 
-    std::fill(_buffer.begin(), _buffer.end(), char(0));
+    std::fill(_localBuffer.begin(), _localBuffer.end(), char(0));
     char* end = nullptr;
     switch (_displayFormat.value()) {
         case static_cast<int>(DisplayFormat::DecimalDegrees):
         {
             // @CPP26(abock): This can be replaced with std::runtime_format
             end = std::vformat_to(
-                _buffer.data(),
+                _localBuffer.data(),
                 _formatString,
                 std::make_format_args(lat, lon, dist.first, dist.second)
             );
@@ -188,7 +188,7 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
 
             // @CPP26(abock): This can be replaced with std::runtime_format
             end = std::vformat_to(
-                _buffer.data(),
+                _localBuffer.data(),
                 _formatString,
                 std::make_format_args(
                     latDeg, latMin, latSec, isNorth ? "N" : "S",
@@ -201,9 +201,7 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
         }
     }
 
-    penPosition.y -= _font->height();
-    const std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
-    RenderFont(*_font, penPosition, text);
+    _buffer = std::string(_localBuffer.data(), end - _localBuffer.data());
 }
 
 glm::vec2 DashboardItemGlobeLocation::size() const {

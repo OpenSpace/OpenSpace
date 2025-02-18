@@ -32,8 +32,6 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/distanceconversion.h>
 #include <ghoul/font/font.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
 #include <ghoul/misc/profiling.h>
 
 namespace openspace {
@@ -50,7 +48,7 @@ DashboardItemParallelConnection::DashboardItemParallelConnection(
     : DashboardTextItem(dictionary)
 {}
 
-void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
+void DashboardItemParallelConnection::update() {
     ZoneScoped;
 
     const ParallelConnection::Status status = global::parallelPeer->status();
@@ -59,49 +57,43 @@ void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
 
     int nLines = 1;
 
-    std::string connectionInfo;
     int nClients = static_cast<int>(nConnections);
     if (status == ParallelConnection::Status::Host) {
         nClients--;
         constexpr std::string_view Singular = "Hosting session with {} client";
         constexpr std::string_view Plural = "Hosting session with {} clients";
 
-        connectionInfo =
+        _buffer =
             (nClients == 1) ?
             std::format(Singular, nClients) :
             std::format(Plural, nClients);
     }
     else if (status == ParallelConnection::Status::ClientWithHost) {
         nClients--;
-        connectionInfo = "Session hosted by '" + hostName + "'";
+        _buffer = "Session hosted by '" + hostName + "'";
     }
     else if (status == ParallelConnection::Status::ClientWithoutHost) {
-        connectionInfo = "Host is disconnected";
+        _buffer = "Host is disconnected";
     }
 
     if (status == ParallelConnection::Status::ClientWithHost ||
         status == ParallelConnection::Status::ClientWithoutHost)
     {
-        connectionInfo += "\n";
+        _buffer += "\n";
 
         if (nClients > 2) {
             constexpr std::string_view Plural = "You and {} more clients are tuned in";
-            connectionInfo += std::format(Plural, nClients - 1);
+            _buffer += std::format(Plural, nClients - 1);
         }
         else if (nClients == 2) {
             constexpr std::string_view Singular = "You and {} more client are tuned in";
-            connectionInfo += std::format(Singular, nClients - 1);
+            _buffer += std::format(Singular, nClients - 1);
         }
         else if (nClients == 1) {
-            connectionInfo += "You are the only client";
+            _buffer += "You are the only client";
         }
 
         nLines = 2;
-    }
-
-    if (!connectionInfo.empty()) {
-        penPosition.y -= _font->height() * nLines;
-        RenderFont(*_font, penPosition, connectionInfo);
     }
 }
 
