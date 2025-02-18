@@ -88,6 +88,10 @@ DashboardTextItem::DashboardTextItem(const ghoul::Dictionary& dictionary, float 
 }
 
 void DashboardTextItem::render(glm::vec2& penPosition) {
+    if (_buffer.empty()) {
+        return;
+    }
+
     const size_t lines = std::count(_buffer.begin(), _buffer.end(), '\n') + 1;
     penPosition.y -= _font->height() * lines;
     RenderFont(*_font, penPosition, _buffer);
