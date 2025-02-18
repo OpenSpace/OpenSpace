@@ -15,6 +15,7 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
+
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
@@ -23,6 +24,12 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    void bindFramebuffer();
+    void bindEnvironmentTexture();
+    void drawQuad();
+    void setupShaders();
+    void setupQuad();
+    void loadEnvironmentTexture();
   ghoul::opengl::ProgramObject* _program = nullptr;
 
   GLuint _framebuffer = 0;
