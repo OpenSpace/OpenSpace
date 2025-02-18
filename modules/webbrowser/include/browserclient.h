@@ -81,7 +81,7 @@ public:
         void OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, int httpStatusCode) override {
 
             // Focus status can be lost. Try to restore it
-            if (_hasFocus) {
+            if (_hasFocus && browser && browser->GetHost()) {
                 browser->GetHost()->SetFocus(true);
             }
         };
