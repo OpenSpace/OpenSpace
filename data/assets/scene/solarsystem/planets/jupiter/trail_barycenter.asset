@@ -12,7 +12,7 @@ local JupiterBarycenterTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = coreKernels.ID.JupiterBarycenter,
-      Observer = coreKernels.Frame.SolarSystemBarycenter
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.8, 0.7, 0.7 },
     Period = 4330.595,

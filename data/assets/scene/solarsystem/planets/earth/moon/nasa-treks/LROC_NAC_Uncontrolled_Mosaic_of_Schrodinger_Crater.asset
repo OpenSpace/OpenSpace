@@ -22,7 +22,7 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_allSchrodinger_10mV10eq")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_allSchrodinger_10mV10eq)
 end)
 
 asset.export("allSchrodinger_10mV10eq", treks_allSchrodinger_10mV10eq)
