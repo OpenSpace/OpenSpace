@@ -53,8 +53,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RefreshRateInfo = {
         "RefreshRate",
         "Refresh Rate (in ms)",
-        "The number of milliseconds between refreshes of the dashboard items. If the value is 0 
-        "the dashboard is refreshed at the same rate as the main rendering.",
+        "The number of milliseconds between refreshes of the dashboard items. If the "
+        "value is 0 the dashboard is refreshed at the same rate as the main rendering.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
@@ -148,9 +148,8 @@ void Dashboard::render(glm::vec2& penPosition) {
         return;
     }
 
-    auto now = std::chrono::high_resolution_clock::now();
-    // count returns values in nanoseconds, _refreshRate is in milliseconds
-    const bool needsUpdate = (now - _lastRefresh).count() > _refreshRate * 1e6;
+    auto now = std::chrono::steady_clock::now();
+    bool needsUpdate = (now - _lastRefresh) > std::chrono::milliseconds(_refreshRate);
     if (needsUpdate) {
         _lastRefresh = now;
     }

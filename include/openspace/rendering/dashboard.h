@@ -44,6 +44,14 @@ public:
     Dashboard();
     virtual ~Dashboard() override = default;
 
+    /**
+     * Renders all of the items of this Dashboard at the provided \p penPosition. The
+     * position is provided in pixels with the top-left corner being located at (0,0). The
+     * rendering of the DashboardItems will update the \p penPosition according to where
+     * the next item should be placed.
+     *
+     * \param penPosition The location at which we want to render the dashboard items
+     */
     void render(glm::vec2& penPosition);
 
     void addDashboardItem(std::unique_ptr<DashboardItem> item);
@@ -67,7 +75,7 @@ private:
     properties::IntProperty _refreshRate;
 
     std::vector<std::unique_ptr<DashboardItem>> _items;
-    std::chrono::high_resolution_clock::time_point _lastRefresh;
+    std::chrono::steady_clock::time_point _lastRefresh;
 };
 
 } // openspace
