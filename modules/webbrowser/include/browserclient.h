@@ -62,6 +62,8 @@ public:
     // This is a fallback to fix a bug with the focus that CEF has. The browser can lose the focus
     // and this is a hacky way to recover it. Solution from this post:
     // https://magpcss.org/ceforum/viewtopic.php?f=6&t=20161&p=56949&hilit=css+focus#
+    // TODO (ylvse 2025-02-18): Update CEF when they have fixed this issue
+    // https://github.com/chromiumembedded/cef/issues/3870
     class FocusHandler : public CefFocusHandler {
         void OnTakeFocus(CefRefPtr<CefBrowser> browser, bool next) override {
             _hasFocus = false;
