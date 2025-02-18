@@ -49,9 +49,30 @@ private:
         double longitude = 0.0;
     };
 
+    void findImpacts(const Task::ProgressCallback& progressCallback, int nVariants);
+
+    /**
+     * Retrieve the index in the flat data list of pixels that cooresponds to a given
+     * pixel coordinate. If the given pixel coordinate is outside the bounds of the image
+     * then it will be properly wrapped/mirrored around the image considering that it
+     * represents a map. If the pixel croses the international day time line then it will
+     * be wrapped around to the other side. If instead the pixel crosses the pole, the it
+     * will be mirrored around Greenwich.
+     *
+     * \param pixelW The horizontal coordinate for the pixel in the image
+     * \param pixelH The vertical coordinate for the pixel in the image
+     * \param nChannels The number of channels in the image
+     * \param imageWidth The total width of the image in pixels
+     * \param imageHeight The total height of the image in pixels
+     * \return The index of the first channel of the given pixel in the flat data list
+     */
+    int pixelIndex(int pixelW, int pixelH, int nChannels, int imageWidth,
+        int imageHeight);
+
     std::filesystem::path _kernelDirectory;
     std::filesystem::path _outputFilename;
     int _impactDistance;
+    double _stepSize;
     std::string _timeIntervalStart;
     std::string _timeIntervalEnd;
     std::vector<ImpactCoordinate> _impactCoordinates;
