@@ -102,6 +102,12 @@ namespace {
 
         // [[codegen::verbatim(BrowserUpdateIntervalInfo.description)]]
         std::optional<float> browserUpdateInterval;
+
+        // Forcably disables accelerated rendering, even if other preconditions
+        // would otherwise allow the use of it to speed up the rendering of the
+        // user interface. This setting can be used to circumvent an otherwise
+        // fatal crash that is caused by the accelerated rendering.
+        std::optional<bool> disableAcceleratedRendering;
     };
 #include "webbrowsermodule_codegen.cpp"
 
@@ -153,6 +159,8 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 
     _webHelperLocation = p.webHelperLocation.value_or(findHelperExecutable());
     _enabled = p.enabled.value_or(_enabled);
+    _disableAcceleratedRendering =
+        p.disableAcceleratedRendering.value_or(_disableAcceleratedRendering);
 
     LDEBUG(std::format("CEF using web helper executable: {}", _webHelperLocation));
     _cefHost = std::make_unique<CefHost>(_webHelperLocation.string());
@@ -245,7 +253,11 @@ bool WebBrowserModule::canUseAcceleratedRendering() {
     );
     bool isVersionOk = OpenGLCap.openGLVersion() >= acceleratedVersion;
     bool isExtensionsOk = it != OpenGLCap.extensions().end();
-    return isVersionOk && isExtensionsOk;
+    bool isVendorOk =
+        OpenGLCap.gpuVendor() ==
+        ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Vendor::Nvidia;
+    return isVersionOk && isExtensionsOk &&
+           isVendorOk && !_disableAcceleratedRendering;
 #else
     return false;
 #endif

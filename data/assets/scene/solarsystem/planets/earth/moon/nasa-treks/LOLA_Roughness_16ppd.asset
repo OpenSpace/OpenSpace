@@ -22,7 +22,7 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_LOLA_ClrRoughness_Global_16ppd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_LOLA_ClrRoughness_Global_16ppd)
 end)
 
 asset.export("LRO_LOLA_ClrRoughness_Global_16ppd", treks_LRO_LOLA_ClrRoughness_Global_16ppd)
