@@ -162,8 +162,8 @@ namespace {
     namespace fs = std::filesystem;
     return ghoul::filesystem::walkDirectory(
         path,
-        recursive,
-        sorted,
+        ghoul::filesystem::Recursive(recursive),
+        ghoul::filesystem::Sorted(sorted),
         [](const fs::path& p) { return fs::is_directory(p) || fs::is_regular_file(p); }
     );
 }
@@ -187,8 +187,8 @@ namespace {
     namespace fs = std::filesystem;
     return ghoul::filesystem::walkDirectory(
         path,
-        recursive,
-        sorted,
+        ghoul::filesystem::Recursive(recursive),
+        ghoul::filesystem::Sorted(sorted),
         [](const fs::path& p) { return fs::is_regular_file(p); }
     );
 }
@@ -212,8 +212,8 @@ namespace {
     namespace fs = std::filesystem;
     return ghoul::filesystem::walkDirectory(
         path,
-        recursive,
-        sorted,
+        ghoul::filesystem::Recursive(recursive),
+        ghoul::filesystem::Sorted(sorted),
         [](const fs::path& p) { return fs::is_directory(p); }
     );
 }

@@ -25,9 +25,12 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/set_openspace_compile_settings.cmake)
 
 set(HEADER_FILES
+  include/backgroundimage.h
   include/filesystemaccess.h
   include/launcherwindow.h
   include/settingsdialog.h
+  include/splitcombobox.h
+  include/windowcolors.h
   include/profile/actiondialog.h
   include/profile/additionalscriptsdialog.h
   include/profile/assetsdialog.h
@@ -47,16 +50,17 @@ set(HEADER_FILES
   include/profile/propertiesdialog.h
   include/sgctedit/displaywindowunion.h
   include/sgctedit/monitorbox.h
-  include/sgctedit/orientationdialog.h
-  include/sgctedit/settingswidget.h
   include/sgctedit/sgctedit.h
   include/sgctedit/windowcontrol.h
 )
 
 set(SOURCE_FILES
+  src/backgroundimage.cpp
   src/launcherwindow.cpp
   src/filesystemaccess.cpp
   src/settingsdialog.cpp
+  src/splitcombobox.cpp
+  src/windowcolors.cpp
   src/profile/actiondialog.cpp
   src/profile/additionalscriptsdialog.cpp
   src/profile/assetsdialog.cpp
@@ -77,8 +81,6 @@ set(SOURCE_FILES
   src/sgctedit/sgctedit.cpp
   src/sgctedit/displaywindowunion.cpp
   src/sgctedit/monitorbox.cpp
-  src/sgctedit/orientationdialog.cpp
-  src/sgctedit/settingswidget.cpp
   src/sgctedit/windowcontrol.cpp
 )
 
