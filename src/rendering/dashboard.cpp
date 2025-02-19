@@ -66,7 +66,7 @@ Dashboard::Dashboard()
     , _isEnabled(EnabledInfo, true)
     , _startPositionOffset(StartPositionOffsetInfo, glm::ivec2(10, -10))
     , _refreshRate(RefreshRateInfo, 0, 0, 1000)
-    , _lastRefresh(std::chrono::high_resolution_clock::now())
+    , _lastRefresh(std::chrono::steady_clock::now())
 {
     addProperty(_isEnabled);
     addProperty(_startPositionOffset);
