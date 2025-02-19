@@ -45,8 +45,8 @@ std::string_view DMat4Property::className() const {
     return "DMat4Property";
 }
 
-int DMat4Property::typeLua() const {
-    return LUA_TTABLE;
+ghoul::lua::LuaTypes DMat4Property::typeLua() const {
+    return ghoul::lua::LuaTypes::Table;
 }
 
 }  // namespace openspace::properties

@@ -44,8 +44,8 @@ std::string_view UIntProperty::className() const {
     return "UIntProperty";
 }
 
-int UIntProperty::typeLua() const {
-    return LUA_TNUMBER;
+ghoul::lua::LuaTypes UIntProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Number;
 }
 
 unsigned int UIntProperty::fromLuaConversion(lua_State* state) const {

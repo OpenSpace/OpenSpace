@@ -82,6 +82,8 @@ public:
      * \return The name of this class for reflection purposes
      */
     std::string_view className() const override;
+    ghoul::lua::LuaTypes typeLua() const override;
+
     using IntProperty::operator=;
 
     /**
@@ -160,6 +162,7 @@ public:
 
 private:
     static const std::string OptionsKey;
+    int fromLuaConversion(lua_State* state) const override;
     std::string generateAdditionalJsonDescription() const override;
 
     /// The list of options which have been registered with this OptionProperty

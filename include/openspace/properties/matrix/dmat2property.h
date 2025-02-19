@@ -42,7 +42,7 @@ public:
         glm::dmat2x2 stepValue = ghoul::createFillMat2x2<double>(0.01));
 
     std::string_view className() const override;
-    int typeLua() const override;
+    ghoul::lua::LuaTypes typeLua() const override;
 
     using TemplateProperty<glm::dmat2x2>::operator=;
 };

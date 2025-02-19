@@ -37,8 +37,8 @@ std::string_view FloatProperty::className() const {
     return "FloatProperty";
 }
 
-int FloatProperty::typeLua() const {
-    return LUA_TNUMBER;
+ghoul::lua::LuaTypes FloatProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Number;
 }
 
 } // namespace openspace::properties

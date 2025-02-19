@@ -41,7 +41,7 @@ public:
         float maxValue = std::numeric_limits<float>::max(), float stepValue = 0.01f);
 
     std::string_view className() const override;
-    int typeLua() const override;
+    ghoul::lua::LuaTypes typeLua() const override;
 
     using TemplateProperty<float>::operator=;
 };
