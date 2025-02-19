@@ -100,6 +100,16 @@ namespace {
         "again.",
         openspace::properties::Property::Visibility::User
     };
+
+    constexpr openspace::properties::Property::PropertyInfo FadeJumpThresholdInfo = {
+        "FadeJumpThreshold",
+        "Fade Jump Threshold",
+        "The threshold that determines when a transition should fade instead of "
+        "interpolate. If the time difference exceeds this threshold, the rendering will "
+        "fade to black, set time, and then fade in again. Otherwise the transition will "
+        "interpolate without fading.",
+        openspace::properties::Property::Visibility::User
+    };
 } // namespace
 
 namespace openspace::interaction {
@@ -111,6 +121,7 @@ NavigationHandler::NavigationHandler()
     , _disableJoystickInputs(DisableJoystickInputInfo, false)
     , _useKeyFrameInteraction(FrameInfo, false)
     , _jumpToFadeDuration(JumpToFadeDurationInfo, 1.f, 0.f, 10.f)
+    , _fadeJumpThreshold(FadeJumpThresholdInfo, 86400.f, 0.f, 86400.f, 1.f)
 {
     addPropertySubOwner(_orbitalNavigator);
     addPropertySubOwner(_pathNavigator);
@@ -120,6 +131,7 @@ NavigationHandler::NavigationHandler()
     addProperty(_disableJoystickInputs);
     addProperty(_useKeyFrameInteraction);
     addProperty(_jumpToFadeDuration);
+    addProperty(_fadeJumpThreshold);
 }
 
 NavigationHandler::~NavigationHandler() {}
@@ -188,6 +200,10 @@ float NavigationHandler::jumpToFadeDuration() const {
 
 float NavigationHandler::interpolationTime() const {
     return _orbitalNavigator.retargetInterpolationTime();
+}
+
+float NavigationHandler::fadeJumpThreshold() const {
+    return _fadeJumpThreshold;
 }
 
 void NavigationHandler::setInterpolationTime(float durationInSeconds) {
