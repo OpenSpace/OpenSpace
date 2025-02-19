@@ -46,14 +46,36 @@ namespace {
      */
     int mapFromGlfwToWindows(openspace::Key key) {
         switch (key) {
-            case openspace::Key::BackSpace:   return 8;
-            case openspace::Key::Tab:         return 9;
-            case openspace::Key::Enter:       return 13;
-            case openspace::Key::Left:        return 37;
-            case openspace::Key::Up:          return 38;
-            case openspace::Key::Right:       return 39;
-            case openspace::Key::Down:        return 40;
-            case openspace::Key::Delete:      return 46;
+            case openspace::Key::BackSpace:      return 8;
+            case openspace::Key::Tab:            return 9;
+            case openspace::Key::Enter:          return 13;
+            case openspace::Key::KeypadEnter:    return 13;
+            case openspace::Key::LeftShift:      return 16;
+            case openspace::Key::RightShift:     return 16;
+            case openspace::Key::LeftControl:    return 17;
+            case openspace::Key::RightControl:   return 17;
+            case openspace::Key::LeftAlt:        return 18;
+            case openspace::Key::RightAlt:       return 18;
+            case openspace::Key::Left:           return 37;
+            case openspace::Key::Up:             return 38;
+            case openspace::Key::Right:          return 39;
+            case openspace::Key::Down:           return 40;
+            case openspace::Key::Delete:         return 46;
+            case openspace::Key::Keypad0:        return 96;
+            case openspace::Key::Keypad1:        return 97;
+            case openspace::Key::Keypad2:        return 98;
+            case openspace::Key::Keypad3:        return 99;
+            case openspace::Key::Keypad4:        return 100;
+            case openspace::Key::Keypad5:        return 101;
+            case openspace::Key::Keypad6:        return 102;
+            case openspace::Key::Keypad7:        return 103;
+            case openspace::Key::Keypad8:        return 104;
+            case openspace::Key::Keypad9:        return 105;
+            case openspace::Key::KeypadMultiply: return 106;
+            case openspace::Key::KeypadAdd:      return 107;
+            case openspace::Key::KeypadSubtract: return 109;
+            case openspace::Key::KeypadDecimal:  return 110;
+            case openspace::Key::KeypadDivide:   return 111;
             default:                          return static_cast<int>(key);
         }
     }
