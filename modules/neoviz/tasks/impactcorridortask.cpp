@@ -30,6 +30,7 @@
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
+#include <algorithm>
 #include <filesystem>
 #include <format>
 #include <numbers>
@@ -40,47 +41,53 @@
 namespace {
     constexpr std::string_view _loggerCat = "ImpactCorridorTask";
     constexpr int MaxEarthRadius = 6378;
-    constexpr unsigned int WinSiz = 200;
+    constexpr unsigned int WindowSize = 200;
     constexpr std::string_view TimeStringFormat = "YYYY MON DD HR:MN:SC.###";
     constexpr unsigned int TimeStringLength = 41;
     constexpr double ToDegrees = 180.0 / std::numbers::pi;
-    constexpr int DebugMaxVariants = 100;
-    constexpr bool DebugMode = false;
+    constexpr unsigned int NChannels = 4;
+    constexpr double DefaultBrushRadius = 15;
+    constexpr double DefaultBrushSaturation = 100;
+    constexpr double DefaultFilterStrength = 1;
 
     // Offset spice Id to not collide with any existing NAIF id. This is the first NAIF ID
     // for the variants
     constexpr int IdOffset = 1000000;
 
+    constexpr int DebugMaxVariants = 100;
+    constexpr bool DebugMode = true;
+
     std::vector<std::vector<double>> gaussianFilter(int kernelSize, double filterStrength) {
         ghoul_assert(kernelSize % 2 == 1, "Kernel size must be odd");
 
-        double sigma = filterStrength;
-        double s = 2.0 * sigma * sigma;
+        double standardDeviation = filterStrength;
+        double sig = 2.0 * standardDeviation * standardDeviation;
         double sum = 0.0;
-        std::vector<std::vector<double>> gaussianKernel = std::vector<std::vector<double>>(
+        std::vector<std::vector<double>> kernel = std::vector<std::vector<double>>(
             kernelSize,
             std::vector<double>(kernelSize, 0.0)
         );
 
         // Generating a kernelSize x kernelSize kernel
-        int halfSize = kernelSize / 2;
-        double r = 0.0;
+        int halfSize = kernelSize / 2; // Intentionally rounded down
+        int distanceSqared = 0;
         for (int x = -halfSize; x <= halfSize; x++) {
             for (int y = -halfSize; y <= halfSize; y++) {
-                r = sqrt(x * x + y * y);
-                gaussianKernel[x + halfSize][y + halfSize] = (exp(-(r * r) / s)) / (std::numbers::pi * s);
-                sum += gaussianKernel[x + halfSize][y + halfSize];
+                distanceSqared = x * x + y * y;
+                kernel[x + halfSize][y + halfSize] =
+                    (exp(-(distanceSqared) / sig)) / (std::numbers::pi * sig);
+                sum += kernel[x + halfSize][y + halfSize];
             }
         }
 
-        // normalising the Kernel
-        for (int i = 0; i < 5; ++i) {
+        // Normalise the kernel
+        /*for (int i = 0; i < 5; ++i) {
             for (int j = 0; j < 5; ++j) {
-                gaussianKernel[i][j] /= sum;
+                kernel[i][j] /= sum;
             }
-        }
+        }*/
 
-        return gaussianKernel;
+        return kernel;
     }
 
     struct [[codegen::Dictionary(ImpactCorridorTask)]] Parameters {
@@ -111,6 +118,20 @@ namespace {
         // The step size in number of seconds used to search for impacts. If not given,
         // then the number of seconds in one day is used.
         std::optional<double> stepSize;
+
+        // The size of the brush used to plot impacts to the image. This is also used as
+        // the kernel size for the gaussian filter. If not given, then a default value of
+        // 15 is used.
+        std::optional<int> brushSize;
+
+        // The saturation of paint on the brush used to plot impacts to the image. If not
+        // given, then a default value of 100 is used.
+        std::optional<int> brushSaturation;
+
+        // The strength of the gaussian filter used to smooth the impact image. If not
+        // given, then a default value of 1.0 is used.
+        std::optional<double> filterStrength;
+
     };
 #include "impactcorridortask_codegen.cpp"
 } // namespace
@@ -132,6 +153,11 @@ ImpactCorridorTask::ImpactCorridorTask(const ghoul::Dictionary& dictionary) {
     _imageHeight = p.imageHeight;
     _impactDistance = p.impactDistance.value_or(MaxEarthRadius);
     _stepSize = p.stepSize.value_or(spd_c());
+    _brushSize = p.brushSize.value_or(DefaultBrushRadius);
+    _brushSaturation = p.brushSaturation.value_or(DefaultBrushSaturation);
+    _filterStrength = p.filterStrength.value_or(DefaultFilterStrength);
+
+    ghoul_assert(_brushRadius % 2 == 1, "Brush radius must be an odd number");
 }
 
 std::string ImpactCorridorTask::description() {
@@ -153,74 +179,38 @@ void ImpactCorridorTask::perform(const Task::ProgressCallback& progressCallback)
     // Find the impacts if there are any
     findImpacts(progressCallback, nVariants);
 
+    // Create a raw impact image that only have information about impact saturation
     progressCallback(0.0);
-    LINFO("Creating image...");
-
-    // Create a transparent image to then plot the impact coordinates on
-    const unsigned int Size = _imageWidth * _imageHeight;
-    const unsigned int NChannels = 4;
-    std::vector<GLubyte> image = std::vector<GLubyte>(Size * NChannels, 0);
-
-    // Tools to plot the impact coordinates on the image
-    // @TODO: Make these parameters configurable
-    const int brushSize = 15; // Somewhere between 15 and 20 is good
-    const int brushSaturation = 100; // Tweak this to get a good result
-    const int halfBrush = static_cast<int>(std::round(brushSize / 2.0));
-
-    // Plot all impact coordinates on the image
-    int impactCounter = 0;
-    for (const ImpactCoordinate& impact : _impactCoordinates) {
-        // Find the pixel in the texture data list for the impact
-        double latitudeNorm = (impact.latitude + 90.0) / 180.0;
-        double longitudeNorm = (impact.longitude + 180.0) / 360.0;
-        int pixelH = static_cast<int>(std::round(latitudeNorm * _imageHeight));
-        int pixelW = static_cast<int>(std::round(longitudeNorm * _imageWidth));
-
-        // Draw a circle around the impact point
-        for (int w = -halfBrush; w < halfBrush; w++) {
-            for (int h = -halfBrush; h < halfBrush; h++) {
-                int index = pixelIndex(
-                    pixelW + w,
-                    pixelH + h,
-                    NChannels,
-                    _imageWidth,
-                    _imageHeight
-                );
-
-                // Get the eucledian distance from the center of the brush and calculate
-                // the total saturation for this pixel
-                double distance = std::sqrt(w * w + h * h);
-                int saturation = static_cast<int>(std::round(
-                    std::max(brushSaturation * (1.0 - distance / halfBrush), 0.0)
-                ));
-
-                for (int c = 0; c < NChannels; ++c) {
-                    // Check for overflow
-                    if (static_cast<int>(image[index + c]) + saturation > 255) {
-                        // Clamp the color in case it will get too saturated
-                        image[index + c] = 255;
-                        continue;
-                    }
-
-                    // Add the saturation to the pixel
-                    image[index + c] += saturation;
-                }
-            }
-        }
-
-        ++impactCounter;
-        progressCallback(impactCounter / static_cast<float>(_impactCoordinates.size()));
-    }
-
-    // @TODO: Apply gaussian filter to the image
-    const int kernelSize = (halfBrush % 2 == 1) ? halfBrush : halfBrush + 1;
-    const double filterStrength = 1.0;
-    const std::vector<std::vector<double>> filter =
-        gaussianFilter(kernelSize, filterStrength);
+    LINFO("Creating raw image...");
+    std::vector<double> rawImage = rawImpactImage(progressCallback);
 
     // @TODO: Apply a transfer function to bring color to the image
 
     // @TODO: Use the night layer image to estimate impact risk due to population density
+
+    // Convert the raw image to a normalized image that can be written to file
+    progressCallback(0.0);
+    LINFO("Processing image...");
+    const unsigned int NumPixels = _imageWidth * _imageHeight;
+    const unsigned int Size = NumPixels * NChannels;
+    std::vector<GLubyte> image = std::vector<GLubyte>(Size, 0);
+
+    // Nromalize the total image to the range [0, 255]
+    auto it = std::max_element(rawImage.begin(), rawImage.end());
+    if (it == rawImage.end()) {
+        LDEBUG("Could not find max element in raw image");
+    }
+    double maxSaturation = *it;
+    for (unsigned int i = 0; i < Size; ++i) {
+        // Note that this assumes the colors have the same values in each channel
+        double saturation = rawImage[i] / maxSaturation;
+
+        // Watch out for overflow
+        double clampedSaturation = std::min(std::round(saturation * 255.0), 255.0);
+
+        image[i] = static_cast<GLubyte>(clampedSaturation);
+        progressCallback(i / static_cast<float>(Size));
+    }
 
     // Create and save the resulting impact map image
     stbi_write_png(
@@ -234,8 +224,8 @@ void ImpactCorridorTask::perform(const Task::ProgressCallback& progressCallback)
 
     // Estimate the impact probability, to compare with the expected value
     LINFO(std::format(
-        "Impact probability: {} ({}/{})",
-        _impactCoordinates.size() / static_cast<float>(nVariants),
+        "Impact probability: {:.4f}% ({}/{})",
+        (_impactCoordinates.size() / static_cast<float>(nVariants)) * 100.0,
         _impactCoordinates.size(), nVariants
     ));
 }
@@ -244,7 +234,7 @@ void ImpactCorridorTask::findImpacts(const Task::ProgressCallback& progressCallb
                                      int nVariants)
 {
     // Specify the time range to search in
-    SPICEDOUBLE_CELL(timerange, WinSiz);
+    SPICEDOUBLE_CELL(timerange, WindowSize);
     SpiceDouble startTime;
     SpiceDouble endTime;
     str2et_c(_timeIntervalStart.c_str(), &startTime);
@@ -268,7 +258,7 @@ void ImpactCorridorTask::findImpacts(const Task::ProgressCallback& progressCallb
     int variantId = IdOffset;
     std::string variantNAIFName;
     int managerKernelId = 0;
-    SPICEDOUBLE_CELL(result, WinSiz);
+    SPICEDOUBLE_CELL(result, WindowSize);
     for (const auto& variantKernel :
          std::filesystem::directory_iterator(_kernelDirectory))
     {
@@ -387,7 +377,7 @@ void ImpactCorridorTask::findImpacts(const Task::ProgressCallback& progressCallb
     }
 }
 
-int ImpactCorridorTask::pixelIndex(int pixelW, int pixelH, int nChannels, int imageWidth,
+int ImpactCorridorTask::pixelIndex(int pixelW, int pixelH, int imageWidth,
                                    int imageHeight)
 {
     if (pixelH < 0) {
@@ -417,11 +407,69 @@ int ImpactCorridorTask::pixelIndex(int pixelW, int pixelH, int nChannels, int im
         pixelW = pixelW - imageWidth;
     }
 
-    int pixelIndex = nChannels * pixelW + nChannels * imageWidth * pixelH;
-    if (pixelIndex < 0 || pixelIndex >= (imageWidth * imageHeight * nChannels)) {
+    int pixelIndex = NChannels * pixelW + NChannels * imageWidth * pixelH;
+    if (pixelIndex < 0 || pixelIndex >= (imageWidth * imageHeight * NChannels)) {
         throw ghoul::RuntimeError("Pixel index out of bounds");
     }
     return pixelIndex;
+}
+
+std::vector<double> ImpactCorridorTask::rawImpactImage(
+                                           const Task::ProgressCallback& progressCallback)
+{
+    // Create a transparent image to then plot the impact coordinates on
+    const unsigned int NumPixels = _imageWidth * _imageHeight;
+    const unsigned int Size = NumPixels * NChannels;
+    std::vector<double> rawImage = std::vector<double>(Size, 0.0);
+
+    // Tools to plot the impact coordinates on the image
+    const int brushRadius = _brushSize / 2; // Intentionally rounded down
+
+    // Use a gaussian kernel to create a smooth circle around the impact location
+    const std::vector<std::vector<double>> filter =
+        gaussianFilter(_brushSize, _filterStrength);
+
+    // Plot all impact coordinates on the image
+    int impactCounter = 0;
+    for (const ImpactCoordinate& impact : _impactCoordinates) {
+        // Find the pixel in the texture data list for the impact
+        double latitudeNorm = (impact.latitude + 90.0) / 180.0;
+        double longitudeNorm = (impact.longitude + 180.0) / 360.0;
+        int pixelH = static_cast<int>(std::round(latitudeNorm * _imageHeight));
+        int pixelW = static_cast<int>(std::round(longitudeNorm * _imageWidth));
+
+        // Draw a circle around the impact point
+        for (int w = -brushRadius; w <= brushRadius; w++) {
+            for (int h = -brushRadius; h <= brushRadius; h++) {
+                int index = pixelIndex(
+                    pixelW + w,
+                    pixelH + h,
+                    _imageWidth,
+                    _imageHeight
+                );
+
+                // Get the eucledian distance from the center of the brush and calculate
+                // the total saturation for this pixel
+                /*double distance = std::sqrt(w * w + h * h);
+                double saturation =
+                    std::max(_brushSaturation * (1.0 - distance / _brushRadius), 0.0);*/
+
+                // Use the gaussian kernel to create a smooth circle around the impact
+                double saturation =
+                    _brushSaturation * filter[w + brushRadius][h + brushRadius];
+
+                for (int c = 0; c < NChannels; ++c) {
+                    // Add the saturation to the pixel
+                    rawImage[index + c] += saturation;
+                }
+            }
+        }
+
+        ++impactCounter;
+        progressCallback(impactCounter / static_cast<float>(_impactCoordinates.size()));
+    }
+
+    return rawImage;
 }
 
 } // namespace openspace::neoviz

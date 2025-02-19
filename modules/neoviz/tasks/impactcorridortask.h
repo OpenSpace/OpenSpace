@@ -27,6 +27,7 @@
 
 #include <openspace/util/task.h>
 
+#include <openspace/rendering/colormappingcomponent.h>
 #include <filesystem>
 #include <string>
 
@@ -49,6 +50,13 @@ private:
         double longitude = 0.0;
     };
 
+    /**
+     * Use Spice to find any impacts and their locations on Earth for all variants. Any
+     * impact found is added into the _impactCoordinates list.
+     *
+     * \param progressCallback To comunicate progress amount
+     * \param nVariants The total number of variants to process
+     */
     void findImpacts(const Task::ProgressCallback& progressCallback, int nVariants);
 
     /**
@@ -61,13 +69,23 @@ private:
      *
      * \param pixelW The horizontal coordinate for the pixel in the image
      * \param pixelH The vertical coordinate for the pixel in the image
-     * \param nChannels The number of channels in the image
      * \param imageWidth The total width of the image in pixels
      * \param imageHeight The total height of the image in pixels
      * \return The index of the first channel of the given pixel in the flat data list
      */
-    int pixelIndex(int pixelW, int pixelH, int nChannels, int imageWidth,
-        int imageHeight);
+    int pixelIndex(int pixelW, int pixelH, int imageWidth, int imageHeight);
+
+    /**
+     * Create a raw impact map image data list that only have information with impact
+     * probability. Each impact is painted onto the image with a guasian blob, and
+     * overlapping blobs are added together.
+     *
+     * \param progressCallback To comunicate progress amount
+     * \param Size The vertical coordinate for the pixel in the image
+     * \return The raw impact map with impact probability as a flat data list
+     */
+    std::vector<double> rawImpactImage(const Task::ProgressCallback& progressCallback,
+        const unsigned int Size);
 
     std::filesystem::path _kernelDirectory;
     std::filesystem::path _outputFilename;
@@ -78,6 +96,10 @@ private:
     std::vector<ImpactCoordinate> _impactCoordinates;
     int _imageWidth;
     int _imageHeight;
+    int _brushSize;
+    int _brushSaturation;
+    double _filterStrength;
+    std::unique_ptr<ColorMappingComponent> colorMapping;
 };
 
 } // namespace openspace::neoviz
