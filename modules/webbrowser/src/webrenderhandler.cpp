@@ -119,7 +119,7 @@ void WebRenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
 {
     // This should never happen - if accelerated rendering is off the OnPaint method
     // should be called. But we instatiate the web render handler and the browser instance
-    // in different places so room for error
+    // in different places so there is room for error
     ghoul_assert(_acceleratedRendering, "Accelerated rendering flag is turned off");
 
     if (dirtyRects.empty()) {
@@ -160,6 +160,10 @@ void WebRenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
     glImportMemoryWin32HandleEXT(
         memObj, size, GL_HANDLE_TYPE_D3D11_IMAGE_EXT, info.shared_texture_handle
     );
+
+    // @TODO (2025-02-17, abock) The following line will cause a crash on AMD cards if
+    // accelerated rendering is enabled. I wasn't able to figure out why, but this is
+    // the reason accelerated rendering is disabled for AMD.
 
     // Allocate immutable storage for the texture for the data from the memory object
     // Use GL_RGBA8 since it is 4 bytes

@@ -712,6 +712,8 @@ TemporalTileProvider::InterpolateTileProvider::~InterpolateTileProvider() {
     glDeleteFramebuffers(1, &fbo);
     glDeleteBuffers(1, &vboQuad);
     glDeleteVertexArrays(1, &vaoQuad);
+
+    global::renderEngine->removeRenderProgram(shaderProgram.get());
 }
 
 Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIndex) {

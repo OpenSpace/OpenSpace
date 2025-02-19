@@ -63,6 +63,8 @@ DashboardItemSpacing::DashboardItemSpacing(const ghoul::Dictionary& dictionary)
     addProperty(_spacing);
 }
 
+void DashboardItemSpacing::update() {}
+
 void DashboardItemSpacing::render(glm::vec2& penPosition) {
     penPosition.y -= _spacing;
 }

@@ -87,7 +87,7 @@ DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
     addProperty(_timeFormat);
 }
 
-void DashboardItemDate::render(glm::vec2& penPosition) {
+void DashboardItemDate::update() {
     ZoneScoped;
 
     std::string time = SpiceManager::ref().dateFromEphemerisTime(
@@ -96,13 +96,8 @@ void DashboardItemDate::render(glm::vec2& penPosition) {
     );
 
     try {
-        penPosition.y -= _font->height();
-        RenderFont(
-            *_font,
-            penPosition,
-            // @CPP26(abock): This can be replaced with std::runtime_format
-            std::vformat(_formatString.value(), std::make_format_args(time))
-        );
+        // @CPP26(abock): This can be replaced with std::runtime_format
+        _buffer = std::vformat(_formatString.value(), std::make_format_args(time));
     }
     catch (const std::format_error&) {
         LERRORC("DashboardItemDate", "Illegal format string");

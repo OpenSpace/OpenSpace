@@ -27,7 +27,9 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
+#include <ghoul/font/fontrenderer.h>
 #include <optional>
 
 namespace {
@@ -83,6 +85,16 @@ DashboardTextItem::DashboardTextItem(const ghoul::Dictionary& dictionary, float 
     addProperty(_fontSize);
 
     _font = global::fontManager->font(_fontName, _fontSize);
+}
+
+void DashboardTextItem::render(glm::vec2& penPosition) {
+    if (_buffer.empty()) {
+        return;
+    }
+
+    const size_t lines = std::count(_buffer.begin(), _buffer.end(), '\n') + 1;
+    penPosition.y -= _font->height() * lines;
+    RenderFont(*_font, penPosition, _buffer);
 }
 
 } // namespace openspace

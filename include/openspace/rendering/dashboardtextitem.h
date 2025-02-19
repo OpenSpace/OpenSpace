@@ -42,6 +42,8 @@ public:
     explicit DashboardTextItem(const ghoul::Dictionary& dictionary, float fontSize = 10.f,
         const std::string& fontName = "Mono");
 
+    void render(glm::vec2& penPosition) override;
+
     static documentation::Documentation Documentation();
 
 protected:
@@ -49,6 +51,7 @@ protected:
     properties::FloatProperty _fontSize;
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
+    std::string _buffer;
 };
 
 } // openspace

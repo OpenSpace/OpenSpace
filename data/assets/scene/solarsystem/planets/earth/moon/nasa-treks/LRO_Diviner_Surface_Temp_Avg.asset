@@ -22,7 +22,7 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_Diviner_ST_Avg_Clr_Global_32ppd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_Diviner_ST_Avg_Clr_Global_32ppd)
 end)
 
 asset.export("LRO_Diviner_ST_Avg_Clr_Global_32ppd", treks_LRO_Diviner_ST_Avg_Clr_Global_32ppd)

@@ -77,6 +77,7 @@ private:
     std::unique_ptr<CefHost> _cefHost;
     std::filesystem::path _webHelperLocation;
     bool _enabled = true;
+    static inline bool _disableAcceleratedRendering = false;
 };
 
 } // namespace openspace

@@ -369,9 +369,18 @@ void ImageSequencer::runSequenceParser(SequenceParser& parser) {
         // from 'predicted event file' (mission-playbook)
         for (const Image& i : source) {
             for (const Image& j : destination) {
+                if (source.empty()) {
+                    break;
+                }
+
                 const double diff = std::abs(i.timeRange.start - j.timeRange.start);
                 if (diff < epsilon) {
-                    source.erase(source.begin() + 1);
+                    if (source.size() == 1) {
+                        source.erase(source.begin());
+                    }
+                    else {
+                        source.erase(source.begin() + 1);
+                    }
                 }
             }
         }

@@ -18,14 +18,14 @@ local Apollo17Lem = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = moonAsset.Moon.Identifier,
-      Longitude = -329.22833,
+      Longitude = 30.77167,
       Latitude = 20.19092,
       UseHeightmap = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = moonAsset.Moon.Identifier,
-      Longitude = -329.22833,
+      Longitude = 30.77167,
       Latitude = 20.19092
     }
   },

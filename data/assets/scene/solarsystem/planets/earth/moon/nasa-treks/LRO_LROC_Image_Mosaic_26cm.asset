@@ -22,7 +22,7 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_apollo11_26cm_mosaic_byte_geo_1_2_highContrast")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_apollo11_26cm_mosaic_byte_geo_1_2_highContrast)
 end)
 
 asset.export("apollo11_26cm_mosaic_byte_geo_1_2_highContrast", treks_apollo11_26cm_mosaic_byte_geo_1_2_highContrast)

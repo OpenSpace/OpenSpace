@@ -32,9 +32,12 @@ namespace {
     openspace::global::sessionRecordingHandler->startRecording();
 }
 
-// Stops a recording session. `dataMode` has to be "Ascii" or "Binary"
+/**
+ * Stops a recording session. `dataMode` has to be "Ascii" or "Binary". If `overwrite` is
+ * true, any existing session recording file will be overwritten, false by default.
+ */
 [[codegen::luawrap]] void stopRecording(std::filesystem::path recordFilePath,
-                                        std::string dataMode)
+                                        std::string dataMode, std::optional<bool> overwrite)
 {
     if (recordFilePath.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
@@ -47,7 +50,8 @@ namespace {
     using DataMode = openspace::interaction::DataMode;
     openspace::global::sessionRecordingHandler->stopRecording(
         recordFilePath,
-        dataMode == "Ascii" ? DataMode::Ascii : DataMode::Binary
+        dataMode == "Ascii" ? DataMode::Ascii : DataMode::Binary,
+        overwrite.value_or(false)
     );
 }
 
