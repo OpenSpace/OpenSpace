@@ -76,6 +76,6 @@ extern void (*webBrowserPerformanceHotfix)();
 void create();
 void destroy();
 
-} // namespace openspace::global
+} // namespace openspace::global::callback
 
 #endif // __OPENSPACE_CORE___GLOBALSCALLBACKS___H__

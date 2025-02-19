@@ -126,7 +126,6 @@ void BrowserInstance::draw() {
     ZoneScoped;
     TracyGpuZone("CEF Draw");
 
-
     if (_zoomLevel != _browser->GetHost()->GetZoomLevel()) {
         _browser->GetHost()->SetZoomLevel(_zoomLevel);
     }

@@ -65,7 +65,7 @@ private:
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
-    ghoul::opengl::ProgramObject* _program;
+    ghoul::opengl::ProgramObject* _program = nullptr;
     /// The vertex attribute location for position
     /// must correlate to layout location in vertex shader
     const GLuint _locVertex = 0;

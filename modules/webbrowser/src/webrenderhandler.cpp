@@ -184,7 +184,7 @@ void WebRenderHandler::updateTexture() {
         return;
     }
 
-    if (_textureSizeIsDirty) {
+    if (_textureSizeIsDirty) [[unlikely]] {
         glBindTexture(GL_TEXTURE_2D, _texture);
         glTexImage2D(
             GL_TEXTURE_2D,

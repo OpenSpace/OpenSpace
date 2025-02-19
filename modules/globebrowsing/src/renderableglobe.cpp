@@ -842,7 +842,7 @@ bool RenderableGlobe::isReady() const {
 }
 
 void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask) {
-    const double distanceToCamera = distance(
+    const double distanceToCamera = glm::distance(
         data.camera.positionVec3(),
         data.modelTransform.translation
     );
@@ -952,7 +952,7 @@ void RenderableGlobe::renderSecondary(const RenderData& data, RendererTasks&) {
 void RenderableGlobe::update(const UpdateData& data) {
     ZoneScoped;
 
-    if (_localRenderer.program && _localRenderer.program->isDirty()) {
+    if (_localRenderer.program && _localRenderer.program->isDirty()) [[unlikely]] {
         _localRenderer.program->rebuildFromFile();
 
         _localRenderer.program->setUniform("xSegments", _grid.xSegments);
@@ -963,7 +963,7 @@ void RenderableGlobe::update(const UpdateData& data) {
         );
     }
 
-    if (_globalRenderer.program && _globalRenderer.program->isDirty()) {
+    if (_globalRenderer.program && _globalRenderer.program->isDirty()) [[unlikely]] {
         _globalRenderer.program->rebuildFromFile();
 
         _globalRenderer.program->setUniform("xSegments", _grid.xSegments);
@@ -1071,12 +1071,12 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 {
     ZoneScoped;
 
-    if (_layerManagerDirty) {
+    if (_layerManagerDirty) [[unlikely]] {
         _layerManager.update();
         _layerManagerDirty = false;
     }
 
-    if (_nLayersIsDirty) {
+    if (_nLayersIsDirty) [[unlikely]] {
         std::array<LayerGroup*, LayerManager::NumLayerGroups> lgs =
             _layerManager.layerGroups();
         _nActiveLayers = std::accumulate(
@@ -1090,7 +1090,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         _nLayersIsDirty = false;
     }
 
-    if (_shadersNeedRecompilation) {
+    if (_shadersNeedRecompilation) [[unlikely]] {
         recompileShaders();
     }
 
@@ -1098,7 +1098,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     // Setting frame-const uniforms that are not view dependent
     //
     if (_layerManager.hasAnyBlendingLayersEnabled()) {
-        if (_lodScaleFactorDirty) {
+        if (_lodScaleFactorDirty) [[unlikely]] {
             const float dsf = static_cast<float>(
                 _currentLodScaleFactor * _ellipsoid.minimumRadius()
             );
@@ -1553,8 +1553,8 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     // TODO: Patch normal can be calculated for all corners and then linearly
     // interpolated on the GPU to avoid cracks for high altitudes.
     // JCC: Camera space includes the SGCT View transformation.
-    const glm::vec3 patchNormalCameraSpace = normalize(
-        cross(
+    const glm::vec3 patchNormalCameraSpace = glm::normalize(
+        glm::cross(
             cornersCameraSpace[Quad::SOUTH_EAST] - cornersCameraSpace[Quad::SOUTH_WEST],
             cornersCameraSpace[Quad::NORTH_EAST] - cornersCameraSpace[Quad::SOUTH_WEST]
         )
@@ -1865,8 +1865,7 @@ void RenderableGlobe::recompileShaders() {
     }
     shaderDictionary.setValue("layerGroups", layerGroupNames);
 
-    for (const std::pair<std::string, std::string>& p : preprocessingData.keyValuePairs)
-    {
+    for (const std::pair<std::string, std::string>& p : preprocessingData.keyValuePairs) {
         shaderDictionary.setValue(p.first, p.second);
     }
 
@@ -2200,15 +2199,9 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
             return;
         }
 
-        const double sourceRadiusScale = std::max(
-            glm::compMax(sourceNode->scale()),
-            1.0
-        );
+        const double sourceRadiusScale = std::max(glm::compMax(sourceNode->scale()), 1.0);
 
-        const double casterRadiusScale = std::max(
-            glm::compMax(casterNode->scale()),
-            1.0
-        );
+        const double casterRadiusScale = std::max(glm::compMax(casterNode->scale()), 1.0);
 
         // First we determine if the caster is shadowing the current planet (all
         // calculations in World Coordinates):
@@ -2247,13 +2240,12 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
             (casterDistSun < planetDistSun))
         {
             // The current caster is shadowing the current planet
-            shadowData.isShadowing       = true;
-            shadowData.rs                = shadowConf.source.second * sourceRadiusScale;
-            shadowData.rc                = shadowConf.caster.second * casterRadiusScale;
-            shadowData.sourceCasterVec   = glm::normalize(sourceCasterVec);
-            shadowData.xp                = xp_test;
-            shadowData.xu                = shadowData.rc * sc_length /
-                                          (shadowData.rs - shadowData.rc);
+            shadowData.isShadowing = true;
+            shadowData.rs = shadowConf.source.second * sourceRadiusScale;
+            shadowData.rc = shadowConf.caster.second * casterRadiusScale;
+            shadowData.sourceCasterVec = glm::normalize(sourceCasterVec);
+            shadowData.xp = xp_test;
+            shadowData.xu = shadowData.rc * sc_length / (shadowData.rs - shadowData.rc);
             shadowData.casterPositionVec = casterPos;
         }
         shadowDataArray.push_back(shadowData);
@@ -2514,28 +2506,28 @@ bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk,
     }
 
 
-    const double objectP = pow(length(objectPos - globePos), 2);
-    const double horizonP = pow(minimumGlobeRadius - maxHeight, 2);
+    const double objectP = std::pow(glm::length(objectPos - globePos), 2);
+    const double horizonP = std::pow(minimumGlobeRadius - maxHeight, 2);
     if (objectP < horizonP) {
         return false;
     }
 
-    const double cameraP = pow(length(cameraPos - globePos), 2);
-    const double minR = pow(minimumGlobeRadius, 2);
+    const double cameraP = std::pow(glm::length(cameraPos - globePos), 2);
+    const double minR = std::pow(minimumGlobeRadius, 2);
     if (cameraP < minR) {
         return false;
     }
 
-    const double minimumAllowedDistanceToObjectFromHorizon = sqrt(objectP - horizonP);
-    const double distanceToHorizon = sqrt(cameraP - minR);
+    const double minimumAllowedDistanceToObjFromHorizon = std::sqrt(objectP - horizonP);
+    const double distanceToHorizon = std::sqrt(cameraP - minR);
 
     // Minimum allowed for the object to be occluded
     const double minimumAllowedDistanceToObjectSquared =
-        pow(distanceToHorizon + minimumAllowedDistanceToObjectFromHorizon, 2) +
-        pow(maxHeight, 2);
+        std::pow(distanceToHorizon + minimumAllowedDistanceToObjFromHorizon, 2) +
+        std::pow(maxHeight, 2);
 
-    const double distanceToObjectSquared = pow(
-        length(objectPos - cameraPos),
+    const double distanceToObjectSquared = std::pow(
+        glm::length(objectPos - cameraPos),
         2
     );
     return distanceToObjectSquared > minimumAllowedDistanceToObjectSquared;

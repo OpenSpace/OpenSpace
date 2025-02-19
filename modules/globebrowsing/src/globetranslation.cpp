@@ -211,7 +211,7 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
         _positionIsDirty = true;
     }
 
-    if (!_positionIsDirty) {
+    if (!_positionIsDirty) [[likely]] {
         return _position;
     }
 

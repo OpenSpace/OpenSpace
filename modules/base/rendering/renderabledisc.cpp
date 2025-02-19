@@ -39,10 +39,6 @@
 #include <optional>
 
 namespace {
-    constexpr std::array<const char*, 4> UniformNames = {
-        "modelViewProjectionTransform", "opacity", "width", "colorTexture"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
@@ -97,6 +93,8 @@ RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
     , _texturePath(TextureInfo)
     , _size(SizeInfo, 1.f, 0.001f, 1e13f)
     , _width(WidthInfo, 1.f, 0.001f, 1.f)
+    , _plane(_size)
+    , _planeIsDirty(true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -119,7 +117,7 @@ RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderableDisc::isReady() const {
-    return _shader && _texture && _plane;
+    return _shader && _texture;
 }
 
 void RenderableDisc::initialize() {
@@ -127,8 +125,6 @@ void RenderableDisc::initialize() {
     _texture->setFilterMode(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
     _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
     _texture->setShouldWatchFileForChanges(true);
-
-    _plane = std::make_unique<PlaneGeometry>(planeSize());
 }
 
 void RenderableDisc::initializeGL() {
@@ -137,12 +133,11 @@ void RenderableDisc::initializeGL() {
     _texture->loadFromFile(_texturePath.value());
     _texture->uploadToGpu();
 
-    _plane->initialize();
+    _plane.initialize();
 }
 
 void RenderableDisc::deinitializeGL() {
-    _plane->deinitialize();
-    _plane = nullptr;
+    _plane.deinitialize();
     _texture = nullptr;
 
     global::renderEngine->removeRenderProgram(_shader.get());
@@ -172,7 +167,7 @@ void RenderableDisc::render(const RenderData& data, RendererTasks&) {
     glDepthMask(false);
     glDisable(GL_CULL_FACE);
 
-    _plane->render();
+    _plane.render();
 
     _shader->deactivate();
 
@@ -183,13 +178,13 @@ void RenderableDisc::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableDisc::update(const UpdateData&) {
-    if (_shader->isDirty()) {
+    if (_shader->isDirty()) [[unlikely]] {
         _shader->rebuildFromFile();
         updateUniformLocations();
     }
 
-    if (_planeIsDirty) {
-        _plane->updateSize(planeSize());
+    if (_planeIsDirty) [[unlikely]] {
+        _plane.updateSize(planeSize());
         _planeIsDirty = false;
     }
 
@@ -206,7 +201,7 @@ void RenderableDisc::initializeShader() {
 }
 
 void RenderableDisc::updateUniformLocations() {
-   ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+   ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 float RenderableDisc::planeSize() const {

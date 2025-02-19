@@ -46,7 +46,7 @@ bool DefaultBrowserLauncher::OnBeforePopup(CefRefPtr<CefBrowser>, CefRefPtr<CefF
     std::string url = targetUrl.ToString();
     LDEBUGC("DefaultBrowserLauncher", "Launching default browser: " + url);
     ShellExecuteA(nullptr, nullptr, url.c_str(), nullptr, nullptr, SW_SHOW);
-#endif
+#endif // WIN32
     return true;
 }
 

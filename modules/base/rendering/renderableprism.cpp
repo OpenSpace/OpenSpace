@@ -215,8 +215,8 @@ void RenderablePrism::updateVertexData() {
     using namespace rendering::helper;
 
     // Get unit circle vertices on the XY-plane
-    std::vector<VertexXYZ> unitVertices = createRingXYZ(_nShapeSegments.value(), 1.f);
-    std::vector<VertexXYZ> unitVerticesLines = createRingXYZ(_nLines.value(), 1.f);
+    std::vector<VertexXYZ> unitVertices = createRingXYZ(_nShapeSegments, 1.f);
+    std::vector<VertexXYZ> unitVerticesLines = createRingXYZ(_nLines, 1.f);
 
     // Put base vertices into array
     for (int j = 0; j < _nShapeSegments; j++) {
@@ -348,11 +348,12 @@ void RenderablePrism::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderablePrism::update(const UpdateData& data) {
-    if (_shader->isDirty()) {
+    if (_shader->isDirty()) [[unlikely]] {
         _shader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
-    if (_prismIsDirty) {
+
+    if (_prismIsDirty) [[unlikely]] {
         updateVertexData();
         updateBufferData();
         setBoundingSphere(_length * glm::compMax(data.modelTransform.scale));

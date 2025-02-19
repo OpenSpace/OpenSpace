@@ -47,7 +47,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemSpacing::Documentation() {
-    return codegen::doc<Parameters>("base_dashboarditem_spacing");
+    return codegen::doc<Parameters>(
+        "base_dashboarditem_spacing",
+        DashboardItem::Documentation()
+    );
 }
 
 DashboardItemSpacing::DashboardItemSpacing(const ghoul::Dictionary& dictionary)

@@ -139,7 +139,7 @@ RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictio
 }
 
 void RenderableDistanceLabel::update(const UpdateData&) {
-    if (_errorThrown) {
+    if (_errorThrown) [[unlikely]] {
         return;
     }
 
@@ -176,7 +176,7 @@ void RenderableDistanceLabel::update(const UpdateData&) {
         // Update placement of label with transformation matrix
         SceneGraphNode* startNode = RE.scene()->sceneGraphNode(nodeline->start());
         SceneGraphNode* endNode = RE.scene()->sceneGraphNode(nodeline->end());
-        if (startNode && endNode) {
+        if (startNode && endNode) [[likely]] {
             const glm::dvec3 start = startNode->worldPosition();
             const glm::dvec3 end = endNode->worldPosition();
             const glm::dvec3 goalPos = start + (end - start) / 2.0;

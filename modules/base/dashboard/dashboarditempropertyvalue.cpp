@@ -110,7 +110,7 @@ DashboardItemPropertyValue::DashboardItemPropertyValue(
 void DashboardItemPropertyValue::update() {
     ZoneScoped;
 
-    if (_propertyIsDirty) {
+    if (_propertyIsDirty) [[unlikely]] {
         _property = openspace::property(_propertyUri);
         _propertyIsDirty = false;
     }

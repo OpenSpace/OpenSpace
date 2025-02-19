@@ -139,8 +139,8 @@ void TouchMarker::createVertexList(const std::vector<openspace::TouchInputHolder
 
     int i = 0;
     for (const openspace::TouchInputHolder& inputHolder : list) {
-        _vertexData[i] = 2 * (inputHolder.latestInput().x - 0.5f);
-        _vertexData[i + 1] = -2 * (inputHolder.latestInput().y - 0.5f);
+        _vertexData[i] = 2.f * (inputHolder.latestInput().x - 0.5f);
+        _vertexData[i + 1] = -2.f * (inputHolder.latestInput().y - 0.5f);
         i += 2;
     }
 
@@ -153,14 +153,7 @@ void TouchMarker::createVertexList(const std::vector<openspace::TouchInputHolder
         GL_STATIC_DRAW
     );
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
-        0,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        0,
-        nullptr
-    );
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 }
 
 } // openspace namespace

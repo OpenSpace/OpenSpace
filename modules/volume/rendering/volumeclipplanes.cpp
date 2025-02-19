@@ -50,8 +50,6 @@ void VolumeClipPlanes::initialize() {
     }
 }
 
-void VolumeClipPlanes::deinitialize() {}
-
 std::vector<glm::vec3> VolumeClipPlanes::normals() {
     std::vector<glm::vec3> normals;
     normals.reserve(_clipPlanes.size());

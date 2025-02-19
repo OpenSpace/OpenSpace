@@ -68,7 +68,7 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
 Tile SizeReferenceTileProvider::tile(const TileIndex& tileIndex) {
     ZoneScoped;
 
-    const GeodeticPatch patch(tileIndex);
+    const GeodeticPatch patch = GeodeticPatch(tileIndex);
     const bool aboveEquator = patch.isNorthern();
     const double lat = aboveEquator ? patch.minLat() : patch.maxLat();
     const double lon1 = patch.minLon();

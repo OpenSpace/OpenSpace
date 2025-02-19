@@ -34,7 +34,6 @@
 // The RenderableSphereSpout can be used to render a sphere with a texture that is
 // provided by another application on the same computer using the SPOUT library. Note that
 // this library is only available on Windows.
-
 namespace {
     struct [[codegen::Dictionary(RenderableSphereSpout)]] Parameters {
         // Specifies the GUI name of the RenderableSphereSpout

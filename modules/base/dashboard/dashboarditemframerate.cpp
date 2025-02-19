@@ -41,8 +41,7 @@ namespace {
         DtStandardDeviation,
         DtCoefficientOfVariation,
         FPS,
-        FPSAvg,
-        None
+        FPSAvg
     };
 
     constexpr openspace::properties::Property::PropertyInfo FrametimeInfo = {
@@ -184,8 +183,7 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
             "Deltatime coefficient of variation"
         },
         { static_cast<int>(FrametimeType::FPS), "Frames per second" },
-        { static_cast<int>(FrametimeType::FPSAvg), "Average frames per second" },
-        { static_cast<int>(FrametimeType::None), "None" }
+        { static_cast<int>(FrametimeType::FPSAvg), "Average frames per second" }
     });
 
     if (p.frametimeType.has_value()) {
@@ -206,7 +204,7 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
 void DashboardItemFramerate::update() {
     ZoneScoped;
 
-    if (_shouldClearCache) {
+    if (_shouldClearCache) [[unlikely]] {
         _minDeltaTimeCache = 1.0;
         _maxDeltaTimeCache = -1.0;
         _shouldClearCache = false;

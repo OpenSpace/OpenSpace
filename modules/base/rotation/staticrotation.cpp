@@ -120,7 +120,7 @@ StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary) : StaticRota
 }
 
 glm::dmat3 StaticRotation::matrix(const UpdateData&) const {
-    if (_matrixIsDirty) {
+    if (_matrixIsDirty) [[unlikely]] {
         _cachedMatrix = glm::mat3_cast(glm::quat(_eulerRotation.value()));
         _matrixIsDirty = false;
     }

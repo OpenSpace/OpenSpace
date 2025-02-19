@@ -28,7 +28,6 @@
 #include <openspace/scene/lightsource.h>
 
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
 
@@ -36,7 +35,6 @@ namespace documentation { struct Documentation; }
 
 class CameraLightSource : public LightSource {
 public:
-    CameraLightSource();
     explicit CameraLightSource(const ghoul::Dictionary& dictionary);
 
     glm::vec3 directionViewSpace(const RenderData& renderData) const override;

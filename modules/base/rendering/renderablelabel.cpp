@@ -378,14 +378,12 @@ void RenderableLabel::initialize() {
 }
 
 void RenderableLabel::initializeGL() {
-    if (_font == nullptr) {
-        _font = global::fontManager->font(
-            "Mono",
-            _fontSize,
-            ghoul::fontrendering::FontManager::Outline::Yes,
-            ghoul::fontrendering::FontManager::LoadGlyphs::No
-        );
-    }
+    _font = global::fontManager->font(
+        "Mono",
+        _fontSize,
+        ghoul::fontrendering::FontManager::Outline::Yes,
+        ghoul::fontrendering::FontManager::LoadGlyphs::No
+    );
 }
 
 void RenderableLabel::deinitializeGL() {}

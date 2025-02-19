@@ -50,14 +50,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableStars";
 
-    constexpr std::array<const char*, 24> UniformNames = {
-        "modelMatrix", "cameraViewProjectionMatrix", "cameraUp", "eyePosition",
-        "colorOption", "magnitudeExponent", "sizeComposition", "lumCent", "radiusCent",
-        "colorTexture", "opacity", "otherDataTexture", "otherDataRange",
-        "filterOutOfRange", "fixedColor", "glareTexture", "glareMultiplier", "glareGamma",
-        "glareScale", "hasCore", "coreTexture", "coreMultiplier", "coreGamma", "coreScale"
-    };
-
     enum SizeComposition {
         DistanceModulus = 0,
         AppBrightness,
@@ -674,7 +666,7 @@ void RenderableStars::initializeGL() {
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     glBindVertexArray(0);
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
     loadData();
 
@@ -852,7 +844,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableStars::update(const UpdateData&) {
-    if (_speckFileIsDirty) {
+    if (_speckFileIsDirty) [[unlikely]] {
         loadData();
         _speckFileIsDirty = false;
         _dataIsDirty = true;
@@ -862,7 +854,7 @@ void RenderableStars::update(const UpdateData&) {
         return;
     }
 
-    if (_dataIsDirty) {
+    if (_dataIsDirty) [[unlikely]] {
         const int value = _colorOption;
         LDEBUG("Regenerating data");
 
@@ -975,12 +967,12 @@ void RenderableStars::update(const UpdateData&) {
         _dataIsDirty = false;
     }
 
-    if (_pointSpreadFunctionTextureIsDirty) {
+    if (_pointSpreadFunctionTextureIsDirty) [[unlikely]] {
         LDEBUG("Reloading Point Spread Function texture");
         loadPSFTexture();
     }
 
-    if (_colorTextureIsDirty) {
+    if (_colorTextureIsDirty) [[unlikely]] {
         LDEBUG("Reloading Color Texture");
         _colorTexture = nullptr;
         if (!_colorTexturePath.value().empty()) {
@@ -1001,7 +993,7 @@ void RenderableStars::update(const UpdateData&) {
         _colorTextureIsDirty = false;
     }
 
-    if (_otherDataColorMapIsDirty) {
+    if (_otherDataColorMapIsDirty) [[unlikely]] {
         LDEBUG("Reloading Color Texture");
         _otherDataColorMapTexture = nullptr;
         if (!_otherDataColorMapPath.value().empty()) {
@@ -1020,9 +1012,9 @@ void RenderableStars::update(const UpdateData&) {
 
     }
 
-    if (_program->isDirty()) {
+    if (_program->isDirty()) [[unlikely]] {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
     }
 }
 

@@ -57,7 +57,7 @@ public:
 
     ghoul::opengl::Texture& texture();
     void uploadTexture();
-    bool hasTexture();
+    bool hasTexture() const;
 
     std::shared_ptr<openspace::TransferFunction> transferFunction();
 
