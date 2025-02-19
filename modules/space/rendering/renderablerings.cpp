@@ -237,10 +237,7 @@ void RenderableRings::loadTexture() {
     );
 
     if (texture) {
-        LDEBUGC(
-            "RenderableRings",
-            std::format("Loaded texture from '{}'", absPath(_texturePath))
-        );
+        LDEBUGC("RenderableRings", std::format("Loaded texture from '{}'", _texturePath));
         _texture = std::move(texture);
 
         _texture->uploadTexture();

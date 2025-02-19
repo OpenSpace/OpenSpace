@@ -165,7 +165,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
 }
 
 bool RenderableSphericalGrid::isReady() const {
-    return _gridProgram && _hasLabels ? _labels->isReady() : true;
+    return _gridProgram && (_hasLabels ? _labels->isReady() : true);
 }
 
 void RenderableSphericalGrid::initialize() {

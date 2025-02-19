@@ -368,8 +368,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
             else {
                 LERROR(std::format(
                     "The given unit name '{}' does not match any currently supported "
-                    "unit names",
-                    stringUnit
+                    "unit names", stringUnit
                 ));
                 _animationTimeScale = 1.0;
             }

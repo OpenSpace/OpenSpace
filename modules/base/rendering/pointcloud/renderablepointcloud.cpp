@@ -1511,7 +1511,8 @@ void RenderablePointCloud::updateBufferData() {
 }
 
 void RenderablePointCloud::updateSpriteTexture() {
-    if (!(_hasSpriteTexture && _spriteTextureIsDirty)) [[likely]] {
+    const bool shouldUpdate = _hasSpriteTexture && _spriteTextureIsDirty;
+    if (!shouldUpdate) [[likely]] {
         return;
     }
 

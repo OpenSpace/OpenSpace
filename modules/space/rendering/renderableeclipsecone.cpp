@@ -123,7 +123,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-
     std::vector<VBOLayout> calculateShadowPoints(
                                              const std::vector<glm::dvec3>& srcTerminator,
                                              const std::vector<glm::dvec3>& dstTerminator,

@@ -77,7 +77,7 @@ SceneGraphLightSource::SceneGraphLightSource(const ghoul::Dictionary& dictionary
     _sceneGraphNodeReference.onChange([this]() {
         _sceneGraphNode =
             global::renderEngine->scene()->sceneGraphNode(_sceneGraphNodeReference);
-        });
+    });
     addProperty(_sceneGraphNodeReference);
     _sceneGraphNodeReference = p.node;
 }

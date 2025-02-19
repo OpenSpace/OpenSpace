@@ -31,36 +31,36 @@ namespace openspace::globebrowsing::layers {
 
 static_assert(
     std::is_sorted(
-        Groups.cbegin(),
-        Groups.cend(),
+        Groups.begin(),
+        Groups.end(),
         [](const Group& lhs, const Group& rhs) { return lhs.id < rhs.id; }
     )
 );
 static_assert(
     std::all_of(
-        Groups.cbegin(),
-        Groups.cend(),
+        Groups.begin(),
+        Groups.end(),
         [](const Group& gi) { return !gi.identifier.empty(); }
     )
 );
 static_assert(
     std::all_of(
-        Groups.cbegin(),
-        Groups.cend(),
+        Groups.begin(),
+        Groups.end(),
         [](const Group& gi) { return !gi.name.empty(); }
     )
 );
 static_assert(
     std::all_of(
-        Groups.cbegin(),
-        Groups.cend(),
+        Groups.begin(),
+        Groups.end(),
         [](const Group& gi) {
             const auto it = std::find_if(
-                Groups.cbegin(),
-                Groups.cend(),
+                Groups.begin(),
+                Groups.end(),
                 [gi](const Group& g) { return g.id == gi.id; }
             );
-            const std::ptrdiff_t pos = std::distance(Groups.cbegin(), it);
+            const std::ptrdiff_t pos = std::distance(Groups.begin(), it);
             return static_cast<int>(pos) == static_cast<int>(gi.id);
         }
     )
@@ -68,29 +68,29 @@ static_assert(
 
 static_assert(
     std::is_sorted(
-        Layers.cbegin(),
-        Layers.cend(),
+        Layers.begin(),
+        Layers.end(),
         [](const Layer& lhs, const Layer& rhs) { return lhs.id < rhs.id; }
     )
 );
 static_assert(
     std::all_of(
-        Layers.cbegin(),
-        Layers.cend(),
+        Layers.begin(),
+        Layers.end(),
         [](const Layer& li) { return !li.identifier.empty(); }
     )
 );
 static_assert(
     std::all_of(
-        Layers.cbegin(),
-        Layers.cend(),
+        Layers.begin(),
+        Layers.end(),
         [](const Layer& li) {
             const auto it = std::find_if(
-                Layers.cbegin(),
-                Layers.cend(),
+                Layers.begin(),
+                Layers.end(),
                 [li](const Layer& l) { return l.id == li.id; }
             );
-            const std::ptrdiff_t pos = std::distance(Layers.cbegin(), it);
+            const std::ptrdiff_t pos = std::distance(Layers.begin(), it);
             return static_cast<int>(pos) == static_cast<int>(li.id);
         }
     )
@@ -102,29 +102,29 @@ static_assert(static_cast<int>(Adjustments[0].id) == 0);
 static_assert(static_cast<size_t>(Adjustments.back().id) == Adjustments.size() - 1);
 static_assert(
     std::is_sorted(
-        Adjustments.cbegin(),
-        Adjustments.cend(),
+        Adjustments.begin(),
+        Adjustments.end(),
         [](const Adjustment& lhs, const Adjustment& rhs) { return lhs.id < rhs.id; }
     )
 );
 static_assert(
     std::all_of(
-        Adjustments.cbegin(),
-        Adjustments.cend(),
+        Adjustments.begin(),
+        Adjustments.end(),
         [](const Adjustment& ai) { return !ai.identifier.empty(); }
     )
 );
 static_assert(
     std::all_of(
-        Adjustments.cbegin(),
-        Adjustments.cend(),
+        Adjustments.begin(),
+        Adjustments.end(),
         [](const Adjustment& ai) {
             const auto it = std::find_if(
-                Adjustments.cbegin(),
-                Adjustments.cend(),
+                Adjustments.begin(),
+                Adjustments.end(),
                 [ai](const Adjustment& a) { return a.id == ai.id; }
             );
-            const std::ptrdiff_t pos = std::distance(Adjustments.cbegin(), it);
+            const std::ptrdiff_t pos = std::distance(Adjustments.begin(), it);
             return static_cast<int>(pos) == static_cast<int>(ai.id);
         }
     )
@@ -136,29 +136,29 @@ static_assert(static_cast<int>(Blends[0].id) == 0);
 static_assert(static_cast<size_t>(Blends.back().id) == Blends.size() - 1);
 static_assert(
     std::is_sorted(
-        Blends.cbegin(),
-        Blends.cend(),
+        Blends.begin(),
+        Blends.end(),
         [](const Blend& lhs, const Blend& rhs) { return lhs.id < rhs.id; }
     )
 );
 static_assert(
     std::all_of(
-        Blends.cbegin(),
-        Blends.cend(),
+        Blends.begin(),
+        Blends.end(),
         [](const Blend& bi) { return !bi.identifier.empty(); }
     )
 );
 static_assert(
     std::all_of(
-        Blends.cbegin(),
-        Blends.cend(),
+        Blends.begin(),
+        Blends.end(),
         [](const Blend& bi) {
             const auto it = std::find_if(
-                Blends.cbegin(),
-                Blends.cend(),
+                Blends.begin(),
+                Blends.end(),
                 [bi](const Blend& b) { return b.id == bi.id; }
             );
-            const std::ptrdiff_t pos = std::distance(Blends.cbegin(), it);
+            const std::ptrdiff_t pos = std::distance(Blends.begin(), it);
             return static_cast<int>(pos) == static_cast<int>(bi.id);
         }
     )

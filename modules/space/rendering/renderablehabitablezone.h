@@ -68,7 +68,7 @@ private:
 
     glm::vec2 _conservativeBounds;
 
-    UniformCache(modelViewProjection, opacity, width, texture,
+    UniformCache(modelViewProjection, opacity, width, transferFunctionTexture,
         conservativeBounds, showOptimistic) _uniformCache;
 };
 
