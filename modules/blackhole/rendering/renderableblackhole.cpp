@@ -3,6 +3,8 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/framebufferrenderer.h>
+#include <openspace/navigation/navigationhandler.h>
+
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/openglstatecache.h>
@@ -11,6 +13,8 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <filesystem>
+
+#include <modules/blackhole/cuda/blackhole_cuda.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "BlackHoleModule";
@@ -32,6 +36,8 @@ namespace openspace {
     }
 
     void RenderableBlackHole::initialize() {
+        _viewport = ViewPort(global::navigationHandler->camera());
+        cuda_test();
     }
 
     void RenderableBlackHole::initializeGL() {
@@ -123,6 +129,8 @@ namespace openspace {
         else {
             LWARNING("UniformCache is missing 'enviromentTexture'");
         }
+
+        //invProjection, invView
     }
 
     void RenderableBlackHole::drawQuad() {

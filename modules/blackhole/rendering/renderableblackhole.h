@@ -2,6 +2,7 @@
 #define __OPENSPACE_MODULE_BLACKHOLE___RENDERABLECANVAS___H__
 
 #include <openspace/rendering/renderable.h>
+#include <modules/blackhole/rendering/viewport.h>
 #include <ghoul/opengl/uniformcache.h>
 
 namespace openspace {
@@ -31,12 +32,14 @@ private:
     void setupQuad();
     void loadEnvironmentTexture();
   ghoul::opengl::ProgramObject* _program = nullptr;
+  ViewPort _viewport;
+
 
   GLuint _framebuffer = 0;
   GLuint _quadVao = 0;
   GLuint _quadVbo = 0;
 
-  UniformCache(enviromentTexture) _uniformCache;
+  UniformCache(enviromentTexture, invProjection, invView) _uniformCache;
 
   std::unique_ptr<ghoul::opengl::Texture> _enviromentTexture;
 };
