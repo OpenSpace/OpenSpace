@@ -22,34 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/neoviz/neovizmodule.h>
+#ifndef __OPENSPACE_MODULE_NEOVIZ___FINDIMPACTSTASK___H__
+#define __OPENSPACE_MODULE_NEOVIZ___FINDIMPACTSTASK___H__
 
-#include <modules/neoviz/tasks/findimpactstask.h>
-#include <modules/neoviz/tasks/impactcorridortask.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/templatefactory.h>
+#include <openspace/util/task.h>
 
-namespace openspace {
+#include <filesystem>
+#include <string>
 
-NEOvizModule::NEOvizModule() : OpenSpaceModule(Name) {}
+namespace openspace::neoviz {
 
-std::vector<documentation::Documentation> NEOvizModule::documentations() const {
-    using namespace neoviz;
+class FindImpactsTask : public Task {
+public:
+    explicit FindImpactsTask(const ghoul::Dictionary& dictionary);
 
-    return {
-        FindImpactsTask::documentation(),
-        ImpactCorridorTask::documentation()
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+
+    static documentation::Documentation documentation();
+
+private:
+    struct ImpactCoordinate {
+        int id = 0;
+        std::string time;
+        double latitude = 0.0;  // Degrees
+        double longitude = 0.0;
     };
-}
 
-void NEOvizModule::internalInitialize(const ghoul::Dictionary&) {
-    using namespace neoviz;
+    /**
+     * Use Spice to find any impacts and their locations on Earth for all variants. Any
+     * impact found is added into the _impactCoordinates list.
+     *
+     * \param progressCallback To comunicate progress amount
+     * \param nVariants The total number of variants to process
+     */
+    void findImpacts(const Task::ProgressCallback& progressCallback, int nVariants);
 
-    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
-    ghoul_assert(fTask, "No task factory existed");
-    fTask->registerClass<FindImpactsTask>("FindImpactsTask");
-    fTask->registerClass<ImpactCorridorTask>("ImpactCorridorTask");
-}
+    /**
+     * Write all impact informaiton that was found into the output file.
+     *
+     * \param progressCallback To comunicate progress amount
+     */
+    void writeImpactCoordinates(const Task::ProgressCallback& progressCallback);
 
-} // namespace openspace
+    std::string _asteroidName;
+    std::filesystem::path _kernelDirectory;
+    std::filesystem::path _outputFilename;
+    std::string _timeIntervalStart;
+    std::string _timeIntervalEnd;
+    int _impactDistance;
+    double _stepSize;
+    std::vector<ImpactCoordinate> _impactCoordinates;
+};
+
+} // namespace openspace::neoviz
+
+#endif // __OPENSPACE_MODULE_NEOVIZ___FINDIMPACTSTASK___H__

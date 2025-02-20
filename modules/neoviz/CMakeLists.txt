@@ -25,11 +25,13 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
+  tasks/findimpactstask.h
   tasks/impactcorridortask.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+  tasks/findimpactstask.cpp
   tasks/impactcorridortask.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

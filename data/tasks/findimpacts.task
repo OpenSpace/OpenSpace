@@ -1,6 +1,5 @@
 
 return {
-  -- 2023 CX1
   --[[{
     Type = "FindImpactsTask",
     AsteroidName = "2023 CX1",
@@ -8,20 +7,8 @@ return {
     OutputFilename = "C:/Users/malej60/Documents/develop/b612-oribt-uncertainty/data/2023 CX1/impacts/2023-CX1-impacts.txt",
     TimeIntervalStart = "2023-02-13T02:39:00.000",
     TimeIntervalEnd = "2023-02-13T03:39:00.000"
-  }]]--
-
+  },]]--
   {
-    Type = "ImpactCorridorTask",
-    AsteroidName = "2023 CX1",
-    ImpactFile = "C:/Users/malej60/Documents/develop/b612-oribt-uncertainty/data/2023 CX1/impacts/2023-CX1-impacts.txt",
-    OutputFilename = "C:/Users/malej60/Documents/develop/b612-oribt-uncertainty/images/new/2023-CX1-test.png",
-    ImageWidth = 5400,
-    ImageHeight = 2700,
-    --ColorMap = "${SYNC}/http/default_colormaps_sequential/1/GnBu.cmap"
-  }
-
-  -- 2004 MN4
-  --[[{
     Type = "FindImpactsTask",
     AsteroidName = "2004 MN4",
     KernelDirectory = "C:/Users/malej60/Documents/develop/b612-oribt-uncertainty/data/2004 MN4/openspace_variants_high_ip/",
@@ -29,11 +16,4 @@ return {
     TimeIntervalStart = "2029-02-01T00:00:00.000",
     TimeIntervalEnd = "2029-08-17T00:00:00.000",
   }
-  {
-    Type = "ImpactCorridorTask",
-    OutputFilename = "C:/Users/malej60/Documents/develop/b612-oribt-uncertainty/images/new/2004-MN4-test.png",
-    ImageWidth = 5400,
-    ImageHeight = 2700,
-    ColorMap = "${SYNC}/http/default_colormaps_sequential/1/GnBu.cmap"
-  }]]--
 }

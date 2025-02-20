@@ -50,13 +50,19 @@ private:
     };
 
     /**
-     * Use Spice to find any impacts and their locations on Earth for all variants. Any
-     * impact found is added into the _impactCoordinates list.
-     *
-     * \param progressCallback To comunicate progress amount
-     * \param nVariants The total number of variants to process
+     * Read the entire impact file and store all impact coordinates in the
+     * _impactCoordinates list. Use the ghouls getline function to handle line endings.
      */
-    void findImpacts(const Task::ProgressCallback& progressCallback, int nVariants);
+    void readImpactFile();
+
+    /**
+     * Read a single line in the impact file and return it. Use the ghouls getline
+     * function to handle line endings.
+     *
+     * \param file The impact file stream to read from
+     * \return The impact coordinate read from the file
+     */
+    ImpactCoordinate readImpactCoordinate(std::ifstream& file);
 
     /**
      * Retrieve the index in the flat data list of pixels that cooresponds to a given
@@ -89,13 +95,10 @@ private:
     std::vector<double> rawImpactData(const Task::ProgressCallback& progressCallback,
         const unsigned int numPixels);
 
-    std::filesystem::path _kernelDirectory;
-    std::filesystem::path _outputFilename;
-    int _impactDistance;
-    double _stepSize;
-    std::string _timeIntervalStart;
-    std::string _timeIntervalEnd;
+    std::string _asteroidName;
+    std::filesystem::path _impactFile;
     std::vector<ImpactCoordinate> _impactCoordinates;
+    std::filesystem::path _outputFilename;
     int _imageWidth;
     int _imageHeight;
     int _brushSize;
