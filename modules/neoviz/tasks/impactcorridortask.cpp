@@ -34,6 +34,7 @@
 #include <filesystem>
 #include <format>
 #include <numbers>
+#include <stb_image.h>
 #include <stb_image_write.h>
 #include "SpiceUsr.h"
 #include "SpiceZpr.h"
@@ -46,7 +47,7 @@ namespace {
     constexpr unsigned int TimeStringLength = 41;
     constexpr double ToDegrees = 180.0 / std::numbers::pi;
     constexpr unsigned int NChannels = 4;
-    constexpr double DefaultBrushRadius = 15;
+    constexpr double DefaultBrushSize = 15;
     constexpr double DefaultBrushSaturation = 100;
     constexpr double DefaultFilterStrength = 1;
 
@@ -93,7 +94,7 @@ namespace {
     struct [[codegen::Dictionary(ImpactCorridorTask)]] Parameters {
         // Path to directory with kernels for the variants of the asteroid to test. The
         // directory can only contain valid kernel files, they will all be loaded.
-        std::filesystem::path kernelDirectory [[codegen::directory()]];
+        std::string kernelDirectory;
 
         // Path to the output impact corridor map image file. Need to include the
         // .png extension.
@@ -120,8 +121,8 @@ namespace {
         std::optional<double> stepSize;
 
         // The size of the brush used to plot impacts to the image. This is also used as
-        // the kernel size for the gaussian filter. If not given, then a default value of
-        // 15 is used.
+        // the kernel size for the gaussian filter, which means that this value needs to
+        // be odd. If not given, then a default value of 15 is used.
         std::optional<int> brushSize;
 
         // The saturation of paint on the brush used to plot impacts to the image. If not
@@ -132,6 +133,8 @@ namespace {
         // given, then a default value of 1.0 is used.
         std::optional<double> filterStrength;
 
+        // Path to the a colormap to use for coloring the impact corridor map.
+        std::optional<std::string> colorMap;
     };
 #include "impactcorridortask_codegen.cpp"
 } // namespace
@@ -153,11 +156,17 @@ ImpactCorridorTask::ImpactCorridorTask(const ghoul::Dictionary& dictionary) {
     _imageHeight = p.imageHeight;
     _impactDistance = p.impactDistance.value_or(MaxEarthRadius);
     _stepSize = p.stepSize.value_or(spd_c());
-    _brushSize = p.brushSize.value_or(DefaultBrushRadius);
+    _brushSize = p.brushSize.value_or(DefaultBrushSize);
     _brushSaturation = p.brushSaturation.value_or(DefaultBrushSaturation);
     _filterStrength = p.filterStrength.value_or(DefaultFilterStrength);
 
-    ghoul_assert(_brushRadius % 2 == 1, "Brush radius must be an odd number");
+    if (p.colorMap.has_value()) {
+        _hasColorMapFile = true;
+        _colorMap = absPath(*p.colorMap);
+        ghoul_assert(std::filesystem::exists(_colorMap), "Cannot find color map file");
+    }
+
+    ghoul_assert(_brushSize % 2 == 1, "Brush size must be an odd number");
 }
 
 std::string ImpactCorridorTask::description() {
@@ -165,51 +174,72 @@ std::string ImpactCorridorTask::description() {
 }
 
 void ImpactCorridorTask::perform(const Task::ProgressCallback& progressCallback) {
+    // Count the number of variants to process in the kernel folder
     int nVariants = static_cast<int>(std::distance(
         std::filesystem::directory_iterator(_kernelDirectory),
         std::filesystem::directory_iterator()
     ));
+    ghoul_assert(nVariants > 0, "No variants found in kernel directory");
     LINFO(std::format("Number of variants: {}", nVariants));
-    LINFO("Finding impacts...");
 
     // Load the general kernels for the major bodies in the solar system
     SpiceManager::ref().loadKernel(absPath("${SYNC}/http/general_spk/2/de430.bsp"));
     SpiceManager::ref().loadKernel(absPath("${SYNC}/http/general_pck/1/pck00011.tpc"));
 
     // Find the impacts if there are any
+    LINFO("Finding impacts...");
     findImpacts(progressCallback, nVariants);
+    progressCallback(0.0);
+
+    // Settings for the images
+    const unsigned int NumPixels = _imageWidth * _imageHeight;
+    const unsigned int Size = NumPixels * NChannels;
 
     // Create a raw impact image that only have information about impact saturation
-    progressCallback(0.0);
     LINFO("Creating raw image...");
-    std::vector<double> rawImage = rawImpactImage(progressCallback);
+    std::vector<double> rawData = rawImpactData(progressCallback, NumPixels);
+    auto it = std::max_element(rawData.begin(), rawData.end());
+    if (it == rawData.end()) {
+        LDEBUG("Could not find max element in raw image");
+    }
+    double maxRawSaturation = *it;
+    progressCallback(0.0);
 
-    // @TODO: Apply a transfer function to bring color to the image
+    // Apply a transfer function to bring color to the image
+    if (_hasColorMapFile) {
+        LINFO("Processing image...");
+        int colorMapWidth = 0;
+        int colorMapHeight = 0;
+        int colorMapChannels = 0;
+        unsigned char* colorMapData = stbi_load(
+            _colorMap.string().c_str(),
+            &colorMapWidth,
+            &colorMapHeight,
+            &colorMapChannels,
+            0
+        );
+        ghoul_assert(colorMapHeight != 1, "Color map needs to be 1D");
+
+        progressCallback(0.0);
+    }
 
     // @TODO: Use the night layer image to estimate impact risk due to population density
 
     // Convert the raw image to a normalized image that can be written to file
-    progressCallback(0.0);
-    LINFO("Processing image...");
-    const unsigned int NumPixels = _imageWidth * _imageHeight;
-    const unsigned int Size = NumPixels * NChannels;
+    LINFO("Finalizing image...");
     std::vector<GLubyte> image = std::vector<GLubyte>(Size, 0);
-
-    // Nromalize the total image to the range [0, 255]
-    auto it = std::max_element(rawImage.begin(), rawImage.end());
-    if (it == rawImage.end()) {
-        LDEBUG("Could not find max element in raw image");
-    }
-    double maxSaturation = *it;
-    for (unsigned int i = 0; i < Size; ++i) {
-        // Note that this assumes the colors have the same values in each channel
-        double saturation = rawImage[i] / maxSaturation;
+    for (unsigned int i, p = 0; p < NumPixels && i < Size; ++p, i += NChannels) {
+        // Note that this normalizes all channels equally
+        double saturation = rawData[p] / maxRawSaturation;
 
         // Watch out for overflow
         double clampedSaturation = std::min(std::round(saturation * 255.0), 255.0);
 
-        image[i] = static_cast<GLubyte>(clampedSaturation);
-        progressCallback(i / static_cast<float>(Size));
+        // Save the normalized saturation to all color channels
+        for (int c = 0; c < NChannels; ++c) {
+            image[i + c] = static_cast<GLubyte>(clampedSaturation);
+        }
+        progressCallback(p / static_cast<float>(NumPixels));
     }
 
     // Create and save the resulting impact map image
@@ -377,7 +407,7 @@ void ImpactCorridorTask::findImpacts(const Task::ProgressCallback& progressCallb
     }
 }
 
-int ImpactCorridorTask::pixelIndex(int pixelW, int pixelH, int imageWidth,
+int ImpactCorridorTask::pixelIndex(int pixelW, int pixelH, int numChannels, int imageWidth,
                                    int imageHeight)
 {
     if (pixelH < 0) {
@@ -407,29 +437,28 @@ int ImpactCorridorTask::pixelIndex(int pixelW, int pixelH, int imageWidth,
         pixelW = pixelW - imageWidth;
     }
 
-    int pixelIndex = NChannels * pixelW + NChannels * imageWidth * pixelH;
-    if (pixelIndex < 0 || pixelIndex >= (imageWidth * imageHeight * NChannels)) {
+    int pixelIndex = numChannels * pixelW + numChannels * imageWidth * pixelH;
+    if (pixelIndex < 0 || pixelIndex >= (imageWidth * imageHeight * numChannels)) {
         throw ghoul::RuntimeError("Pixel index out of bounds");
     }
     return pixelIndex;
 }
 
-std::vector<double> ImpactCorridorTask::rawImpactImage(
-                                           const Task::ProgressCallback& progressCallback)
+std::vector<double> ImpactCorridorTask::rawImpactData(
+                                           const Task::ProgressCallback& progressCallback,
+                                                             const unsigned int numPixels)
 {
-    // Create a transparent image to then plot the impact coordinates on
-    const unsigned int NumPixels = _imageWidth * _imageHeight;
-    const unsigned int Size = NumPixels * NChannels;
-    std::vector<double> rawImage = std::vector<double>(Size, 0.0);
+    // Create a pixel list to then plot the impact coordinates on
+    std::vector<double> rawData = std::vector<double>(numPixels, 0.0);
 
-    // Tools to plot the impact coordinates on the image
+    // Tools to plot the impact coordinates on the pixel list
     const int brushRadius = _brushSize / 2; // Intentionally rounded down
 
     // Use a gaussian kernel to create a smooth circle around the impact location
     const std::vector<std::vector<double>> filter =
         gaussianFilter(_brushSize, _filterStrength);
 
-    // Plot all impact coordinates on the image
+    // Plot all impact coordinates on the pixel list
     int impactCounter = 0;
     for (const ImpactCoordinate& impact : _impactCoordinates) {
         // Find the pixel in the texture data list for the impact
@@ -444,6 +473,7 @@ std::vector<double> ImpactCorridorTask::rawImpactImage(
                 int index = pixelIndex(
                     pixelW + w,
                     pixelH + h,
+                    1,
                     _imageWidth,
                     _imageHeight
                 );
@@ -458,10 +488,8 @@ std::vector<double> ImpactCorridorTask::rawImpactImage(
                 double saturation =
                     _brushSaturation * filter[w + brushRadius][h + brushRadius];
 
-                for (int c = 0; c < NChannels; ++c) {
-                    // Add the saturation to the pixel
-                    rawImage[index + c] += saturation;
-                }
+                // Add the saturation to the pixel data
+                rawData[index] += saturation;
             }
         }
 
@@ -469,7 +497,7 @@ std::vector<double> ImpactCorridorTask::rawImpactImage(
         progressCallback(impactCounter / static_cast<float>(_impactCoordinates.size()));
     }
 
-    return rawImage;
+    return rawData;
 }
 
 } // namespace openspace::neoviz

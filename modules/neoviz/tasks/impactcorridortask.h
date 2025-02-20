@@ -27,7 +27,6 @@
 
 #include <openspace/util/task.h>
 
-#include <openspace/rendering/colormappingcomponent.h>
 #include <filesystem>
 #include <string>
 
@@ -69,23 +68,26 @@ private:
      *
      * \param pixelW The horizontal coordinate for the pixel in the image
      * \param pixelH The vertical coordinate for the pixel in the image
+     * \param numChannels The number of color channels in the image
      * \param imageWidth The total width of the image in pixels
      * \param imageHeight The total height of the image in pixels
      * \return The index of the first channel of the given pixel in the flat data list
      */
-    int pixelIndex(int pixelW, int pixelH, int imageWidth, int imageHeight);
+    int pixelIndex(int pixelW, int pixelH, int numChannels, int imageWidth,
+        int imageHeight);
 
     /**
      * Create a raw impact map image data list that only have information with impact
      * probability. Each impact is painted onto the image with a guasian blob, and
-     * overlapping blobs are added together.
+     * overlapping blobs are added together. This list only contain one channel per pixel
+     * which is the impact probability. Color channels are added in a later step.
      *
      * \param progressCallback To comunicate progress amount
-     * \param Size The vertical coordinate for the pixel in the image
-     * \return The raw impact map with impact probability as a flat data list
+     * \param numPixels The total number of pixels in the image
+     * \return The raw pixel list with impact probability as a flat data list
      */
-    std::vector<double> rawImpactImage(const Task::ProgressCallback& progressCallback,
-        const unsigned int Size);
+    std::vector<double> rawImpactData(const Task::ProgressCallback& progressCallback,
+        const unsigned int numPixels);
 
     std::filesystem::path _kernelDirectory;
     std::filesystem::path _outputFilename;
@@ -99,7 +101,8 @@ private:
     int _brushSize;
     int _brushSaturation;
     double _filterStrength;
-    std::unique_ptr<ColorMappingComponent> colorMapping;
+    std::filesystem::path _colorMap;
+    bool _hasColorMapFile = false;
 };
 
 } // namespace openspace::neoviz
