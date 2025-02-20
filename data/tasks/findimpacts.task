@@ -1,13 +1,13 @@
 
 return {
-  --[[{
+  {
     Type = "FindImpactsTask",
     AsteroidName = "2023 CX1",
     KernelDirectory = "C:/Users/malej60/Documents/develop/b612-oribt-uncertainty/data/2023 CX1/openspace_variants/",
     OutputFilename = "C:/Users/malej60/Documents/develop/b612-oribt-uncertainty/data/2023 CX1/impacts/2023-CX1-impacts.txt",
     TimeIntervalStart = "2023-02-13T02:39:00.000",
     TimeIntervalEnd = "2023-02-13T03:39:00.000"
-  },]]--
+  },
   {
     Type = "FindImpactsTask",
     AsteroidName = "2004 MN4",

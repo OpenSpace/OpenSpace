@@ -24,6 +24,7 @@
 
 #include <modules/neoviz/tasks/impactcorridortask.h>
 
+#include <openspace/data/dataloader.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -62,14 +63,22 @@ namespace {
         for (int x = -halfSize; x <= halfSize; x++) {
             for (int y = -halfSize; y <= halfSize; y++) {
                 distanceSqared = x * x + y * y;
-                kernel[x + halfSize][y + halfSize] =
-                    (exp(-(distanceSqared) / sig)) / (std::numbers::pi * sig);
-                sum += kernel[x + halfSize][y + halfSize];
+                double value = (exp(-(distanceSqared) / sig)) / (std::numbers::pi * sig);
+                kernel[x + halfSize][y + halfSize] = value;
+
+                if (x == 0 && y == 0) {
+                    sum = value;
+                }
+                //sum += kernel[x + halfSize][y + halfSize];
             }
         }
 
-        // No need to normalize the kernel, as that will be done before the image is
-        // saved to file anyway
+        // Normalize so the middle of the kernel is 1
+        for (int i = 0; i < kernelSize; ++i) {
+            for (int j = 0; j < kernelSize; ++j) {
+                kernel[i][j] /= sum;
+            }
+        }
 
         return kernel;
     }
@@ -161,41 +170,65 @@ void ImpactCorridorTask::perform(const Task::ProgressCallback& progressCallback)
     progressCallback(0.0);
 
     // Apply a transfer function to bring color to the image
+    std::vector<GLubyte> image = std::vector<GLubyte>(Size, 0);
     if (_hasColorMapFile) {
         LINFO("Processing image...");
-        int colorMapWidth = 0;
-        int colorMapHeight = 0;
-        int colorMapChannels = 0;
-        unsigned char* colorMapData = stbi_load(
-            _colorMap.string().c_str(),
-            &colorMapWidth,
-            &colorMapHeight,
-            &colorMapChannels,
-            0
-        );
-        ghoul_assert(colorMapHeight != 1, "Color map needs to be 1D");
 
-        progressCallback(0.0);
+        // Read the color map image
+        openspace::dataloader::ColorMap colorMap = dataloader::color::loadFile(_colorMap);
+
+        // Apply the transfer function for each pixel and store the resulting color in
+        // the image
+        for (int p = 0, i = 0; p < NumPixels && i < Size; ++p, i += NChannels) {
+            glm::vec4 color = glm::ivec4(0);
+            double normalizedValue = rawData[p] / maxRawSaturation;
+
+            if (std::abs(normalizedValue) < std::numeric_limits<double>::epsilon()) {
+                progressCallback((p + 1) / static_cast<float>(NumPixels));
+                continue;
+            }
+
+            // Find the color in the color map that cooresponds to the value
+            int colorMapIndex = static_cast<int>(std::round(
+                normalizedValue * (colorMap.entries.size() - 1)
+            ));
+            color = colorMap.entries[colorMapIndex];
+            color.a = normalizedValue;
+
+            // Save the color after the transferfunction to the image
+            for (int c = 0; c < NChannels; ++c) {
+                // Watch out for overflow
+                double clampedSaturation = std::min(std::round(color[c] * 255.0), 255.0);
+
+                image[i + c] = static_cast<GLubyte>(clampedSaturation);
+            }
+            progressCallback((p + 1)/ static_cast<float>(NumPixels));
+        }
+    }
+    else {
+        // Convert the raw image to a normalized image that can be written to file
+        LINFO("Finalizing image...");
+        for (int p = 0, i = 0; p < NumPixels && i < Size; ++p, i += NChannels) {
+            // Note that this normalizes all channels equally
+            double saturation = rawData[p] / maxRawSaturation;
+
+            if (std::abs(saturation) < std::numeric_limits<double>::epsilon()) {
+                progressCallback((p + 1) / static_cast<float>(NumPixels));
+                continue;
+            }
+
+            // Watch out for overflow
+            double clampedSaturation = std::min(std::round(saturation * 255.0), 255.0);
+
+            // Save the normalized saturation to all color channels
+            for (int c = 0; c < NChannels; ++c) {
+                image[i + c] = static_cast<GLubyte>(clampedSaturation);
+            }
+            progressCallback((p + 1) / static_cast<float>(NumPixels));
+        }
     }
 
     // @TODO: Use the night layer image to estimate impact risk due to population density
-
-    // Convert the raw image to a normalized image that can be written to file
-    LINFO("Finalizing image...");
-    std::vector<GLubyte> image = std::vector<GLubyte>(Size, 0);
-    for (unsigned int i = 0, p = 0; p < NumPixels && i < Size; ++p, i += NChannels) {
-        // Note that this normalizes all channels equally
-        double saturation = rawData[p] / maxRawSaturation;
-
-        // Watch out for overflow
-        double clampedSaturation = std::min(std::round(saturation * 255.0), 255.0);
-
-        // Save the normalized saturation to all color channels
-        for (int c = 0; c < NChannels; ++c) {
-            image[i + c] = static_cast<GLubyte>(clampedSaturation);
-        }
-        progressCallback(p / static_cast<float>(NumPixels));
-    }
 
     // Create and save the resulting impact map image
     stbi_write_png(
@@ -258,33 +291,35 @@ ImpactCorridorTask::ImpactCoordinate ImpactCorridorTask::readImpactCoordinate(
 }
 
 int ImpactCorridorTask::pixelIndex(int pixelW, int pixelH, int numChannels, int imageWidth,
-                                   int imageHeight)
+                                   int imageHeight, bool allowWrap)
 {
-    if (pixelH < 0) {
-        // Mirror in the noth pole line
-        pixelH = std::abs(pixelH);
+    if (allowWrap) {
+        if (pixelH < 0) {
+            // Mirror in the noth pole line
+            pixelH = std::abs(pixelH);
 
-        // Mirror in the 0 longitude line (Greenwich)
-        int greenwich = static_cast<int>(std::round(imageWidth / 2.0));
-        pixelW = greenwich + (greenwich - pixelW);
+            // Mirror in the 0 longitude line (Greenwich)
+            int greenwich = static_cast<int>(std::round(imageWidth / 2.0));
+            pixelW = greenwich + (greenwich - pixelW);
 
-    }
-    else if (pixelH >= imageHeight) {
-        // Mirror in the south pole line
-        pixelH = imageHeight - (pixelH - imageHeight);
+        }
+        else if (pixelH >= imageHeight) {
+            // Mirror in the south pole line
+            pixelH = imageHeight - (pixelH - imageHeight);
 
-        // Mirror in the 0 longitude line (Greenwich)
-        int greenwich = static_cast<int>(std::round(imageWidth / 2.0));
-        pixelW = greenwich + (greenwich - pixelW);
-    }
+            // Mirror in the 0 longitude line (Greenwich)
+            int greenwich = static_cast<int>(std::round(imageWidth / 2.0));
+            pixelW = greenwich + (greenwich - pixelW);
+        }
 
-    if (pixelW < 0) {
-        // Go over to the left side of the international daytime line
-        pixelW = imageWidth - std::abs(pixelW);
-    }
-    else if (pixelW >= imageWidth) {
-        // Go over to the right side of the international daytime line
-        pixelW = pixelW - imageWidth;
+        if (pixelW < 0) {
+            // Go over to the left side of the international daytime line
+            pixelW = imageWidth - std::abs(pixelW);
+        }
+        else if (pixelW >= imageWidth) {
+            // Go over to the right side of the international daytime line
+            pixelW = pixelW - imageWidth;
+        }
     }
 
     int pixelIndex = numChannels * pixelW + numChannels * imageWidth * pixelH;
@@ -325,7 +360,8 @@ std::vector<double> ImpactCorridorTask::rawImpactData(
                     pixelH + h,
                     1,
                     _imageWidth,
-                    _imageHeight
+                    _imageHeight,
+                    true
                 );
 
                 // Get the eucledian distance from the center of the brush and calculate

@@ -77,10 +77,12 @@ private:
      * \param numChannels The number of color channels in the image
      * \param imageWidth The total width of the image in pixels
      * \param imageHeight The total height of the image in pixels
+     * \param allowWrap Whether to allow the pixel to wrap around the image if it is
+     *        located outside
      * \return The index of the first channel of the given pixel in the flat data list
      */
     int pixelIndex(int pixelW, int pixelH, int numChannels, int imageWidth,
-        int imageHeight);
+        int imageHeight, bool allowWrap);
 
     /**
      * Create a raw impact map image data list that only have information with impact
