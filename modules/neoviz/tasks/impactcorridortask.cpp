@@ -28,7 +28,6 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/stringhelper.h>
 #include <algorithm>
@@ -90,8 +89,8 @@ namespace {
         // Path to the file that stores the impact coordinates to plot on the map image.
         std::string impactFile;
 
-        // Path to the output impact corridor map image file. Need to include the
-        // .png extension.
+        // Path to the output impact corridor map image file. Cannot include the .png
+        // extension.
         std::string outputFilename;
 
         // The width in pixels of the resulting impact corridor map image
@@ -99,6 +98,9 @@ namespace {
 
         // The height in pixels of the resulting impact corridor map image
         int imageHeight [[codegen::greater(0)]];
+
+        // Path to the a colormap to use for coloring the impact corridor map.
+        std::string colorMap;
 
         // The size of the brush used to plot impacts to the image. This is also used as
         // the kernel size for the gaussian filter, which means that this value needs to
@@ -113,8 +115,9 @@ namespace {
         // given, then a default value of 1.0 is used.
         std::optional<double> filterStrength;
 
-        // Path to the a colormap to use for coloring the impact corridor map.
-        std::optional<std::string> colorMap;
+        // Whether or not to invert the color map. If not given, then the color map is not
+        // inverted.
+        std::optional<bool> invertColorMap;
     };
 #include "impactcorridortask_codegen.cpp"
 } // namespace
@@ -133,14 +136,16 @@ ImpactCorridorTask::ImpactCorridorTask(const ghoul::Dictionary& dictionary) {
     _outputFilename = absPath(p.outputFilename);
     _imageWidth = p.imageWidth;
     _imageHeight = p.imageHeight;
+    _colorMap = absPath(p.colorMap);
     _brushSize = p.brushSize.value_or(DefaultBrushSize);
     _brushSaturation = p.brushSaturation.value_or(DefaultBrushSaturation);
     _filterStrength = p.filterStrength.value_or(DefaultFilterStrength);
+    _invertColorMap = p.invertColorMap.value_or(false);
 
-    if (p.colorMap.has_value()) {
-        _hasColorMapFile = true;
-        _colorMap = absPath(*p.colorMap);
-        ghoul_assert(std::filesystem::exists(_colorMap), "Cannot find color map file");
+    if (!std::filesystem::exists(_colorMap)) {
+        throw ghoul::RuntimeError(
+            std::format("Cannot find color map file {}", _colorMap)
+        );
     }
 
     ghoul_assert(_brushSize % 2 == 1, "Brush size must be an odd number");
@@ -158,87 +163,65 @@ void ImpactCorridorTask::perform(const Task::ProgressCallback& progressCallback)
     // Settings for the images
     const unsigned int NumPixels = _imageWidth * _imageHeight;
     const unsigned int Size = NumPixels * NChannels;
+    std::vector<glm::vec4> pixels = std::vector<glm::vec4>(NumPixels, glm::vec4(0.0));
 
-    // Create a raw impact image that only have information about impact saturation
-    LINFO("Creating raw image...");
+    // Read the color map
+    openspace::dataloader::ColorMap colorMap = dataloader::color::loadFile(_colorMap);
+
+    // Create a raw impact data list that only have information about impact probability
+    LINFO("Creating raw pixel data...");
+    progressCallback(0.0);
     std::vector<double> rawData = rawImpactData(progressCallback, NumPixels);
     auto it = std::max_element(rawData.begin(), rawData.end());
-    if (it == rawData.end()) {
-        LDEBUG("Could not find max element in raw image");
+    if (it == rawData.end() || std::abs(*it) < std::numeric_limits<double>::epsilon()) {
+        LDEBUG("Could not find max element in raw data");
     }
     double maxRawSaturation = *it;
+
+    // Create an impact corridor image with impact probability as the data
+    LINFO("Processing impact probability image...");
     progressCallback(0.0);
 
-    // Apply a transfer function to bring color to the image
-    std::vector<GLubyte> image = std::vector<GLubyte>(Size, 0);
-    if (_hasColorMapFile) {
-        LINFO("Processing image...");
-
-        // Read the color map image
-        openspace::dataloader::ColorMap colorMap = dataloader::color::loadFile(_colorMap);
-
-        // Apply the transfer function for each pixel and store the resulting color in
-        // the image
-        for (int p = 0, i = 0; p < NumPixels && i < Size; ++p, i += NChannels) {
-            glm::vec4 color = glm::ivec4(0);
-            double normalizedValue = rawData[p] / maxRawSaturation;
-
-            if (std::abs(normalizedValue) < std::numeric_limits<double>::epsilon()) {
-                progressCallback((p + 1) / static_cast<float>(NumPixels));
-                continue;
-            }
-
-            // Find the color in the color map that cooresponds to the value
-            int colorMapIndex = static_cast<int>(std::round(
-                normalizedValue * (colorMap.entries.size() - 1)
-            ));
-            color = colorMap.entries[colorMapIndex];
-            color.a = normalizedValue;
-
-            // Save the color after the transferfunction to the image
-            for (int c = 0; c < NChannels; ++c) {
-                // Watch out for overflow
-                double clampedSaturation = std::min(std::round(color[c] * 255.0), 255.0);
-
-                image[i + c] = static_cast<GLubyte>(clampedSaturation);
-            }
-            progressCallback((p + 1)/ static_cast<float>(NumPixels));
-        }
-    }
-    else {
-        // Convert the raw image to a normalized image that can be written to file
-        LINFO("Finalizing image...");
-        for (int p = 0, i = 0; p < NumPixels && i < Size; ++p, i += NChannels) {
-            // Note that this normalizes all channels equally
-            double saturation = rawData[p] / maxRawSaturation;
-
-            if (std::abs(saturation) < std::numeric_limits<double>::epsilon()) {
-                progressCallback((p + 1) / static_cast<float>(NumPixels));
-                continue;
-            }
-
-            // Watch out for overflow
-            double clampedSaturation = std::min(std::round(saturation * 255.0), 255.0);
-
-            // Save the normalized saturation to all color channels
-            for (int c = 0; c < NChannels; ++c) {
-                image[i + c] = static_cast<GLubyte>(clampedSaturation);
-            }
+    // Apply the transfer function for each pixel and store the resulting color
+    for (int p = 0; p < NumPixels; ++p) {
+        double normalizedValue = rawData[p] / maxRawSaturation;
+        if (std::abs(normalizedValue) < std::numeric_limits<double>::epsilon()) {
             progressCallback((p + 1) / static_cast<float>(NumPixels));
+            continue;
         }
+
+        // Find the index in the color map that cooresponds to the value
+        int colorMapIndex = static_cast<int>(std::round(
+            normalizedValue * (colorMap.entries.size() - 1)
+        ));
+
+        // Invert the color map if needed
+        if (_invertColorMap) {
+            colorMapIndex = (colorMap.entries.size() - 1) - colorMapIndex;
+        }
+
+        // Get and save the color that this value cooresponds to in the color map
+        glm::vec4 color = colorMap.entries[colorMapIndex];
+        color.a = static_cast<float>(normalizedValue);
+        pixels[p] = color;
+
+        progressCallback((p + 1)/ static_cast<float>(NumPixels));
     }
+
+    // Write the impact image to file
+    writeFinalImage(
+        progressCallback,
+        _outputFilename.string() + "-probability.png",
+        NumPixels,
+        Size,
+        pixels
+    );
 
     // @TODO: Use the night layer image to estimate impact risk due to population density
+    // and color the image based on that instead of impact proability
 
-    // Create and save the resulting impact map image
-    stbi_write_png(
-        _outputFilename.string().c_str(),
-        _imageWidth,
-        _imageHeight,
-        NChannels,
-        reinterpret_cast<void*>(image.data()),
-        0
-    );
+    // @TODO: Use the color map to color the time of impact difference instead of impact
+    // probability
 }
 
 void ImpactCorridorTask::readImpactFile() {
@@ -384,6 +367,41 @@ std::vector<double> ImpactCorridorTask::rawImpactData(
     }
 
     return rawData;
+}
+
+void ImpactCorridorTask::writeFinalImage(const Task::ProgressCallback& progressCallback,
+                                         const std::string& filename,
+                                         unsigned int numPixels, unsigned int size,
+                                         const std::vector<glm::vec4>& pixels)
+{
+    LINFO("Finalizing image...");
+    progressCallback(0.0);
+    std::vector<GLubyte> image = std::vector<GLubyte>(size, 0);
+
+    for (int p = 0, i = 0; p < numPixels && i < size; ++p, i += NChannels) {
+        glm::vec4 color = pixels[p];
+
+        for (int c = 0; c < NChannels; ++c) {
+            // Watch out for overflow
+            double clampedSaturation = std::min(std::round(color[c] * 255.0), 255.0);
+            image[i + c] = static_cast<GLubyte>(clampedSaturation);
+        }
+        progressCallback((p + 1) / static_cast<float>(numPixels));
+    }
+
+    LINFO("Saving image to file...");
+    int res = stbi_write_png(
+        filename.c_str(),
+        _imageWidth,
+        _imageHeight,
+        NChannels,
+        reinterpret_cast<void*>(image.data()),
+        0
+    );
+
+    if (!res) {
+        LERROR(std::format("Could not save image {}", filename));
+    }
 }
 
 } // namespace openspace::neoviz

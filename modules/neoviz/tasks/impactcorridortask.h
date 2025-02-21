@@ -27,6 +27,7 @@
 
 #include <openspace/util/task.h>
 
+#include <ghoul/glm.h>
 #include <filesystem>
 #include <string>
 
@@ -97,6 +98,10 @@ private:
     std::vector<double> rawImpactData(const Task::ProgressCallback& progressCallback,
         const unsigned int numPixels);
 
+    void writeFinalImage(const Task::ProgressCallback& progressCallback,
+        const std::string& filename, unsigned int numPixels, unsigned int size,
+        const std::vector<glm::vec4>& pixels);
+
     std::string _asteroidName;
     std::filesystem::path _impactFile;
     std::vector<ImpactCoordinate> _impactCoordinates;
@@ -107,7 +112,7 @@ private:
     int _brushSaturation;
     double _filterStrength;
     std::filesystem::path _colorMap;
-    bool _hasColorMapFile = false;
+    bool _invertColorMap = false;
 };
 
 } // namespace openspace::neoviz

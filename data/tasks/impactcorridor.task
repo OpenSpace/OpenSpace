@@ -4,20 +4,22 @@ return {
     Type = "ImpactCorridorTask",
     AsteroidName = "2023 CX1",
     ImpactFile = "C:/Users/malej60/Documents/develop/b612-oribt-uncertainty/data/2023 CX1/impacts/2023-CX1-impacts.txt",
-    OutputFilename = "C:/Users/malej60/Documents/develop/b612-oribt-uncertainty/images/new/2023-CX1-test.png",
+    OutputFilename = "C:/Users/malej60/Documents/develop/b612-oribt-uncertainty/images/new/2023-CX1-test",
     ImageWidth = 5400,
     ImageHeight = 2700,
     FilterStrength = 2.5,
-    ColorMap = "${SYNC}/http/default_colormaps_sequential/1/GnBu.cmap"
+    ColorMap = "${SYNC}/http/default_colormaps_sequential/1/GnBu.cmap",
+    InvertColorMap = true
   },
   {
     Type = "ImpactCorridorTask",
     AsteroidName = "2004 MN4",
     ImpactFile = "C:/Users/malej60/Documents/develop/b612-oribt-uncertainty/data/2004 MN4/impacts/2004-MN4-impacts.txt",
-    OutputFilename = "C:/Users/malej60/Documents/develop/b612-oribt-uncertainty/images/new/2004-MN4-test.png",
+    OutputFilename = "C:/Users/malej60/Documents/develop/b612-oribt-uncertainty/images/new/2004-MN4-test",
     ImageWidth = 5400,
     ImageHeight = 2700,
     FilterStrength = 2.5,
-    ColorMap = "${SYNC}/http/default_colormaps_sequential/1/GnBu.cmap"
+    ColorMap = "${SYNC}/http/default_colormaps_sequential/1/GnBu.cmap",
+    InvertColorMap = true
   }
 }

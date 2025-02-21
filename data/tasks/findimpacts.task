@@ -14,6 +14,6 @@ return {
     KernelDirectory = "C:/Users/malej60/Documents/develop/b612-oribt-uncertainty/data/2004 MN4/openspace_variants_high_ip/",
     OutputFilename = "C:/Users/malej60/Documents/develop/b612-oribt-uncertainty/data/2004 MN4/impacts/2004-MN4-impacts.txt",
     TimeIntervalStart = "2029-02-01T00:00:00.000",
-    TimeIntervalEnd = "2029-08-17T00:00:00.000",
+    TimeIntervalEnd = "2029-08-17T00:00:00.000"
   }
 }
