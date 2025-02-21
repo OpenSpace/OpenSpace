@@ -530,7 +530,7 @@ OrbitalNavigator::OrbitalNavigator()
         SceneGraphNode* node = sceneGraphNode(_anchor.value());
         if (node) {
             const SceneGraphNode* previousAnchor = _anchorNode;
-            setAnchorNode(node);
+            updateAnchorNode(node);
             global::eventEngine->publishEvent<events::EventFocusNodeChanged>(
                 previousAnchor,
                 node
@@ -545,12 +545,12 @@ OrbitalNavigator::OrbitalNavigator()
 
     _aim.onChange([this]() {
         if (_aim.value().empty()) {
-            setAimNode(nullptr);
+            updateAimNode(nullptr);
             return;
         }
         SceneGraphNode* node = sceneGraphNode(_aim.value());
         if (node) {
-            setAimNode(node);
+            updateAimNode(node);
         }
         else {
             LERROR(std::format(
@@ -1093,7 +1093,7 @@ void OrbitalNavigator::setFocusNode(const std::string& identifier, bool resetVel
     _aim = std::string("");
 }
 
-void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode)
+void OrbitalNavigator::updateAnchorNode(const SceneGraphNode* anchorNode)
 {
     if (!_anchorNode) {
         _directlySetStereoDistance = true;
@@ -1124,7 +1124,7 @@ void OrbitalNavigator::clearPreviousState() {
     _previousAimNodePosition = std::nullopt;
 }
 
-void OrbitalNavigator::setAimNode(const SceneGraphNode* aimNode) {
+void OrbitalNavigator::updateAimNode(const SceneGraphNode* aimNode) {
     _retargetAimInterpolator.end();
     _aimNode = aimNode;
     updatePreviousAimState();

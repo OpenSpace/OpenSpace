@@ -105,7 +105,7 @@ public:
     void clearPreviousState();
 
     void setFocusNode(const SceneGraphNode* node, bool resetVelocities = true);
-    void setFocusNode(const std::string& identifier, bool resetVelocities= true);
+    void setFocusNode(const std::string& identifier, bool resetVelocities = true);
     void setAnchorNode(const std::string& identifier);
     void setAimNode(const std::string& identifier);
 
@@ -175,8 +175,8 @@ private:
         properties::FloatProperty friction;
     };
 
-    void setAnchorNode(const SceneGraphNode* anchorNode);
-    void setAimNode(const SceneGraphNode* aimNode);
+    void updateAnchorNode(const SceneGraphNode* anchorNode);
+    void updateAimNode(const SceneGraphNode* aimNode);
 
     void updatePreviousAnchorState();
     void updatePreviousAimState();
