@@ -205,10 +205,22 @@ namespace {
 }
 
 /**
- * TODO
+ * Set the current focus node for the navigation, or re-focus on it if it was already the
+ * focus node.
+ *
+ * Per default, the camera will retarget to center the focus node in the view. The
+ * velocities will also be reset so that the camera stops moving after any retargetting
+ * is done. However, both of these behaviors may be skipped using the optional arguments.
+ *
+ * \param identifier The identifier of the scene graph node to focus
+ * \param shouldRetarget If true, retarget the camera to look at the focus node
+ * \param shouldResetVelocities If true, reset the camera velocities so that the camera
+ *                              stops after its done retagetting (or immediately if
+ *                              retargetting is not done)
+ *
  */
-[[codegen::luawrap]] void setFocusNode(std::string identifier, bool shouldRetarget = true,
-                                       bool shouldResetVelocities = true)
+[[codegen::luawrap]] void setFocus(std::string identifier, bool shouldRetarget = true,
+                                   bool shouldResetVelocities = true)
 {
     using namespace openspace;
     SceneGraphNode* node = sceneGraphNode(identifier);
