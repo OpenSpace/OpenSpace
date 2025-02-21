@@ -807,6 +807,7 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             codegen::lua::ListAllJoysticks,
             codegen::lua::TargetNextInterestingAnchor,
             codegen::lua::TargetPreviousInterestingAnchor,
+            codegen::lua::SetFocusNode,
             codegen::lua::DistanceToFocus,
             codegen::lua::DistanceToFocusBoundingSphere,
             codegen::lua::DistanceToFocusInteractionSphere

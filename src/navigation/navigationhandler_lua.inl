@@ -205,6 +205,28 @@ namespace {
 }
 
 /**
+ * TODO
+ */
+[[codegen::luawrap]] void setFocusNode(std::string identifier, bool shouldRetarget = true,
+                                       bool shouldResetVelocities = true)
+{
+    using namespace openspace;
+    SceneGraphNode* node = sceneGraphNode(identifier);
+    if (!node) {
+        throw ghoul::lua::LuaError("Unknown node: " + identifier);
+    }
+
+    global::navigationHandler->orbitalNavigator().setFocusNode(
+        node,
+        shouldResetVelocities
+    );
+
+    if (shouldRetarget) {
+        global::navigationHandler->orbitalNavigator().startRetargetAnchor();
+    }
+}
+
+/**
  * Bind an axis of a joystick to be used as a certain type, and optionally define
  * detailed settings for the axis.
  *

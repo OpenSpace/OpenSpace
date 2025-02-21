@@ -1083,38 +1083,29 @@ glm::dvec3 OrbitalNavigator::cameraToSurfaceVector(const glm::dvec3& cameraPos,
     return centerToActualSurface - posDiff;
 }
 
-void OrbitalNavigator::setFocusNode(const SceneGraphNode* focusNode,
-                                    bool resetVelocitiesOnChange)
-{
-    const SceneGraphNode* previousAnchor = _anchorNode;
-    setAnchorNode(focusNode, resetVelocitiesOnChange);
-    setAimNode(nullptr);
-
-    global::eventEngine->publishEvent<events::EventFocusNodeChanged>(
-        previousAnchor,
-        focusNode
-    );
+void OrbitalNavigator::setFocusNode(const SceneGraphNode* node, bool resetVelocities) {
+    setFocusNode(node->identifier(), resetVelocities);
 }
 
-void OrbitalNavigator::setFocusNode(const std::string& focusNode, bool) {
-    _anchor = focusNode;
+void OrbitalNavigator::setFocusNode(const std::string& identifier, bool resetVelocities) {
+    _resetVelocitiesOnAnchorChange = resetVelocities;
+    _anchor = identifier;
     _aim = std::string("");
 }
 
-void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode,
-                                     bool resetVelocitiesOnChange)
+void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode)
 {
     if (!_anchorNode) {
         _directlySetStereoDistance = true;
     }
 
-    const bool changedAnchor = _anchorNode != anchorNode;
+    bool changedAnchor = _anchorNode != anchorNode;
     _anchorNode = anchorNode;
     _syncedAnchorNode = anchorNode ? anchorNode->identifier() : "";
 
     // Need to reset velocities after the actual switch in anchor node,
-    // since the reset behavior depends on the anchor node.
-    if (changedAnchor && resetVelocitiesOnChange) {
+    // since the reset behavior depends on the anchor node
+    if (_resetVelocitiesOnAnchorChange) {
         resetVelocities();
     }
 
@@ -1122,6 +1113,9 @@ void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode,
         updateOnCameraInteraction(); // Mark a changed anchor node as a camera interaction
         updatePreviousAnchorState();
     }
+
+    // Resetting velocities is the default behavior, so reset the variable
+    _resetVelocitiesOnAnchorChange = true;
 }
 
 void OrbitalNavigator::clearPreviousState() {
@@ -1136,12 +1130,12 @@ void OrbitalNavigator::setAimNode(const SceneGraphNode* aimNode) {
     updatePreviousAimState();
 }
 
-void OrbitalNavigator::setAnchorNode(const std::string& anchorNode) {
-    _anchor = anchorNode;
+void OrbitalNavigator::setAnchorNode(const std::string& identifier) {
+    _anchor = identifier;
 }
 
-void OrbitalNavigator::setAimNode(const std::string& aimNode) {
-    _aim = aimNode;
+void OrbitalNavigator::setAimNode(const std::string& identifier) {
+    _aim = identifier;
 }
 
 void OrbitalNavigator::updatePreviousAnchorState() {
@@ -2086,7 +2080,7 @@ double OrbitalNavigator::rotationSpeedScaleFromCameraHeight(
         1.0;
 }
 
-void OrbitalNavigator::updateAnchor() {
+void OrbitalNavigator::updateAnchorOnSync() {
     ghoul_assert(
         !global::windowDelegate->isMaster(),
         "Anchor should only be synced on nodes, not on master"
