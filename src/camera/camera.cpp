@@ -46,14 +46,14 @@ void Camera::setPose(CameraPose pose) {
 
 void Camera::setPositionVec3(glm::dvec3 pos) {
     if (!glm::any(glm::isnan(pos))) {
-        const std::lock_guard _lock(_mutex);
+        const std::lock_guard lock(_mutex);
         _position = std::move(pos);
         _cachedCombinedViewMatrix.isDirty = true;
     }
 }
 
 void Camera::setRotation(glm::dquat rotation) {
-    const std::lock_guard _lock(_mutex);
+    const std::lock_guard lock(_mutex);
     _rotation = std::move(rotation);
     _cachedViewDirection.isDirty = true;
     _cachedLookupVector.isDirty = true;
@@ -62,14 +62,14 @@ void Camera::setRotation(glm::dquat rotation) {
 }
 
 void Camera::setScaling(float scaling) {
-    const std::lock_guard _lock(_mutex);
+    const std::lock_guard lock(_mutex);
     _scaling = scaling;
     _cachedViewScaleMatrix.isDirty = true;
     _cachedCombinedViewMatrix.isDirty = true;
 }
 
 void Camera::setMaxFov(float fov) {
-    const std::lock_guard _lock(_mutex);
+    const std::lock_guard lock(_mutex);
     _maxFov = fov;
     _cachedSinMaxFov.isDirty = true;
 }
@@ -79,7 +79,7 @@ void Camera::setParent(SceneGraphNode* parent) {
 }
 
 void Camera::rotate(const glm::dquat& rotation) {
-    const std::lock_guard _lock(_mutex);
+    const std::lock_guard lock(_mutex);
     _rotation = rotation * static_cast<glm::dquat>(_rotation);
 
     _cachedViewDirection.isDirty = true;
@@ -236,20 +236,20 @@ Camera::SgctInternal::SgctInternal(const SgctInternal& o)
 {}
 
 void Camera::SgctInternal::setSceneMatrix(glm::mat4 sceneMatrix) {
-    const std::lock_guard _lock(_mutex);
+    const std::lock_guard lock(_mutex);
 
     _sceneMatrix = std::move(sceneMatrix);
 }
 
 void Camera::SgctInternal::setViewMatrix(glm::mat4 viewMatrix) {
-    const std::lock_guard _lock(_mutex);
+    const std::lock_guard lock(_mutex);
 
     _viewMatrix = std::move(viewMatrix);
     _cachedViewProjectionMatrix.isDirty = true;
 }
 
 void Camera::SgctInternal::setProjectionMatrix(glm::mat4 projectionMatrix) {
-    const std::lock_guard _lock(_mutex);
+    const std::lock_guard lock(_mutex);
 
     _projectionMatrix = std::move(projectionMatrix);
     _cachedViewProjectionMatrix.isDirty = true;
@@ -268,7 +268,7 @@ const glm::mat4& Camera::SgctInternal::projectionMatrix() const {
 }
 
 const glm::mat4& Camera::SgctInternal::viewProjectionMatrix() const {
-    const std::lock_guard _lock(_mutex);
+    const std::lock_guard lock(_mutex);
     _cachedViewProjectionMatrix.datum = _projectionMatrix * _viewMatrix;
     _cachedViewProjectionMatrix.isDirty = false;
     return _cachedViewProjectionMatrix.datum;

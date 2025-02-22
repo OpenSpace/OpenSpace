@@ -144,7 +144,6 @@ void DashboardItemGlobeLocation::update() {
     ZoneScoped;
 
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
-
     const glm::dvec3 position = module->geoPosition();
     double lat = position.x;
     double lon = position.y;

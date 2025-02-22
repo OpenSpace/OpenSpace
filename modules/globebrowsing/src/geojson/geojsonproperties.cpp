@@ -110,7 +110,7 @@ namespace {
         }
     }
 
-    glm::vec3 getColorValue(const geos::io::GeoJSONValue& value) {
+    glm::vec3 colorValue(const geos::io::GeoJSONValue& value) {
         // Default garish color used for when the color loading fails
         glm::vec3 color = glm::vec3(1.f, 0.f, 1.f);
         if (value.isArray()) {
@@ -504,13 +504,13 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
             result.opacity = static_cast<float>(value.getNumber());
         }
         else if (keyMatches(key, propertykeys::Color, ColorInfo)) {
-            result.color = getColorValue(value);
+            result.color = colorValue(value);
         }
         else if (keyMatches(key, propertykeys::FillOpacity, FillOpacityInfo)) {
             result.fillOpacity = static_cast<float>(value.getNumber());
         }
         else if (keyMatches(key, propertykeys::FillColor, FillColorInfo)) {
-            result.fillColor = getColorValue(value);
+            result.fillColor = colorValue(value);
         }
         else if (keyMatches(key, propertykeys::LineWidth, LineWidthInfo)) {
             result.lineWidth = static_cast<float>(value.getNumber());

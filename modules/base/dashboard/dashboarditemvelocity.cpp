@@ -64,7 +64,6 @@ namespace {
             [[codegen::inlist(openspace::distanceUnitList())]];
     };
 #include "dashboarditemvelocity_codegen.cpp"
-
 } // namespace
 
 namespace openspace {

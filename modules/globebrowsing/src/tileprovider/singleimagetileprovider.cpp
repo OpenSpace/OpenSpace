@@ -63,7 +63,6 @@ SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
 }
 
 Tile SingleImageProvider::tile(const TileIndex&) {
-    ZoneScoped;
     return _tile;
 }
 

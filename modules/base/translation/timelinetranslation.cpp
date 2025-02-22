@@ -67,9 +67,7 @@ TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary)
 
         ghoul::mm_unique_ptr<Translation> translation =
             Translation::createFromDictionary(kf.second);
-        if (translation) {
-            _timeline.addKeyframe(t, std::move(translation));
-        }
+        _timeline.addKeyframe(t, std::move(translation));
     }
 
     _shouldInterpolate = p.shouldInterpolate.value_or(_shouldInterpolate);

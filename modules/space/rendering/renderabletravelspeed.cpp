@@ -37,8 +37,6 @@
 #include <optional>
 
 namespace {
-    constexpr std::array<const char*, 2> UniformNames = { "lineColor", "opacity" };
-
     constexpr openspace::properties::Property::PropertyInfo SpeedInfo = {
         "TravelSpeed",
         "Speed of Travel",
@@ -198,7 +196,7 @@ void RenderableTravelSpeed::initializeGL() {
     glGenVertexArrays(1, &_vaoId);
     glGenBuffers(1, &_vBufferId);
 
-    ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache);
 }
 
 void RenderableTravelSpeed::deinitializeGL() {
@@ -306,9 +304,9 @@ void RenderableTravelSpeed::render(const RenderData& data, RendererTasks&) {
 
 #ifndef __APPLE__
     glLineWidth(_lineWidth);
-#else
+#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
     glLineWidth(1.f);
-#endif
+#endif // __APPLE__
     glBindVertexArray(_vaoId);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
     glDrawArrays(GL_LINE_STRIP, 0, 3);

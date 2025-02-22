@@ -51,7 +51,7 @@ void WebBrowserApp::OnBeforeCommandLineProcessing(const CefString&,
 #ifdef __APPLE__
     commandline->AppendSwitch("--disable-gpu-sandbox");
     commandline->AppendSwitch("--no-sandbox");
-#endif
+#endif // __APPLE__
 }
 
 } // namespace openspace

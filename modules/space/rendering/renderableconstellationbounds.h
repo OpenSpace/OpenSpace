@@ -27,6 +27,8 @@
 
 #include <modules/space/rendering/renderableconstellationsbase.h>
 
+#include <ghoul/opengl/uniformcache.h>
+
 namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
@@ -107,6 +109,8 @@ private:
 
     GLuint _vao = 0;
     GLuint _vbo = 0;
+    UniformCache(campos, objpos, camrot, scaling, ViewProjection, ModelTransform, color,
+        opacity) _uniformCache;
 };
 
 } // namespace openspace
