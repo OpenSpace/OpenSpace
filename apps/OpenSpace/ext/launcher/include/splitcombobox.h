@@ -22,62 +22,44 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___SGCTEDIT___H__
-#define __OPENSPACE_UI_LAUNCHER___SGCTEDIT___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___SPLITCOMBOBOX___H__
+#define __OPENSPACE_UI_LAUNCHER___SPLITCOMBOBOX___H__
 
-#include <QDialog>
+#include <QComboBox>
 
-#include <sgct/config.h>
 #include <filesystem>
+#include <optional>
 #include <string>
+#include <vector>
 
-class DisplayWindowUnion;
-class QCheckBox;
-class QComboBox;
-class QLineEdit;
-
-const sgct::config::GeneratorVersion VersionMin { "SgctWindowConfig", 1, 1 };
-const sgct::config::GeneratorVersion VersionLegacy18 { "OpenSpace", 0, 18 };
-const sgct::config::GeneratorVersion VersionLegacy19 { "OpenSpace", 0, 19 };
-
-class SgctEdit final : public QDialog {
+class SplitComboBox final : public QComboBox {
 Q_OBJECT
 public:
-    /**
-     * Constructor for SgctEdit class, the underlying class for the full window
-     * configuration editor. Used when editing an existing config.
-     *
-     * \param cluster The #sgct::config::Cluster object containing all data of the
-     *                imported window cluster configuration.
-     * \param configName The name of the window configuration filename
-     * \param configBasePath The path to the folder where default config files reside
-     * \param parent Pointer to parent Qt widget
-     */
-    SgctEdit(sgct::config::Cluster cluster, std::string configName,
-        std::filesystem::path configBasePath, QWidget* parent);
+    SplitComboBox(QWidget* parent, std::filesystem::path userPath, std::string userHeader,
+        std::filesystem::path hardcodedPath, std::string hardcodedHeader,
+        std::string specialFirst,
+        std::function<bool(const std::filesystem::path&)> fileFilter,
+        std::function<std::string(const std::filesystem::path&)> createTooltip);
 
-    /**
-     * Returns the saved filename.
-     *
-     * \return The saved filename in std::string
-     */
-    std::filesystem::path saveFilename() const;
+    void populateList(const std::string& preset);
+
+    std::pair<std::string, std::string> currentSelection() const;
+
+signals:
+    // Sends the path to the selection or `std::nullopt` iff there was a special non-file
+    // entry at the top and that one has been selected
+    void selectionChanged(std::optional<std::string> selection);
 
 private:
-    void saveCluster();
-    void apply();
+    std::filesystem::path _userPath;
+    std::string _userHeader;
+    std::filesystem::path _hardCodedPath;
+    std::string _hardCodedHeader;
 
-    DisplayWindowUnion* _displayWidget = nullptr;
+    std::string _specialFirst;
 
-    QCheckBox* _checkBoxVsync = nullptr;
-    QLineEdit* _linePitch = nullptr;
-    QLineEdit* _lineRoll = nullptr;
-    QLineEdit* _lineYaw = nullptr;
-
-    sgct::config::Cluster _cluster;
-    const std::filesystem::path _userConfigPath;
-
-    std::string _configurationFilename;
+    std::function<bool(const std::filesystem::path&)> _fileFilter;
+    std::function<std::string(const std::filesystem::path&)> _createTooltip;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___SGCTEDIT___H__
+#endif // __OPENSPACE_UI_LAUNCHER___SPLITCOMBOBOX___H__

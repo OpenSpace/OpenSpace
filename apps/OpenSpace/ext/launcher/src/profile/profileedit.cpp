@@ -38,6 +38,7 @@
 #include <openspace/scene/profile.h>
 #include <ghoul/format.h>
 #include <QDialogButtonBox>
+#include <QFileDialog>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QLineEdit>
@@ -47,7 +48,12 @@
 #include <QVBoxLayout>
 #include <QWidget>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
+
+#ifdef WIN32
+#include <Windows.h>
+#endif // WIN32
 
 using namespace openspace;
 
@@ -96,10 +102,9 @@ namespace {
     }
 } // namespace
 
-ProfileEdit::ProfileEdit(Profile& profile, const std::string& profileName,
+ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
                          std::filesystem::path assetBasePath,
                          std::filesystem::path userAssetBasePath,
-                         std::filesystem::path builtInProfileBasePath,
                          std::filesystem::path profileBasePath,
                          QWidget* parent)
     : QDialog(parent)
@@ -107,15 +112,15 @@ ProfileEdit::ProfileEdit(Profile& profile, const std::string& profileName,
     , _assetBasePath(std::move(assetBasePath))
     , _userAssetBasePath(std::move(userAssetBasePath))
     , _profileBasePath(std::move(profileBasePath))
-    , _builtInProfilesPath(std::move(builtInProfileBasePath))
+    , _profileFilename(std::move(profileName))
 {
     setWindowTitle("Profile Editor");
-    createWidgets(profileName);
+    createWidgets();
 
     initSummaryTextForEachCategory();
 }
 
-void ProfileEdit::createWidgets(const std::string& profileName) {
+void ProfileEdit::createWidgets() {
     QBoxLayout* layout = new QVBoxLayout(this);
     QBoxLayout* topLayout = new QHBoxLayout;
     QBoxLayout* leftLayout = new QVBoxLayout;
@@ -125,20 +130,12 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         profileLabel->setObjectName("profile");
         container->addWidget(profileLabel);
 
-        _profileEdit = new QLineEdit(QString::fromStdString(profileName));
-        _profileEdit->setPlaceholderText("required");
+        _profileEdit = new QLineEdit(QString::fromStdString(_profileFilename));
         container->addWidget(_profileEdit);
-
-        QPushButton* duplicateButton = new QPushButton("Duplicate Profile");
-        connect(
-            duplicateButton, &QPushButton::clicked,
-            this, &ProfileEdit::duplicateProfile
-        );
-        container->addWidget(duplicateButton);
-
         layout->addLayout(container);
     }
     layout->addWidget(new Line);
+
     {
         QGridLayout* container = new QGridLayout;
         container->setColumnStretch(1, 1);
@@ -210,8 +207,6 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         leftLayout->addLayout(container);
     }
     topLayout->addLayout(leftLayout, 3);
-
-    topLayout->addWidget(new Line);
 
     QBoxLayout* rightLayout = new QVBoxLayout;
     {
@@ -327,6 +322,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         container->addWidget(additionalScriptsEdit);
         rightLayout->addLayout(container);
     }
+    rightLayout->addStretch();
     topLayout->addLayout(rightLayout);
     layout->addLayout(topLayout);
 
@@ -369,49 +365,6 @@ void ProfileEdit::initSummaryTextForEachCategory() {
     );
 }
 
-void ProfileEdit::duplicateProfile() {
-    std::string profile = _profileEdit->text().toStdString();
-    if (profile.empty()) {
-        return;
-    }
-
-    constexpr char Separator = '_';
-    int version = 0;
-    if (const size_t it = profile.rfind(Separator);  it != std::string::npos) {
-        // If the value exists, we have a profile that potentially already has a version
-        // number attached to it
-        const std::string versionStr = profile.substr(it + 1);
-        try {
-            version = std::stoi(versionStr);
-
-            // We will re-add the separator with the new version string to the file, so we
-            // will remove the suffix here first
-            profile = profile.substr(0, it);
-        }
-        catch (const std::invalid_argument&) {
-            // If this exception is thrown, we did find a separator character but the
-            // substring afterwards was not a number, so the user just added a separator
-            // by themselves. In this case we don't do anything
-        }
-    }
-
-    // By this point we have our current profile (without any suffix) in 'profile' and the
-    // currently active version in 'version'. Now we need to put both together again and
-    // also make sure that we don't pick a version number that already exists
-    while (true) {
-        version++;
-
-        const std::string candidate = std::format("{}{}{}", profile, Separator, version);
-        const std::string candidatePath = std::format(
-            "{}{}.profile", _profileBasePath, candidate
-        );
-
-        if (!std::filesystem::exists(candidatePath)) {
-            _profileEdit->setText(QString::fromStdString(candidate));
-            return;
-        }
-    }
-}
 
 void ProfileEdit::openMeta() {
     MetaDialog(this, &_profile.meta).exec();
@@ -475,34 +428,93 @@ bool ProfileEdit::wasSaved() const {
 }
 
 std::string ProfileEdit::specifiedFilename() const {
-    return _profileEdit->text().toStdString();
+    return _profileFilename;
 }
 
 void ProfileEdit::approved() {
-    std::string profileName = _profileEdit->text().toStdString();
-    if (profileName.empty()) {
-        QMessageBox::critical(this, "No profile name", "Profile name must be specified");
-        _profileEdit->setFocus();
+    // Show the save dialog
+    std::filesystem::path fullPath =
+        _profileBasePath / _profileEdit->text().toStdString();
+
+    // We might need to create intermediate directories if the user specified them in the
+    // name field. We do a "parent_path" here, since the last component of the path is the
+    // actual desired filename
+    std::filesystem::create_directories(std::filesystem::path(fullPath).parent_path());
+
+    const QString path = QFileDialog::getSaveFileName(
+        this,
+        "Save Profile",
+        QString::fromStdString(fullPath.string()),
+        "Profile (*.profile)",
+        nullptr
+#ifdef __linux__
+        // Linux in Qt5 and Qt6 crashes when trying to access the native dialog here
+        , QFileDialog::DontUseNativeDialog
+#endif // __linux__
+    );
+
+    // The user canceled the saving
+    if (path.isEmpty()) {
         return;
     }
 
-    const std::filesystem::path p = std::format(
-        "{}/{}.profile", _builtInProfilesPath, profileName
-    );
-    if (std::filesystem::exists(p)) {
-        // The filename exists in the OpenSpace-provided folder, so we don't want to allow
-        // a user to overwrite it
+    //
+    // If we got this far then we have a new or existing file that the user wanted to save
+    // the profile into
+
+    // Check if the user saved the profile in the correct folder
+    std::string profileBase = std::filesystem::canonical(_profileBasePath).string();
+    std::string file = std::filesystem::weakly_canonical(path.toStdString()).string();
+    if (!file.starts_with(profileBase)) {
         QMessageBox::critical(
             this,
-            "Reserved profile name",
-            "This is a read-only profile. Click 'Duplicate' or rename profile and save"
+            "File Location",
+            "Profiles can only be stored directly in the user profile folder or "
+            "subfolders inside it"
         );
-        _profileEdit->setFocus();
+        return;
     }
-    else {
-        _saveSelected = true;
-        accept();
+    // +1 for the directory separator
+    std::string filename = file.substr(profileBase.size() + 1);
+
+    try {
+        std::ofstream outFile;
+        outFile.exceptions(std::ofstream::badbit | std::ofstream::failbit);
+        outFile.open(path.toStdString(), std::ofstream::out);
+        outFile << _profile.serialize();
     }
+    catch (const std::ofstream::failure& e) {
+#ifdef WIN32
+        if (std::filesystem::exists(file)) {
+            // Check if the file is hidden, since that causes ofstream to fail
+            DWORD res = GetFileAttributesA(file.c_str());
+            if (res & FILE_ATTRIBUTE_HIDDEN) {
+                QMessageBox::critical(
+                    this,
+                    "Exception",
+                    QString::fromStdString(std::format(
+                        "Error writing data to file '{}' as file is marked hidden", file
+                    ))
+                );
+                return;
+            }
+        }
+#endif // WIN32
+        QMessageBox::critical(
+            this,
+            "Exception",
+            QString::fromStdString(std::format(
+                "Error writing data to file '{}': {}", file, e.what()
+            ))
+        );
+        return;
+    }
+
+    std::filesystem::path p = filename;
+    p.replace_extension("");
+    _profileFilename = p.string();
+    _saveSelected = true;
+    accept();
 }
 
 void ProfileEdit::keyPressEvent(QKeyEvent* evt) {
