@@ -131,7 +131,6 @@ void ProfileEdit::createWidgets() {
         container->addWidget(profileLabel);
 
         _profileEdit = new QLineEdit(QString::fromStdString(_profileFilename));
-        _profileEdit->setPlaceholderText("required");
         container->addWidget(_profileEdit);
         layout->addLayout(container);
     }
@@ -436,6 +435,12 @@ void ProfileEdit::approved() {
     // Show the save dialog
     std::filesystem::path fullPath =
         _profileBasePath / _profileEdit->text().toStdString();
+
+    // We might need to create intermediate directories if the user specified them in the
+    // name field. We do a "parent_path" here, since the last component of the path is the
+    // actual desired filename
+    std::filesystem::create_directories(std::filesystem::path(fullPath).parent_path());
+
     const QString path = QFileDialog::getSaveFileName(
         this,
         "Save Profile",
