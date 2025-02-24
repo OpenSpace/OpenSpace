@@ -51,6 +51,11 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This translation type that generates the translation values used to offset the
+    // scene graph node's position by calling the provided Lua script. The script returns
+    // three translation factors, one for each principal axis, each providing in meters.
+    // The script parameter describes in greater detail how the Lua script file should be
+    // constructed.
     struct [[codegen::Dictionary(LuaTranslation)]] Parameters {
         // [[codegen::verbatim(ScriptInfo.description)]]
         std::filesystem::path script;

@@ -51,6 +51,10 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This rotation type that generates the rotation for the scene graph node by calling
+    // the provided Lua script to create the full matrix used to orient the scene graph
+    // node. The returned matrix should be a valid rotation matrix. The script parameter
+    // describes in greater detail how the Lua script file should be constructed.
     struct [[codegen::Dictionary(LuaRotation)]] Parameters {
         // [[codegen::verbatim(ScriptInfo.description)]]
         std::filesystem::path script;
