@@ -44,17 +44,10 @@ set(SHADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gradiant_fs.glsl
 )
 
-# Define CUDA Files
-set(CUDA_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/blackhole_cuda.cu
-  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/blackhole_cuda.h
-)
-
 # Organize Files into Groups
 source_group("Header Files" FILES ${HEADER_FILES})
 source_group("Source Files" FILES ${SOURCE_FILES})
 source_group("Shader Files" FILES ${SHADER_FILES})
-source_group("CUDA Files" FILES ${CUDA_FILES})
 
 # Create OpenSpace Module
 create_new_module(
@@ -66,15 +59,21 @@ create_new_module(
   ${SHADER_FILES}
 )
 
-# Enable CUDA Compilation
-enable_language(CUDA)
+project(blackhole_cuda_prj CUDA)
+find_package(CUDA REQUIRED)
+# Define CUDA Files
+set(CUDA_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/blackhole_cuda.cu
+  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/blackhole_cuda.h
+)
+source_group("CUDA Files" FILES ${CUDA_FILES})
+
+find_package(CUDAToolkit REQUIRED)
+include_directories(${CUDAToolkit_INCLUDE_DIRS})
 
 if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
     set(CMAKE_CUDA_ARCHITECTURES native)
 endif()
-
-find_package(CUDAToolkit REQUIRED)
-include_directories(${CUDAToolkit_INCLUDE_DIRS})
 
 # Debug Messages
 message("CMAKE_CUDA_ARCHITECTURES: ${CMAKE_CUDA_ARCHITECTURES}")
@@ -82,9 +81,17 @@ message("CMAKE_CUDA_LIBRARY_ROOT: ${CUDAToolkit_LIBRARY_ROOT}")
 message("CMAKE_CUDA_INCLUDE_DIRS: ${CUDAToolkit_INCLUDE_DIRS}")
 message("CMAKE_CUDA_LIBRARY_DIR: ${CUDAToolkit_LIBRARY_DIR}")
 
+message("ABC: ${CMAKE_CXX_FLAGS}")
+message("ABC: ${CMAKE_CUDA_FLAGS}")
+
 # Create CUDA Library
-add_library(blackhole_cuda SHARED ${CUDA_FILES})
+add_library(blackhole_cuda STATIC ${CUDA_FILES})
 set_target_properties(blackhole_cuda PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-target_link_libraries(blackhole_cuda PRIVATE CUDA::cudart)
+set_target_properties(blackhole_cuda PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
+target_link_libraries(blackhole_cuda PRIVATE CUDA::toolkit CUDA::cudart)
 
 target_link_libraries(openspace-module-blackhole PRIVATE blackhole_cuda)
+
+
+get_target_property(_compile_flags blackhole_cuda COMPILE_FLAGS)
+message("DEF: ${_compile_flags}")
