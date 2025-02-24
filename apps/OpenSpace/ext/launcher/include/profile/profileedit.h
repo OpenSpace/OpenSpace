@@ -52,7 +52,7 @@ public:
      * \param profileBasePath The path to the folder in which all profiles live
      * \param parent Pointer to parent Qt widget
      */
-    ProfileEdit(openspace::Profile& profile, const std::string& profileName,
+    ProfileEdit(openspace::Profile& profile, std::string profileName,
         std::filesystem::path assetBasePath, std::filesystem::path userAssetBasePath,
         std::filesystem::path builtInProfileBasePath,
         std::filesystem::path profileBasePath, QWidget* parent);
@@ -87,7 +87,6 @@ signals:
     void raiseExitWindow();
 
 private slots:
-    void duplicateProfile();
     void openMeta();
     void openProperties();
     void openModules();
@@ -101,7 +100,7 @@ private slots:
     void approved();
 
 private:
-    void createWidgets(const std::string& profileName);
+    void createWidgets();
     void initSummaryTextForEachCategory();
 
     openspace::Profile& _profile;
@@ -111,7 +110,8 @@ private:
     const std::filesystem::path _builtInProfilesPath;
     bool _saveSelected = false;
 
-    QLineEdit* _profileEdit = nullptr;
+    std::string _profileFilename;
+
     QLabel* _modulesLabel = nullptr;
     QLabel* _assetsLabel = nullptr;
     QTextEdit* _assetsEdit = nullptr;

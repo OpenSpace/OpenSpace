@@ -42,10 +42,6 @@
 #include <fstream>
 #include <iostream>
 
-#ifdef WIN32
-#include <Windows.h>
-#endif // WIN32
-
 using namespace openspace;
 
 namespace {
@@ -585,7 +581,7 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
         _assetPath,
         _userAssetPath,
         _profilePath,
-        savePath,
+        _userProfilePath,
         this
     );
 
@@ -613,50 +609,10 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
 
     editor.exec();
     if (editor.wasSaved()) {
-        if (editor.specifiedFilename() != profile) {
-            savePath = _userProfilePath;
-        }
-        const std::string path = std::format(
-            "{}{}.profile", savePath, editor.specifiedFilename()
-        );
-
-        // The user might specify subdirectories in the name which we want to create
-        std::filesystem::create_directories(std::filesystem::path(path).parent_path());
-
-        try {
-            std::ofstream outFile;
-            outFile.exceptions(std::ofstream::badbit | std::ofstream::failbit);
-            outFile.open(path, std::ofstream::out);
-            outFile << p->serialize();
-        }
-        catch (const std::ofstream::failure& e) {
-#ifdef WIN32
-            if (std::filesystem::exists(path)) {
-                // Check if the file is hidden, since that causes ofstream to fail
-                DWORD res = GetFileAttributesA(path.c_str());
-                if (res & FILE_ATTRIBUTE_HIDDEN) {
-                    QMessageBox::critical(
-                        this,
-                        "Exception",
-                        QString::fromStdString(std::format(
-                            "Error writing data to file '{}' as file is marked hidden",
-                            path
-                        ))
-                    );
-                    return;
-                }
-            }
-#endif // WIN32
-            QMessageBox::critical(
-                this,
-                "Exception",
-                QString::fromStdString(std::format(
-                    "Error writing data to file '{}': {}", path, e.what()
-                ))
-            );
-        }
-
-        _profileBox->populateList(editor.specifiedFilename());
+        savePath = _userProfilePath;
+        std::filesystem::path path = editor.specifiedFilename();
+        path.replace_extension("");
+        _profileBox->populateList(path.string());
     }
 }
 
