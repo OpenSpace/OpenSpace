@@ -63,8 +63,6 @@ namespace {
 
     constexpr int SettingsIconSize = 35;
 
-    int WindowConfigBoxIndexSgctCfgDefault = 0;
-
     namespace geometry {
         constexpr QRect BackgroundImage(0, 0, ScreenWidth, ScreenHeight);
         constexpr QRect LogoImage(LeftRuler, TopRuler, ItemWidth, ItemHeight);
@@ -153,12 +151,13 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
     QWidget* centralWidget = new QWidget;
 
     {
-        // Yes, this looks weird, but we just create the image here and pass the central
-        // widget as the parent. This will assign the BackgroundImage as a child of the
-        // central widget, thus making it appear and also be destroyed at the end
+        // Yes, this looks weird to create an object but not keeping the pointer around,
+        // but we just create the image here and pass the central widget as the parent.
+        // This will assign the BackgroundImage as a child of the central widget, thus
+        // making it appear and also be destroyed at the end
         new BackgroundImage(
             geometry::BackgroundImage,
-            absPath(globalConfig.pathTokens.at("SYNC") + "/http/launcher_images"),
+            absPath(globalConfig.pathTokens.at("SYNC")),
             centralWidget
         );
     }
@@ -460,8 +459,7 @@ void LauncherWindow::editConfiguration() {
             std::format("Parsing error found in file '{}'", path),
             std::format(
                 "{}\n\nThis configuration file is unable to generate a proper "
-                "display",
-                err
+                "display", err
             )
         );
         return;
@@ -503,11 +501,11 @@ void LauncherWindow::start() {
             "Empty Profile",
             "Cannot launch with an empty profile"
         );
+        return;
     }
-    else {
-        _shouldLaunch = true;
-        close();
-    }
+
+    _shouldLaunch = true;
+    close();
 }
 
 void LauncherWindow::openSettings() {

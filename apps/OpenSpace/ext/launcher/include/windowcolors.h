@@ -28,8 +28,8 @@
 #include <QColor>
 
 /**
- * This function returns the color that a component should use for a specific window. This
- * Function will always return the same color for the same index.
+ * This function returns the color that a component should use for a specific window. The
+ * same index will always return the same color.
  *
  * \param idx The index of the window for which the color should be calculated
  * \return The color for the provided window index

@@ -340,9 +340,9 @@ WindowControl::WindowControl(int monitorIndex, int windowIndex,
     //
     // Render 2D & 3D
     {
-        _render2D = new QCheckBox("Render Overlays");
+        _render2D = new QCheckBox("Render GUI and Overlays");
         _render2D->setToolTip(
-            "Determines whether any overlays should be\nrendered on this window. "
+            "Determines whether any overlays should be\nrendered in this window. "
             "Overlays in this case are\nthe user interface, dashboard information, and "
             "other\nelements that are only useful for a pilot."
         );
@@ -350,9 +350,8 @@ WindowControl::WindowControl(int monitorIndex, int windowIndex,
 
         _render3D = new QCheckBox("Render Scene");
         _render3D->setToolTip(
-            "Determines whether the main 3D scene should be\nrendered on this window. "
-            "This contains anything that is not the overlay\nlike 3D models, the "
-            "planets, stars etc."
+            "Determines whether the main 3D scene should be\nrendered in this window, "
+            "like 3D models, the planets, stars, etc."
         );
         connect(
             _render3D, &QCheckBox::clicked,

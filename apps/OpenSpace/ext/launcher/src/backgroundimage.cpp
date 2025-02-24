@@ -38,7 +38,9 @@ BackgroundImage::BackgroundImage(QRect size, const std::filesystem::path& syncFo
     // Set a backup image in case no other images have been downloaded yet
     setPixmap(QPixmap(":/images/launcher-background.png"));
 
-    if (!std::filesystem::exists(syncFolder)) {
+    std::filesystem::path imagePath = syncFolder / "http" / "launcher_images";
+
+    if (!std::filesystem::exists(imagePath)) {
         return;
     }
 
@@ -50,7 +52,7 @@ BackgroundImage::BackgroundImage(QRect size, const std::filesystem::path& syncFo
         fs::directory_entry path;
         int version = -1;
     } latest;
-    for (const fs::directory_entry& p : fs::directory_iterator(syncFolder)) {
+    for (const fs::directory_entry& p : fs::directory_iterator(imagePath)) {
         if (!p.is_directory()) {
             continue;
         }

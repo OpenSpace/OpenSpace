@@ -177,6 +177,9 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
         validatorPitch->setNotation(QDoubleValidator::StandardNotation);
         _linePitch->setValidator(validatorPitch);
         layoutWindow->addWidget(_linePitch, 0, 1);
+
+        QLabel* range = new QLabel("Range [-90, 90] in degrees");
+        layoutWindow->addWidget(range, 0, 2);
     }
     {
         const QString rollTip = "Roll or bank: negative numbers rotate the camera "
@@ -194,6 +197,9 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
         validatorRoll->setNotation(QDoubleValidator::StandardNotation);
         _lineRoll->setValidator(validatorRoll);
         layoutWindow->addWidget(_lineRoll, 1, 1);
+
+        QLabel* range = new QLabel("Range [-360, 360] in degrees");
+        layoutWindow->addWidget(range, 1, 2);
     }
     {
         const QString yawTip = "Yaw, heading, or azimuth: negative numbers pan the "
@@ -212,6 +218,9 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
         validatorYaw->setNotation(QDoubleValidator::StandardNotation);
         _lineYaw->setValidator(validatorYaw);
         layoutWindow->addWidget(_lineYaw, 2, 1);
+
+        QLabel* range = new QLabel("Range [-180, 180] in degrees");
+        layoutWindow->addWidget(range, 2, 2);
     }
     
 
