@@ -60,7 +60,7 @@ DisplayWindowUnion::DisplayWindowUnion(const std::vector<QRect>& monitorResoluti
 
     {
         QBoxLayout* layoutMonButton = new QHBoxLayout;
-        _removeWindowButton = new QPushButton("Remove Window");
+        _removeWindowButton = new QPushButton("&Remove Window");
         _removeWindowButton->setFocusPolicy(Qt::NoFocus);
         _removeWindowButton->setToolTip(
             "Remove window from the configuration (at least one window is required)"
@@ -73,7 +73,7 @@ DisplayWindowUnion::DisplayWindowUnion(const std::vector<QRect>& monitorResoluti
 
         layoutMonButton->addStretch(1);
 
-        _addWindowButton = new QPushButton("Add Window");
+        _addWindowButton = new QPushButton("&Add Window");
         _addWindowButton->setToolTip(QString::fromStdString(std::format(
             "Add a window to the configuration (up to {} windows allowed)", nMaxWindows
         )));
