@@ -273,8 +273,9 @@ ImpactCorridorTask::ImpactCoordinate ImpactCorridorTask::readImpactCoordinate(
     return impact;
 }
 
-int ImpactCorridorTask::pixelIndex(int pixelW, int pixelH, int numChannels, int imageWidth,
-                                   int imageHeight, bool allowWrap)
+int ImpactCorridorTask::pixelIndex(int pixelW, int pixelH, int numChannels,
+                                   int imageWidth, int imageHeight,
+                                   bool allowWrap)
 {
     if (allowWrap) {
         if (pixelH < 0) {

@@ -55,6 +55,15 @@ namespace {
         // The name of the asteroid to find possible impacts for.
         std::string asteroidName;
 
+        // The name of the tagert to search for impacts against. If not given, then Earth
+        // is used as the target. The name must be a valid SPICE id/name.
+        std::optional<std::string> targetName;
+
+        // The name of the tagert reference frame to calculate the impact position in. If
+        // not given, then IAU_EARTH is used as the reference frame. The name must be a
+        // valid SPICE id/name.
+        std::optional<std::string> targetFrame;
+
         // Path to directory with kernels for the variants of the asteroid to test.
         std::string kernelDirectory;
 
@@ -68,9 +77,9 @@ namespace {
         // The end of the time interval to search for impacts
         std::string timeIntervalEnd;
 
-        // The distance from the center of Earth consided as an impact. If not given, then
-        // the maximum radius of Earth is used. And variant that comes closer to Earth
-        // than this distance, is considered to have impacted.
+        // The distance from the center of the target that is consided as an impact. If
+        // not given, then the maximum radius of Earth is used. And variant that comes
+        // closer to Earth than this distance, is considered to have impacted.
         std::optional<int> impactDistance;
 
         // The step size, in seconds, used to search for impacts. If not given, then the
@@ -90,6 +99,8 @@ FindImpactsTask::FindImpactsTask(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _asteroidName = p.asteroidName;
+    _targetName = p.targetName.value_or("EARTH");
+    _targetFrame = p.targetFrame.value_or("IAU_EARTH");
     _kernelDirectory = absPath(p.kernelDirectory);
     _outputFilename = absPath(p.outputFilename);
     _timeIntervalStart = p.timeIntervalStart;
@@ -191,11 +202,11 @@ void FindImpactsTask::findImpacts(const Task::ProgressCallback& progressCallback
         managerKernelId = SpiceManager::ref().loadKernel(variantKernel);
 
         // Get times within the searching timerange when the variant is closer than the
-        // impact distance to Earth. This is then considered as an impact.
+        // impact distance to the target. This is then considered as an impact.
         gfdist_c(
             variantNAIFName.c_str(), // Name of the target body
             "NONE",                  // Aberration correction flag
-            "EARTH",                 // Name of the observing body
+            _targetName.c_str(),     // Name of the observing body
             "<",                     // Relational operator (example <, =, or >)
             _impactDistance,         // Reference value in km
             0.0,                     // Adjustment value for absolute extrema searches
@@ -218,10 +229,10 @@ void FindImpactsTask::findImpacts(const Task::ProgressCallback& progressCallback
             continue;
         }
 
-        // Check if the variant impacts or misses Earth
+        // Check if the variant impacts or misses the target
         if (wncard_c(&result) == 0) {
             // No impact
-            // LDEBUG(std::format("Variant {} does not impact Earth", variantNAIFName));
+            // LDEBUG(std::format("Variant {} does not impact the target", variantNAIFName));
             ++variantId;
             ++counterVariants;
             SpiceManager::ref().unloadKernel(managerKernelId);
@@ -245,9 +256,9 @@ void FindImpactsTask::findImpacts(const Task::ProgressCallback& progressCallback
         spkpos_c(
             variantNAIFName.c_str(),        // Target body name to check position for
             impactStart,                    // Time in J2000 seconds
-            "IAU_EARTH",                    // Reference frame of output position vector
+            _targetFrame.c_str(),           // Reference frame of output position vector
             "NONE",                         // Aberration correction flag
-            "EARTH",                        // Observing body name, frame of output
+            _targetName.c_str(),            // Observing body name, frame of output
             glm::value_ptr(impactPosition), // Output position vector
             &lightTime                      // Resulting light time between the positions
         );

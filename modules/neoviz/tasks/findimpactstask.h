@@ -66,6 +66,8 @@ private:
     void writeImpactCoordinates(const Task::ProgressCallback& progressCallback);
 
     std::string _asteroidName;
+    std::string _targetName;
+    std::string _targetFrame;
     std::filesystem::path _kernelDirectory;
     std::filesystem::path _outputFilename;
     std::string _timeIntervalStart;
