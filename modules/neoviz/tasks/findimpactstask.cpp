@@ -85,6 +85,11 @@ namespace {
         // The step size, in seconds, used to search for impacts. If not given, then the
         // number of seconds in a day is used.
         std::optional<double> stepSize;
+
+        // An optional list of variants to exclude from the search. If not given, then all
+        // variants are included in the search. This could be a list of variants that are
+        // invalid following a previous impact with another body.
+        std::optional<std::vector<int>> excludedVariants;
     };
 #include "findimpactstask_codegen.cpp"
 } // namespace
@@ -107,6 +112,7 @@ FindImpactsTask::FindImpactsTask(const ghoul::Dictionary& dictionary) {
     _timeIntervalEnd = p.timeIntervalEnd;
     _impactDistance = p.impactDistance.value_or(MaxEarthRadius);
     _stepSize = p.stepSize.value_or(spd_c());
+    _excludedVariants = p.excludedVariants.value_or(std::vector<int>());
 }
 
 std::string FindImpactsTask::description() {
@@ -179,11 +185,21 @@ void FindImpactsTask::findImpacts(const Task::ProgressCallback& progressCallback
     for (const auto& variantKernel :
          std::filesystem::directory_iterator(_kernelDirectory))
     {
+        variantNAIFName = std::to_string(variantId);
+
         if (DebugMode && counterVariants >= DebugMaxVariants) {
             break;
         }
 
-        variantNAIFName = std::to_string(variantId);
+        // Check if the variant should be excluded according to the given list
+        if (std::find(_excludedVariants.begin(), _excludedVariants.end(), variantId) !=
+            _excludedVariants.end())
+        {
+            ++variantId;
+            ++counterVariants;
+            progressCallback(counterVariants / static_cast<float>(nVariants));
+            continue;
+        }
 
         // Make sure it is a kernel file and not anything else
         if (!variantKernel.exists() || variantKernel.is_directory()) {

@@ -74,6 +74,7 @@ private:
     std::string _timeIntervalEnd;
     int _impactDistance;
     double _stepSize;
+    std::vector<int> _excludedVariants;
     std::vector<ImpactCoordinate> _impactCoordinates;
 };
 
