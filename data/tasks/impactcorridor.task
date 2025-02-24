@@ -9,7 +9,8 @@ return {
     ImageHeight = 2700,
     FilterStrength = 2.5,
     ColorMap = "${SYNC}/http/default_colormaps_sequential/1/GnBu.cmap",
-    InvertColorMap = true
+    InvertColorMap = true,
+    NightMap = "${SYNC}/http/earth_textures/3/earth_night.png"
   },
   {
     Type = "ImpactCorridorTask",
@@ -20,6 +21,7 @@ return {
     ImageHeight = 2700,
     FilterStrength = 2.5,
     ColorMap = "${SYNC}/http/default_colormaps_sequential/1/GnBu.cmap",
-    InvertColorMap = true
+    InvertColorMap = true,
+    NightMap = "${SYNC}/http/earth_textures/3/earth_night.png"
   }
 }

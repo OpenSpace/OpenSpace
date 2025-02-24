@@ -27,6 +27,7 @@
 
 #include <openspace/util/task.h>
 
+#include <openspace/data/dataloader.h>
 #include <ghoul/glm.h>
 #include <filesystem>
 #include <string>
@@ -86,20 +87,57 @@ private:
         int imageHeight, bool allowWrap);
 
     /**
-     * Create a raw impact map image data list that only have information with impact
-     * probability. Each impact is painted onto the image with a guasian blob, and
-     * overlapping blobs are added together. This list only contain one channel per pixel
-     * which is the impact probability. Color channels are added in a later step.
+     * Plot all impacts onto a flat list of pixels with a gausian filter for smmothness,
+     * overlapping plots are added together. This list only contain one channel per pixel
+     * which is the summer data contirbution for that resulting pixel. Color channels are
+     * added in a later step based on a color map and the type of data. Multiple types of
+     * data can be plotted and the caller chooses which one to use.
      *
      * \param progressCallback To comunicate progress amount
-     * \param numPixels The total number of pixels in the image
-     * \return The raw pixel list with impact probability as a flat data list
+     * \param nPixels The total number of pixels in the image
+     * \return The flat list of pixels with the summes data contribution from the impacts
      */
-    std::vector<double> rawImpactData(const Task::ProgressCallback& progressCallback,
-        const unsigned int numPixels);
+    std::vector<double> plotImpactData(const Task::ProgressCallback& progressCallback,
+        const unsigned int nPixels);
 
+    /**
+     *
+     *
+     * \param progressCallback To comunicate progress amount
+     * \param nPixels The total number of pixels in the image
+     * \return The flat list of pixels with
+     */
+    std::vector<double> plotRiskData(const Task::ProgressCallback& progressCallback,
+        const unsigned char* nightData, int nightWidth, int nightHeight,
+        int nightChannels, const unsigned int nPixels);
+
+    /**
+     * Apply the color map to the flat list of pixel saturation data.
+     *
+     * \param progressCallback To comunicate progress amount
+     * \param data The flat list of pixel saturátion data
+     * \param nPixels The total number of pixels in the image
+     * \param minValue The minimum scaling value for the color map
+     * \param maxValue The maximum scaling value for the color map
+     * \param colorMap The color map used to color the data
+     * \param pixels The pixel data to save as an image file
+     */
+    void applyColorMap(const Task::ProgressCallback& progressCallback,
+        const std::vector<double>& data, int nPixels, double minValue, double maxValue,
+        const openspace::dataloader::ColorMap& colorMap, std::vector<glm::vec4>& pixels);
+
+    /**
+     * Write the given image to file in the PNG format.
+     *
+     * \param progressCallback To comunicate progress amount
+     * \param filename The name of the .png image file to save. This name must include
+     *        the .png extension
+     * \param nPixels The total number of pixels in the image
+     * \param size The total size of the image when considering the color channels
+     * \param pixels The pixel data to save as an image file
+     */
     void writeFinalImage(const Task::ProgressCallback& progressCallback,
-        const std::string& filename, unsigned int numPixels, unsigned int size,
+        const std::string& filename, unsigned int nPixels, unsigned int size,
         const std::vector<glm::vec4>& pixels);
 
     std::string _asteroidName;
@@ -112,7 +150,9 @@ private:
     int _brushSaturation;
     double _filterStrength;
     std::filesystem::path _colorMap;
-    bool _invertColorMap = false;
+    bool _invertColorMap;
+    bool _hasNightMap;
+    std::filesystem::path _nightMap;
 };
 
 } // namespace openspace::neoviz
