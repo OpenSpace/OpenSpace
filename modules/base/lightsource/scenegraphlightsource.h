@@ -36,7 +36,6 @@ namespace documentation { struct Documentation; }
 
 class SceneGraphLightSource : public LightSource {
 public:
-    SceneGraphLightSource();
     explicit SceneGraphLightSource(const ghoul::Dictionary& dictionary);
 
     static documentation::Documentation Documentation();

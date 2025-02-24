@@ -157,9 +157,9 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&) {
     // Change GL state:
 #ifndef __APPLE__
     glLineWidth(_lineWidth);
-#else
+#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
     glLineWidth(1.f);
-#endif
+#endif // __APPLE__
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
     glEnable(GL_LINE_SMOOTH);
@@ -178,7 +178,7 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableBoxGrid::update(const UpdateData&) {
-    if (_gridIsDirty) {
+    if (_gridIsDirty) [[unlikely]] {
         const glm::vec3 llf = -_size.value() / 2.f;
         const glm::vec3 urb =  _size.value() / 2.f;
 

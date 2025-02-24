@@ -105,7 +105,7 @@ void RenderableSphereImageOnline::deinitializeGL() {
 void RenderableSphereImageOnline::update(const UpdateData& data) {
     RenderableSphere::update(data);
 
-    if (!_textureIsDirty) {
+    if (!_textureIsDirty) [[likely]] {
         return;
     }
 

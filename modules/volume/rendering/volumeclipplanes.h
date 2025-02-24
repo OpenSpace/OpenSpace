@@ -43,7 +43,6 @@ public:
     ~VolumeClipPlanes() override = default;
 
     void initialize();
-    void deinitialize();
 
     std::vector<glm::vec3> normals();
     std::vector<glm::vec2> offsets();

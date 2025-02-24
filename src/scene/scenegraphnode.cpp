@@ -767,24 +767,18 @@ void SceneGraphNode::update(const UpdateData& data) {
     TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
 #endif // TRACY_ENABLE
 
-    if (_state != State::GLInitialized) {
-        return;
-    }
-    if (!isTimeFrameActive(data.time)) {
+    if (_state != State::GLInitialized || !isTimeFrameActive(data.time)) {
         return;
     }
 
-    if (_transform.translation) {
-        _transform.translation->update(data);
-    }
+    ghoul_assert(_transform.translation, "No translation exists");
+    _transform.translation->update(data);
 
-    if (_transform.rotation) {
-        _transform.rotation->update(data);
-    }
+    ghoul_assert(_transform.rotation, "No rotation exists");
+    _transform.rotation->update(data);
 
-    if (_transform.scale) {
-        _transform.scale->update(data);
-    }
+    ghoul_assert(_transform.scale, "No scale exists");
+    _transform.scale->update(data);
     UpdateData newUpdateData = data;
 
     // Assumes _worldRotationCached and _worldScaleCached have been calculated for parent
@@ -821,18 +815,10 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
 #endif // TRACY_ENABLE
 
-    if (_state != State::GLInitialized) {
-        return;
-    }
-
-    const bool visible = _renderable && _renderable->isVisible() &&
-        _renderable->isReady();
-
-    if (!visible) {
-        return;
-    }
-
-    if (!isTimeFrameActive(data.time)) {
+    if (_state != State::GLInitialized ||
+        !(_renderable && _renderable->isVisible() && _renderable->isReady()) ||
+        !isTimeFrameActive(data.time))
+    {
         return;
     }
 
@@ -857,15 +843,14 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
 
         _renderable->render(newData, tasks);
 
-        if (_computeScreenSpaceValues) {
+        if (_computeScreenSpaceValues) [[unlikely]] {
             computeScreenSpaceData(newData);
         }
     }
 
     const bool isInStickerBin =
         data.renderBinMask & static_cast<int>(Renderable::RenderBin::Sticker);
-
-    if (_showDebugSphere && isInStickerBin) {
+    if (_showDebugSphere && isInStickerBin) [[unlikely]] {
         if (const double bs = boundingSphere();  bs > 0.0) {
             renderDebugSphere(data.camera, bs, glm::vec4(0.5f, 0.15f, 0.5f, 0.75f));
         }
@@ -877,7 +862,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
 }
 
 void SceneGraphNode::renderDebugSphere(const Camera& camera, double size,
-                                       const glm::vec4& color)
+                                       const glm::vec4& color) const
 {
     const glm::dvec3 scaleVec = _worldScaleCached * size;
     const glm::dmat4 modelTransform =

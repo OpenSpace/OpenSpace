@@ -115,7 +115,6 @@ Tile::Status TileProviderByDate::tileStatus(const TileIndex& index) {
         Tile::Status::Unavailable;
 }
 
-
 TileDepthTransform TileProviderByDate::depthTransform() {
     return _currentTileProvider ?
         _currentTileProvider->depthTransform() :

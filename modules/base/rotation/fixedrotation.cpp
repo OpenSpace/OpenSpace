@@ -541,7 +541,7 @@ glm::dmat3 FixedRotation::matrix(const UpdateData&) const {
 
     if (glm::dot(x, y) > 1.f - Epsilon ||
         glm::dot(y, z) > 1.f - Epsilon ||
-        glm::dot(x, z) > 1.f - Epsilon)
+        glm::dot(x, z) > 1.f - Epsilon) [[unlikely]]
     {
         LWARNINGC(
             "FixedRotation",
@@ -553,13 +553,12 @@ glm::dmat3 FixedRotation::matrix(const UpdateData&) const {
         );
         return glm::dmat3();
     }
-    else {
-        return {
-            x.x, x.y, x.z,
-            y.x, y.y, y.z,
-            z.x, z.y, z.z
-        };
-    }
+
+    return {
+        x.x, x.y, x.z,
+        y.x, y.y, y.z,
+        z.x, z.y, z.z
+    };
 }
 
 glm::vec3 FixedRotation::xAxis() const {
