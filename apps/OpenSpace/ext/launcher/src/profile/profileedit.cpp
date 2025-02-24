@@ -105,7 +105,6 @@ namespace {
 ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
                          std::filesystem::path assetBasePath,
                          std::filesystem::path userAssetBasePath,
-                         std::filesystem::path builtInProfileBasePath,
                          std::filesystem::path profileBasePath,
                          QWidget* parent)
     : QDialog(parent)
@@ -113,7 +112,6 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
     , _assetBasePath(std::move(assetBasePath))
     , _userAssetBasePath(std::move(userAssetBasePath))
     , _profileBasePath(std::move(profileBasePath))
-    , _builtInProfilesPath(std::move(builtInProfileBasePath))
     , _profileFilename(std::move(profileName))
 {
     setWindowTitle("Profile Editor");

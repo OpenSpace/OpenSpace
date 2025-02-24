@@ -117,8 +117,9 @@ private:
 
     void handleReturnFromWindowEditor(std::filesystem::path savePath);
 
-    // Returns true if a valid profile and window configuration has been chosen
-    bool hasValidSelection() const;
+    // Enables or disables the start button depending on the validity of the selected
+    // profile and configurations
+    void updateStartButton() const;
 
     const std::filesystem::path _assetPath;
     const std::filesystem::path _userAssetPath;

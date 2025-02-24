@@ -228,7 +228,11 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
     _profileBox->setEnabled(profileEnabled);
     connect(
         _profileBox, &SplitComboBox::selectionChanged,
-        this, &LauncherWindow::selectedProfile
+        this, &LauncherWindow::selectProfile
+    );
+    connect(
+        _profileBox, &SplitComboBox::selectionChanged,
+        this, &LauncherWindow::updateStartButton
     );
 
     {
@@ -294,7 +298,6 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
             catch (...) {}
             return std::string();
         }
-
     );
     _windowConfigBox->setObjectName("config");
     _windowConfigBox->setGeometry(geometry::WindowConfigBox);
@@ -306,6 +309,10 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
     connect(
         _windowConfigBox, &SplitComboBox::selectionChanged,
         this, &LauncherWindow::selectConfiguration
+    ); 
+    connect(
+        _windowConfigBox, &SplitComboBox::selectionChanged,
+        this, &LauncherWindow::updateStartButton
     );
 
     {
@@ -329,6 +336,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
     _startButton->setAutoDefault(true);
     _startButton->setAccessibleName("Start OpenSpace");
     _startButton->setFocus(Qt::OtherFocusReason);
+    updateStartButton();
 
 
     //
@@ -366,7 +374,9 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
 
 void LauncherWindow::editProfile() {
     auto [selection, path] = _profileBox->currentSelection();
-    ghoul_assert(std::filesystem::exists(path), "Path not found");
+    if (!std::filesystem::exists(path)) {
+        return;
+    }
     const bool isUserProfile = path.starts_with(_userProfilePath.string());
     ghoul_assert(
         isUserProfile || path.starts_with(_profilePath.string()),
@@ -580,7 +590,6 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
         profile,
         _assetPath,
         _userAssetPath,
-        _profilePath,
         _userProfilePath,
         this
     );
@@ -625,11 +634,11 @@ void LauncherWindow::handleReturnFromWindowEditor(std::filesystem::path savePath
     _windowConfigBox->populateList(p.string());
 }
 
-bool LauncherWindow::hasValidSelection() const {
+void LauncherWindow::updateStartButton() const {
     std::string profilePath = std::get<1>(_profileBox->currentSelection());
     std::string configPath = std::get<1>(_windowConfigBox->currentSelection());
 
-    return true;
+    _startButton->setEnabled(!profilePath.empty() && !configPath.empty());
 }
 
 bool LauncherWindow::wasLaunchSelected() const {

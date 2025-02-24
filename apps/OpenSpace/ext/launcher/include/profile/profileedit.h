@@ -54,7 +54,6 @@ public:
      */
     ProfileEdit(openspace::Profile& profile, std::string profileName,
         std::filesystem::path assetBasePath, std::filesystem::path userAssetBasePath,
-        std::filesystem::path builtInProfileBasePath,
         std::filesystem::path profileBasePath, QWidget* parent);
 
     /**
