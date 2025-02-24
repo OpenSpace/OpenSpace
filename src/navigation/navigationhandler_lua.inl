@@ -215,7 +215,7 @@ namespace {
  * \param identifier The identifier of the scene graph node to focus
  * \param shouldRetarget If true, retarget the camera to look at the focus node
  * \param shouldResetVelocities If true, reset the camera velocities so that the camera
- *                              stops after its done retagetting (or immediately if
+ *                              stops after its done retargetting (or immediately if
  *                              retargetting is not done)
  *
  */

@@ -1090,7 +1090,7 @@ void OrbitalNavigator::setFocusNode(const SceneGraphNode* node, bool resetVeloci
 void OrbitalNavigator::setFocusNode(const std::string& identifier, bool resetVelocities) {
     _resetVelocitiesOnAnchorChange = resetVelocities;
     _anchor = identifier;
-    _aim = std::string("");
+    _aim = std::string();
 }
 
 void OrbitalNavigator::updateAnchorNode(const SceneGraphNode* anchorNode)
@@ -1099,7 +1099,7 @@ void OrbitalNavigator::updateAnchorNode(const SceneGraphNode* anchorNode)
         _directlySetStereoDistance = true;
     }
 
-    bool changedAnchor = _anchorNode != anchorNode;
+    const bool changedAnchor = _anchorNode != anchorNode;
     _anchorNode = anchorNode;
     _syncedAnchorNode = anchorNode ? anchorNode->identifier() : "";
 
