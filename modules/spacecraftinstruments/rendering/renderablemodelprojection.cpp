@@ -47,12 +47,14 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
-    // Similarly to the [RenderablePlaneProjection](spacecraftinstruments_renderableplaneprojection) and
-    // [RenderablePlanetProjection](spacecraftinstruments_renderableplanetprojection), this Renderable type
-    // servers as a potential target for image projections from a spacecraft's instrument.
-    // This renderable will determine whenever an image in a currently loaded image
-    // sequence is projected whether that instrument's field of view intersects this model
-    // and will correctly project the captured image onto the model.
+    // Similarly to the
+    // [RenderablePlaneProjection](spacecraftinstruments_renderableplaneprojection) and
+    // [RenderablePlanetProjection](spacecraftinstruments_renderableplanetprojection),
+    // this Renderable type servers as a potential target for image projections from a
+    // spacecraft's instrument. This renderable will determine whenever an image in a
+    // currently loaded image sequence is projected whether that instrument's field of
+    // view intersects this model and will correctly project the captured image onto the
+    // model.
     struct [[codegen::Dictionary(RenderableModelProjection)]] Parameters {
         // The file or files that should be loaded, that specifies the model to load. The
         // file can contain filesystem tokens or can be specified relative to the
