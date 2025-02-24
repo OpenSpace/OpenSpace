@@ -46,7 +46,7 @@ namespace {
 
     // This specialized Renderable type is used as a target for projections from a
     // spacecraft instrument. Similarly to the
-    // [RenderablePlanetProject](renderableplanetprojection) it uses the spacecraft's
+    // [RenderablePlanetProject](spacecraftinstruments_renderableplanetprojection) it uses the spacecraft's
     // position and orientation and information about an instruments field-of-view and
     // set of images to project a captured image. In the case of this renderable the
     // target geometry is a two-dimensional plane that the image is projected on.
