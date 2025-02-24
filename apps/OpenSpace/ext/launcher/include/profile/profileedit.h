@@ -111,6 +111,7 @@ private:
 
     std::string _profileFilename;
 
+    QLineEdit* _profileEdit = nullptr;
     QLabel* _modulesLabel = nullptr;
     QLabel* _assetsLabel = nullptr;
     QTextEdit* _assetsEdit = nullptr;

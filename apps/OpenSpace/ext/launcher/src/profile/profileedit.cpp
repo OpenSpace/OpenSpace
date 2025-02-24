@@ -124,6 +124,18 @@ void ProfileEdit::createWidgets() {
     QBoxLayout* layout = new QVBoxLayout(this);
     QBoxLayout* topLayout = new QHBoxLayout;
     QBoxLayout* leftLayout = new QVBoxLayout;
+    {
+        QBoxLayout* container = new QHBoxLayout;
+        QLabel* profileLabel = new QLabel("Profile Name:");
+        profileLabel->setObjectName("profile");
+        container->addWidget(profileLabel);
+
+        _profileEdit = new QLineEdit(QString::fromStdString(_profileFilename));
+        _profileEdit->setPlaceholderText("required");
+        container->addWidget(_profileEdit);
+        layout->addLayout(container);
+    }
+    layout->addWidget(new Line);
 
     {
         QGridLayout* container = new QGridLayout;
@@ -422,10 +434,12 @@ std::string ProfileEdit::specifiedFilename() const {
 
 void ProfileEdit::approved() {
     // Show the save dialog
+    std::filesystem::path fullPath =
+        _profileBasePath / _profileEdit->text().toStdString();
     const QString path = QFileDialog::getSaveFileName(
         this,
         "Save Profile",
-        QString::fromStdString(_profileBasePath.string()),
+        QString::fromStdString(fullPath.string()),
         "Profile (*.profile)",
         nullptr
 #ifdef __linux__
