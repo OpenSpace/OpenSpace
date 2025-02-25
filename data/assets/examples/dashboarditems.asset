@@ -1,11 +1,6 @@
 asset.require("scene/solarsystem/planets/earth/earth")
 asset.require("scene/solarsystem/planets/earth/moon/moon")
 
-local Date = {
-  Type = "DashboardItemDate",
-  Identifier = "Date"
-}
-
 local SimulationIncrement = {
   Type = "DashboardItemSimulationIncrement",
   Identifier = "SimulationIncrement",
@@ -116,8 +111,6 @@ local InputState = {
 
 
 asset.onInitialize(function()
-  openspace.dashboard.addDashboardItem(Angle)
-  openspace.dashboard.addDashboardItem(Date)
   openspace.dashboard.addDashboardItem(SimulationIncrement)
   openspace.dashboard.addDashboardItem(Distance)
   openspace.dashboard.addDashboardItem(Framerate)
@@ -155,8 +148,6 @@ asset.onDeinitialize(function()
   openspace.dashboard.removeDashboardItem(Framerate)
   openspace.dashboard.removeDashboardItem(Distance)
   openspace.dashboard.removeDashboardItem(SimulationIncrement)
-  openspace.dashboard.removeDashboardItem(Date)
-  openspace.dashboard.removeDashboardItem(Angle)
 end)
 
 asset.export(Angle)

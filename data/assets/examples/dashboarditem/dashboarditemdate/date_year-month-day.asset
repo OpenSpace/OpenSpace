@@ -1,0 +1,17 @@
+-- Year Month Day
+-- This example adds a new DashboardItem that shows the current in-game simulation date
+-- with a resolution of days.
+
+local Item = {
+  Identifier = "DashboardItemDate_Example_YearMonthDay",
+  Type = "DashboardItemDate",
+  TimeFormat = "YYYY MON DD"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

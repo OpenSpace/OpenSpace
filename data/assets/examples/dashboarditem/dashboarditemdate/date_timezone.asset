@@ -1,0 +1,17 @@
+-- Timezone
+-- This example adds a new DashboardItem that shows the current in-game simulation date
+-- with a timezone of UTC-7 (=PDT)
+
+local Item = {
+  Identifier = "DashboardItemDate_Example_Timezone",
+  Type = "DashboardItemDate",
+  TimeFormat = "YYYY MON DD HR:MN:SC.### PDT ::UTC-7"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)
