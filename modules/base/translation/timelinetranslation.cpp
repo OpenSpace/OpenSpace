@@ -105,7 +105,7 @@ glm::dvec3 TimelineTranslation::position(const UpdateData& data) const {
         if (nextTime - prevTime > 0.0) {
             t = (now - prevTime) / (nextTime - prevTime);
         }
-        return t * next->data->position(data) + (1.0 - t) * prev->data->position(data);
+        return glm::mix(prev->data->position(data), next->data->position(data), t);
     }
     else {
         if (prevTime <= now && now < nextTime) {
