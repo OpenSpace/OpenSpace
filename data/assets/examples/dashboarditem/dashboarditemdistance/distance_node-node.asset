@@ -34,13 +34,11 @@ local Item = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Node1)
   openspace.addSceneGraphNode(Node2)
-
   openspace.dashboard.addDashboardItem(Item)
 end)
 
 asset.onDeinitialize(function()
   openspace.dashboard.removeDashboardItem(Item)
-
   openspace.removeSceneGraphNode(Node2)
   openspace.removeSceneGraphNode(Node1)
 end)

@@ -7,11 +7,6 @@ local SimulationIncrement = {
   GuiName = "Simulation Increment"
 }
 
-local Distance = {
-  Type = "DashboardItemDistance",
-  Identifier = "Distance"
-}
-
 local Framerate = {
   Type = "DashboardItemFramerate",
   Identifier = "Framerate"

@@ -106,9 +106,9 @@ namespace {
 
     // This `DashboardItem` displays the distance between two points. The points can be
     // defined either by the location of a scene graph node, the surface of a scene graph
-    // node (if it is a planetary body), the location of the current focus node, or the
-    // position of the camera. These definitions can be mixed and matched to calculate any
-    // combination of positions.
+    // node's bounding sphere, the location of the current focus node, or the position of
+    // the camera. These definitions can be mixed and matched to calculate any combination
+    // of positions.
     //
     // The resulting text can be formatted in the `FormatString` and the measurement unit
     // is chosed by changing the `Simplification` and `RequestedUnit` parameters.
