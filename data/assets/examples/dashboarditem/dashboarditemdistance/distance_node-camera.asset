@@ -1,0 +1,30 @@
+-- Node-Camera
+-- This example adds an invisible node and a dashboard item that shows the distance
+-- between those this node and the current focus node
+
+local Node1 = {
+  Identifier = "DashboardItemDistance_Example_NodeCamera_Node1",
+  GUI = {
+    Name = "DashboardItemDistance - Node-Node (Node 1)"
+  }
+}
+
+local Item = {
+  Identifier = "DashboardItemDistance_Example_NodeCamera",
+  Type = "DashboardItemDistance",
+  SourceType = "Node",
+  SourceNodeName = "DashboardItemDistance_Example_NodeCamera_Node1",
+  DestinationType = "Camera"
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node1)
+
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+
+  openspace.removeSceneGraphNode(Node1)
+end)
