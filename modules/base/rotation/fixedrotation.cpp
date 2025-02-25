@@ -190,7 +190,34 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This `Rotation` calculates the rotation in such a way that the attached scene graph
+    // node will always be relative to some other direction or pointing at another scene
+    // graph node. The `FixedRotation` must be `Attached` to the current scene graph node,
+    // meaning that the `Identifier` of the current scene graph node must be the value
+    // that is provided in the `Attached` parameter.
+    //
+    // The `FixedRotation` then needs exactly two of its three axes (`XAxis`, `YAxis`,
+    // `ZAxis`) specified. The axis that is missing will be calculated using a
+    // right-handed coordinate completion using the two provided axes. Each axis can be
+    // specified either by providing the `Identifier` of another scene graph node, or by
+    // providing a direction vector. For the general use-case of this `Rotation`, one of
+    // the provided axes usually is an `Identifier` and the other is a direction vector (
+    // see the examples below).
+    //
+    // Each axis has an `invert` option that will cause the provided axes to be considered
+    // inverted. For the direction-type of axis, this just inverts the provided values,
+    // but it is more useful for the `Identifier` version to construct a direction that
+    // either points towards or away from the provided scene graph node.
+    //
+    // Lastly, each axis has an `orthogonal` option. If that value is specified, the
+    // provided axis is instead cross producted with the other axis first with the
+    // resulting orthogonal vector used as the axis. This is primarily useful when
+    // specifying a direction vector and wanting to ensure that the total rotation remains
+    // a valid non-scaling rotation when the second axis can assume arbitrary values.
     struct [[codegen::Dictionary(FixedRotation)]] Parameters {
+        // [[codegen::verbatim(AttachedInfo.description)]]
+        std::string attached;
+
         // This value specifies the direction of the new X axis. If this value is not
         // specified, it will be computed by completing a right handed coordinate system
         // from the Y and Z axis, which must be specified instead. If this value is a
@@ -229,9 +256,6 @@ namespace {
 
         // [[codegen::verbatim(ZAxisInvertObjectInfo.description)]]
         std::optional<bool> zAxisInvert;
-
-        // [[codegen::verbatim(AttachedInfo.description)]]
-        std::optional<std::string> attached;
     };
 #include "fixedrotation_codegen.cpp"
 } // namespace
