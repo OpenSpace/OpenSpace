@@ -37,10 +37,16 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "If this value is set to 'true' this dashboard item is shown in the dashboard.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "If this value is set to 'true' this dashboard item is shown in the dashboard. "
+        "Otherwise it will be hidden."
     };
 
+    // A `DashboardItem` is an item that is rendered in a dashboard. There are multiple
+    // dashboards that can exist in the system; the default dashboard is rendered to the
+    // top left of the screen. Others can be added through the
+    // [ScreenSpaceDashboard](#base_screenspace_dashboard). Each `DashboardItem` shows its
+    // respective text in the dashboard if it is enabled and it depends on the concrete
+    // type of `DashboardItem` to determine what that information is.
     struct [[codegen::Dictionary(DashboardItem)]] Parameters {
         // Determines the type of the DashbordItem that should be created.
         std::string type;

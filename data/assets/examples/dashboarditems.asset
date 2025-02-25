@@ -1,15 +1,6 @@
 asset.require("scene/solarsystem/planets/earth/earth")
 asset.require("scene/solarsystem/planets/earth/moon/moon")
 
-local Angle = {
-  Type = "DashboardItemAngle",
-  Identifier = "Angle",
-  ReferenceType = "Node",
-  ReferenceNodeName = "Earth",
-  DestinationType = "Node",
-  DestinationNodeName = "Moon"
-}
-
 local Date = {
   Type = "DashboardItemDate",
   Identifier = "Date"

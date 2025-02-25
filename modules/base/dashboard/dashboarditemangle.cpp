@@ -98,9 +98,14 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    // This DashboardItem shows the angle between two scenegraph nodes relative to a
-    // reference node. The angle is calculated in the plane that is defined by the
-    // 'SourceNodeName', 'DestinationNodeName', and the 'ReferenceNodeName'.
+    // This `DashboardItem` shows the angle between the lines `Source`->`Reference` and
+    // `Source`->`Destination`. Each of `Source`, `Reference`, and `Destination` can be
+    // either the name of a node, the current focus node, or the position of the camera.
+    // The angle cannot be calculated if two of these three items are located in the same
+    // position, in which case an error message is printed in the `DashboardItem`. The
+    // `SourceNodeName`, `ReferenceNodeName`, and `DestinationNodeName` parameters are
+    // only used if the `SourceType`, `ReferenceType`, or `DestinationType` respectively
+    // is set to `Node`.
     struct [[codegen::Dictionary(DashboardItemAngle)]] Parameters {
         enum class [[codegen::map(Type)]] Type {
             Node,
@@ -109,7 +114,7 @@ namespace {
         };
 
         // [[codegen::verbatim(SourceTypeInfo.description)]]
-        std::optional<Type> sourceType;
+        Type sourceType;
         // [[codegen::verbatim(SourceNodeNameInfo.description)]]
         std::optional<std::string> sourceNodeName;
         // [[codegen::verbatim(ReferenceTypeInfo.description)]]
@@ -117,7 +122,7 @@ namespace {
         // [[codegen::verbatim(ReferenceNodeNameInfo.description)]]
         std::optional<std::string> referenceNodeName;
         // [[codegen::verbatim(DestinationTypeInfo.description)]]
-        std::optional<Type> destinationType;
+        Type destinationType;
         // [[codegen::verbatim(DestinationNodeNameInfo.description)]]
         std::optional<std::string> destinationNodeName;
     };
@@ -255,7 +260,8 @@ void DashboardItemAngle::update() {
     if (glm::length(a) == 0.0 || glm::length(b) == 0) {
         char* end = std::format_to(
             _localBuffer.data(),
-            "Could not compute angle at {} between {} and {}",
+            "Could not compute angle at {} between {} and {}. At least two of the three "
+            "items are placed in the same location",
             sourceInfo.second, destinationInfo.second, referenceInfo.second
         );
         _buffer = std::string(_localBuffer.data(), end - _localBuffer.data());
