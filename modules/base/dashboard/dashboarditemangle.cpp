@@ -172,12 +172,7 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
         { Type::Focus, "Focus" },
         { Type::Camera, "Camera" }
     });
-    if (p.sourceType.has_value()) {
-        _source.type = codegen::map<Type>(*p.sourceType);
-    }
-    else {
-        _source.type = Type::Camera;
-    }
+    _source.type = codegen::map<Type>(p.sourceType);
     addProperty(_source.type);
 
     _source.nodeName.onChange([this]() { _source.node = nullptr; });
@@ -222,12 +217,7 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
         { Type::Focus, "Focus" },
         { Type::Camera, "Camera" }
     });
-    if (p.destinationType.has_value()) {
-        _destination.type = codegen::map<Type>(*p.destinationType);
-    }
-    else {
-        _destination.type = Type::Focus;
-    }
+    _destination.type = codegen::map<Type>(p.destinationType);
     addProperty(_destination.type);
     _destination.nodeName.onChange([this]() { _destination.node = nullptr; });
     if (_destination.type == Type::Node) {

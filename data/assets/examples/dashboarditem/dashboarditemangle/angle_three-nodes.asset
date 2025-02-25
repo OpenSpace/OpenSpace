@@ -36,8 +36,8 @@ local Node3 = {
 }
 
 local Item = {
-  Type = "DashboardItemAngle",
   Identifier = "DashboardItemAngle_Example",
+  Type = "DashboardItemAngle",
   SourceType = "Node",
   SourceNodeName = "DashboardItemAngle_Example_Node1",
   ReferenceType = "Node",
