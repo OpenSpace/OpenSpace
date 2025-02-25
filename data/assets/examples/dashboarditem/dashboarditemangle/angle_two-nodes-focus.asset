@@ -3,14 +3,14 @@
 -- current focus node and those two nodes.
 
 local Node1 = {
-  Identifier = "DashboardItemAngle_Example_Node1",
+  Identifier = "DashboardItemAngle_Example_TwoNodesFocus_Node1",
   GUI = {
-    Name = "DashboardItemAngle - Basic (Node 1)"
+    Name = "DashboardItemAngle - Two Nodes & Focus (Node 1)"
   }
 }
 
 local Node2 = {
-  Identifier = "DashboardItemAngle_Example_Node2",
+  Identifier = "DashboardItemAngle_Example_TwoNodesFocus_Node2",
   Transform = {
     Translation = {
       Type = "StaticTranslation",
@@ -18,18 +18,18 @@ local Node2 = {
     }
   },
   GUI = {
-    Name = "DashboardItemAngle - Basic (Node 2)"
+    Name = "DashboardItemAngle - Two Nodes & Focus (Node 2)"
   }
 }
 
 local Item = {
-  Identifier = "DashboardItemAngle_Example",
+  Identifier = "DashboardItemAngle_Example_TwoNodesFocus",
   Type = "DashboardItemAngle",
   SourceType = "Focus",
   ReferenceType = "Node",
-  ReferenceNodeName = "DashboardItemAngle_Example_Node1",
+  ReferenceNodeName = "DashboardItemAngle_Example_TwoNodesFocus_Node1",
   DestinationType = "Node",
-  DestinationNodeName = "DashboardItemAngle_Example_Node2"
+  DestinationNodeName = "DashboardItemAngle_Example_TwoNodesFocus_Node2"
 }
 
 asset.onInitialize(function()

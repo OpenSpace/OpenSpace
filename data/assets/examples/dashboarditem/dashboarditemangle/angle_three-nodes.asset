@@ -3,14 +3,14 @@
 -- those three nodes.
 
 local Node1 = {
-  Identifier = "DashboardItemAngle_Example_Node1",
+  Identifier = "DashboardItemAngle_Example_ThreeNodes_Node1",
   GUI = {
-    Name = "DashboardItemAngle - Basic (Node 1)"
+    Name = "DashboardItemAngle - Three Nodes (Node 1)"
   }
 }
 
 local Node2 = {
-  Identifier = "DashboardItemAngle_Example_Node2",
+  Identifier = "DashboardItemAngle_Example_ThreeNodes_Node2",
   Transform = {
     Translation = {
       Type = "StaticTranslation",
@@ -18,12 +18,12 @@ local Node2 = {
     }
   },
   GUI = {
-    Name = "DashboardItemAngle - Basic (Node 2)"
+    Name = "DashboardItemAngle - Three Nodes (Node 2)"
   }
 }
 
 local Node3 = {
-  Identifier = "DashboardItemAngle_Example_Node3",
+  Identifier = "DashboardItemAngle_Example_ThreeNodes_Node3",
   Transform = {
     Translation = {
       Type = "StaticTranslation",
@@ -31,19 +31,19 @@ local Node3 = {
     }
   },
   GUI = {
-    Name = "DashboardItemAngle - Basic (Node 3)"
+    Name = "DashboardItemAngle - Three Nodes (Node 3)"
   }
 }
 
 local Item = {
-  Identifier = "DashboardItemAngle_Example",
+  Identifier = "DashboardItemAngle_Example_ThreeNodes",
   Type = "DashboardItemAngle",
   SourceType = "Node",
-  SourceNodeName = "DashboardItemAngle_Example_Node1",
+  SourceNodeName = "DashboardItemAngle_Exampl_ThreeNodese_Node1",
   ReferenceType = "Node",
-  ReferenceNodeName = "DashboardItemAngle_Example_Node2",
+  ReferenceNodeName = "DashboardItemAngle_Example_ThreeNodes_Node2",
   DestinationType = "Node",
-  DestinationNodeName = "DashboardItemAngle_Example_Node3"
+  DestinationNodeName = "DashboardItemAngle_Example_ThreeNodes_Node3"
 }
 
 asset.onInitialize(function()
