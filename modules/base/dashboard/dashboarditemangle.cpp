@@ -50,7 +50,7 @@ namespace {
         "SourceType",
         "Source Type",
         "The type of position that is used as the triangle apex used to calculate the "
-        "angle. The default value is 'Camera'.",
+        "angle.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -86,7 +86,7 @@ namespace {
         "Destination Type",
         "The type of position that is used as the destination to calculate the angle. "
         "The computed angle is the incident angle to Source in the triangle ("
-        "Source, Reference, Destination). The default value for this is 'Focus'.",
+        "Source, Reference, Destination).",
         openspace::properties::Property::Visibility::User
     };
 

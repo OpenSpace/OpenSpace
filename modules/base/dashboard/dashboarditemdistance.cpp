@@ -51,8 +51,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SourceTypeInfo = {
         "SourceType",
         "Source Type",
-        "The type of position that is used as the source to calculate the distance. The "
-        "default value is 'Camera'.",
+        "The type of position that is used as the source to calculate the distance.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -67,8 +66,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DestinationTypeInfo = {
         "DestinationType",
         "Destination Type",
-        "The type of position that is used as the destination to calculate the distance. "
-        "The default value for this is 'Focus'.",
+        "The type of position that is used as the destination to calculate the distance.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -106,6 +104,14 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This `DashboardItem` displays the distance between two points. The points can be
+    // defined either by the location of a scene graph node, the surface of a scene graph
+    // node (if it is a planetary body), the location of the current focus node, or the
+    // position of the camera. These definitions can be mixed and matched to calculate any
+    // combination of positions.
+    //
+    // The resulting text can be formatted in the `FormatString` and the measurement unit
+    // is chosed by changing the `Simplification` and `RequestedUnit` parameters.
     struct [[codegen::Dictionary(DashboardItemDistance)]] Parameters {
         enum class [[codegen::map(Type)]] TypeInfo {
             Node,
@@ -115,13 +121,13 @@ namespace {
         };
 
         // [[codegen::verbatim(SourceTypeInfo.description)]]
-        std::optional<TypeInfo> sourceType;
+        TypeInfo sourceType;
 
         // [[codegen::verbatim(SourceNodeNameInfo.description)]]
         std::optional<std::string> sourceNodeName;
 
         // [[codegen::verbatim(DestinationTypeInfo.description)]]
-        std::optional<TypeInfo> destinationType;
+        TypeInfo destinationType;
 
         // [[codegen::verbatim(DestinationNodeNameInfo.description)]]
         std::optional<std::string> destinationNodeName;
@@ -185,12 +191,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
             )
         );
     });
-    if (p.sourceType.has_value()) {
-        _source.type = codegen::map<Type>(*p.sourceType);
-    }
-    else {
-        _source.type = Type::Camera;
-    }
+    _source.type = codegen::map<Type>(p.sourceType);
     addProperty(_source.type);
 
     _source.nodeName.onChange([this]() { _source.node = nullptr; });
@@ -220,12 +221,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
             )
         );
     });
-    if (p.destinationType.has_value()) {
-        _destination.type = codegen::map<Type>(*p.destinationType);
-    }
-    else {
-        _destination.type = Type::Focus;
-    }
+    _destination.type = codegen::map<Type>(p.destinationType);
     addProperty(_destination.type);
     _destination.nodeName.onChange([this]() { _destination.node = nullptr; });
     if (_destination.type == Type::Node || _destination.type == Type::NodeSurface) {
