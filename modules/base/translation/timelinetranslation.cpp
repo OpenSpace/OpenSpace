@@ -26,6 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/time.h>
 #include <optional>
@@ -71,6 +72,8 @@ TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary)
 
         ghoul::mm_unique_ptr<Translation> translation =
             Translation::createFromDictionary(kf.second);
+        translation->setIdentifier(makeIdentifier(kf.first));
+        addPropertySubOwner(translation.get());
         _timeline.addKeyframe(t, std::move(translation));
     }
 

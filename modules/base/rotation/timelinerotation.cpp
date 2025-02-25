@@ -26,6 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/time.h>
 #include <optional>
@@ -72,6 +73,8 @@ TimelineRotation::TimelineRotation(const ghoul::Dictionary& dictionary)
         ghoul::mm_unique_ptr<Rotation> rotation = Rotation::createFromDictionary(
             kf.second
         );
+        rotation->setIdentifier(makeIdentifier(kf.first));
+        addPropertySubOwner(rotation.get());
         _timeline.addKeyframe(t, std::move(rotation));
     }
 
