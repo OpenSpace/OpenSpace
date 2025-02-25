@@ -168,10 +168,19 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This `Renderable` shows a three-dimensional model. The provided model may contain
+    // textures and animations and is affected by the optionally-provided light sources.
+    // Each model's scale can be adapted by the `ModelScale` and `InvertModelScale`
+    // parameters to account for discrepancies in the units that a model was created in.
+    // See the Documentation page "Scaling of models" for more detailed information.
+    //
+    // Limitation: At the time, only animations of the "Keyframe" type are supported. See
+    // each specific model format to see if it supports that type of animation.
+
     struct [[codegen::Dictionary(RenderableModel)]] Parameters {
-        // The file or files that should be loaded in this RenderableModel. The file can
-        // contain filesystem tokens. This specifies the model that is rendered by
-        // the Renderable.
+        // The file or files that should be loaded in this RenderableModel. Most common
+        // model formats, such as .obj, .fbx, or .gltf. For a full list of supported file
+        // formats, see https://github.com/assimp/assimp/blob/master/doc/Fileformats.md
         std::filesystem::path geometryFile;
 
         // The scale of the model. For example, if the model is in centimeters then
