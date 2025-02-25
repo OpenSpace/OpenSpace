@@ -1093,8 +1093,7 @@ void OrbitalNavigator::setFocusNode(const std::string& identifier, bool resetVel
     _aim = std::string();
 }
 
-void OrbitalNavigator::updateAnchorNode(const SceneGraphNode* anchorNode)
-{
+void OrbitalNavigator::updateAnchorNode(const SceneGraphNode* anchorNode) {
     if (!_anchorNode) {
         _directlySetStereoDistance = true;
     }
