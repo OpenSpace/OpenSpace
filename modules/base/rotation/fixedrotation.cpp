@@ -192,17 +192,26 @@ namespace {
 
     // This `Rotation` calculates the rotation in such a way that the attached scene graph
     // node will always be relative to some other direction or pointing at another scene
-    // graph node. The `FixedRotation` must be `Attached` to the current scene graph node,
-    // meaning that the `Identifier` of the current scene graph node must be the value
-    // that is provided in the `Attached` parameter.
+    // graph node.
     //
-    // The `FixedRotation` then needs exactly two of its three axes (`XAxis`, `YAxis`,
-    // `ZAxis`) specified. The axis that is missing will be calculated using a
-    // right-handed coordinate completion using the two provided axes. Each axis can be
-    // specified either by providing the `Identifier` of another scene graph node, or by
-    // providing a direction vector. For the general use-case of this `Rotation`, one of
-    // the provided axes usually is an `Identifier` and the other is a direction vector (
-    // see the examples below).
+    // The first use-case of the `FixedRotation` needs exactly two of its three axes
+    // (`XAxis`, `YAxis`, `ZAxis`) specified with the last axis being unspecified. The
+    // axis that is missing will be calculated using a right-handed coordinate completion
+    // using the two provided axes. Each axis can be specified either by providing the
+    // `Identifier` of another scene graph node, or by providing a direction vector. For
+    // the general use-case of this `Rotation`, one of the provided axes usually is an
+    // `Identifier` and the other is a direction vector (see the examples below).
+    // If any of the axes is using the `Identifier` of another scene graph node, the
+    // `Attached` value must be specfied and should almost always be the identifier of the
+    // scene graph node to which this `Rotation` belongs.
+    //
+    // A second use-case for this `Rotation` is to directly specify coordinate axis
+    // mappings. In this use-case, two or all three axes are specified using direction
+    // vectors. Causing the new x-axis to be pointing along the direction provided to
+    // `XAxis` in the unmodified coordinate frame, and the same for all three. In this
+    // use-case, all directions are assumed to be normalized. If only two direction
+    // vectors are specified, the third direction is computed using a right-handed
+    // coordinate system completion.
     //
     // Each axis has an `invert` option that will cause the provided axes to be considered
     // inverted. For the direction-type of axis, this just inverts the provided values,
@@ -210,13 +219,16 @@ namespace {
     // either points towards or away from the provided scene graph node.
     //
     // Lastly, each axis has an `orthogonal` option. If that value is specified, the
-    // provided axis is instead cross producted with the other axis first with the
+    // provided axis is instead cross-producted with the other axis first with the
     // resulting orthogonal vector used as the axis. This is primarily useful when
     // specifying a direction vector and wanting to ensure that the total rotation remains
-    // a valid non-scaling rotation when the second axis can assume arbitrary values.
+    // a valid non-skewed rotation (meaning that all three coordinate axes are orthogonal
+    // to each other) when the second axis can assume arbitrary values. Unless there is a
+    // very good reason not to, whenever an axis is specified as a direction vector, that
+    // axis' `orthogonal` setting should also probably be enabled.
     struct [[codegen::Dictionary(FixedRotation)]] Parameters {
         // [[codegen::verbatim(AttachedInfo.description)]]
-        std::string attached;
+        std::optional<std::string> attached;
 
         // This value specifies the direction of the new X axis. If this value is not
         // specified, it will be computed by completing a right handed coordinate system
