@@ -43,6 +43,8 @@ namespace {
     constexpr double DefaultBrushSize = 15;
     constexpr double DefaultBrushSaturation = 100;
     constexpr double DefaultFilterStrength = 1;
+    constexpr std::string_view TimeStringFormat = "YYYY MON DD HR:MN:SC.###";
+    constexpr unsigned int TimeStringLength = 41;
 
     std::vector<std::vector<double>> gaussianFilter(int kernelSize, double filterStrength) {
         ghoul_assert(kernelSize % 2 == 1, "Kernel size must be odd");
@@ -148,28 +150,29 @@ ImpactCorridorTask::ImpactCorridorTask(const ghoul::Dictionary& dictionary) {
     _outputFilename = absPath(p.outputFilename);
     _imageWidth = p.imageWidth;
     _imageHeight = p.imageHeight;
-    _colorMap = absPath(p.colorMap);
-    _brushSize = p.brushSize.value_or(DefaultBrushSize);
-    _brushSaturation = p.brushSaturation.value_or(DefaultBrushSaturation);
-    _filterStrength = p.filterStrength.value_or(DefaultFilterStrength);
-    _invertColorMap = p.invertColorMap.value_or(false);
 
+    _colorMap = absPath(p.colorMap);
     if (!std::filesystem::exists(_colorMap)) {
         throw ghoul::RuntimeError(
             std::format("Cannot find color map file {}", _colorMap)
         );
     }
 
-    if (p.nightMap.has_value()) {
-        _nightMap = absPath(*p.nightMap);
-        if (!std::filesystem::exists(_nightMap)) {
-            throw ghoul::RuntimeError(
-                std::format("Cannot find night map file {}", _nightMap)
-            );
-        }
+    _brushSize = p.brushSize.value_or(DefaultBrushSize);
+    if (_brushSize % 2 == 0) {
+        throw ghoul::RuntimeError("Brush size must be an odd number");
     }
 
-    ghoul_assert(_brushSize % 2 == 1, "Brush size must be an odd number");
+    _brushSaturation = p.brushSaturation.value_or(DefaultBrushSaturation);
+    _filterStrength = p.filterStrength.value_or(DefaultFilterStrength);
+    _invertColorMap = p.invertColorMap.value_or(false);
+
+    _nightMap = absPath(p.nightMap);
+    if (!std::filesystem::exists(_nightMap)) {
+        throw ghoul::RuntimeError(
+            std::format("Cannot find night map file {}", _nightMap)
+        );
+    }
 }
 
 std::string ImpactCorridorTask::description() {
@@ -408,6 +411,9 @@ std::vector<ImpactCorridorTask::ImpactPixel> ImpactCorridorTask::plotImpactData(
     }
 
     // For the risk we need the final impact probability to already be in place
+    impactCounter = 0;
+    LINFO("Creating pixel impact risk data...");
+    progressCallback(0.0);
     for (const ImpactCoordinate& impact : _impactCoordinates) {
         // Find the pixel in the texture data list for the impact
         int pixelH = convertLatitude(impact.latitude, _imageHeight);
@@ -454,6 +460,9 @@ std::vector<ImpactCorridorTask::ImpactPixel> ImpactCorridorTask::plotImpactData(
                 data[index].impactRisk = impactRisk * data[index].impactProbability;
             }
         }
+
+        ++impactCounter;
+        progressCallback(impactCounter / static_cast<float>(_impactCoordinates.size()));
     }
 
     return data;
@@ -505,6 +514,42 @@ void ImpactCorridorTask::processImage(const Task::ProgressCallback& progressCall
         default:
             throw ghoul::MissingCaseException();
     }
+
+    // Save the minimum and maximum values for the chosen data type to a file so that we
+    // can create a color legend later
+    std::string rangeFilename =
+        std::format("{}-{}-range.txt", _outputFilename.string(), dataTypeName);
+    std::ofstream file(rangeFilename);
+    if (!file) {
+        LERROR(std::format("Could not open file {} to store value range", rangeFilename));
+        return;
+    }
+
+    if (dataType == DataType::Time) {
+        // Convert the time to a readable string
+        SpiceChar readableTime[TimeStringLength];
+
+        timout_c(
+            minValue,                // Time in J2000 seconds
+            TimeStringFormat.data(), // Format for the output string
+            TimeStringLength,        // Length of the output string plus 1
+            readableTime             // Result
+        );
+        file << std::format("Min {:<15} {:<30}\n", dataTypeName, readableTime);
+
+        timout_c(
+            maxValue,                // Time in J2000 seconds
+            TimeStringFormat.data(), // Format for the output string
+            TimeStringLength,        // Length of the output string plus 1
+            readableTime             // Result
+        );
+        file << std::format("Max {:<15} {:<30}\n", dataTypeName, readableTime);
+    }
+    else {
+        file << std::format("Min {:<15} {:<20}\n", dataTypeName, minValue);
+        file << std::format("Max {:<15} {:<20}\n", dataTypeName, maxValue);
+    }
+    file.close();
 
     // Find the maximum intensity value
     double maxIntensity = 0.0;
