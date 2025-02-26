@@ -55,6 +55,8 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // This `DashboardItem` shows the velocity of the camera, that is how fast the camera
+    // has moved since the last frame in the amount of time it took to render that frame.
     struct [[codegen::Dictionary(DashboardItemVelocity)]] Parameters {
         // [[codegen::verbatim(SimplificationInfo.description)]]
         std::optional<bool> simplification;
