@@ -143,6 +143,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     if (p.requestedUnit.has_value()) {
         const TimeUnit unit = timeUnitFromString(*p.requestedUnit);
         _requestedUnit = static_cast<int>(unit);
+        _doSimplification = false;
     }
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
     addProperty(_requestedUnit);

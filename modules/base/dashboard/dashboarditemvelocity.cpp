@@ -81,7 +81,6 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
     , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    _doSimplification = p.simplification.value_or(_doSimplification);
     _doSimplification.onChange([this]() {
         _requestedUnit.setVisibility(
             _doSimplification ?
@@ -89,6 +88,7 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
             properties::Property::Visibility::User
         );
     });
+    _doSimplification = p.simplification.value_or(_doSimplification);
     addProperty(_doSimplification);
 
     for (const DistanceUnit u : DistanceUnits) {
@@ -101,8 +101,8 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
     if (p.requestedUnit.has_value()) {
         const DistanceUnit unit = distanceUnitFromString(*p.requestedUnit);
         _requestedUnit = static_cast<int>(unit);
+        _doSimplification = false;
     }
-    _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
     addProperty(_requestedUnit);
 }
 
