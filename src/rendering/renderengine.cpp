@@ -330,8 +330,18 @@ RenderEngine::RenderEngine()
         glm::vec3(-glm::pi<float>()),
         glm::vec3(glm::pi<float>())
     )
-    , _enabledFontColor(EnabledFontColorInfo, glm::vec4(0.2f, 0.75f, 0.2f, 1.f))
-    , _disabledFontColor(DisabledFontColorInfo, glm::vec4(0.55f, 0.2f, 0.2f, 1.f))
+    , _enabledFontColor(
+        EnabledFontColorInfo,
+        glm::vec4(0.2f, 0.75f, 0.2f, 1.f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+    )
+    , _disabledFontColor(
+        DisabledFontColorInfo,
+        glm::vec4(0.55f, 0.2f, 0.2f, 1.f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+    )
 {
     addProperty(_showOverlayOnClients);
     addProperty(_showLog);
