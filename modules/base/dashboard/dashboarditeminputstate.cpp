@@ -69,6 +69,10 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // This `DashboardItem` shows the current state of the different methods to provide
+    // user input. Currently the state for the keyboard, mouse, and joystick are
+    // displayed. Each input method has the ability to be selectively disabled, meaning
+    // that all inputs from that input method are ignored by the system entirely.
     struct [[codegen::Dictionary(DashboardItemPropertyValue)]] Parameters {
         // [[codegen::verbatim(ShowWhenEnabledInfo.description)]]
         std::optional<bool> showWhenEnabled;

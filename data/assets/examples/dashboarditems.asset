@@ -99,11 +99,6 @@ local ElapsedTime = {
   ReferenceTime = "2022-10-12 12:00:00"
 }
 
-local InputState = {
-  Type = "DashboardItemInputState",
-  Identifier = "InputState"
-}
-
 
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(SimulationIncrement)
@@ -121,13 +116,9 @@ asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(PropertyValueVec2)
   openspace.dashboard.addDashboardItem(PropertyValueVec3)
   openspace.dashboard.addDashboardItem(PropertyValueVec4)
-  openspace.dashboard.addDashboardItem(ElapsedTime)
-  openspace.dashboard.addDashboardItem(InputState)
 end)
 
 asset.onDeinitialize(function()
-  openspace.dashboard.removeDashboardItem(InputState)
-  openspace.dashboard.removeDashboardItem(ElapsedTime)
   openspace.dashboard.removeDashboardItem(PropertyValueVec4)
   openspace.dashboard.removeDashboardItem(PropertyValueVec3)
   openspace.dashboard.removeDashboardItem(PropertyValueVec2)

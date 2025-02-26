@@ -1,0 +1,16 @@
+-- Basic
+-- This example adds a dashboard item that shows the input state of the three differnet
+-- input devices
+
+local Item = {
+  Identifier = "DashboardItemInputState_Example",
+  Type = "DashboardItemInputState"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)
