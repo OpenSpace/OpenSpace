@@ -166,9 +166,7 @@ void DashboardItemInputState::update() {
         }
     }
 
-    if (!text.empty()) {
-        _buffer = ghoul::join(std::move(text), "\n");
-    }
+    _buffer = ghoul::join(std::move(text), "\n");
 }
 
 glm::vec2 DashboardItemInputState::size() const {
