@@ -129,7 +129,7 @@ namespace {
         std::optional<bool> invertColorMap;
 
         // Path to the night layer map, used to do a risk analysis based on population
-        std::optional<std::string> nightMap;
+        std::string nightMap;
     };
 #include "impactcorridortask_codegen.cpp"
 } // namespace
@@ -161,16 +161,12 @@ ImpactCorridorTask::ImpactCorridorTask(const ghoul::Dictionary& dictionary) {
     }
 
     if (p.nightMap.has_value()) {
-        _hasNightMap = true;
         _nightMap = absPath(*p.nightMap);
         if (!std::filesystem::exists(_nightMap)) {
             throw ghoul::RuntimeError(
                 std::format("Cannot find night map file {}", _nightMap)
             );
         }
-    }
-    else {
-        _hasNightMap = false;
     }
 
     ghoul_assert(_brushSize % 2 == 1, "Brush size must be an odd number");
@@ -188,109 +184,77 @@ void ImpactCorridorTask::perform(const Task::ProgressCallback& progressCallback)
     // Settings for the images
     const unsigned int NumPixels = _imageWidth * _imageHeight;
     const unsigned int Size = NumPixels * NChannels;
-    std::vector<glm::vec4> pixels = std::vector<glm::vec4>(NumPixels, glm::vec4(0.0));
 
     // Read the color map
     openspace::dataloader::ColorMap colorMap = dataloader::color::loadFile(_colorMap);
 
-    // Create an impact corridor image with impact probability as the data
-    // Create a impact data pixel list that only have information about impact probability
+    // Read the night layer map
+    int nightWidth = 0;
+    int nightHeight = 0;
+    int nightChannels = 0;
+    unsigned char* nightImageData = stbi_load(
+        _nightMap.string().c_str(),
+        &nightWidth,
+        &nightHeight,
+        &nightChannels,
+        0
+    );
+    if (!nightImageData) {
+        throw ghoul::RuntimeError(std::format(
+            "Error: {} reading night map {}", stbi_failure_reason(), _nightMap
+        ));
+    }
+
+    // Plot all impacts on a map and calculate all data related to it, stor ethis in a
+    // flat list of data for each pixel
     LINFO("Creating pixel data...");
     progressCallback(0.0);
-    std::vector<double> data = plotImpactData(progressCallback, NumPixels);
-    auto it = std::max_element(data.begin(), data.end());
-    if (it == data.end() || std::abs(*it) < std::numeric_limits<double>::epsilon()) {
-        LDEBUG("Could not find max element in data");
-    }
-    double maxSaturation = *it;
-
-    // Apply the transfer function for each pixel and store the resulting color
-    LINFO("Processing impact probability image...");
-    progressCallback(0.0);
-    applyColorMap(
+    std::vector<ImpactPixel> data = plotImpactData(
         progressCallback,
+        NumPixels,
+        nightImageData,
+        nightWidth,
+        nightHeight,
+        nightChannels
+    );
+
+    // Create the impact corridor image with impact probability as the data
+    std::vector<glm::vec4> pixels = std::vector<glm::vec4>(NumPixels, glm::vec4(0.0));
+    processImage(
+        progressCallback,
+        DataType::Probability,
         data,
         NumPixels,
-        0.0,
-        maxSaturation,
+        Size,
         colorMap,
         pixels
     );
 
-    // Write the impact image to file
-    writeFinalImage(
+
+    // and color the image based on that instead of impact proability
+    // Clear all previous data from the pixel list
+    pixels = std::vector<glm::vec4>(NumPixels, glm::vec4(0.0));
+    processImage(
         progressCallback,
-        _outputFilename.string() + "-probability.png",
+        DataType::Risk,
+        data,
         NumPixels,
         Size,
+        colorMap,
         pixels
     );
 
-    // Use the night layer image to estimate impact risk due to population density
-    // and color the image based on that instead of impact proability
-    if (_hasNightMap) {
-        // Clear all previous data from the pixel list
-        pixels = std::vector<glm::vec4>(NumPixels, glm::vec4(0.0));
-
-        // Read the map
-        int nightWidth = 0;
-        int nightHeight = 0;
-        int nightChannels = 0;
-        unsigned char* nightImageData = stbi_load(
-            _nightMap.string().c_str(),
-            &nightWidth,
-            &nightHeight,
-            &nightChannels,
-            0
-        );
-        if (!nightImageData) {
-            throw ghoul::RuntimeError(std::format(
-                "Error: {} reading night map {}", stbi_failure_reason(), _nightMap
-            ));
-        }
-
-        // Plot all impacts and sample the night layer to get a risk estimate for that impact
-        LINFO("Creating risk pixel data...");
-        progressCallback(0.0);
-        std::vector<double> nightData = plotRiskData(
-            progressCallback,
-            nightImageData,
-            nightWidth,
-            nightHeight,
-            nightChannels,
-            NumPixels
-        );
-        auto itN = std::max_element(nightData.begin(), nightData.end());
-        if (itN == nightData.end() || std::abs(*itN) < std::numeric_limits<double>::epsilon()) {
-            LDEBUG("Could not find max element in night data");
-        }
-        double maxNightSaturation = *itN;
-
-        // then color the image based on the risk estimate
-        LINFO("Processing impact risk image...");
-        progressCallback(0.0);
-        applyColorMap(
-            progressCallback,
-            nightData,
-            NumPixels,
-            0.0,
-            maxNightSaturation,
-            colorMap,
-            pixels
-        );
-
-        // Write the impact image to file
-        writeFinalImage(
-            progressCallback,
-            _outputFilename.string() + "-risk.png",
-            NumPixels,
-            Size,
-            pixels
-        );
-    }
-
-    // @TODO: Use the color map to color the time of impact difference instead of impact
-    // probability
+    // Use the color map to color the time of impact difference
+    pixels = std::vector<glm::vec4>(NumPixels, glm::vec4(0.0));
+    processImage(
+        progressCallback,
+        DataType::Time,
+        data,
+        NumPixels,
+        Size,
+        colorMap,
+        pixels
+    );
 }
 
 void ImpactCorridorTask::readImpactFile() {
@@ -382,11 +346,15 @@ int ImpactCorridorTask::pixelIndex(int pixelW, int pixelH, int numChannels,
     return pixelIndex;
 }
 
-std::vector<double> ImpactCorridorTask::plotImpactData(
+std::vector<ImpactCorridorTask::ImpactPixel> ImpactCorridorTask::plotImpactData(
                                            const Task::ProgressCallback& progressCallback,
-                                                             const unsigned int nPixels)
+                                                                     unsigned int nPixels,
+                                                           const unsigned char* nightData,
+                                                                           int nightWidth,
+                                                                          int nightHeight,
+                                                                        int nightChannels)
 {
-    std::vector<double> data = std::vector<double>(nPixels, 0.0);
+    std::vector<ImpactPixel> data = std::vector<ImpactPixel>(nPixels);
     const int brushRadius = _brushSize / 2; // Intentionally rounded down
 
     // Use a gaussian kernel to create a smooth circle around the impact location
@@ -399,6 +367,9 @@ std::vector<double> ImpactCorridorTask::plotImpactData(
         // Find the pixel in the texture data list for the impact
         int pixelH = convertLatitude(impact.latitude, _imageHeight);
         int pixelW = convertLongitude(impact.longitude, _imageWidth);
+
+        // Convert the time to a J2000 time
+        double time = SpiceManager::ref().ephemerisTimeFromDate(impact.time);
 
         // Draw a circle around the impact point
         for (int w = -brushRadius; w <= brushRadius; w++) {
@@ -411,13 +382,24 @@ std::vector<double> ImpactCorridorTask::plotImpactData(
                     _imageHeight,
                     true
                 );
+                data[index].hasImpact = true;
 
                 // Use the gaussian kernel to create a smooth circle around the impact
-                double saturation =
-                    _brushSaturation * kernel[w + brushRadius][h + brushRadius];
+                double intensity = kernel[w + brushRadius][h + brushRadius];
+                data[index].intensity += intensity;
 
-                // Add the saturation to the pixel data
-                data[index] += saturation;
+                // Probability
+                double probability = _brushSaturation * intensity;
+                data[index].impactProbability += probability;
+
+                // Time
+                if (data[index].impactTime > 0.0) {
+                    double average = (data[index].impactTime + time) / 2.0;
+                    data[index].impactTime = average;
+                }
+                else {
+                    data[index].impactTime = time;
+                }
             }
         }
 
@@ -425,31 +407,13 @@ std::vector<double> ImpactCorridorTask::plotImpactData(
         progressCallback(impactCounter / static_cast<float>(_impactCoordinates.size()));
     }
 
-    return data;
-}
-
-std::vector<double> ImpactCorridorTask::plotRiskData(
-                                           const Task::ProgressCallback& progressCallback,
-                                                           const unsigned char* nightData,
-                                                                           int nightWidth,
-                                                                          int nightHeight,
-                                                                        int nightChannels,
-                                                               const unsigned int nPixels)
-{
-    std::vector<double> data = std::vector<double>(nPixels, 0.0);
-    const int brushRadius = _brushSize / 2; // Intentionally rounded down
-
-    // Use a gaussian kernel to create a smooth circle around the impact location
-    const std::vector<std::vector<double>> kernel =
-        gaussianFilter(_brushSize, _filterStrength);
-
-    // Plot all impact coordinates on the pixel list
-    int impactCounter = 0;
+    // For the risk we need the final impact probability to already be in place
     for (const ImpactCoordinate& impact : _impactCoordinates) {
         // Find the pixel in the texture data list for the impact
         int pixelH = convertLatitude(impact.latitude, _imageHeight);
         int pixelW = convertLongitude(impact.longitude, _imageWidth);
 
+        // Use the night layer image to estimate impact risk due to population density
         // Sample the surrounding area in the night map to estimate the risk of the impact
         double risk = 0.0;
         for (int w = -brushRadius; w <= brushRadius; w++) {
@@ -468,12 +432,12 @@ std::vector<double> ImpactCorridorTask::plotRiskData(
                     ));
                 }
 
-                risk += _brushSaturation * *(nightData + nightIndex);
+                risk += *(nightData + nightIndex);
             }
         }
         risk /= static_cast<double>(_brushSize * _brushSize);
 
-        // Draw a circle around the impact point
+        // Multiply the risk with the final impact probability to get the final risk value
         for (int w = -brushRadius; w <= brushRadius; w++) {
             for (int h = -brushRadius; h <= brushRadius; h++) {
                 int index = pixelIndex(
@@ -485,44 +449,137 @@ std::vector<double> ImpactCorridorTask::plotRiskData(
                     true
                 );
 
-                // Use the gaussian kernel to create a smooth circle around the impact
-                double saturation =
-                    _brushSaturation * risk * kernel[w + brushRadius][h + brushRadius];
-
-                // Add the saturation to the pixel data
-                data[index] += saturation;
+                // Risk
+                double impactRisk = _brushSaturation * risk;
+                data[index].impactRisk = impactRisk * data[index].impactProbability;
             }
         }
-
-        ++impactCounter;
-        progressCallback(impactCounter / static_cast<float>(_impactCoordinates.size()));
     }
 
     return data;
 }
 
+void ImpactCorridorTask::processImage(const Task::ProgressCallback& progressCallback,
+                                      DataType dataType,
+                                      const std::vector<ImpactPixel>& data,
+                                      unsigned int nPixels, unsigned int size,
+                                      const openspace::dataloader::ColorMap& colorMap,
+                                      std::vector<glm::vec4>& pixels)
+{
+    // Find the minimum and maximum values for the chosen data type
+    std::string dataTypeName;
+    double minValue = std::numeric_limits<double>::max();
+    double maxValue = 0.0;
+    switch (dataType) {
+        case DataType::Probability:
+            dataTypeName = "probability";
+            for (int i = 0; i < nPixels; ++i) {
+                if (!data[i].hasImpact) {
+                    continue;
+                }
+                minValue = 0.0;
+                maxValue = std::max(maxValue, data[i].impactProbability);
+            }
+            break;
+        case DataType::Risk:
+            dataTypeName = "risk";
+
+            for (int i = 0; i < nPixels; ++i) {
+                if (!data[i].hasImpact) {
+                    continue;
+                }
+                minValue = 0.0;
+                maxValue = std::max(maxValue, data[i].impactRisk);
+            }
+            break;
+        case DataType::Time:
+            dataTypeName = "time";
+            for (int i = 0; i < nPixels; ++i) {
+                if (!data[i].hasImpact) {
+                    continue;
+                }
+                minValue = std::min(minValue, data[i].impactTime);
+                maxValue = std::max(maxValue, data[i].impactTime);
+            }
+            break;
+        default:
+            throw ghoul::MissingCaseException();
+    }
+
+    // Find the maximum intensity value
+    double maxIntensity = 0.0;
+    for (int i = 0; i < nPixels; ++i) {
+        if (!data[i].hasImpact) {
+            continue;
+        }
+        maxIntensity = std::max(maxIntensity, data[i].intensity);
+    }
+
+    // Apply the transfer function for each pixel and store the resulting color
+    LINFO(std::format("Processing impact {} image...", dataTypeName));
+    progressCallback(0.0);
+    applyColorMap(
+        progressCallback,
+        dataType,
+        data,
+        nPixels,
+        minValue,
+        maxValue,
+        maxIntensity,
+        colorMap,
+        pixels
+    );
+
+    // Write the impact image to file
+    writeFinalImage(
+        progressCallback,
+        std::format("{}-{}.png", _outputFilename.string(), dataTypeName),
+        nPixels,
+        size,
+        pixels
+    );
+}
+
 void ImpactCorridorTask::applyColorMap(const Task::ProgressCallback& progressCallback,
-                                       const std::vector<double>& data, int nPixels,
-                                       double minValue, double maxValue,
+                                       DataType dataType,
+                                       const std::vector<ImpactPixel>& data,
+                                       int nPixels, double minValue, double maxValue,
+                                       double maxIntensity,
                                        const openspace::dataloader::ColorMap& colorMap,
                                        std::vector<glm::vec4>& pixels)
 {
     for (int p = 0; p < nPixels; ++p) {
-        // Skip fully transparent pixels
-        if (std::abs(data[p]) < std::numeric_limits<double>::epsilon()) {
+        if (!data[p].hasImpact) {
             progressCallback((p + 1) / static_cast<float>(nPixels));
             continue;
         }
 
+        // Get the selected data type
+        double dataValue = 0.0;
+        switch (dataType) {
+            case DataType::Probability:
+                dataValue = data[p].impactProbability;
+                break;
+            case DataType::Risk:
+                dataValue = data[p].impactRisk;
+                break;
+            case DataType::Time:
+                dataValue = data[p].impactTime;
+                break;
+            default:
+                throw ghoul::MissingCaseException();
+        }
+
         // Find the index in the color map that cooresponds to the value
-        double normalizedValue = (data[p] - minValue) / (maxValue - minValue);
+        double normalizedValue = (dataValue - minValue) / (maxValue - minValue);
         int colorMapIndex = static_cast<int>(std::round(
             normalizedValue * (static_cast<int>(colorMap.entries.size()) - 1)
         ));
-        if (colorMapIndex < 0 || colorMapIndex >= colorMap.entries.size()) {
-            LERROR(std::format("Color map index out of bounds: {}", colorMapIndex));
-            progressCallback((p + 1) / static_cast<float>(nPixels));
-            continue;
+        if (colorMapIndex < 0) {
+            colorMapIndex = 0;
+        }
+        else if (colorMapIndex >= colorMap.entries.size()) {
+            colorMapIndex = colorMap.entries.size() - 1;
         }
 
         // Invert the color map if needed
@@ -532,7 +589,7 @@ void ImpactCorridorTask::applyColorMap(const Task::ProgressCallback& progressCal
 
         // Get and save the color that this value cooresponds to in the color map
         glm::vec4 color = colorMap.entries[colorMapIndex];
-        color.a = static_cast<float>(normalizedValue);
+        color.a = static_cast<float>(data[p].intensity / maxIntensity);
         pixels[p] = color;
 
         progressCallback((p + 1) / static_cast<float>(nPixels));

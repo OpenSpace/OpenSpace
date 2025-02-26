@@ -51,6 +51,20 @@ private:
         double longitude = 0.0;
     };
 
+    struct ImpactPixel {
+        double impactProbability = 0.0;
+        double impactRisk = 0.0;
+        double impactTime = 0.0;
+        double intensity = 0.0;
+        bool hasImpact = false;
+    };
+
+    enum class DataType {
+        Probability = 0,
+        Risk,
+        Time
+    };
+
     /**
      * Read the entire impact file and store all impact coordinates in the
      * _impactCoordinates list. Use the ghouls getline function to handle line endings.
@@ -88,43 +102,58 @@ private:
 
     /**
      * Plot all impacts onto a flat list of pixels with a gausian filter for smmothness,
-     * overlapping plots are added together. This list only contain one channel per pixel
-     * which is the summer data contirbution for that resulting pixel. Color channels are
-     * added in a later step based on a color map and the type of data. Multiple types of
-     * data can be plotted and the caller chooses which one to use.
+     * overlapping plots are added together or averaged depending on the type of data.
+     * This list only contain one channel per pixel which is the summer data contirbution
+     * for that resulting pixel. Color channels are added in a later step based on a color
+     * map and the type of data. Multiple types of data is plotted at the same time into a
+     * storage for each pixel.
      *
      * \param progressCallback To comunicate progress amount
      * \param nPixels The total number of pixels in the image
-     * \return The flat list of pixels with the summes data contribution from the impacts
+     * \param nightData The pixel data for the night layer map
+     * \param nightWidth The width of the night layer map in pixels
+     * \param nightHeight The height of the night layer map in pixels
+     * \param nightChannels The number of color channels in the night layer map
+     * \return The flat list of pixel data with the summed data contribution from the
+     *         impacts in several aspects
      */
-    std::vector<double> plotImpactData(const Task::ProgressCallback& progressCallback,
-        const unsigned int nPixels);
+    std::vector<ImpactPixel> plotImpactData(
+        const Task::ProgressCallback& progressCallback, unsigned int nPixels,
+        const unsigned char* nightData, int nightWidth, int nightHeight,
+        int nightChannels);
 
     /**
-     *
+     * Take the input data, normalize it, apply the color map and finaly save the final
+     * image to file.
      *
      * \param progressCallback To comunicate progress amount
+     * \param dataType The type of data to plot
+     * \param data The flat list of pixel data
      * \param nPixels The total number of pixels in the image
-     * \return The flat list of pixels with
+     * \param size The total size of the image when considering the color channels
+     * \param colorMap The color map used to color the data
+     * \param pixels The pixel data to save as an image file
      */
-    std::vector<double> plotRiskData(const Task::ProgressCallback& progressCallback,
-        const unsigned char* nightData, int nightWidth, int nightHeight,
-        int nightChannels, const unsigned int nPixels);
+    void processImage(const Task::ProgressCallback& progressCallback, DataType dataType,
+        const std::vector<ImpactPixel>& data, unsigned int nPixels, unsigned int size,
+        const openspace::dataloader::ColorMap& colorMap, std::vector<glm::vec4>& pixels);
 
     /**
      * Apply the color map to the flat list of pixel saturation data.
      *
      * \param progressCallback To comunicate progress amount
-     * \param data The flat list of pixel saturátion data
+     * \param dataType The type of data to plot
+     * \param data The flat list of pixel data
      * \param nPixels The total number of pixels in the image
      * \param minValue The minimum scaling value for the color map
      * \param maxValue The maximum scaling value for the color map
      * \param colorMap The color map used to color the data
-     * \param pixels The pixel data to save as an image file
+     * \param pixels The pixel data to store the applied color in
      */
-    void applyColorMap(const Task::ProgressCallback& progressCallback,
-        const std::vector<double>& data, int nPixels, double minValue, double maxValue,
-        const openspace::dataloader::ColorMap& colorMap, std::vector<glm::vec4>& pixels);
+    void applyColorMap(const Task::ProgressCallback& progressCallback, DataType dataType,
+        const std::vector<ImpactPixel>& data, int nPixels, double minValue, double maxValue,
+        double maxIntensity, const openspace::dataloader::ColorMap& colorMap,
+        std::vector<glm::vec4>& pixels);
 
     /**
      * Write the given image to file in the PNG format.
