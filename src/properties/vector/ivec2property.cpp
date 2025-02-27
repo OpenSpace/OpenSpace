@@ -50,6 +50,16 @@ ghoul::lua::LuaTypes IVec2Property::typeLua() const {
     return ghoul::lua::LuaTypes::Table;
 }
 
+bool IVec2Property::getLuaValue(lua_State* state) const {
+    toLuaConversion(state);
+    return true;
+}
+
+void IVec2Property::setLuaValue(lua_State* state) {
+    glm::ivec2 thisValue = fromLuaConversion(state);
+    setValue(std::move(thisValue));
+}
+
 std::string IVec2Property::stringValue() const {
     return formatJson(_value);
 }

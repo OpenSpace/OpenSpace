@@ -47,8 +47,6 @@ public:
     float exponent() const;
     void setExponent(float exponent);
 
-    std::string jsonValue() const override;
-
     using TemplateProperty<T>::operator=;
 
     void setLuaInterpolationTarget(lua_State* state) override;
@@ -66,14 +64,6 @@ protected:
     virtual void toLuaConversion(lua_State* state) const override;
 
     std::string generateAdditionalJsonDescription() const override;
-
-    /**
-     * convert a lua formatted value to a JSON formatted value.
-     *
-     * \param luaValue
-     * \return A JSON formatted string representation of the given Lua value
-     */
-    std::string luaToJson(std::string luaValue) const;
 
     T _minimumValue = T(0);
     T _maximumValue = T(0);

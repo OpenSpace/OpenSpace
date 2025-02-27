@@ -38,6 +38,9 @@ public:
 
     using TemplateProperty<std::string>::operator=;
 
+    bool getLuaValue(lua_State* state) const override;
+    void setLuaValue(lua_State* state) override;
+
     std::string stringValue() const override;
     operator std::string_view();
     operator std::string_view() const;

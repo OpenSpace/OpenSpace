@@ -38,7 +38,6 @@
 #include <openspace/util/touch.h>
 #include <openspace/util/versionchecker.h>
 #include <ghoul/glm.h>
-#include <future>
 #include <memory>
 #include <string>
 #include <vector>
@@ -160,8 +159,6 @@ private:
     std::unique_ptr<VersionChecker> _versionChecker;
 
     glm::vec2 _mousePosition = glm::vec2(0.f);
-
-    std::future<void> _writeDocumentationTask;
 
     ShutdownInformation _shutdown;
 

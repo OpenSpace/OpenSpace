@@ -44,6 +44,16 @@ ghoul::lua::LuaTypes IntListProperty::typeLua() const {
     return ghoul::lua::LuaTypes::Table;
 }
 
+bool IntListProperty::getLuaValue(lua_State* state) const {
+    toLuaConversion(state);
+    return true;
+}
+
+void IntListProperty::setLuaValue(lua_State* state) {
+    std::vector<int> thisValue = fromLuaConversion(state);
+    setValue(std::move(thisValue));
+}
+
 std::string IntListProperty::stringValue() const {
     const nlohmann::json json = _value;
     return json.dump();

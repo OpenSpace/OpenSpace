@@ -42,6 +42,16 @@ ghoul::lua::LuaTypes FloatProperty::typeLua() const {
     return ghoul::lua::LuaTypes::Number;
 }
 
+bool FloatProperty::getLuaValue(lua_State* state) const {
+    toLuaConversion(state);
+    return true;
+}
+
+void FloatProperty::setLuaValue(lua_State* state) {
+    float thisValue = fromLuaConversion(state);
+    setValue(thisValue);
+}
+
 std::string FloatProperty::stringValue() const {
     return formatJson(_value);
 }

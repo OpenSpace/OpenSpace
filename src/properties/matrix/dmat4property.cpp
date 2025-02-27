@@ -50,6 +50,16 @@ ghoul::lua::LuaTypes DMat4Property::typeLua() const {
     return ghoul::lua::LuaTypes::Table;
 }
 
+bool DMat4Property::getLuaValue(lua_State* state) const {
+    toLuaConversion(state);
+    return true;
+}
+
+void DMat4Property::setLuaValue(lua_State* state) {
+    glm::dmat4 thisValue = fromLuaConversion(state);
+    setValue(std::move(thisValue));
+}
+
 std::string DMat4Property::stringValue() const {
     return formatJson(_value);
 }

@@ -54,6 +54,16 @@ int IntProperty::fromLuaConversion(lua_State* state) const {
     }
 }
 
+bool IntProperty::getLuaValue(lua_State* state) const {
+    toLuaConversion(state);
+    return true;
+}
+
+void IntProperty::setLuaValue(lua_State* state) {
+    int thisValue = fromLuaConversion(state);
+    setValue(thisValue);
+}
+
 std::string IntProperty::stringValue() const {
     return formatJson(_value);
 }

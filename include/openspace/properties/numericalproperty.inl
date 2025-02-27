@@ -25,6 +25,18 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 
+namespace {
+    std::string luaToJson(std::string luaValue) {
+        if (luaValue[0] == '{') {
+            luaValue.replace(0, 1, "[");
+        }
+        if (luaValue[luaValue.size() - 1] == '}') {
+            luaValue.replace(luaValue.size() - 1, 1, "]");
+        }
+        return luaValue;
+    }
+} // namespace
+
 namespace openspace::properties {
 
 template <typename T>
@@ -101,7 +113,7 @@ void NumericalProperty<T>::setExponent(float exponent) {
 
     // While the exponential slider does not support ranges with negative values,
     // prevent setting the exponent for such ranges
-    // @ TODO (2021-06-30, emmbr), remove this check when no longer needed
+    // @TODO (2021-06-30, emmbr), remove this check when no longer needed
     if (!std::is_unsigned<T>::value) {
         if (!isValidRange(_minimumValue, _maximumValue)) {
             LWARNINGC(
@@ -133,23 +145,6 @@ std::string NumericalProperty<T>::generateAdditionalJsonDescription() const {
       "\"" + ExponentValueKey + "\": " + luaToJson(ghoul::to_string(_exponent));
     result += " }";
     return result;
-}
-
-template <typename T>
-std::string NumericalProperty<T>::luaToJson(std::string luaValue) const {
-    if (luaValue[0] == '{') {
-        luaValue.replace(0, 1, "[");
-    }
-    if (luaValue[luaValue.size() - 1] == '}') {
-        luaValue.replace(luaValue.size() - 1, 1, "]");
-    }
-    return luaValue;
-}
-
-template <typename T>
-std::string NumericalProperty<T>::jsonValue() const {
-    std::string value = TemplateProperty<T>::stringValue();
-    return luaToJson(value);
 }
 
 template <typename T>

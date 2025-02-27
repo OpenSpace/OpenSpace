@@ -45,6 +45,16 @@ ghoul::lua::LuaTypes DoubleListProperty::typeLua() const {
     return ghoul::lua::LuaTypes::Table;
 }
 
+bool DoubleListProperty::getLuaValue(lua_State* state) const {
+    toLuaConversion(state);
+    return true;
+}
+
+void DoubleListProperty::setLuaValue(lua_State* state) {
+    std::vector<double> thisValue = fromLuaConversion(state);
+    setValue(std::move(thisValue));
+}
+
 std::string DoubleListProperty::stringValue() const {
     const nlohmann::json json(_value);
     return json.dump();

@@ -81,12 +81,6 @@ std::string Property::uri() const {
     return !ownerUri.empty() ? std::format("{}.{}", ownerUri, _identifier) : "";
 }
 
-bool Property::getLuaValue(lua_State*) const {
-    return false;
-}
-
-void Property::setLuaValue(lua_State*) {}
-
 const std::type_info& Property::type() const {
     return typeid(void);
 }
@@ -166,7 +160,14 @@ const ghoul::Dictionary& Property::metaData() const {
 }
 
 std::string Property::jsonValue() const {
-    return stringValue();
+    std::string value = stringValue();
+    if (value[0] == '{') {
+        value.replace(0, 1, "[");
+    }
+    if (value[value.size() - 1] == '}') {
+        value.replace(value.size() - 1, 1, "]");
+    }
+    return value;
 }
 
 Property::OnChangeHandle Property::onChange(std::function<void()> callback) {

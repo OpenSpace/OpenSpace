@@ -50,6 +50,16 @@ void StringProperty::toLuaConversion(lua_State* state) const {
     ghoul::lua::push(state, _value);
 }
 
+bool StringProperty::getLuaValue(lua_State* state) const {
+    toLuaConversion(state);
+    return true;
+}
+
+void StringProperty::setLuaValue(lua_State* state) {
+    std::string thisValue = fromLuaConversion(state);
+    setValue(std::move(thisValue));
+}
+
 std::string StringProperty::stringValue() const {
     nlohmann::json json;
     nlohmann::to_json(json, _value);

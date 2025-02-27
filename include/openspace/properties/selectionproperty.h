@@ -109,6 +109,9 @@ public:
      */
     void clearOptions();
 
+    bool getLuaValue(lua_State* state) const override;
+    void setLuaValue(lua_State* state) override;
+
     std::string stringValue() const override;
     using TemplateProperty<std::set<std::string>>::operator std::set<std::string>;
     using TemplateProperty<std::set<std::string>>::operator=;

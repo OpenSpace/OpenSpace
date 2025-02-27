@@ -42,6 +42,16 @@ ghoul::lua::LuaTypes LongProperty::typeLua() const {
     return ghoul::lua::LuaTypes::Number;
 }
 
+bool LongProperty::getLuaValue(lua_State* state) const {
+    toLuaConversion(state);
+    return true;
+}
+
+void LongProperty::setLuaValue(lua_State* state) {
+    long thisValue = fromLuaConversion(state);
+    setValue(thisValue);
+}
+
 std::string LongProperty::stringValue() const {
     return formatJson(_value);
 }

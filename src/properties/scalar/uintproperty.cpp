@@ -61,6 +61,16 @@ unsigned int UIntProperty::fromLuaConversion(lua_State* state) const {
     }
 }
 
+bool UIntProperty::getLuaValue(lua_State* state) const {
+    toLuaConversion(state);
+    return true;
+}
+
+void UIntProperty::setLuaValue(lua_State* state) {
+    unsigned int thisValue = fromLuaConversion(state);
+    setValue(thisValue);
+}
+
 std::string UIntProperty::stringValue() const {
     return formatJson(_value);
 }

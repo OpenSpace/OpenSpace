@@ -53,6 +53,8 @@ public:
      */
     std::string_view className() const override;
 
+    bool getLuaValue(lua_State* state) const override;
+
     /**
      * Accepts only the `LUA_TNIL` type and will notify all the listeners that the event
      * has been triggered.

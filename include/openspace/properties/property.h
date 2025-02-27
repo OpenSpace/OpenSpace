@@ -179,7 +179,7 @@ public:
      * \param state The Lua state to which the value will be encoded
      * \return `true` if the encoding succeeded, `false` otherwise
      */
-    virtual bool getLuaValue(lua_State* state) const;
+    virtual bool getLuaValue(lua_State* state) const = 0;
 
     /**
      * This method sets the value encapsulated by this Property by deserializing the value
@@ -191,7 +191,7 @@ public:
      *
      * \param state The Lua state from which the value will be decoded
      */
-    virtual void setLuaValue(lua_State* state);
+    virtual void setLuaValue(lua_State* state) = 0;
 
     /**
      * Returns the Lua type that will be put onto the stack in the Property::getLua method

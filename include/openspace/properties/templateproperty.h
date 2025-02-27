@@ -75,24 +75,6 @@ public:
     virtual const std::type_info& type() const override;
 
     /**
-     * This method encodes the stored value into a Lua object and pushes that object onto
-     * the stack.
-     *
-     * \param state The Lua state onto which the encoded object will be pushed
-     * \return `true` if the encoding succeeded; `false` otherwise
-     */
-    virtual bool getLuaValue(lua_State* state) const override;
-
-    /**
-     * Sets the value of this TemplateProperty by decoding the object at the top of the
-     * stack and, if successful, assigning it using the Property::set method. If the
-     * decoding is successful, the new value is set, otherwise it remains unchanged.
-     *
-     * \param state The Lua state from which the value will be decoded
-     */
-    virtual void setLuaValue(lua_State* state) override;
-
-    /**
      * This operator allows the TemplateProperty to be used almost transparently as if it
      * was of the type `T`. It makes assignments such as `T v = property;` possible by
      * allowing implicit casts (even though, internally, not casts are performed. This

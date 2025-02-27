@@ -42,9 +42,18 @@ ghoul::lua::LuaTypes ShortProperty::typeLua() const {
     return ghoul::lua::LuaTypes::Number;
 }
 
+bool ShortProperty::getLuaValue(lua_State* state) const {
+    toLuaConversion(state);
+    return true;
+}
+
+void ShortProperty::setLuaValue(lua_State* state) {
+    short thisValue = fromLuaConversion(state);
+    setValue(thisValue);
+}
+
 std::string ShortProperty::stringValue() const {
     return formatJson(_value);
 }
-
 
 } // namespace openspace::properties

@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/lua/lua_helper.h>
-
 namespace openspace::properties {
 
 template <typename T>
@@ -65,18 +63,6 @@ void openspace::properties::TemplateProperty<T>::setValue(T val) {
 template <typename T>
 const std::type_info& TemplateProperty<T>::type() const {
     return typeid(T);
-}
-
-template <typename T>
-bool TemplateProperty<T>::getLuaValue(lua_State* state) const {
-    toLuaConversion(state);
-    return true;
-}
-
-template <typename T>
-void TemplateProperty<T>::setLuaValue(lua_State* state) {
-    T thisValue = fromLuaConversion(state);
-    setValue(thisValue);
 }
 
 }  // namespace openspace::properties
