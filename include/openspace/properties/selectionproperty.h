@@ -109,16 +109,14 @@ public:
      */
     void clearOptions();
 
+    std::string stringValue() const override;
     using TemplateProperty<std::set<std::string>>::operator std::set<std::string>;
-
     using TemplateProperty<std::set<std::string>>::operator=;
 
 protected:
     std::set<std::string> fromLuaConversion(lua_State* state) const override;
 
     void toLuaConversion(lua_State* state) const override;
-
-    std::string toStringConversion() const override;
 
 private:
     void sortOptions();

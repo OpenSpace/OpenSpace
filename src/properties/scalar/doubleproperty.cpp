@@ -24,6 +24,7 @@
 
 #include <openspace/properties/scalar/doubleproperty.h>
 
+#include <openspace/util/json_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
 
 namespace openspace::properties {
@@ -39,6 +40,10 @@ std::string_view DoubleProperty::className() const {
 
 ghoul::lua::LuaTypes DoubleProperty::typeLua() const {
     return ghoul::lua::LuaTypes::Number;
+}
+
+std::string DoubleProperty::stringValue() const {
+    return formatJson(_value);
 }
 
 } // namespace openspace::properties

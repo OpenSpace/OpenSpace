@@ -38,11 +38,9 @@ public:
     std::string_view className() const override;
     ghoul::lua::LuaTypes typeLua() const override;
 
+    std::string stringValue() const override;
     using TemplateProperty<std::vector<std::string>>::operator std::vector<std::string>;
     using TemplateProperty<std::vector<std::string>>::operator=;
-
-protected:
-    std::string toStringConversion() const override;
 };
 
 } // namespace openspace::properties

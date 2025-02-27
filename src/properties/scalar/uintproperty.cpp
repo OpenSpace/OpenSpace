@@ -24,6 +24,7 @@
 
 #include <openspace/properties/scalar/uintproperty.h>
 
+#include <openspace/util/json_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
 
 namespace openspace::properties {
@@ -58,6 +59,10 @@ unsigned int UIntProperty::fromLuaConversion(lua_State* state) const {
     else {
         throw ghoul::RuntimeError("Error extracting value in UIntProperty");
     }
+}
+
+std::string UIntProperty::stringValue() const {
+    return formatJson(_value);
 }
 
 } // namespace openspace::properties

@@ -38,13 +38,13 @@ public:
 
     using TemplateProperty<std::string>::operator=;
 
+    std::string stringValue() const override;
     operator std::string_view();
     operator std::string_view() const;
 
 protected:
     std::string fromLuaConversion(lua_State* state) const override;
     void toLuaConversion(lua_State* state) const override;
-    std::string toStringConversion() const override;
 };
 
 } // namespace openspace::properties

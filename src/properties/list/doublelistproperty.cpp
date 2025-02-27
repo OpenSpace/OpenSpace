@@ -45,7 +45,7 @@ ghoul::lua::LuaTypes DoubleListProperty::typeLua() const {
     return ghoul::lua::LuaTypes::Table;
 }
 
-std::string DoubleListProperty::toStringConversion() const {
+std::string DoubleListProperty::stringValue() const {
     const nlohmann::json json(_value);
     return json.dump();
 }

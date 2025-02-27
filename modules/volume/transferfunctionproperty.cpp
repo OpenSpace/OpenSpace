@@ -51,7 +51,7 @@ void TransferFunctionProperty::toLuaConversion(lua_State* state) const {
     _value.envelopesToLua(state);
 }
 
-std::string TransferFunctionProperty::toStringConversion() const {
+std::string TransferFunctionProperty::stringValue() const {
     return _value.serializedToString();
 }
 

@@ -24,6 +24,7 @@
 
 #include <openspace/properties/vector/uvec3property.h>
 
+#include <openspace/util/json_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 
@@ -47,6 +48,10 @@ std::string_view UVec3Property::className() const {
 
 ghoul::lua::LuaTypes UVec3Property::typeLua() const {
     return ghoul::lua::LuaTypes::Table;
+}
+
+std::string UVec3Property::stringValue() const {
+    return formatJson(_value);
 }
 
 } // namespace openspace::properties

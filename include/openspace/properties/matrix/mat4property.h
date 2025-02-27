@@ -44,6 +44,7 @@ public:
     std::string_view className() const override;
     ghoul::lua::LuaTypes typeLua() const override;
 
+    std::string stringValue() const override;
     using TemplateProperty<glm::mat4x4>::operator=;
 };
 

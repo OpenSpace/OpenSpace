@@ -79,9 +79,4 @@ void TemplateProperty<T>::setLuaValue(lua_State* state) {
     setValue(thisValue);
 }
 
-template <typename T>
-std::string TemplateProperty<T>::stringValue() const {
-    return toStringConversion();
-}
-
 }  // namespace openspace::properties

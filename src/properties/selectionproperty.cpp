@@ -139,7 +139,7 @@ void SelectionProperty::toLuaConversion(lua_State* state) const {
     ghoul::lua::push(state, value);
 }
 
-std::string SelectionProperty::toStringConversion() const {
+std::string SelectionProperty::stringValue() const {
     const nlohmann::json json(_value);
     return json.dump();
 }

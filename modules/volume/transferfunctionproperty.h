@@ -38,12 +38,12 @@ public:
     std::string_view className() const override;
     ghoul::lua::LuaTypes typeLua() const override;
 
+    std::string stringValue() const override;
     using TemplateProperty<volume::TransferFunction>::operator=;
 
 protected:
     volume::TransferFunction fromLuaConversion(lua_State* state) const override;
     void toLuaConversion(lua_State* state) const override;
-    std::string toStringConversion() const override;
 };
 
 } // namespace openspace::properties

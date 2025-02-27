@@ -50,7 +50,7 @@ void StringProperty::toLuaConversion(lua_State* state) const {
     ghoul::lua::push(state, _value);
 }
 
-std::string StringProperty::toStringConversion() const {
+std::string StringProperty::stringValue() const {
     nlohmann::json json;
     nlohmann::to_json(json, _value);
     return json.dump();

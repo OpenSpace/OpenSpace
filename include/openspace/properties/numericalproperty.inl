@@ -22,12 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/json_helper.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
-#include <glm/ext/matrix_common.hpp>
-#include <cmath>
-#include <type_traits>
 
 namespace openspace::properties {
 
@@ -152,7 +148,7 @@ std::string NumericalProperty<T>::luaToJson(std::string luaValue) const {
 
 template <typename T>
 std::string NumericalProperty<T>::jsonValue() const {
-    std::string value = toStringConversion();
+    std::string value = TemplateProperty<T>::stringValue();
     return luaToJson(value);
 }
 
@@ -183,11 +179,6 @@ void NumericalProperty<T>::toLuaConversion(lua_State* state) const {
 template <typename T>
 T NumericalProperty<T>::fromLuaConversion(lua_State* state) const {
     return ghoul::lua::value<T>(state);
-}
-
-template <typename T>
-std::string NumericalProperty<T>::toStringConversion() const {
-    return formatJson(TemplateProperty<T>::_value);
 }
 
 } // namespace openspace::properties

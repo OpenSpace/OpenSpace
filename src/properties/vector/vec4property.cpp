@@ -24,6 +24,7 @@
 
 #include <openspace/properties/vector/vec4property.h>
 
+#include <openspace/util/json_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 
@@ -46,6 +47,10 @@ std::string_view Vec4Property::className() const {
 
 ghoul::lua::LuaTypes Vec4Property::typeLua() const {
     return ghoul::lua::LuaTypes::Table;
+}
+
+std::string Vec4Property::stringValue() const {
+    return formatJson(_value);
 }
 
 } // namespace openspace::properties
