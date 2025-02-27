@@ -28,6 +28,7 @@
 #include <openspace/scene/rotation.h>
 
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/scene/timeframe.h>
 #include <optional>
 
@@ -48,6 +49,7 @@ private:
     properties::StringProperty _sourceFrame;
     properties::StringProperty _destinationFrame;
     properties::StringProperty _fixedDate;
+    properties::FloatProperty _timeOffset;
 
     ghoul::mm_unique_ptr<TimeFrame> _timeFrame;
     std::optional<double> _fixedEphemerisTime;

@@ -28,6 +28,7 @@
 #include <openspace/scene/translation.h>
 
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <optional>
 
 namespace openspace {
@@ -45,6 +46,7 @@ private:
     properties::StringProperty _observer;
     properties::StringProperty _frame;
     properties::StringProperty _fixedDate;
+    properties::FloatProperty _timeOffset;
 
     // We are accessing these values every frame and when retrieving a string from the
     // StringProperty, it allocates some new memory, which we want to prevent. Until the
