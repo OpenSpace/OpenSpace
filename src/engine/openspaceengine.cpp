@@ -1183,7 +1183,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     global::luaConsole->update();
 
     if (!master) {
-        global::navigationHandler->orbitalNavigator().updateAnchor();
+        global::navigationHandler->orbitalNavigator().updateAnchorOnSync();
         _scene->camera()->invalidateCache();
     }
 
