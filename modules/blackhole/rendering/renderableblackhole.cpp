@@ -8,7 +8,6 @@
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/textureunit.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -41,10 +40,12 @@ namespace openspace {
     }
 
     void RenderableBlackHole::initializeGL() {
+        const glm::vec2 screenSize = glm::vec2(global::renderEngine->renderingResolution());
         ZoneScoped;
         setupQuad();
         setupShaders();
         loadEnvironmentTexture();
+        _viewport.uploadViewGrid(screenSize);
     }
 
     void RenderableBlackHole::deinitializeGL() {
@@ -60,15 +61,27 @@ namespace openspace {
     void RenderableBlackHole::render(const RenderData&, RendererTasks&) {
         _program->activate();
         bindFramebuffer();
-        bindEnvironmentTexture();
+
+        ghoul::opengl::TextureUnit enviromentUnit;
+        if (!bindTexture(_uniformCache.enviromentTexture, enviromentUnit, _enviromentTexture)) {
+            LWARNING("UniformCache is missing 'enviromentTexture'");
+        }
+
+        ghoul::opengl::TextureUnit viewGridUnit;
+        if (!bindTexture(_uniformCache.viewGrid, viewGridUnit, _viewport.viewGrid)) {
+            LWARNING("UniformCache is missing 'viewGrid'");
+        }
+     
+
         drawQuad();
+
         _program->deactivate();
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     void RenderableBlackHole::setupShaders() {
-        const std::string vertexShaderPath = "${MODULE_BLACKHOLE}/shaders/gradiant_vs.glsl";
-        const std::string fragmentShaderPath = "${MODULE_BLACKHOLE}/shaders/gradiant_fs.glsl";
+        const std::string vertexShaderPath = "${MODULE_BLACKHOLE}/shaders/blackhole_vs.glsl";
+        const std::string fragmentShaderPath = "${MODULE_BLACKHOLE}/shaders/blackhole_fs.glsl";
 
         // Initialize shaders
         std::string program = std::string(ProgramName);
@@ -104,6 +117,7 @@ namespace openspace {
 
     void RenderableBlackHole::loadEnvironmentTexture() {
         const std::string texturePath = "${MODULE_BLACKHOLE}/rendering/uv.png";
+        //const std::string texturePath = "C:/Users/wilbj602/Documents/GitHub/OpenSpace/sync/http/milkyway_textures/2/DarkUniverse_mellinger_8k.jpg";
         _enviromentTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(texturePath), 2);
 
         if (_enviromentTexture) {
@@ -119,18 +133,13 @@ namespace openspace {
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
     }
 
-    void RenderableBlackHole::bindEnvironmentTexture() {
-        if (_uniformCache.enviromentTexture != -1 && _enviromentTexture) {
-            ghoul::opengl::TextureUnit enviromentUnit;
-            enviromentUnit.activate();
-            _enviromentTexture->bind();
-            _program->setUniform(_uniformCache.enviromentTexture, enviromentUnit);
-        }
-        else {
-            LWARNING("UniformCache is missing 'enviromentTexture'");
-        }
+    bool RenderableBlackHole::bindTexture(GLint chacheRegistry, ghoul::opengl::TextureUnit& textureUnit, std::unique_ptr<ghoul::opengl::Texture>& texture) {
+        if (!texture) return false;
 
-        //invProjection, invView
+        textureUnit.activate();
+        texture->bind();
+        _program->setUniform(chacheRegistry, textureUnit);
+        return true;
     }
 
     void RenderableBlackHole::drawQuad() {
