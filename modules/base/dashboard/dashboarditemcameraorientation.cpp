@@ -57,10 +57,11 @@ void DashboardItemCameraOrientation::update() {
     const Camera* camera = global::renderEngine->scene()->camera();
     const glm::dquat orientation = camera->rotationQuaternion();
     const glm::dvec3 pitchYawRoll = glm::eulerAngles(orientation);
+    const glm::dvec3 pitchYawRollDeg = glm::degrees(pitchYawRoll);
 
     _buffer = std::format(
         "Yaw: {:.2f}\nPitch: {:.2f}\nRoll: {:.2f}",
-        pitchYawRoll.y, pitchYawRoll.x, pitchYawRoll.z
+        pitchYawRollDeg.y, pitchYawRollDeg.x, pitchYawRollDeg.z
     );
 }
 
