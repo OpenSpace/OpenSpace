@@ -40,8 +40,8 @@ set(SOURCE_FILES
 
 # Define Shader Files
 set(SHADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gradiant_vs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gradiant_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/blackhole_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/blackhole_fs.glsl
 )
 
 # Organize Files into Groups
