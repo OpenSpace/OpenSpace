@@ -27,21 +27,21 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/scene/profile.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/scripting/scriptengine.h>
-#include <ghoul/lua/luastate.h>
 #include <ghoul/misc/easing.h>
-#include <ghoul/misc/exception.h>
 #include <ghoul/misc/memorypool.h>
-#include <functional>
 #include <mutex>
 #include <set>
 #include <unordered_map>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::opengl { class ProgramObject; }
+namespace ghoul {
+
+class Dictionary;
+namespace lua { class LuaState; }
+namespace opengl { class ProgramObject; }
+
+} // namespace ghoul
 
 namespace openspace {
 
@@ -57,6 +57,7 @@ enum class PropertyValueType {
 };
 using ProfilePropertyLua = std::variant<bool, float, std::string, ghoul::lua::nil_t>;
 
+class Profile;
 class SceneInitializer;
 
 // Notifications:
@@ -64,16 +65,6 @@ class SceneInitializer;
 class Scene : public properties::PropertyOwner {
 public:
     BooleanType(UpdateDependencies);
-
-    struct InvalidSceneError : ghoul::RuntimeError {
-        /**
-         * \param msg The reason that caused this exception to be thrown
-         * \param comp The optional compoment that caused this exception to be thrown
-         *
-         * \pre message may not be empty
-         */
-        explicit InvalidSceneError(std::string msg, std::string comp = "");
-    };
 
     /**
      * This struct describes a time that has some intrinsic interesting-ness to this
@@ -350,8 +341,6 @@ private:
         bool isExpired = false;
     };
     std::vector<PropertyInterpolationInfo> _propertyInterpolationInfos;
-
-    ghoul::MemoryPool<4096> _memoryPool;
 
     std::unordered_map<std::string, std::vector<std::string>> _guiTreeOrderMap;
 };

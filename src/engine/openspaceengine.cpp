@@ -853,8 +853,10 @@ void OpenSpaceEngine::loadAssets() {
 
     runGlobalCustomizationScripts();
 
-    std::async(&documentation::DocumentationEngine::writeJavascriptDocumentation, DocEng
-);
+    _writeDocumentationTask = std::async(
+        &documentation::DocumentationEngine::writeJavascriptDocumentation,
+        DocEng
+    );
 
     LTRACE("OpenSpaceEngine::loadAsset(end)");
 }

@@ -25,33 +25,13 @@
 #include <openspace/scene/scene.h>
 
 #include <openspace/camera/camera.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/windowdelegate.h>
-#include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
-#include <openspace/navigation/navigationhandler.h>
 #include <openspace/query/query.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/profile.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/sceneinitializer.h>
-#include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/updatestructures.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/luastate.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/defer.h>
-#include <ghoul/misc/easing.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringhelper.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <string>
 #include <stack>
 
 #include "scene_lua.inl"
@@ -105,10 +85,6 @@ namespace {
 
 namespace openspace {
 
-Scene::InvalidSceneError::InvalidSceneError(std::string msg, std::string comp)
-    : ghoul::RuntimeError(std::move(msg), std::move(comp))
-{}
-
 Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
     : properties::PropertyOwner({"Scene", "Scene"})
     , _camera(std::make_unique<Camera>())
@@ -157,7 +133,7 @@ Camera* Scene::camera() const {
 
 void Scene::registerNode(SceneGraphNode* node) {
     if (_nodesByIdentifier.contains(node->identifier())) {
-        throw Scene::InvalidSceneError(std::format(
+        throw ghoul::RuntimeError(std::format(
             "Node with identifier '{}' already exists", node->identifier()
         ));
     }
@@ -220,7 +196,7 @@ void Scene::sortTopologically() {
     // Only the Root node can have an in-degree of 0
     SceneGraphNode* root = _nodesByIdentifier[RootNodeIdentifier];
     if (!root) {
-        throw Scene::InvalidSceneError("No root node found");
+        throw ghoul::RuntimeError("No root node found");
     }
 
     std::unordered_map<SceneGraphNode*, size_t> inDegrees;

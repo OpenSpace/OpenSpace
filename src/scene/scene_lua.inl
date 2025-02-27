@@ -22,7 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/scene/scene.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/matrix/dmat2property.h>
@@ -53,6 +55,7 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <algorithm>
 #include <cctype>

@@ -22,10 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
+#include <string_view>
 
 namespace {
+    constexpr std::string_view MinimumValueKey = "MinimumValue";
+    constexpr std::string_view MaximumValueKey = "MaximumValue";
+    constexpr std::string_view SteppingValueKey = "SteppingValue";
+    constexpr std::string_view ExponentValueKey = "Exponent";
+
+
     std::string luaToJson(std::string luaValue) {
         if (luaValue[0] == '{') {
             luaValue.replace(0, 1, "[");
@@ -38,18 +44,6 @@ namespace {
 } // namespace
 
 namespace openspace::properties {
-
-template <typename T>
-const std::string NumericalProperty<T>::MinimumValueKey = "MinimumValue";
-
-template <typename T>
-const std::string NumericalProperty<T>::MaximumValueKey = "MaximumValue";
-
-template <typename T>
-const std::string NumericalProperty<T>::SteppingValueKey = "SteppingValue";
-
-template <typename T>
-const std::string NumericalProperty<T>::ExponentValueKey = "Exponent";
 
 template <typename T>
 NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info, T value,
@@ -101,31 +95,27 @@ template <typename T>
 void NumericalProperty<T>::setExponent(float exponent) {
     ghoul_assert(std::abs(exponent) > 0.f, "Exponent for property input cannot be zero");
 
-    auto isValidRange = [](const T& minValue, const T& maxValue) {
-        if constexpr (ghoul::isGlmVector<T>() || ghoul::isGlmMatrix<T>()) {
-            return glm::all(glm::greaterThanEqual(minValue, T(0))) &&
-                   glm::all(glm::greaterThanEqual(maxValue, T(0)));
-        }
-        else {
-            return (minValue >= T(0) && maxValue >= T(0));
-        }
-    };
-
-    // While the exponential slider does not support ranges with negative values,
-    // prevent setting the exponent for such ranges
-    // @TODO (2021-06-30, emmbr), remove this check when no longer needed
     if (!std::is_unsigned<T>::value) {
+        auto isValidRange = [](const T& minValue, const T& maxValue) {
+            if constexpr (ghoul::isGlmVector<T>() || ghoul::isGlmMatrix<T>()) {
+                return glm::all(glm::greaterThanEqual(minValue, T(0))) &&
+                    glm::all(glm::greaterThanEqual(maxValue, T(0)));
+            }
+            else {
+                return (minValue >= T(0) && maxValue >= T(0));
+            }
+        };
+
+        // While the exponential slider does not support ranges with negative values,
+        // prevent setting the exponent for such ranges
+        // @TODO (2021-06-30, emmbr), remove this check when no longer needed
+        ghoul_assert(
+            isValidRange(_minimumValue, _maximumValue),
+            "Setting exponent for properties with negative values in [min, max] "
+            "range is not yet supported"
+        );
         if (!isValidRange(_minimumValue, _maximumValue)) {
-            LWARNINGC(
-                "NumericalProperty: setExponent",
-                std::format(
-                    "Setting exponent for properties with negative values in "
-                    "[min, max] range is not yet supported. Property: {}",
-                    this->uri()
-                )
-            );
-            _exponent = 1.f;
-            return;
+            exponent = 1.f;
         }
     }
 
@@ -134,17 +124,13 @@ void NumericalProperty<T>::setExponent(float exponent) {
 
 template <typename T>
 std::string NumericalProperty<T>::generateAdditionalJsonDescription() const {
-    std::string result = "{ ";
-    result +=
-      "\"" + MinimumValueKey + "\": " + luaToJson(ghoul::to_string(_minimumValue)) + ",";
-    result +=
-      "\"" + MaximumValueKey + "\": " + luaToJson(ghoul::to_string(_maximumValue)) + ",";
-    result +=
-      "\"" + SteppingValueKey + "\": " + luaToJson(ghoul::to_string(_stepping)) + ",";
-    result +=
-      "\"" + ExponentValueKey + "\": " + luaToJson(ghoul::to_string(_exponent));
-    result += " }";
-    return result;
+    return std::format(
+        "{{ \"{}\": {}, \"{}\": {}, \"{}\": {}, \"{}\": {} }}",
+        MinimumValueKey, luaToJson(ghoul::to_string(_minimumValue)),
+        MaximumValueKey, luaToJson(ghoul::to_string(_maximumValue)),
+        SteppingValueKey, luaToJson(ghoul::to_string(_stepping)),
+        ExponentValueKey, luaToJson(ghoul::to_string(_exponent))
+    );
 }
 
 template <typename T>

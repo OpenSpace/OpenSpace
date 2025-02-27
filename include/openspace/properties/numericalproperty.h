@@ -55,11 +55,6 @@ public:
         ghoul::EasingFunc<float> easingFunc = nullptr) override;
 
 protected:
-    static const std::string MinimumValueKey;
-    static const std::string MaximumValueKey;
-    static const std::string SteppingValueKey;
-    static const std::string ExponentValueKey;
-
     T fromLuaConversion(lua_State* state) const override;
     virtual void toLuaConversion(lua_State* state) const override;
 
