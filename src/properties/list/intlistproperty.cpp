@@ -40,8 +40,8 @@ std::string_view IntListProperty::className() const {
     return "IntListProperty";
 }
 
-int IntListProperty::typeLua() const {
-    return LUA_TTABLE;
+ghoul::lua::LuaTypes IntListProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Table;
 }
 
 std::string IntListProperty::toStringConversion() const {
