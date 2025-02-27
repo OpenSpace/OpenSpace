@@ -4,6 +4,7 @@
 #include <openspace/rendering/renderable.h>
 #include <modules/blackhole/rendering/viewport.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <ghoul/opengl/textureunit.h>
 
 namespace openspace {
 
@@ -26,7 +27,7 @@ public:
 
 private:
     void bindFramebuffer();
-    void bindEnvironmentTexture();
+    bool bindTexture(GLint chacheRegistry, ghoul::opengl::TextureUnit& textureUnit, std::unique_ptr<ghoul::opengl::Texture>& texture);
     void drawQuad();
     void setupShaders();
     void setupQuad();
@@ -39,7 +40,7 @@ private:
   GLuint _quadVao = 0;
   GLuint _quadVbo = 0;
 
-  UniformCache(enviromentTexture, invProjection, invView) _uniformCache;
+  UniformCache(enviromentTexture, viewGrid) _uniformCache;
 
   std::unique_ptr<ghoul::opengl::Texture> _enviromentTexture;
 };
