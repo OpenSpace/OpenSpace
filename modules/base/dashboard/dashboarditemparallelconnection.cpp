@@ -55,8 +55,6 @@ void DashboardItemParallelConnection::update() {
     const size_t nConnections = global::parallelPeer->nConnections();
     const std::string& hostName = global::parallelPeer->hostName();
 
-    int nLines = 1;
-
     int nClients = static_cast<int>(nConnections);
     if (status == ParallelConnection::Status::Host) {
         nClients--;
@@ -92,8 +90,6 @@ void DashboardItemParallelConnection::update() {
         else if (nClients == 1) {
             _buffer += "You are the only client";
         }
-
-        nLines = 2;
     }
 }
 

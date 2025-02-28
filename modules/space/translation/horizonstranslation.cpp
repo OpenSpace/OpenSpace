@@ -95,7 +95,7 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
             files.cbegin(),
             files.cend(),
             std::back_inserter(f),
-            [](const std::filesystem::path& p) { return p.string(); }
+            [](const std::filesystem::path& path) { return path.string(); }
         );
         _horizonsFiles = f;
     }

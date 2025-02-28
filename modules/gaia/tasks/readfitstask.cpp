@@ -38,8 +38,6 @@
 #include <optional>
 
 namespace {
-    constexpr std::string_view KeyFilterColumnNames = "FilterColumnNames";
-
     constexpr std::string_view _loggerCat = "ReadFitsTask";
 
     struct [[codegen::Dictionary(ReadFitsTask)]] Parameters {
