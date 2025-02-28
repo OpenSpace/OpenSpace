@@ -1,6 +1,6 @@
 -- Basic
 -- This example adds a dashboard item to the main dashboard that shows the current camera
--- orientation
+-- orientation.
 
 local Item = {
   Identifier = "DashboardItemCameraOrientation_Example",
