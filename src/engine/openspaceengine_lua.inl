@@ -35,6 +35,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
 #include <ghoul/io/texture/texturewriter.h>
+#include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/csvreader.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
