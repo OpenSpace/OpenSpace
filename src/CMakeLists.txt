@@ -464,6 +464,7 @@ target_precompile_headers(openspace-core PRIVATE
   <openspace/properties/numericalproperty.h>
   [["ghoul/format.h"]]
   [["ghoul/glm.h"]]
+  [["ghoul/lua/lua_helper.h"]]
   [["ghoul/misc/assert.h"]]
   [["ghoul/misc/boolean.h"]]
   [["ghoul/misc/exception.h"]]
