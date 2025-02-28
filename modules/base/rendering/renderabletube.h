@@ -50,7 +50,6 @@ class RenderableTube : public Renderable {
 public:
     RenderableTube(const ghoul::Dictionary& dictionary);
 
-    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
 

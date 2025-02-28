@@ -31,6 +31,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/lightsource.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
@@ -51,6 +52,7 @@ namespace {
     constexpr std::string_view _loggerCat = "RenderableTube";
     constexpr int8_t CurrentMajorVersion = 0;
     constexpr int8_t CurrentMinorVersion = 1;
+    constexpr int SpiceIdOffset = 1000000;
 
     constexpr int NearestInterpolation = 0;
     constexpr int LinearInterpolation = 1;
@@ -557,7 +559,7 @@ RenderableTube::ColorSettingsCutplane::ColorSettingsCutplane(
     addProperty(fixedColor);
 }
 
-void RenderableTube::initialize() {
+void RenderableTube::initializeGL() {
     readDataFile();
     createTube();
 
@@ -569,9 +571,7 @@ void RenderableTube::initialize() {
     for (const std::unique_ptr<LightSource>& ls : _lightSources) {
         ls->initialize();
     }
-}
 
-void RenderableTube::initializeGL() {
     _shader = global::renderEngine->buildRenderProgram(
         "TubeProgram",
         absPath("${MODULE_BASE}/shaders/tube_vs.glsl"),
@@ -1265,19 +1265,31 @@ void RenderableTube::loadSelectedSample() {
         return;
     }
 
-    // Find information for the scen graph nodes, filenames start from 000001
-    std::string filename = std::format(
-        "{:06}.bsp",
-        std::stoi(_selectedSample.value()) + 1
-    );
+    // Find information for the scen graph nodes.
+    int sample = std::stoi(_selectedSample.value());
+
+    // Filenames start from 000001
+    // Identifier starts at 1000000
+    // SPICE ids start from 1000000
+    std::string filename;
+    std::string identifier;
+    std::string target;
+
+    if (sample >= SpiceIdOffset) {
+        // Convert the SPICE id to a filename
+        filename = std::format("{:06}.bsp", sample - SpiceIdOffset + 1);
+        identifier = std::to_string(sample);
+        target = identifier;
+    }
+    else {
+        filename = std::format("{:06}.bsp", sample);
+        identifier = std::format("1{:06}", sample);
+        target = identifier;
+    }
+
     std::string kernelPath = absPath(_kernelsDirectory / filename).string();
     std::replace(kernelPath.begin(), kernelPath.end(), '\\', '/');
 
-    // Identifier starts at 000001
-    std::string identifier = std::format("{:06}", std::stoi(_selectedSample.value()) + 1);
-
-    // Target starts at 1000000
-    std::string target = std::format("1{:06}", std::stoi(_selectedSample.value()));
     std::string start = std::string(Time(_data.front().timestamp).ISO8601());
     std::string end = std::string(Time(_data.back().timestamp).ISO8601());
 

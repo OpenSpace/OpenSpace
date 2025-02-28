@@ -288,7 +288,7 @@ void ImpactCorridorTask::readImpactFile() {
     }
 
     ImpactCoordinate impact = readImpactCoordinate(file);
-    while (file) {
+    while (file && impact.id > 0) {
         _impactCoordinates.push_back(impact);
         impact = readImpactCoordinate(file);
     }
@@ -301,8 +301,11 @@ ImpactCorridorTask::ImpactCoordinate ImpactCorridorTask::readImpactCoordinate(
     std::string line;
 
     ghoul::getline(file, line);
-    std::stringstream ss(line);
+    if (line.empty()) {
+        return impact;
+    }
 
+    std::stringstream ss(line);
     ss >> impact.id >> impact.latitude >> impact.longitude;
     std::getline(ss >> std::ws, impact.time);
 

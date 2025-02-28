@@ -236,7 +236,7 @@ void FindImpactsTask::findImpacts(const Task::ProgressCallback& progressCallback
         if (failed_c()) {
             // If not, then there is probably a missing kernel file and we need to skip to
             // the next valid variant
-            LWARNING(std::format("Missing kernel file {:07}", variantId - IdOffset + 1));
+            LWARNING(std::format("Missing kernel file {:06}", variantId - IdOffset + 1));
             variantId += 2;
 
             SpiceManager::ref().unloadKernel(managerKernelId);
@@ -333,6 +333,19 @@ void FindImpactsTask::writeImpactCoordinates(
         file << std::format(
             "{:<10}{:>12.7f}{:>12.7f}{:>30}\n",
             impact.id, impact.latitude, impact.longitude, impact.time
+        );
+
+        ++impactCounter;
+        progressCallback(impactCounter / static_cast<float>(_impactCoordinates.size()));
+    }
+    file << "\n";
+
+    // Make it easier to add the samples to the tube by also printing the add sample scripts
+    impactCounter = 0;
+    for (const ImpactCoordinate& impact : _impactCoordinates) {
+        file << std::format(
+            "\"openspace.setPropertyValueSingle(\\\"Scene.{}.Renderable.SelectedSample\\\", '{}')\",\n",
+            _asteroidName, impact.id
         );
 
         ++impactCounter;
