@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/scene/scene.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace {
 

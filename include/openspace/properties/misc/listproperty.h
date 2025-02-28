@@ -22,46 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/stringproperty.h>
+#ifndef __OPENSPACE_CORE___LISTPROPERTY___H__
+#define __OPENSPACE_CORE___LISTPROPERTY___H__
 
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/lua/lua_helper.h>
-#include <openspace/json.h>
+#include <openspace/properties/templateproperty.h>
+#include <vector>
 
 namespace openspace::properties {
 
-StringProperty::StringProperty(Property::PropertyInfo info, std::string value)
-    : TemplateProperty<std::string>(std::move(info), std::move(value))
-{}
+template <typename T>
+class ListProperty : public TemplateProperty<std::vector<T>> {
+public:
+    ListProperty(Property::PropertyInfo info, std::vector<T> values);
 
-std::string_view StringProperty::className() const {
-    return "StringProperty";
-}
-
-ghoul::lua::LuaTypes StringProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::String;
-}
-
-std::string StringProperty::fromLuaConversion(lua_State* state) const {
-    return ghoul::lua::value<std::string>(state);
-}
-
-void StringProperty::toLuaConversion(lua_State* state) const {
-    ghoul::lua::push(state, _value);
-}
-
-std::string StringProperty::toStringConversion() const {
-    nlohmann::json json;
-    nlohmann::to_json(json, _value);
-    return json.dump();
-}
-
-StringProperty::operator std::string_view() {
-    return _value;
-}
-
-StringProperty::operator std::string_view() const {
-    return _value;
-}
+    virtual ~ListProperty() override = 0;
+};
 
 } // namespace openspace::properties
+
+#include "openspace/properties/misc/listproperty.inl"
+
+#endif // __OPENSPACE_CORE___LISTPROPERTY___H__

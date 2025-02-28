@@ -33,13 +33,9 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <numeric>
 
 namespace {
     const ImVec2 WindowSize = ImVec2(350, 500);

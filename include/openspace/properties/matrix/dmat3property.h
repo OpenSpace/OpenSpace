@@ -41,10 +41,16 @@ public:
             ghoul::createFillMat3x3<double>(std::numeric_limits<double>::max()),
         glm::dmat3x3 stepValue = ghoul::createFillMat3x3<double>(0.01));
 
-    std::string_view className() const override;
-    ghoul::lua::LuaTypes typeLua() const override;
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
+    void getLuaValue(lua_State* state) const override final;
+
+    std::string stringValue() const override final;
     using TemplateProperty<glm::dmat3x3>::operator=;
+
+private:
+    glm::dmat3x3 toValue(lua_State* state) const override final;
 };
 
 } // namespace openspace::properties

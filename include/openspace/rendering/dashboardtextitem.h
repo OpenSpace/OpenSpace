@@ -27,8 +27,8 @@
 
 #include <openspace/rendering/dashboarditem.h>
 
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/stringproperty.h>
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::fontrendering { class Font; }

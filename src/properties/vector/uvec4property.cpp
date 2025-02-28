@@ -24,6 +24,7 @@
 
 #include <openspace/properties/vector/uvec4property.h>
 
+#include <openspace/util/json_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 
@@ -47,6 +48,18 @@ std::string_view UVec4Property::className() const {
 
 ghoul::lua::LuaTypes UVec4Property::typeLua() const {
     return ghoul::lua::LuaTypes::Table;
+}
+
+void UVec4Property::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
+glm::uvec4 UVec4Property::toValue(lua_State* state) const {
+    return ghoul::lua::value<glm::uvec4>(state);
+}
+
+std::string UVec4Property::stringValue() const {
+    return formatJson(_value);
 }
 
 } // namespace openspace::properties

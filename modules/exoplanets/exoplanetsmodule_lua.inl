@@ -26,6 +26,7 @@
 #include <modules/exoplanets/exoplanetshelper.h>
 #include <modules/exoplanets/tasks/exoplanetsdatapreparationtask.h>
 #include <openspace/scene/scene.h>
+#include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/csvreader.h>
 #include <ghoul/misc/stringhelper.h>
 #include <algorithm>

@@ -31,6 +31,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/openspacemodule.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/profiling.h>
 
 #include "moduleengine_lua.inl"

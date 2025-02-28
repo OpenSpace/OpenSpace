@@ -24,6 +24,7 @@
 
 #include <openspace/properties/matrix/mat4property.h>
 
+#include <openspace/util/json_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 
@@ -47,6 +48,18 @@ std::string_view Mat4Property::className() const {
 
 ghoul::lua::LuaTypes Mat4Property::typeLua() const {
     return ghoul::lua::LuaTypes::Table;
+}
+
+void Mat4Property::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
+glm::mat4 Mat4Property::toValue(lua_State* state) const {
+    return ghoul::lua::value<glm::mat4>(state);
+}
+
+std::string Mat4Property::stringValue() const {
+    return formatJson(_value);
 }
 
 }  // namespace openspace::properties

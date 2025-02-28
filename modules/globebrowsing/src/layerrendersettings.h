@@ -27,8 +27,8 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/triggerproperty.h>
 
 namespace openspace::globebrowsing {
 

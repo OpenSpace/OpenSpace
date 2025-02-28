@@ -27,10 +27,10 @@
 
 #include <modules/base/rendering/pointcloud/renderablepointcloud.h>
 
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
-#include <openspace/properties/triggerproperty.h>
 
 namespace ghoul::opengl { class Texture; }
 

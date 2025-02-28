@@ -22,28 +22,57 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___LISTPROPERTY___H__
-#define __OPENSPACE_CORE___LISTPROPERTY___H__
+#ifndef __OPENSPACE_CORE___TRIGGERPROPERTY___H__
+#define __OPENSPACE_CORE___TRIGGERPROPERTY___H__
 
-#include <openspace/properties/templateproperty.h>
-#include <vector>
+#include <openspace/properties/property.h>
 
 namespace openspace::properties {
 
-template <typename T>
-class ListProperty : public TemplateProperty<std::vector<T>> {
+/**
+ * TriggerProperty that can be used to fire events into your code using the callback
+ * method #onChange.
+ */
+class TriggerProperty : public Property {
 public:
-    ListProperty(Property::PropertyInfo info, std::vector<T> values);
+    /**
+     * Initializes the TriggerProperty by delegating the `identifier` and `guiName` to the
+     * Property constructor.
+     *
+     * \param info The PropertyInfo structure that contains all the required static
+     *        information for initializing this Property
+     * \pre \p info.identifier must not be empty
+     * \pre \p info.guiName must not be empty
+     */
+    TriggerProperty(PropertyInfo info);
 
-    virtual ~ListProperty() override = 0;
+    /**
+     * Returns the class name `TriggerProperty`.
+     *
+     * \return The class name `TriggerProperty`
+     */
+    std::string_view className() const override final;
 
-protected:
-    std::vector<T> fromLuaConversion(lua_State* state) const override;
-    void toLuaConversion(lua_State* state) const override;
+    void getLuaValue(lua_State* state) const override final;
+
+    /**
+     * Accepts only the `LUA_TNIL` type and will notify all the listeners that the event
+     * has been triggered.
+     *
+     * \param state The unused Lua state
+     */
+    void setLuaValue(lua_State* state) override final;
+
+    ghoul::lua::LuaTypes typeLua() const override final;
+
+    /**
+     * Triggers this TriggerProperty.
+     */
+    void trigger();
+
+    std::string jsonValue() const override final;
 };
 
 } // namespace openspace::properties
 
-#include "openspace/properties/listproperty.inl"
-
-#endif // __OPENSPACE_CORE___LISTPROPERTY___H__
+#endif // __OPENSPACE_CORE___TRIGGERPROPERTY___H__

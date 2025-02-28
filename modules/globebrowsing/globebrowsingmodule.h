@@ -25,10 +25,11 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/util/openspacemodule.h>
+
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
-#include <openspace/util/openspacemodule.h>
 #include <ghoul/glm.h>
 #include <future>
 #include <memory>

@@ -37,6 +37,7 @@
 #include <ghoul/cmdparser/multiplecommand.h>
 #include <ghoul/cmdparser/singlecommand.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
 #include <ghoul/misc/stacktrace.h>
 #ifdef WIN32

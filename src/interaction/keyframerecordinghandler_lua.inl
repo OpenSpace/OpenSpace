@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/engine/globals.h>
+#include <ghoul/lua/lua_helper.h>
 #include <optional>
 
 namespace {

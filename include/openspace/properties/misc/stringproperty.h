@@ -22,55 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___TRIGGERPROPERTY___H__
-#define __OPENSPACE_CORE___TRIGGERPROPERTY___H__
+#ifndef __OPENSPACE_CORE___STRINGPROPERTY___H__
+#define __OPENSPACE_CORE___STRINGPROPERTY___H__
 
-#include <openspace/properties/property.h>
+#include <openspace/properties/templateproperty.h>
 
 namespace openspace::properties {
 
-/**
- * TriggerProperty that can be used to fire events into your code using the callback
- * method #onChange.
- */
-class TriggerProperty : public Property {
+class StringProperty : public TemplateProperty<std::string> {
 public:
-    /**
-     * Initializes the TriggerProperty by delegating the `identifier` and `guiName` to the
-     * Property constructor.
-     *
-     * \param info The PropertyInfo structure that contains all the required static
-     *        information for initializing this Property
-     * \pre \p info.identifier must not be empty
-     * \pre \p info.guiName must not be empty
-     */
-    TriggerProperty(PropertyInfo info);
+    StringProperty(Property::PropertyInfo info, std::string value = "");
 
-    /**
-     * Returns the class name `TriggerProperty`.
-     *
-     * \return The class name `TriggerProperty`
-     */
-    std::string_view className() const override;
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
-    /**
-     * Accepts only the `LUA_TNIL` type and will notify all the listeners that the event
-     * has been triggered.
-     *
-     * \param state The unused Lua state
-     */
-    void setLuaValue(lua_State* state) override;
+    using TemplateProperty<std::string>::operator=;
+    using TemplateProperty<std::string>::value;
 
-    ghoul::lua::LuaTypes typeLua() const;
+    void getLuaValue(lua_State* state) const override final;
 
-    /**
-     * Triggers this TriggerProperty.
-     */
-    void trigger();
+    std::string stringValue() const override final;
+    operator std::string_view();
+    operator std::string_view() const;
 
-    std::string jsonValue() const override;
+private:
+    std::string toValue(lua_State* state) const override final;
 };
 
 } // namespace openspace::properties
 
-#endif // __OPENSPACE_CORE___TRIGGERPROPERTY___H__
+#endif // __OPENSPACE_CORE___STRINGPROPERTY___H__

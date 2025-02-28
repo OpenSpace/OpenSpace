@@ -22,7 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "kepler.h"
+#include <modules/space/kepler.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace {
 

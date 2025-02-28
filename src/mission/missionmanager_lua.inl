@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/engine/globals.h>
+#include <ghoul/lua/lua_helper.h>
 
 // Load mission phases from file.
 [[codegen::luawrap]] void loadMission(ghoul::Dictionary mission) {

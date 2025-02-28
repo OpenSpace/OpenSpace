@@ -27,8 +27,8 @@
 
 #include <openspace/rendering/dashboardtextitem.h>
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 
 namespace ghoul { class Dictionary; }
 

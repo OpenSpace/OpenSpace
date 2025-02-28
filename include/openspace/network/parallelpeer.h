@@ -29,8 +29,8 @@
 
 #include <openspace/network/messagestructures.h>
 #include <openspace/network/parallelconnection.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/designpattern/event.h>
 #include <atomic>

@@ -27,8 +27,8 @@
 
 #include <openspace/scene/lightsource.h>
 
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
 

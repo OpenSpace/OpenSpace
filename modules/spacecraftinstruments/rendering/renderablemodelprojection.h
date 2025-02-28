@@ -29,7 +29,7 @@
 
 #include <modules/spacecraftinstruments/util/image.h>
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/opengl/uniformcache.h>

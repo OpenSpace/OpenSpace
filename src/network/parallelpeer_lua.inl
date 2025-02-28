@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <ghoul/lua/lua_helper.h>
+
 namespace {
 
 [[codegen::luawrap]] void joinServer(std::string port, std::string address,

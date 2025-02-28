@@ -28,8 +28,8 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/camera/camera.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>

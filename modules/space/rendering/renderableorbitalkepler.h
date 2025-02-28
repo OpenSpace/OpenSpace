@@ -30,7 +30,7 @@
 #include <modules/base/rendering/renderabletrail.h>
 #include <modules/space/kepler.h>
 #include <modules/space/translation/keplertranslation.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/objectmanager.h>

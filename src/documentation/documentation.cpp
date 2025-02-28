@@ -25,6 +25,7 @@
 #include <openspace/documentation/documentation.h>
 
 #include <openspace/documentation/verifier.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <algorithm>
 #include <set>

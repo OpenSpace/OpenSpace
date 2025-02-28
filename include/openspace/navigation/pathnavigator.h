@@ -29,7 +29,7 @@
 
 #include <openspace/navigation/path.h>
 #include <openspace/properties/list/stringlistproperty.h>
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>

@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <ghoul/lua/lua_helper.h>
+
 namespace {
 
 /// Will create a ScreenSpaceRenderable from a lua Table and add it in the RenderEngine

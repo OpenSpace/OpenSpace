@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 
 namespace openspace::properties {
 
@@ -33,6 +33,8 @@ TriggerProperty::TriggerProperty(PropertyInfo info)
 std::string_view TriggerProperty::className() const {
     return "TriggerProperty";
 }
+
+void TriggerProperty::getLuaValue(lua_State*) const {}
 
 void TriggerProperty::setLuaValue(lua_State*) {
     notifyChangeListeners();

@@ -22,25 +22,46 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/properties/misc/stringproperty.h>
+
+#include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/lua_helper.h>
+#include <openspace/json.h>
+
 namespace openspace::properties {
 
-template <typename T>
-ListProperty<T>::ListProperty(Property::PropertyInfo info, std::vector<T> values)
-    : TemplateProperty<std::vector<T>>(std::move(info), std::move(values))
+StringProperty::StringProperty(Property::PropertyInfo info, std::string value)
+    : TemplateProperty<std::string>(std::move(info), std::move(value))
 {}
 
-template <typename T>
-ListProperty<T>::~ListProperty() {}
-
-template <typename T>
-std::vector<T> ListProperty<T>::fromLuaConversion(lua_State* state) const {
-    return ghoul::lua::value<std::vector<T>>(state);
+std::string_view StringProperty::className() const {
+    return "StringProperty";
 }
 
-template <typename T>
-void ListProperty<T>::toLuaConversion(lua_State* state) const {
-    ghoul::lua::push(state, TemplateProperty<std::vector<T>>::_value);
+ghoul::lua::LuaTypes StringProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::String;
+}
+
+void StringProperty::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
+std::string StringProperty::toValue(lua_State* state) const {
+    return ghoul::lua::value<std::string>(state);
+}
+
+std::string StringProperty::stringValue() const {
+    nlohmann::json json;
+    nlohmann::to_json(json, _value);
+    return json.dump();
+}
+
+StringProperty::operator std::string_view() {
+    return _value;
+}
+
+StringProperty::operator std::string_view() const {
+    return _value;
 }
 
 } // namespace openspace::properties
-

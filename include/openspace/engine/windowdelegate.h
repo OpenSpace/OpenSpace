@@ -26,7 +26,6 @@
 #define __OPENSPACE_CORE__WINDOWDELEGATE___H__
 
 #include <ghoul/glm.h>
-#include <glbinding/glbinding.h>
 #include <vector>
 
 namespace openspace {

@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/util/timeconversion.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace {
 

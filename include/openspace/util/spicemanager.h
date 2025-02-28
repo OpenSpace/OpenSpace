@@ -1152,8 +1152,8 @@ private:
     std::vector<KernelInformation> _loadedKernels;
 
     // Map: id, vector of pairs. Pair: Start time, end time;
-    std::map<int, std::vector< std::pair<double, double>>> _ckIntervals;
-    std::map<int, std::vector< std::pair<double, double>>> _spkIntervals;
+    std::map<int, std::vector<std::pair<double, double>>> _ckIntervals;
+    std::map<int, std::vector<std::pair<double, double>>> _spkIntervals;
     std::map<int, std::set<double>> _ckCoverageTimes;
     std::map<int, std::set<double>> _spkCoverageTimes;
 

@@ -32,7 +32,7 @@
 #include <modules/globebrowsing/src/layeradjustment.h>
 #include <modules/globebrowsing/src/layerrendersettings.h>
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 
 namespace openspace::documentation { struct Documentation; }

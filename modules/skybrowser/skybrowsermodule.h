@@ -29,9 +29,9 @@
 
 #include <modules/skybrowser/include/utility.h>
 #include <modules/skybrowser/include/wwtdatahandler.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <filesystem>
 
 namespace openspace {

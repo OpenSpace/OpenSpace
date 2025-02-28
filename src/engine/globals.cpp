@@ -62,6 +62,8 @@
 #include <ghoul/misc/sharedmemory.h>
 #include <ghoul/opengl/texture.h>
 #include <array>
+#include <functional>
+#include <memory>
 
 namespace openspace {
 namespace {

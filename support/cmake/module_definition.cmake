@@ -107,6 +107,7 @@ function (handle_module_dependencies target_name module_name)
   target_precompile_headers(${library_name} PRIVATE
     [["ghoul/format.h"]]
     [["ghoul/glm.h"]]
+    [["ghoul/lua/lua_helper.h"]]
     [["ghoul/misc/assert.h"]]
     [["ghoul/misc/boolean.h"]]
     [["ghoul/misc/exception.h"]]

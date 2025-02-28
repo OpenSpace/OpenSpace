@@ -28,7 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/globebrowsing/src/layergroupid.h>
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 

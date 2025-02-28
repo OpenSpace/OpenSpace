@@ -28,7 +28,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/engine/downloadmanager.h>
-#include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/rendering/transferfunction.h>
 #include <ghoul/glm.h>
 #include <chrono>

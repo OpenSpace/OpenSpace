@@ -37,8 +37,8 @@ class SelectionProperty : public TemplateProperty<std::set<std::string>> {
 public:
     SelectionProperty(Property::PropertyInfo info);
 
-    std::string_view className() const override;
-    ghoul::lua::LuaTypes typeLua() const override;
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
     /**
      * This method sets the stored value to the provided value `val`. If the value is
@@ -48,7 +48,7 @@ public:
      *
      * \param val The new value for this SelectionProperty
      */
-    void setValue(std::set<std::string> val) override;
+    void setValue(std::set<std::string> val) override final;
 
     /**
      * Checks if an option given by the provided `key` exists.
@@ -109,22 +109,20 @@ public:
      */
     void clearOptions();
 
+    void getLuaValue(lua_State* state) const override final;
+
+    std::string stringValue() const override;
     using TemplateProperty<std::set<std::string>>::operator std::set<std::string>;
-
     using TemplateProperty<std::set<std::string>>::operator=;
-
-protected:
-    std::set<std::string> fromLuaConversion(lua_State* state) const override;
-
-    void toLuaConversion(lua_State* state) const override;
-
-    std::string toStringConversion() const override;
 
 private:
     void sortOptions();
     bool removeInvalidKeys(std::set<std::string>& keys) const;
 
-    std::string generateAdditionalJsonDescription() const override;
+    std::string generateAdditionalJsonDescription() const override final;
+
+private:
+    std::set<std::string> toValue(lua_State* state) const override final;
 
     // A list of all available options that can be selected
     std::vector<std::string> _options;

@@ -32,6 +32,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/properties/property.h>
 #include <openspace/query/query.h>
+#include <openspace/util/json_helper.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {

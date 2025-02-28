@@ -27,8 +27,8 @@
 
 #include <modules/iswa/rendering/iswabasegroup.h>
 
-#include <openspace/properties/selectionproperty.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/selectionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 
 namespace openspace {

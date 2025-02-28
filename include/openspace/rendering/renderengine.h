@@ -27,14 +27,14 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/list/intlistproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <openspace/properties/triggerproperty.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <chrono>
 #include <filesystem>

@@ -27,9 +27,9 @@
 
 #include <modules/base/rendering/renderablelabel.h>
 
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
 

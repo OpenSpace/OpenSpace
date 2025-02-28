@@ -26,10 +26,6 @@
 
 #include <openspace/documentation/documentationengine.h>
 #include <ghoul/misc/stringhelper.h>
-#include <algorithm>
-#include <filesystem>
-#include <iomanip>
-#include <sstream>
 
 namespace openspace::documentation {
 

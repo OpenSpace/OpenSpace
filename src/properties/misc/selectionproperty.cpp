@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/selectionproperty.h>
+#include <openspace/properties/misc/selectionproperty.h>
 
 #include <openspace/json.h>
 #include <ghoul/logging/logmanager.h>
@@ -129,17 +129,17 @@ void SelectionProperty::clearOptions() {
     clearSelection();
 }
 
-std::set<std::string> SelectionProperty::fromLuaConversion(lua_State* state) const {
-    std::vector<std::string> val = ghoul::lua::value<std::vector<std::string>>(state, -1);
-    return std::set<std::string>(val.begin(), val.end());
-}
-
-void SelectionProperty::toLuaConversion(lua_State* state) const {
+void SelectionProperty::getLuaValue(lua_State* state) const {
     const std::vector<std::string> value(_value.begin(), _value.end());
     ghoul::lua::push(state, value);
 }
 
-std::string SelectionProperty::toStringConversion() const {
+std::set<std::string> SelectionProperty::toValue(lua_State* state) const {
+    std::vector<std::string> val = ghoul::lua::value<std::vector<std::string>>(state, -1);
+    return std::set<std::string>(val.begin(), val.end());
+}
+
+std::string SelectionProperty::stringValue() const {
     const nlohmann::json json(_value);
     return json.dump();
 }

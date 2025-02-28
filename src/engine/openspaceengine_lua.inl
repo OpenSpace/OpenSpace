@@ -30,10 +30,12 @@
 #include <openspace/openspace.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/json_helper.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
 #include <ghoul/io/texture/texturewriter.h>
+#include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/csvreader.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
