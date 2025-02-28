@@ -28,25 +28,29 @@
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable : 4100)
-#endif // _MSC_VER
-#ifdef __clang__
+#elif defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #pragma clang diagnostic ignored "-Wshadow-field"
 #pragma clang diagnostic ignored "-Wcomma"
 #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
-#endif // __clang__
+#elif defined(__GNUC__) || defined(__GNUG__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshadow"
+#endif
 
 #include <include/cef_app.h>
 #include <include/wrapper/cef_helpers.h>
 
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif // __clang__
 #ifdef _MSC_VER
 #pragma warning (pop)
-#endif // _MSC_VER
+#elif defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__) || defined(__GNUG__)
+#pragma GCC diagnostic pop
+#endif
+
 
 namespace openspace {
 

@@ -33,14 +33,19 @@
 #pragma clang diagnostic ignored "-Wshadow-field"
 #pragma clang diagnostic ignored "-Wcomma"
 #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
-#endif // __clang__
+#elif defined(__GNUC__) || defined(__GNUG__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshadow"
+#endif
 
 #include "include/cef_app.h"
 #include "include/webbrowserapp.h"
 
 #ifdef __clang__
 #pragma clang diagnostic pop
-#endif // __clang__
+#elif defined(__GNUC__) || defined(__GNUG__)
+#pragma GCC diagnostic pop
+#endif
 
 // Entry point function for all processes.
 int main(int argc, char* argv[]) {

@@ -179,6 +179,7 @@ namespace {
     template <DataMode mode>
     std::optional<FrameType> readFrameType(std::istream&, int) {
         static_assert(sizeof(int) == 0, "Unimplemented overload");
+        return std::nullopt;
     }
 
     template <>
