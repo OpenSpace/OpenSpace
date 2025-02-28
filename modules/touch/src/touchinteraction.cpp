@@ -796,17 +796,17 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
                 list.begin(),
                 list.end(),
                 0.0,
-                [this, &lastProcessed](double diff, const TouchInputHolder& inputHolder) {
+                [this, &lastProcessed](double diff, const TouchInputHolder& holder) {
                     TouchInput point = *std::find_if(
                         lastProcessed.begin(),
                         lastProcessed.end(),
-                        [&inputHolder](const TouchInput& input) {
-                            return inputHolder.holdsInput(input);
+                        [&holder](const TouchInput& input) {
+                            return holder.holdsInput(input);
                         }
                     );
                     double res = diff;
                     float lastAngle = point.angleToPos(_centroid.x, _centroid.y);
-                    float currentAngle = inputHolder.latestInput().angleToPos(
+                    float currentAngle = holder.latestInput().angleToPos(
                         _centroid.x,
                         _centroid.y
                     );
@@ -1210,7 +1210,11 @@ double FrameTimeAverage::averageFrameTime() const {
         return 1.0 / 60.0;
     }
     else {
-        return std::accumulate(_samples, _samples + _nSamples, 0.0) / (double)(_nSamples);
+        return std::accumulate(
+            _samples,
+            _samples + _nSamples,
+            0.0
+        ) / static_cast<double>(_nSamples);
     }
 }
 
