@@ -35,18 +35,15 @@ namespace openspace {
 
         std::vector<float> data(screenSize.x * screenSize.y * 2, 0.0f);
 
-        float z = -1.0f; 
+      
         for (int i = 0; i < screenSize.y; i++) {
             float y = (i - screenSize.y / 2) * stepSize;
             for (int j = 0; j < screenSize.x; j++) {
                 float x = (j - screenSize.x / 2) * stepSize;
-
-                float theta = atan2(sqrt(x * x + y * y) , z);
-                float phi = atan2(y, x);
-
                 int index = (screenSize.x * i + j) * 2;
-                data[index] = phi;
-                data[index + 1] = theta;
+
+                data[index] = x;
+                data[index + 1] = y;
             }
         }
         updateViewGridTexture(data, screenSize);
