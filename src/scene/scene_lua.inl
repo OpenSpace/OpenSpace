@@ -69,7 +69,7 @@ openspace::properties::PropertyOwner* findPropertyOwnerWithMatchingGroupTag(T* p
     using namespace openspace;
 
     properties::PropertyOwner* tagMatchOwner = nullptr;
-    properties::PropertyOwner* owner = prop->owner();
+    const properties::PropertyOwner* owner = prop->owner();
 
     if (owner) {
         const std::vector<std::string>& tags = owner->tags();

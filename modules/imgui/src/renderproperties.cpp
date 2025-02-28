@@ -106,10 +106,7 @@ void renderOptionProperty(Property* prop, const std::string& ownerName,
     OptionProperty* p = static_cast<OptionProperty*>(prop);
     const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
-    bool isReadOnly = false;
-    if (p->metaData().hasValue<bool>("isReadOnly")) {
-        isReadOnly = p->metaData().value<bool>("isReadOnly");
-    }
+    bool isReadOnly = p->isReadOnly();
 
     int value = *p;
     const std::vector<OptionProperty::Option>& options = p->options();
