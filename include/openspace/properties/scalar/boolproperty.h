@@ -37,16 +37,16 @@ class BoolProperty : public TemplateProperty<bool> {
 public:
     BoolProperty(Property::PropertyInfo info, bool value = false);
 
-    std::string_view className() const override;
-    ghoul::lua::LuaTypes typeLua() const override;
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
-    void getLuaValue(lua_State* state) const override;
+    void getLuaValue(lua_State* state) const override final;
 
-    std::string stringValue() const override;
+    std::string stringValue() const override final;
     using TemplateProperty<bool>::operator=;
 
 private:
-    bool toValue(lua_State* state) const override;
+    bool toValue(lua_State* state) const override final;
 };
 
 } // namespace openspace::properties

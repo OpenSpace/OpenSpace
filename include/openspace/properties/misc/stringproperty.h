@@ -33,20 +33,20 @@ class StringProperty : public TemplateProperty<std::string> {
 public:
     StringProperty(Property::PropertyInfo info, std::string value = "");
 
-    std::string_view className() const override;
-    ghoul::lua::LuaTypes typeLua() const override;
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
     using TemplateProperty<std::string>::operator=;
     using TemplateProperty<std::string>::value;
 
-    void getLuaValue(lua_State* state) const override;
+    void getLuaValue(lua_State* state) const override final;
 
-    std::string stringValue() const override;
+    std::string stringValue() const override final;
     operator std::string_view();
     operator std::string_view() const;
 
 private:
-    std::string toValue(lua_State* state) const override;
+    std::string toValue(lua_State* state) const override final;
 };
 
 } // namespace openspace::properties

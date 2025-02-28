@@ -28,6 +28,7 @@
 #include <openspace/util/json_helper.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
+#include <limits>
 
 namespace {
     constexpr std::string_view _loggerCat = "OptionProperty";
@@ -38,12 +39,24 @@ namespace openspace::properties {
 const std::string OptionProperty::OptionsKey = "Options";
 
 OptionProperty::OptionProperty(PropertyInfo info)
-    : IntProperty(std::move(info))
+    : NumericalProperty<int>(
+        std::move(info),
+        0,
+        std::numeric_limits<int>::lowest(),
+        std::numeric_limits<int>::max(),
+        1
+    )
     , _displayType(DisplayType::Radio)
 {}
 
 OptionProperty::OptionProperty(PropertyInfo info, DisplayType displayType)
-    : IntProperty(std::move(info))
+    : NumericalProperty<int>(
+        std::move(info),
+        0,
+        std::numeric_limits<int>::lowest(),
+        std::numeric_limits<int>::max(),
+        1
+    )
     , _displayType(displayType)
 {}
 
@@ -158,6 +171,10 @@ std::string OptionProperty::getDescriptionByValue(int value) {
     }
 }
 
+void OptionProperty::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
 void OptionProperty::setLuaValue(lua_State* state) {
     int thisValue = 0;
 
@@ -189,6 +206,10 @@ void OptionProperty::setLuaValue(lua_State* state) {
     setValue(thisValue);
 }
 
+std::string OptionProperty::stringValue() const {
+    return formatJson(_value);
+}
+
 std::string OptionProperty::generateAdditionalJsonDescription() const {
     // @REFACTOR from selectionproperty.cpp, possible refactoring? ---abock
     std::string result = "{ \"" + OptionsKey + "\": [";
@@ -210,6 +231,18 @@ std::string OptionProperty::generateAdditionalJsonDescription() const {
 
     result += "] }";
     return result;
+}
+
+int OptionProperty::toValue(lua_State* state) const {
+    if (ghoul::lua::hasValue<double>(state)) {
+        return static_cast<int>(ghoul::lua::value<double>(state));
+    }
+    else if (ghoul::lua::hasValue<int>(state)) {
+        return ghoul::lua::value<int>(state);
+    }
+    else {
+        throw ghoul::RuntimeError("Error extracting value in IntProperty");
+    }
 }
 
 } // namespace openspace::properties

@@ -34,17 +34,17 @@ public:
     DoubleListProperty(Property::PropertyInfo info,
         std::vector<double> values = std::vector<double>());
 
-    std::string_view className() const override;
-    ghoul::lua::LuaTypes typeLua() const override;
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
-    void getLuaValue(lua_State* state) const override;
+    void getLuaValue(lua_State* state) const override final;
 
-    std::string stringValue() const override;
+    std::string stringValue() const override final;
     using TemplateProperty<std::vector<double>>::operator std::vector<double>;
     using TemplateProperty<std::vector<double>>::operator=;
 
 private:
-    std::vector<double> toValue(lua_State* state) const override;
+    std::vector<double> toValue(lua_State* state) const override final;
 };
 
 } // namespace openspace::properties

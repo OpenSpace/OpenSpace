@@ -37,7 +37,7 @@ namespace openspace::properties {
  * options can be queried using the options method. Only values representing valid options
  * can be used to set this property, or an error will be logged.
  */
-class OptionProperty : public IntProperty {
+class OptionProperty : public NumericalProperty<int> {
 public:
     /**
      * The struct storing a single option consisting of an integer `value` and a `string`
@@ -81,10 +81,10 @@ public:
      *
      * \return The name of this class for reflection purposes
      */
-    std::string_view className() const override;
-    ghoul::lua::LuaTypes typeLua() const override;
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
-    using IntProperty::operator=;
+    using TemplateProperty<int>::operator=;
 
     /**
      * Returns the type for GUI display.
@@ -160,11 +160,14 @@ public:
      */
     std::string getDescriptionByValue(int value);
 
-    void setLuaValue(lua_State* state) override;
+    void getLuaValue(lua_State* state) const override final;
+    void setLuaValue(lua_State* state) override final;
+    std::string stringValue() const override final;
 
 private:
     static const std::string OptionsKey;
-    std::string generateAdditionalJsonDescription() const override;
+    std::string generateAdditionalJsonDescription() const override final;
+    int toValue(lua_State* state) const override final;
 
     /// The list of options which have been registered with this OptionProperty
     std::vector<Option> _options;

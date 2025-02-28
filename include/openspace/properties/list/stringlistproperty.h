@@ -35,17 +35,17 @@ public:
     StringListProperty(Property::PropertyInfo info,
         std::vector<std::string> values = std::vector<std::string>());
 
-    std::string_view className() const override;
-    ghoul::lua::LuaTypes typeLua() const override;
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
-    void getLuaValue(lua_State* state) const override;
+    void getLuaValue(lua_State* state) const override final;
 
-    std::string stringValue() const override;
+    std::string stringValue() const override final;
     using TemplateProperty<std::vector<std::string>>::operator std::vector<std::string>;
     using TemplateProperty<std::vector<std::string>>::operator=;
 
 private:
-    std::vector< std::string> toValue(lua_State* state) const override;
+    std::vector< std::string> toValue(lua_State* state) const override final;
 };
 
 } // namespace openspace::properties

@@ -34,17 +34,17 @@ public:
     IntListProperty(Property::PropertyInfo info,
         std::vector<int> values = std::vector<int>());
 
-    std::string_view className() const override;
-    ghoul::lua::LuaTypes typeLua() const override;
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
-    void getLuaValue(lua_State* state) const override;
+    void getLuaValue(lua_State* state) const override final;
 
-    std::string stringValue() const override;
+    std::string stringValue() const override final;
     using TemplateProperty<std::vector<int>>::operator std::vector<int>;
     using TemplateProperty<std::vector<int>>::operator=;
 
 private:
-    std::vector<int> toValue(lua_State* state) const override;
+    std::vector<int> toValue(lua_State* state) const override final;
 };
 
 } // namespace openspace::properties

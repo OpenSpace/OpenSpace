@@ -39,17 +39,17 @@ public:
         glm::vec4 maxValue = glm::vec4(std::numeric_limits<float>::max()),
         glm::vec4 stepValue = glm::vec4(0.01f));
 
-    std::string_view className() const override;
-    ghoul::lua::LuaTypes typeLua() const override;
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
-    void getLuaValue(lua_State* state) const override;
+    void getLuaValue(lua_State* state) const override final;
 
-    std::string stringValue() const override;
+    std::string stringValue() const override final;
 
     using TemplateProperty<glm::vec4>::operator=;
 
 private:
-    glm::vec4 toValue(lua_State* state) const override;
+    glm::vec4 toValue(lua_State* state) const override final;
 };
 
 } // namespace openspace::properties

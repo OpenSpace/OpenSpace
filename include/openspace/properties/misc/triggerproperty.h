@@ -51,9 +51,9 @@ public:
      *
      * \return The class name `TriggerProperty`
      */
-    std::string_view className() const override;
+    std::string_view className() const override final;
 
-    void getLuaValue(lua_State* state) const override;
+    void getLuaValue(lua_State* state) const override final;
 
     /**
      * Accepts only the `LUA_TNIL` type and will notify all the listeners that the event
@@ -61,16 +61,16 @@ public:
      *
      * \param state The unused Lua state
      */
-    void setLuaValue(lua_State* state) override;
+    void setLuaValue(lua_State* state) override final;
 
-    ghoul::lua::LuaTypes typeLua() const;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
     /**
      * Triggers this TriggerProperty.
      */
     void trigger();
 
-    std::string jsonValue() const override;
+    std::string jsonValue() const override final;
 };
 
 } // namespace openspace::properties
