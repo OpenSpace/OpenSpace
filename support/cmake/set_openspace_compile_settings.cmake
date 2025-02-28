@@ -148,6 +148,10 @@ function (set_openspace_compile_settings target)
     "-Wno-sign-compare"
     "-Wno-suggest-destructor-override"
     "-Wno-unknown-attributes"
+
+    # This should be removed as soon as https://github.com/g-truc/glm/issues/1349 is
+    # addressed
+    "-Wno-defaulted-function-deleted"
   )
 
 
