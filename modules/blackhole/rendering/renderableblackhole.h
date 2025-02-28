@@ -40,7 +40,7 @@ private:
   GLuint _quadVao = 0;
   GLuint _quadVbo = 0;
 
-  UniformCache(enviromentTexture, viewGrid) _uniformCache;
+  UniformCache(enviromentTexture, viewGrid, cameraRotationMatrix) _uniformCache;
 
   std::unique_ptr<ghoul::opengl::Texture> _enviromentTexture;
 };

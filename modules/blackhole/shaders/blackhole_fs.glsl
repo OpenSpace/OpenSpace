@@ -3,6 +3,7 @@ in vec2 TexCoord;
 
 uniform sampler2D enviromentTexture;
 uniform sampler2D viewGrid;
+uniform mat4 cameraRotationMatrix;
 
 const float PI = 3.1415926535897932384626433832795f;
 const float VIEWGRIDZ = -1.0f;
@@ -22,8 +23,8 @@ float atan2(float a, float b){
     return 0.0f;
 }
 
-vec2 cartisianToSphereical(vec2 cartisian) {
-    float theta = atan(sqrt(cartisian.x * cartisian.x + cartisian.y * cartisian.y) , VIEWGRIDZ);
+vec2 cartisianToSphereical(vec3 cartisian) {
+    float theta = atan2(sqrt(cartisian.x * cartisian.x + cartisian.y * cartisian.y) , cartisian.z);
     float phi = atan2(cartisian.y, cartisian.x);
 
     return vec2(phi, theta);
@@ -31,8 +32,12 @@ vec2 cartisianToSphereical(vec2 cartisian) {
 
 Fragment getFragment() {
     Fragment frag;
-    vec2 cartisianCoords = texture(viewGrid, TexCoord).xy;
-    vec2 sphereicaleCoords = cartisianToSphereical(cartisianCoords);
+    vec4 cartisianCoords = normalize(vec4(texture(viewGrid, TexCoord).xy, VIEWGRIDZ, 0.0f));
+
+    cartisianCoords = cameraRotationMatrix * cartisianCoords;
+    
+    vec2 sphereicaleCoords = cartisianToSphereical(cartisianCoords.xyz);
+
     vec2 uv = sphereToUV(sphereicaleCoords);
 
     vec4 texColor = texture(enviromentTexture, uv);
