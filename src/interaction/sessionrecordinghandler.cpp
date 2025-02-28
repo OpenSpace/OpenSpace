@@ -659,8 +659,8 @@ void SessionRecordingHandler::checkIfScriptUsesScenegraphNode(
             "NavigationHandler.OrbitalNavigator.Aim"
         };
 
-        for (std::string_view script : NavScriptsUsingNodes) {
-            if (navTerm.find(script) != std::string::npos) {
+        for (std::string_view s : NavScriptsUsingNodes) {
+            if (navTerm.find(s) != std::string::npos) {
                 return true;
             }
         }
