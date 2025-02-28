@@ -10,7 +10,7 @@ const float VIEWGRIDZ = -1.0f;
 vec2 sphereToUV(vec2 sphereCoords){
     float u = sphereCoords.x / (2.0f * PI) + 0.5f;
     float v = sphereCoords.y / PI;
-    
+
     return vec2(u, v);
 }
 
@@ -35,8 +35,8 @@ Fragment getFragment() {
     vec2 sphereicaleCoords = cartisianToSphereical(cartisianCoords);
     vec2 uv = sphereToUV(sphereicaleCoords);
 
-    vec4 texColor = texture(enviromentTexture, uv);
-    
+    vec4 texColor = texture(enviromentTexture, uv);  
     frag.color = texColor;
+    
     return frag;
 }

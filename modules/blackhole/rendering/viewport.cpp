@@ -35,7 +35,6 @@ namespace openspace {
 
         std::vector<float> data(screenSize.x * screenSize.y * 2, 0.0f);
 
-      
         for (int i = 0; i < screenSize.y; i++) {
             float y = (i - screenSize.y / 2) * stepSize;
             for (int j = 0; j < screenSize.x; j++) {
