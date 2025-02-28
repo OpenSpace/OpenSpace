@@ -26,8 +26,20 @@
 // reserved. Use of this source code is governed by a BSD-style license that can
 // be found in the LICENSE file.
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#pragma clang diagnostic ignored "-Wshadow-field"
+#pragma clang diagnostic ignored "-Wcomma"
+#endif // __clang__
+
 #include "include/cef_app.h"
 #include "include/webbrowserapp.h"
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif // __clang__
 
 // Entry point function for all processes.
 int main(int argc, char* argv[]) {
