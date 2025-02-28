@@ -42,25 +42,23 @@ ghoul::lua::LuaTypes IntProperty::typeLua() const {
     return ghoul::lua::LuaTypes::Number;
 }
 
-int IntProperty::fromLuaConversion(lua_State* state) const {
+void IntProperty::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
+void IntProperty::setLuaValue(lua_State* state) {
+    int thisValue = 0;
+
     if (ghoul::lua::hasValue<double>(state)) {
-        return static_cast<int>(ghoul::lua::value<double>(state));
+        thisValue = static_cast<int>(ghoul::lua::value<double>(state));
     }
     else if (ghoul::lua::hasValue<int>(state)) {
-        return ghoul::lua::value<int>(state);
+        thisValue = ghoul::lua::value<int>(state);
     }
     else {
         throw ghoul::RuntimeError("Error extracting value in IntProperty");
     }
-}
 
-bool IntProperty::getLuaValue(lua_State* state) const {
-    toLuaConversion(state);
-    return true;
-}
-
-void IntProperty::setLuaValue(lua_State* state) {
-    int thisValue = fromLuaConversion(state);
     setValue(thisValue);
 }
 

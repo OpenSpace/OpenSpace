@@ -40,25 +40,14 @@ ghoul::lua::LuaTypes TransferFunctionProperty::typeLua() const {
     return ghoul::lua::LuaTypes::Table;
 }
 
-openspace::volume::TransferFunction
-TransferFunctionProperty::fromLuaConversion(lua_State* state) const {
-    openspace::volume::TransferFunction tf;
-    tf.setEnvelopesFromLua(state);
-    return tf;
-}
-
-void TransferFunctionProperty::toLuaConversion(lua_State* state) const {
+void TransferFunctionProperty::getLuaValue(lua_State* state) const {
     _value.envelopesToLua(state);
 }
 
-bool TransferFunctionProperty::getLuaValue(lua_State* state) const {
-    toLuaConversion(state);
-    return true;
-}
-
 void TransferFunctionProperty::setLuaValue(lua_State* state) {
-    volume::TransferFunction thisValue = fromLuaConversion(state);
-    setValue(std::move(thisValue));
+    openspace::volume::TransferFunction tf;
+    tf.setEnvelopesFromLua(state);
+    setValue(std::move(tf));
 }
 
 std::string TransferFunctionProperty::stringValue() const {

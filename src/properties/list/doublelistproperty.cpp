@@ -45,13 +45,12 @@ ghoul::lua::LuaTypes DoubleListProperty::typeLua() const {
     return ghoul::lua::LuaTypes::Table;
 }
 
-bool DoubleListProperty::getLuaValue(lua_State* state) const {
-    toLuaConversion(state);
-    return true;
+void DoubleListProperty::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
 }
 
 void DoubleListProperty::setLuaValue(lua_State* state) {
-    std::vector<double> thisValue = fromLuaConversion(state);
+    std::vector<double> thisValue = ghoul::lua::value<std::vector<double>>(state);
     setValue(std::move(thisValue));
 }
 

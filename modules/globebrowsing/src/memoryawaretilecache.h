@@ -28,10 +28,10 @@
 #include <modules/globebrowsing/src/lrucache.h>
 #include <modules/globebrowsing/src/tileindex.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/triggerproperty.h>
 #include <memory>
 #include <unordered_map>
 #include <vector>

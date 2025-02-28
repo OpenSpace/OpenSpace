@@ -128,7 +128,7 @@ protected:
      * \param state The Lua state from which the value will be decoded
      * \return The decoded value
      */
-    virtual T fromLuaConversion(lua_State* state) const = 0;
+    //virtual T fromLuaConversion(lua_State* state) const = 0;
 
     /**
      * Encodes the stored value into a Lua object and pushes that object onto the stack.
@@ -136,7 +136,7 @@ protected:
      *
      * \param state The Lua state onto which the encoded object will be pushed
      */
-    virtual void toLuaConversion(lua_State* state) const = 0;
+    //virtual void toLuaConversion(lua_State* state) const = 0;
 
     /// The value that this TemplateProperty currently stores
     T _value;

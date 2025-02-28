@@ -22,57 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___TRIGGERPROPERTY___H__
-#define __OPENSPACE_CORE___TRIGGERPROPERTY___H__
-
-#include <openspace/properties/property.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace openspace::properties {
 
-/**
- * TriggerProperty that can be used to fire events into your code using the callback
- * method #onChange.
- */
-class TriggerProperty : public Property {
-public:
-    /**
-     * Initializes the TriggerProperty by delegating the `identifier` and `guiName` to the
-     * Property constructor.
-     *
-     * \param info The PropertyInfo structure that contains all the required static
-     *        information for initializing this Property
-     * \pre \p info.identifier must not be empty
-     * \pre \p info.guiName must not be empty
-     */
-    TriggerProperty(PropertyInfo info);
+template <typename T>
+ListProperty<T>::ListProperty(Property::PropertyInfo info, std::vector<T> values)
+    : TemplateProperty<std::vector<T>>(std::move(info), std::move(values))
+{}
 
-    /**
-     * Returns the class name `TriggerProperty`.
-     *
-     * \return The class name `TriggerProperty`
-     */
-    std::string_view className() const override;
-
-    bool getLuaValue(lua_State* state) const override;
-
-    /**
-     * Accepts only the `LUA_TNIL` type and will notify all the listeners that the event
-     * has been triggered.
-     *
-     * \param state The unused Lua state
-     */
-    void setLuaValue(lua_State* state) override;
-
-    ghoul::lua::LuaTypes typeLua() const;
-
-    /**
-     * Triggers this TriggerProperty.
-     */
-    void trigger();
-
-    std::string jsonValue() const override;
-};
+template <typename T>
+ListProperty<T>::~ListProperty() {}
 
 } // namespace openspace::properties
 
-#endif // __OPENSPACE_CORE___TRIGGERPROPERTY___H__

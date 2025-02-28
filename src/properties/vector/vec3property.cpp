@@ -49,13 +49,12 @@ ghoul::lua::LuaTypes Vec3Property::typeLua() const {
     return ghoul::lua::LuaTypes::Table;
 }
 
-bool Vec3Property::getLuaValue(lua_State* state) const {
-    toLuaConversion(state);
-    return true;
+void Vec3Property::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
 }
 
 void Vec3Property::setLuaValue(lua_State* state) {
-    glm::vec3 thisValue = fromLuaConversion(state);
+    glm::vec3 thisValue = ghoul::lua::value<glm::vec3>(state);
     setValue(std::move(thisValue));
 }
 

@@ -29,7 +29,7 @@
 #include <openspace/util/syncable.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>

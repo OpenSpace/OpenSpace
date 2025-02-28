@@ -22,27 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/lua/lua_helper.h>
+#ifndef __OPENSPACE_CORE___STRINGPROPERTY___H__
+#define __OPENSPACE_CORE___STRINGPROPERTY___H__
+
+#include <openspace/properties/templateproperty.h>
 
 namespace openspace::properties {
 
-template <typename T>
-ListProperty<T>::ListProperty(Property::PropertyInfo info, std::vector<T> values)
-    : TemplateProperty<std::vector<T>>(std::move(info), std::move(values))
-{}
+class StringProperty : public TemplateProperty<std::string> {
+public:
+    StringProperty(Property::PropertyInfo info, std::string value = "");
 
-template <typename T>
-ListProperty<T>::~ListProperty() {}
+    std::string_view className() const override;
+    ghoul::lua::LuaTypes typeLua() const override;
 
-template <typename T>
-std::vector<T> ListProperty<T>::fromLuaConversion(lua_State* state) const {
-    return ghoul::lua::value<std::vector<T>>(state);
-}
+    using TemplateProperty<std::string>::operator=;
 
-template <typename T>
-void ListProperty<T>::toLuaConversion(lua_State* state) const {
-    ghoul::lua::push(state, TemplateProperty<std::vector<T>>::_value);
-}
+    void getLuaValue(lua_State* state) const override;
+    void setLuaValue(lua_State* state) override;
+
+    std::string stringValue() const override;
+    operator std::string_view();
+    operator std::string_view() const;
+};
 
 } // namespace openspace::properties
 
+#endif // __OPENSPACE_CORE___STRINGPROPERTY___H__

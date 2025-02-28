@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___STRINGLISTPROPERTY___H__
 #define __OPENSPACE_CORE___STRINGLISTPROPERTY___H__
 
-#include <openspace/properties/listproperty.h>
+#include <openspace/properties/misc/listproperty.h>
 #include <string>
 
 namespace openspace::properties {
@@ -38,7 +38,7 @@ public:
     std::string_view className() const override;
     ghoul::lua::LuaTypes typeLua() const override;
 
-    bool getLuaValue(lua_State* state) const override;
+    void getLuaValue(lua_State* state) const override;
     void setLuaValue(lua_State* state) override;
 
     std::string stringValue() const override;

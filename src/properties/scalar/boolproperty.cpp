@@ -41,21 +41,12 @@ ghoul::lua::LuaTypes BoolProperty::typeLua() const {
     return ghoul::lua::LuaTypes::Boolean;
 }
 
-bool BoolProperty::fromLuaConversion(lua_State* state) const {
-    return ghoul::lua::value<bool>(state);
-}
-
-void BoolProperty::toLuaConversion(lua_State* state) const {
+void BoolProperty::getLuaValue(lua_State* state) const {
     ghoul::lua::push(state, _value);
 }
 
-bool BoolProperty::getLuaValue(lua_State* state) const {
-    toLuaConversion(state);
-    return true;
-}
-
 void BoolProperty::setLuaValue(lua_State* state) {
-    bool thisValue = fromLuaConversion(state);
+    bool thisValue = ghoul::lua::value<bool>(state);
     setValue(thisValue);
 }
 

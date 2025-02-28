@@ -42,13 +42,12 @@ ghoul::lua::LuaTypes ShortProperty::typeLua() const {
     return ghoul::lua::LuaTypes::Number;
 }
 
-bool ShortProperty::getLuaValue(lua_State* state) const {
-    toLuaConversion(state);
-    return true;
+void ShortProperty::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
 }
 
 void ShortProperty::setLuaValue(lua_State* state) {
-    short thisValue = fromLuaConversion(state);
+    short thisValue = ghoul::lua::value<short>(state);
     setValue(thisValue);
 }
 

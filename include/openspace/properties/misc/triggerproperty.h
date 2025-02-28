@@ -22,36 +22,57 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/triggerproperty.h>
+#ifndef __OPENSPACE_CORE___TRIGGERPROPERTY___H__
+#define __OPENSPACE_CORE___TRIGGERPROPERTY___H__
+
+#include <openspace/properties/property.h>
 
 namespace openspace::properties {
 
-TriggerProperty::TriggerProperty(PropertyInfo info)
-    : Property(std::move(info))
-{}
+/**
+ * TriggerProperty that can be used to fire events into your code using the callback
+ * method #onChange.
+ */
+class TriggerProperty : public Property {
+public:
+    /**
+     * Initializes the TriggerProperty by delegating the `identifier` and `guiName` to the
+     * Property constructor.
+     *
+     * \param info The PropertyInfo structure that contains all the required static
+     *        information for initializing this Property
+     * \pre \p info.identifier must not be empty
+     * \pre \p info.guiName must not be empty
+     */
+    TriggerProperty(PropertyInfo info);
 
-std::string_view TriggerProperty::className() const {
-    return "TriggerProperty";
-}
+    /**
+     * Returns the class name `TriggerProperty`.
+     *
+     * \return The class name `TriggerProperty`
+     */
+    std::string_view className() const override;
 
-bool TriggerProperty::getLuaValue(lua_State*) const {
-    return true;
-}
+    void getLuaValue(lua_State* state) const override;
 
-void TriggerProperty::setLuaValue(lua_State*) {
-    notifyChangeListeners();
-}
+    /**
+     * Accepts only the `LUA_TNIL` type and will notify all the listeners that the event
+     * has been triggered.
+     *
+     * \param state The unused Lua state
+     */
+    void setLuaValue(lua_State* state) override;
 
-ghoul::lua::LuaTypes TriggerProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::Nil;
-}
+    ghoul::lua::LuaTypes typeLua() const;
 
-void TriggerProperty::trigger() {
-    notifyChangeListeners();
-}
+    /**
+     * Triggers this TriggerProperty.
+     */
+    void trigger();
 
-std::string TriggerProperty::jsonValue() const {
-    return "true";
-}
+    std::string jsonValue() const override;
+};
 
 } // namespace openspace::properties
+
+#endif // __OPENSPACE_CORE___TRIGGERPROPERTY___H__

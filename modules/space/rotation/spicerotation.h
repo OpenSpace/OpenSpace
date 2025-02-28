@@ -27,7 +27,7 @@
 
 #include <openspace/scene/rotation.h>
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/scene/timeframe.h>
 #include <optional>
 

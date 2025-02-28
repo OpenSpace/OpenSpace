@@ -25,9 +25,10 @@
 #ifndef __OPENSPACE_MODULE_BASE___RENDERABLEDISC___H__
 #define __OPENSPACE_MODULE_BASE___RENDERABLEDISC___H__
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/rendering/renderable.h>
+
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/rendering/texturecomponent.h>
 #include <openspace/util/planegeometry.h>
 #include <ghoul/opengl/uniformcache.h>

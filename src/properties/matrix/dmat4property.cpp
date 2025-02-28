@@ -50,13 +50,12 @@ ghoul::lua::LuaTypes DMat4Property::typeLua() const {
     return ghoul::lua::LuaTypes::Table;
 }
 
-bool DMat4Property::getLuaValue(lua_State* state) const {
-    toLuaConversion(state);
-    return true;
+void DMat4Property::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
 }
 
 void DMat4Property::setLuaValue(lua_State* state) {
-    glm::dmat4 thisValue = fromLuaConversion(state);
+    glm::dmat4 thisValue = ghoul::lua::value<glm::dmat4>(state);
     setValue(std::move(thisValue));
 }
 

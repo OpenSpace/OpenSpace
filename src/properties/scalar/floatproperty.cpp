@@ -42,13 +42,12 @@ ghoul::lua::LuaTypes FloatProperty::typeLua() const {
     return ghoul::lua::LuaTypes::Number;
 }
 
-bool FloatProperty::getLuaValue(lua_State* state) const {
-    toLuaConversion(state);
-    return true;
+void FloatProperty::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
 }
 
 void FloatProperty::setLuaValue(lua_State* state) {
-    float thisValue = fromLuaConversion(state);
+    float thisValue = ghoul::lua::value<float>(state);
     setValue(thisValue);
 }
 

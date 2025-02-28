@@ -135,7 +135,7 @@ std::string NumericalProperty<T>::generateAdditionalJsonDescription() const {
 
 template <typename T>
 void NumericalProperty<T>::setLuaInterpolationTarget(lua_State* state) {
-    T targetValue = fromLuaConversion(state);
+    T targetValue = ghoul::lua::value<T>(state);
     _interpolationStart = TemplateProperty<T>::_value;
     _interpolationEnd = std::move(targetValue);
 }
@@ -150,16 +150,6 @@ void NumericalProperty<T>::interpolateValue(float t,
     TemplateProperty<T>::setValue(static_cast<T>(
         glm::mix(_interpolationStart, _interpolationEnd, t)
     ));
-}
-
-template <typename T>
-void NumericalProperty<T>::toLuaConversion(lua_State* state) const {
-    ghoul::lua::push(state, TemplateProperty<T>::_value);
-}
-
-template <typename T>
-T NumericalProperty<T>::fromLuaConversion(lua_State* state) const {
-    return ghoul::lua::value<T>(state);
 }
 
 } // namespace openspace::properties

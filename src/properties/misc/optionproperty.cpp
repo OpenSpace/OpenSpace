@@ -23,7 +23,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
 
 #include <openspace/util/json_helper.h>
 #include <ghoul/logging/logmanager.h>
@@ -157,12 +157,14 @@ std::string OptionProperty::getDescriptionByValue(int value) {
     }
 }
 
-int OptionProperty::fromLuaConversion(lua_State* state) const {
+void OptionProperty::setLuaValue(lua_State* state) {
+    int thisValue = 0;
+
     if (ghoul::lua::hasValue<double>(state)) {
-        return static_cast<int>(ghoul::lua::value<double>(state));
+        thisValue = static_cast<int>(ghoul::lua::value<double>(state));
     }
     else if (ghoul::lua::hasValue<int>(state)) {
-        return ghoul::lua::value<int>(state);
+        thisValue = ghoul::lua::value<int>(state);
     }
     else if (ghoul::lua::hasValue<std::string>(state)) {
         std::string value = ghoul::lua::value<std::string>(state);
@@ -177,11 +179,13 @@ int OptionProperty::fromLuaConversion(lua_State* state) const {
                 uri()
             );
         }
-        return it->value;
+        thisValue = it->value;
     }
     else {
         throw ghoul::RuntimeError("Error extracting value in OptionProperty");
     }
+
+    setValue(thisValue);
 }
 
 std::string OptionProperty::generateAdditionalJsonDescription() const {

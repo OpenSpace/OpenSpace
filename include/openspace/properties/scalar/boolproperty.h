@@ -40,15 +40,11 @@ public:
     std::string_view className() const override;
     ghoul::lua::LuaTypes typeLua() const override;
 
-    bool getLuaValue(lua_State* state) const override;
+    void getLuaValue(lua_State* state) const override;
     void setLuaValue(lua_State* state) override;
 
     std::string stringValue() const override;
     using TemplateProperty<bool>::operator=;
-
-protected:
-    bool fromLuaConversion(lua_State* state) const override;
-    void toLuaConversion(lua_State* state) const override;
 };
 
 } // namespace openspace::properties

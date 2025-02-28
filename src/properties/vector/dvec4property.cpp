@@ -50,13 +50,12 @@ ghoul::lua::LuaTypes DVec4Property::typeLua() const {
     return ghoul::lua::LuaTypes::Table;
 }
 
-bool DVec4Property::getLuaValue(lua_State* state) const {
-    toLuaConversion(state);
-    return true;
+void DVec4Property::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
 }
 
 void DVec4Property::setLuaValue(lua_State* state) {
-    glm::dvec4 thisValue = fromLuaConversion(state);
+    glm::dvec4 thisValue = ghoul::lua::value<glm::dvec4>(state);
     setValue(std::move(thisValue));
 }
 

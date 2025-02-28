@@ -22,34 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___STRINGPROPERTY___H__
-#define __OPENSPACE_CORE___STRINGPROPERTY___H__
+#ifndef __OPENSPACE_CORE___LISTPROPERTY___H__
+#define __OPENSPACE_CORE___LISTPROPERTY___H__
 
 #include <openspace/properties/templateproperty.h>
+#include <vector>
 
 namespace openspace::properties {
 
-class StringProperty : public TemplateProperty<std::string> {
+template <typename T>
+class ListProperty : public TemplateProperty<std::vector<T>> {
 public:
-    StringProperty(Property::PropertyInfo info, std::string value = "");
+    ListProperty(Property::PropertyInfo info, std::vector<T> values);
 
-    std::string_view className() const override;
-    ghoul::lua::LuaTypes typeLua() const override;
-
-    using TemplateProperty<std::string>::operator=;
-
-    bool getLuaValue(lua_State* state) const override;
-    void setLuaValue(lua_State* state) override;
-
-    std::string stringValue() const override;
-    operator std::string_view();
-    operator std::string_view() const;
-
-protected:
-    std::string fromLuaConversion(lua_State* state) const override;
-    void toLuaConversion(lua_State* state) const override;
+    virtual ~ListProperty() override = 0;
 };
 
 } // namespace openspace::properties
 
-#endif // __OPENSPACE_CORE___STRINGPROPERTY___H__
+#include "openspace/properties/misc/listproperty.inl"
+
+#endif // __OPENSPACE_CORE___LISTPROPERTY___H__

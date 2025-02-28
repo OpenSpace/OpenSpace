@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
@@ -42,21 +42,12 @@ ghoul::lua::LuaTypes StringProperty::typeLua() const {
     return ghoul::lua::LuaTypes::String;
 }
 
-std::string StringProperty::fromLuaConversion(lua_State* state) const {
-    return ghoul::lua::value<std::string>(state);
-}
-
-void StringProperty::toLuaConversion(lua_State* state) const {
+void StringProperty::getLuaValue(lua_State* state) const {
     ghoul::lua::push(state, _value);
 }
 
-bool StringProperty::getLuaValue(lua_State* state) const {
-    toLuaConversion(state);
-    return true;
-}
-
 void StringProperty::setLuaValue(lua_State* state) {
-    std::string thisValue = fromLuaConversion(state);
+    std::string thisValue = ghoul::lua::value<std::string>(state);
     setValue(std::move(thisValue));
 }
 

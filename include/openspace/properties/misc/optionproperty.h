@@ -160,9 +160,10 @@ public:
      */
     std::string getDescriptionByValue(int value);
 
+    void setLuaValue(lua_State* state) override;
+
 private:
     static const std::string OptionsKey;
-    int fromLuaConversion(lua_State* state) const override;
     std::string generateAdditionalJsonDescription() const override;
 
     /// The list of options which have been registered with this OptionProperty
