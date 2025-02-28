@@ -76,7 +76,7 @@ namespace {
         "in the line before each camera keyframe. The model matrix is the full matrix "
         "that converts the position into a J2000+Galactic reference frame.",
         openspace::properties::Property::Visibility::Developer
-    };sc
+    };
 
     constexpr std::string_view ScriptReturnPrefix = "return ";
 } // namespace

@@ -146,6 +146,7 @@ function (set_openspace_compile_settings target)
     "-Wno-deprecated-enum-enum-conversion"
     "-Wno-missing-braces"
     "-Wno-sign-compare"
+    "-Wno-suggest-destructor-override"
     "-Wno-unknown-attributes"
   )
 

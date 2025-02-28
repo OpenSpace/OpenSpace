@@ -72,7 +72,6 @@ namespace {
 
     constexpr std::string_view FrameTypeCameraAscii = "camera";
     constexpr std::string_view FrameTypeScriptAscii = "script";
-    constexpr std::string_view FrameTypeCommentAscii = "#";
     constexpr char FrameTypeCameraBinary = 'c';
     constexpr char FrameTypeScriptBinary = 's';
 

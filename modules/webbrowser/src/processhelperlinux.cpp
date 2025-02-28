@@ -32,6 +32,7 @@
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #pragma clang diagnostic ignored "-Wshadow-field"
 #pragma clang diagnostic ignored "-Wcomma"
+#pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
 #endif // __clang__
 
 #include "include/cef_app.h"
