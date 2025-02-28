@@ -18,7 +18,7 @@ namespace openspace {
         std::unique_ptr<ghoul::opengl::Texture> viewGrid;
     private:
         Camera* _camera = nullptr;
-        float fovHorizontel = glm::radians(120.f);
+        float fovHorizontel = glm::radians(90.f);
     };
 } // namespace openspace
 

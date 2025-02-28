@@ -36,6 +36,7 @@ namespace openspace {
 
     void RenderableBlackHole::initialize() {
         _viewport = ViewPort(global::navigationHandler->camera());
+        global::navigationHandler->camera()->setRotation(glm::dquat(0,0,0,0));
         cuda_test();
     }
 
@@ -71,6 +72,11 @@ namespace openspace {
         if (!bindTexture(_uniformCache.viewGrid, viewGridUnit, _viewport.viewGrid)) {
             LWARNING("UniformCache is missing 'viewGrid'");
         }
+
+        _program->setUniform(
+            _uniformCache.cameraRotationMatrix,
+            glm::mat4(global::navigationHandler->camera()->combinedViewMatrix())
+        );
      
 
         drawQuad();
