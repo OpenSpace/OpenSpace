@@ -63,7 +63,7 @@ constexpr std::array<TimeUnit, static_cast<int>(TimeUnit::Year) + 1> TimeUnits =
 // Note that the syntax here is required when initializing constexpr std::arrays
 // with structs
 constexpr std::array<TimeUnitName, static_cast<int>(TimeUnit::Year) + 1>
-TimeUnitNames{ {
+TimeUnitNames { {
     { "Nanosecond", "Nanoseconds", "ns" },
     { "Microsecond", "Microseconds", "us" },
     { "Millisecond", "Milliseconds", "ms" },

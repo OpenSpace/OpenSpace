@@ -319,14 +319,15 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
             const std::string stringUnit = std::get<std::string>(*p.modelScale);
 
             // Find matching unit name in list of supported unit names
-            try {
+            if (isValidDistanceUnitName(stringUnit)) {
                 DistanceUnit distanceUnit = distanceUnitFromString(stringUnit);
                 _modelScale = toMeter(distanceUnit);
             }
-            catch (const ghoul::MissingCaseException& e) {
-                std::string message = std::format("The given unit name '{}' does not "
-                    "match any currently supported unit names", stringUnit);
-                LERROR(message);
+            else {
+                LERROR(std::format(
+                    "The given unit name '{}' does not match any currently supported "
+                    "unit names", stringUnit
+                ));
                 _modelScale = 1.0;
             }
         }
@@ -354,15 +355,16 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         else if (std::holds_alternative<std::string>(*p.animationTimeScale)) {
             const std::string stringUnit = std::get<std::string>(*p.animationTimeScale);
 
-            try {
+            if (isValidTimeUnitName(stringUnit)) {
                 TimeUnit timeUnit = timeUnitFromString(stringUnit);
                 _animationTimeScale =
                     static_cast<double>(convertTime(1.0, timeUnit, TimeUnit::Second));
             }
-            catch (const ghoul::MissingCaseException& e) {
-                std::string message = std::format("The given unit name '{}' does not "
-                    "match any currently supported unit names", stringUnit);
-                LERROR(message);
+            else {
+                LERROR(std::format(
+                    "The given unit name '{}' does not match any currently supported "
+                    "unit names", stringUnit
+                ));
                 _animationTimeScale = 1.0;
             }
         }
