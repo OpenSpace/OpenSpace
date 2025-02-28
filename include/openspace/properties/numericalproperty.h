@@ -35,9 +35,6 @@ public:
     NumericalProperty(Property::PropertyInfo info, T value, T minimumValue,
         T maximumValue, T steppingValue, float exponent = 1.f);
 
-    virtual std::string_view className() const override = 0;
-    virtual int typeLua() const override = 0;
-
     T minValue() const;
     void setMinValue(T value);
 
@@ -54,7 +51,6 @@ public:
 
     using TemplateProperty<T>::operator=;
 
-    void setInterpolationTarget(std::any value) override;
     void setLuaInterpolationTarget(lua_State* state) override;
 
     void interpolateValue(float t,

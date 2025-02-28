@@ -70,7 +70,7 @@ namespace documentation { struct Documentation; }
 class HorizonsTranslation : public Translation {
 public:
     HorizonsTranslation();
-    HorizonsTranslation(const ghoul::Dictionary& dictionary);
+    explicit HorizonsTranslation(const ghoul::Dictionary& dictionary);
 
     glm::dvec3 position(const UpdateData& data) const override;
 
@@ -87,7 +87,7 @@ private:
     bool loadCachedFile(const std::filesystem::path& file);
     void saveCachedFile(const std::filesystem::path& file) const;
 
-    properties::StringListProperty _horizonsTextFiles;
+    properties::StringListProperty _horizonsFiles;
     ghoul::lua::LuaState _state;
     Timeline<glm::dvec3> _timeline;
 };

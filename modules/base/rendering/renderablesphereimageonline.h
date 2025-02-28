@@ -43,7 +43,7 @@ namespace documentation { struct Documentation; }
  */
 class RenderableSphereImageOnline : public RenderableSphere {
 public:
-    RenderableSphereImageOnline(const ghoul::Dictionary& dictionary);
+    explicit RenderableSphereImageOnline(const ghoul::Dictionary& dictionary);
 
     void deinitializeGL() override;
 

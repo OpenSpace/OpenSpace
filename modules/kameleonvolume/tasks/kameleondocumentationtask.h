@@ -34,7 +34,7 @@ namespace openspace::kameleonvolume {
 
 class KameleonDocumentationTask : public Task {
 public:
-    KameleonDocumentationTask(const ghoul::Dictionary& dictionary);
+    explicit KameleonDocumentationTask(const ghoul::Dictionary& dictionary);
 
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;

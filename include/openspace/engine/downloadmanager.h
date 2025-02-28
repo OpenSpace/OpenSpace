@@ -44,7 +44,7 @@ public:
         // Since the FileFuture object will be used from multiple threads, we have to be
         // careful about the access pattern, that is, no values should be read and written
         // by both the DownloadManager and the outside threads.
-        FileFuture(std::filesystem::path file);
+        explicit FileFuture(std::filesystem::path file);
 
         // Values that are written by the DownloadManager to be consumed by others
         long long currentSize = -1;
@@ -89,7 +89,8 @@ public:
         return f.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
     }
 
-    DownloadManager(UseMultipleThreads useMultipleThreads = UseMultipleThreads::Yes);
+    explicit DownloadManager(
+        UseMultipleThreads useMultipleThreads = UseMultipleThreads::Yes);
 
     //downloadFile
     // url - specifies the target of the download

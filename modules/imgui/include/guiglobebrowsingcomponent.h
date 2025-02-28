@@ -34,6 +34,7 @@ namespace openspace::gui {
 class GuiGlobeBrowsingComponent : public GuiPropertyComponent {
 public:
     GuiGlobeBrowsingComponent();
+
     void render() override;
 
 private:

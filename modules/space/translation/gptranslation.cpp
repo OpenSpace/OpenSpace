@@ -55,7 +55,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation GPTranslation::Documentation() {
-    return codegen::doc<Parameters>("space_transform_gp");
+    return codegen::doc<Parameters>("space_translation_gp");
 }
 
 GPTranslation::GPTranslation(const ghoul::Dictionary& dictionary) {

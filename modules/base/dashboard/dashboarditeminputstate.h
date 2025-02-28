@@ -36,10 +36,10 @@ namespace documentation { struct Documentation; }
 
 class DashboardItemInputState : public DashboardTextItem {
 public:
-    DashboardItemInputState(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemInputState(const ghoul::Dictionary& dictionary);
     ~DashboardItemInputState() override = default;
 
-    void render(glm::vec2& penPosition) override;
+    void update() override;
 
     glm::vec2 size() const override;
 

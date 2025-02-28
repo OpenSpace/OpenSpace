@@ -44,7 +44,7 @@ class Envelope;
 
 class TransferFunctionHandler : public properties::PropertyOwner {
 public:
-    TransferFunctionHandler(properties::StringProperty prop);
+    explicit TransferFunctionHandler(properties::StringProperty prop);
 
     void initialize();
 
@@ -57,7 +57,7 @@ public:
 
     ghoul::opengl::Texture& texture();
     void uploadTexture();
-    bool hasTexture();
+    bool hasTexture() const;
 
     std::shared_ptr<openspace::TransferFunction> transferFunction();
 

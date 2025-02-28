@@ -513,8 +513,10 @@ double Path::speedAlongPath(double traveledDistance) const {
 
 void checkVisibilityAndShowMessage(const SceneGraphNode* node) {
     auto isEnabled = [](const Renderable* r) {
-        std::any propertyValueAny = r->property("Enabled")->get();
-        return std::any_cast<bool>(propertyValueAny);
+        properties::Property* prop = r->property("Enabled");
+        properties::BoolProperty* boolProp = dynamic_cast<properties::BoolProperty*>(prop);
+        ghoul_assert(boolProp, "Enabled is not a boolean property");
+        return boolProp;
     };
 
     // Show some info related to the visiblity of the object

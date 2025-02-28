@@ -34,7 +34,7 @@ namespace openspace {
 
 class SyncBuffer {
 public:
-    SyncBuffer(size_t n);
+    explicit SyncBuffer(size_t n);
 
     ~SyncBuffer() = default;
 

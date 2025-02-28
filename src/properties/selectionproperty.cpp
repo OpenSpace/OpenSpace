@@ -47,8 +47,8 @@ std::string_view SelectionProperty::className() const {
     return "SelectionProperty";
 }
 
-int SelectionProperty::typeLua() const {
-    return LUA_TTABLE;
+ghoul::lua::LuaTypes SelectionProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Table;
 }
 
 void SelectionProperty::setValue(std::set<std::string> val) {

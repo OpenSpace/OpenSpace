@@ -1,0 +1,24 @@
+-- Specifying Segments
+-- This example adds a planar grid of 50x100 meters, split into 5 segments in the
+-- x-direction and 10 segments in the y-direction so that each segment is 10x10 meters.
+
+local Node = {
+  Identifier = "RenderableGrid_Example_Segments",
+  Renderable = {
+    Type = "RenderableGrid",
+    Size = { 50.0, 100.0 },
+    Segments = { 5, 10 }
+  },
+  GUI = {
+    Name = "RenderableGrid - Segments",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

@@ -38,8 +38,8 @@ void TriggerProperty::setLuaValue(lua_State*) {
     notifyChangeListeners();
 }
 
-void TriggerProperty::set(std::any) {
-    notifyChangeListeners();
+ghoul::lua::LuaTypes TriggerProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Nil;
 }
 
 void TriggerProperty::trigger() {

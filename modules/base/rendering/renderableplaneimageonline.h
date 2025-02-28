@@ -41,7 +41,7 @@ namespace documentation { struct Documentation; }
 
 class RenderablePlaneImageOnline : public RenderablePlane {
 public:
-    RenderablePlaneImageOnline(const ghoul::Dictionary& dictionary);
+    explicit RenderablePlaneImageOnline(const ghoul::Dictionary& dictionary);
 
     void deinitializeGL() override;
 

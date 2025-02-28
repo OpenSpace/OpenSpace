@@ -42,7 +42,7 @@ namespace openspace::globebrowsing {
 template<typename P, typename KeyType>
 class PrioritizingConcurrentJobManager {
 public:
-    PrioritizingConcurrentJobManager(LRUThreadPool<KeyType> pool);
+    explicit PrioritizingConcurrentJobManager(LRUThreadPool<KeyType> pool);
 
     /**
      * Enqueues a job which is identified using a given key.

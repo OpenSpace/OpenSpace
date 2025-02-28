@@ -63,13 +63,15 @@ local Rime = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Rime)
-  openspace.addSceneGraphNode(RimeBase)
+  openspace.printWarning([[The Rime instruments use a circular field-of-view that is
+    currently not supported in OpenSpace]])
+  -- openspace.addSceneGraphNode(Rime)
+  -- openspace.addSceneGraphNode(RimeBase)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(RimeBase)
-  openspace.removeSceneGraphNode(Rime)
+  -- openspace.removeSceneGraphNode(RimeBase)
+  -- openspace.removeSceneGraphNode(Rime)
 end)
 
 asset.export(Rime)

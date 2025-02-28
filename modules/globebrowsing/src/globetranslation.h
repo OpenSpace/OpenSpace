@@ -37,7 +37,7 @@ class RenderableGlobe;
 
 class GlobeTranslation : public Translation {
 public:
-    GlobeTranslation(const ghoul::Dictionary& dictionary);
+    explicit GlobeTranslation(const ghoul::Dictionary& dictionary);
 
     void update(const UpdateData& data) override;
     glm::dvec3 position(const UpdateData& data) const override;

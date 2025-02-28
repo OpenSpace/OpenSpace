@@ -37,7 +37,7 @@ class TSP;
 
 class LocalErrorHistogramManager {
 public:
-    LocalErrorHistogramManager(TSP* tsp);
+    explicit LocalErrorHistogramManager(TSP* tsp);
 
     bool buildHistograms(int numBins);
     const Histogram* spatialHistogram(unsigned int brickIndex) const;

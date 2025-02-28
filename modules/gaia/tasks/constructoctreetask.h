@@ -37,7 +37,7 @@ namespace documentation { struct Documentation; }
 
 class ConstructOctreeTask : public Task {
 public:
-    ConstructOctreeTask(const ghoul::Dictionary& dictionary);
+    explicit ConstructOctreeTask(const ghoul::Dictionary& dictionary);
     ~ConstructOctreeTask() override = default;
 
     std::string description() override;

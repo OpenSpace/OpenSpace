@@ -60,7 +60,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation LuaScale::Documentation() {
-    return codegen::doc<Parameters>("base_scale_lua");
+    return codegen::doc<Parameters>("base_transform_scale_lua");
 }
 
 LuaScale::LuaScale(const ghoul::Dictionary& dictionary)

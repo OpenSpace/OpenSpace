@@ -32,11 +32,11 @@ namespace openspace::properties {
 
 class TransferFunctionProperty : public TemplateProperty<volume::TransferFunction> {
 public:
-    TransferFunctionProperty(Property::PropertyInfo info,
+    explicit TransferFunctionProperty(Property::PropertyInfo info,
         volume::TransferFunction value = volume::TransferFunction());
 
     std::string_view className() const override;
-    int typeLua() const override;
+    ghoul::lua::LuaTypes typeLua() const override;
 
     using TemplateProperty<volume::TransferFunction>::operator=;
 

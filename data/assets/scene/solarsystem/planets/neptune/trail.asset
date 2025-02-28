@@ -14,18 +14,7 @@ local NeptuneTrail = {
       Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.2, 0.5, 1.0 },
-    -- Period = 60200,
-    -- Yes, this period is wrong, but the SPICE kernel we load by default only
-    -- goes back to 1850.  Neptunes orbit is 164 years, which would mean that we
-    -- exceed the SPICE kernel if we go back before 2014, if we try to compute the
-    -- entire orbit.  Cutting the orbit length to 100 years allows us to go back
-    -- to 1950 instead, which is good enough.
-    -- If the positions are needed before that, a different set of kernels are
-    -- needed, namely:
-    -- https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de431_part-1.bsp
-    -- https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de431_part-2.bsp
-    -- that cover a larger time span:  -13201-MAY-06 00:00 to  17191-MAR-15 00:00
-    Period = 36500,
+    Period = 60189.018,
     Resolution = 1000
   },
   Tag = { "planetTrail_solarSystem", "planetTrail_giants" },

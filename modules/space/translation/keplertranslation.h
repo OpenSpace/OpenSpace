@@ -58,7 +58,7 @@ public:
      * \param dictionary The ghoul::Dictionary containing all the information about the
      *        Keplerian elements (see Documentation)
      */
-    KeplerTranslation(const ghoul::Dictionary& dictionary);
+    explicit KeplerTranslation(const ghoul::Dictionary& dictionary);
 
     /// Default destructor
     ~KeplerTranslation() override = default;

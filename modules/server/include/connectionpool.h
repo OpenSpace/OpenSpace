@@ -41,7 +41,7 @@ class ConnectionPool {
 public:
     using SocketHandleFunc = std::function<void(ghoul::io::Socket& socket)>;
 
-    ConnectionPool(SocketHandleFunc handleSocket);
+    explicit ConnectionPool(SocketHandleFunc handleSocket);
     ~ConnectionPool();
 
     void addServer(std::shared_ptr<ghoul::io::SocketServer> server);

@@ -324,13 +324,13 @@ void SessionRecordingHandler::startRecording() {
 }
 
 void SessionRecordingHandler::stopRecording(const std::filesystem::path& filename,
-                                            DataMode dataMode)
+                                            DataMode dataMode, bool overwrite)
 {
     if (_state != SessionState::Recording) {
         return;
     }
 
-    if (std::filesystem::is_regular_file(filename)) {
+    if (!overwrite && std::filesystem::is_regular_file(filename)) {
         throw ghoul::RuntimeError(std::format(
             "Unable to start recording. File '{}' already exists", filename
         ), "SessionRecording");

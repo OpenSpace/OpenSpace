@@ -36,7 +36,7 @@ namespace openspace::volume {
 class TransferFunction {
 public:
     TransferFunction() = default;
-    TransferFunction(const std::string& string);
+    explicit TransferFunction(const std::string& string);
 
     void envelopesToLua(lua_State* state) const;
 

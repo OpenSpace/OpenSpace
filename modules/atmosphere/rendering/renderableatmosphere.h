@@ -65,7 +65,7 @@ namespace planetgeometry { class PlanetGeometry; }
 
 class RenderableAtmosphere : public Renderable {
 public:
-    RenderableAtmosphere(const ghoul::Dictionary& dictionary);
+    explicit RenderableAtmosphere(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;

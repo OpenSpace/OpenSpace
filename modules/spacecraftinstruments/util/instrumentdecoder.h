@@ -31,9 +31,9 @@ namespace openspace {
 
 class InstrumentDecoder : public Decoder {
 public:
-    InstrumentDecoder(const ghoul::Dictionary& dictionary);
+    explicit InstrumentDecoder(const ghoul::Dictionary& dictionary);
 
-    virtual const std::string& decoderType() const override;
+    virtual std::string_view decoderType() const override;
     virtual const std::vector<std::string>& translations() const override;
     const std::string& stopCommand();
 

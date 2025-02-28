@@ -154,7 +154,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     addProperty(_regularFormat);
 }
 
-void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
+void DashboardItemSimulationIncrement::update() {
     ZoneScoped;
 
     const double targetDt = global::timeManager->targetDeltaTime();
@@ -188,35 +188,26 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
     std::string pauseText = global::timeManager->isPaused() ? " (Paused)" : "";
 
     try {
-        penPosition.y -= _font->height();
         if (targetDt != currentDt && !global::timeManager->isPaused()) {
             // We are in the middle of a transition
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(
-                    _transitionFormat.value(),
-                    std::make_format_args(
-                        targetDeltaTime.first, targetDeltaTime.second,
-                        pauseText,
-                        currentDeltaTime.first, currentDeltaTime.second
-                    )
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            _buffer = std::vformat(
+                _transitionFormat.value(),
+                std::make_format_args(
+                    targetDeltaTime.first, targetDeltaTime.second,
+                    pauseText,
+                    currentDeltaTime.first, currentDeltaTime.second
                 )
             );
         }
         else {
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(
-                    _regularFormat.value(),
-                    std::make_format_args(
-                        targetDeltaTime.first,
-                        targetDeltaTime.second,
-                        pauseText
-                    )
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            _buffer = std::vformat(
+                _regularFormat.value(),
+                std::make_format_args(
+                    targetDeltaTime.first,
+                    targetDeltaTime.second,
+                    pauseText
                 )
             );
         }

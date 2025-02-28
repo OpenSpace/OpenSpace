@@ -40,10 +40,10 @@ namespace documentation { struct Documentation; }
 
 class DashboardItemDistance : public DashboardTextItem {
 public:
-    DashboardItemDistance(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemDistance(const ghoul::Dictionary& dictionary);
     ~DashboardItemDistance() override = default;
 
-    void render(glm::vec2& penPosition) override;
+    void update() override;
 
     glm::vec2 size() const override;
 
@@ -66,7 +66,7 @@ private:
     Component _source;
     Component _destination;
 
-    std::vector<char> _buffer;
+    std::vector<char> _localBuffer;
 };
 
 } // namespace openspace

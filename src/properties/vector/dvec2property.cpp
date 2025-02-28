@@ -45,8 +45,8 @@ std::string_view DVec2Property::className() const {
     return "DVec2Property";
 }
 
-int DVec2Property::typeLua() const {
-    return LUA_TTABLE;
+ghoul::lua::LuaTypes DVec2Property::typeLua() const {
+    return ghoul::lua::LuaTypes::Table;
 }
 
 } // namespace openspace::properties

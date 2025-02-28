@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/documentation/documentation.h>
+
 namespace {
 
  // Adds a new dashboard item to the main dashboard.
@@ -31,6 +33,10 @@ namespace {
         global::dashboard->addDashboardItem(
             DashboardItem::createFromDictionary(std::move(dashboard))
         );
+    }
+    catch (const documentation::SpecificationError& e) {
+        logError(e);
+        throw ghoul::lua::LuaError("Error adding dashboard item");
     }
     catch (const ghoul::RuntimeError& e) {
         throw ghoul::lua::LuaError(std::format(

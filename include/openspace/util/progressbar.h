@@ -31,7 +31,7 @@ namespace openspace {
 
 class ProgressBar {
 public:
-    ProgressBar(int end, int width = 70, std::ostream& stream = std::cout);
+    explicit ProgressBar(int end, int width = 70, std::ostream& stream = std::cout);
     ~ProgressBar();
 
     ProgressBar& operator=(const ProgressBar& rhs) = delete;

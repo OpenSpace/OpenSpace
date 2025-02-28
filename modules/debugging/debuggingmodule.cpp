@@ -106,7 +106,7 @@ DebuggingModule::DebuggingModule()
             WindowDelegate* del = global::windowDelegate;
 
             glm::vec2 penPosition = glm::vec2(
-                global::renderEngine->fontResolution().x / 2 - 50,
+                global::renderEngine->fontResolution().x / 2 - 70,
                 global::renderEngine->fontResolution().y / 3
             );
 
@@ -122,13 +122,14 @@ DebuggingModule::DebuggingModule()
                 }
             }(frustum);
 
+            std::string node = std::to_string(del->currentNode());
             std::string sgFn = std::to_string(del->swapGroupFrameNumber());
             std::string dt = std::to_string(del->deltaTime());
             std::string avgDt = std::to_string(del->averageDeltaTime());
 
             const std::string res = std::format(
-                "Frame: {} {}\nSwap group frame: {}\nDt: {}\nAvg Dt: {}",
-                fn, fr, sgFn, dt, avgDt
+                "Node: {}\n\nFrame: {} {}\nSwap group frame: {}\nDt: {}\nAvg Dt: {}",
+                node, fn, fr, sgFn, dt, avgDt
             );
             RenderFont(*_fontFrameInfo, penPosition, res);
         }

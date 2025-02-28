@@ -35,7 +35,7 @@ namespace openspace::kameleonvolume {
 
 class KameleonVolumeToRawTask : public Task {
 public:
-    KameleonVolumeToRawTask(const ghoul::Dictionary& dictionary);
+    explicit KameleonVolumeToRawTask(const ghoul::Dictionary& dictionary);
 
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;

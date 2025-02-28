@@ -43,7 +43,7 @@ class DataProcessor;
  */
 class DataCygnet : public IswaCygnet {
 public:
-    DataCygnet(const ghoul::Dictionary& dictionary);
+    explicit DataCygnet(const ghoul::Dictionary& dictionary);
     ~DataCygnet();
 
 protected:

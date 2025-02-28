@@ -58,7 +58,7 @@ public:
     static constexpr std::string_view KeyName = "Name";
     static constexpr std::string_view KeyIdentifier = "Identifier";
 
-    ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
     virtual ~ScreenSpaceRenderable() override;
 
     struct RenderData {

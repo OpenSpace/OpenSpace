@@ -61,13 +61,7 @@ public:
      */
     void setLuaValue(lua_State* state) override;
 
-    /**
-     * Silently ignores any value that is passed into this function and will trigger the
-     * listeners regardless of the value
-     *
-     * \param value The ignored value
-     */
-    void set(std::any value) override;
+    ghoul::lua::LuaTypes typeLua() const;
 
     /**
      * Triggers this TriggerProperty.

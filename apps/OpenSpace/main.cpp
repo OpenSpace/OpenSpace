@@ -1063,69 +1063,6 @@ void setSgctDelegateFunctions() {
     };
 }
 
-std::string setWindowConfigPresetForGui(const std::string& labelFromCfgFile,
-                                        bool haveCliSGCTConfig)
-{
-    openspace::Configuration& config = *global::configuration;
-
-    std::string preset;
-    const bool sgctCfgFileSpecifiedByLua = !config.sgctConfigNameInitialized.empty();
-    if (haveCliSGCTConfig) {
-        preset = std::format("{} (from CLI)", config.windowConfiguration);
-    }
-    else if (sgctCfgFileSpecifiedByLua) {
-        preset = config.sgctConfigNameInitialized + labelFromCfgFile;
-    }
-    else {
-        preset = config.windowConfiguration;
-    }
-    return preset;
-}
-
-std::pair<std::string, bool> selectedSgctProfileFromLauncher(LauncherWindow& lw,
-                                                             bool hasCliSGCTConfig,
-                                                   const std::string& windowConfiguration,
-                                                      const std::string& labelFromCfgFile)
-{
-    std::string config = windowConfiguration;
-    bool isGeneratedConfig = false;
-    if (!hasCliSGCTConfig) {
-        config = lw.selectedWindowConfig();
-        if (config.find(labelFromCfgFile) != std::string::npos) {
-            if (config.find("sgct.config") == std::string::npos) {
-                config = config.substr(0, config.length() - labelFromCfgFile.length());
-            }
-            else {
-                config = windowConfiguration;
-                isGeneratedConfig = true;
-            }
-        }
-        else {
-            const std::filesystem::path c = absPath(config);
-
-            std::filesystem::path cj = c;
-            cj.replace_extension(".json");
-
-            if (c.extension().empty()) {
-                if (std::filesystem::exists(cj)) {
-                    config += ".json";
-                }
-                else {
-                    throw ghoul::RuntimeError(std::format(
-                        "Error loading configuration file '{}'. File could not be found",
-                        config
-                    ));
-                }
-            }
-            else {
-                // user customized SGCT config
-            }
-        }
-        global::configuration->windowConfiguration = config;
-    }
-    return { config, isGeneratedConfig };
-}
-
 } // namespace
 
 
@@ -1325,9 +1262,6 @@ int main(int argc, char* argv[]) {
             global::configuration->bypassLauncher = *commandlineArguments.bypassLauncher;
         }
 
-        // Determining SGCT configuration file
-        LDEBUG("SGCT Configuration file: " + global::configuration->windowConfiguration);
-
         windowConfiguration = global::configuration->windowConfiguration;
     }
     catch (const documentation::SpecificationError& e) {
@@ -1350,12 +1284,20 @@ int main(int argc, char* argv[]) {
 
     // Call profile GUI
     const std::string labelFromCfgFile = " (from .cfg)";
-    std::string windowCfgPreset = setWindowConfigPresetForGui(
-        labelFromCfgFile,
-        commandlineArguments.windowConfig.has_value()
-    );
+    std::string windowCfgPreset;
+    if (commandlineArguments.windowConfig.has_value()) {
+        windowCfgPreset = std::format(
+            "{} (from CLI)", global::configuration->windowConfiguration
+        );
+    }
+    else if (!global::configuration->sgctConfigNameInitialized.empty()) {
+        windowCfgPreset =
+            global::configuration->sgctConfigNameInitialized + labelFromCfgFile;
+    }
+    else {
+        windowCfgPreset = global::configuration->windowConfiguration;
+    }
 
-    //TODO consider LFATAL if ${USER} doens't exist rather then recurisve create.
     global::openSpaceEngine->createUserDirectoriesIfNecessary();
 
     // (abock, 2020-12-07)  For some reason on Apple the keyboard handler in CEF will call
@@ -1387,17 +1329,16 @@ int main(int argc, char* argv[]) {
             );
         }
 
-        LauncherWindow win = LauncherWindow(
+        LauncherWindow launcher = LauncherWindow(
             !commandlineArguments.profile.has_value(),
             *global::configuration,
             !commandlineArguments.windowConfig.has_value(),
-            std::move(windowCfgPreset),
-            nullptr
+            std::move(windowCfgPreset)
         );
-        win.show();
+        launcher.show();
         QApplication::exec();
 
-        if (!win.wasLaunchSelected()) {
+        if (!launcher.wasLaunchSelected()) {
             exit(EXIT_SUCCESS);
         }
         glfwInit();
@@ -1442,14 +1383,23 @@ int main(int argc, char* argv[]) {
             size
         );
 
-        global::configuration->profile = win.selectedProfile();
-        std::tie(windowConfiguration, isGeneratedWindowConfig) =
-            selectedSgctProfileFromLauncher(
-                win,
-                commandlineArguments.windowConfig.has_value(),
-                windowConfiguration,
-                labelFromCfgFile
-            );
+        global::configuration->profile = launcher.selectedProfile();
+
+        std::string config = windowConfiguration;
+        isGeneratedWindowConfig = false;
+        if (!commandlineArguments.windowConfig.has_value()) {
+            config = launcher.selectedWindowConfig();
+            if (config.find(labelFromCfgFile) != std::string::npos) {
+                if (config.find("sgct.config") == std::string::npos) {
+                    config = config.substr(0, config.length() - labelFromCfgFile.length());
+                }
+                else {
+                    config = windowConfiguration;
+                    isGeneratedWindowConfig = true;
+                }
+            }
+            global::configuration->windowConfiguration = config;
+        }
     }
     else {
         glfwInit();
@@ -1478,7 +1428,10 @@ int main(int argc, char* argv[]) {
     // as well as the configuration file that sgct is supposed to use
     arguments.insert(arguments.begin(), argv[0]);
     arguments.insert(arguments.begin() + 1, "-config");
-    arguments.insert(arguments.begin() + 2, absPath(windowConfiguration).string());
+    arguments.insert(
+        arguments.begin() + 2,
+        absPath(global::configuration->windowConfiguration).string()
+    );
 
     // Need to set this before the creation of the sgct::Engine
 
@@ -1491,12 +1444,27 @@ int main(int argc, char* argv[]) {
     glfwWindowHint(GLFW_STENCIL_BITS, 8);
 #endif
 
+    // Determining SGCT configuration file
+    LINFO(std::format(
+        "SGCT Configuration file: {}", absPath(global::configuration->windowConfiguration)
+    ));
+
+
     LDEBUG("Creating SGCT Engine");
     std::vector<std::string> arg(argv + 1, argv + argc);
     LDEBUG("Parsing commandline arguments");
     sgct::Configuration config = parseArguments(arg);
     LDEBUG("Loading cluster information");
-    config::Cluster cluster = loadCluster(absPath(windowConfiguration).string());
+    config::Cluster cluster;
+    try {
+        cluster = loadCluster(
+            absPath(global::configuration->windowConfiguration).string()
+        );
+    }
+    catch (const std::runtime_error& e) {
+        LFATALC("main", e.what());
+        exit(EXIT_FAILURE);
+    }
 
     LDEBUG("Setting callbacks");
     Engine::Callbacks callbacks = {

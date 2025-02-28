@@ -56,7 +56,7 @@ public:
         NUM_DATA
     };
 
-    TSP(const std::filesystem::path& filename);
+    explicit TSP(const std::filesystem::path& filename);
     ~TSP();
 
     // load performs readHeader, readCache, writeCache and construct

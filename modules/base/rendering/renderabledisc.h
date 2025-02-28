@@ -42,7 +42,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableDisc : public Renderable {
 public:
-    RenderableDisc(const ghoul::Dictionary& dictionary);
+    explicit RenderableDisc(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;
@@ -67,7 +67,7 @@ protected:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 
-    std::unique_ptr<PlaneGeometry> _plane;
+    PlaneGeometry _plane;
     std::unique_ptr<TextureComponent> _texture;
 
 private:

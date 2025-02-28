@@ -22,35 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___ORIENTATIONDIALOG___H__
-#define __OPENSPACE_UI_LAUNCHER___ORIENTATIONDIALOG___H__
+#include <modules/base/rotation/multirotation.h>
 
-#include <QDialog>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
+#include <openspace/util/updatestructures.h>
+#include <openspace/util/time.h>
+#include <optional>
 
-#include <sgct/math.h>
+namespace {
+    // This Rotation type combines multiple individual rotations that are applied one
+    // after the other. The rotations are applied in the order in which they are specified
+    // in the `Rotations` key.
+    struct [[codegen::Dictionary(MultiRotation)]] Parameters {
+        // The list of rotations that are applied one after the other
+        std::vector<ghoul::Dictionary> rotations
+            [[codegen::reference("core_transform_rotation")]];
+    };
+#include "multirotation_codegen.cpp"
+} // namespace
 
-class QLineEdit;
-class QWidget;
+namespace openspace {
 
-class OrientationDialog final : public QDialog {
-Q_OBJECT
-public:
-    /**
-     * Constructor for OrientationDialog object which contains the input text boxes for
-     * orientation x,y,z values,
-     *
-     * \param orientation The x,y,z angles in degrees contained in sgct::quat object
-     * \param parent Pointer to Qt QWidget parent object
-     */
-    OrientationDialog(sgct::quat& orientation, QWidget* parent);
+documentation::Documentation MultiRotation::Documentation() {
+    return codegen::doc<Parameters>("base_transform_rotation_multi");
+}
 
-private:
-    void ok();
+MultiRotation::MultiRotation(const ghoul::Dictionary& dictionary) {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    QLineEdit* _linePitch = nullptr;
-    QLineEdit* _lineRoll = nullptr;
-    QLineEdit* _lineYaw = nullptr;
-    sgct::quat& _orientationValue;
-};
+    int i = 0;
+    for (const ghoul::Dictionary& rot : p.rotations) {
+        ghoul::mm_unique_ptr<Rotation> rotation = Rotation::createFromDictionary(rot);
+        rotation->setGuiName(std::format("{}: {}", i, rotation->guiName()));
+        rotation->setIdentifier(std::format("{}_{}", i, rotation->identifier()));
+        addPropertySubOwner(rotation.get());
+        _rotations.push_back(std::move(rotation));
+        i++;
+    }
+}
 
-#endif // __OPENSPACE_UI_LAUNCHER___ORIENTATIONDIALOG___H__
+glm::dmat3 MultiRotation::matrix(const UpdateData& data) const {
+    glm::dmat3 res = glm::dmat3(1.0);
+    for (const ghoul::mm_unique_ptr<Rotation>& rot : _rotations) {
+        res *= rot->matrix(data);
+    }
+    return res;
+}
+
+} // namespace openspace

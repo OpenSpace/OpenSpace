@@ -143,34 +143,6 @@ namespace {
     }
 }
 
-std::vector<std::filesystem::path> walkCommon(const std::filesystem::path& path,
-                                              bool recursive, bool sorted,
-                                 std::function<bool(const std::filesystem::path&)> filter)
-{
-    namespace fs = std::filesystem;
-    std::vector<std::filesystem::path> result;
-    if (fs::is_directory(path)) {
-        if (recursive) {
-            for (fs::directory_entry e : fs::recursive_directory_iterator(path)) {
-                if (filter(e)) {
-                    result.push_back(e.path());
-                }
-            }
-        }
-        else {
-            for (fs::directory_entry e : fs::directory_iterator(path)) {
-                if (filter(e)) {
-                    result.push_back(e.path());
-                }
-            }
-        }
-    }
-    if (sorted) {
-        std::sort(result.begin(), result.end());
-    }
-    return result;
-}
-
 /**
  * Walks a directory and returns the contents of the directory as absolute paths. The
  * first argument is the path of the directory that should be walked, the second argument
@@ -183,11 +155,15 @@ std::vector<std::filesystem::path> walkCommon(const std::filesystem::path& path,
                                                                    bool recursive = false,
                                                                       bool sorted = false)
 {
+    if (!std::filesystem::exists(path) && !std::filesystem::is_directory(path)) {
+        return std::vector<std::filesystem::path>();
+    }
+
     namespace fs = std::filesystem;
-    return walkCommon(
+    return ghoul::filesystem::walkDirectory(
         path,
-        recursive,
-        sorted,
+        ghoul::filesystem::Recursive(recursive),
+        ghoul::filesystem::Sorted(sorted),
         [](const fs::path& p) { return fs::is_directory(p) || fs::is_regular_file(p); }
     );
 }
@@ -204,11 +180,15 @@ std::vector<std::filesystem::path> walkCommon(const std::filesystem::path& path,
                                                                    bool recursive = false,
                                                                       bool sorted = false)
 {
+    if (!std::filesystem::exists(path) && !std::filesystem::is_directory(path)) {
+        return std::vector<std::filesystem::path>();
+    }
+
     namespace fs = std::filesystem;
-    return walkCommon(
+    return ghoul::filesystem::walkDirectory(
         path,
-        recursive,
-        sorted,
+        ghoul::filesystem::Recursive(recursive),
+        ghoul::filesystem::Sorted(sorted),
         [](const fs::path& p) { return fs::is_regular_file(p); }
     );
 }
@@ -225,11 +205,15 @@ std::vector<std::filesystem::path> walkCommon(const std::filesystem::path& path,
                                                                    bool recursive = false,
                                                                       bool sorted = false)
 {
+    if (!std::filesystem::exists(path) && !std::filesystem::is_directory(path)) {
+        return std::vector<std::filesystem::path>();
+    }
+
     namespace fs = std::filesystem;
-    return walkCommon(
+    return ghoul::filesystem::walkDirectory(
         path,
-        recursive,
-        sorted,
+        ghoul::filesystem::Recursive(recursive),
+        ghoul::filesystem::Sorted(sorted),
         [](const fs::path& p) { return fs::is_directory(p); }
     );
 }

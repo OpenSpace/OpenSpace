@@ -51,7 +51,7 @@ struct LinePoint;
 
 class RenderablePlane : public Renderable {
 public:
-    RenderablePlane(const ghoul::Dictionary& dictionary);
+    explicit RenderablePlane(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;

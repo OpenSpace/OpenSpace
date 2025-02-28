@@ -87,7 +87,6 @@ float interpretFloat(GLenum glType, const std::byte* src) {
         case GL_DOUBLE:
             return static_cast<float>(*reinterpret_cast<const GLdouble*>(src));
         default:
-            ghoul_assert(false, "Unknown data type");
             throw ghoul::MissingCaseException();
     }
 }
@@ -235,14 +234,14 @@ RawTile::ReadError postProcessErrorCheck(const RawTile& rawTile,
     if (hasMissingData && onHighLevel) {
         return RawTile::ReadError::Fatal;
     }
-    return RawTile::ReadError::None;
+    else {
+        return RawTile::ReadError::None;
+    }
 }
 
 } // namespace
 
-
-RawTileDataReader::RawTileDataReader(std::string filePath,
-                                     TileTextureInitData initData,
+RawTileDataReader::RawTileDataReader(std::string filePath, TileTextureInitData initData,
                                      TileCacheProperties cacheProperties,
                                      PerformPreprocessing preprocess)
     : _datasetFilePath(std::move(filePath))
@@ -641,7 +640,7 @@ void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& wor
 
 IODescription RawTileDataReader::ioDescription(const TileIndex& tileIndex) const {
     IODescription io;
-    io.read.region = highestResPixelRegion(tileIndex, _padfTransform);
+    io.read.region = highestResPixelRegion(GeodeticPatch(tileIndex), _padfTransform);
 
     // write region starts in origin
     io.write.region.start = glm::ivec2(0);

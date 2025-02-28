@@ -56,7 +56,7 @@ struct LinePoint;
 
 class RenderableLabel : public Renderable {
 public:
-    RenderableLabel(const ghoul::Dictionary& dictionary);
+    explicit RenderableLabel(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;

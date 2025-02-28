@@ -38,10 +38,11 @@ namespace documentation { struct Documentation; }
 
 class DashboardItemFramerate : public DashboardTextItem {
 public:
-    DashboardItemFramerate(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemFramerate(const ghoul::Dictionary& dictionary);
 
-    void render(glm::vec2& penPosition) override;
+    void update() override;
     glm::vec2 size() const override;
+
     static documentation::Documentation Documentation();
 
 private:
@@ -51,7 +52,7 @@ private:
     double _minDeltaTimeCache = 1.0;
     double _maxDeltaTimeCache = -1.0;
     bool _shouldClearCache = true;
-    mutable std::vector<char> _buffer;
+    mutable std::vector<char> _localBuffer;
 };
 
 } // openspace

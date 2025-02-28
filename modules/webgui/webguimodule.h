@@ -44,6 +44,7 @@ public:
     using EndpointCallback = std::function<void(const std::string&, bool)>;
 
     static constexpr const char* Name = "WebGui";
+
     WebGuiModule();
     int port() const;
     std::string address() const;

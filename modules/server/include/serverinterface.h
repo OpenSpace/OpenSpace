@@ -41,7 +41,7 @@ public:
     static std::unique_ptr<ServerInterface> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
-    ServerInterface(const ghoul::Dictionary& dictionary);
+    explicit ServerInterface(const ghoul::Dictionary& dictionary);
     virtual ~ServerInterface() override = default;
 
     void initialize();

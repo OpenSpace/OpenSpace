@@ -46,7 +46,7 @@ struct UpdateData;
 
 class RenderableShadowCylinder : public Renderable {
 public:
-    RenderableShadowCylinder(const ghoul::Dictionary& dictionary);
+    explicit RenderableShadowCylinder(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;

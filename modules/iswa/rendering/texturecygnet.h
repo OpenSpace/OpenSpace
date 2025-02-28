@@ -36,7 +36,7 @@ namespace openspace {
  */
 class TextureCygnet : public IswaCygnet {
 public:
-    TextureCygnet(const ghoul::Dictionary& dictionary);
+    explicit TextureCygnet(const ghoul::Dictionary& dictionary);
     ~TextureCygnet() = default;
 
 protected:

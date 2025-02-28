@@ -35,10 +35,10 @@ namespace documentation { struct Documentation; }
 
 class DashboardItemDate : public DashboardTextItem {
 public:
-    DashboardItemDate(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemDate(const ghoul::Dictionary& dictionary);
     ~DashboardItemDate() override = default;
 
-    void render(glm::vec2& penPosition) override;
+    void update() override;
 
     glm::vec2 size() const override;
 

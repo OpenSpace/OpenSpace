@@ -71,7 +71,7 @@ struct Chunk {
         WantSplit
     };
 
-    Chunk(const TileIndex& ti);
+    explicit Chunk(const TileIndex& ti);
 
     const TileIndex tileIndex;
     const GeodeticPatch surfacePatch;
@@ -97,7 +97,7 @@ enum class ShadowCompType {
  */
 class RenderableGlobe : public Renderable {
 public:
-    RenderableGlobe(const ghoul::Dictionary& dictionary);
+    explicit RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe() override = default;
 
     void initializeGL() override;

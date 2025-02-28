@@ -45,12 +45,15 @@
 #include <openspace/util/json_helper.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringhelper.h>
 #include <fstream>
 #include <future>
 
 namespace {
+    constexpr std::string_view _loggerCat = "DocumentationEngine";
+
     // General keys
     constexpr const char* NameKey = "name";
     constexpr const char* IdentifierKey = "identifier";
@@ -502,6 +505,10 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
         FactoryManager::ref().factories();
 
     for (const FactoryManager::FactoryInfo& factoryInfo : factories) {
+        if (factoryInfo.name == "") {
+            LERROR("Factory documentation without identifier");
+            continue;
+        }
         nlohmann::json factory;
         factory[NameKey] = factoryInfo.name;
         factory[IdentifierKey] = categoryName + factoryInfo.name;
@@ -530,6 +537,10 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
         // Add documentation about derived classes
         const std::vector<std::string>& registeredClasses = f->registeredClasses();
         for (const std::string& c : registeredClasses) {
+            if (c == "") {
+                LERROR("Factory documentation, derived class, without identifier");
+                continue;
+            }
             auto found = std::find_if(
                 docs.begin(),
                 docs.end(),
@@ -557,6 +568,10 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
     leftovers[IdentifierKey] = OtherIdentifierName;
 
     for (const Documentation& doc : docs) {
+        if (doc.id == "") {
+            LERROR("Documentation without identifier");
+            continue;
+        }
         leftovers[ClassesKey].push_back(documentationToJson(doc));
     }
     sortJson(leftovers[ClassesKey], NameKey);

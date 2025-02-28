@@ -41,7 +41,7 @@ namespace openspace {
  */
 class KameleonPlane : public DataCygnet {
 public:
-    KameleonPlane(const ghoul::Dictionary& dictionary);
+    explicit KameleonPlane(const ghoul::Dictionary& dictionary);
     ~KameleonPlane();
 
      void initializeGL() override;

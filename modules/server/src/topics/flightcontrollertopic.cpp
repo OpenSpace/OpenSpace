@@ -334,7 +334,10 @@ void FlightControllerTopic::setRenderableEnabled(const nlohmann::json& json) con
 
     const SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(name);
     if (node && node->renderable() != nullptr) {
-        node->renderable()->property(RenderableEnabled)->set(enabled);
+        properties::Property* prop = node->renderable()->property(RenderableEnabled);
+        properties::BoolProperty* boolProp = dynamic_cast<properties::BoolProperty*>(prop);
+        ghoul_assert(boolProp, "Enabled is not a boolean property");
+        *boolProp = enabled;
     }
 }
 
@@ -360,9 +363,20 @@ void FlightControllerTopic::setFriction(bool roll, bool rotation, bool zoom) con
     const interaction::OrbitalNavigator& navigator =
         global::navigationHandler->orbitalNavigator();
 
-    navigator.property(RollFriction)->set(roll);
-    navigator.property(RotationalFriction)->set(rotation);
-    navigator.property(ZoomFriction)->set(zoom);
+    properties::Property* rollProp = navigator.property(RollFriction);
+    properties::BoolProperty* rollBoolProp = dynamic_cast<properties::BoolProperty*>(rollProp);
+    ghoul_assert(rollBoolProp, "RollFriction is not a boolean property");
+    *rollBoolProp = roll;
+
+    properties::Property* rotProp = navigator.property(RotationalFriction);
+    properties::BoolProperty* rotBoolProp = dynamic_cast<properties::BoolProperty*>(rotProp);
+    ghoul_assert(rotBoolProp, "RotationFriction is not a boolean property");
+    *rotBoolProp = rotation;
+
+    properties::Property* zoomProp = navigator.property(ZoomFriction);
+    properties::BoolProperty* zoomBoolProp = dynamic_cast<properties::BoolProperty*>(zoomProp);
+    ghoul_assert(zoomBoolProp, "ZoomFriction is not a boolean property");
+    *zoomBoolProp = zoom;
 
     // Update FlightController
     nlohmann::json j;
