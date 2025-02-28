@@ -61,7 +61,8 @@ protected:
     std::shared_ptr<DataProcessor> _dataProcessor;
 
     bool _registered = false;
-    std::string _type;
+private:
+    std::string _iswaType;
 };
 
 } //namespace openspace

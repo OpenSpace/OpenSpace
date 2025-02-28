@@ -144,7 +144,6 @@ void GenerateRawVolumeFromFileTask::perform(const ProgressCallback& progressCall
     progressCallback(0.5f);
 
     // Write data into volume data structure
-    int k = 0;
     for (const dataloader::Dataset::Entry& entry : data.entries) {
         // Get the closest i, j , k voxel that should contain this data
         glm::vec3 normalizedPos = (entry.position - _lowerDomainBound) /
@@ -163,7 +162,6 @@ void GenerateRawVolumeFromFileTask::perform(const ProgressCallback& progressCall
 
         size_t index = rawVolume.coordsToIndex(cell);
         rawVolume.set(index, value);
-        k++;
     }
     progressCallback(0.75f);
 

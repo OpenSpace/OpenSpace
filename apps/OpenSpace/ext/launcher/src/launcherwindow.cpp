@@ -45,8 +45,6 @@
 using namespace openspace;
 
 namespace {
-    constexpr std::string_view _loggerCat = "LauncherWindow";
-
     constexpr int ScreenWidth = 480;
     constexpr int ScreenHeight = 640;
 
@@ -598,7 +596,7 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
     connect(
         &editor,
         &ProfileEdit::raiseExitWindow,
-        [this, &editor, &savePath, &p, &profile]() {
+        [&editor, &savePath, &p, &profile]() {
             const std::string origPath = std::format("{}{}.profile", savePath, profile);
             // If this is a new profile we want to prompt the user
             if (!std::filesystem::exists(origPath)) {

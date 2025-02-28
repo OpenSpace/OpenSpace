@@ -108,7 +108,7 @@ namespace {
             [quality](const std::pair<int, std::string>& p) { return p.first == quality; }
         );
         ghoul_assert(it != Quality.cend(), "Combobox has too many values");
-        return std::distance(Quality.cbegin(), it);
+        return static_cast<int>(std::distance(Quality.cbegin(), it));
     }
 
 } // namespace

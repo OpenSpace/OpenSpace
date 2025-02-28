@@ -37,9 +37,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "ConvertRecFormatTask";
 
-    constexpr std::string_view KeyInFilePath = "InputFilePath";
-    constexpr std::string_view KeyOutFilePath = "OutputFilePath";
-
     struct [[codegen::Dictionary(ConvertRecFormatTask)]] Parameters {
         std::filesystem::path inputFilePath;
         std::filesystem::path outputFilePath;

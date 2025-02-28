@@ -61,7 +61,7 @@ public:
      */
     void setLuaValue(lua_State* state) override;
 
-    ghoul::lua::LuaTypes typeLua() const;
+    ghoul::lua::LuaTypes typeLua() const override;
 
     /**
      * Triggers this TriggerProperty.

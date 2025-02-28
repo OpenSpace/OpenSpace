@@ -54,7 +54,7 @@ namespace {
             .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
             .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
         });
-    };
+    }
 
     constexpr openspace::properties::Property::PropertyInfo InterpolationValueInfo = {
         "Value",
