@@ -48,9 +48,8 @@ void IntListProperty::getLuaValue(lua_State* state) const {
     ghoul::lua::push(state, _value);
 }
 
-void IntListProperty::setLuaValue(lua_State* state) {
-    std::vector<int> thisValue = ghoul::lua::value<std::vector<int>>(state);
-    setValue(std::move(thisValue));
+std::vector<int> IntListProperty::toValue(lua_State* state) const {
+    return ghoul::lua::value<std::vector<int>>(state);
 }
 
 std::string IntListProperty::stringValue() const {

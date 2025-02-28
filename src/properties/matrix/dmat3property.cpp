@@ -54,9 +54,8 @@ void DMat3Property::getLuaValue(lua_State* state) const {
     ghoul::lua::push(state, _value);
 }
 
-void DMat3Property::setLuaValue(lua_State* state) {
-    glm::dmat3 thisValue = ghoul::lua::value<glm::dmat3>(state);
-    setValue(std::move(thisValue));
+glm::dmat3 DMat3Property::toValue(lua_State* state) const {
+    return ghoul::lua::value<glm::dmat3>(state);
 }
 
 std::string DMat3Property::stringValue() const {

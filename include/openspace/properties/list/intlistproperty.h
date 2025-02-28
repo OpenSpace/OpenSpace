@@ -38,11 +38,13 @@ public:
     ghoul::lua::LuaTypes typeLua() const override;
 
     void getLuaValue(lua_State* state) const override;
-    void setLuaValue(lua_State* state) override;
 
     std::string stringValue() const override;
     using TemplateProperty<std::vector<int>>::operator std::vector<int>;
     using TemplateProperty<std::vector<int>>::operator=;
+
+private:
+    std::vector<int> toValue(lua_State* state) const override;
 };
 
 } // namespace openspace::properties

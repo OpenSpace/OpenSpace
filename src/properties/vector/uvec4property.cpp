@@ -54,9 +54,8 @@ void UVec4Property::getLuaValue(lua_State* state) const {
     ghoul::lua::push(state, _value);
 }
 
-void UVec4Property::setLuaValue(lua_State* state) {
-    glm::uvec4 thisValue = ghoul::lua::value<glm::uvec4>(state);
-    setValue(std::move(thisValue));
+glm::uvec4 UVec4Property::toValue(lua_State* state) const {
+    return ghoul::lua::value<glm::uvec4>(state);
 }
 
 std::string UVec4Property::stringValue() const {

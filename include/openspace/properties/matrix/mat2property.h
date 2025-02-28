@@ -45,10 +45,12 @@ public:
     ghoul::lua::LuaTypes typeLua() const override;
 
     void getLuaValue(lua_State* state) const override;
-    void setLuaValue(lua_State* state) override;
 
     std::string stringValue() const override;
     using TemplateProperty<glm::mat2x2>::operator=;
+
+private:
+    glm::mat2x2 toValue(lua_State* state) const override;
 };
 
 } // namespace openspace::properties

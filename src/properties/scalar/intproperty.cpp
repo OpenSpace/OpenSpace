@@ -46,20 +46,16 @@ void IntProperty::getLuaValue(lua_State* state) const {
     ghoul::lua::push(state, _value);
 }
 
-void IntProperty::setLuaValue(lua_State* state) {
-    int thisValue = 0;
-
+int IntProperty::toValue(lua_State* state) const {
     if (ghoul::lua::hasValue<double>(state)) {
-        thisValue = static_cast<int>(ghoul::lua::value<double>(state));
+        return static_cast<int>(ghoul::lua::value<double>(state));
     }
     else if (ghoul::lua::hasValue<int>(state)) {
-        thisValue = ghoul::lua::value<int>(state);
+        return ghoul::lua::value<int>(state);
     }
     else {
         throw ghoul::RuntimeError("Error extracting value in IntProperty");
     }
-
-    setValue(thisValue);
 }
 
 std::string IntProperty::stringValue() const {

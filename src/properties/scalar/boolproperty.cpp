@@ -45,9 +45,8 @@ void BoolProperty::getLuaValue(lua_State* state) const {
     ghoul::lua::push(state, _value);
 }
 
-void BoolProperty::setLuaValue(lua_State* state) {
-    bool thisValue = ghoul::lua::value<bool>(state);
-    setValue(thisValue);
+bool BoolProperty::toValue(lua_State* state) const {
+    return ghoul::lua::value<bool>(state);
 }
 
 std::string BoolProperty::stringValue() const {

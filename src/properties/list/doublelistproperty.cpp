@@ -49,9 +49,8 @@ void DoubleListProperty::getLuaValue(lua_State* state) const {
     ghoul::lua::push(state, _value);
 }
 
-void DoubleListProperty::setLuaValue(lua_State* state) {
-    std::vector<double> thisValue = ghoul::lua::value<std::vector<double>>(state);
-    setValue(std::move(thisValue));
+std::vector<double> DoubleListProperty::toValue(lua_State* state) const {
+    return ghoul::lua::value<std::vector<double>>(state);
 }
 
 std::string DoubleListProperty::stringValue() const {

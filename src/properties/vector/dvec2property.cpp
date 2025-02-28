@@ -54,9 +54,8 @@ void DVec2Property::getLuaValue(lua_State* state) const {
     ghoul::lua::push(state, _value);
 }
 
-void DVec2Property::setLuaValue(lua_State* state) {
-    glm::dvec2 thisValue = ghoul::lua::value<glm::dvec2>(state);
-    setValue(std::move(thisValue));
+glm::dvec2 DVec2Property::toValue(lua_State* state) const {
+    return ghoul::lua::value<glm::dvec2>(state);
 }
 
 std::string DVec2Property::stringValue() const {

@@ -46,9 +46,8 @@ void ShortProperty::getLuaValue(lua_State* state) const {
     ghoul::lua::push(state, _value);
 }
 
-void ShortProperty::setLuaValue(lua_State* state) {
-    short thisValue = ghoul::lua::value<short>(state);
-    setValue(thisValue);
+short ShortProperty::toValue(lua_State* state) const {
+    return ghoul::lua::value<short>(state);
 }
 
 std::string ShortProperty::stringValue() const {

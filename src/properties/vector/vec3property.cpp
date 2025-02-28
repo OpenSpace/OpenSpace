@@ -53,9 +53,8 @@ void Vec3Property::getLuaValue(lua_State* state) const {
     ghoul::lua::push(state, _value);
 }
 
-void Vec3Property::setLuaValue(lua_State* state) {
-    glm::vec3 thisValue = ghoul::lua::value<glm::vec3>(state);
-    setValue(std::move(thisValue));
+glm::vec3 Vec3Property::toValue(lua_State* state) const {
+    return ghoul::lua::value<glm::vec3>(state);
 }
 
 std::string Vec3Property::stringValue() const {

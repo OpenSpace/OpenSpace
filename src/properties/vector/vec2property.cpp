@@ -53,9 +53,8 @@ void Vec2Property::getLuaValue(lua_State* state) const {
     ghoul::lua::push(state, _value);
 }
 
-void Vec2Property::setLuaValue(lua_State* state) {
-    glm::vec2 thisValue = ghoul::lua::value<glm::vec2>(state);
-    setValue(std::move(thisValue));
+glm::vec2 Vec2Property::toValue(lua_State* state) const {
+    return ghoul::lua::value<glm::vec2>(state);
 }
 
 std::string Vec2Property::stringValue() const {

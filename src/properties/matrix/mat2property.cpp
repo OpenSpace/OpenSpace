@@ -54,9 +54,8 @@ void Mat2Property::getLuaValue(lua_State* state) const {
     ghoul::lua::push(state, _value);
 }
 
-void Mat2Property::setLuaValue(lua_State* state) {
-    glm::mat2 thisValue = ghoul::lua::value<glm::mat2>(state);
-    setValue(std::move(thisValue));
+glm::mat2 Mat2Property::toValue(lua_State* state) const {
+    return ghoul::lua::value<glm::mat2>(state);
 }
 
 std::string Mat2Property::stringValue() const {

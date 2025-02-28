@@ -56,6 +56,7 @@ public:
 
 protected:
     std::string generateAdditionalJsonDescription() const override;
+    using TemplateProperty<T>::toValue;
 
     T _minimumValue = T(0);
     T _maximumValue = T(0);

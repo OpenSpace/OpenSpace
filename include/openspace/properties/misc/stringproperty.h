@@ -37,13 +37,16 @@ public:
     ghoul::lua::LuaTypes typeLua() const override;
 
     using TemplateProperty<std::string>::operator=;
+    using TemplateProperty<std::string>::value;
 
     void getLuaValue(lua_State* state) const override;
-    void setLuaValue(lua_State* state) override;
 
     std::string stringValue() const override;
     operator std::string_view();
     operator std::string_view() const;
+
+private:
+    std::string toValue(lua_State* state) const override;
 };
 
 } // namespace openspace::properties

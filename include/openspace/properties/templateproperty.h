@@ -120,23 +120,10 @@ public:
      */
     T value() const;
 
-protected:
-    /**
-     * Decodes the object at the top of the stack to a value of the type `T` and returns
-     * it. This method has to be specialized for each new type.
-     *
-     * \param state The Lua state from which the value will be decoded
-     * \return The decoded value
-     */
-    //virtual T fromLuaConversion(lua_State* state) const = 0;
+    void setLuaValue(lua_State* state) override;
 
-    /**
-     * Encodes the stored value into a Lua object and pushes that object onto the stack.
-     * This method has to be specialized for each new type.
-     *
-     * \param state The Lua state onto which the encoded object will be pushed
-     */
-    //virtual void toLuaConversion(lua_State* state) const = 0;
+protected:
+    virtual T toValue(lua_State* state) const = 0;
 
     /// The value that this TemplateProperty currently stores
     T _value;

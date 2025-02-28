@@ -54,9 +54,8 @@ void IVec3Property::getLuaValue(lua_State* state) const {
     ghoul::lua::push(state, _value);
 }
 
-void IVec3Property::setLuaValue(lua_State* state) {
-    glm::ivec3 thisValue = ghoul::lua::value<glm::ivec3>(state);
-    setValue(std::move(thisValue));
+glm::ivec3 IVec3Property::toValue(lua_State* state) const {
+    return ghoul::lua::value<glm::ivec3>(state);
 }
 
 std::string IVec3Property::stringValue() const {

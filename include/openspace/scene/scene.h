@@ -55,7 +55,6 @@ enum class PropertyValueType {
     Table,
     Nil
 };
-using ProfilePropertyLua = std::variant<bool, float, std::string, ghoul::lua::nil_t>;
 
 class Profile;
 class SceneInitializer;
@@ -270,46 +269,6 @@ private:
      */
     void propertyPushProfileValueToLua(ghoul::lua::LuaState& L, const std::string& value);
 
-    /**
-     * Accepts string version of a property value from a profile, and processes it
-     * according to the data type of the value.
-     *
-     * \param L The Lua state to (eventually) push to
-     * \param value String representation of the value with which to set property
-     * \return The ProfilePropertyLua variant type translated from string representation
-     */
-    ProfilePropertyLua propertyProcessValue(ghoul::lua::LuaState& L,
-        const std::string& value);
-
-    /**
-     * Accepts string version of a property value from a profile, and returns the
-     * supported data types that can be pushed to a Lua state. Currently, the full range
-     * of possible Lua values is not supported.
-     *
-     * \param value String representation of the value with which to set property
-     */
-    PropertyValueType propertyValueType(const std::string& value);
-
-    /**
-     * Accepts string version of a property value from a profile, and adds it to a vector
-     * which will later be used to push as a Lua table containing values of type T
-     *
-     * \param L The Lua state to (eventually) push to
-     * \param value String representation of the value with which to set property
-     * \param table The std::vector container which has elements of type T for a Lua table
-     */
-    template <typename T>
-    void processPropertyValueTableEntries(ghoul::lua::LuaState& L,
-        const std::string& value, std::vector<T>& table);
-
-    /**
-     * Handles a Lua table entry, creating a vector of the correct variable type based
-     * on the profile string, and pushes this vector to the Lua stack.
-     *
-     * \param L The Lua state to (eventually) push to
-     * \param value String representation of the value with which to set property
-     */
-    void handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::string& value);
 
     /**
      * Update dependencies.

@@ -110,7 +110,6 @@ public:
     void clearOptions();
 
     void getLuaValue(lua_State* state) const override;
-    void setLuaValue(lua_State* state) override;
 
     std::string stringValue() const override;
     using TemplateProperty<std::set<std::string>>::operator std::set<std::string>;
@@ -121,6 +120,9 @@ private:
     bool removeInvalidKeys(std::set<std::string>& keys) const;
 
     std::string generateAdditionalJsonDescription() const override;
+
+private:
+    std::set<std::string> toValue(lua_State* state) const override;
 
     // A list of all available options that can be selected
     std::vector<std::string> _options;

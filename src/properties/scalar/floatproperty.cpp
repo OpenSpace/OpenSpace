@@ -46,9 +46,8 @@ void FloatProperty::getLuaValue(lua_State* state) const {
     ghoul::lua::push(state, _value);
 }
 
-void FloatProperty::setLuaValue(lua_State* state) {
-    float thisValue = ghoul::lua::value<float>(state);
-    setValue(thisValue);
+float FloatProperty::toValue(lua_State* state) const {
+    return ghoul::lua::value<float>(state);
 }
 
 std::string FloatProperty::stringValue() const {

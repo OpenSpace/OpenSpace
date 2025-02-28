@@ -27,6 +27,7 @@
 
 #include <openspace/util/json_helper.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "OptionProperty";

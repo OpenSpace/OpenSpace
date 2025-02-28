@@ -134,10 +134,9 @@ void SelectionProperty::getLuaValue(lua_State* state) const {
     ghoul::lua::push(state, value);
 }
 
-void SelectionProperty::setLuaValue(lua_State* state) {
+std::set<std::string> SelectionProperty::toValue(lua_State* state) const {
     std::vector<std::string> val = ghoul::lua::value<std::vector<std::string>>(state, -1);
-    std::set<std::string> thisValue = std::set<std::string>(val.begin(), val.end());
-    setValue(std::move(thisValue));
+    return std::set<std::string>(val.begin(), val.end());
 }
 
 std::string SelectionProperty::stringValue() const {

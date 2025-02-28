@@ -44,10 +44,10 @@ void TransferFunctionProperty::getLuaValue(lua_State* state) const {
     _value.envelopesToLua(state);
 }
 
-void TransferFunctionProperty::setLuaValue(lua_State* state) {
+volume::TransferFunction TransferFunctionProperty::toValue(lua_State* state) const {
     openspace::volume::TransferFunction tf;
     tf.setEnvelopesFromLua(state);
-    setValue(std::move(tf));
+    return tf;
 }
 
 std::string TransferFunctionProperty::stringValue() const {

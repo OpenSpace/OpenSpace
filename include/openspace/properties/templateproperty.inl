@@ -42,22 +42,28 @@ TemplateProperty<T>::operator T() const {
 
 template <typename T>
 TemplateProperty<T>& TemplateProperty<T>::operator=(T val) {
-    setValue(val);
+    setValue(std::move(val));
     return *this;
 }
 
 template <typename T>
-T openspace::properties::TemplateProperty<T>::value() const {
+T TemplateProperty<T>::value() const {
     return _value;
 }
 
 template <typename T>
-void openspace::properties::TemplateProperty<T>::setValue(T val) {
+void TemplateProperty<T>::setValue(T val) {
     if (val != _value) {
         _value = std::move(val);
         notifyChangeListeners();
         _isValueDirty = true;
     }
+}
+
+template <typename T>
+void TemplateProperty<T>::setLuaValue(lua_State* state) {
+    T thisValue = toValue(state);
+    setValue(std::move(thisValue));
 }
 
 template <typename T>

@@ -46,9 +46,8 @@ void DoubleProperty::getLuaValue(lua_State* state) const {
     ghoul::lua::push(state, _value);
 }
 
-void DoubleProperty::setLuaValue(lua_State* state) {
-    double thisValue = ghoul::lua::value<double>(state);
-    setValue(thisValue);
+double DoubleProperty::toValue(lua_State* state) const {
+    return ghoul::lua::value<double>(state);
 }
 
 std::string DoubleProperty::stringValue() const {

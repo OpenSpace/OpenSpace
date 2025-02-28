@@ -46,9 +46,8 @@ void LongProperty::getLuaValue(lua_State* state) const {
     ghoul::lua::push(state, _value);
 }
 
-void LongProperty::setLuaValue(lua_State* state) {
-    long thisValue = ghoul::lua::value<long>(state);
-    setValue(thisValue);
+long LongProperty::toValue(lua_State* state) const {
+    return ghoul::lua::value<long>(state);
 }
 
 std::string LongProperty::stringValue() const {

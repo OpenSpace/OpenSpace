@@ -53,20 +53,16 @@ void UIntProperty::getLuaValue(lua_State* state) const {
     ghoul::lua::push(state, _value);
 }
 
-void UIntProperty::setLuaValue(lua_State* state) {
-    unsigned int thisValue = 0;
-
+unsigned int UIntProperty::toValue(lua_State* state) const {
     if (ghoul::lua::hasValue<double>(state)) {
-        thisValue = static_cast<unsigned int>(ghoul::lua::value<double>(state));
+        return static_cast<unsigned int>(ghoul::lua::value<double>(state));
     }
     else if (ghoul::lua::hasValue<unsigned int>(state)) {
-        thisValue = ghoul::lua::value<unsigned int>(state);
+        return ghoul::lua::value<unsigned int>(state);
     }
     else {
         throw ghoul::RuntimeError("Error extracting value in UIntProperty");
     }
-
-    setValue(thisValue);
 }
 
 std::string UIntProperty::stringValue() const {

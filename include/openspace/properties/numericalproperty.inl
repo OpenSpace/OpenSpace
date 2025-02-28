@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/lua/ghoul_lua.h>
 #include <string_view>
 
 namespace {
@@ -30,7 +29,6 @@ namespace {
     constexpr std::string_view MaximumValueKey = "MaximumValue";
     constexpr std::string_view SteppingValueKey = "SteppingValue";
     constexpr std::string_view ExponentValueKey = "Exponent";
-
 
     std::string luaToJson(std::string luaValue) {
         if (luaValue[0] == '{') {
@@ -135,7 +133,7 @@ std::string NumericalProperty<T>::generateAdditionalJsonDescription() const {
 
 template <typename T>
 void NumericalProperty<T>::setLuaInterpolationTarget(lua_State* state) {
-    T targetValue = ghoul::lua::value<T>(state);
+    T targetValue = toValue(state);
     _interpolationStart = TemplateProperty<T>::_value;
     _interpolationEnd = std::move(targetValue);
 }
