@@ -328,10 +328,10 @@ void FindImpactsTask::writeImpactCoordinates(
 
     int impactCounter = 0;
     for (const ImpactCoordinate& impact : _impactCoordinates) {
-        // Use 6 decimal points for the coordinates. This will give a precision of
-        // approximately 11.1 cm
+        // Use 7 decimal points for the coordinates. This will give a precision of
+        // approximately 1.11 cm
         file << std::format(
-            "{:<10}{:>12.6f}{:>12.6f}{:>30}\n",
+            "{:<10}{:>12.7f}{:>12.7f}{:>30}\n",
             impact.id, impact.latitude, impact.longitude, impact.time
         );
 

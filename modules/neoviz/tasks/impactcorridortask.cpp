@@ -457,7 +457,10 @@ std::vector<ImpactCorridorTask::ImpactPixel> ImpactCorridorTask::plotImpactData(
 
                 // Risk
                 double impactRisk = _brushSaturation * risk;
-                data[index].impactRisk = impactRisk * data[index].impactProbability;
+                data[index].impactRisk = std::max(
+                    impactRisk * data[index].impactProbability,
+                    data[index].impactRisk
+                );
             }
         }
 
@@ -486,7 +489,7 @@ void ImpactCorridorTask::processImage(const Task::ProgressCallback& progressCall
                 if (!data[i].hasImpact) {
                     continue;
                 }
-                minValue = 0.0;
+                minValue = std::min(minValue, data[i].impactProbability);
                 maxValue = std::max(maxValue, data[i].impactProbability);
             }
             break;
@@ -497,7 +500,7 @@ void ImpactCorridorTask::processImage(const Task::ProgressCallback& progressCall
                 if (!data[i].hasImpact) {
                     continue;
                 }
-                minValue = 0.0;
+                minValue = std::min(minValue, data[i].impactRisk);
                 maxValue = std::max(maxValue, data[i].impactRisk);
             }
             break;

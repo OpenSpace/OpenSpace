@@ -3,17 +3,19 @@ return {
   {
     Type = "FindImpactsTask",
     AsteroidName = "2023 CX1",
-    KernelDirectory = "C:/Users/malej60/Documents/develop/b612-oribt-uncertainty/data/2023 CX1/openspace_variants/",
-    OutputFilename = "C:/Users/malej60/Documents/develop/b612-oribt-uncertainty/data/2023 CX1/impacts/2023-CX1-impacts.txt",
+    KernelDirectory = "${USER_ASSETS}/B612/2023 CX1/openspace_variants",
+    OutputFilename = "${USER_ASSETS}/B612/2023 CX1/impacts/2023-CX1-impacts.txt",
     TimeIntervalStart = "2023-02-13T02:39:00.000",
     TimeIntervalEnd = "2023-02-13T03:39:00.000"
   },
   {
     Type = "FindImpactsTask",
     AsteroidName = "2004 MN4",
-    KernelDirectory = "C:/Users/malej60/Documents/develop/b612-oribt-uncertainty/data/2004 MN4/openspace_variants_high_ip/",
-    OutputFilename = "C:/Users/malej60/Documents/develop/b612-oribt-uncertainty/data/2004 MN4/impacts/2004-MN4-impacts.txt",
+    KernelDirectory = "${USER_ASSETS}/B612/2004 MN4/high_ip_2004-12-27T21.28.37.000/openspace_variants",
+    OutputFilename = "${USER_ASSETS}/B612/2004 MN4/high_ip_2004-12-27T21.28.37.000/impacts/2004-MN4-impacts.txt",
     TimeIntervalStart = "2029-02-01T00:00:00.000",
     TimeIntervalEnd = "2029-08-17T00:00:00.000"
   }
 }
+
+--${DATA}/tasks/findimpacts.task
