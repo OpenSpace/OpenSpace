@@ -142,7 +142,7 @@ double GeodeticPatch::edgeLatitudeNearestEquator() const {
     return _center.lat + _halfSize.lat * (isNorthern() ? -1.0 : 1.0);
 }
 
-double GeodeticPatch::isNorthern() const {
+bool GeodeticPatch::isNorthern() const {
     return _center.lat > 0.0;
 }
 

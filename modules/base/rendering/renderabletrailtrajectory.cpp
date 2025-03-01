@@ -143,7 +143,7 @@ namespace {
         std::optional<int> sweepChunkSize;
 
         // [[codegen::verbatim(SweepChunkSizeInfo.description)]]
-        std::optional<int> enableSweepChunking;
+        std::optional<bool> enableSweepChunking;
 
         // [[codegen::verbatim(AccurateTrailPositionsInfo.description)]]
         std::optional<int> accurateTrailPositions;

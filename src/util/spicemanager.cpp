@@ -485,7 +485,7 @@ std::vector<std::pair<int, std::string>> SpiceManager::spiceBodies(
 }
 
 bool SpiceManager::hasValue(int naifId, const std::string& item) const {
-    return bodfnd_c(naifId, item.c_str());
+    return bodfnd_c(naifId, item.c_str()) == SPICETRUE;
 }
 
 bool SpiceManager::hasValue(const std::string& body, const std::string& item) const {
@@ -515,7 +515,7 @@ bool SpiceManager::hasNaifId(const std::string& body) const {
     SpiceInt id = 0;
     bods2c_c(body.c_str(), &id, &success);
     reset_c();
-    return success;
+    return success == SPICETRUE;
 }
 
 int SpiceManager::frameId(const std::string& frame) const {
