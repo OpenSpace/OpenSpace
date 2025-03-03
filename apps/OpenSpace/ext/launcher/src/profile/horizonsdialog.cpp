@@ -858,7 +858,7 @@ openspace::HorizonsFile HorizonsDialog::handleAnswer(nlohmann::json& answer) {
 
     auto it = answer.find("error");
     if (it != answer.end()) {
-        _latestHorizonsError = *it;
+        _latestHorizonsError = it->get<std::string>();
     }
 
     HorizonsResultCode isValid = isValidHorizonsAnswer(answer);
