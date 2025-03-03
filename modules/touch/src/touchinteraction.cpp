@@ -323,13 +323,13 @@ TouchInteraction::TouchInteraction()
         glm::vec4(0.2f)
     )
     , _constTimeDecay_secs(ConstantTimeDecaySecsInfo, 1.75f, 0.1f, 4.f)
-    , _pinchInputs({ TouchInput(0, 0, 0.f, 0.f, 0.0), TouchInput(0, 0, 0.f, 0.f, 0.0) })
-    , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
-    , _sensitivity{ glm::dvec2(0.08, 0.045), 12.0, 2.75, glm::dvec2(0.08, 0.045) }
     // Calculated with two vectors with known diff in length, then
     // projDiffLength/diffLength.
     , _enableDirectManipulation(EnableDirectManipulationInfo, true)
     , _directTouchDistanceThreshold(DirectManipulationThresholdInfo, 5.f, 0.f, 10.f)
+    , _pinchInputs({ TouchInput(0, 0, 0.f, 0.f, 0.0), TouchInput(0, 0, 0.f, 0.f, 0.0) })
+    , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
+    , _sensitivity{ glm::dvec2(0.08, 0.045), 12.0, 2.75, glm::dvec2(0.08, 0.045) }
 {
     addProperty(_disableZoom);
     addProperty(_disableRoll);
@@ -796,17 +796,17 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
                 list.begin(),
                 list.end(),
                 0.0,
-                [this, &lastProcessed](double diff, const TouchInputHolder& inputHolder) {
+                [this, &lastProcessed](double diff, const TouchInputHolder& holder) {
                     TouchInput point = *std::find_if(
                         lastProcessed.begin(),
                         lastProcessed.end(),
-                        [&inputHolder](const TouchInput& input) {
-                            return inputHolder.holdsInput(input);
+                        [&holder](const TouchInput& input) {
+                            return holder.holdsInput(input);
                         }
                     );
                     double res = diff;
                     float lastAngle = point.angleToPos(_centroid.x, _centroid.y);
-                    float currentAngle = inputHolder.latestInput().angleToPos(
+                    float currentAngle = holder.latestInput().angleToPos(
                         _centroid.x,
                         _centroid.y
                     );
@@ -1210,7 +1210,11 @@ double FrameTimeAverage::averageFrameTime() const {
         return 1.0 / 60.0;
     }
     else {
-        return std::accumulate(_samples, _samples + _nSamples, 0.0) / (double)(_nSamples);
+        return std::accumulate(
+            _samples,
+            _samples + _nSamples,
+            0.0
+        ) / static_cast<double>(_nSamples);
     }
 }
 

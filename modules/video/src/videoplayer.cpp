@@ -405,7 +405,9 @@ void VideoPlayer::initializeMpv() {
         LINFO("mpv init failed");
     }
 
-    mpv_opengl_init_params gl_init_params { getOpenGLProcAddress, nullptr };
+    mpv_opengl_init_params glInitParams;
+    glInitParams.get_proc_address = getOpenGLProcAddress;
+    glInitParams.get_proc_address_ctx = nullptr;
     int adv = 1; // Use libmpv advanced mode since we will use the update callback
     // Decouple mpv from waiting to get the correct fps. Use with flag video-timing-offset
     // set to 0
@@ -413,7 +415,7 @@ void VideoPlayer::initializeMpv() {
 
     mpv_render_param params[] = {
         { MPV_RENDER_PARAM_API_TYPE, const_cast<char*>(MPV_RENDER_API_TYPE_OPENGL) },
-        { MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &gl_init_params },
+        { MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &glInitParams },
         { MPV_RENDER_PARAM_ADVANCED_CONTROL, &adv },
         { MPV_RENDER_PARAM_BLOCK_FOR_TARGET_TIME, &blockTime },
         { MPV_RENDER_PARAM_INVALID, nullptr }

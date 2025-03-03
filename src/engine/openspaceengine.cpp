@@ -1036,13 +1036,7 @@ void OpenSpaceEngine::loadFonts() {
         }
 
         LDEBUG(std::format("Registering font '{}' with key '{}'", fontName, key));
-        const bool success = global::fontManager->registerFontPath(key, fontName);
-
-        if (!success) {
-            LERROR(std::format(
-                "Error registering font '{}' with key '{}'", fontName, key
-            ));
-        }
+        global::fontManager->registerFontPath(key, fontName);
     }
 
     try {

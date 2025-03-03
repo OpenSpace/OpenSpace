@@ -22,44 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___SPICETRANSLATION___H__
-#define __OPENSPACE_MODULE_SPACE___SPICETRANSLATION___H__
+#ifndef __OPENSPACE_CORE___TIMECONSTANTS___H__
+#define __OPENSPACE_CORE___TIMECONSTANTS___H__
 
-#include <openspace/scene/translation.h>
+#include <chrono>
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <optional>
+namespace openspace::timeconstants {
+    constexpr double SecondsPerYear = 31556952; // seconds in average Gregorian year
+    constexpr double SecondsPerMonth = SecondsPerYear / 12;
+    constexpr double SecondsPerDay = static_cast<double>(
+        std::chrono::seconds(std::chrono::hours(24)).count()
+    );
+    constexpr double SecondsPerHour = static_cast<double>(
+        std::chrono::seconds(std::chrono::hours(1)).count()
+    );
+    constexpr double SecondsPerMinute = static_cast<double>(
+        std::chrono::seconds(std::chrono::minutes(1)).count()
+    );
+} // openspace::timeconstants
 
-namespace openspace {
-
-class SpiceTranslation : public Translation {
-public:
-    explicit SpiceTranslation(const ghoul::Dictionary& dictionary);
-
-    glm::dvec3 position(const UpdateData& data) const override;
-
-    static documentation::Documentation Documentation();
-
-private:
-    properties::StringProperty _target;
-    properties::StringProperty _observer;
-    properties::StringProperty _frame;
-    properties::StringProperty _fixedDate;
-    properties::FloatProperty _timeOffset;
-
-    // We are accessing these values every frame and when retrieving a string from the
-    // StringProperty, it allocates some new memory, which we want to prevent. Until the
-    // property can return a const ref of the string, we keep a local copy as the target,
-    // observer, and frame are not likely to change very often
-    std::string _cachedTarget;
-    std::string _cachedObserver;
-    std::string _cachedFrame;
-    std::optional<double> _fixedEphemerisTime;
-
-    glm::dvec3 _position = glm::dvec3(0.0);
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SPACE___SPICETRANSLATION___H__
+#endif // __OPENSPACE_CORE___TIMECONSTANTS___H__

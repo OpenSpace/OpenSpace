@@ -244,7 +244,7 @@ private:
 
     void cleanUpTimelinesAndKeyframes();
 
-    void checkIfScriptUsesScenegraphNode(std::string_view s) const;
+    void checkIfScriptUsesScenegraphNode(std::string_view script) const;
 
 
     properties::BoolProperty _renderPlaybackInformation;

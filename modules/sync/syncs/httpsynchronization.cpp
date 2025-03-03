@@ -402,7 +402,7 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
                 originalName.replace_extension().string();
 
             struct zip_t* z = zip_open(source.c_str(), 0, 'r');
-            const bool is64 = zip_is64(z);
+            const bool is64 = zip_is64(z) == 1;
             zip_close(z);
 
             if (is64) {

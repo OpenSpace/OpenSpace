@@ -22,44 +22,56 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___SPICETRANSLATION___H__
-#define __OPENSPACE_MODULE_SPACE___SPICETRANSLATION___H__
+#include <modules/base/dashboard/dashboarditemcameraorientation.h>
 
-#include <openspace/scene/translation.h>
+#include <openspace/camera/camera.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
+#include <ghoul/font/font.h>
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <optional>
+namespace {
+    // This `DashboardItem` shows the current camera orientation in the yaw, pitch, and
+    // roll directions in degrees. Note that the camera's orientation is relative to the
+    // global coordinate system used in the system.
+    struct [[codegen::Dictionary(DashboardItemCameraOrientation)]] Parameters {
+    };
+#include "dashboarditemcameraorientation_codegen.cpp"
+} // namespace
 
 namespace openspace {
 
-class SpiceTranslation : public Translation {
-public:
-    explicit SpiceTranslation(const ghoul::Dictionary& dictionary);
+documentation::Documentation DashboardItemCameraOrientation::Documentation() {
+    return codegen::doc<Parameters>(
+        "base_dashboarditem_cameraorientation",
+        DashboardTextItem::Documentation()
+    );
+}
 
-    glm::dvec3 position(const UpdateData& data) const override;
+DashboardItemCameraOrientation::DashboardItemCameraOrientation(
+                                                      const ghoul::Dictionary& dictionary)
+    : DashboardTextItem(dictionary)
+{}
 
-    static documentation::Documentation Documentation();
+void DashboardItemCameraOrientation::update() {
+    ZoneScoped;
 
-private:
-    properties::StringProperty _target;
-    properties::StringProperty _observer;
-    properties::StringProperty _frame;
-    properties::StringProperty _fixedDate;
-    properties::FloatProperty _timeOffset;
+    const Camera* camera = global::renderEngine->scene()->camera();
+    const glm::dquat orientation = camera->rotationQuaternion();
+    const glm::dvec3 pitchYawRoll = glm::eulerAngles(orientation);
+    const glm::dvec3 pitchYawRollDeg = glm::degrees(pitchYawRoll);
 
-    // We are accessing these values every frame and when retrieving a string from the
-    // StringProperty, it allocates some new memory, which we want to prevent. Until the
-    // property can return a const ref of the string, we keep a local copy as the target,
-    // observer, and frame are not likely to change very often
-    std::string _cachedTarget;
-    std::string _cachedObserver;
-    std::string _cachedFrame;
-    std::optional<double> _fixedEphemerisTime;
+    _buffer = std::format(
+        "Yaw: {:.2f}\nPitch: {:.2f}\nRoll: {:.2f}",
+        pitchYawRollDeg.y, pitchYawRollDeg.x, pitchYawRollDeg.z
+    );
+}
 
-    glm::dvec3 _position = glm::dvec3(0.0);
-};
+glm::vec2 DashboardItemCameraOrientation::size() const {
+    ZoneScoped;
+
+    return _font->boundingBox("Yaw: 0.00\nPitch: 0.00\nRoll: 0.00");
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SPACE___SPICETRANSLATION___H__

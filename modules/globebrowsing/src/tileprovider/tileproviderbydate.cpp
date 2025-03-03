@@ -66,7 +66,6 @@ TileProviderByDate::TileProviderByDate(const ghoul::Dictionary& dictionary) {
         if (dictionary.hasValue<std::string>("GlobeName")) {
             prov.second.setValue("GlobeName", dictionary.value<std::string>("GlobeName"));
         }
-        layers::Layer::ID typeID = layers::Layer::ID::DefaultTileProvider;
 
         std::unique_ptr<TileProvider> tp = createFromDictionary(prov.second);
         const std::string provId = prov.second.value<std::string>("Identifier");
