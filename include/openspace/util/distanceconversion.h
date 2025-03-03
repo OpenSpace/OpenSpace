@@ -115,7 +115,7 @@ DistanceUnitNames { {
     { "Furlong", "Furlongs", "fur" },
     { "Mile", "Miles", "mi" },
     { "League", "Leagues", "league" },
-    { "Nautical Mile", "Nautical Miles", "nm" }
+    { "Nautical Mile", "Nautical Miles", "NM" }
 }};
 
 constexpr bool isValidDistanceUnitName(std::string_view name) {
