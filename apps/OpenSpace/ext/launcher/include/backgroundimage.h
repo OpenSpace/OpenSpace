@@ -22,29 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___UVEC2PROPERTY___H__
-#define __OPENSPACE_CORE___UVEC2PROPERTY___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___BACKGROUNDIMAGE___H__
+#define __OPENSPACE_UI_LAUNCHER___BACKGROUNDIMAGE___H__
 
-#include <openspace/properties/numericalproperty.h>
+#include <QLabel>
 
-#include <ghoul/glm.h>
-#include <limits>
+#include <filesystem>
 
-namespace openspace::properties {
-
-class UVec2Property : public NumericalProperty<glm::uvec2> {
+class BackgroundImage final : public QLabel {
+Q_OBJECT
 public:
-    UVec2Property(Property::PropertyInfo info, glm::uvec2 value = glm::uvec2(0),
-        glm::uvec2 minValue = glm::uvec2(std::numeric_limits<unsigned int>::lowest()),
-        glm::uvec2 maxValue = glm::uvec2(std::numeric_limits<unsigned int>::max()),
-        glm::uvec2 stepValue = glm::uvec2(1));
-
-    std::string_view className() const override;
-    ghoul::lua::LuaTypes typeLua() const override;
-
-    using TemplateProperty<glm::uvec2>::operator=;
+    BackgroundImage(QRect size, const std::filesystem::path& syncFolder,
+        QWidget* parent = nullptr);
 };
 
-} // namespace openspace::properties
-
-#endif // __OPENSPACE_CORE___UVEC2PROPERTY___H__
+#endif // __OPENSPACE_UI_LAUNCHER___BACKGROUNDIMAGE___H__

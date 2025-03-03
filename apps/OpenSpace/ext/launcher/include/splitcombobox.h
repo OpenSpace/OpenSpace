@@ -22,29 +22,44 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___UVEC2PROPERTY___H__
-#define __OPENSPACE_CORE___UVEC2PROPERTY___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___SPLITCOMBOBOX___H__
+#define __OPENSPACE_UI_LAUNCHER___SPLITCOMBOBOX___H__
 
-#include <openspace/properties/numericalproperty.h>
+#include <QComboBox>
 
-#include <ghoul/glm.h>
-#include <limits>
+#include <filesystem>
+#include <optional>
+#include <string>
+#include <vector>
 
-namespace openspace::properties {
-
-class UVec2Property : public NumericalProperty<glm::uvec2> {
+class SplitComboBox final : public QComboBox {
+Q_OBJECT
 public:
-    UVec2Property(Property::PropertyInfo info, glm::uvec2 value = glm::uvec2(0),
-        glm::uvec2 minValue = glm::uvec2(std::numeric_limits<unsigned int>::lowest()),
-        glm::uvec2 maxValue = glm::uvec2(std::numeric_limits<unsigned int>::max()),
-        glm::uvec2 stepValue = glm::uvec2(1));
+    SplitComboBox(QWidget* parent, std::filesystem::path userPath, std::string userHeader,
+        std::filesystem::path hardcodedPath, std::string hardcodedHeader,
+        std::string specialFirst,
+        std::function<bool(const std::filesystem::path&)> fileFilter,
+        std::function<std::string(const std::filesystem::path&)> createTooltip);
 
-    std::string_view className() const override;
-    ghoul::lua::LuaTypes typeLua() const override;
+    void populateList(const std::string& preset);
 
-    using TemplateProperty<glm::uvec2>::operator=;
+    std::pair<std::string, std::string> currentSelection() const;
+
+signals:
+    // Sends the path to the selection or `std::nullopt` iff there was a special non-file
+    // entry at the top and that one has been selected
+    void selectionChanged(std::optional<std::string> selection);
+
+private:
+    std::filesystem::path _userPath;
+    std::string _userHeader;
+    std::filesystem::path _hardCodedPath;
+    std::string _hardCodedHeader;
+
+    std::string _specialFirst;
+
+    std::function<bool(const std::filesystem::path&)> _fileFilter;
+    std::function<std::string(const std::filesystem::path&)> _createTooltip;
 };
 
-} // namespace openspace::properties
-
-#endif // __OPENSPACE_CORE___UVEC2PROPERTY___H__
+#endif // __OPENSPACE_UI_LAUNCHER___SPLITCOMBOBOX___H__

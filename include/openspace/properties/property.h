@@ -27,6 +27,7 @@
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/easing.h>
+#include <ghoul/lua/lua_types.h>
 #include <functional>
 #include <string>
 #include <string_view>
@@ -195,15 +196,12 @@ public:
     /**
      * Returns the Lua type that will be put onto the stack in the Property::getLua method
      * and which will be consumed by the Property::setLuaValue method. The returned value
-     * can belong to the set of Lua types: `LUA_TNONE`, `LUA_TNIL`, `LUA_TBOOLEAN`,
-     * `LUA_TLIGHTUSERDATA`, `LUA_TNUMBER`, `LUA_TSTRING`, `LUA_TTABLE`, `LUA_TFUNCTION`,
-     * `LUA_TUSERDATA`, or `LUA_TTHREAD`. The default implementation will return
-     * `LUA_TNONE`.
+     * can be a combination of any value contained in the `LuaTypes`.
      *
      * \return The Lua type that will be consumed or produced by the Property::getLuaValue
      *         and Property::setLuaValue methods.
      */
-    virtual int typeLua() const;
+    virtual ghoul::lua::LuaTypes typeLua() const = 0;
 
     /**
      * This method encodes the encapsulated \p value of this Property as a `std::string`.

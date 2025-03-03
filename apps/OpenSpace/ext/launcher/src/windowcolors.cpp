@@ -22,35 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___ORIENTATIONDIALOG___H__
-#define __OPENSPACE_UI_LAUNCHER___ORIENTATIONDIALOG___H__
+#include "windowcolors.h"
 
-#include <QDialog>
+#include <ghoul/misc/assert.h>
 
-#include <sgct/math.h>
+QColor colorForWindow(int idx) {
+    constexpr std::array<QColor, 4> Hardcoded = {
+        QColor(43, 158, 195),
+        QColor(252, 171, 16),
+        QColor(68, 175, 105),
+        QColor(248, 51, 60)
+    };
 
-class QLineEdit;
-class QWidget;
+    ghoul_assert(idx >= 0, "idx must be non-negative");
 
-class OrientationDialog final : public QDialog {
-Q_OBJECT
-public:
-    /**
-     * Constructor for OrientationDialog object which contains the input text boxes for
-     * orientation x,y,z values,
-     *
-     * \param orientation The x,y,z angles in degrees contained in sgct::quat object
-     * \param parent Pointer to Qt QWidget parent object
-     */
-    OrientationDialog(sgct::quat& orientation, QWidget* parent);
-
-private:
-    void ok();
-
-    QLineEdit* _linePitch = nullptr;
-    QLineEdit* _lineRoll = nullptr;
-    QLineEdit* _lineYaw = nullptr;
-    sgct::quat& _orientationValue;
-};
-
-#endif // __OPENSPACE_UI_LAUNCHER___ORIENTATIONDIALOG___H__
+    if (idx < 4) {
+        return Hardcoded[idx];
+    }
+    else {
+        // If someone asks for a color of an index greater than what we have, we generate
+        // them by multiplying some prime numbers together
+        const int r = (idx * 31 * 3083) % 256;
+        const int g = (idx * 43 * 4273) % 256;
+        const int b = (idx * 59 * 5857) % 256;
+        return QColor(r, g, b);
+    }
+}

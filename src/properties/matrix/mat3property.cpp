@@ -45,8 +45,8 @@ std::string_view Mat3Property::className() const {
     return "Mat3Property";
 }
 
-int Mat3Property::typeLua() const {
-    return LUA_TTABLE;
+ghoul::lua::LuaTypes Mat3Property::typeLua() const {
+    return ghoul::lua::LuaTypes::Table;
 }
 
 }  // namespace openspace::properties

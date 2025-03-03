@@ -104,11 +104,10 @@ public:
     void setCamera(Camera* camera);
     void clearPreviousState();
 
-    void setFocusNode(const SceneGraphNode* focusNode,
-        bool resetVelocitiesOnChange = true);
-    void setFocusNode(const std::string& focusNode, bool resetVelocitiesOnChange = true);
-    void setAnchorNode(const std::string& anchorNode);
-    void setAimNode(const std::string& aimNode);
+    void setFocusNode(const SceneGraphNode* node, bool resetVelocities = true);
+    void setFocusNode(const std::string& identifier, bool resetVelocities = true);
+    void setAnchorNode(const std::string& identifier);
+    void setAimNode(const std::string& identifier);
 
     void startRetargetAnchor();
     void startRetargetAim();
@@ -149,7 +148,7 @@ public:
      */
     glm::dvec3 pushToSurfaceOfAnchor(const glm::dvec3& cameraPosition) const;
 
-    void updateAnchor();
+    void updateAnchorOnSync();
     std::vector<Syncable*> syncables();
 
     /**
@@ -176,9 +175,8 @@ private:
         properties::FloatProperty friction;
     };
 
-    void setAnchorNode(const SceneGraphNode* anchorNode,
-        bool resetVelocitiesOnChange = true);
-    void setAimNode(const SceneGraphNode* aimNode);
+    void updateAnchorNode(const SceneGraphNode* anchorNode);
+    void updateAimNode(const SceneGraphNode* aimNode);
 
     void updatePreviousAnchorState();
     void updatePreviousAimState();
@@ -255,6 +253,7 @@ private:
     std::optional<glm::dvec3>_previousAnchorNodePosition;
     std::optional<glm::dquat> _previousAnchorNodeRotation;
     std::optional<glm::dvec3> _previousAimNodePosition;
+    bool _resetVelocitiesOnAnchorChange = true;
 
     double _currentCameraToSurfaceDistance = 0.0;
     bool _directlySetStereoDistance = false;

@@ -42,6 +42,7 @@ namespace openspace::distanceconstants {
     constexpr double Yard = 0.9144;
     constexpr double Chain = 20.1168;
     constexpr double Mile = 1609.344;
+    constexpr double NauticalMile = 1852.0;
 } // openspace::distanceconstants
 
 #endif // __OPENSPACE_CORE___DISTANCECONSTANTS___H__

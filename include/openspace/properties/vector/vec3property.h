@@ -40,7 +40,7 @@ public:
         glm::vec3 stepValue = glm::vec3(0.01f));
 
     std::string_view className() const override;
-    int typeLua() const override;
+    ghoul::lua::LuaTypes typeLua() const override;
 
     using TemplateProperty<glm::vec3>::operator=;
 };

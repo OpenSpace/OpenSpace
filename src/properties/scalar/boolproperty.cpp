@@ -37,8 +37,8 @@ std::string_view BoolProperty::className() const {
     return "BoolProperty";
 }
 
-int BoolProperty::typeLua() const {
-    return LUA_TBOOLEAN;
+ghoul::lua::LuaTypes BoolProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Boolean;
 }
 
 bool BoolProperty::fromLuaConversion(lua_State* state) const {

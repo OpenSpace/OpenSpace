@@ -1183,7 +1183,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     global::luaConsole->update();
 
     if (!master) {
-        global::navigationHandler->orbitalNavigator().updateAnchor();
+        global::navigationHandler->orbitalNavigator().updateAnchorOnSync();
         _scene->camera()->invalidateCache();
     }
 
@@ -1593,8 +1593,8 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
         // each of the files contained in the directory
         std::vector<std::filesystem::path> files = ghoul::filesystem::walkDirectory(
             file,
-            true,
-            false,
+            ghoul::filesystem::Recursive::Yes,
+            ghoul::filesystem::Sorted::No,
             [](const std::filesystem::path& f) {
                 return std::filesystem::is_regular_file(f);
             }

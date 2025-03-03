@@ -40,7 +40,7 @@ public:
         glm::ivec4 stepValue = glm::ivec4(1));
 
     std::string_view className() const override;
-    int typeLua() const override;
+    ghoul::lua::LuaTypes typeLua() const override;
 
     using TemplateProperty<glm::ivec4>::operator=;
 };

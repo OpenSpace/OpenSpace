@@ -74,6 +74,10 @@ LauncherWindow  QPushButton#start {
 LauncherWindow  QPushButton#start:hover {
   background: rgb(120, 120, 120);
 }
+LauncherWindow  QPushButton#start:disabled {
+  background: rgb(175, 175, 175);
+  color: rgb(225, 225, 225);
+}
 
 LauncherWindow  QPushButton#small {
   background: rgb(86, 86, 86);

@@ -22,29 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___UVEC2PROPERTY___H__
-#define __OPENSPACE_CORE___UVEC2PROPERTY___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___WINDOWCOLORS___H__
+#define __OPENSPACE_UI_LAUNCHER___WINDOWCOLORS___H__
 
-#include <openspace/properties/numericalproperty.h>
+#include <QColor>
 
-#include <ghoul/glm.h>
-#include <limits>
+/**
+ * This function returns the color that a component should use for a specific window. The
+ * same index will always return the same color.
+ *
+ * \param idx The index of the window for which the color should be calculated
+ * \return The color for the provided window index
+ *
+ * \pre \p idx must be non-negative
+ */
+QColor colorForWindow(int idx);
 
-namespace openspace::properties {
-
-class UVec2Property : public NumericalProperty<glm::uvec2> {
-public:
-    UVec2Property(Property::PropertyInfo info, glm::uvec2 value = glm::uvec2(0),
-        glm::uvec2 minValue = glm::uvec2(std::numeric_limits<unsigned int>::lowest()),
-        glm::uvec2 maxValue = glm::uvec2(std::numeric_limits<unsigned int>::max()),
-        glm::uvec2 stepValue = glm::uvec2(1));
-
-    std::string_view className() const override;
-    ghoul::lua::LuaTypes typeLua() const override;
-
-    using TemplateProperty<glm::uvec2>::operator=;
-};
-
-} // namespace openspace::properties
-
-#endif // __OPENSPACE_CORE___UVEC2PROPERTY___H__
+#endif // __OPENSPACE_UI_LAUNCHER___WINDOWCOLORS___H__
