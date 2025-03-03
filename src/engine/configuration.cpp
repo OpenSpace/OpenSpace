@@ -28,6 +28,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/settings.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/util/json_helper.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -769,6 +770,19 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
         primaryMonitorResolution.x, primaryMonitorResolution.y
     );
     ghoul::lua::runScript(result.state, script);
+
+    // Local function to convert a dictionary to its JSON object's string representation
+    constexpr auto TableToJson = [](lua_State* state) {
+        if (!ghoul::lua::hasValue<ghoul::Dictionary>(state)) {
+            throw ghoul::lua::LuaError("TableToJson must receive a table object");
+        }
+        ghoul::Dictionary dict = ghoul::lua::value<ghoul::Dictionary>(state);
+        std::string stringRepresentation = formatJson(dict);
+        ghoul::lua::push(state, std::move(stringRepresentation));
+        return 1;
+    };
+    lua_pushcfunction(result.state, TableToJson);
+    lua_setglobal(result.state, "TableToJson");
 
     // If there is an initial config helper file, load it into the state
     if (std::filesystem::is_regular_file(absPath(InitialConfigHelper))) {
