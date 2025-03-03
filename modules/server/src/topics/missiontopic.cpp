@@ -60,6 +60,7 @@ nlohmann::json MissionTopic::missionJson() const {
     for (auto const& [name, mission] : missions) {
         nlohmann::json missionJson = createPhaseJson(mission);
         missionJson["capturetimes"] = captureTimesString;
+        missionJson["identifier"] = name;
         json.push_back(std::move(missionJson));
     }
     return json;

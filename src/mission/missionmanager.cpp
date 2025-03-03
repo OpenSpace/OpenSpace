@@ -24,6 +24,7 @@
 
 #include <openspace/mission/missionmanager.h>
 
+#include <openspace/events/eventengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/file.h>
@@ -71,6 +72,7 @@ std::string MissionManager::loadMission(Mission mission) {
         setCurrentMission(currentMission);
     }
 
+    global::eventEngine->publishEvent<events::EventMissionAdded>(missionName);
     return missionName;
 }
 
@@ -83,6 +85,7 @@ void MissionManager::unloadMission(const std::string& missionName) {
         _currentMission = _missionMap.end();
     }
 
+    global::eventEngine->publishEvent<events::EventMissionRemoved>(missionName);
     _missionMap.erase(it);
 }
 

@@ -64,6 +64,8 @@ struct Event {
         ApplicationShutdown,
         CameraFocusTransition,
         TimeOfInterestReached,
+        MissionAdded,
+        MissionRemoved,
         MissionEventReached,
         PlanetEclipsed,
         InterpolationFinished,
@@ -253,6 +255,39 @@ struct EventTimeOfInterestReached : public Event {
 
     const Time* time = nullptr;
     const Camera* camera = nullptr;
+};
+
+
+/**
+ * This event is created when a mission is added 
+ */
+struct EventMissionAdded : public Event {
+    static constexpr Type Type = Event::Type::MissionAdded;
+
+    /**
+     * Creates an instance of an EventMissionAdded event.
+     * 
+     * \param missionName The name of the mission added
+     */
+    EventMissionAdded(std::string_view missionName);
+
+    const tstring missionName;
+};
+
+/**
+ * This event is created when a mission is removed
+ */
+struct EventMissionRemoved : public Event {
+    static constexpr Type Type = Event::Type::MissionRemoved;
+
+    /**
+     * Creates an instance of an EventMissionRemoved event.
+     *
+     * \param missionName The name of the mission removed
+     */
+    EventMissionRemoved(std::string_view missionName);
+
+    const tstring missionName;
 };
 
 
