@@ -120,7 +120,7 @@ public:
     const glm::dmat3& worldRotationMatrix() const;
     glm::dmat4 modelTransform() const;
     glm::dvec3 worldScale() const;
-    bool isTimeFrameActive(const Time& time) const;
+    bool isTimeFrameActive() const;
 
     SceneGraphNode* parent() const;
     std::vector<SceneGraphNode*> children() const;

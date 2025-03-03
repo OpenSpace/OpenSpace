@@ -1,0 +1,35 @@
+-- Euler Angles
+-- This asset creates a rotation provided by Euler angles and applies it to a
+-- SceneGraphNode that only displays coordinate axes. The rotation of the coordinate axes
+-- are determined by a constant and unchanging static rotation. In this example, the
+-- rotation is only applied between 2000 JAN 01 and just prior to 2002 JAN 01.
+
+local Node = {
+  Identifier = "StaticRotation_Example_Euler",
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { math.pi / 2.0, 0.0, math.pi },
+      TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2000 JAN 01",
+        End = "2002 JAN 01"
+      }
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "StaticRotation - Euler Angles",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

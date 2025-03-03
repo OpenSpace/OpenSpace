@@ -101,8 +101,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EpochInfo = {
         "Epoch",
         "Epoch",
-        "This value determines the epoch for which the initial location is defined in "
-        "the form of YYYY MM DD HH:mm:ss.",
+        "Specifies the epoch in which the first position of the Kepler arguments are "
+        "provided. The epoch is specified in numbers of seconds past the J2000 epoch.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -132,8 +132,10 @@ namespace {
         // [[codegen::verbatim(MeanAnomalyAtEpochInfo.description)]]
         double meanAnomaly [[codegen::inrange(-360.0, 360.0)]];
 
-        // [[codegen::verbatim(EpochInfo.description)]]
-        std::string epoch;
+        // This value determines the epoch for which the initial location is defined in.
+        // This is specified wither in the form of a date (YYYY MM DD HH:mm:ss) or in the
+        // number of seconds past the J2000 epoch.
+        std::variant<std::string, double> epoch;
 
         // [[codegen::verbatim(PeriodInfo.description)]]
         double period [[codegen::greater(0.0)]];
@@ -152,8 +154,9 @@ documentation::Documentation KeplerTranslation::Documentation() {
     return codegen::doc<Parameters>("space_transform_kepler");
 }
 
-KeplerTranslation::KeplerTranslation()
-    : _eccentricity(EccentricityInfo, 0.0, 0.0, 1.0)
+KeplerTranslation::KeplerTranslation(const ghoul::Dictionary& dictionary)
+    : Translation(dictionary)
+    , _eccentricity(EccentricityInfo, 0.0, 0.0, 1.0)
     , _semiMajorAxis(SemiMajorAxisInfo, 0.0, 0.0, 1e6)
     , _inclination(InclinationInfo, 0.0, 0.0, 360.0)
     , _ascendingNode(AscendingNodeInfo, 0.0, 0.0, 360.0)
@@ -162,6 +165,8 @@ KeplerTranslation::KeplerTranslation()
     , _epoch(EpochInfo, 0.0, 0.0, 1e9)
     , _period(PeriodInfo, 0.0, 0.0, 1e6)
 {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
     auto update = [this]() {
         _orbitPlaneDirty = true;
         requireUpdate();
@@ -188,12 +193,11 @@ KeplerTranslation::KeplerTranslation()
     addProperty(_meanAnomalyAtEpoch);
     addProperty(_epoch);
     addProperty(_period);
-}
 
-KeplerTranslation::KeplerTranslation(const ghoul::Dictionary& dictionary)
-    : KeplerTranslation()
-{
-    const Parameters p = codegen::bake<Parameters>(dictionary);
+    const double epoch =
+        std::holds_alternative<double>(p.epoch) ?
+        std::get<double>(p.epoch) :
+        SpiceManager::ref().ephemerisTimeFromDate(std::get<std::string>(p.epoch));
 
     setKeplerElements(
         p.eccentricity,
@@ -201,11 +205,11 @@ KeplerTranslation::KeplerTranslation(const ghoul::Dictionary& dictionary)
         p.inclination < 0.0 ? p.inclination + 360.0 : p.inclination,
         p.ascendingNode < 0.0 ? p.ascendingNode + 360.0 : p.ascendingNode,
         p.argumentOfPeriapsis < 0.0 ?
-            p.argumentOfPeriapsis + 360.0 :
-            p.argumentOfPeriapsis,
+        p.argumentOfPeriapsis + 360.0 :
+        p.argumentOfPeriapsis,
         p.meanAnomaly < 0.0 ? p.meanAnomaly + 360.0 : p.meanAnomaly,
         p.period,
-        p.epoch
+        epoch
     );
 }
 

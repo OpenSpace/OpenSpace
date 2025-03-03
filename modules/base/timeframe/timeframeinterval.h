@@ -40,7 +40,7 @@ class TimeFrameInterval : public TimeFrame {
 public:
     explicit TimeFrameInterval(const ghoul::Dictionary& dictionary);
 
-    bool isActive(const Time&) const override;
+    void update(const Time& time) override;
 
     static documentation::Documentation Documentation();
 

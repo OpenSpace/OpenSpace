@@ -27,6 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/scene/timeframe.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 
@@ -38,12 +39,29 @@ struct UpdateData;
 
 namespace documentation { struct Documentation; }
 
+/**
+ * This class represents a configurable rotation which may or may not be time-dependent.
+ * Generally, classes of this type should be created through the #createFromDictionary
+ * function, which takes a dictionary that describes the type of Rotation to create and
+ * the parameters for the specific type that should be created.
+ *
+ * For general use-case by the wider system, the Rotation class should get at most one
+ * call to the #update method, which call calculate the Rotation using the provided data
+ * and cache the results, making subsequent calls to matrix() very efficient. For more
+ * advanced use cases, the matrix(const UpdateDate&) function will calulcate the rotation
+ * every time it is called.
+ *
+ * Generally, when implementing a new type of this class, only the
+ * matrix(const UpdateDate&) verison needs to be implemented as this base class will
+ * handle the caching.
+ */
 class Rotation : public properties::PropertyOwner {
 public:
     static ghoul::mm_unique_ptr<Rotation> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
-    Rotation();
+
+    explicit Rotation(const ghoul::Dictionary& dictionary);
     virtual ~Rotation() override = default;
 
     virtual bool initialize();
@@ -59,6 +77,7 @@ protected:
 
 private:
     bool _needsUpdate = true;
+    ghoul::mm_unique_ptr<TimeFrame> _timeFrame;
     double _cachedTime = -std::numeric_limits<double>::max();
     glm::dmat3 _cachedMatrix = glm::dmat3(1.0);
 };
