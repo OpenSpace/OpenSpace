@@ -37,7 +37,7 @@ namespace openspace {
     void RenderableBlackHole::initialize() {
         _viewport = ViewPort(global::navigationHandler->camera());
         global::navigationHandler->camera()->setRotation(glm::dquat(0,0,0,0));
-        cuda_test();
+        //cuda_test();
     }
 
     void RenderableBlackHole::initializeGL() {
