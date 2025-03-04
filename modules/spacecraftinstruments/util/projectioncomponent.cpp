@@ -175,12 +175,13 @@ documentation::Documentation ProjectionComponent::Documentation() {
 ProjectionComponent::ProjectionComponent()
     : properties::PropertyOwner({ "ProjectionComponent", "Projection Component" })
     , _performProjection(ProjectionInfo, true)
-    , _clearAllProjections(ClearProjectionInfo, false)
+    , _clearAllProjections(ClearProjectionInfo)
     , _projectionFading(FadingInfo, 1.f, 0.f, 1.f)
     , _textureSize(TextureSizeInfo, glm::ivec2(16), glm::ivec2(16), glm::ivec2(32768))
     , _applyTextureSize(ApplyTextureSizeInfo)
 {
     addProperty(_performProjection);
+    _clearAllProjections.onChange([this]() { _needsClearProjection = true; });
     addProperty(_clearAllProjections);
     addProperty(_projectionFading);
 
@@ -790,7 +791,7 @@ bool ProjectionComponent::doesPerformProjection() const {
 }
 
 bool ProjectionComponent::needsClearProjection() const {
-    return _clearAllProjections;
+    return _needsClearProjection;
 }
 
 bool ProjectionComponent::needsMipMapGeneration() const {
@@ -857,7 +858,7 @@ void ProjectionComponent::clearAllProjections() {
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
-    _clearAllProjections = false;
+    _needsClearProjection = false;
     _mipMapDirty = true;
 }
 
