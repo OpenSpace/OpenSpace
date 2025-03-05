@@ -5,6 +5,7 @@
 #include <modules/blackhole/rendering/viewport.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <ghoul/opengl/textureunit.h>
+#include <ghoul/opengl/bufferbinding.h>
 
 namespace openspace {
 
@@ -34,14 +35,18 @@ private:
     void loadEnvironmentTexture();
   ghoul::opengl::ProgramObject* _program = nullptr;
   ViewPort _viewport;
-  size_t _rayCount = 100;
-  std::vector<double> _schwarzschildWarpTable;
+  size_t _rayCount = 5000;
+  std::vector<float> _schwarzschildWarpTable;
+  std::unique_ptr<ghoul::opengl::Texture> warpTableTex;
+  std::unique_ptr<ghoul::opengl::BufferBinding<
+      ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboDataBinding;
 
   GLuint _framebuffer = 0;
   GLuint _quadVao = 0;
   GLuint _quadVbo = 0;
-
-  UniformCache(enviromentTexture, viewGrid, cameraRotationMatrix) _uniformCache;
+  GLuint _ssboData = 0;
+  GLuint modelMatricesBuffer;
+  UniformCache(enviromentTexture, viewGrid, cameraRotationMatrix, schwarzschildWarpTable) _uniformCache;
 
   std::unique_ptr<ghoul::opengl::Texture> _enviromentTexture;
 };

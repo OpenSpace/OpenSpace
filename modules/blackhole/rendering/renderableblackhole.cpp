@@ -38,8 +38,8 @@ namespace openspace {
     void RenderableBlackHole::initialize() {
         _viewport = ViewPort(global::navigationHandler->camera());
         global::navigationHandler->camera()->setRotation(glm::dquat(0,0,0,0));
-        _schwarzschildWarpTable = std::vector<double>(_rayCount * 2, 0);
-        schwarzchild(1, 30, _rayCount, 5000, 1.0 / 20.0, 0.01, _schwarzschildWarpTable.data());
+        _schwarzschildWarpTable = std::vector<float>(_rayCount * 2, 0.f);
+        schwarzchild(1, 30, _rayCount, 5000, 1.0 / 20.0, 0.001, _schwarzschildWarpTable.data());
         for (int i = 0; i < _rayCount; ++i) {
             LINFO(std::format("phi = [s: {:.10f}, e: {:.10f}]", _schwarzschildWarpTable[i * 2], _schwarzschildWarpTable[i * 2 + 1]));
         }
@@ -77,6 +77,24 @@ namespace openspace {
         if (!bindTexture(_uniformCache.viewGrid, viewGridUnit, _viewport.viewGrid)) {
             LWARNING("UniformCache is missing 'viewGrid'");
         }
+
+ /*       _program->setUniform(
+            _uniformCache.schwarzschildWarpTable, _schwarzschildWarpTable
+        );*/
+
+        // Update SSBO Index array with accumulated stars in all chunks.
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboData);
+
+        const size_t indexBufferSize = _schwarzschildWarpTable.size() * sizeof(float);
+
+        // Update SSBO Index (stars per chunk).
+        glBufferData(
+            GL_SHADER_STORAGE_BUFFER,
+            indexBufferSize,
+            _schwarzschildWarpTable.data(),
+            GL_STREAM_DRAW
+        );
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         _program->setUniform(
             _uniformCache.cameraRotationMatrix,
@@ -160,7 +178,29 @@ namespace openspace {
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
 
-    void RenderableBlackHole::update(const UpdateData&) {}
+    void RenderableBlackHole::update(const UpdateData&) {
+        if (_ssboData == 0) {
+            glGenBuffers(1, &_ssboData);
+            LDEBUG(std::format(
+                "Generating Data Shader Storage Buffer Object id '{}'", _ssboData
+            ));
+        }
+
+        // Combined SSBO with all data.
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboData);
+
+        _ssboDataBinding = std::make_unique<ghoul::opengl::BufferBinding<
+            ghoul::opengl::bufferbinding::Buffer::ShaderStorage>
+        >();
+        glBindBufferBase(
+            GL_SHADER_STORAGE_BUFFER,
+            _ssboDataBinding->bindingNumber(),
+            _ssboData
+        );
+        _program->setSsboBinding("ssbo", _ssboDataBinding->bindingNumber());
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    }
 
     documentation::Documentation RenderableBlackHole::Documentation() {
         return documentation::Documentation();
