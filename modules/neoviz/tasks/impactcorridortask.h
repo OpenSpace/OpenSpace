@@ -57,12 +57,14 @@ private:
         double impactTime = 0.0;
         double intensity = 0.0;
         bool hasImpact = false;
+        glm::vec4 debugColor = glm::vec4(0.0f);
     };
 
     enum class DataType {
         Probability = 0,
         Risk,
-        Time
+        Time,
+        Debug
     };
 
     /**

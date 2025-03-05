@@ -33,8 +33,8 @@ return {
     OutputFilename = "${USER_ASSETS}/B612/2004 MN4/high_ip_2004-12-27T21.28.37.000/impact-corridor/2004-MN4",
     ImageWidth = 5400,
     ImageHeight = 2700,
-    BrushSize = 205,
-    FilterStrength = 12.5,
+    BrushSize = 85,
+    FilterStrength = 19,
     ColorMap = "${SYNC}/http/default_colormaps_uniform/1/inferno.cmap",
     InvertColorMap = false,
     NightMap = "${SYNC}/http/earth_textures/3/earth_night.png"
@@ -46,8 +46,8 @@ return {
     OutputFilename = "${USER_ASSETS}/B612/2004 MN4/high_ip_2004-12-27T21.28.37.000/impact-corridor/2004-MN4-PuOr",
     ImageWidth = 5400,
     ImageHeight = 2700,
-    BrushSize = 205,
-    FilterStrength = 12.5,
+    BrushSize = 85,
+    FilterStrength = 19,
     ColorMap = "${SYNC}/http/default_colormaps_diverging/1/PuOr.cmap",
     InvertColorMap = false,
     NightMap = "${SYNC}/http/earth_textures/3/earth_night.png"

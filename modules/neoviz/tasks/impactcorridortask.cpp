@@ -46,10 +46,11 @@ namespace {
     constexpr std::string_view TimeStringFormat = "YYYY MON DD HR:MN:SC.###";
     constexpr unsigned int TimeStringLength = 41;
 
-    std::vector<std::vector<double>> gaussianFilter(int kernelSize, double filterStrength) {
+    std::vector<std::vector<double>> gaussianKernel(int kernelSize,
+                                                    double standardDeviation)
+    {
         ghoul_assert(kernelSize % 2 == 1, "Kernel size must be odd");
 
-        double standardDeviation = filterStrength;
         double sig = 2.0 * standardDeviation * standardDeviation;
         double sum = 0.0;
         std::vector<std::vector<double>> kernel = std::vector<std::vector<double>>(
@@ -81,6 +82,108 @@ namespace {
         }
 
         return kernel;
+    }
+
+    glm::vec3 rgbToHsl(glm::vec3 rgbColor) {
+        float max = std::max(std::max(rgbColor.r, rgbColor.g), rgbColor.b);
+        float min = std::min(std::min(rgbColor.r, rgbColor.g), rgbColor.b);
+
+        float L = (max + min) / 2.f;
+
+        float S = 0.f;
+        if (std::abs(max - min) > std::numeric_limits<float>::epsilon()) {
+            if (L <= 0.5f) {
+                S = (max - min) / (max + min);
+            }
+            else {
+                S = (max - min) / (2.f - max - min);
+            }
+        }
+
+        float H = 0.f;
+        if (S > 0.f) {
+            if (rgbColor.r > rgbColor.g && rgbColor.r > rgbColor.b) {
+                // Red is max
+                H = (rgbColor.g - rgbColor.b) / (max - min);
+            }
+            else if (rgbColor.g > rgbColor.r && rgbColor.g > rgbColor.b) {
+                // Green is max
+                H = 2.f + (rgbColor.b - rgbColor.r) / (max - min);
+            }
+            else {
+                // Blue is max
+                H = 4.f + (rgbColor.r - rgbColor.g) / (max - min);
+            }
+
+            H *= 60.f;
+            if (H < 0.f) {
+                H += 360.f;
+            }
+        }
+
+        return glm::vec3(H, S, L);
+    }
+
+    glm::vec3 hslToRgb(glm::vec3 hslColor) {
+        if (hslColor.y < std::numeric_limits<float>::epsilon()) {
+            return glm::vec3(hslColor.z);
+        }
+        else if (hslColor.y > 1.f) {
+            hslColor.y = 1.f;
+        }
+
+        float temp1 = 0.f;
+        if (hslColor.z < 0.5f) {
+            temp1 = hslColor.z * (1.f + hslColor.y);
+        }
+        else {
+            temp1 = hslColor.z + hslColor.y - hslColor.z * hslColor.y;
+        }
+
+        float temp2 = 2.f * hslColor.z - temp1;
+        hslColor.x /= 360.f;
+
+        glm::vec3 rgbColor = glm::vec3(0.f);
+        rgbColor.r = hslColor.x + 1.f / 3.f;
+        rgbColor.g = hslColor.x;
+        rgbColor.b = hslColor.x - 1.f / 3.f;
+
+        if (rgbColor.r < 0.f) {
+            rgbColor.r += 1.f;
+        }
+        else if (rgbColor.g < 0.f) {
+            rgbColor.g += 1.f;
+        }
+        else if (rgbColor.b < 0.f) {
+            rgbColor.b += 1.f;
+        }
+
+        if (rgbColor.r > 1.f) {
+            rgbColor.r -= 1.f;
+        }
+        else if (rgbColor.g > 1.f) {
+            rgbColor.g -= 1.f;
+        }
+        else if (rgbColor.b > 1.f) {
+            rgbColor.b -= 1.f;
+        }
+
+        for (int i = 0; i < 3; ++i) {
+            if (6.f * rgbColor[i] < 1.f) {
+                rgbColor[i] = temp2 + (temp1 - temp2) * 6.f * rgbColor[i];
+            }
+            else if (2.f * rgbColor[i] < 1.f) {
+                rgbColor[i] = temp1;
+            }
+            else if (3.f * rgbColor[i] < 2.f) {
+                rgbColor[i] = temp2 + (temp1 - temp2) * (2.f / 3.f - rgbColor[i]) * 6.f;
+            }
+            else {
+                rgbColor[i] = temp2;
+            }
+        }
+
+        return rgbColor;
     }
 
     int convertLatitude(double latitude, int imageHeight) {
@@ -220,6 +323,7 @@ void ImpactCorridorTask::perform(const Task::ProgressCallback& progressCallback)
         nightHeight,
         nightChannels
     );
+    stbi_image_free(nightImageData);
 
     // Create the impact corridor image with impact probability as the data
     std::vector<glm::vec4> pixels = std::vector<glm::vec4>(NumPixels, glm::vec4(0.0));
@@ -252,6 +356,18 @@ void ImpactCorridorTask::perform(const Task::ProgressCallback& progressCallback)
     processImage(
         progressCallback,
         DataType::Time,
+        data,
+        NumPixels,
+        Size,
+        colorMap,
+        pixels
+    );
+
+    // Debug
+    pixels = std::vector<glm::vec4>(NumPixels, glm::vec4(0.0));
+    processImage(
+        progressCallback,
+        DataType::Debug,
         data,
         NumPixels,
         Size,
@@ -365,7 +481,7 @@ std::vector<ImpactCorridorTask::ImpactPixel> ImpactCorridorTask::plotImpactData(
 
     // Use a gaussian kernel to create a smooth circle around the impact location
     const std::vector<std::vector<double>> kernel =
-        gaussianFilter(_brushSize, _filterStrength);
+        gaussianKernel(_brushSize, _filterStrength);
 
     // Plot all impact coordinates on the pixel list
     int impactCounter = 0;
@@ -413,6 +529,9 @@ std::vector<ImpactCorridorTask::ImpactPixel> ImpactCorridorTask::plotImpactData(
         progressCallback(impactCounter / static_cast<float>(_impactCoordinates.size()));
     }
 
+    // Count the number of color channels in the night layer image
+    int nightColorChannels = nightChannels > 3 ? 3 : nightChannels;
+
     // For the risk we need the final impact probability to already be in place
     impactCounter = 0;
     LINFO("Creating pixel impact risk data...");
@@ -424,7 +543,7 @@ std::vector<ImpactCorridorTask::ImpactPixel> ImpactCorridorTask::plotImpactData(
 
         // Use the night layer image to estimate impact risk due to population density
         // Sample the surrounding area in the night map to estimate the risk of the impact
-        double risk = 0.0;
+        float risk = 0.0;
         for (int w = -brushRadius; w <= brushRadius; w++) {
             for (int h = -brushRadius; h <= brushRadius; h++) {
                 int nightIndex = pixelIndex(
@@ -441,10 +560,36 @@ std::vector<ImpactCorridorTask::ImpactPixel> ImpactCorridorTask::plotImpactData(
                     ));
                 }
 
-                risk += *(nightData + nightIndex);
+                // To avoid the blue or water and red of deserts, take the lowest color
+                // channel value
+                float pixelRisk = static_cast<float>(*(nightData + nightIndex)) / std::numeric_limits<uint8_t>::max();
+                for (int i = 1; i < nightColorChannels; ++i) {
+                    pixelRisk = std::min(
+                        pixelRisk,
+                        static_cast<float>(*(nightData + nightIndex + i)) / std::numeric_limits<uint8_t>::max()
+                    );
+                }
+
+                // Add the night color as is to the debug color
+                int index = pixelIndex(
+                    pixelW + w,
+                    pixelH + h,
+                    1,
+                    _imageWidth,
+                    _imageHeight,
+                    true
+                );
+                data[index].debugColor = glm::vec4(
+                    static_cast<float>(*(nightData + nightIndex)) / std::numeric_limits<uint8_t>::max(),
+                    static_cast<float>(*(nightData + nightIndex + 1)) / std::numeric_limits<uint8_t>::max(),
+                    static_cast<float>(*(nightData + nightIndex + 2)) / std::numeric_limits<uint8_t>::max(),
+                    static_cast<float>(*(nightData + nightIndex + 3)) / std::numeric_limits<uint8_t>::max()
+                );
+
+                risk += pixelRisk;
             }
         }
-        risk /= static_cast<double>(_brushSize * _brushSize);
+        risk /= static_cast<float>(_brushSize * _brushSize);
 
         // Multiply the risk with the final impact probability to get the final risk value
         for (int w = -brushRadius; w <= brushRadius; w++) {
@@ -459,7 +604,7 @@ std::vector<ImpactCorridorTask::ImpactPixel> ImpactCorridorTask::plotImpactData(
                 );
 
                 // Risk
-                double impactRisk = _brushSaturation * risk;
+                float impactRisk = _brushSaturation * risk;
                 data[index].impactRisk = std::max(
                     impactRisk * data[index].impactProbability,
                     data[index].impactRisk
@@ -516,6 +661,11 @@ void ImpactCorridorTask::processImage(const Task::ProgressCallback& progressCall
                 minValue = std::min(minValue, data[i].impactTime);
                 maxValue = std::max(maxValue, data[i].impactTime);
             }
+            break;
+        case DataType::Debug:
+            dataTypeName = "debug";
+            minValue = 0.0;
+            maxValue = 1.0;
             break;
         default:
             throw ghoul::MissingCaseException();
@@ -617,6 +767,8 @@ void ImpactCorridorTask::applyColorMap(const Task::ProgressCallback& progressCal
             case DataType::Time:
                 dataValue = data[p].impactTime;
                 break;
+            case DataType::Debug:
+                break;
             default:
                 throw ghoul::MissingCaseException();
         }
@@ -641,7 +793,28 @@ void ImpactCorridorTask::applyColorMap(const Task::ProgressCallback& progressCal
         // Get and save the color that this value cooresponds to in the color map
         glm::vec4 color = colorMap.entries[colorMapIndex];
         color.a = static_cast<float>(data[p].intensity / maxIntensity);
-        pixels[p] = color;
+
+        // Bump up the saturation a bit for the time map
+        if (dataType == DataType::Time) {
+            // Convert to HSL
+            glm::vec3 hslColor = rgbToHsl(glm::vec3(color.r, color.g, color.b));
+
+            // Bump up the saturation a bit
+            hslColor.g *= 1.5f;
+
+            // Convert back to RGB
+            glm::vec3 rgbColor = hslToRgb(hslColor);
+            color.r = rgbColor.r;
+            color.g = rgbColor.g;
+            color.b = rgbColor.b;
+        }
+
+        if (dataType == DataType::Debug) {
+            pixels[p] = data[p].debugColor;
+        }
+        else {
+            pixels[p] = color;
+        }
 
         progressCallback((p + 1) / static_cast<float>(nPixels));
     }
