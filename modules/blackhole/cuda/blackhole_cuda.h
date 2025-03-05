@@ -2,7 +2,6 @@
 #define __OPENSPACE_MODULE_BLACKHOLE___CUDA___H__
 #include <vector>
 
-void cuda_test(int num_paths, int num_steps, double u_0, std::vector<double>& du_0_values, std::vector<double>& u_out, std::vector<double>& phi_out);
-
+void schwarzchild(double rs, double envmap_r, int num_paths, int num_steps, double u_0, double h, double* angle_out);
 
 #endif

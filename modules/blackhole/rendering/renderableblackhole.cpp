@@ -12,6 +12,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <filesystem>
+#include <vector>
 
 #include <modules/blackhole/cuda/blackhole_cuda.h>
 
@@ -37,7 +38,11 @@ namespace openspace {
     void RenderableBlackHole::initialize() {
         _viewport = ViewPort(global::navigationHandler->camera());
         global::navigationHandler->camera()->setRotation(glm::dquat(0,0,0,0));
-        //cuda_test();
+        _schwarzschildWarpTable = std::vector<double>(_rayCount * 2, 0);
+        schwarzchild(1, 30, _rayCount, 5000, 1.0 / 20.0, 0.01, _schwarzschildWarpTable.data());
+        for (int i = 0; i < _rayCount; ++i) {
+            LINFO(std::format("phi = [s: {:.10f}, e: {:.10f}]", _schwarzschildWarpTable[i * 2], _schwarzschildWarpTable[i * 2 + 1]));
+        }
     }
 
     void RenderableBlackHole::initializeGL() {
@@ -122,8 +127,10 @@ namespace openspace {
     }
 
     void RenderableBlackHole::loadEnvironmentTexture() {
-        const std::string texturePath = "${MODULE_BLACKHOLE}/rendering/uv.png";
+        //const std::string texturePath = "${MODULE_BLACKHOLE}/rendering/uv.png";
         //const std::string texturePath = "C:/Users/wilbj602/Documents/GitHub/OpenSpace/sync/http/milkyway_textures/2/DarkUniverse_mellinger_8k.jpg";
+        const std::string texturePath = "C:/Users/wilbj602/Downloads/img.jpg";
+
         _enviromentTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(texturePath), 2);
 
         if (_enviromentTexture) {

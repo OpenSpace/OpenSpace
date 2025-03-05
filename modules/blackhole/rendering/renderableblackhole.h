@@ -34,7 +34,8 @@ private:
     void loadEnvironmentTexture();
   ghoul::opengl::ProgramObject* _program = nullptr;
   ViewPort _viewport;
-
+  size_t _rayCount = 100;
+  std::vector<double> _schwarzschildWarpTable;
 
   GLuint _framebuffer = 0;
   GLuint _quadVao = 0;
