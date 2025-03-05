@@ -106,7 +106,7 @@ void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseState,
             const glm::dvec2 mousePositionDelta =
                 _globalRotationState.previousPosition - mousePosition;
             _globalRotationState.velocity.set(
-                mousePositionDelta * (_sensitivity + _sensitivity * totalSensitivity),
+                mousePositionDelta * (_sensitivity + _sensitivity * totalSensitivity / 5),
                 deltaTime
             );
 

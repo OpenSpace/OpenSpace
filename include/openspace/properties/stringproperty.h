@@ -34,7 +34,7 @@ public:
     StringProperty(Property::PropertyInfo info, std::string value = "");
 
     std::string_view className() const override;
-    int typeLua() const override;
+    ghoul::lua::LuaTypes typeLua() const override;
 
     using TemplateProperty<std::string>::operator=;
 

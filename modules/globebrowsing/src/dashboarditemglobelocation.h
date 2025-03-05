@@ -41,7 +41,7 @@ public:
     explicit DashboardItemGlobeLocation(const ghoul::Dictionary& dictionary);
     ~DashboardItemGlobeLocation() override = default;
 
-    void render(glm::vec2& penPosition) override;
+    void update() override;
 
     glm::vec2 size() const override;
 
@@ -57,7 +57,7 @@ private:
     properties::IntProperty _significantDigits;
 
     std::string _formatString;
-    std::vector<char> _buffer;
+    std::vector<char> _localBuffer;
 };
 
 } // namespace openspace

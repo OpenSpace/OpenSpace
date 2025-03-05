@@ -44,8 +44,8 @@ std::string_view ULongProperty::className() const {
     return "ULongProperty";
 }
 
-int ULongProperty::typeLua() const {
-    return LUA_TNUMBER;
+ghoul::lua::LuaTypes ULongProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Number;
 }
 
 } // namespace openspace::properties

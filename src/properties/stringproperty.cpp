@@ -38,8 +38,8 @@ std::string_view StringProperty::className() const {
     return "StringProperty";
 }
 
-int StringProperty::typeLua() const {
-    return LUA_TSTRING;
+ghoul::lua::LuaTypes StringProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::String;
 }
 
 std::string StringProperty::fromLuaConversion(lua_State* state) const {

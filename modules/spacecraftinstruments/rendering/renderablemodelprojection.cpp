@@ -47,8 +47,8 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
-    // Similarly to the [RenderablePlaneProjection](renderableplaneprojection) and
-    // [RenderablePlanetProjection](renderableplanetprojection), this Renderable type
+    // Similarly to the [RenderablePlaneProjection](spacecraftinstruments_renderableplaneprojection) and
+    // [RenderablePlanetProjection](spacecraftinstruments_renderableplanetprojection), this Renderable type
     // servers as a potential target for image projections from a spacecraft's instrument.
     // This renderable will determine whenever an image in a currently loaded image
     // sequence is projected whether that instrument's field of view intersects this model

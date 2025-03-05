@@ -90,59 +90,61 @@ bool ScreenSpaceImageOnline::deinitializeGL() {
 }
 
 void ScreenSpaceImageOnline::update() {
-    if (_textureIsDirty) {
-        if (!_imageFuture.valid()) {
-            std::future<DownloadManager::MemoryFile> future = downloadImageToMemory(
-                _texturePath
-            );
-            if (future.valid()) {
-                _imageFuture = std::move(future);
-            }
-        }
+    if (!_textureIsDirty) [[likely]] {
+        return;
+    }
 
-        if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
-            const DownloadManager::MemoryFile imageFile = _imageFuture.get();
-
-            if (imageFile.corrupted) {
-                LERROR(std::format(
-                    "Error loading image from URL '{}'", _texturePath.value()
-                ));
-                return;
-            }
-
-            try {
-                std::unique_ptr<ghoul::opengl::Texture> texture =
-                    ghoul::io::TextureReader::ref().loadTexture(
-                        reinterpret_cast<void*>(imageFile.buffer),
-                        imageFile.size,
-                        2,
-                        imageFile.format
-                    );
-
-                if (texture) {
-                    // Images don't need to start on 4-byte boundaries, for example if the
-                    // image is only RGB
-                    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-                    if (texture->format() == ghoul::opengl::Texture::Format::Red) {
-                        texture->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_ONE });
-                    }
-
-                    texture->uploadTexture();
-                    texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-                    texture->purgeFromRAM();
-
-                    _texture = std::move(texture);
-                    _objectSize = _texture->dimensions();
-                    _textureIsDirty = false;
-                }
-            }
-            catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
-                _textureIsDirty = false;
-                LERRORC(e.component, e.message);
-            }
+    if (!_imageFuture.valid()) {
+        std::future<DownloadManager::MemoryFile> future = downloadImageToMemory(
+            _texturePath
+        );
+        if (future.valid()) {
+            _imageFuture = std::move(future);
         }
     }
+
+    if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
+        const DownloadManager::MemoryFile imageFile = _imageFuture.get();
+
+        if (imageFile.corrupted) {
+            LERROR(std::format(
+                "Error loading image from URL '{}'", _texturePath.value()
+            ));
+            return;
+        }
+
+        try {
+            std::unique_ptr<ghoul::opengl::Texture> texture =
+                ghoul::io::TextureReader::ref().loadTexture(
+                    reinterpret_cast<void*>(imageFile.buffer),
+                    imageFile.size,
+                    2,
+                    imageFile.format
+                );
+
+            if (texture) {
+                // Images don't need to start on 4-byte boundaries, for example if the
+                // image is only RGB
+                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+                if (texture->format() == ghoul::opengl::Texture::Format::Red) {
+                    texture->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_ONE });
+                }
+
+                texture->uploadTexture();
+                texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+                texture->purgeFromRAM();
+
+                _texture = std::move(texture);
+                _objectSize = _texture->dimensions();
+                _textureIsDirty = false;
+            }
+        }
+        catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
+            _textureIsDirty = false;
+            LERRORC(e.component, e.message);
+        }
+    }   
 }
 
 std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageToMemory(
@@ -150,10 +152,10 @@ std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageTo
 {
     return global::downloadManager->fetchFile(
         url,
-        [url](const DownloadManager::MemoryFile&) {
+        [](const DownloadManager::MemoryFile&) {
             LDEBUG("Download to memory finished for screen space image");
         },
-        [url](const std::string& err) {
+        [](const std::string& err) {
             LDEBUG(std::format(
                 "Download to memory failed for screen space image: {}", err
             ));
@@ -162,7 +164,7 @@ std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageTo
 }
 
 void ScreenSpaceImageOnline::bindTexture() {
-    if (_texture) {
+    if (_texture) [[likely]] {
         _texture->bind();
     }
 }

@@ -38,7 +38,7 @@ public:
     explicit DashboardItemText(const ghoul::Dictionary& dictionary);
     ~DashboardItemText() override = default;
 
-    void render(glm::vec2& penPosition) override;
+    void update() override;
 
     glm::vec2 size() const override;
 

@@ -42,7 +42,7 @@ public:
     explicit DashboardItemAngle(const ghoul::Dictionary& dictionary);
     ~DashboardItemAngle() override = default;
 
-    void render(glm::vec2& penPosition) override;
+    void update() override;
 
     glm::vec2 size() const override;
 
@@ -61,7 +61,7 @@ private:
     Component _reference;
     Component _destination;
 
-    std::vector<char> _buffer;
+    std::vector<char> _localBuffer;
 };
 
 } // namespace openspace

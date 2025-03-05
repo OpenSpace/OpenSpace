@@ -40,22 +40,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
-        "SpoutSelection",
-        "Spout Selection",
-        "This property displays all available Spout sender on the system. If one them is "
-        "selected, its value is stored in the 'SpoutName' property, overwriting its "
-        "previous value.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo UpdateInfo = {
-        "UpdateSelection",
-        "Update Selection",
-        "If this property is trigged, the 'SpoutSelection' options will be refreshed.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     struct [[codegen::Dictionary(ScreenSpaceSpout)]] Parameters {
         // [[codegen::verbatim(NameInfo.description)]]
         std::optional<std::string> spoutName;

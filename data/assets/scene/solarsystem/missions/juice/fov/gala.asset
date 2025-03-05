@@ -33,12 +33,15 @@ local Gala = {
 
 
 asset.onInitialize(function()
+  openspace.printWarning([[The Gala instruments use a circular field-of-view that is
+    currently not supported in OpenSpace]])
+
   -- Circle shapes are currently not supported
-  openspace.addSceneGraphNode(Gala)
+  -- openspace.addSceneGraphNode(Gala)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Gala)
+  -- openspace.removeSceneGraphNode(Gala)
 end)
 
 asset.export(Gala)

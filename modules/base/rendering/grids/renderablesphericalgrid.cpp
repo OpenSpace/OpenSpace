@@ -80,7 +80,7 @@ namespace {
 
     // This `Renderable` creates a grid in the shape of a sphere. Note that the sphere
     // will always be given a radius of one meter. To change its size, use a `Scale`
-    // transform, such as the [StaticScale](#base_scale_static).
+    // transform, such as the [StaticScale](#base_transform_scale_static).
     //
     // The grid may be split up into equal segments in both directions using the `Segments`
     // parameter, or different number of segments in the latitudal and longtudal direction
@@ -165,7 +165,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
 }
 
 bool RenderableSphericalGrid::isReady() const {
-    return _hasLabels ? _gridProgram && _labels->isReady() : _gridProgram != nullptr;
+    return _gridProgram && (_hasLabels ? _labels->isReady() : true);
 }
 
 void RenderableSphericalGrid::initialize() {
@@ -278,7 +278,7 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableSphericalGrid::update(const UpdateData&) {
-    if (!_gridIsDirty) {
+    if (!_gridIsDirty) [[likely]] {
         return;
     }
 

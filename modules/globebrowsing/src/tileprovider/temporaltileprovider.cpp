@@ -473,15 +473,15 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, false>(
     // variable into the retrieveTileProvider function as it would generate a new
     // non-existing TileProvider for every new frame
     auto it = std::lower_bound(
-        _folder.files.begin(),
-        _folder.files.end(),
+        _folder.files.cbegin(),
+        _folder.files.cend(),
         time.j2000Seconds(),
         [](const std::pair<double, std::string>& p, double t) {
             return p.first < t;
         }
     );
 
-    if (it != _folder.files.begin()) {
+    if (it != _folder.files.cbegin()) {
         it -= 1;
     }
 
@@ -495,24 +495,24 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, true>(
                                                                          const Time& time)
 {
     auto next = std::lower_bound(
-        _folder.files.begin(),
-        _folder.files.end(),
+        _folder.files.cbegin(),
+        _folder.files.cend(),
         time.j2000Seconds(),
         [](const std::pair<double, std::string>& p, double t) {
             return p.first < t;
         }
     );
 
-    auto curr = next != _folder.files.begin() ? next - 1 : next;
-    auto nextNext = next != _folder.files.end() ? next + 1 : curr;
+    auto curr = next != _folder.files.cbegin() ? next - 1 : next;
+    auto nextNext = next != _folder.files.cend() ? next + 1 : curr;
 
-    if (next == _folder.files.end()) {
-        curr = _folder.files.end() - 1;
+    if (next == _folder.files.cend()) {
+        curr = _folder.files.cend() - 1;
         next = curr;
         nextNext = curr;
     }
 
-    auto prev = curr != _folder.files.begin() ? curr - 1 : curr;
+    auto prev = curr != _folder.files.cbegin() ? curr - 1 : curr;
 
     _interpolateTileProvider->t1 = retrieveTileProvider(Time(curr->first));
     _interpolateTileProvider->t2 = retrieveTileProvider(Time(next->first));
@@ -712,6 +712,8 @@ TemporalTileProvider::InterpolateTileProvider::~InterpolateTileProvider() {
     glDeleteFramebuffers(1, &fbo);
     glDeleteBuffers(1, &vboQuad);
     glDeleteVertexArrays(1, &vaoQuad);
+
+    global::renderEngine->removeRenderProgram(shaderProgram.get());
 }
 
 Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIndex) {

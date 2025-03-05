@@ -146,6 +146,45 @@ namespace {
         "The number of integration steps used during the raycasting procedure.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
+    
+    void saveCachedFile(const std::filesystem::path& file,
+                        const std::vector<glm::vec3>& positions,
+                        const std::vector<glm::vec3>& colors, int64_t nPoints,
+                        float pointsRatio)
+    {
+        std::ofstream fileStream(file, std::ofstream::binary);
+
+        if (!fileStream.good()) {
+            LERROR(std::format("Error opening file '{}' for save cache file", file));
+            return;
+        }
+
+        fileStream.write(
+            reinterpret_cast<const char*>(&CurrentCacheVersion),
+            sizeof(int8_t)
+        );
+        fileStream.write(reinterpret_cast<const char*>(&nPoints), sizeof(int64_t));
+        fileStream.write(reinterpret_cast<const char*>(&pointsRatio), sizeof(float));
+        uint64_t nPositions = positions.size();
+        fileStream.write(reinterpret_cast<const char*>(&nPositions), sizeof(uint64_t));
+        fileStream.write(
+            reinterpret_cast<const char*>(positions.data()),
+            positions.size() * sizeof(glm::vec3)
+        );
+        uint64_t nColors = colors.size();
+        fileStream.write(reinterpret_cast<const char*>(&nColors), sizeof(uint64_t));
+        fileStream.write(
+            reinterpret_cast<const char*>(colors.data()),
+            colors.size() * sizeof(glm::vec3)
+        );
+    }
+
+    float safeLength(const glm::vec3& vector) {
+        const float maxComponent = std::max(
+            std::max(std::abs(vector.x), std::abs(vector.y)), std::abs(vector.z)
+        );
+        return glm::length(vector / maxComponent) * maxComponent;
+    }
 
     struct [[codegen::Dictionary(RenderableGalaxy)]] Parameters {
         // [[codegen::verbatim(VolumeRenderingEnabledInfo.description)]]
@@ -200,46 +239,6 @@ namespace {
         Points points;
     };
 #include "renderablegalaxy_codegen.cpp"
-
-
-    void saveCachedFile(const std::filesystem::path& file,
-                        const std::vector<glm::vec3>& positions,
-                        const std::vector<glm::vec3>& colors, int64_t nPoints,
-                        float pointsRatio)
-    {
-        std::ofstream fileStream(file, std::ofstream::binary);
-
-        if (!fileStream.good()) {
-            LERROR(std::format("Error opening file '{}' for save cache file", file));
-            return;
-        }
-
-        fileStream.write(
-            reinterpret_cast<const char*>(&CurrentCacheVersion),
-            sizeof(int8_t)
-        );
-        fileStream.write(reinterpret_cast<const char*>(&nPoints), sizeof(int64_t));
-        fileStream.write(reinterpret_cast<const char*>(&pointsRatio), sizeof(float));
-        uint64_t nPositions = positions.size();
-        fileStream.write(reinterpret_cast<const char*>(&nPositions), sizeof(uint64_t));
-        fileStream.write(
-            reinterpret_cast<const char*>(positions.data()),
-            positions.size() * sizeof(glm::vec3)
-        );
-        uint64_t nColors = colors.size();
-        fileStream.write(reinterpret_cast<const char*>(&nColors), sizeof(uint64_t));
-        fileStream.write(
-            reinterpret_cast<const char*>(colors.data()),
-            colors.size() * sizeof(glm::vec3)
-        );
-    }
-
-    float safeLength(const glm::vec3& vector) {
-        const float maxComponent = std::max(
-            std::max(std::abs(vector.x), std::abs(vector.y)), std::abs(vector.z)
-        );
-        return glm::length(vector / maxComponent) * maxComponent;
-    }
 } // namespace
 
 namespace openspace {

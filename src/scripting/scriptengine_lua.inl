@@ -162,8 +162,8 @@ namespace {
     namespace fs = std::filesystem;
     return ghoul::filesystem::walkDirectory(
         path,
-        recursive,
-        sorted,
+        ghoul::filesystem::Recursive(recursive),
+        ghoul::filesystem::Sorted(sorted),
         [](const fs::path& p) { return fs::is_directory(p) || fs::is_regular_file(p); }
     );
 }
@@ -187,8 +187,8 @@ namespace {
     namespace fs = std::filesystem;
     return ghoul::filesystem::walkDirectory(
         path,
-        recursive,
-        sorted,
+        ghoul::filesystem::Recursive(recursive),
+        ghoul::filesystem::Sorted(sorted),
         [](const fs::path& p) { return fs::is_regular_file(p); }
     );
 }
@@ -212,8 +212,8 @@ namespace {
     namespace fs = std::filesystem;
     return ghoul::filesystem::walkDirectory(
         path,
-        recursive,
-        sorted,
+        ghoul::filesystem::Recursive(recursive),
+        ghoul::filesystem::Sorted(sorted),
         [](const fs::path& p) { return fs::is_directory(p); }
     );
 }
@@ -242,7 +242,7 @@ namespace {
     }
 
     struct zip_t* z = zip_open(source.c_str(), 0, 'r');
-    const bool is64 = zip_is64(z);
+    const bool is64 = zip_is64(z) == 1;
     zip_close(z);
 
     if (is64) {

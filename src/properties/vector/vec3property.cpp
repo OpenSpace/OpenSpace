@@ -44,8 +44,8 @@ std::string_view Vec3Property::className() const {
     return "Vec3Property";
 }
 
-int Vec3Property::typeLua() const {
-    return LUA_TTABLE;
+ghoul::lua::LuaTypes Vec3Property::typeLua() const {
+    return ghoul::lua::LuaTypes::Table;
 }
 
 } // namespace openspace::properties

@@ -22,35 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___ORIENTATIONDIALOG___H__
-#define __OPENSPACE_UI_LAUNCHER___ORIENTATIONDIALOG___H__
+#ifndef __OPENSPACE_CORE___TIMECONSTANTS___H__
+#define __OPENSPACE_CORE___TIMECONSTANTS___H__
 
-#include <QDialog>
+#include <chrono>
 
-#include <sgct/math.h>
+namespace openspace::timeconstants {
+    constexpr double SecondsPerYear = 31556952; // seconds in average Gregorian year
+    constexpr double SecondsPerMonth = SecondsPerYear / 12;
+    constexpr double SecondsPerDay = static_cast<double>(
+        std::chrono::seconds(std::chrono::hours(24)).count()
+    );
+    constexpr double SecondsPerHour = static_cast<double>(
+        std::chrono::seconds(std::chrono::hours(1)).count()
+    );
+    constexpr double SecondsPerMinute = static_cast<double>(
+        std::chrono::seconds(std::chrono::minutes(1)).count()
+    );
+} // openspace::timeconstants
 
-class QLineEdit;
-class QWidget;
-
-class OrientationDialog final : public QDialog {
-Q_OBJECT
-public:
-    /**
-     * Constructor for OrientationDialog object which contains the input text boxes for
-     * orientation x,y,z values,
-     *
-     * \param orientation The x,y,z angles in degrees contained in sgct::quat object
-     * \param parent Pointer to Qt QWidget parent object
-     */
-    OrientationDialog(sgct::quat& orientation, QWidget* parent);
-
-private:
-    void ok();
-
-    QLineEdit* _linePitch = nullptr;
-    QLineEdit* _lineRoll = nullptr;
-    QLineEdit* _lineYaw = nullptr;
-    sgct::quat& _orientationValue;
-};
-
-#endif // __OPENSPACE_UI_LAUNCHER___ORIENTATIONDIALOG___H__
+#endif // __OPENSPACE_CORE___TIMECONSTANTS___H__

@@ -67,7 +67,7 @@ namespace {
         "relatively spherical objects.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
-} // namespace openspace
+} // namespace
 
 namespace openspace {
 
@@ -130,7 +130,7 @@ void TouchModule::internalInitialize(const ghoul::Dictionary&) {
         if (nativeWindowHandle) {
             _win32TouchHook = std::make_unique<Win32TouchHook>(nativeWindowHandle);
         }
-#endif
+#endif // WIN32
     });
 
     global::callback::deinitializeGL->push_back([this]() {
@@ -142,14 +142,14 @@ void TouchModule::internalInitialize(const ghoul::Dictionary&) {
     // thread so we don't need a mutex here
     global::callback::touchDetected->push_back(
         [this](TouchInput i) {
-            addTouchInput(i);
+            addTouchInput(std::move(i));
             return true;
         }
     );
 
     global::callback::touchUpdated->push_back(
         [this](TouchInput i) {
-            updateOrAddTouchInput(i);
+            updateOrAddTouchInput(std::move(i));
             return true;
         }
     );
@@ -245,9 +245,7 @@ bool TouchModule::processNewInput() {
     }
 
     // Return true if we got new input
-    if (_touchPoints.size() == _lastTouchInputs.size() &&
-        !_touchPoints.empty())
-    {
+    if (_touchPoints.size() == _lastTouchInputs.size() && !_touchPoints.empty()) {
         // @TODO (emmbr26, 2023-02-03) Looks to me like this code will always return
         // true? That's a bit weird and should probably be investigated
         bool newInput = true;

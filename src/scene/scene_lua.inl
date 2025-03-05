@@ -208,7 +208,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
 
-    const int type = lua_type(L, -1);
+    const ghoul::lua::LuaTypes type = ghoul::lua::fromLuaType(lua_type(L, -1));
 
     std::vector<properties::Property*> matchingProps = findMatchesInAllProperties(
         regex,
@@ -221,7 +221,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
     bool foundMatching = false;
     for (properties::Property* prop : matchingProps) {
         // Check that the types match
-        if (type != prop->typeLua()) {
+        if (!typeMatch(type, prop->typeLua())) {
             LERRORC(
                 "property_setValue",
                 std::format(
@@ -299,8 +299,8 @@ int setPropertyCallSingle(properties::Property& prop, const std::string& uri,
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
 
-    const int type = lua_type(L, -1);
-    if (type != prop.typeLua()) {
+    const ghoul::lua::LuaTypes type = ghoul::lua::fromLuaType(lua_type(L, -1));
+    if (!typeMatch(type, prop.typeLua())) {
         LERRORC(
             "property_setValue",
             std::format(
@@ -1044,7 +1044,7 @@ void createCustomProperty<openspace::properties::TriggerProperty>(
     TriggerProperty* p = new TriggerProperty(info);
     if (onChange.has_value() && !onChange->empty()) {
         p->onChange(
-            [p, script = *onChange]() {
+            [script = *onChange]() {
                 using namespace ghoul::lua;
                 LuaState s;
                 openspace::global::scriptEngine->initializeLuaState(s);

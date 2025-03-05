@@ -53,7 +53,7 @@ public:
     /**
      * Returns `true` if the center above the equator.
      */
-    double isNorthern() const;
+    bool isNorthern() const;
 
     Geodetic2 corner(Quad q) const;
 

@@ -69,13 +69,12 @@ documentation::Documentation HorizonsTranslation::Documentation() {
 HorizonsTranslation::HorizonsTranslation()
     : _horizonsFiles(HorizonsTextFileInfo)
 {
-    addProperty(_horizonsFiles);
-
     _horizonsFiles.onChange([this](){
         requireUpdate();
         notifyObservers();
         loadData();
     });
+    addProperty(_horizonsFiles);
 }
 
 HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
@@ -94,9 +93,9 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
         std::vector<std::string> f;
         std::transform(
             files.cbegin(),
-            files.end(),
+            files.cend(),
             std::back_inserter(f),
-            [](const std::filesystem::path& p) { return p.string(); }
+            [](const std::filesystem::path& path) { return path.string(); }
         );
         _horizonsFiles = f;
     }
@@ -197,7 +196,7 @@ bool HorizonsTranslation::readHorizonsTextFile(HorizonsFile& horizonsFile) {
 }
 
 bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {
-    std::ifstream fileStream(file, std::ifstream::binary);
+    std::ifstream fileStream = std::ifstream(file, std::ifstream::binary);
 
     if (!fileStream.good()) {
         LERROR(std::format("Error opening file '{}' for loading cache file", file));
@@ -247,7 +246,7 @@ bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {
 }
 
 void HorizonsTranslation::saveCachedFile(const std::filesystem::path& file) const {
-    std::ofstream fileStream(file, std::ofstream::binary);
+    std::ofstream fileStream = std::ofstream(file, std::ofstream::binary);
     if (!fileStream.good()) {
         LERROR(std::format("Error opening file '{}' for save cache file", file));
         return;
