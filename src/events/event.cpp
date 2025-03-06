@@ -113,12 +113,12 @@ void log(int i, const EventTimeOfInterestReached& e) {
 
 void log(int i, const EventMissionAdded& e) {
     ghoul_assert(e.type == EventMissionAdded::Type, "Wrong type");
-    LINFO(std::format("[{}] MissionAdded: {}", i, e.missionName));
+    LINFO(std::format("[{}] MissionAdded: {}", i, e.name));
 }
 
 void log(int i, const EventMissionRemoved& e) {
     ghoul_assert(e.type == EventMissionRemoved::Type, "Wrong type");
-    LINFO(std::format("[{}] MissionRemoved: {}", i, e.missionName));
+    LINFO(std::format("[{}] MissionRemoved: {}", i, e.name));
 }
 
 void log(int i, [[maybe_unused]] const EventMissionEventReached& e) {
@@ -401,14 +401,14 @@ ghoul::Dictionary toParameter(const Event& e) {
             break;
         case Event::Type::MissionAdded:
             d.setValue(
-                "MissionName",
-                std::string(static_cast<const EventMissionAdded&>(e).missionName)
+                "Name",
+                std::string(static_cast<const EventMissionAdded&>(e).name)
             );
             break;
         case Event::Type::MissionRemoved:
             d.setValue(
-                "MissionName",
-                std::string(static_cast<const EventMissionRemoved&>(e).missionName)
+                "Name",
+                std::string(static_cast<const EventMissionRemoved&>(e).name)
             );
             break;
         case Event::Type::PlanetEclipsed:
@@ -659,14 +659,14 @@ EventTimeOfInterestReached::EventTimeOfInterestReached(const Time* time_,
     , camera(camera_)
 {}
 
-EventMissionAdded::EventMissionAdded(const std::string_view missionName)
+EventMissionAdded::EventMissionAdded(const std::string_view name)
     : Event(Type)
-    , missionName(temporaryString(missionName))
+    , name(temporaryString(name))
 {}
 
-EventMissionRemoved::EventMissionRemoved(const std::string_view missionName)
+EventMissionRemoved::EventMissionRemoved(const std::string_view name)
     : Event(Type)
-    , missionName(temporaryString(missionName))
+    , name(temporaryString(name))
 {}
 
 EventMissionEventReached::EventMissionEventReached()

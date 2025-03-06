@@ -269,9 +269,9 @@ struct EventMissionAdded : public Event {
      * 
      * \param missionName The name of the mission added
      */
-    EventMissionAdded(std::string_view missionName);
+    EventMissionAdded(std::string_view name);
 
-    const tstring missionName;
+    const tstring name;
 };
 
 /**
@@ -285,9 +285,9 @@ struct EventMissionRemoved : public Event {
      *
      * \param missionName The name of the mission removed
      */
-    EventMissionRemoved(std::string_view missionName);
+    EventMissionRemoved(std::string_view name);
 
-    const tstring missionName;
+    const tstring name;
 };
 
 
