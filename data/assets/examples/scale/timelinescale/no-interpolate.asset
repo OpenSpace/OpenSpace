@@ -23,7 +23,7 @@ local Node = {
         -- The second timeline entry
         ["2000 JAN 01 12:00:00"] = {
           Type = "StaticScale",
-          Scale = 0.0
+          Scale = 10.0
         },
         -- The third timeline entry
         ["2000 JAN 01 23:59:59"] = {
