@@ -83,6 +83,7 @@ set(HEADER_FILES
   scale/nonuniformstaticscale.h
   scale/staticscale.h
   scale/timedependentscale.h
+  scale/timelinescale.h
   timeframe/timeframeinterval.h
   timeframe/timeframeunion.h
   translation/luatranslation.h
@@ -152,6 +153,7 @@ set(SOURCE_FILES
   scale/nonuniformstaticscale.cpp
   scale/staticscale.cpp
   scale/timedependentscale.cpp
+  scale/timelinescale.cpp
   timeframe/timeframeinterval.cpp
   timeframe/timeframeunion.cpp
   translation/luatranslation.cpp

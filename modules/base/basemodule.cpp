@@ -79,6 +79,7 @@
 #include <modules/base/scale/nonuniformstaticscale.h>
 #include <modules/base/scale/staticscale.h>
 #include <modules/base/scale/timedependentscale.h>
+#include <modules/base/scale/timelinescale.h>
 #include <modules/base/translation/timelinetranslation.h>
 #include <modules/base/translation/luatranslation.h>
 #include <modules/base/translation/multitranslation.h>
@@ -204,6 +205,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fScale->registerClass<NonUniformStaticScale>("NonUniformStaticScale");
     fScale->registerClass<StaticScale>("StaticScale");
     fScale->registerClass<TimeDependentScale>("TimeDependentScale");
+    fScale->registerClass<TimelineScale>("TimelineScale");
 
 
     ghoul::TemplateFactory<TimeFrame>* fTimeFrame =
@@ -218,10 +220,10 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
         FactoryManager::ref().factory<Translation>();
     ghoul_assert(fTranslation, "Ephemeris factory was not created");
 
-    fTranslation->registerClass<TimelineTranslation>("TimelineTranslation");
     fTranslation->registerClass<LuaTranslation>("LuaTranslation");
     fTranslation->registerClass<MultiTranslation>("MultiTranslation");
     fTranslation->registerClass<StaticTranslation>("StaticTranslation");
+    fTranslation->registerClass<TimelineTranslation>("TimelineTranslation");
 }
 
 void BaseModule::internalDeinitializeGL() {
@@ -292,6 +294,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         NonUniformStaticScale::Documentation(),
         StaticScale::Documentation(),
         TimeDependentScale::Documentation(),
+        TimelineScale::Documentation(),
 
         TimeFrameInterval::Documentation(),
         TimeFrameUnion::Documentation(),
