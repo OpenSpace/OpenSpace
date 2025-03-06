@@ -1,11 +1,11 @@
--- Basic
+-- Time Frame
 -- This asset creates a set of coordinate axes that are offset from their original
 -- position by a fixed and static amount. In this specific example, the axes are offset
 -- by 50 meters along the y-axis and 10 meters along the negative z-axis. In this example
 -- the translation is only applied from 2000 JAN 01 and just prior to 2002 JAN 01.
 
 local Node = {
-  Identifier = "StaticTranslation_Example",
+  Identifier = "StaticTranslation_TimeFrame",
   Transform = {
     Translation = {
       Type = "StaticTranslation",
@@ -21,7 +21,7 @@ local Node = {
     Type = "RenderableCartesianAxes"
   },
   GUI = {
-    Name = "StaticTranslation - Basic",
+    Name = "StaticTranslation - TimeFrame",
     Path = "/Examples"
   }
 }

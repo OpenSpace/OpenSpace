@@ -1,11 +1,11 @@
--- Euler Angles
+-- Time Frame
 -- This asset creates a rotation provided by Euler angles and applies it to a
 -- SceneGraphNode that only displays coordinate axes. The rotation of the coordinate axes
 -- are determined by a constant and unchanging static rotation. In this example, the
 -- rotation is only applied between 2000 JAN 01 and just prior to 2002 JAN 01.
 
 local Node = {
-  Identifier = "StaticRotation_Example_Euler",
+  Identifier = "StaticRotation_Example_TimeFrame",
   Transform = {
     Rotation = {
       Type = "StaticRotation",
@@ -21,7 +21,7 @@ local Node = {
     Type = "RenderableCartesianAxes"
   },
   GUI = {
-    Name = "StaticRotation - Euler Angles",
+    Name = "StaticRotation - Time Frame",
     Path = "/Examples"
   }
 }
