@@ -107,14 +107,10 @@ glm::dvec3 TimelineScale::scaleValue(const UpdateData& data) const {
         return glm::mix(prev->data->scaleValue(data), next->data->scaleValue(data), t);
     }
     else {
-        if (prevTime <= now && now < nextTime) {
-            return prev->data->scaleValue(data);
-        }
-        else if (nextTime <= now) {
-            return next->data->scaleValue(data);
-        }
+        return now < nextTime ?
+            prev->data->scaleValue(data) :
+            next->data->scaleValue(data);
     }
-    return glm::dvec3(0.0);
 }
 
 } // namespace openspace
