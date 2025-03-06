@@ -125,14 +125,13 @@ std::string_view Time::ISO8601() const {
     ZoneScoped;
 
     constexpr const char Format[] = "YYYY-MM-DDTHR:MN:SC.###";
-    constexpr int S = sizeof(Format);
     char* b = reinterpret_cast<char*>(
-        global::memoryManager->TemporaryMemory.allocate(S)
+        global::memoryManager->TemporaryMemory.allocate(32)
     );
-    std::memset(b, 0, S);
+    std::memset(b, 0, 32);
 
-    SpiceManager::ref().dateFromEphemerisTime(_time, b, S, Format);
-    return std::string_view(b, S - 1);
+    SpiceManager::ref().dateFromEphemerisTime(_time, b, 32, Format);
+    return std::string_view(b, 31);
 }
 
 void Time::ISO8601(char* buffer) const {

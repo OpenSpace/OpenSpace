@@ -481,7 +481,7 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) {
     ZoneScoped;
 
     constexpr const char Format[] = "YYYY-MM-DDTHR:MN:SC.###";
-    constexpr int BufferSize = sizeof(Format);
+    constexpr int BufferSize = sizeof(Format) + 1;
     char unquantizedString[BufferSize];
     std::memset(unquantizedString, 0, BufferSize);
     SpiceManager::ref().dateFromEphemerisTime(

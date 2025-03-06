@@ -97,7 +97,8 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
 
     // get time as string.
     std::string cdfStringTime = SpiceManager::ref().dateFromEphemerisTime(
-        cdfDoubleTime, "YYYYMMDDHRMNSC::RND"
+        cdfDoubleTime,
+        "YYYYMMDDHRMNSC::RND"
     );
 
     // use time as string for picking seedpoints from seedm

@@ -137,12 +137,12 @@ namespace {
         ZoneScoped;
 
         constexpr int BufferSize = 64;
-        ghoul_assert(format.size() < BufferSize, "Format string too long");
+        ghoul_assert(format.size() < BufferSize - 1, "Format string too long");
 
         using namespace openspace;
 
-        char FormatBuf[BufferSize];
-        std::memset(FormatBuf, '\0', BufferSize);
+        char FormatBuf[BufferSize - 1];
+        std::memset(FormatBuf, '\0', BufferSize - 1);
         std::memcpy(FormatBuf, format.c_str(), format.size());
 
         char* OutBuf = reinterpret_cast<char*>(
