@@ -28,7 +28,7 @@ local Node = {
         -- The third timeline entry
         ["2000 JAN 01 23:59:59"] = {
           Type = "StaticScale",
-          Scale = -10.0
+          Scale = 20.0
         }
       },
       ShouldInterpolate = false
