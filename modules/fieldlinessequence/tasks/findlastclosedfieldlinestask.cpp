@@ -141,6 +141,26 @@ void FindLastClosedFieldlinesTask::perform(
                 }
             }
         }
+        // This checks if t or T is already in there, and if not, it makes sure
+        // that p and rho is there before adding the key string "T = p/rho" for
+        // later calculating and adding the temperature parameter in the
+        // kameleon fieldline helper function addExtraQuantities later.
+        auto t = std::find(variableNames.begin(), variableNames.end(), "t");
+        auto T = std::find(variableNames.begin(), variableNames.end(), "T");
+        auto p = std::find(variableNames.begin(), variableNames.end(), "p");
+        auto rho = std::find(variableNames.begin(), variableNames.end(), "rho");
+        if (t == variableNames.end() || T == variableNames.end() ||
+            (p != variableNames.end() && rho != variableNames.end()))
+        {
+            variableNames.push_back("T = p/rho");
+        }
+        // either take input of the names wanting to save:
+        // con: requires knowing the exact names, more difficult running script
+        // pro: easy way to include P/rho = temperature, smaller data.
+        // or
+        // save all and check if both P and rho are there:
+        // con: bigger files, longer tracing time(?)
+        // pro: easier to run task, guaranties temp will be there if possible.
         std::vector<ccmc::Fieldline> fieldlines =
             tracer.getLastClosedFieldlines(_numberOfPointsOnBoundary, 1, 5.1, 300);
 
