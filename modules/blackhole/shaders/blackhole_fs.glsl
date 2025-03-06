@@ -4,16 +4,15 @@ in vec2 TexCoord;
 uniform sampler2D enviromentTexture;
 uniform sampler2D viewGrid;
 uniform mat4 cameraRotationMatrix;
-//const int MAX_SIZE = 200;
-//uniform float schwarzschildWarpTable[MAX_SIZE]; //@TODO: Look into varing size possbilit
 
-layout (std430) buffer ssbo {
+layout (std430) buffer ssbo_warp_table {
   float schwarzschildWarpTable[];
 };
 
-
 const float PI = 3.1415926535897932384626433832795f;
 const float VIEWGRIDZ = -1.0f;
+const float INF = 1.0f/0.0f;
+
 
 vec2 sphereToUV(vec2 sphereCoords){
     float u = sphereCoords.x / (2.0f * PI) + 0.5f;
@@ -23,8 +22,8 @@ vec2 sphereToUV(vec2 sphereCoords){
 }
 
 float getEndAngleFromTable(float phi){
-    float endPhiWdithLeastDistance = 0.0f;
-    float currentDistance = 3*PI;
+    float endPhiWdithLeastDistance;
+    float currentDistance = INF;
 
     int tableLength = schwarzschildWarpTable.length();
 
@@ -61,33 +60,21 @@ vec2 cartisianToSphereical(vec3 cartisian) {
     return vec2(phi, theta);
 }
 
-mat4 createRotationMatrix(float angle) {
-    float cosAngle = cos(angle);
-    float sinAngle = sin(angle);
-    
-    return mat4(
-        cosAngle, -sinAngle, 0.0f, 0.0f,
-        sinAngle, cosAngle,  0.0f, 0.0f,
-        0.0f,      0.0f,     1.0f, 0.0f,
-        0.0f,      0.0f,     0.0f, 1.0f
-    );
-}
-
 Fragment getFragment() {
     Fragment frag;
-    vec4 cartisianCoords = normalize(vec4(texture(viewGrid, TexCoord).xy, VIEWGRIDZ, 0.0f));
 
-    cartisianCoords = createRotationMatrix(PI/2) * cartisianCoords;
+    vec4 cartisianCoords = normalize(vec4(texture(viewGrid, TexCoord).xy, VIEWGRIDZ, 0.0f));
     cartisianCoords = cameraRotationMatrix * cartisianCoords;
     
     vec2 sphereicaleCoords = cartisianToSphereical(cartisianCoords.xyz);
     vec2 envSphereCoords = localToEnvSphereCoords(sphereicaleCoords);
+    
     if (isnan(envSphereCoords.y)) {
         frag.color = vec4(0);
         return frag;
     }
-    vec2 uv = sphereToUV(envSphereCoords);
 
+    vec2 uv = sphereToUV(envSphereCoords);
     vec4 texColor = texture(enviromentTexture, uv);
     
     frag.color = texColor;
