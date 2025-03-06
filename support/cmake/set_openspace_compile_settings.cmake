@@ -23,7 +23,9 @@
 ##########################################################################################
 
 function (set_openspace_compile_settings target)
-  target_compile_features(${target} PUBLIC cxx_std_23)
+  # Switching to cxx_std_23 triggers a bug in Clang17
+  # https://github.com/llvm/llvm-project/issues/61415
+  target_compile_features(${target} PUBLIC cxx_std_20)
 
   set(MSVC_WARNINGS
     "/MP"       # Multi-threading support
