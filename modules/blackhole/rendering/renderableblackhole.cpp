@@ -71,8 +71,8 @@ namespace openspace {
         bindFramebuffer();
 
         ghoul::opengl::TextureUnit enviromentUnit;
-        if (!bindTexture(_uniformCache.enviromentTexture, enviromentUnit, _enviromentTexture)) {
-            LWARNING("UniformCache is missing 'enviromentTexture'");
+        if (!bindTexture(_uniformCache.environmentTexture, enviromentUnit, _environmentTexture)) {
+            LWARNING("UniformCache is missing 'environmentTexture'");
         }
 
         ghoul::opengl::TextureUnit viewGridUnit;
@@ -84,7 +84,7 @@ namespace openspace {
 
         _program->setUniform(
             _uniformCache.cameraRotationMatrix,
-            glm::mat4(global::navigationHandler->camera()->combinedViewMatrix())
+            glm::mat4(global::navigationHandler->camera()->viewRotationMatrix())
         );
      
         drawQuad();
@@ -151,10 +151,10 @@ namespace openspace {
         //const std::string texturePath = "C:/Users/wilbj602/Documents/GitHub/OpenSpace/sync/http/milkyway_textures/2/DarkUniverse_mellinger_8k.jpg";
         const std::string texturePath = "C:/Users/wilbj602/Downloads/img.jpg";
 
-        _enviromentTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(texturePath), 2);
+        _environmentTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(texturePath), 2);
 
-        if (_enviromentTexture) {
-            _enviromentTexture->uploadTexture();
+        if (_environmentTexture) {
+            _environmentTexture->uploadTexture();
         }
         else {
             LWARNING(std::format("Failed to load environment texture from path '{}'", absPath(texturePath).string()));

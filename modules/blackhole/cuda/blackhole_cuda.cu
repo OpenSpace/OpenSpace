@@ -36,7 +36,7 @@ __global__ void solveGeodesicKernel(float rs, float envmap_r, float u_0, float* 
     float r = 1.0f / u;
     float r_0 = 1.0f / u_0;
     float a = r * sin(phi);
-    float b = r_0 - r * cos(phi);
+    float b = r * cos(phi) - r_0;
 
     // Store starting angle (angle is local to camera)
     angles_out[idx * 2] = atan2(a, b);

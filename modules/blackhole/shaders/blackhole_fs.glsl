@@ -1,7 +1,11 @@
 #include "fragment.glsl"
 in vec2 TexCoord;
 
-uniform sampler2D enviromentTexture;
+
+#define SHOW_BLACK_HOLE 1
+
+
+uniform sampler2D environmentTexture;
 uniform sampler2D viewGrid;
 uniform mat4 cameraRotationMatrix;
 
@@ -9,17 +13,11 @@ layout (std430) buffer ssbo_warp_table {
   float schwarzschildWarpTable[];
 };
 
+
 const float PI = 3.1415926535897932384626433832795f;
 const float VIEWGRIDZ = -1.0f;
 const float INF = 1.0f/0.0f;
 
-
-vec2 sphereToUV(vec2 sphereCoords){
-    float u = sphereCoords.x / (2.0f * PI) + 0.5f;
-    float v = sphereCoords.y / PI;
-    
-    return vec2(u, v);
-}
 
 float getEndAngleFromTable(float phi){
     float endPhiWdithLeastDistance;
@@ -31,13 +29,13 @@ float getEndAngleFromTable(float phi){
         float phiDistance = abs(schwarzschildWarpTable[i] - phi);
         if(phiDistance < currentDistance){
             currentDistance = phiDistance;
-            endPhiWdithLeastDistance = schwarzschildWarpTable[i+1];
+            endPhiWdithLeastDistance = schwarzschildWarpTable[i + 1];
         }
     }
     return endPhiWdithLeastDistance;
 }
 
-vec2 localToEnvSphereCoords(vec2 cameraOutSphereCoords){
+vec2 applyBlackHoleWarp(vec2 cameraOutSphereCoords){
     float phi = cameraOutSphereCoords.x;
     float theta = cameraOutSphereCoords.y;
     theta = getEndAngleFromTable(theta);
@@ -53,29 +51,63 @@ float atan2(float a, float b){
     return 0.0f;
 }
 
-vec2 cartisianToSphereical(vec3 cartisian) {
+vec2 cartesianToSpherical(vec3 cartisian) {
     float theta = atan2(sqrt(cartisian.x * cartisian.x + cartisian.y * cartisian.y) , cartisian.z);
     float phi = atan2(cartisian.y, cartisian.x);
 
     return vec2(phi, theta);
 }
 
+vec3 sphericalToCartesian(float phi, float theta){
+    float x = sin(theta)*cos(phi);
+    float y = sin(theta)*sin(phi);
+    float z = cos(theta);
+
+    return vec3(x, y, z);
+}
+
+vec2 sphericalToUV(vec2 sphereCoords){
+    float u = sphereCoords.x / (2.0f * PI) + 0.5f;
+    float v = mod(sphereCoords.y, PI) / PI;
+    
+    return vec2(u, v);
+}
+
 Fragment getFragment() {
     Fragment frag;
 
-    vec4 cartisianCoords = normalize(vec4(texture(viewGrid, TexCoord).xy, VIEWGRIDZ, 0.0f));
-    cartisianCoords = cameraRotationMatrix * cartisianCoords;
+    vec4 viewCoords = normalize(vec4(texture(viewGrid, TexCoord).xy, VIEWGRIDZ, 0.0f));
+    vec4 rotatedViewCoords = cameraRotationMatrix * viewCoords;
     
-    vec2 sphereicaleCoords = cartisianToSphereical(cartisianCoords.xyz);
-    vec2 envSphereCoords = localToEnvSphereCoords(sphereicaleCoords);
+    vec2 sphericalCoords = cartesianToSpherical(rotatedViewCoords.xyz);
     
-    if (isnan(envSphereCoords.y)) {
-        frag.color = vec4(0);
+    vec2 envMapSphericalCoords;
+    #if SHOW_BLACK_HOLE == 1
+    // Apply black hole warping to spherical coordinates
+    envMapSphericalCoords = applyBlackHoleWarp(sphericalCoords);
+    if (isnan(envMapSphericalCoords.y)) {
+        // If inside the event horizon
+        frag.color = vec4(0.0f);
         return frag;
     }
+    #else
+    envMapSphericalCoords = sphericalCoords;
+    #endif
 
-    vec2 uv = sphereToUV(envSphereCoords);
-    vec4 texColor = texture(enviromentTexture, uv);
+    // Init rotation of the black hole
+    vec4 envMapCoords = vec4(sphericalToCartesian(envMapSphericalCoords.x, envMapSphericalCoords.y), 0.0f);
+    float rotationAngle = PI/2;
+    mat4 rotationMatrixX = mat4(
+        1.0f,    0.0f,                 0.0f,               0.0f,
+        0.0f,    cos(rotationAngle),  -sin(rotationAngle), 0.0f,
+        0.0f,    sin(rotationAngle),   cos(rotationAngle), 0.0f,
+        0.0f,    0.0f,                 0.0f,               1.0f
+    );
+    envMapCoords = rotationMatrixX * envMapCoords;
+    sphericalCoords = cartesianToSpherical(envMapCoords.xyz);
+
+    vec2 uv = sphericalToUV(sphericalCoords);
+    vec4 texColor = texture(environmentTexture, uv);
     
     frag.color = texColor;
     return frag;

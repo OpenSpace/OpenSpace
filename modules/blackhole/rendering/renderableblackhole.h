@@ -52,9 +52,9 @@ namespace openspace {
         GLuint _quadVbo = 0;
         GLuint _ssboData = 0;
         GLuint modelMatricesBuffer;
-        UniformCache(enviromentTexture, viewGrid, cameraRotationMatrix, schwarzschildWarpTable) _uniformCache;
+        UniformCache(environmentTexture, viewGrid, cameraRotationMatrix, schwarzschildWarpTable) _uniformCache;
 
-        std::unique_ptr<ghoul::opengl::Texture> _enviromentTexture;
+        std::unique_ptr<ghoul::opengl::Texture> _environmentTexture;
     };
 
 } // openspace namespace
