@@ -5,18 +5,18 @@
   ],
   "camera": {
     "aim": "",
-    "anchor": "Root",
+    "anchor": "Blackhole_Example",
     "frame": "",
     "position": {
-      "x": 20.0,
-      "y": 20.0,
-      "z": 20.0
+      "x": 0,
+      "y": 0,
+      "z": -30
     },
     "type": "setNavigationState",
     "up": {
-      "x": 0.0,
-      "y": 1.0,
-      "z": 0.0
+      "x": -0.3976079901497721,
+      "y": 0.9175553858863555,
+      "z": 0
     },
     "yaw": 0.0
   },
