@@ -23,6 +23,8 @@
  ****************************************************************************************/
 
 #include <openspace/util/timeconstants.h>
+#include <scn/scan.h>
+#include <chrono>
 
 namespace {
 
@@ -277,7 +279,7 @@ namespace {
   *                              the TimeManager.
   */
 [[codegen::luawrap]] void interpolateTime(std::variant<std::string, double> time,
-                                          std::optional<double> interpolationDutation)
+                                          std::optional<double> interpolationDuration)
 {
     using namespace openspace;
 
@@ -287,7 +289,7 @@ namespace {
         std::get<double>(time);
 
 
-    double interp = interpolationDutation.value_or(
+    double interp = interpolationDuration.value_or(
         global::timeManager->defaultTimeInterpolationDuration()
     );
     if (interp > 0) {
@@ -324,6 +326,115 @@ namespace {
         global::timeManager->setTimeNextFrame(
             Time(global::timeManager->time().j2000Seconds() + delta)
         );
+    }
+}
+
+[[codegen::luawrap]] void interpolateTimeRelativeDetail(int years, int months, int days,
+                                                        int hours, int minutes,
+                                                        double seconds,
+                                              std::optional<double> interpolationDuration)
+{
+    using namespace openspace;
+
+    double interp = interpolationDuration.value_or(
+        global::timeManager->defaultTimeInterpolationDuration()
+    );
+
+    constexpr const char Format[] = "YYYY MM DD HR MN SC";
+    char* buffer = reinterpret_cast<char*>(
+        global::memoryManager->TemporaryMemory.allocate(256)
+    );
+    std::memset(buffer, 0, 256);
+
+    SpiceManager::ref().dateFromEphemerisTime(
+        global::timeManager->time().j2000Seconds(),
+        buffer,
+        256,
+        Format
+    );
+
+    auto r = scn::scan<int, int, int, int, int, double>(
+        std::string(buffer),
+        "{} {:2d} {:2d} {:2d} {:2d} {:2f}"
+    );
+    ghoul_assert(r, "Invalid date");
+    auto& [dateYear, dateMonth, dateDay, dateHour, dateMinute, dateSecond] = r->values();
+
+    if (seconds != 0.0) {
+        dateSecond += seconds;
+
+        while (dateSecond < 0.0) {
+            dateSecond += 60.0;
+            minutes -= 1;
+        }
+
+        while (dateSecond >= 60.0) {
+            dateSecond -= 60.0;
+            minutes += 1;
+        }
+    }
+
+    if (minutes != 0) {
+        dateMinute += minutes;
+
+        while (dateMinute < 0) {
+            dateMinute += 60;
+            hours -= 1;
+        }
+
+        while (dateMinute >= 60) {
+            dateMinute -= 60;
+            hours += 1;
+        }
+    }
+
+    if (hours != 0) {
+        dateHour += hours;
+
+        while (dateHour < 0) {
+            dateHour += 24;
+            days -= 1;
+        }
+
+        while (dateHour >= 24) {
+            dateHour -= 24;
+            days += 1;
+        }
+    }
+
+    // std::chrono::year only supports years between [-32767, 32767] and since we want to
+    // support years outside this range, but still want enable leap-years to work
+    // correctly we have to be a bit clever here
+
+    int yearRemainder = (dateYear + years) / 400;
+    int yearModulo = (dateYear + years) % 400;
+
+    std::chrono::year_month_day ymd =
+        std::chrono::year(yearModulo) /
+        std::chrono::month(dateMonth + months) /
+        std::chrono::day(dateDay + days);
+
+    // Normalizes year and month
+    ymd += std::chrono::months(0);
+    // Normalizes day
+    ymd = std::chrono::sys_days(ymd);
+
+    // Reconstruct the full year
+    const int y = yearRemainder * 400 + static_cast<int>(ymd.year());
+    const int m = static_cast<unsigned int>(ymd.month());
+    const int d = static_cast<unsigned int>(ymd.day());
+
+    std::string timeStr = std::format(
+        "{} {:02d} {:02d} {:02d} {:02d} {:02f}", y, m, d, dateHour, dateMinute, dateSecond
+    );
+
+    LINFOC("", timeStr);
+
+    if (interp > 0) {
+        global::timeManager->interpolateTime(Time::convertTime(timeStr), interp);
+    }
+    else {
+        global::timeManager->setTimeNextFrame(Time(timeStr));
     }
 }
 
