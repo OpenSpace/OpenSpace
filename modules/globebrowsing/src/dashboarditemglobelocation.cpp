@@ -59,7 +59,7 @@ namespace {
 
     // This `DashboardItem` shows the longitude/latitude location of the camera and its
     // distance to the current focus node. If the current focus node is Earth, these are
-    // provided in the WGS84 reference frame, if the focus is on another planetary body,
+    // provided in the WGS84 reference frame; if the focus is on another planetary body,
     // it is in the native coordinate frame for that planetary body. If the current focus
     // node is not a planetary body, a position of (0,0) with a distance of 0 will be
     // displayed.

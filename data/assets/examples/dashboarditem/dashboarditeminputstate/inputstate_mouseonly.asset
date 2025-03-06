@@ -1,5 +1,5 @@
 -- Mouse Only
--- This example adds a dashboard item that shows the input state of the mouse inputs
+-- This example adds a dashboard item that only shows the input state of the mouse inputs.
 
 local Item = {
   Identifier = "DashboardItemInputState_Example_MouseOnly",

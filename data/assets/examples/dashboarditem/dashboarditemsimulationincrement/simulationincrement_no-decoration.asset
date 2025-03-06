@@ -1,7 +1,10 @@
 -- No Decoration
 -- This example adds a dashboard item that shows the current simulation increment without
 -- any textual decorations. This example also shows how to ignore the first two parameters
--- the `TransitionFormat` format string.
+-- the `TransitionFormat` format string. Both the `TransitionFormat` and the
+-- `RegularFormat` string replacement markers allow the setting of numbers to determine
+-- which argument should be placed in here. The `TransitionFormat` in this example omits
+-- the numbers 0 and 1, thus ignoring the first two arguments to the string.
 
 local Item = {
   Identifier = "DashboardItemSimulationIncrement_Example_NoDecoration",

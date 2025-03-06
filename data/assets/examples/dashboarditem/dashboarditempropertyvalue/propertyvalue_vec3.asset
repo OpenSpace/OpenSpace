@@ -1,5 +1,5 @@
 -- Vec3
--- This example adds a dashboard item that shows the state of a 3-vector value property
+-- This example adds a dashboard item that shows the state of a 3-vector value property.
 
 local Item = {
   Identifier = "DashboardItemPropertyValue_Example_Vec3",

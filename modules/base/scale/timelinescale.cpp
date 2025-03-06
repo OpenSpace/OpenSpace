@@ -46,7 +46,7 @@ namespace {
     // interpolate between two adjacent keyframes.
     struct [[codegen::Dictionary(TimelineScale)]] Parameters {
         // A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS and values
-        // that are valid Scale objects
+        // that are valid Scale objects.
         std::map<std::string, ghoul::Dictionary> keyframes
             [[codegen::reference("core_transform_scale")]];
 

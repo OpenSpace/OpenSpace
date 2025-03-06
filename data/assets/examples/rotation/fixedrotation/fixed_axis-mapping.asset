@@ -1,7 +1,8 @@
--- Mapping
--- This asset creates a rotation that shows a coordinate axes in which the x and the y
--- axes are flipped. While this could also be achieved with a ConstantRotation class, this
--- serves as an example for more elaborate coordinate system mappings
+-- Axis Mapping
+-- This asset creates a rotation that shows coordinate axes in which the x and the y axes
+-- are flipped. While this could also be achieved with a ConstantRotation class, this
+-- serves as an example for more elaborate coordinate system mappings, such as converting
+-- to a coordinate system with a known coordinate axes.
 
 local Node = {
   Identifier = "FixedRotation_Example_Mapping",

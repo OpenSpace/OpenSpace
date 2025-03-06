@@ -35,7 +35,7 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-    // A TimeFrame object determines the time frame during which a scene graph node is
+    // A `TimeFrame` object determines the time frame during which a scene graph node is
     // valid. If the simulation time is outside the time frame range, the scene graph node
     // and all of its children are automatically disabled and any attached
     // [Renderable](#renderable) will not be displayed either. Usually, the time frame

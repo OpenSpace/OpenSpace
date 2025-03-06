@@ -51,7 +51,7 @@ public:
 private:
     struct Component {
         properties::OptionProperty type;
-        properties::StringProperty nodeName;
+        properties::StringProperty nodeIdentifier;
         SceneGraphNode* node;
     };
 

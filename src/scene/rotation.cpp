@@ -36,7 +36,7 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-    // A Rotation object describes a specific rotation for a scene graph node, which may
+    // A `Rotation` object describes a specific rotation for a scene graph node, which may
     // or may not be time-dependent. The exact method of determining the rotation depends
     // on the concrete type.
     struct [[codegen::Dictionary(Rotation)]] Parameters {

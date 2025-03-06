@@ -202,16 +202,16 @@ namespace {
     // the general use-case of this `Rotation`, one of the provided axes usually is an
     // `Identifier` and the other is a direction vector (see the examples below).
     // If any of the axes is using the `Identifier` of another scene graph node, the
-    // `Attached` value must be specfied and should almost always be the identifier of the
-    // scene graph node to which this `Rotation` belongs.
+    // `Attached` value must be specified and should almost always be the identifier of
+    // the scene graph node to which this `Rotation` belongs.
     //
-    // A second use-case for this `Rotation` is to directly specify coordinate axis
-    // mappings. In this use-case, two or all three axes are specified using direction
-    // vectors. Causing the new x-axis to be pointing along the direction provided to
-    // `XAxis` in the unmodified coordinate frame, and the same for all three. In this
-    // use-case, all directions are assumed to be normalized. If only two direction
-    // vectors are specified, the third direction is computed using a right-handed
-    // coordinate system completion.
+    // A second use-case for this `Rotation` is to directly specify mappings for the
+    // coordinate axes. In this use-case, two or all three axes are specified using
+    // direction vectors. The orientation of the rotated coordinate system will then be
+    // determined by the specified axes, such that the new x-axis points in the direction
+    // provided to the `XAxis`, for example. Note that all direction vectors are assumed
+    // to be normalized. If only two direction vectors are specified, the third direction
+    // is computed using a right-handed coordinate system completion.
     //
     // Each axis has an `invert` option that will cause the provided axes to be considered
     // inverted. For the direction-type of axis, this just inverts the provided values,

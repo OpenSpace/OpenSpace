@@ -45,8 +45,8 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    // This rotation type will cause a scene graph node to consistently rotate about the
-    // provided axis at a fixed and constant rotation speed.
+    // This rotation type will cause a scene graph node to rotate about the provided axis
+    // at a fixed and constant rotation speed.
     struct [[codegen::Dictionary(ConstantRotation)]] Parameters {
         // [[codegen::verbatim(RotationInfo.description)]]
         std::optional<glm::dvec3> rotationAxis

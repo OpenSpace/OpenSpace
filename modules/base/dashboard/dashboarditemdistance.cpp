@@ -55,11 +55,11 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SourceNodeNameInfo = {
-        "SourceNodeName",
-        "Source Node Name",
-        "If a scene graph node is selected as type, this value specifies the name of the "
-        "node that is to be used as the source for computing the distance.",
+    constexpr openspace::properties::Property::PropertyInfo SourceNodeIdentifierInfo = {
+        "SourceNodeIdentifier",
+        "Source Node Identifier",
+        "If a scene graph node is selected as type, this value specifies the identifier "
+        "of the node that is to be used as the source for computing the distance.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -70,11 +70,13 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DestinationNodeNameInfo = {
-        "DestinationNodeName",
-        "Destination Node Name",
-        "If a scene graph node is selected as type, this value specifies the name of the "
-        "node that is to be used as the destination for computing the distance.",
+    constexpr openspace::properties::Property::PropertyInfo
+        DestinationNodeIdentifierInfo =
+    {
+        "DestinationNodeIdentifier",
+        "Destination Node Identifier",
+        "If a scene graph node is selected as type, this value specifies the identifier "
+        "of the node that is to be used as the destination for computing the distance.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -123,14 +125,14 @@ namespace {
         // [[codegen::verbatim(SourceTypeInfo.description)]]
         TypeInfo sourceType;
 
-        // [[codegen::verbatim(SourceNodeNameInfo.description)]]
-        std::optional<std::string> sourceNodeName;
+        // [[codegen::verbatim(SourceNodeIdentifierInfo.description)]]
+        std::optional<std::string> sourceNodeIdentifier;
 
         // [[codegen::verbatim(DestinationTypeInfo.description)]]
         TypeInfo destinationType;
 
-        // [[codegen::verbatim(DestinationNodeNameInfo.description)]]
-        std::optional<std::string> destinationNodeName;
+        // [[codegen::verbatim(DestinationNodeIdentifierInfo.description)]]
+        std::optional<std::string> destinationNodeIdentifier;
 
         // [[codegen::verbatim(SimplificationInfo.description)]]
         std::optional<bool> simplification;
@@ -164,7 +166,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
             SourceTypeInfo,
             properties::OptionProperty::DisplayType::Dropdown
         ),
-        properties::StringProperty(SourceNodeNameInfo),
+        properties::StringProperty(SourceNodeIdentifierInfo),
         nullptr
     }
     , _destination{
@@ -172,7 +174,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
             DestinationTypeInfo,
             properties::OptionProperty::DisplayType::Dropdown
         ),
-        properties::StringProperty(DestinationNodeNameInfo),
+        properties::StringProperty(DestinationNodeIdentifierInfo),
         nullptr
     }
 {
@@ -185,7 +187,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
         { Type::Camera, "Camera" }
     });
     _source.type.onChange([this]() {
-        _source.nodeName.setVisibility(
+        _source.nodeIdentifier.setVisibility(
             properties::Property::Visibility(
                 _source.type == Type::Node || _source.type == Type::NodeSurface
             )
@@ -194,10 +196,10 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     _source.type = codegen::map<Type>(p.sourceType);
     addProperty(_source.type);
 
-    _source.nodeName.onChange([this]() { _source.node = nullptr; });
+    _source.nodeIdentifier.onChange([this]() { _source.node = nullptr; });
     if (_source.type == Type::Node || _source.type == Type::NodeSurface) {
-        if (p.sourceNodeName.has_value()) {
-            _source.nodeName = *p.sourceNodeName;
+        if (p.sourceNodeIdentifier.has_value()) {
+            _source.nodeIdentifier = *p.sourceNodeIdentifier;
         }
         else {
             LERRORC(
@@ -206,7 +208,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
             );
         }
     }
-    addProperty(_source.nodeName);
+    addProperty(_source.nodeIdentifier);
 
     _destination.type.addOptions({
         { Type::Node, "Node" },
@@ -215,7 +217,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
         { Type::Camera, "Camera" }
     });
     _destination.type.onChange([this]() {
-        _destination.nodeName.setVisibility(
+        _destination.nodeIdentifier.setVisibility(
             properties::Property::Visibility(
                 _source.type == Type::Node || _source.type == Type::NodeSurface
             )
@@ -223,10 +225,10 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     });
     _destination.type = codegen::map<Type>(p.destinationType);
     addProperty(_destination.type);
-    _destination.nodeName.onChange([this]() { _destination.node = nullptr; });
+    _destination.nodeIdentifier.onChange([this]() { _destination.node = nullptr; });
     if (_destination.type == Type::Node || _destination.type == Type::NodeSurface) {
-        if (p.destinationNodeName.has_value()) {
-            _destination.nodeName = *p.destinationNodeName;
+        if (p.destinationNodeIdentifier.has_value()) {
+            _destination.nodeIdentifier = *p.destinationNodeIdentifier;
         }
         else {
             LERRORC(
@@ -235,7 +237,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
             );
         }
     }
-    addProperty(_destination.nodeName);
+    addProperty(_destination.nodeIdentifier);
 
     _doSimplification = p.simplification.value_or(_doSimplification);
     addProperty(_doSimplification);
@@ -266,13 +268,13 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
     if ((mainComp.type == Type::Node) || (mainComp.type == Type::NodeSurface)) {
         if (!mainComp.node) [[unlikely]] {
             mainComp.node = global::renderEngine->scene()->sceneGraphNode(
-                mainComp.nodeName
+                mainComp.nodeIdentifier
             );
 
             if (!mainComp.node) {
                 LERRORC(
                     "DashboardItemDistance",
-                    "Could not find node '" + mainComp.nodeName.value() + "'"
+                    "Could not find node '" + mainComp.nodeIdentifier.value() + "'"
                 );
                 return { glm::dvec3(0.0), "Node" };
             }

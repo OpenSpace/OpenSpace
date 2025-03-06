@@ -1,13 +1,16 @@
 -- No Interpolation
--- This asset creates a SceneGraphNode that only displays coordinate axes. The translation
--- of the coordinate axes are determined by a timeline of individual translations that are
--- used without interpolating between the timeline entries. These translations are
--- keyframes that are used to change between different positions. This example transitions
--- between three positions. In this example, the interpolation between entries is
--- disabled, which will cause the coordinate axes to change their position abruptly when
--- the translation changes. If the interpolation were enabled, the orientation of the
--- coordinate axes would transition seamlessly instead at the provided times. This example
--- will only work if the in-game time is set to January 1st, 2000.
+-- This asset creates a scene graph node that only displays coordinate axes whose
+-- translation of the coordinate axes is determined by a timeline of individual
+-- translations that are used without interpolating between the timeline entries. These
+-- translations are keyframes that are used to change between different positions.
+--
+-- This example transitions between three positions. In this example, the interpolation
+-- between entries is disabled, which will cause the coordinate axes to change their
+-- position abruptly when the translation changes. If the interpolation were enabled, the
+-- orientation of the coordinate axes would transition seamlessly instead at the provided
+-- times.
+--
+-- This example will only work if the in-game time is set to January 1st, 2000.
 
 local Node = {
   Identifier = "TimelineTranslation_Example_NoInterpolation",

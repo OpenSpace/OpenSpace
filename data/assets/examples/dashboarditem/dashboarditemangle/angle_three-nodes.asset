@@ -39,11 +39,11 @@ local Item = {
   Identifier = "DashboardItemAngle_Example_ThreeNodes",
   Type = "DashboardItemAngle",
   SourceType = "Node",
-  SourceNodeName = "DashboardItemAngle_Example_ThreeNodes_Node1",
+  SourceNodeIdentifier = Node1.Identifier,
   ReferenceType = "Node",
-  ReferenceNodeName = "DashboardItemAngle_Example_ThreeNodes_Node2",
+  ReferenceNodeIdentifier = Node2.Identifier,
   DestinationType = "Node",
-  DestinationNodeName = "DashboardItemAngle_Example_ThreeNodes_Node3"
+  DestinationNodeIdentifier = Node3.Identifier
 }
 
 asset.onInitialize(function()

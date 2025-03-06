@@ -1,6 +1,6 @@
 -- Basic
--- This example adds a dashboard item that shows the default value for the frame time,
--- which is the average FPS
+-- This example adds a dashboard item that shows the average number of frames per second,
+-- which is the default value for the frame time type setting.
 
 local Item = {
   Identifier = "DashboardItemFramerate_Example",

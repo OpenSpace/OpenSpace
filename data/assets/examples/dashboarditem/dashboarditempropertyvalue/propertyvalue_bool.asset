@@ -1,5 +1,5 @@
 -- Bool
--- This example adds a dashboard item that shows the state of a boolean property
+-- This example adds a dashboard item that shows the state of a boolean property.
 
 local Item = {
   Identifier = "DashboardItemPropertyValue_Example_Bool",

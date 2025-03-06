@@ -27,9 +27,9 @@ local Item = {
   Type = "DashboardItemAngle",
   SourceType = "Camera",
   ReferenceType = "Node",
-  ReferenceNodeName = "DashboardItemAngle_Example_TwoNodesCamera_Node1",
+  ReferenceNodeIdentifier = Node1.Identifier,
   DestinationType = "Node",
-  DestinationNodeName = "DashboardItemAngle_Example_TwoNodesCamera_Node2"
+  DestinationNodeIdentifier = Node2.Identifier
 }
 
 asset.onInitialize(function()

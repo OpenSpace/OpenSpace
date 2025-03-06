@@ -1,7 +1,7 @@
 -- Basic
--- This example creates time frame interval and uses it for a SceneGraphNode displaying a
--- simple coordinate axis. The scene graph node is only valid between January 1st, 2000
--- and March 1st, 2002.
+-- This example creates time frame interval and uses it for a scene graph node displaying
+-- a set of coordinate axes. The time frame interval causes the scene graph node to only
+-- be valid between January 1st, 2000 and March 1st, 2002.
 
 local Node = {
   Identifier = "TimeFrameInterval_Example",

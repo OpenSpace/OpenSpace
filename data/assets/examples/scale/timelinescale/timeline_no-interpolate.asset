@@ -1,13 +1,14 @@
 -- No Interpolation
--- This asset creates a SceneGraphNode that only displays coordinate axes. The scale of
--- the coordinate axes are determined by a timeline of individual scales that are used
--- without interpolating between the timeline entries. These scales are keyframes that are
--- used to change between different sizes. This example transitions between three sizes.
--- In this example, the interpolation between entries is disabled, which will cause the
--- coordinate axes to change their size abruptly when the scale changes. If the
--- interpolation were enabled, the orientation of the coordinate axes would transition
--- seamlessly instead at the provided times. This example will only work if the in-game
--- time is set to January 1st, 2000.
+-- This asset creates a SceneGraphNode that only displays coordinate axes whose scale is
+-- determined by a timeline of individual scales that are used without interpolating
+-- between the timeline entries. These scales are keyframes that are used to change
+-- between different sizes.
+--
+-- This example transitions between three sizes, but as the interpolation between entries
+-- is disabled, it will cause the coordinate axes to change their size abruptly when the
+-- scale changes. If the interpolation were enabled, the orientation of the coordinate
+-- axes would transition seamlessly instead at the provided times. This example will only
+-- work if the in-game time is set to January 1st, 2000.
 
 local Node = {
   Identifier = "TimelineScale_Example_NoInterpolation",

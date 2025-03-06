@@ -1,9 +1,15 @@
 -- Basic Moving (Two Objects)
--- This asset creates a rotation that places a coordinate axes orbiting close to two
--- spheres with the y axis always pointing towards the first sphere and the z axis always
--- pointing towards the second sphere as the coordinate system moves around. Note that in
--- this example the coordinate system will be skewed as, in general, it is not guaranteed
--- that the direction from the node to the two spheres will be an orthogonal vector.
+-- This asset creates a rotation that places coordinate axes orbiting close to two spheres
+-- with the y axis always pointing towards the first sphere and the z axis always pointing
+-- towards the second sphere as the coordinate system moves around. The set of coordinate
+-- axes are orbiting using a [KeplerTranslation](#space_transform_kepler) that provides a
+-- configurable orbital motion. The use of the
+-- [KeplerTranslation](#space_transform_kepler) in this example is arbitrary and the
+-- FixedRotation does not depend on the use of that class.
+--
+-- Note that in this example the coordinate system will be skewed as, in general, it is
+-- not guaranteed that the direction from the node to the two spheres will be an
+-- orthogonal vector.
 
 local Sphere1 = {
   Identifier = "FixedRotation_Example_Moving_TwoObjects_Sphere1",
@@ -51,9 +57,9 @@ local Node = {
     Rotation = {
       Type = "FixedRotation",
       Attached = "FixedRotation_Example_Moving_TwoObjects",
-      YAxis = "FixedRotation_Example_Moving_TwoObjects_Sphere1",
+      YAxis = Sphere1.Identifier,
       YAxisOrthogonal = true,
-      ZAxis = "FixedRotation_Example_Moving_TwoObjects_Sphere2"
+      ZAxis = Sphere2.Identifier
     }
   },
   Renderable = {

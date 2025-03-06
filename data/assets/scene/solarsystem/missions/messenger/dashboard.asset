@@ -8,9 +8,9 @@ local Distance = {
   Identifier = "MessengerDistance",
   GuiName = "Messenger - Mercury Distance",
   SourceType = "Node",
-  SourceNodeName = messenger.Messenger.Identifier,
+  SourceNodeIdentifier = messenger.Messenger.Identifier,
   DestinationType = "Node",
-  DestinationNodeName = mercury.Mercury.Identifier
+  DestinationNodeIdentifier = mercury.Mercury.Identifier
 }
 
 

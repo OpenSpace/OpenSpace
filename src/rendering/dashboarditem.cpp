@@ -42,8 +42,8 @@ namespace {
     };
 
     // A `DashboardItem` is an item that is rendered in a dashboard. There are multiple
-    // dashboards that can exist in the system; the default dashboard is rendered to the
-    // top left of the screen. Others can be added through the
+    // dashboards that can exist in the system. One dashboard is created by default, which
+    // is rendered to the top left of the screen. Others can be added through the
     // [ScreenSpaceDashboard](#base_screenspace_dashboard). Each `DashboardItem` shows its
     // respective text in the dashboard if it is enabled and it depends on the concrete
     // type of `DashboardItem` to determine what that information is.

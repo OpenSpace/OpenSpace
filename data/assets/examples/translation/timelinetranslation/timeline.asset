@@ -1,8 +1,9 @@
 -- Basic
--- This asset creates a SceneGraphNode that only displays coordinate axes. The translation
--- of the coordinate axes are determined by a timeline of individual translations. These
--- translations are keyframes that are used to seamlessly change between different
--- positions. This example transitions between three translations over a long time span.
+-- This asset creates a scene graph node that only displays coordinate axes whose
+-- translation of the coordinate axes is determined by a timeline of individual
+-- translations. These translations are provided as keyframes that interpolate seamlessly
+-- between different positions.
+--
 -- This example will only work if the in-game time is set to January 1st, 2000.
 
 local Node = {

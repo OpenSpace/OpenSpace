@@ -43,7 +43,8 @@ namespace {
     // This `Translation` uses a timeline of other `Translation` classes to calculate the
     // final translation for the attached scene graph node. The current in-game time is
     // used to determine which specific keyframe to currently use. It is also possible to
-    // interpolate between two adjacent keyframes.
+    // disable the interpolation between two adjacent keyframes by setting the
+    // `ShouldInterpolate` parameter to `false`.
     struct [[codegen::Dictionary(TimelineTranslation)]] Parameters {
         // A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS and values
         // that are valid Translation objects

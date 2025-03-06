@@ -1,9 +1,9 @@
 -- Basic
--- This asset creates a SceneGraphNode that only displays coordinate axes. The scale of
--- the coordinate axes are determined by a timeline of individual scales. These scales
--- are keyframes that are used to seamlessly change between different sizes. This example
--- transitions between three scales over a long time span. This example will only work if
--- the in-game time is set to January 1st, 2000.
+-- This asset creates a SceneGraphNode that only displays coordinate axes whose scale is
+-- determined by a timeline of individual scales. These scales are keyframes that are used
+-- to seamlessly change between different sizes. This example transitions between three
+-- scales over a long time span. This example will only work if the in-game time is set to
+-- January 1st, 2000.
 
 local Node = {
   Identifier = "TimelineScale_Example",

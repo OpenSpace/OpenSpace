@@ -1,6 +1,6 @@
 -- Delta Time
 -- This example adds a dashboard item that shows the frame rate of the last frame in
--- milliseconds
+-- milliseconds.
 
 local Item = {
   Identifier = "DashboardItemFramerate_Example_DeltaTime",

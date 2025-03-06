@@ -176,7 +176,6 @@ namespace {
     //
     // Limitation: At the time, only animations of the "Keyframe" type are supported. See
     // each specific model format to see if it supports that type of animation.
-
     struct [[codegen::Dictionary(RenderableModel)]] Parameters {
         // The file or files that should be loaded in this RenderableModel. Most common
         // model formats, such as .obj, .fbx, or .gltf. For a full list of supported file

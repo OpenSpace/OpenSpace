@@ -1,6 +1,6 @@
 -- Node-Node
 -- This example adds two invisible nodes and a dashboard item that shows the distance
--- between those two nodes
+-- between those two nodes.
 
 local Node1 = {
   Identifier = "DashboardItemDistance_Example_NodeNode_Node1",
@@ -26,9 +26,9 @@ local Item = {
   Identifier = "DashboardItemDistance_Example_NodeNode",
   Type = "DashboardItemDistance",
   SourceType = "Node",
-  SourceNodeName = "DashboardItemDistance_Example_NodeNode_Node1",
+  SourceNodeIdentifier = Node1.Identifier,
   DestinationType = "Node",
-  DestinationNodeName = "DashboardItemDistance_Example_NodeNode_Node2"
+  DestinationNodeIdentifier = Node2.Identifier
 }
 
 asset.onInitialize(function()

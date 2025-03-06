@@ -57,6 +57,10 @@ namespace {
 
     // This `DashboardItem` shows the velocity of the camera, that is how fast the camera
     // has moved since the last frame in the amount of time it took to render that frame.
+    // The `Simplification` and `RequestedUnit` can be used to control which unit is used
+    // to display the speed. By default, `Simplification` is enabled, which means that the
+    // most natural unit, that is, the one that gives the least number of printed digits,
+    // is used.
     struct [[codegen::Dictionary(DashboardItemVelocity)]] Parameters {
         // [[codegen::verbatim(SimplificationInfo.description)]]
         std::optional<bool> simplification;

@@ -54,7 +54,7 @@ namespace {
 
     // This `DashboardItem` shows information about the currently active mission. This
     // includes information about the currently active mission phase, the next phase, and
-    // more generally, all subphases of the currently active phase.
+    // all subphases of the currently active phase.
     struct [[codegen::Dictionary(DashboardItemMission)]] Parameters {};
 #include "dashboarditemmission_codegen.cpp"
 } // namespace

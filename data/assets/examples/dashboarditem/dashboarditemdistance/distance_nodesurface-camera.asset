@@ -14,7 +14,7 @@ local Item = {
   Identifier = "DashboardItemDistance_Example_NodeSurfaceCamera",
   Type = "DashboardItemDistance",
   SourceType = "Node Surface",
-  SourceNodeName = "DashboardItemDistance_Example_NodeSurfaceCamera_Node",
+  SourceNodeIdentifier = Node.Identifier,
   DestinationType = "Camera"
 }
 

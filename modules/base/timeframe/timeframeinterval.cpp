@@ -59,11 +59,11 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    // This TimeFrame's validity is determined by a single start and end time in between
+    // This `TimeFrame`'s validity is determined by a single start and end time in between
     // which the scene graph node is valid. The start time is inclusive, while the end
     // time is exclusive. If the start time or end time is not specified, the value
     // corresponds to $-\infty$ and $\infty$ respectively. If both the start and end time
-    // are not specified, the TimeFrameInterval will always be valid.
+    // are not specified, the `TimeFrameInterval` will always be valid.
     struct [[codegen::Dictionary(TimeFrameInterval)]] Parameters {
         // [[codegen::verbatim(StartInfo.description)]]
         std::optional<std::variant<double, std::string>> start;

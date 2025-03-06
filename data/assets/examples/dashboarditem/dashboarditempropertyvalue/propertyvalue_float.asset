@@ -1,6 +1,6 @@
 -- Float
 -- This example adds a dashboard item that shows the state of a floating point value
--- property
+-- property.
 
 local Item = {
   Identifier = "DashboardItemPropertyValue_Example_Float",

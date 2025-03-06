@@ -1,5 +1,5 @@
 -- Vec4
--- This example adds a dashboard item that shows the state of a 4-vector value property
+-- This example adds a dashboard item that shows the state of a 4-vector value property.
 
 local Item = {
   Identifier = "DashboardItemPropertyValue_Example_Vec4",
