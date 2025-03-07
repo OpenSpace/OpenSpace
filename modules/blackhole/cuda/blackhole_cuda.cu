@@ -22,8 +22,8 @@ __device__ void rk4_step(float& u, float& dudphi, float& phi, float h, float rs)
     dudphi = dudphi + (k1_dudphi + 2.f * k2_dudphi + 2.f * k3_dudphi + k4_dudphi) * h / 6.f;
 }
 
-__global__ void solveGeodesicKernel(float rs, float envmap_r, float u_0, float* dudphi_0_values, float h, int num_paths, int num_steps, float* angles_out) {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+__global__ void solveGeodesicKernel(float rs, float envmap_r, float u_0, float* dudphi_0_values, float h, size_t num_paths, size_t num_steps, float* angles_out) {
+    size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx >= num_paths) return;
 
     float u = u_0;
@@ -49,22 +49,22 @@ __global__ void solveGeodesicKernel(float rs, float envmap_r, float u_0, float* 
         return (1.0f / u <= rs);
         };
 
-    for (int step = 1; step < num_steps && !out_of_bounds() && !inside_singularity(); step++) {
+    for (size_t step = 1; step < num_steps && !out_of_bounds() && !inside_singularity(); step++) {
         rk4_step(u, dudphi, phi, h, rs);
     }
 
     angles_out[idx * 2 + 1] = !inside_singularity() ? phi : nan("");
 }
 
-void generate_du(float* d_du_0_values, float min, float max, int count) {
+void generate_du(float* d_du_0_values, float min, float max, size_t count) {
     float step = (max - min) / (count - 1);
-    for (int i = 0; i < count; ++i) {
+    for (size_t i = 0; i < count; ++i) {
         d_du_0_values[i] = min + step * i;
     }
 }
 
 void schwarzchild(
-    float rs, float envmap_r, int num_paths, int num_steps, float u_0, float h, float* angle_out) {
+    float rs, float envmap_r, size_t num_paths, size_t num_steps, float u_0, float h, float* angle_out) {
 
     float* d_dudphi_0_values;
     float* d_angle_values;

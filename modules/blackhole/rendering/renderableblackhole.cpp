@@ -33,13 +33,14 @@ namespace {
 namespace openspace {
     RenderableBlackHole::RenderableBlackHole(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary, { .automaticallyUpdateRenderBin = false }) {
+
     }
 
     void RenderableBlackHole::initialize() {
         _viewport = ViewPort(global::navigationHandler->camera());
         global::navigationHandler->camera()->setRotation(glm::dquat(0,0,0,0));
         _schwarzschildWarpTable = std::vector<float>(_rayCount * 2, 0.f);
-        schwarzchild(1, 30, _rayCount, 500000, 1.0 / 20.0, 0.00001, _schwarzschildWarpTable.data());
+        schwarzchild(_rsBlackHole, _rEnvMap, _rayCount, _stepsCount, 1.0f / _rCamera, _stepLength, _schwarzschildWarpTable.data());
     }
 
     void RenderableBlackHole::initializeGL() {
@@ -59,7 +60,7 @@ namespace openspace {
     }
 
     bool RenderableBlackHole::isReady() const {
-        return _program;
+        return _program != nullptr;
     }
 
     void RenderableBlackHole::update(const UpdateData&) {
@@ -120,7 +121,7 @@ namespace openspace {
         program += "|fs=" + fragmentShaderPath;
         _program = BlackHoleModule::ProgramObjectManager.request(
             program,
-            [this, fragmentShaderPath, vertexShaderPath, program]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            [fragmentShaderPath, vertexShaderPath, program]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
                 const std::filesystem::path vs = absPath(vertexShaderPath);
                 const std::filesystem::path fs = absPath(fragmentShaderPath);
 

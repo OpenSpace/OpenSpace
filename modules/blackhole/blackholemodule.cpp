@@ -29,7 +29,7 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-    constexpr std::string_view _loggerCat = "BlackHoleModule";
+    // constexpr std::string_view _loggerCat = "BlackHoleModule"; //@TODO Is this needed? Warning: Never used 
 
     struct [[codegen::Dictionary(BlackHoleModule)]] Parameters {
         std::optional<int> rs [[codegen::greater(0)]];

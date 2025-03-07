@@ -60,7 +60,7 @@ namespace openspace {
         GLuint _quadVao = 0;
         GLuint _quadVbo = 0;
         GLuint _ssboData = 0;
-        GLuint modelMatricesBuffer;
+        //GLuint modelMatricesBuffer; // @TODO Is this needed?
         UniformCache(environmentTexture, viewGrid, cameraRotationMatrix, schwarzschildWarpTable) _uniformCache;
 
         std::unique_ptr<ghoul::opengl::Texture> _environmentTexture;
