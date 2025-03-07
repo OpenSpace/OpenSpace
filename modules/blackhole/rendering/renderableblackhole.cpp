@@ -40,7 +40,7 @@ namespace openspace {
         _viewport = ViewPort(global::navigationHandler->camera());
         global::navigationHandler->camera()->setRotation(glm::dquat(0,0,0,0));
         _schwarzschildWarpTable = std::vector<float>(_rayCount * 2, 0.f);
-        schwarzchild(_rsBlackHole, _rEnvMap, _rayCount, _stepsCount, 1.0f / _rCamera, _stepLength, _schwarzschildWarpTable.data());
+        schwarzchild(_rsBlackHole, _rEnvmap, _rayCount, _stepsCount, 1.0f / _rCamera, _stepLength, _schwarzschildWarpTable.data());
     }
 
     void RenderableBlackHole::initializeGL() {

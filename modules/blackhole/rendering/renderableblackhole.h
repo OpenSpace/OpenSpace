@@ -46,7 +46,7 @@ namespace openspace {
         float _stepLength = 0.00001f;
 
         float _rsBlackHole = 1.0f;
-        float _rEnvMap = 60.0f;
+        float _rEnvmap = 60.0f;
         float _rCamera = 20.0f;
 
         ViewPort _viewport;
