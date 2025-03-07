@@ -220,7 +220,7 @@ namespace {
     //
     // Lastly, each axis has an `orthogonal` option. If that value is specified, the
     // provided axis is instead cross-producted with the other axis first with the
-    // resulting orthogonal vector used as the axis. This is primarily useful when
+    // resulting orthogonal vector used as the mapped axis. This is primarily useful when
     // specifying a direction vector and wanting to ensure that the total rotation remains
     // a valid non-skewed rotation (meaning that all three coordinate axes are orthogonal
     // to each other) when the second axis can assume arbitrary values. Unless there is a
