@@ -8,6 +8,7 @@ in vec2 TexCoord;
 uniform sampler2D environmentTexture;
 uniform sampler2D viewGrid;
 uniform mat4 cameraRotationMatrix;
+uniform float cameraToAnchorNodeDistance;
 
 layout (std430) buffer ssbo_warp_table {
   float schwarzschildWarpTable[];
@@ -96,7 +97,7 @@ Fragment getFragment() {
 
     // Init rotation of the black hole
     vec4 envMapCoords = vec4(sphericalToCartesian(envMapSphericalCoords.x, envMapSphericalCoords.y), 0.0f);
-    float rotationAngle = PI/2;
+    float rotationAngle = cameraToAnchorNodeDistance;
     mat4 rotationMatrixX = mat4(
         1.0f,    0.0f,                 0.0f,               0.0f,
         0.0f,    cos(rotationAngle),  -sin(rotationAngle), 0.0f,

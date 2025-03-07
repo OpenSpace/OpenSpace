@@ -83,10 +83,19 @@ namespace openspace {
 
         SendSchwarzchildTableToShader();
 
+   
         _program->setUniform(
             _uniformCache.cameraRotationMatrix,
             glm::mat4(global::navigationHandler->camera()->viewRotationMatrix())
         );
+
+        // ### @TODO: The code below is only ment for debuging ###
+        float distance = glm::distance(_viewport.getCameraPos(), global::navigationHandler->anchorNode()->position());
+        _program->setUniform(
+            _uniformCache.cameraToAnchorNodeDistance,
+            distance
+        );
+        // ### ###
      
         drawQuad();
 
