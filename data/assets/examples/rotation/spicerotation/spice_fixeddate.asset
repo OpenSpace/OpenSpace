@@ -1,9 +1,9 @@
 -- Fixed Date
--- This asset creates a rotation provided by a SPICE kernel and applies it to a
--- SceneGraphNode that only displays coordinate axes. The rotation of the coordinate axes
--- are determined by SPICE, in this case pretending that the coordinate axes are rotating
--- at the same rate as Earth. In this specific example, the orientation is independent of
--- the actual in-game time in OpenSpace and only uses a fixed date of 2000 JAN 01 instead.
+-- This asset creates a rotation provided by a SPICE kernel and applies it to a scene
+-- graph node that only displays coordinate axes. The rotation of the coordinate axes are
+-- determined by SPICE, in this case pretending that the coordinate axes are rotating at
+-- the same rate as Earth. In this specific example, the orientation is independent of the
+-- actual in-game time in OpenSpace and only uses a fixed date of 2000 JAN 01 instead.
 
 -- Load the default SPICE kernels, which is the planetary constants and the DE430 kernel
 asset.require("spice/core")

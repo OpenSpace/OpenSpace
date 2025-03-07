@@ -28,7 +28,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/spicemanager.h>
-#include <openspace/util/timeconversion.h>
+#include <openspace/util/timeconstants.h>
 #include <openspace/util/updatestructures.h>
 #include <optional>
 
@@ -143,7 +143,7 @@ namespace {
         std::optional<int> sweepChunkSize;
 
         // [[codegen::verbatim(SweepChunkSizeInfo.description)]]
-        std::optional<int> enableSweepChunking;
+        std::optional<bool> enableSweepChunking;
 
         // [[codegen::verbatim(AccurateTrailPositionsInfo.description)]]
         std::optional<int> accurateTrailPositions;
@@ -193,7 +193,7 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     }
     else {
         const double delta = Time::convertTime(_endTime) - Time::convertTime(_startTime);
-        _sampleInterval = delta / (openspace::SecondsPerYear * 2);
+        _sampleInterval = delta / (openspace::timeconstants::SecondsPerYear * 2);
     }
     _sampleInterval.onChange([this] { reset(); });
     addProperty(_sampleInterval);

@@ -796,7 +796,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderablePointCloud::isReady() const {
-    bool isReady = _program;
+    bool isReady = _program != nullptr;
     if (_hasLabels) {
         isReady = isReady && _labels->isReady();
     }

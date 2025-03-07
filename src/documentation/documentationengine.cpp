@@ -68,6 +68,8 @@ namespace {
     constexpr const char* ActionTitle = "Actions";
     constexpr const char* GuiNameKey = "guiName";
     constexpr const char* CommandKey = "command";
+    constexpr const char* ColorKey = "color";
+    constexpr const char* TextColorKey = "textColor";
 
     // Factory
     constexpr const char* MembersKey = "members";
@@ -705,6 +707,12 @@ nlohmann::json DocumentationEngine::generateActionJson() const {
         d[GuiNameKey] = action.name;
         d[DocumentationKey] = action.documentation;
         d[CommandKey] = action.command;
+        if (action.color.has_value()) {
+            d[ColorKey] = std::format("{}", action.color);
+        }
+        if (action.textColor.has_value()) {
+            d[TextColorKey] = std::format("{}", action.textColor);
+        }
         res[DataKey].push_back(d);
     }
     sortJson(res[DataKey], NameKey);

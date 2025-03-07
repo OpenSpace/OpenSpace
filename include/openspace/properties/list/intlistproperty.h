@@ -35,7 +35,7 @@ public:
         std::vector<int> values = std::vector<int>());
 
     std::string_view className() const override;
-    int typeLua() const override;
+    ghoul::lua::LuaTypes typeLua() const override;
 
     using TemplateProperty<std::vector<int>>::operator std::vector<int>;
     using TemplateProperty<std::vector<int>>::operator=;

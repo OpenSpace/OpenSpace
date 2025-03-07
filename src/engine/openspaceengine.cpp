@@ -1036,13 +1036,7 @@ void OpenSpaceEngine::loadFonts() {
         }
 
         LDEBUG(std::format("Registering font '{}' with key '{}'", fontName, key));
-        const bool success = global::fontManager->registerFontPath(key, fontName);
-
-        if (!success) {
-            LERROR(std::format(
-                "Error registering font '{}' with key '{}'", fontName, key
-            ));
-        }
+        global::fontManager->registerFontPath(key, fontName);
     }
 
     try {
@@ -1183,7 +1177,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     global::luaConsole->update();
 
     if (!master) {
-        global::navigationHandler->orbitalNavigator().updateAnchor();
+        global::navigationHandler->orbitalNavigator().updateAnchorOnSync();
         _scene->camera()->invalidateCache();
     }
 

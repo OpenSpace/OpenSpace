@@ -152,10 +152,10 @@ std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageTo
 {
     return global::downloadManager->fetchFile(
         url,
-        [url](const DownloadManager::MemoryFile&) {
+        [](const DownloadManager::MemoryFile&) {
             LDEBUG("Download to memory finished for screen space image");
         },
-        [url](const std::string& err) {
+        [](const std::string& err) {
             LDEBUG(std::format(
                 "Download to memory failed for screen space image: {}", err
             ));

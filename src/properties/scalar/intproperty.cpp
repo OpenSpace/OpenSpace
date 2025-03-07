@@ -37,8 +37,8 @@ std::string_view IntProperty::className() const {
     return "IntProperty";
 }
 
-int IntProperty::typeLua() const {
-    return LUA_TNUMBER;
+ghoul::lua::LuaTypes IntProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Number;
 }
 
 int IntProperty::fromLuaConversion(lua_State* state) const {

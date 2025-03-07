@@ -42,7 +42,7 @@ public:
         long stepValue = long(1));
 
     std::string_view className() const override;
-    int typeLua() const override;
+    ghoul::lua::LuaTypes typeLua() const override;
 
     using TemplateProperty<long>::operator=;
 };

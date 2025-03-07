@@ -42,7 +42,7 @@ public:
         glm::mat4x4 stepValue = ghoul::createFillMat4x4<float>(0.01f));
 
     std::string_view className() const override;
-    int typeLua() const override;
+    ghoul::lua::LuaTypes typeLua() const override;
 
     using TemplateProperty<glm::mat4x4>::operator=;
 };

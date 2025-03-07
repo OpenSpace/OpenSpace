@@ -102,6 +102,7 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     : _sourceFrame(SourceInfo)
     , _destinationFrame(DestinationInfo)
     , _fixedDate(FixedDateInfo)
+    , _timeOffset(TimeOffsetInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -119,6 +120,9 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     _fixedDate = p.fixedDate.value_or(_fixedDate);
     addProperty(_fixedDate);
 
+    _timeOffset = p.timeOffset.value_or(_timeOffset);
+    addProperty(_timeOffset);
+
     if (p.timeFrame.has_value()) {
         _timeFrame = TimeFrame::createFromDictionary(*p.timeFrame);
         addPropertySubOwner(_timeFrame.get());
@@ -135,14 +139,10 @@ glm::dmat3 SpiceRotation::matrix(const UpdateData& data) const {
     if (_timeFrame && !_timeFrame->isActive(data.time)) {
         return glm::dmat3(1.0);
     }
-    double time = data.time.j2000Seconds();
-    if (_fixedEphemerisTime.has_value()) {
-        time = *_fixedEphemerisTime;
-    }
     return SpiceManager::ref().positionTransformMatrix(
         _sourceFrame,
         _destinationFrame,
-        time
+        _fixedEphemerisTime.value_or(data.time.j2000Seconds()) + _timeOffset
     );
 }
 

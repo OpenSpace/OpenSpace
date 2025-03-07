@@ -1,5 +1,5 @@
 local CarringtonLongitudeToHEEQ180Rotation = {
-  -- This isa rotation matrix to go from the Carrington longitude reference frame to the
+  -- This is a rotation matrix to go from the Carrington longitude reference frame to the
   -- HEEQ180 reference frame. At the reference time, MAS_seq = 0, 2000-07-14T08:33:37.105
   -- the Carrington longitude was 309.3 degrees.
   -- Difference from HEEQ => 360-309.3=50.7 (or 0-309.3 = -309.3). However this leads to

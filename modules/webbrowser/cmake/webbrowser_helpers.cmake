@@ -124,6 +124,7 @@ function(run_cef_windows_config CEF_TARGET CEF_ROOT MODULE_PATH)
   # Executable target.
   add_dependencies(${CEF_TARGET} libcef_dll_wrapper)
   target_link_libraries(${CEF_TARGET} PUBLIC libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
+
   include_directories(${CEF_ROOT})
 
   add_dependencies(${CEF_TARGET} libcef_dll_wrapper "${CEF_HELPER_TARGET}")

@@ -251,7 +251,7 @@ namespace {
         std::optional<float> width [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(ShadingEnabledInfo.description)]]
-        std::optional<float> performShading;
+        std::optional<bool> performShading;
 
         // [[codegen::verbatim(AmbientIntensityInfo.description)]]
         std::optional<float> ambientIntensity [[codegen::greaterequal(0.f)]];
@@ -385,7 +385,7 @@ void RenderableNodeArrow::deinitializeGL() {
 }
 
 bool RenderableNodeArrow::isReady() const {
-    return _shaderProgram;
+    return _shaderProgram != nullptr;
 }
 
 void RenderableNodeArrow::updateShapeTransforms(const RenderData& data) {

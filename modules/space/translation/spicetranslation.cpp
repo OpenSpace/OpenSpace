@@ -98,6 +98,9 @@ namespace {
 
         // [[codegen::verbatim(FixedDateInfo.description)]]
         std::optional<std::string> fixedDate;
+
+        // [[codegen::verbatim(TimeOffsetInfo.description)]]
+        std::optional<float> timeOffset;
     };
 #include "spicetranslation_codegen.cpp"
 } // namespace
@@ -113,6 +116,7 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     , _observer(ObserverInfo)
     , _frame(FrameInfo, "GALACTIC")
     , _fixedDate(FixedDateInfo)
+    , _timeOffset(TimeOffsetInfo)
     , _cachedFrame("GALACTIC")
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -149,6 +153,9 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     _fixedDate = p.fixedDate.value_or(_fixedDate);
     addProperty(_fixedDate);
 
+    _timeOffset = p.timeOffset.value_or(_timeOffset);
+    addProperty(_timeOffset);
+
     if (std::holds_alternative<std::string>(p.target)) {
         _target = std::get<std::string>(p.target);
     }
@@ -175,7 +182,7 @@ glm::dvec3 SpiceTranslation::position(const UpdateData& data) const {
         _cachedObserver,
         _cachedFrame,
         {},
-        _fixedEphemerisTime.value_or(data.time.j2000Seconds()),
+        _fixedEphemerisTime.value_or(data.time.j2000Seconds()) + _timeOffset,
         lightTime
     ) * 1000.0;
 }
