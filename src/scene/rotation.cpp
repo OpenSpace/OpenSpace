@@ -42,7 +42,7 @@ namespace {
         // to disk on application startup into the FactoryDocumentation
         std::string type [[codegen::annotation("Must name a valid Rotation type")]];
 
-        // The time frame in which this Rotation is applied. If the in-game time is
+        // The time frame in which this `Rotation` is applied. If the in-game time is
         // outside this range, no rotation will be applied.
         std::optional<ghoul::Dictionary> timeFrame
             [[codegen::reference("core_time_frame")]];

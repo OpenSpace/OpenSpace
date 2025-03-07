@@ -41,7 +41,7 @@ namespace {
         // disk on application startup into the FactoryDocumentation
         std::string type [[codegen::annotation("Must name a valid Scale type")]];
 
-        // The time frame in which this Scale is applied. If the in-game time is outside
+        // The time frame in which this `Scale` is applied. If the in-game time is outside
         // this range, no scaling will be applied.
         std::optional<ghoul::Dictionary> timeFrame
             [[codegen::reference("core_time_frame")]];

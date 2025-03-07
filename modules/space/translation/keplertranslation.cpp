@@ -133,7 +133,7 @@ namespace {
         double meanAnomaly [[codegen::inrange(-360.0, 360.0)]];
 
         // This value determines the epoch for which the initial location is defined in.
-        // This is specified wither in the form of a date (YYYY MM DD HH:mm:ss) or in the
+        // This is specified either in the form of a date (YYYY MM DD HH:mm:ss) or in the
         // number of seconds past the J2000 epoch.
         std::variant<std::string, double> epoch;
 

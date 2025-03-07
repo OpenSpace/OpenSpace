@@ -1,8 +1,7 @@
 -- Time Frame
--- This asset creates a rotation provided by Euler angles and applies it to a
--- SceneGraphNode that only displays coordinate axes. The rotation of the coordinate axes
--- are determined by a constant and unchanging static rotation. In this example, the
--- rotation is only applied between 2000 JAN 01 and just prior to 2002 JAN 01.
+-- This asset creates a rotation that is only applied between 2000 JAN 01 and just prior
+-- to 2002 JAN 01. The rotation of the coordinate axes shown by this scene graph node are
+-- determined by a constant and unchanging static rotation.
 
 local Node = {
   Identifier = "StaticRotation_Example_TimeFrame",

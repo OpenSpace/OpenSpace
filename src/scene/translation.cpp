@@ -40,7 +40,7 @@ namespace {
         // written to disk on application startup into the FactoryDocumentation
         std::string type [[codegen::annotation("Must name a valid Translation type")]];
 
-        // The time frame in which this Translation is applied. If the in-game time is
+        // The time frame in which this `Translation` is applied. If the in-game time is
         // outside this range, no translation will be applied.
         std::optional<ghoul::Dictionary> timeFrame
             [[codegen::reference("core_time_frame")]];

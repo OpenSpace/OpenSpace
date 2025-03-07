@@ -78,13 +78,12 @@ void TimeFrameUnion::update(const Time& time) {
     for (const ghoul::mm_unique_ptr<TimeFrame>& tf : _timeFrames) {
         tf->update(time);
     }
-    for (const ghoul::mm_unique_ptr<TimeFrame>& tf : _timeFrames) {
-        if (tf->isActive()) {
-            _isInTimeFrame = true;
-            return;
-        }
-    }
-    _isInTimeFrame = false;
+
+    _isInTimeFrame = std::any_of(
+        _timeFrames.begin(),
+        _timeFrames.end(),
+        std::mem_fn(&TimeFrame::isActive)
+    );
 }
 
 } // namespace openspace
