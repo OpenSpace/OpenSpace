@@ -131,7 +131,7 @@ std::string_view Time::ISO8601() const {
     std::memset(b, 0, 32);
 
     SpiceManager::ref().dateFromEphemerisTime(_time, b, 32, Format);
-    return std::string_view(b, 31);
+    return std::string_view(b);
 }
 
 void Time::ISO8601(char* buffer) const {

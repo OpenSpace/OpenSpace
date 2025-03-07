@@ -583,7 +583,7 @@ public:
         if (failed_c()) {
             throwSpiceError(std::format(
                 "Error converting ephemeris time '{}' to date with format '{}'",
-                    ephemerisTime, format
+                ephemerisTime, format
             ));
         }
 
