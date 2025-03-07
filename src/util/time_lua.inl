@@ -340,7 +340,7 @@ namespace {
         global::timeManager->defaultTimeInterpolationDuration()
     );
 
-    constexpr const char Format[] = "YYYY MM DD HR MN SC";
+    constexpr const char Format[] = "YYYY MON DD HR:MN:SC";
     char* buffer = reinterpret_cast<char*>(
         global::memoryManager->TemporaryMemory.allocate(256)
     );
@@ -353,12 +353,42 @@ namespace {
         Format
     );
 
-    auto r = scn::scan<int, int, int, int, int, double>(
+    bool wasBC = false;
+    // If the string starts with B.C., remove it here
+    if (std::string_view(buffer, 4) == "B.C.") {
+        constexpr int SmallerSize = 256 - 4;
+        std::memmove(buffer, buffer + 4, SmallerSize);
+        wasBC = true;
+    }
+
+    auto r = scn::scan<int, std::string, int, int, int, double>(
         std::string(buffer),
-        "{} {:2d} {:2d} {:2d} {:2d} {:2f}"
+        "{} {} {:2d} {:2d}:{:2d}:{:2f}"
     );
     ghoul_assert(r, "Invalid date");
-    auto& [dateYear, dateMonth, dateDay, dateHour, dateMinute, dateSecond] = r->values();
+    auto& [dateYear, monthStr, dateDay, dateHour, dateMinute, dateSecond] = r->values();
+
+    if (wasBC) {
+        // See comment below about the calculation to astronomical year
+        dateYear = -dateYear + 1;
+    }
+
+    const int dateMonth = [](std::string_view m) {
+        if (m == "JAN")      return 1;
+        else if (m == "FEB") return 2;
+        else if (m == "MAR") return 3;
+        else if (m == "APR") return 4;
+        else if (m == "MAY") return 5;
+        else if (m == "JUN") return 6;
+        else if (m == "JUL") return 7;
+        else if (m == "AUG") return 8;
+        else if (m == "SEP") return 9;
+        else if (m == "OCT") return 10;
+        else if (m == "NOV") return 11;
+        else if (m == "DEC") return 12;
+        ghoul_assert(false, "Should not get here");
+        return -1;
+    }(monthStr);
 
     if (seconds != 0.0) {
         dateSecond += seconds;
@@ -420,12 +450,45 @@ namespace {
     ymd = std::chrono::sys_days(ymd);
 
     // Reconstruct the full year
-    const int y = yearRemainder * 400 + static_cast<int>(ymd.year());
-    const int m = static_cast<unsigned int>(ymd.month());
+    int y = yearRemainder * 400 + static_cast<int>(ymd.year());
+    std::string_view era = [](int year) {
+        if (year >= 1000)   return "";
+        else if (year <= 0) return "B.C.";
+        else                return "A.D.";
+    }(y);
+    // 1 B.C. is followed by 1 A.D.;  there is no year zero. Internally we follow the
+    // astronomical year numbering in which there _is_ a year 0 and n BC is equal to
+    // -(n-1) = 1 - n
+    if (y == 0) {
+        y = 1;
+    }
+    else if (y < 0) {
+        y = 1 - y;
+    }
+
+    std::string_view m = [](unsigned int month) {
+        switch (month) {
+            case 1: return "JAN";
+            case 2: return "FEB";
+            case 3: return "MAR";
+            case 4: return "APR";
+            case 5: return "MAY";
+            case 6: return "JUN";
+            case 7: return "JUL";
+            case 8: return "AUG";
+            case 9: return "SEP";
+            case 10: return "OCT";
+            case 11: return "NOV";
+            case 12: return "DEV";
+            default: throw ghoul::MissingCaseException();
+        }
+    }(static_cast<unsigned int>(ymd.month()));
+
     const int d = static_cast<unsigned int>(ymd.day());
 
     std::string timeStr = std::format(
-        "{} {:02d} {:02d} {:02d} {:02d} {:02f}", y, m, d, dateHour, dateMinute, dateSecond
+        "{:04d} {} {} {:02d} {:02d}:{:02d}:{:02f}",
+        y, era, m, d, dateHour, dateMinute, dateSecond
     );
 
     LINFOC("", timeStr);
