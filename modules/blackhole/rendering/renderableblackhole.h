@@ -40,8 +40,17 @@ namespace openspace {
         void loadEnvironmentTexture();
 
         ghoul::opengl::ProgramObject* _program = nullptr;
-        ViewPort _viewport;
+
         size_t _rayCount = 5000;
+        size_t _stepsCount = 500000;
+        float _stepLength = 0.00001f;
+
+        float _rsBlackHole = 1.0f;
+        float _rEnvMap = 60.0f;
+        float _rCamera = 20.0f;
+
+        ViewPort _viewport;
+
         std::vector<float> _schwarzschildWarpTable;
         std::unique_ptr<ghoul::opengl::Texture> warpTableTex;
         std::unique_ptr<ghoul::opengl::BufferBinding<
