@@ -22,9 +22,9 @@ __device__ void rk4_step(float& u, float& dudphi, float& phi, float h, float rs)
     dudphi = dudphi + (k1_dudphi + 2.f * k2_dudphi + 2.f * k3_dudphi + k4_dudphi) * h / 6.f;
 }
 
-__global__ void solveGeodesicKernel(float rs, float envmap_r, float u_0, float* dudphi_0_values, float h, size_t num_paths, size_t num_steps, float* angles_out) {
+__global__ void solveGeodesicKernel(float rs, float envmap_r, float u_0, float* dudphi_0_values, float h, size_t num_rays, size_t num_steps, float* angles_out) {
     size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx >= num_paths) return;
+    if (idx >= num_rays) return;
 
     float u = u_0;
     float dudphi = dudphi_0_values[idx];
@@ -64,26 +64,26 @@ void generate_du(float* d_du_0_values, float min, float max, size_t count) {
 }
 
 void schwarzchild(
-    float rs, float envmap_r, size_t num_paths, size_t num_steps, float u_0, float h, float* angle_out) {
+    float rs, float envmap_r, size_t num_rays, size_t num_steps, float u_0, float h, float* angle_out) {
 
     float* d_dudphi_0_values;
     float* d_angle_values;
 
     // Allocate device memory
-    cudaMalloc(&d_dudphi_0_values, num_paths * sizeof(float));
-    cudaMalloc(&d_angle_values, num_paths * 2 * sizeof(float));
+    cudaMalloc(&d_dudphi_0_values, num_rays * sizeof(float));
+    cudaMalloc(&d_angle_values, num_rays * 2 * sizeof(float));
 
     // Copy initial velocity values to device
-    std::vector<float> dudphi_0_values(num_paths, 0.f);
-    generate_du(dudphi_0_values.data(), 1, -1, num_paths);
-    cudaMemcpy(d_dudphi_0_values, dudphi_0_values.data(), num_paths * sizeof(float), cudaMemcpyHostToDevice);
+    std::vector<float> dudphi_0_values(num_rays, 0.f);
+    generate_du(dudphi_0_values.data(), 1, -1, num_rays);
+    cudaMemcpy(d_dudphi_0_values, dudphi_0_values.data(), num_rays * sizeof(float), cudaMemcpyHostToDevice);
 
     // Launch kernel
     int threadsPerBlock = 256;
-    int numBlocks = (num_paths + threadsPerBlock - 1) / threadsPerBlock;
-    solveGeodesicKernel<<<numBlocks, threadsPerBlock>>>(rs, envmap_r, u_0, d_dudphi_0_values, h, num_paths, num_steps, d_angle_values);
+    int numBlocks = (num_rays + threadsPerBlock - 1) / threadsPerBlock;
+    solveGeodesicKernel<<<numBlocks, threadsPerBlock>>>(rs, envmap_r, u_0, d_dudphi_0_values, h, num_rays, num_steps, d_angle_values);
 
-    cudaMemcpy(angle_out, d_angle_values, num_paths * 2 * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(angle_out, d_angle_values, num_rays * 2 * sizeof(float), cudaMemcpyDeviceToHost);
 
     cudaFree(d_dudphi_0_values);
     cudaFree(d_angle_values);
