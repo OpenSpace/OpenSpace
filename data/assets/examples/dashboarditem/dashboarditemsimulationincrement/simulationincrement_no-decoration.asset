@@ -1,0 +1,22 @@
+-- No Decoration
+-- This example adds a dashboard item that shows the current simulation increment without
+-- any textual decorations. This example also shows how to ignore the first two parameters
+-- the `TransitionFormat` format string. Both the `TransitionFormat` and the
+-- `RegularFormat` string replacement markers allow the setting of numbers to determine
+-- which argument should be placed in here. The `TransitionFormat` in this example omits
+-- the numbers 0 and 1, thus ignoring the first two arguments to the string.
+
+local Item = {
+  Identifier = "DashboardItemSimulationIncrement_Example_NoDecoration",
+  Type = "DashboardItemSimulationIncrement",
+  TransitionFormat = "{3:.1f} {4:s} / second{2:s}",
+  RegularFormat = "{:.1f} {:s} / second{:s}"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

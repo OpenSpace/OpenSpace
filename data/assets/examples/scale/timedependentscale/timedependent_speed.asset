@@ -1,5 +1,5 @@
 -- with Speed
--- This asset creates a SceneGraphNode that only displays coordinate axes, which grow at
+-- This asset creates a scene graph node that only displays coordinate axes, which grow at
 -- a speed of 12 km/s starting on August 8th, 1969 12:00:00. This means that on
 -- that date, the coordinate axes will disappear and, for example, on August 8th, 1969
 -- 23:00:00, the coordinate axes will be 475200 km long.

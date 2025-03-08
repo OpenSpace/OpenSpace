@@ -1,0 +1,15 @@
+-- Basic
+-- This example adds a dashboard item that shows the status of the parallel connection.
+
+local Item = {
+  Identifier = "DashboardItemParallelConnection_Example",
+  Type = "DashboardItemParallelConnection"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

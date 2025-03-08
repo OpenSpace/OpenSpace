@@ -1,0 +1,33 @@
+-- Axis Mapping
+-- This asset creates a rotation that shows coordinate axes in which the x and the y axes
+-- are flipped. While this could also be achieved with a
+-- [ConstantRotation](#base_transform_rotation_constant) class, this serves as an example
+-- for more elaborate coordinate system mappings, such as converting to a coordinate
+-- system with a known coordinate axes.
+
+local Node = {
+  Identifier = "FixedRotation_Example_Mapping",
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      XAxis = { 0.0, 1.0, 0.0 },
+      YAxis = { 1.0, 0.0, 0.0 },
+      ZAxis = { 0.0, 0.0, 1.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "FixedRotation - Mapping",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

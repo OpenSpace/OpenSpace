@@ -1,0 +1,15 @@
+-- Basic
+-- This example adds a dashboard item that shows the speed of the camera.
+
+local Item = {
+  Identifier = "DashboardItemVelocity_Example",
+  Type = "DashboardItemVelocity"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

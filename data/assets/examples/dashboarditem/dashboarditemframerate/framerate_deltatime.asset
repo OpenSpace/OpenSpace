@@ -1,0 +1,17 @@
+-- Delta Time
+-- This example adds a dashboard item that shows the frame rate of the last frame in
+-- milliseconds.
+
+local Item = {
+  Identifier = "DashboardItemFramerate_Example_DeltaTime",
+  Type = "DashboardItemFramerate",
+  FrametimeType = "Deltatime"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

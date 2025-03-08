@@ -129,6 +129,10 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This `Renderable` represents a simple sphere with an image. The image that is shown
+    // should be in an equirectangular projection/spherical panoramic image or else
+    // distortions will be introduced. The `Orientation` parameter determines whether the
+    // provided image is shown on the inside, outside, or both sides of the sphere.
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<float> size [[codegen::greater(0.f)]];

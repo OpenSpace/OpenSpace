@@ -1,0 +1,17 @@
+-- Vec4
+-- This example adds a dashboard item that shows the state of a 4-vector value property.
+
+local Item = {
+  Identifier = "DashboardItemPropertyValue_Example_Vec4",
+  Type = "DashboardItemPropertyValue",
+  URI = "RenderEngine.EnabledFontColor",
+  DisplayString = "Font Color (enabled): ({}, {}, {}, {})"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

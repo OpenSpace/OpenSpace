@@ -1,0 +1,15 @@
+-- Basic
+-- This example adds a dashboard item that shows the current simulation increment.
+
+local Item = {
+  Identifier = "DashboardItemSimulationIncrement_Example",
+  Type = "DashboardItemSimulationIncrement"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

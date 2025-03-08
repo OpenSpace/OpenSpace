@@ -1,7 +1,7 @@
 -- Quaternion
--- This asset creates a SceneGraphNode that only displays coordinate axes. The rotation of
--- the coordinate axes are determined by a constant and unchanging static rotation that is
--- provided by a four-dimensional quaternion.
+-- This asset creates a scene graph node that only displays coordinate axes. The rotation
+-- of the coordinate axes are determined by a constant and unchanging static rotation that
+-- is provided by a four-dimensional quaternion.
 
 local Node = {
   Identifier = "StaticRotation_Example_Quaternion",

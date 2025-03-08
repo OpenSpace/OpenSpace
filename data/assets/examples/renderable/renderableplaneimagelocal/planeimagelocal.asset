@@ -1,0 +1,24 @@
+-- Basic
+-- This example shows how to create a textured plane in 3D space, where the texture is
+-- loaded from a local file on disk.
+
+local Node = {
+  Identifier = "RenderablePlaneImageLocal_Example",
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 3.0E11,
+    Texture = openspace.absPath("${DATA}/test2.jpg")
+  },
+  GUI = {
+    Name = "RenderablePlaneImageLocal - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

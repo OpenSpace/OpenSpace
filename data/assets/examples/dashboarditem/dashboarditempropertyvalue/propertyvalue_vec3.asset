@@ -1,0 +1,17 @@
+-- Vec3
+-- This example adds a dashboard item that shows the state of a 3-vector value property.
+
+local Item = {
+  Identifier = "DashboardItemPropertyValue_Example_Vec3",
+  Type = "DashboardItemPropertyValue",
+  URI = "RenderEngine.GlobalRotation",
+  DisplayString = "Global Rotation: ({}, {}, {})"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

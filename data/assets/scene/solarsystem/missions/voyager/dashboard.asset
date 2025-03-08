@@ -8,9 +8,9 @@ local DistanceVoyager1 = {
   Identifier = "Voyager1Distance",
   GuiName = "Voyager 1 - Earth Distance",
   SourceType = "Node",
-  SourceNodeName = voyager1.Voyager_1.Identifier,
+  SourceNodeIdentifier = voyager1.Voyager_1.Identifier,
   DestinationType = "Node",
-  DestinationNodeName = earth.Earth.Identifier,
+  DestinationNodeIdentifier = earth.Earth.Identifier,
   Enabled = asset.enabled
 }
 
@@ -19,9 +19,9 @@ local DistanceVoyager2 = {
   Identifier = "Voyager2Distance",
   GuiName = "Voyager 2 - Earth Distance",
   SourceType = "Node",
-  SourceNodeName = voyager2.Voyager_2.Identifier,
+  SourceNodeIdentifier = voyager2.Voyager_2.Identifier,
   DestinationType = "Node",
-  DestinationNodeName = earth.Earth.Identifier,
+  DestinationNodeIdentifier = earth.Earth.Identifier,
   Enabled = asset.enabled
 }
 

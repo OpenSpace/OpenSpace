@@ -1,0 +1,17 @@
+-- Mouse Only
+-- This example adds a dashboard item that only shows the input state of the mouse inputs.
+
+local Item = {
+  Identifier = "DashboardItemInputState_Example_MouseOnly",
+  Type = "DashboardItemInputState",
+  ShowKeyboard = false,
+  ShowJoystick = false
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

@@ -41,6 +41,9 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // This `Renderable` shows a sphere with an image provided by a local file on disk. To
+    // show a sphere with an image from an online source, see
+    // [RenderableSphereImageOnline](#base_screenspace_image_online).
     struct [[codegen::Dictionary(RenderableSphereImageLocal)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::filesystem::path texture;

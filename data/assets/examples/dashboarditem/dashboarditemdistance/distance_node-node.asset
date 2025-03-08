@@ -1,0 +1,44 @@
+-- Node-Node
+-- This example adds two invisible nodes and a dashboard item that shows the distance
+-- between those two nodes.
+
+local Node1 = {
+  Identifier = "DashboardItemDistance_Example_NodeNode_Node1",
+  GUI = {
+    Name = "DashboardItemDistance - Node-Node (Node 1)"
+  }
+}
+
+local Node2 = {
+  Identifier = "DashboardItemDistance_Example_NodeNode_Node2",
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 2.0, 0.0, 0.0 }
+    }
+  },
+  GUI = {
+    Name = "DashboardItemDistance - Node-Node (Node 2)"
+  }
+}
+
+local Item = {
+  Identifier = "DashboardItemDistance_Example_NodeNode",
+  Type = "DashboardItemDistance",
+  SourceType = "Node",
+  SourceNodeIdentifier = Node1.Identifier,
+  DestinationType = "Node",
+  DestinationNodeIdentifier = Node2.Identifier
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node1)
+  openspace.addSceneGraphNode(Node2)
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+  openspace.removeSceneGraphNode(Node2)
+  openspace.removeSceneGraphNode(Node1)
+end)

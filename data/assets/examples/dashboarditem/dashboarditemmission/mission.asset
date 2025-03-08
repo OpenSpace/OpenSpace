@@ -1,0 +1,16 @@
+-- Basic
+-- This example adds a dashboard item that shows the status of the currently active
+-- mission.
+
+local Item = {
+  Identifier = "DashboardItemMission_Example",
+  Type = "DashboardItemMission"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

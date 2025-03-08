@@ -1,9 +1,9 @@
 -- Basic
--- This asset creates a SceneGraphNode that only displays coordinate axes. The rotation of
--- the coordinate axes are determined by a timeline of individual rotations. These rotations
--- are keyframes that are used to seamlessly change between different orientations. This
--- example transitions between three rotations over a long time span. This example will
--- only work if the in-game time is set to January 1st, 2000.
+-- This asset creates a scene graph node that only displays coordinate axes. The rotation
+-- of the coordinate axes are determined by a timeline of individual rotations. These
+-- rotations are keyframes that are used to seamlessly change between different
+-- orientations. This example transitions between three rotations over a long time span.
+-- This example will only work if the in-game time is set to January 1st, 2000.
 
 local Node = {
   Identifier = "TimelineRotation_Example",

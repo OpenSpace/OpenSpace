@@ -1,0 +1,15 @@
+-- Basic
+-- This example adds a new DashboardItem that shows the current in-game simulation date.
+
+local Item = {
+  Identifier = "DashboardItemDate_Example",
+  Type = "DashboardItemDate"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

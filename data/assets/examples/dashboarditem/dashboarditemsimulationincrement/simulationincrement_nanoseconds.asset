@@ -1,0 +1,17 @@
+-- Nanoseconds
+-- This example adds a dashboard item that shows the current simulation increment always
+-- expressed in nanoseconds.
+
+local Item = {
+  Identifier = "DashboardItemSimulationIncrement_Example_NoDecoration",
+  Type = "DashboardItemSimulationIncrement",
+  RequestedUnit = "Nanosecond"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

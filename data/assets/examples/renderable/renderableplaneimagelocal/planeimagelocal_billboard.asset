@@ -1,0 +1,26 @@
+-- Billboard Image
+-- This example shows how to create a textured plane in 3D space, where the texture is
+-- loaded from a local file on disk and the plane is billboarded to always face the
+-- camera.
+
+local Node = {
+  Identifier = "RenderablePlaneImageLocal_Example_Billboard",
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 3.0E11,
+    Texture = openspace.absPath("${DATA}/test2.jpg"),
+    Billboard = true
+  },
+  GUI = {
+    Name = "RenderablePlaneImageLocal - Billboard",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

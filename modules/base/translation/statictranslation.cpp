@@ -36,6 +36,8 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // This `Translation` provides a fixed translation to the attached scene graph node
+    // that does not change unless the `Position` property is changed.
     struct [[codegen::Dictionary(StaticTranslation)]] Parameters {
         // [[codegen::verbatim(PositionInfo.description)]]
         glm::dvec3 position;

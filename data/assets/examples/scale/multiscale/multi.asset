@@ -1,5 +1,5 @@
 -- Basic
--- This asset creates a SceneGraphNode that only displays coordinate axes, with a set of
+-- This asset creates a scene graph node that only displays coordinate axes, with a set of
 -- multiple scales that are applied one after the other.
 
 local Node = {

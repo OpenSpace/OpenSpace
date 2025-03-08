@@ -1,18 +1,18 @@
--- Billboarded Image
+-- Billboard Image
 -- This example shows how to create a textured plane in 3D space, where the texture is
 -- loaded from the internet though a web URL and the plane is billboarded to always
 -- face the camera.
 
 local Node = {
-  Identifier = "RenderablePlaneImageOnline_Example_Billboarded",
+  Identifier = "RenderablePlaneImageOnline_Example_Billboard",
   Renderable = {
     Type = "RenderablePlaneImageOnline",
     Size = 3.0E11,
     URL = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg",
-    Billboarded = true
+    Billboard = true
   },
   GUI = {
-    Name = "RenderablePlaneImageOnline - Billboarded",
+    Name = "RenderablePlaneImageOnline - Billboard",
     Path = "/Examples"
   }
 }

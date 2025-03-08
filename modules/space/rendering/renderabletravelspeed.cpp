@@ -87,13 +87,13 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    // This renderable can be used to visualize a certain travel speed using a line that
+    // This `Renderable` can be used to visualize a certain travel speed using a line that
     // moves at the provided speed from a start object to a target. The start position
     // will be set from the `Parent` of this scene graph node, and the end position is
     // set from the provided `Target` scene graph node. Per default, the speed is set to
     // the speed of light.
     //
-    // The length of the traveling line is set based on the travel speed and can be used
+    // The length of the travelling line is set based on the travel speed and can be used
     // to show more information related to the distance traveled. For example, a length
     // of 1 shows how far an object would move over a duration of one second based on the
     // selected speed.

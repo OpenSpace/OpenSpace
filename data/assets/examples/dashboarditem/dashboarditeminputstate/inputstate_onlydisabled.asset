@@ -1,0 +1,17 @@
+-- Only disabled
+-- This example adds a dashboard item that shows the input state of the mouse, keyboard,
+-- and joystick input devices but only when they are disabled.
+
+local Item = {
+  Identifier = "DashboardItemInputState_Example_OnlyDisabled",
+  Type = "DashboardItemInputState",
+  ShowWhenDisabled = true
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

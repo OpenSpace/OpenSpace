@@ -1,8 +1,8 @@
 -- Time offset
--- This asset creates a rotation provided by a SPICE kernel and applies it to a
--- SceneGraphNode that only displays coordinate axes. The rotation of the coordinate axes
--- are determined by SPICE, in this case pretending that the coordinate axes are rotating
--- at the same rate as Earth. In this specific example, the orientation is offset 8h back
+-- This asset creates a rotation provided by a SPICE kernel and applies it to a scene
+-- graph node that only displays coordinate axes. The rotation of the coordinate axes are
+-- determined by SPICE, in this case pretending that the coordinate axes are rotating at
+-- the same rate as Earth. In this specific example, the orientation is offset 8h back
 -- compared to the actual in-game time in OpenSpace.
 
 -- Load the default SPICE kernels, which is the planetary constants and the DE430 kernel

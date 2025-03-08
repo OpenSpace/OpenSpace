@@ -1,0 +1,56 @@
+-- Basic
+-- This asset creates a rotation that places coordinate axes close to a sphere with the
+-- z axis pointing towards the sphere. The coordinate axes are translated away from the
+-- sphere to make that orientation more obvious.
+--
+-- Making the `YAxis` `{ 0.0, 1.0, 0.0 }` and actually using the orthogonal projection of
+-- that direction means that the y axis of the new coordinate system will point in the
+-- hemisphere in which the old y-axis was pointing, albeit being orthogonal to the other
+-- specified axis. That axis is pointing towards the scene graph node holding the sphere.
+
+local Sphere = {
+  Identifier = "FixedRotation_Example_Sphere",
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 2.0, 1.5, 1.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableSphericalGrid"
+  },
+  GUI = {
+    Name = "FixedRotation - Basic (Sphere)",
+    Path = "/Examples"
+  }
+}
+
+local Node = {
+  Identifier = "FixedRotation_Example",
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "FixedRotation_Example",
+      YAxis = { 0.0, 1.0, 0.0 },
+      YAxisOrthogonal = true,
+      ZAxis = "FixedRotation_Example_Sphere"
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "FixedRotation - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Sphere)
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+  openspace.removeSceneGraphNode(Sphere)
+end)

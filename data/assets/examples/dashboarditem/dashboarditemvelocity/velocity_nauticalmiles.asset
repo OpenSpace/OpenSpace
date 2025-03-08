@@ -1,0 +1,17 @@
+-- Nautical Miles
+-- This example adds a dashboard item that shows the speed of the camera, but always
+-- displayed in nautical miles per second (or knots).
+
+local Item = {
+  Identifier = "DashboardItemVelocity_Example_NauticalMiles",
+  Type = "DashboardItemVelocity",
+  RequestedUnit = "Nautical Mile"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

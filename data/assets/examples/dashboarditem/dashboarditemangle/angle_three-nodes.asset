@@ -1,0 +1,61 @@
+-- Three nodes
+-- This example adds three invisible scene graph nodes and then shows the angle between
+-- those three nodes.
+
+local Node1 = {
+  Identifier = "DashboardItemAngle_Example_ThreeNodes_Node1",
+  GUI = {
+    Name = "DashboardItemAngle - Three Nodes (Node 1)"
+  }
+}
+
+local Node2 = {
+  Identifier = "DashboardItemAngle_Example_ThreeNodes_Node2",
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 2.0, 1.0, 0.0 }
+    }
+  },
+  GUI = {
+    Name = "DashboardItemAngle - Three Nodes (Node 2)"
+  }
+}
+
+local Node3 = {
+  Identifier = "DashboardItemAngle_Example_ThreeNodes_Node3",
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { -2.0, 1.0, 0.0 }
+    }
+  },
+  GUI = {
+    Name = "DashboardItemAngle - Three Nodes (Node 3)"
+  }
+}
+
+local Item = {
+  Identifier = "DashboardItemAngle_Example_ThreeNodes",
+  Type = "DashboardItemAngle",
+  SourceType = "Node",
+  SourceNodeIdentifier = Node1.Identifier,
+  ReferenceType = "Node",
+  ReferenceNodeIdentifier = Node2.Identifier,
+  DestinationType = "Node",
+  DestinationNodeIdentifier = Node3.Identifier
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node1)
+  openspace.addSceneGraphNode(Node2)
+  openspace.addSceneGraphNode(Node3)
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+  openspace.removeSceneGraphNode(Node3)
+  openspace.removeSceneGraphNode(Node2)
+  openspace.removeSceneGraphNode(Node1)
+end)

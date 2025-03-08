@@ -1,7 +1,7 @@
 -- Euler Angles
--- This asset creates a rotation provided by Euler angles and applies it to a
--- SceneGraphNode that only displays coordinate axes. The rotation of the coordinate axes
--- are determined by a constant and unchanging static rotation.
+-- This asset creates a rotation provided by Euler angles and applies it to a scene graph
+-- node that only displays coordinate axes. The rotation of the coordinate axes are
+-- determined by a constant and unchanging static rotation.
 
 local Node = {
   Identifier = "StaticRotation_Example_Euler",

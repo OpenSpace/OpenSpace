@@ -15,9 +15,9 @@ local Distance = {
   Identifier = "Rosetta67PDistance",
   GuiName = "Rosetta 67P Distance",
   SourceType = "Node",
-  SourceNodeName = rosetta.Rosetta.Identifier,
+  SourceNodeIdentifier = rosetta.Rosetta.Identifier,
   DestinationType = "Node",
-  DestinationNodeName = cg.Comet67P.Identifier
+  DestinationNodeIdentifier = cg.Comet67P.Identifier
 }
 
 local Instruments = {

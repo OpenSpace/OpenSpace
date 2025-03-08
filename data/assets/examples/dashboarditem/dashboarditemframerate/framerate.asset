@@ -1,0 +1,16 @@
+-- Basic
+-- This example adds a dashboard item that shows the average number of frames per second,
+-- which is the default value for the frame time type setting.
+
+local Item = {
+  Identifier = "DashboardItemFramerate_Example",
+  Type = "DashboardItemFramerate"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

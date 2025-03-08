@@ -40,7 +40,8 @@ namespace {
         "FormatString",
         "Format String",
         "The format text describing how this dashboard item renders its text. This text "
-        "must contain exactly one {} which is a placeholder that will contain the date.",
+        "must contain exactly one {} which is a placeholder that will contain the date "
+        "in the format as specified by `TimeFormat`.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -54,6 +55,10 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // This `DashboardItem` shows the current in-game simulation time. The `FormatString`
+    // and the `TimeFormat` options provide the ability to customize the output that is
+    // printed. See these two parameters for more information on how to structure the
+    // inputs.
     struct [[codegen::Dictionary(DashboardItemDate)]] Parameters {
         // [[codegen::verbatim(FormatStringInfo.description)]]
         std::optional<std::string> formatString;
@@ -75,8 +80,8 @@ documentation::Documentation DashboardItemDate::Documentation() {
 
 DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary, 15.f)
-    , _formatString(FormatStringInfo, "Date: {} UTC")
-    , _timeFormat(TimeFormatInfo, "YYYY MON DDTHR:MN:SC.### ::RND")
+    , _formatString(FormatStringInfo, "Date: {}")
+    , _timeFormat(TimeFormatInfo, "YYYY MON DD HR:MN:SC.### UTC ::RND")
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

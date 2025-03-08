@@ -1,7 +1,9 @@
 local Item = {
   Type = "DashboardItemDistance",
   Identifier = "Distance",
-  GuiName = "Distance"
+  GuiName = "Distance",
+  SourceType = "Camera",
+  DestinationType = "Focus"
 }
 
 

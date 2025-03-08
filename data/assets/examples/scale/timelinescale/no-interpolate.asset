@@ -1,5 +1,5 @@
 -- No Interpolation
--- This asset creates a SceneGraphNode that only displays coordinate axes. The scale of
+-- This asset creates a scene graph node that only displays coordinate axes. The scale of
 -- the coordinate axes are determined by a timeline of individual scales that are used
 -- without interpolating between the timeline entries. These scales are keyframes that are
 -- used to change between different sizes. This example transitions between three sizes.

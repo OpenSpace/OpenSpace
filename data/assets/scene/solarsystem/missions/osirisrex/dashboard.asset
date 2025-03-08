@@ -15,9 +15,9 @@ local Distance = {
   Identifier = "OsirisRexBennuDistance",
   GuiName = "OSIRIS-REx Bennu Distance",
   SourceType = "Node",
-  SourceNodeName = model.OsirisRex.Identifier,
+  SourceNodeIdentifier = model.OsirisRex.Identifier,
   DestinationType = "Node",
-  DestinationNodeName = transforms.BennuBarycenter.Identifier
+  DestinationNodeIdentifier = transforms.BennuBarycenter.Identifier
 }
 
 local Instruments = {
