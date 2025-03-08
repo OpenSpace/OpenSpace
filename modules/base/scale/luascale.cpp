@@ -64,7 +64,8 @@ documentation::Documentation LuaScale::Documentation() {
 }
 
 LuaScale::LuaScale(const ghoul::Dictionary& dictionary)
-    : _luaScriptFile(ScriptInfo)
+    : Scale(dictionary)
+    , _luaScriptFile(ScriptInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

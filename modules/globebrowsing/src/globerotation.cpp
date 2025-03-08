@@ -117,7 +117,8 @@ documentation::Documentation GlobeRotation::Documentation() {
 }
 
 GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
-    : _globe(GlobeInfo)
+    : Rotation(dictionary)
+    , _globe(GlobeInfo)
     , _latitude(LatitudeInfo, 0.0, -90.0, 90.0)
     , _longitude(LongitudeInfo, 0.0, -180.0, 180.0)
     , _angle(AngleInfo, 0.0, 0.0, 360.0)

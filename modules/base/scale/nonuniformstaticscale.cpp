@@ -60,7 +60,8 @@ documentation::Documentation NonUniformStaticScale::Documentation() {
 }
 
 NonUniformStaticScale::NonUniformStaticScale(const ghoul::Dictionary& dictionary)
-    : _scaleValue(ScaleInfo, glm::dvec3(1.0), glm::dvec3(0.1), glm::dvec3(100.0))
+    : Scale(dictionary)
+    , _scaleValue(ScaleInfo, glm::dvec3(1.0), glm::dvec3(0.1), glm::dvec3(100.0))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

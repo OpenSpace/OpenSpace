@@ -63,7 +63,8 @@ documentation::Documentation ConstantRotation::Documentation() {
 }
 
 ConstantRotation::ConstantRotation(const ghoul::Dictionary& dictionary)
-    : _rotationAxis(
+    : Rotation(dictionary)
+    , _rotationAxis(
         RotationInfo,
         glm::dvec3(0.0, 0.0, 1.0),
         glm::dvec3(-1.0),

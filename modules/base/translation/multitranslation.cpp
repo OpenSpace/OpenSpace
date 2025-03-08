@@ -47,7 +47,9 @@ documentation::Documentation MultiTranslation::Documentation() {
     return codegen::doc<Parameters>("base_transform_translation_multi");
 }
 
-MultiTranslation::MultiTranslation(const ghoul::Dictionary& dictionary) {
+MultiTranslation::MultiTranslation(const ghoul::Dictionary& dictionary)
+    : Translation(dictionary)
+{
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     int i = 0;

@@ -556,17 +556,6 @@ SceneGraphNode::SceneGraphNode()
     , _useGuiOrdering(UseGuiOrderInfo, false)
     , _guiFocusable(GuiFocusableInfo, true)
     , _guiOrderingNumber(GuiOrderInfo, 0.f)
-    , _transform {
-        ghoul::mm_unique_ptr<Translation>(
-            global::memoryManager->PersistentMemory.alloc<StaticTranslation>()
-        ),
-        ghoul::mm_unique_ptr<Rotation>(
-            global::memoryManager->PersistentMemory.alloc<StaticRotation>()
-        ),
-        ghoul::mm_unique_ptr<Scale>(
-            global::memoryManager->PersistentMemory.alloc<StaticScale>()
-        )
-    }
     , _boundingSphere(BoundingSphereInfo, -1.0, -1.0, 1e12)
     , _evaluatedBoundingSphere(EvalBoundingSphereInfo)
     , _interactionSphere(InteractionSphereInfo, -1.0, -1.0, 1e12)
@@ -582,6 +571,29 @@ SceneGraphNode::SceneGraphNode()
     , _supportsDirectInteraction(SupportsDirectInteractionInfo, false)
     , _showDebugSphere(ShowDebugSphereInfo, false)
 {
+    {
+        ghoul::Dictionary translation;
+        translation.setValue("Type", std::string("StaticTranslation"));
+        translation.setValue("Position", glm::dvec3(0.0));
+        _transform.translation = ghoul::mm_unique_ptr<Translation>(
+            global::memoryManager->PersistentMemory.alloc<StaticTranslation>(translation)
+        );
+
+        ghoul::Dictionary rotation;
+        rotation.setValue("Type", std::string("StaticRotation"));
+        rotation.setValue("Rotation", glm::dvec3(0.0));
+        _transform.rotation = ghoul::mm_unique_ptr<Rotation>(
+            global::memoryManager->PersistentMemory.alloc<StaticRotation>(rotation)
+        );
+
+        ghoul::Dictionary scale;
+        scale.setValue("Type", std::string("StaticScale"));
+        scale.setValue("Scale", 1.0);
+        _transform.scale = ghoul::mm_unique_ptr<Scale>(
+            global::memoryManager->PersistentMemory.alloc<StaticScale>(scale)
+        );
+    }
+
     addProperty(_computeScreenSpaceValues);
     addProperty(_screenSpacePosition);
     _screenVisibility.setReadOnly(true);
@@ -767,7 +779,15 @@ void SceneGraphNode::update(const UpdateData& data) {
     TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
 #endif // TRACY_ENABLE
 
-    if (_state != State::GLInitialized || !isTimeFrameActive(data.time)) {
+    if (_state != State::GLInitialized) {
+        return;
+    }
+
+    if (_timeFrame) {
+        _timeFrame->update(data.time);
+    }
+
+    if (!isTimeFrameActive()) {
         return;
     }
 
@@ -817,7 +837,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
 
     if (_state != State::GLInitialized ||
         !(_renderable && _renderable->isVisible() && _renderable->isReady()) ||
-        !isTimeFrameActive(data.time))
+        !isTimeFrameActive())
     {
         return;
     }
@@ -1188,18 +1208,18 @@ glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
     }
 }
 
-bool SceneGraphNode::isTimeFrameActive(const Time& time) const {
+bool SceneGraphNode::isTimeFrameActive() const {
     for (SceneGraphNode* dep : _dependencies) {
-        if (!dep->isTimeFrameActive(time)) {
+        if (!dep->isTimeFrameActive()) {
             return false;
         }
     }
 
-    if (_parent && !_parent->isTimeFrameActive(time)) {
+    if (_parent && !_parent->isTimeFrameActive()) {
         return false;
     }
 
-    return !_timeFrame || _timeFrame->isActive(time);
+    return !_timeFrame || _timeFrame->isActive();
 }
 
 glm::dmat3 SceneGraphNode::calculateWorldRotation() const {

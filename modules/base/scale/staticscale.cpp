@@ -55,20 +55,14 @@ documentation::Documentation StaticScale::Documentation() {
 }
 
 StaticScale::StaticScale(const ghoul::Dictionary& dictionary)
-    : StaticScale()
+    : Scale(dictionary)
+    , _scaleValue(ScaleInfo, 1.0, 0.1, 100.0)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
+
     _scaleValue = p.scale;
-    _type = "StaticScale";
-}
-
-StaticScale::StaticScale()
-    : _scaleValue(ScaleInfo, 1.0, 0.1, 100.0)
-{
-    addProperty(_scaleValue);
-
     _scaleValue.onChange([this]() { requireUpdate(); });
-    _type = "StaticScale";
+    addProperty(_scaleValue);
 }
 
 glm::dvec3 StaticScale::scaleValue(const UpdateData&) const {

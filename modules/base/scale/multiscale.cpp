@@ -47,7 +47,9 @@ documentation::Documentation MultiScale::Documentation() {
     return codegen::doc<Parameters>("base_transform_scale_multi");
 }
 
-MultiScale::MultiScale(const ghoul::Dictionary& dictionary) {
+MultiScale::MultiScale(const ghoul::Dictionary& dictionary)
+    : Scale(dictionary)
+{
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     int i = 0;

@@ -66,19 +66,9 @@ documentation::Documentation HorizonsTranslation::Documentation() {
     return codegen::doc<Parameters>("base_transform_translation_horizons");
 }
 
-HorizonsTranslation::HorizonsTranslation()
-    : _horizonsFiles(HorizonsTextFileInfo)
-{
-    _horizonsFiles.onChange([this](){
-        requireUpdate();
-        notifyObservers();
-        loadData();
-    });
-    addProperty(_horizonsFiles);
-}
-
 HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
-    : HorizonsTranslation()
+    : Translation(dictionary)
+    , _horizonsFiles(HorizonsTextFileInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -99,6 +89,13 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
         );
         _horizonsFiles = f;
     }
+
+    _horizonsFiles.onChange([this](){
+        requireUpdate();
+        notifyObservers();
+        loadData();
+    });
+    addProperty(_horizonsFiles);
 }
 
 glm::dvec3 HorizonsTranslation::position(const UpdateData& data) const {

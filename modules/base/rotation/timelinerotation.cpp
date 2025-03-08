@@ -58,7 +58,8 @@ documentation::Documentation TimelineRotation::Documentation() {
 }
 
 TimelineRotation::TimelineRotation(const ghoul::Dictionary& dictionary)
-    : _shouldInterpolate(ShouldInterpolateInfo, true)
+    : Rotation(dictionary)
+    , _shouldInterpolate(ShouldInterpolateInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

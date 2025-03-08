@@ -1,0 +1,35 @@
+-- Time Frame
+-- This asset creates a translation that is only applied from 2000 JAN 01 and just prior
+-- to 2002 JAN 01. In this specific example, the coordinate axes that are attached to the
+-- scene graph node are offset by 50 meters along the y-axis and 10 meters along the
+-- negative z-axis.
+
+local Node = {
+  Identifier = "StaticTranslation_TimeFrame",
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0, 50.0, -10.0 },
+      TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2000 JAN 01",
+        End = "2002 JAN 01"
+      }
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "StaticTranslation - TimeFrame",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

@@ -37,7 +37,6 @@ namespace documentation { struct Documentation; }
 
 class StaticTranslation : public Translation {
 public:
-    StaticTranslation();
     explicit StaticTranslation(const ghoul::Dictionary& dictionary);
 
     glm::dvec3 position(const UpdateData& data) const override;

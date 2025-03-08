@@ -636,20 +636,20 @@ void RenderableOrbitalKepler::updateBuffers() {
     _vertexBufferData.resize(nVerticesTotal);
 
     size_t vertexBufIdx = 0;
-    KeplerTranslation keplerTranslator;
     for (int orbitIdx = 0; orbitIdx < numOrbits; ++orbitIdx) {
         const kepler::Parameters& orbit = parameters[orbitIdx];
 
-        keplerTranslator.setKeplerElements(
-            orbit.eccentricity,
-            orbit.semiMajorAxis,
-            orbit.inclination,
-            orbit.ascendingNode,
-            orbit.argumentOfPeriapsis,
-            orbit.meanAnomaly,
-            orbit.period,
-            orbit.epoch
-        );
+        ghoul::Dictionary d;
+        d.setValue("Type", std::string("KeplerTranslation"));
+        d.setValue("Eccentricity", orbit.eccentricity);
+        d.setValue("SemiMajorAxis", orbit.semiMajorAxis);
+        d.setValue("Inclination", orbit.inclination);
+        d.setValue("AscendingNode", orbit.ascendingNode);
+        d.setValue("ArgumentOfPeriapsis", orbit.argumentOfPeriapsis);
+        d.setValue("MeanAnomaly", orbit.meanAnomaly);
+        d.setValue("Period", orbit.period);
+        d.setValue("Epoch", orbit.epoch);
+        KeplerTranslation keplerTranslator = KeplerTranslation(d);
 
         for (GLint j = 0 ; j < (_segmentSize[orbitIdx]); j++) {
             const double timeOffset = orbit.period *
