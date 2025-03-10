@@ -85,6 +85,10 @@ void schwarzchild(
 
     cudaMemcpy(angle_out, d_angle_values, num_rays * 2 * sizeof(float), cudaMemcpyDeviceToHost);
 
+    // Add handeling of special case straight backwards
+    angle_out[(num_rays - 1) * 2] = 0.0f;
+    angle_out[(num_rays - 1) * 2 + 1] = 0.0f;
+
     cudaFree(d_dudphi_0_values);
     cudaFree(d_angle_values);
 }

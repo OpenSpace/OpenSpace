@@ -19,25 +19,43 @@ const float PI = 3.1415926535897932384626433832795f;
 const float VIEWGRIDZ = -1.0f;
 const float INF = 1.0f/0.0f;
 
-float bstWarpTable(float phi){
+float lerp(float start, float end, float t) {
+    return start + t * (end - start);
+}
+
+float interpelateWarpTable(int indexStart, int indexEnd, float localPhi){
+    float envMapPhiStart = schwarzschildWarpTable[indexStart * 2 + 1];
+    float envMapPhiEnd = schwarzschildWarpTable[indexEnd * 2 + 1];
+
+    float localPhiStart = schwarzschildWarpTable[indexStart * 2];
+    float localPhiEnd = schwarzschildWarpTable[indexEnd * 2];
+
+    float t = (localPhi - localPhiStart) / (localPhiEnd - localPhiStart);
+    
+    return lerp(envMapPhiStart, envMapPhiEnd, t);
+}
+
+ivec2 bstWarpTable(float phi){
     float midPhi = -1.0f;
     float deltaPhi = -1.0f;
 
     float minDeltaPhi = INF;
-    int index = -1;
+    int closestIndex = -1;
 
     int left = 0;
     int mid = -1;
-    int right = schwarzschildWarpTable.length() / 2 - 1;
+    const int tableSize = schwarzschildWarpTable.length() / 2;
+    int right = tableSize - 1;
 
     while(left <= right){
         mid = (left + right) / 2;
         midPhi = schwarzschildWarpTable[mid * 2];
 
         deltaPhi = abs(midPhi - phi);
+        
         if(deltaPhi < minDeltaPhi){
             minDeltaPhi = deltaPhi;
-            index = mid;
+            closestIndex = mid;
         }
 
         if (phi > midPhi) {
@@ -46,12 +64,30 @@ float bstWarpTable(float phi){
             left = mid + 1;
         }
     }
+    
+    int leftIndex = closestIndex - 1;
+    int rightIndex = closestIndex + 1;
+    float leftDist = INF; 
+    float rightDist = INF;
 
-    return (index != -1) ? schwarzschildWarpTable[index * 2 + 1] : 0.0f;
+    if (rightIndex < tableSize - 1){
+        rightDist = abs(schwarzschildWarpTable[rightIndex * 2] - phi);
+    }
+    if (leftIndex > 0){
+        leftDist = abs(schwarzschildWarpTable[leftIndex * 2] - phi);
+    }
+
+    int nextClosestIndex = (rightDist < leftDist) ? rightIndex : leftIndex;
+
+    float v1 = schwarzschildWarpTable[closestIndex * 2 + 1];
+    float v2 = schwarzschildWarpTable[nextClosestIndex * 2 + 1];
+
+    return v1 < v2 ? ivec2(closestIndex, nextClosestIndex) : ivec2(nextClosestIndex, closestIndex);
 }
 
 float getEndAngleFromTable(float phi){
-    return bstWarpTable(phi);
+    ivec2 indices = bstWarpTable(phi);
+    return interpelateWarpTable(indices.x, indices.y, phi);
 }
 
 vec2 applyBlackHoleWarp(vec2 cameraOutSphereCoords){
@@ -90,10 +126,6 @@ vec2 sphericalToUV(vec2 sphereCoords){
     float v = mod(sphereCoords.y, PI) / PI;
     
     return vec2(u, v);
-}
-
-float lerp(float start, float end, float t) {
-    return start + t * (end - start);
 }
 
 Fragment getFragment() {

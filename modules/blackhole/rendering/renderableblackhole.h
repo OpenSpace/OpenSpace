@@ -41,7 +41,7 @@ namespace openspace {
 
         ghoul::opengl::ProgramObject* _program = nullptr;
 
-        size_t _rayCount = 10000;
+        size_t _rayCount = 1000;
         size_t _stepsCount = 50000;
         float _stepLength = 0.001f;
 
