@@ -19,21 +19,39 @@ const float PI = 3.1415926535897932384626433832795f;
 const float VIEWGRIDZ = -1.0f;
 const float INF = 1.0f/0.0f;
 
+float bstWarpTable(float phi){
+    float midPhi = -1.0f;
+    float deltaPhi = -1.0f;
 
-float getEndAngleFromTable(float phi){
-    float endPhiWdithLeastDistance;
-    float currentDistance = INF;
+    float minDeltaPhi = INF;
+    int index = -1;
 
-    int tableLength = schwarzschildWarpTable.length();
+    int left = 0;
+    int mid = -1;
+    int right = schwarzschildWarpTable.length() / 2 - 1;
 
-    for(int i = 0; i < tableLength; i += 2){
-        float phiDistance = abs(schwarzschildWarpTable[i] - phi);
-        if(phiDistance < currentDistance){
-            currentDistance = phiDistance;
-            endPhiWdithLeastDistance = schwarzschildWarpTable[i + 1];
+    while(left <= right){
+        mid = (left + right) / 2;
+        midPhi = schwarzschildWarpTable[mid * 2];
+
+        deltaPhi = abs(midPhi - phi);
+        if(deltaPhi < minDeltaPhi){
+            minDeltaPhi = deltaPhi;
+            index = mid;
+        }
+
+        if (phi > midPhi) {
+            right = mid - 1;
+        } else {
+            left = mid + 1;
         }
     }
-    return endPhiWdithLeastDistance;
+
+    return (index != -1) ? schwarzschildWarpTable[index * 2 + 1] : 0.0f;
+}
+
+float getEndAngleFromTable(float phi){
+    return bstWarpTable(phi);
 }
 
 vec2 applyBlackHoleWarp(vec2 cameraOutSphereCoords){
@@ -74,6 +92,10 @@ vec2 sphericalToUV(vec2 sphereCoords){
     return vec2(u, v);
 }
 
+float lerp(float start, float end, float t) {
+    return start + t * (end - start);
+}
+
 Fragment getFragment() {
     Fragment frag;
 
@@ -97,14 +119,24 @@ Fragment getFragment() {
 
     // Init rotation of the black hole
     vec4 envMapCoords = vec4(sphericalToCartesian(envMapSphericalCoords.x, envMapSphericalCoords.y), 0.0f);
-    float rotationAngle = cameraToAnchorNodeDistance;
+    float rotationAngle = PI/2;
+    float cameraRotationAngle = cameraToAnchorNodeDistance;
+
     mat4 rotationMatrixX = mat4(
         1.0f,    0.0f,                 0.0f,               0.0f,
         0.0f,    cos(rotationAngle),  -sin(rotationAngle), 0.0f,
         0.0f,    sin(rotationAngle),   cos(rotationAngle), 0.0f,
         0.0f,    0.0f,                 0.0f,               1.0f
     );
-    envMapCoords = rotationMatrixX * envMapCoords;
+
+    mat4 rotationMatrixZ = mat4(
+        cos(cameraRotationAngle), -sin(cameraRotationAngle), 0.0f, 0.0f,
+        sin(cameraRotationAngle),  cos(cameraRotationAngle), 0.0f, 0.0f,
+        0.0f,               0.0f,               1.0f, 0.0f,
+        0.0f,               0.0f,               0.0f, 1.0f
+    );
+    
+    envMapCoords = rotationMatrixZ * rotationMatrixX * envMapCoords;
     sphericalCoords = cartesianToSpherical(envMapCoords.xyz);
 
     vec2 uv = sphericalToUV(sphericalCoords);
