@@ -105,11 +105,20 @@ std::string FindLastClosedFieldlinesTask::description() {
 void FindLastClosedFieldlinesTask::perform(
     const Task::ProgressCallback& progressCallback)
 {
+    ZoneScoped;
     for (const std::filesystem::path& cdfPath : _sourceFiles) {
+        ZoneScopedN("Per Path");
+
         std::unique_ptr<ccmc::Kameleon> kameleon =
             kameleonHelper::createKameleonObject(cdfPath.string());
         ccmc::Tracer tracer(kameleon.get());
-        tracer.setInnerBoundary(1.5f);
+        if (kameleon->doesAttributeExist("r_body")) {
+            auto innerBoundary = kameleon->getVariableAttribute("r_body", "r_body");
+            tracer.setInnerBoundary(innerBoundary.getAttributeFloat());
+        }
+        else {
+            tracer.setInnerBoundary(2.5f);
+        }
 
         FieldlinesState state;
         const std::string& modelname = kameleon->getModelName();
@@ -121,6 +130,7 @@ void FindLastClosedFieldlinesTask::perform(
         std::vector<std::string> magVariableNames;
         long nVariables = kameleon->getNumberOfVariables();
         for (long i = 0; i < nVariables; ++i) {
+            ZoneScopedN("Per Parameter");
             std::string name = kameleon->getVariableName(i);
             if (name.size() <= 3) {
                 if (name.back() == 'x' && i+2 < nVariables) {
