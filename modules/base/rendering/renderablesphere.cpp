@@ -276,7 +276,6 @@ void RenderableSphere::deinitializeGL() {
             global::renderEngine->removeRenderProgram(p);
         }
     );
-
     _shader = nullptr;
 }
 
@@ -426,12 +425,12 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableSphere::update(const UpdateData&) {
-    if (_shader->isDirty()) {
+    if (_shader->isDirty()) [[unlikely]] {
         _shader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
 
-    if (_sphereIsDirty) {
+    if (_sphereIsDirty) [[unlikely]] {
         _sphere = std::make_unique<Sphere>(_size, _segments);
         _sphere->initialize();
         _sphereIsDirty = false;

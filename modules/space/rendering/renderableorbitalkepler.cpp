@@ -45,7 +45,6 @@
 #include <vector>
 
 namespace {
-
     // The possible values for the _renderingModes property
     enum RenderingMode {
         RenderingModeTrail = 0,
@@ -398,37 +397,8 @@ void RenderableOrbitalKepler::initializeGL() {
         }
     );
 
-    // Init cache for line rendering
-    _uniformTrailCache.modelView =
-        _trailProgram->uniformLocation("modelViewTransform");
-    _uniformTrailCache.projection =
-        _trailProgram->uniformLocation("projectionTransform");
-    _uniformTrailCache.colorFadeCutoffValue =
-        _trailProgram->uniformLocation("colorFadeCutoffValue");
-    _uniformTrailCache.trailFadeExponent =
-        _trailProgram->uniformLocation("trailFadeExponent");
-    _uniformTrailCache.inGameTime = _trailProgram->uniformLocation("inGameTime");
-    _uniformTrailCache.color = _trailProgram->uniformLocation("color");
-    _uniformTrailCache.opacity = _trailProgram->uniformLocation("opacity");
-
-    // Init cache for point rendering
-    _uniformPointCache.modelTransform = _pointProgram->uniformLocation("modelTransform");
-    _uniformPointCache.viewTransform = _pointProgram->uniformLocation("viewTransform");
-    _uniformPointCache.cameraUpWorld = _pointProgram->uniformLocation("cameraUpWorld");
-    _uniformPointCache.inGameTime = _pointProgram->uniformLocation("inGameTime");
-    _uniformPointCache.color = _pointProgram->uniformLocation("color");
-    _uniformPointCache.enableMaxSize = _pointProgram->uniformLocation("enableMaxSize");
-    _uniformPointCache.maxSize = _pointProgram->uniformLocation("maxSize");
-    _uniformPointCache.enableOutline = _pointProgram->uniformLocation("enableOutline");
-    _uniformPointCache.outlineColor = _pointProgram->uniformLocation("outlineColor");
-    _uniformPointCache.outlineWeight = _pointProgram->uniformLocation("outlineWeight");
-    _uniformPointCache.opacity = _pointProgram->uniformLocation("opacity");
-    _uniformPointCache.projectionTransform =
-        _pointProgram->uniformLocation("projectionTransform");
-    _uniformPointCache.cameraPositionWorld =
-        _pointProgram->uniformLocation("cameraPositionWorld");
-    _uniformPointCache.pointSizeExponent =
-        _pointProgram->uniformLocation("pointSizeExponent");
+    ghoul::opengl::updateUniformLocations(*_trailProgram, _uniformTrailCache);
+    ghoul::opengl::updateUniformLocations(*_pointProgram, _uniformPointCache);
 
     updateBuffers();
 }
@@ -555,11 +525,11 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
             data.time.j2000Seconds()
         );
         _trailProgram->setUniform(
-            _uniformTrailCache.modelView,
+            _uniformTrailCache.modelViewTransform,
             calcModelViewTransform(data)
         );
         _trailProgram->setUniform(
-            _uniformTrailCache.projection,
+            _uniformTrailCache.projectionTransform,
             data.camera.projectionMatrix()
         );
 
@@ -592,10 +562,7 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableOrbitalKepler::updateBuffers() {
-    std::vector<kepler::Parameters> parameters = kepler::readFile(
-       _path.value(),
-        _format
-    );
+    std::vector<kepler::Parameters> parameters = kepler::readFile(_path.value(), _format);
 
     _numObjects = parameters.size();
 
@@ -654,7 +621,7 @@ void RenderableOrbitalKepler::updateBuffers() {
         const double scale = static_cast<double>(_segmentQuality) * 10.0;
         const kepler::Parameters& p = parameters[i];
         _segmentSize.push_back(
-            static_cast<int>(scale + (scale / pow(1.0 - p.eccentricity, 1.2)))
+            static_cast<int>(scale + (scale / std::pow(1.0 - p.eccentricity, 1.2)))
         );
         _startIndex.push_back(_startIndex[i] + static_cast<GLint>(_segmentSize[i]));
     }
@@ -669,20 +636,20 @@ void RenderableOrbitalKepler::updateBuffers() {
     _vertexBufferData.resize(nVerticesTotal);
 
     size_t vertexBufIdx = 0;
-    KeplerTranslation keplerTranslator;
     for (int orbitIdx = 0; orbitIdx < numOrbits; ++orbitIdx) {
         const kepler::Parameters& orbit = parameters[orbitIdx];
 
-        keplerTranslator.setKeplerElements(
-            orbit.eccentricity,
-            orbit.semiMajorAxis,
-            orbit.inclination,
-            orbit.ascendingNode,
-            orbit.argumentOfPeriapsis,
-            orbit.meanAnomaly,
-            orbit.period,
-            orbit.epoch
-        );
+        ghoul::Dictionary d;
+        d.setValue("Type", std::string("KeplerTranslation"));
+        d.setValue("Eccentricity", orbit.eccentricity);
+        d.setValue("SemiMajorAxis", orbit.semiMajorAxis);
+        d.setValue("Inclination", orbit.inclination);
+        d.setValue("AscendingNode", orbit.ascendingNode);
+        d.setValue("ArgumentOfPeriapsis", orbit.argumentOfPeriapsis);
+        d.setValue("MeanAnomaly", orbit.meanAnomaly);
+        d.setValue("Period", orbit.period);
+        d.setValue("Epoch", orbit.epoch);
+        KeplerTranslation keplerTranslator = KeplerTranslation(d);
 
         for (GLint j = 0 ; j < (_segmentSize[orbitIdx]); j++) {
             const double timeOffset = orbit.period *

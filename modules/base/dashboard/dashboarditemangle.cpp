@@ -127,20 +127,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemAngle::Documentation() {
-    documentation::Documentation doc =
-        codegen::doc<Parameters>("base_dashboarditem_angle");
-
-    // @TODO cleanup
-    // Insert the parent's documentation entries until we have a verifier that can deal
-    // with class hierarchy
-    documentation::Documentation parentDoc = DashboardTextItem::Documentation();
-    doc.entries.insert(
-        doc.entries.end(),
-        parentDoc.entries.begin(),
-        parentDoc.entries.end()
+    return codegen::doc<Parameters>(
+        "base_dashboarditem_angle",
+        DashboardTextItem::Documentation()
     );
-
-    return doc;
 }
 
 DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
@@ -248,10 +238,10 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
     }
     addProperty(_destination.nodeName);
 
-    _buffer.resize(128);
+    _localBuffer.resize(128);
 }
 
-void DashboardItemAngle::render(glm::vec2& penPosition) {
+void DashboardItemAngle::update() {
     ZoneScoped;
 
     std::pair<glm::dvec3, std::string> sourceInfo = positionAndLabel(_source);
@@ -261,19 +251,14 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
     const glm::dvec3 a = referenceInfo.first - sourceInfo.first;
     const glm::dvec3 b = destinationInfo.first - sourceInfo.first;
 
-    std::fill(_buffer.begin(), _buffer.end(), char(0));
+    std::fill(_localBuffer.begin(), _localBuffer.end(), char(0));
     if (glm::length(a) == 0.0 || glm::length(b) == 0) {
         char* end = std::format_to(
-            _buffer.data(),
+            _localBuffer.data(),
             "Could not compute angle at {} between {} and {}",
             sourceInfo.second, destinationInfo.second, referenceInfo.second
         );
-        const std::string_view text = std::string_view(
-            _buffer.data(),
-            end - _buffer.data()
-        );
-        penPosition.y -= _font->height();
-        RenderFont(*_font, penPosition, text);
+        _buffer = std::string(_localBuffer.data(), end - _localBuffer.data());
     }
     else {
         const double angle = glm::degrees(
@@ -281,15 +266,11 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
         );
 
         char* end = std::format_to(
-            _buffer.data(),
+            _localBuffer.data(),
             "Angle at {} between {} and {}: {} degrees",
             sourceInfo.second, destinationInfo.second, referenceInfo.second, angle
         );
-        const std::string_view text = std::string_view(
-            _buffer.data(), end - _buffer.data()
-        );
-        penPosition.y -= _font->height();
-        RenderFont(*_font, penPosition, text);
+        _buffer = std::string(_localBuffer.data(), end - _localBuffer.data());
     }
 }
 

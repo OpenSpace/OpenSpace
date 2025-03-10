@@ -40,7 +40,7 @@ public:
     explicit DashboardItemElapsedTime(const ghoul::Dictionary& dictionary);
     ~DashboardItemElapsedTime() override = default;
 
-    void render(glm::vec2& penPosition) override;
+    void update() override;
 
     glm::vec2 size() const override;
 

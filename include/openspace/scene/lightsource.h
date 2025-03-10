@@ -26,8 +26,8 @@
 #define __OPENSPACE_CORE___LIGHTSOURCE___H__
 
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/scalar/boolproperty.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/glm.h>
 #include <memory>
 
@@ -45,7 +45,6 @@ public:
     static std::unique_ptr<LightSource> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
-    LightSource();
     explicit LightSource(const ghoul::Dictionary& dictionary);
     ~LightSource() override = default;
 

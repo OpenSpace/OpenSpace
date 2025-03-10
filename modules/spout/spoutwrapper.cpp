@@ -74,7 +74,6 @@ namespace {
         // [[codegen::verbatim(NameSenderInfo.description)]]
         std::string spoutName;
     };
-
 #include "spoutwrapper_codegen.cpp"
 } // namespace
 

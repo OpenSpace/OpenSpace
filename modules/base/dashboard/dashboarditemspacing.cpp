@@ -47,7 +47,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemSpacing::Documentation() {
-    return codegen::doc<Parameters>("base_dashboarditem_spacing");
+    return codegen::doc<Parameters>(
+        "base_dashboarditem_spacing",
+        DashboardItem::Documentation()
+    );
 }
 
 DashboardItemSpacing::DashboardItemSpacing(const ghoul::Dictionary& dictionary)
@@ -59,6 +62,8 @@ DashboardItemSpacing::DashboardItemSpacing(const ghoul::Dictionary& dictionary)
     _spacing = p.spacing.value_or(_spacing);
     addProperty(_spacing);
 }
+
+void DashboardItemSpacing::update() {}
 
 void DashboardItemSpacing::render(glm::vec2& penPosition) {
     penPosition.y -= _spacing;

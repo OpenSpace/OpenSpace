@@ -54,7 +54,7 @@ Transition::Transition(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _from = p.from;
     _to = p.to;
-    _action = p.action.value_or("");
+    _action = p.action.value_or(_action);
 }
 
 const std::string& Transition::from() const {
@@ -66,9 +66,6 @@ const std::string& Transition::to() const {
 }
 
 void Transition::performAction() const {
-    if (_action.empty()) {
-        return;
-    }
     global::scriptEngine->queueScript(_action);
 }
 

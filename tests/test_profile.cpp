@@ -41,13 +41,6 @@
 // compiler to agree
 // NOLINTBEGIN(modernize-use-emplace)
 
-namespace {
-    std::ostream& operator<<(std::ostream& os, const openspace::Profile& profile) {
-        os << profile.serialize();
-        return os;
-    }
-} // namespace openspace
-
 using namespace openspace;
 
 //

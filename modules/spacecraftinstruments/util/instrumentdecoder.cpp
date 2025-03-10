@@ -63,7 +63,7 @@ const std::string& InstrumentDecoder::stopCommand() {
     return _stopCommand;
 }
 
-const std::string& InstrumentDecoder::decoderType() const {
+std::string_view InstrumentDecoder::decoderType() const {
     return _type;
 }
 

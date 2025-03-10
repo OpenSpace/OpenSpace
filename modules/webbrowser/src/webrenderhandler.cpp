@@ -184,7 +184,7 @@ void WebRenderHandler::updateTexture() {
         return;
     }
 
-    if (_textureSizeIsDirty) {
+    if (_textureSizeIsDirty) [[unlikely]] {
         glBindTexture(GL_TEXTURE_2D, _texture);
         glTexImage2D(
             GL_TEXTURE_2D,
@@ -289,7 +289,7 @@ bool WebRenderHandler::hasContent(int x, int y) {
         }
         int index = x + _browserBufferSize.x * (_browserBufferSize.y - y - 1);
         index = glm::clamp(index, 0, static_cast<int>(_browserBuffer.size() - 1));
-        return _browserBuffer[index].a;
+        return _browserBuffer[index].a != 0;
     }
 }
 

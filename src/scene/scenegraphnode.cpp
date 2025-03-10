@@ -556,17 +556,6 @@ SceneGraphNode::SceneGraphNode()
     , _useGuiOrdering(UseGuiOrderInfo, false)
     , _guiFocusable(GuiFocusableInfo, true)
     , _guiOrderingNumber(GuiOrderInfo, 0.f)
-    , _transform {
-        ghoul::mm_unique_ptr<Translation>(
-            global::memoryManager->PersistentMemory.alloc<StaticTranslation>()
-        ),
-        ghoul::mm_unique_ptr<Rotation>(
-            global::memoryManager->PersistentMemory.alloc<StaticRotation>()
-        ),
-        ghoul::mm_unique_ptr<Scale>(
-            global::memoryManager->PersistentMemory.alloc<StaticScale>()
-        )
-    }
     , _boundingSphere(BoundingSphereInfo, -1.0, -1.0, 1e12)
     , _evaluatedBoundingSphere(EvalBoundingSphereInfo)
     , _interactionSphere(InteractionSphereInfo, -1.0, -1.0, 1e12)
@@ -582,6 +571,29 @@ SceneGraphNode::SceneGraphNode()
     , _supportsDirectInteraction(SupportsDirectInteractionInfo, false)
     , _showDebugSphere(ShowDebugSphereInfo, false)
 {
+    {
+        ghoul::Dictionary translation;
+        translation.setValue("Type", std::string("StaticTranslation"));
+        translation.setValue("Position", glm::dvec3(0.0));
+        _transform.translation = ghoul::mm_unique_ptr<Translation>(
+            global::memoryManager->PersistentMemory.alloc<StaticTranslation>(translation)
+        );
+
+        ghoul::Dictionary rotation;
+        rotation.setValue("Type", std::string("StaticRotation"));
+        rotation.setValue("Rotation", glm::dvec3(0.0));
+        _transform.rotation = ghoul::mm_unique_ptr<Rotation>(
+            global::memoryManager->PersistentMemory.alloc<StaticRotation>(rotation)
+        );
+
+        ghoul::Dictionary scale;
+        scale.setValue("Type", std::string("StaticScale"));
+        scale.setValue("Scale", 1.0);
+        _transform.scale = ghoul::mm_unique_ptr<Scale>(
+            global::memoryManager->PersistentMemory.alloc<StaticScale>(scale)
+        );
+    }
+
     addProperty(_computeScreenSpaceValues);
     addProperty(_screenSpacePosition);
     _screenVisibility.setReadOnly(true);
@@ -770,21 +782,23 @@ void SceneGraphNode::update(const UpdateData& data) {
     if (_state != State::GLInitialized) {
         return;
     }
-    if (!isTimeFrameActive(data.time)) {
+
+    if (_timeFrame) {
+        _timeFrame->update(data.time);
+    }
+
+    if (!isTimeFrameActive()) {
         return;
     }
 
-    if (_transform.translation) {
-        _transform.translation->update(data);
-    }
+    ghoul_assert(_transform.translation, "No translation exists");
+    _transform.translation->update(data);
 
-    if (_transform.rotation) {
-        _transform.rotation->update(data);
-    }
+    ghoul_assert(_transform.rotation, "No rotation exists");
+    _transform.rotation->update(data);
 
-    if (_transform.scale) {
-        _transform.scale->update(data);
-    }
+    ghoul_assert(_transform.scale, "No scale exists");
+    _transform.scale->update(data);
     UpdateData newUpdateData = data;
 
     // Assumes _worldRotationCached and _worldScaleCached have been calculated for parent
@@ -821,18 +835,10 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
 #endif // TRACY_ENABLE
 
-    if (_state != State::GLInitialized) {
-        return;
-    }
-
-    const bool visible = _renderable && _renderable->isVisible() &&
-        _renderable->isReady();
-
-    if (!visible) {
-        return;
-    }
-
-    if (!isTimeFrameActive(data.time)) {
+    if (_state != State::GLInitialized ||
+        !(_renderable && _renderable->isVisible() && _renderable->isReady()) ||
+        !isTimeFrameActive())
+    {
         return;
     }
 
@@ -857,15 +863,14 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
 
         _renderable->render(newData, tasks);
 
-        if (_computeScreenSpaceValues) {
+        if (_computeScreenSpaceValues) [[unlikely]] {
             computeScreenSpaceData(newData);
         }
     }
 
     const bool isInStickerBin =
         data.renderBinMask & static_cast<int>(Renderable::RenderBin::Sticker);
-
-    if (_showDebugSphere && isInStickerBin) {
+    if (_showDebugSphere && isInStickerBin) [[unlikely]] {
         if (const double bs = boundingSphere();  bs > 0.0) {
             renderDebugSphere(data.camera, bs, glm::vec4(0.5f, 0.15f, 0.5f, 0.75f));
         }
@@ -877,7 +882,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
 }
 
 void SceneGraphNode::renderDebugSphere(const Camera& camera, double size,
-                                       const glm::vec4& color)
+                                       const glm::vec4& color) const
 {
     const glm::dvec3 scaleVec = _worldScaleCached * size;
     const glm::dmat4 modelTransform =
@@ -1203,18 +1208,18 @@ glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
     }
 }
 
-bool SceneGraphNode::isTimeFrameActive(const Time& time) const {
+bool SceneGraphNode::isTimeFrameActive() const {
     for (SceneGraphNode* dep : _dependencies) {
-        if (!dep->isTimeFrameActive(time)) {
+        if (!dep->isTimeFrameActive()) {
             return false;
         }
     }
 
-    if (_parent && !_parent->isTimeFrameActive(time)) {
+    if (_parent && !_parent->isTimeFrameActive()) {
         return false;
     }
 
-    return !_timeFrame || _timeFrame->isActive(time);
+    return !_timeFrame || _timeFrame->isActive();
 }
 
 glm::dmat3 SceneGraphNode::calculateWorldRotation() const {

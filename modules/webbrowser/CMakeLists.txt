@@ -90,7 +90,9 @@ add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper SYSTEM)
 
 mark_as_advanced(CEF_DEBUG_INFO_FLAG USE_ATL USE_OFFICIAL_BUILD_SANDBOX USE_SANDBOX)
 
-if (UNIX)
+if (WIN32)
+  target_compile_options(libcef_dll_wrapper PRIVATE "/W0")
+elseif (UNIX)
   target_compile_options(libcef_dll_wrapper PRIVATE "-w")
 endif ()
 
@@ -207,6 +209,13 @@ else()
   message(STATUS "Setting up WebBrowser CEF helper executable: ${CEF_HELPER_TARGET}")
   set_openspace_cef_target_out_dir()
   add_executable(${CEF_HELPER_TARGET} ${WEBBROWSER_HELPER_SOURCES})
+
+  if (WIN32)
+    target_compile_options(${CEF_HELPER_TARGET} PRIVATE "/W0")
+  elseif (UNIX)
+    target_compile_options(${CEF_HELPER_TARGET} PRIVATE "-w")
+  endif ()
+
   set_executable_target_properties(${CEF_HELPER_TARGET})
   add_dependencies(${CEF_HELPER_TARGET} libcef_dll_wrapper)
   # Logical target used to link the libcef library.

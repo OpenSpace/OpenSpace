@@ -26,6 +26,7 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   dashboard/dashboarditemangle.h
+  dashboard/dashboarditemcameraorientation.h
   dashboard/dashboarditemdate.h
   dashboard/dashboarditemdistance.h
   dashboard/dashboarditemelapsedtime.h
@@ -82,6 +83,7 @@ set(HEADER_FILES
   scale/nonuniformstaticscale.h
   scale/staticscale.h
   scale/timedependentscale.h
+  scale/timelinescale.h
   timeframe/timeframeinterval.h
   timeframe/timeframeunion.h
   translation/luatranslation.h
@@ -93,6 +95,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   dashboard/dashboarditemangle.cpp
+  dashboard/dashboarditemcameraorientation.cpp
   dashboard/dashboarditemdate.cpp
   dashboard/dashboarditemdistance.cpp
   dashboard/dashboarditemelapsedtime.cpp
@@ -150,6 +153,7 @@ set(SOURCE_FILES
   scale/nonuniformstaticscale.cpp
   scale/staticscale.cpp
   scale/timedependentscale.cpp
+  scale/timelinescale.cpp
   timeframe/timeframeinterval.cpp
   timeframe/timeframeunion.cpp
   translation/luatranslation.cpp

@@ -67,7 +67,7 @@ protected:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 
-    std::unique_ptr<PlaneGeometry> _plane;
+    PlaneGeometry _plane;
     std::unique_ptr<TextureComponent> _texture;
 
 private:

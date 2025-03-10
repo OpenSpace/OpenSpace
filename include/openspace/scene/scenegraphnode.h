@@ -120,7 +120,7 @@ public:
     const glm::dmat3& worldRotationMatrix() const;
     glm::dmat4 modelTransform() const;
     glm::dvec3 worldScale() const;
-    bool isTimeFrameActive(const Time& time) const;
+    bool isTimeFrameActive() const;
 
     SceneGraphNode* parent() const;
     std::vector<SceneGraphNode*> children() const;
@@ -157,7 +157,8 @@ private:
     glm::dmat3 calculateWorldRotation() const;
     glm::dvec3 calculateWorldScale() const;
     void computeScreenSpaceData(RenderData& newData);
-    void renderDebugSphere(const Camera& camera, double size, const glm::vec4& color);
+    void renderDebugSphere(const Camera& camera, double size,
+        const glm::vec4& color) const;
 
     std::atomic<State> _state = State::Loaded;
     std::vector<ghoul::mm_unique_ptr<SceneGraphNode>> _children;

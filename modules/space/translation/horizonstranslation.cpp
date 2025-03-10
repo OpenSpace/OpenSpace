@@ -66,20 +66,9 @@ documentation::Documentation HorizonsTranslation::Documentation() {
     return codegen::doc<Parameters>("base_transform_translation_horizons");
 }
 
-HorizonsTranslation::HorizonsTranslation()
-    : _horizonsFiles(HorizonsTextFileInfo)
-{
-    addProperty(_horizonsFiles);
-
-    _horizonsFiles.onChange([this](){
-        requireUpdate();
-        notifyObservers();
-        loadData();
-    });
-}
-
 HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
-    : HorizonsTranslation()
+    : Translation(dictionary)
+    , _horizonsFiles(HorizonsTextFileInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -94,12 +83,19 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
         std::vector<std::string> f;
         std::transform(
             files.cbegin(),
-            files.end(),
+            files.cend(),
             std::back_inserter(f),
-            [](const std::filesystem::path& p) { return p.string(); }
+            [](const std::filesystem::path& path) { return path.string(); }
         );
         _horizonsFiles = f;
     }
+
+    _horizonsFiles.onChange([this](){
+        requireUpdate();
+        notifyObservers();
+        loadData();
+    });
+    addProperty(_horizonsFiles);
 }
 
 glm::dvec3 HorizonsTranslation::position(const UpdateData& data) const {
@@ -197,7 +193,7 @@ bool HorizonsTranslation::readHorizonsTextFile(HorizonsFile& horizonsFile) {
 }
 
 bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {
-    std::ifstream fileStream(file, std::ifstream::binary);
+    std::ifstream fileStream = std::ifstream(file, std::ifstream::binary);
 
     if (!fileStream.good()) {
         LERROR(std::format("Error opening file '{}' for loading cache file", file));
@@ -247,7 +243,7 @@ bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {
 }
 
 void HorizonsTranslation::saveCachedFile(const std::filesystem::path& file) const {
-    std::ofstream fileStream(file, std::ofstream::binary);
+    std::ofstream fileStream = std::ofstream(file, std::ofstream::binary);
     if (!fileStream.good()) {
         LERROR(std::format("Error opening file '{}' for save cache file", file));
         return;

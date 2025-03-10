@@ -58,7 +58,8 @@ documentation::Documentation TimelineTranslation::Documentation() {
 }
 
 TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary)
-    : _shouldInterpolate(ShouldInterpolateInfo, true)
+    : Translation(dictionary)
+    , _shouldInterpolate(ShouldInterpolateInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -67,9 +68,7 @@ TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary)
 
         ghoul::mm_unique_ptr<Translation> translation =
             Translation::createFromDictionary(kf.second);
-        if (translation) {
-            _timeline.addKeyframe(t, std::move(translation));
-        }
+        _timeline.addKeyframe(t, std::move(translation));
     }
 
     _shouldInterpolate = p.shouldInterpolate.value_or(_shouldInterpolate);

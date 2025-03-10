@@ -36,8 +36,8 @@ std::string_view TransferFunctionProperty::className() const {
     return "TransferFunctionProperty";
 }
 
-int TransferFunctionProperty::typeLua() const {
-    return LUA_TTABLE;
+ghoul::lua::LuaTypes TransferFunctionProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Table;
 }
 
 openspace::volume::TransferFunction

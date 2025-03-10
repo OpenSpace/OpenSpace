@@ -69,7 +69,6 @@ namespace documentation { struct Documentation; }
  */
 class HorizonsTranslation : public Translation {
 public:
-    HorizonsTranslation();
     explicit HorizonsTranslation(const ghoul::Dictionary& dictionary);
 
     glm::dvec3 position(const UpdateData& data) const override;

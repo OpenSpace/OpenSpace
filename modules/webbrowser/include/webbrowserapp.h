@@ -25,17 +25,8 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERAPP___H__
 #define __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERAPP___H__
 
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable : 4100)
-#endif // _MSC_VER
-
 #include <include/cef_app.h>
 #include <include/wrapper/cef_helpers.h>
-
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif // _MSC_VER
 
 namespace openspace {
 

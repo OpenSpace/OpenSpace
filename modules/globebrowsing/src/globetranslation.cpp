@@ -126,7 +126,8 @@ documentation::Documentation GlobeTranslation::Documentation() {
 }
 
 GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
-    : _globe(GlobeInfo)
+    : Translation(dictionary)
+    , _globe(GlobeInfo)
     , _latitude(LatitudeInfo, 0.0, -90.0, 90.0)
     , _longitude(LongitudeInfo, 0.0, -180.0, 180.0)
     , _altitude(AltitudeInfo, 0.0, -1e12, 1e12)
@@ -211,7 +212,7 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
         _positionIsDirty = true;
     }
 
-    if (!_positionIsDirty) {
+    if (!_positionIsDirty) [[likely]] {
         return _position;
     }
 

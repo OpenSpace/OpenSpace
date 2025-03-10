@@ -66,6 +66,8 @@ DashboardItemMission::DashboardItemMission(const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary, 15.f)
 {}
 
+void DashboardItemMission::update() {}
+
 void DashboardItemMission::render(glm::vec2& penPosition) {
     ZoneScoped;
 

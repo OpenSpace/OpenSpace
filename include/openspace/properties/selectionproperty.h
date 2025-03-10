@@ -38,7 +38,7 @@ public:
     SelectionProperty(Property::PropertyInfo info);
 
     std::string_view className() const override;
-    int typeLua() const override;
+    ghoul::lua::LuaTypes typeLua() const override;
 
     /**
      * This method sets the stored value to the provided value `val`. If the value is

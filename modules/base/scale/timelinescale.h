@@ -22,35 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___ORIENTATIONDIALOG___H__
-#define __OPENSPACE_UI_LAUNCHER___ORIENTATIONDIALOG___H__
+#ifndef __OPENSPACE_MODULE_BASE___TIMELINESCALE___H__
+#define __OPENSPACE_MODULE_BASE___TIMELINESCALE___H__
 
-#include <QDialog>
+#include <openspace/scene/scale.h>
 
-#include <sgct/math.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/util/timeline.h>
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 
-class QLineEdit;
-class QWidget;
+namespace openspace {
 
-class OrientationDialog final : public QDialog {
-Q_OBJECT
+struct UpdateData;
+
+namespace documentation { struct Documentation; }
+
+class TimelineScale : public Scale {
 public:
-    /**
-     * Constructor for OrientationDialog object which contains the input text boxes for
-     * orientation x,y,z values,
-     *
-     * \param orientation The x,y,z angles in degrees contained in sgct::quat object
-     * \param parent Pointer to Qt QWidget parent object
-     */
-    OrientationDialog(sgct::quat& orientation, QWidget* parent);
+    explicit TimelineScale(const ghoul::Dictionary& dictionary);
+
+    glm::dvec3 scaleValue(const UpdateData& data) const override;
+    static documentation::Documentation Documentation();
 
 private:
-    void ok();
-
-    QLineEdit* _linePitch = nullptr;
-    QLineEdit* _lineRoll = nullptr;
-    QLineEdit* _lineYaw = nullptr;
-    sgct::quat& _orientationValue;
+    Timeline<ghoul::mm_unique_ptr<Scale>> _timeline;
+    properties::BoolProperty _shouldInterpolate;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___ORIENTATIONDIALOG___H__
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__

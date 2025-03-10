@@ -54,8 +54,12 @@ local ToggleTrails = {
       if currentFade < 1 then
         newFade = 1
       end
-      openspace.setPropertyValue("Scene.*Trail.Renderable.Fade", newFade, 2)
-      openspace.setPropertyValue("Scene.*trail.Renderable.Fade", newFade, 2)
+      if (#capList > 0) then
+        openspace.setPropertyValue("Scene.*Trail.Renderable.Fade", newFade, 2)
+      end
+      if (#list > 0) then
+        openspace.setPropertyValue("Scene.*trail.Renderable.Fade", newFade, 2)
+      end
       openspace.setPropertyValue("Scene.*TrailEarth.Renderable.Fade", newFade, 2)
     end
   ]],
@@ -84,8 +88,12 @@ local ToggleTrailsInstant = {
       if currentFade < 1 then
         newFade = 1
       end
-      openspace.setPropertyValue("Scene.*Trail.Renderable.Fade", newFade)
-      openspace.setPropertyValue("Scene.*trail.Renderable.Fade", newFade)
+      if (#capList > 0) then
+        openspace.setPropertyValue("Scene.*Trail.Renderable.Fade", newFade)
+      end
+      if (#list > 0) then
+        openspace.setPropertyValue("Scene.*trail.Renderable.Fade", newFade)
+      end
     end
   ]],
   Documentation = "Toggle fade instantly for all trails in the Scene",

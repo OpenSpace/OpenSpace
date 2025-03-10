@@ -71,7 +71,7 @@ private:
 
     Shading _shading;
 
-    ghoul::opengl::ProgramObject* _shaderProgram;
+    ghoul::opengl::ProgramObject* _shaderProgram = nullptr;
 
     properties::StringProperty _start;
     properties::StringProperty _end;

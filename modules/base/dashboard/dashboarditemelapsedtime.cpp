@@ -101,7 +101,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemElapsedTime::Documentation() {
-    return codegen::doc<Parameters>("base_dashboarditem_elapsedtime");
+    return codegen::doc<Parameters>(
+        "base_dashboarditem_elapsedtime",
+        DashboardTextItem::Documentation()
+    );
 }
 
 DashboardItemElapsedTime::DashboardItemElapsedTime(const ghoul::Dictionary& dictionary)
@@ -136,12 +139,10 @@ DashboardItemElapsedTime::DashboardItemElapsedTime(const ghoul::Dictionary& dict
     addProperty(_lowestTimeUnit);
 }
 
-void DashboardItemElapsedTime::render(glm::vec2& penPosition) {
+void DashboardItemElapsedTime::update() {
     ZoneScoped;
 
     const double delta = global::timeManager->time().j2000Seconds() - _referenceJ2000;
-
-    penPosition.y -= _font->height();
 
     if (_simplifyTime) {
         using namespace std::chrono;
@@ -161,21 +162,13 @@ void DashboardItemElapsedTime::render(glm::vec2& penPosition) {
         // Remove the " " at the end
         time = time.substr(0, time.size() - 1);
 
-        RenderFont(
-            *_font,
-            penPosition,
-            // @CPP26(abock): This can be replaced with std::runtime_format
-            std::vformat(_formatString.value(), std::make_format_args(time))
-        );
+        // @CPP26(abock): This can be replaced with std::runtime_format
+        _buffer = std::vformat(_formatString.value(), std::make_format_args(time));
     }
     else {
         std::string time = std::format("{} s", delta);
-        RenderFont(
-            *_font,
-            penPosition,
-            // @CPP26(abock): This can be replaced with std::runtime_format
-            std::vformat(_formatString.value(), std::make_format_args(time))
-        );
+        // @CPP26(abock): This can be replaced with std::runtime_format
+        _buffer = std::vformat(_formatString.value(), std::make_format_args(time));
     }
 }
 

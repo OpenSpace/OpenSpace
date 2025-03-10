@@ -145,13 +145,8 @@ bool ScreenSpaceBrowser::deinitializeGL() {
     _browserInstance->close(true);
 
     WebBrowserModule* webBrowser = global::moduleEngine->module<WebBrowserModule>();
-    if (webBrowser) {
-        webBrowser->removeBrowser(_browserInstance.get());
-        _browserInstance.reset();
-    }
-    else {
-        LWARNING("Could not find WebBrowserModule");
-    }
+    webBrowser->removeBrowser(_browserInstance.get());
+    _browserInstance.reset();
 
     return ScreenSpaceRenderable::deinitializeGL();
 }

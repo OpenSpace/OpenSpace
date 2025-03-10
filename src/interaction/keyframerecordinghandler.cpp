@@ -30,10 +30,6 @@
 
 #include "keyframerecordinghandler_lua.inl"
 
-namespace {
-    constexpr std::string_view _loggerCat = "KeyframeRecording";
-} // namespace
-
 namespace openspace::interaction {
 
 KeyframeRecordingHandler::KeyframeRecordingHandler()

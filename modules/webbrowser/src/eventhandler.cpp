@@ -149,9 +149,9 @@ namespace {
     int doubleClickTime() {
 #ifdef WIN32
         return GetDoubleClickTime();
-#else
+#else // ^^^^ WIN32 // !WIN32 vvvv
         return 500;
-#endif
+#endif // WIN32
     }
 
     /**
@@ -161,9 +161,9 @@ namespace {
     int maxDoubleClickDistance() {
 #ifdef WIN32
         return GetSystemMetrics(SM_CXDOUBLECLK);
-#else
+#else // ^^^^ WIN32 // !WIN32 vvvv
         return 4;
-#endif
+#endif // WIN32
     }
 
 } // namespace
@@ -183,7 +183,7 @@ void EventHandler::initialize() {
     global::callback::keyboard->emplace(
         global::callback::keyboard->begin(),
         [this](Key key, KeyModifier mod, KeyAction action,
-            IsGuiWindow isGuiWindow) -> bool
+               IsGuiWindow isGuiWindow) -> bool
         {
             if (_browserInstance && isGuiWindow) {
                 return keyboardCallback(key, mod, action);
@@ -241,7 +241,7 @@ void EventHandler::initialize() {
                     cef_touch_event_type_t::CEF_TET_PRESSED
                 );
                 _browserInstance->sendTouchEvent(event);
-#else
+#else  // ^^^^ WIN32 // !WIN32 vvvv
                 _mousePosition.x = windowPos.x;
                 _mousePosition.y = windowPos.y;
                 _leftButton.down = true;
@@ -251,7 +251,7 @@ void EventHandler::initialize() {
                     false,
                     BrowserInstance::SingleClick
                 );
-#endif
+#endif // WIN32
             }
 
             _validTouchStates.emplace_back(input);
@@ -304,10 +304,7 @@ void EventHandler::initialize() {
     global::callback::touchExit->emplace(
         global::callback::touchExit->begin(),
         [this](TouchInput input) {
-            if (!_browserInstance) {
-                return;
-            }
-            if (_validTouchStates.empty()) {
+            if (!_browserInstance || _validTouchStates.empty()) {
                 return;
             }
 
@@ -419,7 +416,7 @@ bool EventHandler::mouseWheelCallback(glm::ivec2 delta) {
     // scroll wheel returns very low numbers on Windows machines
     delta.x *= 50;
     delta.y *= 50;
-#endif
+#endif // WIN32
     return _browserInstance->sendMouseWheelEvent(mouseEvent(), delta);
 }
 
@@ -430,7 +427,6 @@ bool EventHandler::charCallback(unsigned int charCode, KeyModifier modifier) {
     keyEvent.native_key_code = mapFromGlfwToNative(Key(charCode));
     keyEvent.modifiers = static_cast<uint32_t>(modifier);
     keyEvent.type = KEYEVENT_CHAR;
-
     return _browserInstance->sendKeyEvent(keyEvent);
 }
 

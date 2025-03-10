@@ -123,6 +123,8 @@ DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dict
     addProperty(_activeFlash);
 }
 
+void DashboardItemInstruments::update() {}
+
 void DashboardItemInstruments::render(glm::vec2& penPosition) {
     ZoneScoped;
 

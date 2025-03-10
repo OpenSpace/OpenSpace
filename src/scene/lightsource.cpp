@@ -81,17 +81,12 @@ std::unique_ptr<LightSource> LightSource::createFromDictionary(
     return std::unique_ptr<LightSource>(source);
 }
 
-LightSource::LightSource()
+LightSource::LightSource(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "LightSource", "Light Source" })
     , _enabled(EnabledInfo, true)
 {
-    addProperty(_enabled);
-}
-
-LightSource::LightSource(const ghoul::Dictionary& dictionary)
-    : LightSource()
-{
     const Parameters p = codegen::bake<Parameters>(dictionary);
+    addProperty(_enabled);
     _enabled = p.enabled.value_or(_enabled);
 }
 
