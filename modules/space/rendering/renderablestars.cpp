@@ -50,14 +50,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableStars";
 
-    constexpr std::array<const char*, 24> UniformNames = {
-        "modelMatrix", "cameraViewProjectionMatrix", "cameraUp", "eyePosition",
-        "colorOption", "magnitudeExponent", "sizeComposition", "lumCent", "radiusCent",
-        "colorTexture", "opacity", "otherDataTexture", "otherDataRange",
-        "filterOutOfRange", "fixedColor", "glareTexture", "glareMultiplier", "glareGamma",
-        "glareScale", "hasCore", "coreTexture", "coreMultiplier", "coreGamma", "coreScale"
-    };
-
     enum SizeComposition {
         DistanceModulus = 0,
         AppBrightness,
@@ -308,8 +300,8 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ProperMotionInfo = {
-        "ProperMotion",
+    constexpr openspace::properties::Property::PropertyInfo UseProperMotionInfo = {
+        "UseProperMotion",
         "Enable proper motion of stars",
         "If this value is enabled and the loaded data file contains velocity information "
         "for the stars, the velocity information is used to move the stars' position "
@@ -426,8 +418,8 @@ namespace {
         // [[codegen::verbatim(FadeInDistancesInfo.description)]]
         std::optional<glm::dvec2> fadeInDistances;
 
-        // [[codegen::verbatim(ProperMotionInfo.description)]]
-        std::optional<bool> properMotion;
+        // [[codegen::verbatim(UseProperMotionInfo.description)]]
+        std::optional<bool> useProperMotion;
 
         // [[codegen::verbatim(ProperMotionEpochInfo.description)]]
         std::optional<double> properMotionEpoch;
@@ -506,7 +498,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         glm::vec2(0.f),
         glm::vec2(100.f)
     )
-    , _properMotion(ProperMotionInfo, true)
+    , _useProperMotion(UseProperMotionInfo, true)
     , _properMotionEpoch(ProperMotionEpochInfo, Time::now().j2000Seconds())
     , _enableFadeInDistance(EnableFadeInInfo, false)
 {
@@ -618,12 +610,12 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addProperty(_filterOutOfRange);
 
 
-    _properMotion.onChange([this]() { _dataIsDirty = true; });
-    _properMotion = p.properMotion.value_or(_properMotion);
-    addProperty(_properMotion);
+    _useProperMotion.onChange([this]() { _dataIsDirty = true; });
+    _useProperMotion = p.useProperMotion.value_or(_useProperMotion);
+    addProperty(_useProperMotion);
 
     
-    _properMotionEpoch = p.properMotion.value_or(_properMotionEpoch);
+    _properMotionEpoch = p.properMotionEpoch.value_or(_properMotionEpoch);
     addProperty(_properMotionEpoch);
 
 
@@ -808,12 +800,12 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix();
     _program->setUniform(_uniformCache.cameraViewProjectionMatrix, viewProjectionMatrix);
 
-    _program->setUniform(_uniformCache.properMotion, _properMotion);
-    if (_properMotion) {
-        const float epoch = _properMotionEpoch;
-        const float curr = static_cast<float>(data.time.j2000Seconds());
-        const float diffTime = curr - epoch;
-        _program->setUniform(_uniformCache.diffTime, diffTime);
+    _program->setUniform(_uniformCache.useProperMotion, _useProperMotion);
+    if (_useProperMotion) {
+        const double epoch = _properMotionEpoch;
+        const double curr = static_cast<double>(data.time.j2000Seconds());
+        const double diffTime = curr - epoch;
+        _program->setUniform(_uniformCache.diffTime, static_cast<float>(diffTime));
     }
 
     _program->setUniform(_uniformCache.colorOption, _colorOption);
@@ -946,7 +938,7 @@ void RenderableStars::update(const UpdateData&) {
         switch (colorOption) {
             case ColorOption::Color:
             case ColorOption::FixedColor:
-                if (_properMotion) {
+                if (_useProperMotion) {
                     glVertexAttribPointer(
                         bvLumAbsMagAttrib,
                         3,
@@ -1145,7 +1137,7 @@ std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
             case ColorOption::Color:
             case ColorOption::FixedColor:
             {
-                if (_properMotion) {
+                if (_useProperMotion) {
                     union {
                         VelocityVBOLayout value;
                         std::array<float, sizeof(VelocityVBOLayout) / sizeof(float)> data;

@@ -33,7 +33,7 @@ out vec3 vs_bvLumAbsMag;
 out vec3 vs_velocity;
 out float vs_speed;
 
-uniform int properMotion;
+uniform int useProperMotion;
 uniform float diffTime;
 
 void main() {
@@ -41,7 +41,7 @@ void main() {
   vs_velocity = in_velocity;
   vs_speed = in_speed;
 
-  if (properMotion == 1) {
+  if (useProperMotion == 1) {
     // 1000 to get from km/s to m/s
     dvec3 offsetInParsec = dvec3(in_velocity) * double(diffTime) * 1000.0;
     vec3 pos = in_position + vec3(offsetInParsec);
