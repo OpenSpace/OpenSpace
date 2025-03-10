@@ -90,7 +90,7 @@ namespace openspace {
         );
 
         // ### @TODO: The code below is only ment for debuging ###
-        float distance = glm::distance(_viewport.getCameraPos(), global::navigationHandler->anchorNode()->position());
+        float distance = (float)glm::distance(_viewport.getCameraPos(), global::navigationHandler->anchorNode()->position());
         _program->setUniform(
             _uniformCache.cameraToAnchorNodeDistance,
             distance

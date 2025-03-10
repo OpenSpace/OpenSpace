@@ -29,7 +29,7 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-    // constexpr std::string_view _loggerCat = "BlackHoleModule"; //@TODO Is this needed? Warning: Never used 
+    constexpr std::string_view _loggerCat = "BlackHoleModule";
 
     struct [[codegen::Dictionary(BlackHoleModule)]] Parameters {
         std::optional<int> rs [[codegen::greater(0)]];
@@ -62,7 +62,7 @@ void BlackHoleModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     ghoul_assert(fRenderable, "Renderable factory was not created");
 
     fRenderable->registerClass<RenderableBlackHole>("RenderableBlackHole");
-
+    LINFO("RenderableBlackHole is registerd");
 }
 
 void BlackHoleModule::internalDeinitializeGL() {}

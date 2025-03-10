@@ -41,9 +41,9 @@ namespace openspace {
 
         ghoul::opengl::ProgramObject* _program = nullptr;
 
-        size_t _rayCount = 5000;
-        size_t _stepsCount = 500000;
-        float _stepLength = 0.00001f;
+        size_t _rayCount = 10000;
+        size_t _stepsCount = 50000;
+        float _stepLength = 0.001f;
 
         float _rsBlackHole = 1.0f;
         float _rEnvmap = 60.0f;
@@ -60,8 +60,8 @@ namespace openspace {
         GLuint _quadVao = 0;
         GLuint _quadVbo = 0;
         GLuint _ssboData = 0;
-        //GLuint modelMatricesBuffer; // @TODO Is this needed?
-        UniformCache(environmentTexture, viewGrid, cameraRotationMatrix, schwarzschildWarpTable, cameraToAnchorNodeDistance) _uniformCache;
+
+        UniformCache(environmentTexture, viewGrid, cameraRotationMatrix, cameraToAnchorNodeDistance) _uniformCache;
 
         std::unique_ptr<ghoul::opengl::Texture> _environmentTexture;
     };
