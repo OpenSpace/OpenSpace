@@ -35,7 +35,6 @@ namespace documentation { struct Documentation; }
 
 class StaticRotation : public Rotation {
 public:
-    StaticRotation();
     explicit StaticRotation(const ghoul::Dictionary& dictionary);
 
     glm::dmat3 matrix(const UpdateData& data) const override;
