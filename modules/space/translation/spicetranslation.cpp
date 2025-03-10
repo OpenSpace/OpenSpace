@@ -112,7 +112,8 @@ documentation::Documentation SpiceTranslation::Documentation() {
 }
 
 SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
-    : _target(TargetInfo)
+    : Translation(dictionary)
+    , _target(TargetInfo)
     , _observer(ObserverInfo)
     , _frame(FrameInfo, "GALACTIC")
     , _fixedDate(FixedDateInfo)

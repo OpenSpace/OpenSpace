@@ -60,15 +60,6 @@ documentation::Documentation TimeFrameUnion::Documentation() {
     return codegen::doc<Parameters>("base_timeframe_union");
 }
 
-bool TimeFrameUnion::isActive(const Time& time) const {
-    for (const ghoul::mm_unique_ptr<TimeFrame>& tf : _timeFrames) {
-        if (tf->isActive(time)) {
-            return true;
-        }
-    }
-    return false;
-}
-
 TimeFrameUnion::TimeFrameUnion(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -81,6 +72,18 @@ TimeFrameUnion::TimeFrameUnion(const ghoul::Dictionary& dictionary) {
         subFrame.setDescription(std::format("{}", i));
         addPropertySubOwner(*_timeFrames.back());
     }
+}
+
+void TimeFrameUnion::update(const Time& time) {
+    for (const ghoul::mm_unique_ptr<TimeFrame>& tf : _timeFrames) {
+        tf->update(time);
+    }
+
+    _isInTimeFrame = std::any_of(
+        _timeFrames.begin(),
+        _timeFrames.end(),
+        std::mem_fn(&TimeFrame::isActive)
+    );
 }
 
 } // namespace openspace

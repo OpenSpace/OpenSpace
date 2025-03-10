@@ -35,6 +35,16 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
+    constexpr openspace::properties::Property::PropertyInfo IsInTimeFrameInfo = {
+        "IsInTimeFrame",
+        "Is in Time Frame",
+        "This property indicates the current state of the TimeFrame time testing. If the "
+        "current simulation time is determined to be a valid time, this property is set "
+        "to true. Otherwise it will be false, meaning that the scene graph node this "
+        "TimeFrame is attached to would not be shown",
+        openspace::properties::Property::Visibility::Developer
+    };
+
     // A `TimeFrame` object determines the time frame during which a scene graph node is
     // valid. If the simulation time is outside the time frame range, the scene graph node
     // and all of its children are automatically disabled and any attached
@@ -70,10 +80,20 @@ ghoul::mm_unique_ptr<TimeFrame> TimeFrame::createFromDictionary(
     return ghoul::mm_unique_ptr<TimeFrame>(result);
 }
 
-TimeFrame::TimeFrame() : properties::PropertyOwner({ "TimeFrame", "Time Frame" }) {}
+TimeFrame::TimeFrame()
+    : properties::PropertyOwner({ "TimeFrame", "Time Frame" })
+    , _isInTimeFrame(IsInTimeFrameInfo, false)
+{
+    _isInTimeFrame.setReadOnly(true);
+    addProperty(_isInTimeFrame);
+}
 
 bool TimeFrame::initialize() {
     return true;
+}
+
+bool TimeFrame::isActive() const {
+    return _isInTimeFrame;
 }
 
 } // namespace openspace

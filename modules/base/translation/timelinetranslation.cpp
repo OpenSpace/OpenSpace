@@ -64,7 +64,8 @@ documentation::Documentation TimelineTranslation::Documentation() {
 }
 
 TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary)
-    : _shouldInterpolate(ShouldInterpolateInfo, true)
+    : Translation(dictionary)
+    , _shouldInterpolate(ShouldInterpolateInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

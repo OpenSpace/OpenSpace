@@ -48,7 +48,9 @@ documentation::Documentation MultiRotation::Documentation() {
     return codegen::doc<Parameters>("base_transform_rotation_multi");
 }
 
-MultiRotation::MultiRotation(const ghoul::Dictionary& dictionary) {
+MultiRotation::MultiRotation(const ghoul::Dictionary& dictionary)
+    : Rotation(dictionary)
+{
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     int i = 0;

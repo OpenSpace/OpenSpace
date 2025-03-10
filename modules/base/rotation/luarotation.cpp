@@ -70,7 +70,8 @@ documentation::Documentation LuaRotation::Documentation() {
 }
 
 LuaRotation::LuaRotation(const ghoul::Dictionary& dictionary)
-    : _luaScriptFile(ScriptInfo)
+    : Rotation(dictionary)
+    , _luaScriptFile(ScriptInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

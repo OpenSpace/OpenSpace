@@ -279,7 +279,8 @@ documentation::Documentation FixedRotation::Documentation() {
 }
 
 FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
-    : _enabled(EnableInfo, true)
+    : Rotation(dictionary)
+    , _enabled(EnableInfo, true)
     , _xAxis{
         properties::OptionProperty(
             XAxisTypeInfo,

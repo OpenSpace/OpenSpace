@@ -70,7 +70,8 @@ documentation::Documentation LuaTranslation::Documentation() {
 }
 
 LuaTranslation::LuaTranslation(const ghoul::Dictionary& dictionary)
-    : _luaScriptFile(ScriptInfo)
+    : Translation(dictionary)
+    , _luaScriptFile(ScriptInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
