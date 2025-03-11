@@ -19,21 +19,45 @@ const float PI = 3.1415926535897932384626433832795f;
 const float VIEWGRIDZ = -1.0f;
 const float INF = 1.0f/0.0f;
 
-float lerp(float start, float end, float t) {
-    return start + t * (end - start);
+// Math
+
+float lerp(float P0, float P1, float t) {
+    return P0 + t * (P1 - P0);
 }
 
-float interpelateWarpTable(int indexStart, int indexEnd, float localPhi){
-    float envMapPhiStart = schwarzschildWarpTable[indexStart * 2 + 1];
-    float envMapPhiEnd = schwarzschildWarpTable[indexEnd * 2 + 1];
+float atan2(float a, float b){
+    if (b != 0.0f) return atan(a, b);
+    if (a > 0.0f) return PI / 2.0f;
+    if (a < 0.0f) return -PI / 2.0f;
+        
+    return 0.0f;
+}
 
-    float localPhiStart = schwarzschildWarpTable[indexStart * 2];
-    float localPhiEnd = schwarzschildWarpTable[indexEnd * 2];
+//Conversions
 
-    float t = (localPhi - localPhiStart) / (localPhiEnd - localPhiStart);
+vec2 cartesianToSpherical(vec3 cartisian) {
+    float theta = atan2(sqrt(cartisian.x * cartisian.x + cartisian.y * cartisian.y) , cartisian.z);
+    float phi = atan2(cartisian.y, cartisian.x);
+
+    return vec2(phi, theta);
+}
+
+vec3 sphericalToCartesian(float phi, float theta){
+    float x = sin(theta)*cos(phi);
+    float y = sin(theta)*sin(phi);
+    float z = cos(theta);
+
+    return vec3(x, y, z);
+}
+
+vec2 sphericalToUV(vec2 sphereCoords){
+    float u = sphereCoords.x / (2.0f * PI) + 0.5f;
+    float v = mod(sphereCoords.y, PI) / PI;
     
-    return lerp(envMapPhiStart, envMapPhiEnd, t);
+    return vec2(u, v);
 }
+
+//Warp Table
 
 ivec2 bstWarpTable(float phi){
     float midPhi = -1.0f;
@@ -85,6 +109,18 @@ ivec2 bstWarpTable(float phi){
     return v1 < v2 ? ivec2(closestIndex, nextClosestIndex) : ivec2(nextClosestIndex, closestIndex);
 }
 
+float interpelateWarpTable(int indexStart, int indexEnd, float localPhi){
+    float envMapPhiStart = schwarzschildWarpTable[indexStart * 2 + 1];
+    float envMapPhiEnd = schwarzschildWarpTable[indexEnd * 2 + 1];
+
+    float localPhiStart = schwarzschildWarpTable[indexStart * 2];
+    float localPhiEnd = schwarzschildWarpTable[indexEnd * 2];
+
+    float t = (localPhi - localPhiStart) / (localPhiEnd - localPhiStart);
+    
+    return lerp(envMapPhiStart, envMapPhiEnd, t);
+}
+
 float getEndAngleFromTable(float phi){
     ivec2 indices = bstWarpTable(phi);
     return interpelateWarpTable(indices.x, indices.y, phi);
@@ -94,38 +130,7 @@ vec2 applyBlackHoleWarp(vec2 cameraOutSphereCoords){
     float phi = cameraOutSphereCoords.x;
     float theta = cameraOutSphereCoords.y;
     theta = getEndAngleFromTable(theta);
-
     return vec2(phi, theta);
-}
-
-float atan2(float a, float b){
-    if (b != 0.0f) return atan(a, b);
-    if (a > 0.0f) return PI / 2.0f;
-    if (a < 0.0f) return -PI / 2.0f;
-        
-    return 0.0f;
-}
-
-vec2 cartesianToSpherical(vec3 cartisian) {
-    float theta = atan2(sqrt(cartisian.x * cartisian.x + cartisian.y * cartisian.y) , cartisian.z);
-    float phi = atan2(cartisian.y, cartisian.x);
-
-    return vec2(phi, theta);
-}
-
-vec3 sphericalToCartesian(float phi, float theta){
-    float x = sin(theta)*cos(phi);
-    float y = sin(theta)*sin(phi);
-    float z = cos(theta);
-
-    return vec3(x, y, z);
-}
-
-vec2 sphericalToUV(vec2 sphereCoords){
-    float u = sphereCoords.x / (2.0f * PI) + 0.5f;
-    float v = mod(sphereCoords.y, PI) / PI;
-    
-    return vec2(u, v);
 }
 
 Fragment getFragment() {
