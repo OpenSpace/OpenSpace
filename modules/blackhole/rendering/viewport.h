@@ -10,18 +10,13 @@ namespace openspace {
     class ViewPort {
     public:
         ViewPort() {};
-        ViewPort(Camera* camera);
-        
-        glm::dvec3 getCameraPos() const { return _camera->positionVec3(); }
-    
+        ~ViewPort();
 
-        glm::dvec3 sphericalPosition() const;
         void uploadViewGrid(const glm::ivec2& screenSize);
-        void updateViewGridTexture(std::vector<float>& data, const glm::vec2& screenSize);
+        void updateViewGridTexture(void* data, const glm::vec2& screenSize);
         std::unique_ptr<ghoul::opengl::Texture> viewGrid;
 
     private:
-        std::unique_ptr<Camera> _camera = nullptr;
         float fovHorizontel = glm::radians(90.f);
     };
 } // namespace openspace

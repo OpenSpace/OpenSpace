@@ -39,7 +39,6 @@ namespace openspace {
     RenderableBlackHole::~RenderableBlackHole() {}
 
     void RenderableBlackHole::initialize() {
-        _viewport = ViewPort(global::navigationHandler->camera());
         global::navigationHandler->camera()->setRotation(glm::dquat(0,0,0,0));
         _schwarzschildWarpTable = std::vector<float>(_rayCount * 2, 0.f);
     }
@@ -59,7 +58,15 @@ namespace openspace {
         _viewport.viewGrid = nullptr;
         glDeleteBuffers(1, &_quadVbo);
         glDeleteVertexArrays(1, &_quadVao);
-        delete(_program);
+
+        std::string program = std::string(ProgramName);
+        BlackHoleModule::ProgramObjectManager.release(
+            program,
+            [](ghoul::opengl::ProgramObject* p) {
+                global::renderEngine->removeRenderProgram(p);
+            }
+        );
+        _program = nullptr;
     }
 
     bool RenderableBlackHole::isReady() const {
@@ -136,8 +143,6 @@ namespace openspace {
 
         // Initialize shaders
         std::string program = std::string(ProgramName);
-        program += "|vs=" + vertexShaderPath;
-        program += "|fs=" + fragmentShaderPath;
         _program = BlackHoleModule::ProgramObjectManager.request(
             program,
             [fragmentShaderPath, vertexShaderPath, program]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {

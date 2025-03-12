@@ -11,30 +11,18 @@ namespace {
 }
 
 namespace openspace {
-
-    ViewPort::ViewPort(Camera* camera) : _camera(camera) {}
-
-    glm::dvec3 ViewPort::sphericalPosition() const {
-        if (!_camera) {
-            return glm::dvec3(0.0);
-        }
-
-        glm::dvec3 cartesian = _camera->positionVec3();
-        double r = glm::length(cartesian);
-        double theta = (r > 0.0) ? std::acos(cartesian.z / r) : 0.0;
-        double phi = std::atan2(cartesian.y, cartesian.x);
-
-        return glm::dvec3(r, theta, phi);
+    ViewPort::~ViewPort()
+    {
+        viewGrid = nullptr;
     }
-
     void ViewPort::uploadViewGrid(const glm::ivec2& screenSize) {
         float halfWidth = tan(fovHorizontel / 2.f);
         float halfHeight = halfWidth * screenSize.y / screenSize.x;
 
         float stepSize = (2.f * halfWidth) / screenSize.x;
 
-        std::vector<float> data(screenSize.x * screenSize.y * 2, 0.0f);
-
+        size_t dataSize = screenSize.x * screenSize.y * 2 * sizeof(float);
+        float* data = static_cast<float*>(malloc(dataSize));
         for (int i = 0; i < screenSize.y; i++) {
             float y = (i - screenSize.y / 2) * stepSize;
             for (int j = 0; j < screenSize.x; j++) {
@@ -48,9 +36,9 @@ namespace openspace {
         updateViewGridTexture(data, screenSize);
     }
 
-    void ViewPort::updateViewGridTexture(std::vector<float>& data, const glm::vec2& screenSize) {
+    void ViewPort::updateViewGridTexture(void* data, const glm::vec2& screenSize) {
         viewGrid = std::make_unique<ghoul::opengl::Texture>(
-            data.data(),
+            data,
             glm::uvec3(screenSize.x, screenSize.y, 1),
             GL_TEXTURE_2D,
             ghoul::opengl::Texture::Format::RG,

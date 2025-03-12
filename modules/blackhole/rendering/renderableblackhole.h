@@ -49,7 +49,7 @@ namespace openspace {
         float _rEnvmap = 60.0f;
         float _rCamera = 20.0f;
 
-        ViewPort _viewport;
+        ViewPort _viewport{};
 
         std::vector<float> _schwarzschildWarpTable;
         std::unique_ptr<ghoul::opengl::BufferBinding<
