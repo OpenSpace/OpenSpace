@@ -118,6 +118,7 @@ float interpelateWarpTable(int indexStart, int indexEnd, float localPhi){
     float localPhiEnd = schwarzschildWarpTable[indexEnd * 2];
 
     float t = (localPhi - localPhiStart) / (localPhiEnd - localPhiStart);
+    t = clamp(t, 0.0, 1.0);
     
     return lerp(envMapPhiStart, envMapPhiEnd, t);
 }
