@@ -10,7 +10,7 @@
     "position": {
       "x": 0,
       "y": 0,
-      "z": 30
+      "z": 80.4607304725808E15
     },
     "type": "setNavigationState",
     "up": {

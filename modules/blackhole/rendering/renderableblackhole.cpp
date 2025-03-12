@@ -65,9 +65,10 @@ namespace openspace {
     bool RenderableBlackHole::isReady() const {
         return _program != nullptr;
     }
-
     void RenderableBlackHole::update(const UpdateData&) {
-        float distanceToAnchor = (float)glm::distance(_viewport.getCameraPos(), global::navigationHandler->anchorNode()->position());
+        glm::vec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
+        glm::vec3 anchorNodePosition = global::navigationHandler->anchorNode()->position();
+        float distanceToAnchor = (float)glm::distance(cameraPosition, anchorNodePosition) / distanceconstants::LightYear;
         if (abs(_rCamera - distanceToAnchor) > 0.01) {
 
             _rCamera = distanceToAnchor;

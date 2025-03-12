@@ -1,10 +1,21 @@
+local lightyear = 9.4607304725808E15
+local parsec = 3.0856776E16
+
 local Node = {
     Identifier = "Blackhole_Example",
+    InteractionSphere = 1 * parsec,
+    BoundingSphere = 1 * parsec,
+    Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 10, 20, 30 }
+      }
+    },
     Renderable = {
         Type = "RenderableBlackHole",
       },
       GUI = {
-          Name = "Schwarzchild Blackhole - Example",
+          Name = "Schwarzchild Blackhole",
           Path = "/Blackholes"
         }
   }
