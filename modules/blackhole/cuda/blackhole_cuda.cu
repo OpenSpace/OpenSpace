@@ -57,10 +57,11 @@ __global__ void solveGeodesicKernel(float rs, float envmap_r, float u_0, float* 
 }
 
 void generate_du(float* d_du_0_values, float min, float max, size_t count) {
-    float step = (max - min) / (count - 1);
     for (size_t i = 0; i < count; ++i) {
-        d_du_0_values[i] = min + step * i;
-    }
+        float t = 2.0f * (i / static_cast<float>(count - 1)) - 1.0f;
+        float smooth_t = (t < 0.0f ? -1.0f : 1.0f) * (powf(fabsf(t), 3.0f));
+        d_du_0_values[i] = min + (smooth_t + 1.0f) * (max - min) / 2.0f;
+    }  
 }
 
 void schwarzchild(
@@ -75,7 +76,7 @@ void schwarzchild(
 
     // Copy initial velocity values to device
     std::vector<float> dudphi_0_values(num_rays, 0.f);
-    generate_du(dudphi_0_values.data(), 1, -1, num_rays);
+    generate_du(dudphi_0_values.data(), 5, -5, num_rays);
     cudaMemcpy(d_dudphi_0_values, dudphi_0_values.data(), num_rays * sizeof(float), cudaMemcpyHostToDevice);
 
     // Launch kernel
