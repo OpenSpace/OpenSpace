@@ -7,23 +7,11 @@ return {
     OutputFilename = "${USER_ASSETS}/B612/2023 CX1/impact-corridor/2023-CX1",
     ImageWidth = 5400,
     ImageHeight = 2700,
-    BrushSize = 205,
-    FilterStrength = 12.5,
+    BrushSize = 85,
+    FilterStrength = 13,
     ColorMap = "${SYNC}/http/default_colormaps_uniform/1/inferno.cmap",
-    InvertColorMap = false,
-    NightMap = "${SYNC}/http/earth_textures/3/earth_night.png"
-  },
-  {
-    Type = "ImpactCorridorTask",
-    AsteroidName = "2023 CX1",
-    ImpactFile = "${USER_ASSETS}/B612/2023 CX1/impacts/2023-CX1-impacts.txt",
-    OutputFilename = "${USER_ASSETS}/B612/2023 CX1/impact-corridor/2023-CX1-PuOr",
-    ImageWidth = 5400,
-    ImageHeight = 2700,
-    BrushSize = 205,
-    FilterStrength = 12.5,
-    ColorMap = "${SYNC}/http/default_colormaps_diverging/1/PuOr.cmap",
-    InvertColorMap = false,
+    TimeLowerColorMap = "${SYNC}/http/default_colormaps_sequential/1/YlOrBr.cmap",
+    TimeUpperColorMap = "${SYNC}/http/default_colormaps_sequential/1/RdPu.cmap",
     NightMap = "${SYNC}/http/earth_textures/3/earth_night.png"
   },
   {
@@ -34,24 +22,12 @@ return {
     ImageWidth = 5400,
     ImageHeight = 2700,
     BrushSize = 85,
-    FilterStrength = 19,
+    FilterStrength = 13,
     ColorMap = "${SYNC}/http/default_colormaps_uniform/1/inferno.cmap",
-    InvertColorMap = false,
+    TimeLowerColorMap = "${SYNC}/http/default_colormaps_sequential/1/YlOrBr.cmap",
+    TimeUpperColorMap = "${SYNC}/http/default_colormaps_sequential/1/RdPu.cmap",
     NightMap = "${SYNC}/http/earth_textures/3/earth_night.png"
   },
-  {
-    Type = "ImpactCorridorTask",
-    AsteroidName = "2004 MN4",
-    ImpactFile = "${USER_ASSETS}/B612/2004 MN4/high_ip_2004-12-27T21.28.37.000/impacts/2004-MN4-impacts.txt",
-    OutputFilename = "${USER_ASSETS}/B612/2004 MN4/high_ip_2004-12-27T21.28.37.000/impact-corridor/2004-MN4-PuOr",
-    ImageWidth = 5400,
-    ImageHeight = 2700,
-    BrushSize = 85,
-    FilterStrength = 19,
-    ColorMap = "${SYNC}/http/default_colormaps_diverging/1/PuOr.cmap",
-    InvertColorMap = false,
-    NightMap = "${SYNC}/http/earth_textures/3/earth_night.png"
-  }
 }
 
 --${DATA}/tasks/impactcorridor.task

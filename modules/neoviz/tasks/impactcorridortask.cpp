@@ -216,6 +216,16 @@ namespace {
         // Path to the a colormap to use for coloring the impact corridor map.
         std::string colorMap;
 
+        // Path to the a colormap to use for coloring the time componend of the impact
+        // corridor map. This is the lower part of the color map that will be combined
+        // with the upper part to create a full color map.
+        std::string timeLowerColorMap;
+
+        // Path to the a colormap to use for coloring the time componend of the impact
+        // corridor map. This is the upper part of the color map that will be combined
+        // with the lower part to create a full color map.
+        std::string timeUpperColorMap;
+
         // The size of the brush used to plot impacts to the image. This is also used as
         // the kernel size for the gaussian filter, which means that this value needs to
         // be odd. If not given, then a default value of 15 is used.
@@ -260,6 +270,18 @@ ImpactCorridorTask::ImpactCorridorTask(const ghoul::Dictionary& dictionary) {
             std::format("Cannot find color map file {}", _colorMap)
         );
     }
+    _timeLowerColorMap = absPath(p.timeLowerColorMap);
+    if (!std::filesystem::exists(_timeLowerColorMap)) {
+        throw ghoul::RuntimeError(
+            std::format("Cannot find color map file {}", _timeLowerColorMap)
+        );
+    }
+    _timeUpperColorMap = absPath(p.timeUpperColorMap);
+    if (!std::filesystem::exists(_timeUpperColorMap)) {
+        throw ghoul::RuntimeError(
+            std::format("Cannot find color map file {}", _timeUpperColorMap)
+        );
+    }
 
     _brushSize = p.brushSize.value_or(DefaultBrushSize);
     if (_brushSize % 2 == 0) {
@@ -291,8 +313,12 @@ void ImpactCorridorTask::perform(const Task::ProgressCallback& progressCallback)
     const unsigned int NumPixels = _imageWidth * _imageHeight;
     const unsigned int Size = NumPixels * NChannels;
 
-    // Read the color map
+    // Read the color maps
     openspace::dataloader::ColorMap colorMap = dataloader::color::loadFile(_colorMap);
+    openspace::dataloader::ColorMap timeLowerColorMap =
+        dataloader::color::loadFile(_timeLowerColorMap);
+    openspace::dataloader::ColorMap timeUpperColorMap =
+        dataloader::color::loadFile(_timeUpperColorMap);
 
     // Read the night layer map
     int nightWidth = 0;
@@ -334,6 +360,8 @@ void ImpactCorridorTask::perform(const Task::ProgressCallback& progressCallback)
         NumPixels,
         Size,
         colorMap,
+        timeLowerColorMap,
+        timeUpperColorMap,
         pixels
     );
 
@@ -348,6 +376,8 @@ void ImpactCorridorTask::perform(const Task::ProgressCallback& progressCallback)
         NumPixels,
         Size,
         colorMap,
+        timeLowerColorMap,
+        timeUpperColorMap,
         pixels
     );
 
@@ -360,6 +390,8 @@ void ImpactCorridorTask::perform(const Task::ProgressCallback& progressCallback)
         NumPixels,
         Size,
         colorMap,
+        timeLowerColorMap,
+        timeUpperColorMap,
         pixels
     );
 
@@ -372,6 +404,8 @@ void ImpactCorridorTask::perform(const Task::ProgressCallback& progressCallback)
         NumPixels,
         Size,
         colorMap,
+        timeLowerColorMap,
+        timeUpperColorMap,
         pixels
     );
 }
@@ -516,8 +550,11 @@ std::vector<ImpactCorridorTask::ImpactPixel> ImpactCorridorTask::plotImpactData(
 
                 // Time
                 if (data[index].impactTime > 0.0) {
-                    double average = (data[index].impactTime + time) / 2.0;
-                    data[index].impactTime = average;
+                    double alpha0 = intensity + data[index].intensity * (1 - intensity);
+                    double smmothed = time * intensity +
+                        data[index].impactTime * data[index].intensity * (1 - intensity);
+                    smmothed /= alpha0;
+                    data[index].impactTime = smmothed;
                 }
                 else {
                     data[index].impactTime = time;
@@ -624,7 +661,9 @@ void ImpactCorridorTask::processImage(const Task::ProgressCallback& progressCall
                                       const std::vector<ImpactPixel>& data,
                                       unsigned int nPixels, unsigned int size,
                                       const openspace::dataloader::ColorMap& colorMap,
-                                      std::vector<glm::vec4>& pixels)
+                                 const openspace::dataloader::ColorMap& timeLowerColorMap,
+                                 const openspace::dataloader::ColorMap& timeUpperColorMap,
+                                                           std::vector<glm::vec4>& pixels)
 {
     // Find the minimum and maximum values for the chosen data type
     std::string dataTypeName;
@@ -728,6 +767,8 @@ void ImpactCorridorTask::processImage(const Task::ProgressCallback& progressCall
         maxValue,
         maxIntensity,
         colorMap,
+        timeLowerColorMap,
+        timeUpperColorMap,
         pixels
     );
 
@@ -747,7 +788,9 @@ void ImpactCorridorTask::applyColorMap(const Task::ProgressCallback& progressCal
                                        int nPixels, double minValue, double maxValue,
                                        double maxIntensity,
                                        const openspace::dataloader::ColorMap& colorMap,
-                                       std::vector<glm::vec4>& pixels)
+                                 const openspace::dataloader::ColorMap& timeLowerColorMap,
+                                 const openspace::dataloader::ColorMap& timeUpperColorMap,
+                                                           std::vector<glm::vec4>& pixels)
 {
     for (int p = 0; p < nPixels; ++p) {
         if (!data[p].hasImpact) {
@@ -794,15 +837,48 @@ void ImpactCorridorTask::applyColorMap(const Task::ProgressCallback& progressCal
         glm::vec4 color = colorMap.entries[colorMapIndex];
         color.a = static_cast<float>(data[p].intensity / maxIntensity);
 
-        // Bump up the saturation a bit for the time map
+        // Special case for the time data type
         if (dataType == DataType::Time) {
-            // Convert to HSL
+            // Combine two sequential color maps to become one custom diverging color map
+            if (normalizedValue < 0.5) {
+                // Use the lower color map, this is inverted relative the upper one
+                double value = 1.0 - (normalizedValue / 0.5);
+
+                colorMapIndex = static_cast<int>(std::round(
+                    value * (static_cast<int>(timeLowerColorMap.entries.size()) - 1)
+                ));
+
+                // Invert the color map if needed
+                if (_invertColorMap) {
+                    colorMapIndex = (timeLowerColorMap.entries.size() - 1) - colorMapIndex;
+                }
+
+                color = timeLowerColorMap.entries[colorMapIndex];
+            }
+            else if (normalizedValue > 0.5) {
+                // Use the upper color map
+                double value = (normalizedValue / 0.5) - 1.0;
+                colorMapIndex = static_cast<int>(std::round(
+                    value * (static_cast<int>(timeUpperColorMap.entries.size()) - 1)
+                ));
+
+                // Invert the color map if needed
+                if (_invertColorMap) {
+                    colorMapIndex = (timeUpperColorMap.entries.size() - 1) - colorMapIndex;
+                }
+
+                color = timeUpperColorMap.entries[colorMapIndex];
+            }
+            else {
+                // Use pure white
+                color = glm::vec4(1.f);
+            }
+            color.a = static_cast<float>(data[p].intensity / maxIntensity);
+
+            // Bump up the saturation a bit for the time map
             glm::vec3 hslColor = rgbToHsl(glm::vec3(color.r, color.g, color.b));
+            hslColor.y *= 1.0f;
 
-            // Bump up the saturation a bit
-            hslColor.g *= 1.5f;
-
-            // Convert back to RGB
             glm::vec3 rgbColor = hslToRgb(hslColor);
             color.r = rgbColor.r;
             color.g = rgbColor.g;

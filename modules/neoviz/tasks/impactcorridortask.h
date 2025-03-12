@@ -134,11 +134,16 @@ private:
      * \param nPixels The total number of pixels in the image
      * \param size The total size of the image when considering the color channels
      * \param colorMap The color map used to color the data
+     * \param timeLowerColorMap The color map used to color the time data, the lower part
+     * \param timeUpperColorMap The color map used to color the time data, the upper part
      * \param pixels The pixel data to save as an image file
      */
     void processImage(const Task::ProgressCallback& progressCallback, DataType dataType,
         const std::vector<ImpactPixel>& data, unsigned int nPixels, unsigned int size,
-        const openspace::dataloader::ColorMap& colorMap, std::vector<glm::vec4>& pixels);
+        const openspace::dataloader::ColorMap& colorMap,
+        const openspace::dataloader::ColorMap& timeLowerColorMap,
+        const openspace::dataloader::ColorMap& timeUpperColorMap,
+        std::vector<glm::vec4>& pixels);
 
     /**
      * Apply the color map to the flat list of pixel saturation data.
@@ -150,11 +155,16 @@ private:
      * \param minValue The minimum scaling value for the color map
      * \param maxValue The maximum scaling value for the color map
      * \param colorMap The color map used to color the data
+     * \param timeLowerColorMap The color map used to color the time data, the lower part
+     * \param timeUpperColorMap The color map used to color the time data, the upper part
      * \param pixels The pixel data to store the applied color in
      */
     void applyColorMap(const Task::ProgressCallback& progressCallback, DataType dataType,
-        const std::vector<ImpactPixel>& data, int nPixels, double minValue, double maxValue,
-        double maxIntensity, const openspace::dataloader::ColorMap& colorMap,
+        const std::vector<ImpactPixel>& data, int nPixels, double minValue,
+        double maxValue, double maxIntensity,
+        const openspace::dataloader::ColorMap& colorMap,
+        const openspace::dataloader::ColorMap& timeLowerColorMap,
+        const openspace::dataloader::ColorMap& timeUpperColorMap,
         std::vector<glm::vec4>& pixels);
 
     /**
@@ -181,6 +191,8 @@ private:
     int _brushSaturation;
     double _filterStrength;
     std::filesystem::path _colorMap;
+    std::filesystem::path _timeLowerColorMap;
+    std::filesystem::path _timeUpperColorMap;
     bool _invertColorMap;
     bool _hasNightMap;
     std::filesystem::path _nightMap;
