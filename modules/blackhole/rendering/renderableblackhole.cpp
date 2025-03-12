@@ -105,15 +105,14 @@ namespace openspace {
         SendSchwarzchildTableToShader();
 
    
-      /*  _program->setUniform(
+        /*   _program->setUniform(
             _uniformCache.cameraRotationMatrix,
             glm::mat4(global::navigationHandler->camera()->viewRotationMatrix())
         );*/
-
-        
+        glm::fmat4 worldRotationMatrix = glm::mat4_cast(global::navigationHandler->camera()->rotationQuaternion());
         _program->setUniform(
             _uniformCache.worldRotationMatrix,
-            glm::mat4_cast(global::navigationHandler->orbitalNavigator().anchorNodeToCameraRotation())
+            worldRotationMatrix
         );
      
         drawQuad();
@@ -174,9 +173,9 @@ namespace openspace {
     }
 
     void RenderableBlackHole::loadEnvironmentTexture() {
-        //const std::string texturePath = "${MODULE_BLACKHOLE}/rendering/uv.png";
-        const std::string texturePath = "${BASE}/sync/http/milkyway_textures/2/DarkUniverse_mellinger_8k.jpg";
-        //const std::string texturePath = "C:/Users/wilbj602/Downloads/img.jpg";
+        const std::string texturePath = "${MODULE_BLACKHOLE}/rendering/uv.png";
+        //const std::string texturePath = "${BASE}/sync/http/milkyway_textures/2/DarkUniverse_mellinger_8k.jpg";
+        //const std::string texturePath = "${MODULE_BLACKHOLE}/skybox.jpg";
 
         _environmentTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(texturePath), 2);
 

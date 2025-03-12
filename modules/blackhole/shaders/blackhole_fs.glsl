@@ -141,8 +141,10 @@ Fragment getFragment() {
     Fragment frag;
 
     vec4 viewCoords = normalize(vec4(texture(viewGrid, TexCoord).xy, VIEWGRIDZ, 0.0f));
-    vec4 rotatedViewCoords = viewCoords;
-    //vec4 rotatedViewCoords = cameraRotationMatrix * viewCoords;
+    vec4 rotatedViewCoords =  viewCoords;
+
+    // User loacal input rotation of the black hole
+    rotatedViewCoords = worldRotationMatrix * viewCoords;
     
     vec2 sphericalCoords = cartesianToSpherical(rotatedViewCoords.xyz);
     
@@ -172,8 +174,8 @@ Fragment getFragment() {
 
     envMapCoords = rotationMatrixX * envMapCoords;
 
-    // User input rotation of the black hole
-    envMapCoords = worldRotationMatrix * envMapCoords;
+    // User world input rotation of the black hole
+    // envMapCoords = worldRotationMatrix * envMapCoords;
 
     sphericalCoords = cartesianToSpherical(envMapCoords.xyz);
     vec2 uv = sphericalToUV(sphericalCoords);
