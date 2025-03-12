@@ -175,7 +175,7 @@ namespace openspace {
     void RenderableBlackHole::loadEnvironmentTexture() {
         const std::string texturePath = "${MODULE_BLACKHOLE}/rendering/uv.png";
         //const std::string texturePath = "${BASE}/sync/http/milkyway_textures/2/DarkUniverse_mellinger_8k.jpg";
-        //const std::string texturePath = "${MODULE_BLACKHOLE}/skybox.jpg";
+        //const std::string texturePath = "${MODULE_BLACKHOLE}/rendering/skybox.jpg";
 
         _environmentTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(texturePath), 2);
 
