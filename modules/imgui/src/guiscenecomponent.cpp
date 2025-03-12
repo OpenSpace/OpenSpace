@@ -49,7 +49,7 @@ namespace {
                 renderSceneGraphNode(*c, time);
             }
 
-            bool timeRangeActive = node.isTimeFrameActive(time);
+            bool timeRangeActive = node.isTimeFrameActive();
             ImGui::Checkbox("Time Range Active", &timeRangeActive);
 
             const Renderable* renderable = node.renderable();
