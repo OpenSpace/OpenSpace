@@ -11,7 +11,6 @@ namespace openspace {
     public:
         ViewPort() {};
         ViewPort(Camera* camera);
-
         
         glm::dvec3 getCameraPos() const { return _camera->positionVec3(); }
     
@@ -22,7 +21,7 @@ namespace openspace {
         std::unique_ptr<ghoul::opengl::Texture> viewGrid;
 
     private:
-        Camera* _camera = nullptr;
+        std::unique_ptr<Camera> _camera = nullptr;
         float fovHorizontel = glm::radians(90.f);
     };
 } // namespace openspace

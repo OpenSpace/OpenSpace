@@ -12,7 +12,7 @@ namespace openspace {
     class RenderableBlackHole : public Renderable {
     public:
         explicit RenderableBlackHole(const ghoul::Dictionary& dictionary);
-        ~RenderableBlackHole() override = default;
+        ~RenderableBlackHole() override;
 
         void initialize() override;
         void initializeGL() override;
@@ -52,11 +52,9 @@ namespace openspace {
         ViewPort _viewport;
 
         std::vector<float> _schwarzschildWarpTable;
-        std::unique_ptr<ghoul::opengl::Texture> warpTableTex;
         std::unique_ptr<ghoul::opengl::BufferBinding<
             ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboDataBinding;
 
-        GLuint _framebuffer = 0;
         GLuint _quadVao = 0;
         GLuint _quadVbo = 0;
         GLuint _ssboData = 0;

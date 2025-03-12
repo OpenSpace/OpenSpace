@@ -36,11 +36,12 @@ namespace openspace {
 
     }
 
+    RenderableBlackHole::~RenderableBlackHole() {}
+
     void RenderableBlackHole::initialize() {
         _viewport = ViewPort(global::navigationHandler->camera());
         global::navigationHandler->camera()->setRotation(glm::dquat(0,0,0,0));
         _schwarzschildWarpTable = std::vector<float>(_rayCount * 2, 0.f);
-        schwarzchild(_rsBlackHole, _rEnvmap, _rayCount, _stepsCount, 1.0f / _rCamera, _stepLength, _schwarzschildWarpTable.data());
     }
 
     void RenderableBlackHole::initializeGL() {
@@ -53,7 +54,9 @@ namespace openspace {
     }
 
     void RenderableBlackHole::deinitializeGL() {
-        glDeleteFramebuffers(1, &_framebuffer);
+        _warpTableTex = nullptr;
+        _environmentTexture = nullptr;
+        _viewport.viewGrid = nullptr;
         glDeleteBuffers(1, &_quadVbo);
         glDeleteVertexArrays(1, &_quadVao);
         delete(_program);
