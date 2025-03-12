@@ -61,8 +61,9 @@ namespace openspace {
         GLuint _quadVbo = 0;
         GLuint _ssboData = 0;
 
-        UniformCache(environmentTexture, viewGrid, cameraRotationMatrix, cameraToAnchorNodeDistance) _uniformCache;
+        UniformCache(environmentTexture, viewGrid, worldRotationMatrix) _uniformCache;
 
+        std::unique_ptr<ghoul::opengl::Texture> _warpTableTex;
         std::unique_ptr<ghoul::opengl::Texture> _environmentTexture;
     };
 

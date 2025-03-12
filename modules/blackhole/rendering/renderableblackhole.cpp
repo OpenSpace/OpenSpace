@@ -64,6 +64,14 @@ namespace openspace {
     }
 
     void RenderableBlackHole::update(const UpdateData&) {
+        float distanceToAnchor = (float)glm::distance(_viewport.getCameraPos(), global::navigationHandler->anchorNode()->position());
+        if (abs(_rCamera - distanceToAnchor) > 0.01) {
+
+            _rCamera = distanceToAnchor;
+            _rEnvmap = 2 * _rCamera;
+
+            schwarzchild(_rsBlackHole, _rEnvmap, _rayCount, _stepsCount, 1.0f / _rCamera, _stepLength, _schwarzschildWarpTable.data());
+        }
         bindSSBOData(_program, "ssbo_warp_table", _ssboDataBinding, _ssboData);
     }
 
@@ -84,18 +92,16 @@ namespace openspace {
         SendSchwarzchildTableToShader();
 
    
-        _program->setUniform(
+      /*  _program->setUniform(
             _uniformCache.cameraRotationMatrix,
             glm::mat4(global::navigationHandler->camera()->viewRotationMatrix())
-        );
+        );*/
 
-        // ### @TODO: The code below is only ment for debuging ###
-        float distance = (float)glm::distance(_viewport.getCameraPos(), global::navigationHandler->anchorNode()->position());
+        
         _program->setUniform(
-            _uniformCache.cameraToAnchorNodeDistance,
-            distance
+            _uniformCache.worldRotationMatrix,
+            glm::mat4_cast(global::navigationHandler->orbitalNavigator().anchorNodeToCameraRotation())
         );
-        // ### ###
      
         drawQuad();
 
@@ -158,8 +164,8 @@ namespace openspace {
 
     void RenderableBlackHole::loadEnvironmentTexture() {
         //const std::string texturePath = "${MODULE_BLACKHOLE}/rendering/uv.png";
-        //const std::string texturePath = "C:/Users/wilbj602/Documents/GitHub/OpenSpace/sync/http/milkyway_textures/2/DarkUniverse_mellinger_8k.jpg";
-        const std::string texturePath = "C:/Users/wilbj602/Downloads/img.jpg";
+        const std::string texturePath = "${BASE}/sync/http/milkyway_textures/2/DarkUniverse_mellinger_8k.jpg";
+        //const std::string texturePath = "C:/Users/wilbj602/Downloads/img.jpg";
 
         _environmentTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(texturePath), 2);
 

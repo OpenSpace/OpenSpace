@@ -7,8 +7,9 @@ in vec2 TexCoord;
 
 uniform sampler2D environmentTexture;
 uniform sampler2D viewGrid;
-uniform mat4 cameraRotationMatrix;
-uniform float cameraToAnchorNodeDistance;
+// uniform mat4 cameraRotationMatrix;
+uniform mat4 worldRotationMatrix;
+
 
 layout (std430) buffer ssbo_warp_table {
   float schwarzschildWarpTable[];
@@ -33,7 +34,7 @@ float atan2(float a, float b){
     return 0.0f;
 }
 
-//Conversions
+// Conversions
 
 vec2 cartesianToSpherical(vec3 cartisian) {
     float theta = atan2(sqrt(cartisian.x * cartisian.x + cartisian.y * cartisian.y) , cartisian.z);
@@ -133,11 +134,14 @@ vec2 applyBlackHoleWarp(vec2 cameraOutSphereCoords){
     return vec2(phi, theta);
 }
 
+// Fragment shader function
+
 Fragment getFragment() {
     Fragment frag;
 
     vec4 viewCoords = normalize(vec4(texture(viewGrid, TexCoord).xy, VIEWGRIDZ, 0.0f));
-    vec4 rotatedViewCoords = cameraRotationMatrix * viewCoords;
+    vec4 rotatedViewCoords = viewCoords;
+    //vec4 rotatedViewCoords = cameraRotationMatrix * viewCoords;
     
     vec2 sphericalCoords = cartesianToSpherical(rotatedViewCoords.xyz);
     
@@ -156,26 +160,21 @@ Fragment getFragment() {
 
     // Init rotation of the black hole
     vec4 envMapCoords = vec4(sphericalToCartesian(envMapSphericalCoords.x, envMapSphericalCoords.y), 0.0f);
-    float rotationAngle = PI/2;
-    float cameraRotationAngle = cameraToAnchorNodeDistance;
-
+    
+    float initRotationAngle = PI/2;
     mat4 rotationMatrixX = mat4(
         1.0f,    0.0f,                 0.0f,               0.0f,
-        0.0f,    cos(rotationAngle),  -sin(rotationAngle), 0.0f,
-        0.0f,    sin(rotationAngle),   cos(rotationAngle), 0.0f,
+        0.0f,    cos(initRotationAngle),  -sin(initRotationAngle), 0.0f,
+        0.0f,    sin(initRotationAngle),   cos(initRotationAngle), 0.0f,
         0.0f,    0.0f,                 0.0f,               1.0f
     );
 
-    mat4 rotationMatrixZ = mat4(
-        cos(cameraRotationAngle), -sin(cameraRotationAngle), 0.0f, 0.0f,
-        sin(cameraRotationAngle),  cos(cameraRotationAngle), 0.0f, 0.0f,
-        0.0f,               0.0f,               1.0f, 0.0f,
-        0.0f,               0.0f,               0.0f, 1.0f
-    );
-    
-    envMapCoords = rotationMatrixZ * rotationMatrixX * envMapCoords;
-    sphericalCoords = cartesianToSpherical(envMapCoords.xyz);
+    envMapCoords = rotationMatrixX * envMapCoords;
 
+    // User input rotation of the black hole
+    envMapCoords = worldRotationMatrix * envMapCoords;
+
+    sphericalCoords = cartesianToSpherical(envMapCoords.xyz);
     vec2 uv = sphericalToUV(sphericalCoords);
     vec4 texColor = texture(environmentTexture, uv);
     
