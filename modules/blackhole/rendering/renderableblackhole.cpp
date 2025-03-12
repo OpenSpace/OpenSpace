@@ -5,6 +5,8 @@
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/navigation/navigationhandler.h>
 
+#include <openspace/util/distanceconstants.h>
+
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/openglstatecache.h>
