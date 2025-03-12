@@ -244,6 +244,9 @@ asset.onInitialize(function()
   openspace.action.registerAction(ToggleMainGui)
   openspace.bindKey("F2", ToggleMainGui.Identifier)
 
+  openspace.action.registerAction(ToggleOverlays)
+  openspace.bindKey("Shift+F2", ToggleOverlays.Identifier)
+
   openspace.action.registerAction(ToggleMasterRendering)
   openspace.bindKey("Alt+R", ToggleMasterRendering.Identifier)
 
@@ -305,6 +308,9 @@ asset.onDeinitialize(function()
 
   openspace.clearKey("Alt+R")
   openspace.action.removeAction(ToggleMasterRendering)
+
+  openspace.clearKey("Shift+F2")
+  openspace.action.removeAction(ToggleOverlays)
 
   openspace.clearKey("F2")
   openspace.action.removeAction(ToggleMainGui)
