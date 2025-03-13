@@ -63,7 +63,8 @@ documentation::Documentation TimelineScale::Documentation() {
 }
 
 TimelineScale::TimelineScale(const ghoul::Dictionary& dictionary)
-    : _shouldInterpolate(ShouldInterpolateInfo, true)
+    : Scale(dictionary)
+    , _shouldInterpolate(ShouldInterpolateInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
