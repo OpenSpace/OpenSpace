@@ -6,6 +6,7 @@
 #include <ghoul/opengl/uniformcache.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/bufferbinding.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
 namespace openspace {
 
@@ -44,6 +45,8 @@ namespace openspace {
         size_t _rayCount = 1000;
         size_t _stepsCount = 50000;
         float _stepLength = 0.001f;
+
+        properties::FloatProperty _MBlackHole;
 
         float _rsBlackHole = 1.0f;
         float _rEnvmap = 60.0f;

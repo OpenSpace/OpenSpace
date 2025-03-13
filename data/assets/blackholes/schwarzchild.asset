@@ -1,10 +1,11 @@
 local lightyear = 9.4607304725808E15
-local parsec = 3.0856776E16
+local lightday = 9.4607304725808E15 / 365
+local _MBlackHole = 4.297E6;
 
 local Node = {
     Identifier = "Blackhole_Example",
-    InteractionSphere = 1 * parsec,
-    BoundingSphere = 1 * parsec,
+    InteractionSphere = 0.8 * lightday,
+    BoundingSphere = 3 * lightday,
     Transform = {
     Translation = {
       Type = "StaticTranslation",
@@ -13,6 +14,7 @@ local Node = {
     },
     Renderable = {
         Type = "RenderableBlackHole",
+        SolarMass = 4.297e6
       },
       GUI = {
           Name = "Schwarzchild Blackhole",

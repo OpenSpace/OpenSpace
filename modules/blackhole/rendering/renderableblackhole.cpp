@@ -18,8 +18,11 @@
 #include <filesystem>
 #include <vector>
 
-
 #include <modules/blackhole/cuda/blackhole_cuda.h>
+
+#ifndef G
+#define G 6.67430e-11f
+#endif
 
 namespace {
     constexpr std::string_view _loggerCat = "BlackHoleModule";
@@ -33,13 +36,30 @@ namespace {
          1.f, -1.f,  1.f,  0.f,
          1.f,  1.f,  1.f,  1.f
     };
+
+    constexpr openspace::properties::Property::PropertyInfo SolarMassInfo = {
+        "SolarMass",
+        "Solar Mass",
+        "The mass of the blackhole in solar mass units",
+        openspace::properties::Property::Visibility::User
+    };
+
+    struct [[codegen::Dictionary(RenderableModel)]] Parameters {
+        std::optional<float> SolarMass;
+    };
+#include "renderableblackhole_codegen.cpp"
 }
 
 namespace openspace {
 
     RenderableBlackHole::RenderableBlackHole(const ghoul::Dictionary& dictionary)
-        : Renderable(dictionary, { .automaticallyUpdateRenderBin = false }) {
+        : Renderable(dictionary, { .automaticallyUpdateRenderBin = false }), _solarMass(SolarMassInfo, 4.297e6f) {
 
+        const Parameters p = codegen::bake<Parameters>(dictionary);
+
+        _solarMass = p.SolarMass.value_or(_solarMass);
+
+        _rs = 2.0f * G * _solarMass;
     }
 
     RenderableBlackHole::~RenderableBlackHole() {}
@@ -82,12 +102,12 @@ namespace openspace {
         glm::vec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
         glm::vec3 anchorNodePosition = global::navigationHandler->anchorNode()->position();
         float distanceToAnchor = (float)glm::distance(cameraPosition, anchorNodePosition) / distanceconstants::LightYear;
-        if (abs(_rCamera - distanceToAnchor) > 0.01) {
+        if (abs(_rCamera - distanceToAnchor) > _rs * 0.01) {
 
             _rCamera = distanceToAnchor;
             _rEnvmap = 2 * _rCamera;
 
-            schwarzchild(_rsBlackHole, _rEnvmap, _rayCount, _stepsCount, 1.0f / _rCamera, _stepLength, _schwarzschildWarpTable.data());
+            schwarzchild(_rs, _rEnvmap, _rayCount, _stepsCount, 1.0f / _rCamera, _stepLength, _schwarzschildWarpTable.data());
         }
         bindSSBOData(_program, "ssbo_warp_table", _ssboDataBinding, _ssboData);
     }

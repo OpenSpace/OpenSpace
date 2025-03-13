@@ -76,7 +76,7 @@ void schwarzchild(
 
     // Copy initial velocity values to device
     std::vector<float> dudphi_0_values(num_rays, 0.f);
-    generate_du(dudphi_0_values.data(), 5, -5, num_rays);
+    generate_du(dudphi_0_values.data(), 50000, -50000, num_rays);
     cudaMemcpy(d_dudphi_0_values, dudphi_0_values.data(), num_rays * sizeof(float), cudaMemcpyHostToDevice);
 
     // Launch kernel
