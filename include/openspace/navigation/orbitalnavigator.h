@@ -157,11 +157,22 @@ public:
      */
     static scripting::LuaLibrary luaLibrary();
 
-private:
     struct CameraRotationDecomposition {
         glm::dquat localRotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
         glm::dquat globalRotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
     };
+
+    /**
+     * Decomposes the camera's rotation in to a global and a local rotation defined by
+     * CameraRotationDecomposition. The global rotation defines the rotation so that the
+     * camera points towards the reference node in the direction opposite to the direction
+     * out from the surface of the object. The local rotation defines the differential
+     * from the global to the current total rotation so that
+     * `cameraRotation = globalRotation * localRotation`.
+     */
+    CameraRotationDecomposition decomposeCameraRotationSurface(
+        const CameraPose& cameraPose, const SceneGraphNode& reference);
+private:
 
     using Displacement = std::pair<glm::dvec3, glm::dvec3>;
 
@@ -269,17 +280,6 @@ private:
     float _idleBehaviorTriggerTimer = 0.f;
 
     float _movementTimer = 0.f;
-
-    /**
-     * Decomposes the camera's rotation in to a global and a local rotation defined by
-     * CameraRotationDecomposition. The global rotation defines the rotation so that the
-     * camera points towards the reference node in the direction opposite to the direction
-     * out from the surface of the object. The local rotation defines the differential
-     * from the global to the current total rotation so that
-     * `cameraRotation = globalRotation * localRotation`.
-     */
-    CameraRotationDecomposition decomposeCameraRotationSurface(
-        const CameraPose& cameraPose, const SceneGraphNode& reference);
 
     /**
      * Decomposes the camera's rotation in to a global and a local rotation defined by

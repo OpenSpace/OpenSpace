@@ -3,18 +3,21 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/framebufferrenderer.h>
-#include <openspace/navigation/navigationhandler.h>
-
 #include <openspace/util/distanceconstants.h>
 
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
+
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
+
 #include <filesystem>
 #include <vector>
+
 
 #include <modules/blackhole/cuda/blackhole_cuda.h>
 
@@ -33,6 +36,7 @@ namespace {
 }
 
 namespace openspace {
+
     RenderableBlackHole::RenderableBlackHole(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary, { .automaticallyUpdateRenderBin = false }) {
 
@@ -104,12 +108,16 @@ namespace openspace {
 
         SendSchwarzchildTableToShader();
 
+        interaction::OrbitalNavigator::CameraRotationDecomposition camRot = global::navigationHandler->orbitalNavigator().decomposeCameraRotationSurface(
+            CameraPose{global::navigationHandler->camera()->positionVec3(),  global::navigationHandler->camera()->rotationQuaternion()},
+            *global::navigationHandler->anchorNode()
+        );
    
-        /*   _program->setUniform(
+        _program->setUniform(
             _uniformCache.cameraRotationMatrix,
-            glm::mat4(global::navigationHandler->camera()->viewRotationMatrix())
-        );*/
-        glm::fmat4 worldRotationMatrix = glm::mat4_cast(global::navigationHandler->camera()->rotationQuaternion());
+            glm::fmat4(glm::mat4_cast(camRot.localRotation))
+        );
+        glm::fmat4 worldRotationMatrix = glm::mat4_cast(camRot.globalRotation);
         _program->setUniform(
             _uniformCache.worldRotationMatrix,
             worldRotationMatrix
@@ -173,8 +181,8 @@ namespace openspace {
     }
 
     void RenderableBlackHole::loadEnvironmentTexture() {
-        const std::string texturePath = "${MODULE_BLACKHOLE}/rendering/uv.png";
-        //const std::string texturePath = "${BASE}/sync/http/milkyway_textures/2/DarkUniverse_mellinger_8k.jpg";
+        //const std::string texturePath = "${MODULE_BLACKHOLE}/rendering/uv.png";
+        const std::string texturePath = "${BASE}/sync/http/milkyway_textures/2/DarkUniverse_mellinger_8k.jpg";
         //const std::string texturePath = "${MODULE_BLACKHOLE}/rendering/skybox.jpg";
 
         _environmentTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(texturePath), 2);
