@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,6 +41,7 @@
 #include <ghoul/ext/assimp/contrib/zip/src/zip.h>
 #include <filesystem>
 #include <fstream>
+
 #include "scriptengine_lua.inl"
 
 namespace {
@@ -572,6 +573,15 @@ void ScriptEngine::postSync(bool isMaster) {
             info.lastRun = now;
         }
     }
+
+    for (size_t i = 0; i < _scheduledScripts.size(); i++) {
+        const ScheduledScriptInfo& info = _scheduledScripts[i];
+        if (now > info.timestamp) {
+            runScript({ info.script });
+            _scheduledScripts.erase(_scheduledScripts.begin() + i);
+            i--;
+        }
+    }
 }
 
 void ScriptEngine::queueScript(Script script) {
@@ -634,6 +644,14 @@ void ScriptEngine::removeRepeatedScript(std::string_view identifier) {
     else {
         LERROR(std::format("Could not find script with identifier '{}'", identifier));
     }
+}
+
+void ScriptEngine::scheduleScript(std::string script, double delay) {
+    double now =
+        global::sessionRecordingHandler->isSavingFramesDuringPlayback() ?
+        global::sessionRecordingHandler->currentApplicationInterpolationTime() :
+        global::windowDelegate->applicationTime();
+    _scheduledScripts.emplace_back(std::move(script), now + delay);
 }
 
 void ScriptEngine::addBaseLibrary() {
@@ -715,7 +733,8 @@ void ScriptEngine::addBaseLibrary() {
             codegen::lua::DirectoryForPath,
             codegen::lua::UnzipFile,
             codegen::lua::RegisterRepeatedScript,
-            codegen::lua::RemoveRepeatedScript
+            codegen::lua::RemoveRepeatedScript,
+            codegen::lua::ScheduleScript
         }
     };
     addLibrary(lib);

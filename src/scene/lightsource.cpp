@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -81,17 +81,12 @@ std::unique_ptr<LightSource> LightSource::createFromDictionary(
     return std::unique_ptr<LightSource>(source);
 }
 
-LightSource::LightSource()
+LightSource::LightSource(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "LightSource", "Light Source" })
     , _enabled(EnabledInfo, true)
 {
-    addProperty(_enabled);
-}
-
-LightSource::LightSource(const ghoul::Dictionary& dictionary)
-    : LightSource()
-{
     const Parameters p = codegen::bake<Parameters>(dictionary);
+    addProperty(_enabled);
     _enabled = p.enabled.value_or(_enabled);
 }
 

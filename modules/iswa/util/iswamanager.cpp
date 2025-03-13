@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -101,9 +101,9 @@ IswaManager::IswaManager()
     : properties::PropertyOwner({ "IswaManager", "Iswa Manager" })
     , _baseUrl("https://iswa-demo-server.herokuapp.com/")
 {
-    _type[CygnetType::Texture] = "Texture";
-    _type[CygnetType::Data] = "Data";
-    _type[CygnetType::Kameleon] = "Kameleon";
+    _cygnetType[CygnetType::Texture] = "Texture";
+    _cygnetType[CygnetType::Data] = "Data";
+    _cygnetType[CygnetType::Kameleon] = "Kameleon";
 
     _geom[CygnetGeometry::Plane] = "Plane";
     _geom[CygnetGeometry::Sphere] = "Sphere";
@@ -123,7 +123,6 @@ IswaManager::~IswaManager() {
     _groups.clear();
     _cygnetInformation.clear();
 }
-
 
 void IswaManager::initialize() {
     ghoul_assert(!isInitialized(), "IswaManager is already initialized");
@@ -156,10 +155,10 @@ void IswaManager::addIswaCygnet(int id, const std::string& type, std::string gro
         metaFuture.group = std::move(group);
 
         // Assign type of cygnet Texture/Data
-        if (type == _type[CygnetType::Texture]) {
+        if (type == _cygnetType[CygnetType::Texture]) {
             metaFuture.type = CygnetType::Texture;
         }
-        else if (type  == _type[CygnetType::Data]) {
+        else if (type  == _cygnetType[CygnetType::Data]) {
             metaFuture.type = CygnetType::Data;
         }
         else {
@@ -389,7 +388,7 @@ std::string IswaManager::jsonPlaneToLuaTable(MetadataFuture& data) {
     "Name = '" + data.name +"' , "
     "Parent = '" + parent + "', "
     "Renderable = {"
-        "Type = '" + _type[data.type] + _geom[data.geom] + "', "
+        "Type = '" + _cygnetType[data.type] + _geom[data.geom] + "', "
         "Id = " + ghoul::to_string(data.id) + ", "
         "Frame = '" + frame + "' , "
         "GridMin = " + ghoul::to_string(min) + ", "
@@ -496,7 +495,7 @@ std::string IswaManager::jsonSphereToLuaTable(MetadataFuture& data) {
     "Name = '" + data.name +"' , "
     "Parent = '" + parent + "', "
     "Renderable = {"
-        "Type = '" + _type[data.type] + _geom[data.geom] + "', "
+        "Type = '" + _cygnetType[data.type] + _geom[data.geom] + "', "
         "Id = " + std::to_string(data.id) + ", "
         "Frame = '" + frame + "' , "
         "GridMin = " + ghoul::to_string(min) + ", "
@@ -513,7 +512,9 @@ std::string IswaManager::jsonSphereToLuaTable(MetadataFuture& data) {
 
 void IswaManager::createPlane(MetadataFuture& data) {
     // check if this plane already exist
-    std::string name = _type[data.type] + _geom[data.geom] + std::to_string(data.id);
+    std::string name = std::format(
+        "{}{}{}", _cygnetType[data.type], _geom[data.geom], data.id
+    );
 
     if (!data.group.empty()) {
         std::string type;
@@ -551,7 +552,9 @@ void IswaManager::createPlane(MetadataFuture& data) {
 
 void IswaManager::createSphere(MetadataFuture& data) {
     // check if this sphere already exist
-    std::string name = _type[data.type] + _geom[data.geom] + std::to_string(data.id);
+    std::string name = std::format(
+        "{}{}{}", _cygnetType[data.type], _geom[data.geom], data.id
+    );
 
     if (!data.group.empty()) {
         std::string type = typeid(DataSphere).name();

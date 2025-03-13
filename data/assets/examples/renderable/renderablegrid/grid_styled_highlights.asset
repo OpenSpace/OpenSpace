@@ -1,0 +1,26 @@
+-- Higlighting Grid Lines
+-- This example adds a planar grid of 100x100 meters, with highlight color for every 5th
+-- grid line in each direction.
+
+local Node = {
+  Identifier = "RenderableGrid_Example_Highlights",
+  Renderable = {
+    Type = "RenderableGrid",
+    Size = { 100.0, 100.0 },
+    HighlightColor = { 0.0, 1.0, 0.0 },
+    HighlightRate = { 5, 5 },
+    HighlightLineWidth = 2.0
+  },
+  GUI = {
+    Name = "RenderableGrid - Highlights",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

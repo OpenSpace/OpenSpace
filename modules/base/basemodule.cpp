@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #include <modules/base/basemodule.h>
 
 #include <modules/base/dashboard/dashboarditemangle.h>
+#include <modules/base/dashboard/dashboarditemcameraorientation.h>
 #include <modules/base/dashboard/dashboarditemdate.h>
 #include <modules/base/dashboard/dashboarditemdistance.h>
 #include <modules/base/dashboard/dashboarditemelapsedtime.h>
@@ -49,6 +50,7 @@
 #include <modules/base/rendering/pointcloud/sizemappingcomponent.h>
 #include <modules/base/rendering/renderablecartesianaxes.h>
 #include <modules/base/rendering/renderabledisc.h>
+#include <modules/base/rendering/renderabledistancelabel.h>
 #include <modules/base/rendering/renderablelabel.h>
 #include <modules/base/rendering/renderablemodel.h>
 #include <modules/base/rendering/renderablenodearrow.h>
@@ -69,14 +71,18 @@
 #include <modules/base/rotation/constantrotation.h>
 #include <modules/base/rotation/fixedrotation.h>
 #include <modules/base/rotation/luarotation.h>
+#include <modules/base/rotation/multirotation.h>
 #include <modules/base/rotation/staticrotation.h>
 #include <modules/base/rotation/timelinerotation.h>
 #include <modules/base/scale/luascale.h>
+#include <modules/base/scale/multiscale.h>
 #include <modules/base/scale/nonuniformstaticscale.h>
 #include <modules/base/scale/staticscale.h>
 #include <modules/base/scale/timedependentscale.h>
+#include <modules/base/scale/timelinescale.h>
 #include <modules/base/translation/timelinetranslation.h>
 #include <modules/base/translation/luatranslation.h>
+#include <modules/base/translation/multitranslation.h>
 #include <modules/base/translation/statictranslation.h>
 #include <modules/base/timeframe/timeframeinterval.h>
 #include <modules/base/timeframe/timeframeunion.h>
@@ -96,8 +102,6 @@ ghoul::opengl::TextureManager BaseModule::TextureManager;
 BaseModule::BaseModule() : OpenSpaceModule(BaseModule::Name) {}
 
 void BaseModule::internalInitialize(const ghoul::Dictionary&) {
-    FactoryManager::ref().addFactory<ScreenSpaceRenderable>("ScreenSpaceRenderable");
-
     ghoul::TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
@@ -107,11 +111,15 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fSsRenderable->registerClass<ScreenSpaceImageOnline>("ScreenSpaceImageOnline");
     fSsRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
 
+
     ghoul::TemplateFactory<DashboardItem>* fDashboard =
         FactoryManager::ref().factory<DashboardItem>();
     ghoul_assert(fDashboard, "Dashboard factory was not created");
 
     fDashboard->registerClass<DashboardItemAngle>("DashboardItemAngle");
+    fDashboard->registerClass<DashboardItemCameraOrientation>(
+        "DashboardItemCameraOrientation"
+    );
     fDashboard->registerClass<DashboardItemDate>("DashboardItemDate");
     fDashboard->registerClass<DashboardItemDistance>("DashboardItemDistance");
     fDashboard->registerClass<DashboardItemElapsedTime>("DashboardItemElapsedTime");
@@ -131,6 +139,15 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fDashboard->registerClass<DashboardItemText>("DashboardItemText");
     fDashboard->registerClass<DashboardItemVelocity>("DashboardItemVelocity");
 
+
+    ghoul::TemplateFactory<LightSource>* fLightSource =
+        FactoryManager::ref().factory<LightSource>();
+    ghoul_assert(fLightSource, "Light Source factory was not created");
+
+    fLightSource->registerClass<CameraLightSource>("CameraLightSource");
+    fLightSource->registerClass<SceneGraphLightSource>("SceneGraphLightSource");
+
+
     ghoul::TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
@@ -138,6 +155,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableBoxGrid>("RenderableBoxGrid");
     fRenderable->registerClass<RenderableCartesianAxes>("RenderableCartesianAxes");
     fRenderable->registerClass<RenderableDisc>("RenderableDisc");
+    fRenderable->registerClass<RenderableDistanceLabel>("RenderableDistanceLabel");
     fRenderable->registerClass<RenderableGrid>("RenderableGrid");
     fRenderable->registerClass<RenderableLabel>("RenderableLabel");
     fRenderable->registerClass<RenderableModel>("RenderableModel");
@@ -166,13 +184,6 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableTrailOrbit>("RenderableTrailOrbit");
     fRenderable->registerClass<RenderableTrailTrajectory>("RenderableTrailTrajectory");
 
-    ghoul::TemplateFactory<Translation>* fTranslation =
-        FactoryManager::ref().factory<Translation>();
-    ghoul_assert(fTranslation, "Ephemeris factory was not created");
-
-    fTranslation->registerClass<TimelineTranslation>("TimelineTranslation");
-    fTranslation->registerClass<LuaTranslation>("LuaTranslation");
-    fTranslation->registerClass<StaticTranslation>("StaticTranslation");
 
     ghoul::TemplateFactory<Rotation>* fRotation =
         FactoryManager::ref().factory<Rotation>();
@@ -181,6 +192,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRotation->registerClass<ConstantRotation>("ConstantRotation");
     fRotation->registerClass<FixedRotation>("FixedRotation");
     fRotation->registerClass<LuaRotation>("LuaRotation");
+    fRotation->registerClass<MultiRotation>("MultiRotation");
     fRotation->registerClass<StaticRotation>("StaticRotation");
     fRotation->registerClass<TimelineRotation>("TimelineRotation");
 
@@ -189,9 +201,12 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fScale, "Scale factory was not created");
 
     fScale->registerClass<LuaScale>("LuaScale");
+    fScale->registerClass<MultiScale>("MultiScale");
     fScale->registerClass<NonUniformStaticScale>("NonUniformStaticScale");
     fScale->registerClass<StaticScale>("StaticScale");
     fScale->registerClass<TimeDependentScale>("TimeDependentScale");
+    fScale->registerClass<TimelineScale>("TimelineScale");
+
 
     ghoul::TemplateFactory<TimeFrame>* fTimeFrame =
         FactoryManager::ref().factory<TimeFrame>();
@@ -200,12 +215,15 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fTimeFrame->registerClass<TimeFrameInterval>("TimeFrameInterval");
     fTimeFrame->registerClass<TimeFrameUnion>("TimeFrameUnion");
 
-    ghoul::TemplateFactory<LightSource>* fLightSource =
-        FactoryManager::ref().factory<LightSource>();
-    ghoul_assert(fLightSource, "Light Source factory was not created");
 
-    fLightSource->registerClass<CameraLightSource>("CameraLightSource");
-    fLightSource->registerClass<SceneGraphLightSource>("SceneGraphLightSource");
+    ghoul::TemplateFactory<Translation>* fTranslation =
+        FactoryManager::ref().factory<Translation>();
+    ghoul_assert(fTranslation, "Ephemeris factory was not created");
+
+    fTranslation->registerClass<LuaTranslation>("LuaTranslation");
+    fTranslation->registerClass<MultiTranslation>("MultiTranslation");
+    fTranslation->registerClass<StaticTranslation>("StaticTranslation");
+    fTranslation->registerClass<TimelineTranslation>("TimelineTranslation");
 }
 
 void BaseModule::internalDeinitializeGL() {
@@ -216,9 +234,12 @@ void BaseModule::internalDeinitializeGL() {
 std::vector<documentation::Documentation> BaseModule::documentations() const {
     return {
         DashboardItemAngle::Documentation(),
+        DashboardItemCameraOrientation::Documentation(),
         DashboardItemDate::Documentation(),
         DashboardItemDistance::Documentation(),
+        DashboardItemElapsedTime::Documentation(),
         DashboardItemFramerate::Documentation(),
+        DashboardItemInputState::Documentation(),
         DashboardItemMission::Documentation(),
         DashboardItemParallelConnection::Documentation(),
         DashboardItemPropertyValue::Documentation(),
@@ -227,9 +248,13 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         DashboardItemText::Documentation(),
         DashboardItemVelocity::Documentation(),
 
+        CameraLightSource::Documentation(),
+        SceneGraphLightSource::Documentation(),
+
         RenderableBoxGrid::Documentation(),
         RenderableCartesianAxes::Documentation(),
         RenderableDisc::Documentation(),
+        RenderableDistanceLabel::Documentation(),
         RenderableGrid::Documentation(),
         RenderableInterpolatedPoints::Documentation(),
         RenderableLabel::Documentation(),
@@ -260,23 +285,24 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         ConstantRotation::Documentation(),
         FixedRotation::Documentation(),
         LuaRotation::Documentation(),
+        MultiRotation::Documentation(),
         StaticRotation::Documentation(),
         TimelineRotation::Documentation(),
 
         LuaScale::Documentation(),
+        MultiScale::Documentation(),
         NonUniformStaticScale::Documentation(),
         StaticScale::Documentation(),
         TimeDependentScale::Documentation(),
-
-        LuaTranslation::Documentation(),
-        StaticTranslation::Documentation(),
-        TimelineTranslation::Documentation(),
+        TimelineScale::Documentation(),
 
         TimeFrameInterval::Documentation(),
         TimeFrameUnion::Documentation(),
 
-        CameraLightSource::Documentation(),
-        SceneGraphLightSource::Documentation()
+        LuaTranslation::Documentation(),
+        MultiTranslation::Documentation(),
+        StaticTranslation::Documentation(),
+        TimelineTranslation::Documentation()
     };
 }
 

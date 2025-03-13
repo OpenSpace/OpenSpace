@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -221,7 +221,7 @@ void LayerGroup::moveLayer(int oldPosition, int newPosition) {
     ghoul_assert(!_layers.empty(), "The list should not be empty at this point");
     if (newLayerPos == _layers.begin()) {
         // If the layer is moved to the first spot in the list
-        Layer* nextLayer = (_layers.begin() + 1)->get();
+        Layer* nextLayer = _layers.begin()->get();
         layer->setZIndex(nextLayer->zIndex());
     }
     else if (newLayerPos == _layers.end()) {
@@ -240,8 +240,8 @@ void LayerGroup::moveLayer(int oldPosition, int newPosition) {
     _layers.insert(newLayerPos, std::move(layer));
     ghoul_assert(
         std::is_sorted(
-            _layers.begin(),
-            _layers.end(),
+            _layers.cbegin(),
+            _layers.cend(),
             [](const std::unique_ptr<Layer>& a, const std::unique_ptr<Layer>& b) {
                 return a->zIndex() < b->zIndex();
             }

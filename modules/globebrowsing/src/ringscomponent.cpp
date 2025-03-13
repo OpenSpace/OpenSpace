@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -232,6 +232,7 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
     // @TODO (abock, 2021-03-25) Righto!  The RenderableGlobe passes this dictionary
     // in as-is so it would be easy to just pass it directly to the initialize method
     // instead
+    // @TODO (abock, 2025-02-16) Why haven't you done it yet?!
     , _ringsDictionary(dictionary)
 {}
 
@@ -580,21 +581,21 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
 void RingsComponent::update(const UpdateData& data) {
     ZoneScoped;
 
-    if (_shader && _shader->isDirty()) {
+    if (_shader && _shader->isDirty()) [[unlikely]] {
         compileShadowShader();
     }
 
-    if (_geometryOnlyShader->isDirty()) {
+    if (_geometryOnlyShader->isDirty()) [[unlikely]] {
         _geometryOnlyShader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_geometryOnlyShader, _geomUniformCache);
     }
 
-    if (_planeIsDirty) {
+    if (_planeIsDirty) [[unlikely]] {
         createPlane();
         _planeIsDirty = false;
     }
 
-    if (_textureIsDirty) {
+    if (_textureIsDirty) [[unlikely]] {
         loadTexture();
         _textureIsDirty = false;
     }

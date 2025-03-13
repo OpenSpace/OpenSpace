@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2024                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -389,6 +389,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/util/task.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/taskloader.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/time.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/util/timeconstants.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/timeconversion.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/timeline.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/timeline.inl

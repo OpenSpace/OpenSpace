@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -297,17 +297,14 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     addProperty(Fadeable::_opacity);
 
-    if (p.forceRenderInvisible.has_value()) {
-        _forceRenderInvisible = *p.forceRenderInvisible;
-
-        if (!_forceRenderInvisible) {
-            // Asset file have specifically said to not render invisible parts,
-            // do not notify in the log if invisible parts are detected and dropped
-            _notifyInvisibleDropped = false;
-        }
+    _forceRenderInvisible = p.forceRenderInvisible.value_or(_forceRenderInvisible);
+    if (p.forceRenderInvisible.has_value() && !_forceRenderInvisible) {
+        // Asset file have specifically said to not render invisible parts, do not notify
+        // in the log if invisible parts are detected and dropped
+        _notifyInvisibleDropped = false;
     }
 
-    _file = absPath(p.geometryFile);
+    _file = p.geometryFile;
     if (!std::filesystem::exists(_file)) {
         throw ghoul::RuntimeError(std::format("Cannot find model file '{}'", _file));
     }
@@ -319,22 +316,15 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
             const std::string stringUnit = std::get<std::string>(*p.modelScale);
 
             // Find matching unit name in list of supported unit names
-            DistanceUnit distanceUnit;
-            bool wasFound = false;
-            for (int i = 0; i < DistanceUnitNamesSingular.size(); ++i) {
-                if (stringUnit == DistanceUnitNamesSingular[i]) {
-                    wasFound = true;
-                    distanceUnit = DistanceUnits[i];
-                }
-            }
-
-            if (wasFound) {
+            if (isValidDistanceUnitName(stringUnit)) {
+                DistanceUnit distanceUnit = distanceUnitFromString(stringUnit);
                 _modelScale = toMeter(distanceUnit);
             }
             else {
-                std::string message = std::format("The given unit name '{}' does not "
-                    "match any currently supported unit names", stringUnit);
-                LERROR(message);
+                LERROR(std::format(
+                    "The given unit name '{}' does not match any currently supported "
+                    "unit names", stringUnit
+                ));
                 _modelScale = 1.0;
             }
         }
@@ -359,29 +349,18 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         if (std::holds_alternative<float>(*p.animationTimeScale)) {
             _animationTimeScale = std::get<float>(*p.animationTimeScale);
         }
-        else if (std::holds_alternative<std::string>(*p.animationTimeScale))
-        {
+        else if (std::holds_alternative<std::string>(*p.animationTimeScale)) {
             const std::string stringUnit = std::get<std::string>(*p.animationTimeScale);
 
-            // Find matching unit name in list of supported unit names
-            TimeUnit timeUnit;
-            bool wasFound = false;
-            for (int i = 0; i < TimeUnitNamesSingular.size(); ++i) {
-                if (stringUnit == TimeUnitNamesSingular[i]) {
-                    wasFound = true;
-                    timeUnit = TimeUnits[i];
-                }
-            }
-
-            if (wasFound) {
-                _animationTimeScale = static_cast<double>(
-                    convertTime(1.0, timeUnit, TimeUnit::Second)
-                );
+            if (isValidTimeUnitName(stringUnit)) {
+                TimeUnit timeUnit = timeUnitFromString(stringUnit);
+                _animationTimeScale = convertTime(1.0, timeUnit, TimeUnit::Second);
             }
             else {
-                std::string message = std::format("The given unit name '{}' does not "
-                    "match any currently supported unit names", stringUnit);
-                LERROR(message);
+                LERROR(std::format(
+                    "The given unit name '{}' does not match any currently supported "
+                    "unit names", stringUnit
+                ));
                 _animationTimeScale = 1.0;
             }
         }
@@ -417,12 +396,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _enableDepthTest = p.enableDepthTest.value_or(_enableDepthTest);
     _enableFaceCulling = p.enableFaceCulling.value_or(_enableFaceCulling);
 
-    if (p.vertexShader.has_value()) {
-        _vertexShaderPath = p.vertexShader->string();
-    }
-    if (p.fragmentShader.has_value()) {
-        _fragmentShaderPath = p.fragmentShader->string();
-    }
+    _vertexShaderPath = p.vertexShader.value_or(_vertexShaderPath);
+    _fragmentShaderPath = p.fragmentShader.value_or(_fragmentShaderPath);
 
     if (p.lightSources.has_value()) {
         const std::vector<ghoul::Dictionary> lightsources = *p.lightSources;
@@ -578,10 +553,10 @@ void RenderableModel::initializeGL() {
     // Initialize shaders
     std::string program = std::string(ProgramName);
     if (!_vertexShaderPath.empty()) {
-        program += "|vs=" + _vertexShaderPath;
+        program += "|vs=" + _vertexShaderPath.string();
     }
     if (!_fragmentShaderPath.empty()) {
-        program += "|fs=" + _fragmentShaderPath;
+        program += "|fs=" + _fragmentShaderPath.string();
     }
     _program = BaseModule::ProgramObjectManager.request(
         program,
@@ -589,11 +564,11 @@ void RenderableModel::initializeGL() {
             const std::filesystem::path vs =
                 _vertexShaderPath.empty() ?
                 absPath("${MODULE_BASE}/shaders/model_vs.glsl") :
-                std::filesystem::path(_vertexShaderPath);
+                _vertexShaderPath;
             const std::filesystem::path fs =
                 _fragmentShaderPath.empty() ?
                 absPath("${MODULE_BASE}/shaders/model_fs.glsl") :
-                std::filesystem::path(_fragmentShaderPath);
+                _fragmentShaderPath;
 
             return global::renderEngine->buildRenderProgram(program, vs, fs);
         }
@@ -614,7 +589,8 @@ void RenderableModel::initializeGL() {
             const std::filesystem::path fs =
                 absPath("${MODULE_BASE}/shaders/modelOpacity_fs.glsl");
 
-            return global::renderEngine->buildRenderProgram("ModelOpacityProgram",
+            return global::renderEngine->buildRenderProgram(
+                "ModelOpacityProgram",
                 vs,
                 fs
             );
@@ -713,10 +689,10 @@ void RenderableModel::deinitializeGL() {
 
     std::string program = std::string(ProgramName);
     if (!_vertexShaderPath.empty()) {
-        program += "|vs=" + _vertexShaderPath;
+        program += "|vs=" + _vertexShaderPath.string();
     }
     if (!_fragmentShaderPath.empty()) {
-        program += "|fs=" + _fragmentShaderPath;
+        program += "|fs=" + _fragmentShaderPath.string();
     }
     BaseModule::ProgramObjectManager.release(
         program,
@@ -996,12 +972,12 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableModel::update(const UpdateData& data) {
-    if (_program->isDirty()) {
+    if (_program->isDirty()) [[unlikely]] {
         _program->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
     }
 
-    if (_quadProgram->isDirty()) {
+    if (_quadProgram->isDirty()) [[unlikely]] {
         _quadProgram->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_quadProgram, _uniformOpacityCache);
     }

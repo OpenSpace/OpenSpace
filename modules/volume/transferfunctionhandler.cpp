@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -75,11 +75,10 @@ TransferFunctionHandler::TransferFunctionHandler(properties::StringProperty prop
     , _maxValue(MaxValueInfo)
     , _saveTransferFunction(SaveTransferFunctionInfo)
     , _transferFunctionProperty(TransferFunctionInfo)
-{
-    _transferFunction = std::make_shared<openspace::TransferFunction>(
+    , _transferFunction(std::make_shared<openspace::TransferFunction>(
         _transferFunctionPath.value()
-    );
-}
+    ))
+{}
 
 void TransferFunctionHandler::initialize() {
     addProperty(_transferFunctionPath);
@@ -105,7 +104,6 @@ void TransferFunctionHandler::initialize() {
     }
 
     _transferFunctionProperty.onChange([this]() { setTexture(); });
-
     _saveTransferFunction.onChange([this]() { saveEnvelopes(); });
 }
 
@@ -149,7 +147,7 @@ void TransferFunctionHandler::uploadTexture() {
     _texture->uploadTexture();
 }
 
-bool TransferFunctionHandler::hasTexture() {
+bool TransferFunctionHandler::hasTexture() const {
     return _texture != nullptr;
 }
 

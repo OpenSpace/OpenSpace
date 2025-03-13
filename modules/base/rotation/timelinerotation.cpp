@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -58,7 +58,8 @@ documentation::Documentation TimelineRotation::Documentation() {
 }
 
 TimelineRotation::TimelineRotation(const ghoul::Dictionary& dictionary)
-    : _shouldInterpolate(ShouldInterpolateInfo, true)
+    : Rotation(dictionary)
+    , _shouldInterpolate(ShouldInterpolateInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -68,9 +69,7 @@ TimelineRotation::TimelineRotation(const ghoul::Dictionary& dictionary)
         ghoul::mm_unique_ptr<Rotation> rotation = Rotation::createFromDictionary(
             kf.second
         );
-        if (rotation) {
-            _timeline.addKeyframe(t, std::move(rotation));
-        }
+        _timeline.addKeyframe(t, std::move(rotation));
     }
 
     _shouldInterpolate = p.shouldInterpolate.value_or(_shouldInterpolate);

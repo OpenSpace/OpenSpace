@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,6 +44,12 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePlaneProjection";
 
+    // This specialized Renderable type is used as a target for projections from a
+    // spacecraft instrument. Similarly to the
+    // [RenderablePlanetProject](spacecraftinstruments_renderableplanetprojection) it uses the spacecraft's
+    // position and orientation and information about an instruments field-of-view and
+    // set of images to project a captured image. In the case of this renderable the
+    // target geometry is a two-dimensional plane that the image is projected on.
     struct [[codegen::Dictionary(RenderablePlaneProjection)]] Parameters {
         // The SPICE name of the spacecraft from which the projection is performed.
         std::string spacecraft;

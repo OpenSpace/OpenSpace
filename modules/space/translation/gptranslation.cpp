@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,44 +50,53 @@ namespace {
         std::optional<int> element [[codegen::greater(0)]];
     };
 #include "gptranslation_codegen.cpp"
+
+    ghoul::Dictionary gpDictionaryToKepler(const ghoul::Dictionary& dictionary) {
+        using namespace openspace;
+
+        const Parameters p = codegen::bake<Parameters>(dictionary);
+        if (!std::filesystem::is_regular_file(p.file)) {
+            throw ghoul::RuntimeError("The provided TLE file must exist");
+        }
+
+        int element = p.element.value_or(1);
+
+        std::vector<kepler::Parameters> parameters = kepler::readFile(
+            p.file,
+            codegen::map<kepler::Format>(p.format)
+        );
+
+        if (element > static_cast<int>(parameters.size())) {
+            throw ghoul::RuntimeError(std::format(
+                "Requested element {} but only {} are available", element, parameters.size()
+            ));
+        }
+
+        const kepler::Parameters& param = parameters[element - 1];
+
+        // We copy the old dictionary to make sure we keep values intact that we don't
+        // want to touch here (for example the 'Type')
+        ghoul::Dictionary res = dictionary;
+        res.setValue("Eccentricity", param.eccentricity);
+        res.setValue("SemiMajorAxis", param.semiMajorAxis);
+        res.setValue("Inclination", param.inclination);
+        res.setValue("AscendingNode", param.ascendingNode);
+        res.setValue("ArgumentOfPeriapsis", param.argumentOfPeriapsis);
+        res.setValue("MeanAnomaly", param.meanAnomaly);
+        res.setValue("Period", param.period);
+        res.setValue("Epoch", param.epoch);
+        return res;
+    }
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation GPTranslation::Documentation() {
-    return codegen::doc<Parameters>("space_transform_gp");
+    return codegen::doc<Parameters>("space_translation_gp");
 }
 
-GPTranslation::GPTranslation(const ghoul::Dictionary& dictionary) {
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-    if (!std::filesystem::is_regular_file(p.file)) {
-        throw ghoul::RuntimeError("The provided TLE file must exist");
-    }
-
-    int element = p.element.value_or(1);
-
-    std::vector<kepler::Parameters> parameters = kepler::readFile(
-        p.file,
-        codegen::map<kepler::Format>(p.format)
-    );
-
-    if (element > static_cast<int>(parameters.size())) {
-        throw ghoul::RuntimeError(std::format(
-            "Requested element {} but only {} are available", element, parameters.size()
-        ));
-    }
-
-    const kepler::Parameters& param = parameters[element - 1];
-    setKeplerElements(
-        param.eccentricity,
-        param.semiMajorAxis,
-        param.inclination,
-        param.ascendingNode,
-        param.argumentOfPeriapsis,
-        param.meanAnomaly,
-        param.period,
-        param.epoch
-    );
-}
+GPTranslation::GPTranslation(const ghoul::Dictionary& dictionary)
+    : KeplerTranslation(gpDictionaryToKepler(dictionary))
+{}
 
 } // namespace openspace

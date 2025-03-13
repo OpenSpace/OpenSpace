@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -72,7 +72,6 @@ namespace {
 
     constexpr std::string_view FrameTypeCameraAscii = "camera";
     constexpr std::string_view FrameTypeScriptAscii = "script";
-    constexpr std::string_view FrameTypeCommentAscii = "#";
     constexpr char FrameTypeCameraBinary = 'c';
     constexpr char FrameTypeScriptBinary = 's';
 
@@ -146,7 +145,7 @@ namespace {
         return result;
     }
 
-    void writeHeader(std::ostream& stream, const Header& header) { 
+    void writeHeader(std::ostream& stream, const Header& header) {
         stream.write(Header::MagicBytes.data(), Header::MagicBytes.size());
 
         std::string_view version = [&header]() {
@@ -180,6 +179,7 @@ namespace {
     template <DataMode mode>
     std::optional<FrameType> readFrameType(std::istream&, int) {
         static_assert(sizeof(int) == 0, "Unimplemented overload");
+        return std::nullopt;
     }
 
     template <>

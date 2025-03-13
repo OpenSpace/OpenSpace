@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,7 @@ public:
         std::vector<double> values = std::vector<double>());
 
     std::string_view className() const override;
-    int typeLua() const override;
+    ghoul::lua::LuaTypes typeLua() const override;
 
     using TemplateProperty<std::vector<double>>::operator std::vector<double>;
     using TemplateProperty<std::vector<double>>::operator=;

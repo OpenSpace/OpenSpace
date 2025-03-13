@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,8 +44,8 @@ std::string_view ULongProperty::className() const {
     return "ULongProperty";
 }
 
-int ULongProperty::typeLua() const {
-    return LUA_TNUMBER;
+ghoul::lua::LuaTypes ULongProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Number;
 }
 
 } // namespace openspace::properties

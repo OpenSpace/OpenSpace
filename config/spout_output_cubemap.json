@@ -18,20 +18,14 @@
       "windows": [
         {
           "name": "OpenSpace",
-          "size": { "x": 1024, "y": 1024 },
+          "size": { "x": 1800, "y": 600 },
           "stereo": "none",
           "viewports": [
             {
               "pos": { "x": 0.0, "y": 0.0 },
               "size": { "x": 1.0, "y": 1.0 },
               "projection": {
-                "type": "SpoutOutputProjection",
-                "background": {
-                  "r": 0.1,
-                  "g": 0.1,
-                  "b": 0.1,
-                  "a": 1.0
-                },
+                "type": "CubemapProjection",
                 "channels": {
                   "bottom": true,
                   "left": true,
@@ -40,8 +34,14 @@
                   "zleft": true,
                   "zright": true
                 },
-                "mapping": "cubemap",
-                "mappingspoutname": "OS_CUBEMAP",
+                "spout": {
+                  "enabled": true,
+                  "name": "OS_SPOUT"
+                },
+                "ndi": {
+                  "enabled": true,
+                  "name": "OS_NDI"
+                },
                 "orientation": { "pitch": 0.0, "roll": 0.0, "yaw": 0.0 },
                 "quality": "1024"
               }

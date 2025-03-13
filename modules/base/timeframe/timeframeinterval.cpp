@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -75,28 +75,6 @@ documentation::Documentation TimeFrameInterval::Documentation() {
     return codegen::doc<Parameters>("base_time_frame_interval");
 }
 
-bool TimeFrameInterval::isActive(const Time& time) const {
-    if (_hasStart && time.j2000Seconds() < _start) {
-        return false;
-    }
-    if (_hasEnd && time.j2000Seconds() >= _end) {
-        return false;
-    }
-    return true;
-}
-
-TimeFrameInterval::TimeFrameInterval()
-    : _hasStart(HasStartInfo, false)
-    , _start(StartInfo, 0, 0, 1E9)
-    , _hasEnd(HasEndInfo, false)
-    , _end(EndInfo, 0, 0, 1E9)
-{
-    addProperty(_hasStart);
-    addProperty(_start);
-    addProperty(_hasEnd);
-    addProperty(_end);
-}
-
 TimeFrameInterval::TimeFrameInterval(const ghoul::Dictionary& dictionary)
     : _hasStart(HasStartInfo, false)
     , _start(StartInfo, 0, 0, 1E9)
@@ -132,6 +110,18 @@ TimeFrameInterval::TimeFrameInterval(const ghoul::Dictionary& dictionary)
     _hasEnd = p.end.has_value();
     addProperty(_hasEnd);
     addProperty(_end);
+}
+
+void TimeFrameInterval::update(const Time& time) {
+    if (_hasStart && time.j2000Seconds() < _start) {
+        _isInTimeFrame = false;
+    }
+    else if (_hasEnd && time.j2000Seconds() >= _end) {
+        _isInTimeFrame = false;
+    }
+    else {
+        _isInTimeFrame = true;
+    }
 }
 
 } // namespace openspace

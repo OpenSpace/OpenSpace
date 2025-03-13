@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -1103,7 +1103,7 @@ void RenderableFieldlinesSequence::updateVertexPositionBuffer() {
     );
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     unbindGL();
 }
@@ -1128,7 +1128,7 @@ void RenderableFieldlinesSequence::updateVertexColorBuffer() {
         );
 
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, 0);
+        glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 
         unbindGL();
     }
@@ -1154,7 +1154,7 @@ void RenderableFieldlinesSequence::updateVertexMaskingBuffer() {
         );
 
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0);
+        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 
         unbindGL();
     }

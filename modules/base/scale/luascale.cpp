@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -60,11 +60,12 @@ namespace {
 namespace openspace {
 
 documentation::Documentation LuaScale::Documentation() {
-    return codegen::doc<Parameters>("base_scale_lua");
+    return codegen::doc<Parameters>("base_transform_scale_lua");
 }
 
 LuaScale::LuaScale(const ghoul::Dictionary& dictionary)
-    : _luaScriptFile(ScriptInfo)
+    : Scale(dictionary)
+    , _luaScriptFile(ScriptInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

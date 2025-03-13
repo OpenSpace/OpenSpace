@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,8 +34,6 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/distanceconversion.h>
 #include <ghoul/font/font.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 
@@ -57,28 +55,15 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    std::vector<std::string> unitList() {
-        std::vector<std::string> res(openspace::DistanceUnits.size());
-        std::transform(
-            openspace::DistanceUnits.begin(),
-            openspace::DistanceUnits.end(),
-            res.begin(),
-            [](openspace::DistanceUnit unit) {
-                return std::string(nameForDistanceUnit(unit));
-            }
-        );
-        return res;
-    }
-
     struct [[codegen::Dictionary(DashboardItemVelocity)]] Parameters {
         // [[codegen::verbatim(SimplificationInfo.description)]]
         std::optional<bool> simplification;
 
         // [[codegen::verbatim(RequestedUnitInfo.description)]]
-        std::optional<std::string> requestedUnit [[codegen::inlist(unitList())]];
+        std::optional<std::string> requestedUnit
+            [[codegen::inlist(openspace::distanceUnitList())]];
     };
 #include "dashboarditemvelocity_codegen.cpp"
-
 } // namespace
 
 namespace openspace {
@@ -121,15 +106,15 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
     addProperty(_requestedUnit);
 }
 
-void DashboardItemVelocity::render(glm::vec2& penPosition) {
+void DashboardItemVelocity::update() {
     ZoneScoped;
 
     const glm::dvec3 currentPos = global::renderEngine->scene()->camera()->positionVec3();
     const glm::dvec3 dt = currentPos - _prevPosition;
+    _prevPosition = currentPos;
+
     const double speedPerFrame = glm::length(dt);
-
     const double secondsPerFrame = global::windowDelegate->averageDeltaTime();
-
     const double speedPerSecond = speedPerFrame / secondsPerFrame;
 
     std::pair<double, std::string_view> dist;
@@ -142,14 +127,7 @@ void DashboardItemVelocity::render(glm::vec2& penPosition) {
         dist = std::pair(convertedD, nameForDistanceUnit(unit, convertedD != 1.0));
     }
 
-    penPosition.y -= _font->height();
-    RenderFont(
-        *_font,
-        penPosition,
-        std::format("Camera velocity: {:.4f} {}/s", dist.first, dist.second)
-    );
-
-    _prevPosition = currentPos;
+    _buffer = std::format("Camera velocity: {:.4f} {}/s", dist.first, dist.second);
 }
 
 glm::vec2 DashboardItemVelocity::size() const {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/easing.h>
-#include <any>
+#include <ghoul/lua/lua_types.h>
 #include <functional>
 #include <string>
 #include <string_view>
@@ -144,7 +144,7 @@ public:
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
      */
-    Property(PropertyInfo info);
+    explicit Property(PropertyInfo info);
 
     /**
      * The destructor taking care of deallocating all unused memory. This method will not
@@ -160,27 +160,6 @@ public:
      * \return The class name of the Property
      */
     virtual std::string_view className() const = 0;
-
-    /**
-     * This method returns the encapsulated value of the Property to the caller. The type
-     * that is returned is determined by the type function and is up to the developer of
-     * the derived class. The default implementation returns an empty ghoul::any object.
-     *
-     * \return The value that is encapsulated by this Property, or an empty ghoul::any
-     *         object if the method was not overritten.
-     */
-    virtual std::any get() const;
-
-    /**
-     * Sets the value encapsulated by this Property to the \p value passed to this
-     * function. It is the caller's responsibility to ensure that the type contained in
-     * \p value is compatible with the concrete subclass of the Property. The method
-     * Property::type will return the desired type for the Property. The default
-     * implementation of this method ignores the input.
-     *
-     * \param value The new value that should be stored in this Property
-     */
-    virtual void set(std::any value);
 
     /**
      * This method returns the type that is requested by this Property for the set method.
@@ -217,15 +196,12 @@ public:
     /**
      * Returns the Lua type that will be put onto the stack in the Property::getLua method
      * and which will be consumed by the Property::setLuaValue method. The returned value
-     * can belong to the set of Lua types: `LUA_TNONE`, `LUA_TNIL`, `LUA_TBOOLEAN`,
-     * `LUA_TLIGHTUSERDATA`, `LUA_TNUMBER`, `LUA_TSTRING`, `LUA_TTABLE`, `LUA_TFUNCTION`,
-     * `LUA_TUSERDATA`, or `LUA_TTHREAD`. The default implementation will return
-     * `LUA_TNONE`.
+     * can be a combination of any value contained in the `LuaTypes`.
      *
      * \return The Lua type that will be consumed or produced by the Property::getLuaValue
      *         and Property::setLuaValue methods.
      */
-    virtual int typeLua() const;
+    virtual ghoul::lua::LuaTypes typeLua() const = 0;
 
     /**
      * This method encodes the encapsulated \p value of this Property as a `std::string`.
@@ -447,7 +423,6 @@ public:
     virtual std::string jsonValue() const;
 
     /// Interpolation methods
-    virtual void setInterpolationTarget(std::any value);
     virtual void setLuaInterpolationTarget(lua_State* state);
 
     virtual void interpolateValue(float t,

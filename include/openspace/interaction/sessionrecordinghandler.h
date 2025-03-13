@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -106,7 +106,7 @@ public:
      * and all keyframes deleted from memory.
      * \param filename File saved with recorded keyframes
      */
-    void stopRecording(const std::filesystem::path& filename, DataMode dataMode);
+    void stopRecording(const std::filesystem::path& filename, DataMode dataMode, bool overwrite = false);
 
     /**
      * Used to check if a session recording is in progress.
@@ -244,7 +244,7 @@ private:
 
     void cleanUpTimelinesAndKeyframes();
 
-    void checkIfScriptUsesScenegraphNode(std::string_view s) const;
+    void checkIfScriptUsesScenegraphNode(std::string_view script) const;
 
 
     properties::BoolProperty _renderPlaybackInformation;

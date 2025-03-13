@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,10 +48,10 @@ enum class PlaybackMode {
 };
 
 class VideoPlayer : public properties::PropertyOwner, public Syncable {
-BooleanType(PauseAfterSeek);
-
 public:
-    VideoPlayer(const ghoul::Dictionary& dictionary);
+    BooleanType(PauseAfterSeek);
+
+    explicit VideoPlayer(const ghoul::Dictionary& dictionary);
     ~VideoPlayer() override;
 
     void initialize();

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -284,16 +284,14 @@ void RenderableDUMeshes::initializeGL() {
 
     createMeshes();
 
-    if (_hasLabel) {
-        if (!_font) {
-            constexpr int FontSize = 50;
-            _font = global::fontManager->font(
-                "Mono",
-                static_cast<float>(FontSize),
-                ghoul::fontrendering::FontManager::Outline::Yes,
-                ghoul::fontrendering::FontManager::LoadGlyphs::No
-            );
-        }
+    if (_hasLabel && !_font) {
+        constexpr int FontSize = 50;
+        _font = global::fontManager->font(
+            "Mono",
+            static_cast<float>(FontSize),
+            ghoul::fontrendering::FontManager::Outline::Yes,
+            ghoul::fontrendering::FontManager::LoadGlyphs::No
+        );
     }
 }
 
@@ -435,7 +433,7 @@ void RenderableDUMeshes::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableDUMeshes::update(const UpdateData&) {
-    if (_program->isDirty()) {
+    if (_program->isDirty()) [[unlikely]] {
         _program->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
     }

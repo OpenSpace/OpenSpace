@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -117,7 +117,8 @@ documentation::Documentation GlobeRotation::Documentation() {
 }
 
 GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
-    : _globe(GlobeInfo)
+    : Rotation(dictionary)
+    , _globe(GlobeInfo)
     , _latitude(LatitudeInfo, 0.0, -90.0, 90.0)
     , _longitude(LongitudeInfo, 0.0, -180.0, 180.0)
     , _angle(AngleInfo, 0.0, 0.0, 360.0)
@@ -176,8 +177,7 @@ void GlobeRotation::setUpdateVariables() {
     requireUpdate();
 }
 
-glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitude) const
-{
+glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitude) const {
     ghoul_assert(_globeNode, "Globe cannot be nullptr");
 
     GlobeBrowsingModule* mod = global::moduleEngine->module<GlobeBrowsingModule>();
@@ -218,7 +218,7 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
         _matrixIsDirty = true;
     }
 
-    if (!_matrixIsDirty) {
+    if (!_matrixIsDirty) [[likely]] {
         return _matrix;
     }
 

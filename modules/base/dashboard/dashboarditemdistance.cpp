@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -106,19 +106,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    std::vector<std::string> unitList() {
-        std::vector<std::string> res(openspace::DistanceUnits.size());
-        std::transform(
-            openspace::DistanceUnits.begin(),
-            openspace::DistanceUnits.end(),
-            res.begin(),
-            [](openspace::DistanceUnit unit) {
-                return std::string(nameForDistanceUnit(unit));
-            }
-        );
-        return res;
-    }
-
     struct [[codegen::Dictionary(DashboardItemDistance)]] Parameters {
         enum class [[codegen::map(Type)]] TypeInfo {
             Node,
@@ -143,7 +130,8 @@ namespace {
         std::optional<bool> simplification;
 
         // [[codegen::verbatim(RequestedUnitInfo.description)]]
-        std::optional<std::string> requestedUnit [[codegen::inlist(unitList())]];
+        std::optional<std::string> requestedUnit
+            [[codegen::inlist(openspace::distanceUnitList())]];
 
         // [[codegen::verbatim(FormatStringInfo.description)]]
         std::optional<std::string> formatString;
@@ -272,7 +260,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     _formatString = p.formatString.value_or(_formatString);
     addProperty(_formatString);
 
-    _buffer.resize(256);
+    _localBuffer.resize(256);
 }
 
 std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
@@ -280,7 +268,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
                                                                Component& otherComp) const
 {
     if ((mainComp.type == Type::Node) || (mainComp.type == Type::NodeSurface)) {
-        if (!mainComp.node) {
+        if (!mainComp.node) [[unlikely]] {
             mainComp.node = global::renderEngine->scene()->sceneGraphNode(
                 mainComp.nodeName
             );
@@ -333,7 +321,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
     }
 }
 
-void DashboardItemDistance::render(glm::vec2& penPosition) {
+void DashboardItemDistance::update() {
     ZoneScoped;
 
     std::pair<glm::dvec3, std::string> sourceInfo = positionAndLabel(
@@ -356,11 +344,11 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
         dist = std::pair(convertedD, nameForDistanceUnit(unit, convertedD != 1.0));
     }
 
-    std::fill(_buffer.begin(), _buffer.end(), char(0));
+    std::fill(_localBuffer.begin(), _localBuffer.end(), char(0));
     try {
         // @CPP26(abock): This can be replaced with std::runtime_format
         char* end = std::vformat_to(
-            _buffer.data(),
+            _localBuffer.data(),
             _formatString.value(),
             std::make_format_args(
                 sourceInfo.second,
@@ -370,9 +358,7 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
             )
         );
 
-        penPosition.y -= _font->height();
-        const std::string_view t = std::string_view(_buffer.data(), end - _buffer.data());
-        RenderFont(*_font, penPosition, t);
+        _buffer = std::string(_localBuffer.data(), end - _localBuffer.data());
     }
     catch (const std::format_error&) {
         LERRORC("DashboardItemDate", "Illegal format string");

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -66,7 +66,6 @@ TileProviderByDate::TileProviderByDate(const ghoul::Dictionary& dictionary) {
         if (dictionary.hasValue<std::string>("GlobeName")) {
             prov.second.setValue("GlobeName", dictionary.value<std::string>("GlobeName"));
         }
-        layers::Layer::ID typeID = layers::Layer::ID::DefaultTileProvider;
 
         std::unique_ptr<TileProvider> tp = createFromDictionary(prov.second);
         const std::string provId = prov.second.value<std::string>("Identifier");
@@ -114,7 +113,6 @@ Tile::Status TileProviderByDate::tileStatus(const TileIndex& index) {
         _currentTileProvider->tileStatus(index) :
         Tile::Status::Unavailable;
 }
-
 
 TileDepthTransform TileProviderByDate::depthTransform() {
     return _currentTileProvider ?

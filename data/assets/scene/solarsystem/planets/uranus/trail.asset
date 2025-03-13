@@ -14,7 +14,7 @@ local UranusTrail = {
       Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.60, 0.95, 1.00 },
-    Period = 30588.740,
+    Period = 30685.4,
     Resolution = 1000
   },
   Tag = { "planetTrail_solarSystem", "planetTrail_giants" },

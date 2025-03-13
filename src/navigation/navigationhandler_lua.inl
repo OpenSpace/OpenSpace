@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -202,6 +202,40 @@ namespace {
         global::navigationHandler->orbitalNavigator().setFocusNode(*(it - 1));
     }
     global::navigationHandler->orbitalNavigator().startRetargetAnchor();
+}
+
+/**
+ * Set the current focus node for the navigation, or re-focus on it if it was already the
+ * focus node.
+ *
+ * Per default, the camera will retarget to center the focus node in the view. The
+ * velocities will also be reset so that the camera stops moving after any retargeting
+ * is done. However, both of these behaviors may be skipped using the optional arguments.
+ *
+ * \param identifier The identifier of the scene graph node to focus
+ * \param shouldRetarget If true, retarget the camera to look at the focus node
+ * \param shouldResetVelocities If true, reset the camera velocities so that the camera
+ *                              stops after its done retargeting (or immediately if
+ *                              retargeting is not done)
+ *
+ */
+[[codegen::luawrap]] void setFocus(std::string identifier, bool shouldRetarget = true,
+                                   bool shouldResetVelocities = true)
+{
+    using namespace openspace;
+    SceneGraphNode* node = sceneGraphNode(identifier);
+    if (!node) {
+        throw ghoul::lua::LuaError("Unknown node: " + identifier);
+    }
+
+    global::navigationHandler->orbitalNavigator().setFocusNode(
+        node,
+        shouldResetVelocities
+    );
+
+    if (shouldRetarget) {
+        global::navigationHandler->orbitalNavigator().startRetargetAnchor();
+    }
 }
 
 /**

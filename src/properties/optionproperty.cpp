@@ -3,7 +3,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,6 +48,12 @@ OptionProperty::OptionProperty(PropertyInfo info, DisplayType displayType)
 
 std::string_view OptionProperty::className() const {
     return "OptionProperty";
+}
+
+ghoul::lua::LuaTypes OptionProperty::typeLua() const {
+    return ghoul::lua::LuaTypes(
+        ghoul::lua::LuaTypes::Number | ghoul::lua::LuaTypes::String
+    );
 }
 
 OptionProperty::DisplayType OptionProperty::displayType() const {
@@ -148,6 +154,33 @@ std::string OptionProperty::getDescriptionByValue(int value) {
     }
     else {
         return "";
+    }
+}
+
+int OptionProperty::fromLuaConversion(lua_State* state) const {
+    if (ghoul::lua::hasValue<double>(state)) {
+        return static_cast<int>(ghoul::lua::value<double>(state));
+    }
+    else if (ghoul::lua::hasValue<int>(state)) {
+        return ghoul::lua::value<int>(state);
+    }
+    else if (ghoul::lua::hasValue<std::string>(state)) {
+        std::string value = ghoul::lua::value<std::string>(state);
+        const auto it = std::find_if(
+            _options.cbegin(),
+            _options.cend(),
+            [&value](const Option& option) { return option.description == value; }
+        );
+        if (it == _options.cend()) {
+            throw ghoul::RuntimeError(
+                std::format("Could not find option '{}'", value),
+                uri()
+            );
+        }
+        return it->value;
+    }
+    else {
+        throw ghoul::RuntimeError("Error extracting value in OptionProperty");
     }
 }
 

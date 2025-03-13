@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,17 +24,15 @@
 
 #include <modules/toyvolume/rendering/toyvolumeraycaster.h>
 
-#include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderable.h>
-#include <vector>
 #include <openspace/util/blockplaneintersectiongeometry.h>
-
-#include <ghoul/opengl/programobject.h>
+#include <openspace/util/updatestructures.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/filesystem/filesystem.h>
-
+#include <ghoul/opengl/programobject.h>
 #include <sstream>
+#include <vector>
 
 namespace {
     constexpr std::string_view GlslRaycastPath =
@@ -103,12 +101,12 @@ glm::dmat4 ToyVolumeRaycaster::modelViewTransform(const RenderData& data) {
 void ToyVolumeRaycaster::preRaycast(const RaycastData& data,
                                     ghoul::opengl::ProgramObject& program)
 {
-    const std::string& colorUniformName = "color" + std::to_string(data.id);
-    const std::string& timeUniformName = "time" + std::to_string(data.id);
-    const std::string& stepSizeUniformName = "maxStepSize" + std::to_string(data.id);
-    program.setUniform(colorUniformName, _color);
-    program.setUniform(stepSizeUniformName, _stepSize);
-    program.setUniform(timeUniformName, static_cast<float>(std::fmod(_time, 3600.0)));
+    program.setUniform(std::format("color{}", data.id), _color);
+    program.setUniform(std::format("maxStepSize{}", data.id), _stepSize);
+    program.setUniform(
+        std::format("time{}", data.id),
+        static_cast<float>(std::fmod(_time, 3600.0))
+    );
 }
 
 void ToyVolumeRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObject&) {}

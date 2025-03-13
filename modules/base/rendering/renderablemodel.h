@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,7 +55,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableModel : public Renderable {
 public:
-    RenderableModel(const ghoul::Dictionary& dictionary);
+    explicit RenderableModel(const ghoul::Dictionary& dictionary);
     ~RenderableModel() override = default;
 
     void initialize() override;
@@ -103,8 +103,8 @@ private:
     properties::BoolProperty _enableDepthTest;
     properties::OptionProperty _blendingFuncOption;
 
-    std::string _vertexShaderPath;
-    std::string _fragmentShaderPath;
+    std::filesystem::path _vertexShaderPath;
+    std::filesystem::path _fragmentShaderPath;
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(modelViewTransform, projectionTransform, normalTransform, meshTransform,
         meshNormalTransform, ambientIntensity, diffuseIntensity,

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -67,7 +67,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemDate::Documentation() {
-    return codegen::doc<Parameters>("base_dashboarditem_date");
+    return codegen::doc<Parameters>(
+        "base_dashboarditem_date",
+        DashboardTextItem::Documentation()
+    );
 }
 
 DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
@@ -84,7 +87,7 @@ DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
     addProperty(_timeFormat);
 }
 
-void DashboardItemDate::render(glm::vec2& penPosition) {
+void DashboardItemDate::update() {
     ZoneScoped;
 
     std::string time = SpiceManager::ref().dateFromEphemerisTime(
@@ -93,13 +96,8 @@ void DashboardItemDate::render(glm::vec2& penPosition) {
     );
 
     try {
-        penPosition.y -= _font->height();
-        RenderFont(
-            *_font,
-            penPosition,
-            // @CPP26(abock): This can be replaced with std::runtime_format
-            std::vformat(_formatString.value(), std::make_format_args(time))
-        );
+        // @CPP26(abock): This can be replaced with std::runtime_format
+        _buffer = std::vformat(_formatString.value(), std::make_format_args(time));
     }
     catch (const std::format_error&) {
         LERRORC("DashboardItemDate", "Illegal format string");

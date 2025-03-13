@@ -47,7 +47,7 @@ local InteractionSphere = 695700000
 
 local PFSS = {
   Identifier = "FL_PFSS",
-  Parent = transforms.HEEQ180ReferenceFrame.Identifier,
+  Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
   InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",

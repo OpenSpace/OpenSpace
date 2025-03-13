@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,7 +37,7 @@ class BrickManager {
 public:
     enum BUFFER_INDEX { EVEN = 0, ODD = 1 };
 
-    BrickManager(TSP* tsp);
+    explicit BrickManager(TSP* tsp);
     ~BrickManager();
 
     bool readHeader();

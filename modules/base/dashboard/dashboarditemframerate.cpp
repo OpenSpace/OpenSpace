@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,8 +41,7 @@ namespace {
         DtStandardDeviation,
         DtCoefficientOfVariation,
         FPS,
-        FPSAvg,
-        None
+        FPSAvg
     };
 
     constexpr openspace::properties::Property::PropertyInfo FrametimeInfo = {
@@ -184,8 +183,7 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
             "Deltatime coefficient of variation"
         },
         { static_cast<int>(FrametimeType::FPS), "Frames per second" },
-        { static_cast<int>(FrametimeType::FPSAvg), "Average frames per second" },
-        { static_cast<int>(FrametimeType::None), "None" }
+        { static_cast<int>(FrametimeType::FPSAvg), "Average frames per second" }
     });
 
     if (p.frametimeType.has_value()) {
@@ -200,14 +198,13 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
         _shouldClearCache = true;
     });
     addProperty(_clearCache);
-
-    _buffer.resize(128);
+    _localBuffer.resize(128);
 }
 
-void DashboardItemFramerate::render(glm::vec2& penPosition) {
+void DashboardItemFramerate::update() {
     ZoneScoped;
 
-    if (_shouldClearCache) {
+    if (_shouldClearCache) [[unlikely]] {
         _minDeltaTimeCache = 1.0;
         _maxDeltaTimeCache = -1.0;
         _shouldClearCache = false;
@@ -224,28 +221,21 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
 
     const FrametimeType frametimeType = FrametimeType(_frametimeType.value());
 
-    std::fill(_buffer.begin(), _buffer.end(), char(0));
+    std::fill(_localBuffer.begin(), _localBuffer.end(), char(0));
     char* end = format(
-        _buffer,
+        _localBuffer,
         frametimeType,
         _minDeltaTimeCache,
         _maxDeltaTimeCache
     );
-    const std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
-
-    const int nLines = text.empty() ?
-        0 :
-        static_cast<int>((std::count(text.begin(), text.end(), '\n') + 1));
-
-    penPosition.y -= _font->height() * static_cast<float>(nLines);
-    RenderFont(*_font, penPosition, text);
+    _buffer = std::string(_localBuffer.data(), end - _localBuffer.data());
 }
 
 glm::vec2 DashboardItemFramerate::size() const {
     ZoneScoped;
 
     const FrametimeType t = FrametimeType(_frametimeType.value());
-    char* end = format(_buffer, t, _minDeltaTimeCache, _maxDeltaTimeCache);
+    char* end = format(_localBuffer, t, _minDeltaTimeCache, _maxDeltaTimeCache);
     const std::string_view res = std::string_view(_buffer.data(), end - _buffer.data());
 
     if (res.empty()) {

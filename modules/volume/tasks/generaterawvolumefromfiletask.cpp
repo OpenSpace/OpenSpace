@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -108,8 +108,7 @@ void GenerateRawVolumeFromFileTask::perform(const ProgressCallback& progressCall
     }
 
     // Get min/max x, y, z position - ie. domain bounds of the volume
-    for (const dataloader::Dataset::Entry& p : data.entries)
-    {
+    for (const dataloader::Dataset::Entry& p : data.entries) {
         _lowerDomainBound = glm::vec3(
             std::min(_lowerDomainBound.x, p.position.x),
             std::min(_lowerDomainBound.y, p.position.y),
@@ -129,14 +128,14 @@ void GenerateRawVolumeFromFileTask::perform(const ProgressCallback& progressCall
     float maxVal = std::numeric_limits<float>::lowest();
 
     auto dataIndex = std::find_if(
-        data.variables.begin(),
-        data.variables.end(),
+        data.variables.cbegin(),
+        data.variables.cend(),
         [this](const dataloader::Dataset::Variable& var) {
             return var.name == _dataValue;
         }
     );
 
-    if (dataIndex == data.variables.end()) {
+    if (dataIndex == data.variables.cend()) {
         LERROR(std::format(
             "Could not find specified variable '{}' in dataset", _dataValue
         ));
@@ -145,20 +144,17 @@ void GenerateRawVolumeFromFileTask::perform(const ProgressCallback& progressCall
     progressCallback(0.5f);
 
     // Write data into volume data structure
-    int k = 0;
-    for (auto& entry : data.entries) {
+    for (const dataloader::Dataset::Entry& entry : data.entries) {
         // Get the closest i, j , k voxel that should contain this data
-        glm::vec3 normalizedPos{ (entry.position - _lowerDomainBound) /
-            (_upperDomainBound - _lowerDomainBound) };
+        glm::vec3 normalizedPos = (entry.position - _lowerDomainBound) /
+            (_upperDomainBound - _lowerDomainBound);
 
-        glm::uvec3 cell{
-            glm::min(
-                static_cast<glm::uvec3>(glm::floor(
-                    normalizedPos * static_cast<glm::vec3>(_dimensions)
-                )),
-                _dimensions - 1u
-            )
-        };
+        glm::uvec3 cell = glm::min(
+            static_cast<glm::uvec3>(glm::floor(
+                normalizedPos * static_cast<glm::vec3>(_dimensions)
+            )),
+            _dimensions - 1u
+        );
 
         const float value = entry.data[dataIndex->index];
         minVal = std::min(minVal, value);
@@ -166,7 +162,6 @@ void GenerateRawVolumeFromFileTask::perform(const ProgressCallback& progressCall
 
         size_t index = rawVolume.coordsToIndex(cell);
         rawVolume.set(index, value);
-        k++;
     }
     progressCallback(0.75f);
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -123,7 +123,7 @@ DashboardItemInputState::DashboardItemInputState(const ghoul::Dictionary& dictio
     addProperty(_showJoystick);
 }
 
-void DashboardItemInputState::render(glm::vec2& penPosition) {
+void DashboardItemInputState::update() {
     ZoneScoped;
 
     std::vector<std::string> text;
@@ -167,9 +167,7 @@ void DashboardItemInputState::render(glm::vec2& penPosition) {
     }
 
     if (!text.empty()) {
-        penPosition.y -= _font->height();
-        const std::string t = ghoul::join(std::move(text), "\n");
-        RenderFont(*_font, penPosition, t);
+        _buffer = ghoul::join(std::move(text), "\n");
     }
 }
 

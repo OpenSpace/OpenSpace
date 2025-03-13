@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,11 +33,6 @@ namespace openspace {
 PlaneGeometry::PlaneGeometry(glm::vec2 size) : _size(std::move(size)) {}
 
 PlaneGeometry::PlaneGeometry(float size) : PlaneGeometry(glm::vec2(size, size)) {}
-
-PlaneGeometry::~PlaneGeometry() {
-    glDeleteBuffers(1, &_vBufferId);
-    glDeleteVertexArrays(1, &_vaoId);
-}
 
 void PlaneGeometry::initialize() {
     glGenVertexArrays(1, &_vaoId);

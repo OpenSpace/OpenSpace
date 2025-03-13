@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -814,11 +814,26 @@ TestResult OrVerifier::operator()(const ghoul::Dictionary& dictionary,
     else {
         TestResult r;
         r.success = false;
+
+        for (const TestResult& r2 : res) {
+            for (const TestResult::Offense& o : r2.offenses) {
+                if (o.reason != TestResult::Offense::Reason::WrongType) {
+                    // This is the first reason that is not a wrong type, so this
+                    // is a good candidate for a useful error message
+                    r.offenses.push_back(o);
+                    return r;
+                }
+            }
+        }
+
+        // If we got here, all of the offense reasons were a wrong type, so we
+        // can report that back
         TestResult::Offense o = {
             .offender = key,
-            .reason = TestResult::Offense::Reason::Verification
+            .reason = TestResult::Offense::Reason::WrongType
         };
         r.offenses.push_back(std::move(o));
+
         return r;
     }
 }

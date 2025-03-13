@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,7 +42,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableDisc : public Renderable {
 public:
-    RenderableDisc(const ghoul::Dictionary& dictionary);
+    explicit RenderableDisc(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;
@@ -67,7 +67,7 @@ protected:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 
-    std::unique_ptr<PlaneGeometry> _plane;
+    PlaneGeometry _plane;
     std::unique_ptr<TextureComponent> _texture;
 
 private:

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -497,8 +497,8 @@ void GeoJsonComponent::deinitializeGL() {
 
 bool GeoJsonComponent::isReady() const {
     const bool isReady = std::all_of(
-        std::begin(_geometryFeatures),
-        std::end(_geometryFeatures),
+        _geometryFeatures.cbegin(),
+        _geometryFeatures.cend(),
         std::mem_fn(&GlobeGeometryFeature::isReady)
     );
     return isReady && _linesAndPolygonsProgram && _pointsProgram;
@@ -574,11 +574,11 @@ void GeoJsonComponent::update() {
         }
         GlobeGeometryFeature& g = _geometryFeatures[i];
 
-        if (_dataIsDirty || _heightOffsetIsDirty) {
+        if (_dataIsDirty || _heightOffsetIsDirty) [[unlikely]] {
             g.setOffsets(offsets);
         }
 
-        if (_textureIsDirty) {
+        if (_textureIsDirty) [[unlikely]] {
             g.updateTexture();
         }
 

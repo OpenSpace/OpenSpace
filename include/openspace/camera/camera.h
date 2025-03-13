@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,18 +38,17 @@ class SceneGraphNode;
  * This class still needs some more love. Suggested improvements:
  * - Accessors should return constant references to double precision class members.
  * - Remove the scaling variable (What is it used for?)
- * - Remove the maxFov and sinMaxfov variables. Redundant since the fov is embedded
- * within the perspective projection matrix.
- * - Remove focusposition, part of the integration with the scale graph. The
- * "focus position" should not be needed since we assume the camera is always
- * positioned relative to its origin. When orbiting another object (not in origin),
- * the focus position should probably be handled outside the camera class
- * (interaction handler) since it does not affect the state of the camera
- * (only how it interacts).
- * - The class might need some more reasonable accessors depending on use cases.
- * (up vector world space?)
- * - Make clear which function returns a combined view matrix (things that are
- * dependent on the separate sgct nodes).
+ * - Remove the maxFov and sinMaxfov variables. Redundant since the fov is embedded within
+ *   the perspective projection matrix
+ * - Remove focusposition, part of the integration with the scale graph. The "focus
+ *   position" should not be needed since we assume the camera is always positioned
+ *   relative to its origin. When orbiting another object (not in origin), the focus
+ *   position should probably be handled outside the camera class (interaction handler)
+ *   since it does not affect the state of the camera (only how it interacts)
+ * - The class might need some more reasonable accessors depending on use cases. (up
+ *   vector world space?)
+ * - Make clear which function returns a combined view matrix (things that are dependent
+ *   on the separate sgct nodes).
  */
 class Camera {
 public:
@@ -154,10 +153,9 @@ public:
     static constexpr glm::dvec3 UpDirectionCameraSpace = glm::dvec3(0.0, 1.0, 0.0);
 
 private:
-
-    SyncData<glm::dvec3> _position = glm::dvec3(1.0, 1.0, 1.0);
-    SyncData<glm::dquat> _rotation  = glm::dquat(glm::dvec3(1.0, 1.0, 1.0));
-    SyncData<float> _scaling = 1.f;
+    SyncData<glm::dvec3> _position = SyncData<glm::dvec3>(glm::dvec3(1.0, 1.0, 1.0));
+    SyncData<glm::dquat> _rotation  = SyncData<glm::dquat>(glm::dvec3(1.0, 1.0, 1.0));
+    SyncData<float> _scaling = SyncData<float>(1.f);
     SceneGraphNode* _parent = nullptr;
 
     float _atmosphereDimmingFactor = 1.f;

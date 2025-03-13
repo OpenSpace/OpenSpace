@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -410,9 +410,7 @@ void PropertiesDialog::selectLineFromScriptLog() {
 
                 // Remove the string markers around the property
                 const QString property = textList[0].mid(1, textList[0].size() - 2);
-
-                textList.removeFirst();
-                const QString value = textList.join(",");
+                const QString value = textList[1];
 
                 _propertyEdit->setText(property.trimmed());
                 _valueEdit->setText(value.trimmed());

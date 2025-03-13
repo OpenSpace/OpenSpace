@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -90,7 +90,7 @@ constexpr std::string_view OpenVRTag = "OpenVR";
 // @TODO (abock, 2020-04-09): These state variables should disappear
 const Window* currentWindow = nullptr;
 const BaseViewport* currentViewport = nullptr;
-Frustum::Mode currentFrustumMode;
+FrustumMode currentFrustumMode;
 glm::mat4 currentModelMatrix;
 glm::ivec2 currentDrawResolution;
 
@@ -459,7 +459,7 @@ void mainRenderFunc(const sgct::RenderData& data) {
     glm::mat4 viewMatrix;
     std::memcpy(
         glm::value_ptr(viewMatrix),
-        data.viewMatrix.values,
+        data.viewMatrix.values.data(),
         sizeof(mat4)
     );
     viewMatrix = viewMatrix * glm::translate(glm::mat4(1.f), pos);
@@ -467,7 +467,7 @@ void mainRenderFunc(const sgct::RenderData& data) {
     glm::mat4 projectionMatrix;
     std::memcpy(
         glm::value_ptr(projectionMatrix),
-        data.projectionMatrix.values,
+        data.projectionMatrix.values.data(),
         sizeof(mat4)
     );
 #ifdef OPENVR_SUPPORT
@@ -483,7 +483,7 @@ void mainRenderFunc(const sgct::RenderData& data) {
         glm::mat4 modelMatrix;
         std::memcpy(
             glm::value_ptr(modelMatrix),
-            data.modelMatrix.values,
+            data.modelMatrix.values.data(),
             sizeof(mat4)
         );
         currentModelMatrix = modelMatrix;
@@ -499,12 +499,12 @@ void mainRenderFunc(const sgct::RenderData& data) {
 
             if (w.leftOrMain.isCreated() && w.leftOrMain.updateSenderSize(width, height))
             {
-                GLuint texId = window.frameBufferTexture(Window::TextureIndex::LeftEye);
+                GLuint texId = window.frameBufferTextureEye(Eye::MonoOrLeft);
                 w.leftOrMain.updateSender(texId, static_cast<int>(GL_TEXTURE_2D));
             }
 
             if (w.right.isCreated() && w.right.updateSenderSize(width, height)) {
-                GLuint texId = window.frameBufferTexture(Window::TextureIndex::RightEye);
+                GLuint texId = window.frameBufferTextureEye(Eye::Right);
                 w.right.updateSender(texId, static_cast<int>(GL_TEXTURE_2D));
             }
 
@@ -731,7 +731,10 @@ void setSgctDelegateFunctions() {
     sgctDelegate.currentWindowSize = []() {
         ZoneScoped;
 
-        return glm::ivec2(currentWindow->resolution().x, currentWindow->resolution().y);
+        return glm::ivec2(
+            currentWindow->windowResolution().x,
+            currentWindow->windowResolution().y
+        );
     };
     sgctDelegate.currentSubwindowSize = []() {
         ZoneScoped;
@@ -740,19 +743,19 @@ void setSgctDelegateFunctions() {
             case Window::StereoMode::SideBySide:
             case Window::StereoMode::SideBySideInverted:
                 return glm::ivec2(
-                    currentWindow->resolution().x / 2,
-                    currentWindow->resolution().y
+                    currentWindow->windowResolution().x / 2,
+                    currentWindow->windowResolution().y
                 );
             case Window::StereoMode::TopBottom:
             case Window::StereoMode::TopBottomInverted:
                 return glm::ivec2(
-                    currentWindow->resolution().x,
-                    currentWindow->resolution().y / 2
+                    currentWindow->windowResolution().x,
+                    currentWindow->windowResolution().y / 2
                 );
             default:
                 return glm::ivec2(
-                    currentWindow->resolution().x * currentViewport->size().x,
-                    currentWindow->resolution().y * currentViewport->size().y
+                    currentWindow->windowResolution().x * currentViewport->size().x,
+                    currentWindow->windowResolution().y * currentViewport->size().y
                 );
         }
     };
@@ -766,7 +769,7 @@ void setSgctDelegateFunctions() {
                 return glm::ivec2(dim.x, dim.y);
             }
             else {
-                const ivec2 dim = currentWindow->finalFBODimensions();
+                const ivec2 dim = currentWindow->framebufferResolution();
                 return glm::ivec2(dim.x, dim.y);
             }
         }
@@ -787,7 +790,7 @@ void setSgctDelegateFunctions() {
         ZoneScoped;
 
         if (currentViewport) {
-            const ivec2 res = currentWindow->resolution();
+            const ivec2 res = currentWindow->windowResolution();
             const vec2 size = currentViewport->size();
             return glm::ivec2(size.x * res.x, size.y * res.y);
         }
@@ -802,23 +805,23 @@ void setSgctDelegateFunctions() {
     sgctDelegate.firstWindowResolution = []() {
         ZoneScoped;
         sgct::Window* window = Engine::instance().windows().front().get();
-        return glm::ivec2(window->resolution().x, window->resolution().y);
+        return glm::ivec2(window->windowResolution().x, window->windowResolution().y);
     };
     sgctDelegate.guiWindowResolution = []() {
         ZoneScoped;
-        const Window* guiWindow = nullptr;
+        const Window* guiWin = nullptr;
         for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
             if (window->hasTag("GUI")) {
-                guiWindow = window.get();
+                guiWin = window.get();
                 break;
             }
         }
 
-        if (!guiWindow) {
-            guiWindow = Engine::instance().windows().front().get();
+        if (!guiWin) {
+            guiWin = Engine::instance().windows().front().get();
         }
 
-        return glm::ivec2(guiWindow->resolution().x, guiWindow->resolution().y);
+        return glm::ivec2(guiWin->windowResolution().x, guiWin->windowResolution().y);
     };
     sgctDelegate.osDpiScaling = []() {
         ZoneScoped;
@@ -956,9 +959,9 @@ void setSgctDelegateFunctions() {
 
         switch (currentFrustumMode) {
             default:
-            case Frustum::Mode::MonoEye: return WindowDelegate::Frustum::Mono;
-            case Frustum::Mode::StereoLeftEye: return WindowDelegate::Frustum::LeftEye;
-            case Frustum::Mode::StereoRightEye: return WindowDelegate::Frustum::RightEye;
+            case FrustumMode::Mono: return WindowDelegate::Frustum::Mono;
+            case FrustumMode::StereoLeft: return WindowDelegate::Frustum::LeftEye;
+            case FrustumMode::StereoRight: return WindowDelegate::Frustum::RightEye;
         }
     };
     sgctDelegate.swapGroupFrameNumber = []() -> uint64_t {
@@ -983,7 +986,7 @@ void setSgctDelegateFunctions() {
                 continue;
             }
 
-            const sgct::ivec2 res = window->resolution();
+            const sgct::ivec2 res = window->windowResolution();
             for (const std::unique_ptr<Viewport>& viewport : window->viewports()) {
                 const sgct::vec2 pos = viewport->position();
                 const sgct::vec2 size = viewport->size();
@@ -1060,69 +1063,6 @@ void setSgctDelegateFunctions() {
     };
 }
 
-std::string setWindowConfigPresetForGui(const std::string& labelFromCfgFile,
-                                        bool haveCliSGCTConfig)
-{
-    openspace::Configuration& config = *global::configuration;
-
-    std::string preset;
-    const bool sgctCfgFileSpecifiedByLua = !config.sgctConfigNameInitialized.empty();
-    if (haveCliSGCTConfig) {
-        preset = std::format("{} (from CLI)", config.windowConfiguration);
-    }
-    else if (sgctCfgFileSpecifiedByLua) {
-        preset = config.sgctConfigNameInitialized + labelFromCfgFile;
-    }
-    else {
-        preset = config.windowConfiguration;
-    }
-    return preset;
-}
-
-std::pair<std::string, bool> selectedSgctProfileFromLauncher(LauncherWindow& lw,
-                                                             bool hasCliSGCTConfig,
-                                                   const std::string& windowConfiguration,
-                                                      const std::string& labelFromCfgFile)
-{
-    std::string config = windowConfiguration;
-    bool isGeneratedConfig = false;
-    if (!hasCliSGCTConfig) {
-        config = lw.selectedWindowConfig();
-        if (config.find(labelFromCfgFile) != std::string::npos) {
-            if (config.find("sgct.config") == std::string::npos) {
-                config = config.substr(0, config.length() - labelFromCfgFile.length());
-            }
-            else {
-                config = windowConfiguration;
-                isGeneratedConfig = true;
-            }
-        }
-        else {
-            const std::filesystem::path c = absPath(config);
-
-            std::filesystem::path cj = c;
-            cj.replace_extension(".json");
-
-            if (c.extension().empty()) {
-                if (std::filesystem::exists(cj)) {
-                    config += ".json";
-                }
-                else {
-                    throw ghoul::RuntimeError(std::format(
-                        "Error loading configuration file '{}'. File could not be found",
-                        config
-                    ));
-                }
-            }
-            else {
-                // user customized SGCT config
-            }
-        }
-        global::configuration->windowConfiguration = config;
-    }
-    return { config, isGeneratedConfig };
-}
-
 } // namespace
 
 
@@ -1133,6 +1073,8 @@ int main(int argc, char* argv[]) {
     _clearfp();
     _controlfp(_controlfp(0, 0) & ~(_EM_ZERODIVIDE | _EM_OVERFLOW), _MCW_EM);
 #endif // OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
+
+    std::setlocale(LC_ALL, "C");
 
 #ifdef WIN32
     SetUnhandledExceptionFilter(generateMiniDump);
@@ -1320,9 +1262,6 @@ int main(int argc, char* argv[]) {
             global::configuration->bypassLauncher = *commandlineArguments.bypassLauncher;
         }
 
-        // Determining SGCT configuration file
-        LDEBUG("SGCT Configuration file: " + global::configuration->windowConfiguration);
-
         windowConfiguration = global::configuration->windowConfiguration;
     }
     catch (const documentation::SpecificationError& e) {
@@ -1345,12 +1284,20 @@ int main(int argc, char* argv[]) {
 
     // Call profile GUI
     const std::string labelFromCfgFile = " (from .cfg)";
-    std::string windowCfgPreset = setWindowConfigPresetForGui(
-        labelFromCfgFile,
-        commandlineArguments.windowConfig.has_value()
-    );
+    std::string windowCfgPreset;
+    if (commandlineArguments.windowConfig.has_value()) {
+        windowCfgPreset = std::format(
+            "{} (from CLI)", global::configuration->windowConfiguration
+        );
+    }
+    else if (!global::configuration->sgctConfigNameInitialized.empty()) {
+        windowCfgPreset =
+            global::configuration->sgctConfigNameInitialized + labelFromCfgFile;
+    }
+    else {
+        windowCfgPreset = global::configuration->windowConfiguration;
+    }
 
-    //TODO consider LFATAL if ${USER} doens't exist rather then recurisve create.
     global::openSpaceEngine->createUserDirectoriesIfNecessary();
 
     // (abock, 2020-12-07)  For some reason on Apple the keyboard handler in CEF will call
@@ -1382,17 +1329,16 @@ int main(int argc, char* argv[]) {
             );
         }
 
-        LauncherWindow win = LauncherWindow(
+        LauncherWindow launcher = LauncherWindow(
             !commandlineArguments.profile.has_value(),
             *global::configuration,
             !commandlineArguments.windowConfig.has_value(),
-            std::move(windowCfgPreset),
-            nullptr
+            std::move(windowCfgPreset)
         );
-        win.show();
+        launcher.show();
         QApplication::exec();
 
-        if (!win.wasLaunchSelected()) {
+        if (!launcher.wasLaunchSelected()) {
             exit(EXIT_SUCCESS);
         }
         glfwInit();
@@ -1437,14 +1383,23 @@ int main(int argc, char* argv[]) {
             size
         );
 
-        global::configuration->profile = win.selectedProfile();
-        std::tie(windowConfiguration, isGeneratedWindowConfig) =
-            selectedSgctProfileFromLauncher(
-                win,
-                commandlineArguments.windowConfig.has_value(),
-                windowConfiguration,
-                labelFromCfgFile
-            );
+        global::configuration->profile = launcher.selectedProfile();
+
+        std::string config = windowConfiguration;
+        isGeneratedWindowConfig = false;
+        if (!commandlineArguments.windowConfig.has_value()) {
+            config = launcher.selectedWindowConfig();
+            if (config.find(labelFromCfgFile) != std::string::npos) {
+                if (config.find("sgct.config") == std::string::npos) {
+                    config = config.substr(0, config.length() - labelFromCfgFile.length());
+                }
+                else {
+                    config = windowConfiguration;
+                    isGeneratedWindowConfig = true;
+                }
+            }
+            global::configuration->windowConfiguration = config;
+        }
     }
     else {
         glfwInit();
@@ -1473,7 +1428,10 @@ int main(int argc, char* argv[]) {
     // as well as the configuration file that sgct is supposed to use
     arguments.insert(arguments.begin(), argv[0]);
     arguments.insert(arguments.begin() + 1, "-config");
-    arguments.insert(arguments.begin() + 2, absPath(windowConfiguration).string());
+    arguments.insert(
+        arguments.begin() + 2,
+        absPath(global::configuration->windowConfiguration).string()
+    );
 
     // Need to set this before the creation of the sgct::Engine
 
@@ -1486,12 +1444,27 @@ int main(int argc, char* argv[]) {
     glfwWindowHint(GLFW_STENCIL_BITS, 8);
 #endif
 
+    // Determining SGCT configuration file
+    LINFO(std::format(
+        "SGCT Configuration file: {}", absPath(global::configuration->windowConfiguration)
+    ));
+
+
     LDEBUG("Creating SGCT Engine");
     std::vector<std::string> arg(argv + 1, argv + argc);
     LDEBUG("Parsing commandline arguments");
-    const sgct::Configuration config = parseArguments(arg);
+    sgct::Configuration config = parseArguments(arg);
     LDEBUG("Loading cluster information");
-    config::Cluster cluster = loadCluster(absPath(windowConfiguration).string());
+    config::Cluster cluster;
+    try {
+        cluster = loadCluster(
+            absPath(global::configuration->windowConfiguration).string()
+        );
+    }
+    catch (const std::runtime_error& e) {
+        LFATALC("main", e.what());
+        exit(EXIT_FAILURE);
+    }
 
     LDEBUG("Setting callbacks");
     Engine::Callbacks callbacks = {
@@ -1511,6 +1484,11 @@ int main(int argc, char* argv[]) {
         .drop = mainDropCallback
     };
     Log::instance().setNotifyLevel(Log::Level::Debug);
+
+    // Do not print message if clients are waiting for the master
+    config.printWaitMessage = config.printWaitMessage.value_or(false);
+    // Only timeout after 15 minutes
+    config.waitTimeout = config.waitTimeout.value_or(15.f * 60.f);
 
     try {
         Engine::create(std::move(cluster), std::move(callbacks), config);
@@ -1552,11 +1530,6 @@ int main(int argc, char* argv[]) {
         glfwPollEvents();
     }
 #endif // __APPLE__
-
-
-    // Do not print message if clients are waiting for the master
-    // Only timeout after 15 minutes
-    Engine::instance().setSyncParameters(false, 15.f * 60.f);
 
     LINFO("Starting rendering loop");
     Engine::instance().exec();

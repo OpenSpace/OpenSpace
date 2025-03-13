@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,8 +38,8 @@ std::string_view StringProperty::className() const {
     return "StringProperty";
 }
 
-int StringProperty::typeLua() const {
-    return LUA_TSTRING;
+ghoul::lua::LuaTypes StringProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::String;
 }
 
 std::string StringProperty::fromLuaConversion(lua_State* state) const {

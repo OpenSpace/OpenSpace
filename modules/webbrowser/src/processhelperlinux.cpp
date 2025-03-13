@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,8 +26,26 @@
 // reserved. Use of this source code is governed by a BSD-style license that can
 // be found in the LICENSE file.
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#pragma clang diagnostic ignored "-Wshadow-field"
+#pragma clang diagnostic ignored "-Wcomma"
+#pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+#elif defined(__GNUC__) || defined(__GNUG__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshadow"
+#endif
+
 #include "include/cef_app.h"
 #include "include/webbrowserapp.h"
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#elif defined(__GNUC__) || defined(__GNUG__)
+#pragma GCC diagnostic pop
+#endif
 
 // Entry point function for all processes.
 int main(int argc, char* argv[]) {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -78,9 +78,6 @@ namespace {
         openspace::properties::Property::Visibility::Developer
     };
 
-    const std::string FileExtensionBinary = ".osrec";
-    const std::string FileExtensionAscii = ".osrectxt";
-
     constexpr std::string_view ScriptReturnPrefix = "return ";
 } // namespace
 
@@ -111,7 +108,7 @@ void SessionRecordingHandler::preSynchronization(double dt) {
     if (_state != _lastState) {
         using K = CallbackHandle;
         using V = StateChangeCallback;
-        for (const std::pair<const K, V>& it : _stateChangeCallbacks) {
+        for (const std::pair<K, V>& it : _stateChangeCallbacks) {
             it.second();
         }
         _lastState = _state;
@@ -324,13 +321,13 @@ void SessionRecordingHandler::startRecording() {
 }
 
 void SessionRecordingHandler::stopRecording(const std::filesystem::path& filename,
-                                            DataMode dataMode)
+                                            DataMode dataMode, bool overwrite)
 {
     if (_state != SessionState::Recording) {
         return;
     }
 
-    if (std::filesystem::is_regular_file(filename)) {
+    if (!overwrite && std::filesystem::is_regular_file(filename)) {
         throw ghoul::RuntimeError(std::format(
             "Unable to start recording. File '{}' already exists", filename
         ), "SessionRecording");
@@ -450,8 +447,8 @@ void SessionRecordingHandler::seek(double recordingTime) {
         _timeline.entries.begin(),
         _timeline.entries.end(),
         recordingTime,
-        [](double recordingTime, const SessionRecording::Entry& e) {
-            return recordingTime < e.timestamp;
+        [](double rt, const SessionRecording::Entry& e) {
+            return rt < e.timestamp;
         }
     );
     _playback.elapsedTime = recordingTime;
@@ -633,7 +630,9 @@ double SessionRecordingHandler::currentApplicationInterpolationTime() const {
     return _playback.saveScreenshots.currentApplicationTime;
 }
 
-void SessionRecordingHandler::checkIfScriptUsesScenegraphNode(std::string_view s) const {
+void SessionRecordingHandler::checkIfScriptUsesScenegraphNode(
+                                                            std::string_view script) const
+{
     auto isolateTermFromQuotes = [](std::string_view s) -> std::string_view {
         // Remove any leading spaces
         s.remove_prefix(s.find_first_not_of(" "));
@@ -660,26 +659,31 @@ void SessionRecordingHandler::checkIfScriptUsesScenegraphNode(std::string_view s
             "NavigationHandler.OrbitalNavigator.Aim"
         };
 
-        for (std::string_view script : NavScriptsUsingNodes) {
-            if (navTerm.find(script) != std::string::npos) {
+        for (std::string_view s : NavScriptsUsingNodes) {
+            if (navTerm.find(s) != std::string::npos) {
                 return true;
             }
         }
         return false;
     };
 
-    if (s.starts_with(ScriptReturnPrefix)) {
-        s.remove_prefix(ScriptReturnPrefix.length());
+    if (script.starts_with(ScriptReturnPrefix)) {
+        script.remove_prefix(ScriptReturnPrefix.length());
     }
     // This works for both setPropertyValue and setPropertyValueSingle
-    if (!s.starts_with("openspace.setPropertyValue") || s.find('(') == std::string::npos)
+    if (!script.starts_with("openspace.setPropertyValue") ||
+        script.find('(') == std::string::npos)
     {
         return;
     }
 
-    std::string_view subjectOfSetProp = isolateTermFromQuotes(s.substr(s.find('(') + 1));
+    std::string_view subjectOfSetProp = isolateTermFromQuotes(
+        script.substr(script.find('(') + 1)
+    );
     if (checkForScenegraphNodeAccessNav(subjectOfSetProp)) {
-        std::string_view navNode = isolateTermFromQuotes(s.substr(s.find(',') + 1));
+        std::string_view navNode = isolateTermFromQuotes(
+            script.substr(script.find(',') + 1)
+        );
         if (navNode != "nil") {
             auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), navNode);
             if (it == _loadedNodes.end()) {

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2024                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -23,16 +23,62 @@
 ##########################################################################################
 
 function (set_openspace_compile_settings target)
+  # Switching to cxx_std_23 triggers a bug in Clang17
+  # https://github.com/llvm/llvm-project/issues/61415
   target_compile_features(${target} PUBLIC cxx_std_20)
 
   set(MSVC_WARNINGS
     "/MP"       # Multi-threading support
     "/W4"       # Highest warning level
     "/w44062"   # missing case label
+    "/w44165"   # 'HRESULT' is being converted to 'bool'
+    "/w44242"   # conversion from 'type1' to 'type2', possible loss of data
+    "/w44254"   # conversion from 'type1' to 'type2', possible loss of data
+    "/w44263"   # member function does not override any base class virtual member function
+    "/w44265"   # class has virtual functions, but destructor is not virtual
+    "/w44287"   # unsigned/negative constant mismatch
     "/w44289"   # using for-loop variable outside of loop
     "/w44296"   # expression is always true/false
+    "/w44437"   # dynamic_cast could fail in some contexts
+    "/w44545"   # expression before comma evaluates to a function missing an argument list
+    "/w44547"   # operator before comma has no effect
+    "/w44548"   # operator before comma has no effect
+    "/w44549"   # operator before comma has no effect
+    "/w44555"   # expression has no effect; expected expression with side-effect
+    "/w44574"   # 'identifier' is defined to be '0': did you mean to use '#if identifier'?
+    "/w44619"   # #pragma warning: there is no warning number 'number'
+    "/w44643"   # Forward declaring 'identifier' in namespace std is not permitted
+    "/w44800"   # Implicit conversion from 'type' to bool. Possible information loss
+    "/w44822"   # local class member function does not have a body
+    "/w44841"   # non-standard extension used: compound member designator used in offsetof
+    "/w44842"   # the result of 'offsetof' applied to a type using multiple inheritance is
+                # not guaranteed to be consistent between compiler releases
+    "/w44946"   # reinterpret_cast used between related classes: 'class1' and 'class2'
+    "/w44986"   # exception specification does not match previous declaration
+    "/w44987"   # nonstandard extension used: 'throw (...)'
+    "/w45022"   # multiple move constructors specified
+    "/w45023"   # multiple move assignment operators specified
+    "/w45031"   # #pragma warning(pop): likely mismatch, popping warning state pushed in
+                # different file
+    "/w45032"   # detected #pragma warning(push) with no #pragma warning(pop)
+    "/w45038"   # data member 'member1' will be initialized after data member 'member2'
     "/w45041"   # out-of-line definition for constexpr data is deprecated
+    "/w45042"   # function declarations at block scope cannot be specified 'inline'
     "/w45204"   # virtual class has non-virtual trivial destructor
+    "/w45233"   # explicit lambda capture 'identifier' is not used
+    "/w45340"   # attribute is ignored in this syntactic position
+    "/w45243"   # using incomplete class 'class-name' can cause potential one definition
+                # rule violation due to ABI limitation
+    "/w45245"   # unreferenced function with internal linkage has been removed
+    "/w45249"   # 'bitfield' of type 'enumeration_name' has named enumerators with values
+                # that cannot be represented in the given bit field width of
+                # 'bitfield_width'.
+    "/w45258"   # explicit capture of 'symbol' is not required for this use
+    "/w45259"   # explicit specialization requires 'template <>'
+    "/w45262"   # implicit fall-through occurs here
+    "/w45263"   # calling 'std::move' on a temporary object prevents copy elision
+    "/w45264"   # 'const' variable is not used
+    "/w45266"   # 'const' qualifier on return type has no effect
     "/wd4127"   # conditional expression is constant [raised by: websocketpp]
     "/wd4201"   # nonstandard extension used : nameless struct/union  [raised by: GLM]
     "/wd5030"   # attribute 'attribute' is not recognized  [raised by: codegen]
@@ -146,7 +192,12 @@ function (set_openspace_compile_settings target)
     "-Wno-deprecated-enum-enum-conversion"
     "-Wno-missing-braces"
     "-Wno-sign-compare"
+    "-Wno-suggest-destructor-override"
     "-Wno-unknown-attributes"
+
+    # This should be removed as soon as https://github.com/g-truc/glm/issues/1349 is
+    # addressed
+    "-Wno-defaulted-function-deleted"
   )
 
 

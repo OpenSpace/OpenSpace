@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,10 +39,6 @@
 #include <optional>
 
 namespace {
-    constexpr std::array<const char*, 4> UniformNames = {
-        "modelViewProjectionTransform", "opacity", "width", "colorTexture"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
@@ -68,6 +64,11 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This renderable can be used to create a circular disc that is colored based on a
+    // one-dimensional texture.
+    //
+    // The disc will be filled i.e. a full circle, per default, but may also be made
+    // with a hole in the center using the `Width` parameter.
     struct [[codegen::Dictionary(RenderableDisc)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::filesystem::path texture;
@@ -90,16 +91,20 @@ documentation::Documentation RenderableDisc::Documentation() {
 RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath(TextureInfo)
-    , _size(SizeInfo, 1.f, 0.f, 1e13f)
-    , _width(WidthInfo, 0.5f, 0.f, 1.f)
+    , _size(SizeInfo, 1.f, 0.001f, 1e13f)
+    , _width(WidthInfo, 1.f, 0.001f, 1.f)
+    , _plane(_size)
+    , _planeIsDirty(true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    addProperty(Fadeable::_opacity);
 
     _texturePath = p.texture.string();
     _texturePath.onChange([this]() { _texture->loadFromFile(_texturePath.value()); });
     addProperty(_texturePath);
 
-    _size.setExponent(13.f);
+    _size.setExponent(7.f);
     _size = p.size.value_or(_size);
     setBoundingSphere(_size);
     _size.onChange([this]() { _planeIsDirty = true; });
@@ -108,13 +113,11 @@ RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
     _width = p.width.value_or(_width);
     addProperty(_width);
 
-    addProperty(Fadeable::_opacity);
-
     setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
 }
 
 bool RenderableDisc::isReady() const {
-    return _shader && _texture && _plane;
+    return _shader && _texture;
 }
 
 void RenderableDisc::initialize() {
@@ -122,8 +125,6 @@ void RenderableDisc::initialize() {
     _texture->setFilterMode(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
     _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
     _texture->setShouldWatchFileForChanges(true);
-
-    _plane = std::make_unique<PlaneGeometry>(planeSize());
 }
 
 void RenderableDisc::initializeGL() {
@@ -132,12 +133,11 @@ void RenderableDisc::initializeGL() {
     _texture->loadFromFile(_texturePath.value());
     _texture->uploadToGpu();
 
-    _plane->initialize();
+    _plane.initialize();
 }
 
 void RenderableDisc::deinitializeGL() {
-    _plane->deinitialize();
-    _plane = nullptr;
+    _plane.deinitialize();
     _texture = nullptr;
 
     global::renderEngine->removeRenderProgram(_shader.get());
@@ -167,7 +167,7 @@ void RenderableDisc::render(const RenderData& data, RendererTasks&) {
     glDepthMask(false);
     glDisable(GL_CULL_FACE);
 
-    _plane->render();
+    _plane.render();
 
     _shader->deactivate();
 
@@ -178,13 +178,13 @@ void RenderableDisc::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableDisc::update(const UpdateData&) {
-    if (_shader->isDirty()) {
+    if (_shader->isDirty()) [[unlikely]] {
         _shader->rebuildFromFile();
         updateUniformLocations();
     }
 
-    if (_planeIsDirty) {
-        _plane->updateSize(planeSize());
+    if (_planeIsDirty) [[unlikely]] {
+        _plane.updateSize(planeSize());
         _planeIsDirty = false;
     }
 
@@ -201,7 +201,7 @@ void RenderableDisc::initializeShader() {
 }
 
 void RenderableDisc::updateUniformLocations() {
-   ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+   ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 float RenderableDisc::planeSize() const {

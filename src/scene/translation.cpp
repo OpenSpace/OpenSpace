@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,6 +39,11 @@ namespace {
         // of translations depend on the configuration of the application and can be
         // written to disk on application startup into the FactoryDocumentation
         std::string type [[codegen::annotation("Must name a valid Translation type")]];
+
+        // The time frame in which this `Translation` is applied. If the in-game time is
+        // outside this range, no translation will be applied.
+        std::optional<ghoul::Dictionary> timeFrame
+            [[codegen::reference("core_time_frame")]];
     };
 #include "translation_codegen.cpp"
 } // namespace
@@ -65,7 +70,16 @@ ghoul::mm_unique_ptr<Translation> Translation::createFromDictionary(
     return ghoul::mm_unique_ptr<Translation>(result);
 }
 
-Translation::Translation() : properties::PropertyOwner({ "Translation" }) {}
+Translation::Translation(const ghoul::Dictionary& dictionary)
+    : properties::PropertyOwner({ "Translation" })
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    if (p.timeFrame.has_value()) {
+        _timeFrame = TimeFrame::createFromDictionary(*p.timeFrame);
+        addPropertySubOwner(_timeFrame.get());
+    }
+}
 
 bool Translation::initialize() {
     return true;
@@ -77,10 +91,20 @@ void Translation::update(const UpdateData& data) {
     if (!_needsUpdate && data.time.j2000Seconds() == _cachedTime) {
         return;
     }
+
+    if (_timeFrame) {
+        _timeFrame->update(data.time);
+    }
+
     const glm::dvec3 oldPosition = _cachedPosition;
-    _cachedPosition = position(data);
-    _cachedTime = data.time.j2000Seconds();
-    _needsUpdate = false;
+    if (_timeFrame && !_timeFrame->isActive()) {
+        _cachedPosition = glm::dvec3(0.0);
+    }
+    else {
+        _cachedPosition = position(data);
+        _cachedTime = data.time.j2000Seconds();
+        _needsUpdate = false;
+    }
 
     if (oldPosition != _cachedPosition) {
         notifyObservers();
