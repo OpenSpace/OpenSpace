@@ -63,12 +63,12 @@
 namespace {
 
 template <class T>
-openspace::properties::PropertyOwner* findPropertyOwnerWithMatchingGroupTag(T* prop,
+const openspace::properties::PropertyOwner* findPropertyOwnerWithMatchingGroupTag(T* prop,
                                                             const std::string& tagToMatch)
 {
     using namespace openspace;
 
-    properties::PropertyOwner* tagMatchOwner = nullptr;
+    const properties::PropertyOwner* tagMatchOwner = nullptr;
     const properties::PropertyOwner* owner = prop->owner();
 
     if (owner) {
@@ -164,7 +164,7 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
 
                 // Check tag
                 if (isGroupMode) {
-                    properties::PropertyOwner* matchingTaggedOwner =
+                    const properties::PropertyOwner* matchingTaggedOwner =
                         findPropertyOwnerWithMatchingGroupTag(prop, groupName);
                     if (!matchingTaggedOwner) {
                         continue;
@@ -180,7 +180,7 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
             if (nodePos != std::string::npos) {
                 // Check tag
                 if (isGroupMode) {
-                    properties::PropertyOwner* matchingTaggedOwner =
+                    const properties::PropertyOwner* matchingTaggedOwner =
                         findPropertyOwnerWithMatchingGroupTag(prop, groupName);
                     if (!matchingTaggedOwner) {
                         continue;
@@ -567,7 +567,7 @@ namespace {
 
                 // Check tag
                 if (!groupName.empty()) {
-                    properties::PropertyOwner* matchingTaggedOwner =
+                    const properties::PropertyOwner* matchingTaggedOwner =
                         findPropertyOwnerWithMatchingGroupTag(prop, groupName);
                     if (!matchingTaggedOwner) {
                         continue;
@@ -583,7 +583,7 @@ namespace {
             if (nodePos != std::string::npos) {
                 // Check tag
                 if (!groupName.empty()) {
-                    properties::PropertyOwner* matchingTaggedOwner =
+                    const properties::PropertyOwner* matchingTaggedOwner =
                         findPropertyOwnerWithMatchingGroupTag(prop, groupName);
                     if (!matchingTaggedOwner) {
                         continue;

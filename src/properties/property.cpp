@@ -32,14 +32,6 @@
 #include <ghoul/misc/dictionaryjsonformatter.h>
 #include <algorithm>
 
-namespace {
-    constexpr std::string_view IdentifierKey = "Identifier";
-    constexpr std::string_view NameKey = "Name";
-    constexpr std::string_view TypeKey = "Type";
-    constexpr std::string_view MetaDataKey = "MetaData";
-    constexpr std::string_view AdditionalDataKey = "AdditionalData";
-} // namespace
-
 namespace openspace::properties {
 
 const char* Property::ViewOptions::Color = "Color";
