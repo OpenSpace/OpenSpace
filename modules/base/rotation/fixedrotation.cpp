@@ -37,6 +37,8 @@
 #include <variant>
 
 namespace {
+    constexpr std::string_view _loggerCat = "FixedRotation";
+
     constexpr openspace::properties::Property::PropertyInfo EnableInfo = {
         "Enable",
         "Enabled",
@@ -243,7 +245,8 @@ documentation::Documentation FixedRotation::Documentation() {
 }
 
 FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
-    : _enabled(EnableInfo, true)
+    : Rotation(dictionary)
+    , _enabled(EnableInfo, true)
     , _xAxis{
         properties::OptionProperty(
             XAxisTypeInfo,
@@ -543,8 +546,7 @@ glm::dmat3 FixedRotation::matrix(const UpdateData&) const {
         glm::dot(y, z) > 1.f - Epsilon ||
         glm::dot(x, z) > 1.f - Epsilon) [[unlikely]]
     {
-        LWARNINGC(
-            "FixedRotation",
+        LWARNING(
             std::format(
                 "Near-collinear vectors detected: "
                 "x ({}, {}, {}) y ({}, {}, {}) z ({}, {}, {})",
@@ -564,7 +566,7 @@ glm::dmat3 FixedRotation::matrix(const UpdateData&) const {
 glm::vec3 FixedRotation::xAxis() const {
     switch (_xAxis.type) {
         case Axis::Type::Unspecified:
-            LWARNINGC("FixedRotation", "Unspecified axis type for X axis");
+            LWARNING("Unspecified axis type for X axis");
             return glm::vec3(1.f, 0.f, 0.f);
         case Axis::Type::Object:
             if (_xAxis.node && _attachedNode) {
@@ -579,17 +581,19 @@ glm::vec3 FixedRotation::xAxis() const {
             }
             else {
                 if (_xAxis.node) {
-                    LWARNINGC("FixedRotation", "Missing attachment node");
+                    LWARNING("Missing attachment node");
                     return glm::vec3(1.f, 0.f, 0.f);
                 }
                 else {
-                    LWARNINGC("FixedRotation", "Missing node for X axis");
+                    LWARNING(std::format(
+                        "Missing node '{}' for X axis", _xAxis.object.value()
+                    ));
                     return glm::vec3(1.f, 0.f, 0.f);
                 }
             }
         case Axis::Type::Vector:
             if (_xAxis.vector.value() == glm::vec3(0.f)) {
-                LWARNINGC("FixedRotation", "Zero vector detected for X Axis");
+                LWARNING("Zero vector detected for X Axis");
                 return glm::vec3(1.f, 0.f, 0.f);
             }
             else {
@@ -597,7 +601,7 @@ glm::vec3 FixedRotation::xAxis() const {
             }
         case Axis::Type::OrthogonalVector:
             if (_xAxis.vector.value() == glm::vec3(0.f)) {
-                LWARNINGC("FixedRotation", "Zero vector detected for X Axis");
+                LWARNING("Zero vector detected for X Axis");
                 return glm::vec3(1.f, 0.f, 0.f);
             }
             else {
@@ -622,7 +626,7 @@ glm::vec3 FixedRotation::xAxis() const {
 glm::vec3 FixedRotation::yAxis() const {
     switch (_yAxis.type) {
         case Axis::Type::Unspecified:
-            LWARNINGC("FixedRotation", "Unspecified axis type for Y axis");
+            LWARNING("Unspecified axis type for Y axis");
             return glm::vec3(0.f, 1.f, 0.f);
         case Axis::Type::Object:
             if (_yAxis.node && _attachedNode) {
@@ -635,17 +639,19 @@ glm::vec3 FixedRotation::yAxis() const {
             }
             else {
                 if (_yAxis.node) {
-                    LWARNINGC("FixedRotation", "Missing attachment node");
+                    LWARNING("Missing attachment node");
                     return glm::vec3(0.f, 1.f, 0.f);
                 }
                 else {
-                    LWARNINGC("FixedRotation", "Missing node for Y axis");
+                    LWARNING(std::format(
+                        "Missing node '{}' for Y axis", _yAxis.object.value()
+                    ));
                     return glm::vec3(0.f, 1.f, 0.f);
                 }
             }
         case Axis::Type::Vector:
             if (_yAxis.vector.value() == glm::vec3(0.f)) {
-                LWARNINGC("FixedRotation", "Zero vector detected for Y Axis");
+                LWARNING("Zero vector detected for Y Axis");
                 return glm::vec3(0.f, 1.f, 0.f);
             }
             else {
@@ -653,7 +659,7 @@ glm::vec3 FixedRotation::yAxis() const {
             }
         case Axis::Type::OrthogonalVector:
             if (_yAxis.vector.value() == glm::vec3(0.f)) {
-                LWARNINGC("FixedRotation", "Zero vector detected for Y Axis");
+                LWARNING("Zero vector detected for Y Axis");
                 return glm::vec3(0.f, 1.f, 0.f);
             }
             else {
@@ -678,7 +684,7 @@ glm::vec3 FixedRotation::yAxis() const {
 glm::vec3 FixedRotation::zAxis() const {
     switch (_zAxis.type) {
         case Axis::Type::Unspecified:
-            LWARNINGC("FixedRotation", "Unspecified axis type for Z axis");
+            LWARNING("Unspecified axis type for Z axis");
             return glm::vec3(0.f, 0.f, 1.f);
         case Axis::Type::Object:
             if (_zAxis.node && _attachedNode) {
@@ -689,17 +695,19 @@ glm::vec3 FixedRotation::zAxis() const {
             }
             else {
                 if (_zAxis.node) {
-                    LWARNINGC("FixedRotation", "Missing attachment node");
+                    LWARNING("Missing attachment node");
                     return glm::vec3(0.f, 0.f, 1.f);
                 }
                 else {
-                    LWARNINGC("FixedRotation", "Missing node for Z axis");
+                    LWARNING(std::format(
+                        "Missing node '{}' for Z axis", _zAxis.object.value()
+                    ));
                     return glm::vec3(0.f, 0.f, 1.f);
                 }
             }
         case Axis::Type::Vector:
             if (_zAxis.vector.value() == glm::vec3(0.f)) {
-                LWARNINGC("FixedRotation", "Zero vector detected for Z Axis");
+                LWARNING("Zero vector detected for Z Axis");
                 return glm::vec3(0.f, 0.f, 1.f);
             }
             else {
@@ -707,7 +715,7 @@ glm::vec3 FixedRotation::zAxis() const {
             }
         case Axis::Type::OrthogonalVector:
             if (_zAxis.vector.value() == glm::vec3(0.f)) {
-                LWARNINGC("FixedRotation", "Zero vector detected for Z Axis");
+                LWARNING("Zero vector detected for Z Axis");
                 return glm::vec3(0.f, 0.f, 1.f);
             }
             else {

@@ -230,14 +230,13 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&) {
     // Change GL state:
 #ifndef __APPLE__
     glLineWidth(_lineWidth);
-#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
+#else // ^^^^ !__APPLE__ // __APPLE__ vvvv
     glLineWidth(1.f);
 #endif // __APPLE__
 
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
-    glDepthMask(false);
 
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
@@ -275,6 +274,11 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&) {
         );
         _labels->render(data, modelViewProjectionTransform, orthoRight, orthoUp);
     }
+
+    // Reset
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetLineState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableSphericalGrid::update(const UpdateData&) {

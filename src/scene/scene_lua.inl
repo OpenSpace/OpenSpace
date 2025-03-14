@@ -1047,7 +1047,7 @@ void createCustomProperty<openspace::properties::TriggerProperty>(
     TriggerProperty* p = new TriggerProperty(info);
     if (onChange.has_value() && !onChange->empty()) {
         p->onChange(
-            [p, script = *onChange]() {
+            [script = *onChange]() {
                 using namespace ghoul::lua;
                 LuaState s;
                 openspace::global::scriptEngine->initializeLuaState(s);

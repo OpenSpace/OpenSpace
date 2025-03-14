@@ -33,8 +33,6 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr std::string_view _loggerCat = "RenderableToyVolume";
-
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",

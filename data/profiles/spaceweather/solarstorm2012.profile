@@ -4,8 +4,7 @@
     "base_keybindings",
     "dashboard/default_dashboard",
     "scene/solarsystem/heliosphere/2012/sun_earth_2012_fieldlines",
-    "scene/solarsystem/planets/earth/magnetosphere/magnetosphere",
-    "scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere"
+    "scene/solarsystem/planets/earth/magnetosphere/magnetosphere"
   ],
   "camera": {
     "altitude": 294000000000.0,

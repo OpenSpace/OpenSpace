@@ -86,9 +86,10 @@ DistanceUnits = {
     DistanceUnit::NauticalMile
 };
 
-// Note that the syntax here is required when initializing constexpr std::arrays with structs
+// Note that the syntax here is required when initializing constexpr std::arrays with
+// structs
 constexpr std::array<DistanceUnitName, static_cast<int>(DistanceUnit::NauticalMile) + 1>
-DistanceUnitNames{ {
+DistanceUnitNames { {
     { "Nanometer", "Nanometers", "nm" },
     { "Micrometer", "Micrometers", "um" },
     { "Millimeter", "Millimeters", "mm" },
@@ -114,7 +115,7 @@ DistanceUnitNames{ {
     { "Furlong", "Furlongs", "fur" },
     { "Mile", "Miles", "mi" },
     { "League", "Leagues", "league" },
-    { "Nautical Mile", "Nautical Miles", "nm" }
+    { "Nautical Mile", "Nautical Miles", "NM" }
 }};
 
 constexpr bool isValidDistanceUnitName(std::string_view name) {

@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/util/timeconstants.h>
 #include <openspace/util/timeconversion.h>
 #include <ghoul/lua/lua_helper.h>
 
@@ -481,7 +482,7 @@ namespace {
  * \return The number of seconds in a day
  */
 [[codegen::luawrap]] double secondsPerDay() {
-    return openspace::SecondsPerDay;
+    return openspace::timeconstants::SecondsPerDay;
 }
 
 /**
@@ -491,7 +492,7 @@ namespace {
  */
 [[codegen::luawrap]] double secondsPerYear() {
     // We could use a call to SPICE here, but the value is a constant anyway
-    return openspace::SecondsPerYear;
+    return openspace::timeconstants::SecondsPerYear;
 }
 
 #include "time_lua_codegen.cpp"

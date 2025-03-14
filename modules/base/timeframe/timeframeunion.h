@@ -37,7 +37,7 @@ class TimeFrameUnion : public TimeFrame {
 public:
     explicit TimeFrameUnion(const ghoul::Dictionary& dictionary);
 
-    bool isActive(const Time&) const override;
+    void update(const Time&) override;
 
     static documentation::Documentation Documentation();
 

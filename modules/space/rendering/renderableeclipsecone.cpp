@@ -290,7 +290,7 @@ void RenderableEclipseCone::deinitializeGL() {
 }
 
 bool RenderableEclipseCone::isReady() const {
-    return _shader;
+    return _shader != nullptr;
 }
 
 void RenderableEclipseCone::render(const RenderData& data, RendererTasks&) {

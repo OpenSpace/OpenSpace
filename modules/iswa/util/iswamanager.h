@@ -116,7 +116,7 @@ private:
     void fillCygnetInfo(std::string jsonString);
     void registerGroup(std::string groupName, std::string type);
 
-    std::map<int, std::string> _type;
+    std::map<int, std::string> _cygnetType;
     std::map<int, std::string> _geom;
 
     std::shared_ptr<ccmc::Kameleon> _kameleon;

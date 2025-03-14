@@ -35,7 +35,6 @@ namespace documentation { struct Documentation; }
 
 class StaticScale : public Scale {
 public:
-    StaticScale();
     explicit StaticScale(const ghoul::Dictionary& dictionary);
 
     glm::dvec3 scaleValue(const UpdateData& data) const override;

@@ -237,11 +237,6 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
 void renderListProperty(const std::string& name, const std::string& fullIdentifier,
                         const std::string& stringValue)
 {
-    ghoul_assert(
-        stringValue.size() > 2,
-        "an empty list should have the string value '[]'"
-    );
-
     // Remove brackets from the string value
     const std::string value = stringValue.substr(1, stringValue.size() - 2);
 
@@ -368,8 +363,8 @@ void renderIntProperty(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     IntProperty::ValueType value = *p;
-    const int min = p->minValue();
-    const int max = p->maxValue();
+    const int min = std::max(p->minValue(), std::numeric_limits<int>::lowest() + 1);
+    const int max = std::min(p->maxValue(), std::numeric_limits<int>::max() - 1);
 
     const bool changed = ImGui::SliderInt(name.c_str(), &value, min, max);
     if (showTooltip) {
@@ -392,8 +387,14 @@ void renderIVec2Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     IVec2Property::ValueType value = *p;
-    const int min = glm::compMin(p->minValue());
-    const int max = glm::compMax(p->maxValue());
+    const int min = std::max(
+        glm::compMin(p->minValue()),
+        std::numeric_limits<int>::lowest() / 2
+    );
+    const int max = std::min(
+        glm::compMax(p->maxValue()),
+        std::numeric_limits<int>::max() / 2
+    );
     const bool changed = ImGui::SliderInt2(name.c_str(), &value.x, min, max);
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
@@ -415,8 +416,14 @@ void renderIVec3Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     IVec3Property::ValueType value = *p;
-    const int min = glm::compMin(p->minValue());
-    const int max = glm::compMax(p->maxValue());
+    const int min = std::max(
+        glm::compMin(p->minValue()),
+        std::numeric_limits<int>::lowest() / 2
+    );
+    const int max = std::min(
+        glm::compMax(p->maxValue()),
+        std::numeric_limits<int>::max() / 2
+    );
     const bool changed = ImGui::SliderInt3(name.c_str(), &value.x, min, max);
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
@@ -437,8 +444,14 @@ void renderIVec4Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     IVec4Property::ValueType value = *p;
-    const int min = glm::compMin(p->minValue());
-    const int max = glm::compMax(p->maxValue());
+    const int min = std::max(
+        glm::compMin(p->minValue()),
+        std::numeric_limits<int>::lowest() / 2
+    );
+    const int max = std::min(
+        glm::compMax(p->maxValue()),
+        std::numeric_limits<int>::max() / 2
+    );
     const bool changed = ImGui::SliderInt4(name.c_str(), &value.x, min, max);
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
@@ -459,8 +472,8 @@ void renderFloatProperty(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     FloatProperty::ValueType value = *p;
-    const float min = p->minValue();
-    const float max = p->maxValue();
+    const float min = std::max(p->minValue(), std::numeric_limits<float>::lowest() / 2.f);
+    const float max = std::min(p->maxValue(), std::numeric_limits<float>::max() / 2.f);
     const bool changed = ImGui::SliderFloat(
         name.c_str(),
         &value,
@@ -489,8 +502,14 @@ void renderVec2Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     Vec2Property::ValueType value = *p;
-    const float min = glm::compMin(p->minValue());
-    const float max = glm::compMax(p->maxValue());
+    const float min = std::max(
+        glm::compMin(p->minValue()),
+        std::numeric_limits<float>::lowest() / 2.f
+    );
+    const float max = std::min(
+        glm::compMax(p->maxValue()),
+        std::numeric_limits<float>::max() / 2.f
+    );
     const bool changed = ImGui::SliderFloat2(
         name.c_str(),
         &value.x,
@@ -519,8 +538,14 @@ void renderVec3Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     Vec3Property::ValueType value = *p;
-    const float min = glm::compMin(p->minValue());
-    const float max = glm::compMax(p->maxValue());
+    const float min = std::max(
+        glm::compMin(p->minValue()),
+        std::numeric_limits<float>::lowest() / 2.f
+    );
+    const float max = std::min(
+        glm::compMax(p->maxValue()),
+        std::numeric_limits<float>::max() / 2.f
+    );
     bool changed = false;
     if (prop->viewOption(Property::ViewOptions::Color)) {
         changed = ImGui::ColorEdit3(name.c_str(), glm::value_ptr(value));
@@ -555,8 +580,14 @@ void renderVec4Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     Vec4Property::ValueType value = *p;
-    const float min = glm::compMin(p->minValue());
-    const float max = glm::compMax(p->maxValue());
+    const float min = std::max(
+        glm::compMin(p->minValue()),
+        std::numeric_limits<float>::lowest() / 2.f
+    );
+    const float max = std::min(
+        glm::compMax(p->maxValue()),
+        std::numeric_limits<float>::max() / 2.f
+    );
     bool changed = false;
     if (prop->viewOption(Property::ViewOptions::Color)) {
         changed = ImGui::ColorEdit4(name.c_str(), glm::value_ptr(value));
@@ -591,8 +622,14 @@ void renderDVec2Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     glm::vec2 value = glm::dvec2(*p);
-    const float min = static_cast<float>(glm::compMin(p->minValue()));
-    const float max = static_cast<float>(glm::compMax(p->maxValue()));
+    const float min = std::max(
+        static_cast<float>(glm::compMin(p->minValue())),
+        std::numeric_limits<float>::lowest() / 2.f
+    );
+    const float max = std::min(
+        static_cast<float>(glm::compMax(p->maxValue())),
+        std::numeric_limits<float>::max() / 2.f
+    );
     const bool changed = ImGui::SliderFloat2(
         name.c_str(),
         &value.x,
@@ -621,8 +658,14 @@ void renderDVec3Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     glm::vec3 value = glm::dvec3(*p);
-    const float min = static_cast<float>(glm::compMin(p->minValue()));
-    const float max = static_cast<float>(glm::compMax(p->maxValue()));
+    const float min = std::max(
+        static_cast<float>(glm::compMin(p->minValue())),
+        std::numeric_limits<float>::lowest() / 2.f
+    );
+    const float max = std::min(
+        static_cast<float>(glm::compMax(p->maxValue())),
+        std::numeric_limits<float>::max() / 2.f
+    );
     const bool changed = ImGui::SliderFloat3(
         name.c_str(),
         glm::value_ptr(value),
@@ -651,8 +694,14 @@ void renderDVec4Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     glm::vec4 value = glm::dvec4(*p);
-    const float min = static_cast<float>(glm::compMin(p->minValue()));
-    const float max = static_cast<float>(glm::compMax(p->maxValue()));
+    const float min = std::max(
+        static_cast<float>(glm::compMin(p->minValue())),
+        std::numeric_limits<float>::lowest() / 2.f
+    );
+    const float max = std::min(
+        static_cast<float>(glm::compMax(p->maxValue())),
+        std::numeric_limits<float>::max() / 2.f
+    );
     const bool changed = ImGui::SliderFloat4(
         name.c_str(),
         &value.x,
@@ -687,13 +736,19 @@ void renderDMat2Property(Property* prop, const std::string& ownerName,
         glm::compMin(p->minValue()[0]),
         glm::compMin(p->minValue()[1])
     );
-    const float min = static_cast<float>(glm::compMin(minValues));
+    const float min = std::max(
+        static_cast<float>(glm::compMin(minValues)),
+        std::numeric_limits<float>::lowest() / 2.f
+    );
 
     const glm::dvec2 maxValues = glm::dvec2(
         glm::compMax(p->maxValue()[0]),
         glm::compMax(p->maxValue()[1])
     );
-    const float max = static_cast<float>(glm::compMax(maxValues));
+    const float max = std::min(
+        static_cast<float>(glm::compMax(maxValues)),
+        std::numeric_limits<float>::max() / 2.f
+    );
 
     bool changed = false;
     changed |= ImGui::SliderFloat2(
@@ -740,14 +795,20 @@ void renderDMat3Property(Property* prop, const std::string& ownerName,
         glm::compMin(p->minValue()[1]),
         glm::compMin(p->minValue()[2])
     );
-    const float min = static_cast<float>(glm::compMin(minValues));
+    const float min = std::max(
+        static_cast<float>(glm::compMin(minValues)),
+        std::numeric_limits<float>::lowest() / 2.f
+    );
 
     const glm::dvec3 maxValues = glm::dvec3(
         glm::compMax(p->maxValue()[0]),
         glm::compMax(p->maxValue()[1]),
         glm::compMax(p->maxValue()[2])
     );
-    const float max = static_cast<float>(glm::compMax(maxValues));
+    const float max = std::min(
+        static_cast<float>(glm::compMax(maxValues)),
+        std::numeric_limits<float>::max() / 2.f
+    );
 
     bool changed = false;
     changed |= ImGui::SliderFloat3(
@@ -803,7 +864,10 @@ void renderDMat4Property(Property* prop, const std::string& ownerName,
         glm::compMin(p->minValue()[2]),
         glm::compMin(p->minValue()[3])
     );
-    const float min = static_cast<float>(glm::compMin(minValues));
+    const float min = std::max(
+        static_cast<float>(glm::compMin(minValues)),
+        std::numeric_limits<float>::lowest() / 2.f
+    );
 
     const glm::dvec4 maxValues = glm::dvec4(
         glm::compMax(p->maxValue()[0]),
@@ -811,7 +875,10 @@ void renderDMat4Property(Property* prop, const std::string& ownerName,
         glm::compMax(p->maxValue()[2]),
         glm::compMax(p->maxValue()[3])
     );
-    const float max = static_cast<float>(glm::compMax(maxValues));
+    const float max = std::min(
+        static_cast<float>(glm::compMax(maxValues)),
+        std::numeric_limits<float>::max() / 2.f
+    );
 
     bool changed = false;
     changed |= ImGui::SliderFloat4(

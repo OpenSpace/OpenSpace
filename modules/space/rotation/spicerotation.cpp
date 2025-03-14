@@ -48,19 +48,20 @@ namespace {
         openspace::properties::Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TimeFrameInfo = {
-        "TimeFrame",
-        "Time Frame",
-        "The time frame in which the spice kernels are valid.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     constexpr openspace::properties::Property::PropertyInfo FixedDateInfo = {
         "FixedDate",
         "Fixed Date",
         "A time to lock the rotation to. Setting this to an empty string will "
         "unlock the time and return to rotation based on current simulation time.",
         openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TimeOffsetInfo = {
+        "TimeOffset",
+        "Time Offset",
+        "A time offset, in seconds, added to the simulation time (or Fixed Date if any), "
+        "at which to compute the rotation.",
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(SpiceRotation)]] Parameters {
@@ -73,13 +74,12 @@ namespace {
         // specified, a reference frame of 'GALACTIC' is used instead
         std::optional<std::string> destinationFrame;
 
-        // [[codegen::verbatim(TimeFrameInfo.description)]]
-        std::optional<ghoul::Dictionary> timeFrame
-            [[codegen::reference("core_time_frame")]];
-
         // [[codegen::verbatim(FixedDateInfo.description)]]
         std::optional<std::string> fixedDate
             [[codegen::annotation("A time to lock the rotation to")]];
+
+        // [[codegen::verbatim(TimeOffsetInfo.description)]]
+        std::optional<float> timeOffset;
     };
 #include "spicerotation_codegen.cpp"
 } // namespace
@@ -91,9 +91,11 @@ documentation::Documentation SpiceRotation::Documentation() {
 }
 
 SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
-    : _sourceFrame(SourceInfo)
+    : Rotation(dictionary)
+    , _sourceFrame(SourceInfo)
     , _destinationFrame(DestinationInfo)
     , _fixedDate(FixedDateInfo)
+    , _timeOffset(TimeOffsetInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -111,10 +113,8 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     _fixedDate = p.fixedDate.value_or(_fixedDate);
     addProperty(_fixedDate);
 
-    if (p.timeFrame.has_value()) {
-        _timeFrame = TimeFrame::createFromDictionary(*p.timeFrame);
-        addPropertySubOwner(_timeFrame.get());
-    }
+    _timeOffset = p.timeOffset.value_or(_timeOffset);
+    addProperty(_timeOffset);
 
     addProperty(_sourceFrame);
     addProperty(_destinationFrame);
@@ -124,17 +124,10 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
 }
 
 glm::dmat3 SpiceRotation::matrix(const UpdateData& data) const {
-    if (_timeFrame && !_timeFrame->isActive(data.time)) {
-        return glm::dmat3(1.0);
-    }
-    double time = data.time.j2000Seconds();
-    if (_fixedEphemerisTime.has_value()) {
-        time = *_fixedEphemerisTime;
-    }
     return SpiceManager::ref().positionTransformMatrix(
         _sourceFrame,
         _destinationFrame,
-        time
+        _fixedEphemerisTime.value_or(data.time.j2000Seconds()) + _timeOffset
     );
 }
 

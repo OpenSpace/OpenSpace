@@ -30,6 +30,7 @@
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -100,7 +101,7 @@ private:
 
 protected:
     properties::BoolProperty _performProjection;
-    properties::BoolProperty _clearAllProjections;
+    properties::TriggerProperty _clearAllProjections;
     properties::FloatProperty _projectionFading;
 
     properties::IVec2Property _textureSize;
@@ -125,7 +126,8 @@ protected:
     GLuint _depthFboID = 0;
 
     GLint _defaultFBO = 0;
-    GLint _viewport[4] = { 0, 0, 0, 0};
+    GLint _viewport[4] = { 0, 0, 0, 0 };
+    bool _needsClearProjection = false;
 
     struct {
         bool isEnabled = false;

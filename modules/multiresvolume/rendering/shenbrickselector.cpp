@@ -59,7 +59,7 @@ void ShenBrickSelector::traverseOT(int timestep, unsigned int brickIndex,
     int numTimeSteps = _tsp->header().numTimesteps;
     for (unsigned int i = 0; i < 8; i++) {
         unsigned int child = firstChild + i;
-        BrickCover cover = coveredBricks.split(i % 2, (i/2) % 2, (i/4));
+        BrickCover cover = coveredBricks.split(i % 2 != 0, (i/2) % 2 != 0, (i/4) != 0);
         selectBricks(timestep, child, child, 0, numTimeSteps, cover, bricks);
     }
 }

@@ -178,7 +178,7 @@ void Browser::update() {
 }
 
 bool Browser::isReady() const {
-    return _texture.get();
+    return _texture != nullptr;
 }
 
 // Updates the browser size to match the size of the texture

@@ -389,6 +389,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/util/task.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/taskloader.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/time.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/util/timeconstants.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/timeconversion.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/timeline.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/timeline.inl

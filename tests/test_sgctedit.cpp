@@ -37,13 +37,6 @@
 using namespace openspace;
 
 namespace {
-    std::string stringify(const std::filesystem::path& filename) {
-        const std::ifstream myfile = std::ifstream(filename);
-        std::stringstream buffer;
-        buffer << myfile.rdbuf();
-        return buffer.str();
-    }
-
     void validate(std::string_view cfgString) {
         const std::filesystem::path schemaDir = absPath("${TESTDIR}/../config/schema");
         const std::filesystem::path schema = schemaDir / "sgcteditor.schema.json";

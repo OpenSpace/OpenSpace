@@ -40,6 +40,11 @@ namespace {
         // of scaling depend on the configuration of the application and can be written to
         // disk on application startup into the FactoryDocumentation
         std::string type [[codegen::annotation("Must name a valid Scale type")]];
+
+        // The time frame in which this `Scale` is applied. If the in-game time is outside
+        // this range, no scaling will be applied.
+        std::optional<ghoul::Dictionary> timeFrame
+            [[codegen::reference("core_time_frame")]];
     };
 #include "scale_codegen.cpp"
 } // namespace
@@ -68,7 +73,16 @@ ghoul::mm_unique_ptr<Scale> Scale::createFromDictionary(
     return ghoul::mm_unique_ptr<Scale>(result);
 }
 
-Scale::Scale() : properties::PropertyOwner({ "Scale" }) {}
+Scale::Scale(const ghoul::Dictionary& dictionary)
+    : properties::PropertyOwner({ "Scale" })
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    if (p.timeFrame.has_value()) {
+        _timeFrame = TimeFrame::createFromDictionary(*p.timeFrame);
+        addPropertySubOwner(_timeFrame.get());
+    }
+}
 
 void Scale::requireUpdate() {
     _needsUpdate = true;
@@ -88,9 +102,19 @@ void Scale::update(const UpdateData& data) {
     if (!_needsUpdate && data.time.j2000Seconds() == _cachedTime) {
         return;
     }
-    _cachedScale = scaleValue(data);
-    _cachedTime = data.time.j2000Seconds();
-    _needsUpdate = false;
+
+    if (_timeFrame) {
+        _timeFrame->update(data.time);
+    }
+
+    if (_timeFrame && !_timeFrame->isActive()) {
+        _cachedScale = glm::dvec3(1.0);
+    }
+    else {
+        _cachedScale = scaleValue(data);
+        _cachedTime = data.time.j2000Seconds();
+        _needsUpdate = false;
+    }
 }
 
 } // namespace openspace

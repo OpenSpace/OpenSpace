@@ -38,7 +38,6 @@
 #include <optional>
 
 namespace {
-    constexpr std::string_view KeyLazyLoading = "LazyLoading";
     constexpr std::string_view _loggerCat = "RenderablePlaneTimeVaryingImage";
 
     constexpr openspace::properties::Property::PropertyInfo SourceFolderInfo = {
