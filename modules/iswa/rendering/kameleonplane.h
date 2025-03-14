@@ -27,7 +27,7 @@
 
 #include <modules/iswa/rendering/datacygnet.h>
 
-#include <openspace/properties/selectionproperty.h>
+#include <openspace/properties/misc/selectionproperty.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {

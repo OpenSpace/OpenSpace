@@ -22,32 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/triggerproperty.h>
+#ifndef __OPENSPACE_CORE___LISTPROPERTY___H__
+#define __OPENSPACE_CORE___LISTPROPERTY___H__
+
+#include <openspace/properties/templateproperty.h>
+#include <vector>
 
 namespace openspace::properties {
 
-TriggerProperty::TriggerProperty(PropertyInfo info)
-    : Property(std::move(info))
-{}
+template <typename T>
+class ListProperty : public TemplateProperty<std::vector<T>> {
+public:
+    ListProperty(Property::PropertyInfo info, std::vector<T> values);
 
-std::string_view TriggerProperty::className() const {
-    return "TriggerProperty";
-}
-
-void TriggerProperty::setLuaValue(lua_State*) {
-    notifyChangeListeners();
-}
-
-ghoul::lua::LuaTypes TriggerProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::Nil;
-}
-
-void TriggerProperty::trigger() {
-    notifyChangeListeners();
-}
-
-std::string TriggerProperty::jsonValue() const {
-    return "true";
-}
+    virtual ~ListProperty() override = 0;
+};
 
 } // namespace openspace::properties
+
+#include "openspace/properties/misc/listproperty.inl"
+
+#endif // __OPENSPACE_CORE___LISTPROPERTY___H__

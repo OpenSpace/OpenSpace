@@ -27,7 +27,7 @@
 
 #include <openspace/scene/translation.h>
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <ghoul/lua/luastate.h>
 #include <memory>
 

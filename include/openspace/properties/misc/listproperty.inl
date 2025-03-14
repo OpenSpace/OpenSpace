@@ -22,31 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___STRINGPROPERTY___H__
-#define __OPENSPACE_CORE___STRINGPROPERTY___H__
-
-#include <openspace/properties/templateproperty.h>
-
 namespace openspace::properties {
 
-class StringProperty : public TemplateProperty<std::string> {
-public:
-    StringProperty(Property::PropertyInfo info, std::string value = "");
+template <typename T>
+ListProperty<T>::ListProperty(Property::PropertyInfo info, std::vector<T> values)
+    : TemplateProperty<std::vector<T>>(std::move(info), std::move(values))
+{}
 
-    std::string_view className() const override;
-    ghoul::lua::LuaTypes typeLua() const override;
-
-    using TemplateProperty<std::string>::operator=;
-
-    operator std::string_view();
-    operator std::string_view() const;
-
-protected:
-    std::string fromLuaConversion(lua_State* state) const override;
-    void toLuaConversion(lua_State* state) const override;
-    std::string toStringConversion() const override;
-};
+template <typename T>
+ListProperty<T>::~ListProperty() {}
 
 } // namespace openspace::properties
 
-#endif // __OPENSPACE_CORE___STRINGPROPERTY___H__

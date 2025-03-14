@@ -24,7 +24,6 @@
 
 #include <modules/touch/include/touchinteraction.h>
 
-#include <modules/touch/include/directinputsolver.h>
 #include <modules/touch/touchmodule.h>
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
@@ -33,27 +32,14 @@
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/query/query.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/keys.h>
-#include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/invariants.h>
-#include <glm/gtx/quaternion.hpp>
-#include <cmath>
-#include <functional>
-#include <fstream>
-#include <numeric>
 
 #ifdef WIN32
 #pragma warning (push)
 #pragma warning (disable : 4310) // cast truncates constant value
 #endif // WIN32
 
-#include <glm/ext.hpp>
+#include <glm/gtx/intersect.hpp>
 
 #ifdef WIN32
 #pragma warning (pop)

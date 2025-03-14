@@ -22,7 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/scene/scene.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/matrix/dmat2property.h>
@@ -53,6 +55,7 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <algorithm>
 #include <cctype>
@@ -60,13 +63,13 @@
 namespace {
 
 template <class T>
-openspace::properties::PropertyOwner* findPropertyOwnerWithMatchingGroupTag(T* prop,
+const openspace::properties::PropertyOwner* findPropertyOwnerWithMatchingGroupTag(T* prop,
                                                             const std::string& tagToMatch)
 {
     using namespace openspace;
 
-    properties::PropertyOwner* tagMatchOwner = nullptr;
-    properties::PropertyOwner* owner = prop->owner();
+    const properties::PropertyOwner* tagMatchOwner = nullptr;
+    const properties::PropertyOwner* owner = prop->owner();
 
     if (owner) {
         const std::vector<std::string>& tags = owner->tags();
@@ -161,7 +164,7 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
 
                 // Check tag
                 if (isGroupMode) {
-                    properties::PropertyOwner* matchingTaggedOwner =
+                    const properties::PropertyOwner* matchingTaggedOwner =
                         findPropertyOwnerWithMatchingGroupTag(prop, groupName);
                     if (!matchingTaggedOwner) {
                         continue;
@@ -177,7 +180,7 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
             if (nodePos != std::string::npos) {
                 // Check tag
                 if (isGroupMode) {
-                    properties::PropertyOwner* matchingTaggedOwner =
+                    const properties::PropertyOwner* matchingTaggedOwner =
                         findPropertyOwnerWithMatchingGroupTag(prop, groupName);
                     if (!matchingTaggedOwner) {
                         continue;
@@ -564,7 +567,7 @@ namespace {
 
                 // Check tag
                 if (!groupName.empty()) {
-                    properties::PropertyOwner* matchingTaggedOwner =
+                    const properties::PropertyOwner* matchingTaggedOwner =
                         findPropertyOwnerWithMatchingGroupTag(prop, groupName);
                     if (!matchingTaggedOwner) {
                         continue;
@@ -580,7 +583,7 @@ namespace {
             if (nodePos != std::string::npos) {
                 // Check tag
                 if (!groupName.empty()) {
-                    properties::PropertyOwner* matchingTaggedOwner =
+                    const properties::PropertyOwner* matchingTaggedOwner =
                         findPropertyOwnerWithMatchingGroupTag(prop, groupName);
                     if (!matchingTaggedOwner) {
                         continue;

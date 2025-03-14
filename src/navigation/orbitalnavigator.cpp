@@ -36,6 +36,7 @@
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/easing.h>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>

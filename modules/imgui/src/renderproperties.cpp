@@ -26,15 +26,15 @@
 
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/selectionproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/list/doublelistproperty.h>
 #include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/matrix/dmat2property.h>
 #include <openspace/properties/matrix/dmat3property.h>
 #include <openspace/properties/matrix/dmat4property.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/selectionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
@@ -106,10 +106,7 @@ void renderOptionProperty(Property* prop, const std::string& ownerName,
     OptionProperty* p = static_cast<OptionProperty*>(prop);
     const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
-    bool isReadOnly = false;
-    if (p->metaData().hasValue<bool>("isReadOnly")) {
-        isReadOnly = p->metaData().value<bool>("isReadOnly");
-    }
+    bool isReadOnly = p->isReadOnly();
 
     int value = *p;
     const std::vector<OptionProperty::Option>& options = p->options();

@@ -22,46 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/stringproperty.h>
+#ifndef __OPENSPACE_CORE___STRINGPROPERTY___H__
+#define __OPENSPACE_CORE___STRINGPROPERTY___H__
 
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/lua/lua_helper.h>
-#include <openspace/json.h>
+#include <openspace/properties/templateproperty.h>
 
 namespace openspace::properties {
 
-StringProperty::StringProperty(Property::PropertyInfo info, std::string value)
-    : TemplateProperty<std::string>(std::move(info), std::move(value))
-{}
+class StringProperty : public TemplateProperty<std::string> {
+public:
+    StringProperty(Property::PropertyInfo info, std::string value = "");
 
-std::string_view StringProperty::className() const {
-    return "StringProperty";
-}
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
-ghoul::lua::LuaTypes StringProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::String;
-}
+    using TemplateProperty<std::string>::operator=;
+    using TemplateProperty<std::string>::value;
 
-std::string StringProperty::fromLuaConversion(lua_State* state) const {
-    return ghoul::lua::value<std::string>(state);
-}
+    void getLuaValue(lua_State* state) const override final;
 
-void StringProperty::toLuaConversion(lua_State* state) const {
-    ghoul::lua::push(state, _value);
-}
+    std::string stringValue() const override final;
+    operator std::string_view();
+    operator std::string_view() const;
 
-std::string StringProperty::toStringConversion() const {
-    nlohmann::json json;
-    nlohmann::to_json(json, _value);
-    return json.dump();
-}
-
-StringProperty::operator std::string_view() {
-    return _value;
-}
-
-StringProperty::operator std::string_view() const {
-    return _value;
-}
+private:
+    std::string toValue(lua_State* state) const override final;
+};
 
 } // namespace openspace::properties
+
+#endif // __OPENSPACE_CORE___STRINGPROPERTY___H__

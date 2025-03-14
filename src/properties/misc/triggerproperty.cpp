@@ -22,28 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___LISTPROPERTY___H__
-#define __OPENSPACE_CORE___LISTPROPERTY___H__
-
-#include <openspace/properties/templateproperty.h>
-#include <vector>
+#include <openspace/properties/misc/triggerproperty.h>
 
 namespace openspace::properties {
 
-template <typename T>
-class ListProperty : public TemplateProperty<std::vector<T>> {
-public:
-    ListProperty(Property::PropertyInfo info, std::vector<T> values);
+TriggerProperty::TriggerProperty(PropertyInfo info)
+    : Property(std::move(info))
+{}
 
-    virtual ~ListProperty() override = 0;
+std::string_view TriggerProperty::className() const {
+    return "TriggerProperty";
+}
 
-protected:
-    std::vector<T> fromLuaConversion(lua_State* state) const override;
-    void toLuaConversion(lua_State* state) const override;
-};
+void TriggerProperty::getLuaValue(lua_State*) const {}
+
+void TriggerProperty::setLuaValue(lua_State*) {
+    notifyChangeListeners();
+}
+
+ghoul::lua::LuaTypes TriggerProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Nil;
+}
+
+void TriggerProperty::trigger() {
+    notifyChangeListeners();
+}
+
+std::string TriggerProperty::jsonValue() const {
+    return "true";
+}
 
 } // namespace openspace::properties
-
-#include "openspace/properties/listproperty.inl"
-
-#endif // __OPENSPACE_CORE___LISTPROPERTY___H__

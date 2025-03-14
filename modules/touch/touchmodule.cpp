@@ -32,9 +32,8 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
-#include <algorithm>
+#include <ghoul/logging/logmanager.h>
 
 using namespace TUIO;
 

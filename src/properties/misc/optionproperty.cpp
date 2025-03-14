@@ -23,10 +23,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
 
 #include <openspace/util/json_helper.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/lua_helper.h>
+#include <limits>
 
 namespace {
     constexpr std::string_view _loggerCat = "OptionProperty";
@@ -37,12 +39,24 @@ namespace openspace::properties {
 const std::string OptionProperty::OptionsKey = "Options";
 
 OptionProperty::OptionProperty(PropertyInfo info)
-    : IntProperty(std::move(info))
+    : NumericalProperty<int>(
+        std::move(info),
+        0,
+        std::numeric_limits<int>::lowest(),
+        std::numeric_limits<int>::max(),
+        1
+    )
     , _displayType(DisplayType::Radio)
 {}
 
 OptionProperty::OptionProperty(PropertyInfo info, DisplayType displayType)
-    : IntProperty(std::move(info))
+    : NumericalProperty<int>(
+        std::move(info),
+        0,
+        std::numeric_limits<int>::lowest(),
+        std::numeric_limits<int>::max(),
+        1
+    )
     , _displayType(displayType)
 {}
 
@@ -157,12 +171,18 @@ std::string OptionProperty::getDescriptionByValue(int value) {
     }
 }
 
-int OptionProperty::fromLuaConversion(lua_State* state) const {
+void OptionProperty::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
+void OptionProperty::setLuaValue(lua_State* state) {
+    int thisValue = 0;
+
     if (ghoul::lua::hasValue<double>(state)) {
-        return static_cast<int>(ghoul::lua::value<double>(state));
+        thisValue = static_cast<int>(ghoul::lua::value<double>(state));
     }
     else if (ghoul::lua::hasValue<int>(state)) {
-        return ghoul::lua::value<int>(state);
+        thisValue = ghoul::lua::value<int>(state);
     }
     else if (ghoul::lua::hasValue<std::string>(state)) {
         std::string value = ghoul::lua::value<std::string>(state);
@@ -177,11 +197,17 @@ int OptionProperty::fromLuaConversion(lua_State* state) const {
                 uri()
             );
         }
-        return it->value;
+        thisValue = it->value;
     }
     else {
         throw ghoul::RuntimeError("Error extracting value in OptionProperty");
     }
+
+    setValue(thisValue);
+}
+
+std::string OptionProperty::stringValue() const {
+    return formatJson(_value);
 }
 
 std::string OptionProperty::generateAdditionalJsonDescription() const {
@@ -205,6 +231,18 @@ std::string OptionProperty::generateAdditionalJsonDescription() const {
 
     result += "] }";
     return result;
+}
+
+int OptionProperty::toValue(lua_State* state) const {
+    if (ghoul::lua::hasValue<double>(state)) {
+        return static_cast<int>(ghoul::lua::value<double>(state));
+    }
+    else if (ghoul::lua::hasValue<int>(state)) {
+        return ghoul::lua::value<int>(state);
+    }
+    else {
+        throw ghoul::RuntimeError("Error extracting value in IntProperty");
+    }
 }
 
 } // namespace openspace::properties

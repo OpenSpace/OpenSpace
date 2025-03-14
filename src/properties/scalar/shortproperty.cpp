@@ -24,6 +24,7 @@
 
 #include <openspace/properties/scalar/shortproperty.h>
 
+#include <openspace/util/json_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
 
 namespace openspace::properties {
@@ -39,6 +40,18 @@ std::string_view ShortProperty::className() const {
 
 ghoul::lua::LuaTypes ShortProperty::typeLua() const {
     return ghoul::lua::LuaTypes::Number;
+}
+
+void ShortProperty::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
+short ShortProperty::toValue(lua_State* state) const {
+    return ghoul::lua::value<short>(state);
+}
+
+std::string ShortProperty::stringValue() const {
+    return formatJson(_value);
 }
 
 } // namespace openspace::properties

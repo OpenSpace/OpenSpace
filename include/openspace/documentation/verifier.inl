@@ -23,12 +23,8 @@
  ****************************************************************************************/
 
 #include <ghoul/misc/dictionary.h>
-
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
-#include <iterator>
+#include <functional>
 #include <numeric>
-#include <sstream>
 
 namespace openspace::documentation {
 
@@ -681,7 +677,6 @@ std::string NotInRangeVerifier<T>::documentation() const {
     return "Not in range: ( " + ghoul::to_string(lower) + "," +
            ghoul::to_string(upper) + " )";
 }
-
 
 template <typename T>
 AnnotationVerifier<T>::AnnotationVerifier(std::string a)

@@ -39,10 +39,16 @@ public:
         glm::uvec4 maxValue = glm::uvec4(std::numeric_limits<unsigned int>::max()),
         glm::uvec4 stepValue = glm::uvec4(1));
 
-    std::string_view className() const override;
-    ghoul::lua::LuaTypes typeLua() const override;
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
+    void getLuaValue(lua_State* state) const override final;
+
+    std::string stringValue() const override final;
     using TemplateProperty<glm::uvec4>::operator=;
+
+private:
+    glm::uvec4 toValue(lua_State* state) const override final;
 };
 
 } // namespace openspace::properties

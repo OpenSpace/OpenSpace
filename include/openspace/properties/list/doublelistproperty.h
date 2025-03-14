@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___DOUBLELISTPROPERTY___H__
 #define __OPENSPACE_CORE___DOUBLELISTPROPERTY___H__
 
-#include <openspace/properties/listproperty.h>
+#include <openspace/properties/misc/listproperty.h>
 
 namespace openspace::properties {
 
@@ -34,14 +34,17 @@ public:
     DoubleListProperty(Property::PropertyInfo info,
         std::vector<double> values = std::vector<double>());
 
-    std::string_view className() const override;
-    ghoul::lua::LuaTypes typeLua() const override;
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
+    void getLuaValue(lua_State* state) const override final;
+
+    std::string stringValue() const override final;
     using TemplateProperty<std::vector<double>>::operator std::vector<double>;
     using TemplateProperty<std::vector<double>>::operator=;
 
-protected:
-    std::string toStringConversion() const override;
+private:
+    std::vector<double> toValue(lua_State* state) const override final;
 };
 
 } // namespace openspace::properties
