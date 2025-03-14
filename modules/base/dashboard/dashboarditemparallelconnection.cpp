@@ -34,13 +34,26 @@
 #include <ghoul/font/font.h>
 #include <ghoul/misc/profiling.h>
 
+namespace {
+    // This `DashboardItem` displays information about the status of the parallel
+    // connection, which is whether OpenSpace is directly connected to other OpenSpace
+    // instances and can either control those instances or be controlled by the master of
+    // the session. If OpenSpace is not connected, this `DashboardItem` will not display
+    // anything.
+    //
+    // The information presented contains how many clients are connected to the same
+    // session and whether this machine is currently the host of the session.
+    struct [[codegen::Dictionary(DashboardItemParallelConnection)]] Parameters {};
+#include "dashboarditemparallelconnection_codegen.cpp"
+} // namespace
+
 namespace openspace {
 
 documentation::Documentation DashboardItemParallelConnection::Documentation() {
-    documentation::Documentation doc = DashboardTextItem::Documentation();
-    doc.name = "DashboardItemParallelConnection";
-    doc.id = "base_dashboarditem_parallelconnection";
-    return doc;
+    return codegen::doc<Parameters>(
+        "base_dashboarditem_parallelconnection",
+        DashboardTextItem::Documentation()
+    );
 }
 
 DashboardItemParallelConnection::DashboardItemParallelConnection(

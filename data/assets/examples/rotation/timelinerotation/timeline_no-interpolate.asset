@@ -1,13 +1,13 @@
 -- No Interpolation
--- This asset creates a SceneGraphNode that only displays coordinate axes. The rotation of
--- the coordinate axes are determined by a timeline of individual rotations that are used
--- without interpolating between the timeline entries. These rotations are keyframes that
--- are used to change between different orientations. This example transitions between
--- three rotations. In this example, the interpolation between entries is disabled, which
--- will cause the coordinate axes to change their orientation abruptly when the rotation
--- changes. If the interpolation were enabled, the orientation of the coordinate axes
--- would transition seamlessly instead at the provided times. This example will only work
--- if the in-game time is set to January 1st, 2000.
+-- This asset creates a scene graph node that only displays coordinate axes. The rotation
+-- of the coordinate axes are determined by a timeline of individual rotations that are
+-- used without interpolating between the timeline entries. These rotations are keyframes
+-- that are used to change between different orientations. This example transitions
+-- between three rotations. In this example, the interpolation between entries is
+-- disabled, which will cause the coordinate axes to change their orientation abruptly
+-- when the rotation changes. If the interpolation were enabled, the orientation of the
+-- coordinate axes would transition seamlessly instead at the provided times. This example
+-- will only work if the in-game time is set to January 1st, 2000.
 
 local Node = {
   Identifier = "TimelineRotation_Example_NoInterpolation",

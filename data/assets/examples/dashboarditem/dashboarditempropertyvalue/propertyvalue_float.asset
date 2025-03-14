@@ -1,0 +1,18 @@
+-- Float
+-- This example adds a dashboard item that shows the state of a floating point value
+-- property.
+
+local Item = {
+  Identifier = "DashboardItemPropertyValue_Example_Float",
+  Type = "DashboardItemPropertyValue",
+  URI = "RenderEngine.Gamma",
+  DisplayString = "Gamma Correction: {}"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

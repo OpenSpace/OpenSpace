@@ -56,14 +56,15 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TimeOffsetInfo = {
-        "TimeOffset",
-        "Time Offset",
-        "A time offset, in seconds, added to the simulation time (or Fixed Date if any), "
-        "at which to compute the rotation.",
-        openspace::properties::Property::Visibility::User
-    };
-
+    // This `Rotation` type uses [SPICE](https://naif.jpl.nasa.gov/naif/) kernels to
+    // provide rotation information for the attached scene graph node. SPICE is a library
+    // used by scientists and engineers to, among other tasks, plan space missions. If you
+    // are unfamiliar with SPICE, their webpage has both extensive
+    // [Tutorials](https://naif.jpl.nasa.gov/naif/tutorials.html) as well as
+    // [Lessions](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/Lessons/) that explain
+    // the system deeper. This class provides access to the
+    // [pxform_c](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/pxform_c.html)
+    // function of the Spice library.
     struct [[codegen::Dictionary(SpiceRotation)]] Parameters {
         // [[codegen::verbatim(SourceInfo.description)]]
         std::string sourceFrame
@@ -75,11 +76,7 @@ namespace {
         std::optional<std::string> destinationFrame;
 
         // [[codegen::verbatim(FixedDateInfo.description)]]
-        std::optional<std::string> fixedDate
-            [[codegen::annotation("A time to lock the rotation to")]];
-
-        // [[codegen::verbatim(TimeOffsetInfo.description)]]
-        std::optional<float> timeOffset;
+        std::optional<std::string> fixedDate [[codegen::datetime()]];
     };
 #include "spicerotation_codegen.cpp"
 } // namespace
