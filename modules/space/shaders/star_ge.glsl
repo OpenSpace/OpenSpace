@@ -105,7 +105,7 @@ double scaleForDistanceModulus(float absMag) {
 void main() {
   vec3 pos = gl_in[0].gl_Position.xyz;
   vs_position = pos; // in object space
-  dvec4 dpos  = modelMatrix * dvec4(pos, 1.0);
+  dvec4 dpos = modelMatrix * dvec4(pos, 1.0);
 
   ge_bv = vs_bvLumAbsMag[0].x;
   ge_velocity = vs_velocity[0];
