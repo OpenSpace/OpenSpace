@@ -56,6 +56,15 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo TimeOffsetInfo = {
+        "TimeOffset",
+        "Time Offset",
+        "A time offset, in seconds, added to the simulation time (or Fixed Date if any), "
+        "at which to compute the rotation.",
+        openspace::properties::Property::Visibility::User
+    };
+
+
     // This `Rotation` type uses [SPICE](https://naif.jpl.nasa.gov/naif/) kernels to
     // provide rotation information for the attached scene graph node. SPICE is a library
     // used by scientists and engineers to, among other tasks, plan space missions. If you
@@ -77,6 +86,9 @@ namespace {
 
         // [[codegen::verbatim(FixedDateInfo.description)]]
         std::optional<std::string> fixedDate [[codegen::datetime()]];
+
+        // [[codegen::verbatim(TimeOffsetInfo.description)]]
+        std::optional<float> timeOffset;
     };
 #include "spicerotation_codegen.cpp"
 } // namespace
