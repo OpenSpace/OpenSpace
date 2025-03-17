@@ -77,6 +77,15 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    constexpr openspace::properties::Property::PropertyInfo TimeOffsetInfo = {
+        "TimeOffset",
+        "Time Offset",
+        "A time offset, in seconds, added to the simulation time (or Fixed Date if any), "
+        "at which to compute the rotation.",
+        openspace::properties::Property::Visibility::User
+    };
+
+
     // This `Translation` type uses [SPICE](https://naif.jpl.nasa.gov/naif/) kernels to
     // provide translational information for the attached scene graph node. SPICE is a
     // library used by scientists and engineers to, among other tasks, plan space
