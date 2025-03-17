@@ -127,9 +127,10 @@ public:
      *
      * \param quality The value for number of vertical lines of resolution. This will be
      *        compared against the QualityValues array in order to set the correct
-     *       combobox index
+     *        combobox index
+     * \tilt  The tilt of the fisheye in degrees
      */
-    void setProjectionFisheye(int quality);
+    void setProjectionFisheye(int quality, float tilt);
 
     /**
      * Sets the window's projection type to spherical mirror, with the accompanying
@@ -209,42 +210,31 @@ private:
 
     struct {
         QWidget* widget = nullptr;
-        QLabel* labelInfo = nullptr;
         QDoubleSpinBox* fovH = nullptr;
         QDoubleSpinBox* fovV = nullptr;
-        QLabel* labelFovH = nullptr;
-        QLabel* labelFovV = nullptr;
         QPushButton* buttonLockFov = nullptr;
     } _planar;
 
     struct {
         QWidget* widget = nullptr;
-        QLabel* labelInfo = nullptr;
         QComboBox* quality = nullptr;
-        QLabel* labelQuality = nullptr;
+        QDoubleSpinBox* tilt = nullptr;
     } _fisheye;
 
     struct {
         QWidget* widget = nullptr;
-        QLabel* labelInfo = nullptr;
         QComboBox* quality = nullptr;
-        QLabel* labelQuality = nullptr;
     } _sphericalMirror;
 
     struct {
         QWidget* widget = nullptr;
-        QLabel* labelInfo = nullptr;
         QComboBox* quality = nullptr;
-        QLabel* labelQuality = nullptr;
         QDoubleSpinBox* heightOffset = nullptr;
-        QLabel* labelHeightOffset = nullptr;
     } _cylindrical;
 
     struct {
         QWidget* widget = nullptr;
-        QLabel* labelInfo = nullptr;
         QComboBox* quality = nullptr;
-        QLabel* labelQuality = nullptr;
     } _equirectangular;
 
     const QIcon _lockIcon;
