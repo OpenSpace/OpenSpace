@@ -106,7 +106,7 @@ namespace {
             [[codegen::annotation("A valid SPICE NAIF name for a reference frame")]];
 
         // [[codegen::verbatim(FixedDateInfo.description)]]
-        std::optional<std::string> fixedDate;
+        std::optional<std::string> fixedDate [[codegen::datetime()]];
 
         // [[codegen::verbatim(TimeOffsetInfo.description)]]
         std::optional<float> timeOffset;

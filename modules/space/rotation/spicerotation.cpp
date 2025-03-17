@@ -86,6 +86,9 @@ namespace {
 
         // [[codegen::verbatim(FixedDateInfo.description)]]
         std::optional<std::string> fixedDate [[codegen::datetime()]];
+
+        // [[codegen::verbatim(TimeOffsetInfo.description)]]
+        std::optional<float> timeOffset;
     };
 #include "spicerotation_codegen.cpp"
 } // namespace
