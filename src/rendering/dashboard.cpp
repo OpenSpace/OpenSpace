@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 
@@ -49,6 +50,14 @@ namespace {
         "in x and y-direction on screen.",
         openspace::properties::Property::Visibility::User
     };
+
+    constexpr openspace::properties::Property::PropertyInfo RefreshRateInfo = {
+        "RefreshRate",
+        "Refresh Rate (in ms)",
+        "The number of milliseconds between refreshes of the dashboard items. If the "
+        "value is 0 the dashboard is refreshed at the same rate as the main rendering.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
 } // namespace
 
 namespace openspace {
@@ -57,9 +66,12 @@ Dashboard::Dashboard()
     : properties::PropertyOwner({ "Dashboard" })
     , _isEnabled(EnabledInfo, true)
     , _startPositionOffset(StartPositionOffsetInfo, glm::ivec2(10, -10))
+    , _refreshRate(RefreshRateInfo, 0, 0, 1000)
+    , _lastRefresh(std::chrono::steady_clock::now())
 {
     addProperty(_isEnabled);
     addProperty(_startPositionOffset);
+    addProperty(_refreshRate);
 }
 
 void Dashboard::addDashboardItem(std::unique_ptr<DashboardItem> item) {
@@ -137,8 +149,17 @@ void Dashboard::render(glm::vec2& penPosition) {
         return;
     }
 
+    auto now = std::chrono::steady_clock::now();
+    bool needsUpdate = (now - _lastRefresh) > std::chrono::milliseconds(_refreshRate);
+    if (needsUpdate) {
+        _lastRefresh = now;
+    }
+
     for (const std::unique_ptr<DashboardItem>& item : _items) {
         if (item->isEnabled()) {
+            if (needsUpdate) {
+                item->update();
+            }
             item->render(penPosition);
         }
     }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,7 +40,7 @@ public:
     /**
      * Constructor that initializes this components member variables.
      */
-    GuiComponent(std::string identifier, std::string guiName = "");
+    explicit GuiComponent(std::string identifier, std::string guiName = "");
 
     /**
      * Returns if this component is enabled, that is, if it is currently active and

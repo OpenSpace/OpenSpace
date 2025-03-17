@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,7 @@
 #include <openspace/rendering/screenspacerenderable.h>
 
 #include <openspace/engine/downloadmanager.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 
 namespace ghoul::opengl { class Texture; }
 
@@ -38,7 +38,7 @@ namespace documentation { struct Documentation; }
 
 class ScreenSpaceImageOnline : public ScreenSpaceRenderable {
 public:
-    ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary);
     virtual ~ScreenSpaceImageOnline() override;
 
     bool deinitializeGL() override;

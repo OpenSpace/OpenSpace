@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,7 +54,7 @@ public:
 
     struct ScheduledScript {
         ScheduledScript() = default;
-        ScheduledScript(const ghoul::Dictionary& dict);
+        explicit ScheduledScript(const ghoul::Dictionary& dict);
 
         double time = -std::numeric_limits<double>::max();
         std::string forwardScript;

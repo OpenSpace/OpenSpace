@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,22 +36,21 @@ std::string_view TransferFunctionProperty::className() const {
     return "TransferFunctionProperty";
 }
 
-int TransferFunctionProperty::typeLua() const {
-    return LUA_TTABLE;
+ghoul::lua::LuaTypes TransferFunctionProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Table;
 }
 
-openspace::volume::TransferFunction
-TransferFunctionProperty::fromLuaConversion(lua_State* state) const {
+void TransferFunctionProperty::getLuaValue(lua_State* state) const {
+    _value.envelopesToLua(state);
+}
+
+volume::TransferFunction TransferFunctionProperty::toValue(lua_State* state) const {
     openspace::volume::TransferFunction tf;
     tf.setEnvelopesFromLua(state);
     return tf;
 }
 
-void TransferFunctionProperty::toLuaConversion(lua_State* state) const {
-    _value.envelopesToLua(state);
-}
-
-std::string TransferFunctionProperty::toStringConversion() const {
+std::string TransferFunctionProperty::stringValue() const {
     return _value.serializedToString();
 }
 

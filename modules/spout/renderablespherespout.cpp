@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,11 +31,10 @@
 #include <openspace/util/sphere.h>
 #include <ghoul/opengl/texture.h>
 
-// The RenderableSphereSpout can be used to render a sphere with a texture that is
-// provided by another application on the same computer using the SPOUT library. Note that
-// this library is only available on Windows.
-
 namespace {
+    // The RenderableSphereSpout can be used to render a sphere with a texture that is
+    // provided by another application on the same computer using the SPOUT library.
+    // Note: The Spout library is only available on Windows
     struct [[codegen::Dictionary(RenderableSphereSpout)]] Parameters {
         // Specifies the GUI name of the RenderableSphereSpout
         std::optional<std::string> name;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -96,7 +96,7 @@ bool ErrorHistogramManager::buildFromLeaf(unsigned int bstOffset,
 
     int bstNode = bstOffset;
     bool bstRightOnly = true;
-    unsigned int bstLevel = 0;
+    //unsigned int bstLevel = 0;
 
     do {
         glm::vec3 leafOffset(0.f); // Leaf offset in leaf sized voxels
@@ -173,7 +173,7 @@ bool ErrorHistogramManager::buildFromLeaf(unsigned int bstOffset,
         bstRightOnly &= (bstNode % 2 == 0);
         bstNode = parentOffset(bstNode, 2);
 
-        bstLevel++;
+        //bstLevel++;
     } while (bstNode != -1);
 
     return true;

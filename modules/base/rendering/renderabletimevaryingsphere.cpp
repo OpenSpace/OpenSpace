@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
 #include <openspace/util/sphere.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
@@ -435,6 +436,10 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
     if (!_firstUpdate && _isUsingColorMap) {
         _dataMinMaxValues = _files[_activeTriggerTimeIndex].dataMinMax;
     }
+    if (_textureIsDirty) [[unlikely]] {
+        loadTexture();
+        _textureIsDirty = false;
+    }
 }
 
 void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks& task) {
@@ -452,17 +457,15 @@ void RenderableTimeVaryingSphere::bindTexture() {
 
 void RenderableTimeVaryingSphere::updateActiveTriggerTimeIndex(double currentTime) {
     auto iter = std::upper_bound(
-        _files.begin(),
-        _files.end(),
+        _files.cbegin(),
+        _files.cend(),
         currentTime,
-        [](double value, const File& f) {
-            return value < f.time;
-        }
+        [](double value, const File& f) { return value < f.time; }
     );
-    if (iter != _files.end()) {
-        if (iter != _files.begin()) {
-            const ptrdiff_t idx = std::distance(_files.begin(), iter);
-            _activeTriggerTimeIndex = static_cast<int>(idx); // TODO -1 here maybe?
+    if (iter != _files.cend()) {
+        if (iter != _files.cbegin()) {
+            const ptrdiff_t idx = std::distance(_files.cbegin(), iter);
+            _activeTriggerTimeIndex = static_cast<int>(idx - 1);
         }
         else {
             _activeTriggerTimeIndex = 0;

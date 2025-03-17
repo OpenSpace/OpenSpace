@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -115,7 +115,7 @@ void RenderablePlaneImageOnline::bindTexture() {
 void RenderablePlaneImageOnline::update(const UpdateData& data) {
     RenderablePlane::update(data);
 
-    if (!_textureIsDirty) {
+    if (!_textureIsDirty) [[unlikely]] {
         return;
     }
 
@@ -195,13 +195,13 @@ RenderablePlaneImageOnline::downloadImageToMemory(const std::string& url)
 {
     return global::downloadManager->fetchFile(
         url,
-        [url](const DownloadManager::MemoryFile&) {
+        [](const DownloadManager::MemoryFile&) {
             LDEBUGC(
                 "ScreenSpaceImageOnline",
                 "Download to memory finished for screen space image"
             );
         },
-        [url](const std::string& err) {
+        [](const std::string& err) {
             LDEBUGC(
                 "ScreenSpaceImageOnline",
                 "Download to memory failer for screen space image: " + err

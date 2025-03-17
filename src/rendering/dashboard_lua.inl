@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,6 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/documentation/documentation.h>
+#include <ghoul/lua/lua_helper.h>
+
 namespace {
 
  // Adds a new dashboard item to the main dashboard.
@@ -31,6 +34,10 @@ namespace {
         global::dashboard->addDashboardItem(
             DashboardItem::createFromDictionary(std::move(dashboard))
         );
+    }
+    catch (const documentation::SpecificationError& e) {
+        logError(e);
+        throw ghoul::lua::LuaError("Error adding dashboard item");
     }
     catch (const ghoul::RuntimeError& e) {
         throw ghoul::lua::LuaError(std::format(

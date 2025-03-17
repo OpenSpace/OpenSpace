@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,13 +40,6 @@
 // for the profiole types, but I haven't been able to convince the Visual Studio
 // compiler to agree
 // NOLINTBEGIN(modernize-use-emplace)
-
-namespace {
-    std::ostream& operator<<(std::ostream& os, const openspace::Profile& profile) {
-        os << profile.serialize();
-        return os;
-    }
-} // namespace openspace
 
 using namespace openspace;
 

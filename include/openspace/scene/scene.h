@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,21 +27,21 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/scene/profile.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/scripting/scriptengine.h>
-#include <ghoul/lua/luastate.h>
 #include <ghoul/misc/easing.h>
-#include <ghoul/misc/exception.h>
 #include <ghoul/misc/memorypool.h>
-#include <functional>
 #include <mutex>
 #include <set>
 #include <unordered_map>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::opengl { class ProgramObject; }
+namespace ghoul {
+
+class Dictionary;
+namespace lua { class LuaState; }
+namespace opengl { class ProgramObject; }
+
+} // namespace ghoul
 
 namespace openspace {
 
@@ -55,8 +55,8 @@ enum class PropertyValueType {
     Table,
     Nil
 };
-using ProfilePropertyLua = std::variant<bool, float, std::string, ghoul::lua::nil_t>;
 
+class Profile;
 class SceneInitializer;
 
 // Notifications:
@@ -64,16 +64,6 @@ class SceneInitializer;
 class Scene : public properties::PropertyOwner {
 public:
     BooleanType(UpdateDependencies);
-
-    struct InvalidSceneError : ghoul::RuntimeError {
-        /**
-         * \param msg The reason that caused this exception to be thrown
-         * \param comp The optional compoment that caused this exception to be thrown
-         *
-         * \pre message may not be empty
-         */
-        explicit InvalidSceneError(std::string msg, std::string comp = "");
-    };
 
     /**
      * This struct describes a time that has some intrinsic interesting-ness to this
@@ -84,7 +74,7 @@ public:
         std::string time;
     };
 
-    Scene(std::unique_ptr<SceneInitializer> initializer);
+    explicit Scene(std::unique_ptr<SceneInitializer> initializer);
     virtual ~Scene() override;
 
     /**
@@ -279,46 +269,6 @@ private:
      */
     void propertyPushProfileValueToLua(ghoul::lua::LuaState& L, const std::string& value);
 
-    /**
-     * Accepts string version of a property value from a profile, and processes it
-     * according to the data type of the value.
-     *
-     * \param L The Lua state to (eventually) push to
-     * \param value String representation of the value with which to set property
-     * \return The ProfilePropertyLua variant type translated from string representation
-     */
-    ProfilePropertyLua propertyProcessValue(ghoul::lua::LuaState& L,
-        const std::string& value);
-
-    /**
-     * Accepts string version of a property value from a profile, and returns the
-     * supported data types that can be pushed to a Lua state. Currently, the full range
-     * of possible Lua values is not supported.
-     *
-     * \param value String representation of the value with which to set property
-     */
-    PropertyValueType propertyValueType(const std::string& value);
-
-    /**
-     * Accepts string version of a property value from a profile, and adds it to a vector
-     * which will later be used to push as a Lua table containing values of type T
-     *
-     * \param L The Lua state to (eventually) push to
-     * \param value String representation of the value with which to set property
-     * \param table The std::vector container which has elements of type T for a Lua table
-     */
-    template <typename T>
-    void processPropertyValueTableEntries(ghoul::lua::LuaState& L,
-        const std::string& value, std::vector<T>& table);
-
-    /**
-     * Handles a Lua table entry, creating a vector of the correct variable type based
-     * on the profile string, and pushes this vector to the Lua stack.
-     *
-     * \param L The Lua state to (eventually) push to
-     * \param value String representation of the value with which to set property
-     */
-    void handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::string& value);
 
     /**
      * Update dependencies.
@@ -350,8 +300,6 @@ private:
         bool isExpired = false;
     };
     std::vector<PropertyInterpolationInfo> _propertyInterpolationInfos;
-
-    ghoul::MemoryPool<4096> _memoryPool;
 
     std::unordered_map<std::string, std::vector<std::string>> _guiTreeOrderMap;
 };

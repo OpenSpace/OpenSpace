@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -142,7 +142,11 @@ namespace {
         }
     }
 
-    // Needs support for std::map first for the frameConversions
+    // This Renderable type shows a visual representation of a spacecraft instrument's
+    // field-of-view. Information about the field-of-view are extracted from SPICE kernels
+    // that must be loaded with the correct information. By default a field-of-view is
+    // only visible while an instrument is active, but the field-of-view can be made
+    // visible at all times through the `AlwaysDrawFov` setting.
     struct [[codegen::Dictionary(RenderableFov)]] Parameters {
         // The SPICE name of the source body for which the field of view should be
         // rendered.
@@ -450,7 +454,7 @@ void RenderableFov::deinitializeGL() {
 }
 
 bool RenderableFov::isReady() const {
-    return _program != nullptr && !_instrument.bounds.empty();
+    return _program && !_instrument.bounds.empty();
 }
 
 // Orthogonal projection next to planets surface

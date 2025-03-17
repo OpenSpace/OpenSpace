@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -127,12 +127,7 @@ Tile TileProviderByLevel::tile(const TileIndex& tileIndex) {
     ZoneScoped;
 
     TileProvider* provider = levelProvider(tileIndex.level);
-    if (provider) {
-        return provider->tile(tileIndex);
-    }
-    else {
-        return Tile();
-    }
+    return provider ? provider->tile(tileIndex) : Tile();
 }
 
 Tile::Status TileProviderByLevel::tileStatus(const TileIndex& index) {
@@ -144,7 +139,7 @@ TileProvider* TileProviderByLevel::levelProvider(int level) const {
     ZoneScoped;
 
     if (!_levelTileProviders.empty()) {
-        const int clampedLevel = glm::clamp(
+        const int clampedLevel = std::clamp(
             level,
             0,
             static_cast<int>(_providerIndices.size() - 1)

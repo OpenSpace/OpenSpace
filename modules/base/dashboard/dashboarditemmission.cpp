@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,20 +51,28 @@ namespace {
         progress.append("|");
         return progress;
     }
+
+    // This `DashboardItem` shows information about the currently active mission. This
+    // includes information about the currently active mission phase, the next phase, and
+    // all subphases of the currently active phase.
+    struct [[codegen::Dictionary(DashboardItemMission)]] Parameters {};
+#include "dashboarditemmission_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItemMission::Documentation() {
-    documentation::Documentation doc = DashboardTextItem::Documentation();
-    doc.name = "DashboardItemMission";
-    doc.id = "base_dashboarditem_mission";
-    return doc;
+    return codegen::doc<Parameters>(
+        "base_dashboarditem_mission",
+        DashboardTextItem::Documentation()
+    );
 }
 
 DashboardItemMission::DashboardItemMission(const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary, 15.f)
 {}
+
+void DashboardItemMission::update() {}
 
 void DashboardItemMission::render(glm::vec2& penPosition) {
     ZoneScoped;

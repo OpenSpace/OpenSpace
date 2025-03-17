@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 
 #include <modules/iswa/rendering/datacygnet.h>
 
-#include <openspace/properties/selectionproperty.h>
+#include <openspace/properties/misc/selectionproperty.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
@@ -41,7 +41,7 @@ namespace openspace {
  */
 class KameleonPlane : public DataCygnet {
 public:
-    KameleonPlane(const ghoul::Dictionary& dictionary);
+    explicit KameleonPlane(const ghoul::Dictionary& dictionary);
     ~KameleonPlane();
 
      void initializeGL() override;

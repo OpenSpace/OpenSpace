@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,9 +52,8 @@ public:
      * \param profileBasePath The path to the folder in which all profiles live
      * \param parent Pointer to parent Qt widget
      */
-    ProfileEdit(openspace::Profile& profile, const std::string& profileName,
+    ProfileEdit(openspace::Profile& profile, std::string profileName,
         std::filesystem::path assetBasePath, std::filesystem::path userAssetBasePath,
-        std::filesystem::path builtInProfileBasePath,
         std::filesystem::path profileBasePath, QWidget* parent);
 
     /**
@@ -87,7 +86,6 @@ signals:
     void raiseExitWindow();
 
 private slots:
-    void duplicateProfile();
     void openMeta();
     void openProperties();
     void openModules();
@@ -101,7 +99,7 @@ private slots:
     void approved();
 
 private:
-    void createWidgets(const std::string& profileName);
+    void createWidgets();
     void initSummaryTextForEachCategory();
 
     openspace::Profile& _profile;
@@ -110,6 +108,8 @@ private:
     const std::filesystem::path _profileBasePath;
     const std::filesystem::path _builtInProfilesPath;
     bool _saveSelected = false;
+
+    std::string _profileFilename;
 
     QLineEdit* _profileEdit = nullptr;
     QLabel* _modulesLabel = nullptr;

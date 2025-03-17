@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -162,21 +162,21 @@ bool BrickManager::buildBrickList(BUFFER_INDEX bufferIndex,
 {
     // Keep track of number bricks used and number of bricks cached
     // (for benchmarking)
-    int numBricks = 0;
-    int numCached = 0;
+    //int numBricks = 0;
+    //int numCached = 0;
 
     // For every non-zero entry in the request list, assign a texture atlas
     // coordinate. For zero entries, signal "no brick" using -1.
 
     for (unsigned int i = 0; i < brickRequest.size(); i++) {
         if (brickRequest[i] > 0) {
-            numBricks++;
+            //numBricks++;
 
             //INFO("Checking brick " << i);
 
             // If the brick is already in the atlas, keep the coordinate
             if (_bricksInPBO[bufferIndex][i] != -1) {
-                numCached++;
+                //numCached++;
 
                 // Get the corresponding coordinates from index
                 int x, y, z;

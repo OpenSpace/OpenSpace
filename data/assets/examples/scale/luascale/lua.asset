@@ -1,5 +1,5 @@
 -- Basic
--- This asset creates a SceneGraphNode that only displays coordinate axes. The sizes of
+-- This asset creates a scene graph node that only displays coordinate axes. The sizes of
 -- coordinate axes are determined by executing a Lua file that returns the scaling
 -- parameters to be used as a table.
 --

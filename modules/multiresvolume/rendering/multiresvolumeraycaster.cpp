@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -152,7 +152,7 @@ bool MultiresVolumeRaycaster::isCameraInside(const RenderData& data,
 
     float divisor = 1.0;
     for (int i = 0; i < 4; i++) for (int j = 0; j < 4; j++) {
-        if (abs(modelTransform[i][j]) > divisor) {
+        if (std::abs(modelTransform[i][j]) > divisor) {
             divisor = modelTransform[i][j];
         }
     }

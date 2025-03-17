@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,6 +38,9 @@ namespace {
         // The human readable name of this mission or mission phase that is displayed to
         // the user
         std::string name;
+
+        // The unique identifier for the mission
+        std::optional<std::string> identifier [[codegen::identifier()]];
 
         // A description of this mission or mission phase
         std::optional<std::string> description;
@@ -88,6 +91,7 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _name = p.name;
+    _identifier = p.identifier.value_or(_identifier);
     _description = p.description.value_or(_description);
     _image = p.image.value_or(_image);
     _link = p.link.value_or(_link);
@@ -186,6 +190,10 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
 
 const std::string& MissionPhase::name() const {
     return _name;
+}
+
+const std::string& MissionPhase::identifier() const {
+    return _identifier;
 }
 
 const TimeRange& MissionPhase::timeRange() const {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,10 +34,6 @@
 #include <ghoul/filesystem/filesystem.h>
 
 namespace {
-    constexpr std::array<const char*, 3> UniformNames = {
-        "modelViewProjectionTransform", "shadowColor", "opacity"
-    };
-
     struct VBOLayout {
         float x = 0.f;
         float y = 0.f;
@@ -126,6 +122,40 @@ namespace {
         "The SPICE name of object that is receiving the shadow from the shadower.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
+
+    std::vector<VBOLayout> calculateShadowPoints(
+                                             const std::vector<glm::dvec3>& srcTerminator,
+                                             const std::vector<glm::dvec3>& dstTerminator,
+                                                  const glm::dvec3& shadowerToLightSource,
+                                                  const glm::dmat3& lightSourceToShadower,
+                                                                       double lengthScale)
+    {
+        ghoul_assert(
+            srcTerminator.size() == dstTerminator.size(),
+            "Unmatched termiator pts"
+        );
+
+        std::vector<VBOLayout> vertices;
+        vertices.reserve(dstTerminator.size() * 2);
+        for (size_t i = 0; i < dstTerminator.size(); i++) {
+            // Convert the terminator points from the reference frame of the Sun to the
+            // reference frame of the Moon
+            const glm::dvec3 src =
+                lightSourceToShadower * srcTerminator[i] + shadowerToLightSource;
+            const glm::dvec3& dst = dstTerminator[i];
+            const glm::dvec3 dir = glm::normalize(dst - src);
+
+            // The start point is the terminator point on the Moon
+            const glm::vec3 p1 = dst;
+            vertices.push_back({ p1.x, p1.y, p1.z });
+
+            // The end point is calculated by forward propagating the incoming direction
+            const glm::vec3 p2 = dst + dir * lengthScale;
+            vertices.push_back({ p2.x, p2.y, p2.z });
+        }
+        return vertices;
+    }
+
 
     struct [[codegen::Dictionary(RenderableEclipseCone)]] Parameters {
         // [[codegen::verbatim(NumberPointsInfo.description)]]
@@ -241,7 +271,7 @@ void RenderableEclipseCone::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 void RenderableEclipseCone::deinitializeGL() {
@@ -260,7 +290,7 @@ void RenderableEclipseCone::deinitializeGL() {
 }
 
 bool RenderableEclipseCone::isReady() const {
-    return _shader;
+    return _shader != nullptr;
 }
 
 void RenderableEclipseCone::render(const RenderData& data, RendererTasks&) {
@@ -300,40 +330,11 @@ void RenderableEclipseCone::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableEclipseCone::update(const UpdateData& data) {
-    if (_shader->isDirty()) {
+    if (_shader->isDirty()) [[unlikely]] {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
     createCone(data.time.j2000Seconds());
-}
-
-std::vector<VBOLayout> calculateShadowPoints(const std::vector<glm::dvec3>& srcTerminator,
-                                             const std::vector<glm::dvec3>& dstTerminator,
-                                             const glm::dvec3& shadowerToLightSource,
-                                             const glm::dmat3& lightSourceToShadower,
-                                             double lengthScale)
-{
-    ghoul_assert(srcTerminator.size() == dstTerminator.size(), "Unmatched termiator pts");
-
-    std::vector<VBOLayout> vertices;
-    vertices.reserve(dstTerminator.size() * 2);
-    for (size_t i = 0; i < dstTerminator.size(); i++) {
-        // Convert the terminator points from the reference frame of the Sun to the
-        // reference frame of the Moon
-        const glm::dvec3 src =
-            lightSourceToShadower * srcTerminator[i] + shadowerToLightSource;
-        const glm::dvec3& dst = dstTerminator[i];
-        const glm::dvec3 dir = glm::normalize(dst - src);
-
-        // The start point is the terminator point on the Moon
-        const glm::vec3 p1 = dst;
-        vertices.push_back({ p1.x, p1.y, p1.z });
-
-        // The end point is calculated by forward propagating the incoming direction
-        const glm::vec3 p2 = dst + dir * lengthScale;
-        vertices.push_back({ p2.x, p2.y, p2.z });
-    }
-    return vertices;
 }
 
 void RenderableEclipseCone::createCone(double et) {

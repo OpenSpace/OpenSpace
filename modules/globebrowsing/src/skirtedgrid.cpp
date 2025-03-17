@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -87,12 +87,12 @@ namespace {
         for (int y = -1; y < ySegments + 2; y++) {
             for (int x = -1; x < xSegments + 2; x++) {
                 textureCoordinates.emplace_back(
-                    glm::clamp(
+                    std::clamp(
                         static_cast<float>(x) / static_cast<float>(xSegments),
                         0.f - 1.f / (2.f * xSegments),
                         1.f + 1.f / (2.f * xSegments)
                     ),
-                    glm::clamp(
+                    std::clamp(
                         static_cast<float>(y) / static_cast<float>(ySegments),
                         0.f - 1.f / (2.f * ySegments),
                         1.f + 1.f / (2.f * ySegments)

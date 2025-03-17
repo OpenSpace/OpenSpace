@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,8 +27,8 @@
 
 #include <openspace/scene/rotation.h>
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/glm.h>
@@ -41,14 +41,14 @@ namespace documentation { struct Documentation; }
 
 class FixedRotation : public Rotation {
 public:
-    FixedRotation(const ghoul::Dictionary& dictionary);
+    explicit FixedRotation(const ghoul::Dictionary& dictionary);
 
     bool initialize() override;
 
-    static documentation::Documentation Documentation();
-
     void update(const UpdateData& data) override;
     glm::dmat3 matrix(const UpdateData& data) const override;
+
+    static documentation::Documentation Documentation();
 
 private:
     glm::vec3 xAxis() const;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -64,7 +64,7 @@ GeodeticPatch::GeodeticPatch(const TileIndex& tileIndex) {
     const double deltaLon = (2 * glm::pi<double>()) /
                             (static_cast<double>(1 << tileIndex.level));
     const Geodetic2 nwCorner{
-        glm::pi<double>() / 2.0 - deltaLat * tileIndex.y,
+        glm::half_pi<double>() - deltaLat * tileIndex.y,
         -glm::pi<double>() + deltaLon * tileIndex.x
     };
     _halfSize = Geodetic2{ deltaLat / 2.0, deltaLon / 2.0 };
@@ -81,12 +81,12 @@ void GeodeticPatch::setHalfSize(Geodetic2 halfSize) {
 
 double GeodeticPatch::maximumTileLevel() const {
     // Numerator is just pi, not 2*pi, since we are dealing with HALF sizes
-    return log2(glm::pi<double>() / glm::min(_halfSize.lat, _halfSize.lon));
+    return std::log2(glm::pi<double>() / std::min(_halfSize.lat, _halfSize.lon));
 }
 
 double GeodeticPatch::minimumTileLevel() const {
     // Numerator is just pi, not 2*pi, since we are dealing with HALF sizes
-    return log2(glm::pi<double>() / glm::max(_halfSize.lat, _halfSize.lon));
+    return std::log2(glm::pi<double>() / std::max(_halfSize.lat, _halfSize.lon));
 }
 
 const Geodetic2& GeodeticPatch::center() const {
@@ -135,14 +135,14 @@ bool GeodeticPatch::contains(const Geodetic2& p) const {
         .lat = _center.lat - p.lat,
         .lon = _center.lon - p.lon
     };
-    return glm::abs(diff.lat) <= _halfSize.lat && glm::abs(diff.lon) <= _halfSize.lon;
+    return std::abs(diff.lat) <= _halfSize.lat && std::abs(diff.lon) <= _halfSize.lon;
 }
 
 double GeodeticPatch::edgeLatitudeNearestEquator() const {
     return _center.lat + _halfSize.lat * (isNorthern() ? -1.0 : 1.0);
 }
 
-double GeodeticPatch::isNorthern() const {
+bool GeodeticPatch::isNorthern() const {
     return _center.lat > 0.0;
 }
 
@@ -158,8 +158,8 @@ Geodetic2 GeodeticPatch::clamp(const Geodetic2& p) const {
     const double pointLon = normalizedAngleAround(p.lon, _center.lon);
 
     return {
-        glm::clamp(pointLat, minLat(), maxLat()),
-        glm::clamp(pointLon, minLon(), maxLon())
+        std::clamp(pointLat, minLat(), maxLat()),
+        std::clamp(pointLon, minLon(), maxLon())
     };
 }
 
@@ -228,21 +228,21 @@ Geodetic2 GeodeticPatch::closestPoint(const Geodetic2& p) const {
     const double centerToPointLon = normalizedAngleAround(_center.lon - pointLon, 0.0);
 
     // Calculate the longitudinal distance to the closest patch edge
-    const double lonDistanceToClosestPatch = glm::abs(centerToPointLon) - _halfSize.lon;
+    const double lonDistanceToClosestPatch = std::abs(centerToPointLon) - _halfSize.lon;
 
     // If the longitude distance to the closest patch edge is larger than 90 deg
     // the latitude will have to be clamped to its closest corner, as explained in
     // the example above.
     const double clampedLat =
         lonDistanceToClosestPatch > glm::half_pi<double>() ?
-        glm::clamp(
+        std::clamp(
             normalizedAngleAround(glm::pi<double>() - pointLat, _center.lat),
             minLat(),
             maxLat()) :
-        glm::clamp(pointLat, minLat(), maxLat());
+        std::clamp(pointLat, minLat(), maxLat());
 
     // Longitude is just clamped normally
-    const double clampedLon = glm::clamp(pointLon, minLon(), maxLon());
+    const double clampedLon = std::clamp(pointLon, minLon(), maxLon());
 
     return Geodetic2{ clampedLat, clampedLon };
 }

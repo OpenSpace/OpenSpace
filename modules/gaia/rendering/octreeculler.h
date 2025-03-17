@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,7 +45,7 @@ public:
      * \param viewFrustum This is the view space in normalized device coordinates space.
      *        Hence it is an axis aligned bounding box and not a real frustum
      */
-    OctreeCuller(globebrowsing::AABB3 viewFrustum);
+    explicit OctreeCuller(globebrowsing::AABB3 viewFrustum);
 
     ~OctreeCuller() = default;
 

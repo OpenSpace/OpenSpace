@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,7 +36,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableHabitableZone : public RenderableDisc {
 public:
-    RenderableHabitableZone(const ghoul::Dictionary& dictionary);
+    explicit RenderableHabitableZone(const ghoul::Dictionary& dictionary);
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
@@ -68,7 +68,7 @@ private:
 
     glm::vec2 _conservativeBounds;
 
-    UniformCache(modelViewProjection, opacity, width, texture,
+    UniformCache(modelViewProjection, opacity, width, transferFunctionTexture,
         conservativeBounds, showOptimistic) _uniformCache;
 };
 

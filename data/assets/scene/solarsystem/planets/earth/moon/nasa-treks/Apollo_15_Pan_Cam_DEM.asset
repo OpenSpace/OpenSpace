@@ -40,9 +40,9 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Apollo15_PanCam_ClrShade_25N311E_5mp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Apollo15_PanCam_ClrShade_28N307E_3mp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Apollo15_PanCam_ClrShade_19S129E_5mp")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_Apollo15_PanCam_ClrShade_25N311E_5mp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_Apollo15_PanCam_ClrShade_28N307E_3mp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_Apollo15_PanCam_ClrShade_19S129E_5mp)
 end)
 
 asset.export("Apollo15_PanCam_ClrShade_25N311E_5mp", treks_Apollo15_PanCam_ClrShade_25N311E_5mp)

@@ -22,7 +22,7 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_Mosaic_03N280E_70cm")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_Mosaic_03N280E_70cm)
 end)
 
 asset.export("LRO_NAC_Mosaic_03N280E_70cm", treks_LRO_NAC_Mosaic_03N280E_70cm)

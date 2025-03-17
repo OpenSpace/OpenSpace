@@ -22,7 +22,7 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_THEMIS_NightIR_ControlledMosaics_100m_v2_oct2018")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_THEMIS_NightIR_ControlledMosaics_100m_v2_oct2018)
 end)
 
 asset.export("THEMIS_NightIR_ControlledMosaics_100m_v2_oct2018", treks_THEMIS_NightIR_ControlledMosaics_100m_v2_oct2018)

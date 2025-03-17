@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,7 @@
 #include <openspace/util/sphere.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 
 namespace {
@@ -63,9 +64,10 @@ namespace {
         );
     }
 
-    // A RenderableSphereImageOnline can be used to show an image from an online source
-    // (as a URL) on a sphere in the OpenSpace scene. The image should be provided in an
-    // equirectangular projection, if it is a map that is draped over the sphere.
+    // This `Renderable` shows a sphere with an image provided by an online URL. The image
+    // will be downloaded when the `Renderable` is added to a scene graph node. To show a
+    // sphere with an image from a local file, see
+    // [RenderableSphereImageLocal](#base_screenspace_image_local).
     struct [[codegen::Dictionary(RenderableSphereImageOnline)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string url [[codegen::key("URL")]];
@@ -105,7 +107,7 @@ void RenderableSphereImageOnline::deinitializeGL() {
 void RenderableSphereImageOnline::update(const UpdateData& data) {
     RenderableSphere::update(data);
 
-    if (!_textureIsDirty) {
+    if (!_textureIsDirty) [[likely]] {
         return;
     }
 

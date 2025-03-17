@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -246,7 +246,7 @@ std::vector<Image> ImageSequencer::imagePaths(const std::string& projectee,
     std::copy_if(
         prev,
         curr,
-        back_inserter(captures),
+        std::back_inserter(captures),
         [instrument](const Image& i) { return i.activeInstruments[0] == instrument; }
     );
 
@@ -369,9 +369,18 @@ void ImageSequencer::runSequenceParser(SequenceParser& parser) {
         // from 'predicted event file' (mission-playbook)
         for (const Image& i : source) {
             for (const Image& j : destination) {
+                if (source.empty()) {
+                    break;
+                }
+
                 const double diff = std::abs(i.timeRange.start - j.timeRange.start);
                 if (diff < epsilon) {
-                    source.erase(source.begin() + 1);
+                    if (source.size() == 1) {
+                        source.erase(source.begin());
+                    }
+                    else {
+                        source.erase(source.begin() + 1);
+                    }
                 }
             }
         }

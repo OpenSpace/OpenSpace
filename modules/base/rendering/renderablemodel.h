@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,10 +26,10 @@
 #define __OPENSPACE_MODULE_BASE___RENDERABLEMODEL___H__
 
 #include <openspace/rendering/renderable.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/matrix/dmat4property.h>
 #include <openspace/properties/matrix/mat3property.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
@@ -55,7 +55,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableModel : public Renderable {
 public:
-    RenderableModel(const ghoul::Dictionary& dictionary);
+    explicit RenderableModel(const ghoul::Dictionary& dictionary);
     ~RenderableModel() override = default;
 
     void initialize() override;
@@ -103,8 +103,8 @@ private:
     properties::BoolProperty _enableDepthTest;
     properties::OptionProperty _blendingFuncOption;
 
-    std::string _vertexShaderPath;
-    std::string _fragmentShaderPath;
+    std::filesystem::path _vertexShaderPath;
+    std::filesystem::path _fragmentShaderPath;
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(modelViewTransform, projectionTransform, normalTransform, meshTransform,
         meshNormalTransform, ambientIntensity, diffuseIntensity,

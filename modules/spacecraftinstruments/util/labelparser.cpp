@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,8 +37,8 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "LabelParser";
-    constexpr std::string_view keySpecs = "Read";
-    constexpr std::string_view keyConvert = "Convert";
+    constexpr std::string_view KeySpecs = "Read";
+    constexpr std::string_view KeyConvert = "Convert";
 } // namespace
 
 namespace openspace {
@@ -77,13 +77,13 @@ LabelParser::LabelParser(std::filesystem::path fileName,
             }
         }
         if (decoderStr == "Target") {
-            if (!typeDict.hasValue<Dictionary>(keySpecs) ||
-                !typeDict.hasValue<Dictionary>(keySpecs))
+            if (!typeDict.hasValue<Dictionary>(KeySpecs) ||
+                !typeDict.hasValue<Dictionary>(KeySpecs))
             {
                 continue;
             }
 
-            const Dictionary specsOfInterestDict = typeDict.value<Dictionary>(keySpecs);
+            const Dictionary specsOfInterestDict = typeDict.value<Dictionary>(KeySpecs);
 
             _specsOfInterest.resize(specsOfInterestDict.size());
             for (size_t n = 0; n < _specsOfInterest.size(); ++n) {
@@ -93,7 +93,7 @@ LabelParser::LabelParser(std::filesystem::path fileName,
                     _specsOfInterest[n] = std::move(readMe);
                 }
             }
-            const Dictionary convertDict = typeDict.value<Dictionary>(keyConvert);
+            const Dictionary convertDict = typeDict.value<Dictionary>(KeyConvert);
 
             for (const std::string_view key : convertDict.keys()) {
                 if (!convertDict.hasValue<Dictionary>(key)) {

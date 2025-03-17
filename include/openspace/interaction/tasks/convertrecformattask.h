@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,10 +40,13 @@ public:
         ToAscii = 0,
         ToBinary
     };
-    ConvertRecFormatTask(const ghoul::Dictionary& dictionary);
+
+    explicit ConvertRecFormatTask(const ghoul::Dictionary& dictionary);
     ~ConvertRecFormatTask() override = default;
+
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
+
     static documentation::Documentation documentation();
 
 private:

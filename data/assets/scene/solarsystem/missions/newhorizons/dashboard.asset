@@ -15,9 +15,9 @@ local Distance = {
   Identifier = "NewHorizonsPlutoDistance",
   GuiName = "New Horizons Pluto Distance",
   SourceType = "Node",
-  SourceNodeName = "NewHorizons",
+  SourceNodeIdentifier = "NewHorizons",
   DestinationType = "Node Surface",
-  DestinationNodeName = "PlutoProjection"
+  DestinationNodeIdentifier = "PlutoProjection"
 }
 
 local Instruments = {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/util/timeconstants.h>
 #include <openspace/util/timeconversion.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace {
 
@@ -429,8 +431,8 @@ namespace {
  * or vice versa.
  *
  * If the given time is a timestamp, the function returns a double precision value
- * representing the ephemeris version of that time; that is, the number of TDB seconds past
- * the J2000 epoch.
+ * representing the ephemeris version of that time; that is, the number of TDB seconds
+ * past the J2000 epoch.
  *
  * If the given time is a J2000 seconds value, the function returns a ISO 8601 timestamp.
  *
@@ -480,7 +482,7 @@ namespace {
  * \return The number of seconds in a day
  */
 [[codegen::luawrap]] double secondsPerDay() {
-    return openspace::SecondsPerDay;
+    return openspace::timeconstants::SecondsPerDay;
 }
 
 /**
@@ -490,7 +492,7 @@ namespace {
  */
 [[codegen::luawrap]] double secondsPerYear() {
     // We could use a call to SPICE here, but the value is a constant anyway
-    return openspace::SecondsPerYear;
+    return openspace::timeconstants::SecondsPerYear;
 }
 
 #include "time_lua_codegen.cpp"

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,8 +27,8 @@
 
 #include <modules/iswa/rendering/iswacygnet.h>
 
-#include <openspace/properties/selectionproperty.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/selectionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <glm/gtx/std_based_type.hpp>
 
@@ -43,7 +43,7 @@ class DataProcessor;
  */
 class DataCygnet : public IswaCygnet {
 public:
-    DataCygnet(const ghoul::Dictionary& dictionary);
+    explicit DataCygnet(const ghoul::Dictionary& dictionary);
     ~DataCygnet();
 
 protected:

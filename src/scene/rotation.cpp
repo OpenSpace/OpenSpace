@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,11 +36,19 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
+    // A `Rotation` object describes a specific rotation for a scene graph node, which may
+    // or may not be time-dependent. The exact method of determining the rotation depends
+    // on the concrete type.
     struct [[codegen::Dictionary(Rotation)]] Parameters {
         // The type of the rotation that is described in this element. The available types
         // of rotations depend on the configuration of the application and can be written
         // to disk on application startup into the FactoryDocumentation
         std::string type [[codegen::annotation("Must name a valid Rotation type")]];
+
+        // The time frame in which this `Rotation` is applied. If the in-game time is
+        // outside this range, no rotation will be applied.
+        std::optional<ghoul::Dictionary> timeFrame
+            [[codegen::reference("core_time_frame")]];
     };
 #include "rotation_codegen.cpp"
 } // namespace
@@ -67,7 +75,16 @@ ghoul::mm_unique_ptr<Rotation> Rotation::createFromDictionary(
     return ghoul::mm_unique_ptr<Rotation>(result);
 }
 
-Rotation::Rotation() : properties::PropertyOwner({ "Rotation" }) {}
+Rotation::Rotation(const ghoul::Dictionary& dictionary)
+    : properties::PropertyOwner({ "Rotation" })
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    if (p.timeFrame.has_value()) {
+        _timeFrame = TimeFrame::createFromDictionary(*p.timeFrame);
+        addPropertySubOwner(_timeFrame.get());
+    }
+}
 
 void Rotation::requireUpdate() {
     _needsUpdate = true;
@@ -87,9 +104,19 @@ void Rotation::update(const UpdateData& data) {
     if (!_needsUpdate && (data.time.j2000Seconds() == _cachedTime)) {
         return;
     }
-    _cachedMatrix = matrix(data);
-    _cachedTime = data.time.j2000Seconds();
-    _needsUpdate = false;
+
+    if (_timeFrame) {
+        _timeFrame->update(data.time);
+    }
+
+    if (_timeFrame && !_timeFrame->isActive()) {
+        _cachedMatrix = glm::dmat3(1.0);
+    }
+    else {
+        _cachedMatrix = matrix(data);
+        _cachedTime = data.time.j2000Seconds();
+        _needsUpdate = false;
+    }
 }
 
 } // namespace openspace

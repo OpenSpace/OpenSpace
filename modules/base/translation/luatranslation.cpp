@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,6 +51,11 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This `Translation` type generates the translation values used to offset the
+    // attached scene graph node's position by calling the provided Lua script. The script
+    // must return three translation factors, one for each principal axis, each providing
+    // in meters. The script parameter describes in greater detail how the Lua script file
+    // should be constructed.
     struct [[codegen::Dictionary(LuaTranslation)]] Parameters {
         // [[codegen::verbatim(ScriptInfo.description)]]
         std::filesystem::path script;
@@ -65,7 +70,8 @@ documentation::Documentation LuaTranslation::Documentation() {
 }
 
 LuaTranslation::LuaTranslation(const ghoul::Dictionary& dictionary)
-    : _luaScriptFile(ScriptInfo)
+    : Translation(dictionary)
+    , _luaScriptFile(ScriptInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

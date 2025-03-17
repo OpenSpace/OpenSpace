@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,7 @@ namespace openspace {
 class DataPlane : public DataCygnet {
 friend class IswaBaseGroup;
 public:
-     DataPlane(const ghoul::Dictionary& dictionary);
+    explicit DataPlane(const ghoul::Dictionary& dictionary);
      ~DataPlane() = default;
 
      void initializeGL() override;

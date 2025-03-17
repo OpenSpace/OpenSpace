@@ -8,9 +8,9 @@ local distance = {
   Identifier = "GaiaEarthDistance",
   GuiName = "Gaia Earth Distance",
   SourceType = "Node",
-  SourceNodeName = gaia.Gaia.Identifier,
+  SourceNodeIdentifier = gaia.Gaia.Identifier,
   DestinationType = "Node Surface",
-  DestinationNodeName = earth.Earth.Identifier
+  DestinationNodeIdentifier = earth.Earth.Identifier
 }
 
 
