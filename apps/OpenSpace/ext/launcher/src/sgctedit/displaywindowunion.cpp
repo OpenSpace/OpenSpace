@@ -208,7 +208,12 @@ void DisplayWindowUnion::initialize(const std::vector<QRect>& monitorSizeList,
                     wCtrl->setProjectionSphericalMirror(*p.quality);
                 }
             },
-            [&](const sgct::config::NoProjection&) {},
+            [&](const sgct::config::NoProjection&) {
+                // We can only generate blitting when there is no projection selected.
+                if (w.blitWindowId.has_value()) {
+                    wCtrl->setProjectionBlit(*w.blitWindowId);
+                }
+            },
             [&](const sgct::config::ProjectionPlane&) {},
             [&](const sgct::config::CubemapProjection&) {},
             },
@@ -251,6 +256,7 @@ void DisplayWindowUnion::updateWindows() {
     _addWindowButton->setEnabled(_nWindowsDisplayed != _windowControls.size());
     for (WindowControl* w : _windowControls) {
         w->showWindowLabel(_nWindowsDisplayed > 1);
+        w->updateWindowCount(_nWindowsDisplayed);
     }
 
     emit nWindowsChanged(_nWindowsDisplayed);

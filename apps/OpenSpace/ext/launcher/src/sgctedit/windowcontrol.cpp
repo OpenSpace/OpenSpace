@@ -64,7 +64,8 @@ namespace {
         Fisheye,
         SphericalMirror,
         Cylindrical,
-        Equirectangular
+        Equirectangular,
+        Blit
     };
 
     constexpr int LineEditWidthFixedWindowSize = 95;
@@ -378,7 +379,7 @@ WindowControl::WindowControl(int monitorIndex, int windowIndex,
         _projectionType = new QComboBox;
         _projectionType->addItems({
             "Planar Projection", "Fisheye", "Spherical Mirror Projection",
-            "Cylindrical Projection", "Equirectangular Projection"
+            "Cylindrical Projection", "Equirectangular Projection", "Copy Window Contents"
         });
         _projectionType->setToolTip("Select from the supported window projection types");
         _projectionType->setCurrentIndex(0);
@@ -402,6 +403,9 @@ WindowControl::WindowControl(int monitorIndex, int windowIndex,
 
         _equirectangular.widget = createEquirectangularWidget();
         projectionLayout->addWidget(_equirectangular.widget);
+
+        _blit.widget = createBlitWidget();
+        projectionLayout->addWidget(_blit.widget);
 
         // We need to trigger this once to ensure that all of the defaults are correct
         onProjectionChanged(0);
@@ -493,7 +497,7 @@ QWidget* WindowControl::createFisheyeWidget() {
     //  *------------*-----------*
     //  | { Informational text } |  Row 0
     //  | Quality    * [DDDDD>]  |  Row 1
-    //  | [] Spout Output        |  Row 2
+    //  | Tilt       * [oooooo]  |  Row 2
     //  *------------*-----------*
     
     QWidget* widget = new QWidget;
@@ -624,7 +628,6 @@ QWidget* WindowControl::createCylindricalWidget() {
     _cylindrical.heightOffset->setToolTip(heightTip);
     layout->addWidget(_cylindrical.heightOffset, 2, 1);
 
-
     return widget;
 }
 
@@ -633,7 +636,6 @@ QWidget* WindowControl::createEquirectangularWidget() {
     //  *------------*-----------*
     //  | { Informational text } |  Row 0
     //  | Quality    * [DDDDD>]  |  Row 1
-    //  | [] Spout Output        |  Row 2
     //  *------------*-----------*
     QWidget* widget = new QWidget;
     QGridLayout* layout = new QGridLayout(widget);
@@ -661,6 +663,49 @@ QWidget* WindowControl::createEquirectangularWidget() {
     _equirectangular.quality->setToolTip(qualityTip);
     _equirectangular.quality->setCurrentIndex(2);
     layout->addWidget(_equirectangular.quality, 1, 1);
+
+    return widget;
+}
+
+QWidget* WindowControl::createBlitWidget() {
+    //    Column 0   Column 1
+    //  *------------*-----------*
+    //  | { Informational text } |  Row 0
+    //  | Window ID  * [DDDDD>]  |  Row 1
+    //  | { Unavailability }     |  Row 2
+    //  *------------*-----------*
+
+    QWidget* widget = new QWidget;
+    QGridLayout* layout = new QGridLayout(widget);
+    layout->setColumnStretch(1, 1);
+
+    QLabel* labelInfo = new QLabel(
+        "This projection type will reuse the contents of another window. This can be "
+        "useful for GUI windows that should show the 3D scene, but not incur the cost of "
+        "rendering the scene twice. Note that the contents of the rendering will be "
+        "copied in their entirety, which means that if the rendering windows have "
+        "different aspect ratios, the image in the receiving window will be stretched."
+    );
+    labelInfo->setObjectName("info");
+    labelInfo->setWordWrap(true);
+    layout->addWidget(labelInfo, 0, 0, 1, 2);
+
+    QLabel* labelBlitId = new QLabel("Window ID");
+    const QString blitTip = "Determines the window from which to copy the contents.";
+    labelBlitId->setToolTip(blitTip);
+    layout->addWidget(labelBlitId, 1, 0);
+
+    _blit.windowId = new QComboBox;
+    _blit.windowId->setToolTip(blitTip);
+    layout->addWidget(_blit.windowId, 1, 1);
+
+    _blit.unavailable = new QLabel(
+        "It is only possible to copy the contents of another window if at least two "
+        "windows have been created. Add a second window before selecting this projection "
+        "type."
+    );
+    _blit.unavailable->setWordWrap(true);
+    layout->addWidget(_blit.unavailable, 2, 0, 1, 2);
 
     return widget;
 }
@@ -701,6 +746,7 @@ void WindowControl::resetToDefaults() {
     _sphericalMirror.quality->setCurrentIndex(2);
     _cylindrical.quality->setCurrentIndex(2);
     _equirectangular.quality->setCurrentIndex(2);
+    _blit.windowId->setCurrentIndex(0);
     emit windowChanged(_monitorIndexDefault, _windowIndex, _windowDimensions);
 }
 
@@ -750,6 +796,7 @@ void WindowControl::generateWindowInformation(sgct::config::Window& window) cons
     );
     window.draw2D = _render2D->isChecked();
     window.draw3D = _render3D->isChecked();
+
     window.isDecorated = _windowDecoration->isChecked();
     if (_spoutOutput->isChecked()) {
         window.spout = sgct::config::Window::Spout{
@@ -759,6 +806,8 @@ void WindowControl::generateWindowInformation(sgct::config::Window& window) cons
     if (!_windowName->text().isEmpty()) {
         window.name = _windowName->text().toStdString();
     }
+
+    window.viewports.clear();
 
     // The rest of this function is just specifying the rendering, which we can skip if we
     // don't want to render 3D anyway
@@ -795,6 +844,16 @@ void WindowControl::generateWindowInformation(sgct::config::Window& window) cons
                 .quality = Quality[_equirectangular.quality->currentIndex()].first
             };
             break;
+        case ProjectionIndices::Blit:
+            // We have to subtract here as SGCT uses 0-indexing, but we present it to the
+            // user as 1-indexing
+            window.blitWindowId = _blit.windowId->currentText().toInt() - 1;
+            window.draw3D = false;
+
+            // We are falling through the planar value on purpose as for a variety of
+            // reasons requires a projection to be defined even when we are blitting the
+            // contents of another window.
+            [[fallthrough]];
         case ProjectionIndices::Planar:
             {
                 double fovH = _planar.fovH->value();
@@ -813,8 +872,6 @@ void WindowControl::generateWindowInformation(sgct::config::Window& window) cons
                 break;
             }
     }
-
-    window.viewports.clear();
     window.viewports.push_back(vp);
 }
 
@@ -848,6 +905,32 @@ void WindowControl::setProjectionEquirectangular(int quality) {
     _projectionType->setCurrentIndex(
         static_cast<int>(ProjectionIndices::Equirectangular)
     );
+}
+
+void WindowControl::setProjectionBlit(int windowBlitId) {
+    // We add 1 here as SGCT uses a 0-indexing for the window idx, but we present it to
+    // the user as a 1-indexing
+    int idx = _blit.windowId->findText(QString::number(windowBlitId + 1));
+    ghoul_assert(idx != -1, "Could not find window blit id");
+    _blit.windowId->setCurrentIndex(idx);
+    _projectionType->setCurrentIndex(
+        static_cast<int>(ProjectionIndices::Blit)
+    );
+}
+
+void WindowControl::updateWindowCount(int newWindowCount) {
+    QString currentIdx = _blit.windowId->currentText();
+    _blit.windowId->clear();
+    for (int idx = 0; idx < newWindowCount; idx++) {
+        if (idx == _windowIndex) {
+            continue;
+        }
+        _blit.windowId->addItem(QString::number(idx + 1));
+    }
+    _blit.windowId->setCurrentText(currentIdx);
+
+    // Set the correct visibility
+    _blit.unavailable->setVisible(newWindowCount == 1);
 }
 
 void WindowControl::onSizeXChanged(int newValue) {
@@ -911,6 +994,7 @@ void WindowControl::onProjectionChanged(int newSelection) const {
     _sphericalMirror.widget->setVisible(selected == ProjectionIndices::SphericalMirror);
     _cylindrical.widget->setVisible(selected == ProjectionIndices::Cylindrical);
     _equirectangular.widget->setVisible(selected == ProjectionIndices::Equirectangular);
+    _blit.widget->setVisible(selected == ProjectionIndices::Blit);
 }
 
 void WindowControl::onAspectRatioLockClicked() {

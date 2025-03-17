@@ -163,6 +163,21 @@ public:
      */
     void setProjectionEquirectangular(int quality);
 
+    /**
+     * Sets the window's projection type to blitting the contents of another window.
+     *
+     * \param windowBlitId The id of the window from which to blit
+     */
+    void setProjectionBlit(int windowBlitId);
+
+    /**
+     * This function must be called by users of this class whenever the total number of
+     * windows has changed.
+     *
+     * \param newWindowCount the number of windows after the change
+     */
+    void updateWindowCount(int newWindowCount);
+
 signals:
     void windowChanged(int monitorIndex, int windowIndex, const QRectF& newDimensions);
 
@@ -172,6 +187,7 @@ private:
     QWidget* createSphericalMirrorWidget();
     QWidget* createCylindricalWidget();
     QWidget* createEquirectangularWidget();
+    QWidget* createBlitWidget();
 
     void onSizeXChanged(int newValue);
     void onSizeYChanged(int newValue);
@@ -236,6 +252,12 @@ private:
         QWidget* widget = nullptr;
         QComboBox* quality = nullptr;
     } _equirectangular;
+
+    struct {
+        QWidget* widget = nullptr;
+        QComboBox* windowId = nullptr;
+        QLabel* unavailable = nullptr;
+    } _blit;
 
     const QIcon _lockIcon;
     const QIcon _unlockIcon;
