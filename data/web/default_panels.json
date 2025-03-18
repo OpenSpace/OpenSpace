@@ -1,0 +1,17 @@
+{
+    "0": { "id": "scene", "name": "Scene", "visible": true, "enabled": true },
+    "1": { "id": "settings", "name": "Settings", "visible": false, "enabled": true },
+    "2": { "id": "navigation", "name": "Navigation", "visible": true, "enabled": true },
+    "3": { "id": "timePanel", "name": "Date & Time", "visible": true, "enabled": true },
+    "4": { "id": "sessionRecording", "name": "Session Recording", "visible": false, "enabled": true },
+    "5": { "id": "geoLocation", "name": "Geo Location", "visible": false, "enabled": true },
+    "6": { "id": "screenSpaceRenderables", "name": "ScreenSpace Renderables", "visible": false, "enabled": true },
+    "7": { "id": "exoplanets", "name": "Exoplanets", "visible": false, "enabled": true },
+    "8": { "id": "userPanels", "name": "User Panels", "visible": false, "enabled": true },
+    "9": { "id": "actions", "name": "Actions", "visible": false, "enabled": true },
+    "10": { "id": "skyBrowser", "name": "SkyBrowser", "visible": false, "enabled": true },
+    "11": { "id": "mission", "name": "Mission", "visible": false, "enabled": false },
+    "12": { "id": "flightControl", "name": "Flight Control", "visible": false, "enabled": true },
+    "13": { "id": "keybindingsLayout", "name": "Keybindings", "visible": false, "enabled": true },
+    "14": { "id": "gettingStartedTour", "name": "Getting Started Tour", "visible": false, "enabled": true }
+}

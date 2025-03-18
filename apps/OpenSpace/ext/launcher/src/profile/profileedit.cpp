@@ -35,6 +35,7 @@
 #include "profile/modulesdialog.h"
 #include "profile/propertiesdialog.h"
 #include "profile/timedialog.h"
+#include "profile/uipanelsdialog.h"
 #include <openspace/scene/profile.h>
 #include <ghoul/format.h>
 #include <QDialogButtonBox>
@@ -307,6 +308,21 @@ void ProfileEdit::createWidgets() {
     rightLayout->addWidget(new Line);
     {
         QBoxLayout* container = new QVBoxLayout;
+        _uiPanelVisibilityLabel = new QLabel("User Interface Panels");
+        _uiPanelVisibilityLabel->setObjectName("heading");
+        _uiPanelVisibilityLabel->setWordWrap(true);
+        container->addWidget(_uiPanelVisibilityLabel);
+
+        QPushButton* uiPanelEdit = new QPushButton("Edit");
+        connect(uiPanelEdit, &QPushButton::clicked, this, &ProfileEdit::openUiPanels);
+        uiPanelEdit->setLayoutDirection(Qt::RightToLeft);
+        uiPanelEdit->setAccessibleName("Edit user interface panels");
+        container->addWidget(uiPanelEdit);
+        rightLayout->addLayout(container);
+    }
+    rightLayout->addWidget(new Line);
+    {
+        QBoxLayout* container = new QVBoxLayout;
         _additionalScriptsLabel = new QLabel("Additional Scripts");
         _additionalScriptsLabel->setObjectName("heading");
         _additionalScriptsLabel->setWordWrap(true);
@@ -373,6 +389,10 @@ void ProfileEdit::openMeta() {
 void ProfileEdit::openModules() {
     ModulesDialog(this, &_profile.modules).exec();
     _modulesLabel->setText(labelText(_profile.modules.size(), "Modules"));
+}
+
+void ProfileEdit::openUiPanels() {
+    UiPanelsDialog(this, &_profile.uiPanelVisibility).exec();
 }
 
 void ProfileEdit::openProperties() {
