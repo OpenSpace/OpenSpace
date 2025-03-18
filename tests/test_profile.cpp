@@ -807,6 +807,7 @@ TEST_CASE("Removing non-exisiting asset (ignored)", "[profile]") {
 //
 TEST_CASE("Save settings to profile", "[profile]") {
     properties::PropertyOwner owner({ "base" });
+    global::rootPropertyOwner->addPropertySubOwner(owner);
     properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner.addProperty(p1);
     properties::StringProperty p2(properties::Property::PropertyInfo("p2", "c", "d"));
@@ -827,6 +828,8 @@ TEST_CASE("Save settings to profile", "[profile]") {
     Profile profile;
     profile.version = Profile::CurrentVersion;
     profile.saveCurrentSettingsToProfile(owner, "current-time", state);
+
+    global::rootPropertyOwner->removePropertySubOwner(owner);
 
     REQUIRE(profile.properties.size() == 2);
     CHECK(
