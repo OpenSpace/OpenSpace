@@ -24,7 +24,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
 
 TEST_CASE("Regression: 527", "[regression]") {
     // Error in OptionProperty if values not starting at 0 are used

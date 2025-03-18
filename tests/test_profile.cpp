@@ -27,8 +27,8 @@
 #include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <openspace/navigation/navigationstate.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/scene/profile.h>
 #include <ghoul/filesystem/filesystem.h>
