@@ -46,9 +46,9 @@ namespace openspace {
         size_t _stepsCount = 50000;
         float _stepLength = 0.001f;
 
-        properties::FloatProperty _MBlackHole;
+        properties::FloatProperty _solarMass;
 
-        float _rsBlackHole = 1.0f;
+        float _rs = 1.0f;
         float _rEnvmap = 60.0f;
         float _rCamera = 20.0f;
 
