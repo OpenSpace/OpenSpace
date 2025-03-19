@@ -36,6 +36,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>

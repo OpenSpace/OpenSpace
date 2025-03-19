@@ -33,7 +33,7 @@
 #include <modules/globebrowsing/src/tileindex.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
 #include <modules/globebrowsing/src/timequantizer.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <unordered_map>

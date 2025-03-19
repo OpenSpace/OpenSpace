@@ -30,6 +30,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionary.h>
 
 namespace {

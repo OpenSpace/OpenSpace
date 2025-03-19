@@ -1,0 +1,17 @@
+-- Bool
+-- This example adds a dashboard item that shows the state of a boolean property.
+
+local Item = {
+  Identifier = "DashboardItemPropertyValue_Example_Bool",
+  Type = "DashboardItemPropertyValue",
+  URI = "NavigationHandler.OrbitalNavigator.Friction.RotationalFriction",
+  DisplayString = "Rotational Friction is: {}"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

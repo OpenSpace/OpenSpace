@@ -27,10 +27,10 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/transferfunction.h>

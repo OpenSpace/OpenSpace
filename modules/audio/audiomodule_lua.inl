@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/engine/moduleengine.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace {
 

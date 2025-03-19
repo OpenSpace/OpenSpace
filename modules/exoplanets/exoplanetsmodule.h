@@ -28,9 +28,9 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <filesystem>
 

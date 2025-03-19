@@ -27,8 +27,8 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/selectionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/selectionproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/rendering/labelscomponent.h>

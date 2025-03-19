@@ -67,11 +67,16 @@ namespace {
         "the value itself will be displayed), or it must contain extact one or more "
         "instances of {}, which will be replaced with the value(s) of the property "
         "during rendering. For scalar types, there has to be exactly one instance of {}, "
-        "for vector types, there need to be as many {} as there are compoents in the "
-        "vector, for example two {} for vec2 types, three for vec3 types, etc.",
+        "for vector types, there need to be as many {} as there are components in the "
+        "vector, for example two {} for vec2 types, three for vec3 types, etc. For more "
+        "information on how to structure the formatting string, see the documentation at "
+        "https://en.cppreference.com/w/cpp/utility/format/spec.",
         openspace::properties::Property::Visibility::User
     };
 
+    // This `DashboardItem` will show the value of the provided property. Depending on the
+    // type of the property, the `DisplayString` will have to be adapted. See the
+    // documentation for the `DisplayString` for more information.
     struct [[codegen::Dictionary(DashboardItemPropertyValue)]] Parameters {
         // [[codegen::verbatim(PropertyUriInfo.description)]]
         std::optional<std::string> uri [[codegen::key("URI")]];
