@@ -28,20 +28,17 @@
 #include <modules/server/include/jsonconverters.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scene/profile.h>
-#include <ghoul/logging/logmanager.h>
-
-using nlohmann::json;
 
 namespace openspace {
 
-    bool ProfileTopic::isDone() const {
-        return true;
-    }
+bool ProfileTopic::isDone() const {
+    return true;
+}
 
-    void ProfileTopic::handleJson(const nlohmann::json&) {
-        const std::map<std::string, bool> panels = global::profile->uiPanelVisibility;
-        const nlohmann::json data = panels;
-        _connection->sendJson(wrappedPayload(data));
-    }
+void ProfileTopic::handleJson(const nlohmann::json&) {
+    const std::map<std::string, bool> panels = global::profile->uiPanelVisibility;
+    const nlohmann::json data = panels;
+    _connection->sendJson(wrappedPayload(data));
+}
 
 } // namespace openspace

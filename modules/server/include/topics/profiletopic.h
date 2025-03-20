@@ -31,16 +31,14 @@ using nlohmann::json;
 
 namespace openspace {
 
-    class ProfileTopic : public Topic {
-    public:
-        ProfileTopic() = default;
-        ~ProfileTopic() override = default;
+class ProfileTopic : public Topic {
+public:
+    ProfileTopic() = default;
+    ~ProfileTopic() override = default;
 
-        void handleJson(const nlohmann::json& json) override;
-        bool isDone() const override;
-
-    private:
-    };
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
+};
 
 } // namespace openspace
 
