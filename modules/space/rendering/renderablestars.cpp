@@ -303,21 +303,21 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UseProperMotionInfo = {
         "UseProperMotion",
         "Enable proper motion of stars",
-        "If this value is enabled and the loaded data file contains velocity information "
-        "for the stars, the velocity information is used to move the stars' position "
-        "to show their proper motion."
+        "If this setting is enabled and the loaded data file contains velocity "
+        "information for the stars, that information is used to move the stars' position "
+        "with progressing to show their proper motion through space."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ProperMotionEpochInfo = {
         "ProperMotionEpoch",
         "Proper motion epoch",
-        "This value is the number of J2000 seconds that is the epoch for the positions "
-        "provided in the SPECK file. This value is only needed if the `ProperMotion` is "
-        "enabled as well, in which case it determines the epoch at which the position of "
-        "the star starts, so if the time in the application is at the epoch, the stars "
-        "will be exactly at their determined position without any velocity-based offset. "
-        "If thi value is not specified, the current time will be used as the epoch "
-        "instead."
+        "This value defines the epoch for the positions provided in the data file in "
+        "J2000 seconds. This value is only needed if the `ProperMotion` is enabled as "
+        "well, in which case it determines the epoch at which the position of the star "
+        "starts. This means that if the time in the application is at the epoch, the "
+        "stars will be exactly at their determined position without any velocity-based "
+        "offset. If this value is not specified, 2000-01-01 12:00:00 will be used as the "
+        "epoch instead."
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableFadeInInfo = {
@@ -499,7 +499,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         glm::vec2(100.f)
     )
     , _useProperMotion(UseProperMotionInfo, true)
-    , _properMotionEpoch(ProperMotionEpochInfo, Time::now().j2000Seconds())
+    , _properMotionEpoch(ProperMotionEpochInfo, 0.0)
     , _enableFadeInDistance(EnableFadeInInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
