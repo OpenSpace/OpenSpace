@@ -36,7 +36,9 @@ namespace {
 
 namespace openspace::globebrowsing {
 
-GeoJsonManager::GeoJsonManager() : properties::PropertyOwner({ "GeoJson" }) {}
+GeoJsonManager::GeoJsonManager()
+    : properties::PropertyOwner({ "GeoJson", "Geometry Overlays" })
+{}
 
 void GeoJsonManager::initialize(RenderableGlobe* globe) {
     ghoul_assert(globe, "No globe provided");
