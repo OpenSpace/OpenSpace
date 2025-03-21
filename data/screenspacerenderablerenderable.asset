@@ -1,0 +1,22 @@
+-- Basic
+-- Create a screenspace image plane that shows the content of a local image file on disk.
+-- In this case we use a test image from the OpenSpace/data folder.
+
+local Object = {
+  Type = "ScreenSpaceRenderableRenderable",
+  Identifier = "Test",
+  Renderable = {
+    Type = "RenderableSphericalGrid",
+    Opacity = 1.0,
+    Color = { 0.3, 0.84, 1.0 },
+    LineWidth = 2.0
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(Object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Object)
+end)
