@@ -14,6 +14,7 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <openspace/util/updatestructures.h>
 
 #include <filesystem>
 #include <vector>
@@ -112,10 +113,9 @@ namespace openspace {
         bindSSBOData(_program, "ssbo_warp_table", _ssboDataBinding, _ssboData);
     }
 
-    void RenderableBlackHole::render(const RenderData&, RendererTasks&) {
+    void RenderableBlackHole::render(const RenderData& renderData, RendererTasks&) {
         _program->activate();
         bindFramebuffer();
-
         ghoul::opengl::TextureUnit enviromentUnit;
         if (!bindTexture(_uniformCache.environmentTexture, enviromentUnit, _environmentTexture)) {
             LWARNING("UniformCache is missing 'environmentTexture'");
@@ -127,21 +127,23 @@ namespace openspace {
         }
 
         SendSchwarzchildTableToShader();
+        SendStarKDTreeToShader();
 
         interaction::OrbitalNavigator::CameraRotationDecomposition camRot = global::navigationHandler->orbitalNavigator().decomposeCameraRotationSurface(
-            CameraPose{global::navigationHandler->camera()->positionVec3(),  global::navigationHandler->camera()->rotationQuaternion()},
+            CameraPose{renderData.camera.positionVec3(), renderData.camera.rotationQuaternion()},
             *global::navigationHandler->anchorNode()
         );
-   
+
+        
         _program->setUniform(
             _uniformCache.cameraRotationMatrix,
             glm::fmat4(glm::mat4_cast(camRot.localRotation))
         );
-        glm::fmat4 worldRotationMatrix = glm::mat4_cast(camRot.globalRotation);
+
         _program->setUniform(
             _uniformCache.worldRotationMatrix,
-            worldRotationMatrix
-        );
+            glm::fmat4(glm::mat4_cast(camRot.globalRotation))
+            );
      
         drawQuad();
 
