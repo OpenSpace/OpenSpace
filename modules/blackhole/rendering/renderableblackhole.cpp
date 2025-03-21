@@ -66,8 +66,11 @@ namespace openspace {
     RenderableBlackHole::~RenderableBlackHole() {}
 
     void RenderableBlackHole::initialize() {
-        global::navigationHandler->camera()->setRotation(glm::dquat(0,0,0,0));
         _schwarzschildWarpTable = std::vector<float>(_rayCount * 2, 0.f);
+
+        _starKDTree.build("${BASE}/sync/http/stars_du/6/stars.speck", glm::vec3(0));
+
+        flatDataStar = _starKDTree.flatTree();
     }
 
     void RenderableBlackHole::initializeGL() {
@@ -99,6 +102,7 @@ namespace openspace {
     bool RenderableBlackHole::isReady() const {
         return _program != nullptr;
     }
+
     void RenderableBlackHole::update(const UpdateData&) {
         glm::vec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
         glm::vec3 anchorNodePosition = global::navigationHandler->anchorNode()->position();
@@ -110,7 +114,8 @@ namespace openspace {
 
             schwarzchild(_rs, _rEnvmap, _rayCount, _stepsCount, 1.0f / _rCamera, _stepLength, _schwarzschildWarpTable.data());
         }
-        bindSSBOData(_program, "ssbo_warp_table", _ssboDataBinding, _ssboData);
+        bindSSBOData(_program, "ssbo_warp_table", _ssboSchwarzschildDataBinding, _ssboSchwarzschildWarpTable);
+        bindSSBOData(_program, "ssbo_star_map", _ssboStarDataBinding, _ssboStarKDTree);
     }
 
     void RenderableBlackHole::render(const RenderData& renderData, RendererTasks&) {
@@ -153,8 +158,7 @@ namespace openspace {
 
     void RenderableBlackHole::SendSchwarzchildTableToShader()
     {
-        // Update SSBO Index array with accumulated stars in all chunks.
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboData);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboSchwarzschildWarpTable);
 
         const size_t indexBufferSize = _schwarzschildWarpTable.size() * sizeof(float);
 
@@ -162,6 +166,22 @@ namespace openspace {
             GL_SHADER_STORAGE_BUFFER,
             indexBufferSize,
             _schwarzschildWarpTable.data(),
+            GL_STREAM_DRAW
+        );
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    }
+
+    void RenderableBlackHole::SendStarKDTreeToShader()
+    {
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboStarKDTree);
+
+        const size_t indexBufferSize = flatDataStar.size() * sizeof(float);
+
+        glBufferData(
+            GL_SHADER_STORAGE_BUFFER,
+            indexBufferSize,
+            flatDataStar.data(),
             GL_STREAM_DRAW
         );
 

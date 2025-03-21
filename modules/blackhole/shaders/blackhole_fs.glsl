@@ -15,12 +15,18 @@ layout (std430) buffer ssbo_warp_table {
   float schwarzschildWarpTable[];
 };
 
+layout (std430) buffer ssbo_star_map {
+    float starKDTree[];
+};
 
 const float PI = 3.1415926535897932384626433832795f;
 const float VIEWGRIDZ = -1.0f;
 const float INF = 1.0f/0.0f;
 
-// Math
+
+/**********************************************************
+                        Math
+***********************************************************/
 
 float lerp(float P0, float P1, float t) {
     return P0 + t * (P1 - P0);
@@ -34,16 +40,18 @@ float atan2(float a, float b){
     return 0.0f;
 }
 
-// Conversions
+/**********************************************************
+                        Conversions
+***********************************************************/
 
-vec2 cartesianToSpherical(vec3 cartisian) {
-    float theta = atan2(sqrt(cartisian.x * cartisian.x + cartisian.y * cartisian.y) , cartisian.z);
-    float phi = atan2(cartisian.y, cartisian.x);
+vec2 cartesianToSpherical(vec3 cartesian) {
+    float theta = atan2(sqrt(cartesian.x * cartesian.x + cartesian.y * cartesian.y) , cartesian.z);
+    float phi = atan2(cartesian.y, cartesian.x);
 
-    return vec2(phi, theta);
+    return vec2(theta, phi);
 }
 
-vec3 sphericalToCartesian(float phi, float theta){
+vec3 sphericalToCartesian(float theta, float phi){
     float x = sin(theta)*cos(phi);
     float y = sin(theta)*sin(phi);
     float z = cos(theta);
@@ -52,14 +60,15 @@ vec3 sphericalToCartesian(float phi, float theta){
 }
 
 vec2 sphericalToUV(vec2 sphereCoords){
-    float u = sphereCoords.x / (2.0f * PI) + 0.5f;
-    float v = mod(sphereCoords.y, PI) / PI;
+    float u = sphereCoords.y / (2.0f * PI) + 0.5f;
+    float v = mod(sphereCoords.x, PI) / PI;
     
     return vec2(u, v);
 }
 
-//Warp Table
-
+/**********************************************************
+                        Warp Table
+***********************************************************/
 ivec2 bstWarpTable(float phi){
     float midPhi = -1.0f;
     float deltaPhi = -1.0f;
@@ -129,13 +138,51 @@ float getEndAngleFromTable(float phi){
 }
 
 vec2 applyBlackHoleWarp(vec2 cameraOutSphereCoords){
-    float phi = cameraOutSphereCoords.x;
-    float theta = cameraOutSphereCoords.y;
+    float theta = cameraOutSphereCoords.x;
+    float phi = cameraOutSphereCoords.y;
     theta = getEndAngleFromTable(theta);
-    return vec2(phi, theta);
+    return vec2(theta, phi);
 }
 
-// Fragment shader function
+/**********************************************************
+                         Star Map
+***********************************************************/
+
+float angularDist(vec2 a, vec2 b) {
+    float dTheta = a.x - b.x;
+    float dPhi = a.y - b.y;
+    return sqrt(dTheta * dTheta + sin(a.x) * sin(b.x) * dPhi * dPhi);
+}
+
+vec4 searchNearestStar(vec3 sphericalCoords) {
+    const int NODE_SIZE = 6;
+    const int SIZE = starKDTree.length() / NODE_SIZE;
+    int index = 0;
+    int nodeIndex = 0;
+    int depth = 0;
+    int axis = -1;
+
+    while(index < SIZE && starKDTree[nodeIndex] > 0.0f){
+        if (angularDist(sphericalCoords.yz, vec2(starKDTree[nodeIndex + 1], starKDTree[nodeIndex + 2])) < 0.001f){
+                return vec4(0.9f, 0.9f, 0.8f, 0.2f);
+        }
+
+        axis = depth % 2 + 1;
+        if(sphericalCoords[axis] < starKDTree[nodeIndex + axis]){
+            index = 2 * index + 1;
+        } else {
+            index = 2 * index + 2;
+        }
+        nodeIndex = index * NODE_SIZE;
+        depth += 1;
+    }
+    return vec4(0.0f);
+}
+
+
+/**********************************************************
+                        Fragment shader
+***********************************************************/
 
 Fragment getFragment() {
     Fragment frag;
@@ -152,7 +199,7 @@ Fragment getFragment() {
     #if SHOW_BLACK_HOLE == 1
     // Apply black hole warping to spherical coordinates
     envMapSphericalCoords = applyBlackHoleWarp(sphericalCoords);
-    if (isnan(envMapSphericalCoords.y)) {
+    if (isnan(envMapSphericalCoords.x)) {
         // If inside the event horizon
         frag.color = vec4(0.0f);
         return frag;
@@ -180,6 +227,8 @@ Fragment getFragment() {
     sphericalCoords = cartesianToSpherical(envMapCoords.xyz);
     vec2 uv = sphericalToUV(sphericalCoords);
     vec4 texColor = texture(environmentTexture, uv);
+    
+    texColor = clamp(texColor + searchNearestStar(vec3(0.0f, sphericalCoords.x, sphericalCoords.y)), 0.f, 1.f);
     
     frag.color = texColor;
     return frag;

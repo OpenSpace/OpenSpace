@@ -7,6 +7,7 @@
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/bufferbinding.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <modules/blackhole/rendering/kdtree.h>
 
 namespace openspace {
 
@@ -23,13 +24,14 @@ namespace openspace {
         bool isReady() const override;
 
         void render(const RenderData& data, RendererTasks& rendererTask) override;
-        void SendSchwarzchildTableToShader();
         void update(const UpdateData& data) override;
 
 
         static documentation::Documentation Documentation();
 
     private:
+        void SendSchwarzchildTableToShader();
+        void SendStarKDTreeToShader();
         void bindSSBOData(ghoul::opengl::ProgramObject* program,
             const std::string& ssboName,
             std::unique_ptr<ghoul::opengl::BufferBinding<ghoul::opengl::bufferbinding::Buffer::ShaderStorage>>& ssboBinding,
@@ -54,13 +56,21 @@ namespace openspace {
 
         ViewPort _viewport{};
 
+
+
         std::vector<float> _schwarzschildWarpTable;
+        std::vector<float> flatDataStar;
+        KDTree _starKDTree{};
+
         std::unique_ptr<ghoul::opengl::BufferBinding<
-            ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboDataBinding;
+            ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboSchwarzschildDataBinding;
+        std::unique_ptr<ghoul::opengl::BufferBinding<
+            ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboStarDataBinding;
 
         GLuint _quadVao = 0;
         GLuint _quadVbo = 0;
-        GLuint _ssboData = 0;
+        GLuint _ssboSchwarzschildWarpTable = 0;
+        GLuint _ssboStarKDTree = 0;
 
         UniformCache(environmentTexture, viewGrid, worldRotationMatrix, cameraRotationMatrix) _uniformCache;
 

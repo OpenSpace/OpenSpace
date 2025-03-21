@@ -29,6 +29,7 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/blackholemodule.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableblackhole.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/viewport.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/kdtree.h
 )
 
 # Define Source Files
@@ -36,6 +37,7 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/blackholemodule.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableblackhole.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/viewport.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/kdtree.cpp
 )
 
 # Define Shader Files
@@ -63,8 +65,8 @@ project(blackhole_cuda_prj CUDA)
 find_package(CUDA REQUIRED)
 # Define CUDA Files
 set(CUDA_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/blackhole_cuda.cu
   ${CMAKE_CURRENT_SOURCE_DIR}/cuda/blackhole_cuda.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/blackhole_cuda.cu
 )
 source_group("CUDA Files" FILES ${CUDA_FILES})
 
