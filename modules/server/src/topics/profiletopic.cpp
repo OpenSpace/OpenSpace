@@ -36,8 +36,10 @@ bool ProfileTopic::isDone() const {
 }
 
 void ProfileTopic::handleJson(const nlohmann::json&) {
-    const std::map<std::string, bool> panels = global::profile->uiPanelVisibility;
-    const nlohmann::json data = panels;
+    const nlohmann::json data = {
+        { "uiPanelVisibility", global::profile->uiPanelVisibility },
+        { "markNodes", global::profile->markNodes }
+    };
     _connection->sendJson(wrappedPayload(data));
 }
 
