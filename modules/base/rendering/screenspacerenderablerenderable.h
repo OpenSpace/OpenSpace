@@ -22,45 +22,42 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACERENDERABLERENDERABLE___H__
+#define __OPENSPACE_MODULE_BASE___SCREENSPACERENDERABLERENDERABLE___H__
 
-#include <modules/base/rendering/screenspaceframebuffer.h>
+#include <modules/base//rendering/screenspaceframebuffer.h>
 
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/rendering/dashboard.h>
-
-namespace ghoul::fontrendering {
-    class Font;
-    class FontRenderer;
-} // namespace ghoul::fontrendering
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec3property.h>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-namespace scripting { struct LuaLibrary; }
+class Renderable;
 
-class ScreenSpaceDashboard : public ScreenSpaceFramebuffer {
+namespace documentation { struct Documentation; }
+
+class ScreenSpaceRenderableRenderable : public ScreenSpaceFramebuffer {
 public:
-    explicit ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceDashboard() override = default;
+    using RenderFunction = std::function<void()>;
+
+    explicit ScreenSpaceRenderableRenderable(const ghoul::Dictionary& dictionary);
+    virtual ~ScreenSpaceRenderableRenderable() override;
 
     bool initializeGL() override;
-
+    bool deinitializeGL() override;
     void update() override;
-
-    Dashboard& dashboard();
-    const Dashboard& dashboard() const;
-
-    static scripting::LuaLibrary luaLibrary();
 
     static documentation::Documentation Documentation();
 
 private:
-    Dashboard _dashboard;
-    properties::BoolProperty _useMainDashboard;
+    ghoul::mm_unique_ptr<Renderable> _renderable = nullptr;
+
+    properties::Vec3Property _cameraPosition;
+    properties::Vec3Property _cameraCenter;
+    properties::Vec3Property _cameraUp;
+    properties::FloatProperty _cameraFov;
 };
 
-} // namespace openspace
+} //namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#endif // __OPENSPACE_MODULE_BASE___SCREENSPACERENDERABLERENDERABLE___H__
