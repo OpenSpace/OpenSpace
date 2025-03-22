@@ -178,7 +178,7 @@ public:
     /// Removes an asset unless the `ignoreUpdates` member is set to `true`
     void removeAsset(const std::string& path);
 
-    static constexpr Version CurrentVersion = Version{ 1, 3 };
+    static constexpr Version CurrentVersion = Version{ 1, 4 };
 
     Version version = CurrentVersion;
     std::vector<Module> modules;
@@ -192,6 +192,7 @@ public:
     std::optional<CameraType> camera;
     std::vector<std::string> markNodes;
     std::vector<std::string> additionalScripts;
+    std::map<std::string, bool> uiPanelVisibility;
 
     bool ignoreUpdates = false;
 

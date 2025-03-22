@@ -48,6 +48,7 @@ set(HEADER_FILES
   include/profile/timedialog.h
   include/profile/profileedit.h
   include/profile/propertiesdialog.h
+  include/profile/uipanelsdialog.h
   include/sgctedit/displaywindowunion.h
   include/sgctedit/monitorbox.h
   include/sgctedit/sgctedit.h
@@ -78,6 +79,7 @@ set(SOURCE_FILES
   src/profile/timedialog.cpp
   src/profile/profileedit.cpp
   src/profile/propertiesdialog.cpp
+  src/profile/uipanelsdialog.cpp
   src/sgctedit/sgctedit.cpp
   src/sgctedit/displaywindowunion.cpp
   src/sgctedit/monitorbox.cpp
