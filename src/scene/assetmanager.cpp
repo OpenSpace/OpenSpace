@@ -144,6 +144,90 @@ void AssetManager::deinitialize() {
     _toBeDeleted.clear();
 }
 
+void AssetManager::runRemoveQueue() {
+    ZoneScoped;
+    for (const std::string& asset : _assetRemoveQueue) {
+        std::filesystem::path path = generateAssetPath(_assetRootDirectory, asset);
+
+        const auto it = std::find_if(
+            _assets.cbegin(),
+            _assets.cend(),
+            [&path](const std::unique_ptr<Asset>& a) { return a->path() == path; }
+        );
+        if (it == _assets.cend()) {
+            LWARNING(std::format("Tried to remove unknown asset '{}'. Skipping", asset));
+            continue;
+        }
+
+        Asset* a = it->get();
+        auto jt = std::find(_rootAssets.cbegin(), _rootAssets.cend(), a);
+        if (jt == _rootAssets.cend()) {
+            // Trying to remove an asset from the middle of the tree might have some
+            // unexpected behavior since if we were to remove an asset with children, we
+            // would have to unload those children as well. Also, we don't know if that
+            // Asset's parents are actually requiring the asset we are about to remove so
+            // we might break things horribly for people.
+            // We should figure out a way to fix this without reintroducing the
+            // require/request confusion, but until then, we'll prohibit removing non-root
+            // assets
+
+            LWARNING("Tried to remove an asset that was not on the root level. Skipping");
+            continue;
+        }
+
+        _rootAssets.erase(jt);
+        // Even though we are removing a root asset, we might not be the only person that
+        // is interested in the asset, so we can only deinitialize it if we were, in fact,
+        // the only person, meaning that the asset never had any parents
+        if (!a->hasInitializedParent()) {
+            a->deinitialize();
+        }
+        if (!a->hasLoadedParent()) {
+            a->unload();
+        }
+        global::profile->removeAsset(asset);
+    }
+    _assetRemoveQueue.clear();
+}
+
+void AssetManager::runAddQueue() {
+    ZoneScoped;
+    for (const std::string& asset : _assetAddQueue) {
+
+        const std::filesystem::path path = generateAssetPath(_assetRootDirectory, asset);
+        Asset* a = nullptr;
+        try {
+            a = retrieveAsset(path, "");
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC(e.component, e.message);
+            continue;
+        }
+
+        const auto it = std::find(_rootAssets.cbegin(), _rootAssets.cend(), a);
+        if (it != _rootAssets.cend()) {
+            // Do nothing if the asset has already been requested on a root level. Even if
+            // another asset has already required this asset, calling `load`,
+            // `startSynchronization`, etc on it are still fine since all of those
+            // functions bail out early if they already have been called before
+            continue;
+        }
+
+        a->load(nullptr);
+        if (a->isFailed()) {
+            // The loading might fail because of any number of reasons, most likely of
+            // them some Lua syntax error
+            continue;
+        }
+        _rootAssets.push_back(a);
+        a->startSynchronizations();
+
+        _toBeInitialized.push_back(a);
+        global::profile->addAsset(asset);
+    }
+    _assetAddQueue.clear();
+}
+
 void AssetManager::update() {
     ZoneScoped;
 
@@ -187,87 +271,10 @@ void AssetManager::update() {
         break;
     }
 
-    // Add all assets that have been queued for loading since the last `update` call
-    for (const std::string& asset : _assetAddQueue) {
-        ZoneScopedN("Adding queued assets");
-
-        const std::filesystem::path path = generateAssetPath(_assetRootDirectory, asset);
-        Asset* a = nullptr;
-        try {
-            a = retrieveAsset(path, "");
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC(e.component, e.message);
-            continue;
-        }
-
-        const auto it = std::find(_rootAssets.cbegin(), _rootAssets.cend(), a);
-        if (it != _rootAssets.cend()) {
-            // Do nothing if the asset has already been requested on a root level. Even if
-            // another asset has already required this asset, calling `load`,
-            // `startSynchronization`, etc on it are still fine since all of those
-            // functions bail out early if they already have been called before
-            continue;
-        }
-
-        a->load(nullptr);
-        if (a->isFailed()) {
-            // The loading might fail because of any number of reasons, most likely of
-            // them some Lua syntax error
-            continue;
-        }
-        _rootAssets.push_back(a);
-        a->startSynchronizations();
-
-        _toBeInitialized.push_back(a);
-        global::profile->addAsset(asset);
-    }
-    _assetAddQueue.clear();
-
     // Remove assets
-    for (const std::string& asset : _assetRemoveQueue) {
-        ZoneScopedN("Removing queued assets");
-        std::filesystem::path path = generateAssetPath(_assetRootDirectory, asset);
-
-        const auto it = std::find_if(
-            _assets.cbegin(),
-            _assets.cend(),
-            [&path](const std::unique_ptr<Asset>& a) { return a->path() == path; }
-        );
-        if (it == _assets.cend()) {
-            LWARNING(std::format("Tried to remove unknown asset '{}'. Skipping", asset));
-            continue;
-        }
-
-        Asset* a = it->get();
-        auto jt = std::find(_rootAssets.cbegin(), _rootAssets.cend(), a);
-        if (jt == _rootAssets.cend()) {
-            // Trying to remove an asset from the middle of the tree might have some
-            // unexpected behavior since if we were to remove an asset with children, we
-            // would have to unload those children as well. Also, we don't know if that
-            // Asset's parents are actually requiring the asset we are about to remove so
-            // we might break things horribly for people.
-            // We should figure out a way to fix this without reintroducing the
-            // require/request confusion, but until then, we'll prohibit removing non-root
-            // assets
-
-            LWARNING("Tried to remove an asset that was not on the root level. Skipping");
-            continue;
-        }
-
-        _rootAssets.erase(jt);
-        // Even though we are removing a root asset, we might not be the only person that
-        // is interested in the asset, so we can only deinitialize it if we were, in fact,
-        // the only person, meaning that the asset never had any parents
-        if (!a->hasInitializedParent()) {
-            a->deinitialize();
-        }
-        if (!a->hasLoadedParent()) {
-            a->unload();
-        }
-        global::profile->removeAsset(asset);
-    }
-    _assetRemoveQueue.clear();
+    runRemoveQueue();
+    // Add all assets that have been queued for loading since the last `update` call
+    runAddQueue();
 
     // Change state based on synchronizations. If any of the unfinished synchronizations
     // has finished since the last call of this function, we should notify the assets and
@@ -315,6 +322,12 @@ void AssetManager::remove(const std::string& path) {
     // First check if the path is already in the add queue. If so, remove it from there
     _assetAddQueue.remove(path);
     _assetRemoveQueue.push_back(path);
+}
+
+void AssetManager::reload(const std::string& path) {
+    ghoul_precondition(!path.empty(), "Path must not be empty");
+    _assetRemoveQueue.push_back(path);
+    _assetAddQueue.push_back(path);
 }
 
 std::vector<const Asset*> AssetManager::allAssets() const {
@@ -1042,6 +1055,7 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
         {
             codegen::lua::Add,
             codegen::lua::Remove,
+            codegen::lua::Reload,
             codegen::lua::RemoveAll,
             codegen::lua::IsLoaded,
             codegen::lua::AllAssets,
