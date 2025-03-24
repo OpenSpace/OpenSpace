@@ -55,7 +55,7 @@ documentation::Documentation ScreenSpaceFramebuffer::Documentation() {
 
 ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
-    , _size(SizeInfo, glm::vec4(0), glm::vec4(0), glm::vec4(16384))
+    , _size(SizeInfo, glm::vec4(16), glm::vec4(16), glm::vec4(16384))
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -73,11 +73,6 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictiona
         else {
             setIdentifier("ScreenSpaceFramebuffer" + std::to_string(iIdentifier));
         }
-    }
-
-    if (_guiName.empty()) {
-        // Adding an extra space to the user-facing name as it looks nicer
-        setGuiName("ScreenSpaceFramebuffer " + std::to_string(iIdentifier));
     }
 
     const glm::vec2 resolution = global::windowDelegate->currentDrawBufferResolution();
@@ -114,15 +109,13 @@ void ScreenSpaceFramebuffer::render(const RenderData& renderData) {
 
     if (!_renderFunctions.empty()) {
         std::array<GLint, 4> viewport;
-        //glGetIntegerv(GL_VIEWPORT, viewport);
-        global::renderEngine->openglStateCache().viewport(viewport.data());
+        glGetIntegerv(GL_VIEWPORT, viewport.data());
         glViewport(
-            static_cast<GLint>(-size.x * xratio),
-            static_cast<GLint>(-size.y * yratio),
-            static_cast<GLsizei>(resolution.x * xratio),
-            static_cast<GLsizei>(resolution.y * yratio)
+            static_cast<GLint>(size.x),
+            static_cast<GLint>(size.y),
+            static_cast<GLsizei>(size.z),
+            static_cast<GLsizei>(size.w)
         );
-        global::renderEngine->openglStateCache().setViewportState(viewport.data());
 
         const GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
         _framebuffer->activate();
