@@ -185,26 +185,13 @@ int OptionProperty::fromLuaConversion(lua_State* state) const {
 }
 
 std::string OptionProperty::generateAdditionalJsonDescription() const {
-    // @REFACTOR from selectionproperty.cpp, possible refactoring? ---abock
-    std::string result = "{ \"" + OptionsKey + "\": [";
-    for (size_t i = 0; i < _options.size(); i++) {
-        const Option& o = _options[i];
-        const std::string v = std::to_string(o.value);
-        const std::string vSan = escapedJson(v);
-        const std::string d = o.description;
-        const std::string dSan = escapedJson(d);
+    nlohmann::json data = {};
 
-        result += '{';
-        result += std::format(R"("{}": "{}")", vSan, dSan);
-        result += '}';
-
-        if (i != _options.size() - 1) {
-            result += ",";
-        }
+    for (const Option& option : _options) {
+        data[std::to_string(option.value)] = option.description;
     }
 
-    result += "] }";
-    return result;
+    return nlohmann::json({{ OptionsKey, data }}).dump();
 }
 
 } // namespace openspace::properties
