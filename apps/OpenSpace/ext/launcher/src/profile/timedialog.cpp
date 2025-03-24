@@ -102,6 +102,9 @@ void TimeDialog::createWidgets() {
         _absoluteEdit->setDateTime(QDateTime::currentDateTime());
         _absoluteEdit->setAccessibleName("Set absolute time");
         l->addWidget(_absoluteEdit);
+
+        l->addStretch();
+
         _tabWidget->addTab(container, "Absolute");
     }
     {
@@ -116,6 +119,16 @@ void TimeDialog::createWidgets() {
             "String for relative time to actual (e.g. \"-1d\" for back 1 day)"
         );
         l->addWidget(_relativeEdit);
+
+        QLabel* desc = new QLabel(
+            "This field modifies the default start time. It has to be of the form "
+            "[-]XX(s,m,h,d,M,y). For example '-1d' will cause the profile to start at "
+            "yesterday's date."
+        );
+        desc->setObjectName("information");
+        desc->setWordWrap(true);
+        l->addWidget(desc);
+
         _tabWidget->addTab(container, "Relative");
     }
 
