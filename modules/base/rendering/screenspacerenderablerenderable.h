@@ -27,12 +27,19 @@
 
 #include <modules/base//rendering/screenspaceframebuffer.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 
 namespace openspace {
 
+namespace properties { class PropertyOwner; }
+
 class Renderable;
+class Rotation;
+class Scale;
+class Translation;
 
 namespace documentation { struct Documentation; }
 
@@ -50,8 +57,14 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    ghoul::mm_unique_ptr<Translation> _translation = nullptr;
+    ghoul::mm_unique_ptr<properties::PropertyOwner> _transform = nullptr;
+    ghoul::mm_unique_ptr<Rotation> _rotation = nullptr;
+    ghoul::mm_unique_ptr<Scale> _scale = nullptr;
     ghoul::mm_unique_ptr<Renderable> _renderable = nullptr;
 
+    double _previousTime = 0.0;
+    properties::DoubleProperty _time;
     properties::Vec3Property _cameraPosition;
     properties::Vec3Property _cameraCenter;
     properties::Vec3Property _cameraUp;

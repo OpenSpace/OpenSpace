@@ -1,10 +1,10 @@
 -- Basic
--- Create a screenspace image plane that shows the content of a local image file on disk.
--- In this case we use a test image from the OpenSpace/data folder.
+-- Creates a screenspace image that shows a spherical grid as an example for any
+-- [Renderable](#renderable) that can be displayed.
 
 local Object = {
   Type = "ScreenSpaceRenderableRenderable",
-  Identifier = "Test",
+  Identifier = "ScreenSpaceRenderableRenderable_Example",
   Renderable = {
     Type = "RenderableSphericalGrid",
     Opacity = 1.0,
