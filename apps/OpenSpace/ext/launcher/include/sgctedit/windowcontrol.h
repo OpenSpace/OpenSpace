@@ -127,9 +127,10 @@ public:
      *
      * \param quality The value for number of vertical lines of resolution. This will be
      *        compared against the QualityValues array in order to set the correct
-     *       combobox index
+     *        combobox index
+     * \tilt  The tilt of the fisheye in degrees
      */
-    void setProjectionFisheye(int quality);
+    void setProjectionFisheye(int quality, float tilt);
 
     /**
      * Sets the window's projection type to spherical mirror, with the accompanying
@@ -162,6 +163,21 @@ public:
      */
     void setProjectionEquirectangular(int quality);
 
+    /**
+     * Sets the window's projection type to blitting the contents of another window.
+     *
+     * \param windowBlitId The id of the window from which to blit
+     */
+    void setProjectionBlit(int windowBlitId);
+
+    /**
+     * This function must be called by users of this class whenever the total number of
+     * windows has changed.
+     *
+     * \param newWindowCount the number of windows after the change
+     */
+    void updateWindowCount(int newWindowCount);
+
 signals:
     void windowChanged(int monitorIndex, int windowIndex, const QRectF& newDimensions);
 
@@ -171,6 +187,7 @@ private:
     QWidget* createSphericalMirrorWidget();
     QWidget* createCylindricalWidget();
     QWidget* createEquirectangularWidget();
+    QWidget* createBlitWidget();
 
     void onSizeXChanged(int newValue);
     void onSizeYChanged(int newValue);
@@ -209,43 +226,38 @@ private:
 
     struct {
         QWidget* widget = nullptr;
-        QLabel* labelInfo = nullptr;
         QDoubleSpinBox* fovH = nullptr;
         QDoubleSpinBox* fovV = nullptr;
-        QLabel* labelFovH = nullptr;
-        QLabel* labelFovV = nullptr;
         QPushButton* buttonLockFov = nullptr;
     } _planar;
 
     struct {
         QWidget* widget = nullptr;
-        QLabel* labelInfo = nullptr;
         QComboBox* quality = nullptr;
-        QLabel* labelQuality = nullptr;
+        QDoubleSpinBox* tilt = nullptr;
     } _fisheye;
 
     struct {
         QWidget* widget = nullptr;
-        QLabel* labelInfo = nullptr;
         QComboBox* quality = nullptr;
-        QLabel* labelQuality = nullptr;
     } _sphericalMirror;
 
     struct {
         QWidget* widget = nullptr;
-        QLabel* labelInfo = nullptr;
         QComboBox* quality = nullptr;
-        QLabel* labelQuality = nullptr;
         QDoubleSpinBox* heightOffset = nullptr;
-        QLabel* labelHeightOffset = nullptr;
     } _cylindrical;
 
     struct {
         QWidget* widget = nullptr;
-        QLabel* labelInfo = nullptr;
         QComboBox* quality = nullptr;
-        QLabel* labelQuality = nullptr;
     } _equirectangular;
+
+    struct {
+        QWidget* widget = nullptr;
+        QComboBox* windowId = nullptr;
+        QLabel* unavailable = nullptr;
+    } _blit;
 
     const QIcon _lockIcon;
     const QIcon _unlockIcon;

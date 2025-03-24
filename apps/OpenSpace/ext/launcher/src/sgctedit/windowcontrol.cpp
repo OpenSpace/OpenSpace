@@ -64,7 +64,8 @@ namespace {
         Fisheye,
         SphericalMirror,
         Cylindrical,
-        Equirectangular
+        Equirectangular,
+        Blit
     };
 
     constexpr int LineEditWidthFixedWindowSize = 95;
@@ -378,7 +379,7 @@ WindowControl::WindowControl(int monitorIndex, int windowIndex,
         _projectionType = new QComboBox;
         _projectionType->addItems({
             "Planar Projection", "Fisheye", "Spherical Mirror Projection",
-            "Cylindrical Projection", "Equirectangular Projection"
+            "Cylindrical Projection", "Equirectangular Projection", "Copy Window Contents"
         });
         _projectionType->setToolTip("Select from the supported window projection types");
         _projectionType->setCurrentIndex(0);
@@ -403,6 +404,9 @@ WindowControl::WindowControl(int monitorIndex, int windowIndex,
         _equirectangular.widget = createEquirectangularWidget();
         projectionLayout->addWidget(_equirectangular.widget);
 
+        _blit.widget = createBlitWidget();
+        projectionLayout->addWidget(_blit.widget);
+
         // We need to trigger this once to ensure that all of the defaults are correct
         onProjectionChanged(0);
 
@@ -424,21 +428,21 @@ QWidget* WindowControl::createPlanarWidget() {
     QGridLayout* layout = new QGridLayout(widget);
     layout->setColumnStretch(1, 1);
 
-    _planar.labelInfo = new QLabel(
+    QLabel* labelInfo = new QLabel(
         "This projection type is the 'regular' projection with a horizontal and a "
         "vertical field of view, given in degrees. The wider the field of view, the "
         "more content is shown at the same time, but everything becomes smaller. Very "
         "large values will introduce distortions on the corners."
     );
-    _planar.labelInfo->setObjectName("info");
-    _planar.labelInfo->setWordWrap(true);
-    layout->addWidget(_planar.labelInfo, 0, 0, 1, 3);
+    labelInfo->setObjectName("info");
+    labelInfo->setWordWrap(true);
+    layout->addWidget(labelInfo, 0, 0, 1, 3);
 
-    _planar.labelFovH = new QLabel("Horizontal FOV");
+    QLabel* labelFovH = new QLabel("Horizontal FOV");
     const QString hfovTip =
         "The total horizontal field of view of the viewport (degrees)";
-    _planar.labelFovH->setToolTip(hfovTip);
-    layout->addWidget(_planar.labelFovH, 1, 0);
+    labelFovH->setToolTip(hfovTip);
+    layout->addWidget(labelFovH, 1, 0);
 
     _planar.fovH = new QDoubleSpinBox;
     _planar.fovH->setMinimum(FovEpsilon);
@@ -452,11 +456,11 @@ QWidget* WindowControl::createPlanarWidget() {
     );
     layout->addWidget(_planar.fovH, 1, 1);
 
-    _planar.labelFovV = new QLabel("Vertical FOV");
+    QLabel* labelFovV = new QLabel("Vertical FOV");
     const QString vfovTip = "The total vertical field of view of the viewport (degrees). "
         "Internally,\nthe values for 'up' & 'down' will each be half this value";
-    _planar.labelFovV->setToolTip(vfovTip);
-    layout->addWidget(_planar.labelFovV, 2, 0);
+    labelFovV->setToolTip(vfovTip);
+    layout->addWidget(labelFovV, 2, 0);
 
     _planar.fovV = new QDoubleSpinBox;
     _planar.fovV->setMinimum(FovEpsilon);
@@ -493,35 +497,48 @@ QWidget* WindowControl::createFisheyeWidget() {
     //  *------------*-----------*
     //  | { Informational text } |  Row 0
     //  | Quality    * [DDDDD>]  |  Row 1
-    //  | [] Spout Output        |  Row 2
+    //  | Tilt       * [oooooo]  |  Row 2
     //  *------------*-----------*
     
     QWidget* widget = new QWidget;
     QGridLayout* layout = new QGridLayout(widget);
     layout->setColumnStretch(1, 1);
 
-    _fisheye.labelInfo = new QLabel(
+    QLabel* labelInfo = new QLabel(
         "This projection provides a rendering in a format that is suitable for "
         "planetariums and other immersive environments. A field-of-view of 180 degrees "
         "is presented as a circular image in the center of the screen. For this "
         "projection a square window is suggested, but not necessary."
     );
-    _fisheye.labelInfo->setObjectName("info");
-    _fisheye.labelInfo->setWordWrap(true);
-    layout->addWidget(_fisheye.labelInfo, 0, 0, 1, 2);
+    labelInfo->setObjectName("info");
+    labelInfo->setWordWrap(true);
+    layout->addWidget(labelInfo, 0, 0, 1, 2);
 
-    _fisheye.labelQuality = new QLabel("Quality");
+    QLabel* labelQuality = new QLabel("Quality");
     const QString qualityTip = "Determines the pixel resolution of the projection "
         "rendering. The higher resolution,\nthe better the rendering quality, but at the "
-        "expense of increased rendering times";
-    _fisheye.labelQuality->setToolTip(qualityTip);
-    layout->addWidget(_fisheye.labelQuality, 1, 0);
+        "expense of increased rendering times.";
+    labelQuality->setToolTip(qualityTip);
+    layout->addWidget(labelQuality, 1, 0);
 
     _fisheye.quality = new QComboBox;
     _fisheye.quality->addItems(qualityList());
     _fisheye.quality->setToolTip(qualityTip);
     _fisheye.quality->setCurrentIndex(2);
     layout->addWidget(_fisheye.quality, 1, 1);
+
+    QLabel* labelTilt = new QLabel("Tilt");
+    const QString tiltTip = "Determines the tilt (in degrees) of the fisheye rendering. "
+        "Changing this value will cause the entire rendering to be tilted by the set "
+        "number of degrees.";
+    labelTilt->setToolTip(tiltTip);
+    layout->addWidget(labelTilt, 2, 0);
+
+    _fisheye.tilt = new QDoubleSpinBox;
+    _fisheye.tilt->setToolTip(tiltTip);
+    _fisheye.tilt->setMinimum(-180.0);
+    _fisheye.tilt->setMaximum(180.0);
+    layout->addWidget(_fisheye.tilt, 2, 1);
 
     return widget;
 }
@@ -536,22 +553,22 @@ QWidget* WindowControl::createSphericalMirrorWidget() {
     QGridLayout* layout = new QGridLayout(widget);
     layout->setColumnStretch(1, 1);
 
-    _sphericalMirror.labelInfo = new QLabel(
+    QLabel* labelInfo = new QLabel(
         "This projection is rendering a image suite for use with a spherical mirror "
         "projection as described by Paul Bourke (http://paulbourke.net/dome/mirrordome/) "
         "and which is a low-cost yet effective way to provide content for a sphericalal "
         "display surface using a regular projector."
     );
-    _sphericalMirror.labelInfo->setObjectName("info");
-    _sphericalMirror.labelInfo->setWordWrap(true);
-    layout->addWidget(_sphericalMirror.labelInfo, 0, 0, 1, 2);
+    labelInfo->setObjectName("info");
+    labelInfo->setWordWrap(true);
+    layout->addWidget(labelInfo, 0, 0, 1, 2);
 
-    _sphericalMirror.labelQuality = new QLabel("Quality");
+    QLabel* labelQuality = new QLabel("Quality");
     const QString qualityTip = "Determines the pixel resolution of the projection "
         "rendering. The higher resolution,\nthe better the rendering quality, but at the "
         "expense of increased rendering times";
-    _sphericalMirror.labelQuality->setToolTip(qualityTip);
-    layout->addWidget(_sphericalMirror.labelQuality, 1, 0);
+    labelQuality->setToolTip(qualityTip);
+    layout->addWidget(labelQuality, 1, 0);
 
     _sphericalMirror.quality = new QComboBox;
     _sphericalMirror.quality->addItems(qualityList());
@@ -573,22 +590,22 @@ QWidget* WindowControl::createCylindricalWidget() {
     QGridLayout* layout = new QGridLayout(widget);
     layout->setColumnStretch(1, 1);
 
-    _cylindrical.labelInfo = new QLabel(
+    QLabel* labelInfo = new QLabel(
         "This projection type provides a cylindrical rendering that covers 360 degrees "
         "around the camera, which can be useful in immersive environments that are not "
         "spherical, but where, for example, all walls of a room are covered with "
         "projectors."
     );
-    _cylindrical.labelInfo->setObjectName("info");
-    _cylindrical.labelInfo->setWordWrap(true);
-    layout->addWidget(_cylindrical.labelInfo, 0, 0, 1, 2);
+    labelInfo->setObjectName("info");
+    labelInfo->setWordWrap(true);
+    layout->addWidget(labelInfo, 0, 0, 1, 2);
 
-    _cylindrical.labelQuality = new QLabel("Quality");
+    QLabel* labelQuality = new QLabel("Quality");
     const QString qualityTip = "Determines the pixel resolution of the projection "
         "rendering. The higher resolution,\nthe better the rendering quality, but at the "
         "expense of increased rendering times";
-    _cylindrical.labelQuality->setToolTip(qualityTip);
-    layout->addWidget(_cylindrical.labelQuality, 1, 0);
+    labelQuality->setToolTip(qualityTip);
+    layout->addWidget(labelQuality, 1, 0);
 
     _cylindrical.quality = new QComboBox;
     _cylindrical.quality->addItems(qualityList());
@@ -596,13 +613,13 @@ QWidget* WindowControl::createCylindricalWidget() {
     _cylindrical.quality->setCurrentIndex(2);
     layout->addWidget(_cylindrical.quality, 1, 1);
 
-    _cylindrical.labelHeightOffset = new QLabel("Height Offset");
+    QLabel* labelHeightOffset = new QLabel("Height Offset");
     const QString heightTip = "Offsets the height from which the cylindrical projection "
         "is generated.\nThis is, in general, only necessary if the user position is "
         "offset and\ncountering that offset is desired in order to continue producing\n"
         "a 'standard' cylindrical projection";
-    _cylindrical.labelHeightOffset->setToolTip(heightTip);
-    layout->addWidget(_cylindrical.labelHeightOffset, 2, 0);
+    labelHeightOffset->setToolTip(heightTip);
+    layout->addWidget(labelHeightOffset, 2, 0);
 
     _cylindrical.heightOffset = new QDoubleSpinBox;
     _cylindrical.heightOffset->setMinimum(-1000000.0);
@@ -610,7 +627,6 @@ QWidget* WindowControl::createCylindricalWidget() {
     _cylindrical.heightOffset->setValue(DefaultHeightOffset);
     _cylindrical.heightOffset->setToolTip(heightTip);
     layout->addWidget(_cylindrical.heightOffset, 2, 1);
-
 
     return widget;
 }
@@ -620,34 +636,76 @@ QWidget* WindowControl::createEquirectangularWidget() {
     //  *------------*-----------*
     //  | { Informational text } |  Row 0
     //  | Quality    * [DDDDD>]  |  Row 1
-    //  | [] Spout Output        |  Row 2
     //  *------------*-----------*
     QWidget* widget = new QWidget;
     QGridLayout* layout = new QGridLayout(widget);
     layout->setColumnStretch(1, 1);
 
-    _equirectangular.labelInfo = new QLabel(
+    QLabel* labelInfo = new QLabel(
         "This projection provides the rendering as an image in equirectangular "
         "projection, which is a common display type for 360 surround video. When "
         "uploading a video in equirectangular projection to YouTube, for example, it "
         "will use it as a 360 video."
     );
-    _equirectangular.labelInfo->setObjectName("info");
-    _equirectangular.labelInfo->setWordWrap(true);
-    layout->addWidget(_equirectangular.labelInfo, 0, 0, 1, 2);
+    labelInfo->setObjectName("info");
+    labelInfo->setWordWrap(true);
+    layout->addWidget(labelInfo, 0, 0, 1, 2);
 
-    _equirectangular.labelQuality = new QLabel("Quality");
+    QLabel* labelQuality = new QLabel("Quality");
     const QString qualityTip = "Determines the pixel resolution of the projection "
         "rendering. The higher resolution,\nthe better the rendering quality, but at the "
         "expense of increased rendering times";
-    _equirectangular.labelQuality->setToolTip(qualityTip);
-    layout->addWidget(_equirectangular.labelQuality, 1, 0);
+    labelQuality->setToolTip(qualityTip);
+    layout->addWidget(labelQuality, 1, 0);
 
     _equirectangular.quality = new QComboBox;
     _equirectangular.quality->addItems(qualityList());
     _equirectangular.quality->setToolTip(qualityTip);
     _equirectangular.quality->setCurrentIndex(2);
     layout->addWidget(_equirectangular.quality, 1, 1);
+
+    return widget;
+}
+
+QWidget* WindowControl::createBlitWidget() {
+    //    Column 0   Column 1
+    //  *------------*-----------*
+    //  | { Informational text } |  Row 0
+    //  | Window ID  * [DDDDD>]  |  Row 1
+    //  | { Unavailability }     |  Row 2
+    //  *------------*-----------*
+
+    QWidget* widget = new QWidget;
+    QGridLayout* layout = new QGridLayout(widget);
+    layout->setColumnStretch(1, 1);
+
+    QLabel* labelInfo = new QLabel(
+        "This projection type will reuse the contents of another window. This can be "
+        "useful for GUI windows that should show the 3D scene, but not incur the cost of "
+        "rendering the scene twice. Note that the contents of the rendering will be "
+        "copied in their entirety, which means that if the rendering windows have "
+        "different aspect ratios, the image in the receiving window will be stretched."
+    );
+    labelInfo->setObjectName("info");
+    labelInfo->setWordWrap(true);
+    layout->addWidget(labelInfo, 0, 0, 1, 2);
+
+    QLabel* labelBlitId = new QLabel("Window ID");
+    const QString blitTip = "Determines the window from which to copy the contents.";
+    labelBlitId->setToolTip(blitTip);
+    layout->addWidget(labelBlitId, 1, 0);
+
+    _blit.windowId = new QComboBox;
+    _blit.windowId->setToolTip(blitTip);
+    layout->addWidget(_blit.windowId, 1, 1);
+
+    _blit.unavailable = new QLabel(
+        "It is only possible to copy the contents of another window if at least two "
+        "windows have been created. Add a second window before selecting this projection "
+        "type."
+    );
+    _blit.unavailable->setWordWrap(true);
+    layout->addWidget(_blit.unavailable, 2, 0, 1, 2);
 
     return widget;
 }
@@ -684,9 +742,11 @@ void WindowControl::resetToDefaults() {
     _planar.fovV->setValue(DefaultFovShortEdge);
     _cylindrical.heightOffset->setValue(DefaultHeightOffset);
     _fisheye.quality->setCurrentIndex(2);
+    _fisheye.tilt->setValue(0.0);
     _sphericalMirror.quality->setCurrentIndex(2);
     _cylindrical.quality->setCurrentIndex(2);
     _equirectangular.quality->setCurrentIndex(2);
+    _blit.windowId->setCurrentIndex(0);
     emit windowChanged(_monitorIndexDefault, _windowIndex, _windowDimensions);
 }
 
@@ -736,6 +796,7 @@ void WindowControl::generateWindowInformation(sgct::config::Window& window) cons
     );
     window.draw2D = _render2D->isChecked();
     window.draw3D = _render3D->isChecked();
+
     window.isDecorated = _windowDecoration->isChecked();
     if (_spoutOutput->isChecked()) {
         window.spout = sgct::config::Window::Spout{
@@ -745,6 +806,8 @@ void WindowControl::generateWindowInformation(sgct::config::Window& window) cons
     if (!_windowName->text().isEmpty()) {
         window.name = _windowName->text().toStdString();
     }
+
+    window.viewports.clear();
 
     // The rest of this function is just specifying the rendering, which we can skip if we
     // don't want to render 3D anyway
@@ -762,7 +825,7 @@ void WindowControl::generateWindowInformation(sgct::config::Window& window) cons
             vp.projection = sgct::config::FisheyeProjection {
                 .fov = 180.f,
                 .quality = Quality[_fisheye.quality->currentIndex()].first,
-                .tilt = 0.f
+                .tilt = static_cast<float>(_fisheye.tilt->value())
             };
             break;
         case ProjectionIndices::SphericalMirror:
@@ -781,6 +844,16 @@ void WindowControl::generateWindowInformation(sgct::config::Window& window) cons
                 .quality = Quality[_equirectangular.quality->currentIndex()].first
             };
             break;
+        case ProjectionIndices::Blit:
+            // We have to subtract here as SGCT uses 0-indexing, but we present it to the
+            // user as 1-indexing
+            window.blitWindowId = _blit.windowId->currentText().toInt() - 1;
+            window.draw3D = false;
+
+            // We are falling through the planar value on purpose as for a variety of
+            // reasons requires a projection to be defined even when we are blitting the
+            // contents of another window.
+            [[fallthrough]];
         case ProjectionIndices::Planar:
             {
                 double fovH = _planar.fovH->value();
@@ -799,8 +872,6 @@ void WindowControl::generateWindowInformation(sgct::config::Window& window) cons
                 break;
             }
     }
-
-    window.viewports.clear();
     window.viewports.push_back(vp);
 }
 
@@ -810,8 +881,9 @@ void WindowControl::setProjectionPlanar(float hfov, float vfov) {
     _projectionType->setCurrentIndex(static_cast<int>(ProjectionIndices::Planar));
 }
 
-void WindowControl::setProjectionFisheye(int quality) {
+void WindowControl::setProjectionFisheye(int quality, float tilt) {
     _fisheye.quality->setCurrentIndex(indexForQuality(quality));
+    _fisheye.tilt->setValue(tilt);
     _projectionType->setCurrentIndex(static_cast<int>(ProjectionIndices::Fisheye));
 }
 
@@ -833,6 +905,32 @@ void WindowControl::setProjectionEquirectangular(int quality) {
     _projectionType->setCurrentIndex(
         static_cast<int>(ProjectionIndices::Equirectangular)
     );
+}
+
+void WindowControl::setProjectionBlit(int windowBlitId) {
+    // We add 1 here as SGCT uses a 0-indexing for the window idx, but we present it to
+    // the user as a 1-indexing
+    int idx = _blit.windowId->findText(QString::number(windowBlitId + 1));
+    ghoul_assert(idx != -1, "Could not find window blit id");
+    _blit.windowId->setCurrentIndex(idx);
+    _projectionType->setCurrentIndex(
+        static_cast<int>(ProjectionIndices::Blit)
+    );
+}
+
+void WindowControl::updateWindowCount(int newWindowCount) {
+    QString currentIdx = _blit.windowId->currentText();
+    _blit.windowId->clear();
+    for (int idx = 0; idx < newWindowCount; idx++) {
+        if (idx == _windowIndex) {
+            continue;
+        }
+        _blit.windowId->addItem(QString::number(idx + 1));
+    }
+    _blit.windowId->setCurrentText(currentIdx);
+
+    // Set the correct visibility
+    _blit.unavailable->setVisible(newWindowCount == 1);
 }
 
 void WindowControl::onSizeXChanged(int newValue) {
@@ -896,6 +994,7 @@ void WindowControl::onProjectionChanged(int newSelection) const {
     _sphericalMirror.widget->setVisible(selected == ProjectionIndices::SphericalMirror);
     _cylindrical.widget->setVisible(selected == ProjectionIndices::Cylindrical);
     _equirectangular.widget->setVisible(selected == ProjectionIndices::Equirectangular);
+    _blit.widget->setVisible(selected == ProjectionIndices::Blit);
 }
 
 void WindowControl::onAspectRatioLockClicked() {
