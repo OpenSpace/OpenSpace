@@ -1415,9 +1415,42 @@ int main(int argc, char* argv[]) {
         openspace::Settings settings = loadSettings();
         settings.hasStartedBefore = true;
 
-        const std::filesystem::path p = global::configuration->profile;
-        const std::filesystem::path reducedName = p.filename().replace_extension();
-        settings.profile = reducedName.string();
+        const std::filesystem::path profile = global::configuration->profile;
+        auto isSubDirectory = [](std::filesystem::path p, std::filesystem::path root) {
+            while (p != p.parent_path()) {
+                if (p == root) {
+                    return true;
+                }
+                p = p.parent_path();
+            }
+            return false;
+        };
+
+        const bool isDefaultProfile = isSubDirectory(profile, absPath("${PROFILES}"));
+        const bool isUserProfile = isSubDirectory(profile, absPath("${USER_PROFILES}"));
+
+        if (isDefaultProfile) {
+            std::filesystem::path p = std::filesystem::relative(
+                profile,
+                absPath("${PROFILES}")
+            );
+            p.replace_extension();
+            settings.profile = p.string();
+        }
+        else if (isUserProfile) {
+            std::filesystem::path p = std::filesystem::relative(
+                profile,
+                absPath("${USER_PROFILES}")
+            );
+            p.replace_extension();
+            settings.profile = p.string();
+        }
+        else {
+            LWARNING(
+                "Cannot save remembered profile when starting a profile that is not in "
+                "the data/profiles or user/data/profiles folder."
+            );
+        }
 
         settings.configuration =
             isGeneratedWindowConfig ? "" : global::configuration->windowConfiguration;
