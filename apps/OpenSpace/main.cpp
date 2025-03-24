@@ -1416,18 +1416,15 @@ int main(int argc, char* argv[]) {
         settings.hasStartedBefore = true;
 
         const std::filesystem::path profile = global::configuration->profile;
-        auto isSubDirectory = [](std::filesystem::path p, std::filesystem::path root) {
-            while (p != p.parent_path()) {
-                if (p == root) {
-                    return true;
-                }
-                p = p.parent_path();
-            }
-            return false;
-        };
 
-        const bool isDefaultProfile = isSubDirectory(profile, absPath("${PROFILES}"));
-        const bool isUserProfile = isSubDirectory(profile, absPath("${USER_PROFILES}"));
+        const bool isDefaultProfile = ghoul::filesystem::isSubdirectory(
+            profile,
+            absPath("${PROFILES}")
+        );
+        const bool isUserProfile = ghoul::filesystem::isSubdirectory(
+            profile,
+            absPath("${USER_PROFILES}")
+        );
 
         if (isDefaultProfile) {
             std::filesystem::path p = std::filesystem::relative(
