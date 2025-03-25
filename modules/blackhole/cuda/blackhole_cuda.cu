@@ -34,7 +34,7 @@ __global__ void solveGeodesicKernel(float rs, float envmap_r, float u_0, float* 
     rk4_step(u, dudphi, phi, h, rs);
 
     float r = 1.0f / u;
-    float r_0 = 1.0f / u_0;
+    float const r_0 = 1.0f / u_0;
     float a = r * sin(phi);
     float b = r * cos(phi) - r_0;
 
