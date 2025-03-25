@@ -55,7 +55,7 @@ documentation::Documentation ScreenSpaceFramebuffer::Documentation() {
 
 ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
-    , _size(SizeInfo, glm::vec4(16), glm::vec4(16), glm::vec4(16384))
+    , _size(SizeInfo, glm::vec2(16), glm::vec2(16), glm::vec2(16384))
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -75,9 +75,8 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictiona
         }
     }
 
-    const glm::vec2 resolution = global::windowDelegate->currentDrawBufferResolution();
+    _size = global::windowDelegate->currentDrawBufferResolution();
     addProperty(_size);
-    _size = glm::vec4(0.f, 0.f, resolution.x, resolution.y);
 }
 
 ScreenSpaceFramebuffer::~ScreenSpaceFramebuffer() {}
@@ -102,20 +101,13 @@ bool ScreenSpaceFramebuffer::deinitializeGL() {
 
 void ScreenSpaceFramebuffer::render(const RenderData& renderData) {
     const glm::vec2& resolution = global::windowDelegate->currentDrawBufferResolution();
-    const glm::vec4& size = _size.value();
-
-    const float xratio = resolution.x / (size.z - size.x);
-    const float yratio = resolution.y / (size.w - size.y);
+    const glm::vec2& size = _size.value();
+    const glm::vec2 ratio = resolution / size;
 
     if (!_renderFunctions.empty()) {
         std::array<GLint, 4> viewport;
         glGetIntegerv(GL_VIEWPORT, viewport.data());
-        glViewport(
-            static_cast<GLint>(size.x),
-            static_cast<GLint>(size.y),
-            static_cast<GLsizei>(size.z),
-            static_cast<GLsizei>(size.w)
-        );
+        glViewport(0, 0, static_cast<GLint>(size.x), static_cast<GLint>(size.y));
 
         const GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
         _framebuffer->activate();
@@ -135,7 +127,7 @@ void ScreenSpaceFramebuffer::render(const RenderData& renderData) {
         const glm::mat4 localRotation = localRotationMatrix();
         const glm::mat4 scale = glm::scale(
             scaleMatrix(),
-            glm::vec3((1.f / xratio), (1.f / yratio), 1.f)
+            glm::vec3((1.f / ratio.x), (1.f / ratio.y), 1.f)
         );
         const glm::mat4 modelTransform = globalRotation*translation*localRotation*scale;
         draw(modelTransform, renderData);
@@ -146,7 +138,7 @@ bool ScreenSpaceFramebuffer::isReady() const {
     return _shader && _texture;
 }
 
-void ScreenSpaceFramebuffer::setSize(glm::vec4 size) {
+void ScreenSpaceFramebuffer::setSize(glm::vec2 size) {
     _size = std::move(size);
 }
 

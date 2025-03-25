@@ -63,8 +63,8 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo CameraFovInfo = {
         "CameraFov",
-        "Camera Field-of-view",
-        "The camera's field-of-view in degrees."
+        "Camera Field of view",
+        "The camera's field of view in degrees."
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo TransformInfo = {
@@ -74,35 +74,47 @@ namespace {
         "Renderable."
     };
 
+    // This [ScreenSpaceRenderable](#core_screenspacerenderable) object can render any
+    // [Renderable](#renderable) type into an image that is shown in screen space. This
+    // can be used to display a rendered object as an overlay in front of the regular 3D
+    // rendering of the scene.
+    //
+    // Note to use this ScreenSpaceRenderable, it might be necessary to specify the `size`
+    // parameter, which determines the resolution of the inset window into which the
+    // Renderable is rendered. For many use cases, the default should suffice, however.
+    //
+    // A possible use-case for the ScreenSpaceRenderable would be to show a 3D model of a
+    // spacecraft without the need to place it at a position in the 3D scene with the need
+    // to fly to that object to talk about it.
     struct [[codegen::Dictionary(ScreenSpaceRenderableRenderable)]] Parameters {
         std::optional<std::string> identifier [[codegen::private()]];
 
-        // The [Renderable](#renderable) object that should be shown in this ScreenSpace
-        // object. See the list of creatable renderable objects for options that can be
-        // used for this type
+        // The [Renderable](#renderable) object that os shown in this ScreenSpace object.
+        // See the list of creatable renderable objects for options that can be used for
+        // this type.
         ghoul::Dictionary renderable [[codegen::reference("renderable")]];
 
         struct Transform {
-            // The [Translation](#core_transform_translation) object that should be used
-            // for the provided [Renderable](#renderable). If no value is specified, a
+            // The [Translation](#core_transform_translation) object that is used for the
+            // provided [Renderable](#renderable). If no value is specified, a
             // [StaticTranslation](#base_transform_translation_static) is created instead.
             std::optional<ghoul::Dictionary> translation
                 [[codegen::reference("core_transform_translation")]];
 
-            // The [Rotation](#core_transform_rotation) object that should be used for the
+            // The [Rotation](#core_transform_rotation) object that is used for the
             // provided [Renderable](#renderable). If no value is specified, a
             // [StaticRotation](#base_transform_rotation_static) is created instead.
             std::optional<ghoul::Dictionary> rotation
                 [[codegen::reference("core_transform_rotation")]];
 
-            // The [Scale](#core_transform_scale) object that should be used for the
-            // provided [Renderable](#renderable). If no value is specified, a
+            // The [Scale](#core_transform_scale) object that is used for the provided
+            // [Renderable](#renderable). If no value is specified, a
             // [StaticScale](#base_transform_scale_static) is created instead.
             std::optional<ghoul::Dictionary> scale
                 [[codegen::reference("core_transform_scale")]];
         };
-        // The collection of transformation that are applied to the
-        // [Renderable](#renderable) before it is shown on screen
+        // The collection of transformations that are applied to the
+        // [Renderable](#renderable) before it is shown on screen.
         std::optional<Transform> transform;
 
         // Specifies the start date that is used to control the renderable and the
@@ -245,8 +257,8 @@ bool ScreenSpaceRenderableRenderable::initializeGL() {
 
         glm::mat4 proj = glm::perspectiveFov(
             glm::radians(_cameraFov.value()),
-            _size.value().z,
-            _size.value().w,
+            _size.value().x,
+            _size.value().y,
             0.1f,
             20.f
         );
