@@ -35,7 +35,7 @@
 #include <string_view>
 
 namespace {
-    constexpr std::string_view DefaultPanelPath = "${DATA}/web/default_panels.json";
+    constexpr std::string_view DefaultPanelPath = "${DATA}/web/default_ui_panels.json";
 
     struct Panel {
         std::string id;
@@ -106,7 +106,9 @@ UiPanelsDialog::UiPanelsDialog(QWidget* parent, std::map<std::string, bool>* uiP
         layout->addWidget(box);
         _checkboxToId[box] = panel.id;
     }
+
     layout->addWidget(new Line);
+
     {
         QDialogButtonBox* buttons = new QDialogButtonBox;
         buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
