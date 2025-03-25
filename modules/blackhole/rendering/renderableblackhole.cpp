@@ -158,10 +158,14 @@ namespace openspace {
             *global::navigationHandler->anchorNode()
         );
 
+        // Calculate the camera planes rotation to make sure fisheye works correcly (dcm in sgct projection.cpp)
+        glm::fmat4 invViewPlaneTranslationMatrix = glm::translate(glm::mat4(1.f), glm::vec3(renderData.camera.eyePositionVec3().x));
+        glm::fmat4 viewMatrix = renderData.camera.viewMatrix();
+        glm::fmat4 const CameraPlaneRotation = glm::inverse(viewMatrix * invViewPlaneTranslationMatrix);
         
         _program->setUniform(
             _uniformCache.cameraRotationMatrix,
-            glm::fmat4(glm::mat4_cast(camRot.localRotation))
+             glm::fmat4(glm::mat4_cast(camRot.localRotation)) * CameraPlaneRotation
         );
 
         _program->setUniform(
