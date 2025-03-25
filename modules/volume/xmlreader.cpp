@@ -29,7 +29,8 @@
 #include <iostream>
 #include <sstream>
 
-#include <tinyxml>
+#include <tinyxml2.h>
+
 
 namespace openspace {
 
@@ -50,6 +51,47 @@ std::string getAttribute(const std::string& line, const std::string& attribute) 
 
 void readVTIFile(const std::filesystem::path& path) {
     tinyxml2::XMLDocument doc;
+
+    if (doc.LoadFile(path.string().c_str()) != tinyxml2::XML_SUCCESS) {
+        throw ghoul::RuntimeError(std::format("Failed to load .vti file '{}'", path.string()));
+    }
+
+    tinyxml2::XMLElement* root = doc.RootElement();
+    tinyxml2::XMLElement* imageData = root->FirstChildElement("ImageData");
+    tinyxml2::XMLElement* dataArray =
+        imageData->FirstChildElement("Piece")
+        ->FirstChildElement("PointData")
+        ->FirstChildElement("DataArray");
+
+    const char* wholeExtent = imageData->Attribute("WholeExtent");
+    const char* origin = imageData->Attribute("Origin");
+    const char* spacing = imageData->Attribute("Spacing");
+
+    const char* dataText = dataArray->GetText();
+
+
+    std::stringstream ss(wholeExtent);
+
+    glm::ivec3 minExtent, maxExtent;
+    ss >> minExtent.x >> maxExtent.x >> minExtent.y >> maxExtent.y >> minExtent.z >> maxExtent.z;
+    glm::ivec3 extents = maxExtent - minExtent + 1;
+
+
+    const int totalSize = extents.x * extents.y * extents.z;
+
+    std::vector<float> scalars;
+    scalars.reserve(totalSize);
+
+    ss.str(dataText);
+    ss.clear();
+
+    float value;
+    while (ss >> value) {
+        scalars.push_back(value);
+    }
+
+    std::cout << scalars.size();
+
 
     //std::ifstream file;
     //file.open(path);

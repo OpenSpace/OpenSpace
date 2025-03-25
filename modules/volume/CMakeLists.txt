@@ -84,3 +84,8 @@ create_new_module(
   STATIC
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
+
+# This introduces a dependency into SGCT, but the way it is handled is not great right now
+# This will break when we remove tinyxml2 from SGCT and then we can move the submodule
+# over into this ext folder and fix it well
+target_link_libraries(${volume_module} PRIVATE tinyxml2)
