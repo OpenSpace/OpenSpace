@@ -37,7 +37,7 @@ namespace {
 namespace openspace::globebrowsing {
 
 GeoJsonManager::GeoJsonManager()
-    : properties::PropertyOwner({ "GeoJson", "Geometry Overlays" })
+    : properties::PropertyOwner({ "GeographicOverlays", "Geographic Overlays" })
 {}
 
 void GeoJsonManager::initialize(RenderableGlobe* globe) {
