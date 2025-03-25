@@ -46,18 +46,6 @@ OptionProperty::OptionProperty(PropertyInfo info)
         std::numeric_limits<int>::max(),
         1
     )
-    , _displayType(DisplayType::Radio)
-{}
-
-OptionProperty::OptionProperty(PropertyInfo info, DisplayType displayType)
-    : NumericalProperty<int>(
-        std::move(info),
-        0,
-        std::numeric_limits<int>::lowest(),
-        std::numeric_limits<int>::max(),
-        1
-    )
-    , _displayType(displayType)
 {}
 
 std::string_view OptionProperty::className() const {
@@ -68,10 +56,6 @@ ghoul::lua::LuaTypes OptionProperty::typeLua() const {
     return ghoul::lua::LuaTypes(
         ghoul::lua::LuaTypes::Number | ghoul::lua::LuaTypes::String
     );
-}
-
-OptionProperty::DisplayType OptionProperty::displayType() const {
-    return _displayType;
 }
 
 const std::vector<OptionProperty::Option>& OptionProperty::options() const {
