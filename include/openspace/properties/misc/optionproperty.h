@@ -98,9 +98,10 @@ public:
      * `option` must not have been registered previously, or a warning will be logged.
      *
      * \param value The option that will be added to the list of available options
-     * \param desc The description of the value that will be added
+     * \param description The description of the value that will be added
+     * \param notifyListeners If true, notify the change listeners for this property
      */
-    void addOption(int value, std::string desc);
+    void addOption(int value, std::string description, bool notifyListeners = true);
 
     /**
      * Adds multiple options to the OptionProperty. Each value in the vector consists of

@@ -78,7 +78,7 @@ const std::vector<OptionProperty::Option>& OptionProperty::options() const {
     return _options;
 }
 
-void OptionProperty::addOption(int value, std::string desc) {
+void OptionProperty::addOption(int value, std::string desc, bool notifyListeners) {
     Option option = { .value = value, .description = std::move(desc) };
 
     for (const Option& o : _options) {
@@ -95,22 +95,29 @@ void OptionProperty::addOption(int value, std::string desc) {
     _options.push_back(std::move(option));
     // Set default value to option added first
     NumericalProperty::setValue(_options[0].value);
+
+    if (notifyListeners) {
+        notifyChangeListeners();
+    }
 }
 
 void OptionProperty::addOptions(std::vector<std::pair<int, std::string>> options) {
     for (std::pair<int, std::string>& p : options) {
-        addOption(p.first, std::move(p.second));
+        addOption(p.first, std::move(p.second), false);
     }
+    notifyChangeListeners();
 }
 
 void OptionProperty::addOptions(std::vector<std::string> options) {
     for (int i = 0; i < static_cast<int>(options.size()); i++) {
-        addOption(i, std::move(options[i]));
+        addOption(i, std::move(options[i]), false);
     }
+    notifyChangeListeners();
 }
 
 void OptionProperty::clearOptions() {
     _options.clear();
+    notifyChangeListeners();
     _value = 0;
 }
 
