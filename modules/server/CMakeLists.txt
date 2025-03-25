@@ -43,6 +43,7 @@ set(HEADER_FILES
   include/topics/getpropertytopic.h
   include/topics/luascripttopic.h
   include/topics/missiontopic.h
+  include/topics/profiletopic.h
   include/topics/sessionrecordingtopic.h
   include/topics/setpropertytopic.h
   include/topics/shortcuttopic.h
@@ -73,6 +74,7 @@ set(SOURCE_FILES
   src/topics/getpropertytopic.cpp
   src/topics/luascripttopic.cpp
   src/topics/missiontopic.cpp
+  src/topics/profiletopic.cpp
   src/topics/sessionrecordingtopic.cpp
   src/topics/setpropertytopic.cpp
   src/topics/shortcuttopic.cpp
