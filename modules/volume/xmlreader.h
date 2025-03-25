@@ -23,9 +23,11 @@
  ****************************************************************************************/
 
 #include <ghoul/filesystem/filesystem.h>
+#include <modules/volume/rawvolumemetadata.h>
+
 
 namespace openspace {
 
-    void readVTIFile(const std::filesystem::path& path);
+std::pair<volume::RawVolumeMetadata, std::vector<float>> readVTIFile(const std::filesystem::path& path, double timestep);
 
 } // namespace openspace

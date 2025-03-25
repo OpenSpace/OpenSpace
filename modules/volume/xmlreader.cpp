@@ -23,12 +23,12 @@
  ****************************************************************************************/
 
 #include <modules/volume/xmlreader.h>
-#include <fstream>
+
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/stringhelper.h>
+#include <fstream>
 #include <iostream>
 #include <sstream>
-
 #include <tinyxml2.h>
 
 
@@ -49,7 +49,7 @@ std::string getAttribute(const std::string& line, const std::string& attribute) 
 
 }
 
-void readVTIFile(const std::filesystem::path& path) {
+std::pair<volume::RawVolumeMetadata, std::vector<float>> readVTIFile(const std::filesystem::path& path, double timestep) {
     tinyxml2::XMLDocument doc;
 
     if (doc.LoadFile(path.string().c_str()) != tinyxml2::XML_SUCCESS) {
@@ -86,49 +86,32 @@ void readVTIFile(const std::filesystem::path& path) {
     ss.clear();
 
     float value;
+    float minValue = std::numeric_limits<float>::max();
+    float maxValue = std::numeric_limits<float>::lowest();
+
     while (ss >> value) {
         scalars.push_back(value);
+        minValue = std::min(minValue, value);
+        maxValue = std::max(maxValue, value);
     }
 
-    std::cout << scalars.size();
 
+    volume::RawVolumeMetadata metadata;
 
-    //std::ifstream file;
-    //file.open(path);
-    //ghoul_assert(file.good(), "File handle should be good");
+    metadata.dimensions = extents;
 
-    //std::stringstream ss;
-    //std::string line;
-    //while (ghoul::getline(file, line)) {
-    //    std::cout << line << std::endl;
+    metadata.hasDomainBounds = true;
+    metadata.lowerDomainBound = minExtent;
+    metadata.upperDomainBound = maxExtent;
 
-    //    if (line.find("<ImageData") != std::string::npos) {
-    //        const std::string wholeExtent = getAttribute(line, "WholeExtent");
-    //        const std::string origin = getAttribute(line, "Origin");
-    //        const std::string spacing = getAttribute(line, "Spacing");
+    metadata.hasValueRange = true;
+    metadata.minValue = minValue;
+    metadata.maxValue = maxValue;
 
-    //        std::cout << "Whole extent '" << wholeExtent << "'\n"
-    //            << "origin '" << origin << "'\n"
-    //            << "spacing '" << spacing << "'\n";
-    //    }
-    //    else if (line.find("<Piece") != std::string::npos) {
-    //        const std::string extent = getAttribute(line, "Extent");
-    //        std::cout << "Extent: " << extent << std::endl;
-    //    }
+    metadata.hasTime = true;
+    metadata.time = timestep;
 
-    //    else if (line.find("<DataArray") != std::string::npos) {
-    //        ghoul::getline(file, line);
-    //        ss << line << " ";
-    //    }
-    //}
-
-    //float value = 0.f;
-    //std::vector<float> dataValues;
-    //while (ss >> value) {
-    //    dataValues.push_back(value);
-    //}
-
-    //file.close();
+    return std::make_pair(metadata, scalars);
 }
 
 } // namespace openspace

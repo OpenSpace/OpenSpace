@@ -234,34 +234,60 @@ void RenderableTimeVaryingVolume::initializeGL() {
     }
 
     namespace fs = std::filesystem;
+    double timestep = 0.0;
     for (const fs::directory_entry& e : fs::recursive_directory_iterator(sequenceDir)) {
         if (e.is_regular_file() && e.path().extension() == ".dictionary") {
             loadTimestepMetadata(e.path());
         }
         if (e.is_regular_file() && e.path().extension() == ".vti") {
-            readVTIFile(e.path());
+            const auto [metadata, scalars] = readVTIFile(e.path(), timestep++);
+
+            Timestep t;
+            t.metadata = metadata;
+            t.baseName = "";
+            t.inRam = false;
+            t.onGpu = false;
+            t.rawData = scalars;
+
+            _volumeTimesteps[t.metadata.time] = std::move(t);
         }
     }
 
     // TODO: defer loading of data to later (separate thread or at least not when loading)
     for (std::pair<const double, Timestep>& p : _volumeTimesteps) {
         Timestep& t = p.second;
-        const std::string path = std::format(
-            "{}/{}.rawvolume", _sourceDirectory.value(), t.baseName
-        );
-        RawVolumeReader<float> reader(path, t.metadata.dimensions);
-        t.rawVolume = reader.read(_invertDataAtZ);
+
+        // Read volume from file if it exists
+        if (t.baseName != "") {
+            const std::string path = std::format(
+                "{}/{}.rawvolume", _sourceDirectory.value(), t.baseName
+            );
+            RawVolumeReader<float> reader(path, t.metadata.dimensions);
+            t.rawVolume = reader.read(_invertDataAtZ);
+        }
 
         const float min = t.metadata.minValue;
         const float diff = t.metadata.maxValue - t.metadata.minValue;
-        float* data = t.rawVolume->data();
-        for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
-            data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
-        }
 
-        t.histogram = std::make_shared<Histogram>(0.f, 1.f, 100);
-        for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
-            t.histogram->add(data[i]);
+        float* data;
+        // We've read data from binary file
+        if (t.rawVolume) {
+            data = t.rawVolume->data();
+            for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
+                data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
+            }
+
+            t.histogram = std::make_shared<Histogram>(0.f, 1.f, 100);
+            for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
+                t.histogram->add(data[i]);
+            }
+        }
+        // Data came from xml file
+        else {
+            data = t.rawData.data();
+            for (size_t i = 0; i < t.rawData.size(); i++) {
+                data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
+            }
         }
         // TODO: handle normalization properly for different timesteps + transfer function
 

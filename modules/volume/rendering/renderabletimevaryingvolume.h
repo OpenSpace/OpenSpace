@@ -68,6 +68,7 @@ private:
         std::shared_ptr<RawVolume<float>> rawVolume;
         std::shared_ptr<ghoul::opengl::Texture> texture;
         std::shared_ptr<Histogram> histogram;
+        std::vector<float> rawData;
     };
 
     Timestep* currentTimestep();
