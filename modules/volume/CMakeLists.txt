@@ -50,6 +50,7 @@ set(HEADER_FILES
   rendering/volumeclipplanes.h
   tasks/generaterawvolumetask.h
   tasks/generaterawvolumefromfiletask.h
+  xmlreader.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -72,6 +73,7 @@ set(SOURCE_FILES
   rendering/volumeclipplanes.cpp
   tasks/generaterawvolumetask.cpp
   tasks/generaterawvolumefromfiletask.cpp
+  xmlreader.cpp
 )
 
 source_group("Source Files" FILES ${SOURCE_FILES})

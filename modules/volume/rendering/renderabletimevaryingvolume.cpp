@@ -48,6 +48,8 @@
 #include <filesystem>
 #include <optional>
 
+#include <modules/volume/xmlreader.h>
+
 namespace {
     constexpr std::string_view _loggerCat = "RenderableTimeVaryingVolume";
 
@@ -235,6 +237,9 @@ void RenderableTimeVaryingVolume::initializeGL() {
     for (const fs::directory_entry& e : fs::recursive_directory_iterator(sequenceDir)) {
         if (e.is_regular_file() && e.path().extension() == ".dictionary") {
             loadTimestepMetadata(e.path());
+        }
+        if (e.is_regular_file() && e.path().extension() == ".vti") {
+            readVTIFile(e.path());
         }
     }
 
