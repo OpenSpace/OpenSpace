@@ -15,10 +15,19 @@ namespace {
     }
 }
 namespace openspace {
-    void KDTree::build(const std::string& filePath, const glm::vec3& localWorldCenter) {
+    void KDTree::build(std::string const& filePath, glm::vec3 const& origin) {
         const std::filesystem::path file{ absPath(filePath) };
         dataloader::Dataset dataset = dataloader::data::loadFileWithCache(file);
-        size_t numberOfStars =  dataset.entries.size();
+
+
+
+#pragma omp parallel for
+        for (size_t i = 0; i < dataset.entries.size(); ++i) {
+            dataset.entries[i].position = cartesianToSpherical(dataset.entries[i].position - origin);
+        }
+
+
+        size_t numberOfStars = dataset.entries.size();
         tree.resize(numberOfStars);
         struct NodeInfo {
             size_t index;
@@ -26,11 +35,6 @@ namespace openspace {
             size_t start;
             size_t end;
         };
-
-        #pragma omp parallel for
-        for (auto& entry : dataset.entries) {
-            entry.position = cartesianToSpherical(entry.position - localWorldCenter);
-        }
 
         std::queue<NodeInfo> q;
         q.emplace(0, 0, 0, numberOfStars);
@@ -57,9 +61,9 @@ namespace openspace {
             dataloader::Dataset::Entry const& entry{ dataset.entries[medianIndex] };
 
             glm::vec3 const& position{ entry.position };
-            float const color{ entry.data[0]};
-            float const lum{ entry.data[1]};
-            float const absMag{ entry.data[2]};
+            float const color{ entry.data[0] };
+            float const lum{ entry.data[1] };
+            float const absMag{ entry.data[2] };
 
             if (node.index >= tree.size()) {
                 tree.resize(std::max(tree.size() * 2, node.index + 1));
@@ -68,6 +72,7 @@ namespace openspace {
             tree.emplace(
                 tree.begin() + node.index, position, color, lum, absMag
             );
+
 
             // Enqueue left and right children
             q.emplace(2 * node.index + 1, node.depth + 1, node.start, medianIndex);

@@ -45,32 +45,40 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ColorTextureInfo = {
+    "ColorMap",
+    "Color Texture",
+    "The path to the texture that is used to convert from the magnitude of the star "
+    "to its color. The texture is used as a one dimensional lookup function.",
+    openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(RenderableModel)]] Parameters {
         std::optional<float> SolarMass;
+        std::string colorMap;
     };
+    
 #include "renderableblackhole_codegen.cpp"
 }
 
 namespace openspace {
 
     RenderableBlackHole::RenderableBlackHole(const ghoul::Dictionary& dictionary)
-        : Renderable(dictionary, { .automaticallyUpdateRenderBin = false }), _solarMass(SolarMassInfo, 4.297e6f) {
+        : Renderable(dictionary, { .automaticallyUpdateRenderBin = false }), _solarMass(SolarMassInfo, 4.297e6f), _colorBVMapTexturePath(ColorTextureInfo) {
 
         const Parameters p = codegen::bake<Parameters>(dictionary);
 
         _solarMass = p.SolarMass.value_or(_solarMass);
 
         _rs = 2.0f * G * _solarMass;
+
+        _colorBVMapTexturePath = absPath(p.colorMap).string();
     }
 
     RenderableBlackHole::~RenderableBlackHole() {}
 
     void RenderableBlackHole::initialize() {
         _schwarzschildWarpTable = std::vector<float>(_rayCount * 2, 0.f);
-
-        _starKDTree.build("${BASE}/sync/http/stars_du/6/stars.speck", glm::vec3(0));
-
-        flatDataStar = _starKDTree.flatTree();
     }
 
     void RenderableBlackHole::initializeGL() {
@@ -103,7 +111,13 @@ namespace openspace {
         return _program != nullptr;
     }
 
-    void RenderableBlackHole::update(const UpdateData&) {
+    void RenderableBlackHole::update(const UpdateData& data) {
+        if (data.modelTransform.translation != _lastTranslation) {
+            _starKDTree.build("${BASE}/sync/http/stars_du/6/stars.speck", data.modelTransform.translation);
+            flatDataStar = _starKDTree.flatTree();
+            _lastTranslation = data.modelTransform.translation;
+        }
+
         glm::vec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
         glm::vec3 anchorNodePosition = global::navigationHandler->anchorNode()->position();
         float distanceToAnchor = (float)glm::distance(cameraPosition, anchorNodePosition) / distanceconstants::LightYear;
@@ -129,6 +143,11 @@ namespace openspace {
         ghoul::opengl::TextureUnit viewGridUnit;
         if (!bindTexture(_uniformCache.viewGrid, viewGridUnit, _viewport.viewGrid)) {
             LWARNING("UniformCache is missing 'viewGrid'");
+        }
+
+        ghoul::opengl::TextureUnit colorBVMapUnit;
+        if (!bindTexture(_uniformCache.colorBVMap, colorBVMapUnit, _colorBVMapTexture)) {
+            LWARNING("UniformCache is missing 'colorBVMap'");
         }
 
         SendSchwarzchildTableToShader();
@@ -235,6 +254,17 @@ namespace openspace {
         else {
             LWARNING(std::format("Failed to load environment texture from path '{}'", absPath(texturePath).string()));
         }
+
+        _colorBVMapTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorBVMapTexturePath), 1);
+
+
+        if (_colorBVMapTexture) {
+            _colorBVMapTexture->uploadTexture();
+        }
+        else {
+            LWARNING(std::format("Failed to load environment texture from path '{}'", absPath(_colorBVMapTexturePath).string()));
+        }
+        
     }
 
     void RenderableBlackHole::bindFramebuffer() {

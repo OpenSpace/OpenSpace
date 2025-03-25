@@ -43,12 +43,14 @@ namespace openspace {
         void loadEnvironmentTexture();
 
         ghoul::opengl::ProgramObject* _program = nullptr;
-
+        glm::dvec3 _lastTranslation{};
         size_t _rayCount = 1000;
         size_t _stepsCount = 50000;
         float _stepLength = 0.001f;
 
         properties::FloatProperty _solarMass;
+        properties::StringProperty _colorBVMapTexturePath;
+
 
         float _rs = 1.0f;
         float _rEnvmap = 60.0f;
@@ -72,10 +74,11 @@ namespace openspace {
         GLuint _ssboSchwarzschildWarpTable = 0;
         GLuint _ssboStarKDTree = 0;
 
-        UniformCache(environmentTexture, viewGrid, worldRotationMatrix, cameraRotationMatrix) _uniformCache;
+        UniformCache(environmentTexture, viewGrid, worldRotationMatrix, cameraRotationMatrix, colorBVMap) _uniformCache;
 
         std::unique_ptr<ghoul::opengl::Texture> _warpTableTex;
         std::unique_ptr<ghoul::opengl::Texture> _environmentTexture;
+        std::unique_ptr<ghoul::opengl::Texture> _colorBVMapTexture;
     };
 
 } // openspace namespace

@@ -7,6 +7,7 @@ in vec2 TexCoord;
 
 uniform sampler2D environmentTexture;
 uniform sampler2D viewGrid;
+uniform sampler1D colorBVMap;
 uniform mat4 cameraRotationMatrix;
 uniform mat4 worldRotationMatrix;
 
@@ -22,6 +23,7 @@ layout (std430) buffer ssbo_star_map {
 const float PI = 3.1415926535897932384626433832795f;
 const float VIEWGRIDZ = -1.0f;
 const float INF = 1.0f/0.0f;
+const float LUM_LOWER_CAP = 0.01;
 
 
 /**********************************************************
@@ -148,6 +150,13 @@ vec2 applyBlackHoleWarp(vec2 cameraOutSphereCoords){
                          Star Map
 ***********************************************************/
 
+vec3 BVIndex2rgb(float color) {
+  // BV is [-0.4, 2.0]
+  float st = (color + 0.4) / (2.0 + 0.4);
+
+  return texture(colorBVMap, st).rgb;
+}
+
 float angularDist(vec2 a, vec2 b) {
     float dTheta = a.x - b.x;
     float dPhi = a.y - b.y;
@@ -163,8 +172,14 @@ vec4 searchNearestStar(vec3 sphericalCoords) {
     int axis = -1;
 
     while(index < SIZE && starKDTree[nodeIndex] > 0.0f){
-        if (angularDist(sphericalCoords.yz, vec2(starKDTree[nodeIndex + 1], starKDTree[nodeIndex + 2])) < 0.001f){
-                return vec4(0.9f, 0.9f, 0.8f, 0.2f);
+        if (angularDist(sphericalCoords.yz, vec2(starKDTree[nodeIndex + 1], starKDTree[nodeIndex + 2])) < 0.002f){
+                float luminosity = pow(10.0, 1.89 - 0.4 * starKDTree[nodeIndex + 4]);
+
+                // If luminosity is really really small then set it to a static low number.
+                if (luminosity < LUM_LOWER_CAP) {
+                    luminosity = LUM_LOWER_CAP;
+                }
+                return vec4(BVIndex2rgb(starKDTree[nodeIndex + 3]), 1.0f);
         }
 
         axis = depth % 2 + 1;

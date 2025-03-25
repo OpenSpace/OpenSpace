@@ -12,7 +12,7 @@ namespace openspace {
 
         size_t size() { return tree.size() * 6; };
 
-        void build(const std::string& filePath, const glm::vec3& localWorldCenter);
+        void build(std::string const& filePath, glm::vec3 const & origin);
 
         std::vector<float> flatTree() const;
 
