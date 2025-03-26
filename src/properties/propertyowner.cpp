@@ -38,7 +38,6 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "PropertyOwner";
-    using namespace openspace;
 
     // The URIs have to be validated because it is not known in what order things are
     // constructed. For example, a SceneGraphNode can be created before its Renderable,
@@ -47,12 +46,16 @@ namespace {
     // been added to the property tree so URI will be invalid and not sent. But the parent
     // will be added later, which will include the child in it's subowners
     void publishPropertyTreeUpdatedEvent(std::string_view uri) {
+        using namespace openspace;
+
         if (!uri.empty()) {
             global::eventEngine->publishEvent<events::EventPropertyTreeUpdated>(uri);
         }
     }
 
     void publishPropertyTreePrunedEvent(std::string_view uri) {
+        using namespace openspace;
+
         if (!uri.empty()) {
             global::eventEngine->publishEvent<events::EventPropertyTreePruned>(uri);
         }
@@ -74,11 +77,6 @@ PropertyOwner::PropertyOwner(PropertyOwnerInfo info)
         _identifier.find_first_of('.') == std::string::npos,
         "Identifier must contain any dots"
     );
-}
-
-PropertyOwner::~PropertyOwner() {
-    _properties.clear();
-    _subOwners.clear();
 }
 
 const std::vector<Property*>& PropertyOwner::properties() const {
