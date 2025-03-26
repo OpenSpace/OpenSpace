@@ -95,8 +95,6 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
                           const std::vector<openspace::properties::Property*>& properties,
                                                              const std::string& groupName)
 {
-    ZoneScoped;
-
     using namespace openspace;
 
     std::vector<properties::Property*> matches;
@@ -149,7 +147,6 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
         properties.cbegin(),
         properties.cend(),
         [&](properties::Property* prop) {
-            ZoneScopedN("Property Iteration");
             // Check the regular expression for all properties
             const std::string_view id = prop->uri();
 
@@ -212,8 +209,6 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
                                                      ghoul::EasingFunction easingFunction,
                                                                    std::string postScript)
 {
-    ZoneScoped;
-
     using namespace openspace;
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
@@ -230,7 +225,6 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
     // end of the loop, the property name regex was probably misspelled.
     bool foundMatching = false;
     for (properties::Property* prop : matchingProps) {
-        ZoneScopedN("Property Iteration");
         // Check that the types match
         if (!typeMatch(type, prop->typeLua())) {
             LERRORC(
