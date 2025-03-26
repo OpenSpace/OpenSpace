@@ -157,6 +157,8 @@ vec3 BVIndex2rgb(float color) {
   return texture(colorBVMap, st).rgb;
 }
 
+const float ONE_PARSEC = 3.08567758e16; // 1 Parsec
+
 float angularDist(vec2 a, vec2 b) {
     float dTheta = a.x - b.x;
     float dPhi = a.y - b.y;
@@ -170,17 +172,23 @@ vec4 searchNearestStar(vec3 sphericalCoords) {
     int nodeIndex = 0;
     int depth = 0;
     int axis = -1;
-
+    const float starRadius = 0.0025f;
     while(index < SIZE && starKDTree[nodeIndex] > 0.0f){
-        if (angularDist(sphericalCoords.yz, vec2(starKDTree[nodeIndex + 1], starKDTree[nodeIndex + 2])) < 0.0012f){
-                float luminosity = pow(10.0, 1.89 - 0.4 * starKDTree[nodeIndex + 4]);
+        float distToStar = angularDist(sphericalCoords.yz, vec2(starKDTree[nodeIndex + 1], starKDTree[nodeIndex + 2]));
+        if (distToStar < starRadius){
+                float luminosity = pow(10.0f, 1.89f - 0.4f * starKDTree[nodeIndex + 4]);
+                float alpha = starRadius / distToStar;
+
+                float observedDistance = starKDTree[nodeIndex];
+                luminosity /= pow(observedDistance, 1.2f);
 
                 // If luminosity is really really small then set it to a static low number.
                 if (luminosity < LUM_LOWER_CAP) {
                     luminosity = LUM_LOWER_CAP;
                 }
-                return vec4(BVIndex2rgb(starKDTree[nodeIndex + 3]), 1.0f);
+                return vec4(BVIndex2rgb(starKDTree[nodeIndex + 3]), alpha) * luminosity;
         }
+
 
         axis = depth % 2 + 1;
         if(sphericalCoords[axis] < starKDTree[nodeIndex + axis]){
@@ -191,7 +199,7 @@ vec4 searchNearestStar(vec3 sphericalCoords) {
         nodeIndex = index * NODE_SIZE;
         depth += 1;
     }
-    return vec4(0.0f);
+    return vec4(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 
@@ -243,8 +251,8 @@ Fragment getFragment() {
     vec2 uv = sphericalToUV(sphericalCoords);
     vec4 texColor = texture(environmentTexture, uv);
     
-    texColor = clamp(texColor + searchNearestStar(vec3(0.0f, sphericalCoords.x, sphericalCoords.y)), 0.f, 1.f);
-    
+    vec4 starColor = searchNearestStar(vec3(0.0f, sphericalCoords.x, sphericalCoords.y));
+    texColor = clamp(texColor + starColor, 0.f, 1.f);
     frag.color = texColor;
     return frag;
 }
