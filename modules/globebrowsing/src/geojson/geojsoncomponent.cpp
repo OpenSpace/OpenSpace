@@ -300,10 +300,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     )
     , _pointSizeScale(PointSizeScaleInfo, 1.f, 0.01f, 100.f)
     , _lineWidthScale(LineWidthScaleInfo, 1.f, 0.01f, 10.f)
-    , _pointRenderModeOption(
-        PointRenderModeInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _pointRenderModeOption(PointRenderModeInfo)
     , _drawWireframe(DrawWireframeInfo, false)
     , _preventUpdatesFromHeightMap(PreventHeightUpdateInfo, false)
     , _forceUpdateHeightData(ForceUpdateHeightDataInfo)

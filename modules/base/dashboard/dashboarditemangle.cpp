@@ -143,26 +143,17 @@ documentation::Documentation DashboardItemAngle::Documentation() {
 DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _source{
-        properties::OptionProperty(
-            SourceTypeInfo,
-            properties::OptionProperty::DisplayType::Dropdown
-        ),
+        properties::OptionProperty(SourceTypeInfo),
         properties::StringProperty(SourceNodeIdentifierInfo),
         nullptr
     }
     , _reference{
-        properties::OptionProperty(
-            ReferenceTypeInfo,
-            properties::OptionProperty::DisplayType::Dropdown
-        ),
+        properties::OptionProperty(ReferenceTypeInfo),
         properties::StringProperty(ReferenceNodeIdentifierInfo),
         nullptr
     }
     , _destination{
-        properties::OptionProperty(
-            DestinationTypeInfo,
-            properties::OptionProperty::DisplayType::Dropdown
-        ),
+        properties::OptionProperty(DestinationTypeInfo),
         properties::StringProperty(DestinationNodeIdentifierInfo),
         nullptr
     }

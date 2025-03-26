@@ -637,10 +637,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     , _useAdditiveBlending(UseAdditiveBlendingInfo, true)
     , _useRotation(UseOrientationDataInfo, false)
     , _drawElements(DrawElementsInfo, true)
-    , _renderOption(
-        OrientationRenderOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _renderOption(OrientationRenderOptionInfo)
     , _nDataPoints(NumShownDataPointsInfo, 0)
     , _hasOrientationData(HasOrientationDataInfo, false)
 {

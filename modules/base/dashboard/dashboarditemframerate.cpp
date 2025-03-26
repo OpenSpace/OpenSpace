@@ -197,7 +197,7 @@ documentation::Documentation DashboardItemFramerate::Documentation() {
 
 DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary)
-    , _frametimeType(FrametimeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _frametimeType(FrametimeInfo)
     , _clearCache(ClearCacheInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

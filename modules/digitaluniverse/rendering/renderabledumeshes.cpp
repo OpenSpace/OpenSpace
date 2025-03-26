@@ -192,7 +192,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         glm::ivec2(1000)
     )
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 16.f)
-    , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _renderOption(RenderOptionInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

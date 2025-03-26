@@ -472,12 +472,9 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _firstRow(FirstRowInfo, 0, 0, 2539913) // DR1-max: 2539913
     , _lastRow(LastRowInfo, 0, 0, 2539913)
     , _columnNamesList(ColumnNamesInfo)
-    , _fileReaderOption(
-        FileReaderOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
-    , _renderMode(RenderModeInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _shaderOption(ShaderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _fileReaderOption(FileReaderOptionInfo)
+    , _renderMode(RenderModeInfo)
+    , _shaderOption(ShaderOptionInfo)
     , _nRenderedStars(NumRenderedStarsInfo, 0, 0, 2000000000) // 2 Billion stars
     , _cpuRamBudgetProperty(CpuRamBudgetInfo, 0.f, 0.f, 1.f)
     , _gpuStreamBudgetProperty(GpuStreamBudgetInfo, 0.f, 0.f, 1.f)

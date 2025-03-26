@@ -450,11 +450,8 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         properties::StringProperty(MappingVzInfo),
         properties::StringProperty(MappingSpeedInfo)
     }
-    , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _otherDataOption(
-        OtherDataOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _colorOption(ColorOptionInfo)
+    , _otherDataOption(OtherDataOptionInfo)
     , _otherDataColorMapPath(OtherDataColorMapInfo)
     , _otherDataRange(
         OtherDataValueRangeInfo,
@@ -484,10 +481,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     }
     , _parameters {
         properties::PropertyOwner(SizeCompositionInfo),
-        properties::OptionProperty(
-            SizeCompositionMethodInfo,
-            properties::OptionProperty::DisplayType::Dropdown
-        ),
+        properties::OptionProperty(SizeCompositionMethodInfo),
         properties::FloatProperty(LumPercentInfo, 0.5f, 0.f, 3.f),
         properties::FloatProperty(RadiusPercentInfo, 0.5f, 0.f, 3.f)
     }
@@ -614,7 +608,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _useProperMotion = p.useProperMotion.value_or(_useProperMotion);
     addProperty(_useProperMotion);
 
-    
+
     _properMotionEpoch = p.properMotionEpoch.value_or(_properMotionEpoch);
     addProperty(_properMotionEpoch);
 

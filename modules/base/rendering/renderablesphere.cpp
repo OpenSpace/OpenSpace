@@ -180,15 +180,12 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _size(SizeInfo, 1.f, 0.f, 1e25f)
     , _segments(SegmentsInfo, 16, 4, 1000)
-    , _orientation(OrientationInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _orientation(OrientationInfo)
     , _mirrorTexture(MirrorTextureInfo, false)
     , _disableFadeInDistance(DisableFadeInOutInfo, false)
     , _fadeInThreshold(FadeInThresholdInfo, 0.f, 0.f, 1.f, 0.001f)
     , _fadeOutThreshold(FadeOutThresholdInfo, 0.f, 0.f, 1.f, 0.001f)
-    , _blendingFuncOption(
-        BlendingOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _blendingFuncOption(BlendingOptionInfo)
     , _disableDepth(DisableDepthInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

@@ -295,10 +295,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _modelScale(ModelScaleInfo, 1.0, std::numeric_limits<double>::epsilon(), 4e+27)
     , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
     , _enableDepthTest(EnableDepthTestInfo, true)
-    , _blendingFuncOption(
-        BlendingOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _blendingFuncOption(BlendingOptionInfo)
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

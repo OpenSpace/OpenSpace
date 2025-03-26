@@ -106,7 +106,7 @@ documentation::Documentation RenderableDistanceLabel::Documentation() {
 RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictionary)
     : RenderableLabel(dictionary)
     , _nodelineId(NodeLineInfo)
-    , _distanceUnit(DistanceUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _distanceUnit(DistanceUnitInfo)
     , _customUnitDescriptor(CustomUnitDescriptorInfo)
     , _precision(PrecisionInfo, 0, 0, 10)
 {
