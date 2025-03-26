@@ -25,6 +25,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/properties/property.h>
@@ -265,6 +266,7 @@ void PropertyOwner::addProperty(Property* prop) {
         else {
             _properties.push_back(prop);
             prop->setPropertyOwner(this);
+            global::openSpaceEngine->invalidatePropertyCache();
 
             // Notify change so we can update the UI
             publishPropertyTreeUpdatedEvent(prop->uri());
@@ -316,6 +318,7 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
             _subOwners.push_back(owner);
             owner->setPropertyOwner(this);
             updateUriCaches();
+            global::openSpaceEngine->invalidatePropertyCache();
 
             // Notify change so UI gets updated
             publishPropertyTreeUpdatedEvent(owner->uri());
@@ -343,6 +346,7 @@ void PropertyOwner::removeProperty(Property* prop) {
         publishPropertyTreePrunedEvent(prop->uri());
 
         (*it)->setPropertyOwner(nullptr);
+        global::openSpaceEngine->invalidatePropertyCache();
         _properties.erase(it);
     }
     else {
@@ -375,6 +379,7 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner*
 
         // It's probably going to get deleted, but we can't be 100% sure of that
         owner->updateUriCaches();
+        global::openSpaceEngine->invalidatePropertyCache();
         _subOwners.erase(it);
     }
     else {
