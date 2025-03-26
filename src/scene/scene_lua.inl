@@ -58,6 +58,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <algorithm>
+#include <execution>
 #include <cctype>
 
 namespace {
@@ -142,57 +143,65 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
         }
     }
 
-    for (properties::Property* prop : properties) {
-        ZoneScopedN("Property Iteration");
-        // Check the regular expression for all properties
-        const std::string_view id = prop->uri();
+    std::mutex mutex;
+    std::for_each(
+        std::execution::par_unseq,
+        properties.cbegin(),
+        properties.cend(),
+        [&](properties::Property* prop) {
+            ZoneScopedN("Property Iteration");
+            // Check the regular expression for all properties
+            const std::string_view id = prop->uri();
 
-        if (isLiteral && id != propertyName) {
-            continue;
-        }
-        else if (!propertyName.empty()) {
-            size_t propertyPos = id.find(propertyName);
-            if (
-                (propertyPos == std::string::npos) ||
-                // Check that the propertyName fully matches the property in id
-                ((propertyPos + propertyName.length() + 1) < id.length()) ||
-                // Match node name
-                (!nodeName.empty() && id.find(nodeName) == std::string::npos))
-            {
-                continue;
+            if (isLiteral && id != propertyName) {
+                return;
             }
-
-            // Check tag
-            if (isGroupMode) {
-                const properties::PropertyOwner* matchingTaggedOwner =
-                    findPropertyOwnerWithMatchingGroupTag(prop, groupName);
-                if (!matchingTaggedOwner) {
-                    continue;
+            else if (!propertyName.empty()) {
+                size_t propertyPos = id.find(propertyName);
+                if (
+                    (propertyPos == std::string::npos) ||
+                    // Check that the propertyName fully matches the property in id
+                    ((propertyPos + propertyName.length() + 1) < id.length()) ||
+                    // Match node name
+                    (!nodeName.empty() && id.find(nodeName) == std::string::npos))
+                {
+                    return;
                 }
-            }
-        }
-        else if (!nodeName.empty()) {
-            size_t nodePos = id.find(nodeName);
-            if (nodePos != std::string::npos) {
+
                 // Check tag
                 if (isGroupMode) {
                     const properties::PropertyOwner* matchingTaggedOwner =
                         findPropertyOwnerWithMatchingGroupTag(prop, groupName);
                     if (!matchingTaggedOwner) {
-                        continue;
+                        return;
                     }
                 }
-                // Check that the nodeName fully matches the node in id
-                else if (nodePos != 0) {
-                    continue;
+            }
+            else if (!nodeName.empty()) {
+                size_t nodePos = id.find(nodeName);
+                if (nodePos != std::string::npos) {
+                    // Check tag
+                    if (isGroupMode) {
+                        const properties::PropertyOwner* matchingTaggedOwner =
+                            findPropertyOwnerWithMatchingGroupTag(prop, groupName);
+                        if (!matchingTaggedOwner) {
+                            return;
+                        }
+                    }
+                    // Check that the nodeName fully matches the node in id
+                    else if (nodePos != 0) {
+                        return;
+                    }
+                }
+                else {
+                    return;
                 }
             }
-            else {
-                continue;
-            }
+            std::lock_guard g(mutex);
+            matches.push_back(prop);
         }
-        matches.push_back(prop);
-    }
+    );
+
     return matches;
 }
 
