@@ -36,10 +36,7 @@ namespace {
     using Option = openspace::properties::OptionProperty::Option;
 
     bool addOptionInternal(int value, std::string desc, std::vector<Option>& options) {
-        Option option = {
-            .value = value,
-            .description = std::move(desc)
-        };
+        Option option = { .value = value, .description = std::move(desc) };
 
         for (const Option& o : options) {
             if (o.value == option.value) {
