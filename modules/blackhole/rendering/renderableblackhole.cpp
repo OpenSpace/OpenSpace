@@ -113,8 +113,7 @@ namespace openspace {
 
     void RenderableBlackHole::update(const UpdateData& data) {
         if (data.modelTransform.translation != _lastTranslation) {
-            _starKDTree.build("${BASE}/sync/http/stars_du/6/stars.speck", data.modelTransform.translation);
-            flatDataStar = _starKDTree.flatTree();
+            _starKDTree.build("${BASE}/sync/http/stars_du/6/stars.speck", data.modelTransform.translation, 100.0f);
             _lastTranslation = data.modelTransform.translation;
         }
 
@@ -122,7 +121,7 @@ namespace openspace {
 
         glm::vec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
         glm::vec3 anchorNodePosition = global::navigationHandler->anchorNode()->position();
-        float distanceToAnchor = (float)glm::distance(cameraPosition, anchorNodePosition) / distanceconstants::LightYear;
+        float distanceToAnchor = glm::distance(cameraPosition, anchorNodePosition) / static_cast<float>(distanceconstants::LightYear);
         if (abs(_rCamera - distanceToAnchor) > _rs * 0.01) {
 
             _rCamera = distanceToAnchor;
@@ -161,18 +160,20 @@ namespace openspace {
         );
 
         // Calculate the camera planes rotation to make sure fisheye works correcly (dcm in sgct projection.cpp)
-        glm::fmat4 invViewPlaneTranslationMatrix = glm::translate(glm::mat4(1.f), glm::vec3(renderData.camera.eyePositionVec3().x));
-        glm::fmat4 viewMatrix = renderData.camera.viewMatrix();
-        glm::fmat4 const CameraPlaneRotation = glm::inverse(viewMatrix * invViewPlaneTranslationMatrix);
+        glm::mat4 invViewPlaneTranslationMatrix = glm::translate(
+            glm::mat4(1.f), glm::vec3(static_cast<float>(renderData.camera.eyePositionVec3().x))
+        );
+        glm::mat4 viewMatrix = renderData.camera.viewMatrix();
+        glm::mat4 const CameraPlaneRotation = glm::inverse(viewMatrix * invViewPlaneTranslationMatrix);
         
         _program->setUniform(
             _uniformCache.cameraRotationMatrix,
-             glm::fmat4(glm::mat4_cast(camRot.localRotation)) * CameraPlaneRotation
+             glm::mat4(glm::mat4_cast(camRot.localRotation)) * CameraPlaneRotation
         );
 
         _program->setUniform(
             _uniformCache.worldRotationMatrix,
-            glm::fmat4(glm::mat4_cast(camRot.globalRotation))
+            glm::mat4(glm::mat4_cast(camRot.globalRotation))
             );
      
         drawQuad();
@@ -201,12 +202,12 @@ namespace openspace {
     {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboStarKDTree);
 
-        const size_t indexBufferSize = flatDataStar.size() * sizeof(float);
+        const size_t indexBufferSize = _starKDTree.size() * sizeof(float);
 
         glBufferData(
             GL_SHADER_STORAGE_BUFFER,
             indexBufferSize,
-            flatDataStar.data(),
+            _starKDTree.data(),
             GL_STREAM_DRAW
         );
 

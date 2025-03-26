@@ -3,28 +3,37 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include <string>
+#include <limits>
 
 namespace openspace {
-    namespace kdtree{}
+    namespace kdtree {}
     class KDTree {
     public:
         KDTree() {};
 
-        size_t size() { return tree.size() * 6; };
+        KDTree(std::string const& filePath, glm::vec3 const& localWorldCenter, float const renderDistance = std::numeric_limits<float>::max());
 
-        void build(std::string const& filePath, glm::vec3 const & origin);
+        size_t size() { return flatTree.size(); };
 
-        std::vector<float> flatTree() const;
+        void* data() {
+            return flatTree.data();
+        }
+
+        void build(
+            std::string const& constfilePath,
+            glm::vec3 const&  localWorldCenter,
+            float const renderDistance = std::numeric_limits<float>::max()
+        );
 
     private:
         struct Node {
-            glm::fvec3 position;
-            float color;
-            float lum;
-            float absMag;
+            glm::fvec3 position{};
+            float color{};
+            float lum{};
+            float absMag{};
         };
-
-        std::vector<Node> tree{};
+        std::vector<float> flattenTree(std::vector<Node> const& tree) const;
+        std::vector<float> flatTree{};
     };
 }
 
