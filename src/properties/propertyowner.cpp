@@ -46,13 +46,13 @@ namespace {
     // know what is created first is because if the child is created first, it has not
     // been added to the property tree so URI will be invalid and not sent. But the parent
     // will be added later, which will include the child in it's subowners
-    void publishPropertyTreeUpdatedEvent(const std::string& uri) {
+    void publishPropertyTreeUpdatedEvent(std::string_view uri) {
         if (!uri.empty()) {
             global::eventEngine->publishEvent<events::EventPropertyTreeUpdated>(uri);
         }
     }
 
-    void publishPropertyTreePrunedEvent(const std::string& uri) {
+    void publishPropertyTreePrunedEvent(std::string_view uri) {
         if (!uri.empty()) {
             global::eventEngine->publishEvent<events::EventPropertyTreePruned>(uri);
         }
@@ -172,6 +172,14 @@ std::string PropertyOwner::uri() const {
 
 bool PropertyOwner::hasProperty(const std::string& uri) const {
     return property(uri) != nullptr;
+}
+
+void PropertyOwner::setPropertyOwner(PropertyOwner* owner) {
+    _owner = owner;
+}
+
+PropertyOwner* PropertyOwner::owner() const {
+    return _owner;
 }
 
 bool PropertyOwner::hasProperty(const Property* prop) const {
@@ -309,6 +317,7 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
         else {
             _subOwners.push_back(owner);
             owner->setPropertyOwner(this);
+            updateUriCaches();
 
             // Notify change so UI gets updated
             publishPropertyTreeUpdatedEvent(owner->uri());
@@ -365,6 +374,9 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner*
     if (it != _subOwners.end() && (*it)->identifier() == owner->identifier()) {
         // Notify the change so the UI can update
         publishPropertyTreePrunedEvent(owner->uri());
+
+        // It's probably going to get deleted, but we can't be 100% sure of that
+        owner->updateUriCaches();
         _subOwners.erase(it);
     }
     else {
@@ -419,6 +431,15 @@ void PropertyOwner::addTag(std::string tag) {
 
 void PropertyOwner::removeTag(const std::string& tag) {
     _tags.erase(std::remove(_tags.begin(), _tags.end(), tag), _tags.end());
+}
+
+void PropertyOwner::updateUriCaches() {
+    for (Property* property : _properties) {
+        property->updateUriCache();
+    }
+    for (PropertyOwner* owner : _subOwners) {
+        owner->updateUriCaches();
+    }
 }
 
 } // namespace openspace::properties

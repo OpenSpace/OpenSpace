@@ -140,39 +140,32 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
         }
     }
 
-    // Stores whether we found at least one matching property. If this is false at the end
-    // of the loop, the property name regex was probably misspelled.
     for (properties::Property* prop : properties) {
         // Check the regular expression for all properties
-        const std::string id = prop->uri();
+        const std::string_view id = prop->uri();
 
         if (isLiteral && id != propertyName) {
             continue;
         }
         else if (!propertyName.empty()) {
             size_t propertyPos = id.find(propertyName);
-            if (propertyPos != std::string::npos) {
+            if (
+                (propertyPos == std::string::npos) ||
                 // Check that the propertyName fully matches the property in id
-                if ((propertyPos + propertyName.length() + 1) < id.length()) {
-                    continue;
-                }
-
+                ((propertyPos + propertyName.length() + 1) < id.length()) ||
                 // Match node name
-                if (!nodeName.empty() && id.find(nodeName) == std::string::npos) {
+                (!nodeName.empty() && id.find(nodeName) == std::string::npos))
+            {
+                continue;
+            }
+
+            // Check tag
+            if (isGroupMode) {
+                const properties::PropertyOwner* matchingTaggedOwner =
+                    findPropertyOwnerWithMatchingGroupTag(prop, groupName);
+                if (!matchingTaggedOwner) {
                     continue;
                 }
-
-                // Check tag
-                if (isGroupMode) {
-                    const properties::PropertyOwner* matchingTaggedOwner =
-                        findPropertyOwnerWithMatchingGroupTag(prop, groupName);
-                    if (!matchingTaggedOwner) {
-                        continue;
-                    }
-                }
-            }
-            else {
-                continue;
             }
         }
         else if (!nodeName.empty()) {
@@ -547,7 +540,7 @@ namespace {
     std::vector<std::string> res;
     for (properties::Property* prop : props) {
         // Check the regular expression for all properties
-        const std::string& id = prop->uri();
+        const std::string_view id = prop->uri();
 
         if (isLiteral && id != propertyName) {
             continue;
@@ -599,7 +592,7 @@ namespace {
             }
         }
 
-        res.push_back(id);
+        res.push_back(std::string(id));
     }
 
     return res;

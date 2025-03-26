@@ -277,7 +277,7 @@ public:
      *
      * \return The fully qualified identifier for this Property
      */
-    std::string uri() const;
+    std::string_view uri() const;
 
     /**
      * Returns the PropertyOwner of this Property or `nullptr`, if it does not have an
@@ -475,6 +475,13 @@ public:
      */
     void resetToUnchanged();
 
+    /**
+     * This function must be called whenever this properties URI changes. Examples of this
+     * are if the PropertyOwner to which this Property belongs changes identifier or is
+     * reparented in any way.
+     */
+    void updateUriCache();
+
 protected:
     /**
      * This method must be called by all subclasses whenever the encapsulated value has
@@ -508,6 +515,11 @@ protected:
 
     /// The callback functions that will be invoked whenever the value changes
     std::vector<std::pair<OnDeleteHandle, std::function<void()>>> _onDeleteCallbacks;
+
+    /// A cached version of the full URI of this property, which includes the identifiers
+    /// of all owners
+    std::string _uriCache;
+    bool _isUriCacheDirty = true;
 
     /// Flag indicating that this property value has been changed after initialization
     bool _isValueDirty = false;
