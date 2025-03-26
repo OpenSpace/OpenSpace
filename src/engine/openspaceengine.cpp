@@ -1727,14 +1727,7 @@ LoadingScreen* OpenSpaceEngine::loadingScreen() {
 }
 
 void OpenSpaceEngine::invalidatePropertyCache() {
-    // This looks a bit strange, but the OpenSpaceEngine constructor will call addProperty
-    // which in turn will cause this invalidate function to be called. However since the
-    // constructor has not finished, there is no object to call and `this` will be a
-    // `nullptr`. We are not missing these properties since the dirty flag is initialized
-    // to `true`
-    if (this != nullptr) {
-        _isAllPropertiesCacheDirty = true;
-    }
+    _isAllPropertiesCacheDirty = true;
 }
 
 const std::vector<properties::Property*>& OpenSpaceEngine::allProperties() const {
