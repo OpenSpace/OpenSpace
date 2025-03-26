@@ -6,7 +6,7 @@
 
 local Object = {
   Type = "ScreenSpaceRenderableRenderable",
-  Identifier = "ScreenSpaceImageOnline_Axes",
+  Identifier = "ScreenSpaceRenderableRenderable_Example_Axes",
   Renderable = {
     Type = "RenderableCartesianAxes"
   },

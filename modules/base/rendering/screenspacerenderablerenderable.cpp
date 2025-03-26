@@ -79,9 +79,10 @@ namespace {
     // can be used to display a rendered object as an overlay in front of the regular 3D
     // rendering of the scene.
     //
-    // Note to use this ScreenSpaceRenderable, it might be necessary to specify the `size`
-    // parameter, which determines the resolution of the inset window into which the
-    // Renderable is rendered. For many use cases, the default should suffice, however.
+    // Note that to use this `ScreenSpaceRenderable`, it might be necessary to specify the
+    // `size` parameter, which determines the resolution of the inset window into which
+    // the Renderable is rendered. For many use cases, the default should suffice,
+    // however.
     //
     // A possible use-case for the ScreenSpaceRenderable would be to show a 3D model of a
     // spacecraft without the need to place it at a position in the 3D scene with the need
@@ -89,7 +90,7 @@ namespace {
     struct [[codegen::Dictionary(ScreenSpaceRenderableRenderable)]] Parameters {
         std::optional<std::string> identifier [[codegen::private()]];
 
-        // The [Renderable](#renderable) object that os shown in this ScreenSpace object.
+        // The [Renderable](#renderable) object that is shown in this ScreenSpace object.
         // See the list of creatable renderable objects for options that can be used for
         // this type.
         ghoul::Dictionary renderable [[codegen::reference("renderable")]];

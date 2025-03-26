@@ -2,7 +2,7 @@
 -- Creates a screen space window into which 3D model of the Eiffel tower is rendered. As
 -- the objects are rendered in meter scale, and the Eiffel tower is about 300m tall, we
 -- place the camera at a great distance to be able to see the entire Eiffel tower at the
--- same time
+-- same time.
 
 -- Download the model file for the Eiffel tower
 local modelFolder = asset.resource({
@@ -14,7 +14,7 @@ local modelFolder = asset.resource({
 
 local Object = {
   Type = "ScreenSpaceRenderableRenderable",
-  Identifier = "ScreenSpaceImageOnline_ModelDistance",
+  Identifier = "ScreenSpaceRenderableRenderable_Example_ModelDistance",
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = modelFolder .. "eiffeltower.osmodel",

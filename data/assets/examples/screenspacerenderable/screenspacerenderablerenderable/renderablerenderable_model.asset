@@ -14,7 +14,7 @@ local modelFolder = asset.resource({
 
 local Object = {
   Type = "ScreenSpaceRenderableRenderable",
-  Identifier = "ScreenSpaceImageOnline_Model",
+  Identifier = "ScreenSpaceRenderableRenderable_Example_Model",
   Transform = {
     Scale = {
       Type = "StaticScale",
