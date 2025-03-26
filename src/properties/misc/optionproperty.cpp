@@ -32,6 +32,29 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "OptionProperty";
+
+    using Option = openspace::properties::OptionProperty::Option;
+
+    bool addOptionInternal(int value, std::string desc, std::vector<Option>& options) {
+        Option option = {
+            .value = value,
+            .description = std::move(desc)
+        };
+
+        for (const Option& o : options) {
+            if (o.value == option.value) {
+                LWARNING(std::format(
+                    "The value of option {{ {} -> {} }} was already registered when "
+                    "trying to add option {{ {} -> {} }}",
+                    o.value, o.description, option.value, option.description
+
+                ));
+                return false;
+            }
+        }
+        options.push_back(std::move(option));
+        return true;
+    }
 } // namespace
 
 namespace openspace::properties {
@@ -62,40 +85,30 @@ const std::vector<OptionProperty::Option>& OptionProperty::options() const {
     return _options;
 }
 
-void OptionProperty::addOption(int value, std::string desc, bool notifyListeners) {
-    Option option = { .value = value, .description = std::move(desc) };
-
-    for (const Option& o : _options) {
-        if (o.value == option.value) {
-            LWARNING(std::format(
-                "The value of option {{ {} -> {} }} was already registered when trying "
-                "to add option {{ {} -> {} }}",
-                o.value, o.description, option.value, option.description
-
-            ));
-            return;
-        }
-    }
-    _options.push_back(std::move(option));
-    // Set default value to option added first
-    NumericalProperty::setValue(_options[0].value);
-
-    if (notifyListeners) {
+void OptionProperty::addOption(int value, std::string description) {
+    bool success = addOptionInternal(value, description, _options);
+    if (success) {
+        // Set default value to option added first
+        NumericalProperty::setValue(_options[0].value);
         notifyChangeListeners();
     }
 }
 
 void OptionProperty::addOptions(std::vector<std::pair<int, std::string>> options) {
     for (std::pair<int, std::string>& p : options) {
-        addOption(p.first, std::move(p.second), false);
+        addOptionInternal(p.first, std::move(p.second), _options);
     }
+    // Set default value to option added first
+    NumericalProperty::setValue(_options[0].value);
     notifyChangeListeners();
 }
 
 void OptionProperty::addOptions(std::vector<std::string> options) {
     for (int i = 0; i < static_cast<int>(options.size()); i++) {
-        addOption(i, std::move(options[i]), false);
+        addOptionInternal(i, std::move(options[i]), _options);
     }
+    // Set default value to option added first
+    NumericalProperty::setValue(_options[0].value);
     notifyChangeListeners();
 }
 

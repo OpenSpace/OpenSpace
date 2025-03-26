@@ -75,9 +75,8 @@ public:
      *
      * \param value The option that will be added to the list of available options
      * \param description The description of the value that will be added
-     * \param notifyListeners If true, notify the change listeners for this property
      */
-    void addOption(int value, std::string description, bool notifyListeners = true);
+    void addOption(int value, std::string description);
 
     /**
      * Adds multiple options to the OptionProperty. Each value in the vector consists of
