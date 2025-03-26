@@ -12,12 +12,13 @@ namespace openspace {
         ViewPort() {};
         ~ViewPort();
 
-        void uploadViewGrid(const glm::ivec2& screenSize);
-        void updateViewGridTexture(void* data, const glm::vec2& screenSize);
+        void updateViewGrid(const glm::ivec2& screenSize);
         std::unique_ptr<ghoul::opengl::Texture> viewGrid;
 
     private:
-        float fovHorizontel = glm::radians(90.f);
+        float _fovHorizontel = glm::radians(90.f);
+        void updateViewGridTexture(void* data, const glm::vec2& screenSize);
+        glm::ivec2 _lastScreenSize{};
     };
 } // namespace openspace
 

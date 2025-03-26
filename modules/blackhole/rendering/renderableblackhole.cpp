@@ -87,7 +87,7 @@ namespace openspace {
         setupQuad();
         setupShaders();
         loadEnvironmentTexture();
-        _viewport.uploadViewGrid(screenSize);
+        _viewport.updateViewGrid(screenSize);
     }
 
     void RenderableBlackHole::deinitializeGL() {
@@ -117,6 +117,8 @@ namespace openspace {
             flatDataStar = _starKDTree.flatTree();
             _lastTranslation = data.modelTransform.translation;
         }
+
+        _viewport.updateViewGrid(global::renderEngine->renderingResolution());
 
         glm::vec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
         glm::vec3 anchorNodePosition = global::navigationHandler->anchorNode()->position();
