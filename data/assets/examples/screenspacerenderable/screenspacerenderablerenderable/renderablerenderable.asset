@@ -1,0 +1,22 @@
+-- Basic
+-- Creates a screenspace image that shows a spherical grid as an example for any
+-- [Renderable](#renderable) that can be displayed.
+
+local Object = {
+  Type = "ScreenSpaceRenderableRenderable",
+  Identifier = "ScreenSpaceRenderableRenderable_Example",
+  Renderable = {
+    Type = "RenderableSphericalGrid",
+    Opacity = 1.0,
+    Color = { 0.3, 0.84, 1.0 },
+    LineWidth = 2.0
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(Object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Object)
+end)

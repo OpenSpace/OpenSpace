@@ -1,0 +1,47 @@
+-- Model
+-- Creates a screen space window into which 3D model of the Eiffel tower is rendered. As
+-- the objects are rendered in meter scale, and the Eiffel tower is about 300m tall, we
+-- both shrink the rendering to make the entire model fit into the view and also modify
+-- the position of the camera.
+
+-- Download the model file for the Eiffel tower
+local modelFolder = asset.resource({
+  Name = "Scale Eiffel Tower",
+  Type = "HttpSynchronization",
+  Identifier = "scale_model_eiffel_tower",
+  Version = 1
+})
+
+local Object = {
+  Type = "ScreenSpaceRenderableRenderable",
+  Identifier = "ScreenSpaceRenderableRenderable_Example_Model",
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 0.0002
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = modelFolder .. "eiffeltower.osmodel",
+    RotationVector = { 0.0, 45.0, 0.0 },
+    LightSources = {
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 5.0
+      }
+    }
+  },
+  Scale = 1.25,
+  CameraPosition = { 0.0, 1.0, 2.0 },
+  CameraCenter = { 0.0, 0.5, 0.0 }
+}
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(Object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Object)
+end)

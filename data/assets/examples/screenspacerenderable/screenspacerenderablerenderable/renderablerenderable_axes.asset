@@ -1,0 +1,24 @@
+-- Axes
+-- Creates a screenspace image that renders three Cartesian axes into the screen space
+-- window. This example also modifies the original camera position to give an oblique view
+-- onto the axes and increases the field of view of the camera to a wider degree. We also
+-- set the background color to be fully opaque to make it easier to see the axes.
+
+local Object = {
+  Type = "ScreenSpaceRenderableRenderable",
+  Identifier = "ScreenSpaceRenderableRenderable_Example_Axes",
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  BackgroundColor = { 0.0, 0.0, 0.0, 1.0 },
+  CameraPosition = { 1.0, 1.0, 1.0 },
+  CameraFov = 80.0
+}
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(Object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Object)
+end)
