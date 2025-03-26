@@ -172,7 +172,7 @@ vec4 searchNearestStar(vec3 sphericalCoords) {
     int axis = -1;
 
     while(index < SIZE && starKDTree[nodeIndex] > 0.0f){
-        if (angularDist(sphericalCoords.yz, vec2(starKDTree[nodeIndex + 1], starKDTree[nodeIndex + 2])) < 0.002f){
+        if (angularDist(sphericalCoords.yz, vec2(starKDTree[nodeIndex + 1], starKDTree[nodeIndex + 2])) < 0.0012f){
                 float luminosity = pow(10.0, 1.89 - 0.4 * starKDTree[nodeIndex + 4]);
 
                 // If luminosity is really really small then set it to a static low number.
