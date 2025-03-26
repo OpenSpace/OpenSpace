@@ -16,7 +16,8 @@ namespace openspace {
     }
 
     void ViewPort::updateViewGrid(const glm::ivec2& screenSize) {
-        ghoul_assert(screenSize.x <= 0 || screenSize.y <= 0);
+        ghoul_assert(screenSize.x > 0 && screenSize.y > 0,
+            "Screen size dimensions must be positive!");
         if (screenSize == _lastScreenSize) return;
         _lastScreenSize = screenSize;
 
