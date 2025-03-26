@@ -134,6 +134,14 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
+    openSpaceEngine = new (currentPos) OpenSpaceEngine;
+    ghoul_assert(openSpaceEngine, "No openSpaceEngine");
+    currentPos += sizeof(OpenSpaceEngine);
+#else // ^^^ WIN32 / !WIN32 vvv
+    openSpaceEngine = new OpenSpaceEngine;
+#endif // WIN32
+
+#ifdef WIN32
     eventEngine = new (currentPos) EventEngine;
     ghoul_assert(eventEngine, "No eventEngine");
     currentPos += sizeof(EventEngine);
@@ -195,14 +203,6 @@ void create() {
     currentPos += sizeof(ModuleEngine);
 #else // ^^^ WIN32 / !WIN32 vvv
     moduleEngine = new ModuleEngine;
-#endif // WIN32
-
-#ifdef WIN32
-    openSpaceEngine = new (currentPos) OpenSpaceEngine;
-    ghoul_assert(openSpaceEngine, "No openSpaceEngine");
-    currentPos += sizeof(OpenSpaceEngine);
-#else // ^^^ WIN32 / !WIN32 vvv
-    openSpaceEngine = new OpenSpaceEngine;
 #endif // WIN32
 
 #ifdef WIN32
@@ -577,13 +577,6 @@ void destroy() {
     delete parallelPeer;
 #endif // WIN32
 
-    LDEBUGC("Globals", "Destroying 'OpenSpaceEngine'");
-#ifdef WIN32
-    openSpaceEngine->~OpenSpaceEngine();
-#else // ^^^ WIN32 / !WIN32 vvv
-    delete openSpaceEngine;
-#endif // WIN32
-
     LDEBUGC("Globals", "Destroying 'ModuleEngine'");
 #ifdef WIN32
     moduleEngine->~ModuleEngine();
@@ -638,6 +631,13 @@ void destroy() {
     eventEngine->~EventEngine();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete eventEngine;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destroying 'OpenSpaceEngine'");
+#ifdef WIN32
+    openSpaceEngine->~OpenSpaceEngine();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete openSpaceEngine;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'MemoryManager'");

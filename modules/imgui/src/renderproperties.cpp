@@ -63,15 +63,13 @@ void renderTooltip(Property* prop, double delay) {
             ImGui::TextWrapped("%s", prop->description().c_str());
             ImGui::Spacing();
         }
-        ImGui::Text(
-            "%s",
-            (std::string("Identifier: ") + prop->uri()).c_str()
-        );
+        std::string t = std::format("Identifier: {}", prop->uri());
+        ImGui::Text("%s", t.c_str());
         ImGui::EndTooltip();
     }
 }
 
-void executeSetPropertyScript(const std::string& id, const std::string& value) {
+void executeSetPropertyScript(std::string_view id, const std::string& value) {
     global::scriptEngine->queueScript(
         std::format("openspace.setPropertyValueSingle('{}', {});", id, value)
     );
@@ -234,7 +232,7 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
     ImGui::PopID();
 }
 
-void renderListProperty(const std::string& name, const std::string& fullIdentifier,
+void renderListProperty(const std::string& name, std::string_view fullIdentifier,
                         const std::string& stringValue)
 {
     // Remove brackets from the string value

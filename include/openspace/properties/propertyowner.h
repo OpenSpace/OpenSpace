@@ -73,7 +73,7 @@ public:
      * The destructor will remove all Propertys and PropertyOwners it owns along with
      * itself.
      */
-    virtual ~PropertyOwner();
+    virtual ~PropertyOwner() = default;
 
     /**
      * Sets the identifier for this PropertyOwner. If the PropertyOwner does not have an
@@ -193,8 +193,8 @@ public:
      */
     bool hasProperty(const Property* prop) const;
 
-    void setPropertyOwner(PropertyOwner* owner) { _owner = owner; }
-    PropertyOwner* owner() const { return _owner; }
+    void setPropertyOwner(PropertyOwner* owner);
+    PropertyOwner* owner() const;
 
     /**
      * Returns a list of all sub-owners this PropertyOwner has. Each name of a sub-owner
@@ -337,6 +337,11 @@ protected:
     std::map<std::string, std::string> _groupNames;
     /// Collection of string tag(s) assigned to this property
     std::vector<std::string> _tags;
+
+
+private:
+    /// Will regenerate the uri caches for all directly or indirectly owned properties
+    void updateUriCaches();
 };
 
 }  // namespace openspace::properties

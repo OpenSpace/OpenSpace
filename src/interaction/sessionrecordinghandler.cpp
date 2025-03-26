@@ -572,7 +572,7 @@ void SessionRecordingHandler::savePropertyBaseline(properties::Property& prop) {
         "NavigationHandler.OrbitalNavigator.RetargetAim"
     };
 
-    const std::string propIdentifier = prop.uri();
+    const std::string propIdentifier = std::string(prop.uri());
     for (std::string_view reject : PropertyBaselineRejects) {
         if (propIdentifier.starts_with(reject)) {
             return;
