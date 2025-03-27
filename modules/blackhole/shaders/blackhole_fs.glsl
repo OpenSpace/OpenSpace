@@ -25,6 +25,11 @@ const float VIEWGRIDZ = -1.0f;
 const float INF = 1.0f/0.0f;
 const float LUM_LOWER_CAP = 0.01;
 
+const int NODE_SIZE = 6;
+const int SIZE = starKDTree.length() / NODE_SIZE;
+const float starRadius = 0.002f;
+const int STACKSIZE = 32;
+const int tableSize = schwarzschildWarpTable.length() / 2;
 
 /**********************************************************
                         Math
@@ -80,7 +85,6 @@ ivec2 bstWarpTable(float phi){
 
     int left = 0;
     int mid = -1;
-    const int tableSize = schwarzschildWarpTable.length() / 2;
     int right = tableSize - 1;
 
     while(left <= right){
@@ -173,31 +177,23 @@ vec4 searchNearestStar(vec3 sphericalCoords) {
         int index;
         float distance;
     };
+
     const int K = 2;
 
-    const int NODE_SIZE = 6;
-    const int SIZE = starKDTree.length() / NODE_SIZE;
-    const float starRadius = 0.0075f;
-    
-    // Number of stars is estimated to never go over 2^32 and 32 aligns with memory
-    const int STACKSIZE = 32;
+    // Number of stars is estimated to never go over 2^32
     TreeIndex stack[STACKSIZE];
     int stackIndex = 0;
 
     TreeIndex treeIndex = TreeIndex(0, 0);
     int nodeIndex = 0;
-    int axis = -1;
     
     float bestDist = INF;
-    vec4 bestColor = vec4(0.0f);
     int bestIndex = -1;
 
     NodeIdentety bestNodes[K];
-
-    for (int i = 0; i < K; i++) {
-        bestNodes[i].index = -1;
-        bestNodes[i].distance = INF;
-    }
+    bestNodes[0] = NodeIdentety(-1, INF);
+    bestNodes[1] = NodeIdentety(-1, INF);
+    
 
     int worstBestNodeIndex = -1;
 
@@ -214,7 +210,7 @@ vec4 searchNearestStar(vec3 sphericalCoords) {
         }
 
         worstBestNodeIndex = 0;
-        float maxDistance = -INF; // Start with a very small value
+        float maxDistance = INF;
 
          for (int i = 0; i < K; i++) {
             if (bestNodes[i].distance > maxDistance) {
@@ -231,12 +227,13 @@ vec4 searchNearestStar(vec3 sphericalCoords) {
         }
 
         // Treverse to next node
-        axis = treeIndex.depth % 2 + 1;
+        int axis = treeIndex.depth % 2 + 1;
         float diff = sphericalCoords[axis] - starKDTree[nodeIndex + axis];
         
-        bool goLeft = diff < 0.0;
-        int closerIndex = goLeft ? 2 * treeIndex.index + 1 : 2 * treeIndex.index + 2;
-        int fartherIndex = goLeft ? 2 * treeIndex.index + 2 : 2 * treeIndex.index + 1;
+        int base = 2 * treeIndex.index;
+        int offset = int(diff >= 0.0);
+        int closerIndex = base + 1 + offset;
+        int fartherIndex = base + 2 - offset;
 
         treeIndex.index = closerIndex;
         nodeIndex = treeIndex.index * NODE_SIZE;
@@ -248,7 +245,7 @@ vec4 searchNearestStar(vec3 sphericalCoords) {
         }
     }
     
-    bestColor = vec4(0.0f);
+    vec4 bestColor = vec4(0.0f);
     float totalAlpha = 0.0f;
 
     int nearStarCount = 0;
@@ -262,7 +259,7 @@ vec4 searchNearestStar(vec3 sphericalCoords) {
             luminosity /= pow(observedDistance, 1.1f);
             luminosity = max(luminosity, LUM_LOWER_CAP);
 
-            float alpha = pow((starRadius - bestNodes[i].distance) / starRadius, 2.0f);
+            float alpha = 1.0f - pow((bestNodes[i].distance) / starRadius, 2.2f);
             vec3 starColor = BVIndex2rgb(starKDTree[bestNodes[i].index + 3]);
 
             // Pre-multiplied alpha accumulation
@@ -273,8 +270,8 @@ vec4 searchNearestStar(vec3 sphericalCoords) {
 
 // Final alpha blending
 if (totalAlpha > 0.0f) {
-    bestColor.rgb /= totalAlpha; // Normalize color by total alpha
-    bestColor.a = totalAlpha;    // Set final alpha
+    bestColor.rgb /= totalAlpha;
+    bestColor.a = totalAlpha;
 }
 
 return bestColor;
@@ -311,19 +308,9 @@ Fragment getFragment() {
 
     // Init rotation of the black hole
     vec4 envMapCoords = vec4(sphericalToCartesian(envMapSphericalCoords.x, envMapSphericalCoords.y), 0.0f);
-    
-    float initRotationAngle = PI/2;
-    mat4 rotationMatrixX = mat4(
-        1.0f,    0.0f,                 0.0f,               0.0f,
-        0.0f,    cos(initRotationAngle),  -sin(initRotationAngle), 0.0f,
-        0.0f,    sin(initRotationAngle),   cos(initRotationAngle), 0.0f,
-        0.0f,    0.0f,                 0.0f,               1.0f
-    );
-
 
     // User world input rotation of the black hole
     envMapCoords = worldRotationMatrix * envMapCoords;
-    envMapCoords = rotationMatrixX * envMapCoords;
 
     sphericalCoords = cartesianToSpherical(envMapCoords.xyz);
     vec2 uv = sphericalToUV(sphericalCoords);
