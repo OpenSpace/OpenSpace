@@ -89,12 +89,8 @@ set(OPENSPACE_SOURCE
   network/parallelconnection.cpp
   network/parallelpeer.cpp
   network/parallelpeer_lua.inl
-  properties/optionproperty.cpp
   properties/property.cpp
   properties/propertyowner.cpp
-  properties/selectionproperty.cpp
-  properties/stringproperty.cpp
-  properties/triggerproperty.cpp
   properties/list/doublelistproperty.cpp
   properties/list/intlistproperty.cpp
   properties/list/stringlistproperty.cpp
@@ -104,6 +100,10 @@ set(OPENSPACE_SOURCE
   properties/matrix/mat2property.cpp
   properties/matrix/mat3property.cpp
   properties/matrix/mat4property.cpp
+  properties/misc/optionproperty.cpp
+  properties/misc/selectionproperty.cpp
+  properties/misc/stringproperty.cpp
+  properties/misc/triggerproperty.cpp
   properties/scalar/boolproperty.cpp
   properties/scalar/doubleproperty.cpp
   properties/scalar/floatproperty.cpp
@@ -276,18 +276,12 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/network/parallelpeer.h
   ${PROJECT_SOURCE_DIR}/include/openspace/network/messagestructures.h
   ${PROJECT_SOURCE_DIR}/include/openspace/network/messagestructureshelper.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/properties/listproperty.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/properties/listproperty.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/numericalproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/numericalproperty.inl
-  ${PROJECT_SOURCE_DIR}/include/openspace/properties/optionproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/property.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/propertyowner.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/properties/selectionproperty.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/properties/stringproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/templateproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/templateproperty.inl
-  ${PROJECT_SOURCE_DIR}/include/openspace/properties/triggerproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/list/doublelistproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/list/intlistproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/list/stringlistproperty.h
@@ -297,6 +291,12 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/matrix/mat2property.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/matrix/mat3property.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/matrix/mat4property.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/properties/misc/listproperty.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/properties/misc/listproperty.inl
+  ${PROJECT_SOURCE_DIR}/include/openspace/properties/misc/optionproperty.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/properties/misc/selectionproperty.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/properties/misc/stringproperty.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/properties/misc/triggerproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/scalar/boolproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/scalar/doubleproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/scalar/floatproperty.h
@@ -465,6 +465,7 @@ target_precompile_headers(openspace-core PRIVATE
   <openspace/properties/numericalproperty.h>
   [["ghoul/format.h"]]
   [["ghoul/glm.h"]]
+  [["ghoul/lua/lua_helper.h"]]
   [["ghoul/misc/assert.h"]]
   [["ghoul/misc/boolean.h"]]
   [["ghoul/misc/exception.h"]]

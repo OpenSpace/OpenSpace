@@ -13,13 +13,13 @@ local Node = {
       {
         Type = "TimeFrameInterval",
         Start = "2000 JAN 01 00:00:00.000",
-        End = "2000 JAN 01 23:59:59.999"
+        End = "2000 JAN 02 00:00:00.000"
       },
       -- The second TimeFrameInterval for the second day
       {
         Type = "TimeFrameInterval",
         Start = "2002 MAR 01 00:00:00.000",
-        End = "2002 MAR 01 23:59:59.999"
+        End = "2002 MAR 02 00:00:00.000"
       }
     }
   },

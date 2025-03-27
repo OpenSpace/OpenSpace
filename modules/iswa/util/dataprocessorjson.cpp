@@ -25,7 +25,7 @@
 #include <modules/iswa/util/dataprocessorjson.h>
 
 #include <openspace/json.h>
-#include <openspace/properties/selectionproperty.h>
+#include <openspace/properties/misc/selectionproperty.h>
 #include <openspace/util/histogram.h>
 
 using json = nlohmann::json;

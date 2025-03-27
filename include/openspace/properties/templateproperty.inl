@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/lua/lua_helper.h>
-
 namespace openspace::properties {
 
 template <typename T>
@@ -44,17 +42,17 @@ TemplateProperty<T>::operator T() const {
 
 template <typename T>
 TemplateProperty<T>& TemplateProperty<T>::operator=(T val) {
-    setValue(val);
+    setValue(std::move(val));
     return *this;
 }
 
 template <typename T>
-T openspace::properties::TemplateProperty<T>::value() const {
+T TemplateProperty<T>::value() const {
     return _value;
 }
 
 template <typename T>
-void openspace::properties::TemplateProperty<T>::setValue(T val) {
+void TemplateProperty<T>::setValue(T val) {
     if (val != _value) {
         _value = std::move(val);
         notifyChangeListeners();
@@ -63,25 +61,14 @@ void openspace::properties::TemplateProperty<T>::setValue(T val) {
 }
 
 template <typename T>
+void TemplateProperty<T>::setLuaValue(lua_State* state) {
+    T thisValue = toValue(state);
+    setValue(std::move(thisValue));
+}
+
+template <typename T>
 const std::type_info& TemplateProperty<T>::type() const {
     return typeid(T);
-}
-
-template <typename T>
-bool TemplateProperty<T>::getLuaValue(lua_State* state) const {
-    toLuaConversion(state);
-    return true;
-}
-
-template <typename T>
-void TemplateProperty<T>::setLuaValue(lua_State* state) {
-    T thisValue = fromLuaConversion(state);
-    setValue(thisValue);
-}
-
-template <typename T>
-std::string TemplateProperty<T>::stringValue() const {
-    return toStringConversion();
 }
 
 }  // namespace openspace::properties

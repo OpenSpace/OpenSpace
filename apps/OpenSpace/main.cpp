@@ -37,6 +37,7 @@
 #include <ghoul/cmdparser/multiplecommand.h>
 #include <ghoul/cmdparser/singlecommand.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
 #include <ghoul/misc/stacktrace.h>
 #ifdef WIN32
@@ -1414,9 +1415,39 @@ int main(int argc, char* argv[]) {
         openspace::Settings settings = loadSettings();
         settings.hasStartedBefore = true;
 
-        const std::filesystem::path p = global::configuration->profile;
-        const std::filesystem::path reducedName = p.filename().replace_extension();
-        settings.profile = reducedName.string();
+        const std::filesystem::path profile = global::configuration->profile;
+
+        const bool isDefaultProfile = ghoul::filesystem::isSubdirectory(
+            profile,
+            absPath("${PROFILES}")
+        );
+        const bool isUserProfile = ghoul::filesystem::isSubdirectory(
+            profile,
+            absPath("${USER_PROFILES}")
+        );
+
+        if (isDefaultProfile) {
+            std::filesystem::path p = std::filesystem::relative(
+                profile,
+                absPath("${PROFILES}")
+            );
+            p.replace_extension();
+            settings.profile = p.string();
+        }
+        else if (isUserProfile) {
+            std::filesystem::path p = std::filesystem::relative(
+                profile,
+                absPath("${USER_PROFILES}")
+            );
+            p.replace_extension();
+            settings.profile = p.string();
+        }
+        else {
+            LWARNING(
+                "Cannot save remembered profile when starting a profile that is not in "
+                "the data/profiles or user/data/profiles folder."
+            );
+        }
 
         settings.configuration =
             isGeneratedWindowConfig ? "" : global::configuration->windowConfiguration;

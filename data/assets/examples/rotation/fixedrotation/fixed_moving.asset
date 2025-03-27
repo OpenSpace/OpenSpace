@@ -1,0 +1,63 @@
+-- Rotation Following One Moving Object
+-- This asset creates a rotation that places coordinate axes orbiting close to a sphere
+-- with the z axis always pointing towards the sphere as it orbits around the sphere. The
+-- coordinate axes are translated away from the sphere to make that orientation more
+-- obvious.
+--
+-- Making the `YAxis` { 0.0, 1.0, 0.0 } and actually using the orthogonal projection of
+-- that direction means that the y axis of the new coordinate system will point in the
+-- hemisphere in which the old y-axis was pointing, albeit being orthogonal to the other
+-- specified axis. That axis is pointing towards the scene graph node holding the sphere.
+local Sphere = {
+  Identifier = "FixedRotation_Example_Moving_Sphere",
+  Transform = {
+    Translation = {
+      Type = "KeplerTranslation",
+      Eccentricity = 0.5,
+      SemiMajorAxis = 0.0025,
+      Inclination = 0.0,
+      AscendingNode = 0.0,
+      ArgumentOfPeriapsis = 0.0,
+      MeanAnomaly = 0.0,
+      Epoch = "2000 JAN 01 12:00:00",
+      Period = 10.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableSphericalGrid"
+  },
+  GUI = {
+    Name = "FixedRotation - Moving (Sphere)",
+    Path = "/Examples"
+  }
+}
+
+local Node = {
+  Identifier = "FixedRotation_Example_Moving",
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "FixedRotation_Example_Moving",
+      YAxis = { 0.0, 1.0, 0.0 },
+      YAxisOrthogonal = true,
+      ZAxis = Sphere.Identifier
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "FixedRotation - Moving",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Sphere)
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+  openspace.removeSceneGraphNode(Sphere)
+end)

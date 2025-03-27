@@ -25,7 +25,7 @@
 #include <modules/iswa/util/dataprocessorkameleon.h>
 
 #include <modules/kameleon/include/kameleonwrapper.h>
-#include <openspace/properties/selectionproperty.h>
+#include <openspace/properties/misc/selectionproperty.h>
 #include <openspace/util/histogram.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/file.h>

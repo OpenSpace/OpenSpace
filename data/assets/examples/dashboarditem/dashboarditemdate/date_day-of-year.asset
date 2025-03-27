@@ -1,0 +1,17 @@
+-- Day of Year
+-- This example adds a new DashboardItem that shows the current in-game simulation date
+-- showing the current year and the number of days that have passed in the year.
+
+local Item = {
+  Identifier = "DashboardItemDate_Example_DayOfYear",
+  Type = "DashboardItemDate",
+  TimeFormat = "YYYY DOY"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

@@ -62,18 +62,16 @@ public:
     bool wasLaunchSelected() const;
 
     /**
-      * Returns the selected profile name when launcher window closed.
+      * Returns the selected profile name when the launcher window closed.
       *
-      * \return The name of selected profile (this is only the name without file extension
-      *         and without path)
+      * \return The path to the selected profile
       */
     std::string selectedProfile() const;
 
     /**
-      * Returns the selected sgct window configuration when launcher window closed.
+      * Returns the selected SGCT window configuration when the launcher window closed.
       *
-      * \return The name of selected profile (this is only the name without file extension
-      *         and without path)
+      * \return The path to the selected profile
       */
     std::string selectedWindowConfig() const;
 

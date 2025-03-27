@@ -46,7 +46,7 @@ namespace {
     // interpolate between two adjacent keyframes.
     struct [[codegen::Dictionary(TimelineScale)]] Parameters {
         // A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS and values
-        // that are valid Scale objects
+        // that are valid Scale objects.
         std::map<std::string, ghoul::Dictionary> keyframes
             [[codegen::reference("core_transform_scale")]];
 
@@ -108,10 +108,14 @@ glm::dvec3 TimelineScale::scaleValue(const UpdateData& data) const {
         return glm::mix(prev->data->scaleValue(data), next->data->scaleValue(data), t);
     }
     else {
-        return now < nextTime ?
-            prev->data->scaleValue(data) :
-            next->data->scaleValue(data);
+        if (prevTime <= now && now < nextTime) {
+            return prev->data->scaleValue(data);
+        }
+        else if (nextTime <= now) {
+            return next->data->scaleValue(data);
+        }
     }
+    return glm::dvec3(0.0);
 }
 
 } // namespace openspace

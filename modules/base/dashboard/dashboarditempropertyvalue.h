@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/dashboardtextitem.h>
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 
 namespace openspace {
 
