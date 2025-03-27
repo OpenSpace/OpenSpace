@@ -163,43 +163,121 @@ float angularDist(vec2 a, vec2 b) {
     return sqrt(dTheta * dTheta + sin(a.x) * sin(b.x) * dPhi * dPhi);
 }
 
-
 vec4 searchNearestStar(vec3 sphericalCoords) {
+    struct TreeIndex {
+        int index;
+        int depth;
+    };
+
+    struct NodeIdentety {
+        int index;
+        float distance;
+    };
+    const int K = 2;
+
     const int NODE_SIZE = 6;
     const int SIZE = starKDTree.length() / NODE_SIZE;
-    int index = 0;
+    const float starRadius = 0.0075f;
+    
+    // Number of stars is estimated to never go over 2^32 and 32 aligns with memory
+    const int STACKSIZE = 32;
+    TreeIndex stack[STACKSIZE];
+    int stackIndex = 0;
+
+    TreeIndex treeIndex = TreeIndex(0, 0);
     int nodeIndex = 0;
-    int depth = 0;
     int axis = -1;
-    const float starRadius = 0.007f;
+    
+    float bestDist = INF;
+    vec4 bestColor = vec4(0.0f);
+    int bestIndex = -1;
 
-    while(index < SIZE && starKDTree[nodeIndex] > 0.0f){
-        float distToStar = angularDist(sphericalCoords.yz, vec2(starKDTree[nodeIndex + 1], starKDTree[nodeIndex + 2]));
-        if (distToStar < starRadius){
-                float luminosity = pow(10.0f, 1.89f - 0.4f * starKDTree[nodeIndex + 4]);
-                float alpha = pow((starRadius-distToStar) / starRadius, 3.0f);
+    NodeIdentety bestNodes[K];
 
-                float observedDistance = starKDTree[nodeIndex];
-                luminosity /= pow(observedDistance, 1.1f);
-
-                // If luminosity is really really small then set it to a static low number.
-                if (luminosity < LUM_LOWER_CAP) {
-                    luminosity = LUM_LOWER_CAP;
-                }
-                return vec4(BVIndex2rgb(starKDTree[nodeIndex + 3]), alpha * luminosity);
-        }
-
-
-        axis = depth % 2 + 1;
-        if(sphericalCoords[axis] < starKDTree[nodeIndex + axis]){
-            index = 2 * index + 1;
-        } else {
-            index = 2 * index + 2;
-        }
-        nodeIndex = index * NODE_SIZE;
-        depth += 1;
+    for (int i = 0; i < K; i++) {
+        bestNodes[i].index = -1;
+        bestNodes[i].distance = INF;
     }
-    return vec4(0.0f);
+
+    int worstBestNodeIndex = -1;
+
+    // Nereast neighbor search of KDTree
+    while (treeIndex.index < SIZE || stackIndex > 0) {
+        // Back track possible branches with closer stars
+        if (nodeIndex >= SIZE * NODE_SIZE) {
+            if (stackIndex > 0) {
+                treeIndex = stack[--stackIndex];
+                nodeIndex = treeIndex.index * NODE_SIZE;
+                continue;
+            }
+            break;
+        }
+
+        worstBestNodeIndex = 0;
+        float maxDistance = -INF; // Start with a very small value
+
+         for (int i = 0; i < K; i++) {
+            if (bestNodes[i].distance > maxDistance) {
+                maxDistance = bestNodes[i].distance;
+                worstBestNodeIndex = i;
+            }
+        }
+
+        // Check if a new closer star is found 
+        float distToStar = angularDist(sphericalCoords.yz, vec2(starKDTree[nodeIndex + 1], starKDTree[nodeIndex + 2]));
+        if (distToStar <  bestNodes[worstBestNodeIndex].distance) {
+            bestNodes[worstBestNodeIndex].distance = distToStar;
+            bestNodes[worstBestNodeIndex].index = treeIndex.index * NODE_SIZE;
+        }
+
+        // Treverse to next node
+        axis = treeIndex.depth % 2 + 1;
+        float diff = sphericalCoords[axis] - starKDTree[nodeIndex + axis];
+        
+        bool goLeft = diff < 0.0;
+        int closerIndex = goLeft ? 2 * treeIndex.index + 1 : 2 * treeIndex.index + 2;
+        int fartherIndex = goLeft ? 2 * treeIndex.index + 2 : 2 * treeIndex.index + 1;
+
+        treeIndex.index = closerIndex;
+        nodeIndex = treeIndex.index * NODE_SIZE;
+        treeIndex.depth++;
+
+        // If there could be a coloser point on the other branch add to backtrack stack
+        if (abs(diff) <  bestNodes[worstBestNodeIndex].distance) {
+            stack[stackIndex++] = TreeIndex(fartherIndex, treeIndex.depth);
+        }
+    }
+    
+    bestColor = vec4(0.0f);
+    float totalAlpha = 0.0f;
+
+    int nearStarCount = 0;
+    for (int i = 0; i < K; i++) {
+        if (bestNodes[i].index > 0 && bestNodes[i].distance < starRadius) {
+            nearStarCount++;
+
+            float luminosity = pow(10.0f, 1.89f - 0.4f * starKDTree[bestNodes[i].index + 4]);
+            float observedDistance = starKDTree[bestNodes[i].index];
+
+            luminosity /= pow(observedDistance, 1.1f);
+            luminosity = max(luminosity, LUM_LOWER_CAP);
+
+            float alpha = pow((starRadius - bestNodes[i].distance) / starRadius, 2.0f);
+            vec3 starColor = BVIndex2rgb(starKDTree[bestNodes[i].index + 3]);
+
+            // Pre-multiplied alpha accumulation
+            bestColor.rgb += starColor * alpha * luminosity;
+            totalAlpha += alpha * luminosity;
+        }
+    }
+
+// Final alpha blending
+if (totalAlpha > 0.0f) {
+    bestColor.rgb /= totalAlpha; // Normalize color by total alpha
+    bestColor.a = totalAlpha;    // Set final alpha
+}
+
+return bestColor;
 }
 
 
@@ -252,7 +330,7 @@ Fragment getFragment() {
     vec4 texColor = texture(environmentTexture, uv);
     
     vec4 starColor = searchNearestStar(vec3(0.0f, sphericalCoords.x, sphericalCoords.y));
-    texColor = vec4((starColor.rgb * starColor.a) + (texColor.rgb * (1-starColor.a)), 1.0f);
+    texColor = vec4((starColor.rgb * starColor.a) + (texColor.rgb * (1.0f - starColor.a)), 1.0f);
     frag.color = texColor;
     return frag;
 }
