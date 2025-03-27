@@ -41,18 +41,22 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo NodeCameraStateInfo = {
+    constexpr openspace::properties::Property::PropertyInfo NodeInfo = {
         "Node",
         "Node",
         "The identifier of the scene graph node to follow.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This `LightSource` type represents a light source placed at the position of a
+    // scene graph node. That is, it will follow an existing object in the scene.
+    //
+    // The direction for the light will update dynamically as the object moves.
     struct [[codegen::Dictionary(SceneGraphLightSource)]] Parameters {
         // [[codegen::verbatim(IntensityInfo.description)]]
-        std::optional<float> intensity;
+        std::optional<float> intensity [[codegen::inrange(0.0, 1.0)]];
 
-        // [[codegen::verbatim(NodeCameraStateInfo.description)]]
+        // [[codegen::verbatim(NodeInfo.description)]]
         std::string node [[codegen::identifier()]];
     };
 #include "scenegraphlightsource_codegen.cpp"
@@ -67,7 +71,7 @@ documentation::Documentation SceneGraphLightSource::Documentation() {
 SceneGraphLightSource::SceneGraphLightSource(const ghoul::Dictionary& dictionary)
     : LightSource(dictionary)
     , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
-    , _sceneGraphNodeReference(NodeCameraStateInfo, "")
+    , _sceneGraphNodeReference(NodeInfo, "")
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
