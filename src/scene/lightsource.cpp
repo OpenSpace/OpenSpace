@@ -42,13 +42,20 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This is the base class of all `LightSource` types, which are components that can be
+    // added to certain `Renderable` types to add lighting effects.
+    //
+    // A `LightSource` is in this case just a table that describes properties such as the
+    // location of the light. It _does not physically exist in the scene_, and the table
+    // of parameters have to be added to each `Renderable` the that should be affected by
+    // the light source. This is commonly done by exporting a light source table from an
+    // Asset file that represents an illuminating object in the scene, such as the Sun in
+    // our solar system.
     struct [[codegen::Dictionary(LightSource)]] Parameters {
-        // The type of the light source that is described in this element. The available
-        // types of light sources depend on the configuration of the application and can
-        // be written to disk on application startup into the FactoryDocumentation
-        std::string type [[codegen::annotation("Must name a valid LightSource type")]];
+        // The type of light source that is described in this element.
+        std::string type [[codegen::annotation("Must name a valid `LightSource` type")]];
 
-        // The identifier of the light source
+        // The identifier of the light source.
         std::string identifier [[codegen::identifier()]];
 
         // [[codegen::verbatim(EnabledInfo.description)]]
