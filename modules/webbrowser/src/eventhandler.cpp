@@ -56,6 +56,7 @@ namespace {
             case openspace::Key::RightControl:   return 17;
             case openspace::Key::LeftAlt:        return 18;
             case openspace::Key::RightAlt:       return 18;
+            case openspace::Key::Escape:         return 27;
             case openspace::Key::Left:           return 37;
             case openspace::Key::Up:             return 38;
             case openspace::Key::Right:          return 39;
