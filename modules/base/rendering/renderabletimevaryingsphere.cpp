@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -167,7 +167,8 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
         // not in interval => set everything to false
         _activeTriggerTimeIndex = 0;
     }
-    if (_textureIsDirty) {
+
+    if (_textureIsDirty) [[unlikely]] {
         loadTexture();
         _textureIsDirty = false;
     }
@@ -184,16 +185,14 @@ void RenderableTimeVaryingSphere::bindTexture() {
 
 void RenderableTimeVaryingSphere::updateActiveTriggerTimeIndex(double currentTime) {
     auto iter = std::upper_bound(
-        _files.begin(),
-        _files.end(),
+        _files.cbegin(),
+        _files.cend(),
         currentTime,
-        [](double value, const FileData& f) {
-            return value < f.time;
-        }
+        [](double value, const FileData& f) { return value < f.time; }
     );
-    if (iter != _files.end()) {
-        if (iter != _files.begin()) {
-            const ptrdiff_t idx = std::distance(_files.begin(), iter);
+    if (iter != _files.cend()) {
+        if (iter != _files.cbegin()) {
+            const ptrdiff_t idx = std::distance(_files.cbegin(), iter);
             _activeTriggerTimeIndex = static_cast<int>(idx - 1);
         }
         else {

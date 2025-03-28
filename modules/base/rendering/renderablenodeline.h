@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,7 +45,7 @@ class Translation;
  */
 class RenderableNodeLine : public Renderable {
 public:
-    RenderableNodeLine(const ghoul::Dictionary& dictionary);
+    explicit RenderableNodeLine(const ghoul::Dictionary& dictionary);
     ~RenderableNodeLine() override = default;
 
     static documentation::Documentation Documentation();
@@ -65,7 +65,7 @@ private:
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
-    ghoul::opengl::ProgramObject* _program;
+    ghoul::opengl::ProgramObject* _program = nullptr;
     /// The vertex attribute location for position
     /// must correlate to layout location in vertex shader
     const GLuint _locVertex = 0;

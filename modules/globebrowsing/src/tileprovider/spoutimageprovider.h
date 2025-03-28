@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,7 @@ namespace openspace::globebrowsing {
 
 class SpoutImageProvider : public TileProvider {
 public:
-    SpoutImageProvider(const ghoul::Dictionary& dictionary);
+    explicit SpoutImageProvider(const ghoul::Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
     Tile::Status tileStatus(const TileIndex& index) override final;
@@ -51,12 +51,11 @@ private:
     void internalDeinitialize() override final;
 
     std::array<std::unique_ptr<ghoul::opengl::Texture>, 2> tileTexture;
-    std::array<GLuint, 2> fbo = { 0, 0 };
     std::array<Tile, 2> tiles;
-
 #ifdef OPENSPACE_HAS_SPOUT
+    std::array<GLuint, 2> fbo = { 0, 0 };
     std::unique_ptr<spout::SpoutReceiverPropertyProxy> spoutReceiver;
-#endif
+#endif // OPENSPACE_HAS_SPOUT
 
     bool spoutUpdate = false;
 };

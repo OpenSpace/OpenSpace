@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,8 +27,7 @@
 
 #include <openspace/util/task.h>
 
-#include <modules/exoplanets/exoplanetshelper.h>
-
+#include <modules/exoplanets/datastructure.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <filesystem>
 #include <string>
@@ -44,7 +43,8 @@ public:
         ExoplanetDataEntry dataEntry;
     };
 
-    ExoplanetsDataPreparationTask(const ghoul::Dictionary& dictionary);
+    explicit ExoplanetsDataPreparationTask(const ghoul::Dictionary& dictionary);
+
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
     static documentation::Documentation documentation();

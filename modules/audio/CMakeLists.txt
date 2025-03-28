@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2024                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -49,7 +49,7 @@ if (WIN32)
 elseif (UNIX)
   set(SOLOUD_BACKEND_ALSA ON CACHE BOOL "")
 endif ()
-add_subdirectory(ext/soloud/contrib)
+add_subdirectory(ext/soloud/contrib SYSTEM)
 
 # Unfortunately, the soloud cmake tarket doesn't set the include directories correctly
 target_include_directories(openspace-module-audio SYSTEM PRIVATE ext/soloud/include)

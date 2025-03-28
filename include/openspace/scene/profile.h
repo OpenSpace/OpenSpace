@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,7 @@ public:
     struct ParsingError : public ghoul::RuntimeError {
         enum class Severity { Info, Warning, Error };
 
-        explicit ParsingError(Severity severity_, std::string msg);
+        ParsingError(Severity severity_, std::string msg);
 
         Severity severity;
     };
@@ -55,11 +55,15 @@ public:
     struct Version {
         int major = 0;
         int minor = 0;
+
+        auto operator<=>(const Version&) const = default;
     };
     struct Module {
         std::string name;
         std::optional<std::string> loadedInstruction;
         std::optional<std::string> notLoadedInstruction;
+
+        auto operator<=>(const Module&) const = default;
     };
     struct Meta {
         std::optional<std::string> name;
@@ -68,6 +72,8 @@ public:
         std::optional<std::string> author;
         std::optional<std::string> url;
         std::optional<std::string> license;
+
+        auto operator<=>(const Meta&) const = default;
     };
 
     struct Property {
@@ -79,6 +85,8 @@ public:
         SetType setType = SetType::SetPropertyValue;
         std::string name;
         std::string value;
+
+        auto operator<=>(const Property&) const = default;
     };
 
     struct Action {
@@ -88,11 +96,15 @@ public:
         std::string guiPath;
         bool isLocal = false;
         std::string script;
+
+        auto operator<=>(const Action&) const = default;
     };
 
     struct Keybinding {
         KeyWithModifier key;
         std::string action;
+
+        auto operator<=>(const Keybinding&) const = default;
     };
 
     struct Time {
@@ -104,6 +116,8 @@ public:
         Type type = Type::Relative;
         std::string value;
         bool startPaused = false;
+
+        auto operator<=>(const Time&) const = default;
     };
 
     struct CameraGoToNode {
@@ -111,6 +125,8 @@ public:
 
         std::string anchor;
         std::optional<double> height;
+
+        auto operator<=>(const CameraGoToNode&) const = default;
     };
 
     struct CameraNavState {
@@ -123,6 +139,8 @@ public:
         std::optional<glm::dvec3> up;
         std::optional<double> yaw;
         std::optional<double> pitch;
+
+        auto operator<=>(const CameraNavState&) const = default;
     };
 
     struct CameraGoToGeo {
@@ -132,6 +150,8 @@ public:
         double latitude = 0.0;
         double longitude = 0.0;
         std::optional<double> altitude;
+
+        auto operator<=>(const CameraGoToGeo&) const = default;
     };
 
     using CameraType = std::variant<CameraGoToNode, CameraNavState, CameraGoToGeo>;
@@ -139,6 +159,8 @@ public:
     Profile() = default;
     explicit Profile(const std::filesystem::path& path);
     std::string serialize() const;
+
+    auto operator<=>(const Profile&) const = default;
 
     /**
      * Saves all current settings, starting from the profile that was loaded at startup,

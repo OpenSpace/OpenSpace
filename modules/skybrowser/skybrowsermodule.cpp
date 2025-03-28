@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -159,6 +159,10 @@ namespace {
 } // namespace
 
 namespace openspace {
+
+documentation::Documentation SkyBrowserModule::Documentation() {
+    return codegen::doc<Parameters>("module_skybrowser");
+}
 
 SkyBrowserModule::SkyBrowserModule()
     : OpenSpaceModule(SkyBrowserModule::Name)
@@ -380,7 +384,10 @@ void SkyBrowserModule::disableHoverCircle(bool useScript) {
             global::scriptEngine->queueScript(script);
         }
         else {
-            _hoverCircle->renderable()->property("Fade")->set(0.f);
+            properties::Property* prop = _hoverCircle->renderable()->property("Fade");
+            properties::FloatProperty* floatProp = dynamic_cast<properties::FloatProperty*>(prop);
+            ghoul_assert(floatProp, "Fade property is not a float property");
+            *floatProp = 0.f;
         }
     }
 }

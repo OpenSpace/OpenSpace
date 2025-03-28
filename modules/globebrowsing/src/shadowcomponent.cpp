@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -186,12 +186,7 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
     // coded into the RenderableGlobe. Instead, the parent should unpack the dictionary
     // and pass the unpacked dictionary in here;  Or maybe we don't want a dictionary at
     // this state anyway?
-    if (!dictionary.hasValue<ghoul::Dictionary>("Shadows")) {
-        return;
-    }
-    const ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>("Shadows");
-
-    const Parameters p = codegen::bake<Parameters>(d);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_enabled);
 
@@ -347,7 +342,7 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     //glPolygonOffset(2.5f, 10.f);
     //checkGLError("begin() -- set values for polygon offset");
 
-    RenderData lightRenderData{
+    RenderData lightRenderData {
         *_lightCamera,
         data.time,
         data.renderBinMask,
@@ -388,12 +383,7 @@ void ShadowComponent::update(const UpdateData&) {
     ZoneScoped;
 
     SceneGraphNode* sun = global::renderEngine->scene()->sceneGraphNode("Sun");
-    if (sun) {
-        _sunPosition = sun->worldPosition();
-    }
-    else {
-        _sunPosition = glm::dvec3(0.0);
-    }
+    _sunPosition = sun ? sun->worldPosition() : glm::dvec3(0.0);
 }
 
 void ShadowComponent::createDepthTexture() {
@@ -521,7 +511,6 @@ void ShadowComponent::saveDepthBuffer() const {
 
     ppmFile.open("depthBufferShadowMapping.ppm", std::fstream::out);
     if (ppmFile.is_open()) {
-
         ppmFile << "P3\n";
         ppmFile << _shadowDepthTextureWidth << " " << _shadowDepthTextureHeight << '\n';
         ppmFile << "255\n";
@@ -559,7 +548,6 @@ void ShadowComponent::saveDepthBuffer() const {
 
     ppmFile.open("positionBufferShadowMapping.ppm", std::fstream::out);
     if (ppmFile.is_open()) {
-
         ppmFile << "P3\n";
         ppmFile << _shadowDepthTextureWidth << " " << _shadowDepthTextureHeight << '\n';
         ppmFile << "255\n";

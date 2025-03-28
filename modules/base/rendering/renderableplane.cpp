@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -120,6 +120,10 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // A `RenderablePlane` is a renderable that will shows some form of contents projected
+    // on a two-dimensional plane, which in turn is placed in three-dimensional space as
+    // any other `Renderable`. It is possible to specify the `Size` of the plane, whether
+    // it should always face the camera (`Billboard`), and other parameters shown below.
     struct [[codegen::Dictionary(RenderablePlane)]] Parameters {
         // [[codegen::verbatim(BillboardInfo.description)]]
         std::optional<bool> billboard;
@@ -198,7 +202,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 
     _blendMode.addOptions({
         { static_cast<int>(BlendMode::Normal), "Normal" },
-        { static_cast<int>(BlendMode::Additive), "Additive"}
+        { static_cast<int>(BlendMode::Additive), "Additive" }
     });
     _blendMode.onChange([this]() {
         const BlendMode m = static_cast<BlendMode>(_blendMode.value());
@@ -383,12 +387,12 @@ void RenderablePlane::unbindTexture() {}
 void RenderablePlane::update(const UpdateData&) {
     ZoneScoped;
 
-    if (_shader->isDirty()) {
+    if (_shader->isDirty()) [[unlikely]] {
         _shader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
 
-    if (_planeIsDirty) {
+    if (_planeIsDirty) [[unlikely]] {
         createPlane();
     }
 }

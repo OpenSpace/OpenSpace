@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,10 +43,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableConstellationLines";
 
-    constexpr std::array<const char*, 4> UniformNames = {
-        "modelViewTransform", "projectionTransform", "opacity", "color"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
         "File",
         "Constellation Data File Path",
@@ -78,6 +74,28 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // @TODO (2025-01-07, emmbr) I did not add any description of the file format below,
+    // since we intend for this to be changed in a relatively near future. When that is
+    // done, update the description.
+    // @TODO (2025-01-07, emmbr) Also need to update description of names file and labels
+    // as part of the labels rewrite
+
+    // This renderable can be used to draw constellations using lines. Each constellation
+    // corresponds to a group of lines between 3D positions that represent the star
+    // positions.
+    //
+    // Each constellation is given an abbreviation that acts as the identifier of the
+    // constellation. These abbreviations can be mapped to full names in the
+    // optional `NamesFile`. The names in this file are then the ones that will show
+    // in the user interface. A line in the `NamesFile` should first include the
+    // abbreviation and then the full name. For example: `AND Andromeda`.
+    //
+    // If labels were added, the full names in the `NamesFile` may also be used for the
+    // text of the labels. Note that labels are added using a different file, where each
+    // line may or may not include an identifier for that specific label, marked by `id`
+    // in the file. If a row in the label file has an `id` that matches the abbreviation
+    // of the constellation, the text of that label is replaced with the full name from
+    // the `NamesFile`.
     struct [[codegen::Dictionary(RenderableConstellationLines)]] Parameters {
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path file;
@@ -121,7 +139,7 @@ RenderableConstellationLines::RenderableConstellationLines(
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     // Avoid reading files here, instead do it in multithreaded initialize()
-    _speckFile = absPath(p.file).string();
+    _speckFile = p.file.string();
     _speckFile.onChange([this]() { loadData(); });
     addProperty(_speckFile);
 
@@ -196,16 +214,16 @@ void RenderableConstellationLines::initialize() {
         std::set<std::string> selectedConstellations;
 
         for (const std::string& s : _assetSelection) {
-            auto it = std::find(options.begin(), options.end(), s);
-            if (it == options.end()) {
+            auto it = std::find(options.cbegin(), options.cend(), s);
+            if (it == options.cend()) {
                 // Test if the provided name was an identifier instead of the full name
                 it = std::find(
-                    options.begin(),
-                    options.end(),
+                    options.cbegin(),
+                    options.cend(),
                     constellationFullName(s)
                 );
 
-                if (it == options.end()) {
+                if (it == options.cend()) {
                     // The user has specified a constellation name that doesn't exist
                     LWARNING(std::format(
                         "Option '{}' not found in list of constellations", s
@@ -230,7 +248,7 @@ void RenderableConstellationLines::initializeGL() {
         absPath("${MODULE_SPACE}/shaders/constellationlines_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
     createConstellations();
 }
@@ -305,29 +323,22 @@ void RenderableConstellationLines::render(const RenderData& data, RendererTasks&
 void RenderableConstellationLines::update(const UpdateData&) {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
     }
 }
 
-bool RenderableConstellationLines::loadData() {
-    const bool success = readSpeckFile();
-    if (!success) {
-        throw ghoul::RuntimeError("Error loading data");
-    }
-    return success;
-}
-
-bool RenderableConstellationLines::readSpeckFile() {
+void RenderableConstellationLines::loadData() {
     if (_speckFile.value().empty()) {
-        return false;
+        throw ghoul::RuntimeError("Error loading data");
     }
     std::filesystem::path fileName = absPath(_speckFile);
 
     LINFO(std::format("Loading Speck file '{}'", fileName));
     std::ifstream file(fileName);
     if (!file.good()) {
-        LERROR(std::format("Failed to open Speck file '{}'", fileName));
-        return false;
+        throw ghoul::RuntimeError(std::format(
+            "Failed to open Speck file '{}'", fileName
+        ));
     }
 
     const float scale = static_cast<float>(toMeter(_constellationUnit));
@@ -438,12 +449,10 @@ bool RenderableConstellationLines::readSpeckFile() {
             _renderingConstellationsMap.insert({ lineIndex++, constellationLine });
         }
         else {
-            return false;
+            throw ghoul::RuntimeError("Error parsing file");
         }
     }
     setBoundingSphere(maxRadius);
-
-    return true;
 }
 
 void RenderableConstellationLines::createConstellations() {

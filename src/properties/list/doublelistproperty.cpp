@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,11 +41,19 @@ std::string_view DoubleListProperty::className() const {
     return "DoubleListProperty";
 }
 
-int DoubleListProperty::typeLua() const {
-    return LUA_TTABLE;
+ghoul::lua::LuaTypes DoubleListProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Table;
 }
 
-std::string DoubleListProperty::toStringConversion() const {
+void DoubleListProperty::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
+std::vector<double> DoubleListProperty::toValue(lua_State* state) const {
+    return ghoul::lua::value<std::vector<double>>(state);
+}
+
+std::string DoubleListProperty::stringValue() const {
     const nlohmann::json json(_value);
     return json.dump();
 }

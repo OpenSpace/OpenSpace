@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,11 +39,6 @@
 #include <optional>
 
 namespace {
-    constexpr std::array<const char*, 6> UniformNames = {
-        "modelViewProjectionTransform", "textureOffset", "colorFilterValue",
-        "_nightFactor", "sunPosition", "texture1"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
@@ -157,7 +152,7 @@ void RenderableRings::initializeGL() {
         absPath("${MODULE_SPACE}/shaders/rings_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 
     glGenVertexArrays(1, &_quad);
     glGenBuffers(1, &_vertexPositionBuffer);
@@ -208,17 +203,17 @@ void RenderableRings::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableRings::update(const UpdateData& data) {
-    if (_shader->isDirty()) {
+    if (_shader->isDirty()) [[unlikely]] {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
 
-    if (_planeIsDirty) {
+    if (_planeIsDirty) [[unlikely]] {
         createPlane();
         _planeIsDirty = false;
     }
 
-    if (_textureIsDirty) {
+    if (_textureIsDirty) [[unlikely]] {
         loadTexture();
         _textureIsDirty = false;
     }
@@ -234,29 +229,25 @@ void RenderableRings::update(const UpdateData& data) {
 }
 
 void RenderableRings::loadTexture() {
-    if (!_texturePath.value().empty()) {
-        using namespace ghoul::io;
-        using namespace ghoul::opengl;
-        std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
-            absPath(_texturePath),
-            1
+    using namespace ghoul::io;
+    using namespace ghoul::opengl;
+    std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
+        _texturePath.value(),
+        1
+    );
+
+    if (texture) {
+        LDEBUGC(
+            "RenderableRings",
+            std::format("Loaded texture from '{}'", _texturePath.value())
         );
+        _texture = std::move(texture);
 
-        if (texture) {
-            LDEBUGC(
-                "RenderableRings",
-                std::format("Loaded texture from '{}'", absPath(_texturePath))
-            );
-            _texture = std::move(texture);
+        _texture->uploadTexture();
+        _texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 
-            _texture->uploadTexture();
-            _texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-
-            _textureFile = std::make_unique<ghoul::filesystem::File>(
-                _texturePath.value()
-            );
-            _textureFile->setCallback([this]() { _textureIsDirty = true; });
-        }
+        _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
+        _textureFile->setCallback([this]() { _textureIsDirty = true; });
     }
 }
 

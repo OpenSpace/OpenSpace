@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2024                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -58,16 +58,16 @@ set(OPENSPACE_SOURCE
   interaction/joystickcamerastates.cpp
   interaction/keybindingmanager.cpp
   interaction/keybindingmanager_lua.inl
-  interaction/keyframerecording.cpp
-  interaction/keyframerecording_lua.inl
+  interaction/keyframerecordinghandler.cpp
+  interaction/keyframerecordinghandler_lua.inl
   interaction/keyboardinputstate.cpp
   interaction/mousecamerastates.cpp
   interaction/scriptcamerastates.cpp
   interaction/sessionrecording.cpp
-  interaction/sessionrecording_lua.inl
+  interaction/sessionrecordinghandler.cpp
+  interaction/sessionrecordinghandler_lua.inl
   interaction/websocketinputstate.cpp
   interaction/websocketcamerastates.cpp
-  interaction/tasks/convertrecfileversiontask.cpp
   interaction/tasks/convertrecformattask.cpp
   mission/mission.cpp
   mission/missionmanager.cpp
@@ -89,12 +89,8 @@ set(OPENSPACE_SOURCE
   network/parallelconnection.cpp
   network/parallelpeer.cpp
   network/parallelpeer_lua.inl
-  properties/optionproperty.cpp
   properties/property.cpp
   properties/propertyowner.cpp
-  properties/selectionproperty.cpp
-  properties/stringproperty.cpp
-  properties/triggerproperty.cpp
   properties/list/doublelistproperty.cpp
   properties/list/intlistproperty.cpp
   properties/list/stringlistproperty.cpp
@@ -104,6 +100,10 @@ set(OPENSPACE_SOURCE
   properties/matrix/mat2property.cpp
   properties/matrix/mat3property.cpp
   properties/matrix/mat4property.cpp
+  properties/misc/optionproperty.cpp
+  properties/misc/selectionproperty.cpp
+  properties/misc/stringproperty.cpp
+  properties/misc/triggerproperty.cpp
   properties/scalar/boolproperty.cpp
   properties/scalar/doubleproperty.cpp
   properties/scalar/floatproperty.cpp
@@ -252,14 +252,13 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/joystickcamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/keybindingmanager.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/keyboardinputstate.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/keyframerecording.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/keyframerecordinghandler.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/mousecamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/scriptcamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/sessionrecording.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/sessionrecording.inl
+  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/sessionrecordinghandler.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/websocketinputstate.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/websocketcamerastates.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/tasks/convertrecfileversiontask.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/tasks/convertrecformattask.h
   ${PROJECT_SOURCE_DIR}/include/openspace/mission/mission.h
   ${PROJECT_SOURCE_DIR}/include/openspace/mission/missionmanager.h
@@ -277,18 +276,12 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/network/parallelpeer.h
   ${PROJECT_SOURCE_DIR}/include/openspace/network/messagestructures.h
   ${PROJECT_SOURCE_DIR}/include/openspace/network/messagestructureshelper.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/properties/listproperty.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/properties/listproperty.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/numericalproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/numericalproperty.inl
-  ${PROJECT_SOURCE_DIR}/include/openspace/properties/optionproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/property.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/propertyowner.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/properties/selectionproperty.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/properties/stringproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/templateproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/templateproperty.inl
-  ${PROJECT_SOURCE_DIR}/include/openspace/properties/triggerproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/list/doublelistproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/list/intlistproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/list/stringlistproperty.h
@@ -298,6 +291,12 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/matrix/mat2property.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/matrix/mat3property.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/matrix/mat4property.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/properties/misc/listproperty.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/properties/misc/listproperty.inl
+  ${PROJECT_SOURCE_DIR}/include/openspace/properties/misc/optionproperty.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/properties/misc/selectionproperty.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/properties/misc/stringproperty.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/properties/misc/triggerproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/scalar/boolproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/scalar/doubleproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/scalar/floatproperty.h
@@ -390,6 +389,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/util/task.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/taskloader.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/time.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/util/timeconstants.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/timeconversion.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/timeline.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/timeline.inl
@@ -465,6 +465,7 @@ target_precompile_headers(openspace-core PRIVATE
   <openspace/properties/numericalproperty.h>
   [["ghoul/format.h"]]
   [["ghoul/glm.h"]]
+  [["ghoul/lua/lua_helper.h"]]
   [["ghoul/misc/assert.h"]]
   [["ghoul/misc/boolean.h"]]
   [["ghoul/misc/exception.h"]]
@@ -502,6 +503,9 @@ configure_file(
 
 if (APPLE)
   target_link_libraries(openspace-core INTERFACE external-system-apple)
+endif ()
+if (WIN32)
+  target_link_libraries(openspace-core PUBLIC "pdh")
 endif ()
 
 set_openspace_compile_settings(openspace-core)

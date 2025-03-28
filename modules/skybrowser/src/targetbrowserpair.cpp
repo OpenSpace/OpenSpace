@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -100,7 +100,10 @@ void TargetBrowserPair::synchronizeAim() {
 
 void TargetBrowserPair::setEnabled(bool enable) {
     _browser->setEnabled(enable);
-    _targetRenderable->property("Enabled")->set(enable);
+    properties::Property* prop = _targetRenderable->property("Enabled");
+    properties::BoolProperty* boolProp = dynamic_cast<properties::BoolProperty*>(prop);
+    ghoul_assert(boolProp, "Enabled is not a boolean property");
+    *boolProp = enable;
 }
 
 bool TargetBrowserPair::isEnabled() const {

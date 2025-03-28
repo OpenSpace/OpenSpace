@@ -4,32 +4,33 @@ openspace.documentation = {
     Arguments = {{ "sceneGraphNodes", "String[]" }},
     Documentation = [[This function marks the scene graph nodes identified by name as
       interesting, which will provide shortcut access to focus buttons and featured
-      properties]]
+      properties.]]
   },
   {
     Name = "markInterestingTimes",
     Arguments = {{ "times", "Table[]" }},
     Documentation = [[This function marks interesting times for the current scene, which
-      will create shortcuts for a quick access]]
+      will create shortcuts for a quick access.]]
   },
   {
     Name = "removeInterestingNodes",
     Arguments = {{ "sceneGraphNodes", "String[]" }},
     Documentation = [[This function removes unmarks the scene graph nodes identified by
-      name as interesting, thus removing the shortcuts from the features properties list]]
+      name as interesting, thus removing the shortcuts from the features properties list.
+    ]]
   },
   {
     Name = "setDefaultDashboard",
     Arguments = {},
     Documentation = [[This function sets the default values for the dashboard consisting
       of 'DashboardItemDate', 'DashboardItemSimulationIncrement', 'DashboardItemDistance',
-      'DashboardItemFramerate', and 'DashboardItemParallelConnection']]
+      'DashboardItemFramerate', and 'DashboardItemParallelConnection'.]]
   },
   {
     Name = "rebindKey",
     Arguments = {{ "oldKey", "String" }, { "newKey", "String" }},
     Documentation = [[Rebinds all scripts from the old key (first argument) to the new
-      key (second argument)]]
+      key (second argument).]]
   },
   {
     Name = "appendToListProperty",
@@ -48,7 +49,7 @@ openspace.documentation = {
   {
     Name = "invertBooleanProperty",
     Arguments = {{ "identifier", "String" }},
-    Documentation = "Inverts the value of a boolean property with the given identifier"
+    Documentation = "Inverts the value of a boolean property with the given identifier."
   },
   {
     Name = "fadeIn",
@@ -88,6 +89,38 @@ openspace.documentation = {
       target several nodes. If the fade time is not provided then the
       "OpenSpaceEngine.FadeDuration" property will be used instead. If the third argument
       (endScript) is provided then that script will be run after the fade is finished.]]
+  },
+  {
+    Name = "ternary",
+    Arguments = {
+      { "condition", "Boolean" },
+      { "trueValue", "any" },
+      { "falseValue", "any" }
+    },
+    Return = "any",
+    Documentation = [[
+      A utility function to return a specific value based on a True/False condition.
+
+      \\param condition The condition to check against
+      \\param trueValue The value to return if the condition is True
+      \\param falseValue The value to return if the condition is False
+      \\return Either the trueValue of falseValue, depending on if the condition is true
+               or not
+    ]]
+  },
+  {
+    Name = "isEmpty",
+    Arguments = {
+      { "object", "any" }
+    },
+    Return = "Boolean",
+    Documentation = [[
+      A utility function to check whether an object is empty or not. Identifies `nil`
+      objects, Tables without any keys, and empty strings.
+
+      \\param object The object to check
+      \\return A Boolean that specifies if the object is empty or not
+    ]]
   }
 }
 
@@ -285,8 +318,15 @@ openspace.fadeOut = function(identifier, fadeTime, endScript)
 
   -- If node is already disabled we don't have to do anything
   if isEnabled then
-    openspace.setPropertyValue(fadeProperty, 0.0, fadeTime, "Linear", endScript)
-    end
+    local disableScript = "openspace.setPropertyValue('" .. enabledProperty .. "', false)"
+    openspace.setPropertyValue(
+      fadeProperty,
+      0.0,
+      fadeTime,
+      "Linear",
+      disableScript .. endScript
+    )
+  end
 end
 
 openspace.toggleFade = function(renderable, fadeTime, endScript)
@@ -303,5 +343,17 @@ openspace.toggleFade = function(renderable, fadeTime, endScript)
     end
   else
     openspace.fadeIn(renderable, fadeTime, endScript)
+  end
+end
+
+openspace.ternary = function(condition, trueValue, falseValue)
+  if condition then return trueValue else return falseValue end
+end
+
+openspace.isEmpty = function(v)
+  if type(v) == "table" then
+    return next(v) == nil
+  else
+    return v == nil or v == ''
   end
 end

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/lightsource.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
@@ -54,15 +55,16 @@ void FactoryManager::initialize() {
     ghoul_assert(!_manager, "Factory Manager must not have been initialized");
 
     _manager = new FactoryManager;
+    _manager->addFactory<DashboardItem>("DashboardItem");
+    _manager->addFactory<LightSource>("LightSource");
     _manager->addFactory<Renderable>("Renderable");
-    _manager->addFactory<Translation>("Translation");
+    _manager->addFactory<ResourceSynchronization>("ResourceSynchronization");
     _manager->addFactory<Rotation>("Rotation");
     _manager->addFactory<Scale>("Scale");
-    _manager->addFactory<TimeFrame>("TimeFrame");
-    _manager->addFactory<LightSource>("LightSource");
+    _manager->addFactory<ScreenSpaceRenderable>("ScreenSpaceRenderable");
     _manager->addFactory<Task>("Task");
-    _manager->addFactory<ResourceSynchronization>("ResourceSynchronization");
-    _manager->addFactory<DashboardItem>("DashboardItem");
+    _manager->addFactory<TimeFrame>("TimeFrame");
+    _manager->addFactory<Translation>("Translation");
 }
 
 void FactoryManager::deinitialize() {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,7 +56,7 @@ public:
     /**
      * \param radii defines three radii for the Ellipsoid
      */
-    Ellipsoid(glm::dvec3 radii = glm::dvec3(1.0));
+    explicit Ellipsoid(glm::dvec3 radii = glm::dvec3(1.0));
 
     /**
      * Scales a point along the geocentric normal and places it on the surface of the

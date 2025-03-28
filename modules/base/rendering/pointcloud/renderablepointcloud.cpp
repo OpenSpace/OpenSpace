@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -796,7 +796,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderablePointCloud::isReady() const {
-    bool isReady = _program;
+    bool isReady = _program != nullptr;
     if (_hasLabels) {
         isReady = isReady && _labels->isReady();
     }
@@ -1374,11 +1374,11 @@ void RenderablePointCloud::update(const UpdateData&) {
         _colorSettings.colorMapping->update(_dataset, _useCaching);
     }
 
-    if (_spriteTextureIsDirty) {
+    if (_spriteTextureIsDirty) [[unlikely]] {
         updateSpriteTexture();
     }
 
-    if (_dataIsDirty) {
+    if (_dataIsDirty) [[unlikely]] {
         updateBufferData();
     }
 }
@@ -1511,9 +1511,8 @@ void RenderablePointCloud::updateBufferData() {
 }
 
 void RenderablePointCloud::updateSpriteTexture() {
-    bool shouldUpdate = _hasSpriteTexture && _spriteTextureIsDirty;
-
-    if (!shouldUpdate) {
+    const bool shouldUpdate = _hasSpriteTexture && _spriteTextureIsDirty;
+    if (!shouldUpdate) [[likely]] {
         return;
     }
 

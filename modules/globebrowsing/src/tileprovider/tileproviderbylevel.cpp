@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,12 +27,35 @@
 #include <openspace/documentation/documentation.h>
 
 namespace {
+    // This tile provider will switch between different tile providers specified within
+    // based on the level of detail that is requested by the Globe. All other things being
+    // equal, this corresponds to the distance of the camera to the planet, with a closer
+    // distance resulting in a higher lever. Due to technical reasons, the available
+    // levels are in the range [2, 22] and each increase in levels corresponds to a
+    // doubling in the effective resolution. For a given requested level, the tile
+    // provider that has the largest `MaxLevel` that is not greater than the requested
+    // level will be used.
     struct [[codegen::Dictionary(TileProviderByLevel)]] Parameters {
+        // Each collection describes a distinct layer which can be toggled at a specified
+        // max level at which it is requested.
         struct Provider {
+            // The maximum level until which the tile provider is used. This number is
+            // inclusive, meaning that a value of 4 causes the tile provider to be used
+            // at level 4 but not at level 5.
             int maxLevel [[codegen::greaterequal(0)]];
-            ghoul::Dictionary tileProvider;
+
+            // The tile provider that should be used at this stage.
+            ghoul::Dictionary tileProvider [[codegen::reference("globebrowsing_layer")]];
         };
+
+        // The list of all tile providers that are used by this TileProviderByLevel.
         std::vector<Provider> levelTileProviders;
+
+        // The layer needs to know about the LayerGroupID this but we don't want it to be
+        // part of the parameters struct as that would mean it would be visible to the end
+        // user, which we don't want since this value just comes from whoever creates it,
+        // not the user.
+        int layerGroupID [[codegen::private()]];
     };
 #include "tileproviderbylevel_codegen.cpp"
 } // namespace
@@ -48,17 +71,9 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    // For now we need to inject the LayerGroupID this way. We don't want it to be part of
-    // the parameters struct as that would mean it would be visible to the end user, which
-    // we don't want since this value just comes from whoever creates it, not the user
-    ghoul_assert(dictionary.hasValue<int>("LayerGroupID"), "No Layer Group ID provided");
-    const layers::Group::ID group = static_cast<layers::Group::ID>(
-        dictionary.value<int>("LayerGroupID")
-    );
-
     for (Parameters::Provider provider : p.levelTileProviders) {
         ghoul::Dictionary& tileProviderDict = provider.tileProvider;
-        tileProviderDict.setValue("LayerGroupID", static_cast<int>(group));
+        tileProviderDict.setValue("LayerGroupID", p.layerGroupID);
 
         // Pass down the caching information from the enclosing dictionary
         if (dictionary.hasValue<std::string>("GlobeName")) {
@@ -67,13 +82,8 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
                 dictionary.value<std::string>("GlobeName")
             );
         }
-        layers::Layer::ID typeID = layers::Layer::ID::DefaultTileProvider;
-        if (tileProviderDict.hasValue<std::string>("Type")) {
-            const std::string type = tileProviderDict.value<std::string>("Type");
-            typeID = ghoul::from_string<layers::Layer::ID>(type);
-        }
 
-        std::unique_ptr<TileProvider> tp = createFromDictionary(typeID, tileProviderDict);
+        std::unique_ptr<TileProvider> tp = createFromDictionary(tileProviderDict);
 
         const std::string provId = tileProviderDict.value<std::string>("Identifier");
         tp->setIdentifier(provId);
@@ -117,12 +127,7 @@ Tile TileProviderByLevel::tile(const TileIndex& tileIndex) {
     ZoneScoped;
 
     TileProvider* provider = levelProvider(tileIndex.level);
-    if (provider) {
-        return provider->tile(tileIndex);
-    }
-    else {
-        return Tile();
-    }
+    return provider ? provider->tile(tileIndex) : Tile();
 }
 
 Tile::Status TileProviderByLevel::tileStatus(const TileIndex& index) {
@@ -134,7 +139,7 @@ TileProvider* TileProviderByLevel::levelProvider(int level) const {
     ZoneScoped;
 
     if (!_levelTileProviders.empty()) {
-        const int clampedLevel = glm::clamp(
+        const int clampedLevel = std::clamp(
             level,
             0,
             static_cast<int>(_providerIndices.size() - 1)

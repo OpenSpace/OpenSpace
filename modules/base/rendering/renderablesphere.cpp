@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,6 +40,18 @@
 #include <optional>
 
 namespace {
+    constexpr int DefaultBlending = 0;
+    constexpr int AdditiveBlending = 1;
+    constexpr int PolygonBlending = 2;
+    constexpr int ColorAddingBlending = 3;
+
+    std::map<std::string, int> BlendingMapping = {
+        { "Default", DefaultBlending },
+        { "Additive", AdditiveBlending },
+        { "Polygon", PolygonBlending },
+        { "Color Adding", ColorAddingBlending }
+    };
+
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
@@ -100,6 +112,27 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
+        "BlendingOption",
+        "Blending Options",
+        "Controls the blending function used to calculate the colors of the sphere with "
+        "respect to the opacity.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DisableDepthInfo = {
+        "DisableDepth",
+        "Disable Depth",
+        "If disabled, no depth values are taken into account for this sphere, meaning "
+        "that depth values are neither written or tested against during the rendering. "
+        "This can be useful for spheres that represent a background image.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    // This `Renderable` represents a simple sphere with an image. The image that is shown
+    // should be in an equirectangular projection/spherical panoramic image or else
+    // distortions will be introduced. The `Orientation` parameter determines whether the
+    // provided image is shown on the inside, outside, or both sides of the sphere.
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<float> size [[codegen::greater(0.f)]];
@@ -127,6 +160,12 @@ namespace {
 
         // [[codegen::verbatim(FadeOutThresholdInfo.description)]]
         std::optional<float> fadeOutThreshold [[codegen::inrange(0.0, 1.0)]];
+
+        // [[codegen::verbatim(BlendingOptionInfo.description)]]
+        std::optional<std::string> blendingOption;
+
+        // [[codegen::verbatim(DisableDepthInfo.description)]]
+        std::optional<bool> disableDepth;
     };
 #include "renderablesphere_codegen.cpp"
 } // namespace
@@ -146,6 +185,11 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     , _disableFadeInDistance(DisableFadeInOutInfo, false)
     , _fadeInThreshold(FadeInThresholdInfo, 0.f, 0.f, 1.f, 0.001f)
     , _fadeOutThreshold(FadeOutThresholdInfo, 0.f, 0.f, 1.f, 0.001f)
+    , _blendingFuncOption(
+        BlendingOptionInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
+    , _disableDepth(DisableDepthInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -187,6 +231,21 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     _fadeOutThreshold = p.fadeOutThreshold.value_or(_fadeOutThreshold);
     addProperty(_fadeOutThreshold);
 
+    _blendingFuncOption.addOption(DefaultBlending, "Default");
+    _blendingFuncOption.addOption(AdditiveBlending, "Additive");
+    _blendingFuncOption.addOption(PolygonBlending, "Polygon");
+    _blendingFuncOption.addOption(ColorAddingBlending, "Color Adding");
+
+    addProperty(_blendingFuncOption);
+
+    if (p.blendingOption.has_value()) {
+        const std::string blendingOpt = *p.blendingOption;
+        _blendingFuncOption = BlendingMapping[blendingOpt];
+    }
+
+    _disableDepth = p.disableDepth.value_or(_disableDepth);
+    addProperty(_disableDepth);
+
     setBoundingSphere(_size);
 }
 
@@ -221,7 +280,6 @@ void RenderableSphere::deinitializeGL() {
             global::renderEngine->removeRenderProgram(p);
         }
     );
-
     _shader = nullptr;
 }
 
@@ -330,8 +388,25 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_CULL_FACE);
     }
 
-    if (_renderBin != Renderable::RenderBin::Opaque) {
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    // Configure blending
+    glEnablei(GL_BLEND, 0);
+    switch (_blendingFuncOption) {
+        case DefaultBlending:
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        case AdditiveBlending:
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            break;
+        case PolygonBlending:
+            glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE);
+            break;
+        case ColorAddingBlending:
+            glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
+            break;
+    };
+
+    if (_disableDepth) {
+        glDepthMask(GL_FALSE);
     }
 
     _sphere->render();
@@ -354,12 +429,12 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableSphere::update(const UpdateData&) {
-    if (_shader->isDirty()) {
+    if (_shader->isDirty()) [[unlikely]] {
         _shader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
 
-    if (_sphereIsDirty) {
+    if (_sphereIsDirty) [[unlikely]] {
         _sphere = std::make_unique<Sphere>(_size, _segments);
         _sphere->initialize();
         _sphereIsDirty = false;

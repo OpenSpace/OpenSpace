@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,9 +28,9 @@
 #include <openspace/rendering/screenspacerenderable.h>
 
 #include <modules/webbrowser/include/webrenderhandler.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/vector/uvec2property.h>
-#include <openspace/properties/triggerproperty.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -62,7 +62,7 @@ class WebKeyboardHandler;
 
 class ScreenSpaceBrowser : public ScreenSpaceRenderable {
 public:
-    ScreenSpaceBrowser(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceBrowser(const ghoul::Dictionary& dictionary);
     ~ScreenSpaceBrowser() override = default;
 
     bool initializeGL() override;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -57,12 +57,10 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
-        "Labels",
-        "Labels",
-        "The labels for the grid."
-    };
-
+    // A RenderableBoxGrid creates a 3D box that is rendered using grid lines.
+    //
+    // Per default the box is given a uniform size of 1x1x1 meters. It can then be scaled
+    // to the desired size. Alternatively, the size in each dimension can be specified.
     struct [[codegen::Dictionary(RenderableBoxGrid)]] Parameters {
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
@@ -72,10 +70,6 @@ namespace {
 
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<glm::vec3> size;
-
-        // [[codegen::verbatim(LabelsInfo.description)]]
-        std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("labelscomponent")]];
     };
 #include "renderableboxgrid_codegen.cpp"
 } // namespace
@@ -90,7 +84,7 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
-    , _size(SizeInfo, glm::vec3(1.f), glm::vec3(1.f), glm::vec3(100.f))
+    , _size(SizeInfo, glm::vec3(1.f), glm::vec3(0.0001f), glm::vec3(100.f))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -106,24 +100,10 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     _size = p.size.value_or(_size);
     _size.onChange([this]() { _gridIsDirty = true; });
     addProperty(_size);
-
-    if (p.labels.has_value()) {
-        _labels = std::make_unique<LabelsComponent>(*p.labels);
-        _hasLabels = true;
-        addPropertySubOwner(_labels.get());
-        // Fading of the labels should also depend on the fading of the renderable
-        _labels->setParentFadeable(this);
-    }
 }
 
 bool RenderableBoxGrid::isReady() const {
-    return _hasLabels ? _gridProgram && _labels->isReady() : _gridProgram != nullptr;
-}
-
-void RenderableBoxGrid::initialize() {
-    if (_hasLabels) {
-        _labels->initialize();
-    }
+    return _gridProgram != nullptr;
 }
 
 void RenderableBoxGrid::initializeGL() {
@@ -163,7 +143,7 @@ void RenderableBoxGrid::deinitializeGL() {
     _gridProgram = nullptr;
 }
 
-void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
+void RenderableBoxGrid::render(const RenderData& data, RendererTasks&) {
     _gridProgram->activate();
 
     auto [modelTransform, modelViewTransform, modelViewProjectionTransform] =
@@ -177,9 +157,9 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
     // Change GL state:
 #ifndef __APPLE__
     glLineWidth(_lineWidth);
-#else
+#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
     glLineWidth(1.f);
-#endif
+#endif // __APPLE__
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
     glEnable(GL_LINE_SMOOTH);
@@ -195,35 +175,10 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
     global::renderEngine->openglStateCache().resetDepthState();
-
-    // Draw labels
-    if (_hasLabels && _labels->enabled()) {
-        const glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
-        const glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
-        glm::vec3 right = glm::cross(viewDirection, lookup);
-        const glm::vec3 up = glm::cross(right, viewDirection);
-
-        const glm::dmat4 worldToModelTransform = glm::inverse(modelTransform);
-        glm::vec3 orthoRight = glm::normalize(
-            glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
-        );
-
-        if (orthoRight == glm::vec3(0.0)) {
-            const glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
-            right = glm::cross(viewDirection, otherVector);
-            orthoRight = glm::normalize(
-                glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
-            );
-        }
-        const glm::vec3 orthoUp = glm::normalize(
-            glm::vec3(worldToModelTransform * glm::dvec4(up, 0.0))
-        );
-        _labels->render(data, modelViewProjectionTransform, orthoRight, orthoUp);
-    }
 }
 
 void RenderableBoxGrid::update(const UpdateData&) {
-    if (_gridIsDirty) {
+    if (_gridIsDirty) [[unlikely]] {
         const glm::vec3 llf = -_size.value() / 2.f;
         const glm::vec3 urb =  _size.value() / 2.f;
 

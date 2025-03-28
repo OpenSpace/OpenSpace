@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,11 +26,6 @@
 #include <modules/webbrowser/webbrowsermodule.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
-
-namespace {
-    constexpr std::string_view _loggerCat = "WebRenderHandler";
-} // namespace
-
 
 namespace openspace {
 
@@ -124,7 +119,7 @@ void WebRenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
 {
     // This should never happen - if accelerated rendering is off the OnPaint method
     // should be called. But we instatiate the web render handler and the browser instance
-    // in different places so room for error
+    // in different places so there is room for error
     ghoul_assert(_acceleratedRendering, "Accelerated rendering flag is turned off");
 
     if (dirtyRects.empty()) {
@@ -166,6 +161,10 @@ void WebRenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
         memObj, size, GL_HANDLE_TYPE_D3D11_IMAGE_EXT, info.shared_texture_handle
     );
 
+    // @TODO (2025-02-17, abock) The following line will cause a crash on AMD cards if
+    // accelerated rendering is enabled. I wasn't able to figure out why, but this is
+    // the reason accelerated rendering is disabled for AMD.
+
     // Allocate immutable storage for the texture for the data from the memory object
     // Use GL_RGBA8 since it is 4 bytes
     glTextureStorageMem2DEXT(sharedTexture, 1, GL_RGBA8, newWidth, newHeight, memObj, 0);
@@ -185,7 +184,7 @@ void WebRenderHandler::updateTexture() {
         return;
     }
 
-    if (_textureSizeIsDirty) {
+    if (_textureSizeIsDirty) [[unlikely]] {
         glBindTexture(GL_TEXTURE_2D, _texture);
         glTexImage2D(
             GL_TEXTURE_2D,
@@ -259,7 +258,7 @@ bool WebRenderHandler::hasContent(int x, int y) {
         glBindTexture(GL_TEXTURE_2D, _texture);
 
         // Read the texture data into the PBO
-        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
         // Map the PBO to the CPU memory space
         GLubyte* pixels = reinterpret_cast<GLubyte*>(
@@ -290,7 +289,7 @@ bool WebRenderHandler::hasContent(int x, int y) {
         }
         int index = x + _browserBufferSize.x * (_browserBufferSize.y - y - 1);
         index = glm::clamp(index, 0, static_cast<int>(_browserBuffer.size() - 1));
-        return _browserBuffer[index].a;
+        return _browserBuffer[index].a != 0;
     }
 }
 

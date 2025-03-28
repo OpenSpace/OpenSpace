@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,9 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/syncbuffer.h>
 #include <openspace/documentation/documentation.h>
@@ -39,6 +41,7 @@
 #include <ghoul/ext/assimp/contrib/zip/src/zip.h>
 #include <filesystem>
 #include <fstream>
+
 #include "scriptengine_lua.inl"
 
 namespace {
@@ -103,6 +106,12 @@ void ScriptEngine::deinitialize() {
     ZoneScoped;
 
     _registeredLibraries.clear();
+    for (const RepeatedScriptInfo& info : _repeatedScripts) {
+        if (info.postScript.empty()) {
+            queueScript(info.postScript);
+        }
+    }
+    _repeatedScripts.clear();
 }
 
 void ScriptEngine::initializeLuaState(lua_State* state) {
@@ -475,8 +484,8 @@ void ScriptEngine::preSync(bool isMaster) {
             // Not really a received script but the master also needs to run the script...
             _masterScriptQueue.push(item);
 
-            if (global::sessionRecording->isRecording()) {
-                global::sessionRecording->saveScriptKeyframeToTimeline(item.code);
+            if (global::sessionRecordingHandler->isRecording()) {
+                global::sessionRecordingHandler->saveScriptKeyframeToTimeline(item.code);
             }
 
             // Sync out to other nodes (cluster)
@@ -553,6 +562,26 @@ void ScriptEngine::postSync(bool isMaster) {
             }
         }
     }
+
+    double now =
+        global::sessionRecordingHandler->isSavingFramesDuringPlayback() ?
+        global::sessionRecordingHandler->currentApplicationInterpolationTime() :
+        global::windowDelegate->applicationTime();
+    for (RepeatedScriptInfo& info : _repeatedScripts) {
+        if (now - info.lastRun >= info.timeout) {
+            runScript({ info.script });
+            info.lastRun = now;
+        }
+    }
+
+    for (size_t i = 0; i < _scheduledScripts.size(); i++) {
+        const ScheduledScriptInfo& info = _scheduledScripts[i];
+        if (now > info.timestamp) {
+            runScript({ info.script });
+            _scheduledScripts.erase(_scheduledScripts.begin() + i);
+            i--;
+        }
+    }
 }
 
 void ScriptEngine::queueScript(Script script) {
@@ -566,6 +595,63 @@ void ScriptEngine::queueScript(Script script) {
 
 void ScriptEngine::queueScript(std::string script) {
     queueScript({ .code = std::move(script) });
+}
+
+void ScriptEngine::registerRepeatedScript(std::string identifier, std::string script,
+                                          double timeout, std::string preScript,
+                                          std::string postScript)
+{
+    auto it = std::find_if(
+        _repeatedScripts.begin(),
+        _repeatedScripts.end(),
+        [&identifier](const RepeatedScriptInfo& info) {
+            return info.identifier == identifier;
+        }
+    );
+    if (it != _repeatedScripts.end()) {
+        throw ghoul::RuntimeError(
+            std::format("Script with identifier '{}' already registered", identifier),
+            "ScriptEngine"
+        );
+    }
+
+    if (!preScript.empty()) {
+        runScript({ std::move(preScript) });
+    }
+    _repeatedScripts.emplace_back(
+        std::move(script),
+        std::move(postScript),
+        std::move(identifier),
+        timeout
+    );
+}
+
+void ScriptEngine::removeRepeatedScript(std::string_view identifier) {
+    auto it = std::find_if(
+        _repeatedScripts.begin(),
+        _repeatedScripts.end(),
+        [&identifier](const RepeatedScriptInfo& info) {
+            return info.identifier == identifier;
+        }
+    );
+    if (it != _repeatedScripts.end()) {
+        if (!it->postScript.empty()) {
+            queueScript(it->postScript);
+        }
+
+        _repeatedScripts.erase(it);
+    }
+    else {
+        LERROR(std::format("Could not find script with identifier '{}'", identifier));
+    }
+}
+
+void ScriptEngine::scheduleScript(std::string script, double delay) {
+    double now =
+        global::sessionRecordingHandler->isSavingFramesDuringPlayback() ?
+        global::sessionRecordingHandler->currentApplicationInterpolationTime() :
+        global::windowDelegate->applicationTime();
+    _scheduledScripts.emplace_back(std::move(script), now + delay);
 }
 
 void ScriptEngine::addBaseLibrary() {
@@ -645,7 +731,10 @@ void ScriptEngine::addBaseLibrary() {
             codegen::lua::WalkDirectoryFiles,
             codegen::lua::WalkDirectoryFolders,
             codegen::lua::DirectoryForPath,
-            codegen::lua::UnzipFile
+            codegen::lua::UnzipFile,
+            codegen::lua::RegisterRepeatedScript,
+            codegen::lua::RemoveRepeatedScript,
+            codegen::lua::ScheduleScript
         }
     };
     addLibrary(lib);

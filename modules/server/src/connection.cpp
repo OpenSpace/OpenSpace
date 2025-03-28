@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,7 @@
 #include <modules/server/include/topics/cameratopic.h>
 #include <modules/server/include/topics/documentationtopic.h>
 #include <modules/server/include/topics/enginemodetopic.h>
+#include <modules/server/include/topics/errorlogtopic.h>
 #include <modules/server/include/topics/eventtopic.h>
 #include <modules/server/include/topics/flightcontrollertopic.h>
 #include <modules/server/include/topics/getpropertytopic.h>
@@ -85,24 +86,25 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
         }
     );
 
-    _topicFactory.registerClass<MissionTopic>("missions");
+    _topicFactory.registerClass<BounceTopic>("bounce");
+    _topicFactory.registerClass<CameraTopic>("camera");
+    _topicFactory.registerClass<CameraPathTopic>("cameraPath");
     _topicFactory.registerClass<DocumentationTopic>("documentation");
+    _topicFactory.registerClass<EngineModeTopic>("engineMode");
+    _topicFactory.registerClass<ErrorLogTopic>("errorLog");
+    _topicFactory.registerClass<EventTopic>("event");
+    _topicFactory.registerClass<FlightControllerTopic>("flightcontroller");
     _topicFactory.registerClass<GetPropertyTopic>("get");
     _topicFactory.registerClass<LuaScriptTopic>("luascript");
-    _topicFactory.registerClass<EngineModeTopic>("engineMode");
+    _topicFactory.registerClass<MissionTopic>("missions");
     _topicFactory.registerClass<SessionRecordingTopic>("sessionRecording");
     _topicFactory.registerClass<SetPropertyTopic>("set");
     _topicFactory.registerClass<ShortcutTopic>("shortcuts");
+    _topicFactory.registerClass<SkyBrowserTopic>("skybrowser");
     _topicFactory.registerClass<SubscriptionTopic>("subscribe");
     _topicFactory.registerClass<TimeTopic>("time");
     _topicFactory.registerClass<TriggerPropertyTopic>("trigger");
-    _topicFactory.registerClass<BounceTopic>("bounce");
-    _topicFactory.registerClass<FlightControllerTopic>("flightcontroller");
     _topicFactory.registerClass<VersionTopic>("version");
-    _topicFactory.registerClass<SkyBrowserTopic>("skybrowser");
-    _topicFactory.registerClass<CameraTopic>("camera");
-    _topicFactory.registerClass<CameraPathTopic>("cameraPath");
-    _topicFactory.registerClass<EventTopic>("event");
 }
 
 void Connection::handleMessage(const std::string& message) {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,8 +27,8 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/selectionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/selectionproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/rendering/labelscomponent.h>

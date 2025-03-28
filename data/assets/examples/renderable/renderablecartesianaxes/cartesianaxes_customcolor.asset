@@ -1,0 +1,32 @@
+-- Custom Colors
+-- This example creates a set of cartesian coordinate axes with specified colors, instead
+-- of using the default which is red (X), green (Y), and blue (Z). The parent is not set
+-- which defaults to placing the axes at the center of the Solar System.
+
+local Node = {
+  Identifier = "RenderableCartesianAxes_Example_CustomColors",
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 30000000
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes",
+    XColor = { 0.0, 1.0, 1.0 }, -- Cyan
+    YColor = { 1.0, 0.0, 1.0 }, -- Magenta
+    ZColor = { 1.0, 1.0, 0.0 }  -- Yellow
+  },
+  GUI = {
+    Name = "RenderableCartesianAxes - Custom Colors",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -266,6 +266,9 @@ namespace {
         // masked by. Should be entered as {min value, max value} per range
         std::optional<std::vector<glm::vec2>> maskingRanges;
 
+        // [[codegen::verbatim(DomainEnabledInfo.description)]]
+        std::optional<bool> domainEnabled;
+
         // Value should be path to folder where states are saved. Specifying this
         // makes it use file type converter
         // (JSON/CDF input => osfls output & oslfs input => JSON output)
@@ -477,6 +480,8 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     else {
         _maskingRanges.push_back(glm::vec2(-100000.f, 100000.f)); // some default values
     }
+
+    _domainEnabled = p.domainEnabled.value_or(_domainEnabled);
 
     _outputFolderPath = p.outputFolder.value_or(_outputFolderPath);
     if (!_outputFolderPath.empty() && !std::filesystem::is_directory(_outputFolderPath)) {
@@ -1222,7 +1227,7 @@ void RenderableFieldlinesSequence::updateVertexPositionBuffer() {
     );
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     unbindGL();
 }
@@ -1247,7 +1252,7 @@ void RenderableFieldlinesSequence::updateVertexColorBuffer() {
         );
 
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, 0);
+        glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 
         unbindGL();
     }
@@ -1273,7 +1278,7 @@ void RenderableFieldlinesSequence::updateVertexMaskingBuffer() {
         );
 
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0);
+        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 
         unbindGL();
     }

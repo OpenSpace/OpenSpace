@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,10 +25,11 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/util/openspacemodule.h>
+
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
-#include <openspace/util/openspacemodule.h>
 #include <ghoul/glm.h>
 #include <future>
 #include <memory>
@@ -71,6 +72,7 @@ public:
     globebrowsing::cache::MemoryAwareTileCache* tileCache();
     scripting::LuaLibrary luaLibrary() const override;
     std::vector<documentation::Documentation> documentations() const override;
+    static documentation::Documentation Documentation();
 
     const globebrowsing::RenderableGlobe* castFocusNodeRenderableToGlobe();
 

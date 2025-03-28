@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,7 +44,7 @@ namespace {
     // the actual camera position or view direction.
     //
     // To get the current navigation state of the camera, use the
-    // `openspace.navigation.getNavigationState()` function in the Scripting API.
+    // `openspace.navigation.navigationState()` function in the Scripting API.
     //
     // Note that when loading a NavigationState, the visuals may be different depending
     // on what the simulation timestamp is, as the relative positions of objects in the
@@ -114,7 +114,7 @@ NavigationState::NavigationState(const nlohmann::json& json) {
     position.y = json["position"]["y"].get<double>();
     position.z = json["position"]["z"].get<double>();
 
-    anchor = json["anchor"];
+    anchor = json["anchor"].get<std::string>();
 
     if (auto it = json.find("referenceframe");  it != json.end()) {
         referenceFrame = it->get<std::string>();

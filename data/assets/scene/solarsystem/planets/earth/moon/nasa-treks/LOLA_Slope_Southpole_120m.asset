@@ -22,7 +22,7 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_LOLA_ClrSlope_SPole75S_120m_EQ")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_LOLA_ClrSlope_SPole75S_120m_EQ)
 end)
 
 asset.export("LRO_LOLA_ClrSlope_SPole75S_120m_EQ", treks_LRO_LOLA_ClrSlope_SPole75S_120m_EQ)

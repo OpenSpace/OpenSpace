@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,8 +32,7 @@ namespace openspace {
 
 class BoxGeometry {
 public:
-    // initializers
-    BoxGeometry(glm::vec3 size);
+    explicit BoxGeometry(glm::vec3 size);
     ~BoxGeometry();
 
     bool initialize();

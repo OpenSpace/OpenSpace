@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -61,7 +61,7 @@ bool MissionManager::hasCurrentMission() const {
 std::string MissionManager::loadMission(Mission mission) {
     // Changing the values might invalidate the _currentMission iterator
     const std::string currentMission = hasCurrentMission() ? _currentMission->first : "";
-    const std::string missionName = mission.name();
+    const std::string missionName = mission.identifier();
     _missionMap.insert({ missionName, std::move(mission) });
     if (_missionMap.size() == 1) {
         setCurrentMission(missionName);

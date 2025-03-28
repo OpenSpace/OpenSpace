@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,6 +39,7 @@ namespace openspace::documentation {
 class Verifier;
 
 BooleanType(Optional);
+BooleanType(Private);
 
 /**
  * The TestResult structure returns the information from the #testSpecification method. It
@@ -161,16 +162,20 @@ struct DocumentationEntry {
      *        contains this DocumentationEntry will be matched
      * \param v The Verifier that is used to test the \p k%'s value to determine if it is
      *        a valid value
-     * \param doc The textual documentation that describes the DocumentationEntry in a
-     *        human readable format
      * \param opt Determines whether the Documentation containing this DocumentationEntry
      *        must have a key \p key, or whether it is optional
+     * \param priv Determines whether the DocumentationEntry is considered private. If it
+     *        is, then shall not be reported in a user-facing manner, but its values
+     *        should still be checked when verifying the correctness and completeness of
+     *        an entry
+     * \param doc The textual documentation that describes the DocumentationEntry in a
+     *        human readable format
      *
      * \pre \p k must not be empty
      * \pre \p v must not be nullptr
      */
     DocumentationEntry(std::string k, std::shared_ptr<Verifier> v,
-        Optional opt, std::string doc = "");
+        Optional opt = Optional::No, Private priv = Private::No, std::string doc = "");
 
     /**
      * The constructor for a DocumentationEntry describing a key \p k in a Documentation.
@@ -187,15 +192,20 @@ struct DocumentationEntry {
      * \param v The Verifier that is used to test the \p key%'s value to determine if it
      *        is a valid value. The DocumentationEntry will take ownership of the passed
      *        object
-     * \param doc The textual documentation that describes the DocumentationEntry in a
-     *        human readable format
      * \param opt Determines whether the Documentation containing this DocumentationEntry
      *        must have a key \p key, or whether it is optional
+     * \param priv Determines whether the DocumentationEntry is considered private. If it
+     *        is, then shall not be reported in a user-facing manner, but its values
+     *        should still be checked when verifying the correctness and completeness of
+     *        an entry
+     * \param doc The textual documentation that describes the DocumentationEntry in a
+     *        human readable format
      *
      * \pre \p k must not be empty
      * \pre \p v must not be nullptr
      */
-    DocumentationEntry(std::string k, Verifier* v, Optional opt, std::string doc = "");
+    DocumentationEntry(std::string k, Verifier* v, Optional opt = Optional::No,
+        Private priv = Private::No, std::string doc = "");
 
     /// The key that is described by this DocumentationEntry
     std::string key;
@@ -203,6 +213,8 @@ struct DocumentationEntry {
     std::shared_ptr<Verifier> verifier;
     /// Determines whether the described DocumentationEntry is optional or not
     Optional optional;
+    /// Determines if the entry should be visible to the user
+    Private isPrivate;
     /// The textual description of this DocumentationEntry
     std::string documentation;
 };

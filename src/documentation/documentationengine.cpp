@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,11 +45,15 @@
 #include <openspace/util/json_helper.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stringhelper.h>
 #include <fstream>
 #include <future>
 
 namespace {
+    constexpr std::string_view _loggerCat = "DocumentationEngine";
+
     // General keys
     constexpr const char* NameKey = "name";
     constexpr const char* IdentifierKey = "identifier";
@@ -64,6 +68,8 @@ namespace {
     constexpr const char* ActionTitle = "Actions";
     constexpr const char* GuiNameKey = "guiName";
     constexpr const char* CommandKey = "command";
+    constexpr const char* ColorKey = "color";
+    constexpr const char* TextColorKey = "textColor";
 
     // Factory
     constexpr const char* MembersKey = "members";
@@ -242,7 +248,18 @@ namespace {
 
         function[ArgumentsKey] = arguments;
         function[ReturnTypeKey] = f.returnType;
-        function[HelpKey] = f.helpText;
+
+        // Remove all double whitespaces from the helptext (these may be generated when
+        // using multi-line strings in Lua)
+        std::string cleanedHelpText = f.helpText;
+        ghoul::trimWhitespace(cleanedHelpText);
+        std::size_t doubleSpace = cleanedHelpText.find("  ");
+        while (doubleSpace != std::string::npos) {
+            cleanedHelpText.erase(doubleSpace, 1);
+            doubleSpace = cleanedHelpText.find("  ");
+        }
+
+        function[HelpKey] = cleanedHelpText;
 
         if (includeSourceLocation) {
             nlohmann::json sourceLocation;
@@ -490,6 +507,10 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
         FactoryManager::ref().factories();
 
     for (const FactoryManager::FactoryInfo& factoryInfo : factories) {
+        if (factoryInfo.name == "") {
+            LERROR("Factory documentation without identifier");
+            continue;
+        }
         nlohmann::json factory;
         factory[NameKey] = factoryInfo.name;
         factory[IdentifierKey] = categoryName + factoryInfo.name;
@@ -518,6 +539,10 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
         // Add documentation about derived classes
         const std::vector<std::string>& registeredClasses = f->registeredClasses();
         for (const std::string& c : registeredClasses) {
+            if (c == "") {
+                LERROR("Factory documentation, derived class, without identifier");
+                continue;
+            }
             auto found = std::find_if(
                 docs.begin(),
                 docs.end(),
@@ -545,6 +570,10 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
     leftovers[IdentifierKey] = OtherIdentifierName;
 
     for (const Documentation& doc : docs) {
+        if (doc.id == "") {
+            LERROR("Documentation without identifier");
+            continue;
+        }
         leftovers[ClassesKey].push_back(documentationToJson(doc));
     }
     sortJson(leftovers[ClassesKey], NameKey);
@@ -642,7 +671,6 @@ void DocumentationEngine::writeJavascriptDocumentation() const {
     // Make into a javascript variable so that it is possible to open with static html
     std::ofstream out = std::ofstream(absPath("${DOCUMENTATION}/documentationData.js"));
     out << "var data = " << result.dump();
-    out.close();
 }
 
 void DocumentationEngine::writeJsonDocumentation() const {
@@ -678,6 +706,12 @@ nlohmann::json DocumentationEngine::generateActionJson() const {
         d[GuiNameKey] = action.name;
         d[DocumentationKey] = action.documentation;
         d[CommandKey] = action.command;
+        if (action.color.has_value()) {
+            d[ColorKey] = std::format("{}", action.color);
+        }
+        if (action.textColor.has_value()) {
+            d[TextColorKey] = std::format("{}", action.textColor);
+        }
         res[DataKey].push_back(d);
     }
     sortJson(res[DataKey], NameKey);

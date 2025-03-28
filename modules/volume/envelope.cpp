@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -95,31 +95,31 @@ bool Envelope::isEnvelopeValid() const {
 }
 
 glm::vec3 Envelope::normalizeColor(const glm::vec3& vec) const {
-    return { vec.r / 255.f, vec.g / 255.f , vec.b / 255.f };
+    return glm::vec3(vec.r / 255.f, vec.g / 255.f , vec.b / 255.f);
 }
 
 glm::vec4 Envelope::valueAtPosition(float pos) const {
     auto afterIter = _points.begin();
     while (afterIter->position.first < pos) {
         if (afterIter == _points.end()) {
-            return { 0.f, 0.f, 0.f ,0.f };
+            return glm::vec4(0.f, 0.f, 0.f ,0.f);
         }
         ++afterIter;
     }
     if (afterIter->position.first == pos) {
-        return { afterIter->color, afterIter->position.second };
+        return glm::vec4(afterIter->color, afterIter->position.second);
     }
     auto beforeIter = afterIter - 1;
 
     const float dist = afterIter->position.first - beforeIter->position.first;
     if (dist < 0.0001) {
-        return {
+        return glm::vec4(
             normalizeColor((beforeIter->color + afterIter->color) / 2.f),
             std::max(beforeIter->position.second, afterIter->position.second)
-        };
+        );
     }
     else {
-        return {
+        return glm::vec4(
             normalizeColor(
                 beforeIter->color * (std::fabs(pos - afterIter->position.first) / dist) +
                 afterIter->color * (std::fabs(pos - beforeIter->position.first) / dist)
@@ -128,7 +128,7 @@ glm::vec4 Envelope::valueAtPosition(float pos) const {
                 (std::fabs(pos - afterIter->position.first) / dist) +
                 afterIter->position.second *
                 (std::fabs(pos - beforeIter->position.first) / dist)
-        };
+        );
     }
 }
 
@@ -176,7 +176,6 @@ glm::vec3 EnvelopePoint::hexadecimalToRGBConversion(const std::string& hex) cons
     const float r = static_cast<float>(hexadecimalToDecimal(hex.substr(1, 2)));
     const float g = static_cast<float>(hexadecimalToDecimal(hex.substr(3, 2)));
     const float b = static_cast<float>(hexadecimalToDecimal(hex.substr(5, 2)));
-
     return glm::vec3(r, g, b);
 }
 
@@ -184,7 +183,6 @@ std::string EnvelopePoint::hexadecimalFromVec3(const glm::vec3& vec) const {
     const std::string r = decimalToHexadecimal(static_cast<int>(vec.r));
     const std::string g = decimalToHexadecimal(static_cast<int>(vec.g));
     const std::string b = decimalToHexadecimal(static_cast<int>(vec.b));
-
     return ("#" + r + g + b);
 }
 

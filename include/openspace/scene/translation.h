@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/scene/timeframe.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <functional>
@@ -44,8 +45,9 @@ public:
     static ghoul::mm_unique_ptr<Translation> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
-    Translation();
+    explicit Translation(const ghoul::Dictionary& dictionary);
     virtual ~Translation() override = default;
+
     virtual bool initialize();
 
     virtual void update(const UpdateData& data);
@@ -65,6 +67,7 @@ protected:
 
 private:
     bool _needsUpdate = true;
+    ghoul::mm_unique_ptr<TimeFrame> _timeFrame;
     double _cachedTime = -std::numeric_limits<double>::max();
     glm::dvec3 _cachedPosition = glm::dvec3(0.0);
     std::function<void()> _onParameterChangeCallback;

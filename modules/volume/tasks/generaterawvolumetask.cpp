@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -117,15 +117,7 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
     ghoul::lua::LuaState state;
     ghoul::lua::runScript(state, _valueFunctionLua);
 
-#if (defined(NDEBUG) || defined(DEBUG))
-    ghoul::lua::verifyStackSize(state, 1);
-#endif
-
     int functionReference = luaL_ref(state, LUA_REGISTRYINDEX);
-
-#if (defined(NDEBUG) || defined(DEBUG))
-    ghoul::lua::verifyStackSize(state, 0);
-#endif
 
     glm::vec3 domainSize = _upperDomainBound - _lowerDomainBound;
 
@@ -137,18 +129,11 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
         const glm::vec3 coord = _lowerDomainBound +
             glm::vec3(cell) / glm::vec3(_dimensions) * domainSize;
 
-#if (defined(NDEBUG) || defined(DEBUG))
-        ghoul::lua::verifyStackSize(state, 0);
-#endif
         lua_rawgeti(state, LUA_REGISTRYINDEX, functionReference);
 
         lua_pushnumber(state, coord.x);
         lua_pushnumber(state, coord.y);
         lua_pushnumber(state, coord.z);
-
-#if (defined(NDEBUG) || defined(DEBUG))
-        ghoul::lua::verifyStackSize(state, 4);
-#endif
 
         if (lua_pcall(state, 3, 1, 0) != LUA_OK) {
             return;

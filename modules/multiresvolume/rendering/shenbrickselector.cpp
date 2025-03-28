@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -59,7 +59,7 @@ void ShenBrickSelector::traverseOT(int timestep, unsigned int brickIndex,
     int numTimeSteps = _tsp->header().numTimesteps;
     for (unsigned int i = 0; i < 8; i++) {
         unsigned int child = firstChild + i;
-        BrickCover cover = coveredBricks.split(i % 2, (i/2) % 2, (i/4));
+        BrickCover cover = coveredBricks.split(i % 2 != 0, (i/2) % 2 != 0, (i/4) != 0);
         selectBricks(timestep, child, child, 0, numTimeSteps, cover, bricks);
     }
 }

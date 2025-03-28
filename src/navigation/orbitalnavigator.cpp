@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,7 @@
 
 #include <openspace/camera/camerapose.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/mouseinputstate.h>
 #include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -35,6 +36,7 @@
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/easing.h>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
@@ -529,7 +531,7 @@ OrbitalNavigator::OrbitalNavigator()
         SceneGraphNode* node = sceneGraphNode(_anchor.value());
         if (node) {
             const SceneGraphNode* previousAnchor = _anchorNode;
-            setAnchorNode(node);
+            updateAnchorNode(node);
             global::eventEngine->publishEvent<events::EventFocusNodeChanged>(
                 previousAnchor,
                 node
@@ -544,12 +546,12 @@ OrbitalNavigator::OrbitalNavigator()
 
     _aim.onChange([this]() {
         if (_aim.value().empty()) {
-            setAimNode(nullptr);
+            updateAimNode(nullptr);
             return;
         }
         SceneGraphNode* node = sceneGraphNode(_aim.value());
         if (node) {
-            setAimNode(node);
+            updateAimNode(node);
         }
         else {
             LERROR(std::format(
@@ -1082,37 +1084,28 @@ glm::dvec3 OrbitalNavigator::cameraToSurfaceVector(const glm::dvec3& cameraPos,
     return centerToActualSurface - posDiff;
 }
 
-void OrbitalNavigator::setFocusNode(const SceneGraphNode* focusNode,
-                                    bool resetVelocitiesOnChange)
-{
-    const SceneGraphNode* previousAnchor = _anchorNode;
-    setAnchorNode(focusNode, resetVelocitiesOnChange);
-    setAimNode(nullptr);
-
-    global::eventEngine->publishEvent<events::EventFocusNodeChanged>(
-        previousAnchor,
-        focusNode
-    );
+void OrbitalNavigator::setFocusNode(const SceneGraphNode* node, bool resetVelocities) {
+    setFocusNode(node->identifier(), resetVelocities);
 }
 
-void OrbitalNavigator::setFocusNode(const std::string& focusNode, bool) {
-    _anchor = focusNode;
-    _aim = std::string("");
+void OrbitalNavigator::setFocusNode(const std::string& identifier, bool resetVelocities) {
+    _resetVelocitiesOnAnchorChange = resetVelocities;
+    _anchor = identifier;
+    _aim = std::string();
 }
 
-void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode,
-                                     bool resetVelocitiesOnChange)
-{
+void OrbitalNavigator::updateAnchorNode(const SceneGraphNode* anchorNode) {
     if (!_anchorNode) {
         _directlySetStereoDistance = true;
     }
 
     const bool changedAnchor = _anchorNode != anchorNode;
     _anchorNode = anchorNode;
+    _syncedAnchorNode = anchorNode ? anchorNode->identifier() : "";
 
     // Need to reset velocities after the actual switch in anchor node,
-    // since the reset behavior depends on the anchor node.
-    if (changedAnchor && resetVelocitiesOnChange) {
+    // since the reset behavior depends on the anchor node
+    if (_resetVelocitiesOnAnchorChange) {
         resetVelocities();
     }
 
@@ -1120,6 +1113,9 @@ void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode,
         updateOnCameraInteraction(); // Mark a changed anchor node as a camera interaction
         updatePreviousAnchorState();
     }
+
+    // Resetting velocities is the default behavior, so reset the variable
+    _resetVelocitiesOnAnchorChange = true;
 }
 
 void OrbitalNavigator::clearPreviousState() {
@@ -1128,18 +1124,18 @@ void OrbitalNavigator::clearPreviousState() {
     _previousAimNodePosition = std::nullopt;
 }
 
-void OrbitalNavigator::setAimNode(const SceneGraphNode* aimNode) {
+void OrbitalNavigator::updateAimNode(const SceneGraphNode* aimNode) {
     _retargetAimInterpolator.end();
     _aimNode = aimNode;
     updatePreviousAimState();
 }
 
-void OrbitalNavigator::setAnchorNode(const std::string& anchorNode) {
-    _anchor = anchorNode;
+void OrbitalNavigator::setAnchorNode(const std::string& identifier) {
+    _anchor = identifier;
 }
 
-void OrbitalNavigator::setAimNode(const std::string& aimNode) {
-    _aim = aimNode;
+void OrbitalNavigator::setAimNode(const std::string& identifier) {
+    _aim = identifier;
 }
 
 void OrbitalNavigator::updatePreviousAnchorState() {
@@ -2082,6 +2078,21 @@ double OrbitalNavigator::rotationSpeedScaleFromCameraHeight(
     return distFromCenterToSurface > 0.0 ?
         glm::clamp(distFromSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0) :
         1.0;
+}
+
+void OrbitalNavigator::updateAnchorOnSync() {
+    ghoul_assert(
+        !global::windowDelegate->isMaster(),
+        "Anchor should only be synced on nodes, not on master"
+    );
+
+    if (!_syncedAnchorNode.data().empty()) {
+        setAnchorNode(_syncedAnchorNode);
+    }
+}
+
+std::vector<Syncable*> OrbitalNavigator::syncables() {
+    return { &_syncedAnchorNode };
 }
 
 scripting::LuaLibrary OrbitalNavigator::luaLibrary() {

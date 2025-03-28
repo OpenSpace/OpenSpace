@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -303,7 +303,7 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
     const double dist = ((varMax - varMin) / NBins) * stop;
 
     const double varMaxNew = varMin + dist;
-    for(size_t i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) {
         const double normalizedVal = (doubleData[i] - varMin) / (varMaxNew - varMin);
 
         data[i] = static_cast<float>(glm::clamp(normalizedVal, 0.0, 1.0));
@@ -362,7 +362,7 @@ float* KameleonWrapper::uniformSliceValues(const std::string& var,
 
     for (size_t x = 0; x < outDimensions.x; ++x) {
         for (size_t y = 0; y < outDimensions.y; ++y) {
-            for(size_t z = 0; z < outDimensions.z; ++z){
+            for (size_t z = 0; z < outDimensions.z; ++z) {
 
                 const float xi = (hasXSlice) ? slice : x;
                 const float yi = (hasYSlice) ? slice : y;

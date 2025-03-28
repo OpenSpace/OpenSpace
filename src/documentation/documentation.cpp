@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #include <openspace/documentation/documentation.h>
 
 #include <openspace/documentation/verifier.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <algorithm>
 #include <set>
@@ -110,7 +111,7 @@ std::string to_string(const openspace::documentation::TestResult::Offense::Reaso
         case openspace::documentation::TestResult::Offense::Reason::MissingKey:
             return "Missing key";
         case openspace::documentation::TestResult::Offense::Reason::UnknownIdentifier:
-            return "Unknown identifier";
+            return "Unknown documentation identifier";
         case openspace::documentation::TestResult::Offense::Reason::Verification:
             return "Verification failed";
         case openspace::documentation::TestResult::Offense::Reason::WrongType:
@@ -178,10 +179,11 @@ void logError(const SpecificationError& error, std::string component) {
 }
 
 DocumentationEntry::DocumentationEntry(std::string k, std::shared_ptr<Verifier> v,
-                                       Optional opt, std::string doc)
+                                       Optional opt, Private priv, std::string doc)
     : key(std::move(k))
     , verifier(std::move(v))
     , optional(opt)
+    , isPrivate(priv)
     , documentation(std::move(doc))
 {
     ghoul_assert(!key.empty(), "Key must not be empty");
@@ -189,8 +191,8 @@ DocumentationEntry::DocumentationEntry(std::string k, std::shared_ptr<Verifier> 
 }
 
 DocumentationEntry::DocumentationEntry(std::string k, Verifier* v, Optional opt,
-                                       std::string doc)
-    : DocumentationEntry(std::move(k), std::shared_ptr<Verifier>(v), opt,
+                                       Private priv, std::string doc)
+    : DocumentationEntry(std::move(k), std::shared_ptr<Verifier>(v), opt, priv,
                          std::move(doc))
 {}
 

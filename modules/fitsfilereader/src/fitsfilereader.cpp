@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -81,7 +81,7 @@ std::shared_ptr<ImageData<T>> FitsFileReader::readImage(const std::filesystem::p
         }
         // Extension HDU Object
         return readImageInternal<T>(_infile->currentExtension());
-    } catch (const FitsException& e){
+    } catch (const FitsException& e) {
         LERROR("Could not read FITS image from table. " + e.message());
     }
 

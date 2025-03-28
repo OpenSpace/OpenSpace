@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -236,12 +236,8 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
             }
             catch (geos::util::IllegalStateException& e) {
                 throw ghoul::RuntimeError(std::format(
-                    "Non-simple (e.g. self-intersecting) polygons not supported yet. "
-                    "GEOS error: {}", e.what()
+                    "GEOS illegal state error: {}", e.what()
                 ));
-
-                // TODO: handle self-intersections points
-                // https://www.sciencedirect.com/science/article/pii/S0304397520304199
             }
             catch (geos::util::GEOSException& e) {
                 throw ghoul::RuntimeError(std::format(
@@ -307,9 +303,9 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
 
 #ifndef __APPLE__
     glLineWidth(_properties.lineWidth() * extraRenderData.lineWidthScale);
-#else
+#else  // ^^^^ __APPLE__ // !__APPLE__ vvvv
     glLineWidth(1.f);
-#endif
+#endif // __APPLE__
 
     for (const RenderFeature& r : _renderFeatures) {
         if (r.isExtrusionFeature && !_properties.extrude()) {
@@ -482,34 +478,32 @@ void GlobeGeometryFeature::renderPolygons(const RenderFeature& feature,
 }
 
 bool GlobeGeometryFeature::shouldUpdateDueToHeightMapChange() const {
-    if (_properties.altitudeMode() == GeoJsonProperties::AltitudeMode::RelativeToGround) {
-        // Cap the update to a given time interval
-        const auto now = std::chrono::system_clock::now();
-        if (now - _lastHeightUpdateTime < HeightUpdateInterval) {
-            return false;
-        }
-
-        // TODO: Change computation so that we return true immediately if even one height
-        // value is different
-
-        // Check if last height values for the control positions have changed
-        std::vector<double> newHeights = getCurrentReferencePointsHeights();
-
-        const bool isSame = std::equal(
-            _lastControlHeights.begin(),
-            _lastControlHeights.end(),
-            newHeights.begin(),
-            newHeights.end(),
-            [](double a, double b) {
-                return std::abs(a - b) < std::numeric_limits<double>::epsilon();
-            }
-        );
-
-        if (!isSame) {
-            return true;
-        }
+    if (_properties.altitudeMode() != GeoJsonProperties::AltitudeMode::RelativeToGround) {
+        return false;
     }
-    return false;
+
+    // Cap the update to a given time interval
+    const auto now = std::chrono::system_clock::now();
+    if (now - _lastHeightUpdateTime < HeightUpdateInterval) {
+        return false;
+    }
+
+    // TODO: Change computation so that we return true immediately if even one height
+    // value is different
+
+    // Check if last height values for the control positions have changed
+    std::vector<double> newHeights = getCurrentReferencePointsHeights();
+
+    const bool isSame = std::equal(
+        _lastControlHeights.cbegin(),
+        _lastControlHeights.cend(),
+        newHeights.cbegin(),
+        newHeights.cend(),
+        [](double a, double b) {
+            return std::abs(a - b) < std::numeric_limits<double>::epsilon();
+        }
+    );
+    return !isSame;
 }
 
 void GlobeGeometryFeature::update(bool dataIsDirty, bool preventHeightUpdates) {
@@ -545,10 +539,7 @@ void GlobeGeometryFeature::updateGeometry() {
 void GlobeGeometryFeature::updateHeightsFromHeightMap() {
     // @TODO: do the updating piece by piece, not all in one frame
     for (RenderFeature& f : _renderFeatures) {
-        f.heights = geometryhelper::heightMapHeightsFromGeodetic2List(
-            _globe,
-            f.vertices
-        );
+        f.heights = geometryhelper::heightMapHeightsFromGeodetic2List(_globe, f.vertices);
         bufferDynamicHeightData(f);
     }
 
@@ -829,12 +820,7 @@ void GlobeGeometryFeature::bufferVertexData(const RenderFeature& feature,
 
     glBindVertexArray(feature.vaoId);
     glBindBuffer(GL_ARRAY_BUFFER, feature.vboId);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        fullBufferSize,
-        nullptr,
-        GL_STATIC_DRAW
-    );
+    glBufferData(GL_ARRAY_BUFFER, fullBufferSize, nullptr, GL_STATIC_DRAW);
 
     glBufferSubData(
         GL_ARRAY_BUFFER,

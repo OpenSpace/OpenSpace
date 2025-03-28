@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -223,29 +223,18 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
     , _nightFactor(NightFactorInfo, 0.33f, 0.f, 1.f)
     , _colorFilter(ColorFilterInfo, 0.15f, 0.f, 1.f)
     , _enabled(EnabledInfo, true)
-    , _zFightingPercentage(ZFightingPercentageInfo, 0.995f, 0.000001f, 1.f)
+    , _zFightingPercentage(ZFightingPercentageInfo, 0.95f, 0.000001f, 1.f)
     , _nShadowSamples(NumberShadowSamplesInfo, 2, 1, 7)
+    // @TODO (abock, 2019-12-16) It would be better to not store the dictionary long
+    // term and rather extract the values directly here.  This would require a bit of
+    // a rewrite in the RenderableGlobe class to not create the RingsComponent in the
+    // class-initializer list though
+    // @TODO (abock, 2021-03-25) Righto!  The RenderableGlobe passes this dictionary
+    // in as-is so it would be easy to just pass it directly to the initialize method
+    // instead
+    // @TODO (abock, 2025-02-16) Why haven't you done it yet?!
     , _ringsDictionary(dictionary)
-{
-    using ghoul::filesystem::File;
-
-    if (dictionary.hasValue<ghoul::Dictionary>("Rings")) {
-        // @TODO (abock, 2019-12-16) It would be better to not store the dictionary long
-        // term and rather extract the values directly here.  This would require a bit of
-        // a rewrite in the RenderableGlobe class to not create the RingsComponent in the
-        // class-initializer list though
-        // @TODO (abock, 2021-03-25) Righto!  The RenderableGlobe passes this dictionary
-        // in as-is so it would be easy to just pass it directly to the initialize method
-        // instead
-        _ringsDictionary = dictionary.value<ghoul::Dictionary>("Rings");
-
-        documentation::testSpecificationAndThrow(
-            Documentation(),
-            _ringsDictionary,
-            "RingsComponent"
-        );
-    }
-}
+{}
 
 void RingsComponent::initialize() {
     ZoneScoped;
@@ -592,21 +581,21 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
 void RingsComponent::update(const UpdateData& data) {
     ZoneScoped;
 
-    if (_shader && _shader->isDirty()) {
+    if (_shader && _shader->isDirty()) [[unlikely]] {
         compileShadowShader();
     }
 
-    if (_geometryOnlyShader->isDirty()) {
+    if (_geometryOnlyShader->isDirty()) [[unlikely]] {
         _geometryOnlyShader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_geometryOnlyShader, _geomUniformCache);
     }
 
-    if (_planeIsDirty) {
+    if (_planeIsDirty) [[unlikely]] {
         createPlane();
         _planeIsDirty = false;
     }
 
-    if (_textureIsDirty) {
+    if (_textureIsDirty) [[unlikely]] {
         loadTexture();
         _textureIsDirty = false;
     }

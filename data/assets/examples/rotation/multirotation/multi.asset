@@ -1,0 +1,38 @@
+-- Basic
+-- This asset creates a scene graph node that only displays coordinate axes. The rotation
+-- of the coordinate axes are determined by a combination of individual rotations. The
+-- rotations are applied in the order in which they are specified
+
+local Node = {
+  Identifier = "MultiRotation_Example",
+  Transform = {
+    Rotation = {
+      Type = "MultiRotation",
+      Rotations = {
+        {
+          Type = "StaticRotation",
+          Rotation = { math.pi, 0.0, 0.0 }
+        },
+        {
+          Type = "StaticRotation",
+          Rotation = { 0.0, 0.0, math.pi }
+        }
+      }
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "MultiRotation - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,7 +53,7 @@ class WebRenderHandler : public CefRenderHandler {
 public:
     // @TODO (ylvse 2024-08-20): Remove this argument when the skybrowser rewrite is done.
     // It is necessary atm for making the skybrowser work.
-    WebRenderHandler(bool accelerate = true);
+    explicit WebRenderHandler(bool accelerate = true);
     using Pixel = glm::tvec4<char>;
 
     virtual void draw(void) = 0;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -118,6 +118,10 @@ namespace {
 } // namespace
 
 namespace openspace {
+
+documentation::Documentation WebGuiModule::Documentation() {
+    return codegen::doc<Parameters>("module_webgui");
+}
 
 WebGuiModule::WebGuiModule()
     : OpenSpaceModule(WebGuiModule::Name)
@@ -248,9 +252,9 @@ void WebGuiModule::startProcess() {
 
 #ifdef _MSC_VER
     const std::filesystem::path node = absPath("${MODULE_WEBGUI}/ext/nodejs/node.exe");
-#else
+#else  // ^^^^ _MSC_VER // !_MSC_VER vvvv
     const std::filesystem::path node = absPath("${MODULE_WEBGUI}/ext/nodejs/node");
-#endif
+#endif // _MSC_VER
 
     std::string formattedDirectories = "[";
 
@@ -283,11 +287,11 @@ void WebGuiModule::startProcess() {
         command,
         absPath("${BIN}"),
         [](const char* data, size_t n) {
-            const std::string str = std::string(data, n);
+            const std::string_view str = std::string_view(data, n);
             LDEBUG(std::format("Web GUI server output: {}", str));
         },
         [](const char* data, size_t n) {
-            const std::string str = std::string(data, n);
+            const std::string_view str = std::string_view(data, n);
             LERROR(std::format("Web GUI server error: {}", str));
         }
     );

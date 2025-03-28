@@ -22,7 +22,7 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_SchrodingerMareNortheq")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_SchrodingerMareNortheq)
 end)
 
 asset.export("SchrodingerMareNortheq", treks_SchrodingerMareNortheq)

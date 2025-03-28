@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,11 +40,6 @@
 #include <optional>
 
 namespace {
-    constexpr std::array<const char*, 6> UniformNames = {
-        "modelViewProjectionTransform", "opacity", "width", "transferFunctionTexture",
-        "conservativeBounds", "showOptimistic"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo EffectiveTemperatureInfo = {
         "EffectiveTemperature",
         "Effective Temperature",
@@ -154,14 +149,14 @@ void RenderableHabitableZone::render(const RenderData& data, RendererTasks&) {
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
-    _shader->setUniform(_uniformCache.texture, unit);
+    _shader->setUniform(_uniformCache.transferFunctionTexture, unit);
 
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthMask(false);
     glDisable(GL_CULL_FACE);
 
-    _plane->render();
+    _plane.render();
 
     _shader->deactivate();
 
@@ -177,11 +172,11 @@ void RenderableHabitableZone::initializeShader() {
         absPath("${MODULE_SPACE}/shaders/habitablezone_vs.glsl"),
         absPath("${MODULE_SPACE}/shaders/habitablezone_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+    updateUniformLocations();
 }
 
 void RenderableHabitableZone::updateUniformLocations() {
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 void RenderableHabitableZone::computeZone() {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -330,8 +330,18 @@ RenderEngine::RenderEngine()
         glm::vec3(-glm::pi<float>()),
         glm::vec3(glm::pi<float>())
     )
-    , _enabledFontColor(EnabledFontColorInfo, glm::vec4(0.2f, 0.75f, 0.2f, 1.f))
-    , _disabledFontColor(DisabledFontColorInfo, glm::vec4(0.55f, 0.2f, 0.2f, 1.f))
+    , _enabledFontColor(
+        EnabledFontColorInfo,
+        glm::vec4(0.2f, 0.75f, 0.2f, 1.f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+    )
+    , _disabledFontColor(
+        DisabledFontColorInfo,
+        glm::vec4(0.55f, 0.2f, 0.2f, 1.f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+    )
 {
     addProperty(_showOverlayOnClients);
     addProperty(_showLog);
@@ -572,6 +582,10 @@ void RenderEngine::updateScreenSpaceRenderables() {
     ZoneScoped;
 
     for (std::unique_ptr<ScreenSpaceRenderable>& ssr : *global::screenSpaceRenderables) {
+#ifdef TRACY_ENABLE
+        TracyPlot("RAM", static_cast<int64_t>(global::openSpaceEngine->ramInUse()));
+        TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
+#endif // TRACY_ENABLE
         ssr->update();
     }
 }
@@ -706,6 +720,10 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
             .gamma = _gamma
         };
         for (ScreenSpaceRenderable* ssr : ssrs) {
+#ifdef TRACY_ENABLE
+            TracyPlot("RAM", static_cast<int64_t>(global::openSpaceEngine->ramInUse()));
+            TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
+#endif // TRACY_ENABLE
             ssr->render(data);
         }
         glDisable(GL_BLEND);

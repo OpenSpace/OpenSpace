@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -64,23 +64,21 @@ documentation::Documentation SceneGraphLightSource::Documentation() {
     return codegen::doc<Parameters>("base_scene_graph_light_source");
 }
 
-SceneGraphLightSource::SceneGraphLightSource()
-    : _intensity(IntensityInfo, 1.f, 0.f, 1.f)
+SceneGraphLightSource::SceneGraphLightSource(const ghoul::Dictionary& dictionary)
+    : LightSource(dictionary)
+    , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
     , _sceneGraphNodeReference(NodeCameraStateInfo, "")
 {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _intensity = p.intensity.value_or(_intensity);
     addProperty(_intensity);
+
     _sceneGraphNodeReference.onChange([this]() {
         _sceneGraphNode =
             global::renderEngine->scene()->sceneGraphNode(_sceneGraphNodeReference);
     });
     addProperty(_sceneGraphNodeReference);
-}
-
-SceneGraphLightSource::SceneGraphLightSource(const ghoul::Dictionary& dictionary)
-    : SceneGraphLightSource()
-{
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-    _intensity = p.intensity.value_or(_intensity);
     _sceneGraphNodeReference = p.node;
 }
 

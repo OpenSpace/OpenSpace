@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,7 +51,7 @@ void LinearLruCache<ValueType>::set(size_t key, ValueType value) {
 
 template <typename ValueType>
 ValueType& LinearLruCache<ValueType>::use(size_t key) {
-    auto& pair = _cache[key];
+    const auto& pair = _cache[key];
     const std::list<size_t>::iterator trackerIter = pair.second;
     _tracker.splice(_tracker.end(), _tracker, trackerIter);
     return pair.first;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -134,7 +134,7 @@ void KeyframeNavigator::updateCamera(Camera* camera, const CameraPose& prevPose,
 
     // Linear interpolation
     t = std::max(0.0, std::min(1.0, t));
-    const glm::dvec3 nowCameraPosition =
+    glm::dvec3 nowCameraPosition =
         prevKeyframeCameraPosition * (1.0 - t) + nextKeyframeCameraPosition * t;
     glm::dquat nowCameraRotation = glm::slerp(
         prevKeyframeCameraRotation,

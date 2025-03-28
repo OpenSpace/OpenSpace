@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/globals.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/scene/asset.h>
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -142,79 +144,9 @@ void AssetManager::deinitialize() {
     _toBeDeleted.clear();
 }
 
-void AssetManager::update() {
+void AssetManager::runRemoveQueue() {
     ZoneScoped;
-
-    // Delete all the assets that have been marked for deletion in the previous frame
-    {
-        ZoneScopedN("Deleting assets");
-
-        _toBeDeleted.clear();
-    }
-
-    // Initialize all assets that have been loaded and synchronized but that not yet
-    // initialized
-    for (auto it = _toBeInitialized.cbegin(); it != _toBeInitialized.cend(); it++) {
-        ZoneScopedN("Initializing queued assets");
-        Asset* a = *it;
-
-        if (a->isInitialized() || !a->isSynchronized()) {
-            // nothing to do here
-            continue;
-        }
-
-        a->initialize();
-
-        // We are only doing one asset per frame to keep the loading screen working a bit
-        // smoother, so we remove the current one and then break out of the loop
-        _toBeInitialized.erase(it);
-
-        // OBS: This can't be replaced with a (get the first one and then bail) as the
-        // first asset in the list might wait for its child later in the list to finished.
-        // So if we check the first one over and over again, we'll be in an infinite loop
-        break;
-    }
-
-    // Add all assets that have been queued for loading since the last `update` call
-    for (const std::string& asset : _assetAddQueue) {
-        ZoneScopedN("Adding queued assets");
-
-        const std::filesystem::path path = generateAssetPath(_assetRootDirectory, asset);
-        Asset* a = nullptr;
-        try {
-            a = retrieveAsset(path, "");
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC(e.component, e.message);
-            continue;
-        }
-
-        const auto it = std::find(_rootAssets.cbegin(), _rootAssets.cend(), a);
-        if (it != _rootAssets.cend()) {
-            // Do nothing if the asset has already been requested on a root level. Even if
-            // another asset has already required this asset, calling `load`,
-            // `startSynchronization`, etc on it are still fine since all of those
-            // functions bail out early if they already have been called before
-            continue;
-        }
-
-        a->load(nullptr);
-        if (a->isFailed()) {
-            // The loading might fail because of any number of reasons, most likely of
-            // them some Lua syntax error
-            continue;
-        }
-        _rootAssets.push_back(a);
-        a->startSynchronizations();
-
-        _toBeInitialized.push_back(a);
-        global::profile->addAsset(asset);
-    }
-    _assetAddQueue.clear();
-
-    // Remove assets
     for (const std::string& asset : _assetRemoveQueue) {
-        ZoneScopedN("Removing queued assets");
         std::filesystem::path path = generateAssetPath(_assetRootDirectory, asset);
 
         const auto it = std::find_if(
@@ -256,7 +188,93 @@ void AssetManager::update() {
         global::profile->removeAsset(asset);
     }
     _assetRemoveQueue.clear();
+}
 
+void AssetManager::runAddQueue() {
+    ZoneScoped;
+    for (const std::string& asset : _assetAddQueue) {
+
+        const std::filesystem::path path = generateAssetPath(_assetRootDirectory, asset);
+        Asset* a = nullptr;
+        try {
+            a = retrieveAsset(path, "");
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC(e.component, e.message);
+            continue;
+        }
+
+        const auto it = std::find(_rootAssets.cbegin(), _rootAssets.cend(), a);
+        if (it != _rootAssets.cend()) {
+            // Do nothing if the asset has already been requested on a root level. Even if
+            // another asset has already required this asset, calling `load`,
+            // `startSynchronization`, etc on it are still fine since all of those
+            // functions bail out early if they already have been called before
+            continue;
+        }
+
+        a->load(nullptr);
+        if (a->isFailed()) {
+            // The loading might fail because of any number of reasons, most likely of
+            // them some Lua syntax error
+            continue;
+        }
+        _rootAssets.push_back(a);
+        a->startSynchronizations();
+
+        _toBeInitialized.push_back(a);
+        global::profile->addAsset(asset);
+    }
+    _assetAddQueue.clear();
+}
+
+void AssetManager::update() {
+    ZoneScoped;
+
+    // Flag to keep track of when to emit synchronization event
+    const bool isLoadingAssets = !_toBeInitialized.empty();
+
+    // Delete all the assets that have been marked for deletion in the previous frame
+    {
+        ZoneScopedN("Deleting assets");
+
+        _toBeDeleted.clear();
+    }
+
+    // Initialize all assets that have been loaded and synchronized but that not yet
+    // initialized
+    for (auto it = _toBeInitialized.cbegin(); it != _toBeInitialized.cend(); it++) {
+        ZoneScopedN("Initializing queued assets");
+        Asset* a = *it;
+
+        if (a->isFailed()) {
+            _toBeInitialized.erase(it);
+            break;
+        }
+
+        if (!a->isSynchronized()) {
+            // nothing to do here
+            continue;
+        }
+
+        if (!a->isInitialized()) {
+            a->initialize();
+        }
+
+        // We are only doing one asset per frame to keep the loading screen working a bit
+        // smoother, so we remove the current one and then break out of the loop
+        _toBeInitialized.erase(it);
+
+        // OBS: This can't be replaced with a (get the first one and then bail) as the
+        // first asset in the list might wait for its child later in the list to finished.
+        // So if we check the first one over and over again, we'll be in an infinite loop
+        break;
+    }
+
+    // Remove assets
+    runRemoveQueue();
+    // Add all assets that have been queued for loading since the last `update` call
+    runAddQueue();
 
     // Change state based on synchronizations. If any of the unfinished synchronizations
     // has finished since the last call of this function, we should notify the assets and
@@ -285,6 +303,11 @@ void AssetManager::update() {
             it++;
         }
     }
+
+    // If the _toBeInitialized state has changed in this update call we emit the event
+    if (isLoadingAssets && _toBeInitialized.empty()) {
+        global::eventEngine->publishEvent<events::EventAssetLoadingFinished>();
+    }
 }
 
 void AssetManager::add(const std::string& path) {
@@ -299,6 +322,12 @@ void AssetManager::remove(const std::string& path) {
     // First check if the path is already in the add queue. If so, remove it from there
     _assetAddQueue.remove(path);
     _assetRemoveQueue.push_back(path);
+}
+
+void AssetManager::reload(const std::string& path) {
+    ghoul_precondition(!path.empty(), "Path must not be empty");
+    _assetRemoveQueue.push_back(path);
+    _assetAddQueue.push_back(path);
 }
 
 std::vector<const Asset*> AssetManager::allAssets() const {
@@ -1026,6 +1055,7 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
         {
             codegen::lua::Add,
             codegen::lua::Remove,
+            codegen::lua::Reload,
             codegen::lua::RemoveAll,
             codegen::lua::IsLoaded,
             codegen::lua::AllAssets,

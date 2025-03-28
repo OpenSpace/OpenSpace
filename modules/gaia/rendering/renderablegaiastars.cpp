@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -406,7 +406,7 @@ namespace {
         std::optional<int> lastRow;
 
         // [codegen::verbatim(ColumnNamesInfo.description)]]
-        std::optional<std::vector<std::string>> columnNames;
+        std::optional<ghoul::Dictionary> columnNames;
 
         // [codegen::verbatim(LodPixelThresholdInfo.description)]]
         std::optional<float> lodPixelThreshold;
@@ -636,9 +636,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         addProperty(_lastRow);
 
         if (p.columnNames.has_value()) {
-            const ghoul::Dictionary tmpDict = dictionary.value<ghoul::Dictionary>(
-                ColumnNamesInfo.identifier
-            );
+            const ghoul::Dictionary tmpDict = *p.columnNames;
 
             // Ugly fix for ASCII sorting when there are more columns read than 10.
             std::set<int> intKeys;

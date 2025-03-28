@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,7 @@
 
 #include <modules/debugging/debuggingmodule.h>
 
-#include <modules/debugging/rendering/renderabledebugplane.h>
+#include <modules/debugging/rendering/screenspacedebugplane.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
@@ -106,7 +106,7 @@ DebuggingModule::DebuggingModule()
             WindowDelegate* del = global::windowDelegate;
 
             glm::vec2 penPosition = glm::vec2(
-                global::renderEngine->fontResolution().x / 2 - 50,
+                global::renderEngine->fontResolution().x / 2 - 70,
                 global::renderEngine->fontResolution().y / 3
             );
 
@@ -122,13 +122,14 @@ DebuggingModule::DebuggingModule()
                 }
             }(frustum);
 
+            std::string node = std::to_string(del->currentNode());
             std::string sgFn = std::to_string(del->swapGroupFrameNumber());
             std::string dt = std::to_string(del->deltaTime());
             std::string avgDt = std::to_string(del->averageDeltaTime());
 
             const std::string res = std::format(
-                "Frame: {} {}\nSwap group frame: {}\nDt: {}\nAvg Dt: {}",
-                fn, fr, sgFn, dt, avgDt
+                "Node: {}\n\nFrame: {} {}\nSwap group frame: {}\nDt: {}\nAvg Dt: {}",
+                node, fn, fr, sgFn, dt, avgDt
             );
             RenderFont(*_fontFrameInfo, penPosition, res);
         }
@@ -136,11 +137,11 @@ DebuggingModule::DebuggingModule()
 }
 
 void DebuggingModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Renderable>* fRenderable =
-        FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
+    ghoul::TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
+        FactoryManager::ref().factory<ScreenSpaceRenderable>();
+    ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
 
-    fRenderable->registerClass<RenderableDebugPlane>("RenderableDebugPlane");
+    fSsRenderable->registerClass<ScreenSpaceDebugPlane>("ScreenSpaceDebugPlane");
 }
 
 void DebuggingModule::internalInitializeGL() {
@@ -150,7 +151,7 @@ void DebuggingModule::internalInitializeGL() {
 
 std::vector<documentation::Documentation> DebuggingModule::documentations() const {
     return {
-        RenderableDebugPlane::Documentation()
+        ScreenSpaceDebugPlane::Documentation()
     };
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -96,9 +96,9 @@ documentation::Documentation ScreenSpaceBrowser::Documentation() {
 ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _dimensions(DimensionsInfo, glm::uvec2(0), glm::uvec2(0), glm::uvec2(3000))
+    , _renderHandler(new ScreenSpaceRenderHandler)
     , _url(UrlInfo)
     , _reload(ReloadInfo)
-    , _renderHandler(new ScreenSpaceRenderHandler)
     , _keyboardHandler(new WebKeyboardHandler)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -145,13 +145,8 @@ bool ScreenSpaceBrowser::deinitializeGL() {
     _browserInstance->close(true);
 
     WebBrowserModule* webBrowser = global::moduleEngine->module<WebBrowserModule>();
-    if (webBrowser) {
-        webBrowser->removeBrowser(_browserInstance.get());
-        _browserInstance.reset();
-    }
-    else {
-        LWARNING("Could not find WebBrowserModule");
-    }
+    webBrowser->removeBrowser(_browserInstance.get());
+    _browserInstance.reset();
 
     return ScreenSpaceRenderable::deinitializeGL();
 }

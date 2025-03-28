@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,6 +39,15 @@ namespace {
  */
 [[codegen::luawrap]] void remove(std::string assetName) {
     openspace::global::openSpaceEngine->assetManager().remove(assetName);
+}
+
+/**
+ * Reloads the asset with the specified name. If the asset was previously loaded explicity
+ * it will be removed and then re-added. If the asset was not previously loaded, it will
+ * only be loaded instead.
+ */
+[[codegen::luawrap]] void reload(std::string assetName) {
+    openspace::global::openSpaceEngine->assetManager().reload(assetName);
 }
 
 /**

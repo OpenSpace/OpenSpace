@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,7 @@
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
 #include <modules/video/include/videoplayer.h>
-#include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <ghoul/glm.h>
@@ -43,7 +43,7 @@ namespace openspace::globebrowsing {
 
 class VideoTileProvider : public TileProvider {
 public:
-    VideoTileProvider(const ghoul::Dictionary& dictionary);
+    explicit VideoTileProvider(const ghoul::Dictionary& dictionary);
     ~VideoTileProvider() override;
 
     void update() override final;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,30 +38,26 @@ public:
      * Constructor for MonitorBox class, which displays the system's monitor(s), their
      * relative position and size, and window(s) that they contain.
      *
-     * \param widgetDims The size of the display widget in pixels, stored in QRect
-     * \param monitorResolution A vector containing the monitor's maximum display size in
-     *        pixels in a QRect object
-     * \param nWindows The current number of windows that has been selected by the user
-     * \param winColors An array of QColor objects for window colors. The indexing of this
-     *        array matches the window indexing used elsewhere in the class. This allows
-     *        for a unique color for each window
+     * \param widgetSize The size of the display widget in pixels
+     * \param monitorResolution A vector containing each monitor's maximum display size in
+     *        pixels
      * \param parent The parent which to which this MonitorBox belongs
      */
-    MonitorBox(QRect widgetDims, const std::vector<QRect>& monitorResolutions,
-        unsigned int nWindows, const std::array<QColor, 4>& windowColors,
+    MonitorBox(QRect widgetSize, const std::vector<QRect>& monitorResolutions,
         QWidget* parent = nullptr);
 
+public slots:
     /**
      * Called when window dimensions or monitor location have changed, requiring redraw.
      * This will also map the window resolution into the scaled resolution of the display
      * widget.
      *
-     * \param mIdx The zero-based monitor index (primary monitor is 0)
-     * \param wIdx The zero-based window index
-     * \param newDimensions Dimensions (pixels) of window to be mapped in QRect
+     * \param monitorIdx The zero-based monitor index (primary monitor is 0)
+     * \param windowIdx The zero-based window index
+     * \param dimension Dimensions (pixels) of window to be mapped in QRect
      */
-    void windowDimensionsChanged(unsigned int mIdx, unsigned int wIdx,
-        const QRectF& newDimensions);
+    void windowDimensionsChanged(unsigned int monitorIdx, unsigned int windowIdx,
+        const QRectF& dimension);
 
     /**
      * Called when the number of windows that should be displayed changes.
@@ -74,21 +70,10 @@ protected:
     void paintEvent(QPaintEvent* event) override;
 
 private:
-    std::vector<QSizeF> computeScaledResolutionLandscape(QRectF arrangement,
-        const std::vector<QRect>& resolutions);
-    std::vector<QSizeF> computeScaledResolutionPortrait(QRectF arrangement,
-        const std::vector<QRect>& resolutions);
-
     std::vector<QRectF> _monitorDimensionsScaled;
-    std::array<QRectF, 4> _windowRendering = {
-        QRectF(0.f, 0.f, 0.f, 0.f),
-        QRectF(0.f, 0.f, 0.f, 0.f),
-        QRectF(0.f, 0.f, 0.f, 0.f),
-        QRectF(0.f, 0.f, 0.f, 0.f)
-    };
-    int _nWindows = 1;
-    const std::array<QColor, 4> _colorsForWindows;
-    float _monitorScaleFactor = 1.0;
+    std::vector<QRectF> _windowRendering;
+    int _nWindows = 0;
+    float _monitorScaleFactor = 1.f;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___MONITORBOX___H__

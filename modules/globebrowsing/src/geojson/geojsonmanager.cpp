@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,18 +36,9 @@ namespace {
 
 namespace openspace::globebrowsing {
 
-documentation::Documentation GeoJsonManager::Documentation() {
-    using namespace documentation;
-    return {
-        "GeoJsonManager",
-        "globebrowsing_geojsonmanager",
-        "",
-        {}
-    };
-}
-
-// TODO: Gui name and description
-GeoJsonManager::GeoJsonManager() : properties::PropertyOwner({ "GeoJson" }) {}
+GeoJsonManager::GeoJsonManager()
+    : properties::PropertyOwner({ "GeographicOverlays", "Geographic Overlays" })
+{}
 
 void GeoJsonManager::initialize(RenderableGlobe* globe) {
     ghoul_assert(globe, "No globe provided");
@@ -61,27 +52,17 @@ void GeoJsonManager::deinitializeGL() {
 }
 
 bool GeoJsonManager::isReady() const {
-    const bool isReady = std::all_of(
-        std::begin(_geoJsonObjects),
-        std::end(_geoJsonObjects),
-        [](const std::unique_ptr<GeoJsonComponent>& g) {
-            return g->isReady();
-        }
+    return std::all_of(
+        _geoJsonObjects.cbegin(),
+        _geoJsonObjects.cend(),
+        std::mem_fn(&GeoJsonComponent::isReady)
     );
-    return isReady;
 }
 
 void GeoJsonManager::addGeoJsonLayer(const ghoul::Dictionary& layerDict) {
     ZoneScoped;
 
     try {
-        // Parse dictionary
-        documentation::testSpecificationAndThrow(
-            GeoJsonComponent::Documentation(),
-            layerDict,
-            "GeoJsonComponent"
-        );
-
         const std::string identifier = layerDict.value<std::string>("Identifier");
         if (hasPropertySubOwner(identifier)) {
             LERROR("GeoJson layer with identifier '" + identifier + "' already exists");

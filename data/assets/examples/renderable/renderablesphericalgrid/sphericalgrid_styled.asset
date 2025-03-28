@@ -1,0 +1,23 @@
+-- Styled
+-- This example adds a spherical grid with a custom color and line width.
+
+local Node = {
+  Identifier = "RenderableSphericalGrid_Example_Styled",
+  Renderable = {
+    Type = "RenderableSphericalGrid",
+    Color = { 0.0, 0.0, 1.0 },
+    LineWidth = 2.0
+  },
+  GUI = {
+    Name = "RenderableSphericalGrid - Styled",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -58,22 +58,29 @@
 #include <fstream>
 #include "cpl_minixml.h"
 
-namespace openspace::globebrowsing {
-
 namespace {
-
-std::unique_ptr<ghoul::opengl::Texture> DefaultTileTexture;
-Tile DefaultTile = Tile { nullptr, std::nullopt, Tile::Status::Unavailable };
-
+    std::unique_ptr<ghoul::opengl::Texture> DefaultTileTexture;
+    openspace::globebrowsing::Tile DefaultTile = openspace::globebrowsing::Tile {
+        nullptr,
+        std::nullopt,
+        openspace::globebrowsing::Tile::Status::Unavailable
+    };
 } // namespace
+
+namespace openspace::globebrowsing {
 
 unsigned int TileProvider::NumTileProviders = 0;
 
 std::unique_ptr<TileProvider> TileProvider::createFromDictionary(
-                                                            layers::Layer::ID layerTypeID,
                                                       const ghoul::Dictionary& dictionary)
 {
     ZoneScoped;
+
+    layers::Layer::ID layerTypeID = layers::Layer::ID::DefaultTileProvider;
+    if (dictionary.hasValue<std::string>("Type")) {
+        const std::string type = dictionary.value<std::string>("Type");
+        layerTypeID = ghoul::from_string<layers::Layer::ID>(type);
+    }
 
     const std::string_view type =
         layers::Layers[static_cast<int>(layerTypeID)].identifier;

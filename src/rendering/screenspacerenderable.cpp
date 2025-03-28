@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -235,6 +235,9 @@ namespace {
         // [[codegen::verbatim(ScaleInfo.description)]]
         std::optional<float> scale;
 
+        // [[codegen::verbatim(LocalRotationInfo.description)]]
+        std::optional<glm::vec3> rotation;
+
         // [[codegen::verbatim(GammaOffsetInfo.description)]]
         std::optional<float> gammaOffset;
 
@@ -350,15 +353,31 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         setGuiName(*p.name);
     }
 
+    _enabled = p.enabled.value_or(_enabled);
     addProperty(_enabled);
+
     _renderDuringBlackout = p.renderDuringBlackout.value_or(_renderDuringBlackout);
     addProperty(_renderDuringBlackout);
+
+    _useRadiusAzimuthElevation =
+        p.useRadiusAzimuthElevation.value_or(_useRadiusAzimuthElevation);
     addProperty(_useRadiusAzimuthElevation);
+
+    _usePerspectiveProjection =
+        p.usePerspectiveProjection.value_or(_usePerspectiveProjection);
     addProperty(_usePerspectiveProjection);
+
+    _faceCamera = p.faceCamera.value_or(_faceCamera);
     addProperty(_faceCamera);
+
+    if (_useRadiusAzimuthElevation) {
+        _raePosition = p.radiusAzimuthElevation.value_or(_raePosition);
+    }
+    else {
+        _cartesianPosition = p.cartesianPosition.value_or(_cartesianPosition);
+    }
     addProperty(_cartesianPosition);
     addProperty(_raePosition);
-    addProperty(_gammaOffset);
 
     // Setting spherical/euclidean onchange handler
     _useRadiusAzimuthElevation.onChange([this]() {
@@ -370,47 +389,35 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         }
     });
 
+    _gammaOffset = p.gammaOffset.value_or(_gammaOffset);
+    addProperty(_gammaOffset);
+
+    _scale = p.scale.value_or(_scale);
     addProperty(_scale);
-    addProperty(_multiplyColor);
-    addProperty(_backgroundColor);
-    addProperty(Fadeable::_opacity);
-    addProperty(Fadeable::_fade);
-    addProperty(_localRotation);
-
-    addProperty(_borderColor);
-    addProperty(_borderWidth);
-    addProperty(_borderFeather);
-
-    _borderWidth = p.borderWidth.value_or(_borderWidth);
-
-    _borderColor = p.borderColor.value_or(_borderColor);
-    _borderColor.setViewOption(properties::Property::ViewOptions::Color);
 
     _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
     _multiplyColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_multiplyColor);
 
     _backgroundColor = p.backgroundColor.value_or(_backgroundColor);
     _backgroundColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_backgroundColor);
 
-    _enabled = p.enabled.value_or(_enabled);
-    _gammaOffset = p.gammaOffset.value_or(_gammaOffset);
-
-    _useRadiusAzimuthElevation =
-        p.useRadiusAzimuthElevation.value_or(_useRadiusAzimuthElevation);
-
-    if (_useRadiusAzimuthElevation) {
-        _raePosition = p.radiusAzimuthElevation.value_or(_raePosition);
-    }
-    else {
-        _cartesianPosition = p.cartesianPosition.value_or(_cartesianPosition);
-    }
-
-    _scale = p.scale.value_or(_scale);
     _opacity = p.opacity.value_or(_opacity);
-    _usePerspectiveProjection =
-        p.usePerspectiveProjection.value_or(_usePerspectiveProjection);
+    addProperty(Fadeable::_opacity);
+    addProperty(Fadeable::_fade);
 
-    _faceCamera = p.faceCamera.value_or(_faceCamera);
+    _localRotation = p.rotation.value_or(_localRotation);
+    addProperty(_localRotation);
+
+    _borderColor = p.borderColor.value_or(_borderColor);
+    _borderColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_borderColor);
+
+    addProperty(_borderFeather);
+
+    _borderWidth = p.borderWidth.value_or(_borderWidth);
+    addProperty(_borderWidth);
 
     if (p.tag.has_value()) {
         if (std::holds_alternative<std::string>(*p.tag)) {

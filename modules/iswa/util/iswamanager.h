@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -116,7 +116,7 @@ private:
     void fillCygnetInfo(std::string jsonString);
     void registerGroup(std::string groupName, std::string type);
 
-    std::map<int, std::string> _type;
+    std::map<int, std::string> _cygnetType;
     std::map<int, std::string> _geom;
 
     std::shared_ptr<ccmc::Kameleon> _kameleon;

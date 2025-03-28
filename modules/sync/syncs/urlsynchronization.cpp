@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -119,10 +119,9 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dictionary,
     // Disregard override variable if user specified a specific time to live.
     _secondsUntilResync = p.secondsUntilResync.value_or(_secondsUntilResync);
 
-    const bool useHash = p.useHash.value_or(true);
-
     _identifier = p.identifier;
 
+    const bool useHash = p.useHash.value_or(true);
     if (useHash) {
         // We just merge all of the URLs together to generate a hash that works for this
         std::vector<std::string> urls = _urls;
@@ -271,7 +270,7 @@ void UrlSynchronization::createSyncFile(bool) const {
     std::filesystem::create_directories(dir);
 
     dir.replace_extension("ossync");
-    std::ofstream syncFile(dir, std::ofstream::out);
+    std::ofstream syncFile = std::ofstream(dir, std::ofstream::out);
 
     const std::string currentTimeAsISO8601 = Time::currentWallTime();
     const double currentTimeAsJ2000 = Time::convertTime(currentTimeAsISO8601);
@@ -390,7 +389,9 @@ bool UrlSynchronization::trySyncUrls() {
         if (ec) {
             LERRORC(
                 "URLSynchronization",
-                std::format("Error renaming file '{}' to '{}'", tempName, originalName)
+                std::format(
+                    "Error renaming file '{}' to '{}' error code {}",
+                    tempName, originalName, ec.message())
             );
 
             failed = true;

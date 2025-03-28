@@ -1,0 +1,35 @@
+-- Basic
+-- This asset creates a time-varying translation with information from a SPICE kernel and
+-- applies it to a scene graph node that only displays coordinate axes. The position of
+-- the coordinate axes are determined by SPICE, in this case pretending that the axes are
+-- orbiting the same way the Moon does around Earth.
+-- For more information about SPICE see: https://naif.jpl.nasa.gov/naif/
+
+-- Load the default SPICE kernels, which are the planetary constants and the DE430 kernel
+asset.require("spice/core")
+
+local Node = {
+  Identifier = "SpiceTranslation_Example",
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "MOON",
+      Observer = "EARTH"
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "SpiceTranslation - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

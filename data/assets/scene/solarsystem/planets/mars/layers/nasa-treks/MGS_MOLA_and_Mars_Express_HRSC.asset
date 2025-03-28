@@ -43,8 +43,8 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Mars_MOLA_blend200ppx_HRSC_ClrShade_clon0dd_200mpp_lzw")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Mars_MOLA_blend200ppx_HRSC_Shade_clon0dd_200mpp_lzw")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_Mars_MOLA_blend200ppx_HRSC_ClrShade_clon0dd_200mpp_lzw)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_Mars_MOLA_blend200ppx_HRSC_Shade_clon0dd_200mpp_lzw)
 end)
 
 asset.export("Mars_MOLA_blend200ppx_HRSC_ClrShade_clon0dd_200mpp_lzw", treks_Mars_MOLA_blend200ppx_HRSC_ClrShade_clon0dd_200mpp_lzw)

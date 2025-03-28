@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -98,7 +98,7 @@ bool TouchInputHolder::tryAddInput(TouchInput input) {
         _inputs.emplace_front(input);
         successful = true;
     }
-    else if (!sameTimeAsLastInput){
+    else if (!sameTimeAsLastInput) {
         _inputs.front().timestamp = input.timestamp;
         successful = true;
     }

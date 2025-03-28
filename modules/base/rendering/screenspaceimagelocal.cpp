@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,8 +52,10 @@ namespace {
     // To load an image from a web URL, see
     // [ScreenSpaceImageOnline](#base_screenspace_image_online).
     struct [[codegen::Dictionary(ScreenSpaceImageLocal)]] Parameters {
+        std::optional<std::string> identifier;
+
         // [[codegen::verbatim(TexturePathInfo.description)]]
-        std::optional<std::string> texturePath;
+        std::optional<std::filesystem::path> texturePath;
     };
 #include "screenspaceimagelocal_codegen.cpp"
 } // namespace
@@ -70,19 +72,12 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    std::string identifier;
-    if (dictionary.hasValue<std::string>(KeyIdentifier)) {
-        identifier = dictionary.value<std::string>(KeyIdentifier);
-    }
-    else {
-        identifier = "ScreenSpaceImageLocal";
-    }
-    identifier = makeUniqueIdentifier(identifier);
-    setIdentifier(identifier);
+    std::string identifier = p.identifier.value_or("ScreenSpaceImageLocal");
+    setIdentifier(makeUniqueIdentifier(std::move(identifier)));
 
     _texturePath.onChange([this]() {
         if (!std::filesystem::is_regular_file(absPath(_texturePath))) {
-            LWARNINGC(
+            LERRORC(
                 "ScreenSpaceImageLocal",
                 std::format(
                     "Image '{}' did not exist for '{}'", _texturePath.value(), _identifier
@@ -96,17 +91,7 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
     addProperty(_texturePath);
 
     if (p.texturePath.has_value()) {
-        if (std::filesystem::is_regular_file(absPath(*p.texturePath))) {
-            _texturePath = absPath(*p.texturePath).string();
-        }
-        else {
-            LWARNINGC(
-                "ScreenSpaceImageLocal",
-                std::format(
-                    "Image '{}' did not exist for '{}'", *p.texturePath, _identifier
-                )
-            );
-        }
+        _texturePath = p.texturePath->string();
     }
 }
 
@@ -117,7 +102,7 @@ bool ScreenSpaceImageLocal::deinitializeGL() {
 }
 
 void ScreenSpaceImageLocal::update() {
-    if (_textureIsDirty && !_texturePath.value().empty()) {
+    if (_textureIsDirty && !_texturePath.value().empty()) [[unlikely]] {
         std::unique_ptr<ghoul::opengl::Texture> texture =
             ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath), 2);
 
@@ -142,7 +127,7 @@ void ScreenSpaceImageLocal::update() {
 }
 
 void ScreenSpaceImageLocal::bindTexture() {
-    if (_texture) {
+    if (_texture) [[likely]] {
         _texture->bind();
     }
 }

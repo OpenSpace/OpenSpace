@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -593,7 +593,7 @@ void RenderableFluxNodes::populateStartTimes() {
             break;
         }
 
-        const std::string f = filePath.string();
+        const std::string f = filePath.filename().string();
         // if no file extention but word "time" in file name
         if (f.find("time") != std::string::npos && f.find('.') == std::string::npos) {
             timeFile = filePath;

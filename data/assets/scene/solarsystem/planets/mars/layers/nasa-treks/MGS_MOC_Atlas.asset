@@ -24,7 +24,7 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_msss_atlas_simp_clon")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_msss_atlas_simp_clon)
 end)
 
 asset.export("msss_atlas_simp_clon", treks_msss_atlas_simp_clon)
