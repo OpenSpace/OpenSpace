@@ -34,6 +34,26 @@
 #include <ghoul/opengl/textureconversion.h>
 #include <filesystem>
 #include <optional>
+#include <openspace/properties/misc/stringproperty.h>
+
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
+#include <openspace/util/timemanager.h>
+#include <openspace/engine/downloadmanager.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/programobject.h>
+#include <json/json.hpp>
+#include <optional>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <string_view>
+#include <fstream>
+#include <ctime>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TexturePathInfo = {
@@ -55,7 +75,8 @@ namespace {
         std::optional<std::string> identifier;
 
         // [[codegen::verbatim(TexturePathInfo.description)]]
-        std::optional<std::filesystem::path> texturePath;
+        std::string texturePath;
+        //std::optional<std::filesystem::path> texturePath;
     };
 #include "screenspaceimagelocal_codegen.cpp"
 } // namespace
@@ -88,11 +109,13 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
             _textureIsDirty = true;
         }
     });
+
+    _texturePath = absPath(p.texturePath).string();
     addProperty(_texturePath);
 
-    if (p.texturePath.has_value()) {
-        _texturePath = p.texturePath->string();
-    }
+    /*if (p.texturePath.has_value()) {
+        _texturePath = absPath(p.texturePath).string();
+    }*/
 }
 
 bool ScreenSpaceImageLocal::deinitializeGL() {

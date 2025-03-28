@@ -33,7 +33,8 @@
 #include <ghoul/font/font.h>
 #include <ghoul/misc/profiling.h>
 #include <optional>
-
+#include <ghoul/font/fontmanager.h>
+#include <ghoul/font/fontrenderer.h>
 #include <json/json.hpp>
 #include <map>
 #include <iostream>
@@ -193,12 +194,15 @@ void DashboardItemText::render(glm::vec2& penPosition) {
             146.f / 255.f,
             208.f / 255.f,
             80.f / 255.f,
-            1.f 
+            1.f
         };
     }
 
     penPosition.y -= _font->height();
     RenderFont(*_font, penPosition, _text.value(), color);
+
+}
+
 void DashboardItemText::update() {
     _buffer = _text.value();
 }

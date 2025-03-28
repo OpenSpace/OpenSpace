@@ -54,12 +54,13 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DataFileInfo = {
+    constexpr openspace::properties::Property::PropertyInfo JsonFileInfo = {
         "JsonFilePath",
         "Json File Path",
         "The file path to the JSON data.",
         openspace::properties::Property::Visibility::User
     };
+
 
     struct [[codegen::Dictionary(ScreenSpaceImageOnline)]] Parameters {
         std::optional<std::string> identifier;
@@ -74,19 +75,9 @@ namespace {
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceImageOnline::Documentation() {
-    return codegen::doc<Parameters>("base_screenspace_image_online");
-}
-
-ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary)
-    : ScreenSpaceRenderable(dictionary)
-    , _textureIsDirty(false)
-    , _texturePath(TextureInfo)
-{
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-
-    std::string identifier = p.identifier.value_or("ScreenSpaceImageOnline");
-    setIdentifier(makeUniqueIdentifier(std::move(identifier)));
+    documentation::Documentation ScreenSpaceImageOnline::Documentation() {
+        return codegen::doc<Parameters>("base_screenspace_image_online");
+    }
 
     ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary)
         : ScreenSpaceRenderable(dictionary)
@@ -96,15 +87,8 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
     {
         const Parameters p = codegen::bake<Parameters>(dictionary);
 
-        std::string identifier;
-        if (dictionary.hasValue<std::string>(KeyIdentifier)) {
-            identifier = dictionary.value<std::string>(KeyIdentifier);
-        }
-        else {
-            identifier = "ScreenSpaceImageOnline";
-        }
-        identifier = makeUniqueIdentifier(identifier);
-        setIdentifier(std::move(identifier));
+        std::string identifier = p.identifier.value_or("ScreenSpaceImageOnline");
+        setIdentifier(makeUniqueIdentifier(std::move(identifier)));
 
         _texturePath.onChange([this]() { _textureIsDirty = true; });
         //_texturePath = p.url.value_or(_texturePath);
@@ -123,92 +107,48 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
     }
 
     //void ScreenSpaceImageOnline::update() {
-    //    auto currentTime = std::chrono::system_clock::now();
+    //    std::string currentTimestamp = getCurrentTimestamp();
 
-    //    // Check if one minute has passed since the last check
-    //    if (std::chrono::duration_cast<std::chrono::minutes>(currentTime - _lastCheckedTime).count() >= 1) {
-    //        _lastCheckedTime = std::chrono::system_clock::now();  // Update the last checked time
+    //    // Check if we are not on the same update frame
+    //    if (currentTimestamp != _lastCheckedSoftwareTimestamp) {
 
-    //        // Read the JSON from the local file system
-    //        std::string jsonFilePath = _texturePath.value();
-    //        std::ifstream file(jsonFilePath);
+    //        //std::string lastCheckedTime = parseTimestamp(_lastCheckedSoftwareTimestamp);
+    //        //std::string currentTime = parseTimestamp(currentTimestamp);
 
-    //        if (!file.is_open()) {
-    //            LERROR("Could not open JSON file at " + jsonFilePath);
-    //            return;
-    //        }
+    //       
+    //        //double timeDiff = std::abs(std::difftime(currentTime, lastCheckedTime)) / 60.0;
 
-    //        // Parse the JSON data
-    //        std::stringstream buffer;
-    //        buffer << file.rdbuf();
-    //        std::string jsonContent = buffer.str();
-    //        std::string currentTimestamp = getCurrentTimestamp();
+    //        //if (timeDiff >= 1) {  // If 1 minutes has passed
+    //            _lastCheckedSoftwareTimestamp = currentTimestamp;
 
-    //        // Find the closest image URL based on the current timestamp
-    //        std::string closestUrl = findClosestTimestampUrl(jsonContent, currentTimestamp);
+    //            std::string jsonFilePath = _texturePath.value();
+    //            std::ifstream file(jsonFilePath);
 
-    //        if (!closestUrl.empty()) {
-    //            // Update the currently used texture URL and load the new image
-    //            _currentTextureUrl = closestUrl;
-    //            _textureIsDirty = true;  // Mark texture as dirty to reload
-    //        }
+    //            if (!file.is_open()) {
+    //                LERROR("Could not open JSON file at " + jsonFilePath);
+    //                return;
+    //            }
+
+    //            // Parse the JSON data
+    //            std::stringstream buffer;
+    //            buffer << file.rdbuf();
+    //            std::string jsonContent = buffer.str();
+
+    //            std::string closestUrl = findClosestTimestampUrl(jsonContent, currentTimestamp);
+
+    //            if (!closestUrl.empty()) {
+    //                // Update the currently used texture URL
+    //                _currentTextureUrl = closestUrl;
+    //                _textureIsDirty = true;  // Mark texture as dirty to reload
+    //            }
+    //        //}
     //    }
 
-    //    // Load the image if the texture is dirty
     //    if (_textureIsDirty && !_currentTextureUrl.empty()) {
-    //        loadImage(_currentTextureUrl); // Load the image based on the current URL
-    //        _textureIsDirty = false;        // Reset the dirty flag
+    //        loadImage(_currentTextureUrl); 
+    //        _textureIsDirty = false;
     //    }
     //}
-
-
-
-
-    void ScreenSpaceImageOnline::update() {
-        std::string currentTimestamp = getCurrentTimestamp();
-
-        // Check if we are not on the same update frame
-        if (currentTimestamp != _lastCheckedSoftwareTimestamp) {
-
-            //std::string lastCheckedTime = parseTimestamp(_lastCheckedSoftwareTimestamp);
-            //std::string currentTime = parseTimestamp(currentTimestamp);
-
-           
-            //double timeDiff = std::abs(std::difftime(currentTime, lastCheckedTime)) / 60.0;
-
-            //if (timeDiff >= 1) {  // If 1 minutes has passed
-                _lastCheckedSoftwareTimestamp = currentTimestamp;
-
-                std::string jsonFilePath = _texturePath.value();
-                std::ifstream file(jsonFilePath);
-
-                if (!file.is_open()) {
-                    LERROR("Could not open JSON file at " + jsonFilePath);
-                    return;
-                }
-
-                // Parse the JSON data
-                std::stringstream buffer;
-                buffer << file.rdbuf();
-                std::string jsonContent = buffer.str();
-
-                std::string closestUrl = findClosestTimestampUrl(jsonContent, currentTimestamp);
-
-                if (!closestUrl.empty()) {
-                    // Update the currently used texture URL
-                    _currentTextureUrl = closestUrl;
-                    _textureIsDirty = true;  // Mark texture as dirty to reload
-                }
-            //}
-        }
-
-        if (_textureIsDirty && !_currentTextureUrl.empty()) {
-            loadImage(_currentTextureUrl); 
-            _textureIsDirty = false;
-        }
-    }
-
-
 
     /*std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadJsonToMemory(const std::string& url) {
         if (url.empty()) {
@@ -227,71 +167,50 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
         );
     }*/
 
-ScreenSpaceImageOnline::~ScreenSpaceImageOnline() {}
+    void ScreenSpaceImageOnline::update() {
+        std::string currentTimestamp = getCurrentTimestamp();
 
-bool ScreenSpaceImageOnline::deinitializeGL() {
-    _texture = nullptr;
+        // Check if we are not on the same update frame
+        if (currentTimestamp != _lastCheckedSoftwareTimestamp) {
 
-    return ScreenSpaceRenderable::deinitializeGL();
-}
+            //std::string lastCheckedTime = parseTimestamp(_lastCheckedSoftwareTimestamp);
+            //std::string currentTime = parseTimestamp(currentTimestamp);
 
-void ScreenSpaceImageOnline::update() {
-    if (!_textureIsDirty) [[likely]] {
-        return;
-    }
 
-    if (!_imageFuture.valid()) {
-        std::future<DownloadManager::MemoryFile> future = downloadImageToMemory(
-            _texturePath
-        );
-        if (future.valid()) {
-            _imageFuture = std::move(future);
-        }
-    }
+            //double timeDiff = std::abs(std::difftime(currentTime, lastCheckedTime)) / 60.0;
 
-    if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
-        const DownloadManager::MemoryFile imageFile = _imageFuture.get();
+            //if (timeDiff >= 1) {  // If 1 minutes has passed
+            _lastCheckedSoftwareTimestamp = currentTimestamp;
 
-        if (imageFile.corrupted) {
-            LERROR(std::format(
-                "Error loading image from URL '{}'", _texturePath.value()
-            ));
-            return;
-        }
+            std::string jsonFilePath = _texturePath.value();
+            std::ifstream file(jsonFilePath);
 
-        try {
-            std::unique_ptr<ghoul::opengl::Texture> texture =
-                ghoul::io::TextureReader::ref().loadTexture(
-                    reinterpret_cast<void*>(imageFile.buffer),
-                    imageFile.size,
-                    2,
-                    imageFile.format
-                );
-
-            if (texture) {
-                // Images don't need to start on 4-byte boundaries, for example if the
-                // image is only RGB
-                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-                if (texture->format() == ghoul::opengl::Texture::Format::Red) {
-                    texture->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_ONE });
-                }
-
-                texture->uploadTexture();
-                texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-                texture->purgeFromRAM();
-
-                _texture = std::move(texture);
-                _objectSize = _texture->dimensions();
-                _textureIsDirty = false;
+            if (!file.is_open()) {
+                LERROR("Could not open JSON file at " + jsonFilePath);
+                return;
             }
+
+            // Parse the JSON data
+            std::stringstream buffer;
+            buffer << file.rdbuf();
+            std::string jsonContent = buffer.str();
+
+            std::string closestUrl = findClosestTimestampUrl(jsonContent, currentTimestamp);
+
+            if (!closestUrl.empty()) {
+                // Update the currently used texture URL
+                _currentTextureUrl = closestUrl;
+                _textureIsDirty = true;  // Mark texture as dirty to reload
+            }
+            //}
         }
-        catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
+
+        if (_textureIsDirty && !_currentTextureUrl.empty()) {
+            loadImage(_currentTextureUrl);
             _textureIsDirty = false;
-            LERRORC(e.component, e.message);
         }
-    }   
-}
+    }
+
 
 std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageToMemory(
                                                                    const std::string& url)

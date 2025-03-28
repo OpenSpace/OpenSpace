@@ -145,7 +145,59 @@ local SouthLayerNameChange = {
   }
 }
 
+local ToggleNorthLayer2 = {
+  Identifier = "os.ToggleNorthLayer",
+  Name = "Toggle North Oval Layer",
+  Command = [[
+    if openspace.propertyValue("Scene.North_Oval_LayerNameChange.Renderable.Enabled") then
+      openspace.setPropertyValueSingle(
+        "Scene.North_Oval_LayerNameChange.Renderable.Fade",
+        0.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear",
+        'openspace.setPropertyValueSingle("Scene.North_Oval_LayerNameChange.Renderable.Enabled", false)'
+      )
+    else
+      openspace.setPropertyValueSingle("Scene.North_Oval_LayerNameChange.Renderable.Enabled", true)
+      openspace.setPropertyValueSingle(
+        "Scene.North_Oval_LayerNameChange.Renderable.Fade",
+        1.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear"
+      )
+    end
+  ]],
+  Documentation = "Toggle EUV layer of sun",
+  GuiPath = "/Aurorasaurus",
+  IsLocal = false
+}
 
+local ToggleSouthLayer2 = {
+  Identifier = "os.ToggleSouthLayer",
+  Name = "Toggle South Oval Layer",
+  Command = [[
+    if openspace.propertyValue("Scene.South_Oval_LayerNameChange.Renderable.Enabled") then
+      openspace.setPropertyValueSingle(
+        "Scene.South_Oval_LayerNameChange.Renderable.Fade",
+        0.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear",
+        'openspace.setPropertyValueSingle("Scene.South_Oval_LayerNameChange.Renderable.Enabled", false)'
+      )
+    else
+      openspace.setPropertyValueSingle("Scene.South_Oval_LayerNameChange.Renderable.Enabled", true)
+      openspace.setPropertyValueSingle(
+        "Scene.South_Oval_LayerNameChange.Renderable.Fade",
+        1.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear"
+      )
+    end
+  ]],
+  Documentation = "Toggle EUV layer of sun",
+  GuiPath = "/Aurorasaurus",
+  IsLocal = false
+}
 
 
 
@@ -155,6 +207,8 @@ asset.onInitialize(function()
   openspace.action.registerAction(ToggleNorthLayer)
   openspace.action.registerAction(ToggleSouthLayer) ]]
 
+  openspace.action.registerAction(ToggleNorthLayer2)
+  openspace.action.registerAction(ToggleSouthLayer2)
   openspace.addSceneGraphNode(NorthLayerNameChange)
   openspace.addSceneGraphNode(SouthLayerNameChange)
   openspace.setPropertyValueSingle("Scene.North_Oval_LayerNameChange.Rotation.Rotation", {0.000000,0.000000,-3.140000})
@@ -168,7 +222,8 @@ asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", NorthLayer)
   openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", SouthLayer) ]]
 
-
+  openspace.action.removeAction(ToggleNorthLayer2)
+  openspace.action.removeAction(ToggleSouthLayer2)
   openspace.removeSceneGraphNode(NorthLayerNameChange)
   openspace.removeSceneGraphNode(SouthLayerNameChange)
 
@@ -178,6 +233,7 @@ end)
 asset.export("Prototype", SouthLayer)
 asset.export("ToggleNorthLayer", ToggleNorthLayer.Identifier)
 asset.export("ToggleSouthLayer", ToggleSouthLayer.Identifier) ]]
-
+asset.export("ToggleNorthLayer2", ToggleNorthLayer.Identifier)
+asset.export("ToggleSouthLayer2", ToggleSouthLayer.Identifier)
 asset.export(NorthLayerNameChange)
 asset.export(SouthLayerNameChange)

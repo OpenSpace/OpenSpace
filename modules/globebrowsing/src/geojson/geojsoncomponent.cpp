@@ -464,7 +464,7 @@ GeoJsonComponent::~GeoJsonComponent() {}
 
 bool GeoJsonComponent::isTimeFrameActive(const Time& time) const
 {
-    return !_timeFrame || _timeFrame->isActive(time);
+    return !_timeFrame || _timeFrame->isActive();
 }
 
 

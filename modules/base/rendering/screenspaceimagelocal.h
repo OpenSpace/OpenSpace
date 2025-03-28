@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGELOCAL___H__
 
 #include <openspace/rendering/screenspacerenderable.h>
-
+#include <string>
 #include <openspace/properties/misc/stringproperty.h>
 
 namespace ghoul::opengl { class Texture; }

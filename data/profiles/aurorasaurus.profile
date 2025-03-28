@@ -64,11 +64,11 @@
       "key": "S"
     },
     {
-      "action": "os.ToggleNorthLayer",
+      "action": "os.ToggleNorthLayer2",
       "key": "Q"
     },
     {
-      "action": "os.ToggleSouthLayer",
+      "action": "os.ToggleSouthLayer2",
       "key": "W"
     },
     {
