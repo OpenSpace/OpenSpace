@@ -423,6 +423,7 @@ bool EventHandler::mouseWheelCallback(glm::ivec2 delta) {
 
 bool EventHandler::charCallback(unsigned int charCode, KeyModifier modifier) {
     CefKeyEvent keyEvent;
+
     keyEvent.windows_key_code = mapFromGlfwToWindows(Key(charCode));
     keyEvent.character = mapFromGlfwToCharacter(Key(charCode));
     keyEvent.native_key_code = mapFromGlfwToNative(Key(charCode));
@@ -445,7 +446,18 @@ bool EventHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction act
     keyEvent.modifiers = mapToCefModifiers(modifier);
     keyEvent.type = keyEventType(action);
 
-    return _browserInstance->sendKeyEvent(keyEvent);
+    const bool KeyEventFlag = _browserInstance->sendKeyEvent(keyEvent);
+
+    // The `Enter` key does not produce a `charCallback` event like other character keys.
+    // Some web elements (e.g., buttons) rely on receiving a char event in addition to
+    // `keydown` to properly register an `onClick`. Since GLFW does not generate this
+    // event for Enter, we manually invoke it to ensure expected behavior.
+    const int EnterKeyCode = 13;
+    if (keyEvent.windows_key_code == EnterKeyCode && keyEvent.type == KEYEVENT_KEYDOWN) {
+        return charCallback(static_cast<unsigned int>(Key::Enter), modifier);
+    }
+
+    return KeyEventFlag;    
 }
 
 bool EventHandler::specialKeyEvent(Key key, KeyModifier mod, KeyAction action) {
