@@ -1,0 +1,36 @@
+local globe = asset.require("../../titan")
+
+
+
+local Layer = {
+  Identifier = "Cassini_SAR_HiSAR_Global_Mosaic_351m",
+  Name = "Cassini SAR - HiSAR Global Mosaic (351m)",
+  Enabled = asset.enabled,
+  ZIndex = 20,
+  FilePath = asset.resource("cassini_sar_hisar_global_mosaic_351m_sweden.wms"),
+  Description = [[This global map of Titan is a preliminary product showing coverage from
+    Synthetic Aperture Radar (SAR) and High Altitude Synthetic Aperture Radar (HiSAR)
+    images at a pixel resolution of 351 meters per pixel (m). This mosaic merges Cassini
+    swaths through flyby T104 into a single mosaic.  (Description from URL)]]
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Titan.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Titan.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "Titan Cassini SAR - HiSAR Global Mosaic 351m",
+  Description = "Cassini global synthetic aperture radar image layer for Titan",
+  Author = "USGS",
+  URL = "https://astrogeology.usgs.gov/search/map/titan_cassini_sar_hisar_global_mosaic_351m",
+  License = "NASA/PDS"
+}
