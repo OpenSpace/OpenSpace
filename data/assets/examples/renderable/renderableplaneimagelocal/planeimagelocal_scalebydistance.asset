@@ -12,10 +12,7 @@ local Node = {
         Translation = {
         Type = "GlobeTranslation",
         Globe = earth.Earth.Identifier,
-        Latitude = 56.74629592885196,
-        Longitude = -111.47245469411168,
-        Altitude = 95000,
-        UseHeightmap = false
+        Altitude = 100000,
         }
     },
     Renderable = {
