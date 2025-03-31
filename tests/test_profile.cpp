@@ -861,6 +861,62 @@ TEST_CASE("Save settings to profile", "[profile]") {
     CHECK(profile.time->value == "current-time");
 }
 
+TEST_CASE("Version 1.0 -> 1.1", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_10.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_11.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.0 -> 1.2", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_10.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_12.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.0 -> 1.3", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_10.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_13.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.1 -> 1.2", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_11.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_12.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.1 -> 1.3", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_11.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_13.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.2 -> 1.3", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_12.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_13.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+
+
 //
 // Error states
 //
