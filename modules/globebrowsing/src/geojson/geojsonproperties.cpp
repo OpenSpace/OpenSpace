@@ -380,16 +380,10 @@ GeoJsonProperties::GeoJsonProperties()
     , lineWidth(LineWidthInfo, 2.f, 0.01f, 10.f)
     , pointSize(PointSizeInfo, 10.f, 0.01f, 100.f)
     , pointTexture(PointTextureInfo)
-    , pointAnchorOption(
-        PointAnchorOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , pointAnchorOption(PointAnchorOptionInfo)
     , extrude(ExtrudeInfo, false)
     , performShading(PerformShadingInfo, false)
-    , altitudeModeOption(
-        AltitudeModeInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , altitudeModeOption(AltitudeModeInfo)
 {
     addProperty(opacity);
     color.setViewOption(properties::Property::ViewOptions::Color);

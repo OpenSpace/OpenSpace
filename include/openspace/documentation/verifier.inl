@@ -22,8 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 #include <functional>
+#include <iterator>
 #include <numeric>
 
 namespace openspace::documentation {

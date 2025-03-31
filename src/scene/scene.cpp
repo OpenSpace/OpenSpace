@@ -32,6 +32,7 @@
 #include <openspace/scene/profile.h>
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/lua/lua_helper.h>
 #include <stack>
 

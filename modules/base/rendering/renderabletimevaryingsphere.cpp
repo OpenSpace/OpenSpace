@@ -182,9 +182,9 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     const ghoul::Dictionary& dictionary)
     : RenderableSphere(dictionary)
     , _textureSourcePath(TextureSourceInfo)
-    , _fitsLayer(FitsLayerInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _fitsLayer(FitsLayerInfo)
     , _deleteDownloadsOnShutdown(DeleteDownloadsOnShutdown, true)
-    , _textureFilterProperty(TextureFilterInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _textureFilterProperty(TextureFilterInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

@@ -24,7 +24,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
 
 TEST_CASE("OptionProperty: No Option", "[optionproperty]") {
     const openspace::properties::OptionProperty p({ "id", "gui", "desc" });

@@ -159,21 +159,15 @@ documentation::Documentation DashboardItemDistance::Documentation() {
 DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _doSimplification(SimplificationInfo, true)
-    , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _requestedUnit(RequestedUnitInfo)
     , _formatString(FormatStringInfo, "Distance from {} to {}: {:f} {}")
     , _source{
-        properties::OptionProperty(
-            SourceTypeInfo,
-            properties::OptionProperty::DisplayType::Dropdown
-        ),
+        properties::OptionProperty(SourceTypeInfo),
         properties::StringProperty(SourceNodeIdentifierInfo),
         nullptr
     }
     , _destination{
-        properties::OptionProperty(
-            DestinationTypeInfo,
-            properties::OptionProperty::DisplayType::Dropdown
-        ),
+        properties::OptionProperty(DestinationTypeInfo),
         properties::StringProperty(DestinationNodeIdentifierInfo),
         nullptr
     }

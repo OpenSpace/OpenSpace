@@ -308,8 +308,8 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _colorGroup({ "Color" })
-    , _colorMethod(ColorMethodInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _colorQuantity(ColorQuantityInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _colorMethod(ColorMethodInfo)
+    , _colorQuantity(ColorQuantityInfo)
     , _selectedColorRange(
         ColorMinMaxInfo,
         glm::vec2(0.f, 100.f),
@@ -353,10 +353,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         glm::vec2(-5000.f),
         glm::vec2(5000.f)
     )
-    , _maskingQuantity(
-        MaskingQuantityInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _maskingQuantity(MaskingQuantityInfo)
     , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
     , _jumpToStartBtn(TimeJumpButtonInfo)
 {

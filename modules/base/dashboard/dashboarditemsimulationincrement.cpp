@@ -125,7 +125,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
                                                       const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _doSimplification(SimplificationInfo, true)
-    , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _requestedUnit(RequestedUnitInfo)
     , _transitionFormat(
         TransitionFormatInfo,
         "Simulation increment: {:.1f} {:s} / second{:s} (current: {:.1f} {:s})"

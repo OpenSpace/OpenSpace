@@ -284,10 +284,7 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
     : Rotation(dictionary)
     , _enabled(EnableInfo, true)
     , _xAxis{
-        properties::OptionProperty(
-            XAxisTypeInfo,
-            properties::OptionProperty::DisplayType::Dropdown
-        ),
+        properties::OptionProperty(XAxisTypeInfo),
         properties::StringProperty(XAxisObjectInfo, ""),
         properties::BoolProperty(XAxisInvertObjectInfo, false),
         properties::Vec3Property(
@@ -300,10 +297,7 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         nullptr
     }
     , _yAxis{
-        properties::OptionProperty(
-            YAxisTypeInfo,
-            properties::OptionProperty::DisplayType::Dropdown
-        ),
+        properties::OptionProperty(YAxisTypeInfo),
         properties::StringProperty(YAxisObjectInfo, ""),
         properties::BoolProperty(YAxisInvertObjectInfo, false),
         properties::Vec3Property(
@@ -316,10 +310,7 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         nullptr
     }
     , _zAxis{
-        properties::OptionProperty(
-            ZAxisTypeInfo,
-            properties::OptionProperty::DisplayType::Dropdown
-        ),
+        properties::OptionProperty(ZAxisTypeInfo),
         properties::StringProperty(ZAxisObjectInfo, ""),
         properties::BoolProperty(ZAxisInvertObjectInfo, false),
         properties::Vec3Property(
