@@ -27,7 +27,8 @@ end)
 
 asset.meta = {
   Name = "Hybrid 2005-04-08",
-  Description = "Hybrid eclipse map for 2005-04-08",
+  Description = [[Hybrid eclipse map for 2005-04-08. The GeoJSON is adapted from the
+    data provided by Xavier M. Jubier (http://xjubier.free.fr).]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"
