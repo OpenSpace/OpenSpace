@@ -6,23 +6,28 @@
 #include <limits>
 
 namespace openspace {
-    namespace kdtree {}
-    class KDTree {
+    class StarMaps {
     public:
-        KDTree() {};
+        StarMaps() {};
 
-        KDTree(std::string const& filePath, glm::vec3 const& localWorldCenter, float const renderDistance = std::numeric_limits<float>::max());
+        StarMaps(std::string const& filePath, glm::vec3 const& localWorldCenter, std::vector<std::pair<float, float>> const& renderSpans = {});
 
-        size_t size() { return flatTree.size(); };
+        size_t mapsSize() { return _flatTrees.size(); };
 
-        void* data() {
-            return flatTree.data();
+        void* mapsData() {
+            return _flatTrees.data();
+        }
+
+        size_t indicesSize() { return _treeStartIndices.size(); };
+
+        void* indicesData() {
+            return _treeStartIndices.data();
         }
 
         void build(
             std::string const& constfilePath,
             glm::vec3 const&  localWorldCenter,
-            float const renderDistance = std::numeric_limits<float>::max()
+            std::vector<std::pair<float, float>> const& renderSpans = {}
         );
 
     private:
@@ -32,8 +37,8 @@ namespace openspace {
             float lum{};
             float absMag{};
         };
-        std::vector<float> flattenTree(std::vector<Node> const& tree) const;
-        std::vector<float> flatTree{};
+        std::vector<float> _flatTrees{};
+        std::vector<int> _treeStartIndices;
     };
 }
 

@@ -78,7 +78,7 @@ namespace openspace {
     RenderableBlackHole::~RenderableBlackHole() {}
 
     void RenderableBlackHole::initialize() {
-        _schwarzschildWarpTable = std::vector<float>(_rayCount * 2, 0.f);
+        _schwarzschildWarpTable = std::vector<float>(_rayCount * 2, std::numeric_limits<double>::quiet_NaN());
     }
 
     void RenderableBlackHole::initializeGL() {
@@ -113,7 +113,7 @@ namespace openspace {
 
     void RenderableBlackHole::update(const UpdateData& data) {
         if (data.modelTransform.translation != _lastTranslation) {
-            _starKDTree.build("${BASE}/sync/http/stars_du/6/stars.speck", data.modelTransform.translation, 100.0f);
+            _starKDTree.build("${BASE}/sync/http/stars_du/6/stars.speck", data.modelTransform.translation, { {0, 50 }, {50, 100} });
             _lastTranslation = data.modelTransform.translation;
         }
 
@@ -127,9 +127,10 @@ namespace openspace {
             _rCamera = distanceToAnchor;
             _rEnvmap = 2 * _rCamera;
 
-            schwarzchild(_rs, _rEnvmap, _rayCount, _stepsCount, 1.0f / _rCamera, _stepLength, _schwarzschildWarpTable.data());
+            schwarzchild(_rs, { _rCamera * 1.5f, _rCamera * 3.0f}, _rayCount, _stepsCount, 1.0f / _rCamera, _stepLength, _schwarzschildWarpTable);
         }
         bindSSBOData(_program, "ssbo_warp_table", _ssboSchwarzschildDataBinding, _ssboSchwarzschildWarpTable);
+        bindSSBOData(_program, "ssbo_star_map_start_indices", _ssboStarIndicesDataBinding, _ssboStarKDTreeIndices);
         bindSSBOData(_program, "ssbo_star_map", _ssboStarDataBinding, _ssboStarKDTree);
     }
 
@@ -202,12 +203,23 @@ namespace openspace {
     {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboStarKDTree);
 
-        const size_t indexBufferSize = _starKDTree.size() * sizeof(float);
+        size_t indexBufferSize = _starKDTree.mapsSize() * sizeof(float);
 
         glBufferData(
             GL_SHADER_STORAGE_BUFFER,
             indexBufferSize,
-            _starKDTree.data(),
+            _starKDTree.mapsData(),
+            GL_STREAM_DRAW
+        );
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboStarKDTreeIndices);
+
+        indexBufferSize = _starKDTree.indicesSize() * sizeof(int);
+
+        glBufferData(
+            GL_SHADER_STORAGE_BUFFER,
+            indexBufferSize,
+            _starKDTree.indicesData(),
             GL_STREAM_DRAW
         );
 

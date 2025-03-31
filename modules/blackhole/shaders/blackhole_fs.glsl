@@ -17,7 +17,11 @@ layout (std430) buffer ssbo_warp_table {
 };
 
 layout (std430) buffer ssbo_star_map {
-    float starKDTree[];
+    float starMapKDTrees[];
+};
+
+layout (std430) buffer ssbo_star_map_start_indices  {
+    int starMapKDTreesIndices[];
 };
 
 const float PI = 3.1415926535897932384626433832795f;
@@ -26,7 +30,9 @@ const float INF = 1.0f/0.0f;
 const float LUM_LOWER_CAP = 0.01;
 
 const int NODE_SIZE = 6;
-const int SIZE = starKDTree.length() / NODE_SIZE;
+const int StarArrySize = starMapKDTrees.length() / NODE_SIZE;
+const int layerCount = starMapKDTreesIndices.length();
+const int tableNodeSize = starMapKDTreesIndices.length() + 1;
 const float starRadius = 0.002f;
 const int STACKSIZE = 32;
 const int tableSize = schwarzschildWarpTable.length() / 2;
@@ -76,7 +82,7 @@ vec2 sphericalToUV(vec2 sphereCoords){
 /**********************************************************
                         Warp Table
 ***********************************************************/
-ivec2 bstWarpTable(float phi){
+ivec2 bstWarpTable(float phi, int layer){
     float midPhi = -1.0f;
     float deltaPhi = -1.0f;
 
@@ -89,7 +95,7 @@ ivec2 bstWarpTable(float phi){
 
     while(left <= right){
         mid = (left + right) / 2;
-        midPhi = schwarzschildWarpTable[mid * 2];
+        midPhi = schwarzschildWarpTable[mid * tableNodeSize];
 
         deltaPhi = abs(midPhi - phi);
         
@@ -111,26 +117,26 @@ ivec2 bstWarpTable(float phi){
     float rightDist = INF;
 
     if (rightIndex < tableSize - 1){
-        rightDist = abs(schwarzschildWarpTable[rightIndex * 2] - phi);
+        rightDist = abs(schwarzschildWarpTable[rightIndex * tableNodeSize] - phi);
     }
     if (leftIndex > 0){
-        leftDist = abs(schwarzschildWarpTable[leftIndex * 2] - phi);
+        leftDist = abs(schwarzschildWarpTable[leftIndex * tableNodeSize] - phi);
     }
 
     int nextClosestIndex = (rightDist < leftDist) ? rightIndex : leftIndex;
 
-    float v1 = schwarzschildWarpTable[closestIndex * 2 + 1];
-    float v2 = schwarzschildWarpTable[nextClosestIndex * 2 + 1];
+    float v1 = schwarzschildWarpTable[closestIndex * tableNodeSize + layer];
+    float v2 = schwarzschildWarpTable[nextClosestIndex * tableNodeSize + layer];
 
-    return v1 < v2 ? ivec2(closestIndex, nextClosestIndex) : ivec2(nextClosestIndex, closestIndex);
+    return v1 < v2 ? ivec2(closestIndex * tableNodeSize, nextClosestIndex * tableNodeSize) : ivec2(nextClosestIndex * tableNodeSize, closestIndex * tableNodeSize);
 }
 
-float interpelateWarpTable(int indexStart, int indexEnd, float localPhi){
-    float envMapPhiStart = schwarzschildWarpTable[indexStart * 2 + 1];
-    float envMapPhiEnd = schwarzschildWarpTable[indexEnd * 2 + 1];
+float interpelateWarpTable(int indexStart, int indexEnd, float localPhi, int layer){
+    float envMapPhiStart = schwarzschildWarpTable[indexStart + layer];
+    float envMapPhiEnd = schwarzschildWarpTable[indexEnd + layer];
 
-    float localPhiStart = schwarzschildWarpTable[indexStart * 2];
-    float localPhiEnd = schwarzschildWarpTable[indexEnd * 2];
+    float localPhiStart = schwarzschildWarpTable[indexStart];
+    float localPhiEnd = schwarzschildWarpTable[indexEnd];
 
     float t = (localPhi - localPhiStart) / (localPhiEnd - localPhiStart);
     t = clamp(t, 0.0, 1.0);
@@ -138,15 +144,15 @@ float interpelateWarpTable(int indexStart, int indexEnd, float localPhi){
     return lerp(envMapPhiStart, envMapPhiEnd, t);
 }
 
-float getEndAngleFromTable(float phi){
-    ivec2 indices = bstWarpTable(phi);
-    return interpelateWarpTable(indices.x, indices.y, phi);
+float getEndAngleFromTable(float phi, int layer){
+    ivec2 indices = bstWarpTable(phi, layer);
+    return interpelateWarpTable(indices.x, indices.y, phi, layer);
 }
 
-vec2 applyBlackHoleWarp(vec2 cameraOutSphereCoords){
+vec2 applyBlackHoleWarp(vec2 cameraOutSphereCoords, int layer){
     float theta = cameraOutSphereCoords.x;
     float phi = cameraOutSphereCoords.y;
-    theta = getEndAngleFromTable(theta);
+    theta = getEndAngleFromTable(theta, layer + 1);
     return vec2(theta, phi);
 }
 
@@ -167,114 +173,112 @@ float angularDist(vec2 a, vec2 b) {
     return sqrt(dTheta * dTheta + sin(a.x) * sin(b.x) * dPhi * dPhi);
 }
 
-vec4 searchNearestStar(vec3 sphericalCoords) {
+// Search a single KD-tree given its start and node count.
+// Returns a vec4 where rgb is the accumulated star color and a is the total alpha.
+vec4 searchTree(int treeStart, int treeNodeCount, vec3 sphericalCoords) {
+    // Local struct for tree traversal.
     struct TreeIndex {
-        int index;
+        int index; // local index (starting at 0 for this tree)
         int depth;
     };
 
-    struct NodeIdentety {
-        int index;
-        float distance;
-    };
-
-    const int K = 2;
-
-    // Number of stars is estimated to never go over 2^32
+    // Initialize candidate tracking for this tree.
+    float bestDist = INF;
+    int bestLocalIndex = -1;
+    
     TreeIndex stack[STACKSIZE];
     int stackIndex = 0;
-
-    TreeIndex treeIndex = TreeIndex(0, 0);
-    int nodeIndex = 0;
+    TreeIndex cur;
+    cur.index = 0; // root of the tree (local index 0)
+    cur.depth = 0;
     
-    float bestDist = INF;
-    int bestIndex = -1;
-
-    NodeIdentety bestNodes[K];
-    bestNodes[0] = NodeIdentety(-1, INF);
-    bestNodes[1] = NodeIdentety(-1, INF);
-    
-
-    int worstBestNodeIndex = -1;
-
-    // Nereast neighbor search of KDTree
-    while (treeIndex.index < SIZE || stackIndex > 0) {
-        // Back track possible branches with closer stars
-        if (nodeIndex >= SIZE * NODE_SIZE) {
+    // Perform iterative search on the single KD-tree.
+    while (true) {
+        // If current index is out-of-bounds, backtrack if possible.
+        if (cur.index < 0 || cur.index >= treeNodeCount) {
             if (stackIndex > 0) {
-                treeIndex = stack[--stackIndex];
-                nodeIndex = treeIndex.index * NODE_SIZE;
+                cur = stack[--stackIndex];
                 continue;
-            }
-            break;
-        }
-
-        worstBestNodeIndex = 0;
-        float maxDistance = INF;
-
-         for (int i = 0; i < K; i++) {
-            if (bestNodes[i].distance > maxDistance) {
-                maxDistance = bestNodes[i].distance;
-                worstBestNodeIndex = i;
+            } else {
+                break;
             }
         }
-
-        // Check if a new closer star is found 
-        float distToStar = angularDist(sphericalCoords.yz, vec2(starKDTree[nodeIndex + 1], starKDTree[nodeIndex + 2]));
-        if (distToStar <  bestNodes[worstBestNodeIndex].distance) {
-            bestNodes[worstBestNodeIndex].distance = distToStar;
-            bestNodes[worstBestNodeIndex].index = treeIndex.index * NODE_SIZE;
-        }
-
-        // Treverse to next node
-        int axis = treeIndex.depth % 2 + 1;
-        float diff = sphericalCoords[axis] - starKDTree[nodeIndex + axis];
         
-        int base = 2 * treeIndex.index;
-        int offset = int(diff >= 0.0);
-        int closerIndex = base + 1 + offset;
-        int fartherIndex = base + 2 - offset;
-
-        treeIndex.index = closerIndex;
-        nodeIndex = treeIndex.index * NODE_SIZE;
-        treeIndex.depth++;
-
-        // If there could be a coloser point on the other branch add to backtrack stack
-        if (abs(diff) <  bestNodes[worstBestNodeIndex].distance) {
-            stack[stackIndex++] = TreeIndex(fartherIndex, treeIndex.depth);
+        // Convert local index to absolute index in the flat array.
+        int absIndex = treeStart + cur.index;
+        int base = absIndex * NODE_SIZE;
+        
+        float d = angularDist(sphericalCoords.yz,
+                              vec2(starMapKDTrees[base + 1], starMapKDTrees[base + 2]));
+        if (d < bestDist) {
+            bestDist = d;
+            bestLocalIndex = cur.index;
         }
+        
+        // Determine axis (1 or 2) using depth (sphericalCoords: index 1=theta, index 2=phi)
+        int axis = cur.depth % 2 + 1;
+        float diff = sphericalCoords[axis] - starMapKDTrees[base + axis];
+        
+        int offset = int(diff >= 0.0);
+        int closerLocal = 2 * cur.index + 1 + offset;
+        int fartherLocal = 2 * cur.index + 2 - offset;
+        
+        int nextDepth = cur.depth + 1;
+        
+        // If the farther branch might hold a closer point, push it onto the stack.
+        if (abs(diff) < bestDist && (fartherLocal < treeNodeCount)) {
+            stack[stackIndex].index = fartherLocal;
+            stack[stackIndex].depth = nextDepth;
+            stackIndex++;
+        }
+        
+        // Continue down the closer branch.
+        cur.index = closerLocal;
+        cur.depth = nextDepth;
+    } // End of tree traversal loop
+
+    if (bestLocalIndex == -1 || bestDist >= starRadius) {
+        return vec4(0.0);
     }
     
-    vec4 bestColor = vec4(0.0f);
-    float totalAlpha = 0.0f;
-
-    int nearStarCount = 0;
-    for (int i = 0; i < K; i++) {
-        if (bestNodes[i].index > 0 && bestNodes[i].distance < starRadius) {
-            nearStarCount++;
-
-            float luminosity = pow(10.0f, 1.89f - 0.4f * starKDTree[bestNodes[i].index + 4]);
-            float observedDistance = starKDTree[bestNodes[i].index];
-
-            luminosity /= pow(observedDistance, 1.1f);
-            luminosity = max(luminosity, LUM_LOWER_CAP);
-
-            float alpha = 1.0f - pow((bestNodes[i].distance) / starRadius, 2.2f);
-            vec3 starColor = BVIndex2rgb(starKDTree[bestNodes[i].index + 3]);
-
-            // Pre-multiplied alpha accumulation
-            bestColor.rgb += starColor * alpha * luminosity;
-            totalAlpha += alpha * luminosity;
-        }
-    }
-
-// Final alpha blending
-if (totalAlpha > 0.0f) {
-    bestColor.rgb /= totalAlpha;
-    bestColor.a = totalAlpha;
+    int bestAbsIndex = treeStart + bestLocalIndex;
+    int base = bestAbsIndex * NODE_SIZE;
+    
+    float observedDistance = starMapKDTrees[base];
+    float luminosity = pow(10.0, 1.89 - 0.4 * starMapKDTrees[base + 4]);
+    luminosity /= pow(observedDistance, 1.1);
+    luminosity = max(luminosity, LUM_LOWER_CAP);
+    
+    float alpha = 1.0 - pow(bestDist / starRadius, 2.2);
+    vec3 starColor = BVIndex2rgb(starMapKDTrees[base + 3]);
+    
+    // Return the star contribution (with pre-multiplied alpha).
+    return vec4(starColor * alpha * luminosity, alpha * luminosity);
 }
 
-return bestColor;
+vec4 searchNearestStar(vec3 sphericalCoords, int layer) {
+    vec4 accumulatedColor = vec4(0.0);
+    float totalAlpha = 0.0;
+    
+    int kdTreeCount = starMapKDTreesIndices.length();
+    int totalNodes = starMapKDTrees.length() / NODE_SIZE;
+    
+    // Determine the start offset for the current tree
+    int treeStartFloat = starMapKDTreesIndices[layer];
+    int treeStart = treeStartFloat / NODE_SIZE;
+    
+    // Determine the end of this tree.
+    int treeEnd;
+    if (layer < kdTreeCount - 1) {
+        int nextTreeStartFloat = int(starMapKDTreesIndices[layer+1]);
+        treeEnd = nextTreeStartFloat / NODE_SIZE;
+    } else {
+        treeEnd = totalNodes;
+    }
+    int treeNodeCount = treeEnd - treeStart;
+    
+    // Search the current tree.
+    return searchTree(treeStart, treeNodeCount, sphericalCoords);
 }
 
 
@@ -287,37 +291,50 @@ Fragment getFragment() {
 
     vec4 viewCoords = normalize(vec4(texture(viewGrid, TexCoord).xy, VIEWGRIDZ, 0.0f));
 
-    // User loacal input rotation of the black hole
+    // User local input rotation of the black hole
     vec4 rotatedViewCoords = cameraRotationMatrix * viewCoords;
-    //vec4 rotatedViewCoords = viewCoords;
     
-    vec2 sphericalCoords = cartesianToSpherical(rotatedViewCoords.xyz);
-    
+    vec2 sphericalCoords;
     vec2 envMapSphericalCoords;
-    #if SHOW_BLACK_HOLE == 1
+    
+    vec4 accumulatedColor = vec4(0.0f);
+    float accumulatedWeight = 0.0f;  // Track total weight of blending
+
     // Apply black hole warping to spherical coordinates
-    envMapSphericalCoords = applyBlackHoleWarp(sphericalCoords);
-    if (isnan(envMapSphericalCoords.x)) {
-        // If inside the event horizon
-        frag.color = vec4(0.0f);
-        return frag;
+    for (int l = 0; l < layerCount; ++l) {
+        sphericalCoords = cartesianToSpherical(rotatedViewCoords.xyz);
+        envMapSphericalCoords = applyBlackHoleWarp(sphericalCoords, l);
+
+        if (isnan(envMapSphericalCoords.x)) {
+            // If inside the event horizon
+            frag.color = vec4(0.0f);
+            return frag;
+        }
+
+        vec4 envMapCoords = vec4(sphericalToCartesian(envMapSphericalCoords.x, envMapSphericalCoords.y), 0.0f);
+
+        // User world input rotation of the black hole
+        envMapCoords = worldRotationMatrix * envMapCoords;
+
+        sphericalCoords = cartesianToSpherical(envMapCoords.xyz);
+        vec4 starColor = searchNearestStar(vec3(0.0f, sphericalCoords.x, sphericalCoords.y), l);
+
+        if (starColor.a > 0.0) {
+            float layerWeight = exp(-0.5 * l);  // Earlier layers have more weight
+
+            // Blend using weighted alpha blending
+            accumulatedColor.rgb = (accumulatedColor.rgb * accumulatedWeight + starColor.rgb * starColor.a * layerWeight) / (accumulatedWeight + starColor.a * layerWeight);
+            accumulatedWeight += starColor.a * layerWeight;
+        }
     }
-    #else
-    envMapSphericalCoords = sphericalCoords;
-    #endif
 
-    // Init rotation of the black hole
-    vec4 envMapCoords = vec4(sphericalToCartesian(envMapSphericalCoords.x, envMapSphericalCoords.y), 0.0f);
-
-    // User world input rotation of the black hole
-    envMapCoords = worldRotationMatrix * envMapCoords;
-
-    sphericalCoords = cartesianToSpherical(envMapCoords.xyz);
     vec2 uv = sphericalToUV(sphericalCoords);
     vec4 texColor = texture(environmentTexture, uv);
-    
-    vec4 starColor = searchNearestStar(vec3(0.0f, sphericalCoords.x, sphericalCoords.y));
-    texColor = vec4((starColor.rgb * starColor.a) + (texColor.rgb * (1.0f - starColor.a)), 1.0f);
-    frag.color = texColor;
+
+    vec4 finalColor;
+    finalColor.rgb = accumulatedColor.rgb * accumulatedWeight + texColor.rgb * (1.0 - accumulatedWeight);
+    finalColor.a = 1.0;
+
+    frag.color = finalColor;
     return frag;
 }

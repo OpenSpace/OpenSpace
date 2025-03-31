@@ -15,28 +15,52 @@ namespace {
     }
 }
 namespace openspace {
-    KDTree::KDTree(std::string const& filePath, glm::vec3 const& localWorldCenter, float const renderDistance) {
-        build(filePath, localWorldCenter, renderDistance);
+    StarMaps::StarMaps(std::string const& filePath, glm::vec3 const& localWorldCenter, std::vector<std::pair<float, float>> const& renderSpans) {
+        build(filePath, localWorldCenter, renderSpans);
     }
 
-    void KDTree::build(std::string const&  filePath, glm::vec3 const& localWorldCenter, float const renderDistance)
+    void StarMaps::build(std::string const& filePath, glm::vec3 const& localWorldCenter,
+        std::vector<std::pair<float, float>> const& renderSpans)
     {
-        std::vector<Node> tree{};
         const std::filesystem::path file{ absPath(filePath) };
         dataloader::Dataset dataset = dataloader::data::loadFileWithCache(file);
 
-
+        // Convert positions to spherical coordinates
 #pragma omp parallel for
         for (auto& entry : dataset.entries) {
             entry.position = cartesianToSpherical(entry.position - localWorldCenter);
         }
 
-        std::erase_if(dataset.entries, [renderDistance](const dataloader::Dataset::Entry& e) {
-            return e.position.x > renderDistance;
-            });
+        size_t numEntries = dataset.entries.size();
+        size_t numTrees = renderSpans.size();
 
-        size_t numberOfStars = dataset.entries.size();
-        tree.resize(numberOfStars);
+        // Preallocate space for KD-tree partitions
+        std::vector<std::vector<Node>> kdTrees(numTrees, std::vector<Node>{});
+        for (auto& tree : kdTrees) {
+            tree.reserve(numEntries / numTrees); // Approximate initial allocation
+        }
+
+        // Partition data into the correct KD-tree
+        for (const auto& entry : dataset.entries) {
+            float radius = entry.position.x;
+            for (size_t i = 0; i < numTrees; ++i) {
+                if (radius >= renderSpans[i].first && radius < renderSpans[i].second) {
+                    kdTrees[i].emplace_back(entry.position, entry.data[0], entry.data[1], entry.data[2]);
+                    break;
+                }
+            }
+        }
+
+        // Estimate total storage size for the flat array
+        size_t estimatedNodes = 0;
+        for (const auto& tree : kdTrees) {
+            estimatedNodes += tree.size();
+        }
+        _flatTrees.reserve(estimatedNodes * 6);
+
+        // Build KD-trees compactly
+        _treeStartIndices.reserve(numTrees);
+
         struct NodeInfo {
             size_t index;
             size_t depth;
@@ -44,63 +68,39 @@ namespace openspace {
             size_t end;
         };
 
-        std::queue<NodeInfo> q;
-        q.emplace(0, 0, 0, numberOfStars);
-        while (!q.empty()) {
-            NodeInfo node{ q.front() };
-            q.pop();
+        for (size_t i = 0; i < kdTrees.size(); ++i) {
+            if (kdTrees[i].empty()) continue;
+            _treeStartIndices.push_back(_flatTrees.size()); // Mark start index of this KD-tree
 
-            if (node.start >= node.end) continue;
+            std::queue<NodeInfo> q;
+            q.emplace(0, 0, 0, kdTrees[i].size());
 
-            int axis = node.depth % 2 + 1;
-            auto comparetor = [axis](dataloader::Dataset::Entry const& a, dataloader::Dataset::Entry const& b) -> bool {
-                return a.position[axis] < b.position[axis];
-                };
+            while (!q.empty()) {
+                NodeInfo node = q.front();
+                q.pop();
+                if (node.start >= node.end) continue;
 
-            // Sort to find median
-            std::sort(
-                dataset.entries.begin() + node.start,
-                dataset.entries.begin() + node.end,
-                comparetor
-            );
-            size_t medianIndex{ (node.start + node.end) / 2 };
+                int axis = node.depth % 2 + 1;
+                auto comparator = [axis](const Node& a, const Node& b) {
+                    return a.position[axis] < b.position[axis];
+                    };
 
-            dataloader::Dataset::Entry const& entry{ dataset.entries[medianIndex] };
-            glm::vec3 const& position{ entry.position };
-            float const color{ entry.data[0] };
-            float const lum{ entry.data[1] };
-            float const absMag{ entry.data[2] };
+                std::sort(kdTrees[i].begin() + node.start, kdTrees[i].begin() + node.end, comparator);
+                size_t medianIndex = (node.start + node.end) / 2;
+                const Node& entry = kdTrees[i][medianIndex];
 
-            if (node.index >= tree.size()) {
-                tree.resize(std::max(tree.size() * 2, node.index + 1));
+                _flatTrees.push_back(entry.position.x);
+                _flatTrees.push_back(entry.position.y);
+                _flatTrees.push_back(entry.position.z);
+                _flatTrees.push_back(entry.color);
+                _flatTrees.push_back(entry.lum);
+                _flatTrees.push_back(entry.absMag);
+
+                // Enqueue left and right children
+                q.emplace(2 * node.index + 1, node.depth + 1, node.start, medianIndex);
+                q.emplace(2 * node.index + 2, node.depth + 1, medianIndex + 1, node.end);
             }
-            tree.emplace(
-                tree.begin() + node.index, position, color, lum, absMag
-            );
-
-            // Enqueue left and right children
-            q.emplace(2 * node.index + 1, node.depth + 1, node.start, medianIndex);
-            q.emplace(2 * node.index + 2, node.depth + 1, medianIndex + 1, node.end);
         }
-        flatTree = flattenTree(tree);
-    }
-
-    std::vector<float> KDTree::flattenTree(std::vector<Node> const& tree) const {
-        std::vector<float> flatData;
-        flatData.resize(tree.size() * 6);
-
-        for (int i = 0; i < tree.size(); i++) {
-            Node const& node{ tree[i] };
-
-            size_t index = i * 6;
-            flatData[index] = node.position.x;
-            flatData[index + 1] = node.position.y;
-            flatData[index + 2] = node.position.z;
-            flatData[index + 3] = node.color;
-            flatData[index + 4] = node.lum;
-            flatData[index + 5] = node.absMag;
-        }
-
-        return flatData;
+        _flatTrees.shrink_to_fit();
     }
 }

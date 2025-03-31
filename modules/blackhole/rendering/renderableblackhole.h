@@ -62,17 +62,20 @@ namespace openspace {
 
         std::vector<float> _schwarzschildWarpTable;
         std::vector<float> flatDataStar;
-        KDTree _starKDTree{};
+        StarMaps _starKDTree{};
 
         std::unique_ptr<ghoul::opengl::BufferBinding<
             ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboSchwarzschildDataBinding;
         std::unique_ptr<ghoul::opengl::BufferBinding<
             ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboStarDataBinding;
+        std::unique_ptr<ghoul::opengl::BufferBinding<
+            ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboStarIndicesDataBinding;
 
         GLuint _quadVao = 0;
         GLuint _quadVbo = 0;
         GLuint _ssboSchwarzschildWarpTable = 0;
         GLuint _ssboStarKDTree = 0;
+        GLuint _ssboStarKDTreeIndices = 0;
 
         UniformCache(environmentTexture, viewGrid, worldRotationMatrix, cameraRotationMatrix, colorBVMap) _uniformCache;
 
