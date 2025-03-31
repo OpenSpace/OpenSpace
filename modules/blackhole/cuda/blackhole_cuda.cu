@@ -74,11 +74,14 @@ void generate_du(float* d_du_0_values, float min, float max, size_t count) {
 }
 
 void schwarzchild(
-    float rs, std::vector<float> envmap_r_values, size_t num_rays, size_t num_steps, float u_0, float h, std::vector<float>& angle_out) {
+    float const rs, std::vector<float> const envmap_r_values, size_t const num_rays, size_t const num_steps, float const r_0, float const h, std::vector<float>& angle_out) {
 
     float* d_dudphi_0_values;
     float* d_angle_values;
     float* d_envmap_r_values;
+
+    float u_0 = 1.0f / r_0;
+    float scale = r_0 > 0.1 ? 0.5f / r_0 : 1.0f;
 
     size_t const outValuesPerRay = (envmap_r_values.size() + 1);
     // Allocate device memory
@@ -88,7 +91,7 @@ void schwarzchild(
 
     // Copy initial velocity values to device
     std::vector<float> dudphi_0_values(num_rays, 0.f);
-    generate_du(dudphi_0_values.data(), 50000, -50000, num_rays);
+    generate_du(dudphi_0_values.data(), 20000 * scale, -20000 * scale, num_rays);
     cudaMemcpy(d_dudphi_0_values, dudphi_0_values.data(), num_rays * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(d_envmap_r_values, envmap_r_values.data(), envmap_r_values.size() * sizeof(float), cudaMemcpyHostToDevice);
 
@@ -101,8 +104,8 @@ void schwarzchild(
 
     // Add handeling of special case straight backwards
     //for (int i = 0; i < envmap_r_values.size(); ++i) {
-    //    angle_out[(num_rays - 1) * outValusPerRay] = 0.0f;
-    //    angle_out[(num_rays - 1) * outValusPerRay + 1 + i] = 0.0f;
+    //    angle_out[(num_rays - 1) * outValuesPerRay] = 0.0f;
+    //    angle_out[(num_rays - 1) * outValuesPerRay + 1 + i] = 0.0f;
     //}
 
     cudaFree(d_dudphi_0_values);

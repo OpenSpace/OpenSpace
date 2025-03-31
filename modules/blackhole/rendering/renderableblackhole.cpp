@@ -113,7 +113,7 @@ namespace openspace {
 
     void RenderableBlackHole::update(const UpdateData& data) {
         if (data.modelTransform.translation != _lastTranslation) {
-            _starKDTree.build("${BASE}/sync/http/stars_du/6/stars.speck", data.modelTransform.translation, { {0, 50 }, {50, 100} });
+            _starKDTree.build("${BASE}/sync/http/stars_du/6/stars.speck", data.modelTransform.translation, { {0, 25 }, {25, 50}, { 50, 100 } });
             _lastTranslation = data.modelTransform.translation;
         }
 
@@ -127,7 +127,7 @@ namespace openspace {
             _rCamera = distanceToAnchor;
             _rEnvmap = 2 * _rCamera;
 
-            schwarzchild(_rs, { _rCamera * 1.5f, _rCamera * 3.0f}, _rayCount, _stepsCount, 1.0f / _rCamera, _stepLength, _schwarzschildWarpTable);
+            schwarzchild(_rs, { _rCamera * 1.5f, _rCamera * 2.0f, _rCamera * 3.0f}, _rayCount, _stepsCount, _rCamera, _stepLength, _schwarzschildWarpTable);
         }
         bindSSBOData(_program, "ssbo_warp_table", _ssboSchwarzschildDataBinding, _ssboSchwarzschildWarpTable);
         bindSSBOData(_program, "ssbo_star_map_start_indices", _ssboStarIndicesDataBinding, _ssboStarKDTreeIndices);
