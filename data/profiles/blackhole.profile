@@ -1,11 +1,11 @@
 {
   "assets": [
     "base_blank",
-    "blackholes/schwarzchild"
+    "blackholes/schwarzschild"
   ],
   "camera": {
     "aim": "",
-    "anchor": "Blackhole_Example",
+    "anchor": "schwarzschild",
     "frame": "",
     "position": {
       "x": 0,
@@ -24,7 +24,7 @@
     1.0
   ],
   "mark_nodes": [
-    "Blackhole_Example"
+    "schwarzschild"
   ],
   "meta": {
     "author": "OpenSpace Team",
