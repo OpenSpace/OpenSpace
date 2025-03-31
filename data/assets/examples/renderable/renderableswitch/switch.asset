@@ -1,0 +1,36 @@
+-- Basic
+-- This example shows how to create a renderable that switches between 2 textured planes in 3D space,
+-- where one texture is loaded from a local file on disk and the other is
+-- loaded from the internet though a web URL.
+
+local Node = {
+    Identifier = "RenderableSwitch_Example",
+    Renderable = {
+      Type = "RenderableSwitch",
+      Renderable1 = {
+          Type = "RenderablePlaneImageLocal",
+          Size = 3.0E11,
+          Texture = openspace.absPath("${DATA}/test.jpg"),
+        },
+        Renderable2 = {
+            Type = "RenderablePlaneImageOnline",
+            Size = 3.0E11,
+            URL = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg"
+          },
+        DistanceThreshold = 2.0E12
+    },
+    GUI = {
+      Name = "RenderableSwitch - Basic",
+      Path = "/Examples"
+    }
+  }
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
+
+asset.export(Node)
