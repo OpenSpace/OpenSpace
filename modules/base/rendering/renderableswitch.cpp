@@ -155,6 +155,10 @@ namespace openspace {
         }
         // More renderable types here
 
+        LERRORC(
+            "ScreenSpaceImageLocal",
+            std::format("Renderable '{}' is not supported yet.", type)
+        );
         return nullptr; // Throw an exception if type is not recognized?
     }
 
