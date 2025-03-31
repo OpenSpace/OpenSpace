@@ -1,5 +1,5 @@
 asset.require("scene/solarsystem/heliosphere/2012/reset_loop_action")
-local transforms = asset.require("scene/solarsystem/heliosphere/transforms_heliosphere")
+local transforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
 
 
 
@@ -61,7 +61,6 @@ local ENLILSliceEqPlane11AU1 = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.EqPlane011AU1,
     InputFileType = "Osfls",
-    LoadingType = "DynamicLoading",
     ShowAtAllTimes = false,
     Color = { 0.4, 0.15, 0.4, 0.6 },
     ColorMethod = "ByQuantity", -- Color by Quantity
@@ -86,7 +85,6 @@ local ENLILSliceEqPlane11AU2 = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.EqPlane011AU2,
     InputFileType = "Osfls",
-    LoadingType = "DynamicLoading",
     ShowAtAllTimes = false,
     Color = { 0.4, 0.15, 0.4, 0.6 },
     ColorMethod = "ByQuantity", -- Color by Quantity
@@ -111,7 +109,6 @@ local ENLILSliceLat411AU1 = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.Lat4011AU1,
     InputFileType = "Osfls",
-    LoadingType = "DynamicLoading",
     ShowAtAllTimes = false,
     Color = { 0.4, 0.15, 0.4, 0.6 },
     ColorMethod = "ByQuantity", -- Color by Quantity
@@ -136,7 +133,6 @@ local ENLILSliceLat411AU2 = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.Lat4011AU2,
     InputFileType = "Osfls",
-    LoadingType = "DynamicLoading",
     ShowAtAllTimes = false,
     Color = { 0.4, 0.15, 0.4, 0.6 },
     ColorMethod = "ByQuantity", -- Color by Quantity
@@ -161,7 +157,6 @@ local ENLILEarth = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.Earth,
     InputFileType = "Osfls",
-    LoadingType = "DynamicLoading",
     ShowAtAllTimes = false,
     Color = { 1.0, 1.0, 1.0, 0.6 },
     ColorTablePaths = {
@@ -184,7 +179,6 @@ local ENLILStereoA = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.StereoA,
     InputFileType = "Osfls",
-    LoadingType = "DynamicLoading",
     ShowAtAllTimes = false,
     Color = { 1.0, 1.0, 1.0, 0.6 },
     ColorTablePaths = {

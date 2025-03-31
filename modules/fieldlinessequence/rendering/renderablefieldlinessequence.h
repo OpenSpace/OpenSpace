@@ -101,7 +101,6 @@ public:
 //    };
 //    std::optional<std::map<std::string, VariableInfo>> variables;
 private:
-
     void definePropertyCallbackFunctions();
     void setupProperties();
     void setModelDependentConstants();
@@ -126,7 +125,7 @@ private:
     // it does not ensure that multiple instances of this class cannot try to load the
     // same file at the same time, however.
     std::mutex _mutex;
-    std::thread loadFile(File& file);
+    void loadFile(File& file);
 
     SourceFileType _inputFileType;
     // Static Loading on default / if not specified

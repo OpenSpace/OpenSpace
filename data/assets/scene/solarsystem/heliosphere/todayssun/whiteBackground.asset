@@ -1,0 +1,45 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local whiteTexture = openspace.createSingleColorImage(
+  "one_piexel_texture_color_white",
+  { 1.0, 1.0, 1.0 }
+)
+
+local WhiteBackground = {
+  Identifier = "WhiteBackground_sphere",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Renderable = {
+      Type = "RenderableSphereImageLocal",
+      Enabled = false,
+      Texture = whiteTexture,
+      Size = 5E16,
+      Segments = 50,
+      DisableFadeInOut = true,
+      Orientation = "Inside",
+      Opacity = 1.00
+  },
+  GUI = {
+      Name = "White Background",
+      Path = "/Solar System/Heliosphere",
+      Description = "A big white sphere encapsulating the solarsystem"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(WhiteBackground)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(WhiteBackground)
+end)
+
+asset.export(WhiteBackground)
+
+
+
+asset.meta = {
+Name = "White Background",
+Description = "A big sphere that works as a white background when inside the solarsystem",
+Author = "CCMC",
+URL = "",
+License = "MIT"
+}

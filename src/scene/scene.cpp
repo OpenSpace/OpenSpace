@@ -479,10 +479,10 @@ void Scene::update(const UpdateData& data) {
 
 void Scene::render(const RenderData& data, RendererTasks& tasks) {
     ZoneScoped;
-    ZoneText(
-        renderBinToString(data.renderBinMask),
-        strlen(renderBinToString(data.renderBinMask))
-    );
+    //ZoneText(
+    //    renderBinToString(data.renderBinMask),
+    //    strlen(renderBinToString(data.renderBinMask))
+    //);
 
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {

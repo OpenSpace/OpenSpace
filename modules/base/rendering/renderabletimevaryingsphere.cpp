@@ -30,6 +30,7 @@
 #include <openspace/util/sphere.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/properties/property.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/crc32.h>
@@ -159,6 +160,8 @@ namespace {
         // This is set to true by default and will delete all the downloaded content when
         // OpenSpace is shut down. Set to false to save all the downloaded fils.
         std::optional<bool> deleteDownloadsOnShutdown;
+        // Set if first/last file should render forever
+        std::optional<bool> showAtAllTimes;
         enum class [[codegen::map(openspace::RenderableTimeVaryingSphere::TextureFilter)]] TextureFilter {
             NearestNeighbor,
             Linear,
@@ -203,7 +206,7 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
 
     _textureFilterProperty.addOptions({
         {static_cast<int>(TextureFilter::NearestNeighbor), "No Filter"},
-        {static_cast<int>(TextureFilter::Linear), "Linear smoothening"}
+        {static_cast<int>(TextureFilter::Linear), "Linear smoothing"}
     });
     if (p.textureFilter.has_value()) {
         _textureFilter = codegen::map<TextureFilter>(*p.textureFilter);
@@ -211,14 +214,7 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     else {
         _textureFilter = TextureFilter::Unspecified;
     }
-}
-
-bool RenderableTimeVaryingSphere::isReady() const {
-    return RenderableSphere::isReady();
-}
-
-void RenderableTimeVaryingSphere::initializeGL() {
-    RenderableSphere::initializeGL();
+    _renderForever = p.showAtAllTimes.value_or(_renderForever);
 
     if (_loadingType == LoadingType::StaticLoading) {
         extractMandatoryInfoFromSourceFolder();
@@ -227,7 +223,16 @@ void RenderableTimeVaryingSphere::initializeGL() {
     }
     addProperty(_textureSourcePath);
     addProperty(_textureFilterProperty);
+    addProperty(_fitsLayer);
     definePropertyCallbackFunctions();
+}
+
+bool RenderableTimeVaryingSphere::isReady() const {
+    return RenderableSphere::isReady();
+}
+
+void RenderableTimeVaryingSphere::initializeGL() {
+    RenderableSphere::initializeGL();
 }
 
 void RenderableTimeVaryingSphere::setupDynamicDownloading(
@@ -273,6 +278,9 @@ void RenderableTimeVaryingSphere::deinitializeGL() {
         _loadingType == LoadingType::DynamicDownloading)
     {
         std::filesystem::path syncDir = _dynamicFileDownloader->destinationDirectory();
+        if (!std::filesystem::exists(syncDir)) {
+            return;
+        }
         for (auto& file : std::filesystem::directory_iterator(syncDir)) {
             std::filesystem::remove(file);
         }
@@ -295,6 +303,10 @@ void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
     //newFile.time = extractTriggerTimeFromISO8601FileName(path);
     newFile.time = extractTriggerTimeFromFitsFileName(path);
     std::unique_ptr<ghoul::opengl::Texture> t = loadTextureFromFits(path, _fitsLayer);
+    if (t == nullptr) {
+        return;
+    }
+
     if (_textureFilter == TextureFilter::NearestNeighbor ||
         _textureFilter == TextureFilter::Unspecified)
     {
@@ -361,7 +373,7 @@ void RenderableTimeVaryingSphere::setMinMaxValues(
     const void* rawData = t->pixelData();
     const float* pixelData = static_cast<const float*>(rawData);
     size_t dataSize = t->dimensions().x * t->dimensions().y;
-    float min = *std::min_element(pixelData, pixelData + dataSize);                      //TODO crash here
+    float min = *std::min_element(pixelData, pixelData + dataSize);
     float max = *std::max_element(pixelData, pixelData + dataSize);
     file.dataMinMax = glm::vec2(min, max);
 }
@@ -410,10 +422,15 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
         updateDynamicDownloading(currentTime, deltaTime);
     }
 
-    const bool isInInterval = _files.size() > 0 &&
+    _inInterval = _files.size() > 0 &&
         currentTime >= _files[0].time &&
         currentTime < _sequenceEndTime;
-    if (isInInterval) {
+
+    if (!_inInterval && _renderForever) {
+        updateActiveTriggerTimeIndex(currentTime);
+    }
+
+    if (_inInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
         if (
             // true => We stepped back to a time represented by another state
@@ -443,6 +460,12 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
 }
 
 void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks& task) {
+    if (_files.empty()) {
+        return;
+    }
+    if (!_inInterval && !_renderForever) {
+        return;
+    }
     RenderableSphere::render(data, task);
 }
 
@@ -493,9 +516,6 @@ void RenderableTimeVaryingSphere::updateDynamicDownloading(const double currentT
         }
     }
     if (_firstUpdate) {
-        if (_isFitsFormat && _layerOptionsAdded && !hasProperty(&_fitsLayer)) {
-            addProperty(_fitsLayer);
-        }
         const bool isInInterval = _files.size() > 0 &&
             currentTime >= _files[0].time &&
             currentTime < _sequenceEndTime;
@@ -511,7 +531,18 @@ void RenderableTimeVaryingSphere::updateDynamicDownloading(const double currentT
 }
 
 void RenderableTimeVaryingSphere::computeSequenceEndTime() {
-    if (_files.size() > 1) {
+    if (_files.size() == 0) {
+        _sequenceEndTime = 0.f;
+    }
+    else if (_files.size() == 1) {
+        _sequenceEndTime = _files[0].time + 7200.f;
+        if (_loadingType == LoadingType::StaticLoading && !_renderForever) {
+            //TODO: Alternativly check at construction and throw exeption.
+            LWARNING("Only one file in data set, but ShowAtAllTimes set to false. "
+                "Using arbitrary duration to visualize data file instead");
+        }
+    }
+    else if (_files.size() > 1) {
         const double lastTriggerTime = _files[_files.size() - 1].time;
         const double sequenceDuration = lastTriggerTime - _files[0].time;
         const double averageStateDuration =

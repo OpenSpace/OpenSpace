@@ -84,11 +84,14 @@ DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
 }
 
 void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest) {
-    HttpMemoryDownload respons(httpInfoRequest);
-    respons.start();
-    respons.wait();
+    HttpMemoryDownload response(httpInfoRequest);
+    response.start();
+    response.wait();
 
-    nlohmann::json jsonResult = nlohmann::json::parse(respons.downloadedData());
+    bool success = false;
+    int attempt = 0;
+    const int maxRetries = 1;
+    nlohmann::json jsonResult;
 
     /********************
     *   Example respons
@@ -103,10 +106,43 @@ void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest)
     *        "id" : 1177
     *}
     ********************/
+    while (attempt <= maxRetries && !success) {
+        try {
+            auto responseText = response.downloadedData();
+            if (responseText.empty()) {
+                throw std::runtime_error("Empty HTTP response");
+            }
 
-    _dataMinTime = Time::convertTime(jsonResult["availability"]["startDate"]);
-    _dataMaxTime = Time::convertTime(jsonResult["availability"]["stopDate"]);
-    //_dataIdDescription = jsonResult["description"];
+            jsonResult = nlohmann::json::parse(responseText);
+            success = true;
+            _dataMinTime = Time::convertTime(jsonResult["availability"]["startDate"]);
+            _dataMaxTime = Time::convertTime(jsonResult["availability"]["stopDate"]);
+            //_dataIdDescription = jsonResult["description"];
+        }
+        catch (nlohmann::json::parse_error& e) {
+            LWARNING(std::format("JSON parse error: {}", e.what()));
+        }
+        catch (std::exception& e) {
+            LWARNING(std::format("HTTP or other error: {}", e.what()));
+        }
+
+        if (!success) {
+            if (attempt < maxRetries) {
+                LINFO(std::format("Retry nr {}.", attempt+1));
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+
+                response.start();
+                response.wait();
+            }
+            else {
+                LERROR(std::format(
+                    "Failed according to warning above with http request of url: {}",
+                    httpInfoRequest
+                ));
+            }
+        }
+        attempt++;
+    }
 }
 
 void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRequest,
@@ -117,30 +153,14 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
     // Get big window/ list of available files for the specified data set.
     // If it expands to more of a API call rather than a http-request, that code goes here
     // TODO: make_unique?
+    HttpMemoryDownload response(httpDataRequest);
+    response.start();
+    response.wait();
+
+    bool success = false;
+    int attempt = 0;
+    const int maxRetries = 1;
     nlohmann::json jsonResult;
-    HttpMemoryDownload responds(httpDataRequest);
-    try {
-        responds.start();
-        responds.wait();
-
-        const std::vector<char>& data = responds.downloadedData();
-        //TODO what value is actually to large to handle?
-        if (data.size() > std::numeric_limits<std::size_t>::max()) {
-            LERROR("Http responds with list of available files to large");
-        }
-
-        jsonResult = nlohmann::json::parse(data);
-
-    }
-    catch (const nlohmann::json::parse_error& ex) {
-        LERROR(std::format("JSON parsing error: '{}'", ex.what()));
-    }
-    catch (const std::bad_alloc& ex) {
-        LERROR(std::format("Memory allocation error while parsing JSON: '{}'",ex.what()));
-    }
-    catch (const std::exception& ex) {
-        LERROR(std::format("An error occurred: '{}'", ex.what()));
-    }
 
     /********************
     *   Example respons
@@ -164,6 +184,56 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
     * note that requested time can be month 10 but last entry in list is month 07,
     * meaning there are no more available files between month 7-10.
     * *****************/
+    while (attempt <= maxRetries && !success) {
+        try {
+            const std::vector<char>& data = response.downloadedData();
+            if (data.empty()) {
+                throw std::runtime_error("Empty HTTP response");
+            }
+            //TODO what value is actually to large to handle?
+            if (data.size() > std::numeric_limits<std::size_t>::max()) {
+                throw std::runtime_error(
+                    "Http responds with list of available files to large"
+                );
+            }
+
+            jsonResult = nlohmann::json::parse(data);
+            success = true;
+        }
+        catch (const nlohmann::json::parse_error& ex) {
+            LERROR(std::format("JSON parsing error: '{}'", ex.what()));
+        }
+        catch (const std::bad_alloc& ex) {
+            LERROR(std::format(
+                "Memory allocation error while parsing JSON: '{}'",
+                ex.what()
+            ));
+        }
+        catch (const std::exception& ex) {
+            LERROR(std::format("An error occurred: '{}'", ex.what()));
+        }
+
+        if (!success) {
+            if (attempt < maxRetries) {
+                LINFO(std::format("Retry nr {}.", attempt + 1));
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+
+                response.start();
+                response.wait();
+            }
+            else {
+                LERROR(std::format(
+                    "Failed according to warning above with http request of url: {}",
+                    httpDataRequest
+                ));
+            }
+        }
+        attempt++;
+    }
+
+    if (!success) {
+        return;
+    }
 
     int index = 0;
     for (auto& element : jsonResult["files"]) {
@@ -210,7 +280,6 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
     //_dataMaxTime = jsonResult["time.max"];
     //_dataMinTime = jsonResult["time.min"];
 
-    // TODO Shyam: add accurate cadence to each file here
     _tempCadence = calculateCadence();
     for (File& element : _availableData) {
         element.cadence = _tempCadence;
@@ -443,43 +512,6 @@ void DynamicFileSequenceDownloader::update(const double time, const double delta
     putOnQueue();
 
     downloadFile();
-
-// The todo list: //
-//
-//     TBD if we should implement this or not.
-// 2. OnChange functions for if a different dataID is selected - reinitialize things
-//     note: can there be the same id for for different models other than wsa.
-//     If that is the case, it wouldnt make sense to change id, and therefor dataset,
-//     for the same renderable. If they are all the same model, it could work.
-//
-// 3. Rename folder for where files are being downloaded to
-//     note: same as above:
-//     if same id for diffrent models: then include modelname in path
-//     else: Only rename after what new name for dynamic downloader is
-//
-//
-// 5. recall data info every now and then to get new files
-//
-// 6. ultimet test: test with different data
-//
-// 9. maybe make a copy of the once that gets returned with downloadedFiles() so that
-//     the originals can be removed with clearDownloaded() before returning out of
-//     downloadedFiles()
-// 10. deal with jsonResult["description"]
-//
-// Done items:
-// 4. Move class into a different module + rename class
-//
-// 7. optamize the closestFileToNow function
-//
-// 8. tracy
-//
-// 1. When initializing add the already cached files to the _availableData
-// list as downloaded
-//
-//
-
-
 }
 
 std::filesystem::path DynamicFileSequenceDownloader::destinationDirectory() {

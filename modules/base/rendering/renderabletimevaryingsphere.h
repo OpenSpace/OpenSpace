@@ -115,6 +115,10 @@ private:
     // An option to keep or delete the downloads from dynamic downloader on shutdown
     // Deletes on default
     properties::BoolProperty _deleteDownloadsOnShutdown;
+    // If there's just one state it should never disappear
+    bool _renderForever = false;
+    bool _inInterval = false;
+
     bool _isLoadingStateFromDisk = false;
     //  DynamicFileSequenceDownloader downloads and updates the renderable with
     //  data downloaded from the web.

@@ -31,6 +31,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
+//#include <openspace/util/threadpool.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/openglstatecache.h>
@@ -307,7 +308,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _colorGroup({ "Color" })
-    , _colorMethod(ColorMethodInfo, properties::OptionProperty::DisplayType::Radio)
+    , _colorMethod(ColorMethodInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _colorQuantity(ColorQuantityInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _selectedColorRange(
         ColorMinMaxInfo,
@@ -523,11 +524,13 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         _selectedMaskingRange = glm::vec2(0.f, 1.f);
     }
 
-
     if (p.maskingMinMaxRange.has_value()) {
         _selectedMaskingRange.setMinValue(glm::vec2(p.maskingMinMaxRange->x));
         _selectedMaskingRange.setMaxValue(glm::vec2(p.maskingMinMaxRange->y));
     }
+
+    setupProperties();
+    definePropertyCallbackFunctions();
 }
 
 void RenderableFieldlinesSequence::setupDynamicDownloading(
@@ -588,26 +591,16 @@ void RenderableFieldlinesSequence::staticallyLoadFiles(
                     );
                 break;
             case SourceFileType::Osfls: {
-                std::thread thread = loadFile(file);
-                openThreads.push_back(std::move(thread));
+                loadFile(file);
+                //openThreads.push_back(std::move(thread));
                 // loadSuccess = true;
                 break;
             }
             default:
                 break;
         }
-        //if (loadSuccess) {
-        //    file.status = File::FileStatus::Loaded;
-        //    file.timestamp = extractTriggerTimeFromFilename(file.path);
-        //}
-        //else {
-        //    LERROR(fmt::format("Failed to load state from: {}", file.path));
-        //}
     }
 
-    for (std::thread& thread : openThreads) {
-        thread.join();
-    }
     _isLoadingStateFromDisk = false;
     for (auto& file : _files) {
         if (!file.path.empty() && file.status != File::FileStatus::Loaded) {
@@ -632,8 +625,6 @@ void RenderableFieldlinesSequence::initializeGL() {
         absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_vs.glsl"),
         absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl")
     );
-    setupProperties();
-    definePropertyCallbackFunctions();
 
     glGenVertexArrays(1, &_vertexArrayObject);
     glGenBuffers(1, &_vertexPositionBuffer);
@@ -835,14 +826,31 @@ void RenderableFieldlinesSequence::deinitializeGL() {
         _shaderProgram = nullptr;
     }
 
+    _files.clear();
+
     // Stall main thread until thread that's loading states is done
     bool printedWarning = false;
-    while (_isLoadingStateFromDisk) {
+    while (_dynamicFileDownloader != nullptr &&
+        _dynamicFileDownloader->filesCurrentlyDownloading())
+    {
         if (!printedWarning) {
             LWARNING("Currently downloading file, exiting might take longer than usual");
             printedWarning = true;
         }
+        _dynamicFileDownloader->checkForFinishedDownloads();
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
+    if (_dynamicFileDownloader != nullptr &&
+        //_deleteDownloadsOnShutdown &&
+        _loadingType == LoadingType::DynamicDownloading)
+    {
+        std::filesystem::path syncDir = _dynamicFileDownloader->destinationDirectory();
+        if (!std::filesystem::exists(syncDir)) {
+            return;
+        }
+        for (auto& file : std::filesystem::directory_iterator(syncDir)) {
+            std::filesystem::remove(file);
+        }
     }
 }
 
@@ -851,7 +859,7 @@ void RenderableFieldlinesSequence::computeSequenceEndTime() {
         _sequenceEndTime = 0.f;
     }
     else if (_files.size() == 1) {
-        _sequenceEndTime = _files[0].timestamp + 3600.f;
+        _sequenceEndTime = _files[0].timestamp + 7200.f;
         if (_loadingType == LoadingType::StaticLoading && !_renderForever) {
             //TODO: Alternativly check at construction and throw exeption.
             LWARNING("Only one file in data set, but ShowAtAllTimes set to false. "
@@ -866,22 +874,23 @@ void RenderableFieldlinesSequence::computeSequenceEndTime() {
     }
 }
 
-std::thread RenderableFieldlinesSequence::loadFile(File& file) {
+void RenderableFieldlinesSequence::loadFile(File& file) {
     _isLoadingStateFromDisk = true;
-//    if (_inputFileType == SourceFileType::Osfls) {
-        std::thread readFileThread([this, &file]() {
-            try {
-                //std::lock_guard<std::mutex> lock(_mutex);
-                file.state = FieldlinesState::createStateFromOsfls(file.path.string());
-                //const bool success = file.state.loadStateFromOsfls(file.path.string());
-                //file.status = File::FileStatus::Loaded;
-            }
-            catch(const std::exception& e ) {
-                LERROR(e.what());
-            }
-        });
-        return readFileThread;
-//    }
+    try {
+        if (_inputFileType == SourceFileType::Osfls) {
+            file.state = FieldlinesState::createStateFromOsfls(file.path.string());
+        }
+        else if (_inputFileType == SourceFileType::Json) {
+            file.state.loadStateFromJson(
+                file.path.string(),
+                fls::Model::Invalid,
+                _scalingFactor
+            );
+        }
+    }
+    catch(const std::exception& e ) {
+        LERROR(e.what());
+    }
 
     // So far uncleare why model is needed and if scalingFactor can be changed afterwards.
     // If these 2 things can be desided afterwards, without affecting Ganamyde fieldlines
@@ -891,16 +900,6 @@ std::thread RenderableFieldlinesSequence::loadFile(File& file) {
     //
     // I don't think it matters if model is invalid and scalingFactor is 1.f when loading
     // json files anyway.
-
-    //else if (_inputFileType == SourceFileType::Json) {
-    //    std::thread readFileThread([this, &file, &success]() {
-    //        success = file.state.loadStateFromJson(
-    //            file.path.string(),
-    //            fls::Model::Invalid,
-    //            _scalingFactor
-    //        );
-    //    });
-    //}
 
 }
 
@@ -973,29 +972,59 @@ void RenderableFieldlinesSequence::firstUpdate() {
         std::find_if( _files.begin(), _files.end(), [](File& f) {
                 return f.status == File::FileStatus::Loaded;
         });
-    if (file == _files.end()) return;
+    if (file == _files.end()) {
+        return;
+    }
+
     const std::vector<std::vector<float>>& quantities = file->state.extraQuantities();
     const std::vector<std::string>& extraNamesVec =
         file->state.extraQuantityNames();
+    //////////////// Before GUI rewrite, this is the temporary fix to ////////////////////
+    //////////////////////// have GUI properties update in GUI ///////////////////////////
+    ////////////// In addition when potentially removing, check to see if ////////////////
+    //////////////// colorQuantity option {-1, "dummy default} is needed//////////////////
+    //_colorQuantity.clearOptions();
+    //_maskingQuantity.clearOptions();
+
+    //_colorGroup.removeProperty(_colorUniform);
+    //_colorGroup.removeProperty(_colorMethod);
+    //_colorGroup.removeProperty(_colorQuantity);
+    //_colorGroup.removeProperty(_selectedColorRange);
+    //_colorGroup.removeProperty(_colorTablePath);
+
+    //_maskingGroup.removeProperty(_maskingQuantity);
+    //_maskingGroup.removeProperty(_maskingEnabled);
+    //_maskingGroup.removeProperty(_selectedMaskingRange);
+
     for (int i = 0; i < quantities.size(); ++i) {
         _colorQuantity.addOption(i, extraNamesVec[i]);
         _maskingQuantity.addOption(i, extraNamesVec[i]);
     }
+
+    //_colorGroup.addProperty(_colorUniform);
+    //_colorGroup.addProperty(_colorMethod);
+    //_colorGroup.addProperty(_colorQuantity);
+    //_selectedColorRange.setViewOption(
+    //    properties::Property::ViewOptions::MinMaxRange
+    //);
+    //_colorGroup.addProperty(_selectedColorRange);
+    //_colorGroup.addProperty(_colorTablePath);
+    //std::filesystem::path newPath = absPath(_colorTablePath);
+    //if (std::filesystem::exists(newPath)) {
+    //    _transferFunction = std::make_unique<TransferFunction>(newPath.string());
+    //}
+    //else {
+    //    LWARNING("Invalid path to transferfunction, please enter new path.");
+    //}
+
+    //_maskingGroup.addProperty(_maskingEnabled);
+    //_maskingGroup.addProperty(_maskingQuantity);
+    //_selectedMaskingRange.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    //_maskingGroup.addProperty(_selectedMaskingRange);
+    //////////////////////////// End of temporary solution ///////////////////////////////
     _firstLoad = false;
     _colorQuantity = _colorQuantityTemp;
     _maskingQuantity = _maskingQuantityTemp;
-
-
-
-    std::filesystem::path newPath = absPath(_colorTablePath);
-
-    if (std::filesystem::exists(newPath)) {
-        _transferFunction = std::make_unique<TransferFunction>(newPath.string());
-    }
-    else
-    {
-        LWARNING("Invalid path to transferfunction, please enter new path.");
-    }
 
     _shouldUpdateColorBuffer = true;
     _shouldUpdateMaskingBuffer = true;
@@ -1068,8 +1097,9 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         if (_files[_activeIndex].status == File::FileStatus::Downloaded) {
             // if LoadingType is StaticLoading all files will be Loaded
             // would be optimal if loading of next file would happen in the background
-            std::thread t = loadFile(_files[_activeIndex]);
-            t.join();
+            //std::thread t = loadFile(_files[_activeIndex]);
+            //t.join();
+            loadFile(_files[_activeIndex]);
             _isLoadingStateFromDisk = false;
             _files[_activeIndex].status = File::FileStatus::Loaded;
             _files[_activeIndex].timestamp =

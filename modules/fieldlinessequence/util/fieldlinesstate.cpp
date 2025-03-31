@@ -67,7 +67,7 @@ FieldlinesState FieldlinesState::createStateFromOsfls(const std::string& path) {
     const bool success = s.loadStateFromOsfls(path);
     if (!success) {
         throw std::runtime_error(
-            std::format("loading state from osfls file from {}", path)
+            std::format("loading state from osfls file {}", path)
         );
     }
     return s;
