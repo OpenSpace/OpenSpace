@@ -1,0 +1,42 @@
+-- Scaling Image
+-- This example shows how to create a textured plane at Earth, where the texture is
+-- loaded from a local file on disk and the plane changes its scale based on its distance
+-- to the camera.
+
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+local Node = {
+    Identifier = "RenderablePlaneImageLocal_Example_ScaleByDistance",
+    Parent = earth.Earth.Identifier,
+    Transform = {
+        Translation = {
+        Type = "GlobeTranslation",
+        Globe = earth.Earth.Identifier,
+        Latitude = 56.74629592885196,
+        Longitude = -111.47245469411168,
+        Altitude = 95000,
+        UseHeightmap = false
+        }
+    },
+    Renderable = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 1,
+        Texture = openspace.absPath("${DATA}/test2.jpg"),
+        ScaleByDistance = true,
+        ScaleRatio = 0.01,
+        ScaleByDistanceMaxHeight = 2000000,
+        ScaleByDistanceMinHeight = 30000
+    },
+    GUI = {
+        Name = "RenderablePlaneImageLocal - ScaleByDistance",
+        Path = "/Examples"
+    }
+}
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(Node)
+end)
