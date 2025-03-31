@@ -43,7 +43,7 @@ namespace openspace {
         void loadEnvironmentTexture();
 
         ghoul::opengl::ProgramObject* _program = nullptr;
-        glm::dvec3 _lastTranslation{};
+        glm::dvec3 _chachedTranslation{};
         size_t _rayCount = 1000;
         size_t _stepsCount = 50000;
         float _stepLength = 0.001f;

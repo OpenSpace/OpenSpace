@@ -64,7 +64,8 @@ namespace {
 namespace openspace {
 
     RenderableBlackHole::RenderableBlackHole(const ghoul::Dictionary& dictionary)
-        : Renderable(dictionary, { .automaticallyUpdateRenderBin = false }), _solarMass(SolarMassInfo, 4.297e6f), _colorBVMapTexturePath(ColorTextureInfo) {
+        : Renderable(dictionary), _solarMass(SolarMassInfo, 4.297e6f), _colorBVMapTexturePath(ColorTextureInfo) {
+        setRenderBin(Renderable::RenderBin::Background);
 
         const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -112,18 +113,16 @@ namespace openspace {
     }
 
     void RenderableBlackHole::update(const UpdateData& data) {
-        if (data.modelTransform.translation != _lastTranslation) {
-            _starKDTree.build("${BASE}/sync/http/stars_du/6/stars.speck", data.modelTransform.translation, { {0, 25 }, {25, 50}, { 50, 100 } });
-            _lastTranslation = data.modelTransform.translation;
+        if (data.modelTransform.translation != _chachedTranslation) {
+            _chachedTranslation = data.modelTransform.translation;
+            _starKDTree.build("${BASE}/sync/http/stars_du/6/stars.speck", _chachedTranslation, { {0, 25 }, {25, 50}, { 50, 100 } });
         }
 
         _viewport.updateViewGrid(global::renderEngine->renderingResolution());
 
-        glm::vec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
-        glm::vec3 anchorNodePosition = global::navigationHandler->anchorNode()->position();
-        float distanceToAnchor = glm::distance(cameraPosition, anchorNodePosition) / static_cast<float>(distanceconstants::LightYear);
+        glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
+        float distanceToAnchor = static_cast<float>(glm::distance(cameraPosition, _chachedTranslation) / distanceconstants::LightYear);
         if (abs(_rCamera - distanceToAnchor) > _rs * 0.01) {
-
             _rCamera = distanceToAnchor;
             _rEnvmap = 2 * _rCamera;
 
@@ -137,6 +136,9 @@ namespace openspace {
     void RenderableBlackHole::render(const RenderData& renderData, RendererTasks&) {
         _program->activate();
         bindFramebuffer();
+
+        glDisable(GL_DEPTH_TEST);
+
         ghoul::opengl::TextureUnit enviromentUnit;
         if (!bindTexture(_uniformCache.environmentTexture, enviromentUnit, _environmentTexture)) {
             LWARNING("UniformCache is missing 'environmentTexture'");
@@ -157,7 +159,7 @@ namespace openspace {
 
         interaction::OrbitalNavigator::CameraRotationDecomposition camRot = global::navigationHandler->orbitalNavigator().decomposeCameraRotationSurface(
             CameraPose{renderData.camera.positionVec3(), renderData.camera.rotationQuaternion()},
-            *global::navigationHandler->anchorNode()
+            *parent()
         );
 
         // Calculate the camera planes rotation to make sure fisheye works correcly (dcm in sgct projection.cpp)
@@ -178,6 +180,8 @@ namespace openspace {
             );
      
         drawQuad();
+
+        glEnable(GL_DEPTH_TEST);
 
         _program->deactivate();
         glBindTexture(GL_TEXTURE_2D, 0);

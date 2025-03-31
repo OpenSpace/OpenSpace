@@ -6,10 +6,10 @@
 #include <queue>
 
 namespace {
-    glm::vec3 cartesianToSpherical(glm::vec3 const& cartesian) {
-        float radius = glm::length(cartesian);
-        float theta = std::atan2(glm::sqrt(cartesian.x * cartesian.x + cartesian.y * cartesian.y), cartesian.z);
-        float phi = std::atan2(cartesian.y, cartesian.x);
+    glm::vec3 cartesianToSpherical(glm::dvec3 const& cartesian) {
+        double radius = glm::length(cartesian);
+        double theta = std::atan2(glm::sqrt(cartesian.x * cartesian.x + cartesian.y * cartesian.y), cartesian.z);
+        double phi = std::atan2(cartesian.y, cartesian.x);
 
         return glm::vec3(radius, theta, phi);
     }
@@ -24,6 +24,10 @@ namespace openspace {
     {
         const std::filesystem::path file{ absPath(filePath) };
         dataloader::Dataset dataset = dataloader::data::loadFileWithCache(file);
+
+        // Clear without deallocating memory
+        _flatTrees.clear();
+        _treeStartIndices.clear();
 
         // Convert positions to spherical coordinates
 #pragma omp parallel for
@@ -69,8 +73,8 @@ namespace openspace {
         };
 
         for (size_t i = 0; i < kdTrees.size(); ++i) {
-            if (kdTrees[i].empty()) continue;
             _treeStartIndices.push_back(_flatTrees.size()); // Mark start index of this KD-tree
+            if (kdTrees[i].empty()) continue;
 
             std::queue<NodeInfo> q;
             q.emplace(0, 0, 0, kdTrees[i].size());
