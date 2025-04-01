@@ -49,12 +49,16 @@ namespace {
     };
 
     // This `LightSource` type represents a light source placed at the position of a
-    // scene graph node. That is, it will follow an existing object in the scene.
+    // scene graph node. That is, the direction of the light will follow the position
+    // of an existing object in the scene. It will also update dynamically as the
+    // object moves.
     //
-    // The direction for the light will update dynamically as the object moves.
+    // Note that the brightness of the light from the light source does not depend on
+    // the distance between the two scene graph nodes. Only the `Intensity` value has
+    // an impact on the brightness.
     struct [[codegen::Dictionary(SceneGraphLightSource)]] Parameters {
         // [[codegen::verbatim(IntensityInfo.description)]]
-        std::optional<float> intensity [[codegen::inrange(0.0, 1.0)]];
+        std::optional<float> intensity;
 
         // [[codegen::verbatim(NodeInfo.description)]]
         std::string node [[codegen::identifier()]];

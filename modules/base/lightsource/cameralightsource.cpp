@@ -42,7 +42,7 @@ namespace {
     // current view direction.
     struct [[codegen::Dictionary(CameraLightSource)]] Parameters {
         // [[codegen::verbatim(IntensityInfo.description)]]
-        std::optional<float> intensity [[codegen::inrange(0.0, 1.0)]];
+        std::optional<float> intensity;
     };
 #include "cameralightsource_codegen.cpp"
 } // namespace

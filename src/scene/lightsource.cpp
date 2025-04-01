@@ -45,12 +45,12 @@ namespace {
     // This is the base class of all `LightSource` types, which are components that can be
     // added to certain `Renderable` types to add lighting effects.
     //
-    // A `LightSource` is in this case just a table that describes properties such as the
-    // location of the light. It _does not physically exist in the scene_, and the table
-    // of parameters have to be added to each `Renderable` the that should be affected by
-    // the light source. This is commonly done by exporting a light source table from an
-    // Asset file that represents an illuminating object in the scene, such as the Sun in
-    // our solar system.
+    // A `LightSource`, in this case, is just a table that describes properties such as
+    // the location of the light. It _does not physically exist in the scene_, and the
+    // table of parameters have to be added to each `Renderable` that should be affected
+    // by the light source. This is commonly done by exporting a light source table from
+    // an Asset file that represents an illuminating object in the scene, such as the Sun
+    // in our solar system.
     struct [[codegen::Dictionary(LightSource)]] Parameters {
         // The type of light source that is described in this element.
         std::string type [[codegen::annotation("Must name a valid `LightSource` type")]];
