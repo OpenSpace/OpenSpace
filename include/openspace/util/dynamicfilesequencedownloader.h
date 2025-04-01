@@ -112,11 +112,10 @@ struct FieldlineOption {
 struct File {
     std::unique_ptr<HttpFileDownload> download;
     std::string timestep;
-    //TODO: need both times?
     double time;
     std::string URL;
-    double cadence;
     //TODO: need Cadence?
+    double cadence;
     int availableIndex;
     enum class State {
         Available,
@@ -129,8 +128,10 @@ struct File {
 
 class DynamicFileSequenceDownloader {
 public:
+    //Constructor of dynamic downloader. Add one last parameter to change number of files
+    //that it will keep around during run time instead of the default of 100 files.
     DynamicFileSequenceDownloader(
-        int dataID, const std::string infoURL, const std::string dataURL, int nOfFilesToQ
+        int dataID, const std::string infoURL, const std::string dataURL, size_t nOfFilesToQ
     );
     void requestDataInfo(std::string httpInfoRequest);
     void requestAvailableFiles(std::string httpDataRequest, std::filesystem::path syncdir);
@@ -161,7 +162,7 @@ private:
     //std::string _dataIdDescription;
     //Currently have both a global cadence and it's assigned to every element too.
     double _tempCadence = 0;
-    const int _nOfFilesToQueue = 0;
+    const size_t _nOfFilesToQueue = 0;
 
     //to iterate window
     std::vector<File>::iterator _thisFile;

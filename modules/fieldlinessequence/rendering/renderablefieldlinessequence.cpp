@@ -31,7 +31,6 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-//#include <openspace/util/threadpool.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/openglstatecache.h>
@@ -489,8 +488,8 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         _colorMethod = static_cast<int>(ColorMethod::Uniform);
     }
     _colorQuantityTemp = p.colorQuantity.value_or(_colorQuantityTemp);
-    _colorQuantity.addOption(-1, "dummy_default");
-    _colorQuantity = -1;
+    //_colorQuantity.addOption(-1, "dummy_default");
+    //_colorQuantity = -1;
 
     if (p.colorTableRanges.has_value()) {
         _colorTableRanges = *p.colorTableRanges;
@@ -641,12 +640,12 @@ void RenderableFieldlinesSequence::setupProperties() {
     addPropertySubOwner(_colorGroup);
     addPropertySubOwner(_domainGroup);
     addPropertySubOwner(_flowGroup);
-    addPropertySubOwner(_maskingGroup); // hasExtra
+    addPropertySubOwner(_maskingGroup);
 
     _colorUniform.setViewOption(properties::Property::ViewOptions::Color);
     _colorGroup.addProperty(_colorUniform);
     _colorGroup.addProperty(_colorMethod);
-    _colorGroup.addProperty(_colorQuantity);// hasExtra
+    _colorGroup.addProperty(_colorQuantity);
     _selectedColorRange.setViewOption(
         properties::Property::ViewOptions::MinMaxRange
     );

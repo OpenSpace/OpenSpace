@@ -62,7 +62,7 @@ std::string formulateDataHttpRequest(double minTime, double maxTime,
 DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
     const std::string infoURL,
     const std::string dataURL,
-    int nOfFilesToQ)
+    size_t nOfFilesToQ)
     : _infoURL(infoURL)
     , _dataURL(dataURL)
     , _nOfFilesToQueue(nOfFilesToQ)
@@ -334,16 +334,19 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
             std::streampos size = tempFile.tellg();
             if (size == 0){
                 LERROR(std::format("File '{}' was 0kb, removing", dl->destination()));
-                _filesCurrentlyDownloading.erase(currentIt);
+                currentIt = _filesCurrentlyDownloading.erase(currentIt);
+                --i;
             }
-            std::filesystem::path path = dl->destination();
-            //_downloadedFiles.push_back(std::move(*currentIt));
-            //std::vector<std::filesystem::path> downloadedFiles;
-            _downloadedFiles.push_back(dl->destination());
-            file->state = File::State::Downloaded;
-            currentIt = _filesCurrentlyDownloading.erase(currentIt);
-            // if one is removed, i is reduced, else we'd skip one in the list
-            --i;
+            else {
+                std::filesystem::path path = dl->destination();
+                //_downloadedFiles.push_back(std::move(*currentIt));
+                //std::vector<std::filesystem::path> downloadedFiles;
+                _downloadedFiles.push_back(dl->destination());
+                file->state = File::State::Downloaded;
+                currentIt = _filesCurrentlyDownloading.erase(currentIt);
+                // if one is removed, i is reduced, else we'd skip one in the list
+                --i;
+            }
         }
         else if (dl->hasFailed()) {
             LERROR(std::format("File '{}' failed to download. Removing file", file->URL));
@@ -371,7 +374,7 @@ std::vector<File>::iterator DynamicFileSequenceDownloader::closestFileToNow(
 {
     ZoneScoped;
 
-    File* closest;
+    File* closest = &*_availableData.begin();
     std::vector<File>::iterator it = _availableData.begin();
     double smallest = DBL_MAX;
     for (File& file : _availableData) {
@@ -410,7 +413,7 @@ void DynamicFileSequenceDownloader::putOnQueue() {
     }
 
     // if forward iterate from now to end. else reverse from now to begin
-    int notToMany = 0;
+    size_t notToMany = 0;
     for (std::vector<File>::iterator it = _thisFile; it != end; _forward ? ++it : --it) {
         if (it->state == File::State::Available) {
             _queuedFilesToDownload.push_back(&*it);
