@@ -2,6 +2,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <openspace/data/dataloader.h>
 #include <algorithm>
+#include <openspace/util/distanceconstants.h>
 
 #include <queue>
 
@@ -15,11 +16,11 @@ namespace {
     }
 }
 namespace openspace {
-    StarMaps::StarMaps(std::string const& filePath, glm::vec3 const& localWorldCenter, std::vector<std::pair<float, float>> const& renderSpans) {
+    StarMaps::StarMaps(std::string const& filePath, glm::dvec3 const& localWorldCenter, std::vector<std::pair<float, float>> const& renderSpans) {
         build(filePath, localWorldCenter, renderSpans);
     }
 
-    void StarMaps::build(std::string const& filePath, glm::vec3 const& localWorldCenter,
+    void StarMaps::build(std::string const& filePath, glm::dvec3 const& localWorldCenter,
         std::vector<std::pair<float, float>> const& renderSpans)
     {
         const std::filesystem::path file{ absPath(filePath) };
@@ -32,7 +33,7 @@ namespace openspace {
         // Convert positions to spherical coordinates
 #pragma omp parallel for
         for (auto& entry : dataset.entries) {
-            entry.position = cartesianToSpherical(entry.position - localWorldCenter);
+            entry.position = cartesianToSpherical(entry.position - static_cast<glm::vec3>(localWorldCenter / distanceconstants::Parsec));
         }
 
         size_t numEntries = dataset.entries.size();

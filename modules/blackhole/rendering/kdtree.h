@@ -10,7 +10,7 @@ namespace openspace {
     public:
         StarMaps() {};
 
-        StarMaps(std::string const& filePath, glm::vec3 const& localWorldCenter, std::vector<std::pair<float, float>> const& renderSpans = {});
+        StarMaps(std::string const& filePath, glm::dvec3 const& localWorldCenter, std::vector<std::pair<float, float>> const& renderSpans = {});
 
         size_t mapsSize() { return _flatTrees.size(); };
 
@@ -26,7 +26,7 @@ namespace openspace {
 
         void build(
             std::string const& constfilePath,
-            glm::vec3 const&  localWorldCenter,
+            glm::dvec3 const&  localWorldCenter,
             std::vector<std::pair<float, float>> const& renderSpans = {}
         );
 
