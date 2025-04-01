@@ -60,6 +60,20 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    constexpr openspace::properties::Property::PropertyInfo RenderOrderInfo = {
+        "RenderOrder",
+        "Render Order",
+        "Lower values render first (behind higher values)",
+        openspace::properties::Property::Visibility::User
+    };
+    
+    constexpr openspace::properties::Property::PropertyInfo AlignmentInfo = {
+        "Alignment",
+        "Alignment",
+        "Anchor point for positioning",
+        openspace::properties::Property::Visibility::User
+    };
+
 //    constexpr openspace::properties::Property::PropertyInfo
 //        UseRadiusAzimuthElevationInfo =
 //    {
@@ -258,6 +272,10 @@ namespace {
         // `ScreenSpaceRenderable`, thus making it possible to address multiple, separate
         // Renderables with a single property change.
         std::optional<std::variant<std::string, std::vector<std::string>>> tag;
+
+        std::optional<float> renderOrder;
+        std::optional<std::string> alignment;
+
     };
 #include "screenspacerenderable_codegen.cpp"
 } // namespace
@@ -341,7 +359,18 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
-    , _delete(DeleteInfo)
+    , _delete(DeleteInfo),
+    , _renderOrder(RenderOrderInfo, 0.f, -1000.f, 1000.f)
+    , _alignment(AlignmentInfo, {
+        { static_cast<int>(Alignment::TopLeft), "TopLeft" },
+        { static_cast<int>(Alignment::TopCenter), "TopCenter" },
+        { static_cast<int>(Alignment::TopRight), "TopRight" },
+        { static_cast<int>(Alignment::CenterLeft), "CenterLeft" },
+        { static_cast<int>(Alignment::Center), "Center" },
+        { static_cast<int>(Alignment::CenterRight), "CenterRight" },
+        { static_cast<int>(Alignment::BottomLeft), "BottomLeft" },
+        { static_cast<int>(Alignment::BottomCenter), "BottomCenter" },
+        { static_cast<int>(Alignment::BottomRight), "BottomRight" }
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -448,6 +477,15 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         });
     });
     addProperty(_delete);
+
+    _renderOrder = p.renderOrder.value_or(_renderOrder);
+    addProperty(_renderOrder);
+
+    if (p.alignment.has_value()) {
+        _alignment.set(alignmentFromString(*p.alignment));
+    }
+    addProperty(_alignment);
+
 }
 
 ScreenSpaceRenderable::~ScreenSpaceRenderable() {}
@@ -548,6 +586,37 @@ void ScreenSpaceRenderable::createShaders(ghoul::Dictionary dict) {
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
+void ScreenSpaceRenderable::setRenderOrder(float order) {
+    _renderOrder = order;
+}
+
+float ScreenSpaceRenderable::renderOrder() const {
+    return _renderOrder;
+}
+
+void ScreenSpaceRenderable::setAlignment(Alignment alignment) {
+    _alignment = static_cast<int>(alignment);
+}
+
+Alignment ScreenSpaceRenderable::alignment() const {
+    return static_cast<Alignment>(_alignment.value());
+}
+
+Alignment ScreenSpaceRenderable::alignmentFromString(const std::string& alignmentStr) {
+    static const std::unordered_map<std::string, Alignment> mapping = {
+        {"TopLeft", Alignment::TopLeft},
+        {"TopCenter", Alignment::TopCenter},
+        {"TopRight", Alignment::TopRight},
+        {"CenterLeft", Alignment::CenterLeft},
+        {"Center", Alignment::Center},
+        {"CenterRight", Alignment::CenterRight},
+        {"BottomLeft", Alignment::BottomLeft},
+        {"BottomCenter", Alignment::BottomCenter},
+        {"BottomRight", Alignment::BottomRight}
+    };
+    return mapping.at(alignmentStr);
+}
+
 glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
     // to scale the plane
     const float textureRatio =
@@ -562,7 +631,19 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
 }
 
 glm::vec2 ScreenSpaceRenderable::screenSpacePosition() {
-    return glm::vec2(_cartesianPosition.value());
+   // Convert from [-1,1] to [0,1] range
+   return glm::vec2(
+    _cartesianPosition.value().x * 0.5f + 0.5f,
+    _cartesianPosition.value().y * 0.5f + 0.5f
+);
+}
+void ScreenSpaceRenderable::setScreenPosition(glm::vec2 pos) {
+    // Convert from [0,1] to [-1,1] range
+    _cartesianPosition = glm::vec3(
+        pos.x * 2.f - 1.f,
+        pos.y * 2.f - 1.f,
+        _cartesianPosition.value().z
+    );
 }
 
 glm::vec2 ScreenSpaceRenderable::screenSpaceDimensions() {
@@ -656,6 +737,23 @@ glm::mat4 ScreenSpaceRenderable::translationMatrix() {
 //    const glm::vec3 translation = _useRadiusAzimuthElevation ?
 //        sphericalToCartesian(raeToSpherical(_raePosition)) :
 //        _cartesianPosition;
+glm::vec3 translation = _cartesianPosition;
+    
+// Apply alignment offset
+glm::vec2 alignOffset(0.f);
+switch (alignment()) {
+    case Alignment::TopLeft:      alignOffset = glm::vec2(1.f, -1.f); break;
+    case Alignment::TopCenter:    alignOffset = glm::vec2(0.f, -1.f); break;
+    case Alignment::TopRight:     alignOffset = glm::vec2(-1.f, -1.f); break;
+    case Alignment::CenterLeft:   alignOffset = glm::vec2(1.f, 0.f); break;
+    case Alignment::Center:       alignOffset = glm::vec2(0.f, 0.f); break;
+    case Alignment::CenterRight:  alignOffset = glm::vec2(-1.f, 0.f); break;
+    case Alignment::BottomLeft:   alignOffset = glm::vec2(1.f, 1.f); break;
+    case Alignment::BottomCenter: alignOffset = glm::vec2(0.f, 1.f); break;
+    case Alignment::BottomRight:  alignOffset = glm::vec2(-1.f, 1.f); break;
+}
+
+translation += glm::vec3(alignOffset * screenSpaceDimensions() * 0.5f, 0.f);
 
     return glm::translate(glm::mat4(1.f), translation);
 }
