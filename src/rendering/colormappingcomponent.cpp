@@ -192,8 +192,8 @@ namespace {
         // for color mapping when the option is selected.
         std::optional<std::vector<ColorMapParameter>> parameterOptions;
 
-        // The default parameter to use for the color map. The options for this parameter are
-        // either loaded from the dataset or provided in the `ParameterOptions` list.
+        // The default parameter to use for the color map. The options for this parameter
+        // are either loaded from the dataset or provided in the `ParameterOptions` list.
         // This value can be changed dynamically in the user interface.
         std::optional<std::string> parameter;
 
