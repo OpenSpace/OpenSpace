@@ -152,11 +152,11 @@ namespace {
     //
     // The option for the parameters will be initialized based on the dataset used for
     // the specific renderable. The value range will be set based on the min and max
-    // value for the respective column in the dataset, but can be manually adjusted.
+    // values for the respective column in the dataset, but can be manually adjusted.
     // Per default, all columns will be loaded, but this can also be adjusted.
     //
-    // In addition to specifying a color map (.cmap) file and changing the parameter, this
-    // component includes features such as:
+    // In addition to specifying a color map (.cmap) file and changing the parameter used
+    // for determining the color, this component includes features such as:
     //
     //   - Inverting the color map
     //
@@ -182,18 +182,18 @@ namespace {
             // dataset.
             std::optional<glm::vec2> range;
         };
-        // A list of options for parameters to use for color mapping, that will appear
+        // A list of options for parameters to use for color mapping that will appear
         // as options in the drop-down menu in the user interface. Per default, the
         // first option in the list is selected.
         //
         // Each option is a table in the form
-        // `{ Key = \"dataColumn\", Range = {min, max} }`, where the range is optional.
+        // `{ Key = \"dataColumn\", Range = {min, max} }`, where the `Range` is optional.
         // The specified range (or the min/max values for this data column) will be used
         // for color mapping when the option is selected.
         std::optional<std::vector<ColorMapParameter>> parameterOptions;
 
-        // The default parameter to color map by. The options for this parameter are
-        // either loaded from the dataset, or provided in the `ParameterOptions` list.
+        // The default parameter to use for the color map. The options for this parameter are
+        // either loaded from the dataset or provided in the `ParameterOptions` list.
         // This value can be changed dynamically in the user interface.
         std::optional<std::string> parameter;
 
