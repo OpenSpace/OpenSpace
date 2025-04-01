@@ -22,61 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEFRAMEBUFFER___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEFRAMEBUFFER___H__
+#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACERENDERABLERENDERABLE___H__
+#define __OPENSPACE_MODULE_BASE___SCREENSPACERENDERABLERENDERABLE___H__
 
-#include <openspace/rendering/screenspacerenderable.h>
+#include <modules/base//rendering/screenspaceframebuffer.h>
 
-#include <openspace/properties/vector/vec2property.h>
-
-namespace ghoul::opengl {
-    class FramebufferObject;
-    class Texture;
-} // namespace ghoul::opengl
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec3property.h>
 
 namespace openspace {
 
+namespace properties { class PropertyOwner; }
+
+class Renderable;
+class Rotation;
+class Scale;
+class Translation;
+
 namespace documentation { struct Documentation; }
 
-/**
- * Creates a texture by rendering to a framebuffer, this is then used on a screen space
- * plane. This class lets you ass renderfunctions that should render to a framebuffer with
- * an attached texture. The texture is then used on a screen space plane that works both
- * in fisheye and flat screens.
- */
-class ScreenSpaceFramebuffer : public ScreenSpaceRenderable {
+class ScreenSpaceRenderableRenderable : public ScreenSpaceFramebuffer {
 public:
     using RenderFunction = std::function<void()>;
 
-    explicit ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceFramebuffer() override;
+    explicit ScreenSpaceRenderableRenderable(const ghoul::Dictionary& dictionary);
+    virtual ~ScreenSpaceRenderableRenderable() override;
 
     bool initializeGL() override;
     bool deinitializeGL() override;
-    void render(const RenderData& renderData) override;
-    bool isReady() const override;
-
-    void setSize(glm::vec2 size);
-    void addRenderFunction(RenderFunction renderFunction);
-    void removeAllRenderFunctions();
+    void update() override;
 
     static documentation::Documentation Documentation();
 
-protected:
-    void createFramebuffer();
-    properties::Vec2Property _size;
-
 private:
-    void bindTexture() override;
+    ghoul::mm_unique_ptr<Translation> _translation = nullptr;
+    ghoul::mm_unique_ptr<properties::PropertyOwner> _transform = nullptr;
+    ghoul::mm_unique_ptr<Rotation> _rotation = nullptr;
+    ghoul::mm_unique_ptr<Scale> _scale = nullptr;
+    ghoul::mm_unique_ptr<Renderable> _renderable = nullptr;
 
-    static int id();
-
-    std::unique_ptr<ghoul::opengl::FramebufferObject> _framebuffer;
-    std::vector<std::function<void()>> _renderFunctions;
-
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    double _previousTime = 0.0;
+    properties::DoubleProperty _time;
+    properties::Vec3Property _cameraPosition;
+    properties::Vec3Property _cameraCenter;
+    properties::Vec3Property _cameraUp;
+    properties::FloatProperty _cameraFov;
 };
 
 } //namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEFRAMEBUFFER___H__
+#endif // __OPENSPACE_MODULE_BASE___SCREENSPACERENDERABLERENDERABLE___H__
