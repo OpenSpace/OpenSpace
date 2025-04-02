@@ -121,10 +121,7 @@ documentation::Documentation SizeMappingComponent::Documentation() {
 SizeMappingComponent::SizeMappingComponent()
     : properties::PropertyOwner({ "SizeMapping", "Size Mapping", "" })
     , enabled(EnabledInfo, true)
-    , parameterOption(
-        OptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , parameterOption(OptionInfo)
     , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 1000.f)
     , isRadius(IsRadiusInfo, false)
 {

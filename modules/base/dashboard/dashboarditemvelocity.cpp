@@ -84,7 +84,7 @@ documentation::Documentation DashboardItemVelocity::Documentation() {
 DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _doSimplification(SimplificationInfo, true)
-    , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _requestedUnit(RequestedUnitInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _doSimplification.onChange([this]() {
