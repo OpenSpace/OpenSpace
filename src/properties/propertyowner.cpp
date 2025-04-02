@@ -383,7 +383,9 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner*
         // Notify the change so the UI can update
         publishPropertyTreePrunedEvent(owner->uri());
 
-        // It's probably going to get deleted, but we can't be 100% sure of that
+        // When a PropertyOwner is removed as a subowner, it means that it will probably
+        // be deleted soon and we wouldn't need to invalidate the cache, but we can't be
+        // 100% sure of that, so we are invalidating the cache anyway
         owner->updateUriCaches();
         if (global::openSpaceEngine) {
             global::openSpaceEngine->invalidatePropertyCache();

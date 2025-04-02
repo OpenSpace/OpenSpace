@@ -148,19 +148,20 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
         properties.cend(),
         [&](properties::Property* prop) {
             // Check the regular expression for all properties
-            const std::string_view id = prop->uri();
+            const std::string_view uri = prop->uri();
 
-            if (isLiteral && id != propertyName) {
+            if (isLiteral && uri != propertyName) {
                 return;
             }
             else if (!propertyName.empty()) {
-                size_t propertyPos = id.find(propertyName);
+                size_t propertyPos = uri.find(propertyName);
                 if (
+                    // Check if the propertyName appears in the URI at all
                     (propertyPos == std::string::npos) ||
-                    // Check that the propertyName fully matches the property in id
-                    ((propertyPos + propertyName.length() + 1) < id.length()) ||
+                    // Check that the propertyName fully matches the property in uri
+                    ((propertyPos + propertyName.length() + 1) < uri.length()) ||
                     // Match node name
-                    (!nodeName.empty() && id.find(nodeName) == std::string::npos))
+                    (!nodeName.empty() && uri.find(nodeName) == std::string::npos))
                 {
                     return;
                 }
@@ -175,7 +176,7 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
                 }
             }
             else if (!nodeName.empty()) {
-                size_t nodePos = id.find(nodeName);
+                size_t nodePos = uri.find(nodeName);
                 if (nodePos != std::string::npos) {
                     // Check tag
                     if (isGroupMode) {
@@ -551,21 +552,21 @@ namespace {
     std::vector<std::string> res;
     for (properties::Property* prop : props) {
         // Check the regular expression for all properties
-        const std::string_view id = prop->uri();
+        const std::string_view uri = prop->uri();
 
-        if (isLiteral && id != propertyName) {
+        if (isLiteral && uri != propertyName) {
             continue;
         }
         else if (!propertyName.empty()) {
-            size_t propertyPos = id.find(propertyName);
+            size_t propertyPos = uri.find(propertyName);
             if (propertyPos != std::string::npos) {
                 // Check that the propertyName fully matches the property in id
-                if ((propertyPos + propertyName.length() + 1) < id.length()) {
+                if ((propertyPos + propertyName.length() + 1) < uri.length()) {
                     continue;
                 }
 
                 // Match node name
-                if (!nodeName.empty() && id.find(nodeName) == std::string::npos) {
+                if (!nodeName.empty() && uri.find(nodeName) == std::string::npos) {
                     continue;
                 }
 
@@ -583,7 +584,7 @@ namespace {
             }
         }
         else if (!nodeName.empty()) {
-            size_t nodePos = id.find(nodeName);
+            size_t nodePos = uri.find(nodeName);
             if (nodePos != std::string::npos) {
                 // Check tag
                 if (!groupName.empty()) {
@@ -603,7 +604,7 @@ namespace {
             }
         }
 
-        res.push_back(std::string(id));
+        res.push_back(std::string(uri));
     }
 
     return res;
