@@ -61,6 +61,7 @@ set(HEADER_FILES
   rendering/renderableplaneimageonline.h
   rendering/renderableplanetimevaryingimage.h
   rendering/renderableprism.h
+  rendering/renderablesolarimagery.h
   rendering/renderablesphere.h
   rendering/renderablesphereimagelocal.h
   rendering/renderablesphereimageonline.h
@@ -130,6 +131,7 @@ set(SOURCE_FILES
   rendering/renderableplaneimageonline.cpp
   rendering/renderableplanetimevaryingimage.cpp
   rendering/renderableprism.cpp
+  rendering/renderablesolarimagery.cpp
   rendering/renderablesphere.cpp
   rendering/renderablesphereimagelocal.cpp
   rendering/renderablesphereimageonline.cpp

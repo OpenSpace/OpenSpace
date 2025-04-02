@@ -63,6 +63,7 @@
 #include <modules/base/rendering/renderableplaneimageonline.h>
 #include <modules/base/rendering/renderableplanetimevaryingimage.h>
 #include <modules/base/rendering/renderableprism.h>
+#include <modules/base/rendering/renderablesolarimagery.h>
 #include <modules/base/rendering/renderabletimevaryingsphere.h>
 #include <modules/base/rendering/screenspacedashboard.h>
 #include <modules/base/rendering/screenspaceimagelocal.h>
@@ -172,6 +173,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderablePointCloud>("RenderablePointCloud");
     fRenderable->registerClass<RenderablePolygonCloud>("RenderablePolygonCloud");
     fRenderable->registerClass<RenderablePrism>("RenderablePrism");
+    fRenderable->registerClass<RenderableSolarImagery>("RenderableSolarImagery");
     fRenderable->registerClass<RenderableTimeVaryingSphere>(
         "RenderableTimeVaryingSphere"
     );
@@ -267,6 +269,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderablePointCloud::Documentation(),
         RenderablePolygonCloud::Documentation(),
         RenderablePrism::Documentation(),
+        RenderableSolarImagery::Documentation(),
         RenderableRadialGrid::Documentation(),
         RenderableSphereImageLocal::Documentation(),
         RenderableSphereImageOnline::Documentation(),
