@@ -476,7 +476,7 @@ public:
     void resetToUnchanged();
 
     /**
-     * This function must be called whenever this properties URI changes. Examples of this
+     * This function must be called whenever this property's URI changes. Examples of this
      * are if the PropertyOwner to which this Property belongs changes identifier or is
      * reparented in any way.
      */
