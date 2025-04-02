@@ -97,15 +97,6 @@ namespace openspace {
         _viewport.viewGrid = nullptr;
         glDeleteBuffers(1, &_quadVbo);
         glDeleteVertexArrays(1, &_quadVao);
-
-        std::string program = std::string(ProgramName);
-        BlackHoleModule::ProgramObjectManager.release(
-            program,
-            [](ghoul::opengl::ProgramObject* p) {
-                global::renderEngine->removeRenderProgram(p);
-            }
-        );
-        _program = nullptr;
     }
 
     bool RenderableBlackHole::isReady() const {
@@ -231,22 +222,14 @@ namespace openspace {
     }
 
     void RenderableBlackHole::setupShaders() {
-        const std::string vertexShaderPath = "${MODULE_BLACKHOLE}/shaders/blackhole_vs.glsl";
-        const std::string fragmentShaderPath = "${MODULE_BLACKHOLE}/shaders/blackhole_fs.glsl";
-
-        // Initialize shaders
-        std::string program = std::string(ProgramName);
-        _program = BlackHoleModule::ProgramObjectManager.request(
-            program,
-            [fragmentShaderPath, vertexShaderPath, program]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                const std::filesystem::path vs = absPath(vertexShaderPath);
-                const std::filesystem::path fs = absPath(fragmentShaderPath);
-
-                return global::renderEngine->buildRenderProgram(program, vs, fs);
-            }
+        _program = ghoul::opengl::ProgramObject::Build(
+            "BlackHoleProgram",
+            absPath("${MODULE_BLACKHOLE}/shaders/blackhole_vs.glsl"),
+            absPath("${MODULE_BLACKHOLE}/shaders/blackhole_fs.glsl")
         );
 
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+
     }
 
     void RenderableBlackHole::setupQuad() {
@@ -310,7 +293,7 @@ namespace openspace {
     }
 
     void RenderableBlackHole::bindSSBOData(
-        ghoul::opengl::ProgramObject* program,
+        std::unique_ptr<ghoul::opengl::ProgramObject>& program,
         const std::string& ssboName,
         std::unique_ptr<ghoul::opengl::BufferBinding<ghoul::opengl::bufferbinding::Buffer::ShaderStorage>>& ssboBinding,
         GLuint& ssboID

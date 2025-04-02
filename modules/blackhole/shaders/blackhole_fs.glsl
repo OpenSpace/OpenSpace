@@ -1,4 +1,7 @@
-#include "fragment.glsl"
+//#include "fragment.glsl"
+
+#version __CONTEXT__
+
 in vec2 TexCoord;
 
 
@@ -11,6 +14,7 @@ uniform sampler1D colorBVMap;
 uniform mat4 cameraRotationMatrix;
 uniform mat4 worldRotationMatrix;
 
+layout (location = 0) out vec4 finalColor;
 
 layout (std430) buffer ssbo_warp_table {
   float schwarzschildWarpTable[];
@@ -286,8 +290,7 @@ vec4 searchNearestStar(vec3 sphericalCoords, int layer) {
                         Fragment shader
 ***********************************************************/
 
-Fragment getFragment() {
-    Fragment frag;
+void main() {
 
     vec4 viewCoords = normalize(vec4(texture(viewGrid, TexCoord).xy, VIEWGRIDZ, 0.0f));
 
@@ -307,8 +310,8 @@ Fragment getFragment() {
 
         if (isnan(envMapSphericalCoords.x)) {
             // If inside the event horizon
-            frag.color = vec4(0.0f);
-            return frag;
+            finalColor = vec4(0.0f);
+            return;
         }
 
         vec4 envMapCoords = vec4(sphericalToCartesian(envMapSphericalCoords.x, envMapSphericalCoords.y), 0.0f);
@@ -331,10 +334,6 @@ Fragment getFragment() {
     vec2 uv = sphericalToUV(sphericalCoords);
     vec4 texColor = texture(environmentTexture, uv);
 
-    vec4 finalColor;
     finalColor.rgb = accumulatedColor.rgb * accumulatedWeight + texColor.rgb * (1.0 - accumulatedWeight);
     finalColor.a = 1.0;
-
-    frag.color = finalColor;
-    return frag;
 }

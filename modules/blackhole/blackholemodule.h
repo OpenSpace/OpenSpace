@@ -43,7 +43,6 @@ public:
 
     static documentation::Documentation Documentation();
 
-    static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
     static ghoul::opengl::TextureManager TextureManager;
 
 private:

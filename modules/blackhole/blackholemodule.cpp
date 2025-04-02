@@ -40,8 +40,6 @@ namespace {
 } // namespace
 
 namespace openspace {
-
-ghoul::opengl::ProgramObjectManager BlackHoleModule::ProgramObjectManager;
 ghoul::opengl::TextureManager BlackHoleModule::TextureManager;
 
 documentation::Documentation BlackHoleModule::Documentation() {
