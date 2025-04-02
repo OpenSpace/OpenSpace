@@ -312,7 +312,8 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
         const bool hasProp = hasProperty(owner->identifier());
         if (hasProp) {
             LERROR(std::format(
-                "PropertyOwner '{}'s name already names a Property", owner->identifier()
+                "PropertyOwner '{}'s identifier is already in use for a Property",
+                owner->identifier()
             ));
             return;
         }

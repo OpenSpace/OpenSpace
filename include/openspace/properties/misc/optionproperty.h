@@ -48,11 +48,6 @@ public:
         std::string description;
     };
 
-    enum class DisplayType {
-        Radio,
-        Dropdown
-    };
-
     /**
      * The constructor delegating the `identifier` and the `guiName` to its super class.
      *
@@ -65,18 +60,6 @@ public:
     OptionProperty(Property::PropertyInfo info);
 
     /**
-    * The constructor delegating the `identifier` and the `guiName` to its super class.
-    *
-    * \param info The PropertyInfo structure that contains all the required static
-    *        information for initializing this Property
-    * \param displayType Optional DisplayType for GUI (default RADIO)
-    *
-    * \pre \p info.identifier must not be empty
-    * \pre \p info.guiName must not be empty
-    */
-    OptionProperty(PropertyInfo info, DisplayType displayType);
-
-    /**
      * Returns the name of the class for reflection purposes.
      *
      * \return The name of this class for reflection purposes
@@ -87,20 +70,13 @@ public:
     using TemplateProperty<int>::operator=;
 
     /**
-     * Returns the type for GUI display.
-     *
-     * \return OptionType for display purposes
-     */
-    DisplayType displayType() const;
-
-    /**
      * Adds the passed option to the list of available options. The `value` of the
      * `option` must not have been registered previously, or a warning will be logged.
      *
      * \param value The option that will be added to the list of available options
-     * \param desc The description of the value that will be added
+     * \param description The description of the value that will be added
      */
-    void addOption(int value, std::string desc);
+    void addOption(int value, std::string description);
 
     /**
      * Adds multiple options to the OptionProperty. Each value in the vector consists of
@@ -171,7 +147,6 @@ private:
 
     /// The list of options which have been registered with this OptionProperty
     std::vector<Option> _options;
-    DisplayType _displayType;
 };
 
 } // namespace openspace::properties
