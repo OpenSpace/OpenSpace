@@ -24,6 +24,7 @@
 
 #include <modules/space/kepler.h>
 
+#include <openspace/util/distanceconstants.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -278,20 +279,20 @@ namespace {
             epoch.end(),
             [](char c) { return c == '-'; }
         );
-        const std::string format = (nDashes == 2) ? "{:4d}-{:2d}-{}" : "{:4d}{:2d}{}";
-        auto res = scn::scan<int, int, double>(e, scn::runtime_format(format));
+        if (nDashes == 0) {
+            // Insert the two dashes; once after the year and one after the month
+            e.insert(4, "-");
+            e.insert(7, "-");
+        }
+
+        auto res = scn::scan<int, int, int, double>(e, "{:4d}-{:2d}-{:2d}.{}");
         if (!res) {
             throw ghoul::RuntimeError(std::format("Error parsing epoch '{}'", epoch));
         }
-        auto [year, monthNum, dayOfMonth] = res->values();
+        auto [year, monthNum, day, fraction] = res->values();
         const int daysSince2000 = countDays(year);
-        const int daysInto = daysIntoGivenYear(
-            year,
-            monthNum,
-            static_cast<int>(dayOfMonth)
-        );
-        const double daysInYear = static_cast<double>(daysInto) +
-            (dayOfMonth - std::floor(dayOfMonth));
+        const int daysInto = daysIntoGivenYear(year, monthNum, day);
+        const double daysInYear = static_cast<double>(daysInto) + fraction;
 
         // 3
         using namespace std::chrono;
@@ -731,8 +732,6 @@ std::vector<Parameters> readSbdbFile(const std::filesystem::path& file) {
 
     std::vector<Parameters> result;
     while (ghoul::getline(f, line)) {
-        constexpr double AuToKm = 1.496e8;
-
         std::vector<std::string> parts = ghoul::tokenizeString(line, ',');
         if (parts.size() != NDataFields) {
             throw ghoul::RuntimeError(std::format(
@@ -746,7 +745,9 @@ std::vector<Parameters> readSbdbFile(const std::filesystem::path& file) {
 
         p.epoch = epochFromYMDdSubstring(parts[1]);
         p.eccentricity = std::stod(parts[2]);
-        p.semiMajorAxis = std::stod(parts[3]) * AuToKm;
+        // AU -> km
+        p.semiMajorAxis =
+            std::stod(parts[3]) * distanceconstants::AstronomicalUnit / 1000.0;
 
         auto importAngleValue = [](const std::string& angle) {
             if (angle.empty()) {
@@ -818,13 +819,13 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
             .name = designation,
             .id = designation,
             .inclination = inclination,
-            .semiMajorAxis = semiMajorAxis,
+            // AU -> km
+            .semiMajorAxis = semiMajorAxis * distanceconstants::AstronomicalUnit / 1000.0,
             .ascendingNode = ascNode,
             .eccentricity = eccentricity,
             .argumentOfPeriapsis = argPeriapsis,
             .meanAnomaly = meanAnomaly
         };
-        // @TODO: Calculate epoch/period
 
         std::string epochDate = unpackDate(epoch);
         parameters.epoch = epochFromYMDdSubstring(epochDate);
@@ -841,7 +842,7 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
         }
 
         auto remains =
-            nOppositions > 1 ? multiOpposition->range() : singleOpposition->range();
+            nObservations > 1 ? multiOpposition->range() : singleOpposition->range();
 
         // The remaining data is purely optional, so it is fine if we fail, but we try
         // anyway as there is a user-friendly name of the minor body at the end
