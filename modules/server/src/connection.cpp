@@ -53,6 +53,7 @@
 #include <ghoul/io/socket/tcpsocketserver.h>
 #include <ghoul/io/socket/websocketserver.h>
 #include <ghoul/misc/profiling.h>
+#include <include/topics/profiletopic.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "ServerModule: Connection";
@@ -97,6 +98,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
     _topicFactory.registerClass<GetPropertyTopic>("get");
     _topicFactory.registerClass<LuaScriptTopic>("luascript");
     _topicFactory.registerClass<MissionTopic>("missions");
+    _topicFactory.registerClass<ProfileTopic>("profile");
     _topicFactory.registerClass<SessionRecordingTopic>("sessionRecording");
     _topicFactory.registerClass<SetPropertyTopic>("set");
     _topicFactory.registerClass<ShortcutTopic>("shortcuts");

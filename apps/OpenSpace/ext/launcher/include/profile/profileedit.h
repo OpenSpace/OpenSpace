@@ -86,16 +86,17 @@ signals:
     void raiseExitWindow();
 
 private slots:
-    void openMeta();
     void openProperties();
-    void openModules();
-    void openKeybindings();
     void openAssets();
-    void openTime();
-    void openAddedScripts();
+    void openKeybindings();
+    void openMeta();
+    void openMarkNodes();
     void openDeltaTimes();
     void openCamera();
-    void openMarkNodes();
+    void openTime();
+    void openModules();
+    void openUiPanels();
+    void openAddedScripts();
     void approved();
 
 private:
@@ -112,18 +113,19 @@ private:
     std::string _profileFilename;
 
     QLineEdit* _profileEdit = nullptr;
-    QLabel* _modulesLabel = nullptr;
-    QLabel* _assetsLabel = nullptr;
-    QTextEdit* _assetsEdit = nullptr;
     QLabel* _propertiesLabel = nullptr;
     QTextEdit* _propertiesEdit = nullptr;
+    QLabel* _assetsLabel = nullptr;
+    QTextEdit* _assetsEdit = nullptr;
     QLabel* _keybindingsLabel = nullptr;
     QTextEdit* _keybindingsEdit = nullptr;
-    QLabel* _deltaTimesLabel = nullptr;
+    QLabel* _metaLabel = nullptr;
     QLabel* _interestingNodesLabel = nullptr;
+    QLabel* _deltaTimesLabel = nullptr;
     QLabel* _cameraLabel = nullptr;
     QLabel* _timeLabel = nullptr;
-    QLabel* _metaLabel = nullptr;
+    QLabel* _modulesLabel = nullptr;
+    QLabel* _uiPanelVisibilityLabel = nullptr;
     QLabel* _additionalScriptsLabel = nullptr;
 };
 
