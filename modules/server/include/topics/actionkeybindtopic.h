@@ -22,26 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___ACTIONKEYBIND_TOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___ACTIONKEYBIND_TOPIC___H__
+#ifndef __OPENSPACE_MODULE_SERVER___SHORTCUT_TOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___SHORTCUT_TOPIC___H__
 
 #include <modules/server/include/topics/topic.h>
 
 namespace openspace {
 
-class ActionKeybindTopic : public Topic {
+class ShortcutTopic : public Topic {
 public:
-    ~ActionKeybindTopic() override = default;
+    ~ShortcutTopic() override = default;
 
     void handleJson(const nlohmann::json& input) override;
     bool isDone() const override;
 
 private:
     void sendData(nlohmann::json data) const;
-    nlohmann::json allActionsKeybinds() const;
-    nlohmann::json action(const std::string& identifier) const;
+    nlohmann::json shortcutsJson() const;
+    nlohmann::json shortcutJson(const std::string& identifier) const;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___ACTIONKEYBIND_TOPIC___H__
+#endif // __OPENSPACE_MODULE_SERVER___SHORTCUT_TOPIC___H__

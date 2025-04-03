@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/topics/actionkeybindtopic.h>
+#include <modules/server/include/topics/shortcuttopic.h>
 
 #include <modules/server/include/connection.h>
 #include <openspace/engine/globals.h>
@@ -113,7 +113,6 @@ nlohmann::json ActionKeybindTopic::allActionsKeybinds() const {
 }
 
 nlohmann::json ActionKeybindTopic::action(const std::string& identifier) const {
-    std::vector<nlohmann::json> json;
     std::vector<interaction::Action> actions = global::actionManager->actions();
 
     auto found = std::find_if(
@@ -129,9 +128,7 @@ nlohmann::json ActionKeybindTopic::action(const std::string& identifier) const {
     }
     interaction::Action action = *found;
 
-    json.push_back(jsonAction(action));
-
-    return json;
+    return jsonAction(action);
 }
 
 void ActionKeybindTopic::sendData(nlohmann::json data) const {

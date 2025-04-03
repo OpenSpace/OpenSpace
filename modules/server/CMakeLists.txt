@@ -45,7 +45,7 @@ set(HEADER_FILES
   include/topics/missiontopic.h
   include/topics/sessionrecordingtopic.h
   include/topics/setpropertytopic.h
-  include/topics/shortcuttopic.h
+  include/topics/actionkeybindtopic.h
   include/topics/subscriptiontopic.h
   include/topics/timetopic.h
   include/topics/skybrowsertopic.h
@@ -75,7 +75,7 @@ set(SOURCE_FILES
   src/topics/missiontopic.cpp
   src/topics/sessionrecordingtopic.cpp
   src/topics/setpropertytopic.cpp
-  src/topics/shortcuttopic.cpp
+  src/topics/actionkeybindtopic.cpp
   src/topics/subscriptiontopic.cpp
   src/topics/timetopic.cpp
   src/topics/skybrowsertopic.cpp
