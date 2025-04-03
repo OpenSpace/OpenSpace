@@ -403,6 +403,102 @@ namespace {
         return
             nSecondsSince2000 + totalSeconds + nLeapSecondsOffset - offset + date.seconds;
     }
+
+    std::string unpackDate(std::string_view packedDate) {
+        // Some data in the MPC dataset are stored in a packed data format that this
+        // function unpacks. More information on packed dates can be found here:
+        // http://www.minorplanetcenter.org/iau/info/PackedDates.html
+
+        if (packedDate.size() < 5) {
+            throw ghoul::RuntimeError(std::format(
+                "Illformed packed date. Size must be 5 characters. {}", packedDate
+            ));
+        }
+
+        if (packedDate[0] != 'I' && packedDate[0] != 'J' && packedDate[0] != 'K') {
+            throw ghoul::RuntimeError(std::format(
+                "Illformed packed date. Illegal year marker. {}", packedDate
+            ));
+        }
+        int year = (packedDate[0] - 55) * 100;
+        auto yearRes = scn::scan<int>(packedDate.substr(1, 2), "{}");
+        if (!yearRes) {
+            throw ghoul::RuntimeError(std::format(
+                "Illformed packed date. Second and third characters must be numbers. {}",
+                packedDate
+            ));
+        }
+        year += yearRes->value();
+
+        int month = [](char m) {
+            switch (m) {
+                case '1':  return 1;
+                case '2':  return 2;
+                case '3':  return 3;
+                case '4':  return 4;
+                case '5':  return 5;
+                case '6':  return 6;
+                case '7':  return 7;
+                case '8':  return 8;
+                case '9':  return 9;
+                case 'A':  return 10;
+                case 'B':  return 11;
+                case 'C':  return 12;
+                default:   return -1;
+            }
+        }(packedDate[3]);
+
+        if (month == -1) {
+            throw ghoul::RuntimeError(std::format(
+                "Illformed packed date. Wrong month marker. {}", packedDate
+            ));
+        }
+
+        int day = [](char d) {
+            switch (d) {
+                case '1': return 1;
+                case '2': return 2;
+                case '3': return 3;
+                case '4': return 4;
+                case '5': return 5;
+                case '6': return 6;
+                case '7': return 7;
+                case '8': return 8;
+                case '9': return 9;
+                case 'A': return 10;
+                case 'B': return 11;
+                case 'C': return 12;
+                case 'D': return 13;
+                case 'E': return 14;
+                case 'F': return 15;
+                case 'G': return 16;
+                case 'H': return 17;
+                case 'I': return 18;
+                case 'J': return 19;
+                case 'K': return 20;
+                case 'L': return 21;
+                case 'M': return 22;
+                case 'N': return 23;
+                case 'O': return 24;
+                case 'P': return 25;
+                case 'Q': return 26;
+                case 'R': return 27;
+                case 'S': return 28;
+                case 'T': return 29;
+                case 'U': return 30;
+                case 'V': return 31;
+                default:  return -1;
+            }
+        }(packedDate[4]);
+
+        if (day == -1) {
+            throw ghoul::RuntimeError(std::format(
+                "Illformed packed date. Wrong day marker. {}", packedDate
+            ));
+        }
+
+        return std::format("{}{:0>2}{:0>2}", year, month, day);
+    }
 } // namespace
 
 namespace openspace::kepler {
@@ -677,6 +773,97 @@ std::vector<Parameters> readSbdbFile(const std::filesystem::path& file) {
     return result;
 }
 
+std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
+    ghoul_assert(std::filesystem::is_regular_file(file), "File must exist");
+
+    std::ifstream f = std::ifstream(file);
+
+    // Automatically detecting the header in an MPC file is unfortuntely not trivially
+    // The data lines in the MPC file format must be at least 160 character in length and
+    // none of the header lines (with one exception) encountered thus far are less than
+    // these 160 characters long. The exception is a line exactly 160 characters long with
+    // all `-` characters as a delimiter between header and data
+    std::vector<Parameters> result;
+    std::string line;
+    int i = 0;
+    while (ghoul::getline(f, line)) {
+        if (line.size() < 160) {
+            // The line is too short to be a data line
+            continue;
+        }
+        if (line.starts_with("------------------")) {
+            // It is the special case of the header seperator
+            continue;
+        }
+
+
+
+        // If we get this far, we should be in the data segment of the file
+        auto initial = scn::scan<
+            std::string, double, double, std::string, double, double, double, double,
+            double, double, double, std::string, std::string, int, int>(
+                line, "{} {} {} {} {} {} {} {} {} {} {} {} {} {} {}"
+            );
+        if (!initial) {
+            throw ghoul::RuntimeError(std::format(
+                "Unable to parse initial block of line {} in data file '{}'.", i, file
+            ));
+        }
+
+        auto& [designation, magnitude, slope, epoch, meanAnomaly, argPeriapsis, ascNode,
+            inclination, eccentricity, meanMotion, semiMajorAxis, uncertainty, reference,
+            nObservations, nOppositions] = initial->values();
+
+        Parameters parameters = {
+            .name = designation,
+            .id = designation,
+            .inclination = inclination,
+            .semiMajorAxis = semiMajorAxis,
+            .ascendingNode = ascNode,
+            .eccentricity = eccentricity,
+            .argumentOfPeriapsis = argPeriapsis,
+            .meanAnomaly = meanAnomaly
+        };
+        // @TODO: Calculate epoch/period
+
+        std::string epochDate = unpackDate(epoch);
+        parameters.epoch = epochFromYMDdSubstring(epochDate);
+        parameters.period =
+            std::chrono::seconds(std::chrono::hours(24)).count() / meanMotion;
+
+
+        auto multiOpposition = scn::scan<int, int>(initial->range(), "{}-{}");
+        auto singleOpposition = scn::scan<int>(initial->range(), "{} days");
+        if (!multiOpposition && !singleOpposition) {
+            throw ghoul::RuntimeError(std::format(
+                "Unable to parse data file '{}' line {}.", file, i
+            ));
+        }
+
+        auto remains =
+            nOppositions > 1 ? multiOpposition->range() : singleOpposition->range();
+
+        // The remaining data is purely optional, so it is fine if we fail, but we try
+        // anyway as there is a user-friendly name of the minor body at the end
+
+        auto skipData = scn::scan<double, std::string, std::string, std::string,
+            std::string, std::string, std::string>(
+                remains, "{} {} {} {} {} {} {}"
+            );
+        if (skipData) {
+            auto& [rms, coarsePert, precPert, computer, flags, humanDesignation, date] =
+                skipData->values();
+            parameters.name = humanDesignation;
+        }
+
+        result.push_back(std::move(parameters));
+
+        i++;
+    }
+
+    return result;
+}
+
 void saveCache(const std::vector<Parameters>& params, const std::filesystem::path& file) {
     std::ofstream stream = std::ofstream(file, std::ofstream::binary);
 
@@ -774,6 +961,9 @@ std::vector<Parameters> readFile(std::filesystem::path file, Format format) {
             break;
         case Format::SBDB:
             res = readSbdbFile(file);
+            break;
+        case Format::MPC:
+            res = readMpcFile(file);
             break;
     }
 
