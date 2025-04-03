@@ -799,65 +799,61 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
 
 
 
+        //std::string_view l = line;
+
+        //std::string_view designation = l.substr(0, 6);
+        //std::string_view magnitude = l.substr(8, 5);
+        //std::string_view slope = l.substr(14, 5);
+        //std::string_view epoch = l.substr(20, 5);
+        //std::string_view meanAnomaly = l.substr(26, 9);
+        //std::string_view argPeriapsis = l.substr(37, 9);
+        //std::string_view ascNode = l.substr(48, 9);
+        //std::string_view inclination = l.substr(59, 9);
+        //std::string_view eccentricity = l.substr(70, 9);
+        //std::string_view meanMotion = l.substr(80, 11);
+        //std::string_view semiMajorAxis = l.substr(92, 11);
+        //std::string_view uncertainty = l.substr(105, 1);
+        //std::string_view reference = l.substr(107, 9);
+        //std::string_view nObservations = l.substr(117, 5);
+        //std::string_view nOppositions = l.substr(123, 3);
+
+
         // If we get this far, we should be in the data segment of the file
         auto initial = scn::scan<
             std::string, double, double, std::string, double, double, double, double,
-            double, double, double, std::string, std::string, int, int>(
-                line, "{} {} {} {} {} {} {} {} {} {} {} {} {} {} {}"
+            double, double, double>(
+                line, "{} {} {} {} {} {} {} {} {} {} {}"
             );
         if (!initial) {
             throw ghoul::RuntimeError(std::format(
-                "Unable to parse initial block of line {} in data file '{}'.", i, file
+                "Unable to parse initial block of line {} in data file '{}'. {}",
+                i, file, line
             ));
         }
 
         auto& [designation, magnitude, slope, epoch, meanAnomaly, argPeriapsis, ascNode,
-            inclination, eccentricity, meanMotion, semiMajorAxis, uncertainty, reference,
-            nObservations, nOppositions] = initial->values();
+            inclination, eccentricity, meanMotion, semiMajorAxis] = initial->values();
 
-        Parameters parameters = {
-            .name = designation,
-            .id = designation,
-            .inclination = inclination,
-            // AU -> km
-            .semiMajorAxis = semiMajorAxis * distanceconstants::AstronomicalUnit / 1000.0,
-            .ascendingNode = ascNode,
-            .eccentricity = eccentricity,
-            .argumentOfPeriapsis = argPeriapsis,
-            .meanAnomaly = meanAnomaly
-        };
+        std::string name = designation;
+        if (line.size() >= 194) {
+            name = line.substr(166, 28);
+            ghoul::trimWhitespace(name);
+        }
 
         std::string epochDate = unpackDate(epoch);
-        parameters.epoch = epochFromYMDdSubstring(epochDate);
-        parameters.period =
-            std::chrono::seconds(std::chrono::hours(24)).count() / meanMotion;
-
-
-        auto multiOpposition = scn::scan<int, int>(initial->range(), "{}-{}");
-        auto singleOpposition = scn::scan<int>(initial->range(), "{} days");
-        if (!multiOpposition && !singleOpposition) {
-            throw ghoul::RuntimeError(std::format(
-                "Unable to parse data file '{}' line {}.", file, i
-            ));
-        }
-
-        auto remains =
-            nObservations > 1 ? multiOpposition->range() : singleOpposition->range();
-
-        // The remaining data is purely optional, so it is fine if we fail, but we try
-        // anyway as there is a user-friendly name of the minor body at the end
-
-        auto skipData = scn::scan<double, std::string, std::string, std::string,
-            std::string, std::string, std::string>(
-                remains, "{} {} {} {} {} {} {}"
-            );
-        if (skipData) {
-            auto& [rms, coarsePert, precPert, computer, flags, humanDesignation, date] =
-                skipData->values();
-            parameters.name = humanDesignation;
-        }
-
-        result.push_back(std::move(parameters));
+        result.emplace_back(
+            std::move(name),
+            std::move(designation),
+            inclination,
+            // AU -> km
+            semiMajorAxis * distanceconstants::AstronomicalUnit / 1000.0,
+            ascNode,
+            eccentricity,
+            argPeriapsis,
+            meanAnomaly,
+            epochFromYMDdSubstring(epochDate),
+            std::chrono::seconds(std::chrono::hours(24)).count() / meanMotion
+        );
 
         i++;
     }

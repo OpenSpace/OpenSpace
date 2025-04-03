@@ -16,6 +16,7 @@ local Object = {
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = asset.resource("MPCORB.DAT"),
+    -- Path = asset.resource("test.dat"),
     Format = "MPC",
     Segments = 200,
     SegmentQuality = 4,
