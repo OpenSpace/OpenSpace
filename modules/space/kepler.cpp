@@ -788,6 +788,8 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
     std::string line;
     int i = 0;
     while (ghoul::getline(f, line)) {
+        i++;
+
         if (line.size() < 160) {
             // The line is too short to be a data line
             continue;
@@ -797,32 +799,17 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
             continue;
         }
 
+        std::string designation = line.substr(0, 6);
 
-
-        //std::string_view l = line;
-
-        //std::string_view designation = l.substr(0, 6);
-        //std::string_view magnitude = l.substr(8, 5);
-        //std::string_view slope = l.substr(14, 5);
-        //std::string_view epoch = l.substr(20, 5);
-        //std::string_view meanAnomaly = l.substr(26, 9);
-        //std::string_view argPeriapsis = l.substr(37, 9);
-        //std::string_view ascNode = l.substr(48, 9);
-        //std::string_view inclination = l.substr(59, 9);
-        //std::string_view eccentricity = l.substr(70, 9);
-        //std::string_view meanMotion = l.substr(80, 11);
-        //std::string_view semiMajorAxis = l.substr(92, 11);
-        //std::string_view uncertainty = l.substr(105, 1);
-        //std::string_view reference = l.substr(107, 9);
-        //std::string_view nObservations = l.substr(117, 5);
-        //std::string_view nOppositions = l.substr(123, 3);
-
+        // We skip over the definitions of the magnitude and slope since we are not using
+        // those values anyway
+        line = line.substr(20);
 
         // If we get this far, we should be in the data segment of the file
         auto initial = scn::scan<
-            std::string, double, double, std::string, double, double, double, double,
-            double, double, double>(
-                line, "{} {} {} {} {} {} {} {} {} {} {}"
+            std::string, double, double, double, double, double, double, double>
+            (
+                line, "{} {} {} {} {} {} {} {}"
             );
         if (!initial) {
             throw ghoul::RuntimeError(std::format(
@@ -831,8 +818,8 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
             ));
         }
 
-        auto& [designation, magnitude, slope, epoch, meanAnomaly, argPeriapsis, ascNode,
-            inclination, eccentricity, meanMotion, semiMajorAxis] = initial->values();
+        auto& [epoch, meanAnomaly, argPeriapsis, ascNode, inclination, eccentricity,
+            meanMotion, semiMajorAxis] = initial->values();
 
         std::string name = designation;
         if (line.size() >= 194) {
@@ -855,7 +842,6 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
             std::chrono::seconds(std::chrono::hours(24)).count() / meanMotion
         );
 
-        i++;
     }
 
     return result;

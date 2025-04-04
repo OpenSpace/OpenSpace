@@ -2,33 +2,34 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local sssb = asset.resource({
-  Name = "Small SolarSystem Body Data (Amor Asteroid)",
-  Type = "HttpSynchronization",
-  Identifier = "sssb_data_amor_asteroid",
-  Version = 4
+local mpcorb = asset.resource({
+  Type = "UrlSynchronization",
+  Name = "Minor Planet Center Orbital File",
+  Identifier = "mpc_orb",
+  Url = "https://minorplanetcenter.net/iau/MPCORB/MPCORB.DAT"
 })
 
 
 local Object = {
-  Identifier = "mpc_full",
+  Identifier = "MinorPlanetCenterObjects",
   Parent = transforms.SunEclipJ2000.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
-    Path = asset.resource("MPCORB.DAT"),
-    -- Path = asset.resource("test.dat"),
+    Path = mpcorb,
     Format = "MPC",
     Segments = 200,
     SegmentQuality = 4,
-    Color = { 1.0, 1.0, 1.0 },
+    Color = { 0.8, 0.15, 0.2 },
     TrailFade = 11,
     PointSizeExponent = 9.2
   },
   GUI = {
-    Name = "Minor Planet Center",
+    Name = "Minor Planet Center Bodies",
     Path = "/Solar System/Small Bodies",
-    Description = [[Earth-approaching Near-Earth-Asteroids with orbits exterior to
-      Earth's but interior to Mars'.]]
+    Description = [[The full catalog of objects from the IAU's Minor Planets Center.
+      Specifically from the publications of the Minor Planets Circulars, the Minor Planets
+      Orbit Supplement, and the Minor Planet Electronic Circulars. For more information
+      visit https://minorplanetcenter.net/iau/MPCORB.html.]]
   }
 }
 
@@ -46,12 +47,12 @@ asset.export(Object)
 
 
 asset.meta = {
-  Name = "Amor Asteroids",
-  Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
-    the Amor group]],
-  Author = "JPL Small-Body Database hosted by California Institute of Technology",
-  URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
-  License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010.
-    All documents available from this server may be protected under the U.S. and
-    Foreign Copyright Laws]]
+  Name = "Minor Planets Center Database",
+  Description = [[The full catalog of objects from the IAU's Minor Planets Center.
+      Specifically from the publications of the Minor Planets Circulars, the Minor Planets
+      Orbit Supplement, and the Minor Planet Electronic Circulars. For more information
+      visit https://minorplanetcenter.net/iau/MPCORB.html.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }
