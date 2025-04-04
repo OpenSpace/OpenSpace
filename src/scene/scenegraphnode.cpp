@@ -195,7 +195,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiFocusableInfo = {
-        "IsFocusable",
+        "Focusable",
         "Focusable Hint",
         "This value serves as a hint to determine if it makes sense to focus the camera "
         "on this scene graph node. It only serves as a hint and does not actually "
