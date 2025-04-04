@@ -129,7 +129,7 @@ void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest)
         if (!success) {
             if (attempt < maxRetries) {
                 LINFO(std::format("Retry nr {}.", attempt+1));
-                std::this_thread::sleep_for(std::chrono::seconds(1));
+                std::this_thread::sleep_for(std::chrono::seconds(2));
 
                 response.start();
                 response.wait();
@@ -480,6 +480,12 @@ void DynamicFileSequenceDownloader::update(const double time, const double delta
         {
             _thisFile = closestFileToNow(time);
         }
+        // We've jumped back without interpolating to a previous time step,
+        // past circa 2 files worth of time and without changing delta time
+        // >>>>>>>we jumped to here>>>>>>>>>now>>>>>>>
+        else if (_thisFile->time - 2 * _thisFile->cadence > time) {
+            _thisFile = closestFileToNow(time);
+        }
     }
     else if (!_forward && _thisFile != _availableData.begin()) {
         // if file is there and time is between prev and this file
@@ -497,6 +503,12 @@ void DynamicFileSequenceDownloader::update(const double time, const double delta
         else if (_thisFile - 1 != _availableData.begin() &&
                 (_thisFile - 1)->time > time)
         {
+            _thisFile = closestFileToNow(time);
+        }
+        // We've jumped forward without interpolating to a future time step,
+        // past circa 2 files worth of time and without changing delta time
+        // <<<<<<now<<<<<<<<<we jumped to here<<<<<<<
+        else if (_thisFile->time - 2 * _thisFile->cadence < time) {
             _thisFile = closestFileToNow(time);
         }
     }

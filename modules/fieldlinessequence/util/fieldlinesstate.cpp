@@ -395,6 +395,18 @@ void FieldlinesState::saveStateToJson(const std::string& absPath) {
     LINFO(std::format("Saved fieldline state to: {}{}", absPath, ext));
 }
 
+void FieldlinesState::clear() {
+    _isMorphable = 0;
+    _triggerTime = -1.0;
+    _model = fls::Model::Invalid;
+
+    _extraQuantities.clear();
+    _extraQuantityNames.clear();
+    _lineCount.clear();
+    _lineStart.clear();
+    _vertexPositions.clear();
+}
+
 void FieldlinesState::setModel(fls::Model m) {
     _model = m;
 }

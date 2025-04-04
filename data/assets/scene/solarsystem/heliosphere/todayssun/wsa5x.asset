@@ -5,8 +5,8 @@ local polarityColorTable = transferFunctions .. "/polarity_spec.txt"
 local subEarthLevelColorTable = transferFunctions .. "/subearth_spec.txt"
 local blueBlackRed = transferFunctions .. "/blue-black-red.txt"
 
-infoURL = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id="
-dataURL = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID="
+infoURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id="
+dataURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID="
 
 local sunRadius = 695508000
 --          Convert = { --how to map the number of fits layers to a name
