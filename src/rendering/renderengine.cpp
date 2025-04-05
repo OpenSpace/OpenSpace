@@ -699,14 +699,14 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
             }
         }
 
-        std::sort(
-            ssrs.begin(),
-            ssrs.end(),
-            [](ScreenSpaceRenderable* lhs, ScreenSpaceRenderable* rhs) {
-                // Render back to front
-                return lhs->depth() > rhs->depth();
-            }
-        );
+//        std::sort(
+//            ssrs.begin(),
+//            ssrs.end(),
+//            [](ScreenSpaceRenderable* lhs, ScreenSpaceRenderable* rhs) {
+//                // Render back to front
+//                return lhs->depth() > rhs->depth();
+//            }
+//        );
 
 
         glDisable(GL_DEPTH_TEST);
@@ -730,6 +730,25 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     }
     LTRACE("RenderEngine::render(end)");
 }
+void RenderEngine::moveScreenSpaceRenderable(std::string_view identifier, int direction) {
+    auto& renderables = *global::screenSpaceRenderables;
+
+    auto it = std::find_if(renderables.begin(), renderables.end(),
+        [&identifier](const std::unique_ptr<ScreenSpaceRenderable>& ssr) {
+            return ssr->identifier() == identifier;
+        }
+    );
+
+    if (it != renderables.end()) {
+        size_t index = std::distance(renderables.begin(), it);
+        size_t newIndex = direction > 0 ? index + 1 : (index > 0 ? index - 1 : 0);
+
+        if (newIndex < renderables.size()) {
+            std::swap(renderables[index], renderables[newIndex]);
+        }
+    }
+}
+
 
 bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) const {
     auto intersects = [](const glm::dvec2& mousePos, const glm::ivec4& bbox) {
