@@ -99,9 +99,11 @@ struct WindowDelegate {
 
     int (*firstWindowId)() = []() { return 0; };
 
-    double (*getHorizFieldOfView)() = []() { return 0.0; };
+    std::string (*nameForWindow)(int windowIdx) = [](int) { return std::string(); };
 
-    void (*setHorizFieldOfView)(float hFovDeg) = [](float) { };
+    float (*horizFieldOfView)(int windowIdx) = [](int) { return 0.f; };
+
+    void (*setHorizFieldOfView)(int windowIdx, float hFovDeg) = [](int, float) {};
 
     void* (*getNativeWindowHandle)(size_t windowIndex) = [](size_t) -> void* {
         return nullptr;

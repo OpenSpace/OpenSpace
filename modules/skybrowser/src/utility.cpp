@@ -196,7 +196,9 @@ glm::dvec2 fovWindow() {
     // OpenSpace FOV
     const glm::dvec2 windowDim = glm::dvec2(global::windowDelegate->currentWindowSize());
     const double ratio = windowDim.y / windowDim.x;
-    const double hFov = global::windowDelegate->getHorizFieldOfView();
+    const double hFov = global::windowDelegate->horizFieldOfView(
+        global::windowDelegate->currentWindowId()
+    );
     const glm::dvec2 OpenSpaceFOV = glm::dvec2(hFov, hFov * ratio);
     return OpenSpaceFOV;
 }

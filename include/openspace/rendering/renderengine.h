@@ -204,7 +204,15 @@ private:
 
     properties::IntProperty _framerateLimit;
     std::chrono::high_resolution_clock::time_point _lastFrameTime;
-    properties::FloatProperty _horizFieldOfView;
+
+    struct Window : properties::PropertyOwner {
+        Window(PropertyOwnerInfo info, int id);
+
+        properties::FloatProperty horizFieldOfView;
+    };
+
+    properties::PropertyOwner _windowing;
+    std::vector<std::unique_ptr<Window>> _windows;
 
     properties::Vec3Property _globalRotation;
     properties::Vec3Property _screenSpaceRotation;

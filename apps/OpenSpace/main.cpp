@@ -924,24 +924,40 @@ void setSgctDelegateFunctions() {
 
         return Engine::instance().windows().front()->id();
     };
+    sgctDelegate.nameForWindow = [](int windowIdx) {
+        ZoneScoped;
+
+        ghoul_assert(
+            windowIdx >= 0 &&
+            windowIdx < Engine::instance().windows().size(),
+            "Invalid window index"
+        );
+        return Engine::instance().windows()[windowIdx]->name();
+    };
     sgctDelegate.openGLProcedureAddress = [](const char* func) {
         ZoneScoped;
 
         return glfwGetProcAddress(func);
     };
-    sgctDelegate.getHorizFieldOfView = []() {
+    sgctDelegate.horizFieldOfView = [](int windowIdx) {
         ZoneScoped;
 
-        return static_cast<double>(
-            Engine::instance().windows().front()->horizFieldOfViewDegrees()
+        ghoul_assert(
+            windowIdx >= 0 &&
+            windowIdx < Engine::instance().windows().size(),
+            "Invalid window index"
         );
+        return Engine::instance().windows()[windowIdx]->horizFieldOfViewDegrees();
     };
-    sgctDelegate.setHorizFieldOfView = [](float hFovDeg) {
+    sgctDelegate.setHorizFieldOfView = [](int windowIdx, float hFovDeg) {
         ZoneScoped;
 
-        for (std::unique_ptr<sgct::Window> const& w : Engine::instance().windows()) {
-            w->setHorizFieldOfView(hFovDeg);
-        }
+        ghoul_assert(
+            windowIdx >= 0 &&
+            windowIdx < Engine::instance().windows().size(),
+            "Invalid window index"
+        );
+        Engine::instance().windows()[windowIdx]->setHorizFieldOfView(hFovDeg);
     };
     #ifdef WIN32
     sgctDelegate.getNativeWindowHandle = [](size_t windowIndex) -> void* {
