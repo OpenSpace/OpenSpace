@@ -1,0 +1,58 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
+
+local mpcorb = asset.resource({
+  Type = "UrlSynchronization",
+  Name = "Minor Planet Center Orbital File",
+  Identifier = "mpc_orb",
+  Url = "https://minorplanetcenter.net/iau/MPCORB/MPCORB.DAT"
+})
+
+
+local Object = {
+  Identifier = "MinorPlanetCenterObjects",
+  Parent = transforms.SunEclipJ2000.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = mpcorb,
+    Format = "MPC",
+    Segments = 200,
+    SegmentQuality = 4,
+    Color = { 0.8, 0.15, 0.2 },
+    TrailFade = 11,
+    PointSizeExponent = 9.2
+  },
+  GUI = {
+    Name = "Minor Planet Center Bodies",
+    Path = "/Solar System/Small Bodies",
+    Description = [[The full catalog of objects from the IAU's Minor Planets Center.
+      Specifically from the publications of the Minor Planets Circulars, the Minor Planets
+      Orbit Supplement, and the Minor Planet Electronic Circulars. For more information
+      visit https://minorplanetcenter.net/iau/MPCORB.html.]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Object)
+end)
+
+asset.export(Object)
+
+
+
+asset.meta = {
+  Name = "Minor Planets Center Database",
+  Description = [[The full catalog of objects from the IAU's Minor Planets Center.
+      Specifically from the publications of the Minor Planets Circulars, the Minor Planets
+      Orbit Supplement, and the Minor Planet Electronic Circulars. For more information
+      visit https://minorplanetcenter.net/iau/MPCORB.html.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

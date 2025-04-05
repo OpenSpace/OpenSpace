@@ -186,7 +186,9 @@ namespace {
             // Orbit Mean-Elements Message in the KVN notation.
             OMM,
             // JPL's Small Bodies Database.
-            SBDB
+            SBDB,
+            // Minor Planet Center.
+            MPC
         };
         // The file format that is contained in the file.
         Format format;
