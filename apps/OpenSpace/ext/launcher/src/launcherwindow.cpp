@@ -26,6 +26,7 @@
 
 #include "profile/profileedit.h"
 #include "backgroundimage.h"
+#include "notificationwindow.h"
 #include "settingsdialog.h"
 #include "splitcombobox.h"
 #include <openspace/openspace.h>
@@ -162,6 +163,8 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         logoImage->setGeometry(geometry::LogoImage);
         logoImage->setPixmap(QPixmap(":/images/openspace-horiz-logo-small.png"));
     }
+
+    new NotificationWindow(this);
 
     //
     // Profile chooser
