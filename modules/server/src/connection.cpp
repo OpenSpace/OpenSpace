@@ -38,7 +38,7 @@
 #include <modules/server/include/topics/missiontopic.h>
 #include <modules/server/include/topics/sessionrecordingtopic.h>
 #include <modules/server/include/topics/setpropertytopic.h>
-#include <modules/server/include/topics/shortcuttopic.h>
+#include <modules/server/include/topics/actionkeybindtopic.h>
 #include <modules/server/include/topics/skybrowsertopic.h>
 #include <modules/server/include/topics/subscriptiontopic.h>
 #include <modules/server/include/topics/timetopic.h>

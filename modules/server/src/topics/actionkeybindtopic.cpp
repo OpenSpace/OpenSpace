@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/topics/shortcuttopic.h>
+#include <modules/server/include/topics/actionkeybindtopic.h>
 
 #include <modules/server/include/connection.h>
 #include <openspace/engine/globals.h>
@@ -40,26 +40,31 @@ bool ActionKeybindTopic::isDone() const {
 
 nlohmann::json jsonAction(const interaction::Action& action) {
     // Convert to std as nlohmann doesn't understand glm
-    std::vector<float> colorVec;
+    nlohmann::json colorJson;
     if (action.color.has_value()) {
-        glm::vec4 color = action.color.value();
-        colorVec = { color.r, color.g, color.b, color.a };
+        glm::ivec4 color = action.color.value();
+        // Convert to [0, 255] color range as that is the format the UI wants
+        color *= 255.0;
+        colorJson = { "color", { color.r, color.g, color.b, color.a } };
+    }
+    else {
+        colorJson = { "color", nullptr };
     }
 
-    const nlohmann::json shortcutJson = {
+    const nlohmann::json json = {
         { "identifier", action.identifier },
         { "name", action.name },
         { "synchronization", static_cast<bool>(!action.isLocal) },
         { "documentation", action.documentation },
         { "guiPath", action.guiPath },
-        { "color", colorVec }
+        colorJson
     };
-    return shortcutJson;
+    return json;
 }
 
 nlohmann::json jsonKeybind(const KeyWithModifier& k, std::string identifier) {
     // @TODO (abock, 2021-08-05) Probably this should be rewritten to better account
-        // for the new action mechanism
+    // for the new action mechanism
     const interaction::Action& action = global::actionManager->action(
         identifier
     );
