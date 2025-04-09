@@ -55,7 +55,7 @@ __global__ void solveGeodesicKernel(float u_0, float h, float* envmap_r_values, 
 
     float theta_shadow = compute_shadow_angle(r_0);  // edge of the blackhole shadow
 
-    float delta = 0.001f;
+    const float delta = 0.01f;
 
     // Set the lower bound slightly inside the shadow:
     float lower_bound = theta_shadow - delta;

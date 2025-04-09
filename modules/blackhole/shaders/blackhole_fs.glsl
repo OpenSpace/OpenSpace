@@ -7,12 +7,14 @@ in vec2 TexCoord;
 
 #define SHOW_BLACK_HOLE 1
 
+#define hash
 
 uniform sampler2D environmentTexture;
 uniform sampler2D viewGrid;
 uniform sampler1D colorBVMap;
 uniform mat4 cameraRotationMatrix;
 uniform mat4 worldRotationMatrix;
+uniform float r_0;
 
 layout (location = 0) out vec4 finalColor;
 
@@ -40,6 +42,7 @@ const int tableNodeSize = starMapKDTreesIndices.length() + 1;
 const float starRadius = 0.002f;
 const int STACKSIZE = 32;
 const int tableSize = schwarzschildWarpTable.length() / 2;
+const int num_rays = schwarzschildWarpTable.length() / (layerCount + 1);
 
 /**********************************************************
                         Math
@@ -83,9 +86,51 @@ vec2 sphericalToUV(vec2 sphereCoords){
     return vec2(u, v);
 }
 
+
 /**********************************************************
                         Warp Table
 ***********************************************************/
+#ifdef hash
+float ShadowAngle() {
+    // Critical impact parameter for a Schwarzschild black hole in geometric units.
+    float b_crit = 3.0 * sqrt(3.0) / 2.0;  // ~2.598
+
+    // Compute the sine of the shadow angle:
+    float ratio = b_crit * sqrt(1.0 - 1.0 / r_0) / r_0;
+
+    // Clamp to [0,1] to avoid domain errors
+    ratio = clamp(ratio, 0.0, 1.0);
+
+    return asin(ratio);
+}
+
+ivec2 getClosestWarpIndices(float phi) {
+    //Delta needs to be the same as the Cuda implemtation that calculates the Schwarszchild table
+    float r_0;
+    float theta_shadow = ShadowAngle();
+    float delta = 0.01f;
+    float lower_bound = theta_shadow - delta;
+
+    float denom = delta - (PI - lower_bound);
+    float s = (phi - (PI - lower_bound)) / denom;
+    s = clamp(s, 0.0, 1.0);
+
+    float idx_f = s * float(num_rays - 1);
+    int idx0 = int(floor(idx_f)) * (layerCount + 1);
+    int idx1 = int(min(float(num_rays - 1), ceil(idx_f))) * (layerCount + 1);
+
+    return ivec2(idx0, idx1);
+    // float phi0 = schwarzschildWarpTable[idx0];
+    // float phi1 = schwarzschildWarpTable[idx1];
+
+    // // Determine which is closer
+    // if (abs(phi - phi0) < abs(phi - phi1)) {
+    //     return ivec2(idx0, idx1);
+    // } else {
+    //     return ivec2(idx1, idx0);
+    // }
+}
+#else
 ivec2 bstWarpTable(float phi, int layer){
     float midPhi = -1.0f;
     float deltaPhi = -1.0f;
@@ -134,7 +179,7 @@ ivec2 bstWarpTable(float phi, int layer){
 
     return v1 < v2 ? ivec2(closestIndex * tableNodeSize, nextClosestIndex * tableNodeSize) : ivec2(nextClosestIndex * tableNodeSize, closestIndex * tableNodeSize);
 }
-
+#endif
 float interpelateWarpTable(int indexStart, int indexEnd, float localPhi, int layer){
     float envMapPhiStart = schwarzschildWarpTable[indexStart + layer];
     float envMapPhiEnd = schwarzschildWarpTable[indexEnd + layer];
@@ -149,7 +194,11 @@ float interpelateWarpTable(int indexStart, int indexEnd, float localPhi, int lay
 }
 
 float getEndAngleFromTable(float phi, int layer){
+    #ifdef hash
+    ivec2 indices = getClosestWarpIndices(phi);
+    #else
     ivec2 indices = bstWarpTable(phi, layer);
+    #endif
     return interpelateWarpTable(indices.x, indices.y, phi, layer);
 }
 

@@ -72,6 +72,10 @@ namespace openspace {
         constexpr float M = 1.9885e30;
 
         _rs = 2.0 * G * 8.543e36 / (c * c);
+
+        setInteractionSphere(_rs);
+        setBoundingSphere(_rs*50);
+
         _colorBVMapTexturePath = absPath(p.colorMap).string();
     }
 
@@ -166,6 +170,13 @@ namespace openspace {
             _uniformCache.worldRotationMatrix,
             glm::mat4(glm::mat4_cast(camRot.globalRotation))
             );
+
+        if (_uniformCache.r_0 != -1) {
+            _program->setUniform(
+                _uniformCache.r_0,
+                _rCamera
+            );
+        }
      
         drawQuad();
 
