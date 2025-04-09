@@ -21,10 +21,6 @@
 
 #include <modules/blackhole/cuda/blackhole_cuda.h>
 
-#ifndef G
-#define G 6.67430e-11f
-#endif
-
 namespace {
     constexpr std::string_view _loggerCat = "BlackHoleModule";
     constexpr std::string_view ProgramName = "BlackHoleProgram";
@@ -65,14 +61,17 @@ namespace openspace {
 
     RenderableBlackHole::RenderableBlackHole(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary), _solarMass(SolarMassInfo, 4.297e6f), _colorBVMapTexturePath(ColorTextureInfo) {
-        setRenderBin(Renderable::RenderBin::Background);
+        //setRenderBin(Renderable::RenderBin::Background);
 
         const Parameters p = codegen::bake<Parameters>(dictionary);
 
         _solarMass = p.SolarMass.value_or(_solarMass);
 
-        _rs = 2.0f * G * _solarMass;
+        constexpr float G = 6.67430e-11;
+        constexpr float c = 2.99792458e8;
+        constexpr float M = 1.9885e30;
 
+        _rs = 2.0 * G * 8.543e36 / (c * c);
         _colorBVMapTexturePath = absPath(p.colorMap).string();
     }
 
@@ -112,12 +111,10 @@ namespace openspace {
         _viewport.updateViewGrid(global::renderEngine->renderingResolution());
 
         glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
-        float distanceToAnchor = static_cast<float>(glm::distance(cameraPosition, _chachedTranslation) / distanceconstants::LightYear);
-        if (abs(_rCamera - distanceToAnchor) > _rs * 0.01) {
-            _rCamera = distanceToAnchor;
-            _rEnvmap = 2 * _rCamera;
-
-            schwarzchild(_rs, { _rCamera * 1.5f, _rCamera * 2.0f, _rCamera * 3.0f}, _rayCount, _stepsCount, _rCamera, _stepLength, _schwarzschildWarpTable);
+        float distanceToAnchor = static_cast<float>(glm::distance(cameraPosition, _chachedTranslation));
+        if (abs(_rCamera * _rs - distanceToAnchor) > _rs * 0.1) {
+            _rCamera = distanceToAnchor / _rs;
+            schwarzchild({ _rCamera * 2.0f, _rCamera * 2.5f, _rCamera * 4.0f}, _rayCount, _stepsCount, _rCamera, _stepLength, _schwarzschildWarpTable);
         }
         bindSSBOData(_program, "ssbo_warp_table", _ssboSchwarzschildDataBinding, _ssboSchwarzschildWarpTable);
         bindSSBOData(_program, "ssbo_star_map_start_indices", _ssboStarIndicesDataBinding, _ssboStarKDTreeIndices);

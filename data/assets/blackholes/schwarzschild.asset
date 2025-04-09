@@ -9,14 +9,13 @@ local colormaps = asset.resource({
   Version = 3
 })
 
+
 local Node = {
     Identifier = "schwarzschild",
-    InteractionSphere = 0.8 * lightday,
-    BoundingSphere = 3 * lightday,
     Transform = {
     Translation = {
       Type = "StaticTranslation",
-      Position = { 0, 20, 30 }
+      Position = { 1e14, 0, 0 }
       }
     },
     Renderable = {
