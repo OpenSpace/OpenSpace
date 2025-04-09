@@ -24,17 +24,23 @@
 
 #include "notificationwindow.h"
 
+#include <openspace/openspace.h>
+#include <openspace/engine/settings.h>
 #include <openspace/util/httprequest.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/stringhelper.h>
+#include <QGuiApplication>
+#include <QStyleHints>
+#include <QTimer>
+#include <scn/scan.h>
+#include <date/date.h>
 #include <string_view>
 #include <vector>
 
 using namespace openspace;
 
 namespace {
-    constexpr std::string_view URL = "https://raw.githubusercontent.com/OpenSpace/Notifications/refs/heads/master/test.txt";
-
     struct Entry {
         std::string date;
         std::string text;
@@ -51,6 +57,7 @@ namespace {
 
             text += *curr;
         } while (!curr->empty());
+        curr++;
 
         return { std::move(date), std::move(text) };
     }
@@ -67,6 +74,53 @@ namespace {
 
         return entries;
     }
+
+    std::string formatEntry(const Entry& e, date::year_month_day lastStartedDate) {
+        auto r = scn::scan<int, int, int>(e.date, "{}-{}-{}");
+        ghoul_assert(r, "Invalid date");
+        auto& [year, month, day] = r->values();
+        const date::year_month_day ymd = date::year_month_day(
+            date::year(year),
+            date::month(month),
+            date::day(day)
+        );
+
+        Qt::ColorScheme scheme = QGuiApplication::styleHints()->colorScheme();
+        QColor text = QGuiApplication::palette().text().color();
+        if (scheme == Qt::ColorScheme::Dark) {
+            text = text.darker();
+        }
+        else {
+            text = text.lighter();
+        }
+
+        if (date::sys_days(ymd) < date::sys_days(lastStartedDate)) {
+            return std::format(
+                "<tr>"
+                    "<td width=\"15%\">"
+                        "<font color=\"#{2:x}{3:x}{4:x}\">{0}</font>"
+                    "</td>"
+                    "<td width=\"85%\" align=\"left\">"
+                        "<font color=\"#{2:x}{3:x}{4:x}\">{1}</font>"
+                    "</td>"
+                "</tr>",
+                e.date, e.text, text.red(), text.green(), text.blue()
+            );
+        }
+        else {
+            return std::format(
+                "<tr>"
+                    "<td width=\"15%\">"
+                        "{0}"
+                    "</td>"
+                    "<td width=\"85%\" align=\"left\">"
+                        "{1}"
+                    "</td>"
+                "</tr>",
+                e.date, e.text
+            );
+        }
+    }
 } // namespace
 
 NotificationWindow::NotificationWindow(QWidget* parent)
@@ -74,29 +128,100 @@ NotificationWindow::NotificationWindow(QWidget* parent)
 {
     setAcceptRichText(true);
     setReadOnly(true);
+    setFocusPolicy(Qt::NoFocus);
 
-    HttpMemoryDownload req = HttpMemoryDownload(std::string(URL));
-    req.start(std::chrono::seconds(1));
+    std::string URL = std::format(
+        "https://raw.githubusercontent.com/OpenSpace/Notifications/refs/heads/master/"
+        "{}.txt",
+        OPENSPACE_IS_RELEASE_BUILD ? OPENSPACE_VERSION_NUMBER : "master"
+    );
 
-    std::thread t = std::thread([this, &req]() {
-        if (!req.hasSucceeded()) {
+    _request = std::make_unique<HttpMemoryDownload>(std::string(URL));
+    _request->start(std::chrono::seconds(1));
+
+    // The download has a timeout of 1s, so after 1250ms we'll definitely have answer.
+    constexpr int TimeOut = 1250;
+    QTimer::singleShot(TimeOut, [this](){
+        while (!_request->hasSucceeded() && !_request->hasFailed()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(250));
+        }
+        if (_request->hasFailed()) {
+            LWARNINGC("Notification", "Failed to retrieve notification file");
             // The download has failed for some reason
             return;
         }
-        const std::vector<char> data = req.downloadedData();
+
+        // 1. Get the downloaded data
+        const std::vector<char>& data = _request->downloadedData();
         std::string notificationText = std::string(data.begin(), data.end());
 
+        // 2. Parse the retrieved data into entries
         std::vector<Entry> entries = parseEntries(notificationText);
+
+        // 3. Filter the entries to not show anything that is older than 6 months
+        const date::year_month_day now = date::year_month_day(
+            floor<date::days>(std::chrono::system_clock::now())
+        );
+        std::erase_if(
+            entries,
+            [now](const Entry& e) {
+                auto r = scn::scan<int, int, int>(e.date, "{}-{}-{}");
+                if (!r) {
+                    return false;
+                }
+
+                auto& [year, month, day] = r->values();
+
+                const date::year_month_day ymd = date::year_month_day(
+                    date::year(year),
+                    date::month(month),
+                    date::day(day)
+                );
+
+                const std::chrono::days diff = date::sys_days(now) - date::sys_days(ymd);
+                const bool older = diff.count() > (365 / 2);
+                return older;
+            }
+        );
+
+        // 4. Format the entries into a table format
+        Settings settings = loadSettings();
+        // Picking a date as the default date that is far enough in the past
+        date::year_month_day lastStart = date::year_month_day(
+            date::year(2000),
+            date::month(1),
+            date::day(1)
+        );
+        if (settings.lastStartedDate.has_value()) {
+            auto r = scn::scan<int, int, int>(*settings.lastStartedDate, "{}-{}-{}");
+            if (r) {
+                auto& [year, month, day] = r->values();
+
+                lastStart = date::year_month_day(
+                    date::year(year),
+                    date::month(month),
+                    date::day(day)
+                );
+            }
+        }
 
         std::string text = std::accumulate(
             entries.begin(),
             entries.end(),
             std::string(),
-            [](std::string t, const Entry& e) {
-                return std::format("{}\n# {}\n{}", std::move(t), e.date, e.text);
+            [&lastStart](std::string t, const Entry& e) {
+                return std::format(
+                    "{}{}",
+                    std::move(t), formatEntry(e, lastStart)
+                );
             }
         );
-        setText(QString::fromStdString(text));
+
+        // Add the HTML-like table attributes
+        text = std::format("<table border=\"0\">{}</table>", std::move(text));
+
+        // 5. Set the text
+        QString t = QString::fromStdString(text);
+        setText(t);
     });
-    t.detach();
 }

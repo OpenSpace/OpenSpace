@@ -53,6 +53,7 @@
 #include <sgct/projection/nonlinearprojection.h>
 #include <sgct/user.h>
 #include <sgct/window.h>
+#include <date/date.h>
 #include <stb_image.h>
 #include <tracy/Tracy.hpp>
 #include <iostream>
@@ -1451,6 +1452,15 @@ int main(int argc, char* argv[]) {
 
         settings.configuration =
             isGeneratedWindowConfig ? "" : global::configuration->windowConfiguration;
+        const date::year_month_day now = date::year_month_day(
+            floor<date::days>(std::chrono::system_clock::now())
+        );
+        settings.lastStartedDate = std::format(
+            "{}-{:0>2}-{:0>2}",
+            static_cast<int>(now.year()),
+            static_cast<unsigned>(now.month()),
+            static_cast<unsigned>(now.day())
+        );
 
         saveSettings(settings, findSettings());
     }

@@ -27,10 +27,16 @@
 
 #include <QTextEdit>
 
+#include <openspace/util/httprequest.h>
+#include <memory>
+
 class NotificationWindow final : public QTextEdit {
 Q_OBJECT
 public:
     explicit NotificationWindow(QWidget* parent);
+
+private:
+    std::unique_ptr<openspace::HttpMemoryDownload> _request;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___NOTIFICATIONWINDOW___H__
