@@ -27,6 +27,12 @@ cmake_policy(VERSION 3.25)
 
 project(OpenSpace)
 
+# CMake 4.0 will no longer allow minimum required version below 3.5 and some of our
+# dependencies have not been updated to reflect this. To make things work, we blanked
+# require to 3.10 here to remove those issues. Once CMake configures and generates
+# successfully without this next line, it can be removed
+set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
+
 set(OPENSPACE_RELEASE_BUILD OFF)
 set(OPENSPACE_VERSION_MAJOR)
 set(OPENSPACE_VERSION_MINOR)

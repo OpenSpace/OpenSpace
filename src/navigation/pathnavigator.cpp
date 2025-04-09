@@ -128,10 +128,7 @@ namespace openspace::interaction {
 
 PathNavigator::PathNavigator()
     : properties::PropertyOwner({ "PathNavigator", "Path Navigator" })
-    , _defaultPathType(
-        DefaultCurveOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _defaultPathType(DefaultCurveOptionInfo)
     , _includeRoll(IncludeRollInfo, false)
     , _speedScale(SpeedScaleInfo, 1.f, 0.01f, 2.f)
     , _applyIdleBehaviorOnFinish(IdleBehaviorOnFinishInfo, false)
