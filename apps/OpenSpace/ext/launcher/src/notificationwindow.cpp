@@ -85,6 +85,7 @@ namespace {
             date::day(day)
         );
 
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 5, 0))
         Qt::ColorScheme scheme = QGuiApplication::styleHints()->colorScheme();
         QColor text = QGuiApplication::palette().text().color();
         if (scheme == Qt::ColorScheme::Dark) {
@@ -93,6 +94,10 @@ namespace {
         else {
             text = text.lighter();
         }
+#else
+        QColor text = QGuiApplication::palette().text().color();
+        text = text.darker();
+#endif
 
         if (date::sys_days(ymd) < date::sys_days(lastStartedDate)) {
             return std::format(
