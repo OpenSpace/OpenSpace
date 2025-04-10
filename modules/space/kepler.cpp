@@ -416,12 +416,18 @@ namespace {
             ));
         }
 
-        if (packedDate[0] != 'I' && packedDate[0] != 'J' && packedDate[0] != 'K') {
-            throw ghoul::RuntimeError(std::format(
-                "Illformed packed date. Illegal year marker. {}", packedDate
-            ));
-        }
-        int year = (packedDate[0] - 55) * 100;
+        int year = [packedDate](char m) {
+            switch (m) {
+                case 'I': return 18;
+                case 'J': return 19;
+                case 'K': return 20;
+                default:
+                    throw ghoul::RuntimeError(std::format(
+                        "Illformed packed date. Illegal year marker. {}", packedDate
+                    ));
+            }; 
+        }(packedDate[0]);
+
         auto yearRes = scn::scan<int>(packedDate.substr(1, 2), "{}");
         if (!yearRes) {
             throw ghoul::RuntimeError(std::format(
@@ -783,7 +789,10 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
     // The data lines in the MPC file format must be at least 160 character in length and
     // none of the header lines (with one exception) encountered thus far are less than
     // these 160 characters long. The exception is a line exactly 160 characters long with
-    // all `-` characters as a delimiter between header and data
+    // all `-` characters as a delimiter between header and data. Furthermore, the MPC
+    // file format is a fixed-width format where columns are located at specific positions
+    // and with a fixed length. More information about the file format is available at
+    // http://www.minorplanetcenter.org/iau/info/MPOrbitFormat.html
     std::vector<Parameters> result;
     std::string line;
     int i = 0;
