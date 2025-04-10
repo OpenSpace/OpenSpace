@@ -22,52 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/lightsource/cameralightsource.h>
+#include <modules/server/include/topics/profiletopic.h>
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/util/updatestructures.h>
-#include <optional>
-
-namespace {
-    constexpr openspace::properties::Property::PropertyInfo IntensityInfo = {
-        "Intensity",
-        "Intensity",
-        "The intensity of this light source.",
-        openspace::properties::Property::Visibility::NoviceUser
-    };
-
-    // This `LightSource` type represents a light source placed at the position of the
-    // camera. An object with this light source will always be illuminated from the
-    // current view direction.
-    struct [[codegen::Dictionary(CameraLightSource)]] Parameters {
-        // [[codegen::verbatim(IntensityInfo.description)]]
-        std::optional<float> intensity;
-    };
-#include "cameralightsource_codegen.cpp"
-} // namespace
+#include <modules/server/include/connection.h>
+#include <modules/server/include/jsonconverters.h>
+#include <openspace/engine/globals.h>
+#include <openspace/scene/profile.h>
 
 namespace openspace {
 
-documentation::Documentation CameraLightSource::Documentation() {
-    return codegen::doc<Parameters>("base_camera_light_source");
+bool ProfileTopic::isDone() const {
+    return true;
 }
 
-CameraLightSource::CameraLightSource(const ghoul::Dictionary& dictionary)
-    : LightSource(dictionary)
-    , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
-{
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-    _intensity = p.intensity.value_or(_intensity);
-    addProperty(_intensity);
-}
-
-float CameraLightSource::intensity() const {
-    return _intensity;
-}
-
-glm::vec3 CameraLightSource::directionViewSpace(const RenderData&) const {
-    return glm::vec3(0.f, 0.f, 1.f);
+void ProfileTopic::handleJson(const nlohmann::json&) {
+    const nlohmann::json data = {
+        { "uiPanelVisibility", global::profile->uiPanelVisibility },
+        { "markNodes", global::profile->markNodes }
+    };
+    _connection->sendJson(wrappedPayload(data));
 }
 
 } // namespace openspace

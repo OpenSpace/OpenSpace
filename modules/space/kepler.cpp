@@ -208,12 +208,25 @@ namespace {
         if (e.find('.') == std::string::npos) {
             e += ".0";
         }
-        // @TODO(abock, 2024-05-20) 'd' suffix is needed until scnlib updates to v3
-        auto res = scn::scan<int, double>(e, "{:2d}{}");
-        if (!res) {
+        if (e.size() <= 2) {
+            throw ghoul::RuntimeError(
+                std::format("Error parsing epoch '{}'. Invalid date string", epoch)
+            );
+        }
+
+        std::string_view yearStr = std::string_view(e).substr(0, 2);
+        std::string_view daysInYearStr = std::string_view(e).substr(2);
+        auto resYear = scn::scan<int>(yearStr, "{}");
+        if (!resYear) {
             throw ghoul::RuntimeError(std::format("Error parsing epoch '{}'", epoch));
         }
-        auto [year, daysInYear] = res->values();
+        int year = resYear->value();
+
+        auto resDaysInYear = scn::scan<double>(daysInYearStr, "{}");
+        if (!resDaysInYear) {
+            throw ghoul::RuntimeError(std::format("Error parsing epoch '{}'", epoch));
+        }
+        double daysInYear = resDaysInYear->value();
         year += year > 57 ? 1900 : 2000;
         const int daysSince2000 = countDays(year);
 
@@ -336,9 +349,8 @@ namespace {
             // We have the first form
             int month = 0;
             int days = 0;
-            // @TODO(abock, 2024-05-20) 'd' suffix is needed until scnlib updates to v3
             auto res = scn::scan<int, int, int, int, int, double>(
-                epoch, "{:4d}-{:2d}-{:2d}T{:2d}:{:2d}:{}"
+                epoch, "{:4}-{:2}-{:2}T{:2}:{:2}:{}"
             );
             if (!res) {
                 throw ghoul::RuntimeError(std::format("Error parsing epoch '{}'", epoch));
@@ -350,9 +362,8 @@ namespace {
         else if (pos == 8) {
             // We have the second form
 
-            // @TODO(abock, 2024-05-20) 'd' suffix is needed until scnlib updates to v3
             auto res = scn::scan<int, int, int, int, double>(
-                epoch, "{:4d}-{:3d}T{:2d}:{:2d}:{}"
+                epoch, "{:4}-{:3}T{:2}:{:2}:{}"
                 //date.year, date.nDays, date.hours, date.minutes, date.seconds
             );
             if (!res) {

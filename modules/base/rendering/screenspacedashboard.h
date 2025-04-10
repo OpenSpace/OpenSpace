@@ -40,7 +40,7 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 namespace scripting { struct LuaLibrary; }
 
-class ScreenSpaceDashboard: public ScreenSpaceFramebuffer {
+class ScreenSpaceDashboard : public ScreenSpaceFramebuffer {
 public:
     explicit ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
     virtual ~ScreenSpaceDashboard() override = default;

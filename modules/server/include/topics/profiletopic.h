@@ -22,52 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/lightsource/cameralightsource.h>
+#ifndef __OPENSPACE_MODULE_SERVER___PROFILETOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___PROFILETOPIC___H__
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/util/updatestructures.h>
-#include <optional>
+#include <modules/server/include/topics/topic.h>
 
-namespace {
-    constexpr openspace::properties::Property::PropertyInfo IntensityInfo = {
-        "Intensity",
-        "Intensity",
-        "The intensity of this light source.",
-        openspace::properties::Property::Visibility::NoviceUser
-    };
-
-    // This `LightSource` type represents a light source placed at the position of the
-    // camera. An object with this light source will always be illuminated from the
-    // current view direction.
-    struct [[codegen::Dictionary(CameraLightSource)]] Parameters {
-        // [[codegen::verbatim(IntensityInfo.description)]]
-        std::optional<float> intensity;
-    };
-#include "cameralightsource_codegen.cpp"
-} // namespace
+using nlohmann::json;
 
 namespace openspace {
 
-documentation::Documentation CameraLightSource::Documentation() {
-    return codegen::doc<Parameters>("base_camera_light_source");
-}
+class ProfileTopic : public Topic {
+public:
+    ProfileTopic() = default;
+    ~ProfileTopic() override = default;
 
-CameraLightSource::CameraLightSource(const ghoul::Dictionary& dictionary)
-    : LightSource(dictionary)
-    , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
-{
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-    _intensity = p.intensity.value_or(_intensity);
-    addProperty(_intensity);
-}
-
-float CameraLightSource::intensity() const {
-    return _intensity;
-}
-
-glm::vec3 CameraLightSource::directionViewSpace(const RenderData&) const {
-    return glm::vec3(0.f, 0.f, 1.f);
-}
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SERVER___PROFILETOPIC___H__

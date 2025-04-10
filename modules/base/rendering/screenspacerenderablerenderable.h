@@ -22,52 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/lightsource/cameralightsource.h>
+#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACERENDERABLERENDERABLE___H__
+#define __OPENSPACE_MODULE_BASE___SCREENSPACERENDERABLERENDERABLE___H__
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/util/updatestructures.h>
-#include <optional>
+#include <modules/base//rendering/screenspaceframebuffer.h>
 
-namespace {
-    constexpr openspace::properties::Property::PropertyInfo IntensityInfo = {
-        "Intensity",
-        "Intensity",
-        "The intensity of this light source.",
-        openspace::properties::Property::Visibility::NoviceUser
-    };
-
-    // This `LightSource` type represents a light source placed at the position of the
-    // camera. An object with this light source will always be illuminated from the
-    // current view direction.
-    struct [[codegen::Dictionary(CameraLightSource)]] Parameters {
-        // [[codegen::verbatim(IntensityInfo.description)]]
-        std::optional<float> intensity;
-    };
-#include "cameralightsource_codegen.cpp"
-} // namespace
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec3property.h>
 
 namespace openspace {
 
-documentation::Documentation CameraLightSource::Documentation() {
-    return codegen::doc<Parameters>("base_camera_light_source");
-}
+namespace properties { class PropertyOwner; }
 
-CameraLightSource::CameraLightSource(const ghoul::Dictionary& dictionary)
-    : LightSource(dictionary)
-    , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
-{
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-    _intensity = p.intensity.value_or(_intensity);
-    addProperty(_intensity);
-}
+class Renderable;
+class Rotation;
+class Scale;
+class Translation;
 
-float CameraLightSource::intensity() const {
-    return _intensity;
-}
+namespace documentation { struct Documentation; }
 
-glm::vec3 CameraLightSource::directionViewSpace(const RenderData&) const {
-    return glm::vec3(0.f, 0.f, 1.f);
-}
+class ScreenSpaceRenderableRenderable : public ScreenSpaceFramebuffer {
+public:
+    using RenderFunction = std::function<void()>;
 
-} // namespace openspace
+    explicit ScreenSpaceRenderableRenderable(const ghoul::Dictionary& dictionary);
+    virtual ~ScreenSpaceRenderableRenderable() override;
+
+    bool initializeGL() override;
+    bool deinitializeGL() override;
+    void update() override;
+
+    static documentation::Documentation Documentation();
+
+private:
+    ghoul::mm_unique_ptr<Translation> _translation = nullptr;
+    ghoul::mm_unique_ptr<properties::PropertyOwner> _transform = nullptr;
+    ghoul::mm_unique_ptr<Rotation> _rotation = nullptr;
+    ghoul::mm_unique_ptr<Scale> _scale = nullptr;
+    ghoul::mm_unique_ptr<Renderable> _renderable = nullptr;
+
+    double _previousTime = 0.0;
+    properties::DoubleProperty _time;
+    properties::Vec3Property _cameraPosition;
+    properties::Vec3Property _cameraCenter;
+    properties::Vec3Property _cameraUp;
+    properties::FloatProperty _cameraFov;
+};
+
+} //namespace openspace
+
+#endif // __OPENSPACE_MODULE_BASE___SCREENSPACERENDERABLERENDERABLE___H__
