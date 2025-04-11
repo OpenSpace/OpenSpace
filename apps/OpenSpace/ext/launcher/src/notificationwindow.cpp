@@ -223,7 +223,7 @@ NotificationWindow::NotificationWindow(QWidget* parent)
         );
 
         // Add the HTML-like table attributes
-        text = std::format("<table border=\"0\">{}</table>", std::move(text));
+        text = std::format("<table border='0'>{}</table>", std::move(text));
 
         // 5. Set the text
         QString t = QString::fromStdString(text);
