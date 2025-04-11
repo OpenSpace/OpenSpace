@@ -210,14 +210,15 @@ std::string OptionProperty::stringValue() const {
     return formatJson(_value);
 }
 
-std::string OptionProperty::generateAdditionalJsonDescription() const {
+
+nlohmann::json OptionProperty::generateAdditionalJsonDescription() const {
     nlohmann::json data = {};
 
     for (const Option& option : _options) {
         data[std::to_string(option.value)] = option.description;
     }
 
-    return nlohmann::json({{ OptionsKey, data }}).dump();
+    return data;
 }
 
 int OptionProperty::toValue(lua_State* state) const {

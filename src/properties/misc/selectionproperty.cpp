@@ -168,12 +168,12 @@ bool SelectionProperty::removeInvalidKeys(std::set<std::string>& keys) const {
     return changed;
 }
 
-std::string SelectionProperty::generateAdditionalJsonDescription() const {
+nlohmann::json SelectionProperty::generateAdditionalJsonDescription() const {
     const nlohmann::json optionsJson(_options);
     std::string result = std::format(
         R"({{ "{}": {} }})", OptionsKey, optionsJson.dump()
     );
-    return result;
+    return nlohmann::json::parse(result);
 }
 
 } // namespace openspace::properties

@@ -258,14 +258,14 @@ void Property::resetToUnchanged() {
 
 nlohmann::json Property::generateJsonDescription() const {
     const nlohmann::json metaData = generateMetaDataJsonDescription();
-    const std::string desc = generateAdditionalJsonDescription();
+    const nlohmann::json desc = generateAdditionalJsonDescription();
 
     nlohmann::json json = {
         { "Type", className() },
         { "Identifier", uri() },
         { "Name", _guiName },
         { "MetaData", metaData },
-        { "AdditionalData", nlohmann::json::parse(desc)},
+        { "AdditionalData", desc },
         { "description", _description }
     };
 
@@ -301,8 +301,8 @@ nlohmann::json Property::generateMetaDataJsonDescription() const {
     return json;
 }
 
-std::string Property::generateAdditionalJsonDescription() const {
-    return "{}";
+nlohmann::json Property::generateAdditionalJsonDescription() const {
+    return nlohmann::json::object();
 }
 
 void Property::setLuaInterpolationTarget(lua_State*) {}

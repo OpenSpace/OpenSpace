@@ -499,7 +499,7 @@ public:
      *
      * \return The information specific to each subclass of Property
      */
-    virtual std::string generateAdditionalJsonDescription() const;
+    virtual nlohmann::json generateAdditionalJsonDescription() const;
 
     /**
      * Returns whether or not the property value has changed.
