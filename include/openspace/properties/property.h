@@ -479,7 +479,7 @@ public:
      *
      * \return The metadata information text for the property
      */
-    std::string generateMetaDataJsonDescription() const;
+    nlohmann::json generateMetaDataJsonDescription() const;
 
     /**
      * Creates the information that is specific to each subclass of Property%s. If a

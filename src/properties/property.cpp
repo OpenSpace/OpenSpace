@@ -257,14 +257,14 @@ void Property::resetToUnchanged() {
 }
 
 nlohmann::json Property::generateJsonDescription() const {
-    const std::string metaData = generateMetaDataJsonDescription();
+    const nlohmann::json metaData = generateMetaDataJsonDescription();
     const std::string desc = generateAdditionalJsonDescription();
 
     nlohmann::json json = {
-        { "Type", std::string(className()) },
+        { "Type", className() },
         { "Identifier", uri() },
         { "Name", _guiName },
-        { "MetaData", nlohmann::json::parse(metaData)},
+        { "MetaData", metaData },
         { "AdditionalData", nlohmann::json::parse(desc)},
         { "description", _description }
     };
@@ -272,7 +272,7 @@ nlohmann::json Property::generateJsonDescription() const {
     return json;
 }
 
-std::string Property::generateMetaDataJsonDescription() const {
+nlohmann::json Property::generateMetaDataJsonDescription() const {
     static const std::unordered_map<Visibility, std::string> VisibilityConverter = {
         { Visibility::Always, "Always" },
         { Visibility::NoviceUser, "NoviceUser" },
@@ -282,31 +282,23 @@ std::string Property::generateMetaDataJsonDescription() const {
         { Visibility::Hidden, "Hidden" }
     };
     const std::string& vis = VisibilityConverter.at(_metaData.visibility);
-
     const bool isReadOnly = _metaData.readOnly.value_or(false);
-    std::string isReadOnlyString = (isReadOnly ? "true" : "false");
-
     const bool needsConfirmation = _metaData.needsConfirmation.value_or(false);
-    std::string needsConfirmationString = (needsConfirmation ? "true" : "false");
-
     const std::string groupId = groupIdentifier();
-    const std::string sanitizedGroupId = escapedJson(groupId);
 
-    std::string viewOptions = "{}";
-    {
-        ghoul::Dictionary d;
-        for (const std::pair<std::string, bool>& p : _metaData.viewOptions) {
-            d.setValue(p.first, p.second);
-        }
-        viewOptions = ghoul::formatJson(d);
+    nlohmann::json viewOptions = nlohmann::json::object();
+    for (const std::pair<std::string, bool>& p : _metaData.viewOptions) {
+        viewOptions[p.first] = p.second;
     }
 
-    std::string result = std::format(
-        R"({{"Group":"{}","Visibility":"{}","isReadOnly":{},"needsConfirmation":{},
-             "ViewOptions":{}}})",
-        sanitizedGroupId, vis, isReadOnlyString, needsConfirmationString, viewOptions
-    );
-    return result;
+    nlohmann::json json = {
+        { "Group", groupId },
+        { "Visibility", vis },
+        { "isReadOnly", isReadOnly },
+        { "needsConfirmation", needsConfirmation },
+        { "ViewOptions", viewOptions }
+    };
+    return json;
 }
 
 std::string Property::generateAdditionalJsonDescription() const {
