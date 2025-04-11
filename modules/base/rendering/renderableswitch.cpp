@@ -78,9 +78,9 @@ namespace openspace {
     {
         const Parameters p = codegen::bake<Parameters>(dictionary);
 
-        _renderable1 = createRenderable(p.Renderable1);
+        _renderable1 = createFromDictionary(p.Renderable1);
 
-        _renderable2 = createRenderable(p.Renderable2);
+        _renderable2 = createFromDictionary(p.Renderable2);
 
         _distanceThreshold = p.distanceThreshold.value_or(_distanceThreshold);
         addProperty(_distanceThreshold);
@@ -138,28 +138,4 @@ namespace openspace {
             }
         }
     }
-
-    std::unique_ptr<Renderable> RenderableSwitch::createRenderable(const ghoul::Dictionary& config) {
-        std::string type = config.value<std::string>("Type");
-
-        if (type == "RenderablePlaneImageLocal") {
-            return std::make_unique<RenderablePlaneImageLocal>(config);
-        }
-        else if (type == "RenderablePlaneImageOnline")
-        {
-            return std::make_unique<RenderablePlaneImageOnline>(config);
-        }
-        else if (type == "RenderableSwitch")
-        {
-            return std::make_unique<RenderableSwitch>(config);
-        }
-        // More renderable types here
-
-        LERRORC(
-            "ScreenSpaceImageLocal",
-            std::format("Renderable '{}' is not supported yet.", type)
-        );
-        return nullptr; // Throw an exception if type is not recognized?
-    }
-
 } // namespace openspace
