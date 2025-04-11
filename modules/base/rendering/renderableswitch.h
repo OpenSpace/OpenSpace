@@ -28,6 +28,7 @@
 #include <modules/base/rendering/RenderablePlaneImageLocal.h>
 #include <modules/base/rendering/RenderablePlaneImageOnline.h>
 #include <modules/base/rendering/renderableplane.h>
+#include <openspace/rendering/renderable.h>
 
 #include <openspace/util/updatestructures.h>
 
@@ -55,13 +56,9 @@ namespace openspace {
 
     protected:
         properties::BoolProperty _autoScale;
-        std::unique_ptr<Renderable> _renderable1;
-        std::unique_ptr<Renderable> _renderable2;
+        ghoul::mm_unique_ptr<Renderable> _renderable1;
+        ghoul::mm_unique_ptr<Renderable> _renderable2;
         properties::FloatProperty _distanceThreshold;
-
-    private:
-
-        std::unique_ptr<Renderable> createRenderable(const ghoul::Dictionary& config);
     };
 
 } // namespace openspace
