@@ -25,7 +25,6 @@
 #include <openspace/properties/property.h>
 
 #include <openspace/properties/propertyowner.h>
-#include <openspace/util/json_helper.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/dictionary.h>
@@ -257,20 +256,20 @@ void Property::resetToUnchanged() {
     _isValueDirty = false;
 }
 
-std::string Property::generateJsonDescription() const {
-    const std::string cName = escapedJson(std::string(className()));
-    const std::string identifier = uri();
-    const std::string identifierSan = escapedJson(identifier);
-    const std::string& gName = guiName();
-    const std::string gNameSan = escapedJson(gName);
+nlohmann::json Property::generateJsonDescription() const {
     const std::string metaData = generateMetaDataJsonDescription();
-    const std::string description = generateAdditionalJsonDescription();
+    const std::string desc = generateAdditionalJsonDescription();
 
-    return std::format(
-        R"(
-{{"Type":"{}","Identifier":"{}","Name":"{}","MetaData":{},"AdditionalData":{}}}
-        )", cName, identifierSan, gNameSan, metaData, description
-    );
+    nlohmann::json json = {
+        { "Type", std::string(className()) },
+        { "Identifier", uri() },
+        { "Name", _guiName },
+        { "MetaData", nlohmann::json::parse(metaData)},
+        { "AdditionalData", nlohmann::json::parse(desc)},
+        { "description", _description }
+    };
+
+    return json;
 }
 
 std::string Property::generateMetaDataJsonDescription() const {

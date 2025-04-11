@@ -77,17 +77,16 @@ void SubscriptionTopic::handleJson(const nlohmann::json& json) {
         if (_prop) {
             _requestedResourceIsSubscribable = true;
             _isSubscribedTo = true;
-            auto onChange = [this, k = std::move(uri)]() {
+            auto onChange = [this, k = uri]() {
                 nlohmann::json payload = {
                     { "value", json::parse(_prop->jsonValue()) }
                 };
                 _connection->sendJson(wrappedPayload(payload));
             };
 
-            auto onMetaDataChange = [this, k = std::move(uri)]() {
-                nlohmann::json payload = {
-                    { "metaData",json::parse(_prop->generateJsonDescription()) }
-                };
+            auto onMetaDataChange = [this, k = uri]() {
+                nlohmann::json payload = {};
+                payload["metaData"] = _prop->generateJsonDescription();
                 _connection->sendJson(wrappedPayload(payload));
             };
 

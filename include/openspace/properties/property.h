@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___PROPERTY___H__
 #define __OPENSPACE_CORE___PROPERTY___H__
 
+#include <openspace/util/json_helper.h>
 #include <ghoul/misc/easing.h>
 #include <ghoul/lua/lua_types.h>
 #include <functional>
@@ -468,7 +469,7 @@ public:
      *
      * \return The base description common to all Property classes
      */
-    std::string generateJsonDescription() const;
+    nlohmann::json generateJsonDescription() const;
 
     /**
      * Creates the information for the `MetaData` key-part of the JSON description for
