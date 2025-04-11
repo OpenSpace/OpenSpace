@@ -25,6 +25,7 @@
 #include <modules/server/include/topics/actionkeybindtopic.h>
 
 #include <modules/server/include/connection.h>
+#include <modules/server/include/jsonconverters.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
@@ -38,47 +39,22 @@ bool ActionKeybindTopic::isDone() const {
     return true;
 }
 
-nlohmann::json jsonAction(const interaction::Action& action) {
-    // Convert to std as nlohmann doesn't understand glm
-    nlohmann::json colorJson;
-    if (action.color.has_value()) {
-        glm::ivec4 color = action.color.value();
-        // Convert to [0, 255] color range as that is the format the UI wants
-        color *= 255.0;
-        colorJson = { "color", { color.r, color.g, color.b, color.a } };
-    }
-    else {
-        colorJson = { "color", nullptr };
-    }
 
-    const nlohmann::json json = {
-        { "identifier", action.identifier },
-        { "name", action.name },
-        { "synchronization", static_cast<bool>(!action.isLocal) },
-        { "documentation", action.documentation },
-        { "guiPath", action.guiPath },
-        colorJson
-    };
-    return json;
-}
 
 nlohmann::json jsonKeybind(const KeyWithModifier& k, std::string identifier) {
-    // @TODO (abock, 2021-08-05) Probably this should be rewritten to better account
-    // for the new action mechanism
-    const interaction::Action& action = global::actionManager->action(
-        identifier
-    );
+    const interaction::Action& action = global::actionManager->action(identifier);
+
     return {
-            { "key", ghoul::to_string(k.key) },
-            { "modifiers",
-                {
-                    { "shift" , hasKeyModifier(k.modifier, KeyModifier::Shift) },
-                    { "control" , hasKeyModifier(k.modifier, KeyModifier::Control) },
-                    { "alt" , hasKeyModifier(k.modifier, KeyModifier::Alt) },
-                    { "super" , hasKeyModifier(k.modifier, KeyModifier::Super) }
-                }
-            },
-            { "action", action.identifier },
+        { "key", ghoul::to_string(k.key) },
+        { "modifiers",
+            {
+                { "shift" , hasKeyModifier(k.modifier, KeyModifier::Shift) },
+                { "control" , hasKeyModifier(k.modifier, KeyModifier::Control) },
+                { "alt" , hasKeyModifier(k.modifier, KeyModifier::Alt) },
+                { "super" , hasKeyModifier(k.modifier, KeyModifier::Super) }
+            }
+        },
+        { "action", action.identifier },
     };
 }
 
@@ -99,7 +75,7 @@ nlohmann::json ActionKeybindTopic::allActionsKeybinds() const {
     );
 
     for (const interaction::Action& action : actions) {
-        json["actions"].push_back(jsonAction(action));
+        json["actions"].push_back(action);
     }
 
     const std::multimap<KeyWithModifier, std::string>& keyBindings =
@@ -112,7 +88,8 @@ nlohmann::json ActionKeybindTopic::allActionsKeybinds() const {
             // only one of which is actually defined
             continue;
         }
-        json["keybinds"].push_back(jsonKeybind(keyBinding.first, keyBinding.second));
+        nlohmann::json keybindJson = jsonKeybind(keyBinding.first, keyBinding.second);
+        json["keybinds"].push_back(keybindJson);
     }
     return json;
 }
@@ -133,11 +110,12 @@ nlohmann::json ActionKeybindTopic::action(const std::string& identifier) const {
     }
     interaction::Action action = *found;
 
-    return jsonAction(action);
+    return action;
 }
 
 void ActionKeybindTopic::sendData(nlohmann::json data) const {
-    _connection->sendJson(wrappedPayload({ data }));
+    nlohmann::json payload = wrappedPayload({ data });
+    _connection->sendJson(std::move(payload));
 }
 
 void ActionKeybindTopic::handleJson(const nlohmann::json& input) {
