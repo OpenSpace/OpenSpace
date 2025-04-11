@@ -126,14 +126,13 @@ void NumericalProperty<T>::setExponent(float exponent) {
 
 template <typename T>
 nlohmann::json NumericalProperty<T>::generateAdditionalJsonDescription() const {
-    std::string result = std::format(
-        "{{ \"{}\": {}, \"{}\": {}, \"{}\": {}, \"{}\": {} }}",
-        MinimumValueKey, luaToJson(ghoul::to_string(_minimumValue)),
-        MaximumValueKey, luaToJson(ghoul::to_string(_maximumValue)),
-        SteppingValueKey, luaToJson(ghoul::to_string(_stepping)),
-        ExponentValueKey, luaToJson(ghoul::to_string(_exponent))
-    );
-    return nlohmann::json::parse(result);
+    nlohmann::json result = {
+        { MinimumValueKey, nlohmann::json::parse(luaToJson(ghoul::to_string(_minimumValue))) },
+        { MaximumValueKey, nlohmann::json::parse(luaToJson(ghoul::to_string(_maximumValue))) },
+        { SteppingValueKey, nlohmann::json::parse(luaToJson(ghoul::to_string(_stepping))) },
+        { ExponentValueKey, nlohmann::json::parse(luaToJson(ghoul::to_string(_exponent))) }
+    };
+    return result;
 }
 
 template <typename T>
