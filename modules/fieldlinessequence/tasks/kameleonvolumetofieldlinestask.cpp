@@ -162,7 +162,7 @@ void KameleonVolumeToFieldlinesTask::perform(
                 newState,
                 cdfPath,
                 seedPoints,
-                _manualTimeOffset,
+                _manualTimeOffset, 
                 _tracingVar,
                 _scalarVars,
                 extraMagVars

@@ -28,22 +28,26 @@
 #include <modules/volume/rawvolumewriter.h>
 #include <openspace/documentation/verifier.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <openspace/util/time.h>
 #include <ghoul/format.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <array>
 #include <filesystem>
+#include <ccmc/Kameleon.h>
 #include <optional>
-
+#include <openspace/util/spicemanager.h>
+#include <modules/kameleon/include/kameleonwrapper.h>
+#include <modules/kameleon/include/kameleonhelper.h>
 namespace {
     struct [[codegen::Dictionary(KameleonVolumeToRawTask)]] Parameters {
-        // The cdf file to extract data from
-        std::filesystem::path input;
+        // The folder containing CDF files
+        std::filesystem::path inputDirectory [[codegen::directory()]];
 
-        // The raw volume file to export data to
-        std::string rawVolumeOutput [[codegen::annotation("A valid filepath")]];
+        // The base path (folder) for raw volume output files
+        std::string rawVolumeOutputBase [[codegen::annotation("A valid folder path")]];
 
-        // The Lua dictionary file to export metadata to
-        std::string dictionaryOutput [[codegen::annotation("A valid filepath")]];
+        // The base path (folder) for Lua dictionary output files
+        std::string dictionaryOutputBase [[codegen::annotation("A valid folder path")]];
 
         // The variable name to read from the kameleon dataset
         std::string variable [[codegen::annotation("A valid kameleon variable")]];
@@ -58,6 +62,9 @@ namespace {
         // A vector representing the lower bound of the domain, in the native kameleon
         // grid units
         std::optional<glm::vec3> upperDomainBound;
+
+        // Choose to decrese cadence and only use every nth time step/ input file
+        std::optional<int> nthTimeStep;
 
         // The unit of the data
         std::optional<std::string> visUnit
@@ -75,11 +82,12 @@ documentation::Documentation KameleonVolumeToRawTask::documentation() {
 KameleonVolumeToRawTask::KameleonVolumeToRawTask(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _inputPath = p.input;
-    _rawVolumeOutputPath = absPath(p.rawVolumeOutput);
-    _dictionaryOutputPath = absPath(p.dictionaryOutput);
+    _inputDirectory = p.inputDirectory;
+    _rawVolumeOutputBasePath = absPath(p.rawVolumeOutputBase);
+    _dictionaryOutputBasePath = absPath(p.dictionaryOutputBase);
     _variable = p.variable;
     _dimensions = p.dimensions;
+    _nthTimeStep = p.nthTimeStep.value_or(_nthTimeStep);
 
     if (p.lowerDomainBound.has_value()) {
         _lowerDomainBound = *p.lowerDomainBound;
@@ -98,68 +106,92 @@ KameleonVolumeToRawTask::KameleonVolumeToRawTask(const ghoul::Dictionary& dictio
 
 std::string KameleonVolumeToRawTask::description() {
     return std::format(
-        "Extract volumetric data from CDF file '{}'. Write raw volume data into '{}' "
-        "and dictionary with metadata to '{}'",
-        _inputPath, _rawVolumeOutputPath, _dictionaryOutputPath
+        "Extract volumetric data from all CDF files in '{}'. Write raw volume data into '{}' "
+        "and dictionaries with metadata to '{}'",
+        _inputDirectory, _rawVolumeOutputBasePath, _dictionaryOutputBasePath
     );
 }
 
 void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCallback) {
-    KameleonVolumeReader reader = KameleonVolumeReader(_inputPath);
+    namespace fs = std::filesystem;
 
-    std::array<std::string, 3> variables = reader.gridVariableNames();
-
-    if (_autoDomainBounds) {
-        _lowerDomainBound = glm::vec3(
-            reader.minValue(variables[0]),
-            reader.minValue(variables[1]),
-            reader.minValue(variables[2])
-        );
-
-        _upperDomainBound = glm::vec3(
-            reader.maxValue(variables[0]),
-            reader.maxValue(variables[1]),
-            reader.maxValue(variables[2])
-        );
-    }
-
-    std::unique_ptr<volume::RawVolume<float>> rawVolume = reader.readFloatVolume(
-        _dimensions,
-        _variable,
-        _lowerDomainBound,
-        _upperDomainBound
+    size_t totalFiles = std::distance(
+        fs::directory_iterator(_inputDirectory), fs::directory_iterator{}
     );
+    size_t count = 0;
 
-    progressCallback(0.5f);
+    for (const fs::directory_entry& entry : fs::directory_iterator(_inputDirectory)) {
+        if (!entry.is_regular_file() || entry.path().extension() != ".cdf") {
+            continue;
+        }
+        if (count % _nthTimeStep == 0) {
+            const fs::path& inputPath = entry.path();
+            std::string baseName = inputPath.stem().string();
 
-    volume::RawVolumeWriter<float> writer(_rawVolumeOutputPath);
-    writer.write(*rawVolume);
+            fs::path rawOutput = _rawVolumeOutputBasePath / (baseName + ".rawvolume");
+            fs::path dictOutput = _dictionaryOutputBasePath / (baseName + ".dictionary");
 
-    progressCallback(0.9f);
+            KameleonVolumeReader reader(inputPath);
+            std::array<std::string, 3> variables = reader.gridVariableNames();
 
-    ghoul::Dictionary inputMetadata = reader.readMetaData();
-    ghoul::Dictionary outputMetadata;
+            glm::vec3 lowerBound, upperBound;
+            if (_autoDomainBounds) {
+                lowerBound = glm::vec3(
+                    reader.minValue(variables[0]),
+                    reader.minValue(variables[1]),
+                    reader.minValue(variables[2])
+                );
+                upperBound = glm::vec3(
+                    reader.maxValue(variables[0]),
+                    reader.maxValue(variables[1]),
+                    reader.maxValue(variables[2])
+                );
+            }
+            else {
+                lowerBound = _lowerDomainBound;
+                upperBound = _upperDomainBound;
+            }
 
-    std::string time = reader.time();
 
-    // Do not include time offset in time string
-    if (time.back() == 'Z') {
-        time.pop_back();
+            std::unique_ptr<volume::RawVolume<float>> rawVolume = reader.readFloatVolume(
+                _dimensions, _variable, lowerBound, upperBound
+            );
+
+            volume::RawVolumeWriter<float> writer(rawOutput);
+            writer.write(*rawVolume);
+
+            ghoul::Dictionary inputMetadata = reader.readMetaData();
+            ghoul::Dictionary outputMetadata;
+
+            std::string time = reader.time();
+
+            std::unique_ptr<ccmc::Kameleon> kameleon = kameleonHelper::createKameleonObject(inputPath.string());
+            double cdfDoubleTime = kameleonHelper::getTime(kameleon.get(), 0);
+
+            std::string cdfStringTime = SpiceManager::ref().dateFromEphemerisTime(
+                cdfDoubleTime, "YYYY-MM-DDTHR:MN:SC::RND"
+            );
+
+            if (time.back() == 'Z') {
+                time.pop_back();
+            }
+
+            outputMetadata.setValue("Time", cdfStringTime);
+            outputMetadata.setValue("Dimensions", glm::dvec3(_dimensions));
+            outputMetadata.setValue("LowerDomainBound", glm::dvec3(lowerBound));
+            outputMetadata.setValue("UpperDomainBound", glm::dvec3(upperBound));
+            outputMetadata.setValue("MinValue", reader.minValue(_variable));
+            outputMetadata.setValue("MaxValue", reader.maxValue(_variable));
+            outputMetadata.setValue("VisUnit", reader.getVisUnit(_variable));
+
+            std::string metadataString = ghoul::formatLua(outputMetadata);
+            std::ofstream dictFile(dictOutput);
+            dictFile << "return " << metadataString;
+        }
+
+        count++;
+        progressCallback(static_cast<float>(count) / static_cast<float>(totalFiles));
     }
-
-    outputMetadata.setValue("Time", time);
-    outputMetadata.setValue("Dimensions", glm::dvec3(_dimensions));
-    outputMetadata.setValue("LowerDomainBound", glm::dvec3(_lowerDomainBound));
-    outputMetadata.setValue("UpperDomainBound", glm::dvec3(_upperDomainBound));
-
-    outputMetadata.setValue("MinValue", reader.minValue(_variable));
-    outputMetadata.setValue("MaxValue", reader.maxValue(_variable));
-    outputMetadata.setValue("VisUnit", reader.getVisUnit(_variable));
-
-    std::string metadataString = ghoul::formatLua(outputMetadata);
-
-    std::fstream f = std::fstream(_dictionaryOutputPath, std::ios::out);
-    f << "return " << metadataString;
 
     progressCallback(1.f);
 }
