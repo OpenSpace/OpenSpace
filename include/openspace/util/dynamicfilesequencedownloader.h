@@ -141,7 +141,8 @@ public:
     void checkForFinishedDownloads();
     void clearDownloaded();
     std::filesystem::path destinationDirectory();
-    bool filesCurrentlyDownloading();
+    bool areFilesCurrentlyDownloading();
+    std::vector<File*>& filesCurrentlyDownloading();
 
 private:
 

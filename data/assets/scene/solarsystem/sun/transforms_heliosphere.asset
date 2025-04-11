@@ -115,6 +115,23 @@ local TransformGONG = {
   }
 }
 
+local WSATEST = {
+  Identifier = "WSATEST",
+  Parent = HeliocentricEarthEquatorial180.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      --Rotation = {0, 0, 1.57079633} -- 90 deg
+      Rotation = {0, 0, 2.0943951} -- 120 deg
+    }
+  },
+  GUI = {
+    Name = "Transform test 90 deg",
+    Path = "/Solar System/Sun",
+    Hidden = true
+  }
+}
+
 asset.onInitialize(function()
   openspace.spice.loadKernel(SunCentricFrameKernels .. "HEEQ180.tf")
   openspace.spice.loadKernel(SunCentricFrameKernels .. "HEEQ.tf")
@@ -123,9 +140,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(HeliocentricEarthEquatorial)
   openspace.addSceneGraphNode(HeliocentricEarthEcliptic)
   openspace.addSceneGraphNode(TransformGONG)
+  openspace.addSceneGraphNode(WSATEST)
+
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(WSATEST)
   openspace.removeSceneGraphNode(TransformGONG)
   openspace.removeSceneGraphNode(HeliocentricEarthEcliptic)
   openspace.removeSceneGraphNode(HeliocentricEarthEquatorial)
@@ -139,6 +159,7 @@ asset.export(HeliocentricEarthEquatorial180)
 asset.export(HeliocentricEarthEquatorial)
 asset.export(HeliocentricEarthEcliptic)
 asset.export(TransformGONG)
+asset.export(WSATEST)
 
 
 

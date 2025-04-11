@@ -622,6 +622,7 @@ void RenderableFieldlinesSequence::initialize() {
 //    _transferFunction = std::make_unique<TransferFunction>(
 //        absPath(_colorTablePath).string()
 //    );
+    _firstLoad = true;
 }
 
 void RenderableFieldlinesSequence::initializeGL() {
@@ -835,7 +836,7 @@ void RenderableFieldlinesSequence::deinitializeGL() {
 
     bool printedWarning = false;
     while (_dynamicFileDownloader != nullptr &&
-        _dynamicFileDownloader->filesCurrentlyDownloading())
+        _dynamicFileDownloader->areFilesCurrentlyDownloading())
     {
         if (!printedWarning) {
             LWARNING("Currently downloading file, exiting might take longer than usual");
@@ -873,8 +874,11 @@ void RenderableFieldlinesSequence::computeSequenceEndTime() {
     else if (_files.size() > 1) {
         const double lastTriggerTime = _files.back().timestamp;
         const double sequenceDuration = lastTriggerTime - _files[0].timestamp;
-        const double averageStateDuration = sequenceDuration / (_files.size() - 1);
-        _sequenceEndTime = lastTriggerTime + averageStateDuration;
+        const double averageCadence = sequenceDuration / (_files.size() - 1);
+        // A 2 multiplier to the average cadence is added at the end as a small buffer
+        // 2 because if you start it just before new data came in, you might just be
+        // outside the sequence end time otherwise
+        _sequenceEndTime = lastTriggerTime + 2 * averageCadence;
     }
 }
 // The function loads the file in the sense that it creates the FieldlineState object in
@@ -920,16 +924,9 @@ void RenderableFieldlinesSequence::trackOldest(File& file) {
         _loadedFiles.size() >= _maxLoadedFiles)
     {
         File* oldest = _loadedFiles.front();
-        //std::vector<File>::iterator it =
-        //    std::find(_files.begin(), _files.end(), [&](File& f)
-        //        {
-        //            return &f == oldest;
-        //        });
-        //if (it != _files.end()) {
         oldest->status = File::FileStatus::Downloaded;
         oldest->state.clear();
         _loadedFiles.pop();
-        //}
     }
 }
 
@@ -991,6 +988,9 @@ void RenderableFieldlinesSequence::updateDynamicDownloading(const double current
 
         auto inserted = insertToFilesInOrder(newFile);
     }
+    if (!filesToRead.empty()) {
+        _activeIndex = updateActiveIndex(currentTime);
+    }
 
     // if all files are moved into _sourceFiles then we can
     // empty the DynamicFileSequenceDownloader _downloadedFiles;
@@ -1039,13 +1039,15 @@ void RenderableFieldlinesSequence::firstUpdate() {
     //);
     //_colorGroup.addProperty(_selectedColorRange);
     //_colorGroup.addProperty(_colorTablePath);
-    //std::filesystem::path newPath = absPath(_colorTablePath);
-    //if (std::filesystem::exists(newPath)) {
-    //    _transferFunction = std::make_unique<TransferFunction>(newPath.string());
-    //}
-    //else {
-    //    LWARNING("Invalid path to transferfunction, please enter new path.");
-    //}
+    std::filesystem::path newPath = absPath(_colorTablePath);
+    if (std::filesystem::exists(newPath)) {
+        _transferFunction = std::make_unique<TransferFunction>(newPath.string());
+    }
+    else {
+        LWARNING("Invalid path to transferfunction, please enter new path.");
+        _colorTablePath = FieldlinesSequenceModule::DefaultTransferFunctionFile.string();
+        _transferFunction = std::make_unique<TransferFunction>(_colorTablePath.stringValue());
+    }
 
     //_maskingGroup.addProperty(_maskingEnabled);
     //_maskingGroup.addProperty(_maskingQuantity);
@@ -1085,6 +1087,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 
     if (_loadingType == LoadingType::DynamicDownloading) {
         updateDynamicDownloading(currentTime, deltaTime);
+        computeSequenceEndTime();
     }
     if (_firstLoad && _atLeastOneFileLoaded) {
         firstUpdate();
@@ -1093,10 +1096,6 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     _inInterval = _files.size() > 0 &&
         currentTime >= _files[0].timestamp &&
         currentTime < _sequenceEndTime;
-
-    if (!_inInterval && _renderForever) {
-        updateActiveIndex(currentTime);
-    }
 
     // for the sake of this if statment, it is easiest to think of activeIndex as the
     // previous index and nextIndex as the current
@@ -1111,32 +1110,35 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         // if currentTime >= next timestamp, it means that we stepped forward to a
         // time represented by another state
         (nextIndex < _files.size() && currentTime >= _files[nextIndex].timestamp) ||
-        // if this case is not taken care of yet
-        _files[_activeIndex].status == File::FileStatus::Downloaded)
+        // The case when we jumped passed last file. where nextIndex is not < file.size()
+        currentTime >= _files[_activeIndex].timestamp)
     {
         int previousIndex = _activeIndex;
         _activeIndex = updateActiveIndex(currentTime);
         // check index again after updating
-        if (_activeIndex == -1) return;
-        // If we have a new index, buffers needs to update
-        if (previousIndex != _activeIndex && !_firstLoad) {
-            _shouldUpdateColorBuffer = true;
-            _shouldUpdateMaskingBuffer = true;
+        if (_activeIndex == -1) {
+            return;
         }
+        File& file = _files[_activeIndex];
         // here, for DynamicLoading, the dataset is known, but files not loaded yet
-        if (_files[_activeIndex].status == File::FileStatus::Downloaded) {
+        if (file.status == File::FileStatus::Downloaded) {
             // if LoadingType is StaticLoading all files will be Loaded
             // would be optimal if loading of next file would happen in the background
             //std::thread t = loadFile(_files[_activeIndex]);
             //t.join();
-            loadFile(_files[_activeIndex]);
+            loadFile(file);
             _isLoadingStateFromDisk = false;
-            _files[_activeIndex].status = File::FileStatus::Loaded;
-            _files[_activeIndex].timestamp =
-                extractTriggerTimeFromFilename(_files[_activeIndex].path);
+            file.status = File::FileStatus::Loaded;
+            file.timestamp =
+                extractTriggerTimeFromFilename(file.path);
             _atLeastOneFileLoaded = true;
             computeSequenceEndTime();
-            trackOldest(_files[_activeIndex]);
+        }
+        // If we have a new index, buffers needs to update
+        if (previousIndex != _activeIndex) {
+            _shouldUpdateColorBuffer = true;
+            _shouldUpdateMaskingBuffer = true;
+            trackOldest(file);
         }
 
         updateVertexPositionBuffer();
@@ -1152,7 +1154,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 }
 
 void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&) {
-    if (_files.empty()) return;
+    if (_files.empty() || _firstLoad) return;
     if (!_inInterval && !_renderForever) return;
 
     _shaderProgram->activate();

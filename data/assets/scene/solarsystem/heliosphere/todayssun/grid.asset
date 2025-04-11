@@ -1,0 +1,87 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
+
+local size = 700000000
+
+local grid_slice = {
+  Identifier = "carrington_grid_slice",
+  Parent = transforms.WSATEST.Identifier,
+  Transform = {
+--    Rotation = {
+--      Type = "StaticRotation",
+--      -- 70 degrees
+--      Rotation = { 0.0, 0.0, 1.22173 }
+--    }
+    Scale = {
+      Type = "StaticScale",
+      Scale = size
+    }
+  },
+  Renderable = {
+    Type = "RenderableSphericalGrid",
+    Enabled = true,
+    Size = size,
+    Opacity = 1.0,
+    Color = { 0.8, 0.8, 0.8 },
+    LineWidth = 1.0,
+    GridSegments = { 2, 64 }
+  },
+  GUI = {
+    Name = "Longitude at Sun-Earth line",
+    Path =  "/Solar System/Heliosphere",
+    Description = [[A grid with 10 degree seperationg between line segments]]
+  }
+}
+
+local grid_10deg = {
+  Identifier = "carrington_grid_10_degrees",
+  Parent = transforms.WSATEST.Identifier,
+  Transform = {
+--    Rotation = {
+--      Type = "StaticRotation",
+--      -- 70 degrees
+--      Rotation = { 0.0, 0.0, 1.22173 }
+--    }
+    Scale = {
+      Type = "StaticScale",
+      Scale = size
+    }
+  },
+  Renderable = {
+    Type = "RenderableSphericalGrid",
+    Enabled = true,
+    Size = size,
+    Opacity = 1.0,
+    Color = { 0.035, 0.675, 0.255 },
+    LineWidth = 1.0,
+    GridSegments = { 36, 36 }
+  },
+  GUI = {
+    Name = "10 Degree Grid",
+    Path =  "/Solar System/Heliosphere",
+    Description = [[A grid with 10 degree seperationg between line segments]]
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(grid_10deg)
+  openspace.addSceneGraphNode(grid_slice)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(grid_10deg)
+  openspace.removeSceneGraphNode(grid_slice)
+end)
+
+asset.export(grid_10deg)
+asset.export(grid_slice)
+
+
+
+asset.meta = {
+  Name = "10 Degree Grid",
+  Version = "1.0",
+  Description = [[A grid with 10 degree seperationg between line segments]],
+  Author = "CCMC",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

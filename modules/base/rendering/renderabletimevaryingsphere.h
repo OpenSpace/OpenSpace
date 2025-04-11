@@ -86,6 +86,7 @@ protected:
 
 private:
     void loadTexture();
+    void trackOldest(File& file);
     void showCorrectFileName();
     void extractMandatoryInfoFromSourceFolder();
     void readFileFromImage(std::filesystem::path path);
@@ -108,9 +109,15 @@ private:
     int _dataID;
     // number of files to queue up at a time
     int _nOfFilesToQueue = 10;
+    // to keep track of oldest file
+    std::queue<File*> _loadedFiles;
+    // max number of files loaded at onse
+    size_t _maxLoadedFiles = 100;
     std::string _infoURL = "";
     std::string _dataURL = "";
     properties::OptionProperty _fitsLayer;
+    //properties::OptionProperty _fitsLayerName;
+    std::map<int, std::string> _layerNames;
     int _fitsLayerTemp;
     // An option to keep or delete the downloads from dynamic downloader on shutdown
     // Deletes on default
@@ -134,7 +141,7 @@ private:
     bool _firstUpdate = true;
     bool _layerOptionsAdded = false;
     ghoul::opengl::Texture* _texture = nullptr;
-    bool _textureIsDirty = false;
+    bool _textureIsDirty = true;
 
 };
 

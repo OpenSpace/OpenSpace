@@ -22,7 +22,7 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
             );
             return nullptr;
         }
-        // Convirt fits path with fits-file-reader functions
+        // Convert fits path with fits-file-reader functions
         const std::shared_ptr<ImageData<float>> fitsValues = callCorrectImageReader(file);
         int layerSize = fitsValues->width * fitsValues->height;
 

@@ -14,8 +14,8 @@ dataURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/FilesIn
 local sunRadius = 695508000
 
 local WSA_Magnetograms = {
-  Identifier = "WSA_54_Magnetograms",
-  Parent = transforms.TransformGONG.Identifier,
+  Identifier = "WSA_54_Magnetograms_GONGZ",
+  Parent = transforms.WSATEST.Identifier,
   Renderable = {
     Type = "RenderableTimeVaryingSphere",
     Enabled = true,
@@ -25,17 +25,57 @@ local WSA_Magnetograms = {
     DataURL = dataURL,
     DataID = 2148, --1233, --1196 --1180
     FitsLayer = 4,
+    --LayerNames = {
+   --   0 = {"a"},
+   --   1 = {"b"},
+   --   2 = {"c"},
+   --   3 = {"d"},
+   --   4 = {"e"}
+   -- },
     ColorMap = blueBlackRed,
-    DeleteDownloadsOnShutdown = true,
+    DeleteDownloadsOnShutdown = false,
     ShowAtAllTimes = false,
     Opacity = 1,
     Segments = 132
   },
   GUI = {
-    Name = "Solar Surface",
+    Name = "Solar Surface (GONG-Z)",
     Path = "/Solar System/Heliosphere/WSA Coronal Model 5.4",
-    Description = [[Texture sequence of magnetograms from simulation model WSA 5.4. ]]..
+    Description = [[Texture sequence of simulation model WSA 5.4. ]]..
     [[Output: fits files using GONG-Z Map (RADOUT =  5.0). Dynamically downloaded]]
+  }
+}
+
+local WSA_Magnetograms_Adapt = {
+  Identifier = "WSA_54_Magnetograms_ADAPT",
+  Parent = transforms.TransformGONG.Identifier,
+  Renderable = {
+    Type = "RenderableTimeVaryingSphere",
+    Enabled = true,
+    Size = sunRadius * 1.002,
+    LoadingType = "DynamicDownloading",
+    InfoURL = infoURL,
+    DataURL = dataURL,
+    DataID = 2149, --1233, --1196 --1180
+    FitsLayer = 4,
+    --LayerNames = {
+   --   0 = {"a"},
+   --   1 = {"b"},
+   --   2 = {"c"},
+   --   3 = {"d"},
+   --   4 = {"e"}
+   -- },
+    ColorMap = blueBlackRed,
+    DeleteDownloadsOnShutdown = false,
+    ShowAtAllTimes = false,
+    Opacity = 1,
+    Segments = 132
+  },
+  GUI = {
+    Name = "Solar Surface (GONG ADAPT)",
+    Path = "/Solar System/Heliosphere/WSA Coronal Model 5.4",
+    Description = [[Texture sequence of simulation model WSA 5.4. ]]..
+    [[Output fits file using ADAPT GONG realization 000 to 011 Maps (RADOUT =  5.0)]]
   }
 }
 

@@ -311,10 +311,12 @@ void DynamicFileSequenceDownloader::downloadFile() {
                 "but its status is not OnQueue"
             );
         }
-        _queuedFilesToDownload.erase(_queuedFilesToDownload.begin());
-        dl->download->start();
-        _filesCurrentlyDownloading.push_back(dl);
-        dl->state = File::State::Downloading;
+        if (dl->download != nullptr) {
+            dl->download->start();
+            _filesCurrentlyDownloading.push_back(dl);
+            dl->state = File::State::Downloading;
+            _queuedFilesToDownload.erase(_queuedFilesToDownload.begin());
+        }
     }
 }
 
@@ -350,6 +352,28 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
         }
         else if (dl->hasFailed()) {
             LERROR(std::format("File '{}' failed to download. Removing file", file->URL));
+            std::string filename;
+            //remove file here
+            size_t lastSlash = file->URL.find_last_of('/');
+            if (lastSlash == std::string::npos || lastSlash + 1 >= file->URL.size()) {
+                filename = "";
+            }
+            else {
+                filename = file->URL.substr(lastSlash + 1);
+            }
+
+            std::filesystem::path filepath = std::filesystem::path(_syncDir) / filename;
+            if (std::filesystem::exists(filepath)) {
+                std::error_code ec;
+                std::filesystem::remove(filepath, ec);
+                if (ec) {
+                    LERROR(std::format("Failed to delete file: {}", filepath));
+                }
+                else {
+                    LINFO(std::format("Deleted file after failed download: "), filepath);
+                }
+            }
+
             currentIt = _filesCurrentlyDownloading.erase(currentIt);
             // if one is removed, i is reduced, else we'd skip one in the list
             --i;
@@ -512,6 +536,9 @@ void DynamicFileSequenceDownloader::update(const double time, const double delta
             _thisFile = closestFileToNow(time);
         }
     }
+    else if (_thisFile->download == nullptr && !_availableData.empty()) {
+        _thisFile = closestFileToNow(time);
+    }
 
     if (_downloadedFiles.size() > 20) {
         // cache files.
@@ -536,8 +563,12 @@ std::filesystem::path DynamicFileSequenceDownloader::destinationDirectory() {
 void DynamicFileSequenceDownloader::clearDownloaded() {
     _downloadedFiles.clear();
 }
-bool DynamicFileSequenceDownloader::filesCurrentlyDownloading() {
+bool DynamicFileSequenceDownloader::areFilesCurrentlyDownloading() {
     return _filesCurrentlyDownloading.size() != 0;
+}
+
+std::vector<File*>& DynamicFileSequenceDownloader::filesCurrentlyDownloading() {
+    return _filesCurrentlyDownloading;
 }
 
 //reference or no reference? return path to where they are instead?
