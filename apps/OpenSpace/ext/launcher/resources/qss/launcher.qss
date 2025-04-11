@@ -119,6 +119,12 @@ LauncherWindow QComboBox#config:focus
 LauncherWindow QPushButton#settings:focus {
   outline: 2px solid rgb(61, 189, 238);
 }
+
+LauncherWindow QTextEdit#notifications {
+  background-color: #242424;
+  color: #d7d7d7;
+}
+
 /*
  * ProfileEdit
  */

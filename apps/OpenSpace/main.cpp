@@ -1071,6 +1071,12 @@ void setSgctDelegateFunctions() {
 int main(int argc, char* argv[]) {
     ZoneScoped;
 
+    // For debugging purposes: Enforce Light Mode in Qt
+    // qputenv("QT_QPA_PLATFORM", "windows:darkmode=0");
+
+    // For debugging purposes: Enforce Dark Mode in Qt
+    // qputenv("QT_QPA_PLATFORM", "windows:darkmode=1");
+
 #ifdef OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
     _clearfp();
     _controlfp(_controlfp(0, 0) & ~(_EM_ZERODIVIDE | _EM_OVERFLOW), _MCW_EM);

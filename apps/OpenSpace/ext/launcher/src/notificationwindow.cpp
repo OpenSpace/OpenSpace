@@ -85,21 +85,11 @@ namespace {
             date::day(day)
         );
 
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 5, 0))
-        Qt::ColorScheme scheme = QGuiApplication::styleHints()->colorScheme();
-        QColor text = QGuiApplication::palette().text().color();
-        if (scheme == Qt::ColorScheme::Dark) {
-            text = text.darker();
-        }
-        else {
-            text = text.lighter();
-        }
-#else
         QColor text = QGuiApplication::palette().text().color();
         text = text.darker();
-#endif
 
         if (date::sys_days(ymd) < date::sys_days(lastStartedDate)) {
+            QColor text = QColor(120, 120, 120);
             return std::format(
                 "<tr>"
                     "<td width='15%'>"
@@ -134,6 +124,7 @@ NotificationWindow::NotificationWindow(QWidget* parent)
     setAcceptRichText(true);
     setReadOnly(true);
     setFocusPolicy(Qt::NoFocus);
+    setObjectName("notifications");
 
     std::string URL = std::format(
         "https://raw.githubusercontent.com/OpenSpace/Notifications/refs/heads/master/"
