@@ -61,6 +61,7 @@ T NumericalProperty<T>::minValue() const {
 
 template <typename T>
 void NumericalProperty<T>::setMinValue(T value) {
+    Property::notifyMetaDataChangeListeners();
     _minimumValue = std::move(value);
 }
 
@@ -71,6 +72,7 @@ T NumericalProperty<T>::maxValue() const {
 
 template <typename T>
 void NumericalProperty<T>::setMaxValue(T value) {
+    Property::notifyMetaDataChangeListeners();
     _maximumValue = std::move(value);
 }
 
@@ -81,6 +83,7 @@ T NumericalProperty<T>::steppingValue() const {
 
 template <typename T>
 void NumericalProperty<T>::setSteppingValue(T value) {
+    Property::notifyMetaDataChangeListeners();
     _stepping = std::move(value);
 }
 
@@ -118,6 +121,7 @@ void NumericalProperty<T>::setExponent(float exponent) {
     }
 
     _exponent = exponent;
+    Property::notifyMetaDataChangeListeners();
 }
 
 template <typename T>

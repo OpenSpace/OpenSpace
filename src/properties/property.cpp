@@ -92,6 +92,7 @@ const std::string& Property::description() const {
 
 void Property::setGroupIdentifier(std::string groupId) {
     _metaData.group = std::move(groupId);
+    notifyMetaDataChangeListeners();
 }
 
 std::string Property::groupIdentifier() const {
@@ -100,6 +101,7 @@ std::string Property::groupIdentifier() const {
 
 void Property::setVisibility(Visibility visibility) {
     _metaData.visibility = visibility;
+    notifyMetaDataChangeListeners();
 }
 
 Property::Visibility Property::visibility() const {
@@ -108,6 +110,7 @@ Property::Visibility Property::visibility() const {
 
 void Property::setReadOnly(bool state) {
     _metaData.readOnly = state;
+    notifyMetaDataChangeListeners();
 }
 
 bool Property::isReadOnly() const {
@@ -116,10 +119,12 @@ bool Property::isReadOnly() const {
 
 void Property::setNeedsConfirmation(bool state) {
     _metaData.needsConfirmation = state;
+    notifyMetaDataChangeListeners();
 }
 
 void Property::setViewOption(std::string option, bool value) {
     _metaData.viewOptions[std::move(option)] = value;
+    notifyMetaDataChangeListeners();
 }
 
 bool Property::viewOption(const std::string& option, bool defaultValue) const {
@@ -151,6 +156,14 @@ Property::OnChangeHandle Property::onDelete(std::function<void()> callback) {
 
     const OnDeleteHandle handle = _currentHandleValue++;
     _onDeleteCallbacks.emplace_back(handle, std::move(callback));
+    return handle;
+}
+
+Property::OnMetaDataChangeHandle Property::onMetaDataChange(std::function<void()> callback) {
+    ghoul_assert(callback, "The callback must not be empty");
+
+    const OnMetaDataChangeHandle handle = _currentHandleValue++;
+    _onMetaDataChangeCallbacks.emplace_back(handle, std::move(callback));
     return handle;
 }
 
@@ -193,6 +206,29 @@ void Property::removeOnDelete(OnDeleteHandle handle) {
     _onDeleteCallbacks.erase(it);
 }
 
+void Property::removeOnMetaDataChange(OnMetaDataChangeHandle handle) {
+    if (handle == OnMetaDataChangeHandleAll) {
+        _onMetaDataChangeCallbacks.clear();
+    }
+    else {
+        auto it = std::find_if(
+            _onMetaDataChangeCallbacks.begin(),
+            _onMetaDataChangeCallbacks.end(),
+            [handle](const std::pair<OnChangeHandle, std::function<void()>>& p) {
+                return p.first == handle;
+            }
+        );
+
+        ghoul_assert(
+            it != _onMetaDataChangeCallbacks.end(),
+            "handle must be a valid callback handle"
+        );
+
+        _onMetaDataChangeCallbacks.erase(it);
+    }
+}
+
+
 const PropertyOwner* Property::owner() const {
     return _owner;
 }
@@ -203,6 +239,12 @@ void Property::setPropertyOwner(PropertyOwner* owner) {
 
 void Property::notifyChangeListeners() {
     for (const std::pair<OnChangeHandle, std::function<void()>>& p : _onChangeCallbacks) {
+        p.second();
+    }
+}
+
+void Property::notifyMetaDataChangeListeners() {
+    for (const std::pair<OnChangeHandle, std::function<void()>>& p : _onMetaDataChangeCallbacks) {
         p.second();
     }
 }

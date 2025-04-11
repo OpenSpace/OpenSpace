@@ -124,10 +124,19 @@ public:
     /// onDelete callback
     using OnDeleteHandle = uint32_t;
 
+    /// An OnMetaDataChangeHandle is returned by the onMetaDataChange method to uniquely
+    /// identify an onMetaDataChange callback
+    using OnMetaDataChangeHandle = uint32_t;
+
     /// This OnChangeHandle can be used to remove all onChange callbacks from this
     /// Property
     constexpr static OnChangeHandle OnChangeHandleAll =
         std::numeric_limits<OnChangeHandle>::max();
+
+    /// This OnMetaDataChangeHandle can be used to remove all onMetaDataChange callbacks
+    /// from this Property
+    constexpr static OnMetaDataChangeHandle OnMetaDataChangeHandleAll =
+        std::numeric_limits<OnMetaDataChangeHandle >::max();
 
     /**
      * The constructor for the property. The \p info (see PropertyInfo) contains
@@ -237,6 +246,21 @@ public:
     OnDeleteHandle onDelete(std::function<void()> callback);
 
     /**
+     * This method registers a \p callback function that will be called every time the
+     * notifyMetaDataChangeListener function was called. The callback can be removed by
+     * calling the removeOnMetaDataChange method with the OnMetaDataChangeHandle that was
+     * returned here.
+     *
+     * \param callback The callback function that is called when the meta data of the
+     * property has been changed.
+     * \return An OnMetaDataChangeHandle that can be used in subsequent calls to remove a
+     * callback
+     *
+     * \pre The \p callback must not be empty
+     */
+    OnMetaDataChangeHandle onMetaDataChange(std::function<void()> callback);
+
+    /**
      * This method deregisters a callback that was previously registered with the onChange
      * method. If OnChangeHandleAll is passed to this function, all registered callbacks
      * are removed.
@@ -260,6 +284,19 @@ public:
      * \pre \p handle must refer to a callback that has not been removed previously
      */
     void removeOnDelete(OnDeleteHandle handle);
+
+    /**
+     * This method deregisters a callback that was previously registered with the onMetaDataChange
+     * method. If OnMetaDataChangeHandleAll is passed to this function, all registered callbacks
+     * are removed.
+     *
+     * \param handle An OnMetaDataChangeHandle that was returned from a previous call to onMetaDataChange
+     *        by this property or OnMetaDataChangeHandleAll if all callbacks should be removed.
+     *
+     * \pre \p handle must refer to a callback that has been previously registred
+     * \pre \p handle must refer to a callback that has not been removed previously
+     */
+    void removeOnMetaDataChange(OnMetaDataChangeHandle handle);
 
     /**
      * This method returns the unique identifier of this Property.
@@ -482,6 +519,12 @@ protected:
      */
     void notifyChangeListeners();
 
+    /**
+     * This method must be called by all subclasses whenever the meta data has
+     * changed and potential listeners need to be informed.
+     */
+    void notifyMetaDataChangeListeners();
+
     /// The PropetyOwner this Property belongs to, or `nullptr`
     PropertyOwner* _owner = nullptr;
 
@@ -508,6 +551,10 @@ protected:
 
     /// The callback functions that will be invoked whenever the value changes
     std::vector<std::pair<OnDeleteHandle, std::function<void()>>> _onDeleteCallbacks;
+
+    /// The callback functions that will be invoked whenever the value changes
+    std::vector<std::pair<OnMetaDataChangeHandle, std::function<void()>>>
+        _onMetaDataChangeCallbacks;
 
     /// Flag indicating that this property value has been changed after initialization
     bool _isValueDirty = false;

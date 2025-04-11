@@ -87,6 +87,7 @@ void OptionProperty::addOption(int value, std::string description) {
         // Set default value to option added first
         NumericalProperty::setValue(_options[0].value);
     }
+    notifyMetaDataChangeListeners();
 }
 
 void OptionProperty::addOptions(std::vector<std::pair<int, std::string>> options) {
@@ -95,6 +96,7 @@ void OptionProperty::addOptions(std::vector<std::pair<int, std::string>> options
     }
     // Set default value to option added first
     NumericalProperty::setValue(_options[0].value);
+    notifyMetaDataChangeListeners();
 }
 
 void OptionProperty::addOptions(std::vector<std::string> options) {
@@ -103,11 +105,13 @@ void OptionProperty::addOptions(std::vector<std::string> options) {
     }
     // Set default value to option added first
     NumericalProperty::setValue(_options[0].value);
+    notifyMetaDataChangeListeners();
 }
 
 void OptionProperty::clearOptions() {
     NumericalProperty::setValue(0);
     _options.clear();
+    notifyMetaDataChangeListeners();
 }
 
 void OptionProperty::setValue(int value) {
