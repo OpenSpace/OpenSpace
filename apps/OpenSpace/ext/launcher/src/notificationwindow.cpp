@@ -102,11 +102,11 @@ namespace {
         if (date::sys_days(ymd) < date::sys_days(lastStartedDate)) {
             return std::format(
                 "<tr>"
-                    "<td width=\"15%\">"
-                        "<font color=\"#{2:x}{3:x}{4:x}\">{0}</font>"
+                    "<td width='15%'>"
+                        "<font color='#{2:x}{3:x}{4:x}'>{0}</font>"
                     "</td>"
-                    "<td width=\"85%\" align=\"left\">"
-                        "<font color=\"#{2:x}{3:x}{4:x}\">{1}</font>"
+                    "<td width='85%' align='left'>"
+                        "<font color='#{2:x}{3:x}{4:x}'>{1}</font>"
                     "</td>"
                 "</tr>",
                 e.date, e.text, text.red(), text.green(), text.blue()
@@ -115,10 +115,10 @@ namespace {
         else {
             return std::format(
                 "<tr>"
-                    "<td width=\"15%\">"
+                    "<td width='15%'>"
                         "{0}"
                     "</td>"
-                    "<td width=\"85%\" align=\"left\">"
+                    "<td width='85%' align='left'>"
                         "{1}"
                     "</td>"
                 "</tr>",
