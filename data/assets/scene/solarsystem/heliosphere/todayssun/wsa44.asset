@@ -4,13 +4,39 @@ local transferFunctions = asset.resource("transferfunctions")
 local windSpeedPolarityColorTable = transferFunctions .. "/polarity_spec.txt"
 local currentSheetColorTable = transferFunctions .. "/currentsheet_spec.txt"
 local subEarthLevelColorTable = transferFunctions .. "/subearth_spec.txt"
+local blueBlackRed = transferFunctions .. "/blue-black-red.txt"
 
 
 
-infoURL = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id="
-dataURL = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID="
+infoURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id="
+dataURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID="
 
 local sunRadius = 695508000
+
+local WSA_Magnetograms = {
+  Identifier = "WSA_44_Magnetograms",
+  Parent = transforms.TransformGONG.Identifier,
+  Renderable = {
+      Type = "RenderableTimeVaryingSphere",
+      Enabled = false,
+      Size = sunRadius * 1.002,
+      LoadingType = "DynamicDownloading",
+      InfoURL = infoURL,
+      DataURL = dataURL,
+      DataID = 1180,
+      FitsLayer = 4,
+      ColorMap = blueBlackRed,
+      DeleteDownloadsOnShutdown = true,
+      ShowAtAllTimes = false,
+      Opacity = 1,
+      Segments = 132
+  },
+  GUI = {
+      Name = "Solar Surface",
+      Path = "/Solar System/Heliosphere/WSA Coronal Model 4.4",
+      Description = [[WSA 4.4 output fits file using GONG (specifics unknown)]]
+  }
+}
 
 local fieldlinesSCS = {
   Identifier = "WSA_44_Fieldlines_SCS_OI",
@@ -164,6 +190,7 @@ local fieldlinesEarth = {
 
 
 asset.onInitialize(function()
+  openspace.addSceneGraphNode(WSA_Magnetograms)
   openspace.addSceneGraphNode(fieldlinesSCS)
   openspace.addSceneGraphNode(fieldlinesOI)
   openspace.addSceneGraphNode(fieldlinesIO)
@@ -175,10 +202,14 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(fieldlinesIO)
   openspace.removeSceneGraphNode(fieldlinesOI)
   openspace.removeSceneGraphNode(fieldlinesSCS)
+  openspace.removeSceneGraphNode(WSA_Magnetograms)
 end)
 
+asset.export(WSA_Magnetograms)
 asset.export(fieldlinesSCS)
-
+asset.export(fieldlinesOI)
+asset.export(fieldlinesIO)
+asset.export(fieldlinesEarth)
 
 
 asset.meta = {

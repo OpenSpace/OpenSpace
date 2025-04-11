@@ -121,11 +121,8 @@ private:
     std::vector<File> _files;
     std::vector<RenderableFieldlinesSequence::File>::iterator
         insertToFilesInOrder(File& file);
-    // mutex ensures file cannot be accessed while thread is operating on it
-    // it does not ensure that multiple instances of this class cannot try to load the
-    // same file at the same time, however.
-    std::mutex _mutex;
     void loadFile(File& file);
+    void trackOldest(File& file);
 
     SourceFileType _inputFileType;
     // Static Loading on default / if not specified
@@ -147,7 +144,11 @@ private:
     // dataID that corresponds to what dataset to use if using DynamicDownloading
     int _dataID;
     // number of files to queue up at a time
-    int _nOfFilesToQueue = 10;
+    size_t _nOfFilesToQueue = 10;
+    // to keep track of oldest file
+    std::queue<File*> _loadedFiles;
+    // max number of files loaded at onse
+    size_t _maxLoadedFiles = 100;
     std::string _infoURL = "";
     std::string _dataURL = "";
     //  DynamicFileSequenceDownloader downloads and updates renderable field lines with
@@ -163,6 +164,7 @@ private:
     bool _shouldUpdatePositionBuffer;
     int _activeIndex = -1;
     bool _atLeastOneFileLoaded = false;
+    bool _deleteDownloadsOnShutdown = false;
 
     bool _isLoadingStateFromDisk = false;
 

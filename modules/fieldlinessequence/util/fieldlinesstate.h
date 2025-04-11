@@ -48,6 +48,8 @@ public:
         float coordToMeters);
     void saveStateToJson(const std::string& pathToJsonFile);
 
+    void clear();
+
     const std::vector<std::vector<float>>& extraQuantities() const;
     const std::vector<std::string>& extraQuantityNames() const;
     const std::vector<GLsizei>& lineCount() const;
@@ -71,7 +73,7 @@ public:
 private:
     uint8_t _isMorphable = 0;
     double _triggerTime = -1.0;
-    fls::Model _model;
+    fls::Model _model = fls::Model::Invalid;
 
     std::vector<std::vector<float>> _extraQuantities;
     std::vector<std::string> _extraQuantityNames;

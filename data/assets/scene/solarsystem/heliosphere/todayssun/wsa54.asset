@@ -7,8 +7,9 @@ local blueBlackRed = transferFunctions .. "/blue-black-red.txt"
 local currentSheetColorTable = transferFunctions .. "/currentsheet_spec.txt"
 local opennessColorTable = transferFunctions .."/openness_spec.txt"
 
-infoURL = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id="
-dataURL = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID="
+
+infoURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id="
+dataURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID="
 
 local sunRadius = 695508000
 

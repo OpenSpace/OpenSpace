@@ -237,6 +237,10 @@ namespace {
         // Set if first/last file should render forever
         bool showAtAllTimes;
 
+        // If using dynamic downloading, files are cached by default.
+        // To save local space, set this to true.
+        std::optional<bool> deleteDownloadsOnShutdown;
+
         // If data sets parameter start_time differ from start of run,
         // elapsed_time_in_seconds might be in relation to start of run.
         // ManuelTimeOffset will be added to trigger time.
@@ -429,6 +433,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
                 );
             }
         }
+        _maxLoadedFiles = _files.size();
     }
 
     _extraVars = p.extraVariables.value_or(_extraVars);
@@ -444,6 +449,8 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     _colorABlendEnabled = p.alphaBlendingEnabled.value_or(_colorABlendEnabled);
     _renderForever = p.showAtAllTimes;
+    _deleteDownloadsOnShutdown =
+        p.deleteDownloadsOnShutdown.value_or(_deleteDownloadsOnShutdown);
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
 
     if (_loadingType == LoadingType::StaticLoading){
@@ -541,7 +548,9 @@ void RenderableFieldlinesSequence::setupDynamicDownloading(
             "If running with dynamic downloading, dataID needs to be specified"
         );
     }
-    _nOfFilesToQueue = numberOfFilesToQueue.value_or(_nOfFilesToQueue);
+    _nOfFilesToQueue = static_cast<size_t>(
+        numberOfFilesToQueue.value_or(_nOfFilesToQueue)
+    );
     _infoURL = infoURL.value();
     if (_infoURL.empty()) { throw ghoul::RuntimeError("InfoURL has to be provided"); }
     _dataURL = dataURL.value();
@@ -824,7 +833,6 @@ void RenderableFieldlinesSequence::deinitializeGL() {
 
     _files.clear();
 
-    // Stall main thread until thread that's loading states is done
     bool printedWarning = false;
     while (_dynamicFileDownloader != nullptr &&
         _dynamicFileDownloader->filesCurrentlyDownloading())
@@ -837,7 +845,7 @@ void RenderableFieldlinesSequence::deinitializeGL() {
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
     if (_dynamicFileDownloader != nullptr &&
-        //_deleteDownloadsOnShutdown &&
+        _deleteDownloadsOnShutdown &&
         _loadingType == LoadingType::DynamicDownloading)
     {
         std::filesystem::path syncDir = _dynamicFileDownloader->destinationDirectory();
@@ -869,7 +877,11 @@ void RenderableFieldlinesSequence::computeSequenceEndTime() {
         _sequenceEndTime = lastTriggerTime + averageStateDuration;
     }
 }
-
+// The function loads the file in the sense that it creates the FieldlineState object in
+// the File object. The function also deletes the oldest file if the loadedFiles queue
+// is full. The currentTime is given a default value because the function is also called
+// if loadingType = StaticLoading where things initializes in the constructor where
+// current time is not set yet. In that case, the current time is also irrelevant here.
 void RenderableFieldlinesSequence::loadFile(File& file) {
     _isLoadingStateFromDisk = true;
     try {
@@ -887,7 +899,6 @@ void RenderableFieldlinesSequence::loadFile(File& file) {
     catch(const std::exception& e ) {
         LERROR(e.what());
     }
-
     // So far uncleare why model is needed and if scalingFactor can be changed afterwards.
     // If these 2 things can be desided afterwards, without affecting Ganamyde fieldlines
     // that are using json input, then changes to fieldlinesstate function
@@ -897,6 +908,29 @@ void RenderableFieldlinesSequence::loadFile(File& file) {
     // I don't think it matters if model is invalid and scalingFactor is 1.f when loading
     // json files anyway.
 
+}
+
+void RenderableFieldlinesSequence::trackOldest(File& file) {
+    if (file.status == File::FileStatus::Loaded) {
+        _loadedFiles.push(&file);
+    }
+    // Repopulate the queue if new File makes the queue full
+    if (!_loadedFiles.empty() &&
+        _loadingType != LoadingType::StaticLoading &&
+        _loadedFiles.size() >= _maxLoadedFiles)
+    {
+        File* oldest = _loadedFiles.front();
+        //std::vector<File>::iterator it =
+        //    std::find(_files.begin(), _files.end(), [&](File& f)
+        //        {
+        //            return &f == oldest;
+        //        });
+        //if (it != _files.end()) {
+        oldest->status = File::FileStatus::Downloaded;
+        oldest->state.clear();
+        _loadedFiles.pop();
+        //}
+    }
 }
 
 std::vector<RenderableFieldlinesSequence::File>::iterator
@@ -912,16 +946,16 @@ RenderableFieldlinesSequence::insertToFilesInOrder(File& file) {
     return iterToInserted;
 }
 
-int RenderableFieldlinesSequence::updateActiveIndex(const double nowTime) {
+int RenderableFieldlinesSequence::updateActiveIndex(const double currentTime) {
     if (_files.empty()) return -1;
-    // if == nowTime, sets correct index if exactly the same
+    // if == currentTime, sets correct index if exactly the same
     // if size == 1 at this point, we can expect to not have a sequence and wants to show
     // the one files fieldlines at any point in time
-    if (_files.begin()->timestamp == nowTime || _files.size() == 1) return 0;
+    if (_files.begin()->timestamp == currentTime || _files.size() == 1) return 0;
 
     int index = 0;
     const std::vector<File>::const_iterator iter = std::upper_bound(
-        _files.begin(), _files.end(), nowTime, [](double timeRef, const File& fileRef) {
+        _files.begin(), _files.end(), currentTime, [](double timeRef, const File& fileRef) {
             return timeRef < fileRef.timestamp;
         }
     );
@@ -1102,6 +1136,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
                 extractTriggerTimeFromFilename(_files[_activeIndex].path);
             _atLeastOneFileLoaded = true;
             computeSequenceEndTime();
+            trackOldest(_files[_activeIndex]);
         }
 
         updateVertexPositionBuffer();
@@ -1192,7 +1227,6 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
             }
         }
     }
-    else return;
 
     const FieldlinesState& state = _files[loadedIndex].state;
     double timeTest = _files[_activeIndex].timestamp;
