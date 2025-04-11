@@ -30,7 +30,9 @@ local COBE = {
     Texture = textures .. "COBErect.png",
     Orientation = "Both",
     MirrorTexture = true,
-    FadeInThreshold = 0.4
+    FadeInThreshold = 0.4,
+    BlendingOption = "Additive",
+    DisableDepth = true
   },
   GUI = {
     Name = "1990 COBE CMB",
@@ -62,7 +64,9 @@ local WMAP = {
     Texture = textures .. "wmap_ilc_7yr_v4_200uK_RGB_sos.png",
     Orientation = "Both",
     MirrorTexture = true,
-    FadeInThreshold = 0.4
+    FadeInThreshold = 0.4,
+    BlendingOption = "Additive",
+    DisableDepth = true
   },
   GUI = {
     Name = "2003 WMAP CMB",
@@ -93,7 +97,9 @@ local Planck = {
     Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    FadeInThreshold = 0.4
+    FadeInThreshold = 0.4,
+    BlendingOption = "Additive",
+    DisableDepth = true
   },
   GUI = {
     Name = "2013 Planck CMB",
