@@ -455,6 +455,16 @@ bool EventHandler::specialKeyEvent(Key key, KeyModifier mod, KeyAction action) {
             _browserInstance->sendKeyEvent(keyEvent);
             return true;
         }
+        case Key::Apostrophe: {
+            CefKeyEvent keyEvent;
+            keyEvent.windows_key_code = mapFromGlfwToWindows(Key(222));
+            keyEvent.character = mapFromGlfwToCharacter(Key(222));
+            keyEvent.native_key_code = mapFromGlfwToNative(Key(222));
+            keyEvent.modifiers = static_cast<uint32_t>(mod);
+            keyEvent.type = keyEventType(action);
+            _browserInstance->sendKeyEvent(keyEvent);
+            return true;
+        }
         default:
             return false;
     }
