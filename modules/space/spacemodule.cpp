@@ -33,6 +33,7 @@
 #include <modules/space/rendering/renderablerings.h>
 #include <modules/space/rendering/renderablestars.h>
 #include <modules/space/rendering/renderabletravelspeed.h>
+#include <modules/space/timeframe/timeframekernel.h>
 #include <modules/space/translation/keplertranslation.h>
 #include <modules/space/translation/spicetranslation.h>
 #include <modules/space/translation/gptranslation.h>
@@ -105,6 +106,7 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     fRenderable->registerClass<RenderableStars>("RenderableStars");
     fRenderable->registerClass<RenderableTravelSpeed>("RenderableTravelSpeed");
 
+
     ghoul::TemplateFactory<Translation>* fTranslation =
         FactoryManager::ref().factory<Translation>();
     ghoul_assert(fTranslation, "Ephemeris factory was not created");
@@ -114,11 +116,18 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     fTranslation->registerClass<GPTranslation>("GPTranslation");
     fTranslation->registerClass<HorizonsTranslation>("HorizonsTranslation");
 
+
     ghoul::TemplateFactory<Rotation>* fRotation =
         FactoryManager::ref().factory<Rotation>();
     ghoul_assert(fRotation, "Rotation factory was not created");
 
     fRotation->registerClass<SpiceRotation>("SpiceRotation");
+
+
+    ghoul::TemplateFactory<TimeFrame>* fTimeFrame =
+        FactoryManager::ref().factory<TimeFrame>();
+    ghoul_assert(fTimeFrame, "Scale factory was not created");
+    fTimeFrame->registerClass<TimeFrameKernel>("TimeFrameKernel");
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _showSpiceExceptions = p.showExceptions.value_or(_showSpiceExceptions);

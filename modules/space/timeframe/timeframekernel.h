@@ -27,6 +27,8 @@
 
 #include <openspace/scene/timeframe.h>
 
+#include <openspace/util/timerange.h>
+
 namespace openspace {
 
 class TimeFrameKernel : public TimeFrame {
@@ -36,6 +38,10 @@ public:
     void update(const Time& time) override;
 
     static documentation::Documentation Documentation();
+
+private:
+    std::vector<TimeRange> _timeRangesSPK;
+    std::vector<TimeRange> _timeRangesCK;
 };
 
 } // namespace openspace
