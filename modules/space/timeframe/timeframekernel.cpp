@@ -35,7 +35,7 @@ namespace {
 
     std::vector<openspace::TimeRange> extractTimeFramesSPK(
                                         const std::vector<std::filesystem::path>& kernels,
-                                                                const std::string& object)
+                                             const std::variant<std::string, int>& object)
     {
         using namespace openspace;
         std::vector<TimeRange> res;
@@ -52,9 +52,16 @@ namespace {
         // Convert the provided object name into a SpiceInt
         SpiceBoolean success = SPICEFALSE;
         SpiceInt id = 0;
-        bods2c_c(object.c_str(), &id, &success);
-        if (!success) {
-            throw ghoul::RuntimeError(std::format("Error finding object '{}'", object));
+        if (std::holds_alternative<std::string>(object)) {
+            std::string s = std::get<std::string>(object);
+            bods2c_c(s.c_str(), &id, &success);
+            if (!success) {
+                throw ghoul::RuntimeError(std::format("Error finding object '{}'", s));
+            }
+        }
+        else {
+            ghoul_assert(std::holds_alternative<int>(object), "Additional variant type");
+            id = std::get<int>(object);
         }
     
 
@@ -86,10 +93,9 @@ namespace {
             );
 
             if (std::string_view(type.data()) != "SPK") {
-                throw ghoul::RuntimeError(std::format(
-                    "Only SPK kernel files are allowed. Received '{}' for file '{}'",
-                    std::string_view(type.data()), kernel
-                ));
+                // Only SPK kernels are allowed, but we want the user to be able to pass
+                // the full list of kernels to this class, which includes other types
+                continue;
             }
 
             spkobj_c(k.c_str(), &ids);
@@ -160,7 +166,7 @@ namespace {
 
     std::vector<openspace::TimeRange> extractTimeFramesCK(
                                         const std::vector<std::filesystem::path>& kernels,
-                                                                const std::string& object)
+                                             const std::variant<std::string, int>& object)
     {
         using namespace openspace;
         std::vector<TimeRange> res;
@@ -182,10 +188,16 @@ namespace {
         // Convert the provided reference name into a SpiceInt
         SpiceBoolean success = SPICEFALSE;
         SpiceInt id = 0;
-        bods2c_c(object.c_str(), &id, &success);
-
-        if (!success) {
-            throw ghoul::RuntimeError(std::format("Error finding frame '{}'", object));
+        if (std::holds_alternative<std::string>(object)) {
+            std::string s = std::get<std::string>(object);
+            bods2c_c(s.c_str(), &id, &success);
+            if (!success) {
+                throw ghoul::RuntimeError(std::format("Error finding object '{}'", s));
+            }
+        }
+        else {
+            ghoul_assert(std::holds_alternative<int>(object), "Additional variant type");
+            id = std::get<int>(object);
         }
 
 
@@ -358,14 +370,15 @@ namespace {
         // times when positional information for the provided object is available.
         struct SPK {
             // The path to the kernel or list of kernels that should be loaded to extract
-            // the positional information. All kernels specified must be SPK-type kernels.
+            // the positional information. At least one kernel must be a SPK-type kernel.
+            // Any other kernel type is ignored.
             std::variant<
                 std::filesystem::path, std::vector<std::filesystem::path>
             > kernels;
 
             // The NAIF name of the object for which the positional information should be
             // extracted
-            std::string object;
+            std::variant<std::string, int> object;
         };
         std::optional<SPK> spk [[codegen::key("SPK")]];
 
@@ -373,14 +386,14 @@ namespace {
         // the times when positional information for the provided object is available.
         struct CK {
             // The path to the list of kernels that should be loaded to extract
-            // orientation information. All kernels specified must be either CK-type
-            // or SCLK (spacecraft clock) kernels and at least one of each must be
-            // provided.
+            // orientation information. At least one kernel must be a CK-type kernel and
+            // if needed, a SCLK (spacecraft clock) kernel musat be provided. Any other
+            // kernel type is ignored.
             std::vector<std::filesystem::path> kernels;
 
             // The NAIF name of the reference frame for which the times are extacted at
             // which this reference frame has data in the provided kernels
-            std::string reference;
+            std::variant<std::string, int> reference;
         };
         std::optional<CK> ck [[codegen::key("CK")]];
     };
@@ -393,8 +406,15 @@ documentation::Documentation TimeFrameKernel::Documentation() {
     return codegen::doc<Parameters>("space_time_frame_kernel");
 }
 
-TimeFrameKernel::TimeFrameKernel(const ghoul::Dictionary& dictionary) {
-    const Parameters p = codegen::bake<Parameters>(dictionary);
+TimeFrameKernel::TimeFrameKernel(const ghoul::Dictionary& dictionary)
+    : _initialization(dictionary)
+{
+    // Baking the dictionary here to detect any error
+    codegen::bake<Parameters>(dictionary);
+}
+
+bool TimeFrameKernel::initialize() {
+    const Parameters p = codegen::bake<Parameters>(_initialization);
 
     // Either the SPK or the CK variable must be specified
     if (!p.spk.has_value() && !p.ck.has_value()) {
@@ -430,6 +450,8 @@ TimeFrameKernel::TimeFrameKernel(const ghoul::Dictionary& dictionary) {
     // of the vector and improve performance in the `update` lookup
     normalizeTimeRanges(_timeRangesSPK);
     normalizeTimeRanges(_timeRangesCK);
+
+    return true;
 }
 
 void TimeFrameKernel::update(const Time& time) {

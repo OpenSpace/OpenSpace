@@ -35,11 +35,14 @@ class TimeFrameKernel : public TimeFrame {
 public:
     explicit TimeFrameKernel(const ghoul::Dictionary& dictionary);
 
+    bool initialize() override;
     void update(const Time& time) override;
 
     static documentation::Documentation Documentation();
 
 private:
+    ghoul::Dictionary _initialization;
+
     std::vector<TimeRange> _timeRangesSPK;
     std::vector<TimeRange> _timeRangesCK;
 };
