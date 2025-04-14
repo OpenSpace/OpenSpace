@@ -8,12 +8,12 @@ local Node = {
   Identifier = "RenderableSwitch_Example",
   Renderable = {
     Type = "RenderableSwitch",
-    Renderable1 = {
+    RenderableNear = {
       Type = "RenderablePlaneImageLocal",
       Size = 3.0E11,
       Texture = openspace.absPath("${DATA}/test.jpg"),
     },
-    Renderable2 = {
+    RenderableFar = {
       Type = "RenderablePlaneImageOnline",
       Size = 3.0E11,
       URL = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg"

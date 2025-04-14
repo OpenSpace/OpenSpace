@@ -27,6 +27,7 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
@@ -38,94 +39,93 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo AutoScaleInfo = {
-        "AutoScale",
-        "Auto Scale",
-        "When true, the plane will automatically adjust in size to match the aspect "
-        "ratio of the content. Otherwise it will remain in the given size."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo DistanceThresholdInfo = {
         "DistanceThreshold",
         "Distance Threshold",
-        "Threshold for when the switch happens between the two renderables. "
+        "Threshold in meters for when the switch happens between the two renderables."
     };
 
+    // A RenderableSwitch can be used to render one of two renderables depending on the 
+    // distance between the camera and the object's position.
+    //
+    // The two renderables are specified separately: `RenderableNear` and `RenderableFar`. 
+    // These can be any renderable types.
+    //
+    // The `DistanceThreshold` property determines which renderable will be shown.
+    // If the camera is closer to the object than the threshold, `RenderableNear` is used,
+    // otherwise, `RenderableFar` is rendered.
     struct [[codegen::Dictionary(RenderableSwitch)]] Parameters {
-        ghoul::Dictionary renderable1;
-        ghoul::Dictionary renderable2;
+        ghoul::Dictionary renderableNear;
+        ghoul::Dictionary renderableFar;
 
-        std::optional<float> distanceThreshold;
+        std::optional<double> distanceThreshold;
     };
 #include "renderableswitch_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
-    documentation::Documentation RenderableSwitch::Documentation() {
-        return codegen::doc<Parameters>(
-            "base_renderable_switch"
-        );
-    }
+documentation::Documentation RenderableSwitch::Documentation() {
+    return codegen::doc<Parameters>(
+        "base_renderable_switch"
+    );
+}
 
-    RenderableSwitch::RenderableSwitch(const ghoul::Dictionary& dictionary)
-        : Renderable(dictionary), _autoScale(AutoScaleInfo, false)
-        , _distanceThreshold(DistanceThresholdInfo, 1.f, 0.f, 1e25f)
-    {
-        const Parameters p = codegen::bake<Parameters>(dictionary);
+RenderableSwitch::RenderableSwitch(const ghoul::Dictionary& dictionary)
+    : Renderable(dictionary),
+    _distanceThreshold(DistanceThresholdInfo, 1.f, 0.f, 1e25f)
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-        _renderable1 = createFromDictionary(p.Renderable1);
+    _renderableNear = createFromDictionary(p.renderableNear);
+    _renderableNear->setIdentifier("RenderableNear");
+    _renderableNear->setGuiName("Renderable Near");
+    addPropertySubOwner(_renderableNear.get());
 
-        _renderable2 = createFromDictionary(p.Renderable2);
+    _renderableFar = createFromDictionary(p.renderableFar);
+    _renderableFar->setIdentifier("RenderableFar");
+    _renderableFar->setGuiName("Renderable Far");
+    addPropertySubOwner(_renderableFar.get());
 
-        _distanceThreshold = p.distanceThreshold.value_or(_distanceThreshold);
-        addProperty(_distanceThreshold);
+    _distanceThreshold = p.distanceThreshold.value_or(_distanceThreshold);
+    addProperty(_distanceThreshold);
 
-        addProperty(_autoScale);
-    }
+}
 
-    void RenderableSwitch::initializeGL() {
-        ghoul_assert(_renderable1, "No renderable1");
-        ghoul_assert(_renderable2, "No renderable2");
+void RenderableSwitch::initializeGL() {
+    ghoul_assert(_renderableNear, "No renderableNear");
+    ghoul_assert(_renderableFar, "No renderableFar");
         
-        _renderable1->initializeGL();
-        _renderable2->initializeGL();
-    }
+    _renderableNear->initializeGL();
+    _renderableFar->initializeGL();
+}
 
-    void RenderableSwitch::deinitializeGL() {
-        if (_renderable1) {
-            _renderable1->deinitializeGL();
-        }
-        if (_renderable2) {
-            _renderable2->deinitializeGL();
-        }
-    }
+void RenderableSwitch::deinitializeGL() {
+    ghoul_assert(_renderableNear, "No renderableNear");
+    ghoul_assert(_renderableFar, "No renderableFar");
 
-    bool RenderableSwitch::isReady() const {
-        return (_renderable1->isReady() && _renderable2->isReady());
-    }
+    _renderableNear->deinitializeGL();
+    _renderableFar->deinitializeGL();
+}
 
-    void RenderableSwitch::update(const UpdateData& data) {
-        if (_renderable1) {
-            _renderable1->update(data);
-        }
-        if (_renderable2) {
-            _renderable2->update(data);
-        }
-    }
+bool RenderableSwitch::isReady() const {
+    return (_renderableNear->isReady() && _renderableFar->isReady());
+}
 
-    void RenderableSwitch::render(const RenderData& data, RendererTasks& tasks) {
-        if (!_enabled) {
-            return;
-        }
-        glm::dvec3 cameraPosition = data.camera.positionVec3();
-        glm::dvec3 modelPosition = data.modelTransform.translation;
+void RenderableSwitch::update(const UpdateData& data) {
+    _renderableNear->update(data);
+    _renderableFar->update(data);
+}
 
-        if (glm::distance(cameraPosition, modelPosition) < _distanceThreshold) {
-            _renderable1->render(data, tasks);
-        }
-        else {
-            _renderable2->render(data, tasks);
-        }
+void RenderableSwitch::render(const RenderData& data, RendererTasks& tasks) {
+    glm::dvec3 cameraPosition = data.camera.positionVec3();
+    glm::dvec3 modelPosition = data.modelTransform.translation;
+
+    if (glm::distance(cameraPosition, modelPosition) < _distanceThreshold) {
+        _renderableNear->render(data, tasks);
     }
+    else {
+        _renderableFar->render(data, tasks);
+    }
+}
 } // namespace openspace
