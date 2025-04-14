@@ -418,9 +418,9 @@ namespace {
 
         int year = [packedDate](char m) {
             switch (m) {
-                case 'I': return 18;
-                case 'J': return 19;
-                case 'K': return 20;
+                case 'I': return 1800;
+                case 'J': return 1900;
+                case 'K': return 2000;
                 default:
                     throw ghoul::RuntimeError(std::format(
                         "Illformed packed date. Illegal year marker. {}", packedDate
