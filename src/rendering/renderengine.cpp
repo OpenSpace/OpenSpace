@@ -286,9 +286,29 @@ namespace {
         "The font color used for disabled options.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
+
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo WindowingInfo = {
+        "Windowing",
+        "Windowing",
+        "Contains properties that concern the specific rendering settings of individual "
+        "windows. Note that the number of properties in this owner are determined by the "
+        "configuration file and might be different from run to run."
+    };
 } // namespace
 
 namespace openspace {
+
+RenderEngine::Window::Window(PropertyOwnerInfo info, int id)
+    : properties::PropertyOwner(info)
+    , horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.f)
+{
+    horizFieldOfView.onChange([this, id]() {
+        if (global::windowDelegate->isMaster()) {
+            global::windowDelegate->setHorizFieldOfView(id, horizFieldOfView);
+        }
+    });
+    addProperty(horizFieldOfView);
+}
 
 RenderEngine::RenderEngine()
     : properties::PropertyOwner({ "RenderEngine", "Render Engine" })
@@ -311,7 +331,7 @@ RenderEngine::RenderEngine()
     , _saturation(SaturationInfo, 1.f, 0.f, 2.f)
     , _value(ValueInfo, 1.f, 0.f, 2.f)
     , _framerateLimit(FramerateLimitInfo, 0, 0, 500)
-    , _horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.f)
+    , _windowing(WindowingInfo)
     , _globalRotation(
         GlobalRotationInfo,
         glm::vec3(0.f),
@@ -418,13 +438,9 @@ RenderEngine::RenderEngine()
     });
     addProperty(_screenshotUseDate);
 
-    _horizFieldOfView.onChange([this]() {
-        if (global::windowDelegate->isMaster()) {
-            global::windowDelegate->setHorizFieldOfView(_horizFieldOfView);
-        }
-    });
-    addProperty(_horizFieldOfView);
-
+    addPropertySubOwner(_windowing);
+    // Adding the actual window owners later in the initialize, as we don't know yet how
+    // many windows will exist
 
     addProperty(_framerateLimit);
     addProperty(_globalRotation);
@@ -482,6 +498,17 @@ void RenderEngine::initializeGL() {
 
     LTRACE("RenderEngine::initializeGL(begin)");
 
+    for (int i = 0; i < global::windowDelegate->nWindows(); i++) {
+        std::string name = global::windowDelegate->nameForWindow(i);
+        properties::PropertyOwner::PropertyOwnerInfo info = {
+            .identifier = std::format("Window_{}", i),
+            .guiName = name.empty() ? std::format("Window {}", i) : name
+        };
+        auto w = std::make_unique<Window>(info, i);
+        _windowing.addPropertySubOwner(w.get());
+        _windows.push_back(std::move(w));
+    }
+
     _renderer.setResolution(renderingResolution());
     _renderer.enableFXAA(_enableFXAA);
     _renderer.setHDRExposure(_hdrExposure);
@@ -493,7 +520,13 @@ void RenderEngine::initializeGL() {
 
     // Set horizontal FOV value with whatever the field of view (in degrees) is of the
     // initialized window
-    _horizFieldOfView = static_cast<float>(global::windowDelegate->getHorizFieldOfView());
+    ghoul_assert(
+        global::windowDelegate->nWindows() == _windows.size(),
+        "Invalid number of windows"
+    );
+    for (int i = 0; i < global::windowDelegate->nWindows(); i++) {
+        _windows[i]->horizFieldOfView = global::windowDelegate->horizFieldOfView(i);
+    }
 
     const Configuration::FontSizes fontSize = global::configuration->fontSize;
     {
@@ -571,8 +604,13 @@ void RenderEngine::updateRenderer() {
         FR::defaultRenderer().setFramebufferSize(fontResolution());
         FR::defaultProjectionRenderer().setFramebufferSize(renderingResolution());
         // Override the aspect ratio property value to match that of resized window
-        _horizFieldOfView =
-            static_cast<float>(global::windowDelegate->getHorizFieldOfView());
+        ghoul_assert(
+            global::windowDelegate->nWindows() == _windows.size(),
+            "Invalid number of windows"
+        );
+        for (int i = 0; i < global::windowDelegate->nWindows(); i++) {
+            _windows[i]->horizFieldOfView = global::windowDelegate->horizFieldOfView(i);
+        }
     }
 
     _renderer.update();
