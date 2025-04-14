@@ -342,10 +342,7 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     , _colorSettingsCutplane(dictionary)
     , _addEdges(AddEdgesInfo, true)
     , _useSmoothNormals(UseSmoothNormalsInfo, true)
-    , _interpolationMethod(
-        InterpolationMethodInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _interpolationMethod(InterpolationMethodInfo)
     , _drawWireframe(DrawWireframeInfo, false)
     , _wireLineWidth(WireLineWidthInfo, 1.f, 1.f, 10.f)
     , _showAllTube(ShowAllTubeInfo, false)
