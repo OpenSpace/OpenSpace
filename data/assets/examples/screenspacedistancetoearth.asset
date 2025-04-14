@@ -16,7 +16,7 @@ local Dashboard = {
       FontSize = 40,
       SourceType = "Camera",
       DestinationType = "Node",
-      DestinationNodeName = earth.Earth.Identifier,
+      DestinationNodeIdentifier = earth.Earth.Identifier,
       -- Specify to use a specific unit, by disabling the automatic simplification of
       -- unit and instead use light-years
       Simplification = false,

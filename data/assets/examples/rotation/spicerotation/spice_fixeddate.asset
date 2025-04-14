@@ -1,0 +1,36 @@
+-- Fixed Date
+-- This asset creates a rotation provided by a SPICE kernel and applies it to a scene
+-- graph node that only displays coordinate axes. The rotation of the coordinate axes are
+-- determined by SPICE, in this case pretending that the coordinate axes are rotating at
+-- the same rate as Earth. In this specific example, the orientation is independent of the
+-- actual in-game time in OpenSpace and only uses a fixed date of 2000 JAN 01 instead.
+
+-- Load the default SPICE kernels, which is the planetary constants and the DE430 kernel
+asset.require("spice/core")
+
+local Node = {
+  Identifier = "SpiceRotation_Example_FixedDate",
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_EARTH",
+      DestinationFrame = "GALACTIC",
+      FixedDate = "2000 JAN 01 00:00:00.000"
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "SpiceRotation - Fixed Date",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

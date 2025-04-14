@@ -75,32 +75,6 @@ public:
     virtual const std::type_info& type() const override;
 
     /**
-     * This method encodes the stored value into a Lua object and pushes that object onto
-     * the stack.
-     *
-     * \param state The Lua state onto which the encoded object will be pushed
-     * \return `true` if the encoding succeeded; `false` otherwise
-     */
-    virtual bool getLuaValue(lua_State* state) const override;
-
-    /**
-     * Sets the value of this TemplateProperty by decoding the object at the top of the
-     * stack and, if successful, assigning it using the Property::set method. If the
-     * decoding is successful, the new value is set, otherwise it remains unchanged.
-     *
-     * \param state The Lua state from which the value will be decoded
-     */
-    virtual void setLuaValue(lua_State* state) override;
-
-    /**
-     * This method encodes the stored value into a std::string object. The resulting
-     * encoding must also be a valid JSON representation fo the property.
-     *
-     * \return The string representation of the stored property value
-     */
-    virtual std::string stringValue() const override;
-
-    /**
      * This operator allows the TemplateProperty to be used almost transparently as if it
      * was of the type `T`. It makes assignments such as `T v = property;` possible by
      * allowing implicit casts (even though, internally, not casts are performed. This
@@ -146,32 +120,10 @@ public:
      */
     T value() const;
 
+    void setLuaValue(lua_State* state) override;
+
 protected:
-    /**
-     * Decodes the object at the top of the stack to a value of the type `T` and returns
-     * it. This method has to be specialized for each new type.
-     *
-     * \param state The Lua state from which the value will be decoded
-     * \return The decoded value
-     */
-    virtual T fromLuaConversion(lua_State* state) const = 0;
-
-    /**
-     * Encodes the stored value into a Lua object and pushes that object onto the stack.
-     * This method has to be specialized for each new type.
-     *
-     * \param state The Lua state onto which the encoded object will be pushed
-     */
-    virtual void toLuaConversion(lua_State* state) const = 0;
-
-    /**
-     * Encodes the stored value into a std::string object, in a format that is a valid
-     * JSON representation of the property. This method has to be specialized for each new
-     * type.
-     *
-     * \return The resulting encoding
-     */
-    virtual std::string toStringConversion() const = 0;
+    virtual T toValue(lua_State* state) const = 0;
 
     /// The value that this TemplateProperty currently stores
     T _value;

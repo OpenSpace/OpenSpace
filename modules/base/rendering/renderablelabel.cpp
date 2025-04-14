@@ -252,7 +252,7 @@ documentation::Documentation RenderableLabel::Documentation() {
 
 RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary, { .automaticallyUpdateRenderBin = false })
-    , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _blendMode(BlendModeInfo)
     , _text(TextInfo, "")
     , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _fontSize(FontSizeInfo, 50.f, 1.f, 100.f)
@@ -261,14 +261,8 @@ RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
     , _enableFadingEffect(EnableFadingEffectInfo, false)
     , _fadeWidths(FadeWidthsInfo, glm::vec2(1.f), glm::vec2(0.f), glm::vec2(100.f))
     , _fadeDistances(FadeDistancesInfo, glm::vec2(1.f), glm::vec2(0.f), glm::vec2(100.f))
-    , _fadeUnitOption(
-        FadeUnitOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
-    , _orientationOption(
-        OrientationOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _fadeUnitOption(FadeUnitOptionInfo)
+    , _orientationOption(OrientationOptionInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

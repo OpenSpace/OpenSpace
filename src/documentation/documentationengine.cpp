@@ -671,7 +671,6 @@ void DocumentationEngine::writeJavascriptDocumentation() const {
     // Make into a javascript variable so that it is possible to open with static html
     std::ofstream out = std::ofstream(absPath("${DOCUMENTATION}/documentationData.js"));
     out << "var data = " << result.dump();
-    out.close();
 }
 
 void DocumentationEngine::writeJsonDocumentation() const {

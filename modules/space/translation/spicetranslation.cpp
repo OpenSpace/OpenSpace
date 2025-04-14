@@ -81,10 +81,20 @@ namespace {
         "TimeOffset",
         "Time Offset",
         "A time offset, in seconds, added to the simulation time (or Fixed Date if any), "
-        "at which to compute the translation.",
+        "at which to compute the rotation.",
         openspace::properties::Property::Visibility::User
     };
 
+
+    // This `Translation` type uses [SPICE](https://naif.jpl.nasa.gov/naif/) kernels to
+    // provide translational information for the attached scene graph node. SPICE is a
+    // library used by scientists and engineers to, among other tasks, plan space
+    // missions. If you are unfamiliar with SPICE, their webpage has both extensive
+    // [Tutorials](https://naif.jpl.nasa.gov/naif/tutorials.html) as well as
+    // [Lessions](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/Lessons/) that explain
+    // the system deeper. This class provides access to the
+    // [spkpos_c](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkpos_c.html)
+    // function of the Spice library.
     struct [[codegen::Dictionary(SpiceTranslation)]] Parameters {
         // [[codegen::verbatim(TargetInfo.description)]]
         std::variant<std::string, int> target;
@@ -96,7 +106,7 @@ namespace {
             [[codegen::annotation("A valid SPICE NAIF name for a reference frame")]];
 
         // [[codegen::verbatim(FixedDateInfo.description)]]
-        std::optional<std::string> fixedDate;
+        std::optional<std::string> fixedDate [[codegen::datetime()]];
 
         // [[codegen::verbatim(TimeOffsetInfo.description)]]
         std::optional<float> timeOffset;

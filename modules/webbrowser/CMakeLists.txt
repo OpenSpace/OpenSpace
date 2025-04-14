@@ -38,7 +38,7 @@ set(PROJECT_ARCH "x86_64")
 # reserved. Use of this source code is governed by a BSD-style license that
 # can be found in the LICENSE file.
 
-cmake_minimum_required(VERSION 2.8.12.1)
+cmake_minimum_required(VERSION 3.10)
 
 # Use folders in the resulting project files.
 set_property(GLOBAL PROPERTY OS_FOLDERS ON)

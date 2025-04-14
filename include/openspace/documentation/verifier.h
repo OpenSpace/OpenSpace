@@ -27,8 +27,6 @@
 
 #include <openspace/documentation/documentation.h>
 #include <ghoul/glm.h>
-#include <functional>
-#include <type_traits>
 #include <variant>
 
 namespace openspace::documentation {

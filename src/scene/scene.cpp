@@ -25,33 +25,15 @@
 #include <openspace/scene/scene.h>
 
 #include <openspace/camera/camera.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/windowdelegate.h>
-#include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
-#include <openspace/navigation/navigationhandler.h>
 #include <openspace/query/query.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/profile.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/sceneinitializer.h>
-#include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/luastate.h>
 #include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/defer.h>
-#include <ghoul/misc/easing.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringhelper.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <string>
 #include <stack>
 
 #include "scene_lua.inl"
@@ -99,15 +81,202 @@ namespace {
         }
     }
 
+    using ProfilePropertyLua = std::variant<bool, float, std::string, ghoul::lua::nil_t>;
+    openspace::PropertyValueType propertyValueType(const std::string& value);
+    void handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::string& value,
+        bool& isTableValue, std::string_view propertyName);
+    ProfilePropertyLua propertyProcessValue(ghoul::lua::LuaState& L,
+        const std::string& value, bool& valueIsTable, std::string_view propertyName);
+    template <typename T>
+    void processPropertyValueTableEntries(ghoul::lua::LuaState& L,
+        const std::string& value, std::vector<T>& table, bool& valueIsTable,
+        std::string_view propertyName);
+
+
+    /**
+     * Accepts string version of a property value from a profile, and returns the
+     * supported data types that can be pushed to a Lua state. Currently, the full range
+     * of possible Lua values is not supported.
+     *
+     * \param value String representation of the value with which to set property
+     */
+    openspace::PropertyValueType propertyValueType(const std::string& value) {
+        auto isFloatValue = [](const std::string& s) {
+            try {
+                float converted = std::numeric_limits<float>::min();
+                converted = std::stof(s);
+                return (converted != std::numeric_limits<float>::min());
+            }
+            catch (...) {
+                return false;
+            }
+            };
+
+        if (value == "true" || value == "false") {
+            return openspace::PropertyValueType::Boolean;
+        }
+        else if (isFloatValue(value)) {
+            return openspace::PropertyValueType::Float;
+        }
+        else if (value == "nil") {
+            return openspace::PropertyValueType::Nil;
+        }
+        else if ((value.front() == '{') && (value.back() == '}')) {
+            return openspace::PropertyValueType::Table;
+        }
+        else {
+            return openspace::PropertyValueType::String;
+        }
+    }
+
+    /**
+     * Handles a Lua table entry, creating a vector of the correct variable type based
+     * on the profile string, and pushes this vector to the Lua stack.
+     *
+     * \param L The Lua state to (eventually) push to
+     * \param value String representation of the value with which to set property
+     */
+    void handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::string& value,
+                                     bool& isTableValue, std::string_view propertyName)
+    {
+        openspace::PropertyValueType enclosedType = openspace::PropertyValueType::Nil;
+        const size_t commaPos = value.find(',', 0);
+        if (commaPos != std::string::npos) {
+            enclosedType = propertyValueType(value.substr(0, commaPos));
+        }
+        else {
+            enclosedType = propertyValueType(value);
+        }
+
+        switch (enclosedType) {
+            case openspace::PropertyValueType::Boolean:
+                LERROR(std::format(
+                    "A Lua table of bool values is not supported. (processing "
+                    "property '{}')", propertyName
+                ));
+                break;
+            case openspace::PropertyValueType::Float:
+            {
+                std::vector<float> vals;
+                processPropertyValueTableEntries(L, value, vals, isTableValue, propertyName);
+                ghoul::lua::push(L, vals);
+            }
+            break;
+            case openspace::PropertyValueType::String:
+            {
+                std::vector<std::string> vals;
+                processPropertyValueTableEntries(L, value, vals, isTableValue, propertyName);
+                ghoul::lua::push(L, vals);
+            }
+            break;
+            case openspace::PropertyValueType::Table:
+            default:
+                LERROR(std::format(
+                    "Table-within-a-table values are not supported for profile a "
+                    "property (processing property '{}')", propertyName
+                ));
+                break;
+        }
+    }
+
+
+    /**
+     * Accepts string version of a property value from a profile, and processes it
+     * according to the data type of the value.
+     *
+     * \param L The Lua state to (eventually) push to
+     * \param value String representation of the value with which to set property
+     * \return The ProfilePropertyLua variant type translated from string representation
+     */
+    ProfilePropertyLua propertyProcessValue(ghoul::lua::LuaState& L,
+                                            const std::string& value, bool& valueIsTable,
+                                            std::string_view propertyName)
+    {
+        ProfilePropertyLua result;
+        const openspace::PropertyValueType pType = propertyValueType(value);
+
+        switch (pType) {
+            case openspace::PropertyValueType::Boolean:
+                result = (value == "true");
+                break;
+            case openspace::PropertyValueType::Float:
+                result = std::stof(value);
+                break;
+            case openspace::PropertyValueType::Nil:
+                result = ghoul::lua::nil_t();
+                break;
+            case openspace::PropertyValueType::Table: {
+                std::string val = value;
+                ghoul::trimSurroundingCharacters(val, '{');
+                ghoul::trimSurroundingCharacters(val, '}');
+                handlePropertyLuaTableEntry(L, val, valueIsTable, propertyName);
+                valueIsTable = true;
+                break;
+            }
+            case openspace::PropertyValueType::String:
+            default: {
+                std::string val = value;
+                ghoul::trimSurroundingCharacters(val, '\"');
+                ghoul::trimSurroundingCharacters(val, '[');
+                ghoul::trimSurroundingCharacters(val, ']');
+                result = val;
+                break;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Accepts string version of a property value from a profile, and adds it to a vector
+     * which will later be used to push as a Lua table containing values of type T
+     *
+     * \param L The Lua state to (eventually) push to
+     * \param value String representation of the value with which to set property
+     * \param table The std::vector container which has elements of type T for a Lua table
+     */
+    template <typename T>
+    void processPropertyValueTableEntries(ghoul::lua::LuaState& L,
+                                          const std::string& value, std::vector<T>& table,
+                                          bool& valueIsTable,
+                                          std::string_view propertyName)
+    {
+        size_t commaPos = 0;
+        size_t prevPos = 0;
+        std::string nextValue;
+        while (commaPos != std::string::npos) {
+            commaPos = value.find(',', prevPos);
+            if (commaPos != std::string::npos) {
+                nextValue = value.substr(prevPos, commaPos - prevPos);
+                prevPos = commaPos + 1;
+            }
+            else {
+                nextValue = value.substr(prevPos);
+            }
+            ghoul::trimSurroundingCharacters(nextValue, ' ');
+            ProfilePropertyLua t = propertyProcessValue(
+                L,
+                nextValue,
+                valueIsTable,
+                propertyName
+            );
+
+            try {
+                table.push_back(std::get<T>(t));
+            }
+            catch (std::bad_variant_access&) {
+                LERROR(std::format(
+                    "Error attempting to parse profile property setting for '{}' using "
+                    "value = {}", propertyName, value
+                ));
+            }
+        }
+    }
+
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 } // namespace
 
 namespace openspace {
-
-Scene::InvalidSceneError::InvalidSceneError(std::string msg, std::string comp)
-    : ghoul::RuntimeError(std::move(msg), std::move(comp))
-{}
 
 Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
     : properties::PropertyOwner({"Scene", "Scene"})
@@ -157,7 +326,7 @@ Camera* Scene::camera() const {
 
 void Scene::registerNode(SceneGraphNode* node) {
     if (_nodesByIdentifier.contains(node->identifier())) {
-        throw Scene::InvalidSceneError(std::format(
+        throw ghoul::RuntimeError(std::format(
             "Node with identifier '{}' already exists", node->identifier()
         ));
     }
@@ -220,7 +389,7 @@ void Scene::sortTopologically() {
     // Only the Root node can have an in-degree of 0
     SceneGraphNode* root = _nodesByIdentifier[RootNodeIdentifier];
     if (!root) {
-        throw Scene::InvalidSceneError("No root node found");
+        throw ghoul::RuntimeError("No root node found");
     }
 
     std::unordered_map<SceneGraphNode*, size_t> inDegrees;
@@ -617,7 +786,12 @@ void Scene::propertyPushProfileValueToLua(ghoul::lua::LuaState& L,
                                                                  const std::string& value)
 {
     _valueIsTable = false;
-    ProfilePropertyLua elem = propertyProcessValue(L, value);
+    ProfilePropertyLua elem = propertyProcessValue(
+        L,
+        value,
+        _valueIsTable,
+        _profilePropertyName
+    );
     if (!_valueIsTable) {
         std::visit(overloaded {
             [&L](bool v) {
@@ -633,144 +807,6 @@ void Scene::propertyPushProfileValueToLua(ghoul::lua::LuaState& L,
                 ghoul::lua::push(L, v);
             }
         }, elem);
-    }
-}
-
-ProfilePropertyLua Scene::propertyProcessValue(ghoul::lua::LuaState& L,
-                                                                 const std::string& value)
-{
-    ProfilePropertyLua result;
-    const PropertyValueType pType = propertyValueType(value);
-
-    switch (pType) {
-        case PropertyValueType::Boolean:
-            result = (value == "true");
-            break;
-        case PropertyValueType::Float:
-            result = std::stof(value);
-            break;
-        case PropertyValueType::Nil:
-            result = ghoul::lua::nil_t();
-            break;
-        case PropertyValueType::Table: {
-            std::string val = value;
-            ghoul::trimSurroundingCharacters(val, '{');
-            ghoul::trimSurroundingCharacters(val, '}');
-            handlePropertyLuaTableEntry(L, val);
-            _valueIsTable = true;
-            break;
-        }
-        case PropertyValueType::String:
-        default: {
-            std::string val = value;
-            ghoul::trimSurroundingCharacters(val, '\"');
-            ghoul::trimSurroundingCharacters(val, '[');
-            ghoul::trimSurroundingCharacters(val, ']');
-            result = val;
-            break;
-        }
-    }
-    return result;
-}
-
-void Scene::handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::string& value)
-{
-    PropertyValueType enclosedType = PropertyValueType::Nil;
-    const size_t commaPos = value.find(',', 0);
-    if (commaPos != std::string::npos) {
-        enclosedType = propertyValueType(value.substr(0, commaPos));
-    }
-    else {
-        enclosedType = propertyValueType(value);
-    }
-
-    switch (enclosedType) {
-        case PropertyValueType::Boolean:
-            LERROR(std::format(
-                "A Lua table of bool values is not supported. (processing property '{}')",
-                _profilePropertyName
-            ));
-            break;
-        case PropertyValueType::Float:
-            {
-                std::vector<float> vals;
-                processPropertyValueTableEntries(L, value, vals);
-                ghoul::lua::push(L, vals);
-            }
-            break;
-        case PropertyValueType::String:
-            {
-                std::vector<std::string> vals;
-                processPropertyValueTableEntries(L, value, vals);
-                ghoul::lua::push(L, vals);
-            }
-            break;
-        case PropertyValueType::Table:
-        default:
-            LERROR(std::format(
-                "Table-within-a-table values are not supported for profile a "
-                "property (processing property '{}')", _profilePropertyName
-            ));
-            break;
-    }
-}
-
-template <typename T>
-void Scene::processPropertyValueTableEntries(ghoul::lua::LuaState& L,
-    const std::string& value, std::vector<T>& table)
-{
-    size_t commaPos = 0;
-    size_t prevPos = 0;
-    std::string nextValue;
-    while (commaPos != std::string::npos) {
-        commaPos = value.find(',', prevPos);
-        if (commaPos != std::string::npos) {
-            nextValue = value.substr(prevPos, commaPos - prevPos);
-            prevPos = commaPos + 1;
-        }
-        else {
-            nextValue = value.substr(prevPos);
-        }
-        ghoul::trimSurroundingCharacters(nextValue, ' ');
-        ProfilePropertyLua tableElement = propertyProcessValue(L, nextValue);
-        try {
-            table.push_back(std::get<T>(tableElement));
-        }
-        catch (std::bad_variant_access&) {
-            LERROR(std::format(
-                "Error attempting to parse profile property setting for '{}' using "
-                "value = {}", _profilePropertyName, value
-            ));
-        }
-    }
-}
-
-PropertyValueType Scene::propertyValueType(const std::string& value) {
-    auto isFloatValue = [](const std::string& s) {
-        try {
-            float converted = std::numeric_limits<float>::min();
-            converted = std::stof(s);
-            return (converted != std::numeric_limits<float>::min());
-        }
-        catch (...) {
-            return false;
-        }
-    };
-
-    if (value == "true" || value == "false") {
-        return PropertyValueType::Boolean;
-    }
-    else if (isFloatValue(value)) {
-        return PropertyValueType::Float;
-    }
-    else if (value == "nil") {
-        return PropertyValueType::Nil;
-    }
-    else if ((value.front() == '{') && (value.back() == '}')) {
-        return PropertyValueType::Table;
-    }
-    else {
-        return PropertyValueType::String;
     }
 }
 

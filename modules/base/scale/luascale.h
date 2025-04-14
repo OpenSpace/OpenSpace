@@ -27,7 +27,7 @@
 
 #include <openspace/scene/scale.h>
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <ghoul/lua/luastate.h>
 
 namespace ghoul::filesystem { class File; }

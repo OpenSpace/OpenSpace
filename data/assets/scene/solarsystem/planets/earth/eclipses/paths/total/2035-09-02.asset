@@ -27,7 +27,8 @@ end)
 
 asset.meta = {
   Name = "Total 2035-09-02",
-  Description = "Total eclipse map for 2035-09-02",
+  Description = [[Total eclipse map for 2035-09-02. The GeoJSON is adapted from the
+    data provided by Xavier M. Jubier (http://xjubier.free.fr).]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

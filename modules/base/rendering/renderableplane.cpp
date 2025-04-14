@@ -93,6 +93,10 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // A `RenderablePlane` is a renderable that will shows some form of contents projected
+    // on a two-dimensional plane, which in turn is placed in three-dimensional space as
+    // any other `Renderable`. It is possible to specify the `Size` of the plane, whether
+    // it should always face the camera (`Billboard`), and other parameters shown below.
     struct [[codegen::Dictionary(RenderablePlane)]] Parameters {
         // [[codegen::verbatim(BillboardInfo.description)]]
         std::optional<bool> billboard;
@@ -127,7 +131,7 @@ documentation::Documentation RenderablePlane::Documentation() {
 
 RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary, { .automaticallyUpdateRenderBin = false })
-    , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _blendMode(BlendModeInfo)
     , _billboard(BillboardInfo, false)
     , _mirrorBackside(MirrorBacksideInfo, false)
     , _size(SizeInfo, glm::vec2(10.f), glm::vec2(0.f), glm::vec2(1e25f))

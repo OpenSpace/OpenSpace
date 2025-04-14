@@ -55,7 +55,7 @@ local InteractionSphere = 695700000
 
 local ENLILSliceEqPlane11AU1 = {
   Identifier = "FL_ENLIL_slice_eqPlane_011AU_1",
-  Parent = transforms.HEEQ180ReferenceFrame.Identifier,
+  Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
   InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
@@ -78,7 +78,7 @@ local ENLILSliceEqPlane11AU1 = {
 
 local ENLILSliceEqPlane11AU2 = {
   Identifier = "FL_ENLIL_slice_eqPlane_011AU_2",
-  Parent = transforms.HEEQ180ReferenceFrame.Identifier,
+  Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
   InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
@@ -101,7 +101,7 @@ local ENLILSliceEqPlane11AU2 = {
 
 local ENLILSliceLat411AU1 = {
   Identifier = "FL_ENLIL_slice_lat4_011AU_1",
-  Parent = transforms.HEEQ180ReferenceFrame.Identifier,
+  Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
   InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
@@ -125,7 +125,7 @@ local ENLILSliceLat411AU1 = {
 
 local ENLILSliceLat411AU2 = {
   Identifier = "FL_ENLIL_slice_lat4_011AU_2",
-  Parent = transforms.HEEQ180ReferenceFrame.Identifier,
+  Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
   InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
@@ -149,7 +149,7 @@ local ENLILSliceLat411AU2 = {
 
 local ENLILEarth = {
   Identifier = "FL_ENLIL_earth",
-  Parent = transforms.HEEQ180ReferenceFrame.Identifier,
+  Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
   InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
@@ -170,7 +170,7 @@ local ENLILEarth = {
 
 local ENLILStereoA = {
   Identifier = "FL_ENLIL_stereoa",
-  Parent = transforms.HEEQ180ReferenceFrame.Identifier,
+  Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
   InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
@@ -196,7 +196,7 @@ local ENLILStereoA = {
 
 
 asset.onInitialize(function()
-  openspace.action.registerAction(LoopEnlil)
+openspace.action.registerAction(LoopEnlil)
 
   openspace.addSceneGraphNode(ENLILSliceEqPlane11AU1)
   openspace.addSceneGraphNode(ENLILSliceEqPlane11AU2)

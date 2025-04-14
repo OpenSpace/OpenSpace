@@ -69,7 +69,12 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    struct [[codegen::Dictionary(DashboardItemPropertyValue)]] Parameters {
+    // This `DashboardItem` shows the current state of the different methods to provide
+    // user input: keyboard, mouse, and/or joystick.
+    //
+    // Each input method has the ability to be selectively disabled, meaning that all
+    // inputs from that input method are ignored by the system entirely.
+    struct [[codegen::Dictionary(DashboardItemInputState)]] Parameters {
         // [[codegen::verbatim(ShowWhenEnabledInfo.description)]]
         std::optional<bool> showWhenEnabled;
 
@@ -166,9 +171,7 @@ void DashboardItemInputState::update() {
         }
     }
 
-    if (!text.empty()) {
-        _buffer = ghoul::join(std::move(text), "\n");
-    }
+    _buffer = ghoul::join(std::move(text), "\n");
 }
 
 glm::vec2 DashboardItemInputState::size() const {

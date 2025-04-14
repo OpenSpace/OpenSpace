@@ -39,6 +39,7 @@
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace {
@@ -194,7 +195,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiFocusableInfo = {
-        "IsFocusable",
+        "Focusable",
         "Focusable Hint",
         "This value serves as a hint to determine if it makes sense to focus the camera "
         "on this scene graph node. It only serves as a hint and does not actually "
@@ -923,7 +924,7 @@ void SceneGraphNode::renderDebugSphere(const Camera& camera, double size,
 void SceneGraphNode::setParent(SceneGraphNode& parent) {
     ghoul_assert(_parent != nullptr, "Node must be attached to a parent");
 
-    parent.attachChild(_parent->detachChild(*this));
+    _parent = &parent;
 }
 
 void SceneGraphNode::attachChild(ghoul::mm_unique_ptr<SceneGraphNode> child) {

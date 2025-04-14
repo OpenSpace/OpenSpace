@@ -25,10 +25,11 @@
 #ifndef __OPENSPACE_CORE___LUALIBRARY___H__
 #define __OPENSPACE_CORE___LUALIBRARY___H__
 
-#include <ghoul/lua/ghoul_lua.h>
 #include <filesystem>
 #include <string>
 #include <vector>
+
+struct lua_State;
 
 namespace openspace::scripting {
 
@@ -43,6 +44,8 @@ struct LuaLibrary {
      * the function.
      */
     struct Function {
+        using lua_CFunction =int(*)(lua_State* L);
+
         /// The name of the function
         std::string name;
         /// The function pointer that is executed if the function is called

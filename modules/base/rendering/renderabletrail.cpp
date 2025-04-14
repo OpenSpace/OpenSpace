@@ -188,10 +188,7 @@ RenderableTrail::Appearance::Appearance()
     , useLineFade(EnableFadeInfo, true)
     , lineWidth(LineWidthInfo, 10.f, 1.f, 20.f)
     , pointSize(PointSizeInfo, 1, 1, 64)
-    , renderingModes(
-          RenderingModeInfo,
-          properties::OptionProperty::DisplayType::Dropdown
-    )
+    , renderingModes(RenderingModeInfo)
     , lineLength(LineLengthInfo, 1.f, 0.f, 1.f)
     , lineFadeAmount(LineFadeAmountInfo, 1.f, 0.f, 1.f)
 {

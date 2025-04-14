@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <ghoul/lua/lua_helper.h>
+
 namespace {
 
 // Load timed scripts from a Lua script file that returns a list of scheduled scripts.

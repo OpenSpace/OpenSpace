@@ -27,8 +27,8 @@
 
 #include <modules/webbrowser/include/webrenderhandler.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 
 #ifdef _MSC_VER

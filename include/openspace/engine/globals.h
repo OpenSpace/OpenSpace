@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___GLOBALS___H__
 #define __OPENSPACE_CORE___GLOBALS___H__
 
-#include <functional>
 #include <memory>
 #include <vector>
 

@@ -26,6 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/time.h>
 #include <optional>
@@ -39,6 +40,11 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This `Translation` uses a timeline of other `Translation` classes to calculate the
+    // final translation for the attached scene graph node. The current in-game time is
+    // used to determine which specific keyframe to currently use. It is also possible to
+    // disable the interpolation between two adjacent keyframes by setting the
+    // `ShouldInterpolate` parameter to `false`.
     struct [[codegen::Dictionary(TimelineTranslation)]] Parameters {
         // A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS and values
         // that are valid Translation objects
@@ -68,6 +74,8 @@ TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary)
 
         ghoul::mm_unique_ptr<Translation> translation =
             Translation::createFromDictionary(kf.second);
+        translation->setIdentifier(makeIdentifier(kf.first));
+        addPropertySubOwner(translation.get());
         _timeline.addKeyframe(t, std::move(translation));
     }
 
@@ -99,7 +107,7 @@ glm::dvec3 TimelineTranslation::position(const UpdateData& data) const {
         if (nextTime - prevTime > 0.0) {
             t = (now - prevTime) / (nextTime - prevTime);
         }
-        return t * next->data->position(data) + (1.0 - t) * prev->data->position(data);
+        return glm::mix(prev->data->position(data), next->data->position(data), t);
     }
     else {
         if (prevTime <= now && now < nextTime) {

@@ -50,16 +50,16 @@ namespace {
         "SourceType",
         "Source Type",
         "The type of position that is used as the triangle apex used to calculate the "
-        "angle. The default value is 'Camera'.",
+        "angle.",
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SourceNodeNameInfo = {
-        "SourceNodeName",
-        "Source Node Name",
-        "If a scene graph node is selected as type, this value specifies the name of the "
-        "node that is to be used as the apex of the triangle used to calculate the "
-        "angle. The computed angle is the incident angle to Source in the triangle ("
+    constexpr openspace::properties::Property::PropertyInfo SourceNodeIdentifierInfo = {
+        "SourceNodeIdentifier",
+        "Source Node Identifier",
+        "If a scene graph node is selected as type, this value specifies the identifier "
+        "of the node that is to be used as the apex of the triangle used to calculate "
+        "the angle. The computed angle is the incident angle to Source in the triangle ("
         "Source, Reference, Destination).",
         openspace::properties::Property::Visibility::User
     };
@@ -73,11 +73,12 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ReferenceNodeNameInfo = {
-        "ReferenceNodeName",
-        "Reference Node Name",
-        "If a scene graph node is selected as type, this value specifies the name of the "
-        "node that is to be used as the reference direction to compute the angle.",
+    constexpr openspace::properties::Property::PropertyInfo ReferenceNodeIdentifierInfo =
+    {
+        "ReferenceNodeIdentifier",
+        "Reference Node Identifier",
+        "If a scene graph node is selected as type, this value specifies the identifier "
+        "of the node that is to be used as the reference direction to compute the angle.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -86,21 +87,27 @@ namespace {
         "Destination Type",
         "The type of position that is used as the destination to calculate the angle. "
         "The computed angle is the incident angle to Source in the triangle ("
-        "Source, Reference, Destination). The default value for this is 'Focus'.",
+        "Source, Reference, Destination).",
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DestinationNodeNameInfo = {
-        "DestinationNodeName",
-        "Destination Node Name",
-        "If a scene graph node is selected as type, this value specifies the name of the "
-        "node that is to be used as the destination for computing the angle.",
+    constexpr openspace::properties::Property::PropertyInfo
+        DestinationNodeIdentifierInfo =
+    {
+        "DestinationNodeIdentifier",
+        "Destination Node Identifier",
+        "If a scene graph node is selected as type, this value specifies the identifier "
+        "of the node that is to be used as the destination for computing the angle.",
         openspace::properties::Property::Visibility::User
     };
 
-    // This DashboardItem shows the angle between two scenegraph nodes relative to a
-    // reference node. The angle is calculated in the plane that is defined by the
-    // 'SourceNodeName', 'DestinationNodeName', and the 'ReferenceNodeName'.
+    // This `DashboardItem` shows the angle between the lines `Source`->`Reference` and
+    // `Source`->`Destination`. Each of `Source`, `Reference`, and `Destination` can be
+    // either the identifier of a node, the current focus node, or the position of the
+    // camera. The angle cannot be calculated if two of these three items are located in
+    // the same position, in which case an error message is printed. The `SourceNodeName`,
+    // `ReferenceNodeName`, and `DestinationNodeName` parameters are only used if the
+    // `SourceType`, `ReferenceType`, or `DestinationType` respectively is set to `Node`.
     struct [[codegen::Dictionary(DashboardItemAngle)]] Parameters {
         enum class [[codegen::map(Type)]] Type {
             Node,
@@ -109,17 +116,17 @@ namespace {
         };
 
         // [[codegen::verbatim(SourceTypeInfo.description)]]
-        std::optional<Type> sourceType;
-        // [[codegen::verbatim(SourceNodeNameInfo.description)]]
-        std::optional<std::string> sourceNodeName;
+        Type sourceType;
+        // [[codegen::verbatim(SourceNodeIdentifierInfo.description)]]
+        std::optional<std::string> sourceNodeIdentifier;
         // [[codegen::verbatim(ReferenceTypeInfo.description)]]
         Type referenceType;
-        // [[codegen::verbatim(ReferenceNodeNameInfo.description)]]
-        std::optional<std::string> referenceNodeName;
+        // [[codegen::verbatim(ReferenceNodeIdentifierInfo.description)]]
+        std::optional<std::string> referenceNodeIdentifier;
         // [[codegen::verbatim(DestinationTypeInfo.description)]]
-        std::optional<Type> destinationType;
-        // [[codegen::verbatim(DestinationNodeNameInfo.description)]]
-        std::optional<std::string> destinationNodeName;
+        Type destinationType;
+        // [[codegen::verbatim(DestinationNodeIdentifierInfo.description)]]
+        std::optional<std::string> destinationNodeIdentifier;
     };
 #include "dashboarditemangle_codegen.cpp"
 } // namespace
@@ -136,27 +143,18 @@ documentation::Documentation DashboardItemAngle::Documentation() {
 DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _source{
-        properties::OptionProperty(
-            SourceTypeInfo,
-            properties::OptionProperty::DisplayType::Dropdown
-        ),
-        properties::StringProperty(SourceNodeNameInfo),
+        properties::OptionProperty(SourceTypeInfo),
+        properties::StringProperty(SourceNodeIdentifierInfo),
         nullptr
     }
     , _reference{
-        properties::OptionProperty(
-            ReferenceTypeInfo,
-            properties::OptionProperty::DisplayType::Dropdown
-        ),
-        properties::StringProperty(ReferenceNodeNameInfo),
+        properties::OptionProperty(ReferenceTypeInfo),
+        properties::StringProperty(ReferenceNodeIdentifierInfo),
         nullptr
     }
     , _destination{
-        properties::OptionProperty(
-            DestinationTypeInfo,
-            properties::OptionProperty::DisplayType::Dropdown
-        ),
-        properties::StringProperty(DestinationNodeNameInfo),
+        properties::OptionProperty(DestinationTypeInfo),
+        properties::StringProperty(DestinationNodeIdentifierInfo),
         nullptr
     }
 {
@@ -167,18 +165,13 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
         { Type::Focus, "Focus" },
         { Type::Camera, "Camera" }
     });
-    if (p.sourceType.has_value()) {
-        _source.type = codegen::map<Type>(*p.sourceType);
-    }
-    else {
-        _source.type = Type::Camera;
-    }
+    _source.type = codegen::map<Type>(p.sourceType);
     addProperty(_source.type);
 
-    _source.nodeName.onChange([this]() { _source.node = nullptr; });
+    _source.nodeIdentifier.onChange([this]() { _source.node = nullptr; });
     if (_source.type == Type::Node) {
-        if (p.sourceNodeName.has_value()) {
-            _source.nodeName = *p.sourceNodeName;
+        if (p.sourceNodeIdentifier.has_value()) {
+            _source.nodeIdentifier = *p.sourceNodeIdentifier;
         }
         else {
             LERRORC(
@@ -187,7 +180,7 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
             );
         }
     }
-    addProperty(_source.nodeName);
+    addProperty(_source.nodeIdentifier);
 
 
     _reference.type.addOptions({
@@ -198,10 +191,10 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
     _reference.type = codegen::map<Type>(p.referenceType);
     addProperty(_reference.type);
 
-    _reference.nodeName.onChange([this]() { _reference.node = nullptr; });
+    _reference.nodeIdentifier.onChange([this]() { _reference.node = nullptr; });
     if (_reference.type == Type::Node) {
-        if (p.referenceNodeName.has_value()) {
-            _reference.nodeName = *p.referenceNodeName;
+        if (p.referenceNodeIdentifier.has_value()) {
+            _reference.nodeIdentifier = *p.referenceNodeIdentifier;
         }
         else {
             LERRORC(
@@ -210,24 +203,19 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
             );
         }
     }
-    addProperty(_reference.nodeName);
+    addProperty(_reference.nodeIdentifier);
 
     _destination.type.addOptions({
         { Type::Node, "Node" },
         { Type::Focus, "Focus" },
         { Type::Camera, "Camera" }
     });
-    if (p.destinationType.has_value()) {
-        _destination.type = codegen::map<Type>(*p.destinationType);
-    }
-    else {
-        _destination.type = Type::Focus;
-    }
+    _destination.type = codegen::map<Type>(p.destinationType);
     addProperty(_destination.type);
-    _destination.nodeName.onChange([this]() { _destination.node = nullptr; });
+    _destination.nodeIdentifier.onChange([this]() { _destination.node = nullptr; });
     if (_destination.type == Type::Node) {
-        if (p.destinationNodeName.has_value()) {
-            _destination.nodeName = *p.destinationNodeName;
+        if (p.destinationNodeIdentifier.has_value()) {
+            _destination.nodeIdentifier = *p.destinationNodeIdentifier;
         }
         else {
             LERRORC(
@@ -236,7 +224,7 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
             );
         }
     }
-    addProperty(_destination.nodeName);
+    addProperty(_destination.nodeIdentifier);
 
     _localBuffer.resize(128);
 }
@@ -255,7 +243,8 @@ void DashboardItemAngle::update() {
     if (glm::length(a) == 0.0 || glm::length(b) == 0) {
         char* end = std::format_to(
             _localBuffer.data(),
-            "Could not compute angle at {} between {} and {}",
+            "Could not compute angle at {} between {} and {}. At least two of the three "
+            "items are placed in the same location",
             sourceInfo.second, destinationInfo.second, referenceInfo.second
         );
         _buffer = std::string(_localBuffer.data(), end - _localBuffer.data());
@@ -284,12 +273,13 @@ glm::vec2 DashboardItemAngle::size() const {
 std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(Component& comp) {
     if (comp.type == Type::Node) {
         if (!comp.node) {
-            comp.node = global::renderEngine->scene()->sceneGraphNode(comp.nodeName);
+            comp.node =
+                global::renderEngine->scene()->sceneGraphNode(comp.nodeIdentifier);
 
             if (!comp.node) {
                 LERRORC(
                     "DashboardItemAngle",
-                    "Could not find node '" + comp.nodeName.value() + "'"
+                    "Could not find node '" + comp.nodeIdentifier.value() + "'"
                 );
                 return { glm::dvec3(0.0), "Node" };
             }
