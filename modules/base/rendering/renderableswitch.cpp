@@ -37,10 +37,6 @@
 #include <fstream>
 #include <optional>
 
- //renderableSelectRenderable
- //add by distance to the end
- //renderableSelectorByDistance
- //RenderableSwitcherByDistance
 namespace {
     constexpr openspace::properties::Property::PropertyInfo AutoScaleInfo = {
         "AutoScale",
@@ -56,8 +52,8 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableSwitch)]] Parameters {
-        ghoul::Dictionary Renderable1;
-        ghoul::Dictionary Renderable2;
+        ghoul::Dictionary renderable1;
+        ghoul::Dictionary renderable2;
 
         std::optional<float> distanceThreshold;
     };
@@ -74,7 +70,7 @@ namespace openspace {
 
     RenderableSwitch::RenderableSwitch(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary), _autoScale(AutoScaleInfo, false)
-        , _distanceThreshold(DistanceThresholdInfo, 1000000.f)
+        , _distanceThreshold(DistanceThresholdInfo, 1.f, 0.f, 1e25f)
     {
         const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -89,12 +85,11 @@ namespace openspace {
     }
 
     void RenderableSwitch::initializeGL() {
-        if (_renderable1) {
-            _renderable1->initializeGL();
-        }
-        if (_renderable2) {
-            _renderable2->initializeGL();
-        }
+        ghoul_assert(_renderable1, "No renderable1");
+        ghoul_assert(_renderable2, "No renderable2");
+        
+        _renderable1->initializeGL();
+        _renderable2->initializeGL();
     }
 
     void RenderableSwitch::deinitializeGL() {
@@ -107,8 +102,7 @@ namespace openspace {
     }
 
     bool RenderableSwitch::isReady() const {
-        return (_renderable1 && _renderable1->isReady()) &&
-            (_renderable2 && _renderable2->isReady());
+        return (_renderable1->isReady() && _renderable2->isReady());
     }
 
     void RenderableSwitch::update(const UpdateData& data) {
@@ -128,14 +122,10 @@ namespace openspace {
         glm::dvec3 modelPosition = data.modelTransform.translation;
 
         if (glm::distance(cameraPosition, modelPosition) < _distanceThreshold) {
-            if (_renderable1) {
-                _renderable1->render(data, tasks);
-            }
+            _renderable1->render(data, tasks);
         }
         else {
-            if (_renderable2) {
-                _renderable2->render(data, tasks);
-            }
+            _renderable2->render(data, tasks);
         }
     }
 } // namespace openspace

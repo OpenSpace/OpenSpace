@@ -25,9 +25,6 @@
 #ifndef __OPENSPACE_MODULE_BASE___RENDERABLESWITCH___H__
 #define __OPENSPACE_MODULE_BASE___RENDERABLESWITCH___H__
 
-#include <modules/base/rendering/RenderablePlaneImageLocal.h>
-#include <modules/base/rendering/RenderablePlaneImageOnline.h>
-#include <modules/base/rendering/renderableplane.h>
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/util/updatestructures.h>
@@ -42,7 +39,7 @@ namespace openspace {
 
     class RenderableSwitch : public Renderable {
     public:
-        RenderableSwitch(const ghoul::Dictionary& dictionary);
+        explicit RenderableSwitch(const ghoul::Dictionary& dictionary);
 
         void initializeGL() override;
         void deinitializeGL() override;
