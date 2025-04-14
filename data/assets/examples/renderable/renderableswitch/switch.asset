@@ -1,6 +1,6 @@
 -- Basic
--- This example shows how to create a renderable that switches between 2 textured planes in 3D space,
--- where one texture is loaded from a local file on disk and the other is
+-- This example shows how to create a renderable that switches between two textured planes
+-- in 3D space, where one texture is loaded from a local file on disk and the other is 
 -- loaded from the internet though a web URL.
 -- The switch is done based on the distance from the camera to the renderable.
 
