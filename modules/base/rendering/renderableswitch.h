@@ -27,37 +27,34 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/util/updatestructures.h>
-
-
 namespace openspace {
 
-    struct RenderData;
-    struct UpdateData;
+struct RenderData;
+struct UpdateData;
 
-    namespace documentation { struct Documentation; }
+namespace documentation { struct Documentation; }
 
-    class RenderableSwitch : public Renderable {
-    public:
-        explicit RenderableSwitch(const ghoul::Dictionary& dictionary);
+class RenderableSwitch : public Renderable {
+public:
+    explicit RenderableSwitch(const ghoul::Dictionary& dictionary);
 
-        void initializeGL() override;
-        void deinitializeGL() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
-        bool isReady() const override;
+    bool isReady() const override;
 
-        void update(const UpdateData& data) override;
-        void render(const RenderData& data, RendererTasks& tasks) override;
+    void update(const UpdateData& data) override;
+    void render(const RenderData& data, RendererTasks& tasks) override;
 
-        static documentation::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
-    protected:
-        properties::BoolProperty _autoScale;
-        ghoul::mm_unique_ptr<Renderable> _renderable1;
-        ghoul::mm_unique_ptr<Renderable> _renderable2;
-        properties::FloatProperty _distanceThreshold;
-    };
+protected:
+    properties::DoubleProperty _distanceThreshold;
 
+    ghoul::mm_unique_ptr<Renderable> _renderableNear;
+    ghoul::mm_unique_ptr<Renderable> _renderableFar;
+    
+};
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_BASE___RENDERABLESWITCH___H__
