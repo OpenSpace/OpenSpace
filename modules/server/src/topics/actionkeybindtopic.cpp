@@ -39,8 +39,6 @@ bool ActionKeybindTopic::isDone() const {
     return true;
 }
 
-
-
 nlohmann::json jsonKeybind(const KeyWithModifier& k, std::string identifier) {
     const interaction::Action& action = global::actionManager->action(identifier);
 
