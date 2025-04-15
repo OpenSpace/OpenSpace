@@ -25,10 +25,10 @@
 #include <string_view>
 
 namespace {
-    constexpr std::string_view MinimumValueKey = "MinimumValue";
-    constexpr std::string_view MaximumValueKey = "MaximumValue";
-    constexpr std::string_view SteppingValueKey = "SteppingValue";
-    constexpr std::string_view ExponentValueKey = "Exponent";
+    constexpr std::string_view MinimumValueKey = "minimumValue";
+    constexpr std::string_view MaximumValueKey = "maximumValue";
+    constexpr std::string_view SteppingValueKey = "steppingValue";
+    constexpr std::string_view ExponentValueKey = "exponent";
 
     std::string luaToJson(std::string luaValue) {
         if (luaValue[0] == '{') {

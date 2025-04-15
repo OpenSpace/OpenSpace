@@ -55,7 +55,7 @@ namespace {
 
 namespace openspace::properties {
 
-const std::string OptionProperty::OptionsKey = "Options";
+const std::string OptionProperty::OptionsKey = "options";
 
 OptionProperty::OptionProperty(PropertyInfo info)
     : NumericalProperty<int>(

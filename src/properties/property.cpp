@@ -257,17 +257,41 @@ void Property::resetToUnchanged() {
 }
 
 nlohmann::json Property::generateJsonDescription() const {
-    const nlohmann::json metaData = generateMetaDataJsonDescription();
-    const nlohmann::json desc = generateAdditionalJsonDescription();
+    static const std::unordered_map<Visibility, std::string> VisibilityConverter = {
+       { Visibility::Always, "Always" },
+       { Visibility::NoviceUser, "NoviceUser" },
+       { Visibility::User, "User" },
+       { Visibility::AdvancedUser, "AdvancedUser" },
+       { Visibility::Developer, "Developer" },
+       { Visibility::Hidden, "Hidden" }
+    };
+    const std::string& vis = VisibilityConverter.at(_metaData.visibility);
+    const bool isReadOnly = _metaData.readOnly.value_or(false);
+    const bool needsConfirmation = _metaData.needsConfirmation.value_or(false);
+    const std::string groupId = groupIdentifier();
 
     nlohmann::json json = {
-        { "Type", className() },
-        { "Identifier", uri() },
-        { "Name", _guiName },
-        { "MetaData", metaData },
-        { "AdditionalData", desc },
-        { "description", _description }
+        { "description", _description },
+        { "guiName", _guiName },
+        { "group", groupId },
+        { "isReadOnly", isReadOnly },
+        { "needsConfirmation", needsConfirmation },
+        { "type", className() },
+        { "visibility", vis }
     };
+
+    if (_metaData.viewOptions.size() > 0) {
+        nlohmann::json viewOptions = nlohmann::json::object();
+        for (const std::pair<std::string, bool>& p : _metaData.viewOptions) {
+            viewOptions[p.first] = p.second;
+        }
+        json["viewOptions"] = viewOptions;
+    }
+
+    const nlohmann::json desc = generateAdditionalJsonDescription();
+    if (!desc.empty()) {
+        json["additionalData"] = desc;
+    }
 
     return json;
 }
@@ -286,18 +310,21 @@ nlohmann::json Property::generateMetaDataJsonDescription() const {
     const bool needsConfirmation = _metaData.needsConfirmation.value_or(false);
     const std::string groupId = groupIdentifier();
 
-    nlohmann::json viewOptions = nlohmann::json::object();
-    for (const std::pair<std::string, bool>& p : _metaData.viewOptions) {
-        viewOptions[p.first] = p.second;
-    }
-
     nlohmann::json json = {
-        { "Group", groupId },
-        { "Visibility", vis },
+        { "group", groupId },
+        { "visibility", vis },
         { "isReadOnly", isReadOnly },
         { "needsConfirmation", needsConfirmation },
-        { "ViewOptions", viewOptions }
     };
+
+    if (_metaData.viewOptions.size() > 0) {
+        nlohmann::json viewOptions = nlohmann::json::object();
+        for (const std::pair<std::string, bool>& p : _metaData.viewOptions) {
+            viewOptions[p.first] = p.second;
+        }
+        json["viewOptions"] = viewOptions;
+    }
+
     return json;
 }
 
