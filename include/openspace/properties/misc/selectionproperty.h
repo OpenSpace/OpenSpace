@@ -119,7 +119,7 @@ private:
     void sortOptions();
     bool removeInvalidKeys(std::set<std::string>& keys) const;
 
-    std::string generateAdditionalJsonDescription() const override final;
+    nlohmann::json generateAdditionalJsonDescription() const override final;
 
 private:
     std::set<std::string> toValue(lua_State* state) const override final;

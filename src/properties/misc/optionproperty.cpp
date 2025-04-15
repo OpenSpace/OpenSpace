@@ -55,7 +55,7 @@ namespace {
 
 namespace openspace::properties {
 
-const std::string OptionProperty::OptionsKey = "Options";
+const std::string OptionProperty::OptionsKey = "options";
 
 OptionProperty::OptionProperty(PropertyInfo info)
     : NumericalProperty<int>(
@@ -87,6 +87,7 @@ void OptionProperty::addOption(int value, std::string description) {
         // Set default value to option added first
         NumericalProperty::setValue(_options[0].value);
     }
+    notifyMetaDataChangeListeners();
 }
 
 void OptionProperty::addOptions(std::vector<std::pair<int, std::string>> options) {
@@ -95,6 +96,7 @@ void OptionProperty::addOptions(std::vector<std::pair<int, std::string>> options
     }
     // Set default value to option added first
     NumericalProperty::setValue(_options[0].value);
+    notifyMetaDataChangeListeners();
 }
 
 void OptionProperty::addOptions(std::vector<std::string> options) {
@@ -103,11 +105,13 @@ void OptionProperty::addOptions(std::vector<std::string> options) {
     }
     // Set default value to option added first
     NumericalProperty::setValue(_options[0].value);
+    notifyMetaDataChangeListeners();
 }
 
 void OptionProperty::clearOptions() {
     NumericalProperty::setValue(0);
     _options.clear();
+    notifyMetaDataChangeListeners();
 }
 
 void OptionProperty::setValue(int value) {
@@ -206,14 +210,15 @@ std::string OptionProperty::stringValue() const {
     return formatJson(_value);
 }
 
-std::string OptionProperty::generateAdditionalJsonDescription() const {
+
+nlohmann::json OptionProperty::generateAdditionalJsonDescription() const {
     nlohmann::json data = {};
 
     for (const Option& option : _options) {
         data[std::to_string(option.value)] = option.description;
     }
 
-    return nlohmann::json({{ OptionsKey, data }}).dump();
+    return { { OptionsKey, data } };
 }
 
 int OptionProperty::toValue(lua_State* state) const {

@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___NUMERICALPROPERTY___H__
 
 #include <openspace/properties/templateproperty.h>
+#include <openspace/util/json_helper.h>
 
 namespace openspace::properties {
 
@@ -55,7 +56,7 @@ public:
         ghoul::EasingFunc<float> easingFunc = nullptr) override;
 
 protected:
-    std::string generateAdditionalJsonDescription() const override;
+    nlohmann::json generateAdditionalJsonDescription() const override;
     using TemplateProperty<T>::toValue;
 
     T _minimumValue = T(0);

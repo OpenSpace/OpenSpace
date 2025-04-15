@@ -25,10 +25,10 @@
 #include <string_view>
 
 namespace {
-    constexpr std::string_view MinimumValueKey = "MinimumValue";
-    constexpr std::string_view MaximumValueKey = "MaximumValue";
-    constexpr std::string_view SteppingValueKey = "SteppingValue";
-    constexpr std::string_view ExponentValueKey = "Exponent";
+    constexpr std::string_view MinimumValueKey = "minimumValue";
+    constexpr std::string_view MaximumValueKey = "maximumValue";
+    constexpr std::string_view SteppingValueKey = "steppingValue";
+    constexpr std::string_view ExponentValueKey = "exponent";
 
     std::string luaToJson(std::string luaValue) {
         if (luaValue[0] == '{') {
@@ -61,6 +61,7 @@ T NumericalProperty<T>::minValue() const {
 
 template <typename T>
 void NumericalProperty<T>::setMinValue(T value) {
+    Property::notifyMetaDataChangeListeners();
     _minimumValue = std::move(value);
 }
 
@@ -71,6 +72,7 @@ T NumericalProperty<T>::maxValue() const {
 
 template <typename T>
 void NumericalProperty<T>::setMaxValue(T value) {
+    Property::notifyMetaDataChangeListeners();
     _maximumValue = std::move(value);
 }
 
@@ -81,6 +83,7 @@ T NumericalProperty<T>::steppingValue() const {
 
 template <typename T>
 void NumericalProperty<T>::setSteppingValue(T value) {
+    Property::notifyMetaDataChangeListeners();
     _stepping = std::move(value);
 }
 
@@ -118,17 +121,18 @@ void NumericalProperty<T>::setExponent(float exponent) {
     }
 
     _exponent = exponent;
+    Property::notifyMetaDataChangeListeners();
 }
 
 template <typename T>
-std::string NumericalProperty<T>::generateAdditionalJsonDescription() const {
-    return std::format(
-        "{{ \"{}\": {}, \"{}\": {}, \"{}\": {}, \"{}\": {} }}",
-        MinimumValueKey, luaToJson(ghoul::to_string(_minimumValue)),
-        MaximumValueKey, luaToJson(ghoul::to_string(_maximumValue)),
-        SteppingValueKey, luaToJson(ghoul::to_string(_stepping)),
-        ExponentValueKey, luaToJson(ghoul::to_string(_exponent))
-    );
+nlohmann::json NumericalProperty<T>::generateAdditionalJsonDescription() const {
+    nlohmann::json result = {
+        { MinimumValueKey, nlohmann::json::parse(luaToJson(ghoul::to_string(_minimumValue))) },
+        { MaximumValueKey, nlohmann::json::parse(luaToJson(ghoul::to_string(_maximumValue))) },
+        { SteppingValueKey, nlohmann::json::parse(luaToJson(ghoul::to_string(_stepping))) },
+        { ExponentValueKey, nlohmann::json::parse(luaToJson(ghoul::to_string(_exponent))) }
+    };
+    return result;
 }
 
 template <typename T>
