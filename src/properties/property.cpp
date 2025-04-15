@@ -296,38 +296,6 @@ nlohmann::json Property::generateJsonDescription() const {
     return json;
 }
 
-nlohmann::json Property::generateMetaDataJsonDescription() const {
-    static const std::unordered_map<Visibility, std::string> VisibilityConverter = {
-        { Visibility::Always, "Always" },
-        { Visibility::NoviceUser, "NoviceUser" },
-        { Visibility::User, "User" },
-        { Visibility::AdvancedUser, "AdvancedUser" },
-        { Visibility::Developer, "Developer" },
-        { Visibility::Hidden, "Hidden" }
-    };
-    const std::string& vis = VisibilityConverter.at(_metaData.visibility);
-    const bool isReadOnly = _metaData.readOnly.value_or(false);
-    const bool needsConfirmation = _metaData.needsConfirmation.value_or(false);
-    const std::string groupId = groupIdentifier();
-
-    nlohmann::json json = {
-        { "group", groupId },
-        { "visibility", vis },
-        { "isReadOnly", isReadOnly },
-        { "needsConfirmation", needsConfirmation },
-    };
-
-    if (_metaData.viewOptions.size() > 0) {
-        nlohmann::json viewOptions = nlohmann::json::object();
-        for (const std::pair<std::string, bool>& p : _metaData.viewOptions) {
-            viewOptions[p.first] = p.second;
-        }
-        json["viewOptions"] = viewOptions;
-    }
-
-    return json;
-}
-
 nlohmann::json Property::generateAdditionalJsonDescription() const {
     return nlohmann::json::object();
 }
