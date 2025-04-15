@@ -218,7 +218,7 @@ nlohmann::json OptionProperty::generateAdditionalJsonDescription() const {
         data[std::to_string(option.value)] = option.description;
     }
 
-    return data;
+    return { { OptionsKey, data } };
 }
 
 int OptionProperty::toValue(lua_State* state) const {
