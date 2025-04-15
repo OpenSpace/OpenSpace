@@ -42,7 +42,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DistanceThresholdInfo = {
         "DistanceThreshold",
         "Distance Threshold",
-        "Threshold in meters for when the switch happens between the two renderables."
+        "Threshold in meters for when the switch happens between the two renderables.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     // A RenderableSwitch can be used to render one of two renderables depending on the 
@@ -122,9 +123,15 @@ void RenderableSwitch::render(const RenderData& data, RendererTasks& tasks) {
     glm::dvec3 modelPosition = data.modelTransform.translation;
 
     if (glm::distance(cameraPosition, modelPosition) < _distanceThreshold) {
+        if (!_renderableNear->isEnabled()) {
+            return;
+        }
         _renderableNear->render(data, tasks);
     }
     else {
+        if (!_renderableFar->isEnabled()) {
+            return;
+        }
         _renderableFar->render(data, tasks);
     }
 }
