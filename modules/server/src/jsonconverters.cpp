@@ -76,7 +76,7 @@ namespace openspace::interaction {
         j = {
             { "identifier", action.identifier },
             { "name", action.name },
-            { "synchronization", action.isLocal == Action::IsLocal::No },
+            { "isLocal", action.isLocal == Action::IsLocal::Yes },
             { "documentation", action.documentation },
             { "guiPath", action.guiPath }
         };
@@ -182,6 +182,7 @@ void to_json(json& j, const Renderable* pR) {
     // Use reference converter instead of pointer
     j = *pR;
 }
+
 } // namespace openspace
 
 namespace glm {
