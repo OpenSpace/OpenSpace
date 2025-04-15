@@ -243,7 +243,7 @@ void Property::notifyChangeListeners() {
 }
 
 void Property::notifyMetaDataChangeListeners() {
-    for (const std::pair<OnChangeHandle, std::function<void()>>& p : _onMetaDataChangeCallbacks) {
+    for (const std::pair<OnMetaDataChangeHandle, std::function<void()>>& p : _onMetaDataChangeCallbacks) {
         p.second();
     }
 }
