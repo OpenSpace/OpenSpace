@@ -115,22 +115,23 @@ local TransformGONG = {
   }
 }
 
-local WSATEST = {
-  Identifier = "WSATEST",
-  Parent = HeliocentricEarthEquatorial180.Identifier,
+local WSAOffset60 = {
+  Identifier = "WSAOffset60",
+  Parent = HeliocentricEarthEquatorial.Identifier,
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      --Rotation = {0, 0, 1.57079633} -- 90 deg
-      Rotation = {0, 0, 2.0943951} -- 120 deg
+      Rotation = {0, 0, -1.04719755} -- -60 deg
     }
   },
   GUI = {
-    Name = "Transform test 90 deg",
+    Name = "WSA data offset 60 degrees",
     Path = "/Solar System/Sun",
+    Description = "WSA outputs (fits files) has the Sun-Earth line 60 degrees shifted from the edge",
     Hidden = true
   }
 }
+
 
 asset.onInitialize(function()
   openspace.spice.loadKernel(SunCentricFrameKernels .. "HEEQ180.tf")
@@ -140,12 +141,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(HeliocentricEarthEquatorial)
   openspace.addSceneGraphNode(HeliocentricEarthEcliptic)
   openspace.addSceneGraphNode(TransformGONG)
-  openspace.addSceneGraphNode(WSATEST)
+  openspace.addSceneGraphNode(WSAOffset60)
 
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(WSATEST)
+  openspace.removeSceneGraphNode(WSAOffset60)
   openspace.removeSceneGraphNode(TransformGONG)
   openspace.removeSceneGraphNode(HeliocentricEarthEcliptic)
   openspace.removeSceneGraphNode(HeliocentricEarthEquatorial)
@@ -159,7 +160,7 @@ asset.export(HeliocentricEarthEquatorial180)
 asset.export(HeliocentricEarthEquatorial)
 asset.export(HeliocentricEarthEcliptic)
 asset.export(TransformGONG)
-asset.export(WSATEST)
+asset.export(WSAOffset60)
 
 
 

@@ -4,13 +4,13 @@ local size = 700000000
 
 local grid_slice = {
   Identifier = "carrington_grid_slice",
-  Parent = transforms.WSATEST.Identifier,
+  Parent = transforms.WSAOffset60.Identifier,
   Transform = {
---    Rotation = {
---      Type = "StaticRotation",
---      -- 70 degrees
---      Rotation = { 0.0, 0.0, 1.22173 }
---    }
+    Rotation = {
+      Type = "StaticRotation",
+      -- -30 degrees
+      Rotation = { 0.0, 0.0, -0.523598776 }
+    },
     Scale = {
       Type = "StaticScale",
       Scale = size
@@ -22,8 +22,10 @@ local grid_slice = {
     Size = size,
     Opacity = 1.0,
     Color = { 0.8, 0.8, 0.8 },
-    LineWidth = 1.0,
-    GridSegments = { 2, 64 }
+    LineWidth = 2.0,
+    GridSegments = { 2, 64 },
+    LongSegments = 2,
+    LatSegments = 64
   },
   GUI = {
     Name = "Longitude at Sun-Earth line",
@@ -34,13 +36,13 @@ local grid_slice = {
 
 local grid_10deg = {
   Identifier = "carrington_grid_10_degrees",
-  Parent = transforms.WSATEST.Identifier,
+  Parent = transforms.WSAOffset60.Identifier,
   Transform = {
---    Rotation = {
---      Type = "StaticRotation",
---      -- 70 degrees
---      Rotation = { 0.0, 0.0, 1.22173 }
---    }
+    Rotation = {
+      Type = "StaticRotation",
+      -- 30 degrees
+      Rotation = { 0.0, 0.0, -0.523598776 }
+    },
     Scale = {
       Type = "StaticScale",
       Scale = size
@@ -53,7 +55,7 @@ local grid_10deg = {
     Opacity = 1.0,
     Color = { 0.035, 0.675, 0.255 },
     LineWidth = 1.0,
-    GridSegments = { 36, 36 }
+    Segments = 36
   },
   GUI = {
     Name = "10 Degree Grid",

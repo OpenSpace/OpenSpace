@@ -1,0 +1,27 @@
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local sun = asset.require("scene/solarsystem/sun/sun")
+
+local SunEarthLine = {
+  Identifier = "RenderableNodeLine_Sun_Earth",
+  Renderable = {
+    Type = "RenderableNodeLine",
+    StartNode = sun.Sun.Identifier,
+    EndNode = earth.Earth.Identifier
+  },
+  GUI = {
+    Name = "Sun Earth Line",
+    Path =  "/Solar System/Heliosphere"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SunEarthLine)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SunEarthLine)
+end)
+
+
+
+asset.export("NodeLine", SunEarthLine)

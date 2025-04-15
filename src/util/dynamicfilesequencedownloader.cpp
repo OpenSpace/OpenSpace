@@ -391,32 +391,35 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
     }
 }
 
-// negative part of this is it has to go through the whole list.
-// Maybe a std::map is better to fetch to most relavent file to download.
 std::vector<File>::iterator DynamicFileSequenceDownloader::closestFileToNow(
                                                                         const double time)
 {
     ZoneScoped;
-
-    File* closest = &*_availableData.begin();
-    std::vector<File>::iterator it = _availableData.begin();
+    std::vector<File>::iterator closestIt = _availableData.begin();
     double smallest = DBL_MAX;
-    for (File& file : _availableData) {
-        // smallest differens determains closest file
-        const double differens = abs(time - file.time);
-        if (differens < smallest) {
-            smallest = differens;
-            closest = &file;
+
+    std::vector<File>::iterator it = std::lower_bound(
+        _availableData.begin(),
+        _availableData.end(),
+        time,
+        [](const File& file, double t) {
+            return file.time < t;
         }
+    );
+
+    if (it == _availableData.end()) {
+        return std::prev(_availableData.end());
     }
-    it += closest->availableIndex;
-    if(_forward){
-        it -= 1;
+    if (it == _availableData.begin()) {
+        return it;
+    }
+    std::vector<File>::iterator prev = std::prev(it);
+    if (std::abs(prev->time - time) <= std::abs(it->time - time)) {
+        return prev;
     }
     else {
-        it += 1;
+        return it;
     }
-    return it;
 }
 
 void DynamicFileSequenceDownloader::putOnQueue() {
