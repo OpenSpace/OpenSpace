@@ -1,11 +1,7 @@
-local propertyHelper = asset.require("util/property_helper")
-
-
-
 local ToggleNativeUi = {
   Identifier = "os.ToggleNativeUi",
   Name = "Show native GUI",
-  Command = propertyHelper.invert("Modules.ImGUI.Enabled"),
+  Command = [[openspace.invertBooleanProperty("Modules.ImGUI.Enabled")]],
   Documentation = "Shows or hides the native UI",
   GuiPath = "/System/GUI",
   IsLocal = true
@@ -53,7 +49,7 @@ local TogglePauseImmediate = {
 local ToggleRotationFriction = {
   Identifier = "os.ToggleRotationFriction",
   Name = "Toggle rotation friction",
-  Command = propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RotationalFriction"),
+  Command = [[openspace.invertBooleanProperty("NavigationHandler.OrbitalNavigator.Friction.RotationalFriction")]],
   Documentation = [[Toggles the rotational friction of the camera. If it is disabled, the
     camera rotates around the focus object indefinitely]],
   GuiPath = "/Navigation",
@@ -63,7 +59,7 @@ local ToggleRotationFriction = {
 local ToggleZoomFriction = {
   Identifier = "os.ToggleZoomFriction",
   Name = "Toggle zoom friction",
-  Command = propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.ZoomFriction"),
+  Command = [[openspace.invertBooleanProperty("NavigationHandler.OrbitalNavigator.Friction.ZoomFriction")]],
   Documentation = [[Toggles the zoom friction of the camera. If it is disabled, the camera
     rises up from or closes in towards the focus object indefinitely]],
   GuiPath = "/Navigation",
@@ -73,7 +69,7 @@ local ToggleZoomFriction = {
 local ToggleRollFriction = {
   Identifier = "os.ToggleRollFriction",
   Name = "Toggle roll friction",
-  Command = propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RollFriction"),
+  Command = [[openspace.invertBooleanProperty("NavigationHandler.OrbitalNavigator.Friction.RollFriction")]],
   Documentation = [[Toggles the roll friction of the camera. If it is disabled, the camera
     rolls around its own axis indefinitely]],
   GuiPath = "/Navigation",
@@ -99,7 +95,7 @@ local FadeToBlack = {
 local ToggleMainGui = {
   Identifier = "os.ToggleMainGui",
   Name = "Toggle main GUI",
-  Command = propertyHelper.invert("Modules.CefWebGui.Visible"),
+  Command = [[openspace.invertBooleanProperty("Modules.CefWebGui.Visible")]],
   Documentation = "Toggles the main GUI",
   GuiPath = "/System/GUI",
   IsLocal = true
@@ -123,7 +119,7 @@ local ToggleOverlays = {
 local ToggleMasterRendering = {
   Identifier = "os.ToggleMasterRendering",
   Name = "Toggle rendering on master",
-  Command = propertyHelper.invert("RenderEngine.DisableMasterRendering"),
+  Command = [[openspace.invertBooleanProperty("RenderEngine.DisableMasterRendering")]],
   Documentation = "Toggles the rendering on master",
   GuiPath = "/System/Rendering",
   IsLocal = true
