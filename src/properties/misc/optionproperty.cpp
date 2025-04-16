@@ -190,7 +190,7 @@ void OptionProperty::setLuaValue(lua_State* state) {
         if (it == _options.cend()) {
             throw ghoul::RuntimeError(
                 std::format("Could not find option '{}'", value),
-                uri()
+                std::string(uri())
             );
         }
         thisValue = it->value;
