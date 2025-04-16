@@ -62,6 +62,11 @@ target_compile_features(spice PUBLIC cxx_std_20)
 set_target_properties(spice PROPERTIES FOLDER "External")
 end_dependency()
 
+# nlohmann
+begin_dependency("nlohmann")
+add_subdirectory(json)
+end_dependency()
+
 # Curl
 begin_dependency("CURL")
 if (WIN32)

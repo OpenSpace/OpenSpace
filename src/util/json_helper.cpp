@@ -91,8 +91,8 @@ void sortJson(nlohmann::json& json, const std::string& key) {
         json.begin(),
         json.end(),
         [&key](const nlohmann::json& lhs, const nlohmann::json& rhs) {
-            const std::string lhsString = ghoul::toLowerCase(lhs[key]);
-            const std::string rhsString = ghoul::toLowerCase(rhs[key]);
+            const std::string lhsString = ghoul::toLowerCase(lhs[key].get<std::string>());
+            const std::string rhsString = ghoul::toLowerCase(rhs[key].get<std::string>());
 
             return rhsString > lhsString;
         }
