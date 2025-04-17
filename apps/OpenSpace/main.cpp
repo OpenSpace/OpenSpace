@@ -1487,17 +1487,7 @@ int main(int argc, char* argv[]) {
         saveSettings(settings, findSettings());
     }
 
-    // Prepend the outgoing sgctArguments with the program name
-    // as well as the configuration file that sgct is supposed to use
-    arguments.insert(arguments.begin(), argv[0]);
-    arguments.insert(arguments.begin() + 1, "-config");
-    arguments.insert(
-        arguments.begin() + 2,
-        absPath(global::configuration->windowConfiguration).string()
-    );
-
     // Need to set this before the creation of the sgct::Engine
-
     Log::instance().setLogToConsole(false);
     Log::instance().setShowTime(false);
     Log::instance().setShowLogLevel(false);
@@ -1507,9 +1497,14 @@ int main(int argc, char* argv[]) {
     glfwWindowHint(GLFW_STENCIL_BITS, 8);
 #endif
 
+    std::filesystem::path winConf =
+        commandlineArguments.windowConfig.has_value() ?
+        *commandlineArguments.windowConfig :
+        global::configuration->windowConfiguration;
+
     // Determining SGCT configuration file
     LINFO(std::format(
-        "SGCT Configuration file: {}", absPath(global::configuration->windowConfiguration)
+        "SGCT Configuration file: {}", absPath(winConf)
     ));
 
 
@@ -1520,9 +1515,7 @@ int main(int argc, char* argv[]) {
     LDEBUG("Loading cluster information");
     config::Cluster cluster;
     try {
-        cluster = loadCluster(
-            absPath(global::configuration->windowConfiguration).string()
-        );
+        cluster = loadCluster(absPath(winConf).string());
     }
     catch (const std::runtime_error& e) {
         LFATALC("main", e.what());
