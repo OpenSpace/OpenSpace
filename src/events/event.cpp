@@ -113,12 +113,12 @@ void log(int i, const EventTimeOfInterestReached& e) {
 
 void log(int i, const EventMissionAdded& e) {
     ghoul_assert(e.type == EventMissionAdded::Type, "Wrong type");
-    LINFO(std::format("[{}] MissionAdded: {}", i, e.name));
+    LINFO(std::format("[{}] MissionAdded: {}", i, e.identifier));
 }
 
 void log(int i, const EventMissionRemoved& e) {
     ghoul_assert(e.type == EventMissionRemoved::Type, "Wrong type");
-    LINFO(std::format("[{}] MissionRemoved: {}", i, e.name));
+    LINFO(std::format("[{}] MissionRemoved: {}", i, e.identifier));
 }
 
 void log(int i, [[maybe_unused]] const EventMissionEventReached& e) {
@@ -401,14 +401,14 @@ ghoul::Dictionary toParameter(const Event& e) {
             break;
         case Event::Type::MissionAdded:
             d.setValue(
-                "Name",
-                std::string(static_cast<const EventMissionAdded&>(e).name)
+                "Identifier",
+                std::string(static_cast<const EventMissionAdded&>(e).identifier)
             );
             break;
         case Event::Type::MissionRemoved:
             d.setValue(
-                "Name",
-                std::string(static_cast<const EventMissionRemoved&>(e).name)
+                "Identifier",
+                std::string(static_cast<const EventMissionRemoved&>(e).identifier)
             );
             break;
         case Event::Type::PlanetEclipsed:
@@ -659,14 +659,14 @@ EventTimeOfInterestReached::EventTimeOfInterestReached(const Time* time_,
     , camera(camera_)
 {}
 
-EventMissionAdded::EventMissionAdded(const std::string_view name)
+EventMissionAdded::EventMissionAdded(const std::string_view identifier_)
     : Event(Type)
-    , name(temporaryString(name))
+    , identifier(temporaryString(identifier_))
 {}
 
-EventMissionRemoved::EventMissionRemoved(const std::string_view name)
+EventMissionRemoved::EventMissionRemoved(const std::string_view identifier_)
     : Event(Type)
-    , name(temporaryString(name))
+    , identifier(temporaryString(identifier_))
 {}
 
 EventMissionEventReached::EventMissionEventReached()
