@@ -26,6 +26,7 @@
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
+#include <QPainter>
 #include <QStandardItemModel>
 
 SplitComboBox::SplitComboBox(QWidget* parent, std::filesystem::path userPath,
@@ -66,14 +67,39 @@ void SplitComboBox::populateList(const std::string& preset) {
     // Clear the previously existing entries since we might call this function again
     clear();
 
+    // Create "icons" that we use to indicate whether an item is built-in or user content
+    QIcon userIcon = []() {
+        QPixmap px = QPixmap(20, 25);
+        px.fill(Qt::transparent);
+
+        QPainter painter = QPainter(&px);
+        painter.setBrush(QColor(183, 211, 149, 255));
+        painter.drawEllipse(0, 5, 19, 19);
+
+        QFont f = QFont("Arial");
+        f.setPixelSize(14);
+        f.setBold(true);
+        painter.setFont(f);
+        painter.drawText(0, 5, 20, 20, Qt::AlignCenter, "U");
+        return QIcon(px);
+    }();
 
     //
     // Special item (if it was specified)
     if (!_specialFirst.empty()) {
-        addItem(
-            QString::fromStdString(_specialFirst),
-            QString::fromStdString(_specialFirst)
-        );
+        if (_specialFirst.starts_with(_userPath.string())) {
+            addItem(
+                userIcon,
+                QString::fromStdString(_specialFirst),
+                QString::fromStdString(_specialFirst)
+            );
+        }
+        else {
+            addItem(
+                QString::fromStdString(_specialFirst),
+                QString::fromStdString(_specialFirst)
+            );
+        }
     }
 
 
@@ -94,6 +120,7 @@ void SplitComboBox::populateList(const std::string& preset) {
 
         // Display the relative path, but store the full path in the user data segment
         addItem(
+            userIcon,
             QString::fromStdString(relPath.string()),
             QString::fromStdString(p.string())
         );
