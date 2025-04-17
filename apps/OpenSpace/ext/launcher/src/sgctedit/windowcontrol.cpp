@@ -162,7 +162,7 @@ WindowControl::WindowControl(int monitorIndex, int windowIndex,
 
         _windowName = new QLineEdit;
         _windowName->setToolTip(tip);
-        layout->addWidget(_windowName, 1, 1, 1, 7);
+        layout->addWidget(_windowName, 1, 1, 1, 3);
     }
     const QString tip = "The monitor where this window is located";
 
@@ -188,9 +188,9 @@ WindowControl::WindowControl(int monitorIndex, int windowIndex,
         // potential nullpointer accesses elsewhere in the code
         QLabel* labelLocation = new QLabel("Monitor");
         labelLocation->setToolTip(tip);
-        layout->addWidget(labelLocation, 2, 0);
+        layout->addWidget(labelLocation, 1, 4);
 
-        layout->addWidget(_monitor, 2, 1, 1, 7);
+        layout->addWidget(_monitor, 1, 5, 1, 4);
     }
 
     //

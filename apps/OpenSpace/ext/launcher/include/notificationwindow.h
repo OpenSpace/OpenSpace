@@ -22,47 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SETTINGS___H__
-#define __OPENSPACE_CORE___SETTINGS___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___NOTIFICATIONWINDOW___H__
+#define __OPENSPACE_UI_LAUNCHER___NOTIFICATIONWINDOW___H__
 
-#include <openspace/engine/configuration.h>
-#include <openspace/properties/property.h>
-#include <filesystem>
-#include <optional>
+#include <QTextEdit>
 
-namespace openspace {
+#include <openspace/util/httprequest.h>
+#include <memory>
 
-struct Settings {
-    auto operator<=>(const Settings&) const = default;
+class NotificationWindow final : public QTextEdit {
+Q_OBJECT
+public:
+    explicit NotificationWindow(QWidget* parent);
 
-    // Settings that are not configurable by the user and that represent a persistent
-    // state for the system
-    std::optional<bool> hasStartedBefore;
-    std::optional<std::string> lastStartedDate;
-
-    // Configurable settings
-    std::optional<std::string> configuration;
-    std::optional<bool> rememberLastConfiguration;
-    std::optional<std::string> profile;
-    std::optional<bool> rememberLastProfile;
-    std::optional<properties::Property::Visibility> visibility;
-    std::optional<bool> bypassLauncher;
-    std::optional<Configuration::LayerServer> layerServer;
-
-    struct MRF {
-        auto operator<=>(const MRF&) const = default;
-
-        std::optional<bool> isEnabled;
-        std::optional<std::string> location;
-    };
-    MRF mrf;
+private:
+    std::unique_ptr<openspace::HttpMemoryDownload> _request;
 };
 
-std::filesystem::path findSettings(const std::string& filename = "settings.json");
-
-Settings loadSettings(const std::filesystem::path& filename = findSettings());
-void saveSettings(const Settings& settings, const std::filesystem::path& filename);
-
-} // namespace openspace
-
-#endif // __OPENSPACE_CORE___SETTINGS___H__
+#endif // __OPENSPACE_UI_LAUNCHER___NOTIFICATIONWINDOW___H__
