@@ -452,7 +452,7 @@ bool EventHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction act
     // Some web elements (e.g., buttons) rely on receiving a char event in addition to
     // `keydown` to properly register an `onClick`. Since GLFW does not generate this
     // event for Enter, we manually invoke it to ensure expected behavior.
-    const int EnterKeyCode = 13;
+    constexpr int EnterKeyCode = 13;
     if (keyEvent.windows_key_code == EnterKeyCode && keyEvent.type == KEYEVENT_KEYDOWN) {
         return charCallback(static_cast<unsigned int>(Key::Enter), modifier);
     }
