@@ -35,7 +35,7 @@ void WebBrowserApp::OnContextCreated(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
 {
     CefRefPtr<CefV8Value> val = CefV8Value::CreateBool(true);
     CefRefPtr<CefV8Value> global = context->GetGlobal();
-    global->SetValue("IsWithinCEF", val, V8_PROPERTY_ATTRIBUTE_NONE);
+    global->SetValue("isWithinCEF", val, V8_PROPERTY_ATTRIBUTE_NONE);
 }
 
 void WebBrowserApp::OnBeforeCommandLineProcessing(const CefString&,
