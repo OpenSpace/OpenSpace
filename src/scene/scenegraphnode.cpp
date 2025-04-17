@@ -924,7 +924,23 @@ void SceneGraphNode::renderDebugSphere(const Camera& camera, double size,
 void SceneGraphNode::setParent(SceneGraphNode& parent) {
     ghoul_assert(_parent != nullptr, "Node must be attached to a parent");
 
+    // 1. Remove `this` from its currents parent's children
+    auto iter = std::find_if(
+        _parent->_children.begin(),
+        _parent->_children.end(),
+        [this](const ghoul::mm_unique_ptr<SceneGraphNode>& node) {
+            return node.get() == this;
+        }
+    );
+    ghoul_assert(iter != _parent->_children.end(), "This was not a child of its parent");
+    ghoul::mm_unique_ptr<SceneGraphNode> c = std::move(*iter);
+    _parent->_children.erase(iter);
+
+    // 2. Reparent `this`
     _parent = &parent;
+
+    // 3. Add `this` to the new parent's children list
+    _parent->_children.push_back(std::move(c));
 }
 
 void SceneGraphNode::attachChild(ghoul::mm_unique_ptr<SceneGraphNode> child) {

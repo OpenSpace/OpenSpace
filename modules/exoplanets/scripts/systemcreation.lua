@@ -374,6 +374,7 @@ function addExoplanetSystem(data)
       Type = "RenderableRadialGrid",
       Enabled = showCircle,
       Radii = { 0.0, 1.0 },
+      GridSegments = { 1, 1 }, -- 1 segment in each direction, makes the grid a ring
       Color = circleColor,
       CircleSegments = 64,
       LineWidth = 2.0

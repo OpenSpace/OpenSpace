@@ -167,7 +167,7 @@ void Connection::handleJson(const nlohmann::json& json) {
     }
 
     // The topic id may be an already discussed topic, or a new one.
-    const TopicId topicId = *topicJson;
+    const TopicId topicId = topicJson->get<TopicId>();
     auto topicIt = _topics.find(topicId);
 
     if (topicIt == _topics.end()) {
@@ -179,7 +179,7 @@ void Connection::handleJson(const nlohmann::json& json) {
             LERROR("Type must be specified as a string when a new topic is initialized");
             return;
         }
-        const std::string type = *typeJson;
+        const std::string type = typeJson->get<std::string>();
         ZoneText(type.c_str(), type.size());
 
         if (!isAuthorized() && (type != "authorize")) {

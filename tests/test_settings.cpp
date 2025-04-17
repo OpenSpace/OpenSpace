@@ -27,7 +27,7 @@
 #include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <openspace/engine/settings.h>
-#include <json/json.hpp>
+#include <openspace/json.h>
 #include <filesystem>
 #include <fstream>
 

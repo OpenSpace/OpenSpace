@@ -342,7 +342,7 @@ void KameleonPlane::readFieldlinePaths(const std::filesystem::path& indexFile) {
                 _fieldlines.addOption(it.key());
                 _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
                     partName + "/" + it.key(),
-                    it.value(),
+                    it->get<std::string>(),
                     false
                 );
                 i++;

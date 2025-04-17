@@ -460,6 +460,8 @@ target_include_directories(openspace-core
     ${PROJECT_SOURCE_DIR}
 )
 
+target_link_libraries(openspace-core PUBLIC nlohmann_json)
+
 target_precompile_headers(openspace-core PRIVATE
   <openspace/json.h>
   <openspace/properties/numericalproperty.h>
