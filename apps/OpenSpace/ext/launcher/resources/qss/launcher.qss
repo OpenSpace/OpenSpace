@@ -201,6 +201,10 @@ ScriptlogDialog  QListWidget {
   min-width: 60em;
 }
 
+MarkNodesDialog  QListWidget:focus {
+  border: 2px solid rgb(61, 189, 238);
+}
+
 /*
  * Horizons dialog
  */
