@@ -35,9 +35,11 @@ namespace openspace::volume {
 
 class GenerateRawVolumeFromFileTask : public Task {
 public:
-    GenerateRawVolumeFromFileTask(const ghoul::Dictionary& dictionary);
+    explicit GenerateRawVolumeFromFileTask(const ghoul::Dictionary& dictionary);
+
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
+
     static documentation::Documentation Documentation();
 
 private:

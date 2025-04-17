@@ -107,8 +107,8 @@ bool LayerManager::hasAnyBlendingLayersEnabled() const {
     ZoneScoped;
 
     return std::any_of(
-        _layerGroups.begin(),
-        _layerGroups.end(),
+        _layerGroups.cbegin(),
+        _layerGroups.cend(),
         [](const std::unique_ptr<LayerGroup>& lg) {
             return lg->layerBlendingEnabled() && !lg->activeLayers().empty();
         }

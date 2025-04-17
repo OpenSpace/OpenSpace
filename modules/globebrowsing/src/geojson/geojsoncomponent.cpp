@@ -300,10 +300,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     )
     , _pointSizeScale(PointSizeScaleInfo, 1.f, 0.01f, 100.f)
     , _lineWidthScale(LineWidthScaleInfo, 1.f, 0.01f, 10.f)
-    , _pointRenderModeOption(
-        PointRenderModeInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _pointRenderModeOption(PointRenderModeInfo)
     , _drawWireframe(DrawWireframeInfo, false)
     , _preventUpdatesFromHeightMap(PreventHeightUpdateInfo, false)
     , _forceUpdateHeightData(ForceUpdateHeightDataInfo)
@@ -497,8 +494,8 @@ void GeoJsonComponent::deinitializeGL() {
 
 bool GeoJsonComponent::isReady() const {
     const bool isReady = std::all_of(
-        std::begin(_geometryFeatures),
-        std::end(_geometryFeatures),
+        _geometryFeatures.cbegin(),
+        _geometryFeatures.cend(),
         std::mem_fn(&GlobeGeometryFeature::isReady)
     );
     return isReady && _linesAndPolygonsProgram && _pointsProgram;
@@ -574,11 +571,11 @@ void GeoJsonComponent::update() {
         }
         GlobeGeometryFeature& g = _geometryFeatures[i];
 
-        if (_dataIsDirty || _heightOffsetIsDirty) {
+        if (_dataIsDirty || _heightOffsetIsDirty) [[unlikely]] {
             g.setOffsets(offsets);
         }
 
-        if (_textureIsDirty) {
+        if (_textureIsDirty) [[unlikely]] {
             g.updateTexture();
         }
 

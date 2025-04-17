@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/dashboardtextitem.h>
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 
 namespace openspace {
 
@@ -40,7 +40,7 @@ public:
     DashboardItemPropertyValue(const ghoul::Dictionary& dictionary);
     ~DashboardItemPropertyValue() override = default;
 
-    void render(glm::vec2& penPosition) override;
+    void update() override;
 
     glm::vec2 size() const override;
 

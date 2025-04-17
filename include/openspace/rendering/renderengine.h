@@ -27,14 +27,14 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/list/intlistproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <openspace/properties/triggerproperty.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <chrono>
 #include <filesystem>
@@ -204,7 +204,15 @@ private:
 
     properties::IntProperty _framerateLimit;
     std::chrono::high_resolution_clock::time_point _lastFrameTime;
-    properties::FloatProperty _horizFieldOfView;
+
+    struct Window : properties::PropertyOwner {
+        Window(PropertyOwnerInfo info, int id);
+
+        properties::FloatProperty horizFieldOfView;
+    };
+
+    properties::PropertyOwner _windowing;
+    std::vector<std::unique_ptr<Window>> _windows;
 
     properties::Vec3Property _globalRotation;
     properties::Vec3Property _screenSpaceRotation;

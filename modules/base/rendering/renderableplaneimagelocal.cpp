@@ -45,6 +45,8 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // A RenderablePlaneImageLocal creates a textured 3D plane, where the texture is
+    // provided by a local file on disk.
     struct [[codegen::Dictionary(RenderablePlaneImageLocal)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string texture;
@@ -118,10 +120,6 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
     });
 }
 
-bool RenderablePlaneImageLocal::isReady() const {
-    return RenderablePlane::isReady();
-}
-
 void RenderablePlaneImageLocal::initializeGL() {
     RenderablePlane::initializeGL();
 
@@ -146,7 +144,7 @@ void RenderablePlaneImageLocal::update(const UpdateData& data) {
 
     RenderablePlane::update(data);
 
-    if (_textureIsDirty) {
+    if (_textureIsDirty) [[unlikely]] {
         loadTexture();
         _textureIsDirty = false;
     }

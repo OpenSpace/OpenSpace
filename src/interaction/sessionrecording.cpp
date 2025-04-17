@@ -72,7 +72,6 @@ namespace {
 
     constexpr std::string_view FrameTypeCameraAscii = "camera";
     constexpr std::string_view FrameTypeScriptAscii = "script";
-    constexpr std::string_view FrameTypeCommentAscii = "#";
     constexpr char FrameTypeCameraBinary = 'c';
     constexpr char FrameTypeScriptBinary = 's';
 
@@ -180,6 +179,7 @@ namespace {
     template <DataMode mode>
     std::optional<FrameType> readFrameType(std::istream&, int) {
         static_assert(sizeof(int) == 0, "Unimplemented overload");
+        return std::nullopt;
     }
 
     template <>

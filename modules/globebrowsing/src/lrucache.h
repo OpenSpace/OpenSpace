@@ -44,7 +44,7 @@ public:
     /**
      * \param size This is the maximum size of the cache given in number of cached items
      */
-    LRUCache(size_t size);
+    explicit LRUCache(size_t size);
 
     void put(KeyType key, ValueType value);
     std::vector<Item> putAndFetchPopped(KeyType key, ValueType value);

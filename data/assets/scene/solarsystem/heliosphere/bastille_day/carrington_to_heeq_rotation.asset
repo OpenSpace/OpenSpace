@@ -1,9 +1,9 @@
 local CarringtonLongitudeToHEEQ180Rotation = {
-  -- This is a rotation matrix to go from Carrington longitude referens frame to HEEQ180
-  -- reference fram. At the reference time, MAS_seq = 0, 2000-07-14T08:33:37.105 the
-  -- Carrington longitude was 309.3 degrees.
-  -- Difference from HEEQ => 360-309.3=50.7
-  -- (or 0-309.3 = -309.3 However this leads to the same rotation matrix in the end)
+  -- This is a rotation matrix to go from the Carrington longitude reference frame to the
+  -- HEEQ180 reference frame. At the reference time, MAS_seq = 0, 2000-07-14T08:33:37.105
+  -- the Carrington longitude was 309.3 degrees.
+  -- Difference from HEEQ => 360-309.3=50.7 (or 0-309.3 = -309.3). However this leads to
+  -- the same rotation matrix in the end)
   -- Since OpenSpace supports HEEQ180 and not HEEQ, 180 was added or subtracted
   -- => a1 = -129.3 and a2 = 230.7
   -- Rotation matrix: (cos a, -sin a, 0)(sin a, cos a, 0)(0, 0, 1) leads to the result.

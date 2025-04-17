@@ -65,18 +65,6 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
-        "Segments",
-        "Number of Segments",
-        "The number of segments the sphere is split into. Determines the resolution "
-        "of the rendered sphere. Should be an even value (if an odd value is provided, "
-        "the value will be set to the new value minus one). Setting this value is equal "
-        "to setting `LongSegments` and `LatSegments` to the same value. If this value is "
-        "specified, it will overwrite the values provided in `LongSegments` and "
-        "`LatSegments`.",
-        openspace::properties::Property::Visibility::User
-    };
-
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
@@ -90,6 +78,13 @@ namespace {
         "The labels for the grid."
     };
 
+    // This `Renderable` creates a grid in the shape of a sphere. Note that the sphere
+    // will always be given a radius of one meter. To change its size, use a `Scale`
+    // transform, such as the [StaticScale](#base_transform_scale_static).
+    //
+    // The grid may be split up into equal segments in both directions using the `Segments`
+    // parameter, or different number of segments in the latitudal and longtudal direction
+    // using the `LatSegments` and `LongSegments` parameters.
     struct [[codegen::Dictionary(RenderableSphericalGrid)]] Parameters {
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
@@ -100,7 +95,12 @@ namespace {
         // [[codegen::verbatim(LatSegmentsInfo.description)]]
         std::optional<int> latSegments;
 
-        // [[codegen::verbatim(SegmentsInfo.description)]]
+        // The number of segments the sphere is split into. Determines the resolution
+        // of the rendered sphere. Should be an even value (if an odd value is provided,
+        // the value will be set to the new value minus one). Setting this value is equal
+        // to setting `LongSegments` and `LatSegments` to the same value. If this value is
+        // specified, it will overwrite the values provided in `LongSegments` and
+        //`LatSegments`.
         std::optional<int> segments;
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
@@ -165,7 +165,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
 }
 
 bool RenderableSphericalGrid::isReady() const {
-    return _hasLabels ? _gridProgram && _labels->isReady() : _gridProgram != nullptr;
+    return _gridProgram && (_hasLabels ? _labels->isReady() : true);
 }
 
 void RenderableSphericalGrid::initialize() {
@@ -230,14 +230,13 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&) {
     // Change GL state:
 #ifndef __APPLE__
     glLineWidth(_lineWidth);
-#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
+#else // ^^^^ !__APPLE__ // __APPLE__ vvvv
     glLineWidth(1.f);
 #endif // __APPLE__
 
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
-    glDepthMask(false);
 
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
@@ -275,10 +274,15 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&) {
         );
         _labels->render(data, modelViewProjectionTransform, orthoRight, orthoUp);
     }
+
+    // Reset
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetLineState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableSphericalGrid::update(const UpdateData&) {
-    if (!_gridIsDirty) {
+    if (!_gridIsDirty) [[likely]] {
         return;
     }
 

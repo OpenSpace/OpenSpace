@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
@@ -45,7 +45,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableOrbitDisc : public Renderable {
 public:
-    RenderableOrbitDisc(const ghoul::Dictionary& dictionary);
+    explicit RenderableOrbitDisc(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;

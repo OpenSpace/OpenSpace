@@ -33,7 +33,7 @@ namespace openspace::globebrowsing {
 
 class SingleImageProvider : public TileProvider {
 public:
-    SingleImageProvider(const ghoul::Dictionary& dictionary);
+    explicit SingleImageProvider(const ghoul::Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
     Tile::Status tileStatus(const TileIndex& index) override final;

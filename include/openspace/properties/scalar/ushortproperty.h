@@ -41,10 +41,16 @@ public:
         unsigned short maxValue = std::numeric_limits<unsigned short>::max(),
         unsigned short stepValue = 1);
 
-    std::string_view className() const override;
-    int typeLua() const override;
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
+    void getLuaValue(lua_State* state) const override final;
+
+    std::string stringValue() const override final;
     using TemplateProperty<unsigned short>::operator=;
+
+private:
+    unsigned short toValue(lua_State* state) const override final;
 };
 
 } // namespace openspace::properties

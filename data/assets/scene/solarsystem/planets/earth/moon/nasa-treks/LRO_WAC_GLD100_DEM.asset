@@ -31,8 +31,8 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_WACGLD100_ClrShade_79S79N_256ppd")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_WACGLD100_Shade_79S79N_256ppd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_WACGLD100_ClrShade_79S79N_256ppd)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_WACGLD100_Shade_79S79N_256ppd)
 end)
 
 asset.export("LRO_WACGLD100_ClrShade_79S79N_256ppd", treks_LRO_WACGLD100_ClrShade_79S79N_256ppd)

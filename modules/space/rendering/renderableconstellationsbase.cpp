@@ -31,6 +31,7 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/programobject.h>
 #include <fstream>
@@ -105,7 +106,7 @@ RenderableConstellationsBase::RenderableConstellationsBase(
 
     // Avoid reading files here, instead do it in multithreaded initialize()
     if (p.namesFile.has_value()) {
-        _namesFilename = absPath(*p.namesFile).string();
+        _namesFilename = p.namesFile->string();
     }
     _namesFilename.onChange([this]() { loadConstellationFile(); });
     addProperty(_namesFilename);
@@ -156,7 +157,7 @@ void RenderableConstellationsBase::loadConstellationFile() {
     // Load the constellation names file
     std::ifstream file;
     file.exceptions(std::ifstream::goodbit);
-    file.open(absPath(_namesFilename));
+    file.open(_namesFilename);
 
     std::string line;
     while (file.good()) {

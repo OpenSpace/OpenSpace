@@ -25,9 +25,8 @@
 #ifndef __OPENSPACE_CORE___PROPERTY___H__
 #define __OPENSPACE_CORE___PROPERTY___H__
 
-#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/easing.h>
-#include <any>
+#include <ghoul/lua/lua_types.h>
 #include <functional>
 #include <string>
 #include <string_view>
@@ -144,7 +143,7 @@ public:
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
      */
-    Property(PropertyInfo info);
+    explicit Property(PropertyInfo info);
 
     /**
      * The destructor taking care of deallocating all unused memory. This method will not
@@ -160,27 +159,6 @@ public:
      * \return The class name of the Property
      */
     virtual std::string_view className() const = 0;
-
-    /**
-     * This method returns the encapsulated value of the Property to the caller. The type
-     * that is returned is determined by the type function and is up to the developer of
-     * the derived class. The default implementation returns an empty ghoul::any object.
-     *
-     * \return The value that is encapsulated by this Property, or an empty ghoul::any
-     *         object if the method was not overritten.
-     */
-    virtual std::any get() const;
-
-    /**
-     * Sets the value encapsulated by this Property to the \p value passed to this
-     * function. It is the caller's responsibility to ensure that the type contained in
-     * \p value is compatible with the concrete subclass of the Property. The method
-     * Property::type will return the desired type for the Property. The default
-     * implementation of this method ignores the input.
-     *
-     * \param value The new value that should be stored in this Property
-     */
-    virtual void set(std::any value);
 
     /**
      * This method returns the type that is requested by this Property for the set method.
@@ -200,7 +178,7 @@ public:
      * \param state The Lua state to which the value will be encoded
      * \return `true` if the encoding succeeded, `false` otherwise
      */
-    virtual bool getLuaValue(lua_State* state) const;
+    virtual void getLuaValue(lua_State* state) const = 0;
 
     /**
      * This method sets the value encapsulated by this Property by deserializing the value
@@ -212,20 +190,17 @@ public:
      *
      * \param state The Lua state from which the value will be decoded
      */
-    virtual void setLuaValue(lua_State* state);
+    virtual void setLuaValue(lua_State* state) = 0;
 
     /**
      * Returns the Lua type that will be put onto the stack in the Property::getLua method
      * and which will be consumed by the Property::setLuaValue method. The returned value
-     * can belong to the set of Lua types: `LUA_TNONE`, `LUA_TNIL`, `LUA_TBOOLEAN`,
-     * `LUA_TLIGHTUSERDATA`, `LUA_TNUMBER`, `LUA_TSTRING`, `LUA_TTABLE`, `LUA_TFUNCTION`,
-     * `LUA_TUSERDATA`, or `LUA_TTHREAD`. The default implementation will return
-     * `LUA_TNONE`.
+     * can be a combination of any value contained in the `LuaTypes`.
      *
      * \return The Lua type that will be consumed or produced by the Property::getLuaValue
      *         and Property::setLuaValue methods.
      */
-    virtual int typeLua() const;
+    virtual ghoul::lua::LuaTypes typeLua() const = 0;
 
     /**
      * This method encodes the encapsulated \p value of this Property as a `std::string`.
@@ -302,7 +277,7 @@ public:
      *
      * \return The fully qualified identifier for this Property
      */
-    std::string uri() const;
+    std::string_view uri() const;
 
     /**
      * Returns the PropertyOwner of this Property or `nullptr`, if it does not have an
@@ -310,7 +285,7 @@ public:
      *
      * \return The PropertyOwner of this Property
      */
-    PropertyOwner* owner() const;
+    const PropertyOwner* owner() const;
 
     /**
      * Assigned the Property to a new PropertyOwner. This method does not inform the
@@ -358,8 +333,7 @@ public:
 
     /**
      * Sets a hint about the visibility of the Property. Each application accessing the
-     * properties is free to ignore this hint. It is stored in the metaData Dictionary
-     * with the key: `Visibility`.
+     * properties is free to ignore this hint.
      *
      * \param visibility The new visibility of the Property
      */
@@ -376,19 +350,24 @@ public:
      * This method determines if this Property should be read-only in external
      * applications. This setting is only a hint and does not need to be followed by GUI
      * applications and does not have any effect on the Property::set or
-     * Property::setLuaValue methods. The value is stored in the metaData Dictionary with
-     * the key: `isReadOnly`. The default value is `false`.
+     * Property::setLuaValue methods. The default value is `false`.
      *
      * \param state `true` if the Property should be read only, `false` otherwise
      */
     void setReadOnly(bool state);
 
     /**
+     * Returns whether this property is read-only. This setting is only a hint and does
+     * not need to be followed by GUI applications and does not have any effect on the
+     * Property::set or Property::setLuaValue methods.
+     */
+    bool isReadOnly() const;
+
+    /**
      * This method determines if this Property requires confirmation upon every change of
      * the value. This setting is only a hint and does not need to be followed by GUI
      * applications and does not have any effect on the Property::set or
-     * Property::setLuaValue methods. The value is stored in the metaData Dictionary with
-     * the key: `needsConfirmation`. The default value is `false`.
+     * Property::setLuaValue methods. The default value is `false`.
      *
      * \param state `true` if the Property needs confirmation, `false` otherwise
      */
@@ -431,15 +410,6 @@ public:
     bool viewOption(const std::string& option, bool defaultValue = false) const;
 
     /**
-     * Returns the metaData that contains all information for external applications to
-     * correctly display information about the Property. No information that is stored in
-     * this Dictionary is necessary for the programmatic use of the Property.
-     *
-     * \return The Dictionary containing all meta data information about this Property
-     */
-    const ghoul::Dictionary& metaData() const;
-
-    /**
      * Get a valid JSON formatted representation of the Property's value.
      *
      * \return The value in a JSON compatible format
@@ -447,7 +417,6 @@ public:
     virtual std::string jsonValue() const;
 
     /// Interpolation methods
-    virtual void setInterpolationTarget(std::any value);
     virtual void setLuaInterpolationTarget(lua_State* state);
 
     virtual void interpolateValue(float t,
@@ -506,6 +475,13 @@ public:
      */
     void resetToUnchanged();
 
+    /**
+     * This function must be called whenever this property's URI changes. Examples of this
+     * are if the PropertyOwner to which this Property belongs changes identifier or is
+     * reparented in any way.
+     */
+    void updateUriCache();
+
 protected:
     /**
      * This method must be called by all subclasses whenever the encapsulated value has
@@ -525,21 +501,30 @@ protected:
     /// The user-facing description of this Property
     std::string _description;
 
-    /// The Dictionary containing all meta data necessary for external applications
-    ghoul::Dictionary _metaData;
+    /// The meta data necessary for external applications
+    struct {
+        std::optional<std::string> group;
+        Visibility visibility = Visibility::Default;
+        std::optional<bool> readOnly;
+        std::optional<bool> needsConfirmation;
+        std::unordered_map<std::string, bool> viewOptions;
+    } _metaData;
 
-    /// The callback function sthat will be invoked whenever the value changes
+    /// The callback functions that will be invoked whenever the value changes
     std::vector<std::pair<OnChangeHandle, std::function<void()>>> _onChangeCallbacks;
 
-    /// The callback function sthat will be invoked whenever the value changes
+    /// The callback functions that will be invoked whenever the value changes
     std::vector<std::pair<OnDeleteHandle, std::function<void()>>> _onDeleteCallbacks;
+
+    /// A cached version of the full URI of this property, which includes the identifiers
+    /// of all owners
+    std::string _uriCache;
+    bool _isUriCacheDirty = true;
 
     /// Flag indicating that this property value has been changed after initialization
     bool _isValueDirty = false;
 
 private:
-    void notifyDeleteListeners();
-
     OnChangeHandle _currentHandleValue = 0;
 
 #ifdef _DEBUG

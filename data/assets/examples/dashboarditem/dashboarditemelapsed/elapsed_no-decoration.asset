@@ -1,0 +1,19 @@
+-- No Decorations
+-- This example adds a dashboard item that shows the remaining time or the elapsed time
+-- since midday 2000 JAN 01 without any additional text decoration and only printing the
+-- remaining time.
+
+local Item = {
+  Identifier = "DashboardItemElapsedTime_Example_NoDecorations",
+  Type = "DashboardItemElapsedTime",
+  ReferenceTime = "2000 JAN 01 12:00:00",
+  FormatString = "{}"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

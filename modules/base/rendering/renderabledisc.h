@@ -25,9 +25,10 @@
 #ifndef __OPENSPACE_MODULE_BASE___RENDERABLEDISC___H__
 #define __OPENSPACE_MODULE_BASE___RENDERABLEDISC___H__
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/rendering/renderable.h>
+
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/rendering/texturecomponent.h>
 #include <openspace/util/planegeometry.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -42,7 +43,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableDisc : public Renderable {
 public:
-    RenderableDisc(const ghoul::Dictionary& dictionary);
+    explicit RenderableDisc(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;
@@ -67,7 +68,7 @@ protected:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 
-    std::unique_ptr<PlaneGeometry> _plane;
+    PlaneGeometry _plane;
     std::unique_ptr<TextureComponent> _texture;
 
 private:

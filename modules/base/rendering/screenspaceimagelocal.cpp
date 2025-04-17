@@ -55,7 +55,7 @@ namespace {
         std::optional<std::string> identifier;
 
         // [[codegen::verbatim(TexturePathInfo.description)]]
-        std::optional<std::string> texturePath;
+        std::optional<std::filesystem::path> texturePath;
     };
 #include "screenspaceimagelocal_codegen.cpp"
 } // namespace
@@ -77,7 +77,7 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
 
     _texturePath.onChange([this]() {
         if (!std::filesystem::is_regular_file(absPath(_texturePath))) {
-            LWARNINGC(
+            LERRORC(
                 "ScreenSpaceImageLocal",
                 std::format(
                     "Image '{}' did not exist for '{}'", _texturePath.value(), _identifier
@@ -91,17 +91,7 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
     addProperty(_texturePath);
 
     if (p.texturePath.has_value()) {
-        if (std::filesystem::is_regular_file(absPath(*p.texturePath))) {
-            _texturePath = absPath(*p.texturePath).string();
-        }
-        else {
-            LWARNINGC(
-                "ScreenSpaceImageLocal",
-                std::format(
-                    "Image '{}' did not exist for '{}'", *p.texturePath, _identifier
-                )
-            );
-        }
+        _texturePath = p.texturePath->string();
     }
 }
 
@@ -112,7 +102,7 @@ bool ScreenSpaceImageLocal::deinitializeGL() {
 }
 
 void ScreenSpaceImageLocal::update() {
-    if (_textureIsDirty && !_texturePath.value().empty()) {
+    if (_textureIsDirty && !_texturePath.value().empty()) [[unlikely]] {
         std::unique_ptr<ghoul::opengl::Texture> texture =
             ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath), 2);
 
@@ -137,7 +127,7 @@ void ScreenSpaceImageLocal::update() {
 }
 
 void ScreenSpaceImageLocal::bindTexture() {
-    if (_texture) {
+    if (_texture) [[likely]] {
         _texture->bind();
     }
 }

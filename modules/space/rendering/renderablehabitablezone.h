@@ -36,7 +36,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableHabitableZone : public RenderableDisc {
 public:
-    RenderableHabitableZone(const ghoul::Dictionary& dictionary);
+    explicit RenderableHabitableZone(const ghoul::Dictionary& dictionary);
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
@@ -68,7 +68,7 @@ private:
 
     glm::vec2 _conservativeBounds;
 
-    UniformCache(modelViewProjection, opacity, width, texture,
+    UniformCache(modelViewProjection, opacity, width, transferFunctionTexture,
         conservativeBounds, showOptimistic) _uniformCache;
 };
 

@@ -39,6 +39,9 @@ namespace {
         // the user
         std::string name;
 
+        // The unique identifier for the mission
+        std::optional<std::string> identifier [[codegen::identifier()]];
+
         // A description of this mission or mission phase
         std::optional<std::string> description;
 
@@ -88,6 +91,7 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _name = p.name;
+    _identifier = p.identifier.value_or(_identifier);
     _description = p.description.value_or(_description);
     _image = p.image.value_or(_image);
     _link = p.link.value_or(_link);
@@ -186,6 +190,10 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
 
 const std::string& MissionPhase::name() const {
     return _name;
+}
+
+const std::string& MissionPhase::identifier() const {
+    return _identifier;
 }
 
 const TimeRange& MissionPhase::timeRange() const {

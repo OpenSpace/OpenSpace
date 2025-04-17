@@ -1,0 +1,37 @@
+-- Basic
+-- This asset creates a scene graph node that only displays coordinate axes, with a set of
+-- multiple scales that are applied one after the other.
+
+local Node = {
+  Identifier = "MultiScale_Example",
+  Transform = {
+    Scale = {
+      Type = "MultiScale",
+      Scales = {
+        {
+          Type = "StaticScale",
+          Scale = 2.0
+        },
+        {
+          Type = "StaticScale",
+          Scale = 1.25
+        }
+      }
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "MultiScale - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

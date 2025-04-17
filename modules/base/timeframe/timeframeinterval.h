@@ -38,9 +38,9 @@ namespace documentation { struct Documentation; }
 
 class TimeFrameInterval : public TimeFrame {
 public:
-    TimeFrameInterval();
-    TimeFrameInterval(const ghoul::Dictionary& dictionary);
-    bool isActive(const Time&) const override;
+    explicit TimeFrameInterval(const ghoul::Dictionary& dictionary);
+
+    void update(const Time& time) override;
 
     static documentation::Documentation Documentation();
 

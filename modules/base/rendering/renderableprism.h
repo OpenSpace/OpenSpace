@@ -42,7 +42,7 @@ namespace documentation { struct Documentation; }
 
 class RenderablePrism : public Renderable {
 public:
-    RenderablePrism(const ghoul::Dictionary& dictionary);
+    explicit RenderablePrism(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;

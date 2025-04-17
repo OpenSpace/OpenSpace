@@ -1,0 +1,47 @@
+-- Basic
+-- This asset creates a scene graph node that only displays coordinate axes. The scale of
+-- the coordinate axes are determined by a timeline of individual scales. These scales
+-- are keyframes that are used to seamlessly change between different sizes. This example
+-- transitions between three scales over a long time span. This example will only work if
+-- the in-game time is set to January 1st, 2000.
+
+local Node = {
+  Identifier = "TimelineScale_Example",
+  Transform = {
+    Scale = {
+      Type = "TimelineScale",
+      Keyframes = {
+        -- The first timeline entry
+        ["2000 JAN 01 00:00:00"] = {
+          Type = "StaticScale",
+          Scale = 10.0
+        },
+        -- The second timeline entry
+        ["2000 JAN 01 12:00:00"] = {
+          Type = "StaticScale",
+          Scale = 0.0
+        },
+        -- The third timeline entry
+        ["2000 JAN 01 23:59:59"] = {
+          Type = "StaticScale",
+          Scale = -10.0
+        }
+      }
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "TimelineScale - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

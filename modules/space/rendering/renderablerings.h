@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 
@@ -46,7 +46,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableRings : public Renderable {
 public:
-    RenderableRings(const ghoul::Dictionary& dictionary);
+    explicit RenderableRings(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;

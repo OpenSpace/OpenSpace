@@ -27,8 +27,8 @@
 
 #include <openspace/rendering/dashboardtextitem.h>
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 
 namespace openspace {
@@ -37,10 +37,10 @@ namespace documentation { struct Documentation; }
 
 class DashboardItemSimulationIncrement : public DashboardTextItem {
 public:
-    DashboardItemSimulationIncrement(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemSimulationIncrement(const ghoul::Dictionary& dictionary);
     ~DashboardItemSimulationIncrement() override = default;
 
-    void render(glm::vec2& penPosition) override;
+    void update() override;
     glm::vec2 size() const override;
 
     static documentation::Documentation Documentation();

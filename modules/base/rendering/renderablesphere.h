@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
 #include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::opengl { class ProgramObject; }
@@ -42,7 +42,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableSphere : public Renderable {
 public:
-    RenderableSphere(const ghoul::Dictionary& dictionary);
+    explicit RenderableSphere(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;

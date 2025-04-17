@@ -28,8 +28,8 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/volume/transferfunctionproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <memory>
 #include <string>
 
@@ -44,7 +44,7 @@ class Envelope;
 
 class TransferFunctionHandler : public properties::PropertyOwner {
 public:
-    TransferFunctionHandler(properties::StringProperty prop);
+    explicit TransferFunctionHandler(properties::StringProperty prop);
 
     void initialize();
 
@@ -57,7 +57,7 @@ public:
 
     ghoul::opengl::Texture& texture();
     void uploadTexture();
-    bool hasTexture();
+    bool hasTexture() const;
 
     std::shared_ptr<openspace::TransferFunction> transferFunction();
 

@@ -39,7 +39,7 @@ namespace openspace {
 class DataPlane : public DataCygnet {
 friend class IswaBaseGroup;
 public:
-     DataPlane(const ghoul::Dictionary& dictionary);
+    explicit DataPlane(const ghoul::Dictionary& dictionary);
      ~DataPlane() = default;
 
      void initializeGL() override;

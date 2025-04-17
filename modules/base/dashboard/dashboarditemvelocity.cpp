@@ -34,8 +34,6 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/distanceconversion.h>
 #include <ghoul/font/font.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 
@@ -57,6 +55,12 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // This `DashboardItem` shows the velocity of the camera, that is how fast the camera
+    // has moved since the last frame in the amount of time it took to render that frame.
+    // The `Simplification` and `RequestedUnit` can be used to control which unit is used
+    // to display the speed. By default, `Simplification` is enabled, which means that the
+    // most natural unit, that is, the one that gives the least number of printed digits,
+    // is used.
     struct [[codegen::Dictionary(DashboardItemVelocity)]] Parameters {
         // [[codegen::verbatim(SimplificationInfo.description)]]
         std::optional<bool> simplification;
@@ -66,7 +70,6 @@ namespace {
             [[codegen::inlist(openspace::distanceUnitList())]];
     };
 #include "dashboarditemvelocity_codegen.cpp"
-
 } // namespace
 
 namespace openspace {
@@ -81,10 +84,9 @@ documentation::Documentation DashboardItemVelocity::Documentation() {
 DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _doSimplification(SimplificationInfo, true)
-    , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _requestedUnit(RequestedUnitInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    _doSimplification = p.simplification.value_or(_doSimplification);
     _doSimplification.onChange([this]() {
         _requestedUnit.setVisibility(
             _doSimplification ?
@@ -92,6 +94,7 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
             properties::Property::Visibility::User
         );
     });
+    _doSimplification = p.simplification.value_or(_doSimplification);
     addProperty(_doSimplification);
 
     for (const DistanceUnit u : DistanceUnits) {
@@ -104,20 +107,20 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
     if (p.requestedUnit.has_value()) {
         const DistanceUnit unit = distanceUnitFromString(*p.requestedUnit);
         _requestedUnit = static_cast<int>(unit);
+        _doSimplification = false;
     }
-    _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
     addProperty(_requestedUnit);
 }
 
-void DashboardItemVelocity::render(glm::vec2& penPosition) {
+void DashboardItemVelocity::update() {
     ZoneScoped;
 
     const glm::dvec3 currentPos = global::renderEngine->scene()->camera()->positionVec3();
     const glm::dvec3 dt = currentPos - _prevPosition;
+    _prevPosition = currentPos;
+
     const double speedPerFrame = glm::length(dt);
-
     const double secondsPerFrame = global::windowDelegate->averageDeltaTime();
-
     const double speedPerSecond = speedPerFrame / secondsPerFrame;
 
     std::pair<double, std::string_view> dist;
@@ -130,14 +133,7 @@ void DashboardItemVelocity::render(glm::vec2& penPosition) {
         dist = std::pair(convertedD, nameForDistanceUnit(unit, convertedD != 1.0));
     }
 
-    penPosition.y -= _font->height();
-    RenderFont(
-        *_font,
-        penPosition,
-        std::format("Camera velocity: {:.4f} {}/s", dist.first, dist.second)
-    );
-
-    _prevPosition = currentPos;
+    _buffer = std::format("Camera velocity: {:.4f} {}/s", dist.first, dist.second);
 }
 
 glm::vec2 DashboardItemVelocity::size() const {

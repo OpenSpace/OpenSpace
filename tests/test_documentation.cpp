@@ -858,7 +858,7 @@ TEST_CASE("Documentation: Optional", "[documentation]") {
     const Documentation doc = {
         .entries = {
             { "Bool_Force", new BoolVerifier },
-            { "Bool_Optional", new BoolVerifier }
+            { "Bool_Optional", new BoolVerifier, Optional::Yes }
         }
     };
 
@@ -907,7 +907,10 @@ TEST_CASE("Documentation: Required In Optional", "[documentation]") {
         .entries = {
             {
                 "a",
-                new TableVerifier({{ "b", new IntVerifier }, { "c", new IntVerifier }}),
+                new TableVerifier({
+                    { "b", new IntVerifier },
+                    { "c", new IntVerifier, Optional::Yes }
+                }),
                 Optional::Yes
             }
         }
@@ -2132,7 +2135,7 @@ TEST_CASE("Documentation: OrOperator", "[documentation]") {
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
     CHECK(negativeRes.offenses[0].offender == "a");
-    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: IntVector2Verifier", "[documentation]") {

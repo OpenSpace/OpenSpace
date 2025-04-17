@@ -27,7 +27,7 @@
 
 #include <modules/iswa/rendering/datacygnet.h>
 
-#include <openspace/properties/selectionproperty.h>
+#include <openspace/properties/misc/selectionproperty.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
@@ -41,7 +41,7 @@ namespace openspace {
  */
 class KameleonPlane : public DataCygnet {
 public:
-    KameleonPlane(const ghoul::Dictionary& dictionary);
+    explicit KameleonPlane(const ghoul::Dictionary& dictionary);
     ~KameleonPlane();
 
      void initializeGL() override;

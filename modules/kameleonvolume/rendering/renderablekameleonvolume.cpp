@@ -191,7 +191,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     , _domainScale(DomainScaleInfo, glm::vec3(1.f))
     , _lowerValueBound(LowerValueBoundInfo, 0.f, 0.f, 1.f)
     , _upperValueBound(UpperValueBoundInfo, 1.f, 0.01f, 1.f)
-    , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _gridType(GridTypeInfo)
     , _stepSize(StepSizeInfo, 0.02f, 0.01f, 1.f)
     , _sourcePath(SourcePathInfo)
     , _transferFunctionPath(TransferFunctionInfo)

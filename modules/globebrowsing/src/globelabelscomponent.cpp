@@ -280,10 +280,7 @@ GlobeLabelsComponent::GlobeLabelsComponent()
     , _fadeOutEnabled(FadeOutEnabledInfo, false)
     , _disableCulling(DisableCullingInfo, false)
     , _distanceEPS(DistanceEPSInfo, 100000.f, 1000.f, 10000000.f)
-    , _alignmentOption(
-        AlignmentOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _alignmentOption(AlignmentOptionInfo)
 {
     addProperty(_enabled);
     addProperty(_color);
@@ -322,7 +319,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
         return;
     }
 
-    const bool loadSuccess = loadLabelsData(absPath(*p.fileName));
+    const bool loadSuccess = loadLabelsData(*p.fileName);
     if (!loadSuccess) {
         return;
     }

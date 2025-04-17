@@ -83,11 +83,12 @@ namespace {
 namespace openspace {
 
 documentation::Documentation TimeDependentScale::Documentation() {
-    return codegen::doc<Parameters>("base_scale_timedependent");
+    return codegen::doc<Parameters>("base_transform_scale_timedependent");
 }
 
 TimeDependentScale::TimeDependentScale(const ghoul::Dictionary& dictionary)
-    : _referenceDate(ReferenceDateInfo, "")
+    : Scale(dictionary)
+    , _referenceDate(ReferenceDateInfo, "")
     , _speed(SpeedInfo, 1.0, 0.0, 1e12)
     , _clampToPositive(ClampToPositiveInfo, true)
 {
@@ -105,7 +106,7 @@ TimeDependentScale::TimeDependentScale(const ghoul::Dictionary& dictionary)
 }
 
 glm::dvec3 TimeDependentScale::scaleValue(const UpdateData& data) const {
-    if (_cachedReferenceDirty) {
+    if (_cachedReferenceDirty) [[unlikely]] {
         _cachedReference = Time::convertTime(_referenceDate);
         _cachedReferenceDirty = false;
     }

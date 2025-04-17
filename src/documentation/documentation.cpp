@@ -25,6 +25,7 @@
 #include <openspace/documentation/documentation.h>
 
 #include <openspace/documentation/verifier.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <algorithm>
 #include <set>
@@ -110,7 +111,7 @@ std::string to_string(const openspace::documentation::TestResult::Offense::Reaso
         case openspace::documentation::TestResult::Offense::Reason::MissingKey:
             return "Missing key";
         case openspace::documentation::TestResult::Offense::Reason::UnknownIdentifier:
-            return "Unknown identifier";
+            return "Unknown documentation identifier";
         case openspace::documentation::TestResult::Offense::Reason::Verification:
             return "Verification failed";
         case openspace::documentation::TestResult::Offense::Reason::WrongType:

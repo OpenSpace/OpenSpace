@@ -41,7 +41,7 @@ template <typename T> struct Job;
 template<typename P>
 class ConcurrentJobManager {
 public:
-    ConcurrentJobManager(ThreadPool pool);
+    explicit ConcurrentJobManager(ThreadPool pool);
 
     void enqueueJob(std::shared_ptr<Job<P>> job);
 

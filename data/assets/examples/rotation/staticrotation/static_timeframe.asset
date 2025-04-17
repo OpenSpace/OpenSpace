@@ -1,0 +1,34 @@
+-- Time Frame
+-- This asset creates a rotation that is only applied between 2000 JAN 01 and just prior
+-- to 2002 JAN 01. The rotation of the coordinate axes shown by this scene graph node are
+-- determined by a constant and unchanging static rotation.
+
+local Node = {
+  Identifier = "StaticRotation_Example_TimeFrame",
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { math.pi / 2.0, 0.0, math.pi },
+      TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2000 JAN 01",
+        End = "2002 JAN 01"
+      }
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "StaticRotation - Time Frame",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

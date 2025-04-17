@@ -101,7 +101,7 @@ bool ScreenSpaceDashboard::initializeGL() {
     ScreenSpaceFramebuffer::initializeGL();
 
     addRenderFunction([this]() {
-        glm::vec2 penPosition = glm::vec2(0.f, _size.value().w);
+        glm::vec2 penPosition = glm::vec2(0.f, _size.value().x);
 
         if (_useMainDashboard) {
             global::dashboard->render(penPosition);
@@ -112,14 +112,6 @@ bool ScreenSpaceDashboard::initializeGL() {
     });
 
     return true;
-}
-
-bool ScreenSpaceDashboard::deinitializeGL() {
-    return ScreenSpaceFramebuffer::deinitializeGL();
-}
-
-bool ScreenSpaceDashboard::isReady() const {
-    return ScreenSpaceFramebuffer::isReady();
 }
 
 void ScreenSpaceDashboard::update() {

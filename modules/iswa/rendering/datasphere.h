@@ -38,7 +38,7 @@ class Sphere;
  */
 class DataSphere : public DataCygnet {
 public:
-    DataSphere(const ghoul::Dictionary& dictionary);
+    explicit DataSphere(const ghoul::Dictionary& dictionary);
     ~DataSphere();
 
      void initializeGL() override;

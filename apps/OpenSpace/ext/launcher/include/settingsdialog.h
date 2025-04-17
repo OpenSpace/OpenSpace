@@ -38,7 +38,7 @@ class QLineEdit;
 class SettingsDialog : public QDialog {
 Q_OBJECT
 public:
-    SettingsDialog(openspace::Settings settings,
+    explicit SettingsDialog(openspace::Settings settings,
         QWidget* parent = nullptr);
 
 signals:

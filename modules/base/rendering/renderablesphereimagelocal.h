@@ -40,7 +40,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableSphereImageLocal : public RenderableSphere {
 public:
-    RenderableSphereImageLocal(const ghoul::Dictionary& dictionary);
+    explicit RenderableSphereImageLocal(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;

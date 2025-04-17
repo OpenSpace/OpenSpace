@@ -27,8 +27,8 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/list/stringlistproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <ghoul/misc/process.h>
@@ -44,6 +44,7 @@ public:
     using EndpointCallback = std::function<void(const std::string&, bool)>;
 
     static constexpr const char* Name = "WebGui";
+
     WebGuiModule();
     int port() const;
     std::string address() const;

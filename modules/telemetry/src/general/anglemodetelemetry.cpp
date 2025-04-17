@@ -26,6 +26,7 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "AngleModeTelemetry";

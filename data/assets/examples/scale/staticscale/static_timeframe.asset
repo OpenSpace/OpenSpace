@@ -1,0 +1,36 @@
+-- Time Frame
+-- This asset creates a scale that is only applied between 2000 JAN 01 and just prior to
+-- 2002 JAN 01. The coordinate axes of this scene graph node normally have a length of 1
+-- meter and are scaled in this example by a factor of 149597870700, which means they
+-- will be 149597870700 m (1 AU) long, thus reaching the same distance as Earth's orbit
+-- around the Sun.
+
+local Node = {
+  Identifier = "StaticScale_TimeFrame",
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 149597870700,
+      TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2000 JAN 01",
+        End = "2002 JAN 01"
+      }
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "StaticScale - TimeFrame",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

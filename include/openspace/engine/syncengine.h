@@ -48,7 +48,7 @@ public:
      *
      * \pre syncBufferSize must be bigger than 0
      */
-    SyncEngine(unsigned int syncBufferSize);
+    explicit SyncEngine(unsigned int syncBufferSize);
 
     /**
      * Encodes all added Syncables in the injected `SyncBuffer`. This method is only

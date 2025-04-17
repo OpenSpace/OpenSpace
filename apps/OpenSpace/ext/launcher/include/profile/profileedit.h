@@ -52,9 +52,8 @@ public:
      * \param profileBasePath The path to the folder in which all profiles live
      * \param parent Pointer to parent Qt widget
      */
-    ProfileEdit(openspace::Profile& profile, const std::string& profileName,
+    ProfileEdit(openspace::Profile& profile, std::string profileName,
         std::filesystem::path assetBasePath, std::filesystem::path userAssetBasePath,
-        std::filesystem::path builtInProfileBasePath,
         std::filesystem::path profileBasePath, QWidget* parent);
 
     /**
@@ -87,21 +86,21 @@ signals:
     void raiseExitWindow();
 
 private slots:
-    void duplicateProfile();
-    void openMeta();
     void openProperties();
-    void openModules();
-    void openKeybindings();
     void openAssets();
-    void openTime();
-    void openAddedScripts();
+    void openKeybindings();
+    void openMeta();
+    void openMarkNodes();
     void openDeltaTimes();
     void openCamera();
-    void openMarkNodes();
+    void openTime();
+    void openModules();
+    void openUiPanels();
+    void openAddedScripts();
     void approved();
 
 private:
-    void createWidgets(const std::string& profileName);
+    void createWidgets();
     void initSummaryTextForEachCategory();
 
     openspace::Profile& _profile;
@@ -111,19 +110,22 @@ private:
     const std::filesystem::path _builtInProfilesPath;
     bool _saveSelected = false;
 
+    std::string _profileFilename;
+
     QLineEdit* _profileEdit = nullptr;
-    QLabel* _modulesLabel = nullptr;
-    QLabel* _assetsLabel = nullptr;
-    QTextEdit* _assetsEdit = nullptr;
     QLabel* _propertiesLabel = nullptr;
     QTextEdit* _propertiesEdit = nullptr;
+    QLabel* _assetsLabel = nullptr;
+    QTextEdit* _assetsEdit = nullptr;
     QLabel* _keybindingsLabel = nullptr;
     QTextEdit* _keybindingsEdit = nullptr;
-    QLabel* _deltaTimesLabel = nullptr;
+    QLabel* _metaLabel = nullptr;
     QLabel* _interestingNodesLabel = nullptr;
+    QLabel* _deltaTimesLabel = nullptr;
     QLabel* _cameraLabel = nullptr;
     QLabel* _timeLabel = nullptr;
-    QLabel* _metaLabel = nullptr;
+    QLabel* _modulesLabel = nullptr;
+    QLabel* _uiPanelVisibilityLabel = nullptr;
     QLabel* _additionalScriptsLabel = nullptr;
 };
 

@@ -106,10 +106,7 @@ namespace openspace {
 
 NodesTelemetry::NodesTelemetry(const std::string& ip, int port)
     : TelemetryBase(NodesTelemetryInfo, ip, port)
-    , _distanceUnitOption(
-        DistanceUnitInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _distanceUnitOption(DistanceUnitInfo)
     , _precisionProperties(NodesTelemetry::PrecisionProperties(PrecisionInfo))
 {
     for (int i = 0; i < DistanceUnitNames.size(); ++i) {

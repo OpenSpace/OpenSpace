@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 
-#include <openspace/properties/vector/vec4property.h>
+#include <openspace/properties/vector/vec2property.h>
 
 namespace ghoul::opengl {
     class FramebufferObject;
@@ -48,7 +48,7 @@ class ScreenSpaceFramebuffer : public ScreenSpaceRenderable {
 public:
     using RenderFunction = std::function<void()>;
 
-    ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary = ghoul::Dictionary());
+    explicit ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary);
     virtual ~ScreenSpaceFramebuffer() override;
 
     bool initializeGL() override;
@@ -56,7 +56,7 @@ public:
     void render(const RenderData& renderData) override;
     bool isReady() const override;
 
-    void setSize(glm::vec4 size);
+    void setSize(glm::vec2 size);
     void addRenderFunction(RenderFunction renderFunction);
     void removeAllRenderFunctions();
 
@@ -64,7 +64,7 @@ public:
 
 protected:
     void createFramebuffer();
-    properties::Vec4Property _size;
+    properties::Vec2Property _size;
 
 private:
     void bindTexture() override;

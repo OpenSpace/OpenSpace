@@ -93,7 +93,9 @@ void MilkywayPointsConversionTask::perform(const Task::ProgressCallback& progres
 documentation::Documentation MilkywayPointsConversionTask::Documentation() {
     return {
         "MilkywayPointsConversionTask",
-        "galaxy_milkywaypointsconversiontask"
+        "galaxy_milkywaypointsconversiontask",
+        "",
+        {}
     };
 }
 

@@ -32,7 +32,6 @@
 #include <modules/telemetry/include/specific/planetscomparesonification.h>
 #include <modules/telemetry/include/specific/planetsoverviewsonification.h>
 #include <modules/telemetry/include/specific/planetssonification.h>
-#include <ghoul/logging/logmanager.h>
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
@@ -40,6 +39,8 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scripting/lualibrary.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "TelemetryModule";
@@ -121,10 +122,7 @@ TelemetryModule::TelemetryModule()
     , _enabled(EnabledInfo, false)
     , _ipAddress(IpAddressInfo, DefaultSuperColliderIp.data())
     , _port(PortInfo, DefaultSuperColliderPort, 1025, 65536)
-    , _modeOptions(
-        AngleCalculationModeInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _modeOptions(AngleCalculationModeInfo)
     , _includeElevationAngle(IncludeElevationAngleInfo, false)
 {
     addProperty(_enabled);

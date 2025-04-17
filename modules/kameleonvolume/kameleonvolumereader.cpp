@@ -54,8 +54,6 @@
 #endif // WIN32
 
 namespace {
-    constexpr std::string_view _loggerCat = "KameleonVolumeReader";
-
     template <typename T>
     T globalAttribute(ccmc::Model&, const std::string&) {
         static_assert(sizeof(T) == 0);

@@ -40,7 +40,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableTimeVaryingSphere : public RenderableSphere {
 public:
-    RenderableTimeVaryingSphere(const ghoul::Dictionary& dictionary);
+    explicit RenderableTimeVaryingSphere(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;

@@ -32,8 +32,7 @@ namespace openspace {
 
 class BoxGeometry {
 public:
-    // initializers
-    BoxGeometry(glm::vec3 size);
+    explicit BoxGeometry(glm::vec3 size);
     ~BoxGeometry();
 
     bool initialize();

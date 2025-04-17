@@ -29,6 +29,7 @@
 
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/constexpr.h>
+#include <algorithm>
 #include <array>
 #include <string>
 #include <utility>
@@ -62,7 +63,8 @@ enum class DistanceUnit {
     Chain,
     Furlong,
     Mile,
-    League
+    League,
+    NauticalMile
 };
 
 struct DistanceUnitName {
@@ -71,7 +73,7 @@ struct DistanceUnitName {
     std::string_view abbreviation;
 };
 
-constexpr std::array<DistanceUnit, static_cast<int>(DistanceUnit::League) + 1>
+constexpr std::array<DistanceUnit, static_cast<int>(DistanceUnit::NauticalMile) + 1>
 DistanceUnits = {
     DistanceUnit::Nanometer, DistanceUnit::Micrometer, DistanceUnit::Millimeter,
     DistanceUnit::Centimeter, DistanceUnit::Decimeter, DistanceUnit::Meter,
@@ -80,12 +82,14 @@ DistanceUnits = {
     DistanceUnit::Parsec, DistanceUnit::Kiloparsec, DistanceUnit::Megaparsec,
     DistanceUnit::Gigaparsec, DistanceUnit::Gigalightyear, DistanceUnit::Thou,
     DistanceUnit::Inch, DistanceUnit::Foot, DistanceUnit::Yard, DistanceUnit::Chain,
-    DistanceUnit::Furlong, DistanceUnit::Mile, DistanceUnit::League
+    DistanceUnit::Furlong, DistanceUnit::Mile, DistanceUnit::League,
+    DistanceUnit::NauticalMile
 };
 
-// Note that the syntax here is required when initializing constexpr std::arrays with structs
-constexpr std::array<DistanceUnitName, static_cast<int>(DistanceUnit::League) + 1>
-DistanceUnitNames {{
+// Note that the syntax here is required when initializing constexpr std::arrays with
+// structs
+constexpr std::array<DistanceUnitName, static_cast<int>(DistanceUnit::NauticalMile) + 1>
+DistanceUnitNames { {
     { "Nanometer", "Nanometers", "nm" },
     { "Micrometer", "Micrometers", "um" },
     { "Millimeter", "Millimeters", "mm" },
@@ -110,7 +114,8 @@ DistanceUnitNames {{
     { "Chain", "Chains", "ch" },
     { "Furlong", "Furlongs", "fur" },
     { "Mile", "Miles", "mi" },
-    { "League", "Leagues", "league"}
+    { "League", "Leagues", "league" },
+    { "Nautical Mile", "Nautical Miles", "NM" }
 }};
 
 constexpr bool isValidDistanceUnitName(std::string_view name) {
@@ -125,7 +130,8 @@ constexpr bool isValidDistanceUnitName(std::string_view name) {
     return false;
 }
 
-constexpr std::string_view nameForDistanceUnit(DistanceUnit unit, bool usePluralForm = false)
+constexpr std::string_view nameForDistanceUnit(DistanceUnit unit,
+                                               bool usePluralForm = false)
 {
     const DistanceUnitName unitName = DistanceUnitNames[static_cast<int>(unit)];
     return usePluralForm ? unitName.plural : unitName.singular;
@@ -218,6 +224,8 @@ constexpr double convertMeters(double meters, DistanceUnit requestedUnit) {
             return meters / distanceconstants::Mile;
         case DistanceUnit::League:
             return meters / (3.0 * distanceconstants::Mile);
+        case DistanceUnit::NauticalMile:
+            return meters / distanceconstants::NauticalMile;
         default:
             throw ghoul::MissingCaseException();
     }
@@ -275,6 +283,8 @@ constexpr double toMeter(DistanceUnit unit) {
             return distanceconstants::Mile;
         case DistanceUnit::League:
             return 3.0 * distanceconstants::Mile;
+        case DistanceUnit::NauticalMile:
+            return distanceconstants::NauticalMile;
         default:
             throw ghoul::MissingCaseException();
     }

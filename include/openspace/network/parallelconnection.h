@@ -75,7 +75,7 @@ public:
         bool shouldLogError;
     };
 
-    ParallelConnection(std::unique_ptr<ghoul::io::TcpSocket> socket);
+    explicit ParallelConnection(std::unique_ptr<ghoul::io::TcpSocket> socket);
 
     bool isConnectedOrConnecting() const;
     void sendDataMessage(const ParallelConnection::DataMessage& dataMessage);

@@ -39,10 +39,16 @@ public:
         glm::dvec2 maxValue = glm::dvec2(std::numeric_limits<double>::max()),
         glm::dvec2 stepValue = glm::dvec2(0.01));
 
-    std::string_view className() const override;
-    int typeLua() const override;
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
+    void getLuaValue(lua_State* state) const override final;
+
+    std::string stringValue() const override final;
     using TemplateProperty<glm::dvec2>::operator=;
+
+private:
+    glm::dvec2 toValue(lua_State* state) const override final;
 };
 
 } // namespace openspace::properties

@@ -24,6 +24,7 @@
 
 #include <openspace/properties/matrix/mat2property.h>
 
+#include <openspace/util/json_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 
@@ -45,8 +46,20 @@ std::string_view Mat2Property::className() const {
     return "Mat2Property";
 }
 
-int Mat2Property::typeLua() const {
-    return LUA_TTABLE;
+ghoul::lua::LuaTypes Mat2Property::typeLua() const {
+    return ghoul::lua::LuaTypes::Table;
+}
+
+void Mat2Property::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
+glm::mat2 Mat2Property::toValue(lua_State* state) const {
+    return ghoul::lua::value<glm::mat2>(state);
+}
+
+std::string Mat2Property::stringValue() const {
+    return formatJson(_value);
 }
 
 }  // namespace openspace::properties

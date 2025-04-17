@@ -36,7 +36,7 @@ class RawVolume {
 public:
     using VoxelType = Type;
 
-    RawVolume(const glm::uvec3& dimensions);
+    explicit RawVolume(const glm::uvec3& dimensions);
 
     glm::uvec3 dimensions() const;
     void setDimensions(const glm::uvec3& dimensions);

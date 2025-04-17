@@ -37,7 +37,7 @@ namespace documentation { struct Documentation; }
 
 class ScreenSpaceSpout : public ScreenSpaceRenderable {
 public:
-    ScreenSpaceSpout(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceSpout(const ghoul::Dictionary& dictionary);
 
     bool deinitializeGL() override;
 

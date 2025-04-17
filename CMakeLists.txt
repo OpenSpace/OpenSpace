@@ -27,6 +27,12 @@ cmake_policy(VERSION 3.25)
 
 project(OpenSpace)
 
+# CMake 4.0 will no longer allow minimum required version below 3.5 and some of our
+# dependencies have not been updated to reflect this. To make things work, we blanked
+# require to 3.10 here to remove those issues. Once CMake configures and generates
+# successfully without this next line, it can be removed
+set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
+
 set(OPENSPACE_RELEASE_BUILD OFF)
 set(OPENSPACE_VERSION_MAJOR)
 set(OPENSPACE_VERSION_MINOR)
@@ -88,6 +94,8 @@ execute_process(
   OUTPUT_VARIABLE OPENSPACE_GIT_COMMIT
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
+
+option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
 
 if (MSVC)
   option(OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION "Raise exceptions when encountering Inf's or Nan's in floating point numbers" OFF)
@@ -193,7 +201,6 @@ if (MSVC AND TARGET OpenSpace)
 endif ()
 
 
-option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
 if (OPENSPACE_HAVE_TESTS)
   add_subdirectory(support/coding/codegen/tests)
   set_target_properties(run_test_codegen PROPERTIES FOLDER "Unit Tests/support")

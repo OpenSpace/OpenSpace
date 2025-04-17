@@ -27,9 +27,9 @@
 
 #include <openspace/scene/scale.h>
 
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
-#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
 
@@ -37,7 +37,8 @@ namespace documentation { struct Documentation; }
 
 class TimeDependentScale : public Scale {
 public:
-    TimeDependentScale(const ghoul::Dictionary& dictionary);
+    explicit TimeDependentScale(const ghoul::Dictionary& dictionary);
+
     glm::dvec3 scaleValue(const UpdateData& data) const override;
 
     static documentation::Documentation Documentation();

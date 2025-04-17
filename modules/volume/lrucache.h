@@ -38,7 +38,7 @@ template<
 >
 class LruCache {
 public:
-    LruCache(size_t capacity);
+    explicit LruCache(size_t capacity);
 
     bool has(const KeyType& key);
     void set(const KeyType& key, ValueType value);

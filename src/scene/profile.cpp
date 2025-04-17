@@ -26,6 +26,7 @@
 
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
+#include <openspace/json.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/scripting/lualibrary.h>
@@ -43,7 +44,6 @@
 #include <ctime>
 #include <filesystem>
 #include <set>
-#include <json/json.hpp>
 
 #include "profile_lua.inl"
 
@@ -623,6 +623,15 @@ void convertVersion12to13(nlohmann::json& profile) {
 
 } // namespace version12
 
+namespace version13 {
+
+void convertVersion13to14(nlohmann::json& profile) {
+    // Version 1.4 introduced the ui panel view
+    profile["version"] = Profile::Version{ 1, 4 };
+}
+
+} // namespace version13
+
 Profile::ParsingError::ParsingError(Severity severity_, std::string msg)
     : ghoul::RuntimeError(std::move(msg), "profile")
     , severity(severity_)
@@ -737,6 +746,9 @@ std::string Profile::serialize() const {
     if (!additionalScripts.empty()) {
         r["additional_scripts"] = additionalScripts;
     }
+    if (!uiPanelVisibility.empty()) {
+        r["panel_visibility"] = uiPanelVisibility;
+    }
 
     return r.dump(2);
 }
@@ -776,6 +788,11 @@ Profile::Profile(const std::filesystem::path& path) {
 
         if (version.major == 1 && version.minor == 2) {
             version12::convertVersion12to13(profile);
+            profile["version"].get_to(version);
+        }
+
+        if (version.major == 1 && version.minor == 3) {
+            version13::convertVersion13to14(profile);
             profile["version"].get_to(version);
         }
 
@@ -826,6 +843,9 @@ Profile::Profile(const std::filesystem::path& path) {
         }
         if (profile.find("additional_scripts") != profile.end()) {
             profile["additional_scripts"].get_to(additionalScripts);
+        }
+        if (profile.find("panel_visibility") != profile.end()) {
+            profile["panel_visibility"].get_to(uiPanelVisibility);
         }
     }
     catch (const nlohmann::json::exception& e) {

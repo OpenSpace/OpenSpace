@@ -94,10 +94,7 @@ namespace openspace {
 
 CameraTelemetry::CameraTelemetry(const std::string& ip, int port)
     : TelemetryBase(CameraTelemetryInfo, ip, port)
-    , _cameraSpeedDistanceUnitOption(
-        CameraSpeedDistanceUnitInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _cameraSpeedDistanceUnitOption(CameraSpeedDistanceUnitInfo)
     , _precisionProperties(CameraTelemetry::PrecisionProperties(PrecisionInfo))
 {
     for (int i = 0; i < DistanceUnitNames.size(); ++i) {

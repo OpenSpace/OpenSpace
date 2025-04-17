@@ -27,8 +27,8 @@
 
 #include <openspace/rendering/dashboardtextitem.h>
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <utility>
 
 namespace openspace {
@@ -39,10 +39,10 @@ namespace documentation { struct Documentation; }
 
 class DashboardItemAngle : public DashboardTextItem {
 public:
-    DashboardItemAngle(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemAngle(const ghoul::Dictionary& dictionary);
     ~DashboardItemAngle() override = default;
 
-    void render(glm::vec2& penPosition) override;
+    void update() override;
 
     glm::vec2 size() const override;
 
@@ -51,7 +51,7 @@ public:
 private:
     struct Component {
         properties::OptionProperty type;
-        properties::StringProperty nodeName;
+        properties::StringProperty nodeIdentifier;
         SceneGraphNode* node;
     };
 
@@ -61,7 +61,7 @@ private:
     Component _reference;
     Component _destination;
 
-    std::vector<char> _buffer;
+    std::vector<char> _localBuffer;
 };
 
 } // namespace openspace

@@ -53,6 +53,7 @@
 #include <ghoul/io/socket/tcpsocketserver.h>
 #include <ghoul/io/socket/websocketserver.h>
 #include <ghoul/misc/profiling.h>
+#include <include/topics/profiletopic.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "ServerModule: Connection";
@@ -97,6 +98,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
     _topicFactory.registerClass<GetPropertyTopic>("get");
     _topicFactory.registerClass<LuaScriptTopic>("luascript");
     _topicFactory.registerClass<MissionTopic>("missions");
+    _topicFactory.registerClass<ProfileTopic>("profile");
     _topicFactory.registerClass<SessionRecordingTopic>("sessionRecording");
     _topicFactory.registerClass<SetPropertyTopic>("set");
     _topicFactory.registerClass<ShortcutTopic>("shortcuts");
@@ -165,7 +167,7 @@ void Connection::handleJson(const nlohmann::json& json) {
     }
 
     // The topic id may be an already discussed topic, or a new one.
-    const TopicId topicId = *topicJson;
+    const TopicId topicId = topicJson->get<TopicId>();
     auto topicIt = _topics.find(topicId);
 
     if (topicIt == _topics.end()) {
@@ -177,7 +179,7 @@ void Connection::handleJson(const nlohmann::json& json) {
             LERROR("Type must be specified as a string when a new topic is initialized");
             return;
         }
-        const std::string type = *typeJson;
+        const std::string type = typeJson->get<std::string>();
         ZoneText(type.c_str(), type.size());
 
         if (!isAuthorized() && (type != "authorize")) {

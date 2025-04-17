@@ -27,11 +27,11 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/glm.h>
 #include <optional>
@@ -45,6 +45,7 @@ class RenderableGlobe;
 
 struct GeoJsonProperties : public properties::PropertyOwner {
     GeoJsonProperties();
+
     void createFromDictionary(const ghoul::Dictionary& dictionary,
         const RenderableGlobe& globe);
 

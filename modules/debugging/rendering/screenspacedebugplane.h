@@ -33,7 +33,7 @@ namespace openspace {
 
 class ScreenSpaceDebugPlane : public ScreenSpaceRenderable {
 public:
-    ScreenSpaceDebugPlane(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceDebugPlane(const ghoul::Dictionary& dictionary);
 
     static documentation::Documentation Documentation();
 

@@ -24,6 +24,7 @@
 
 #include <openspace/properties/vector/dvec2property.h>
 
+#include <openspace/util/json_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 
@@ -45,8 +46,20 @@ std::string_view DVec2Property::className() const {
     return "DVec2Property";
 }
 
-int DVec2Property::typeLua() const {
-    return LUA_TTABLE;
+ghoul::lua::LuaTypes DVec2Property::typeLua() const {
+    return ghoul::lua::LuaTypes::Table;
+}
+
+void DVec2Property::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
+glm::dvec2 DVec2Property::toValue(lua_State* state) const {
+    return ghoul::lua::value<glm::dvec2>(state);
+}
+
+std::string DVec2Property::stringValue() const {
+    return formatJson(_value);
 }
 
 } // namespace openspace::properties

@@ -39,10 +39,16 @@ public:
         glm::ivec2 maxValue = glm::ivec2(std::numeric_limits<int>::max()),
         glm::ivec2 stepValue = glm::ivec2(1));
 
-    std::string_view className() const override;
-    int typeLua() const override;
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
+    void getLuaValue(lua_State* state) const override final;
+
+    std::string stringValue() const override final;
     using TemplateProperty<glm::ivec2>::operator=;
+
+private:
+    glm::ivec2 toValue(lua_State* state) const override final;
 };
 
 } // namespace openspace::properties

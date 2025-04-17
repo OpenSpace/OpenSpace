@@ -28,6 +28,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/memorymanager.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "PlanetsCompareSonification";
@@ -153,8 +154,8 @@ PlanetsCompareSonification::PlanetsCompareSonification(const std::string& ip, in
     : TelemetryBase(PlanetsCompareSonificationInfo, ip, port)
     , _selectedUpscale(SelectedUpscaleInfo, 2000.0, 0.0, 1.0e+20)
     , _selectedScaleInterpolationTime(SelectedScaleInterpolationTimeInfo, 1.0, 0.0, 60.0)
-    , _firstPlanet(FirstOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _secondPlanet(SecondOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _firstPlanet(FirstOptionInfo)
+    , _secondPlanet(SecondOptionInfo)
     , _toggleAll(ToggleAllInfo, false)
     , _sizeDayEnabled(SizeDayInfo, false)
     , _gravityEnabled(GravityInfo, false)

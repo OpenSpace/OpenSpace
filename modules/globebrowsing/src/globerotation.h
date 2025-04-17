@@ -27,7 +27,7 @@
 
 #include <openspace/scene/rotation.h>
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 
@@ -37,7 +37,7 @@ class RenderableGlobe;
 
 class GlobeRotation : public Rotation {
 public:
-    GlobeRotation(const ghoul::Dictionary& dictionary);
+    explicit GlobeRotation(const ghoul::Dictionary& dictionary);
 
     void update(const UpdateData& data) override;
     glm::dmat3 matrix(const UpdateData& data) const override;

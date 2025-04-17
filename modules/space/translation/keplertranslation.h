@@ -58,7 +58,7 @@ public:
      * \param dictionary The ghoul::Dictionary containing all the information about the
      *        Keplerian elements (see Documentation)
      */
-    KeplerTranslation(const ghoul::Dictionary& dictionary);
+    explicit KeplerTranslation(const ghoul::Dictionary& dictionary);
 
     /// Default destructor
     ~KeplerTranslation() override = default;
@@ -120,11 +120,6 @@ public:
     void setKeplerElements(double eccentricity, double semiMajorAxis, double inclination,
         double ascendingNode, double argumentOfPeriapsis, double meanAnomalyAtEpoch,
         double orbitalPeriod, double epoch);
-
-    /**
-     * Default construct that initializes all the properties and member variables.
-     */
-    KeplerTranslation();
 
     /**
      * Recombutes the rotation matrix used in the update method.

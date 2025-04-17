@@ -17,7 +17,7 @@ local SunRadius = 695700000
 -- Fieldlies from binaries
 local Fieldlines = {
   Identifier = "MAS-MHD-Fieldlines-bastille-day-2000",
-  Parent = heliosphereTransforms.HEEQ180ReferenceFrame.Identifier,
+  Parent = heliosphereTransforms.HeliocentricEarthEquatorial180.Identifier,
   -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
   -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
   InteractionSphere = 1 / SunRadius,

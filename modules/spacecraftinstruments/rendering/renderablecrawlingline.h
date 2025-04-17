@@ -36,7 +36,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableCrawlingLine : public Renderable {
 public:
-    RenderableCrawlingLine(const ghoul::Dictionary& dictionary);
+    explicit RenderableCrawlingLine(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;

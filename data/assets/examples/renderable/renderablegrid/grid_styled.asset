@@ -1,0 +1,24 @@
+-- Styled
+-- This example adds a planar grid of 100x100 meters, with a custom color and line width.
+
+local Node = {
+  Identifier = "RenderableGrid_Example_Styled",
+  Renderable = {
+    Type = "RenderableGrid",
+    Size = { 100.0, 100.0 },
+    Color = { 0.0, 1.0, 0.0 },
+    LineWidth = 2.0
+  },
+  GUI = {
+    Name = "RenderableGrid - Styled",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

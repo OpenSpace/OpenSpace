@@ -39,6 +39,7 @@
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace {
@@ -193,6 +194,15 @@ namespace {
         openspace::properties::Property::Visibility::Hidden
     };
 
+    constexpr openspace::properties::Property::PropertyInfo GuiFocusableInfo = {
+        "Focusable",
+        "Focusable Hint",
+        "This value serves as a hint to determine if it makes sense to focus the camera "
+        "on this scene graph node. It only serves as a hint and does not actually "
+        "prevent the focussing. The default value is `true`.",
+        openspace::properties::Property::Visibility::Hidden
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ShowDebugSphereInfo = {
         "ShowDebugSphere",
         "Show Debug Sphere",
@@ -264,12 +274,14 @@ namespace {
             // all its children. Depending on the 'Type' of the scaling, this can either
             // be a static scaling or a time-varying one
             std::optional<ghoul::Dictionary> scale
-                [[codegen::reference("core_transform_scaling")]];
+                [[codegen::reference("core_transform_scale")]];
         };
 
         // This describes a set of transformations that are applied to this scene graph
         // node and all of its children. There are only three possible values
-        // corresponding to a 'Translation', a 'Rotation', and a 'Scale'
+        // corresponding to a 'Translation', a 'Rotation', and a 'Scale'. The combined
+        // transformation will be computed by first applying the 'Scale', followed by the
+        // 'Rotation', and then the 'Translation'.
         std::optional<Transform> transform;
 
         // This value is a multiplication factor for the interaction sphere that
@@ -327,6 +339,9 @@ namespace {
             // scene graph node. This is most useful to trim collective lists of nodes and
             // not display, for example, barycenters
             std::optional<bool> hidden;
+
+            // [[codegen::verbatim(GuiFocusableInfo.description)]]
+            std::optional<bool> focusable;
 
             // If this value is specified, the scene graph node will be ordered in
             // relation to its neighbors in the GUI based on this value, so that nodes
@@ -394,6 +409,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         if (p.gui->orderingNumber.has_value()) {
             result->_guiOrderingNumber = *p.gui->orderingNumber;
         }
+        result->_guiFocusable = p.gui->focusable.value_or(result->_guiFocusable);
     }
 
     result->_boundingSphere = p.boundingSphere.value_or(result->_boundingSphere);
@@ -539,18 +555,8 @@ SceneGraphNode::SceneGraphNode()
     , _guiDisplayName(GuiNameInfo)
     , _guiDescription(GuiDescriptionInfo)
     , _useGuiOrdering(UseGuiOrderInfo, false)
+    , _guiFocusable(GuiFocusableInfo, true)
     , _guiOrderingNumber(GuiOrderInfo, 0.f)
-    , _transform {
-        ghoul::mm_unique_ptr<Translation>(
-            global::memoryManager->PersistentMemory.alloc<StaticTranslation>()
-        ),
-        ghoul::mm_unique_ptr<Rotation>(
-            global::memoryManager->PersistentMemory.alloc<StaticRotation>()
-        ),
-        ghoul::mm_unique_ptr<Scale>(
-            global::memoryManager->PersistentMemory.alloc<StaticScale>()
-        )
-    }
     , _boundingSphere(BoundingSphereInfo, -1.0, -1.0, 1e12)
     , _evaluatedBoundingSphere(EvalBoundingSphereInfo)
     , _interactionSphere(InteractionSphereInfo, -1.0, -1.0, 1e12)
@@ -566,6 +572,29 @@ SceneGraphNode::SceneGraphNode()
     , _supportsDirectInteraction(SupportsDirectInteractionInfo, false)
     , _showDebugSphere(ShowDebugSphereInfo, false)
 {
+    {
+        ghoul::Dictionary translation;
+        translation.setValue("Type", std::string("StaticTranslation"));
+        translation.setValue("Position", glm::dvec3(0.0));
+        _transform.translation = ghoul::mm_unique_ptr<Translation>(
+            global::memoryManager->PersistentMemory.alloc<StaticTranslation>(translation)
+        );
+
+        ghoul::Dictionary rotation;
+        rotation.setValue("Type", std::string("StaticRotation"));
+        rotation.setValue("Rotation", glm::dvec3(0.0));
+        _transform.rotation = ghoul::mm_unique_ptr<Rotation>(
+            global::memoryManager->PersistentMemory.alloc<StaticRotation>(rotation)
+        );
+
+        ghoul::Dictionary scale;
+        scale.setValue("Type", std::string("StaticScale"));
+        scale.setValue("Scale", 1.0);
+        _transform.scale = ghoul::mm_unique_ptr<Scale>(
+            global::memoryManager->PersistentMemory.alloc<StaticScale>(scale)
+        );
+    }
+
     addProperty(_computeScreenSpaceValues);
     addProperty(_screenSpacePosition);
     _screenVisibility.setReadOnly(true);
@@ -623,6 +652,7 @@ SceneGraphNode::SceneGraphNode()
     addProperty(_guiPath);
     addProperty(_guiOrderingNumber);
     addProperty(_useGuiOrdering);
+    addProperty(_guiFocusable);
 }
 
 SceneGraphNode::~SceneGraphNode() {}
@@ -753,21 +783,23 @@ void SceneGraphNode::update(const UpdateData& data) {
     if (_state != State::GLInitialized) {
         return;
     }
-    if (!isTimeFrameActive(data.time)) {
+
+    if (_timeFrame) {
+        _timeFrame->update(data.time);
+    }
+
+    if (!isTimeFrameActive()) {
         return;
     }
 
-    if (_transform.translation) {
-        _transform.translation->update(data);
-    }
+    ghoul_assert(_transform.translation, "No translation exists");
+    _transform.translation->update(data);
 
-    if (_transform.rotation) {
-        _transform.rotation->update(data);
-    }
+    ghoul_assert(_transform.rotation, "No rotation exists");
+    _transform.rotation->update(data);
 
-    if (_transform.scale) {
-        _transform.scale->update(data);
-    }
+    ghoul_assert(_transform.scale, "No scale exists");
+    _transform.scale->update(data);
     UpdateData newUpdateData = data;
 
     // Assumes _worldRotationCached and _worldScaleCached have been calculated for parent
@@ -804,18 +836,10 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
 #endif // TRACY_ENABLE
 
-    if (_state != State::GLInitialized) {
-        return;
-    }
-
-    const bool visible = _renderable && _renderable->isVisible() &&
-        _renderable->isReady();
-
-    if (!visible) {
-        return;
-    }
-
-    if (!isTimeFrameActive(data.time)) {
+    if (_state != State::GLInitialized ||
+        !(_renderable && _renderable->isVisible() && _renderable->isReady()) ||
+        !isTimeFrameActive())
+    {
         return;
     }
 
@@ -840,15 +864,14 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
 
         _renderable->render(newData, tasks);
 
-        if (_computeScreenSpaceValues) {
+        if (_computeScreenSpaceValues) [[unlikely]] {
             computeScreenSpaceData(newData);
         }
     }
 
     const bool isInStickerBin =
         data.renderBinMask & static_cast<int>(Renderable::RenderBin::Sticker);
-
-    if (_showDebugSphere && isInStickerBin) {
+    if (_showDebugSphere && isInStickerBin) [[unlikely]] {
         if (const double bs = boundingSphere();  bs > 0.0) {
             renderDebugSphere(data.camera, bs, glm::vec4(0.5f, 0.15f, 0.5f, 0.75f));
         }
@@ -860,7 +883,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
 }
 
 void SceneGraphNode::renderDebugSphere(const Camera& camera, double size,
-                                       const glm::vec4& color)
+                                       const glm::vec4& color) const
 {
     const glm::dvec3 scaleVec = _worldScaleCached * size;
     const glm::dmat4 modelTransform =
@@ -901,7 +924,23 @@ void SceneGraphNode::renderDebugSphere(const Camera& camera, double size,
 void SceneGraphNode::setParent(SceneGraphNode& parent) {
     ghoul_assert(_parent != nullptr, "Node must be attached to a parent");
 
-    parent.attachChild(_parent->detachChild(*this));
+    // 1. Remove `this` from its currents parent's children
+    auto iter = std::find_if(
+        _parent->_children.begin(),
+        _parent->_children.end(),
+        [this](const ghoul::mm_unique_ptr<SceneGraphNode>& node) {
+            return node.get() == this;
+        }
+    );
+    ghoul_assert(iter != _parent->_children.end(), "This was not a child of its parent");
+    ghoul::mm_unique_ptr<SceneGraphNode> c = std::move(*iter);
+    _parent->_children.erase(iter);
+
+    // 2. Reparent `this`
+    _parent = &parent;
+
+    // 3. Add `this` to the new parent's children list
+    _parent->_children.push_back(std::move(c));
 }
 
 void SceneGraphNode::attachChild(ghoul::mm_unique_ptr<SceneGraphNode> child) {
@@ -1186,18 +1225,18 @@ glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
     }
 }
 
-bool SceneGraphNode::isTimeFrameActive(const Time& time) const {
+bool SceneGraphNode::isTimeFrameActive() const {
     for (SceneGraphNode* dep : _dependencies) {
-        if (!dep->isTimeFrameActive(time)) {
+        if (!dep->isTimeFrameActive()) {
             return false;
         }
     }
 
-    if (_parent && !_parent->isTimeFrameActive(time)) {
+    if (_parent && !_parent->isTimeFrameActive()) {
         return false;
     }
 
-    return !_timeFrame || _timeFrame->isActive(time);
+    return !_timeFrame || _timeFrame->isActive();
 }
 
 glm::dmat3 SceneGraphNode::calculateWorldRotation() const {

@@ -26,12 +26,12 @@
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/scene/profile.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
@@ -132,6 +132,9 @@ public:
     AssetManager& assetManager();
     LoadingScreen* loadingScreen();
 
+    void invalidatePropertyCache();
+    const std::vector<properties::Property*>& allProperties() const;
+
     void createUserDirectoriesIfNecessary();
 
     uint64_t ramInUse() const;
@@ -174,6 +177,9 @@ private:
 
     int _nextCallbackHandle = 0;
     std::vector<std::pair<CallbackHandle, ModeChangeCallback>> _modeChangeCallbacks;
+
+    mutable bool _isAllPropertiesCacheDirty = true;
+    mutable std::vector<properties::Property*> _allPropertiesCache;
 };
 
 /**

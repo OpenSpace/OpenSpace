@@ -40,7 +40,7 @@ namespace openspace::globebrowsing {
  */
 class RangedTime {
 public:
-    RangedTime() {}
+    RangedTime() = default;
 
     /**
      * Constructor that accepts an ISO8601 date/time string (`YYYY-MM-DDTHH:mm:ss`) for an
@@ -118,12 +118,13 @@ private:
 class DateTime {
 public:
     DateTime() = default;
+
     /**
      * Constructor that initializes with date/time string.
      *
      * \param initDateTime The ISO8601 date/time string (`YYYY-MM-DDTHH:mm:ss`)
      */
-    DateTime(std::string_view initDateTime);
+    explicit DateTime(std::string_view initDateTime);
 
     /**
      * Set the date/time value.

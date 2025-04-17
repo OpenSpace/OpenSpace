@@ -38,7 +38,7 @@ class QWidget;
 class AssetEdit final : public QDialog {
 Q_OBJECT
 public:
-    AssetEdit(QWidget* parent);
+    explicit AssetEdit(QWidget* parent);
 
 private:
     void createWidgets();

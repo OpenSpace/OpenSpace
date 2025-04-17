@@ -28,7 +28,7 @@
 #include <modules/telemetry/include/telemetrybase.h>
 
 #include <modules/telemetry/telemetrymodule.h>
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 
 namespace openspace {

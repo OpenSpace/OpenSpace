@@ -24,6 +24,7 @@
 
 #include <modules/telemetry/include/general/timetelemetry.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 
@@ -71,14 +72,11 @@ namespace openspace {
 
 TimeTelemetry::TimeTelemetry(const std::string& ip, int port)
     : TelemetryBase(TimeTelemetryInfo, ip, port)
-    , _timeUnitOption(
-        TimeUnitOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _timeUnitOption(TimeUnitOptionInfo)
     , _precisionProperties(TimeTelemetry::PrecisionProperties(PrecisionInfo))
 {
-    for (size_t i = 0; i < TimeUnitNamesSingular.size(); ++i) {
-        _timeUnitOption.addOption(i, TimeUnitNamesSingular[i].data());
+    for (size_t i = 0; i < TimeUnitNames.size(); ++i) {
+        _timeUnitOption.addOption(i, TimeUnitNames[i].singular.data());
     }
 
     _timeUnitOption.setValue(static_cast<int>(TimeUnit::Day));

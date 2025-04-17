@@ -27,8 +27,8 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/vector/uvec3property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -49,7 +49,7 @@ namespace openspace::kameleonvolume {
 
 class RenderableKameleonVolume : public Renderable {
 public:
-    RenderableKameleonVolume(const ghoul::Dictionary& dictionary);
+    explicit RenderableKameleonVolume(const ghoul::Dictionary& dictionary);
     ~RenderableKameleonVolume();
 
     void initializeGL() override;

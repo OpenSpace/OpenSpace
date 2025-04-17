@@ -1,0 +1,18 @@
+-- Int
+-- This example adds a dashboard item that shows the state of a integer point value
+-- property.
+
+local Item = {
+  Identifier = "DashboardItemPropertyValue_Example_Int",
+  Type = "DashboardItemPropertyValue",
+  URI = "LuaConsole.HistoryLength",
+  DisplayString = "Lua Console History Length: {}"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

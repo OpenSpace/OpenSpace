@@ -186,8 +186,8 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
         layerDict.hasKey(KeyDesc) ? layerDict.value<std::string>(KeyDesc) : ""
     })
     , _parent(parent)
-    , _typeOption(TypeInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _blendModeOption(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _typeOption(TypeInfo)
+    , _blendModeOption(BlendModeInfo)
     , _enabled(EnabledInfo, false)
     , _reset(ResetInfo)
     , _remove(RemoveInfo)

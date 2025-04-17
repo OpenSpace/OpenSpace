@@ -31,7 +31,7 @@ namespace openspace::globebrowsing {
 
 class TileProviderByIndex : public TileProvider {
 public:
-    TileProviderByIndex(const ghoul::Dictionary& dictionary);
+    explicit TileProviderByIndex(const ghoul::Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
     Tile::Status tileStatus(const TileIndex& index) override final;

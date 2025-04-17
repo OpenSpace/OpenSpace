@@ -35,7 +35,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableVideoSphere : public RenderableSphere {
 public:
-    RenderableVideoSphere(const ghoul::Dictionary& dictionary);
+    explicit RenderableVideoSphere(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;

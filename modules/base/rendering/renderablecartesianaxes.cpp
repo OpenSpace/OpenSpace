@@ -67,7 +67,7 @@ namespace {
     // renderable and add it as a child to the other scene graph node, i.e. specify the
     // other node as the `Parent` of the node with this renderable. Also, the axes have to
     // be scaled to match the parent object for the axes to be visible in the scene, for
-    // example using a [StaticScale](#base_scale_static).
+    // example using a [StaticScale](#base_transform_scale_static).
     struct [[codegen::Dictionary(RenderableCartesianAxes)]] Parameters {
         // [[codegen::verbatim(XColorInfo.description)]]
         std::optional<glm::vec3> xColor [[codegen::color()]];
@@ -132,14 +132,14 @@ void RenderableCartesianAxes::initializeGL() {
     glGenVertexArrays(1, &_vaoId);
     glBindVertexArray(_vaoId);
 
-    std::vector<Vertex> vertices({
+    constexpr std::array<Vertex, 4> vertices = {
         Vertex{0.f, 0.f, 0.f},
         Vertex{1.f, 0.f, 0.f},
         Vertex{0.f, 1.f, 0.f},
         Vertex{0.f, 0.f, 1.f}
-    });
+    };
 
-    std::vector<int> indices = {
+    constexpr std::array<int, 6> indices = {
         0, 1,
         0, 2,
         0, 3
@@ -204,7 +204,11 @@ void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
     glEnable(GL_LINE_SMOOTH);
-    glLineWidth(3.0);
+#ifndef __APPLE__
+    glLineWidth(3.f);
+#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
+    glLineWidth(1.f);
+#endif // __APPLE__
 
     glBindVertexArray(_vaoId);
     glDrawElements(GL_LINES, 6, GL_UNSIGNED_INT, nullptr);

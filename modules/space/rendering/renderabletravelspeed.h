@@ -40,7 +40,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableTravelSpeed : public Renderable {
 public:
-    RenderableTravelSpeed(const ghoul::Dictionary& dictionary);
+    explicit RenderableTravelSpeed(const ghoul::Dictionary& dictionary);
 
     static documentation::Documentation Documentation();
     void initializeGL() override;

@@ -39,11 +39,10 @@ class VolumeClipPlane;
 
 class VolumeClipPlanes : public properties::PropertyOwner {
 public:
-    VolumeClipPlanes(const ghoul::Dictionary& dictionary);
+    explicit VolumeClipPlanes(const ghoul::Dictionary& dictionary);
     ~VolumeClipPlanes() override = default;
 
     void initialize();
-    void deinitialize();
 
     std::vector<glm::vec3> normals();
     std::vector<glm::vec2> offsets();

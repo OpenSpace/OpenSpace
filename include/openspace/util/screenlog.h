@@ -77,7 +77,8 @@ public:
      * \param logLevel The minimum ghoul::logging::LogLevel that messages must
      *        have in order to be stored in the ScreenLog
      */
-    ScreenLog(std::chrono::seconds timeToLive, LogLevel logLevel = LogLevel::Info);
+    explicit ScreenLog(std::chrono::seconds timeToLive,
+        LogLevel logLevel = LogLevel::Info);
 
     /**
      * Destructor

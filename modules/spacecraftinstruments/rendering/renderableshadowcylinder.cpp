@@ -157,10 +157,7 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
     , _numberOfPoints(NumberPointsInfo, 190, 1, 300)
     , _shadowLength(ShadowLengthInfo, 0.1f, 0.f, 0.5f)
     , _shadowColor(ShadowColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _terminatorType(
-        TerminatorTypeInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _terminatorType(TerminatorTypeInfo)
     , _lightSource(LightSourceInfo)
     , _observer(ObserverInfo)
     , _body(BodyInfo)
@@ -257,7 +254,7 @@ void RenderableShadowCylinder::deinitializeGL() {
 }
 
 bool RenderableShadowCylinder::isReady() const {
-    return _shader;
+    return _shader != nullptr;
 }
 
 void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {

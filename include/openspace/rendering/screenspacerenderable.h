@@ -28,7 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/fadeable.h>
 
-#include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
@@ -58,7 +58,7 @@ public:
     static constexpr std::string_view KeyName = "Name";
     static constexpr std::string_view KeyIdentifier = "Identifier";
 
-    ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
     virtual ~ScreenSpaceRenderable() override;
 
     struct RenderData {

@@ -26,6 +26,7 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   dashboard/dashboarditemangle.h
+  dashboard/dashboarditemcameraorientation.h
   dashboard/dashboarditemdate.h
   dashboard/dashboarditemdistance.h
   dashboard/dashboarditemelapsedtime.h
@@ -71,18 +72,23 @@ set(HEADER_FILES
   rendering/screenspaceframebuffer.h
   rendering/screenspaceimagelocal.h
   rendering/screenspaceimageonline.h
+  rendering/screenspacerenderablerenderable.h
   rotation/timelinerotation.h
   rotation/constantrotation.h
   rotation/fixedrotation.h
   rotation/luarotation.h
+  rotation/multirotation.h
   rotation/staticrotation.h
   scale/luascale.h
+  scale/multiscale.h
   scale/nonuniformstaticscale.h
   scale/staticscale.h
   scale/timedependentscale.h
+  scale/timelinescale.h
   timeframe/timeframeinterval.h
   timeframe/timeframeunion.h
   translation/luatranslation.h
+  translation/multitranslation.h
   translation/statictranslation.h
   translation/timelinetranslation.h
 )
@@ -90,6 +96,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   dashboard/dashboarditemangle.cpp
+  dashboard/dashboarditemcameraorientation.cpp
   dashboard/dashboarditemdate.cpp
   dashboard/dashboarditemdistance.cpp
   dashboard/dashboarditemelapsedtime.cpp
@@ -136,18 +143,23 @@ set(SOURCE_FILES
   rendering/screenspaceframebuffer.cpp
   rendering/screenspaceimagelocal.cpp
   rendering/screenspaceimageonline.cpp
+  rendering/screenspacerenderablerenderable.cpp
   rotation/timelinerotation.cpp
   rotation/constantrotation.cpp
   rotation/fixedrotation.cpp
   rotation/luarotation.cpp
+  rotation/multirotation.cpp
   rotation/staticrotation.cpp
   scale/luascale.cpp
+  scale/multiscale.cpp
   scale/nonuniformstaticscale.cpp
   scale/staticscale.cpp
   scale/timedependentscale.cpp
+  scale/timelinescale.cpp
   timeframe/timeframeinterval.cpp
   timeframe/timeframeunion.cpp
   translation/luatranslation.cpp
+  translation/multitranslation.cpp
   translation/statictranslation.cpp
   translation/timelinetranslation.cpp
 )

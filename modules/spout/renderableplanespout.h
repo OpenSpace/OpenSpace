@@ -37,7 +37,7 @@ namespace documentation { struct Documentation; }
 
 class RenderablePlaneSpout : public RenderablePlane {
 public:
-    RenderablePlaneSpout(const ghoul::Dictionary& dictionary);
+    explicit RenderablePlaneSpout(const ghoul::Dictionary& dictionary);
 
     void deinitializeGL() override;
     void update(const UpdateData& data) override;

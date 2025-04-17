@@ -57,6 +57,12 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This `DashboardItem` shows the longitude/latitude location of the camera and its
+    // distance to the current focus node. If the current focus node is Earth, these are
+    // provided in the WGS84 reference frame; if the focus is on another planetary body,
+    // it is in the native coordinate frame for that planetary body. If the current focus
+    // node is not a planetary body, a position of (0,0) with a distance of 0 will be
+    // displayed.
     struct [[codegen::Dictionary(DashboardItemGlobeLocation)]] Parameters {
         enum class DisplayFormat {
             DecimalDegrees,
@@ -136,15 +142,14 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
     addProperty(_significantDigits);
 
     _font = global::fontManager->font(_fontName, _fontSize);
-    _buffer.resize(128);
+    _localBuffer.resize(128);
     updateFormatString();
 }
 
-void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
+void DashboardItemGlobeLocation::update() {
     ZoneScoped;
 
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
-
     const glm::dvec3 position = module->geoPosition();
     double lat = position.x;
     double lon = position.y;
@@ -152,14 +157,14 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
 
     std::pair<double, std::string_view> dist = simplifyDistance(altitude);
 
-    std::fill(_buffer.begin(), _buffer.end(), char(0));
+    std::fill(_localBuffer.begin(), _localBuffer.end(), char(0));
     char* end = nullptr;
     switch (_displayFormat.value()) {
         case static_cast<int>(DisplayFormat::DecimalDegrees):
         {
             // @CPP26(abock): This can be replaced with std::runtime_format
             end = std::vformat_to(
-                _buffer.data(),
+                _localBuffer.data(),
                 _formatString,
                 std::make_format_args(lat, lon, dist.first, dist.second)
             );
@@ -188,7 +193,7 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
 
             // @CPP26(abock): This can be replaced with std::runtime_format
             end = std::vformat_to(
-                _buffer.data(),
+                _localBuffer.data(),
                 _formatString,
                 std::make_format_args(
                     latDeg, latMin, latSec, isNorth ? "N" : "S",
@@ -201,9 +206,7 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
         }
     }
 
-    penPosition.y -= _font->height();
-    const std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
-    RenderFont(*_font, penPosition, text);
+    _buffer = std::string(_localBuffer.data(), end - _localBuffer.data());
 }
 
 glm::vec2 DashboardItemGlobeLocation::size() const {

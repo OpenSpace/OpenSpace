@@ -300,8 +300,8 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _colorGroup({ "Color" })
-    , _colorMethod(ColorMethodInfo, properties::OptionProperty::DisplayType::Radio)
-    , _colorQuantity(ColorQuantityInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _colorMethod(ColorMethodInfo)
+    , _colorQuantity(ColorQuantityInfo)
     , _colorQuantityMinMax(
         ColorMinMaxInfo,
         glm::vec2(-0.f, 100.f),
@@ -342,10 +342,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         glm::vec2(-5000.f),
         glm::vec2(5000.f)
     )
-    , _maskingQuantity(
-        MaskingQuantityInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _maskingQuantity(MaskingQuantityInfo)
     , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
     , _jumpToStartBtn(TimeJumpButtonInfo)
 {
@@ -1201,7 +1198,7 @@ void RenderableFieldlinesSequence::updateVertexPositionBuffer() {
     );
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     unbindGL();
 }
@@ -1226,7 +1223,7 @@ void RenderableFieldlinesSequence::updateVertexColorBuffer() {
         );
 
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, 0);
+        glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 
         unbindGL();
     }
@@ -1252,7 +1249,7 @@ void RenderableFieldlinesSequence::updateVertexMaskingBuffer() {
         );
 
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0);
+        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 
         unbindGL();
     }

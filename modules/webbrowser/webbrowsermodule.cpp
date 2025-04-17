@@ -59,16 +59,15 @@ namespace {
         "UpdateBrowserBetweenRenderables",
         "Update Browser Between Renderables",
         "Run the message loop of the browser between calls to render individual "
-        "renderables. When disabled, the browser message loop only runs "
-        "once per frame.",
+        "renderables. When disabled, the browser message loop only runs once per frame.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo BrowserUpdateIntervalInfo = {
         "BrowserUpdateInterval",
         "Browser Update Interval",
-        "The time in microseconds between running the message loop of the browser. "
-        "Only used if UpdateBrowserBetweenRenderables is true.",
+        "The time in microseconds between running the message loop of the browser. Only "
+        "used if UpdateBrowserBetweenRenderables is true.",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -102,6 +101,12 @@ namespace {
 
         // [[codegen::verbatim(BrowserUpdateIntervalInfo.description)]]
         std::optional<float> browserUpdateInterval;
+
+        // Forcably disables accelerated rendering, even if other preconditions
+        // would otherwise allow the use of it to speed up the rendering of the
+        // user interface. This setting can be used to circumvent an otherwise
+        // fatal crash that is caused by the accelerated rendering.
+        std::optional<bool> disableAcceleratedRendering;
     };
 #include "webbrowsermodule_codegen.cpp"
 
@@ -117,7 +122,7 @@ WebBrowserModule::WebBrowserModule()
     : OpenSpaceModule(WebBrowserModule::Name)
     , _updateBrowserBetweenRenderables(UpdateBrowserBetweenRenderablesInfo, true)
     , _browserUpdateInterval(BrowserUpdateIntervalInfo, 1.f, 1.f, 1000.f)
-    , _eventHandler(new EventHandler)
+    , _eventHandler(std::make_unique<EventHandler>())
 {
     global::callback::deinitialize->emplace_back([this]() {
         ZoneScopedN("WebBrowserModule");
@@ -153,6 +158,8 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 
     _webHelperLocation = p.webHelperLocation.value_or(findHelperExecutable());
     _enabled = p.enabled.value_or(_enabled);
+    _disableAcceleratedRendering =
+        p.disableAcceleratedRendering.value_or(_disableAcceleratedRendering);
 
     LDEBUG(std::format("CEF using web helper executable: {}", _webHelperLocation));
     _cefHost = std::make_unique<CefHost>(_webHelperLocation.string());
@@ -189,6 +196,7 @@ void WebBrowserModule::internalDeinitialize() {
 void WebBrowserModule::addBrowser(BrowserInstance* browser) {
     ZoneScoped;
 
+    ghoul_assert(browser, "Browser must not be a nullptr");
     if (_enabled) {
         _browsers.push_back(browser);
         if (_updateBrowserBetweenRenderables) {
@@ -245,10 +253,14 @@ bool WebBrowserModule::canUseAcceleratedRendering() {
     );
     bool isVersionOk = OpenGLCap.openGLVersion() >= acceleratedVersion;
     bool isExtensionsOk = it != OpenGLCap.extensions().end();
-    return isVersionOk && isExtensionsOk;
-#else
+    bool isVendorOk =
+        OpenGLCap.gpuVendor() ==
+        ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Vendor::Nvidia;
+    return isVersionOk && isExtensionsOk &&
+           isVendorOk && !_disableAcceleratedRendering;
+#else  // ^^^^ WIN32 // !WIN32 vvvv
     return false;
-#endif
+#endif // WIN32
 }
 
 std::vector<documentation::Documentation> WebBrowserModule::documentations() const {

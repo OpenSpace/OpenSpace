@@ -47,3 +47,6 @@
 [submodule "modules/opensoundcontrol/ext/oscpack"]
 	path = modules/opensoundcontrol/ext/oscpack
 	url = https://github.com/RossBencina/oscpack.git
+[submodule "ext/json"]
+	path = ext/json
+	url = https://github.com/nlohmann/json

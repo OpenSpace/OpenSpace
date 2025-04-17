@@ -22,7 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/scene/scene.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/matrix/dmat2property.h>
@@ -53,20 +55,22 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <algorithm>
+#include <execution>
 #include <cctype>
 
 namespace {
 
 template <class T>
-openspace::properties::PropertyOwner* findPropertyOwnerWithMatchingGroupTag(T* prop,
+const openspace::properties::PropertyOwner* findPropertyOwnerWithMatchingGroupTag(T* prop,
                                                             const std::string& tagToMatch)
 {
     using namespace openspace;
 
-    properties::PropertyOwner* tagMatchOwner = nullptr;
-    properties::PropertyOwner* owner = prop->owner();
+    const properties::PropertyOwner* tagMatchOwner = nullptr;
+    const properties::PropertyOwner* owner = prop->owner();
 
     if (owner) {
         const std::vector<std::string>& tags = owner->tags();
@@ -137,63 +141,65 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
         }
     }
 
-    // Stores whether we found at least one matching property. If this is false at the end
-    // of the loop, the property name regex was probably misspelled.
-    for (properties::Property* prop : properties) {
-        // Check the regular expression for all properties
-        const std::string id = prop->uri();
+    std::mutex mutex;
+    std::for_each(
+        std::execution::par_unseq,
+        properties.cbegin(),
+        properties.cend(),
+        [&](properties::Property* prop) {
+            // Check the regular expression for all properties
+            const std::string_view uri = prop->uri();
 
-        if (isLiteral && id != propertyName) {
-            continue;
-        }
-        else if (!propertyName.empty()) {
-            size_t propertyPos = id.find(propertyName);
-            if (propertyPos != std::string::npos) {
-                // Check that the propertyName fully matches the property in id
-                if ((propertyPos + propertyName.length() + 1) < id.length()) {
-                    continue;
-                }
-
-                // Match node name
-                if (!nodeName.empty() && id.find(nodeName) == std::string::npos) {
-                    continue;
+            if (isLiteral && uri != propertyName) {
+                return;
+            }
+            else if (!propertyName.empty()) {
+                size_t propertyPos = uri.find(propertyName);
+                if (
+                    // Check if the propertyName appears in the URI at all
+                    (propertyPos == std::string::npos) ||
+                    // Check that the propertyName fully matches the property in uri
+                    ((propertyPos + propertyName.length() + 1) < uri.length()) ||
+                    // Match node name
+                    (!nodeName.empty() && uri.find(nodeName) == std::string::npos))
+                {
+                    return;
                 }
 
                 // Check tag
                 if (isGroupMode) {
-                    properties::PropertyOwner* matchingTaggedOwner =
+                    const properties::PropertyOwner* matchingTaggedOwner =
                         findPropertyOwnerWithMatchingGroupTag(prop, groupName);
                     if (!matchingTaggedOwner) {
-                        continue;
+                        return;
                     }
                 }
             }
-            else {
-                continue;
-            }
-        }
-        else if (!nodeName.empty()) {
-            size_t nodePos = id.find(nodeName);
-            if (nodePos != std::string::npos) {
-                // Check tag
-                if (isGroupMode) {
-                    properties::PropertyOwner* matchingTaggedOwner =
-                        findPropertyOwnerWithMatchingGroupTag(prop, groupName);
-                    if (!matchingTaggedOwner) {
-                        continue;
+            else if (!nodeName.empty()) {
+                size_t nodePos = uri.find(nodeName);
+                if (nodePos != std::string::npos) {
+                    // Check tag
+                    if (isGroupMode) {
+                        const properties::PropertyOwner* matchingTaggedOwner =
+                            findPropertyOwnerWithMatchingGroupTag(prop, groupName);
+                        if (!matchingTaggedOwner) {
+                            return;
+                        }
+                    }
+                    // Check that the nodeName fully matches the node in id
+                    else if (nodePos != 0) {
+                        return;
                     }
                 }
-                // Check that the nodeName fully matches the node in id
-                else if (nodePos != 0) {
-                    continue;
+                else {
+                    return;
                 }
             }
-            else {
-                continue;
-            }
+            std::lock_guard g(mutex);
+            matches.push_back(prop);
         }
-        matches.push_back(prop);
-    }
+    );
+
     return matches;
 }
 
@@ -208,7 +214,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
 
-    const int type = lua_type(L, -1);
+    const ghoul::lua::LuaTypes type = ghoul::lua::fromLuaType(lua_type(L, -1));
 
     std::vector<properties::Property*> matchingProps = findMatchesInAllProperties(
         regex,
@@ -221,7 +227,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
     bool foundMatching = false;
     for (properties::Property* prop : matchingProps) {
         // Check that the types match
-        if (type != prop->typeLua()) {
+        if (!typeMatch(type, prop->typeLua())) {
             LERRORC(
                 "property_setValue",
                 std::format(
@@ -299,8 +305,8 @@ int setPropertyCallSingle(properties::Property& prop, const std::string& uri,
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
 
-    const int type = lua_type(L, -1);
-    if (type != prop.typeLua()) {
+    const ghoul::lua::LuaTypes type = ghoul::lua::fromLuaType(lua_type(L, -1));
+    if (!typeMatch(type, prop.typeLua())) {
         LERRORC(
             "property_setValue",
             std::format(
@@ -334,6 +340,8 @@ int setPropertyCallSingle(properties::Property& prop, const std::string& uri,
 
 template <bool optimization>
 int propertySetValue(lua_State* L) {
+    ZoneScoped;
+
     int nParameters = ghoul::lua::checkArgumentsAndThrow(
         L,
         { 2, 6 },
@@ -544,27 +552,27 @@ namespace {
     std::vector<std::string> res;
     for (properties::Property* prop : props) {
         // Check the regular expression for all properties
-        const std::string& id = prop->uri();
+        const std::string_view uri = prop->uri();
 
-        if (isLiteral && id != propertyName) {
+        if (isLiteral && uri != propertyName) {
             continue;
         }
         else if (!propertyName.empty()) {
-            size_t propertyPos = id.find(propertyName);
+            size_t propertyPos = uri.find(propertyName);
             if (propertyPos != std::string::npos) {
                 // Check that the propertyName fully matches the property in id
-                if ((propertyPos + propertyName.length() + 1) < id.length()) {
+                if ((propertyPos + propertyName.length() + 1) < uri.length()) {
                     continue;
                 }
 
                 // Match node name
-                if (!nodeName.empty() && id.find(nodeName) == std::string::npos) {
+                if (!nodeName.empty() && uri.find(nodeName) == std::string::npos) {
                     continue;
                 }
 
                 // Check tag
                 if (!groupName.empty()) {
-                    properties::PropertyOwner* matchingTaggedOwner =
+                    const properties::PropertyOwner* matchingTaggedOwner =
                         findPropertyOwnerWithMatchingGroupTag(prop, groupName);
                     if (!matchingTaggedOwner) {
                         continue;
@@ -576,11 +584,11 @@ namespace {
             }
         }
         else if (!nodeName.empty()) {
-            size_t nodePos = id.find(nodeName);
+            size_t nodePos = uri.find(nodeName);
             if (nodePos != std::string::npos) {
                 // Check tag
                 if (!groupName.empty()) {
-                    properties::PropertyOwner* matchingTaggedOwner =
+                    const properties::PropertyOwner* matchingTaggedOwner =
                         findPropertyOwnerWithMatchingGroupTag(prop, groupName);
                     if (!matchingTaggedOwner) {
                         continue;
@@ -596,7 +604,7 @@ namespace {
             }
         }
 
-        res.push_back(id);
+        res.push_back(std::string(uri));
     }
 
     return res;
@@ -1044,7 +1052,7 @@ void createCustomProperty<openspace::properties::TriggerProperty>(
     TriggerProperty* p = new TriggerProperty(info);
     if (onChange.has_value() && !onChange->empty()) {
         p->onChange(
-            [p, script = *onChange]() {
+            [script = *onChange]() {
                 using namespace ghoul::lua;
                 LuaState s;
                 openspace::global::scriptEngine->initializeLuaState(s);

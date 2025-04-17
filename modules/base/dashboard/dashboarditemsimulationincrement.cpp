@@ -61,7 +61,9 @@ namespace {
         "delta time. This format gets five parameters in this order:  The target delta "
         "time value, the target delta time unit, the string 'Paused' if the delta time "
         "is paused or the empty string otherwise, the current delta time value, and the "
-        "current delta time unit.",
+        "current delta time unit. More information about how to make use of the format "
+        "string, see the documentation at "
+        "https://en.cppreference.com/w/cpp/utility/format/spec.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -71,7 +73,9 @@ namespace {
         "The format string used to format the text if the target delta time is the same "
         "as the current delta time. This format gets three parameters in this order:  "
         "The target delta value, the target delta unit, and the string 'Paused' if the "
-        "delta time is paused or the empty string otherwise.",
+        "delta time is paused or the empty string otherwise. More information about how "
+        "to make use of the format string, see the documentation at "
+        "https://en.cppreference.com/w/cpp/utility/format/spec.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -88,6 +92,10 @@ namespace {
         return res;
     }
 
+    // This `DashboardItem` shows how fast the in-game time progresses. The display string
+    // for the `RegularFormat` is used when the current simulation increment is not
+    // changing, the `TransitionFormat` is used if the simulation increment is currently
+    // interpolating to a new value.
     struct [[codegen::Dictionary(DashboardItemSimulationIncrement)]] Parameters {
         // [[codegen::verbatim(SimplificationInfo.description)]]
         std::optional<bool> simplification;
@@ -117,7 +125,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
                                                       const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _doSimplification(SimplificationInfo, true)
-    , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _requestedUnit(RequestedUnitInfo)
     , _transitionFormat(
         TransitionFormatInfo,
         "Simulation increment: {:.1f} {:s} / second{:s} (current: {:.1f} {:s})"
@@ -143,6 +151,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     if (p.requestedUnit.has_value()) {
         const TimeUnit unit = timeUnitFromString(*p.requestedUnit);
         _requestedUnit = static_cast<int>(unit);
+        _doSimplification = false;
     }
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
     addProperty(_requestedUnit);
@@ -154,7 +163,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     addProperty(_regularFormat);
 }
 
-void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
+void DashboardItemSimulationIncrement::update() {
     ZoneScoped;
 
     const double targetDt = global::timeManager->targetDeltaTime();
@@ -188,35 +197,26 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
     std::string pauseText = global::timeManager->isPaused() ? " (Paused)" : "";
 
     try {
-        penPosition.y -= _font->height();
         if (targetDt != currentDt && !global::timeManager->isPaused()) {
             // We are in the middle of a transition
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(
-                    _transitionFormat.value(),
-                    std::make_format_args(
-                        targetDeltaTime.first, targetDeltaTime.second,
-                        pauseText,
-                        currentDeltaTime.first, currentDeltaTime.second
-                    )
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            _buffer = std::vformat(
+                _transitionFormat.value(),
+                std::make_format_args(
+                    targetDeltaTime.first, targetDeltaTime.second,
+                    pauseText,
+                    currentDeltaTime.first, currentDeltaTime.second
                 )
             );
         }
         else {
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(
-                    _regularFormat.value(),
-                    std::make_format_args(
-                        targetDeltaTime.first,
-                        targetDeltaTime.second,
-                        pauseText
-                    )
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            _buffer = std::vformat(
+                _regularFormat.value(),
+                std::make_format_args(
+                    targetDeltaTime.first,
+                    targetDeltaTime.second,
+                    pauseText
                 )
             );
         }

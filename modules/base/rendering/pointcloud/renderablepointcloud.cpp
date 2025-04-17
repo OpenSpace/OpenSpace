@@ -637,10 +637,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     , _useAdditiveBlending(UseAdditiveBlendingInfo, true)
     , _useRotation(UseOrientationDataInfo, false)
     , _drawElements(DrawElementsInfo, true)
-    , _renderOption(
-        OrientationRenderOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _renderOption(OrientationRenderOptionInfo)
     , _nDataPoints(NumShownDataPointsInfo, 0)
     , _hasOrientationData(HasOrientationDataInfo, false)
 {
@@ -796,7 +793,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderablePointCloud::isReady() const {
-    bool isReady = _program;
+    bool isReady = _program != nullptr;
     if (_hasLabels) {
         isReady = isReady && _labels->isReady();
     }
@@ -1374,11 +1371,11 @@ void RenderablePointCloud::update(const UpdateData&) {
         _colorSettings.colorMapping->update(_dataset, _useCaching);
     }
 
-    if (_spriteTextureIsDirty) {
+    if (_spriteTextureIsDirty) [[unlikely]] {
         updateSpriteTexture();
     }
 
-    if (_dataIsDirty) {
+    if (_dataIsDirty) [[unlikely]] {
         updateBufferData();
     }
 }
@@ -1511,9 +1508,8 @@ void RenderablePointCloud::updateBufferData() {
 }
 
 void RenderablePointCloud::updateSpriteTexture() {
-    bool shouldUpdate = _hasSpriteTexture && _spriteTextureIsDirty;
-
-    if (!shouldUpdate) {
+    const bool shouldUpdate = _hasSpriteTexture && _spriteTextureIsDirty;
+    if (!shouldUpdate) [[likely]] {
         return;
     }
 

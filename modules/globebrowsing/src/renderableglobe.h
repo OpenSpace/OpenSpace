@@ -37,10 +37,10 @@
 #include <modules/globebrowsing/src/shadowcomponent.h>
 #include <modules/globebrowsing/src/skirtedgrid.h>
 #include <modules/globebrowsing/src/tileindex.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <ghoul/misc/memorypool.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <cstddef>
@@ -71,7 +71,7 @@ struct Chunk {
         WantSplit
     };
 
-    Chunk(const TileIndex& ti);
+    explicit Chunk(const TileIndex& ti);
 
     const TileIndex tileIndex;
     const GeodeticPatch surfacePatch;
@@ -97,7 +97,7 @@ enum class ShadowCompType {
  */
 class RenderableGlobe : public Renderable {
 public:
-    RenderableGlobe(const ghoul::Dictionary& dictionary);
+    explicit RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe() override = default;
 
     void initializeGL() override;

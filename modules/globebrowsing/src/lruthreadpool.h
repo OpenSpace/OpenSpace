@@ -41,7 +41,7 @@ template<typename KeyType> class LRUThreadPool;
 template<typename KeyType>
 class LRUThreadPoolWorker {
 public:
-    LRUThreadPoolWorker(LRUThreadPool<KeyType>& pool);
+    explicit LRUThreadPoolWorker(LRUThreadPool<KeyType>& pool);
     void operator()();
 
 private:

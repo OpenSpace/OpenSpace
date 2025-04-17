@@ -50,7 +50,7 @@ public:
          *
          * \param doc The Documentation whose identifier was previously registered
          */
-        DuplicateDocumentationException(Documentation doc);
+        explicit DuplicateDocumentationException(Documentation doc);
 
         /// The offending Documentation whose identifier was previously registered
         Documentation documentation;

@@ -50,7 +50,7 @@ public:
 class Envelope {
 public:
     Envelope() = default;
-    Envelope(std::vector<EnvelopePoint> vec);
+    explicit Envelope(std::vector<EnvelopePoint> vec);
 
     void setPoints(std::vector<EnvelopePoint> vec);
     const std::vector<EnvelopePoint>& points() const;

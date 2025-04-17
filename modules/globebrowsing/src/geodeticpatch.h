@@ -40,7 +40,7 @@ public:
 
     GeodeticPatch(const GeodeticPatch& patch) = default;
 
-    GeodeticPatch(const TileIndex& tileIndex);
+    explicit GeodeticPatch(const TileIndex& tileIndex);
 
     void setCenter(Geodetic2 center);
     void setHalfSize(Geodetic2 halfSize);
@@ -53,7 +53,7 @@ public:
     /**
      * Returns `true` if the center above the equator.
      */
-    double isNorthern() const;
+    bool isNorthern() const;
 
     Geodetic2 corner(Quad q) const;
 
