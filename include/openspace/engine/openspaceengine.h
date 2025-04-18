@@ -71,6 +71,8 @@ struct CommandlineArguments {
     std::optional<std::string> profile;
     std::optional<std::string> propertyVisibility;
     std::optional<bool> bypassLauncher;
+
+    std::optional<std::string> task;
 };
 
 class OpenSpaceEngine : public properties::PropertyOwner {

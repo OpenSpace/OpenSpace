@@ -85,6 +85,7 @@ set(HEADER_FILES
   scale/staticscale.h
   scale/timedependentscale.h
   scale/timelinescale.h
+  task/convertmodeltask.h
   timeframe/timeframeinterval.h
   timeframe/timeframeunion.h
   translation/luatranslation.h
@@ -156,6 +157,7 @@ set(SOURCE_FILES
   scale/staticscale.cpp
   scale/timedependentscale.cpp
   scale/timelinescale.cpp
+  task/convertmodeltask.cpp
   timeframe/timeframeinterval.cpp
   timeframe/timeframeunion.cpp
   translation/luatranslation.cpp

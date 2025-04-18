@@ -247,7 +247,10 @@ std::string IdentifierVerifier::type() const {
     return "Identifier";
 }
 
-FileVerifier::FileVerifier() : StringVerifier(true) {}
+FileVerifier::FileVerifier(bool fileMustExist)
+    : StringVerifier(true)
+    , _fileMustExist(fileMustExist)
+{}
 
 TestResult FileVerifier::operator()(const ghoul::Dictionary& dict,
                                     const std::string& key) const
@@ -258,7 +261,9 @@ TestResult FileVerifier::operator()(const ghoul::Dictionary& dict,
     }
 
     const std::string file = dict.value<std::string>(key);
-    if (!std::filesystem::exists(file) || !std::filesystem::is_regular_file(file)) {
+    if (_fileMustExist &&
+        (!std::filesystem::exists(file) || !std::filesystem::is_regular_file(file)))
+    {
         res.success = false;
         TestResult::Offense o = {
             .offender = key,
@@ -274,7 +279,14 @@ std::string FileVerifier::type() const {
     return "File";
 }
 
-DirectoryVerifier::DirectoryVerifier() : StringVerifier(true) {}
+bool FileVerifier::mustExist() const {
+    return _fileMustExist;
+}
+
+DirectoryVerifier::DirectoryVerifier(bool directoryMusExist)
+    : StringVerifier(true)
+    , _directoryMustExist(directoryMusExist)
+{}
 
 TestResult DirectoryVerifier::operator()(const ghoul::Dictionary& dict,
                                          const std::string& key) const
@@ -285,7 +297,9 @@ TestResult DirectoryVerifier::operator()(const ghoul::Dictionary& dict,
     }
 
     const std::string dir = dict.value<std::string>(key);
-    if (!std::filesystem::exists(dir) || !std::filesystem::is_directory(dir)) {
+    if (_directoryMustExist &&
+        (!std::filesystem::exists(dir) || !std::filesystem::is_directory(dir)))
+    {
         res.success = false;
         TestResult::Offense o = {
             .offender = key,
@@ -299,6 +313,10 @@ TestResult DirectoryVerifier::operator()(const ghoul::Dictionary& dict,
 
 std::string DirectoryVerifier::type() const {
     return "Directory";
+}
+
+bool DirectoryVerifier::mustExist() const {
+    return _directoryMustExist;
 }
 
 DateTimeVerifier::DateTimeVerifier() : StringVerifier(true) {}
