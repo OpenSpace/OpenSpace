@@ -841,7 +841,7 @@ void GeoJsonComponent::flyToFeature(std::optional<int> index) const {
     float lon = centroidLon + _latLongOffset.value().y;
 
     const std::string script = std::format(
-        "openspace.globebrowsing.flyToGeo([[{}]], {}, {}, {})",
+        "openspace.navigation.flyToGeo([[{}]], {}, {}, {})",
         _globeNode.owner()->identifier(), lat, lon, d
     );
     global::scriptEngine->queueScript(script);

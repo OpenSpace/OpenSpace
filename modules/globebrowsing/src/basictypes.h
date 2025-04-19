@@ -42,20 +42,6 @@ struct AABB3 {
 
 
 
-struct Geodetic2 {
-    double lat = 0.0; // in radians
-    double lon = 0.0; // in radians
-};
-
-
-
-struct Geodetic3 {
-    Geodetic2 geodetic2;
-    double height = 0.0;
-};
-
-
-
 struct PixelRegion {
     glm::ivec2 start = glm::ivec2(0);
     glm::ivec2 numPixels = glm::ivec2(0);

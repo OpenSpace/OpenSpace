@@ -22,53 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <catch2/catch_test_macros.hpp>
+#ifndef __OPENSPACE_CORE___GEODETIC___H__
+#define __OPENSPACE_CORE___GEODETIC___H__
 
-#include <modules/globebrowsing/src/basictypes.h>
-#include <modules/globebrowsing/src/geodeticpatch.h>
-#include <openspace/util/geodetic.h>
 #include <ghoul/glm.h>
+#include <optional>
 
-TEST_CASE("LatLonPatch: findCenterControlPoint", "[latlonpatch]") {
-    using namespace openspace::globebrowsing;
+namespace openspace {
 
-    const GeodeticPatch patch(0, 0, glm::pi<float>() / 4.f, glm::pi<float>() / 4.f);
-}
+class SceneGraphNode;
 
-TEST_CASE("LatLonPatch: Find Closest Corner", "[latlonpatch]") {
-    using namespace openspace;
-    using namespace openspace::globebrowsing;
+struct Geodetic2 {
+    double lat = 0.0; // in radians
+    double lon = 0.0; // in radians
+};
 
-    constexpr float piOver4 = glm::pi<float>() / 4.f;
-    const Geodetic2 halfSize { piOver4, piOver4 };
-    const Geodetic2 center { 0, 0 };
-    const GeodeticPatch patch(center, halfSize);
+struct Geodetic3 {
+    Geodetic2 geodetic2;
+    double height = 0.0; // in meters
+};
 
-    constexpr float piOver3 = glm::pi<float>() / 3.f;
-    const Geodetic2 point { piOver3, piOver3 };
+double altitudeFromCamera(const SceneGraphNode& renderable, bool useHeightMap = false);
 
-    const Geodetic2 closestCorner = patch.closestCorner(point);
-    const Geodetic2 northEastCorner = patch.corner(NORTH_EAST);
+void goToGeo(const SceneGraphNode& globe, double latitude, double longitude);
+void goToGeo(const SceneGraphNode& globe, double latitude, double longitude,
+    double altitude);
 
-    CHECK(closestCorner.lat == northEastCorner.lat);
-    CHECK(closestCorner.lon == northEastCorner.lon);
-}
+void goToGeodetic2(const SceneGraphNode& globe, Geodetic2 geo2);
+void goToGeodetic3(const SceneGraphNode& globe, Geodetic3 geo3);
 
-TEST_CASE("LatLonPatch: Find Closest Corner 2", "[latlonpatch]") {
-    using namespace openspace;
-    using namespace openspace::globebrowsing;
+glm::vec3 cartesianCoordinatesFromGeo(const SceneGraphNode& renderable, double latitude,
+    double longitude, std::optional<double> altitude = std::nullopt);
 
-    constexpr float piOver6 = glm::pi<float>() / 4.f;
+glm::dvec3 geoPosition();
 
-    const Geodetic2 halfSize { 1.1 * piOver6, 1.1 * piOver6 };
-    const Geodetic2 center { piOver6, piOver6 };
-    const GeodeticPatch patch(center, halfSize);
+} // namespace openspace
 
-    constexpr Geodetic2 Point { 0, 0 };
-
-    const Geodetic2 closestCorner = patch.closestCorner(Point);
-    const Geodetic2 expectedCorner = patch.corner(SOUTH_WEST);
-
-    CHECK(closestCorner.lat == expectedCorner.lat);
-    CHECK(closestCorner.lon == expectedCorner.lon);
-}
+#endif // __OPENSPACE_CORE___GEODETIC___H__

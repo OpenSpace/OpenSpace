@@ -32,6 +32,7 @@
 #include <openspace/events/eventengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/ellipsoid.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
@@ -257,6 +258,10 @@ SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
         directionFromCenterToTarget,
         0.0
     };
+}
+
+Ellipsoid Renderable::ellipsoid() const {
+    return Ellipsoid(glm::dvec3(_interactionSphere));
 }
 
 bool Renderable::renderedWithDesiredData() const {

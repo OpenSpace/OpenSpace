@@ -45,6 +45,7 @@ namespace ghoul::opengl {
 namespace openspace {
 
 class Camera;
+class Ellipsoid;
 struct RenderData;
 struct RendererTasks;
 struct SurfacePositionHandle;
@@ -102,6 +103,8 @@ public:
     // handled
     virtual SurfacePositionHandle calculateSurfacePositionHandle(
         const glm::dvec3& targetModelSpace) const;
+
+    virtual Ellipsoid ellipsoid() const;
 
     virtual bool renderedWithDesiredData() const;
 

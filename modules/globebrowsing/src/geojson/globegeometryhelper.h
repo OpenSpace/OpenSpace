@@ -28,15 +28,13 @@
 #include <ghoul/glm.h>
 #include <vector>
 
-namespace openspace::globebrowsing {
+namespace openspace {
     struct Geodetic2;
     struct Geodetic3;
-    class RenderableGlobe;
-} // namespace openspace::globebrowsing
 
-namespace openspace::rendering::helper {
-    struct VertexXYZNormal;
-} // namespace openspace::rendering::helper
+    namespace globebrowsing { class RenderableGlobe; }
+    namespace rendering::helper { struct VertexXYZNormal; }
+} // namespace openspace
 
 namespace geos::geom {
     class Coordinate;

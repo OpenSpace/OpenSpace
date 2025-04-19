@@ -22,14 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___ELLIPSOID___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___ELLIPSOID___H__
+#ifndef __OPENSPACE_CORE___ELLIPSOID___H__
+#define __OPENSPACE_CORE___ELLIPSOID___H__
 
 #include <ghoul/glm.h>
 
 #include <vector>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 struct Geodetic2;
 struct Geodetic3;
@@ -114,6 +114,6 @@ private:
     std::vector<Ellipsoid::ShadowConfiguration> _shadowConfArray;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___ELLIPSOID___H__
+#endif // __OPENSPACE_CORE___ELLIPSOID___H__

@@ -22,9 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/src/ellipsoid.h>
+#include <openspace/util/ellipsoid.h>
 
-#include <modules/globebrowsing/src/basictypes.h>
+#include <openspace/util/geodetic.h>
 #include <algorithm>
 #include <array>
 #include <vector>
@@ -33,7 +33,7 @@ namespace {
     constexpr size_t MaxIterations = 8;
 } // namespace
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 Ellipsoid::Ellipsoid(glm::dvec3 radii) : _radii(std::move(radii)) {
     updateInternalCache();
@@ -174,4 +174,4 @@ Ellipsoid::shadowConfigurationArray() const
     return _shadowConfArray;
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

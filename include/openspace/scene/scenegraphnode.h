@@ -32,6 +32,7 @@
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
+#include <openspace/util/ellipsoid.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
@@ -129,6 +130,8 @@ public:
     const std::vector<std::string>& onReachAction() const;
     const std::vector<std::string>& onRecedeAction() const;
     const std::vector<std::string>& onExitAction() const;
+
+    Ellipsoid ellipsoid() const;
 
     double boundingSphere() const;
     double interactionSphere() const;
