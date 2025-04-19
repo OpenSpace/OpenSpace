@@ -470,7 +470,7 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
             std::strncpy(lEntry.feature, token.c_str(), 255);
 
             lEntry.geoPosition = cartesianCoordinatesFromGeo(
-                *_globe,
+                *static_cast<SceneGraphNode*>(_globe->owner()),
                 lEntry.latitude,
                 lEntry.longitude,
                 lEntry.diameter

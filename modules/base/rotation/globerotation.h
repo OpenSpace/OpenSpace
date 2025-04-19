@@ -33,7 +33,7 @@
 
 namespace openspace {
 
-class Renderable;
+class SceneGraphNode;
 
 class GlobeRotation : public Rotation {
 public:
@@ -56,7 +56,7 @@ private:
     properties::BoolProperty _useHeightmap;
     properties::BoolProperty _useCamera;
 
-    Renderable* _renderable = nullptr;
+    SceneGraphNode* _attachedNode = nullptr;
 
     mutable bool _matrixIsDirty = true;
     mutable glm::dmat3 _matrix = glm::dmat3(0.0);

@@ -33,7 +33,7 @@
 
 namespace openspace {
 
-    class Renderable;
+class SceneGraphNode;
 
 class GlobeTranslation : public Translation {
 public:
@@ -56,7 +56,7 @@ private:
     properties::BoolProperty _useCamera;
     properties::BoolProperty _useCameraAltitude;
 
-    Renderable* _attachedNode = nullptr;
+    SceneGraphNode* _attachedNode = nullptr;
 
     mutable bool _positionIsDirty = true;
     mutable glm::dvec3 _position = glm::dvec3(0.0);

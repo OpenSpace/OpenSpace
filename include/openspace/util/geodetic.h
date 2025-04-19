@@ -30,7 +30,7 @@
 
 namespace openspace {
 
-class Renderable;
+class SceneGraphNode;
 
 struct Geodetic2 {
     double lat = 0.0; // in radians
@@ -42,15 +42,16 @@ struct Geodetic3 {
     double height = 0.0; // in meters
 };
 
-double altitudeFromCamera(const Renderable& renderable, bool useHeightMap = false);
+double altitudeFromCamera(const SceneGraphNode& renderable, bool useHeightMap = false);
 
-void goToGeo(const Renderable& globe, double latitude, double longitude);
-void goToGeo(const Renderable& globe, double latitude, double longitude, double altitude);
+void goToGeo(const SceneGraphNode& globe, double latitude, double longitude);
+void goToGeo(const SceneGraphNode& globe, double latitude, double longitude,
+    double altitude);
 
-void goToGeodetic2(const Renderable& globe, Geodetic2 geo2);
-void goToGeodetic3(const Renderable& globe, Geodetic3 geo3);
+void goToGeodetic2(const SceneGraphNode& globe, Geodetic2 geo2);
+void goToGeodetic3(const SceneGraphNode& globe, Geodetic3 geo3);
 
-glm::vec3 cartesianCoordinatesFromGeo(const Renderable& renderable, double latitude,
+glm::vec3 cartesianCoordinatesFromGeo(const SceneGraphNode& renderable, double latitude,
     double longitude, std::optional<double> altitude = std::nullopt);
 
 glm::dvec3 geoPosition();

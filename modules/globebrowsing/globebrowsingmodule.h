@@ -48,7 +48,7 @@ namespace openspace {
 class Camera;
 struct Geodetic2;
 struct Geodetic3;
-class Renderable;
+class SceneGraphNode;
 
 class GlobeBrowsingModule : public OpenSpaceModule {
 public:
@@ -56,7 +56,7 @@ public:
 
     GlobeBrowsingModule();
 
-    void goToChunk(const globebrowsing::RenderableGlobe& globe, int x, int y, int level);
+    void goToChunk(const SceneGraphNode& globe, int x, int y, int level);
 
     globebrowsing::cache::MemoryAwareTileCache* tileCache();
     scripting::LuaLibrary luaLibrary() const override;
@@ -96,9 +96,6 @@ protected:
     void internalInitialize(const ghoul::Dictionary&) override;
 
 private:
-    void goToChunk(const globebrowsing::RenderableGlobe& globe,
-        const globebrowsing::TileIndex& ti, const glm::vec2& uv);
-
     properties::UIntProperty _tileCacheSizeMB;
 
     properties::StringProperty _defaultGeoPointTexturePath;

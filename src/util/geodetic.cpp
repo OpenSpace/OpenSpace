@@ -34,20 +34,15 @@
 
 namespace openspace {
 
-double altitudeFromCamera(const Renderable& renderable, bool useHeightMap) {
+double altitudeFromCamera(const SceneGraphNode& sgn, bool useHeightMap) {
     const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
-    SceneGraphNode* sgn = dynamic_cast<SceneGraphNode*>(renderable.owner());
-    if (!sgn) {
-        LERRORC("AltitudeFromCamera", "Could not find scene graph node for renderable");
-        return 0.0;
-    }
 
-    const glm::dmat4 inverseModelTransform = glm::inverse(sgn->modelTransform());
+    const glm::dmat4 inverseModelTransform = glm::inverse(sgn.modelTransform());
 
     const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
 
-    SurfacePositionHandle posHandle = renderable.calculateSurfacePositionHandle(
+    SurfacePositionHandle posHandle = sgn.calculateSurfacePositionHandle(
         cameraPositionModelSpace
     );
 
@@ -63,17 +58,15 @@ double altitudeFromCamera(const Renderable& renderable, bool useHeightMap) {
     }
 }
 
-void goToGeo(const Renderable& globe, double latitude, double longitude) {
-    goToGeodetic2(
-        globe,
-        Geodetic2{ glm::radians(latitude), glm::radians(longitude) }
-    );
+void goToGeo(const SceneGraphNode& sgn, double latitude, double longitude) {
+    goToGeodetic2(sgn, Geodetic2{ glm::radians(latitude), glm::radians(longitude) });
 }
 
-void goToGeo(const Renderable& globe, double latitude, double longitude, double altitude)
+void goToGeo(const SceneGraphNode& sgn, double latitude, double longitude,
+             double altitude)
 {
     goToGeodetic3(
-        globe,
+        sgn,
         {
             Geodetic2{ glm::radians(latitude), glm::radians(longitude) },
             altitude
@@ -81,12 +74,12 @@ void goToGeo(const Renderable& globe, double latitude, double longitude, double 
     );
 }
 
-void goToGeodetic3(const Renderable& globe, Geodetic3 geo3) {
-    const glm::dvec3 positionModelSpace = globe.ellipsoid().cartesianPosition(geo3);
+void goToGeodetic3(const SceneGraphNode& sgn, Geodetic3 geo3) {
+    const glm::dvec3 positionModelSpace = sgn.ellipsoid().cartesianPosition(geo3);
 
     interaction::NavigationState state;
-    state.anchor = globe.owner()->identifier();
-    state.referenceFrame = globe.owner()->identifier();
+    state.anchor = sgn.identifier();
+    state.referenceFrame = sgn.identifier();
     state.position = positionModelSpace;
     // For globes, we know that the up-direction will always be positive Z.
     // @TODO (2023-12-06 emmbr) Eventually, we want each scene graph node to be aware of
@@ -96,20 +89,20 @@ void goToGeodetic3(const Renderable& globe, Geodetic3 geo3) {
     global::navigationHandler->setNavigationStateNextFrame(state);
 }
 
-void goToGeodetic2(const Renderable& globe, Geodetic2 geo2) {
+void goToGeodetic2(const SceneGraphNode& globe, Geodetic2 geo2) {
     const double altitude = altitudeFromCamera(globe);
 
     goToGeodetic3(globe, { std::move(geo2), altitude });
 }
 
-glm::vec3 cartesianCoordinatesFromGeo(const Renderable& renderable, double latitude,
+glm::vec3 cartesianCoordinatesFromGeo(const SceneGraphNode& sgn, double latitude,
                                       double longitude, std::optional<double> altitude)
 {
     const Geodetic3 pos = {
         {.lat = glm::radians(latitude), .lon = glm::radians(longitude) },
-        altitude.value_or(altitudeFromCamera(renderable))
+        altitude.value_or(altitudeFromCamera(sgn))
     };
-    return glm::vec3(renderable.ellipsoid().cartesianPosition(pos));
+    return glm::vec3(sgn.ellipsoid().cartesianPosition(pos));
 }
 
 glm::dvec3 geoPosition() {

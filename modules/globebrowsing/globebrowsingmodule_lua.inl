@@ -300,17 +300,20 @@ namespace {
         throw ghoul::lua::LuaError("Identifier must be a RenderableGlobe");
     }
 
-    global::moduleEngine->module<GlobeBrowsingModule>()->goToChunk(*globe, x, y, level);
+    global::moduleEngine->module<GlobeBrowsingModule>()->goToChunk(*n, x, y, level);
 }
 
 /**
- * Immediately move the camera to a geographic coordinate on a globe by first fading the
- * rendering to black, jump to the specified coordinate, and then fade in.
+ * Immediately move the camera to a geographic coordinate on a node by first fading the
+ * rendering to black, jump to the specified coordinate, and then fade in. If the node is
+ * a globe, the  longitude and latitude is expressed in the body's native coordinate
+ * system. If it is not, the position on the surface of the interaction sphere is used
+ * instead.
  *
  * This is done by triggering another script that handles the logic.
  *
- * \param globe The identifier of a scene graph node that has a RenderableGlobe attached.
- *              If an empty string is provided, the current anchor node is used
+ * \param node The identifier of a scene graph node. If an empty string is provided, the
+ *        current anchor node is used
  * \param latitude The latitude of the target coordinate, in degrees
  * \param longitude The longitude of the target coordinate, in degrees
  * \param altitude An optional altitude, given in meters over the reference surface of
@@ -319,7 +322,7 @@ namespace {
  * \param fadeDuration An optional duration for the fading. If not included, the
  *                     property in Navigation Handler will be used
  */
-[[codegen::luawrap]] void jumpToGeo(std::string globe, double latitude, double longitude,
+[[codegen::luawrap]] void jumpToGeo(std::string node, double latitude, double longitude,
                                     std::optional<double> altitude,
                                     std::optional<double> fadeDuration)
 {
@@ -331,13 +334,13 @@ namespace {
     if (altitude.has_value()) {
         script = std::format(
             "openspace.globebrowsing.flyToGeo('{}', {}, {}, {}, 0)",
-            globe, latitude, longitude, *altitude
+            node, latitude, longitude, *altitude
         );
     }
     else {
         script = std::format(
             "openspace.globebrowsing.flyToGeo2('{}', {}, {}, true, 0)",
-            globe, latitude, longitude
+            node, latitude, longitude
         );
     }
 
@@ -353,17 +356,19 @@ namespace {
 }
 
 /**
- * Immediately move the camera to a geographic coordinate on a globe.
+ * Immediately move the camera to a geographic coordinate on a globe. If the node is a
+ * globe, the longitude and latitude is expressed in the body's native coordinate system.
+ * If it is not, the position on the surface of the interaction sphere is used instead.
  *
- * \param globe The identifier of a scene graph node that has a RenderableGlobe attached.
- *              If an empty string is provided, the current anchor node is used
+ * \param node The identifier of a scene graph node. If an empty string is provided, the
+ *        current anchor node is used
  * \param latitude The latitude of the target coordinate, in degrees
  * \param longitude The longitude of the target coordinate, in degrees
  * \param altitude An optional altitude, given in meters over the reference surface of
  *                 the globe. If no altitude is provided, the altitude will be kept as
  *                 the current distance to the reference surface of the specified globe.
  */
-[[codegen::luawrap("goToGeo")]] void goToGeoDeprecated(std::string globe, double latitude,
+[[codegen::luawrap("goToGeo")]] void goToGeoDeprecated(std::string node, double latitude,
                                                        double longitude,
                                                        std::optional<double> altitude)
 {
@@ -372,28 +377,21 @@ namespace {
         "'goToGeo' function is deprecated and should be replaced with 'jumpToGeo'"
     );
 
-    return jumpToGeo(
-        std::move(globe),
-        latitude,
-        longitude,
-        altitude,
-        0
-    );
+    return jumpToGeo(std::move(node), latitude, longitude, altitude, 0);
 }
 
-void flyToGeoInternal(std::string globe, double latitude,
-                      double longitude, std::optional<double> altitude,
-                      std::optional<double> duration,
+void flyToGeoInternal(std::string node, double latitude, double longitude,
+                      std::optional<double> altitude, std::optional<double> duration,
                       std::optional<bool> shouldUseUpVector)
 {
     using namespace openspace;
     using namespace globebrowsing;
 
     const SceneGraphNode* n;
-    if (!globe.empty()) {
-        n = sceneGraphNode(globe);
+    if (!node.empty()) {
+        n = sceneGraphNode(node);
         if (!n) {
-            throw ghoul::lua::LuaError("Unknown globe name: " + globe);
+            throw ghoul::lua::LuaError("Unknown scene graph node: " + node);
         }
     }
     else {
@@ -403,13 +401,8 @@ void flyToGeoInternal(std::string globe, double latitude,
         }
     }
 
-    const RenderableGlobe* gl = dynamic_cast<const RenderableGlobe*>(n->renderable());
-    if (!gl) {
-        throw ghoul::lua::LuaError("The targetted node is not a RenderableGlobe");
-    }
-
     const glm::dvec3 positionModelCoords = cartesianCoordinatesFromGeo(
-        *gl,
+        *n,
         latitude,
         longitude,
         altitude
@@ -417,7 +410,7 @@ void flyToGeoInternal(std::string globe, double latitude,
 
     const glm::dvec3 currentPosW = global::navigationHandler->camera()->positionVec3();
     const glm::dvec3 currentPosModelCoords =
-        glm::inverse(gl->modelTransform()) * glm::dvec4(currentPosW, 1.0);
+        glm::inverse(n->modelTransform()) * glm::dvec4(currentPosW, 1.0);
 
     constexpr double LengthEpsilon = 10.0; // meters
     if (glm::distance(currentPosModelCoords, positionModelCoords) < LengthEpsilon) {
@@ -449,13 +442,15 @@ void flyToGeoInternal(std::string globe, double latitude,
 
 /**
  * Fly the camera to a geographic coordinate (latitude and longitude) on a globe, using
- * the path navigation system.
+ * the path navigation system. If the node is a globe, the longitude and latitude is
+ * expressed in the body's native coordinate system. If it is not, the position on the
+ * surface of the interaction sphere is used instead.
  *
  * The distance to fly to can either be set to be the current distance of the camera to
  * the target object, or the default distance from the path navigation system.
  *
- * \param globe The identifier of a scene graph node that has a RenderableGlobe attached.
- *              If an empty string is provided, the current anchor node is used
+ * \param node The identifier of a scene graph node. If an empty string is provided, the
+ *             current anchor node is used
  * \param latitude The latitude of the target coordinate, in degrees
  * \param longitude The longitude of the target coordinate, in degrees
  * \param useCurrentDistance If true, use the current distance of the camera to the
@@ -470,7 +465,7 @@ void flyToGeoInternal(std::string globe, double latitude,
  *                          direction. Note that for this to take effect, rolling motions
  *                          must be enabled in the Path Navigator settings.
  */
-[[codegen::luawrap]] void flyToGeo2(std::string globe, double latitude, double longitude,
+[[codegen::luawrap]] void flyToGeo2(std::string node, double latitude, double longitude,
                                     std::optional<bool> useCurrentDistance,
                                     std::optional<double> duration,
                                     std::optional<bool> shouldUseUpVector)
@@ -482,11 +477,11 @@ void flyToGeoInternal(std::string globe, double latitude,
         altitude = std::nullopt;
     }
     else {
-        altitude = global::navigationHandler->pathNavigator().defaultArrivalHeight(globe);
+        altitude = global::navigationHandler->pathNavigator().defaultArrivalHeight(node);
     }
 
     flyToGeoInternal(
-        globe,
+        node,
         latitude,
         longitude,
         std::nullopt,
@@ -497,10 +492,12 @@ void flyToGeoInternal(std::string globe, double latitude,
 
  /**
   * Fly the camera to a geographic coordinate (latitude, longitude and altitude) on a
-  * globe, using the path navigation system.
+  * globe, using the path navigation system. If the node is a globe, the longitude and
+  * latitude is expressed in the body's native coordinate system. If it is not, the
+  * position on the surface of the interaction sphere is used instead.
   *
-  * \param globe The identifier of a scene graph node that has a RenderableGlobe attached.
-  *              If an empty string is provided, the current anchor node is used
+  * \param node The identifier of a scene graph node. If an empty string is provided, the
+  *        current anchor node is used
   * \param latitude The latitude of the target coordinate, in degrees
   * \param longitude The longitude of the target coordinate, in degrees
   * \param altitude The altitude of the target coordinate, in meters
@@ -512,60 +509,60 @@ void flyToGeoInternal(std::string globe, double latitude,
   *                          direction. Note that for this to take effect, rolling motions
   *                          must be enabled in the Path Navigator settings.
   */
-[[codegen::luawrap]] void flyToGeo(std::string globe, double latitude,
+[[codegen::luawrap]] void flyToGeo(std::string node, double latitude,
                                    double longitude, double altitude,
                                    std::optional<double> duration,
                                    std::optional<bool> shouldUseUpVector)
 {
-    flyToGeoInternal(globe, latitude, longitude, altitude, duration, shouldUseUpVector);
+    flyToGeoInternal(node, latitude, longitude, altitude, duration, shouldUseUpVector);
 }
 
 /**
- * Returns the position in the local Cartesian coordinate system of the specified globe
+ * Returns the position in the local Cartesian coordinate system of the specified node
  * that corresponds to the given geographic coordinates. In the local coordinate system,
- * the position (0,0,0) corresponds to the globe's center.
+ * the position (0,0,0) corresponds to the globe's center. If the node is a globe, the
+ * longitude and latitude is expressed in the body's native coordinate system. If it is
+ * not, the position on the surface of the interaction sphere is used instead.
  *
- * \param globeIdentifier The identifier of the scene graph node for the globe
+ * \param nodeIdentifier The identifier of the scene graph node
  * \param latitude The latitude of the geograpic position, in degrees
  * \param longitude The longitude of the geographic position, in degrees
  * \param altitude The altitude, in meters
  */
 [[codegen::luawrap]]
 std::tuple<double, double, double>
-localPositionFromGeo(std::string globeIdentifier, double latitude, double longitude,
+localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitude,
                      double altitude)
 {
     using namespace openspace;
     using namespace globebrowsing;
 
-    SceneGraphNode* n = sceneGraphNode(globeIdentifier);
+    SceneGraphNode* n = sceneGraphNode(nodeIdentifier);
     if (!n) {
-        throw ghoul::lua::LuaError("Unknown globe identifier: " + globeIdentifier);
-    }
-    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
-    if (!globe) {
-        throw ghoul::lua::LuaError("Identifier must be a RenderableGlobe");
+        throw ghoul::lua::LuaError("Unknown globe identifier: " + nodeIdentifier);
     }
 
-    glm::vec3 p = cartesianCoordinatesFromGeo(*globe, latitude, longitude, altitude);
+    glm::vec3 p = cartesianCoordinatesFromGeo(*n, latitude, longitude, altitude);
     return { p.x, p.y, p.z };
 }
 
 /**
 * Returns the position in the local Cartesian coordinate system of the specified globe
 * that corresponds to the given geographic coordinates. In the local coordinate system,
-* the position (0,0,0) corresponds to the globe's center.
+* the position (0,0,0) corresponds to the globe's center. If the node is a globe, the
+* longitude and latitude is expressed in the body's native coordinate system. If it is
+* not, the position on the surface of the interaction sphere is used instead.
 *
 * Deprecated in favor of `localPositionFromGeo`.
 *
-* \param globeIdentifier The identifier of the scene graph node for the globe
+* \param globeIdentifier The identifier of the scene graph node
 * \param latitude The latitude of the geograpic position, in degrees
 * \param longitude The longitude of the geographic position, in degrees
 * \param altitude The altitude, in meters
 */
 [[codegen::luawrap("getLocalPositionFromGeo")]]
 std::tuple<double, double, double>
-localPositionFromGeoDeprecated(std::string globeIdentifier, double latitude,
+localPositionFromGeoDeprecated(std::string nodeIdentifier, double latitude,
                                double longitude, double altitude)
 {
     LWARNINGC(
@@ -574,12 +571,7 @@ localPositionFromGeoDeprecated(std::string globeIdentifier, double latitude,
         "'localPositionFromGeo'"
     );
 
-    return localPositionFromGeo(
-        std::move(globeIdentifier),
-        latitude,
-        longitude,
-        altitude
-    );
+    return localPositionFromGeo(std::move(nodeIdentifier), latitude, longitude, altitude);
 }
 
 /**

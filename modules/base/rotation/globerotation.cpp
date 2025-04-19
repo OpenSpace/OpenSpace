@@ -40,7 +40,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo GlobeInfo = {
         "Globe",
         "Attached Globe",
-        "The globe on which the longitude/latitude is specified.",
+        "The node on which the longitude/latitude is specified. If the node is a globe, "
+        "the correct height information for the globe is used. Otherwise, the position "
+        "is specified based on the longitude and latitude on the node's interaction "
+        "sphere",
         openspace::properties::Property::Visibility::User
     };
 
@@ -94,8 +97,7 @@ namespace {
     // graph node at the same position for which the rotation is calculated.
     struct [[codegen::Dictionary(GlobeRotation)]] Parameters {
         // [[codegen::verbatim(GlobeInfo.description)]]
-        std::string globe
-            [[codegen::annotation("A valid scene graph node with a RenderableGlobe")]];
+        std::string globe;
 
         // [[codegen::verbatim(LatitudeInfo.description)]]
         double latitude [[codegen::inrange(-90.0, 90.0)]];
@@ -169,7 +171,7 @@ void GlobeRotation::findGlobe() {
         );
         return;
     }
-    _renderable = n->renderable();
+    _attachedNode = n;
 }
 
 void GlobeRotation::setUpdateVariables() {
@@ -178,26 +180,26 @@ void GlobeRotation::setUpdateVariables() {
 }
 
 glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitude) const {
-    ghoul_assert(_renderable, "Renderable cannot be nullptr");
+    ghoul_assert(_attachedNode, "Renderable cannot be nullptr");
 
     const Geodetic3 pos = {
         { .lat = glm::radians(latitude), .lon = glm::radians(longitude) },
-        altitudeFromCamera(*_renderable)
+        altitudeFromCamera(*_attachedNode)
     };
 
     const glm::vec3 groundPos = cartesianCoordinatesFromGeo(
-        *_renderable,
+        *_attachedNode,
         latitude,
         longitude,
         0.0
     );
 
     const SurfacePositionHandle h =
-        _renderable->calculateSurfacePositionHandle(groundPos);
+        _attachedNode->calculateSurfacePositionHandle(groundPos);
 
     // Compute position including heightmap
     return cartesianCoordinatesFromGeo(
-        *_renderable,
+        *_attachedNode,
         latitude,
         longitude,
         h.heightToSurface
@@ -205,7 +207,7 @@ glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitud
 }
 
 void GlobeRotation::update(const UpdateData& data) {
-    if (!_renderable) [[unlikely]] {
+    if (!_attachedNode) [[unlikely]] {
         findGlobe();
         _matrixIsDirty = true;
     }
@@ -223,7 +225,7 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
         return _matrix;
     }
 
-    if (!_renderable) {
+    if (!_attachedNode) {
         LERRORC(
             "GlobeRotation",
             std::format("Could not find globe '{}'", _sceneGraphNode.value())
@@ -255,7 +257,7 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
     else {
         const float latitudeRad = glm::radians(static_cast<float>(lat));
         const float longitudeRad = glm::radians(static_cast<float>(lon));
-        yAxis = _renderable->ellipsoid().geodeticSurfaceNormal(
+        yAxis = _attachedNode->ellipsoid().geodeticSurfaceNormal(
             { latitudeRad, longitudeRad }
         );
     }

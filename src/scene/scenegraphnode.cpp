@@ -1316,6 +1316,15 @@ const std::vector<std::string>& SceneGraphNode::onExitAction() const {
     return _onExitAction;
 }
 
+Ellipsoid SceneGraphNode::ellipsoid() const {
+    if (_renderable) {
+        return _renderable->ellipsoid();
+    }
+    else {
+        return Ellipsoid(glm::dvec3(_interactionSphere));
+    }
+}
+
 double SceneGraphNode::boundingSphere() const {
     if (_overrideBoundingSphere.has_value()) {
         return glm::compMax(scale() * *_overrideBoundingSphere);

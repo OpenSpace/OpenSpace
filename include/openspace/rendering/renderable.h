@@ -106,7 +106,6 @@ public:
 
     virtual Ellipsoid ellipsoid() const;
 
-
     virtual bool renderedWithDesiredData() const;
 
     RenderBin renderBin() const;

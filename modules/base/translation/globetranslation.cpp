@@ -40,7 +40,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo GlobeInfo = {
         "Globe",
         "Attached Globe",
-        "The globe on which the longitude/latitude is specified.",
+        "The node on which the longitude/latitude is specified. If the node is a globe, "
+        "the correct height information for the globe is used. Otherwise, the position "
+        "is specified based on the longitude and latitude on the node's interaction "
+        "sphere",
         openspace::properties::Property::Visibility::User
     };
 
@@ -94,10 +97,21 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This `Translation` places the scene graph node at a specific location relative to
+    // another scene graph node. The position is identified via the longitude, latitude,
+    // and altitude parameters. If the provided scene graph node is a globe, the positions
+    // correspond to the native coordinate frame of that object. If it is a node without a
+    // renderable or a non-globe renderable, the latitude/longitude grid used is the
+    // node's interaction sphere.
+    // This class is useful in conjunction with the
+    // [GlobeRotation](#base_rotation_globerotation) rotation to orient a scene graph node
+    // away from the center of the body.
+    //
+    // If the UseCamera value is set, the object's position automatically updates based on
+    // the current camera location.
     struct [[codegen::Dictionary(GlobeTranslation)]] Parameters {
         // [[codegen::verbatim(GlobeInfo.description)]]
-        std::string globe
-            [[codegen::annotation("A valid scene graph node with a RenderableGlobe")]];
+        std::string globe;
 
         // [[codegen::verbatim(LatitudeInfo.description)]]
         std::optional<double> latitude;
@@ -182,7 +196,7 @@ void GlobeTranslation::fillAttachedNode() {
         return;
     }
 
-    _attachedNode = n->renderable();
+    _attachedNode = n;
 }
 
 void GlobeTranslation::setUpdateVariables() {
