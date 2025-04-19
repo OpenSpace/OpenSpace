@@ -117,6 +117,11 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(COBE)
   openspace.addSceneGraphNode(WMAP)
   openspace.addSceneGraphNode(Planck)
+
+  openspace.setGuiOrder(
+    "/Universe/Cosmic Microwave Background",
+    { COBE.Identifier, WMAP.Identifier, Planck.Identifier }
+  )
 end)
 
 asset.onDeinitialize(function()
