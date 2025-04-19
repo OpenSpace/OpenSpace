@@ -1,0 +1,7 @@
+return {
+  {
+    Type = "ConvertModelTask",
+    InputFilePath = "< in path >",
+    OutputFilePath = "< out path >"
+  }
+}

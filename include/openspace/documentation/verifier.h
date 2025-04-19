@@ -191,30 +191,40 @@ public:
 
 /**
  * A Verifier that checks whether a given key inside a ghoul::Dictionary is a string and
- * refers to an existing file on disk.
+ * optionally refers to an existing file on disk.
  */
 class FileVerifier : public StringVerifier {
 public:
-    FileVerifier();
+    explicit FileVerifier(bool fileMustExist = true);
 
     TestResult operator()(const ghoul::Dictionary& dict,
         const std::string& key) const override;
 
     std::string type() const override;
+
+    bool mustExist() const;
+
+private:
+    bool _fileMustExist = true;
 };
 
 /**
  * A Verifier that checks whether a given key inside a ghoul::Dictionary is a string and
- * refers to an existing directory on disk.
+ * optionally refers to an existing directory on disk.
  */
 class DirectoryVerifier : public StringVerifier {
 public:
-    DirectoryVerifier();
+    explicit DirectoryVerifier(bool directoryMustExist = true);
 
     TestResult operator()(const ghoul::Dictionary& dict,
         const std::string& key) const override;
 
     std::string type() const override;
+
+    bool mustExist() const;
+
+private:
+    bool _directoryMustExist = true;
 };
 
 /**
