@@ -27,7 +27,6 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/globebrowsing/src/ellipsoid.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
 #include <modules/globebrowsing/src/geojson/geojsonmanager.h>
 #include <modules/globebrowsing/src/globelabelscomponent.h>
@@ -41,6 +40,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
+#include <openspace/util/ellipsoid.h>
 #include <ghoul/misc/memorypool.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <cstddef>
@@ -114,7 +114,7 @@ public:
 
     bool renderedWithDesiredData() const override;
 
-    const Ellipsoid& ellipsoid() const;
+    Ellipsoid ellipsoid() const override;
     const LayerManager& layerManager() const;
     LayerManager& layerManager();
     const GeoJsonManager& geoJsonManager() const;

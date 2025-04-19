@@ -30,6 +30,7 @@
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
+#include <openspace/util/ellipsoid.h>
 #include <ghoul/glm.h>
 #include <future>
 #include <memory>
@@ -38,8 +39,6 @@
 namespace openspace::globebrowsing {
     class RenderableGlobe;
     struct TileIndex;
-    struct Geodetic2;
-    struct Geodetic3;
 
     namespace cache { class MemoryAwareTileCache; }
 } // namespace openspace::globebrowsing
@@ -47,6 +46,8 @@ namespace openspace::globebrowsing {
 namespace openspace {
 
 class Camera;
+struct Geodetic2;
+struct Geodetic3;
 class Renderable;
 
 class GlobeBrowsingModule : public OpenSpaceModule {
@@ -113,11 +114,8 @@ private:
     void goToChunk(const globebrowsing::RenderableGlobe& globe,
         const globebrowsing::TileIndex& ti, const glm::vec2& uv);
 
-    void goToGeodetic2(const globebrowsing::RenderableGlobe& globe,
-        globebrowsing::Geodetic2 geo2);
-
-    void goToGeodetic3(const globebrowsing::RenderableGlobe& globe,
-        globebrowsing::Geodetic3 geo3);
+    void goToGeodetic2(const globebrowsing::RenderableGlobe& globe, Geodetic2 geo2);
+    void goToGeodetic3(const globebrowsing::RenderableGlobe& globe, Geodetic3 geo3);
 
     properties::UIntProperty _tileCacheSizeMB;
 

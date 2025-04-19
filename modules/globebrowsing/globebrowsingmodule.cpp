@@ -503,17 +503,17 @@ void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
 }
 
 void GlobeBrowsingModule::goToGeodetic2(const globebrowsing::RenderableGlobe& globe,
-                                        globebrowsing::Geodetic2 geo2)
+                                        Geodetic2 geo2)
 {
     using namespace globebrowsing;
 
     const double altitude = altitudeFromCamera(globe);
 
-    goToGeodetic3(globe, { geo2, altitude });
+    goToGeodetic3(globe, { std::move(geo2), altitude });
 }
 
 void GlobeBrowsingModule::goToGeodetic3(const globebrowsing::RenderableGlobe& globe,
-                                        globebrowsing::Geodetic3 geo3)
+                                        Geodetic3 geo3)
 {
     using namespace globebrowsing;
     const glm::dvec3 positionModelSpace = globe.ellipsoid().cartesianPosition(geo3);
