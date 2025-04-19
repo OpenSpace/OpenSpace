@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/src/globetranslation.h>
+#include <modules/base/translation/globetranslation.h>
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <openspace/documentation/documentation.h>
@@ -32,6 +32,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
+#include <openspace/util/geodetic.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
 
@@ -119,10 +120,10 @@ namespace {
 #include "globetranslation_codegen.cpp"
 } // namespace
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 documentation::Documentation GlobeTranslation::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_translation_globetranslation");
+    return codegen::doc<Parameters>("base_translation_globetranslation");
 }
 
 GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
@@ -216,14 +217,12 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
         return _position;
     }
 
-    GlobeBrowsingModule* mod = global::moduleEngine->module<GlobeBrowsingModule>();
-
     double lat = _latitude;
     double lon = _longitude;
     double alt = _altitude;
 
     if (_useCamera) {
-        const glm::dvec3 position = mod->geoPosition();
+        const glm::dvec3 position = geoPosition();
         lat = position.x;
         lon = position.y;
         if (_useCameraAltitude) {
@@ -232,7 +231,7 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
     }
 
     if (_useHeightmap) {
-        const glm::vec3 groundPos = mod->cartesianCoordinatesFromGeo(
+        const glm::vec3 groundPos = cartesianCoordinatesFromGeo(
             *_attachedNode,
             lat,
             lon,
@@ -243,24 +242,23 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
             groundPos
         );
 
-        _position = mod->cartesianCoordinatesFromGeo(
+        _position = cartesianCoordinatesFromGeo(
             *_attachedNode,
             lat,
             lon,
             h.heightToSurface + alt
         );
-        return _position;
     }
     else {
-        _position = mod->cartesianCoordinatesFromGeo(
+        _position = cartesianCoordinatesFromGeo(
             *_attachedNode,
             lat,
             lon,
             alt
         );
         _positionIsDirty = false;
-        return _position;
     }
+    return _position;
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

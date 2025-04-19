@@ -25,7 +25,12 @@
 #ifndef __OPENSPACE_CORE___GEODETIC___H__
 #define __OPENSPACE_CORE___GEODETIC___H__
 
+#include <ghoul/glm.h>
+#include <optional>
+
 namespace openspace {
+
+class Renderable;
 
 struct Geodetic2 {
     double lat = 0.0; // in radians
@@ -36,6 +41,19 @@ struct Geodetic3 {
     Geodetic2 geodetic2;
     double height = 0.0; // in meters
 };
+
+double altitudeFromCamera(const Renderable& renderable, bool useHeightMap = false);
+
+void goToGeo(const Renderable& globe, double latitude, double longitude);
+void goToGeo(const Renderable& globe, double latitude, double longitude, double altitude);
+
+void goToGeodetic2(const Renderable& globe, Geodetic2 geo2);
+void goToGeodetic3(const Renderable& globe, Geodetic3 geo3);
+
+glm::vec3 cartesianCoordinatesFromGeo(const Renderable& renderable, double latitude,
+    double longitude, std::optional<double> altitude = std::nullopt);
+
+glm::dvec3 geoPosition();
 
 } // namespace openspace
 

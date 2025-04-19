@@ -408,8 +408,7 @@ void flyToGeoInternal(std::string globe, double latitude,
         throw ghoul::lua::LuaError("The targetted node is not a RenderableGlobe");
     }
 
-    auto module = global::moduleEngine->module<GlobeBrowsingModule>();
-    const glm::dvec3 positionModelCoords = module->cartesianCoordinatesFromGeo(
+    const glm::dvec3 positionModelCoords = cartesianCoordinatesFromGeo(
         *gl,
         latitude,
         longitude,
@@ -548,8 +547,7 @@ localPositionFromGeo(std::string globeIdentifier, double latitude, double longit
         throw ghoul::lua::LuaError("Identifier must be a RenderableGlobe");
     }
 
-    GlobeBrowsingModule& mod = *(global::moduleEngine->module<GlobeBrowsingModule>());
-    glm::vec3 p = mod.cartesianCoordinatesFromGeo(*globe, latitude, longitude, altitude);
+    glm::vec3 p = cartesianCoordinatesFromGeo(*globe, latitude, longitude, altitude);
     return { p.x, p.y, p.z };
 }
 

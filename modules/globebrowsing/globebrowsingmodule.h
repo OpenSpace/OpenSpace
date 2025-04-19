@@ -57,21 +57,6 @@ public:
     GlobeBrowsingModule();
 
     void goToChunk(const globebrowsing::RenderableGlobe& globe, int x, int y, int level);
-    void goToGeo(const globebrowsing::RenderableGlobe& globe,
-        double latitude, double longitude);
-
-    void goToGeo(const globebrowsing::RenderableGlobe& globe,
-        double latitude, double longitude, double altitude);
-
-    // If the `renderable` is a RenderableGlobe, it will use the correct height
-    // information to calculate the cartesian information. If it is any other type of
-    // `Renderable`, this function ses the interaction sphere as a standin
-    glm::vec3 cartesianCoordinatesFromGeo(const Renderable& renderable, double latitude,
-        double longitude, std::optional<double> altitude = std::nullopt);
-
-    glm::dvec3 geoPosition() const;
-
-    double altitudeFromCamera(const Renderable& globe, bool useHeightMap = false) const;
 
     globebrowsing::cache::MemoryAwareTileCache* tileCache();
     scripting::LuaLibrary luaLibrary() const override;
@@ -113,9 +98,6 @@ protected:
 private:
     void goToChunk(const globebrowsing::RenderableGlobe& globe,
         const globebrowsing::TileIndex& ti, const glm::vec2& uv);
-
-    void goToGeodetic2(const globebrowsing::RenderableGlobe& globe, Geodetic2 geo2);
-    void goToGeodetic3(const globebrowsing::RenderableGlobe& globe, Geodetic3 geo3);
 
     properties::UIntProperty _tileCacheSizeMB;
 

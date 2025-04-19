@@ -469,9 +469,7 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
             }
             std::strncpy(lEntry.feature, token.c_str(), 255);
 
-            GlobeBrowsingModule* _globeBrowsingModule =
-                global::moduleEngine->module<openspace::GlobeBrowsingModule>();
-            lEntry.geoPosition = _globeBrowsingModule->cartesianCoordinatesFromGeo(
+            lEntry.geoPosition = cartesianCoordinatesFromGeo(
                 *_globe,
                 lEntry.latitude,
                 lEntry.longitude,

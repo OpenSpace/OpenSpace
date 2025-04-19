@@ -22,16 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/src/globerotation.h>
+#include <modules/base/rotation/globerotation.h>
 
-#include <modules/globebrowsing/globebrowsingmodule.h>
-#include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
+#include <openspace/util/ellipsoid.h>
+#include <openspace/util/geodetic.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/quaternion.hpp>
@@ -90,8 +90,8 @@ namespace {
     // This `Rotation` orients the scene graph node in such a way that the y-axis points
     // away from the provided globe, the x-axis points towards the globe's southern pole
     // and the z-axis points in a western direction. Using this rotation generally means
-    // using the [GlobeTranslation](#globebrowsing_translation_globetranslation) to place
-    // the scene graph node at the same position for which the rotation is calculated.
+    // using the [GlobeTranslation](#base_translation_globetranslation) to place the scene
+    // graph node at the same position for which the rotation is calculated.
     struct [[codegen::Dictionary(GlobeRotation)]] Parameters {
         // [[codegen::verbatim(GlobeInfo.description)]]
         std::string globe
@@ -115,10 +115,10 @@ namespace {
 #include "globerotation_codegen.cpp"
 } // namespace
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 documentation::Documentation GlobeRotation::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_rotation_globerotation");
+    return codegen::doc<Parameters>("base_rotation_globerotation");
 }
 
 GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
@@ -180,8 +180,12 @@ void GlobeRotation::setUpdateVariables() {
 glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitude) const {
     ghoul_assert(_renderable, "Renderable cannot be nullptr");
 
-    GlobeBrowsingModule* mod = global::moduleEngine->module<GlobeBrowsingModule>();
-    const glm::vec3 groundPos = mod->cartesianCoordinatesFromGeo(
+    const Geodetic3 pos = {
+        { .lat = glm::radians(latitude), .lon = glm::radians(longitude) },
+        altitudeFromCamera(*_renderable)
+    };
+
+    const glm::vec3 groundPos = cartesianCoordinatesFromGeo(
         *_renderable,
         latitude,
         longitude,
@@ -192,7 +196,7 @@ glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitud
         _renderable->calculateSurfacePositionHandle(groundPos);
 
     // Compute position including heightmap
-    return mod->cartesianCoordinatesFromGeo(
+    return cartesianCoordinatesFromGeo(
         *_renderable,
         latitude,
         longitude,
@@ -231,8 +235,7 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
     double lon = _longitude;
 
     if (_useCamera) {
-        GlobeBrowsingModule* mod = global::moduleEngine->module<GlobeBrowsingModule>();
-        const glm::dvec3 position = mod->geoPosition();
+        const glm::dvec3 position = geoPosition();
         lat = position.x;
         lon = position.y;
     }

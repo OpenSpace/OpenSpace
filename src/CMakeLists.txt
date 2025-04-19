@@ -174,6 +174,7 @@ set(OPENSPACE_SOURCE
   util/distanceconversion.cpp
   util/ellipsoid.cpp
   util/factorymanager.cpp
+  util/geodetic.cpp
   util/httprequest.cpp
   util/json_helper.cpp
   util/keys.cpp
