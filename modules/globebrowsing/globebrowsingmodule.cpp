@@ -518,12 +518,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             codegen::lua::LayersDeprecated,
             codegen::lua::MoveLayer,
             codegen::lua::GoToChunk,
-            codegen::lua::JumpToGeo,
-            codegen::lua::GoToGeoDeprecated,
-            codegen::lua::FlyToGeo2,
-            codegen::lua::FlyToGeo,
-            codegen::lua::LocalPositionFromGeo,
-            codegen::lua::LocalPositionFromGeoDeprecated,
             codegen::lua::GeoPositionForCamera,
             codegen::lua::GeoPositionForCameraDeprecated,
             codegen::lua::LoadWMSCapabilities,
@@ -531,7 +525,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             codegen::lua::CapabilitiesWMS,
             codegen::lua::AddGeoJson,
             codegen::lua::DeleteGeoJson,
-            codegen::lua::AddGeoJsonFromFile,
+            codegen::lua::AddGeoJsonFromFile
         },
         .scripts = {
             absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua"),
