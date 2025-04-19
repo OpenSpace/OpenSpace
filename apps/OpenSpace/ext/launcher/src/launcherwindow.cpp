@@ -36,6 +36,7 @@
 #include <QFile>
 #include <QKeyEvent>
 #include <QLabel>
+#include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QStandardItemModel>
@@ -211,6 +212,20 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
             newProfileButton, &QPushButton::released,
             this, &LauncherWindow::newProfile
         );
+
+        QMenu* menu = new QMenu;
+        QAction* newClean = new QAction("New profile");
+        connect(
+            newClean, &QAction::triggered,
+            this, &LauncherWindow::newProfile
+        );
+        QAction* newFromCurrent = new QAction("Duplicate profile");
+        connect(
+            newFromCurrent, &QAction::triggered,
+            this, &LauncherWindow::editProfile
+        );
+        menu->addActions({ newClean, newFromCurrent });
+        newProfileButton->setMenu(menu);
     }
 
     // Creating the profile box _after_ the Edit and New buttons as the comboboxes
@@ -407,7 +422,19 @@ void LauncherWindow::selectProfile(std::optional<std::string> selection) {
     ghoul_assert(selection.has_value(), "No special item in the profiles");
     if (selection.has_value()) {
         // Having the `if` statement here to satisfy the MSVC code analysis
-        _editProfileButton->setEnabled(std::filesystem::exists(*selection));
+
+        // Enable the Edit button only for the user profiles
+        const bool isUser = selection->starts_with(_userProfilePath.string());
+        _editProfileButton->setEnabled(isUser);
+
+        if (isUser) {
+            _editProfileButton->setToolTip("");
+        }
+        else {
+            _editProfileButton->setToolTip(
+                "Cannot edit the selected profile as it is one of the built-in profiles"
+            );
+        }
     }
 }
 
@@ -423,8 +450,7 @@ void LauncherWindow::selectConfiguration(std::optional<std::string> selection) {
         // If the configuration is a default configuration, we don't allow editing
         _editWindowButton->setEnabled(false);
         _editWindowButton->setToolTip(
-            "Cannot edit since the selected configuration is one of the files "
-            "provided by OpenSpace"
+            "Cannot edit the selected configuration as it is one of the built-in profiles"
         );
     }
     else {
