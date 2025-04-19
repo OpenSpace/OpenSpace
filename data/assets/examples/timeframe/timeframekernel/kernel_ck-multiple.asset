@@ -1,0 +1,44 @@
+-- CK Multiple
+-- This example creates a time frame based on the information provided by multiple SPICE
+-- kernel files that contain orientation information about the same object. The created
+-- scene graph node will only be valid whenever any window in any of the provided kernels
+-- contains information about refernence frame "-98000", which is the intertial
+-- orientation frame for the New Horizons spacecraft.
+
+-- We need a SPICE kernel to work with in this example
+local data = asset.resource({
+  Name = "New Horizons Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "newhorizons_kernels",
+  Version = 1
+})
+
+local Node = {
+  Identifier = "TimeFrameKernel_Example_CK_Multiple",
+  TimeFrame = {
+    Type = "TimeFrameKernel",
+    CK = {
+      Kernels = {
+        data .. "nh_apf_20150404_20150420_001.bc",
+        data .. "nh_apf_20150420_20150504_001.bc",
+        data .. "new-horizons_1121.tsc"
+      },
+      Reference = "-98000"
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "TimeFrameKernel - Basic (CK, Multiple)",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
