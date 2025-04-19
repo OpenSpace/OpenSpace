@@ -25,7 +25,6 @@
 #include <modules/globebrowsing/src/globetranslation.h>
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
-//#include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
@@ -128,7 +127,7 @@ documentation::Documentation GlobeTranslation::Documentation() {
 
 GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     : Translation(dictionary)
-    , _globe(GlobeInfo)
+    , _sceneGraphNode(GlobeInfo)
     , _latitude(LatitudeInfo, 0.0, -90.0, 90.0)
     , _longitude(LongitudeInfo, 0.0, -180.0, 180.0)
     , _altitude(AltitudeInfo, 0.0, -1e12, 1e12)
@@ -138,12 +137,12 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _globe = p.globe;
-    _globe.onChange([this]() {
+    _sceneGraphNode = p.globe;
+    _sceneGraphNode.onChange([this]() {
         fillAttachedNode();
         setUpdateVariables();
     });
-    addProperty(_globe);
+    addProperty(_sceneGraphNode);
 
     _latitude = p.latitude.value_or(_latitude);
     _latitude.onChange([this]() { setUpdateVariables(); });
@@ -173,20 +172,16 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
 }
 
 void GlobeTranslation::fillAttachedNode() {
-    SceneGraphNode* n = sceneGraphNode(_globe);
-    if (n && n->renderable()) {
-        _attachedNode = n->renderable();
-    }
-    else {
+    SceneGraphNode* n = sceneGraphNode(_sceneGraphNode);
+    if (!n || !n->renderable()) {
         LERRORC(
             "GlobeTranslation",
-            "Could not set attached node as it does not have a RenderableGlobe"
+            "Could not set attached node as it does not have a renderable"
         );
-        if (_attachedNode) {
-            // Reset the globe name to its previous name
-            _globe = _attachedNode->identifier();
-        }
+        return;
     }
+
+    _attachedNode = n->renderable();
 }
 
 void GlobeTranslation::setUpdateVariables() {
@@ -216,7 +211,7 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
     if (!_attachedNode) {
         LERRORC(
             "GlobeRotation",
-            std::format("Could not find attached node '{}'", _globe.value())
+            std::format("Could not find attached node '{}'", _sceneGraphNode.value())
         );
         return _position;
     }

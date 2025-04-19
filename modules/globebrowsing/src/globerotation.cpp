@@ -123,7 +123,7 @@ documentation::Documentation GlobeRotation::Documentation() {
 
 GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
     : Rotation(dictionary)
-    , _globe(GlobeInfo)
+    , _sceneGraphNode(GlobeInfo)
     , _latitude(LatitudeInfo, 0.0, -90.0, 90.0)
     , _longitude(LongitudeInfo, 0.0, -180.0, 180.0)
     , _angle(AngleInfo, 0.0, 0.0, 360.0)
@@ -132,12 +132,12 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _globe = p.globe;
-    _globe.onChange([this]() {
+    _sceneGraphNode = p.globe;
+    _sceneGraphNode.onChange([this]() {
         findGlobe();
         setUpdateVariables();
     });
-    addProperty(_globe);
+    addProperty(_sceneGraphNode);
 
     _latitude = p.latitude;
     _latitude.onChange([this]() { setUpdateVariables(); });
@@ -161,20 +161,15 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
 }
 
 void GlobeRotation::findGlobe() {
-    SceneGraphNode* n = sceneGraphNode(_globe);
-    if (n && n->renderable() && dynamic_cast<RenderableGlobe*>(n->renderable())) {
-        _globeNode = dynamic_cast<RenderableGlobe*>(n->renderable());
-    }
-    else {
+    SceneGraphNode* n = sceneGraphNode(_sceneGraphNode);
+    if (!n || !n->renderable()) {
         LERRORC(
             "GlobeRotation",
-            "Could not set attached node as it does not have a RenderableGlobe"
+            "Could not set attached node as it does not have a Renderable"
         );
-        if (_globeNode) {
-            // Reset the globe name to it's previous name
-            _globe = _globeNode->identifier();
-        }
+        return;
     }
+    _renderable = n->renderable();
 }
 
 void GlobeRotation::setUpdateVariables() {
@@ -183,21 +178,22 @@ void GlobeRotation::setUpdateVariables() {
 }
 
 glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitude) const {
-    ghoul_assert(_globeNode, "Globe cannot be nullptr");
+    ghoul_assert(_renderable, "Renderable cannot be nullptr");
 
     GlobeBrowsingModule* mod = global::moduleEngine->module<GlobeBrowsingModule>();
     const glm::vec3 groundPos = mod->cartesianCoordinatesFromGeo(
-        *_globeNode,
+        *_renderable,
         latitude,
         longitude,
         0.0
     );
 
-    const SurfacePositionHandle h = _globeNode->calculateSurfacePositionHandle(groundPos);
+    const SurfacePositionHandle h =
+        _renderable->calculateSurfacePositionHandle(groundPos);
 
     // Compute position including heightmap
     return mod->cartesianCoordinatesFromGeo(
-        *_globeNode,
+        *_renderable,
         latitude,
         longitude,
         h.heightToSurface
@@ -205,6 +201,11 @@ glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitud
 }
 
 void GlobeRotation::update(const UpdateData& data) {
+    if (!_renderable) [[unlikely]] {
+        findGlobe();
+        _matrixIsDirty = true;
+    }
+
     if (_useHeightmap || _useCamera) {
         // If we use the heightmap, we have to compute the height every frame
         setUpdateVariables();
@@ -214,23 +215,14 @@ void GlobeRotation::update(const UpdateData& data) {
 }
 
 glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
-    if (!_globeNode) {
-        // @TODO(abock): The const cast should be removed on a redesign of the rotation
-        //               to make the matrix function not constant. Const casting this
-        //               away is fine as the factories that create the rotations don't
-        //               create them as constant objects
-        const_cast<GlobeRotation*>(this)->findGlobe();
-        _matrixIsDirty = true;
-    }
-
     if (!_matrixIsDirty) [[likely]] {
         return _matrix;
     }
 
-    if (!_globeNode) {
+    if (!_renderable) {
         LERRORC(
             "GlobeRotation",
-            std::format("Could not find globe '{}'", _globe.value())
+            std::format("Could not find globe '{}'", _sceneGraphNode.value())
         );
         return _matrix;
     }
@@ -260,7 +252,7 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
     else {
         const float latitudeRad = glm::radians(static_cast<float>(lat));
         const float longitudeRad = glm::radians(static_cast<float>(lon));
-        yAxis = _globeNode->ellipsoid().geodeticSurfaceNormal(
+        yAxis = _renderable->ellipsoid().geodeticSurfaceNormal(
             { latitudeRad, longitudeRad }
         );
     }

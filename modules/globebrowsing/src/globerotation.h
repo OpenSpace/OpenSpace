@@ -31,9 +31,9 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 
-namespace openspace::globebrowsing {
+namespace openspace { class Renderable; }
 
-class RenderableGlobe;
+namespace openspace::globebrowsing {
 
 class GlobeRotation : public Rotation {
 public:
@@ -49,14 +49,14 @@ private:
     void setUpdateVariables();
     glm::vec3 computeSurfacePosition(double latitude, double longitude) const;
 
-    properties::StringProperty _globe;
+    properties::StringProperty _sceneGraphNode;
     properties::DoubleProperty _latitude;
     properties::DoubleProperty _longitude;
     properties::DoubleProperty _angle;
     properties::BoolProperty _useHeightmap;
     properties::BoolProperty _useCamera;
 
-    RenderableGlobe* _globeNode = nullptr;
+    Renderable* _renderable = nullptr;
 
     mutable bool _matrixIsDirty = true;
     mutable glm::dmat3 _matrix = glm::dmat3(0.0);

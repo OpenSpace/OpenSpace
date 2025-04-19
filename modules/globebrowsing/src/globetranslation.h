@@ -48,7 +48,7 @@ private:
     void fillAttachedNode();
     void setUpdateVariables();
 
-    properties::StringProperty _globe;
+    properties::StringProperty _sceneGraphNode;
     properties::DoubleProperty _latitude;
     properties::DoubleProperty _longitude;
     properties::DoubleProperty _altitude;
