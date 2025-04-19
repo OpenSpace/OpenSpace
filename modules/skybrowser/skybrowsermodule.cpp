@@ -46,14 +46,6 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowTitleInGuiBrowserInfo = {
-        "ShowTitleInGuiBrowser",
-        "Show Title in Gui Browser",
-        "If true, the name of the currently selected sky browser is shown in the WebGUI "
-        "browser.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     constexpr openspace::properties::Property::PropertyInfo AllowRotationInfo = {
         "AllowCameraRotation",
         "Allow Camera Rotation",
@@ -167,7 +159,6 @@ documentation::Documentation SkyBrowserModule::Documentation() {
 SkyBrowserModule::SkyBrowserModule()
     : OpenSpaceModule(SkyBrowserModule::Name)
     , _enabled(EnabledInfo)
-    , _showTitleInGuiBrowser(ShowTitleInGuiBrowserInfo, true)
     , _allowCameraRotation(AllowRotationInfo, true)
     , _cameraRotationSpeed(CameraRotSpeedInfo, 0.5, 0.0, 1.0)
     , _targetAnimationSpeed(TargetSpeedInfo, 0.2, 0.0, 1.0)
@@ -182,7 +173,6 @@ SkyBrowserModule::SkyBrowserModule()
     )
 {
     addProperty(_enabled);
-    addProperty(_showTitleInGuiBrowser);
     addProperty(_allowCameraRotation);
     addProperty(_cameraRotationSpeed);
     addProperty(_targetAnimationSpeed);

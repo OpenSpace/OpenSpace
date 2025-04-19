@@ -22,9 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/topics/shortcuttopic.h>
+#include <modules/server/include/topics/actionkeybindtopic.h>
 
 #include <modules/server/include/connection.h>
+#include <modules/server/include/jsonconverters.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
@@ -34,12 +35,29 @@ using nlohmann::json;
 
 namespace openspace {
 
-bool ShortcutTopic::isDone() const {
+bool ActionKeybindTopic::isDone() const {
     return true;
 }
 
-std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
-    std::vector<nlohmann::json> json;
+nlohmann::json jsonKeybind(const KeyWithModifier& k, std::string identifier) {
+    const interaction::Action& action = global::actionManager->action(identifier);
+
+    return {
+        { "key", ghoul::to_string(k.key) },
+        { "modifiers",
+            {
+                { "shift" , hasKeyModifier(k.modifier, KeyModifier::Shift) },
+                { "control" , hasKeyModifier(k.modifier, KeyModifier::Control) },
+                { "alt" , hasKeyModifier(k.modifier, KeyModifier::Alt) },
+                { "super" , hasKeyModifier(k.modifier, KeyModifier::Super) }
+            }
+        },
+        { "action", action.identifier },
+    };
+}
+
+nlohmann::json ActionKeybindTopic::allActionsKeybinds() const {
+    nlohmann::json json = {};
     std::vector<interaction::Action> actions = global::actionManager->actions();
     std::sort(
         actions.begin(),
@@ -55,14 +73,7 @@ std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
     );
 
     for (const interaction::Action& action : actions) {
-        const nlohmann::json shortcutJson = {
-            { "identifier", action.identifier },
-            { "name", action.name },
-            { "synchronization", static_cast<bool>(!action.isLocal) },
-            { "documentation", action.documentation },
-            { "guiPath", action.guiPath },
-        };
-        json.push_back(shortcutJson);
+        json["actions"].push_back(action);
     }
 
     const std::multimap<KeyWithModifier, std::string>& keyBindings =
@@ -75,33 +86,13 @@ std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
             // only one of which is actually defined
             continue;
         }
-
-        const KeyWithModifier& k = keyBinding.first;
-        // @TODO (abock, 2021-08-05) Probably this should be rewritten to better account
-        // for the new action mechanism
-        const interaction::Action& action = global::actionManager->action(
-            keyBinding.second
-        );
-
-        const nlohmann::json shortcutJson = {
-            { "key", ghoul::to_string(k.key) },
-            { "modifiers",
-                {
-                    { "shift" , hasKeyModifier(k.modifier, KeyModifier::Shift) },
-                    { "control" , hasKeyModifier(k.modifier, KeyModifier::Control) },
-                    { "alt" , hasKeyModifier(k.modifier, KeyModifier::Alt) },
-                    { "super" , hasKeyModifier(k.modifier, KeyModifier::Super) }
-                }
-            },
-            { "action", action.identifier },
-        };
-        json.push_back(shortcutJson);
+        nlohmann::json keybindJson = jsonKeybind(keyBinding.first, keyBinding.second);
+        json["keybinds"].push_back(keybindJson);
     }
     return json;
 }
 
-nlohmann::json ShortcutTopic::shortcutJson(const std::string& identifier) const {
-    std::vector<nlohmann::json> json;
+nlohmann::json ActionKeybindTopic::action(const std::string& identifier) const {
     std::vector<interaction::Action> actions = global::actionManager->actions();
 
     auto found = std::find_if(
@@ -117,28 +108,22 @@ nlohmann::json ShortcutTopic::shortcutJson(const std::string& identifier) const 
     }
     interaction::Action action = *found;
 
-    json.push_back({
-        { "identifier", action.identifier },
-        { "name", action.name },
-        { "synchronization", static_cast<bool>(!action.isLocal) },
-        { "documentation", action.documentation },
-        { "guiPath", action.guiPath },
-    });
-    return json;
+    return action;
 }
 
-void ShortcutTopic::sendData(nlohmann::json data) const {
-    _connection->sendJson(wrappedPayload({ { "shortcuts", data } }));
+void ActionKeybindTopic::sendData(nlohmann::json data) const {
+    nlohmann::json payload = wrappedPayload({ data });
+    _connection->sendJson(std::move(payload));
 }
 
-void ShortcutTopic::handleJson(const nlohmann::json& input) {
+void ActionKeybindTopic::handleJson(const nlohmann::json& input) {
     const std::string& event = input.at("event").get<std::string>();
-    if (event == "get_all_shortcuts") {
-        sendData(shortcutsJson());
+    if (event == "get_all") {
+        sendData(allActionsKeybinds());
     }
-    else if (event == "get_shortcut") {
+    else if (event == "get_action") {
         const std::string& identifier = input.at("identifier").get<std::string>();
-        sendData(shortcutJson(identifier));
+        sendData(action(identifier));
     }
 }
 

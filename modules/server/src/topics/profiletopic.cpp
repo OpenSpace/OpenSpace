@@ -36,9 +36,12 @@ bool ProfileTopic::isDone() const {
 }
 
 void ProfileTopic::handleJson(const nlohmann::json&) {
+    const std::string name = global::profile->meta->name.value_or("");
+
     const nlohmann::json data = {
         { "uiPanelVisibility", global::profile->uiPanelVisibility },
-        { "markNodes", global::profile->markNodes }
+        { "markNodes", global::profile->markNodes },
+        { "name", name }
     };
     _connection->sendJson(wrappedPayload(data));
 }

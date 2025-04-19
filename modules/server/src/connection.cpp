@@ -38,7 +38,7 @@
 #include <modules/server/include/topics/missiontopic.h>
 #include <modules/server/include/topics/sessionrecordingtopic.h>
 #include <modules/server/include/topics/setpropertytopic.h>
-#include <modules/server/include/topics/shortcuttopic.h>
+#include <modules/server/include/topics/actionkeybindtopic.h>
 #include <modules/server/include/topics/skybrowsertopic.h>
 #include <modules/server/include/topics/subscriptiontopic.h>
 #include <modules/server/include/topics/timetopic.h>
@@ -101,7 +101,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
     _topicFactory.registerClass<ProfileTopic>("profile");
     _topicFactory.registerClass<SessionRecordingTopic>("sessionRecording");
     _topicFactory.registerClass<SetPropertyTopic>("set");
-    _topicFactory.registerClass<ShortcutTopic>("shortcuts");
+    _topicFactory.registerClass<ActionKeybindTopic>("actionsKeybinds");
     _topicFactory.registerClass<SkyBrowserTopic>("skybrowser");
     _topicFactory.registerClass<SubscriptionTopic>("subscribe");
     _topicFactory.registerClass<TimeTopic>("time");
