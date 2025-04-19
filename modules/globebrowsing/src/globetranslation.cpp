@@ -25,11 +25,12 @@
 #include <modules/globebrowsing/src/globetranslation.h>
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
-#include <modules/globebrowsing/src/renderableglobe.h>
+//#include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
 #include <openspace/util/updatestructures.h>
@@ -173,8 +174,8 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
 
 void GlobeTranslation::fillAttachedNode() {
     SceneGraphNode* n = sceneGraphNode(_globe);
-    if (n && n->renderable() && dynamic_cast<RenderableGlobe*>(n->renderable())) {
-        _attachedNode = dynamic_cast<RenderableGlobe*>(n->renderable());
+    if (n && n->renderable()) {
+        _attachedNode = n->renderable();
     }
     else {
         LERRORC(
@@ -194,6 +195,11 @@ void GlobeTranslation::setUpdateVariables() {
 }
 
 void GlobeTranslation::update(const UpdateData& data) {
+    if (!_attachedNode) [[unlikely]] {
+        fillAttachedNode();
+        _positionIsDirty = true;
+    }
+
     if (_useHeightmap || _useCamera) {
         // If we use the heightmap, we have to compute the height every frame
         setUpdateVariables();
@@ -203,15 +209,6 @@ void GlobeTranslation::update(const UpdateData& data) {
 }
 
 glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
-    if (!_attachedNode) {
-        // @TODO(abock): The const cast should be removed on a redesign of the translation
-        //               to make the position function not constant. Const casting this
-        //               away is fine as the factories that create the translations don't
-        //               create them as constant objects
-        const_cast<GlobeTranslation*>(this)->fillAttachedNode();
-        _positionIsDirty = true;
-    }
-
     if (!_positionIsDirty) [[likely]] {
         return _position;
     }

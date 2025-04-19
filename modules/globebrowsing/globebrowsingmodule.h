@@ -47,6 +47,7 @@ namespace openspace::globebrowsing {
 namespace openspace {
 
 class Camera;
+class Renderable;
 
 class GlobeBrowsingModule : public OpenSpaceModule {
 public:
@@ -61,13 +62,15 @@ public:
     void goToGeo(const globebrowsing::RenderableGlobe& globe,
         double latitude, double longitude, double altitude);
 
-    glm::vec3 cartesianCoordinatesFromGeo(const globebrowsing::RenderableGlobe& globe,
-        double latitude, double longitude, std::optional<double> altitude = std::nullopt);
+    // If the `renderable` is a RenderableGlobe, it will use the correct height
+    // information to calculate the cartesian information. If it is any other type of
+    // `Renderable`, this function ses the interaction sphere as a standin
+    glm::vec3 cartesianCoordinatesFromGeo(const Renderable& renderable, double latitude,
+        double longitude, std::optional<double> altitude = std::nullopt);
 
     glm::dvec3 geoPosition() const;
 
-    double altitudeFromCamera(const globebrowsing::RenderableGlobe& globe,
-        bool useHeightMap = false) const;
+    double altitudeFromCamera(const Renderable& globe, bool useHeightMap = false) const;
 
     globebrowsing::cache::MemoryAwareTileCache* tileCache();
     scripting::LuaLibrary luaLibrary() const override;

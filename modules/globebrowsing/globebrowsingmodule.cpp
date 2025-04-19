@@ -388,20 +388,26 @@ void GlobeBrowsingModule::goToGeo(const globebrowsing::RenderableGlobe& globe,
     );
 }
 
-glm::vec3 GlobeBrowsingModule::cartesianCoordinatesFromGeo(
-                                              const globebrowsing::RenderableGlobe& globe,
-                                                                          double latitude,
-                                                                         double longitude,
+glm::vec3 GlobeBrowsingModule::cartesianCoordinatesFromGeo(const Renderable& renderable,
+                                                           double latitude,
+                                                           double longitude,
                                                            std::optional<double> altitude)
 {
     using namespace globebrowsing;
 
     const Geodetic3 pos = {
         { .lat = glm::radians(latitude), .lon = glm::radians(longitude) },
-        altitude.value_or(altitudeFromCamera(globe))
+        altitude.value_or(altitudeFromCamera(renderable))
     };
 
-    return glm::vec3(globe.ellipsoid().cartesianPosition(pos));
+    if (renderable.type() == "RenderableGlobe") {
+        const RenderableGlobe& globe = static_cast<const RenderableGlobe&>(renderable);
+        return glm::vec3(globe.ellipsoid().cartesianPosition(pos));
+    }
+    else {
+        Ellipsoid e = Ellipsoid(glm::dvec3(renderable.interactionSphere()));
+        return glm::vec3(e.cartesianPosition(pos));
+    }
 }
 
 glm::dvec3 GlobeBrowsingModule::geoPosition() const {
@@ -444,12 +450,9 @@ glm::dvec3 GlobeBrowsingModule::geoPosition() const {
     return glm::dvec3(lat, lon, altitude);
 }
 
-double GlobeBrowsingModule::altitudeFromCamera(
-                                       const globebrowsing::RenderableGlobe& globe,
-                                       bool useHeightMap) const
+double GlobeBrowsingModule::altitudeFromCamera(const Renderable& globe,
+                                               bool useHeightMap) const
 {
-    using namespace globebrowsing;
-
     const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
     SceneGraphNode* sgn = dynamic_cast<SceneGraphNode*>(globe.owner());
     if (!sgn) {

@@ -31,9 +31,9 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 
-namespace openspace::globebrowsing {
+namespace openspace { class Renderable; }
 
-class RenderableGlobe;
+namespace openspace::globebrowsing {
 
 class GlobeTranslation : public Translation {
 public:
@@ -56,7 +56,7 @@ private:
     properties::BoolProperty _useCamera;
     properties::BoolProperty _useCameraAltitude;
 
-    RenderableGlobe* _attachedNode = nullptr;
+    Renderable* _attachedNode = nullptr;
 
     mutable bool _positionIsDirty = true;
     mutable glm::dvec3 _position = glm::dvec3(0.0);
