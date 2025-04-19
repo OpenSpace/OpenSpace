@@ -1,4 +1,3 @@
-local propertyHelper = asset.require("util/property_helper")
 local transforms = asset.require("./transforms")
 
 
