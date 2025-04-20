@@ -188,11 +188,4 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
     penPosition.y += _font->height();
 }
 
-glm::vec2 DashboardItemMission::size() const {
-    ZoneScoped;
-
-    // @TODO fix this up ---abock
-    return { 0.f, 0.f };
-}
-
 } // namespace openspace

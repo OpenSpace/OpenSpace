@@ -92,9 +92,25 @@ void DashboardTextItem::render(glm::vec2& penPosition) {
         return;
     }
 
-    const size_t lines = std::count(_buffer.begin(), _buffer.end(), '\n') + 1;
-    penPosition.y -= _font->height() * lines;
-    RenderFont(*_font, penPosition, _buffer);
+    // Go through the text in the buffer and render each line separately. We can't use the
+    // multiline version for a variety of reasons, which all boil down to the fact that
+    // the dashboard gets rendered top to bottom with potentially different font sizes
+
+    std::string_view text = _buffer;
+    size_t end = text.find('\n');
+    while (end != std::string_view::npos) {
+        // Render the current text
+        penPosition.y -= _font->height();
+        RenderFont(*_font, penPosition, text.substr(0, end));
+
+        // Remove the already rendered text
+        text.remove_prefix(end + 1);
+        end = text.find('\n');
+    }
+
+    // There is one line left
+    penPosition.y -= _font->height();
+    RenderFont(*_font, penPosition, text);
 }
 
 } // namespace openspace

@@ -263,13 +263,6 @@ void DashboardItemAngle::update() {
     }
 }
 
-glm::vec2 DashboardItemAngle::size() const {
-    ZoneScoped;
-
-    constexpr double Angle = 120;
-    return _font->boundingBox("Angle: " + std::to_string(Angle));
-}
-
 std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(Component& comp) {
     if (comp.type == Type::Node) {
         if (!comp.node) {

@@ -209,12 +209,4 @@ void DashboardItemGlobeLocation::update() {
     _buffer = std::string(_localBuffer.data(), end - _localBuffer.data());
 }
 
-glm::vec2 DashboardItemGlobeLocation::size() const {
-    ZoneScoped;
-
-    return _font->boundingBox(
-        std::format("Position: {}, {}  Altitude: {}", 1.f, 1.f, 1.f)
-    );
-}
-
 } // namespace openspace
