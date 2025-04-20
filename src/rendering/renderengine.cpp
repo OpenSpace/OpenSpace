@@ -1338,6 +1338,7 @@ void RenderEngine::renderScreenLog() {
     constexpr size_t MaxNumberMessages = 20;
     constexpr int CategoryLength = 30;
     constexpr int MessageLength = 280;
+    constexpr float LineSpacing = 1.15f;
     constexpr std::chrono::seconds FadeTime(5);
 
     const std::vector<ScreenLog::LogEntry>& entries = _log->entries();
@@ -1371,6 +1372,9 @@ void RenderEngine::renderScreenLog() {
 
         const glm::vec4 white = glm::vec4(0.9f, 0.9f, 0.9f, alpha);
 
+        const float y =
+            _fontLog->height() * nRows * LineSpacing + fontRes.y * _verticalLogOffset;
+
         std::array<char, 15 + 1 + CategoryLength + 3> buf;
         {
             std::fill(buf.begin(), buf.end(), char(0));
@@ -1384,10 +1388,7 @@ void RenderEngine::renderScreenLog() {
 
             RenderFont(
                 *_fontLog,
-                glm::vec2(
-                    10.f,
-                    _fontLog->pointSize() * nRows * 2 + fontRes.y * _verticalLogOffset
-                ),
+                glm::vec2(10.f, y),
                 std::string_view(buf.data(), end - buf.data()),
                 white
             );
@@ -1402,10 +1403,7 @@ void RenderEngine::renderScreenLog() {
             char* end = std::format_to(buf.data(), "({})", lvl);
             RenderFont(
                 *_fontLog,
-                glm::vec2(
-                    10 + (30 + 3) * _fontLog->pointSize(),
-                    _fontLog->pointSize() * nRows * 2 + fontRes.y * _verticalLogOffset
-                ),
+                glm::vec2(10 + (30 + 3) * _fontLog->pointSize(), y),
                 std::string_view(buf.data(), end - buf.data()),
                 color
             );
@@ -1413,10 +1411,7 @@ void RenderEngine::renderScreenLog() {
 
         RenderFont(
             *_fontLog,
-            glm::vec2(
-                10 + 44 * _fontLog->pointSize(),
-                _fontLog->pointSize() * nRows * 2 + fontRes.y * _verticalLogOffset
-            ),
+            glm::vec2(10 + 44 * _fontLog->pointSize(), y),
             message,
             white
         );
