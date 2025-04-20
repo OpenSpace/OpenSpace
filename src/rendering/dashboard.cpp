@@ -150,7 +150,7 @@ void Dashboard::clearDashboardItems() {
 void Dashboard::render(glm::vec2& penPosition) {
     ZoneScoped;
 
-    if (!_isEnabled) {
+    if (!_isEnabled || _items.empty()) {
         return;
     }
 
