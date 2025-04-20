@@ -894,7 +894,7 @@ void RenderEngine::renderDashboard() const {
     const glm::vec2 dashboardStart = global::dashboard->getStartPositionOffset();
     glm::vec2 penPosition = glm::vec2(
         dashboardStart.x,
-        dashboardStart.y + fontResolution().y - global::luaConsole->currentHeight()
+        fontResolution().y - dashboardStart.y - global::luaConsole->currentHeight()
     );
 
     global::dashboard->render(penPosition);
