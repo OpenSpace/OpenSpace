@@ -891,7 +891,7 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 void RenderEngine::renderDashboard() const {
     ZoneScoped;
 
-    const glm::vec2 dashboardStart = global::dashboard->getStartPositionOffset();
+    const glm::ivec2 dashboardStart = global::dashboard->startPositionOffset();
     glm::vec2 penPosition = glm::vec2(
         dashboardStart.x,
         fontResolution().y - dashboardStart.y - global::luaConsole->currentHeight()
