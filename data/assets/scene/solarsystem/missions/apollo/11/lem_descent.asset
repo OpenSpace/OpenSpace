@@ -1832,3 +1832,14 @@ local keyframes = {
 }
 
 asset.export("keyframes", keyframes)
+
+
+
+asset.meta = {
+  Name = "Apollo 11 Descent Position",
+  Description = [[This asset provides position information about Apollo 11 as it is in the
+    final stages of the descent onto the Moon.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
