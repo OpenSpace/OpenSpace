@@ -30,7 +30,7 @@ namespace openspace {
         static documentation::Documentation Documentation();
 
     private:
-        void SendSchwarzchildTableToShader();
+        void SendSchwarzschildTableToShader();
         void SendStarKDTreeToShader();
         void bindSSBOData(std::unique_ptr<ghoul::opengl::ProgramObject>& program,
             const std::string& ssboName,
@@ -78,7 +78,7 @@ namespace openspace {
         GLuint _ssboStarKDTree = 0;
         GLuint _ssboStarKDTreeIndices = 0;
 
-        UniformCache(environmentTexture, viewGrid, worldRotationMatrix, cameraRotationMatrix, colorBVMap) _uniformCache;
+        UniformCache(environmentTexture, viewGrid, worldRotationMatrix, cameraRotationMatrix, colorBVMap, r_0) _uniformCache;
 
         std::unique_ptr<ghoul::opengl::Texture> _warpTableTex;
         std::unique_ptr<ghoul::opengl::Texture> _environmentTexture;

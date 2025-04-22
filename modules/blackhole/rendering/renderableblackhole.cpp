@@ -118,7 +118,7 @@ namespace openspace {
         float distanceToAnchor = static_cast<float>(glm::distance(cameraPosition, _chachedTranslation));
         if (abs(_rCamera * _rs - distanceToAnchor) > _rs * 0.1) {
             _rCamera = distanceToAnchor / _rs;
-            schwarzchild({ _rCamera * 2.0f, _rCamera * 2.5f, _rCamera * 4.0f}, _rayCount, _stepsCount, _rCamera, _stepLength, _schwarzschildWarpTable);
+            schwarzschild({ _rCamera * 2.0f, _rCamera * 2.5f, _rCamera * 4.0f}, _rayCount, _stepsCount, _rCamera, _stepLength, _schwarzschildWarpTable);
         }
         bindSSBOData(_program, "ssbo_warp_table", _ssboSchwarzschildDataBinding, _ssboSchwarzschildWarpTable);
         bindSSBOData(_program, "ssbo_star_map_start_indices", _ssboStarIndicesDataBinding, _ssboStarKDTreeIndices);
@@ -146,7 +146,7 @@ namespace openspace {
             LWARNING("UniformCache is missing 'colorBVMap'");
         }
 
-        SendSchwarzchildTableToShader();
+        SendSchwarzschildTableToShader();
         SendStarKDTreeToShader();
 
         interaction::OrbitalNavigator::CameraRotationDecomposition camRot = global::navigationHandler->orbitalNavigator().decomposeCameraRotationSurface(
@@ -181,12 +181,12 @@ namespace openspace {
         drawQuad();
 
         glEnable(GL_DEPTH_TEST);
-
         _program->deactivate();
+
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    void RenderableBlackHole::SendSchwarzchildTableToShader()
+    void RenderableBlackHole::SendSchwarzschildTableToShader()
     {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboSchwarzschildWarpTable);
 

@@ -62,6 +62,7 @@ __global__ void solveGeodesicKernel(float u_0, float h, float* envmap_r_values, 
 
     float s = idx / static_cast<float>(num_rays - 1);
     float alpha = (PI - lower_bound) * (1.0f - s) + delta * s;
+
     angles_out[idx * outNodeSize] = alpha;
 
     // Compute initial derivative for this ray using the selected alpha.
@@ -91,7 +92,7 @@ __global__ void solveGeodesicKernel(float u_0, float h, float* envmap_r_values, 
     }
 }
 
-void schwarzchild(std::vector<float> const& envmap_r_values, size_t const num_rays, size_t const num_steps, float const r_0, float const h, std::vector<float>& angle_out) {
+void schwarzschild(std::vector<float> const& envmap_r_values, size_t const num_rays, size_t const num_steps, float const r_0, float const h, std::vector<float>& angle_out) {
     float* d_angle_values;
     float* d_envmap_r_values;
 
