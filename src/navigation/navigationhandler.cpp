@@ -816,7 +816,16 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             codegen::lua::FlyToGeo2,
             codegen::lua::FlyToGeo,
             codegen::lua::LocalPositionFromGeo,
-            codegen::lua::LocalPositionFromGeoDeprecated
+            codegen::lua::LocalPositionFromGeoDeprecated,
+            codegen::lua::IsFlying,
+            codegen::lua::FlyTo,
+            codegen::lua::FlyToHeight,
+            codegen::lua::FlyToNavigationState,
+            codegen::lua::ZoomToFocus,
+            codegen::lua::ZoomToDistance,
+            codegen::lua::ZoomToDistanceRelative,
+            codegen::lua::JumpTo,
+            codegen::lua::JumpToNavigationState
         }
     };
 }
