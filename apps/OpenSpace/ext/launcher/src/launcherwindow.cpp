@@ -253,8 +253,8 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
     _profileBox->setObjectName("config");
     _profileBox->setGeometry(geometry::ProfileBox);
     _profileBox->setAccessibleName("Choose profile");
-    _profileBox->populateList(globalConfig.profile);
     _profileBox->setEnabled(profileEnabled);
+    _profileBox->populateList(globalConfig.profile);
     connect(
         _profileBox, &SplitComboBox::selectionChanged,
         this, &LauncherWindow::selectProfile
