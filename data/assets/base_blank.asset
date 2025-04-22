@@ -4,7 +4,9 @@
 asset.require("spice/core")
 
 asset.require("dashboard/default_dashboard")
--- Load default key bindings applicable to most scenes
+
+-- Load default actions and key bindings applicable to most scenes
+asset.require("actions/default_actions")
 asset.require("./default_keybindings")
 
 -- Load web gui
