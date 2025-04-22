@@ -263,18 +263,4 @@ void DashboardItemFramerate::update() {
     _buffer = std::string(_localBuffer.data(), end - _localBuffer.data());
 }
 
-glm::vec2 DashboardItemFramerate::size() const {
-    ZoneScoped;
-
-    const FrametimeType t = FrametimeType(_frametimeType.value());
-    char* end = format(_localBuffer, t, _minDeltaTimeCache, _maxDeltaTimeCache);
-    const std::string_view res = std::string_view(_buffer.data(), end - _buffer.data());
-
-    if (res.empty()) {
-        return { 0.f, 0.f };
-    }
-
-    return _font->boundingBox(res);
-}
-
 } // namespace openspace

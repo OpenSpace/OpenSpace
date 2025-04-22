@@ -29,7 +29,7 @@ local Object = {
   },
   Tag = { "daytime_hidden" },
   GUI = {
-    Name = "Visible Milky Way",
+    Name = "Visible All-sky",
     Path = "/Milky Way/All Sky Images",
     Description = [[An all-sky image of the night sky as our eye sees it (in the visible
       spectrum), with the stars removed. You will see the brightest part of the Galaxy if

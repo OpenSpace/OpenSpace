@@ -71,8 +71,4 @@ void DashboardItemSpacing::render(glm::vec2& penPosition) {
     penPosition.y -= _spacing;
 }
 
-glm::vec2 DashboardItemSpacing::size() const {
-    return { 0.f, _spacing };
-}
-
 } // namespace openspace

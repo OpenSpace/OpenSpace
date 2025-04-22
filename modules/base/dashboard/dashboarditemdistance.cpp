@@ -357,23 +357,4 @@ void DashboardItemDistance::update() {
     }
 }
 
-glm::vec2 DashboardItemDistance::size() const {
-    ZoneScoped;
-
-    const double d = glm::length(1e20);
-    std::pair<double, std::string_view> dist;
-    if (_doSimplification) {
-        dist = simplifyDistance(d);
-    }
-    else {
-        const DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
-        const double convertedD = convertMeters(d, unit);
-        dist = std::pair(convertedD, nameForDistanceUnit(unit, convertedD != 1.0));
-    }
-
-    return _font->boundingBox(
-        std::format("Distance from focus: {} {}", dist.first, dist.second)
-    );
-}
-
 } // namespace openspace
