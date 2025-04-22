@@ -213,18 +213,26 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
             this, &LauncherWindow::newProfile
         );
 
-        QMenu* menu = new QMenu;
-        QAction* newClean = new QAction("Empty profile");
+        QMenu* menu = new QMenu(this);
+        menu->setObjectName("newprofile");
+        menu->setToolTipsVisible(true);
+        QAction* newEmpty = new QAction("Empty profile", this);
+        newEmpty->setToolTip("Creates a new empty profile without any existing content");
         connect(
-            newClean, &QAction::triggered,
+            newEmpty, &QAction::triggered,
             this, &LauncherWindow::newProfile
         );
-        QAction* newFromCurrent = new QAction("Duplicate profile");
+        QAction* newFromCurrent = new QAction("Duplicate profile", this);
+        newFromCurrent->setToolTip(
+            "Creates a duplicate of the currently selected profile. This duplicate can "
+            "be edited and saved under a new name, or if it was a user profile be "
+            "overwritten"
+        );
         connect(
             newFromCurrent, &QAction::triggered,
             this, &LauncherWindow::editProfile
         );
-        menu->addActions({ newClean, newFromCurrent });
+        menu->addActions({ newEmpty, newFromCurrent });
         newProfileButton->setMenu(menu);
     }
 

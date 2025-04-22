@@ -61,6 +61,17 @@ LauncherWindow  QComboBox#config:disabled {
   color: rgb(225, 225, 225);
 }
 
+LauncherWindow  QMenu#newprofile {
+  background: rgb(50, 50, 50);
+  min-width: 8em;
+  max-width: 8em;
+  color: rgb(255, 255, 255);
+}
+
+LauncherWindow  QMenu#newprofile::item:selected {
+  background: rgb(100, 100, 100);
+}
+
 LauncherWindow  QPushButton#start {
   background: rgb(96, 96, 96);
   border: 2px solid rgb(225, 225, 225);
