@@ -24,6 +24,7 @@
 
 #include "splitcombobox.h"
 
+#include "usericon.h"
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 #include <QPainter>
@@ -68,28 +69,14 @@ void SplitComboBox::populateList(const std::string& preset) {
     clear();
 
     // Create "icons" that we use to indicate whether an item is built-in or user content
-    QIcon userIcon = []() {
-        QPixmap px = QPixmap(40, 50);
-        px.fill(Qt::transparent);
-
-        QPainter painter = QPainter(&px);
-        painter.setBrush(QColor(183, 211, 149, 255));
-        painter.drawEllipse(0, 10, 38, 38);
-
-        QFont f = QFont("Arial");
-        f.setPixelSize(28);
-        f.setBold(true);
-        painter.setFont(f);
-        painter.drawText(0, 10, 40, 40, Qt::AlignCenter, "U");
-        return QIcon(px);
-    }();
+    QIcon icon = userIcon();
 
     //
     // Special item (if it was specified)
     if (!_specialFirst.empty()) {
         if (_specialFirst.starts_with(_userPath.string())) {
             addItem(
-                userIcon,
+                icon,
                 QString::fromStdString(_specialFirst),
                 QString::fromStdString(_specialFirst)
             );
@@ -120,7 +107,7 @@ void SplitComboBox::populateList(const std::string& preset) {
 
         // Display the relative path, but store the full path in the user data segment
         addItem(
-            userIcon,
+            icon,
             QString::fromStdString(relPath.string()),
             QString::fromStdString(p.string())
         );
