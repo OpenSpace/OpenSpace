@@ -42,6 +42,8 @@ SplitComboBox::SplitComboBox(QWidget* parent, std::filesystem::path userPath,
     , _fileFilter(std::move(fileFilter))
     , _createTooltip(std::move(createTooltip))
 {
+    setCursor(Qt::PointingHandCursor);
+
     connect(
         this,
         QOverload<int>::of(&QComboBox::currentIndexChanged),
