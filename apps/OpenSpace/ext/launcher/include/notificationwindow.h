@@ -22,47 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/query/query.h>
+#ifndef __OPENSPACE_UI_LAUNCHER___NOTIFICATIONWINDOW___H__
+#define __OPENSPACE_UI_LAUNCHER___NOTIFICATIONWINDOW___H__
 
-#include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
+#include <QTextEdit>
 
-namespace openspace {
+#include <openspace/util/httprequest.h>
+#include <memory>
 
-Scene* sceneGraph() {
-    return global::renderEngine->scene();
-}
+class NotificationWindow final : public QTextEdit {
+Q_OBJECT
+public:
+    explicit NotificationWindow(QWidget* parent);
 
-SceneGraphNode* sceneGraphNode(const std::string& name) {
-    const Scene* graph = sceneGraph();
-    if (!graph) {
-        return nullptr;
-    }
-    return graph->sceneGraphNode(name);
-}
+private:
+    std::unique_ptr<openspace::HttpMemoryDownload> _request;
+};
 
-const Renderable* renderable(const std::string& name) {
-    SceneGraphNode* node = sceneGraphNode(name);
-    if (!node) {
-        return nullptr;
-    }
-    return node->renderable();
-}
-
-properties::Property* property(const std::string& uri) {
-    properties::Property* property = global::rootPropertyOwner->property(uri);
-    return property;
-}
-
-properties::PropertyOwner* propertyOwner(const std::string& uri) {
-    properties::PropertyOwner* property = global::rootPropertyOwner->propertyOwner(uri);
-    return property;
-}
-
-std::vector<properties::Property*> allProperties() {
-    return global::openSpaceEngine->allProperties();
-}
-
-}  // namespace openspace
+#endif // __OPENSPACE_UI_LAUNCHER___NOTIFICATIONWINDOW___H__

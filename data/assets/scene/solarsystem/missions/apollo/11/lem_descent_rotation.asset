@@ -1584,3 +1584,14 @@ asset.export("keyframes", {
     Rotation = { -0.0794, -0.0088, -0.2447 }
   }
 })
+
+
+
+asset.meta = {
+  Name = "Apollo 11 Descent Orientation",
+  Description = [[This asset provides orientation information about Apollo 11 as it is in
+    the final stages of the descent onto the Moon.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

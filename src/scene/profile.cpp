@@ -26,6 +26,7 @@
 
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
+#include <openspace/json.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/scripting/lualibrary.h>
@@ -43,7 +44,6 @@
 #include <ctime>
 #include <filesystem>
 #include <set>
-#include <json/json.hpp>
 
 #include "profile_lua.inl"
 

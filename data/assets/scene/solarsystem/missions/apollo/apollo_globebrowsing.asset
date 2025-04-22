@@ -80,3 +80,14 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(DisableApolloSites)
   openspace.action.removeAction(ToggleKaguyaLayer)
 end)
+
+
+
+asset.meta = {
+  Name = "Apollo - Globe Actions",
+  Description = [[This asset defines actions that are used to control the visibility of
+    features on the Moon's surface as they related to the different landing sites.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

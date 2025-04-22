@@ -1726,6 +1726,19 @@ LoadingScreen* OpenSpaceEngine::loadingScreen() {
     return _loadingScreen.get();
 }
 
+void OpenSpaceEngine::invalidatePropertyCache() {
+    _isAllPropertiesCacheDirty = true;
+}
+
+const std::vector<properties::Property*>& OpenSpaceEngine::allProperties() const {
+    if (_isAllPropertiesCacheDirty) {
+        _allPropertiesCache = global::rootPropertyOwner->propertiesRecursive();
+        _isAllPropertiesCacheDirty = false;
+    }
+
+    return _allPropertiesCache;
+}
+
 AssetManager& OpenSpaceEngine::assetManager() {
     ghoul_assert(_assetManager, "Asset Manager must not be nullptr");
     return *_assetManager;

@@ -85,3 +85,14 @@ end)
 
 asset.export(Apollo15)
 asset.export(Apollo15Trail)
+
+
+
+asset.meta = {
+  Name = "Apollo 15",
+  Description = [[This asset provides a 3D model and a Moon-centered trail of the Apollo
+    15 command and service module.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

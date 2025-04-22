@@ -103,7 +103,7 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
     //
     // Monitor widget at the top of the window
     {
-        constexpr QRect MonitorWidgetSize = QRect(0, 0, 500, 500);
+        constexpr QRect MonitorWidgetSize = QRect(0, 0, 350, 350);
 
         MonitorBox* monitorBox = new MonitorBox(MonitorWidgetSize, monitorSizes);
         layout->addWidget(monitorBox, 0, Qt::AlignCenter);
@@ -131,6 +131,7 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
     layout->addWidget(settingsContainer);
     QBoxLayout* settingsLayout = new QVBoxLayout(settingsContainer);
     settingsLayout->setContentsMargins(0, 0, 0, 0);
+    settingsLayout->setSpacing(0);
 
 
     //
@@ -149,9 +150,6 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
 
     //
     // Orientation specification
-    QLabel* labelOrientation = new QLabel("Orientation");
-    settingsLayout->addWidget(labelOrientation);
-
     QWidget* orientationContainer = new QWidget;
     settingsLayout->addWidget(orientationContainer);
     QGridLayout* layoutWindow = new QGridLayout(orientationContainer);
@@ -177,9 +175,6 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
         validatorPitch->setNotation(QDoubleValidator::StandardNotation);
         _linePitch->setValidator(validatorPitch);
         layoutWindow->addWidget(_linePitch, 0, 1);
-
-        QLabel* range = new QLabel("Range [-90, 90] in degrees");
-        layoutWindow->addWidget(range, 0, 2);
     }
     {
         const QString rollTip = "Roll or bank: negative numbers rotate the camera "
@@ -188,7 +183,7 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
 
         QLabel* labelRoll = new QLabel("Roll");
         labelRoll->setToolTip(rollTip);
-        layoutWindow->addWidget(labelRoll, 1, 0);
+        layoutWindow->addWidget(labelRoll, 0, 2);
 
         _lineRoll = new QLineEdit;
         _lineRoll->setText(QString::number(glm::degrees(glm::roll(q))));
@@ -196,10 +191,7 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
         QDoubleValidator* validatorRoll = new QDoubleValidator(-360.0, 360.0, 15);
         validatorRoll->setNotation(QDoubleValidator::StandardNotation);
         _lineRoll->setValidator(validatorRoll);
-        layoutWindow->addWidget(_lineRoll, 1, 1);
-
-        QLabel* range = new QLabel("Range [-360, 360] in degrees");
-        layoutWindow->addWidget(range, 1, 2);
+        layoutWindow->addWidget(_lineRoll, 0, 3);
     }
     {
         const QString yawTip = "Yaw, heading, or azimuth: negative numbers pan the "
@@ -209,7 +201,7 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
         QLabel* labelYaw = new QLabel;
         labelYaw->setText("Yaw");
         labelYaw->setToolTip(yawTip);
-        layoutWindow->addWidget(labelYaw, 2, 0);
+        layoutWindow->addWidget(labelYaw, 0, 4);
 
         _lineYaw = new QLineEdit;
         _lineYaw->setText(QString::number(glm::degrees(glm::yaw(q))));
@@ -217,10 +209,15 @@ SgctEdit::SgctEdit(sgct::config::Cluster cluster, std::string configName,
         QDoubleValidator* validatorYaw = new QDoubleValidator(-180.0, 180.0, 15, this);
         validatorYaw->setNotation(QDoubleValidator::StandardNotation);
         _lineYaw->setValidator(validatorYaw);
-        layoutWindow->addWidget(_lineYaw, 2, 1);
+        layoutWindow->addWidget(_lineYaw, 0, 5);
+    }
 
-        QLabel* range = new QLabel("Range [-180, 180] in degrees");
-        layoutWindow->addWidget(range, 2, 2);
+    {
+        QLabel* info = new QLabel(
+            "The allowed ranges for pitch is [-90, 90], for roll [-180, 180], and for "
+            "yaw [-360, 360]."
+        );
+        layoutWindow->addWidget(info, 1, 0, 1, 6);
     }
     
 

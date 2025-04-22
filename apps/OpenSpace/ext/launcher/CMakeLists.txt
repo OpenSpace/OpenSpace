@@ -28,6 +28,7 @@ set(HEADER_FILES
   include/backgroundimage.h
   include/filesystemaccess.h
   include/launcherwindow.h
+  include/notificationwindow.h
   include/settingsdialog.h
   include/splitcombobox.h
   include/windowcolors.h
@@ -59,6 +60,7 @@ set(SOURCE_FILES
   src/backgroundimage.cpp
   src/launcherwindow.cpp
   src/filesystemaccess.cpp
+  src/notificationwindow.cpp
   src/settingsdialog.cpp
   src/splitcombobox.cpp
   src/windowcolors.cpp
