@@ -214,7 +214,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         );
 
         QMenu* menu = new QMenu;
-        QAction* newClean = new QAction("New profile");
+        QAction* newClean = new QAction("Empty profile");
         connect(
             newClean, &QAction::triggered,
             this, &LauncherWindow::newProfile
@@ -640,19 +640,21 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
         &ProfileEdit::raiseExitWindow,
         [&editor, &savePath, &p, &profile]() {
             const std::string origPath = std::format("{}{}.profile", savePath, profile);
-            // If this is a new profile we want to prompt the user
-            if (!std::filesystem::exists(origPath)) {
+            // If this is a new profile we want to prompt the user, but only if the user
+            // actually changed something. If it is still an empty profile, there is no
+            // need to save it
+            if (!std::filesystem::exists(origPath) && *p != Profile()) {
+                editor.promptUserOfUnsavedChanges();
+                return;
+            }
+            // Check if the profile is the same as current existing file
+            if (std::filesystem::exists(origPath) && *p != Profile(origPath)) {
                 editor.promptUserOfUnsavedChanges();
                 return;
             }
 
-            // Check if the profile is the same as current existing file
-            if (*p != Profile(origPath)) {
-                editor.promptUserOfUnsavedChanges();
-            }
-            else {
-                editor.closeWithoutSaving();
-            }
+            // If we got this far, we can safely close the dialog without saving anything
+            editor.closeWithoutSaving();
         }
     );
 
