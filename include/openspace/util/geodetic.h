@@ -44,12 +44,8 @@ struct Geodetic3 {
 
 double altitudeFromCamera(const SceneGraphNode& renderable, bool useHeightMap = false);
 
-void goToGeo(const SceneGraphNode& globe, double latitude, double longitude);
-void goToGeo(const SceneGraphNode& globe, double latitude, double longitude,
-    double altitude);
-
-void goToGeodetic2(const SceneGraphNode& globe, Geodetic2 geo2);
-void goToGeodetic3(const SceneGraphNode& globe, Geodetic3 geo3);
+void goToGeodetic2(const SceneGraphNode& sgn, Geodetic2 geo2);
+void goToGeodetic3(const SceneGraphNode& sgn, Geodetic3 geo3);
 
 glm::vec3 cartesianCoordinatesFromGeo(const SceneGraphNode& renderable, double latitude,
     double longitude, std::optional<double> altitude = std::nullopt);

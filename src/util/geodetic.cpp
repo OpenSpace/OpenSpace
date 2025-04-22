@@ -58,22 +58,6 @@ double altitudeFromCamera(const SceneGraphNode& sgn, bool useHeightMap) {
     }
 }
 
-void goToGeo(const SceneGraphNode& sgn, double latitude, double longitude) {
-    goToGeodetic2(sgn, Geodetic2{ glm::radians(latitude), glm::radians(longitude) });
-}
-
-void goToGeo(const SceneGraphNode& sgn, double latitude, double longitude,
-             double altitude)
-{
-    goToGeodetic3(
-        sgn,
-        {
-            Geodetic2{ glm::radians(latitude), glm::radians(longitude) },
-            altitude
-        }
-    );
-}
-
 void goToGeodetic3(const SceneGraphNode& sgn, Geodetic3 geo3) {
     const glm::dvec3 positionModelSpace = sgn.ellipsoid().cartesianPosition(geo3);
 

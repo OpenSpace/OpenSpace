@@ -136,7 +136,7 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
 
     _sceneGraphNode = p.globe;
     _sceneGraphNode.onChange([this]() {
-        findGlobe();
+        findNode();
         setUpdateVariables();
     });
     addProperty(_sceneGraphNode);
@@ -162,7 +162,7 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
     addProperty(_useCamera);
 }
 
-void GlobeRotation::findGlobe() {
+void GlobeRotation::findNode() {
     SceneGraphNode* n = sceneGraphNode(_sceneGraphNode);
     if (!n || !n->renderable()) {
         LERRORC(
@@ -208,7 +208,7 @@ glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitud
 
 void GlobeRotation::update(const UpdateData& data) {
     if (!_attachedNode) [[unlikely]] {
-        findGlobe();
+        findNode();
         _matrixIsDirty = true;
     }
 

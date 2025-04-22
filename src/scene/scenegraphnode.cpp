@@ -1321,7 +1321,7 @@ Ellipsoid SceneGraphNode::ellipsoid() const {
         return _renderable->ellipsoid();
     }
     else {
-        return Ellipsoid(glm::dvec3(_interactionSphere));
+        return Ellipsoid(glm::dvec3(interactionSphere()));
     }
 }
 
