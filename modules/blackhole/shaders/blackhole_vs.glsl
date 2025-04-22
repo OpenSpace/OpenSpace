@@ -1,4 +1,4 @@
-#version __CONTEXT__
+#version 130
 
 in vec2 aPos;
 in vec2 aTexCoord;

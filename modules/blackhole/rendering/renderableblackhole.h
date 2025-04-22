@@ -32,7 +32,7 @@ namespace openspace {
     private:
         void SendSchwarzschildTableToShader();
         void SendStarKDTreeToShader();
-        void bindSSBOData(std::unique_ptr<ghoul::opengl::ProgramObject>& program,
+        void bindSSBOData(ghoul::opengl::ProgramObject* program,
             const std::string& ssboName,
             std::unique_ptr<ghoul::opengl::BufferBinding<ghoul::opengl::bufferbinding::Buffer::ShaderStorage>>& ssboBinding,
             GLuint& ssboID);    void bindFramebuffer();
@@ -42,7 +42,7 @@ namespace openspace {
         void setupQuad();
         void loadEnvironmentTexture();
 
-        std::unique_ptr<ghoul::opengl::ProgramObject> _program = nullptr;
+        ghoul::opengl::ProgramObject* _program = nullptr;
         std::unique_ptr<ghoul::opengl::ProgramObject> _cullProgram = nullptr;
         glm::dvec3 _chachedTranslation{};
         size_t _rayCount = 500;

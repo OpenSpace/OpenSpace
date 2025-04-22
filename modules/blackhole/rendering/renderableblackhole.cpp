@@ -15,6 +15,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <openspace/util/updatestructures.h>
+#include <modules/base/basemodule.h>
 
 #include <filesystem>
 #include <vector>
@@ -98,6 +99,8 @@ namespace openspace {
         _warpTableTex = nullptr;
         _environmentTexture = nullptr;
         _viewport.viewGrid = nullptr;
+        BaseModule::ProgramObjectManager.release(_program);
+        _program = nullptr;
         glDeleteBuffers(1, &_quadVbo);
         glDeleteVertexArrays(1, &_quadVao);
     }
@@ -230,10 +233,16 @@ namespace openspace {
     }
 
     void RenderableBlackHole::setupShaders() {
-        _program = ghoul::opengl::ProgramObject::Build(
+
+        _program = BaseModule::ProgramObjectManager.request(
             "BlackHoleProgram",
-            absPath("${MODULE_BLACKHOLE}/shaders/blackhole_vs.glsl"),
-            absPath("${MODULE_BLACKHOLE}/shaders/blackhole_fs.glsl")
+            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+                return global::renderEngine->buildRenderProgram(
+                    "BlackHoleProgram",
+                    absPath("${MODULE_BLACKHOLE}/shaders/blackhole_vs.glsl"),
+                    absPath("${MODULE_BLACKHOLE}/shaders/blackhole_fs.glsl")
+                );
+            }
         );
 
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
@@ -301,7 +310,7 @@ namespace openspace {
     }
 
     void RenderableBlackHole::bindSSBOData(
-        std::unique_ptr<ghoul::opengl::ProgramObject>& program,
+        ghoul::opengl::ProgramObject* program,
         const std::string& ssboName,
         std::unique_ptr<ghoul::opengl::BufferBinding<ghoul::opengl::bufferbinding::Buffer::ShaderStorage>>& ssboBinding,
         GLuint& ssboID
