@@ -1,5 +1,4 @@
 local heliosphereTransforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
-local propertyHelper = asset.require("util/property_helper")
 local rot = asset.require("./carrington_to_heeq_rotation")
 
 
