@@ -124,16 +124,6 @@ local ToggleMasterRendering = {
   IsLocal = true
 }
 
-local NextDeltaStepInterpolate = {
-  Identifier = "os.NextDeltaStepInterpolate",
-  Name = "Next simulation time step (interpolate)",
-  Command = "openspace.time.interpolateNextDeltaTimeStep()",
-  Documentation = [[Smoothly interpolates the simulation speed to the next simulation time
-    step, if one exists]],
-  GuiPath = "/Time/Simulation Speed",
-  IsLocal = true
-}
-
 
 -- Time actions
 
@@ -151,6 +141,16 @@ local TogglePauseImmediate = {
   Name = "Toggle pause (immediate)",
   Command = "openspace.time.togglePause()",
   Documentation = "Immediately starts and stops the simulation time",
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = true
+}
+
+local NextDeltaStepInterpolate = {
+  Identifier = "os.NextDeltaStepInterpolate",
+  Name = "Next simulation time step (interpolate)",
+  Command = "openspace.time.interpolateNextDeltaTimeStep()",
+  Documentation = [[Smoothly interpolates the simulation speed to the next simulation time
+    step, if one exists]],
   GuiPath = "/Time/Simulation Speed",
   IsLocal = true
 }
