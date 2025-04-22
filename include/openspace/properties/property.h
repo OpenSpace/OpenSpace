@@ -253,9 +253,9 @@ public:
      * returned here.
      *
      * \param callback The callback function that is called when the meta data of the
-     * property has been changed.
+     *        property has been changed.
      * \return An OnMetaDataChangeHandle that can be used in subsequent calls to remove a
-     * callback
+     *         callback
      *
      * \pre The \p callback must not be empty
      */
@@ -287,12 +287,13 @@ public:
     void removeOnDelete(OnDeleteHandle handle);
 
     /**
-     * This method deregisters a callback that was previously registered with the onMetaDataChange
-     * method. If OnMetaDataChangeHandleAll is passed to this function, all registered callbacks
-     * are removed.
+     * This method deregisters a callback that was previously registered with the
+     * onMetaDataChange method. If OnMetaDataChangeHandleAll is passed to this function,
+     * all registered callbacks are removed.
      *
-     * \param handle An OnMetaDataChangeHandle that was returned from a previous call to onMetaDataChange
-     *        by this property or OnMetaDataChangeHandleAll if all callbacks should be removed.
+     * \param handle An OnMetaDataChangeHandle that was returned from a previous call to
+     * onMetaDataChange by this property or OnMetaDataChangeHandleAll if all callbacks
+     * should be removed.
      *
      * \pre \p handle must refer to a callback that has been previously registred
      * \pre \p handle must refer to a callback that has not been removed previously
@@ -462,8 +463,8 @@ public:
 
     /**
      * Creates the information that is general to every Property and adds the
-     * `Identifier`, `Name`, `Type`, and `MetaData` keys and their values. The `MetaData`
-     * keys are added to the top level of this json object.
+     * `description`, `guiName`, `group`, `isReadOnly`, `needsConfirmation` `type`, 
+     * and `visibility` keys and their values.
      *
      * \return The base description common to all Property classes
      */
@@ -473,17 +474,7 @@ public:
      * Creates the information that is specific to each subclass of Property%s. If a
      * subclass needs to add additional information into the description, it has to
      * override this method and return the string containing all of the additional
-     * information. The base implementation of the #description method will return the Lua
-     * script:
-     * ```
-     * return {
-     *     generateBaseDescription(),
-     *     generateMetaDataJsonDescription(),
-     *     generateAdditionalDescription()
-     * }
-     * ```
-     * #generateMetaDataJsonDescription and this method being the override points to
-     * customize the behavior.
+     * information.
      *
      * \return The information specific to each subclass of Property
      */
@@ -541,7 +532,7 @@ protected:
     /// The callback functions that will be invoked whenever the value changes
     std::vector<std::pair<OnDeleteHandle, std::function<void()>>> _onDeleteCallbacks;
 
-    /// The callback functions that will be invoked whenever the value changes
+    /// The callback functions that will be invoked whenever the meta data changes
     std::vector<std::pair<OnMetaDataChangeHandle, std::function<void()>>>
         _onMetaDataChangeCallbacks;
 

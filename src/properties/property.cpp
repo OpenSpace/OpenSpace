@@ -227,7 +227,6 @@ void Property::removeOnMetaDataChange(OnMetaDataChangeHandle handle) {
     }
 }
 
-
 const PropertyOwner* Property::owner() const {
     return _owner;
 }
@@ -243,7 +242,8 @@ void Property::notifyChangeListeners() {
 }
 
 void Property::notifyMetaDataChangeListeners() {
-    for (const std::pair<OnMetaDataChangeHandle, std::function<void()>>& p : _onMetaDataChangeCallbacks) {
+    using Callback = const std::pair<OnMetaDataChangeHandle, std::function<void()>>;
+    for (Callback& p : _onMetaDataChangeCallbacks) {
         p.second();
     }
 }
@@ -288,9 +288,9 @@ nlohmann::json Property::generateJsonDescription() const {
         json["viewOptions"] = viewOptions;
     }
 
-    const nlohmann::json desc = generateAdditionalJsonDescription();
-    if (!desc.empty()) {
-        json["additionalData"] = desc;
+    const nlohmann::json data = generateAdditionalJsonDescription();
+    if (!data.empty()) {
+        json["additionalData"] = data;
     }
 
     return json;

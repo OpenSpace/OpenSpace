@@ -25,9 +25,9 @@
 #include <string_view>
 
 namespace {
-    constexpr std::string_view MinimumValueKey = "minimumValue";
-    constexpr std::string_view MaximumValueKey = "maximumValue";
-    constexpr std::string_view SteppingValueKey = "steppingValue";
+    constexpr std::string_view MinimumValueKey = "min";
+    constexpr std::string_view MaximumValueKey = "max";
+    constexpr std::string_view SteppingValueKey = "step";
     constexpr std::string_view ExponentValueKey = "exponent";
 
     std::string luaToJson(std::string luaValue) {
@@ -61,8 +61,8 @@ T NumericalProperty<T>::minValue() const {
 
 template <typename T>
 void NumericalProperty<T>::setMinValue(T value) {
-    Property::notifyMetaDataChangeListeners();
     _minimumValue = std::move(value);
+	Property::notifyMetaDataChangeListeners();
 }
 
 template <typename T>
@@ -72,8 +72,8 @@ T NumericalProperty<T>::maxValue() const {
 
 template <typename T>
 void NumericalProperty<T>::setMaxValue(T value) {
-    Property::notifyMetaDataChangeListeners();
     _maximumValue = std::move(value);
+	Property::notifyMetaDataChangeListeners();
 }
 
 template <typename T>
@@ -83,8 +83,8 @@ T NumericalProperty<T>::steppingValue() const {
 
 template <typename T>
 void NumericalProperty<T>::setSteppingValue(T value) {
-    Property::notifyMetaDataChangeListeners();
     _stepping = std::move(value);
+	Property::notifyMetaDataChangeListeners();
 }
 
 template <typename T>
