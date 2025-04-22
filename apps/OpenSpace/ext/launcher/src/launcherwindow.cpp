@@ -190,52 +190,6 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         labelChoose->setObjectName("label_choose");
     }
 
-    _editProfileButton = new QPushButton("Edit", centralWidget);
-    _editProfileButton->setObjectName("small");
-    _editProfileButton->setGeometry(geometry::EditProfileButton);
-    _editProfileButton->setCursor(Qt::PointingHandCursor);
-    _editProfileButton->setAutoDefault(true);
-    _editProfileButton->setAccessibleName("Edit profile");
-    connect(
-        _editProfileButton, &QPushButton::released,
-        this, &LauncherWindow::editProfile
-    );
-
-    {
-        QPushButton* newProfileButton = new QPushButton("New", centralWidget);
-        newProfileButton->setObjectName("small");
-        newProfileButton->setGeometry(geometry::NewProfileButton);
-        newProfileButton->setCursor(Qt::PointingHandCursor);
-        newProfileButton->setAutoDefault(true);
-        newProfileButton->setAccessibleName("New profile");
-        connect(
-            newProfileButton, &QPushButton::released,
-            this, &LauncherWindow::newProfile
-        );
-
-        QMenu* menu = new QMenu(this);
-        menu->setObjectName("newprofile");
-        menu->setToolTipsVisible(true);
-        QAction* newEmpty = new QAction("Empty profile", this);
-        newEmpty->setToolTip("Creates a new empty profile without any existing content");
-        connect(
-            newEmpty, &QAction::triggered,
-            this, &LauncherWindow::newProfile
-        );
-        QAction* newFromCurrent = new QAction("Duplicate profile", this);
-        newFromCurrent->setToolTip(
-            "Creates a duplicate of the currently selected profile. This duplicate can "
-            "be edited and saved under a new name, or if it was a user profile be "
-            "overwritten"
-        );
-        connect(
-            newFromCurrent, &QAction::triggered,
-            this, &LauncherWindow::editProfile
-        );
-        menu->addActions({ newEmpty, newFromCurrent });
-        newProfileButton->setMenu(menu);
-    }
-
     // Creating the profile box _after_ the Edit and New buttons as the comboboxes
     // `selectionChanged` signal will trigger that will try to make changes to the edit
     // button
@@ -272,10 +226,56 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         this, &LauncherWindow::updateStartButton
     );
 
+
+    _editProfileButton = new QPushButton("Edit", centralWidget);
+    _editProfileButton->setObjectName("small");
+    _editProfileButton->setGeometry(geometry::EditProfileButton);
+    _editProfileButton->setCursor(Qt::PointingHandCursor);
+    _editProfileButton->setAutoDefault(true);
+    _editProfileButton->setAccessibleName("Edit profile");
+    connect(
+        _editProfileButton, &QPushButton::released,
+        this, &LauncherWindow::editProfile
+    );
     {
         // Set up the default value for the edit button
         std::string selection = std::get<1>(_profileBox->currentSelection());
         _editProfileButton->setEnabled(std::filesystem::exists(selection));
+    }
+
+    {
+        QPushButton* newProfileButton = new QPushButton("New", centralWidget);
+        newProfileButton->setObjectName("small");
+        newProfileButton->setGeometry(geometry::NewProfileButton);
+        newProfileButton->setCursor(Qt::PointingHandCursor);
+        newProfileButton->setAutoDefault(true);
+        newProfileButton->setAccessibleName("New profile");
+        connect(
+            newProfileButton, &QPushButton::released,
+            this, &LauncherWindow::newProfile
+        );
+
+        QMenu* menu = new QMenu(this);
+        menu->setObjectName("newprofile");
+        menu->setToolTipsVisible(true);
+        QAction* newEmpty = new QAction("Empty profile", this);
+        newEmpty->setToolTip("Creates a new empty profile without any existing content");
+        connect(
+            newEmpty, &QAction::triggered,
+            this, &LauncherWindow::newProfile
+        );
+        QAction* newFromCurrent = new QAction("Duplicate profile", this);
+        newFromCurrent->setToolTip(
+            "Creates a duplicate of the currently selected profile. This duplicate can "
+            "be edited and saved under a new name, or if it was a user profile be "
+            "overwritten"
+        );
+        connect(
+            newFromCurrent, &QAction::triggered,
+            this, &LauncherWindow::editProfile
+        );
+        menu->addActions({ newEmpty, newFromCurrent });
+        newProfileButton->setMenu(menu);
     }
 
 
@@ -287,31 +287,6 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         QLabel* optionsLabel = new QLabel("Window Options", centralWidget);
         optionsLabel->setGeometry(geometry::OptionsLabel);
         optionsLabel->setObjectName("label_options");
-    }
-
-    _editWindowButton = new QPushButton("Edit", centralWidget);
-    _editWindowButton->setVisible(true);
-    _editWindowButton->setObjectName("small");
-    _editWindowButton->setGeometry(geometry::EditWindowButton);
-    _editWindowButton->setCursor(Qt::PointingHandCursor);
-    _editWindowButton->setAutoDefault(true);
-    _editWindowButton->setAccessibleName("Edit window configuration");
-    connect(
-        _editWindowButton, &QPushButton::released,
-        this, &LauncherWindow::editConfiguration
-    );
-
-    {
-        QPushButton* newWindowButton = new QPushButton("New", centralWidget);
-        newWindowButton->setObjectName("small");
-        newWindowButton->setGeometry(geometry::NewWindowButton);
-        newWindowButton->setCursor(Qt::PointingHandCursor);
-        newWindowButton->setAutoDefault(true);
-        newWindowButton->setAccessibleName("New window configuration");
-        connect(
-            newWindowButton, &QPushButton::released,
-            this, &LauncherWindow::newConfiguration
-        );
     }
 
     _windowConfigBox = new SplitComboBox(
@@ -352,10 +327,35 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         this, &LauncherWindow::updateStartButton
     );
 
+
+
+    _editWindowButton = new QPushButton("Edit", centralWidget);
+    _editWindowButton->setVisible(true);
+    _editWindowButton->setObjectName("small");
+    _editWindowButton->setGeometry(geometry::EditWindowButton);
+    _editWindowButton->setCursor(Qt::PointingHandCursor);
+    _editWindowButton->setAutoDefault(true);
+    _editWindowButton->setAccessibleName("Edit window configuration");
+    connect(
+        _editWindowButton, &QPushButton::released,
+        this, &LauncherWindow::editConfiguration
+    );
     {
         // Set up the default value for the edit button
         std::string selection = std::get<1>(_windowConfigBox->currentSelection());
         _editWindowButton->setEnabled(std::filesystem::exists(selection));
+    }
+    {
+        QPushButton* newWindowButton = new QPushButton("New", centralWidget);
+        newWindowButton->setObjectName("small");
+        newWindowButton->setGeometry(geometry::NewWindowButton);
+        newWindowButton->setCursor(Qt::PointingHandCursor);
+        newWindowButton->setAutoDefault(true);
+        newWindowButton->setAccessibleName("New window configuration");
+        connect(
+            newWindowButton, &QPushButton::released,
+            this, &LauncherWindow::newConfiguration
+        );
     }
 
 
