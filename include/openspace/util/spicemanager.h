@@ -1029,6 +1029,13 @@ public:
      */
     UseException exceptionHandling() const;
 
+    /**
+     * Returns the path to the most current leap second kernel.
+     *
+     * \return The path to the most current leap second kernel.
+     */
+    static std::filesystem::path leapSecondKernel();
+
     static scripting::LuaLibrary luaLibrary();
 
 private:

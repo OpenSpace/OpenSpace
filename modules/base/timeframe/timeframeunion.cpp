@@ -40,8 +40,8 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    // This TimeFrame class will accept the union of all passed-in TimeFrames. This means
-    // that this TimeFrame will be active if at least one of the child TimeFrames is
+    // This `TimeFrame` class will accept the union of all passed-in TimeFrames. This
+    // means that this TimeFrame will be active if at least one of the child TimeFrames is
     // active and it will be inactive if none of the child TimeFrames are active.
     //
     // This can be used to create more complex TimeFrames that are made up of several,
