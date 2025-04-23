@@ -1,7 +1,9 @@
 local Item = {
     Type = "DashboardItemTimeVaryingText",
     Identifier = "DashboardItemTimeVaryingText_Example",
-    DataFile = asset.resource("data/dummydata.json")
+    DataFile = asset.resource("data/dummydata.json"),
+    TextBefore = "Observed KP index: ",
+    FontSize = 40
 }
 
 asset.onInitialize(function()
