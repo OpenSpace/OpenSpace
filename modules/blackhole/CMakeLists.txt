@@ -65,8 +65,10 @@ project(blackhole_cuda_prj CUDA)
 find_package(CUDA REQUIRED)
 # Define CUDA Files
 set(CUDA_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/blackhole_cuda.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/blackhole_cuda.cu
+  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/schwarzschild.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/schwarzschild.cu
+  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/kerr.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/kerr.cu
 )
 source_group("CUDA Files" FILES ${CUDA_FILES})
 

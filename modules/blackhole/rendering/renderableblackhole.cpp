@@ -20,7 +20,7 @@
 #include <filesystem>
 #include <vector>
 
-#include <modules/blackhole/cuda/blackhole_cuda.h>
+#include <modules/blackhole/cuda/schwarzschild.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "BlackHoleModule";

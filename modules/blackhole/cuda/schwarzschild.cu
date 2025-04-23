@@ -2,7 +2,7 @@
 #include <vector>
 #include <stdexcept>
 #include "device_launch_parameters.h"
-#include "blackhole_cuda.h"
+#include "schwarzschild.h"
 
 constexpr float PI = 3.1415926535897932384626433832795f;
 
