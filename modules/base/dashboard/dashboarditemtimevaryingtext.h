@@ -43,26 +43,19 @@
      static documentation::Documentation Documentation();
 
  private:
-     // Properties
-     properties::StringProperty _text;
+     void loadDataFromJson(const std::string& filePath);
+     void computeSequenceEndTime();
+     int updateActiveTriggerTimeIndex(double currentTime) const;
+
+     properties::StringProperty _textBefore;
      properties::StringProperty _dataFile;
 
-     glm::vec4 _color = { 255.f, 255.f, 255.f, 1.f };
-
-     // Time-varying data
      std::unordered_map<double, double> _data;
      std::vector<double> _startTimes;
 
      int _activeTriggerTimeIndex = -1;
      double _sequenceEndTime = 0.0;
-
      mutable double _lastValue = 0.0;
-
-     // Internal logic
-     void loadDataFromJson(const std::string& filePath);
-
-     void computeSequenceEndTime();
-     int updateActiveTriggerTimeIndex(double currentTime) const;
  };
  } // namespace openspace
 

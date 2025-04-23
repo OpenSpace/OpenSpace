@@ -24,19 +24,24 @@
 
 #include <modules/base/dashboard/dashboarditemtimevaryingtext.h>
 
+#include <fstream>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/json.h>
-#include <fstream>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+
+
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TextInfo = {
-        "Text",
-        "Text",
-        "The text to be displayed.",
+    constexpr std::string_view _loggerCat = "DashboardItemTimeVaryingText";
+
+    constexpr openspace::properties::Property::PropertyInfo TextBeforeInfo = {
+        "TextBefore",
+        "Text Before",
+        "Optional text before the time varying text to be displayed.",
         openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo DataFileInfo = {
@@ -47,8 +52,9 @@ namespace {
     };
 
     struct [[codegen::Dictionary(DashboardItemTimeVaryingText)]] Parameters {
-        // [[codegen::verbatim(TextInfo.description)]]
-        std::optional<std::string> text;
+        // [[codegen::verbatim(TextBeforeInfo.description)]]
+        std::optional<std::string> textBefore;
+        // [[codegen::verbatim(DataFileInfo.description)]]
         std::string dataFile;
     };
 #include "dashboarditemtimevaryingtext_codegen.cpp"
@@ -58,19 +64,20 @@ namespace openspace {
 
 documentation::Documentation DashboardItemTimeVaryingText::Documentation() {
     return codegen::doc<Parameters>(
-        "base_dashboarditem_timevaryingtext",
+        "base_dashboarditem_timevaryingtextBefore",
         DashboardTextItem::Documentation()
     );
 }
 
-DashboardItemTimeVaryingText::DashboardItemTimeVaryingText(const ghoul::Dictionary& dictionary)
+DashboardItemTimeVaryingText::DashboardItemTimeVaryingText(
+                                                      const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary)
-    , _text(TextInfo, "")
+    , _textBefore(TextBeforeInfo, "")
     , _dataFile(DataFileInfo, "")
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    _text = p.text.value_or(_text);
-    addProperty(_text);
+    _textBefore = p.textBefore.value_or(_textBefore);
+    addProperty(_textBefore);
     _dataFile = absPath(p.dataFile).string();
     addProperty(_dataFile);
     loadDataFromJson(_dataFile);
@@ -95,8 +102,7 @@ void DashboardItemTimeVaryingText::update() {
 
             std::ostringstream oss;
             oss << value;
-            _text = oss.str();
-            _buffer = _text.value();
+            _buffer = _textBefore.value() + oss.str();
         }
     }
     else {
@@ -108,7 +114,11 @@ void DashboardItemTimeVaryingText::update() {
 void DashboardItemTimeVaryingText::loadDataFromJson(const std::string& filePath) {
     std::ifstream file(filePath);
     if (!file.is_open()) {
-        throw std::runtime_error("Unable to open JSON file: " + filePath);
+        LERROR(std::format(
+            "Time varying text, '{}' is not a valid JSON file",
+            filePath
+        ));
+        return;
     }
 
     nlohmann::json jsonData;

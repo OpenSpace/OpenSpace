@@ -1,10 +1,7 @@
 local Item = {
     Type = "DashboardItemTimeVaryingText",
-    Identifier = "KPindexText",
-    GuiName = "Storm KP index",
-    Text = "",
-    DataFile = "C:/Users/alundkvi/Documents/work/OpenSpace/user/data/assets/aurorasaurus/KPjson/observed_data.json",
-    FontSize = 72
+    Identifier = "DashboardItemTimeVaryingText_Example",
+    DataFile = asset.resource("data/dummydata.json")
 }
 
 asset.onInitialize(function()
