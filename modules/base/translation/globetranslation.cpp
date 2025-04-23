@@ -107,11 +107,11 @@ namespace {
     // [GlobeRotation](#base_rotation_globerotation) rotation to orient a scene graph node
     // away from the center of the body.
     //
-    // If the UseCamera value is set, the object's position automatically updates based on
-    // the current camera location.
+    // If the `UseCamera` value is set, the object's position automatically updates based
+    // on the current camera location.
     struct [[codegen::Dictionary(GlobeTranslation)]] Parameters {
         // [[codegen::verbatim(GlobeInfo.description)]]
-        std::string globe;
+        std::string globe [[codegen::identifier()]];
 
         // [[codegen::verbatim(LatitudeInfo.description)]]
         std::optional<double> latitude;
@@ -236,7 +236,7 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
     double alt = _altitude;
 
     if (_useCamera) {
-        const glm::dvec3 position = geoPosition();
+        const glm::dvec3 position = geoPositionFromCamera();
         lat = position.x;
         lon = position.y;
         if (_useCameraAltitude) {

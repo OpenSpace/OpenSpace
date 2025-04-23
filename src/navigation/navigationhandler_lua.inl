@@ -655,9 +655,9 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
 /**
  * Immediately move the camera to a geographic coordinate on a node by first fading the
  * rendering to black, jump to the specified coordinate, and then fade in. If the node is
- * a globe, the  longitude and latitude is expressed in the body's native coordinate
- * system. If it is not, the position on the surface of the interaction sphere is used
- * instead.
+ * a globe, the longitude and latitude values are expressed in the body's native
+ * coordinate system. If it is not, the position on the surface of the interaction sphere
+ * is used instead.
  *
  * This is done by triggering another script that handles the logic.
  *
@@ -667,7 +667,7 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * \param longitude The longitude of the target coordinate, in degrees
  * \param altitude An optional altitude, given in meters over the reference surface of
  *                 the globe. If no altitude is provided, the altitude will be kept as
- *                 the current distance to the reference surface of the specified globe.
+ *                 the current distance to the reference surface of the specified node
  * \param fadeDuration An optional duration for the fading. If not included, the
  *                     property in Navigation Handler will be used
  */
@@ -935,6 +935,15 @@ localPositionFromGeoDeprecated(std::string nodeIdentifier, double latitude,
  * specifies the duration of the motion, in seconds. If the optional bool is set to true
  * the target up vector for camera is set based on the target node. Either of the optional
  * parameters can be left out.
+ *
+ * \param nodeIdentifier The identifier of the node to which we want to fly
+ * \param useUpFromTargetOrDuration If this value is a boolean value (`true` or `false`),
+ *        this value determines whether we want to end up with the camera facing along the
+ *        selected node's up direction. If this value is a numerical value, refer to the
+ *        documnentation of the `duration` parameter
+ * \param duration The duration (in seconds) how long the flying to the selected node
+ *        should take. If this value is left out, a sensible default value is uses, which
+ *        can be configured in the engine
  */
 [[codegen::luawrap]] void flyTo(std::string nodeIdentifier,
                       std::optional<std::variant<bool, double>> useUpFromTargetOrDuration,
@@ -991,6 +1000,18 @@ localPositionFromGeoDeprecated(std::string nodeIdentifier, double latitude,
  * double specifies the duration of the motion, in seconds. If the optional bool is set to
  * true, the target up vector for camera is set based on the target node. Either of the
  * optional parameters can be left out.
+ *
+ * \param nodeIdentifier The identifier of the node to which we want to fly
+ * \param height The height (in meters) to which we want to fly. The way the height is
+ *        defined specifically determines on the type of node to which the fly-to command
+ *        is pointed.
+ * \param useUpFromTargetOrDuration If this value is a boolean value (`true` or `false`),
+ *        this value determines whether we want to end up with the camera facing along the
+ *        selected node's up direction. If this value is a numerical value, refer to the
+ *        documnentation of the `duration` parameter
+ * \param duration The duration (in seconds) how long the flying to the selected node
+ *        should take. If this value is left out, a sensible default value is uses, which
+ *        can be configured in the engine
  */
 [[codegen::luawrap]] void flyToHeight(std::string nodeIdentifier, double height,
                       std::optional<std::variant<bool, double>> useUpFromTargetOrDuration,

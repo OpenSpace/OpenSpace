@@ -178,28 +178,6 @@ namespace {
         return result;
     }
 
-    void goToChunk(const openspace::SceneGraphNode& node,
-                   const openspace::globebrowsing::TileIndex& ti, const glm::vec2& uv)
-    {
-        using namespace openspace;
-        using namespace globebrowsing;
-
-        const GeodeticPatch patch(ti);
-        const Geodetic2 corner = patch.corner(SOUTH_WEST);
-        Geodetic2 positionOnPatch = patch.size();
-        positionOnPatch.lat *= uv.y;
-        positionOnPatch.lon *= uv.x;
-        const Geodetic2 pointPosition = {
-            .lat = corner.lat + positionOnPatch.lat,
-            .lon = corner.lon + positionOnPatch.lon
-        };
-
-        const double altitude = altitudeFromCamera(node);
-
-        goToGeodetic3(node, { pointPosition, altitude });
-    }
-
-
     struct [[codegen::Dictionary(GlobeBrowsingModule)]] Parameters {
         // [[codegen::verbatim(TileCacheSizeInfo.description)]]
         std::optional<int> tileCacheSize;
@@ -367,11 +345,24 @@ void GlobeBrowsingModule::goToChunk(const SceneGraphNode& node,
                                     int x, int y, int level)
 {
     ghoul_assert(level < std::numeric_limits<uint8_t>::max(), "Level way too big");
-    ::goToChunk(
-        node,
-        globebrowsing::TileIndex(x, y, static_cast<uint8_t>(level)),
-        glm::vec2(0.5f, 0.5f)
+    using namespace openspace;
+    using namespace globebrowsing;
+
+    const GeodeticPatch patch = GeodeticPatch(
+        globebrowsing::TileIndex(x, y, static_cast<uint8_t>(level))
     );
+    const Geodetic2 corner = patch.corner(SOUTH_WEST);
+    Geodetic2 positionOnPatch = patch.size();
+    positionOnPatch.lat *= 0.5f;
+    positionOnPatch.lon *= 0.5f;
+    const Geodetic2 pointPosition = {
+        .lat = corner.lat + positionOnPatch.lat,
+        .lon = corner.lon + positionOnPatch.lon
+    };
+
+    const double altitude = altitudeFromCamera(node);
+
+    goToGeodetic3(node, { pointPosition, altitude });
 }
 
 const globebrowsing::RenderableGlobe*

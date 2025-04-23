@@ -97,7 +97,7 @@ namespace {
     // graph node at the same position for which the rotation is calculated.
     struct [[codegen::Dictionary(GlobeRotation)]] Parameters {
         // [[codegen::verbatim(GlobeInfo.description)]]
-        std::string globe;
+        std::string globe [[codegen::identifier()]];
 
         // [[codegen::verbatim(LatitudeInfo.description)]]
         double latitude [[codegen::inrange(-90.0, 90.0)]];
@@ -237,7 +237,7 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
     double lon = _longitude;
 
     if (_useCamera) {
-        const glm::dvec3 position = geoPosition();
+        const glm::dvec3 position = geoPositionFromCamera();
         lat = position.x;
         lon = position.y;
     }

@@ -42,15 +42,41 @@ struct Geodetic3 {
     double height = 0.0; // in meters
 };
 
-double altitudeFromCamera(const SceneGraphNode& renderable, bool useHeightMap = false);
+/**
+ * Sets the camera position for the next frame to be at the location identified by the
+ * provided geodetic position \p geo relative to the SceneGraphNode \p sgn. The current
+ * altitude of the camera over the selected scene graph node is maintained.
+ */
+void goToGeodetic2(const SceneGraphNode& sgn, Geodetic2 geo);
 
-void goToGeodetic2(const SceneGraphNode& sgn, Geodetic2 geo2);
-void goToGeodetic3(const SceneGraphNode& sgn, Geodetic3 geo3);
+/**
+ * Sets the camera position for the next frame to be at the location identified by the
+ * provided geodetic position \p geo relative to the SceneGraphNode \p sgn.
+ */
+void goToGeodetic3(const SceneGraphNode& sgn, Geodetic3 geo);
 
-glm::vec3 cartesianCoordinatesFromGeo(const SceneGraphNode& renderable, double latitude,
+/**
+ * Returns the Cartesian coordinate for the provided geodetic position of \p latitude,
+ * \p longitude, and \p altitude relative to the SceneGraphNode \p sgn. If no altitude is
+ * provided, the current altitude of the camera relative to the scene graph node is used.
+ */
+glm::vec3 cartesianCoordinatesFromGeo(const SceneGraphNode& sgn, double latitude,
     double longitude, std::optional<double> altitude = std::nullopt);
 
-glm::dvec3 geoPosition();
+/**
+ * Returns the position of the camera relative to the current anchor node as geodetic
+ * coordinates. The returned value contains the latitude in the x coordinate, the
+ * longitude in the y coordinate, and the altitude in the z coordinate. The longitude and
+ * latitude are provided in degrees, the altitude is provided in meters.
+ */
+glm::dvec3 geoPositionFromCamera();
+
+/**
+ * Returns the height of the camera relative to the provided SceneGraphNode \p sgn in
+ * meters. If \p useHeightMap is provided as `true` and \p sgn is a globe with an existing
+ * height map, that height map is used to calculate the altitude.
+ */
+double altitudeFromCamera(const SceneGraphNode& sgn, bool useHeightMap = false);
 
 } // namespace openspace
 

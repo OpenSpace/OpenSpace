@@ -149,7 +149,7 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
 void DashboardItemGlobeLocation::update() {
     ZoneScoped;
 
-    const glm::dvec3 position = geoPosition();
+    const glm::dvec3 position = geoPositionFromCamera();
     double lat = position.x;
     double lon = position.y;
     const double altitude = position.z;

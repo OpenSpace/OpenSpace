@@ -83,7 +83,7 @@ void CameraTopic::handleJson(const nlohmann::json& json) {
 
 void CameraTopic::sendCameraData() {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
-    glm::dvec3 position = geoPosition();
+    glm::dvec3 position = geoPositionFromCamera();
     std::pair<double, std::string_view> altSimplified = simplifyDistance(position.z);
 
     const nlohmann::json jsonData = {

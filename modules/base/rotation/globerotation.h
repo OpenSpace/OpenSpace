@@ -48,9 +48,11 @@ private:
     void findNode();
     void setUpdateVariables();
 
-    // Calculates the position on the surface of the node based on the provided latitude
-    // and longitude (in degrees). Returns the position on the surface of the node
-    // corresponding to the provided latitude and longitude
+    /**
+     * Calculates the position on the surface of the node based on the provided latitude
+     * and longitude (in degrees). Returns the position on the surface of the node
+     * corresponding to the provided latitude and longitude.
+     */
     glm::vec3 computeSurfacePosition(double latitude, double longitude) const;
 
     properties::StringProperty _sceneGraphNode;
