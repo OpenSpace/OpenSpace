@@ -6,10 +6,7 @@
 
 constexpr float PI = 3.1415926535897932384626433832795f;
 
-__device__ float zamoconv(float r0, float u0, float psi) {
-    // Global inverse radial coordinate u = 1/r0
-    u0 = 1.f / r0;
-
+__device__ float zamoconv(float r0, float psi) {
     // Compute the Schwarzschild lapse factor at r0:
     // For rs = 1, we have: N(r0) = sqrt(1 - 1/r0)
     float N_r0 = sqrtf(1.f - 1.f / r0);
@@ -66,7 +63,7 @@ __global__ void solveGeodesicKernel(float u_0, float h, float* envmap_r_values, 
     angles_out[idx * outNodeSize] = alpha;
 
     // Compute initial derivative for this ray using the selected alpha.
-    float dudphi = zamoconv(r_0, u_0, alpha); //compute_initial_dudphi(r_0, alpha);
+    float dudphi = zamoconv(r_0, alpha); //compute_initial_dudphi(r_0, alpha);
 
     float u = u_0;
     float phi = 0.0f;
