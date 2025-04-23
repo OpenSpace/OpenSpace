@@ -22,46 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBETRANSLATION___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBETRANSLATION___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESWITCH___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLESWITCH___H__
 
-#include <openspace/scene/translation.h>
+#include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/doubleproperty.h>
+namespace openspace {
 
-namespace openspace::globebrowsing {
+struct RenderData;
+struct UpdateData;
 
-class RenderableGlobe;
+namespace documentation { struct Documentation; }
 
-class GlobeTranslation : public Translation {
+class RenderableSwitch : public Renderable {
 public:
-    explicit GlobeTranslation(const ghoul::Dictionary& dictionary);
+    explicit RenderableSwitch(const ghoul::Dictionary& dictionary);
+
+    void initialize() override;
+    void deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
+
+    bool isReady() const override;
 
     void update(const UpdateData& data) override;
-    glm::dvec3 position(const UpdateData& data) const override;
+    void render(const RenderData& data, RendererTasks& tasks) override;
 
     static documentation::Documentation Documentation();
 
-private:
-    void fillAttachedNode();
-    void setUpdateVariables();
+protected:
+    properties::DoubleProperty _distanceThreshold;
 
-    properties::StringProperty _globe;
-    properties::DoubleProperty _latitude;
-    properties::DoubleProperty _longitude;
-    properties::DoubleProperty _altitude;
-    properties::BoolProperty _useHeightmap;
-    properties::BoolProperty _useCamera;
-    properties::BoolProperty _useCameraAltitude;
-
-    RenderableGlobe* _attachedNode = nullptr;
-
-    mutable bool _positionIsDirty = true;
-    mutable glm::dvec3 _position = glm::dvec3(0.0);
+    ghoul::mm_unique_ptr<Renderable> _renderableNear;
+    ghoul::mm_unique_ptr<Renderable> _renderableFar;
+    
 };
+} // namespace openspace
 
-} // namespace openspace::globebrowsing
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GLOBETRANSLATION___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLESWITCH___H__

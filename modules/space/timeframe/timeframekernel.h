@@ -22,46 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEROTATION___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEROTATION___H__
+#ifndef __OPENSPACE_MODULE_BASE___TIMEFRAMEKERNEL___H__
+#define __OPENSPACE_MODULE_BASE___TIMEFRAMEKERNEL___H__
 
-#include <openspace/scene/rotation.h>
+#include <openspace/scene/timeframe.h>
 
-#include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/util/timerange.h>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-class RenderableGlobe;
-
-class GlobeRotation : public Rotation {
+class TimeFrameKernel : public TimeFrame {
 public:
-    explicit GlobeRotation(const ghoul::Dictionary& dictionary);
+    explicit TimeFrameKernel(const ghoul::Dictionary& dictionary);
 
-    void update(const UpdateData& data) override;
-    glm::dmat3 matrix(const UpdateData& data) const override;
+    bool initialize() override;
+    void update(const Time& time) override;
 
     static documentation::Documentation Documentation();
 
 private:
-    void findGlobe();
-    void setUpdateVariables();
-    glm::vec3 computeSurfacePosition(double latitude, double longitude) const;
+    ghoul::Dictionary _initialization;
 
-    properties::StringProperty _globe;
-    properties::DoubleProperty _latitude;
-    properties::DoubleProperty _longitude;
-    properties::DoubleProperty _angle;
-    properties::BoolProperty _useHeightmap;
-    properties::BoolProperty _useCamera;
-
-    RenderableGlobe* _globeNode = nullptr;
-
-    mutable bool _matrixIsDirty = true;
-    mutable glm::dmat3 _matrix = glm::dmat3(0.0);
+    std::vector<TimeRange> _timeRangesSPK;
+    std::vector<TimeRange> _timeRangesCK;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEROTATION___H__
+#endif // __OPENSPACE_MODULE_BASE___TIMEFRAMEKERNEL___H__

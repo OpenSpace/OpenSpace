@@ -149,8 +149,7 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
 void DashboardItemGlobeLocation::update() {
     ZoneScoped;
 
-    GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
-    const glm::dvec3 position = module->geoPosition();
+    const glm::dvec3 position = geoPositionFromCamera();
     double lat = position.x;
     double lon = position.y;
     const double altitude = position.z;

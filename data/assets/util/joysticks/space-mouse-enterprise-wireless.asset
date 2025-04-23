@@ -1,4 +1,3 @@
-local propertyHelper = asset.require("../property_helper")
 local joystickHelper = asset.require("./joystick_helper")
 
 

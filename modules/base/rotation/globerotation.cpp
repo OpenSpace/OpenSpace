@@ -22,16 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/src/globerotation.h>
+#include <modules/base/rotation/globerotation.h>
 
-#include <modules/globebrowsing/globebrowsingmodule.h>
-#include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
+#include <openspace/util/ellipsoid.h>
+#include <openspace/util/geodetic.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/quaternion.hpp>
@@ -40,7 +40,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo GlobeInfo = {
         "Globe",
         "Attached Globe",
-        "The globe on which the longitude/latitude is specified.",
+        "The node on which the longitude/latitude is specified. If the node is a globe, "
+        "the correct height information for the globe is used. Otherwise, the position "
+        "is specified based on the longitude and latitude on the node's interaction "
+        "sphere",
         openspace::properties::Property::Visibility::User
     };
 
@@ -90,12 +93,11 @@ namespace {
     // This `Rotation` orients the scene graph node in such a way that the y-axis points
     // away from the provided globe, the x-axis points towards the globe's southern pole
     // and the z-axis points in a western direction. Using this rotation generally means
-    // using the [GlobeTranslation](#globebrowsing_translation_globetranslation) to place
-    // the scene graph node at the same position for which the rotation is calculated.
+    // using the [GlobeTranslation](#base_translation_globetranslation) to place the scene
+    // graph node at the same position for which the rotation is calculated.
     struct [[codegen::Dictionary(GlobeRotation)]] Parameters {
         // [[codegen::verbatim(GlobeInfo.description)]]
-        std::string globe
-            [[codegen::annotation("A valid scene graph node with a RenderableGlobe")]];
+        std::string globe [[codegen::identifier()]];
 
         // [[codegen::verbatim(LatitudeInfo.description)]]
         double latitude [[codegen::inrange(-90.0, 90.0)]];
@@ -115,15 +117,15 @@ namespace {
 #include "globerotation_codegen.cpp"
 } // namespace
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 documentation::Documentation GlobeRotation::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_rotation_globerotation");
+    return codegen::doc<Parameters>("base_rotation_globerotation");
 }
 
 GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
     : Rotation(dictionary)
-    , _globe(GlobeInfo)
+    , _sceneGraphNode(GlobeInfo)
     , _latitude(LatitudeInfo, 0.0, -90.0, 90.0)
     , _longitude(LongitudeInfo, 0.0, -180.0, 180.0)
     , _angle(AngleInfo, 0.0, 0.0, 360.0)
@@ -132,12 +134,12 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _globe = p.globe;
-    _globe.onChange([this]() {
-        findGlobe();
+    _sceneGraphNode = p.globe;
+    _sceneGraphNode.onChange([this]() {
+        findNode();
         setUpdateVariables();
     });
-    addProperty(_globe);
+    addProperty(_sceneGraphNode);
 
     _latitude = p.latitude;
     _latitude.onChange([this]() { setUpdateVariables(); });
@@ -160,21 +162,16 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
     addProperty(_useCamera);
 }
 
-void GlobeRotation::findGlobe() {
-    SceneGraphNode* n = sceneGraphNode(_globe);
-    if (n && n->renderable() && dynamic_cast<RenderableGlobe*>(n->renderable())) {
-        _globeNode = dynamic_cast<RenderableGlobe*>(n->renderable());
-    }
-    else {
+void GlobeRotation::findNode() {
+    SceneGraphNode* n = sceneGraphNode(_sceneGraphNode);
+    if (!n || !n->renderable()) {
         LERRORC(
             "GlobeRotation",
-            "Could not set attached node as it does not have a RenderableGlobe"
+            "Could not set attached node as it does not have a Renderable"
         );
-        if (_globeNode) {
-            // Reset the globe name to it's previous name
-            _globe = _globeNode->identifier();
-        }
+        return;
     }
+    _attachedNode = n;
 }
 
 void GlobeRotation::setUpdateVariables() {
@@ -183,21 +180,26 @@ void GlobeRotation::setUpdateVariables() {
 }
 
 glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitude) const {
-    ghoul_assert(_globeNode, "Globe cannot be nullptr");
+    ghoul_assert(_attachedNode, "Renderable cannot be nullptr");
 
-    GlobeBrowsingModule* mod = global::moduleEngine->module<GlobeBrowsingModule>();
-    const glm::vec3 groundPos = mod->cartesianCoordinatesFromGeo(
-        *_globeNode,
+    const Geodetic3 pos = {
+        { .lat = glm::radians(latitude), .lon = glm::radians(longitude) },
+        altitudeFromCamera(*_attachedNode)
+    };
+
+    const glm::vec3 groundPos = cartesianCoordinatesFromGeo(
+        *_attachedNode,
         latitude,
         longitude,
         0.0
     );
 
-    const SurfacePositionHandle h = _globeNode->calculateSurfacePositionHandle(groundPos);
+    const SurfacePositionHandle h =
+        _attachedNode->calculateSurfacePositionHandle(groundPos);
 
     // Compute position including heightmap
-    return mod->cartesianCoordinatesFromGeo(
-        *_globeNode,
+    return cartesianCoordinatesFromGeo(
+        *_attachedNode,
         latitude,
         longitude,
         h.heightToSurface
@@ -205,6 +207,11 @@ glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitud
 }
 
 void GlobeRotation::update(const UpdateData& data) {
+    if (!_attachedNode) [[unlikely]] {
+        findNode();
+        _matrixIsDirty = true;
+    }
+
     if (_useHeightmap || _useCamera) {
         // If we use the heightmap, we have to compute the height every frame
         setUpdateVariables();
@@ -214,23 +221,14 @@ void GlobeRotation::update(const UpdateData& data) {
 }
 
 glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
-    if (!_globeNode) {
-        // @TODO(abock): The const cast should be removed on a redesign of the rotation
-        //               to make the matrix function not constant. Const casting this
-        //               away is fine as the factories that create the rotations don't
-        //               create them as constant objects
-        const_cast<GlobeRotation*>(this)->findGlobe();
-        _matrixIsDirty = true;
-    }
-
     if (!_matrixIsDirty) [[likely]] {
         return _matrix;
     }
 
-    if (!_globeNode) {
+    if (!_attachedNode) {
         LERRORC(
             "GlobeRotation",
-            std::format("Could not find globe '{}'", _globe.value())
+            std::format("Could not find globe '{}'", _sceneGraphNode.value())
         );
         return _matrix;
     }
@@ -239,8 +237,7 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
     double lon = _longitude;
 
     if (_useCamera) {
-        GlobeBrowsingModule* mod = global::moduleEngine->module<GlobeBrowsingModule>();
-        const glm::dvec3 position = mod->geoPosition();
+        const glm::dvec3 position = geoPositionFromCamera();
         lat = position.x;
         lon = position.y;
     }
@@ -260,7 +257,7 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
     else {
         const float latitudeRad = glm::radians(static_cast<float>(lat));
         const float longitudeRad = glm::radians(static_cast<float>(lon));
-        yAxis = _globeNode->ellipsoid().geodeticSurfaceNormal(
+        yAxis = _attachedNode->ellipsoid().geodeticSurfaceNormal(
             { latitudeRad, longitudeRad }
         );
     }
