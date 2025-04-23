@@ -1,10 +1,13 @@
--- Basic
+-- Styled
 -- This example shows how to create a time varying text dashboard item.
+-- It has a custom font size and text before the time varying text.
 
 local Item = {
     Type = "DashboardItemTimeVaryingText",
     Identifier = "DashboardItemTimeVaryingText_Example",
     DataFile = asset.resource("data/dummydata.json"),
+    TextBefore = "Observed KP index: ",
+    FontSize = 40
 }
 
 asset.onInitialize(function()
