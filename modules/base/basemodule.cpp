@@ -37,6 +37,7 @@
 #include <modules/base/dashboard/dashboarditemsimulationincrement.h>
 #include <modules/base/dashboard/dashboarditemspacing.h>
 #include <modules/base/dashboard/dashboarditemtext.h>
+#include <modules/base/dashboard/dashboarditemtimevaryingtext.h>
 #include <modules/base/dashboard/dashboarditemvelocity.h>
 #include <modules/base/lightsource/cameralightsource.h>
 #include <modules/base/lightsource/scenegraphlightsource.h>
@@ -141,6 +142,9 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     );
     fDashboard->registerClass<DashboardItemSpacing>("DashboardItemSpacing");
     fDashboard->registerClass<DashboardItemText>("DashboardItemText");
+    fDashboard->registerClass<DashboardItemTimeVaryingText>(
+        "DashboardItemTimeVaryingText"
+    );
     fDashboard->registerClass<DashboardItemVelocity>("DashboardItemVelocity");
 
 
@@ -250,6 +254,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         DashboardItemSimulationIncrement::Documentation(),
         DashboardItemSpacing::Documentation(),
         DashboardItemText::Documentation(),
+        DashboardItemTimeVaryingText::Documentation(),
         DashboardItemVelocity::Documentation(),
 
         CameraLightSource::Documentation(),

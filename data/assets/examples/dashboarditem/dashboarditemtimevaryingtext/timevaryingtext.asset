@@ -1,0 +1,16 @@
+local Item = {
+    Type = "DashboardItemTimeVaryingText",
+    Identifier = "KPindexText",
+    GuiName = "Storm KP index",
+    Text = "",
+    DataFile = "C:/Users/alundkvi/Documents/work/OpenSpace/user/data/assets/aurorasaurus/KPjson/observed_data.json",
+    FontSize = 72
+}
+
+asset.onInitialize(function()
+    openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+    openspace.dashboard.removeDashboardItem(Item)
+end)
