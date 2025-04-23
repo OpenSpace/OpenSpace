@@ -27,9 +27,9 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/defer.h>
@@ -82,8 +82,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ScaleByDistanceInfo = {
         "ScaleByDistance",
         "Scale By Distance",
-        "Decides whether the plane should automatically adjust in size to match the "
-        "distance to the camera. Otherwise it will remain in the given size."
+        "Decides whether the plane should automatically adjust in size to based on "
+        "the distance to the camera. Otherwise it will remain in the given size."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleRatioInfo = {
@@ -92,13 +92,15 @@ namespace {
         "The scale ratio for scaling a plane by distance to camera."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScaleByDistanceMaxHeightInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ScaleByDistanceMaxHeightInfo =
+    {
         "ScaleByDistanceMaxHeight",
         "Scale By Distance Max Height",
         "The maximum height a plane can get while using the scale by distance."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScaleByDistanceMinHeightInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ScaleByDistanceMinHeightInfo =
+    {
         "ScaleByDistanceMinHeight",
         "Scale By Distance Min Height",
         "The minimum height a plane can get while using the scale by distance."
@@ -235,10 +237,12 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     _scaleRatio = p.scaleRatio.value_or(_scaleRatio);
     addProperty(_scaleRatio);
 
-    _scaleByDistanceMaxHeight = p.scaleByDistanceMaxHeight.value_or(_scaleByDistanceMaxHeight);
+    _scaleByDistanceMaxHeight =
+        p.scaleByDistanceMaxHeight.value_or(_scaleByDistanceMaxHeight);
     addProperty(_scaleByDistanceMaxHeight);
 
-    _scaleByDistanceMinHeight = p.scaleByDistanceMinHeight.value_or(_scaleByDistanceMinHeight);
+    _scaleByDistanceMinHeight =
+        p.scaleByDistanceMinHeight.value_or(_scaleByDistanceMinHeight);
     addProperty(_scaleByDistanceMinHeight);
 
     _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
@@ -336,7 +340,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
         glm::vec2 currentSize = _size.value();
 
-        if (currentSize.y != 0.f) {
+        if (currentSize.y > 0.f) {
             float scaleFactor = projectedHeight / currentSize.y;
             glm::vec2 scaledSize = currentSize * scaleFactor;
             _size.setValue(scaledSize);
