@@ -24,6 +24,8 @@
 
 #include <ghoul/lua/lua_helper.h>
 
+#include <openspace/util/geodetic.h>
+
 namespace {
 
 /**
@@ -648,6 +650,657 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
     double distance = glm::distance(camera->positionVec3(), focus->worldPosition());
 
     return distance - focus->interactionSphere();
+}
+
+/**
+ * Immediately move the camera to a geographic coordinate on a node by first fading the
+ * rendering to black, jump to the specified coordinate, and then fade in. If the node is
+ * a globe, the longitude and latitude values are expressed in the body's native
+ * coordinate system. If it is not, the position on the surface of the interaction sphere
+ * is used instead.
+ *
+ * This is done by triggering another script that handles the logic.
+ *
+ * \param node The identifier of a scene graph node. If an empty string is provided, the
+ *        current anchor node is used
+ * \param latitude The latitude of the target coordinate, in degrees
+ * \param longitude The longitude of the target coordinate, in degrees
+ * \param altitude An optional altitude, given in meters over the reference surface of
+ *                 the globe. If no altitude is provided, the altitude will be kept as
+ *                 the current distance to the reference surface of the specified node
+ * \param fadeDuration An optional duration for the fading. If not included, the
+ *                     property in Navigation Handler will be used
+ */
+[[codegen::luawrap]] void jumpToGeo(std::string node, double latitude, double longitude,
+                                    std::optional<double> altitude,
+                                    std::optional<double> fadeDuration)
+{
+    using namespace openspace;
+
+    std::string script;
+
+    if (altitude.has_value()) {
+        script = std::format(
+            "openspace.navigation.flyToGeo('{}', {}, {}, {}, 0)",
+            node, latitude, longitude, *altitude
+        );
+    }
+    else {
+        script = std::format(
+            "openspace.navigation.flyToGeo2('{}', {}, {}, true, 0)",
+            node, latitude, longitude
+        );
+    }
+
+    if (fadeDuration.has_value()) {
+        global::navigationHandler->triggerFadeToTransition(
+            std::move(script),
+            static_cast<float>(*fadeDuration)
+        );
+    }
+    else {
+        global::navigationHandler->triggerFadeToTransition(script);
+    }
+}
+
+/**
+ * Immediately move the camera to a geographic coordinate on a globe. If the node is a
+ * globe, the longitude and latitude is expressed in the body's native coordinate system.
+ * If it is not, the position on the surface of the interaction sphere is used instead.
+ *
+ * \param node The identifier of a scene graph node. If an empty string is provided, the
+ *        current anchor node is used
+ * \param latitude The latitude of the target coordinate, in degrees
+ * \param longitude The longitude of the target coordinate, in degrees
+ * \param altitude An optional altitude, given in meters over the reference surface of
+ *                 the globe. If no altitude is provided, the altitude will be kept as
+ *                 the current distance to the reference surface of the specified globe.
+ */
+[[codegen::luawrap("goToGeo")]] void goToGeoDeprecated(std::string node, double latitude,
+                                                       double longitude,
+                                                       std::optional<double> altitude)
+{
+    LWARNINGC(
+        "Deprecation",
+        "'goToGeo' function is deprecated and should be replaced with 'jumpToGeo'"
+    );
+
+    return jumpToGeo(std::move(node), latitude, longitude, altitude, 0);
+}
+
+void flyToGeoInternal(std::string node, double latitude, double longitude,
+                      std::optional<double> altitude, std::optional<double> duration,
+                      std::optional<bool> shouldUseUpVector)
+{
+    using namespace openspace;
+
+    const SceneGraphNode* n;
+    if (!node.empty()) {
+        n = sceneGraphNode(node);
+        if (!n) {
+            throw ghoul::lua::LuaError("Unknown scene graph node: " + node);
+        }
+    }
+    else {
+        n = global::navigationHandler->orbitalNavigator().anchorNode();
+        if (!n) {
+            throw ghoul::lua::LuaError("No anchor node is set");
+        }
+    }
+
+    const glm::dvec3 positionModelCoords = cartesianCoordinatesFromGeo(
+        *n,
+        latitude,
+        longitude,
+        altitude
+    );
+
+    const glm::dvec3 currentPosW = global::navigationHandler->camera()->positionVec3();
+    const glm::dvec3 currentPosModelCoords =
+        glm::inverse(n->modelTransform()) * glm::dvec4(currentPosW, 1.0);
+
+    constexpr double LengthEpsilon = 10.0; // meters
+    if (glm::distance(currentPosModelCoords, positionModelCoords) < LengthEpsilon) {
+        LINFOC("GlobeBrowsing", "flyToGeo: Already at the requested position");
+        return;
+    }
+
+    ghoul::Dictionary instruction;
+    instruction.setValue("TargetType", std::string("Node"));
+    instruction.setValue("Target", n->identifier());
+    instruction.setValue("Position", positionModelCoords);
+    instruction.setValue("PathType", std::string("ZoomOutOverview"));
+
+    if (duration.has_value()) {
+        if (*duration < 0) {
+            throw ghoul::lua::LuaError("Duration must be a positive value");
+        }
+        instruction.setValue("Duration", *duration);
+    }
+
+    if (shouldUseUpVector.has_value()) {
+        instruction.setValue("UseTargetUpDirection", *shouldUseUpVector);
+
+    }
+
+    global::navigationHandler->pathNavigator().createPath(instruction);
+    global::navigationHandler->pathNavigator().startPath();
+}
+
+/**
+ * Fly the camera to a geographic coordinate (latitude and longitude) on a globe, using
+ * the path navigation system. If the node is a globe, the longitude and latitude is
+ * expressed in the body's native coordinate system. If it is not, the position on the
+ * surface of the interaction sphere is used instead.
+ *
+ * The distance to fly to can either be set to be the current distance of the camera to
+ * the target object, or the default distance from the path navigation system.
+ *
+ * \param node The identifier of a scene graph node. If an empty string is provided, the
+ *             current anchor node is used
+ * \param latitude The latitude of the target coordinate, in degrees
+ * \param longitude The longitude of the target coordinate, in degrees
+ * \param useCurrentDistance If true, use the current distance of the camera to the
+ *                           target globe when going to the specified position. If false,
+ *                           or not specified, set the distance based on the bounding
+ *                           sphere and the distance factor setting in Path Navigator
+ * \param duration An optional duration for the motion to take, in seconds. For example,
+ *                 a value of 5 means "fly to this position over a duration of 5 seconds"
+ * \param shouldUseUpVector If true, try to use the up-direction when computing the
+ *                          target position for the camera. For globes, this means that
+ *                          North should be up, in relation to the camera's view
+ *                          direction. Note that for this to take effect, rolling motions
+ *                          must be enabled in the Path Navigator settings.
+ */
+[[codegen::luawrap]] void flyToGeo2(std::string node, double latitude, double longitude,
+                                    std::optional<bool> useCurrentDistance,
+                                    std::optional<double> duration,
+                                    std::optional<bool> shouldUseUpVector)
+{
+    using namespace openspace;
+
+    std::optional<double> altitude;
+    if (useCurrentDistance.has_value() && *useCurrentDistance) {
+        altitude = std::nullopt;
+    }
+    else {
+        altitude = global::navigationHandler->pathNavigator().defaultArrivalHeight(node);
+    }
+
+    flyToGeoInternal(
+        node,
+        latitude,
+        longitude,
+        std::nullopt,
+        duration,
+        shouldUseUpVector
+    );
+}
+
+ /**
+  * Fly the camera to a geographic coordinate (latitude, longitude and altitude) on a
+  * globe, using the path navigation system. If the node is a globe, the longitude and
+  * latitude is expressed in the body's native coordinate system. If it is not, the
+  * position on the surface of the interaction sphere is used instead.
+  *
+  * \param node The identifier of a scene graph node. If an empty string is provided, the
+  *        current anchor node is used
+  * \param latitude The latitude of the target coordinate, in degrees
+  * \param longitude The longitude of the target coordinate, in degrees
+  * \param altitude The altitude of the target coordinate, in meters
+  * \param duration An optional duration for the motion to take, in seconds. For example,
+  *                 a value of 5 means "fly to this position over a duration of 5 seconds"
+  * \param shouldUseUpVector If true, try to use the up-direction when computing the
+  *                          target position for the camera. For globes, this means that
+  *                          North should be up, in relation to the camera's view
+  *                          direction. Note that for this to take effect, rolling motions
+  *                          must be enabled in the Path Navigator settings.
+  */
+[[codegen::luawrap]] void flyToGeo(std::string node, double latitude,
+                                   double longitude, double altitude,
+                                   std::optional<double> duration,
+                                   std::optional<bool> shouldUseUpVector)
+{
+    flyToGeoInternal(node, latitude, longitude, altitude, duration, shouldUseUpVector);
+}
+
+/**
+ * Returns the position in the local Cartesian coordinate system of the specified node
+ * that corresponds to the given geographic coordinates. In the local coordinate system,
+ * the position (0,0,0) corresponds to the globe's center. If the node is a globe, the
+ * longitude and latitude is expressed in the body's native coordinate system. If it is
+ * not, the position on the surface of the interaction sphere is used instead.
+ *
+ * \param nodeIdentifier The identifier of the scene graph node
+ * \param latitude The latitude of the geograpic position, in degrees
+ * \param longitude The longitude of the geographic position, in degrees
+ * \param altitude The altitude, in meters
+ */
+[[codegen::luawrap]]
+std::tuple<double, double, double>
+localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitude,
+                     double altitude)
+{
+    using namespace openspace;
+
+    SceneGraphNode* n = sceneGraphNode(nodeIdentifier);
+    if (!n) {
+        throw ghoul::lua::LuaError("Unknown globe identifier: " + nodeIdentifier);
+    }
+
+    glm::vec3 p = cartesianCoordinatesFromGeo(*n, latitude, longitude, altitude);
+    return { p.x, p.y, p.z };
+}
+
+/**
+* Returns the position in the local Cartesian coordinate system of the specified globe
+* that corresponds to the given geographic coordinates. In the local coordinate system,
+* the position (0,0,0) corresponds to the globe's center. If the node is a globe, the
+* longitude and latitude is expressed in the body's native coordinate system. If it is
+* not, the position on the surface of the interaction sphere is used instead.
+*
+* Deprecated in favor of `localPositionFromGeo`.
+*
+* \param globeIdentifier The identifier of the scene graph node
+* \param latitude The latitude of the geograpic position, in degrees
+* \param longitude The longitude of the geographic position, in degrees
+* \param altitude The altitude, in meters
+*/
+[[codegen::luawrap("getLocalPositionFromGeo")]]
+std::tuple<double, double, double>
+localPositionFromGeoDeprecated(std::string nodeIdentifier, double latitude,
+                               double longitude, double altitude)
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getLocalPositionFromGeo' function is deprecated and should be replaced with "
+        "'localPositionFromGeo'"
+    );
+
+    return localPositionFromGeo(std::move(nodeIdentifier), latitude, longitude, altitude);
+}
+
+/**
+ * Returns true if a camera path is currently running, and false otherwise.
+ *
+ * \return Whether a camera path is currently active, or not
+ */
+[[codegen::luawrap]] bool isFlying() {
+    using namespace openspace;
+    return global::openSpaceEngine->currentMode() == OpenSpaceEngine::Mode::CameraPath;
+}
+
+/**
+ * Move the camera to the node with the specified identifier. The optional double
+ * specifies the duration of the motion, in seconds. If the optional bool is set to true
+ * the target up vector for camera is set based on the target node. Either of the optional
+ * parameters can be left out.
+ *
+ * \param nodeIdentifier The identifier of the node to which we want to fly
+ * \param useUpFromTargetOrDuration If this value is a boolean value (`true` or `false`),
+ *        this value determines whether we want to end up with the camera facing along the
+ *        selected node's up direction. If this value is a numerical value, refer to the
+ *        documnentation of the `duration` parameter
+ * \param duration The duration (in seconds) how long the flying to the selected node
+ *        should take. If this value is left out, a sensible default value is uses, which
+ *        can be configured in the engine
+ */
+[[codegen::luawrap]] void flyTo(std::string nodeIdentifier,
+                      std::optional<std::variant<bool, double>> useUpFromTargetOrDuration,
+                                                           std::optional<double> duration)
+{
+    using namespace openspace;
+    if (useUpFromTargetOrDuration.has_value() &&
+        std::holds_alternative<double>(*useUpFromTargetOrDuration) &&
+        duration.has_value())
+    {
+        throw ghoul::lua::LuaError("Duration cannot be specified twice");
+    }
+
+    if (!sceneGraphNode(nodeIdentifier)) {
+        throw ghoul::lua::LuaError("Unknown node name: " + nodeIdentifier);
+    }
+
+    ghoul::Dictionary insDict;
+    insDict.setValue("TargetType", std::string("Node"));
+    insDict.setValue("Target", nodeIdentifier);
+    if (useUpFromTargetOrDuration.has_value()) {
+        if (std::holds_alternative<bool>(*useUpFromTargetOrDuration)) {
+            insDict.setValue(
+                "UseTargetUpDirection",
+                std::get<bool>(*useUpFromTargetOrDuration)
+            );
+        }
+        else {
+            double d = std::get<double>(*useUpFromTargetOrDuration);
+            if (d < 0.0) {
+                throw ghoul::lua::LuaError("Duration must be a positive value");
+            }
+            insDict.setValue("Duration", d);
+        }
+    }
+    if (duration.has_value()) {
+        double d = *duration;
+        if (d < 0.0) {
+            throw ghoul::lua::LuaError("Duration must be a positive value");
+        }
+        insDict.setValue("Duration", d);
+    }
+
+    global::navigationHandler->pathNavigator().createPath(insDict);
+
+    if (global::navigationHandler->pathNavigator().hasCurrentPath()) {
+        global::navigationHandler->pathNavigator().startPath();
+    }
+}
+
+/**
+ * Move the camera to the node with the specified identifier. The second argument is the
+ * desired target height above the target node's bounding sphere, in meters. The optional
+ * double specifies the duration of the motion, in seconds. If the optional bool is set to
+ * true, the target up vector for camera is set based on the target node. Either of the
+ * optional parameters can be left out.
+ *
+ * \param nodeIdentifier The identifier of the node to which we want to fly
+ * \param height The height (in meters) to which we want to fly. The way the height is
+ *        defined specifically determines on the type of node to which the fly-to command
+ *        is pointed.
+ * \param useUpFromTargetOrDuration If this value is a boolean value (`true` or `false`),
+ *        this value determines whether we want to end up with the camera facing along the
+ *        selected node's up direction. If this value is a numerical value, refer to the
+ *        documnentation of the `duration` parameter
+ * \param duration The duration (in seconds) how long the flying to the selected node
+ *        should take. If this value is left out, a sensible default value is uses, which
+ *        can be configured in the engine
+ */
+[[codegen::luawrap]] void flyToHeight(std::string nodeIdentifier, double height,
+                      std::optional<std::variant<bool, double>> useUpFromTargetOrDuration,
+                                                           std::optional<double> duration)
+{
+    using namespace openspace;
+    if (!sceneGraphNode(nodeIdentifier)) {
+        throw ghoul::lua::LuaError("Unknown node name: " + nodeIdentifier);
+    }
+
+    ghoul::Dictionary insDict;
+    insDict.setValue("TargetType", std::string("Node"));
+    insDict.setValue("Target", nodeIdentifier);
+    insDict.setValue("Height", height);
+    if (useUpFromTargetOrDuration.has_value()) {
+        if (std::holds_alternative<bool>(*useUpFromTargetOrDuration)) {
+            insDict.setValue(
+                "UseTargetUpDirection",
+                std::get<bool>(*useUpFromTargetOrDuration)
+            );
+        }
+        else {
+            double d = std::get<double>(*useUpFromTargetOrDuration);
+            if (d < 0.0) {
+                throw ghoul::lua::LuaError("Duration must be a positive value");
+            }
+            insDict.setValue("Duration", d);
+        }
+    }
+    if (duration.has_value()) {
+        double d = *duration;
+        if (d < 0.0) {
+            throw ghoul::lua::LuaError("Duration must be a positive value");
+        }
+        insDict.setValue("Duration", d);
+    }
+
+    global::navigationHandler->pathNavigator().createPath(insDict);
+
+    if (global::navigationHandler->pathNavigator().hasCurrentPath()) {
+        global::navigationHandler->pathNavigator().startPath();
+    }
+}
+
+/**
+ * Create a path to the navigation state described by the input table. Note that roll must
+ * be included for the target up direction in the navigation state to be taken into
+ * account.
+ *
+ * \param navigationState A [NavigationState](#core_navigation_state) to fly to
+ * \param duration An optional duration for the motion to take, in seconds. For example,
+ *                 a value of 5 means "fly to this position over a duration of 5 seconds"
+ */
+[[codegen::luawrap]] void flyToNavigationState(ghoul::Dictionary navigationState,
+                                               std::optional<double> duration)
+{
+    using namespace openspace;
+    try {
+        documentation::testSpecificationAndThrow(
+            interaction::NavigationState::Documentation(),
+            navigationState,
+            "NavigationState"
+        );
+    }
+    catch (const documentation::SpecificationError& e) {
+        logError(e, "flyToNavigationState");
+        throw ghoul::lua::LuaError(std::format("Unable to create a path: {}", e.what()));
+    }
+
+    ghoul::Dictionary instruction;
+    instruction.setValue("TargetType", std::string("NavigationState"));
+    instruction.setValue("NavigationState", navigationState);
+
+    if (duration.has_value()) {
+        double d = *duration;
+        if (d < 0.0) {
+            throw ghoul::lua::LuaError("Duration must be a positive value");
+        }
+        instruction.setValue("Duration", d);
+    }
+
+    global::navigationHandler->pathNavigator().createPath(instruction);
+
+    if (global::navigationHandler->pathNavigator().hasCurrentPath()) {
+        global::navigationHandler->pathNavigator().startPath();
+    }
+}
+
+/**
+ * Zoom linearly to the current focus node, using the default distance.
+ *
+ * \param duration An optional duration for the motion to take, in seconds. For example,
+ *                 a value of 5 means "zoom in over 5 seconds"
+ */
+[[codegen::luawrap]] void zoomToFocus(std::optional<double> duration) {
+    using namespace openspace;
+    const SceneGraphNode* node = global::navigationHandler->anchorNode();
+    if (!node) {
+        throw ghoul::lua::LuaError("Could not determine current focus node");
+    }
+
+    ghoul::Dictionary insDict;
+    insDict.setValue("TargetType", std::string("Node"));
+    insDict.setValue("Target", node->identifier());
+    insDict.setValue("PathType", std::string("Linear"));
+
+    if (duration.has_value()) {
+        double d = *duration;
+        if (d < 0.0) {
+            throw ghoul::lua::LuaError("Duration must be a positive value");
+        }
+        insDict.setValue("Duration", d);
+    }
+
+    global::navigationHandler->pathNavigator().createPath(insDict);
+
+    if (global::navigationHandler->pathNavigator().hasCurrentPath()) {
+        global::navigationHandler->pathNavigator().startPath();
+    }
+}
+
+/**
+ * Fly linearly to a specific distance in relation to the focus node.
+ *
+ * \param distance The distance to fly to, in meters above the bounding sphere.
+ * \param duration An optional duration for the motion to take, in seconds.
+ */
+[[codegen::luawrap]] void zoomToDistance(double distance, std::optional<double> duration)
+{
+    using namespace openspace;
+    if (distance <= 0.0) {
+        throw ghoul::lua::LuaError("The distance must be larger than zero");
+    }
+
+    const SceneGraphNode* node = global::navigationHandler->anchorNode();
+    if (!node) {
+        throw ghoul::lua::LuaError("Could not determine current focus node");
+    }
+
+    ghoul::Dictionary insDict;
+    insDict.setValue("TargetType", std::string("Node"));
+    insDict.setValue("Target", node->identifier());
+    insDict.setValue("Height", distance);
+    insDict.setValue("PathType", std::string("Linear"));
+
+    if (duration.has_value()) {
+        double d = *duration;
+        if (d < 0.0) {
+            throw ghoul::lua::LuaError("Duration must be a positive value");
+        }
+        insDict.setValue("Duration", d);
+    }
+
+    global::navigationHandler->pathNavigator().createPath(insDict);
+
+    if (global::navigationHandler->pathNavigator().hasCurrentPath()) {
+        global::navigationHandler->pathNavigator().startPath();
+    }
+}
+
+/**
+ * Fly linearly to a specific distance in relation to the focus node, given as a relative
+ * value based on the size of the object rather than in meters.
+ *
+ * \param distance The distance to fly to, given as a multiple of the bounding sphere of
+ *                 the current focus node bounding sphere. A value of 1 will result in a
+ *                 position at a distance of one times the size of the bounding
+ *                 sphere away from the object.
+ * \param duration An optional duration for the motion, in seconds.
+ */
+[[codegen::luawrap]] void zoomToDistanceRelative(double distance,
+                                                 std::optional<double> duration)
+{
+    using namespace openspace;
+    if (distance <= 0.0) {
+        throw ghoul::lua::LuaError("The distance must be larger than zero");
+    }
+
+    const SceneGraphNode* node = global::navigationHandler->anchorNode();
+    if (!node) {
+        throw ghoul::lua::LuaError("Could not determine current focus node");
+    }
+
+    distance *= node->boundingSphere();
+
+    ghoul::Dictionary insDict;
+    insDict.setValue("TargetType", std::string("Node"));
+    insDict.setValue("Target", node->identifier());
+    insDict.setValue("Height", distance);
+    insDict.setValue("PathType", std::string("Linear"));
+
+  if (duration.has_value()) {
+        double d = *duration;
+        if (d < 0.0) {
+            throw ghoul::lua::LuaError("Duration must be a positive value");
+        }
+        insDict.setValue("Duration", d);
+    }
+
+    global::navigationHandler->pathNavigator().createPath(insDict);
+
+    if (global::navigationHandler->pathNavigator().hasCurrentPath()) {
+        global::navigationHandler->pathNavigator().startPath();
+    }
+}
+
+/**
+ * Fade rendering to black, jump to the specified node, and then fade in. This is done by
+ * triggering another script that handles the logic.
+ *
+ * \param navigationState A [NavigationState](#core_navigation_state) to jump to.
+ * \param useTimeStamp if true, and the provided NavigationState includes a timestamp,
+ *                     the time will be set as well.
+ * \param fadeDuration An optional duration for the fading. If not included, the
+ *                     property in Navigation Handler will be used.
+ */
+[[codegen::luawrap]] void jumpToNavigationState(ghoul::Dictionary navigationState,
+                                                std::optional<bool> useTimeStamp,
+                                                std::optional<double> fadeDuration)
+{
+    using namespace openspace;
+    try {
+        documentation::testSpecificationAndThrow(
+            interaction::NavigationState::Documentation(),
+            navigationState,
+            "NavigationState"
+        );
+    }
+    catch (const documentation::SpecificationError& e) {
+        logError(e, "jumpToNavigationState");
+        throw ghoul::lua::LuaError(std::format(
+            "Unable to jump to navigation state: {}", e.what()
+        ));
+    }
+
+    // When copy pasting a printed navigation state from the console, the formatting of
+    // the navigation state dictionary won't be completely correct if using the
+    // dictionary directly, due to the number keys for arrays. We solve this by first
+    // creating an object of the correct datatype
+    // (@TODO emmbr 2024-04-03, This formatting problem should probably be fixed)
+    interaction::NavigationState ns = interaction::NavigationState(navigationState);
+
+    bool setTime = (ns.timestamp.has_value() && useTimeStamp.value_or(false));
+
+    const std::string script = std::format(
+        "openspace.navigation.setNavigationState({}, {})",
+        ghoul::formatLua(ns.dictionary()), setTime
+    );
+
+    if (fadeDuration.has_value()) {
+        global::navigationHandler->triggerFadeToTransition(
+            std::move(script),
+            static_cast<float>(*fadeDuration)
+        );
+    }
+    else {
+        global::navigationHandler->triggerFadeToTransition(script);
+    }
+}
+
+/**
+ * Fade rendering to black, jump to the specified navigation state, and then fade in.
+ * This is done by triggering another script that handles the logic.
+ *
+ * \param nodeIdentifier The identifier of the scene graph node to jump to
+ * \param fadeDuration An optional duration for the fading. If not included, the
+ *                     property in Navigation Handler will be used
+ */
+[[codegen::luawrap]] void jumpTo(std::string nodeIdentifier,
+                                 std::optional<double> fadeDuration)
+{
+    using namespace openspace;
+    if (SceneGraphNode* n = sceneGraphNode(nodeIdentifier);  !n) {
+        throw ghoul::lua::LuaError("Unknown node name: " + nodeIdentifier);
+    }
+
+    const std::string script = std::format(
+        "openspace.navigation.flyTo('{}', 0)", nodeIdentifier
+    );
+
+    if (fadeDuration.has_value()) {
+        global::navigationHandler->triggerFadeToTransition(
+            std::move(script),
+            static_cast<float>(*fadeDuration)
+        );
+    }
+    else {
+        global::navigationHandler->triggerFadeToTransition(script);
+    }
 }
 
 #include "navigationhandler_lua_codegen.cpp"
