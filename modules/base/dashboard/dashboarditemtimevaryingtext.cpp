@@ -83,6 +83,35 @@ DashboardItemTimeVaryingText::DashboardItemTimeVaryingText(const ghoul::Dictiona
     loadDataFromJson(_dataFile);
 }
 
+void DashboardItemTimeVaryingText::update() {
+    if (_startTimes.empty()) {
+        _buffer = "";
+        return;
+    }
+
+    double current = global::timeManager->time().j2000Seconds();
+    double first = _startTimes.front();
+    double last = _sequenceEndTime;
+
+    if (current >= first && current < last) {
+        int newIdx = updateActiveTriggerTimeIndex(current);
+        if (newIdx != _activeTriggerTimeIndex) {
+            _activeTriggerTimeIndex = newIdx;
+            double timeKey = _startTimes[_activeTriggerTimeIndex];
+            double value = _data[timeKey];
+
+            std::ostringstream oss;
+            oss << value;
+            _text = oss.str();
+            _buffer = _text.value();
+        }
+    }
+    else {
+        _activeTriggerTimeIndex = -1;
+        _buffer = "";
+    }
+}
+
 void DashboardItemTimeVaryingText::loadDataFromJson(const std::string& filePath) {
     std::ifstream file(filePath);
     if (!file.is_open()) {
@@ -107,8 +136,6 @@ void DashboardItemTimeVaryingText::loadDataFromJson(const std::string& filePath)
     computeSequenceEndTime();
 }
 
-
-
 void DashboardItemTimeVaryingText::computeSequenceEndTime() {
     if (_startTimes.size() > 1) {
         double first = _startTimes.front();
@@ -116,12 +143,6 @@ void DashboardItemTimeVaryingText::computeSequenceEndTime() {
         double avgDuration = (last - first) / static_cast<double>(_startTimes.size() - 1);
         _sequenceEndTime = last + avgDuration;
     }
-}
-
-void DashboardItemTimeVaryingText::render(glm::vec2& penPosition) {
-    ZoneScoped;
-    penPosition.y -= _font->height();
-    RenderFont(*_font, penPosition, _text.value(), _color);
 }
 
 int DashboardItemTimeVaryingText::updateActiveTriggerTimeIndex(double currentTime) const {
@@ -134,83 +155,4 @@ int DashboardItemTimeVaryingText::updateActiveTriggerTimeIndex(double currentTim
     }
     return static_cast<int>(_startTimes.size()) - 1;
 }
-
-void DashboardItemTimeVaryingText::update() {
-    if (_startTimes.empty()) {
-        _buffer = "";
-        return;
-    }
-    
-
-    double current = global::timeManager->time().j2000Seconds();
-    double first = _startTimes.front();
-    double last = _sequenceEndTime;
-
-    if (current >= first && current < last) {
-        int newIdx = updateActiveTriggerTimeIndex(current);
-        if (newIdx != _activeTriggerTimeIndex) {
-            _activeTriggerTimeIndex = newIdx;
-            double timeKey = _startTimes[_activeTriggerTimeIndex];
-            double value = _data[timeKey];
-
-            std::ostringstream oss;
-            oss << value;
-            _text = "Observed KP Index: " + oss.str();
-            _buffer = _text.value();
-
-
-            if (value > 8)
-            {
-                _color = {
-                    255.f / 255.f,
-                    0.f / 255.f,
-                    0.f / 255.f,
-                    1.f
-                };
-            }
-            else if (value > 7)
-            {
-                _color = {
-                    255.f / 255.f,
-                    150.f / 255.f,
-                    0.f / 255.f,
-                    1.f
-                };
-            }
-            else if (value > 6)
-            {
-                _color = {
-                    255.f / 255.f,
-                    200.f / 255.f,
-                    0.f / 255.f,
-                    1.f
-                };
-            }
-            else if (value > 5)
-            {
-                _color = {
-                    246.f / 255.f,
-                    235.f / 255.f,
-                    20.f / 255.f,
-                    1.f
-                };
-            }
-            else
-            {
-                _color = {
-                    146.f / 255.f,
-                    208.f / 255.f,
-                    80.f / 255.f,
-                    1.f
-                };
-            }
-        }
-    }
-    else {
-        _activeTriggerTimeIndex = -1;
-        _buffer = "";
-    }
-}
-
-
 }// namespace openspace

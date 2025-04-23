@@ -46,7 +46,6 @@
      explicit DashboardItemTimeVaryingText(const ghoul::Dictionary& dictionary);
      ~DashboardItemTimeVaryingText() override = default;
 
-     void render(glm::vec2& penPosition) override;
      void update() override;
 
      static documentation::Documentation Documentation();
@@ -73,7 +72,6 @@
      void computeSequenceEndTime();
      int updateActiveTriggerTimeIndex(double currentTime) const;
  };
-
  } // namespace openspace
 
  #endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMTIMEVARYINGTEXT___H__
