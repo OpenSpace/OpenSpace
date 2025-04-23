@@ -38,6 +38,8 @@ class RenderableSwitch : public Renderable {
 public:
     explicit RenderableSwitch(const ghoul::Dictionary& dictionary);
 
+    void initialize() override;
+    void deinitialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
 

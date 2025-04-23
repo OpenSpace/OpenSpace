@@ -56,10 +56,17 @@ namespace {
     // If the camera is closer to the object than the threshold, `RenderableNear` is used,
     // otherwise, `RenderableFar` is rendered.
     struct [[codegen::Dictionary(RenderableSwitch)]] Parameters {
-        ghoul::Dictionary renderableNear;
-        ghoul::Dictionary renderableFar;
+        // The renderable to show when the camera is closer to the object than the
+        // threshold.
+        std::optional<ghoul::Dictionary>
+            renderableNear [[codegen::reference("renderable")]];
 
-        std::optional<double> distanceThreshold;
+        // The renderable to show when the camera is further away than the threshold.
+        std::optional<ghoul::Dictionary>
+            renderableFar [[codegen::reference("renderable")]];
+
+        // [[codegen::verbatim(DistanceThresholdInfo.description)]]
+        std::optional<double> distanceThreshold [[codegen::greater(0.f)]];
     };
 #include "renderableswitch_codegen.cpp"
 } // namespace
@@ -73,49 +80,100 @@ documentation::Documentation RenderableSwitch::Documentation() {
 }
 
 RenderableSwitch::RenderableSwitch(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary),
-    _distanceThreshold(DistanceThresholdInfo, 1.f, 0.f, 1e25f)
+    : Renderable(dictionary)
+    , _distanceThreshold(DistanceThresholdInfo, 1.f, 0.f, 1e25f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _renderableNear = createFromDictionary(p.renderableNear);
-    _renderableNear->setIdentifier("RenderableNear");
-    _renderableNear->setGuiName("Renderable Near");
-    addPropertySubOwner(_renderableNear.get());
+    if (!p.renderableNear.has_value() && !p.renderableFar.has_value()) {
+        throw ghoul::RuntimeError(
+            "Either a RenderableNear or a RenderableFar (or both) has to be provided, "
+            "but omitting both is invalid."
+        );
+    }
 
-    _renderableFar = createFromDictionary(p.renderableFar);
-    _renderableFar->setIdentifier("RenderableFar");
-    _renderableFar->setGuiName("Renderable Far");
-    addPropertySubOwner(_renderableFar.get());
+    if (p.renderableNear.has_value()) {
+        _renderableNear = createFromDictionary(*p.renderableNear);
+        _renderableNear->setIdentifier("RenderableNear");
+        _renderableNear->setGuiName("Renderable Near");
+        addPropertySubOwner(_renderableNear.get());
+    }
+
+    if (p.renderableFar.has_value()) {
+        _renderableFar = createFromDictionary(*p.renderableFar);
+        _renderableFar->setIdentifier("RenderableFar");
+        _renderableFar->setGuiName("Renderable Far");
+        addPropertySubOwner(_renderableFar.get());
+    }
 
     _distanceThreshold = p.distanceThreshold.value_or(_distanceThreshold);
     addProperty(_distanceThreshold);
+}
 
+void RenderableSwitch::initialize() {
+    ghoul_assert(_renderableNear || _renderableFar, "No renderable");
+
+    if (_renderableNear) {
+        _renderableNear->initialize();
+    }
+
+    if (_renderableFar) {
+        _renderableFar->initialize();
+    }
+}
+
+void RenderableSwitch::deinitialize() {
+    ghoul_assert(_renderableNear || _renderableFar, "No renderable");
+
+    if (_renderableNear) {
+        _renderableNear->deinitialize();
+    }
+
+    if (_renderableFar) {
+        _renderableFar->deinitialize();
+    }
 }
 
 void RenderableSwitch::initializeGL() {
-    ghoul_assert(_renderableNear, "No renderableNear");
-    ghoul_assert(_renderableFar, "No renderableFar");
-        
-    _renderableNear->initializeGL();
-    _renderableFar->initializeGL();
+    ghoul_assert(_renderableNear || _renderableFar, "No renderable");
+
+    if (_renderableNear) {
+        _renderableNear->initializeGL();
+    }
+
+    if (_renderableFar) {
+        _renderableFar->initializeGL();
+    }
 }
 
 void RenderableSwitch::deinitializeGL() {
-    ghoul_assert(_renderableNear, "No renderableNear");
-    ghoul_assert(_renderableFar, "No renderableFar");
+    ghoul_assert(_renderableNear || _renderableFar, "No renderable");
 
-    _renderableNear->deinitializeGL();
-    _renderableFar->deinitializeGL();
+    if (_renderableNear) {
+        _renderableNear->deinitializeGL();
+    }
+
+    if (_renderableFar) {
+        _renderableFar->deinitializeGL();
+    }
 }
 
 bool RenderableSwitch::isReady() const {
-    return (_renderableNear->isReady() && _renderableFar->isReady());
+    const bool near = _renderableNear ? _renderableNear->isReady() : true;
+    const bool far = _renderableFar ? _renderableFar->isReady() : true;
+    return near && far;
 }
 
 void RenderableSwitch::update(const UpdateData& data) {
-    _renderableNear->update(data);
-    _renderableFar->update(data);
+    ghoul_assert(_renderableNear || _renderableFar, "No renderable");
+
+    if (_renderableNear) {
+        _renderableNear->update(data);
+    }
+
+    if (_renderableFar) {
+        _renderableFar->update(data);
+    }
 }
 
 void RenderableSwitch::render(const RenderData& data, RendererTasks& tasks) {
@@ -123,16 +181,15 @@ void RenderableSwitch::render(const RenderData& data, RendererTasks& tasks) {
     glm::dvec3 modelPosition = data.modelTransform.translation;
 
     if (glm::distance(cameraPosition, modelPosition) < _distanceThreshold) {
-        if (!_renderableNear->isEnabled()) {
-            return;
+        if (_renderableNear && _renderableNear->isEnabled()) {
+            _renderableNear->render(data, tasks);
         }
-        _renderableNear->render(data, tasks);
     }
     else {
-        if (!_renderableFar->isEnabled()) {
-            return;
+        if (_renderableFar && _renderableFar->isEnabled()) {
+            _renderableFar->render(data, tasks);
         }
-        _renderableFar->render(data, tasks);
     }
 }
+
 } // namespace openspace
