@@ -22,22 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
- #include <modules/base/dashboard/dashboarditemtimevaryingtext.h>
+#include <modules/base/dashboard/dashboarditemtimevaryingtext.h>
 
- #include <openspace/documentation/documentation.h>
- #include <openspace/documentation/verifier.h>
- #include <openspace/engine/globals.h>
- #include <ghoul/filesystem/file.h>
- #include <ghoul/filesystem/filesystem.h>
- #include <openspace/util/timemanager.h>
- #include <ghoul/font/font.h>
- #include <ghoul/misc/profiling.h>
- #include <optional>
- #include <ghoul/font/fontmanager.h>
- #include <ghoul/font/fontrenderer.h>
- #include <openspace/json.h>
- #include <map>
- #include <iostream>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <openspace/util/timemanager.h>
+#include <openspace/json.h>
+#include <fstream>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TextInfo = {

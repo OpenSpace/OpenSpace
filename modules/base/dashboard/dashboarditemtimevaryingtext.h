@@ -24,18 +24,10 @@
 
  #ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMTIMEVARYINGTEXT___H__
  #define __OPENSPACE_MODULE_BASE___DASHBOARDITEMTIMEVARYINGTEXT___H__
+
  #include <openspace/rendering/dashboardtextitem.h>
 
  #include <openspace/properties/misc/stringproperty.h>
-
- #include <fstream>
- #include <unordered_map>
- #include <string>
- #include <vector>
- #include <chrono>
- #include <iomanip>
- #include <sstream>
- #include <algorithm>
 
  namespace openspace {
 
