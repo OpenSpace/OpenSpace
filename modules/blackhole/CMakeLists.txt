@@ -44,6 +44,8 @@ set(SOURCE_FILES
 set(SHADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/blackhole_vs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/blackhole_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/kerr_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/kerr_fs.glsl
 )
 
 # Organize Files into Groups

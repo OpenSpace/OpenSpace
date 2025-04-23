@@ -20,7 +20,13 @@
 #include <filesystem>
 #include <vector>
 
+#define M_Kerr false
+#if M_Kerr
+#include <modules/blackhole/cuda/kerr.h>
+#else
 #include <modules/blackhole/cuda/schwarzschild.h>
+#endif
+
 
 namespace {
     constexpr std::string_view _loggerCat = "BlackHoleModule";
@@ -72,10 +78,10 @@ namespace openspace {
         constexpr float c = 2.99792458e8;
         constexpr float M = 1.9885e30;
 
-        _rs = 2.0 * G * 8.543e36 / (c * c);
+        _rs = 2.0f * G * 8.543e36 / (c * c);
 
         setInteractionSphere(_rs);
-        setBoundingSphere(_rs*50);
+        setBoundingSphere(_rs*20);
 
         _colorBVMapTexturePath = absPath(p.colorMap).string();
     }
@@ -117,15 +123,25 @@ namespace openspace {
 
         _viewport.updateViewGrid(global::renderEngine->renderingResolution());
 
+        #if M_Kerr
+        glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3() - _chachedTranslation;
+        if (glm::distance(cameraPosition, _chacedCameraPos) > 0.01f) {
+            kerr(cameraPosition.x, cameraPosition.y, cameraPosition.z, _rs, 0.99f, _rayCount, _stepsCount, _schwarzschildWarpTable);
+            _chacedCameraPos = cameraPosition;
+        }
+#else
         glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
         float distanceToAnchor = static_cast<float>(glm::distance(cameraPosition, _chachedTranslation));
         if (abs(_rCamera * _rs - distanceToAnchor) > _rs * 0.1) {
             _rCamera = distanceToAnchor / _rs;
             schwarzschild({ _rCamera * 2.0f, _rCamera * 2.5f, _rCamera * 4.0f}, _rayCount, _stepsCount, _rCamera, _stepLength, _schwarzschildWarpTable);
         }
+#endif
         bindSSBOData(_program, "ssbo_warp_table", _ssboSchwarzschildDataBinding, _ssboSchwarzschildWarpTable);
+#if !M_Kerr
         bindSSBOData(_program, "ssbo_star_map_start_indices", _ssboStarIndicesDataBinding, _ssboStarKDTreeIndices);
         bindSSBOData(_program, "ssbo_star_map", _ssboStarDataBinding, _ssboStarKDTree);
+#endif
     }
 
     void RenderableBlackHole::render(const RenderData& renderData, RendererTasks&) {
@@ -143,14 +159,17 @@ namespace openspace {
         if (!bindTexture(_uniformCache.viewGrid, viewGridUnit, _viewport.viewGrid)) {
             LWARNING("UniformCache is missing 'viewGrid'");
         }
-
+#if !M_Kerr
         ghoul::opengl::TextureUnit colorBVMapUnit;
         if (!bindTexture(_uniformCache.colorBVMap, colorBVMapUnit, _colorBVMapTexture)) {
             LWARNING("UniformCache is missing 'colorBVMap'");
         }
+#endif
 
         SendSchwarzschildTableToShader();
+#if !M_Kerr
         SendStarKDTreeToShader();
+#endif
 
         interaction::OrbitalNavigator::CameraRotationDecomposition camRot = global::navigationHandler->orbitalNavigator().decomposeCameraRotationSurface(
             CameraPose{renderData.camera.positionVec3(), renderData.camera.rotationQuaternion()},
@@ -173,13 +192,14 @@ namespace openspace {
             _uniformCache.worldRotationMatrix,
             glm::mat4(glm::mat4_cast(camRot.globalRotation))
             );
-
+#if !M_Kerr
         if (_uniformCache.r_0 != -1) {
             _program->setUniform(
                 _uniformCache.r_0,
                 _rCamera
             );
         }
+#endif
      
         drawQuad();
 
@@ -203,6 +223,7 @@ namespace openspace {
         );
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
     }
 
     void RenderableBlackHole::SendStarKDTreeToShader()
@@ -233,7 +254,20 @@ namespace openspace {
     }
 
     void RenderableBlackHole::setupShaders() {
+#if M_Kerr
+        _program = BaseModule::ProgramObjectManager.request(
+            "KerrBlackHoleProgram",
+            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+                return global::renderEngine->buildRenderProgram(
+                    "KerrBlackHoleProgram",
+                    absPath("${MODULE_BLACKHOLE}/shaders/kerr_vs.glsl"),
+                    absPath("${MODULE_BLACKHOLE}/shaders/kerr_fs.glsl")
+                );
+            }
+        );
 
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+#else
         _program = BaseModule::ProgramObjectManager.request(
             "BlackHoleProgram",
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
@@ -246,7 +280,7 @@ namespace openspace {
         );
 
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
-
+#endif
     }
 
     void RenderableBlackHole::setupQuad() {
