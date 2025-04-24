@@ -1,19 +1,19 @@
 -- Styled
--- This example shows how to create a time varying text dashboard item.
+-- This example shows how to create a time-varying text dashboard item.
 -- It has a custom font size and text before the time varying text.
 
 local Item = {
-    Type = "DashboardItemTimeVaryingText",
-    Identifier = "DashboardItemTimeVaryingText_Example",
-    DataFile = asset.resource("data/dummydata.json"),
-    TextBefore = "Observed KP index: ",
-    FontSize = 40
+  Type = "DashboardItemTimeVaryingText",
+  Identifier = "DashboardItemTimeVaryingText_Example",
+  DataFile = asset.resource("data/dummydata.json"),
+  TextBefore = "Observed KP index: ",
+  FontSize = 40
 }
 
 asset.onInitialize(function()
-    openspace.dashboard.addDashboardItem(Item)
+  openspace.dashboard.addDashboardItem(Item)
 end)
 
 asset.onDeinitialize(function()
-    openspace.dashboard.removeDashboardItem(Item)
+  openspace.dashboard.removeDashboardItem(Item)
 end)

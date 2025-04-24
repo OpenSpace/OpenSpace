@@ -55,7 +55,6 @@
 
      int _activeTriggerTimeIndex = -1;
      double _sequenceEndTime = 0.0;
-     mutable double _lastValue = 0.0;
  };
  } // namespace openspace
 

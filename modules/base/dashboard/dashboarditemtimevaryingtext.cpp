@@ -24,16 +24,14 @@
 
 #include <modules/base/dashboard/dashboarditemtimevaryingtext.h>
 
-#include <fstream>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/util/timemanager.h>
 #include <openspace/json.h>
+#include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-
-
+#include <fstream>
 
 namespace {
     constexpr std::string_view _loggerCat = "DashboardItemTimeVaryingText";
@@ -44,6 +42,7 @@ namespace {
         "Optional text before the time varying text to be displayed.",
         openspace::properties::Property::Visibility::User
     };
+
     constexpr openspace::properties::Property::PropertyInfo DataFileInfo = {
         "DataFile",
         "Data File Path",
@@ -54,6 +53,7 @@ namespace {
     struct [[codegen::Dictionary(DashboardItemTimeVaryingText)]] Parameters {
         // [[codegen::verbatim(TextBeforeInfo.description)]]
         std::optional<std::string> textBefore;
+
         // [[codegen::verbatim(DataFileInfo.description)]]
         std::string dataFile;
     };
@@ -64,7 +64,7 @@ namespace openspace {
 
 documentation::Documentation DashboardItemTimeVaryingText::Documentation() {
     return codegen::doc<Parameters>(
-        "base_dashboarditem_timevaryingtextBefore",
+        "base_dashboarditem_timevaryingtext",
         DashboardTextItem::Documentation()
     );
 }
@@ -78,6 +78,7 @@ DashboardItemTimeVaryingText::DashboardItemTimeVaryingText(
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _textBefore = p.textBefore.value_or(_textBefore);
     addProperty(_textBefore);
+    
     _dataFile = absPath(p.dataFile).string();
     addProperty(_dataFile);
     loadDataFromJson(_dataFile);
@@ -85,7 +86,7 @@ DashboardItemTimeVaryingText::DashboardItemTimeVaryingText(
 
 void DashboardItemTimeVaryingText::update() {
     if (_startTimes.empty()) {
-        _buffer = "";
+        _buffer.clear();
         return;
     }
 
@@ -107,14 +108,14 @@ void DashboardItemTimeVaryingText::update() {
     }
     else {
         _activeTriggerTimeIndex = -1;
-        _buffer = "";
+        _buffer.clear();
     }
 }
 
 void DashboardItemTimeVaryingText::loadDataFromJson(const std::string& filePath) {
-    std::ifstream file(filePath);
+    std::ifstream file = std::ifstream(filePath);
     if (!file.is_open()) {
-        LERROR(std::format(
+        throw ghoul::Runtime(std::format(
             "Time varying text, '{}' is not a valid JSON file",
             filePath
         ));
@@ -124,10 +125,13 @@ void DashboardItemTimeVaryingText::loadDataFromJson(const std::string& filePath)
     nlohmann::json jsonData;
     file >> jsonData;
 
-    _data.clear();
-    _startTimes.clear();
+    if (jsonData.find("data") != jsonData.end()) {
+        throw ghoul::RuntimeError(std::format(
+            "Error loading JSON file. No 'data' was found in '{}', filePath
+        ));
+    }
 
-    for (const auto& item : jsonData["data"]) {
+    for (const nlohmann::json& item : jsonData["data"]) {
         const std::string& timeString = item[0].get<std::string>();
         double j2000Time = Time::convertTime(timeString);
         double value = item[1].get<double>();
