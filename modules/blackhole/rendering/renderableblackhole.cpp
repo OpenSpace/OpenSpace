@@ -138,7 +138,7 @@ namespace openspace {
 
         if (glm::distance(cameraPosition, _chacedCameraPos) > 0.01f && rerender) {
             //kerr(2e11, 0, 0, _rs, 0.99f, _rayCount, _stepsCount, _schwarzschildWarpTable);
-            kerr(cameraPosition.x, cameraPosition.y, cameraPosition.z, _rs, 0.5f, _rayCount, _stepsCount, _schwarzschildWarpTable);
+            kerr(cameraPosition.x, cameraPosition.y, cameraPosition.z, _rs, 0.99f, _rayCount, _stepsCount, _schwarzschildWarpTable);
             _chacedCameraPos = cameraPosition;
             //rerender = false;
         }

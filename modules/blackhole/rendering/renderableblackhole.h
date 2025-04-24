@@ -46,7 +46,7 @@ namespace openspace {
         std::unique_ptr<ghoul::opengl::ProgramObject> _cullProgram = nullptr;
         glm::dvec3 _chachedTranslation{};
         glm::dvec3 _chacedCameraPos{};
-        static constexpr size_t _rayCount{ 100 };
+        static constexpr size_t _rayCount{ 250 };
         static constexpr size_t _stepsCount = 100000;
         static constexpr float _stepLength = 0.0001f;
         static constexpr size_t _mapCount = 3;

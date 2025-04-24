@@ -22,7 +22,7 @@ __constant__ unsigned int c_num_steps = 15000;
 __constant__ unsigned int c_layers = 1;
 __constant__ float c_M = 1.0f;     // Mass parameter
 __constant__ float c_epsilon = 1e-10;   // Numerical tolerance
-__constant__ float3 worldUp = { 0.0f, 1.0f, 0.0f };
+__constant__ float3 worldUp = { 0.0f, 0.0f, 1.0f };
 
 
 
@@ -310,29 +310,34 @@ __global__ void simulateRayKernel(float3 pos, size_t num_rays_per_dim, float* lo
 
     int idx_entry = 0;
     entry[idx_entry] = theta;
-    entry[idx_entry++ + 1] = phi;
+    entry[idx_entry + 1] = phi;
+    idx_entry += 2;
     for (int step = 0; step < c_num_steps; step++) {
         // Terminate integration if ray is inside the horizon or outside the environment.
         if (y[0] < 2.f) {
             while (idx_entry <= c_layers) {
                 entry[idx_entry] = nanf("");
-                entry[idx_entry++ + 1] = nanf("");
+                entry[idx_entry + 1] = nanf("");
+                idx_entry += 2;
             }
             break;
         }
         else if (y[0] > 100.f) { //TODO Check collision with the correct env map and save to entry
             entry[idx_entry] = y[1];
-            entry[idx_entry++ + 1] = y[2];
+            entry[idx_entry + 1] = y[2];
+            idx_entry += 2;
             if (idx_entry > c_layers) {
                 break;
             }
         }
         // Advance one RK4 step.
         rk4(y, c_h, E, L, k_val);
+
     }
     if (idx_entry <= c_layers) {
         entry[idx_entry] = y[1];
-        entry[idx_entry++ + 1] = y[2];
+        entry[idx_entry + 1] = y[2];
+        idx_entry += 2;
     }
 }
 
