@@ -23,17 +23,21 @@ local WSA_Magnetograms = {
     LoadingType = "DynamicDownloading",
     InfoURL = infoURL,
     DataURL = dataURL,
-    DataID = 2148, --1233, --1196 --1180
+    DataID = 2148,
     FitsLayer = 4,
-    --LayerNames = {
-   --   0 = {"a"},
-   --   1 = {"b"},
-   --   2 = {"c"},
-   --   3 = {"d"},
-   --   4 = {"e"}
-   -- },
+    LayerNames = {
+      ['0'] = "Coronal Magnetic Field at 5 Solar Radii (nT)",
+      ['1'] = "Flux tube expansion factor evaluated at the source surface",
+      ['2'] = "Colatitude of open field footpoints at photosphere (rad)",
+      ['3'] = "Longitude of open field footpoints (rad)",
+      ['4'] = "Observed Photospheric Field (Gauss)",
+      ['5'] = "Distance from open field footpoint to nearest coronal boundary (deg)",
+      ['6'] = "Open (1,2,3) and closed (0) regions on the photosphere [1=in-to-out tracing; 2=out-to-in tracing; 3=both] (no units)",
+      ['7'] = "Distance to current sheet at outer boundary (degrees)"
+    },
     ColorMap = blueBlackRed,
-    DeleteDownloadsOnShutdown = false,
+    UseColorMap = false,
+    CacheData = false,
     ShowAtAllTimes = false,
     Opacity = 1,
     Segments = 132
@@ -51,22 +55,25 @@ local WSA_Magnetograms_Adapt = {
   Parent = transforms.WSAOffset60.Identifier,
   Renderable = {
     Type = "RenderableTimeVaryingSphere",
-    Enabled = true,
+    Enabled = false,
     Size = sunRadius * 1.002,
     LoadingType = "DynamicDownloading",
     InfoURL = infoURL,
     DataURL = dataURL,
-    DataID = 2149, --1233, --1196 --1180
+    DataID = 2149,
     FitsLayer = 4,
-    --LayerNames = {
-   --   0 = {"a"},
-   --   1 = {"b"},
-   --   2 = {"c"},
-   --   3 = {"d"},
-   --   4 = {"e"}
-   -- },
+    LayerNames = {
+      ['0'] = "Coronal Magnetic Field at 5 Solar Radii (nT)",
+      ['1'] = "Flux tube expansion factor evaluated at the source surface",
+      ['2'] = "Colatitude of open field footpoints at photosphere (rad)",
+      ['3'] = "Longitude of open field footpoints (rad)",
+      ['4'] = "Observed Photospheric Field (Gauss)",
+      ['5'] = "Distance from open field footpoint to nearest coronal boundary (deg)",
+      ['6'] = "Open (1,2,3) and closed (0) regions on the photosphere [1=in-to-out tracing; 2=out-to-in tracing; 3=both] (no units)",
+      ['7'] = "Distance to current sheet at outer boundary (degrees)"
+    },
     ColorMap = blueBlackRed,
-    DeleteDownloadsOnShutdown = false,
+    CacheData = false,
     ShowAtAllTimes = false,
     Opacity = 1,
     Segments = 132
@@ -79,9 +86,75 @@ local WSA_Magnetograms_Adapt = {
   }
 }
 
+local WSA_Velocity_Adapt = {
+  Identifier = "WSA_54_velocity_ADAPT",
+  Parent = transforms.WSAOffset60.Identifier,
+  Renderable = {
+    Type = "RenderableTimeVaryingSphere",
+    Enabled = false,
+    Size = sunRadius * 1.002,
+    LoadingType = "DynamicDownloading",
+    InfoURL = infoURL,
+    DataURL = dataURL,
+    DataID = 2218,
+    FitsLayer = 0,
+    --LayerNames = {
+   --   0 = {"a"},
+   --   1 = {"b"},
+   --   2 = {"c"},
+   --   3 = {"d"},
+   --   4 = {"e"}
+   -- },
+    ColorMap = blueBlackRed,
+    CacheData = false,
+    ShowAtAllTimes = false,
+    Opacity = 1,
+    Segments = 132
+  },
+  GUI = {
+    Name = "Solar Surface Velocity (GONG-ADAPT)",
+    Path = "/Solar System/Heliosphere/WSA Coronal Model 5.4",
+    Description = [[Texture sequence of simulation model WSA 5.4. ]]..
+    [[Output fits file using ADAPT GONG realization 000-011 Maps (RADOUT =  21.5)]]
+  }
+}
+
+local WSA_Velocity_Gong = {
+  Identifier = "WSA_54_velocity_GONG",
+  Parent = transforms.WSAOffset60.Identifier,
+  Renderable = {
+    Type = "RenderableTimeVaryingSphere",
+    Enabled = false,
+    Size = sunRadius * 1.002,
+    LoadingType = "DynamicDownloading",
+    InfoURL = infoURL,
+    DataURL = dataURL,
+    DataID = 2217,
+    FitsLayer = 0,
+    --LayerNames = {
+   --   0 = {"a"},
+   --   1 = {"b"},
+   --   2 = {"c"},
+   --   3 = {"d"},
+   --   4 = {"e"}
+   -- },
+    ColorMap = blueBlackRed,
+    CacheData = false,
+    ShowAtAllTimes = false,
+    Opacity = 1,
+    Segments = 132
+  },
+  GUI = {
+    Name = "Solar Surface Velocity (GONG-Z)",
+    Path = "/Solar System/Heliosphere/WSA Coronal Model 5.4",
+    Description = [[Texture sequence of simulation model WSA 5.4. ]]..
+    [[Output fits file using GONG-Z Map (RADOUT =  21.5)]]
+  }
+}
+
 local fieldlinesSCS = {
   Identifier = "WSA_54_Fieldlines_SCS_OI",
-  Parent = transforms.TransformGONG.Identifier,
+  Parent = transforms.WSAOffset60.Identifier,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     Enabled = false,
@@ -89,7 +162,7 @@ local fieldlinesSCS = {
     LoadingType = "DynamicDownloading",
     InfoURL = infoURL,
     DataURL = dataURL,
-    DataID = 2286, --2284 IO, 2285 OI, 2286 SCS-OI, 2287 Earth
+    DataID = 2286,
     ShowAtAllTimes = false,
     ColorMethod = "ByQuantity", -- Color by Quantity
     ColorQuantity = 0, -- Wind speed & polarity
@@ -124,7 +197,7 @@ local fieldlinesSCS = {
 
 local fieldlinesOI = {
   Identifier = "WSA_54_Fieldlines_PFSS_OI",
-  Parent = transforms.TransformGONG.Identifier,
+  Parent = transforms.WSAOffset60.Identifier,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     Enabled = true,
@@ -132,7 +205,7 @@ local fieldlinesOI = {
     LoadingType = "DynamicDownloading",
     InfoURL = infoURL,
     DataURL = dataURL,
-    DataID = 2285, --2284 IO, 2285 OI, 2286 SCS-OI, 2287 Earth
+    DataID = 2285,
     ShowAtAllTimes = false,
     ColorMethod = "ByQuantity", -- Color by Quantity
     ColorQuantity = 0, -- Wind speed & polarity
@@ -161,7 +234,7 @@ local fieldlinesOI = {
 
 local fieldlinesIO = {
   Identifier = "WSA_54_Fieldlines_PFSS_IO",
-  Parent = transforms.TransformGONG.Identifier,
+  Parent = transforms.WSAOffset60.Identifier,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     Enabled = false,
@@ -169,7 +242,7 @@ local fieldlinesIO = {
     LoadingType = "DynamicDownloading",
     InfoURL = infoURL,
     DataURL = dataURL,
-    DataID = 2284, --2284 IO, 2285 OI, 2286 SCS-OI, 2287 Earth
+    DataID = 2284,
     ShowAtAllTimes = false,
     ColorMethod = "ByQuantity", -- Color by Quantity
     ColorQuantity = 0, -- Wind speed & polarity
@@ -196,7 +269,7 @@ local fieldlinesIO = {
 
 local fieldlinesEarth = {
   Identifier = "WSA_54_Fieldlines_Earth",
-  Parent = transforms.TransformGONG.Identifier,
+  Parent = transforms.WSAOffset60.Identifier,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     Enabled = false,
@@ -204,7 +277,7 @@ local fieldlinesEarth = {
     LoadingType = "DynamicDownloading",
     InfoURL = infoURL,
     DataURL = dataURL,
-    DataID = 2287, --2284 IO, 2285 OI, 2286 SCS-OI, 2287 Earth
+    DataID = 2287,
     ShowAtAllTimes = false,
     ColorMethod = "ByQuantity", -- Color by Quantity
     ColorQuantity = 0, -- Wind speed & polarity
@@ -234,6 +307,9 @@ local fieldlinesEarth = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(WSA_Magnetograms)
+  openspace.addSceneGraphNode(WSA_Magnetograms_Adapt)
+  openspace.addSceneGraphNode(WSA_Velocity_Adapt)
+  openspace.addSceneGraphNode(WSA_Velocity_Gong)
   openspace.addSceneGraphNode(fieldlinesSCS)
   openspace.addSceneGraphNode(fieldlinesOI)
   openspace.addSceneGraphNode(fieldlinesIO)
@@ -246,10 +322,16 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(fieldlinesIO)
   openspace.removeSceneGraphNode(fieldlinesOI)
   openspace.removeSceneGraphNode(fieldlinesSCS)
+  openspace.removeSceneGraphNode(WSA_Velocity_Gong)
+  openspace.removeSceneGraphNode(WSA_Velocity_Adapt)
+  openspace.removeSceneGraphNode(WSA_Magnetograms_Adapt)
   openspace.removeSceneGraphNode(WSA_Magnetograms)
 end)
 
 asset.export(WSA_Magnetograms)
+asset.export(WSA_Magnetograms_Adapt)
+asset.export(WSA_Velocity_Adapt)
+asset.export(WSA_Velocity_Gong)
 asset.export(fieldlinesSCS)
 asset.export(fieldlinesOI)
 asset.export(fieldlinesIO)

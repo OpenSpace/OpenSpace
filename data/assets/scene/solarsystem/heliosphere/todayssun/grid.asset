@@ -1,15 +1,52 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local size = 700000000
 
-local grid_slice = {
-  Identifier = "carrington_grid_slice",
-  Parent = transforms.WSAOffset60.Identifier,
+
+local carrington_prime_meridian = {
+  Identifier = "carrington_prime_meridian",
+  Parent = sunTransforms.SunIAU.Identifier,
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      -- -30 degrees
-      Rotation = { 0.0, 0.0, -0.523598776 }
+      --Rotation = { 0.0, 0.0, -0.523598776 } -- -30 degrees
+      Rotation = { 0.0, 0.0, -1.57079633 } -- -90 degrees
+    },
+    Scale = {
+      Type = "StaticScale",
+      Scale = 698000000
+    },
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 3500000, 0, 0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableSphericalGrid",
+    Enabled = true,
+    Size = size,
+    Opacity = 1.0,
+    Color = { 1.0, 1.0, 0.0 },
+    LineWidth = 2.0,
+    LongSegments = 2,
+    LatSegments = 64
+  },
+  GUI = {
+    Name = "Carrington Prime Meridian",
+    Path =  "/Solar System/Heliosphere",
+    Description = [[A 2x64 spherical grid showing the Carrington prime meridian]]
+  }
+}
+
+local grid_slice = {
+  Identifier = "WSA_grid_slice",
+  Parent = transforms.HeliocentricEarthEquatorial.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      --Rotation = { 0.0, 0.0, -0.523598776 } -- -30 degrees
+      Rotation = { 0.0, 0.0, -1.57079633 } -- -90 degrees
     },
     Scale = {
       Type = "StaticScale",
@@ -23,7 +60,6 @@ local grid_slice = {
     Opacity = 1.0,
     Color = { 0.8, 0.8, 0.8 },
     LineWidth = 2.0,
-    GridSegments = { 2, 64 },
     LongSegments = 2,
     LatSegments = 64
   },
@@ -35,14 +71,9 @@ local grid_slice = {
 }
 
 local grid_10deg = {
-  Identifier = "carrington_grid_10_degrees",
-  Parent = transforms.WSAOffset60.Identifier,
+  Identifier = "WSA_grid_10_degrees",
+  Parent = transforms.HeliocentricEarthEquatorial.Identifier,
   Transform = {
-    Rotation = {
-      Type = "StaticRotation",
-      -- 30 degrees
-      Rotation = { 0.0, 0.0, -0.523598776 }
-    },
     Scale = {
       Type = "StaticScale",
       Scale = size
@@ -58,24 +89,27 @@ local grid_10deg = {
     Segments = 36
   },
   GUI = {
-    Name = "10 Degree Grid",
+    Name = "Grid on Sun",
     Path =  "/Solar System/Heliosphere",
-    Description = [[A grid with 10 degree seperationg between line segments]]
+    Description = [[A grid aligned with the Sun-Earth line. 10 degree seperationg between line segments on default]]
   }
 }
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(grid_10deg)
+  openspace.addSceneGraphNode(carrington_prime_meridian)
   openspace.addSceneGraphNode(grid_slice)
+  openspace.addSceneGraphNode(grid_10deg)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(grid_10deg)
   openspace.removeSceneGraphNode(grid_slice)
+  openspace.removeSceneGraphNode(carrington_prime_meridian)
 end)
 
-asset.export(grid_10deg)
+asset.export(carrington_prime_meridian)
 asset.export(grid_slice)
+asset.export(grid_10deg)
 
 
 

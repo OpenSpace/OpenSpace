@@ -116,12 +116,13 @@ private:
     std::string _infoURL = "";
     std::string _dataURL = "";
     properties::OptionProperty _fitsLayer;
-    //properties::OptionProperty _fitsLayerName;
+    properties::OptionProperty _fitsLayerName;
     std::map<int, std::string> _layerNames;
     int _fitsLayerTemp;
+    int _fitsLayerNameTemp;
     // An option to keep or delete the downloads from dynamic downloader on shutdown
     // Deletes on default
-    properties::BoolProperty _deleteDownloadsOnShutdown;
+    properties::BoolProperty _saveDownloadsOnShutdown;
     // If there's just one state it should never disappear
     bool _renderForever = false;
     bool _inInterval = false;

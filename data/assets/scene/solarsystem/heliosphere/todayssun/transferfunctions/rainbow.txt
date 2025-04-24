@@ -1,0 +1,25 @@
+width 40
+lower 0.0
+upper 1.0
+
+mappingkey 0.00 255 0   0   255   // Red
+mappingkey 0.05 255 51  0   255   // Reddish-Orange
+mappingkey 0.10 255 102 0   255   // Orange
+mappingkey 0.15 255 153 0   255   // Orangish-Yellow
+mappingkey 0.20 255 204 0   255   // Yellow-Orange
+mappingkey 0.25 255 255 0   255   // Yellow
+mappingkey 0.30 204 255 0   255   // Yellow-Green
+mappingkey 0.35 153 255 0   255   // Green-Yellow
+mappingkey 0.40 102 255 0   255   // Lime
+mappingkey 0.45 0   255 0   255   // Green
+mappingkey 0.50 0   255 102 255   // Greenish-Cyan
+mappingkey 0.55 0   255 153 255   // Cyan-Green
+mappingkey 0.60 0   255 204 255   // Cyan
+mappingkey 0.65 0   255 255 255   // Light Cyan
+mappingkey 0.70 0   204 255 255   // Sky Blue
+mappingkey 0.75 0   153 255 255   // Blue-Cyan
+mappingkey 0.80 0   102 255 255   // Blue
+mappingkey 0.85 0   51  255 255   // Deep Blue
+mappingkey 0.90 51  0   255 255   // Indigo
+mappingkey 0.95 153 0   255 255   // Violet
+mappingkey 1.00 255 0   255 255   // Magenta

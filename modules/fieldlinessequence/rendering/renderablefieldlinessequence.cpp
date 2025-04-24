@@ -181,6 +181,13 @@ namespace {
         "Performs a time jump to the start of the sequence.",
         openspace::properties::Property::Visibility::NoviceUser
     };
+    constexpr openspace::properties::Property::PropertyInfo SaveDownloadsOnShutdown = {
+        "SaveDownloadsOnShutdown",
+        "Save Downloads On Shutdown",
+        "This is an option for if dynamically downloaded should be saved between runs "
+        "or not. Deletes on default",
+        openspace::properties::Property::Visibility::User
+    };
     struct [[codegen::Dictionary(RenderableFieldlinesSequence)]] Parameters {
         enum class [[codegen::map(openspace::RenderableFieldlinesSequence::ColorMethod)]] ColorMethod {
             Uniform = 0,
@@ -237,9 +244,9 @@ namespace {
         // Set if first/last file should render forever
         bool showAtAllTimes;
 
-        // If using dynamic downloading, files are cached by default.
-        // To save local space, set this to true.
-        std::optional<bool> deleteDownloadsOnShutdown;
+        // If using dynamic downloading, files are not cached by default.
+        // To save files locally , set this to true.
+        std::optional<bool> CacheData;
 
         // If data sets parameter start_time differ from start of run,
         // elapsed_time_in_seconds might be in relation to start of run.
@@ -296,6 +303,9 @@ namespace {
         std::optional<std::vector<std::string>> extraVariables;
         // Which variable in CDF file to trace. b is default for fieldline
         std::optional<std::string> tracingVariable;
+        // This is set to false by default and will delete all the downloaded content when
+        // OpenSpace is shut down. Set to true to save all the downloaded files.
+        std::optional<bool> cacheData;
     };
 #include "renderablefieldlinessequence_codegen.cpp"
 } // namespace
@@ -359,6 +369,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _maskingQuantity(MaskingQuantityInfo)
     , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
     , _jumpToStartBtn(TimeJumpButtonInfo)
+    , _saveDownloadsOnShutdown(SaveDownloadsOnShutdown, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -449,9 +460,10 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     _colorABlendEnabled = p.alphaBlendingEnabled.value_or(_colorABlendEnabled);
     _renderForever = p.showAtAllTimes;
-    _deleteDownloadsOnShutdown =
-        p.deleteDownloadsOnShutdown.value_or(_deleteDownloadsOnShutdown);
+    _saveDownloadsOnShutdown =
+        p.CacheData.value_or(_saveDownloadsOnShutdown);
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
+    _saveDownloadsOnShutdown = p.cacheData.value_or(_saveDownloadsOnShutdown);
 
     if (_loadingType == LoadingType::StaticLoading){
         staticallyLoadFiles(p.seedPointDirectory, p.tracingVariable);
@@ -680,6 +692,8 @@ void RenderableFieldlinesSequence::setupProperties() {
     _maskingGroup.addProperty(_maskingQuantity);
     _selectedMaskingRange.setViewOption(properties::Property::ViewOptions::MinMaxRange);
     _maskingGroup.addProperty(_selectedMaskingRange);
+
+    addProperty(_saveDownloadsOnShutdown);
 }
 
 void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
@@ -846,7 +860,7 @@ void RenderableFieldlinesSequence::deinitializeGL() {
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
     if (_dynamicFileDownloader != nullptr &&
-        _deleteDownloadsOnShutdown &&
+        !_saveDownloadsOnShutdown &&
         _loadingType == LoadingType::DynamicDownloading)
     {
         std::filesystem::path syncDir = _dynamicFileDownloader->destinationDirectory();
@@ -875,10 +889,10 @@ void RenderableFieldlinesSequence::computeSequenceEndTime() {
         const double lastTriggerTime = _files.back().timestamp;
         const double sequenceDuration = lastTriggerTime - _files[0].timestamp;
         const double averageCadence = sequenceDuration / (_files.size() - 1);
-        // A 2 multiplier to the average cadence is added at the end as a small buffer
-        // 2 because if you start it just before new data came in, you might just be
+        // A multiplier of 3 to the average cadence is added at the end as a buffer
+        // 3 because if you start it just before new data came in, you might just be
         // outside the sequence end time otherwise
-        _sequenceEndTime = lastTriggerTime + 2 * averageCadence;
+        _sequenceEndTime = lastTriggerTime + 3 * averageCadence;
     }
 }
 // The function loads the file in the sense that it creates the FieldlineState object in

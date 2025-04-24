@@ -181,6 +181,9 @@ namespace {
         // Path to transferfunction / colormap
         std::optional<std::filesystem::path> colorMap;
 
+        // Option that desides if colormap is being used or not
+        std::optional<bool> useColorMap;
+
         // [[codegen::verbatim(BlendingOptionInfo.description)]]
         std::optional<std::string> blendingOption;
 
@@ -272,6 +275,13 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
         _isUsingColorMap = true;
         addProperty(_isUsingColorMap);
         addProperty(_transferFunctionPath);
+    }
+    // This check is after colormap in case a colormap is given
+    // but using it on default is set to false.
+    if (p.useColorMap.has_value()) {
+        _isUsingColorMap = p.useColorMap.value();
+        //TODO Potentially require a tf here. if not, in onchange in the case
+        //useColorMap is = false but then switched to true but no tf is given.
     }
 }
 
@@ -407,6 +417,11 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
         _shader->setUniform("transferFunction", transferfunctionUnit);
         _shader->setUniform("dataMinMaxValues", _dataMinMaxValues);
     if (_isUsingColorMap) {
+        if (_transferFunction == nullptr) {
+            _transferFunction = std::make_unique<TransferFunction>(
+                absPath(_transferFunctionPath)
+            );
+        }
         transferfunctionUnit.activate();
         _transferFunction->bind();
     }

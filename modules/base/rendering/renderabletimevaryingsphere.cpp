@@ -121,24 +121,24 @@ namespace {
         "This value specifies which index in the fits file to extract and use as texture",
         openspace::properties::Property::Visibility::User
     };
-    //constexpr openspace::properties::Property::PropertyInfo FitsLayerNameInfo = {
-    //    "FitsLayerName",
-    //    "Fits Layer Name",
-    //    "This value specifies which name of the fits layer to use as texture",
-    //    openspace::properties::Property::Visibility::User
-    //};
+    constexpr openspace::properties::Property::PropertyInfo FitsLayerNameInfo = {
+        "FitsLayerName",
+        "Fits Layer Name",
+        "This value specifies which name of the fits layer to use as texture",
+        openspace::properties::Property::Visibility::User
+    };
     constexpr openspace::properties::Property::PropertyInfo TextureFilterInfo = {
         "TextureFilter",
         "Texture Filter",
         "Option to choose nearest neighobr or linear filter to texture.",
         openspace::properties::Property::Visibility::User
     };
-    constexpr openspace::properties::Property::PropertyInfo DeleteDownloadsOnShutdown = {
-        "DeleteDownloadsOnShutdown",
-        "Delete Downloads On Shutdown",
+    constexpr openspace::properties::Property::PropertyInfo SaveDownloadsOnShutdown = {
+        "SaveDownloadsOnShutdown",
+        "Save Downloads On Shutdown",
         "This is an option for if dynamically downloaded should be saved between runs "
         "or not. Deletes on default",
-        openspace::properties::Property::Visibility::Developer
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableTimeVaryingSphere)]] Parameters {
@@ -146,11 +146,9 @@ namespace {
         std::optional<std::string> textureSource;
         // choose type of loading:
         //0: static loading and static downloading
-        //1: dynamic loading and static downloading
-        //2: dynamic loading and dynamic downloading
+        //1: dynamic loading and dynamic downloading
         enum class [[codegen::map(openspace::RenderableTimeVaryingSphere::LoadingType)]] LoadingType {
             StaticLoading,
-            DynamicLoading,
             DynamicDownloading
         };
         std::optional<LoadingType> loadingType;
@@ -163,10 +161,10 @@ namespace {
         std::optional<std::string> dataURL;
         // An index specifying which layer in the fits file to display
         std::optional<int> fitsLayer;
-        //std::optional<ghoul::Dictionary> layerNames;
-        // This is set to true by default and will delete all the downloaded content when
-        // OpenSpace is shut down. Set to false to save all the downloaded fils.
-        std::optional<bool> deleteDownloadsOnShutdown;
+        std::optional<ghoul::Dictionary> layerNames;
+        // This is set to false by default and will delete all the downloaded content when
+        // OpenSpace is shut down. Set to true to save all the downloaded files.
+        std::optional<bool> cacheData;
         // Set if first/last file should render forever
         std::optional<bool> showAtAllTimes;
         enum class [[codegen::map(openspace::RenderableTimeVaryingSphere::TextureFilter)]] TextureFilter {
@@ -190,8 +188,8 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     : RenderableSphere(dictionary)
     , _textureSourcePath(TextureSourceInfo)
     , _fitsLayer(FitsLayerInfo)
-    //, _fitsLayerName(FitsLayerNameInfo)
-    , _deleteDownloadsOnShutdown(DeleteDownloadsOnShutdown, true)
+    , _fitsLayerName(FitsLayerNameInfo)
+    , _saveDownloadsOnShutdown(SaveDownloadsOnShutdown, false)
     , _textureFilterProperty(TextureFilterInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -209,18 +207,6 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     if (p.fitsLayer.has_value()) {
         _fitsLayerTemp = *p.fitsLayer;
     }
-    //if (p.layerNames.has_value()) {
-    //    const ghoul::Dictionary d = *p.layerNames;
-
-    //    std::set<int> intKeys;
-    //    for (std::string_view key : d.keys()) {
-    //        std::string keyStr = std::string(key);
-    //        std::pair<int, std::string> p { std::stoi(keyStr), d.value<std::string>(key)};
-    //        _layerNames.emplace(p);
-    //    }
-    //}
-    _deleteDownloadsOnShutdown =
-        p.deleteDownloadsOnShutdown.value_or(_deleteDownloadsOnShutdown);
 
     _textureFilterProperty.addOptions({
         {static_cast<int>(TextureFilter::NearestNeighbor), "No Filter"},
@@ -241,8 +227,32 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     }
     addProperty(_textureSourcePath);
     addProperty(_textureFilterProperty);
-    addProperty(_fitsLayer);
-    //addProperty(_fitsLayerName);
+
+    if (p.layerNames.has_value()) {
+        const ghoul::Dictionary d = *p.layerNames;
+        std::set<int> intKeys;
+        for (std::string_view key : d.keys()) {
+            std::string keyStr = std::string(key);
+            std::pair<int, std::string> p { std::stoi(keyStr), d.value<std::string>(key)};
+            _layerNames.emplace(p);
+        }
+        if (!p.fitsLayer.has_value()) {
+            LWARNING(std::format(
+                "Specify 'FitsLayer' for scene graph node with DataID: {}.",
+                "Assuming first layer",
+                _dataID
+            ));
+            _fitsLayerTemp = 0;
+        }
+        addProperty(_fitsLayerName);
+    }
+    else {
+        addProperty(_fitsLayer);
+    }
+
+    _saveDownloadsOnShutdown = p.cacheData.value_or(_saveDownloadsOnShutdown);
+    addProperty(_saveDownloadsOnShutdown);
+
     definePropertyCallbackFunctions();
 }
 
@@ -303,7 +313,7 @@ void RenderableTimeVaryingSphere::deinitializeGL() {
     }
 
     if (_dynamicFileDownloader != nullptr &&
-        _deleteDownloadsOnShutdown &&
+        !_saveDownloadsOnShutdown &&
         _loadingType == LoadingType::DynamicDownloading)
     {
         std::filesystem::path syncDir = _dynamicFileDownloader->destinationDirectory();
@@ -321,18 +331,17 @@ void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
     if (!_layerOptionsAdded) {
         for (int i = 0; i < nLayers(path); ++i) {
             _fitsLayer.addOption(i, std::to_string(i+1));
-        //    auto it = _layerNames.find(i);
-        //    if (it != _layerNames.end()) {
-        //        _fitsLayerName.addOption(it->first, it->second);
-        //    }
-        //    else {
-        //        LERROR(std::format(
-        //            "Could not add fits layer name: {} Key {} not found",
-        //            it->second, it->first
-        //        ));
-        //    }
-        //
+            auto it = _layerNames.find(i);
+            if (it != _layerNames.end()) {
+                _fitsLayerName.addOption(it->first, it->second);
+            }
+            else {
+                LERROR(std::format(
+                    "Could not add fits layer name"
+                ));
+            }
         }
+        _fitsLayerName = _fitsLayerTemp;
         _fitsLayer = _fitsLayerTemp;
         _layerOptionsAdded = true;
     }
@@ -596,10 +605,10 @@ void RenderableTimeVaryingSphere::computeSequenceEndTime() {
         const double sequenceDuration = lastTriggerTime - _files[0].time;
         const double averageCadence=
             sequenceDuration / (static_cast<double>(_files.size()) - 1.0);
-        // A 2 multiplier to the average cadence is added at the end as a small buffer
-        // 2 because if you start it just before new data came in, you might just be
+        // A multiplier of 3 to the average cadence is added at the end as a buffer
+        // 3 because if you start it just before new data came in, you might just be
         // outside the sequence end time otherwise
-        _sequenceEndTime = lastTriggerTime + 2 * averageCadence;
+        _sequenceEndTime = lastTriggerTime + 3 * averageCadence;
     }
 }
 
@@ -649,21 +658,21 @@ void RenderableTimeVaryingSphere::definePropertyCallbackFunctions() {
         }
     });
 
-    //_fitsLayerName.onChange([this]() {
-    //    if (_loadingType == LoadingType::StaticLoading) {
-    //        extractMandatoryInfoFromSourceFolder();
-    //    }
-    //    else {
-    //        if (_isFitsFormat) {
-    //            for (auto file = _files.begin(); file != _files.end(); ++file) {
-    //                file->texture = loadTextureFromFits(file->path, _fitsLayerName);
-    //                file->texture->uploadTexture();
-    //                file->texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
-    //            }
-    //            loadTexture();
-    //        }
-    //    }
-    //});
+    _fitsLayerName.onChange([this]() {
+        if (_loadingType == LoadingType::StaticLoading) {
+            extractMandatoryInfoFromSourceFolder();
+        }
+        else {
+            if (_isFitsFormat) {
+                for (auto file = _files.begin(); file != _files.end(); ++file) {
+                    file->texture = loadTextureFromFits(file->path, _fitsLayerName);
+                    file->texture->uploadTexture();
+                    file->texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
+                }
+                loadTexture();
+            }
+        }
+    });
 
     _textureFilterProperty.onChange([this]() {
         switch (_textureFilterProperty) {

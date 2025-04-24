@@ -164,7 +164,7 @@ private:
     bool _shouldUpdatePositionBuffer;
     int _activeIndex = -1;
     bool _atLeastOneFileLoaded = false;
-    bool _deleteDownloadsOnShutdown = false;
+    properties::BoolProperty _saveDownloadsOnShutdown;
 
     bool _isLoadingStateFromDisk = false;
 
