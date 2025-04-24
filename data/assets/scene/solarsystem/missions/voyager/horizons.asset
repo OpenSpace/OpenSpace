@@ -1,0 +1,93 @@
+local ssb = asset.require("scene/solarsystem/sun/transforms")
+
+local voyager_horizons = asset.resource({
+  Name = "Voyager horizons",
+  Type = "HttpSynchronization",
+  Identifier = "voyager_horizons",
+  Version = 1
+})
+
+
+local Voyager1 = {
+  Identifier = "Voyager1_Horizons",
+  Parent = ssb.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Enabled = false,
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = voyager_horizons .. "voyager_1.hrz"
+      -- Target: Voyager 1 (spacecraft) (-31)
+      -- Observer: SSB
+      -- Start time: 1977-Sep-06 00:00:00 (first data point)
+      -- End time: 2030-Jan-01 00:00:00 (last data point)
+      -- Step size: 1 day
+    },
+    Color = { 0.9, 0.9, 0.0 },
+    Fade = 5.0,
+    StartTime = "1977 SEP 06 00:00:00",
+    EndTime = "2030 JAN 01 00:00:00",
+    SampleInterval = openspace.time.secondsPerDay()
+  },
+  GUI = {
+    Name = "Voyager 1 Trail (Horizons)",
+    Path = "/Solar System/Missions/Voyager",
+    Description = [[Voyager 1 Trail, spanning from September 6th, 1977 to January 1st,
+      2030. Data from JPL Horizons]]
+  }
+}
+
+local Voyager2 = {
+  Identifier = "Voyager2_Horizons",
+  Parent = ssb.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Enabled = false,
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = voyager_horizons .. "voyager_2.hrz"
+      -- Target: Voyager 2 (spacecraft) (-32)
+      -- Observer: SSB
+      -- Start time: 1977-Aug-21 00:00:00 (first data point)
+      -- End time: 2030-Jan-01 00:00:00 (last data point)
+      -- Step size: 1 day
+    },
+    Color = { 0.9, 0.9, 0.0 },
+    LineFadeAmount = 0.3,
+    StartTime = "1977 AUG 21 00:00:00",
+    EndTime = "2030 JAN 01 00:00:00",
+    SampleInterval = openspace.time.secondsPerDay()
+  },
+  GUI = {
+    Name = "Voyager 2 Trail (Horizons)",
+    Path = "/Solar System/Missions/Voyager",
+    Description = [[Voyager 2 Trail, spanning from August 21st, 1977 to January 1st, 2030.
+      Data from JPL Horizons]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Voyager1)
+  openspace.addSceneGraphNode(Voyager2)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Voyager2)
+  openspace.removeSceneGraphNode(Voyager1)
+end)
+
+asset.export(Voyager1)
+asset.export(Voyager2)
+
+
+
+asset.meta = {
+  Name = "Voyager Horizons Trails",
+  Description = [[Voyager 1 and Voyager 2 trails driven by JPL Horizons data for better
+    performance then SPICE but lower resolution. Data is from shortly after mission
+    launches until January 1st, 2030]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
