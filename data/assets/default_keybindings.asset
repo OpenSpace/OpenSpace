@@ -4,7 +4,7 @@ local actions = asset.require("actions/default_actions")
 asset.onInitialize(function()
   openspace.bindKey("F1", actions.ToggleNativeUi)
 
-  openspace.bindKey("ESC", actions.ToggleShutdown)
+  openspace.bindKey("Ctrl+Q", actions.ToggleShutdown)
 
   openspace.bindKey("F12", actions.TakeScreenshot)
   openspace.bindKey("PRINT_SCREEN", actions.TakeScreenshot)
@@ -36,35 +36,35 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.clearKey("F5")
+  openspace.clearKey("F5")           -- actions.ReloadGui
 
-  openspace.clearKey("Shift+Down")
-  openspace.clearKey("Down")
+  openspace.clearKey("Shift+Down")   -- actions.RealTimeDeltaStepImmediate
+  openspace.clearKey("Down")         -- actions.RealTimeDeltaStepInterpolate
 
-  openspace.clearKey("Shift+Left")
-  openspace.clearKey("Left")
+  openspace.clearKey("Shift+Left")   -- actions.PreviousDeltaStepImmediate
+  openspace.clearKey("Left")         -- actions.PreviousDeltaStepInterpolate
 
-  openspace.clearKey("Shift+Right")
-  openspace.clearKey("Right")
+  openspace.clearKey("Shift+Right")  -- actions.NextDeltaStepImmediate
+  openspace.clearKey("Right")        -- actions.NextDeltaStepInterpolate
 
-  openspace.clearKey("Alt+R")
+  openspace.clearKey("Alt+R")        -- actions.ToggleMasterRendering
 
-  openspace.clearKey("Shift+TAB")
-  openspace.clearKey("TAB")
+  openspace.clearKey("Shift+TAB")    -- actions.ToggleOverlays
+  openspace.clearKey("TAB")          -- actions.ToggleMainGui
 
-  openspace.clearKey("B")
+  openspace.clearKey("B")            -- actions.FadeToBlack
 
-  openspace.clearKey("Ctrl+F")
-  openspace.clearKey("Shift+F")
-  openspace.clearKey("F")
+  openspace.clearKey("Ctrl+F")       -- actions.ToggleRollFriction
+  openspace.clearKey("Shift+F")      -- actions.ToggleZoomFriction
+  openspace.clearKey("F")            -- actions.ToggleRotationFriction
 
-  openspace.clearKey("Shift+SPACE")
-  openspace.clearKey("SPACE")
+  openspace.clearKey("Shift+SPACE")  -- actions.TogglePauseImmediate
+  openspace.clearKey("SPACE")        -- actions.TogglePauseInterpolated
 
-  openspace.clearKey("F12")
-  openspace.clearKey("PRINT_SCREEN")
+  openspace.clearKey("F12")          -- actions.TakeScreenshot
+  openspace.clearKey("PRINT_SCREEN") -- actions.TakeScreenshot
 
-  openspace.clearKey("ESC")
+  openspace.clearKey("Ctrl+Q")       -- actions.ToggleShutdown
 
-  openspace.clearKey("F1")
+  openspace.clearKey("F1")           -- actions.ToggleNativeUi
 end)
