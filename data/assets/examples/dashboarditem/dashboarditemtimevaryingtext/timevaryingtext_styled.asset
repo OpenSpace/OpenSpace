@@ -5,8 +5,8 @@
 local Item = {
   Type = "DashboardItemTimeVaryingText",
   Identifier = "DashboardItemTimeVaryingText_Example",
-  DataFile = asset.resource("data/dummydata.json"),
-  TextBefore = "Observed KP index: ",
+  DataFile = asset.resource("C:/Users/alundkvi/Documents/work/OpenSpace/user/data/assets/aurorasaurus/KPjson/observed_data.json"),
+  FormatString = "Observed KP index: {}",
   FontSize = 40
 }
 

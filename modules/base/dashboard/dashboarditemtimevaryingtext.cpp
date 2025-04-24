@@ -36,11 +36,13 @@
 namespace {
     constexpr std::string_view _loggerCat = "DashboardItemTimeVaryingText";
 
-    constexpr openspace::properties::Property::PropertyInfo TextBeforeInfo = {
-        "TextBefore",
-        "Text Before",
-        "Optional text before the time varying text to be displayed.",
-        openspace::properties::Property::Visibility::User
+    constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {
+        "FormatString",
+        "Format String",
+        "The format text describing how this dashboard item renders its text. This text "
+        "must contain exactly one {} which is a placeholder that will contain the date "
+        "in the format as specified by `TimeFormat`.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DataFileInfo = {
@@ -51,8 +53,8 @@ namespace {
     };
 
     struct [[codegen::Dictionary(DashboardItemTimeVaryingText)]] Parameters {
-        // [[codegen::verbatim(TextBeforeInfo.description)]]
-        std::optional<std::string> textBefore;
+        // [[codegen::verbatim(FormatStringInfo.description)]]
+        std::optional<std::string> formatString;
 
         // [[codegen::verbatim(DataFileInfo.description)]]
         std::string dataFile;
@@ -72,15 +74,21 @@ documentation::Documentation DashboardItemTimeVaryingText::Documentation() {
 DashboardItemTimeVaryingText::DashboardItemTimeVaryingText(
                                                       const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary)
-    , _textBefore(TextBeforeInfo, "")
+    , _formatString(FormatStringInfo, "{}")
     , _dataFile(DataFileInfo, "")
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    _textBefore = p.textBefore.value_or(_textBefore);
-    addProperty(_textBefore);
+
+    _formatString = p.formatString.value_or(_formatString);
+    addProperty(_formatString);
     
     _dataFile = absPath(p.dataFile).string();
     addProperty(_dataFile);
+
+    _dataFile.onChange([this]() {
+        loadDataFromJson(_dataFile);
+    });
+
     loadDataFromJson(_dataFile);
 }
 
@@ -103,7 +111,14 @@ void DashboardItemTimeVaryingText::update() {
 
             std::ostringstream oss;
             oss << value;
-            _buffer = _textBefore.value() + oss.str();
+            std::string valueString = oss.str();
+            try {
+                _buffer = std::vformat(_formatString.value(),
+                                                      std::make_format_args(valueString));
+            }
+            catch (const std::format_error&) {
+                LERRORC("DashboardItemTimeVaryingText", "Illegal format string");
+            }
         }
     }
     else {
@@ -115,7 +130,7 @@ void DashboardItemTimeVaryingText::update() {
 void DashboardItemTimeVaryingText::loadDataFromJson(const std::string& filePath) {
     std::ifstream file = std::ifstream(filePath);
     if (!file.is_open()) {
-        throw ghoul::Runtime(std::format(
+        throw ghoul::RuntimeError(std::format(
             "Time varying text, '{}' is not a valid JSON file",
             filePath
         ));
@@ -125,11 +140,14 @@ void DashboardItemTimeVaryingText::loadDataFromJson(const std::string& filePath)
     nlohmann::json jsonData;
     file >> jsonData;
 
-    if (jsonData.find("data") != jsonData.end()) {
+    if (jsonData.find("data") == jsonData.end()) {
         throw ghoul::RuntimeError(std::format(
-            "Error loading JSON file. No 'data' was found in '{}', filePath
+            "Error loading JSON file. No 'data' was found in '{}'", filePath
         ));
     }
+
+    _data.clear();
+    _startTimes.clear();
 
     for (const nlohmann::json& item : jsonData["data"]) {
         const std::string& timeString = item[0].get<std::string>();
@@ -148,6 +166,7 @@ void DashboardItemTimeVaryingText::computeSequenceEndTime() {
         double first = _startTimes.front();
         double last = _startTimes.back();
         double avgDuration = (last - first) / static_cast<double>(_startTimes.size() - 1);
+        // Extend end time so the last value remains visible for one more interval
         _sequenceEndTime = last + avgDuration;
     }
 }

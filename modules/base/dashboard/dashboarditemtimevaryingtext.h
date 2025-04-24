@@ -47,7 +47,7 @@
      void computeSequenceEndTime();
      int updateActiveTriggerTimeIndex(double currentTime) const;
 
-     properties::StringProperty _textBefore;
+     properties::StringProperty _formatString;
      properties::StringProperty _dataFile;
 
      std::unordered_map<double, double> _data;
