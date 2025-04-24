@@ -31,6 +31,7 @@ set(HEADER_FILES
   include/notificationwindow.h
   include/settingsdialog.h
   include/splitcombobox.h
+  include/usericon.h
   include/windowcolors.h
   include/profile/actiondialog.h
   include/profile/additionalscriptsdialog.h
@@ -63,6 +64,7 @@ set(SOURCE_FILES
   src/notificationwindow.cpp
   src/settingsdialog.cpp
   src/splitcombobox.cpp
+  src/usericon.cpp
   src/windowcolors.cpp
   src/profile/actiondialog.cpp
   src/profile/additionalscriptsdialog.cpp
