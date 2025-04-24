@@ -1,0 +1,93 @@
+local ssb = asset.require("scene/solarsystem/sun/transforms")
+
+local pioneer_horizons = asset.resource({
+  Name = "Pioneer horizons",
+  Type = "HttpSynchronization",
+  Identifier = "pioneer_horizons",
+  Version = 1
+})
+
+
+local Pioneer10 = {
+  Identifier = "Pioneer10_Horizons",
+  Parent = ssb.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Enabled = false,
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = pioneer_horizons .. "pioneer_10.hrz"
+      -- Target: Pioneer 10 (spacecraft) (-23)
+      -- Observer: SSB
+      -- Start time: 1972-Mar-04 00:00:00 (first data point)
+      -- End time: 2030-Jan-01 00:00:00 (last data point)
+      -- Step size: 1 day
+    },
+    Color = { 0.9, 0.3, 0.0 },
+    Fade = 5.0,
+    StartTime = "1972 MAR 04 00:00:00",
+    EndTime = "2030 JAN 01 00:00:00",
+    SampleInterval = openspace.time.secondsPerDay()
+  },
+  GUI = {
+    Name = "Pioneer 10 Trail (Horizons)",
+    Path = "/Solar System/Missions/Pioneer",
+    Description = [[Pioneer 10 Trail, spanning from March 4th, 1972 to January 1st, 2030.
+      Data from JPL Horizons]]
+  }
+}
+
+local Pioneer11 = {
+  Identifier = "Pioneer11_Horizons",
+  Parent = ssb.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Enabled = false,
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = pioneer_horizons .. "pioneer_11.hrz"
+      -- Target: Pioneer 11 (spacecraft) (-24)
+      -- Observer: SSB
+      -- Start time: 1973-Apr-07 00:00:00 (first data point)
+      -- End time: 2030-Jan-01 00:00:00 (last data point)
+      -- Step size: 1 day
+    },
+    Color = { 0.9, 0.3, 0.0 },
+    LineFadeAmount = 0.3,
+    StartTime = "1973 APR 07 00:00:00",
+    EndTime = "2030 JAN 01 00:00:00",
+    SampleInterval = openspace.time.secondsPerDay()
+  },
+  GUI = {
+    Name = "Pioneer 11 Trail (Horizons)",
+    Path = "/Solar System/Missions/Pioneer",
+    Description = [[Pioneer 11 Trail, spanning from April 7th, 1973 to January 1st, 2030.
+      Data from JPL Horizons]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Pioneer10)
+  openspace.addSceneGraphNode(Pioneer11)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Pioneer11)
+  openspace.removeSceneGraphNode(Pioneer10)
+end)
+
+asset.export(Pioneer10)
+asset.export(Pioneer11)
+
+
+
+asset.meta = {
+  Name = "Pioneer Horizons Trails",
+  Description = [[Pioneer 10, Pioneer 11 trails driven by JPL Horizons data for better
+    performance then SPICE but lower resolution. Data is from shortly after mission
+    launches until January 1st, 2030]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

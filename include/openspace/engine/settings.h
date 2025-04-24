@@ -35,8 +35,12 @@ namespace openspace {
 struct Settings {
     auto operator<=>(const Settings&) const = default;
 
+    // Settings that are not configurable by the user and that represent a persistent
+    // state for the system
     std::optional<bool> hasStartedBefore;
+    std::optional<std::string> lastStartedDate;
 
+    // Configurable settings
     std::optional<std::string> configuration;
     std::optional<bool> rememberLastConfiguration;
     std::optional<std::string> profile;

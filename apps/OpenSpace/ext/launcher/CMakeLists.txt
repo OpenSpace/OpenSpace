@@ -28,8 +28,10 @@ set(HEADER_FILES
   include/backgroundimage.h
   include/filesystemaccess.h
   include/launcherwindow.h
+  include/notificationwindow.h
   include/settingsdialog.h
   include/splitcombobox.h
+  include/usericon.h
   include/windowcolors.h
   include/profile/actiondialog.h
   include/profile/additionalscriptsdialog.h
@@ -48,6 +50,7 @@ set(HEADER_FILES
   include/profile/timedialog.h
   include/profile/profileedit.h
   include/profile/propertiesdialog.h
+  include/profile/uipanelsdialog.h
   include/sgctedit/displaywindowunion.h
   include/sgctedit/monitorbox.h
   include/sgctedit/sgctedit.h
@@ -58,8 +61,10 @@ set(SOURCE_FILES
   src/backgroundimage.cpp
   src/launcherwindow.cpp
   src/filesystemaccess.cpp
+  src/notificationwindow.cpp
   src/settingsdialog.cpp
   src/splitcombobox.cpp
+  src/usericon.cpp
   src/windowcolors.cpp
   src/profile/actiondialog.cpp
   src/profile/additionalscriptsdialog.cpp
@@ -78,6 +83,7 @@ set(SOURCE_FILES
   src/profile/timedialog.cpp
   src/profile/profileedit.cpp
   src/profile/propertiesdialog.cpp
+  src/profile/uipanelsdialog.cpp
   src/sgctedit/sgctedit.cpp
   src/sgctedit/displaywindowunion.cpp
   src/sgctedit/monitorbox.cpp

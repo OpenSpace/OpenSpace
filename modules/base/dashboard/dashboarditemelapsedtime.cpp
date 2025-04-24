@@ -175,14 +175,4 @@ void DashboardItemElapsedTime::update() {
     }
 }
 
-glm::vec2 DashboardItemElapsedTime::size() const {
-    ZoneScoped;
-
-    const double delta = global::timeManager->time().j2000Seconds() - _referenceJ2000;
-    // @CPP26(abock): This can be replaced with std::runtime_format
-    return _font->boundingBox(
-        std::vformat(_formatString.value(), std::make_format_args(delta))
-    );
-}
-
 } // namespace openspace

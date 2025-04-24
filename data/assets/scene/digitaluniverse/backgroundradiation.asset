@@ -30,10 +30,12 @@ local COBE = {
     Texture = textures .. "COBErect.png",
     Orientation = "Both",
     MirrorTexture = true,
-    FadeInThreshold = 0.4
+    FadeInThreshold = 0.4,
+    BlendingOption = "Additive",
+    DisableDepth = true
   },
   GUI = {
-    Name = "1990 COBE CMB",
+    Name = "COBE",
     Path = "/Universe/Cosmic Microwave Background",
     Description = [[In 1990, COBE, the Cosmic Background Explorer, took the first
       detailed map of the cosmic microwave background light. The red areas are
@@ -62,10 +64,12 @@ local WMAP = {
     Texture = textures .. "wmap_ilc_7yr_v4_200uK_RGB_sos.png",
     Orientation = "Both",
     MirrorTexture = true,
-    FadeInThreshold = 0.4
+    FadeInThreshold = 0.4,
+    BlendingOption = "Additive",
+    DisableDepth = true
   },
   GUI = {
-    Name = "2003 WMAP CMB",
+    Name = "WMAP",
     Path = "/Universe/Cosmic Microwave Background",
     Description = [[WMAP, the Wilkinson Microwave Anisotropy Probe, released this all-sky
       image of the cosmic microwave background light in 2003. The blue colors are slightly
@@ -93,10 +97,12 @@ local Planck = {
     Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    FadeInThreshold = 0.4
+    FadeInThreshold = 0.4,
+    BlendingOption = "Additive",
+    DisableDepth = true
   },
   GUI = {
-    Name = "2013 Planck CMB",
+    Name = "Planck",
     Path = "/Universe/Cosmic Microwave Background",
     Description = [[The Planck mission's 2013 image of the cosmic microwave background
       light release is the most detailed view of the CMB we have to date. The orange
@@ -111,6 +117,11 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(COBE)
   openspace.addSceneGraphNode(WMAP)
   openspace.addSceneGraphNode(Planck)
+
+  openspace.setGuiOrder(
+    "/Universe/Cosmic Microwave Background",
+    { COBE.Identifier, WMAP.Identifier, Planck.Identifier }
+  )
 end)
 
 asset.onDeinitialize(function()

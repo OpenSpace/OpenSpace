@@ -28,6 +28,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/settings.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/json.h>
 #include <openspace/util/json_helper.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -35,7 +36,6 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/assert.h>
-#include <json/json.hpp>
 #include <optional>
 
 namespace {

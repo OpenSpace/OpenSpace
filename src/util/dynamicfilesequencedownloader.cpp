@@ -115,8 +115,12 @@ void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest)
 
             jsonResult = nlohmann::json::parse(responseText);
             success = true;
-            _dataMinTime = Time::convertTime(jsonResult["availability"]["startDate"]);
-            _dataMaxTime = Time::convertTime(jsonResult["availability"]["stopDate"]);
+            _dataMinTime = Time::convertTime(
+                jsonResult["availability"]["startDate"].get<std::string>()
+            );
+            _dataMaxTime = Time::convertTime(
+                jsonResult["availability"]["stopDate"].get<std::string>()
+            );
             //_dataIdDescription = jsonResult["description"];
         }
         catch (nlohmann::json::parse_error& e) {
@@ -237,8 +241,8 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
 
     int index = 0;
     for (auto& element : jsonResult["files"]) {
-        std::string timestamp = element["timestamp"];
-        std::string url = element["url"];
+        std::string timestamp = element["timestamp"].get<std::string>();
+        std::string url = element["url"].get<std::string>();
 
         //timestamp = "2022-11-13T16:14:00.000";
         //url =

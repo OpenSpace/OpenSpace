@@ -53,6 +53,7 @@
 #include <sgct/projection/nonlinearprojection.h>
 #include <sgct/user.h>
 #include <sgct/window.h>
+#include <date/date.h>
 #include <stb_image.h>
 #include <tracy/Tracy.hpp>
 #include <iostream>
@@ -924,24 +925,40 @@ void setSgctDelegateFunctions() {
 
         return Engine::instance().windows().front()->id();
     };
+    sgctDelegate.nameForWindow = [](int windowIdx) {
+        ZoneScoped;
+
+        ghoul_assert(
+            windowIdx >= 0 &&
+            windowIdx < Engine::instance().windows().size(),
+            "Invalid window index"
+        );
+        return Engine::instance().windows()[windowIdx]->name();
+    };
     sgctDelegate.openGLProcedureAddress = [](const char* func) {
         ZoneScoped;
 
         return glfwGetProcAddress(func);
     };
-    sgctDelegate.getHorizFieldOfView = []() {
+    sgctDelegate.horizFieldOfView = [](int windowIdx) {
         ZoneScoped;
 
-        return static_cast<double>(
-            Engine::instance().windows().front()->horizFieldOfViewDegrees()
+        ghoul_assert(
+            windowIdx >= 0 &&
+            windowIdx < Engine::instance().windows().size(),
+            "Invalid window index"
         );
+        return Engine::instance().windows()[windowIdx]->horizFieldOfViewDegrees();
     };
-    sgctDelegate.setHorizFieldOfView = [](float hFovDeg) {
+    sgctDelegate.setHorizFieldOfView = [](int windowIdx, float hFovDeg) {
         ZoneScoped;
 
-        for (std::unique_ptr<sgct::Window> const& w : Engine::instance().windows()) {
-            w->setHorizFieldOfView(hFovDeg);
-        }
+        ghoul_assert(
+            windowIdx >= 0 &&
+            windowIdx < Engine::instance().windows().size(),
+            "Invalid window index"
+        );
+        Engine::instance().windows()[windowIdx]->setHorizFieldOfView(hFovDeg);
     };
     #ifdef WIN32
     sgctDelegate.getNativeWindowHandle = [](size_t windowIndex) -> void* {
@@ -1069,6 +1086,12 @@ void setSgctDelegateFunctions() {
 
 int main(int argc, char* argv[]) {
     ZoneScoped;
+
+    // For debugging purposes: Enforce Light Mode in Qt
+    // qputenv("QT_QPA_PLATFORM", "windows:darkmode=0");
+
+    // For debugging purposes: Enforce Dark Mode in Qt
+    // qputenv("QT_QPA_PLATFORM", "windows:darkmode=1");
 
 #ifdef OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
     _clearfp();
@@ -1451,21 +1474,20 @@ int main(int argc, char* argv[]) {
 
         settings.configuration =
             isGeneratedWindowConfig ? "" : global::configuration->windowConfiguration;
+        const date::year_month_day now = date::year_month_day(
+            floor<date::days>(std::chrono::system_clock::now())
+        );
+        settings.lastStartedDate = std::format(
+            "{}-{:0>2}-{:0>2}",
+            static_cast<int>(now.year()),
+            static_cast<unsigned>(now.month()),
+            static_cast<unsigned>(now.day())
+        );
 
         saveSettings(settings, findSettings());
     }
 
-    // Prepend the outgoing sgctArguments with the program name
-    // as well as the configuration file that sgct is supposed to use
-    arguments.insert(arguments.begin(), argv[0]);
-    arguments.insert(arguments.begin() + 1, "-config");
-    arguments.insert(
-        arguments.begin() + 2,
-        absPath(global::configuration->windowConfiguration).string()
-    );
-
     // Need to set this before the creation of the sgct::Engine
-
     Log::instance().setLogToConsole(false);
     Log::instance().setShowTime(false);
     Log::instance().setShowLogLevel(false);
@@ -1475,9 +1497,14 @@ int main(int argc, char* argv[]) {
     glfwWindowHint(GLFW_STENCIL_BITS, 8);
 #endif
 
+    std::filesystem::path winConf =
+        commandlineArguments.windowConfig.has_value() ?
+        *commandlineArguments.windowConfig :
+        global::configuration->windowConfiguration;
+
     // Determining SGCT configuration file
     LINFO(std::format(
-        "SGCT Configuration file: {}", absPath(global::configuration->windowConfiguration)
+        "SGCT Configuration file: {}", absPath(winConf)
     ));
 
 
@@ -1488,9 +1515,7 @@ int main(int argc, char* argv[]) {
     LDEBUG("Loading cluster information");
     config::Cluster cluster;
     try {
-        cluster = loadCluster(
-            absPath(global::configuration->windowConfiguration).string()
-        );
+        cluster = loadCluster(absPath(winConf).string());
     }
     catch (const std::runtime_error& e) {
         LFATALC("main", e.what());

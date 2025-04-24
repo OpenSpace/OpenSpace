@@ -173,7 +173,9 @@ set(OPENSPACE_SOURCE
   util/coordinateconversion.cpp
   util/distanceconversion.cpp
   util/dynamicfilesequencedownloader.cpp
+  util/ellipsoid.cpp
   util/factorymanager.cpp
+  util/geodetic.cpp
   util/httprequest.cpp
   util/json_helper.cpp
   util/keys.cpp
@@ -367,8 +369,10 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/util/distanceconstants.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/distanceconversion.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/dynamicfilesequencedownloader.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/util/ellipsoid.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/factorymanager.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/factorymanager.inl
+  ${PROJECT_SOURCE_DIR}/include/openspace/util/geodetic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/httprequest.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/job.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/json_helper.h
@@ -461,6 +465,8 @@ target_include_directories(openspace-core
     # introduces a dependency from the opnspace-core onto the modules
     ${PROJECT_SOURCE_DIR}
 )
+
+target_link_libraries(openspace-core PUBLIC nlohmann_json)
 
 target_precompile_headers(openspace-core PRIVATE
   <openspace/json.h>

@@ -84,7 +84,7 @@ void DataProcessorJson::addDataValues(const std::string& data,
                 const int colsize = static_cast<int>(col.size());
 
                 for (int x = 0; x < colsize; ++x) {
-                    const float value = col.at(x);
+                    const float value = col.at(x).get<float>();
                     optionValues[i].push_back(value);
                     _min[i] = std::min(_min[i], value);
                     _max[i] = std::max(_max[i], value);
@@ -131,7 +131,7 @@ std::vector<float*> DataProcessorJson::processData(const std::string& data,
             const int colsize = static_cast<int>(col.size());
 
             for (int x = 0; x < colsize; ++x) {
-                const float value = col.at(x);
+                const float value = col.at(x).get<float>();
                 const int i = x + y * colsize;
 
                 dataOptions[option][i] = processDataPoint(value, option);

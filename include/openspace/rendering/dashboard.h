@@ -60,7 +60,7 @@ public:
     void removeDashboardItem(const std::string& identifier);
     void removeDashboardItem(int index);
     void clearDashboardItems();
-    glm::vec2 getStartPositionOffset();
+    glm::ivec2 startPositionOffset();
     std::vector<DashboardItem*> dashboardItems() const;
 
     /**

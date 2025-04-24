@@ -132,6 +132,9 @@ public:
     AssetManager& assetManager();
     LoadingScreen* loadingScreen();
 
+    void invalidatePropertyCache();
+    const std::vector<properties::Property*>& allProperties() const;
+
     void createUserDirectoriesIfNecessary();
 
     uint64_t ramInUse() const;
@@ -174,6 +177,9 @@ private:
 
     int _nextCallbackHandle = 0;
     std::vector<std::pair<CallbackHandle, ModeChangeCallback>> _modeChangeCallbacks;
+
+    mutable bool _isAllPropertiesCacheDirty = true;
+    mutable std::vector<properties::Property*> _allPropertiesCache;
 };
 
 /**

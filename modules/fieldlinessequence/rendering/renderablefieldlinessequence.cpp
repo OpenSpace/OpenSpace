@@ -460,8 +460,6 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     _colorABlendEnabled = p.alphaBlendingEnabled.value_or(_colorABlendEnabled);
     _renderForever = p.showAtAllTimes;
-    _saveDownloadsOnShutdown =
-        p.CacheData.value_or(_saveDownloadsOnShutdown);
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
     _saveDownloadsOnShutdown = p.cacheData.value_or(_saveDownloadsOnShutdown);
 

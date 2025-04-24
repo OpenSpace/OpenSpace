@@ -22,46 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEROTATION___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEROTATION___H__
+#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACERENDERABLERENDERABLE___H__
+#define __OPENSPACE_MODULE_BASE___SCREENSPACERENDERABLERENDERABLE___H__
 
-#include <openspace/scene/rotation.h>
+#include <modules/base//rendering/screenspaceframebuffer.h>
 
-#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec3property.h>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-class RenderableGlobe;
+namespace properties { class PropertyOwner; }
 
-class GlobeRotation : public Rotation {
+class Renderable;
+class Rotation;
+class Scale;
+class Translation;
+
+namespace documentation { struct Documentation; }
+
+class ScreenSpaceRenderableRenderable : public ScreenSpaceFramebuffer {
 public:
-    explicit GlobeRotation(const ghoul::Dictionary& dictionary);
+    using RenderFunction = std::function<void()>;
 
-    void update(const UpdateData& data) override;
-    glm::dmat3 matrix(const UpdateData& data) const override;
+    explicit ScreenSpaceRenderableRenderable(const ghoul::Dictionary& dictionary);
+    virtual ~ScreenSpaceRenderableRenderable() override;
+
+    bool initializeGL() override;
+    bool deinitializeGL() override;
+    void update() override;
 
     static documentation::Documentation Documentation();
 
 private:
-    void findGlobe();
-    void setUpdateVariables();
-    glm::vec3 computeSurfacePosition(double latitude, double longitude) const;
+    ghoul::mm_unique_ptr<Translation> _translation = nullptr;
+    ghoul::mm_unique_ptr<properties::PropertyOwner> _transform = nullptr;
+    ghoul::mm_unique_ptr<Rotation> _rotation = nullptr;
+    ghoul::mm_unique_ptr<Scale> _scale = nullptr;
+    ghoul::mm_unique_ptr<Renderable> _renderable = nullptr;
 
-    properties::StringProperty _globe;
-    properties::DoubleProperty _latitude;
-    properties::DoubleProperty _longitude;
-    properties::DoubleProperty _angle;
-    properties::BoolProperty _useHeightmap;
-    properties::BoolProperty _useCamera;
-
-    RenderableGlobe* _globeNode = nullptr;
-
-    mutable bool _matrixIsDirty = true;
-    mutable glm::dmat3 _matrix = glm::dmat3(0.0);
+    double _previousTime = 0.0;
+    properties::DoubleProperty _time;
+    properties::Vec3Property _cameraPosition;
+    properties::Vec3Property _cameraCenter;
+    properties::Vec3Property _cameraUp;
+    properties::FloatProperty _cameraFov;
 };
 
-} // namespace openspace::globebrowsing
+} //namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEROTATION___H__
+#endif // __OPENSPACE_MODULE_BASE___SCREENSPACERENDERABLERENDERABLE___H__

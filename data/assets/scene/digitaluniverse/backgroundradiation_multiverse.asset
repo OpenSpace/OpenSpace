@@ -27,7 +27,9 @@ local PlanckMultiverse1 = {
     Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    FadeInThreshold = 0.4
+    FadeInThreshold = 0.4,
+    BlendingOption = "Additive",
+    DisableDepth = true
   },
   GUI = {
     Name = "Planck Multiverse 1",
@@ -56,7 +58,9 @@ local PlanckMultiverse2 = {
     Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    FadeInThreshold = 0.4
+    FadeInThreshold = 0.4,
+    BlendingOption = "Additive",
+    DisableDepth = true
   },
   GUI = {
     Name = "Planck Multiverse 2",
@@ -85,7 +89,9 @@ local PlanckMultiverse3 = {
     Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    FadeInThreshold = 0.4
+    FadeInThreshold = 0.4,
+    BlendingOption = "Additive",
+    DisableDepth = true
   },
   GUI = {
     Name = "Planck Multiverse 3",
@@ -114,7 +120,9 @@ local PlanckMultiverse4 = {
     Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    FadeInThreshold = 0.4
+    FadeInThreshold = 0.4,
+    BlendingOption = "Additive",
+    DisableDepth = true
   },
   GUI = {
     Name = "Planck Multiverse 4",
