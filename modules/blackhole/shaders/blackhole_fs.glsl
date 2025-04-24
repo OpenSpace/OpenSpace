@@ -2,8 +2,6 @@
 
 in vec2 TexCoord;
 
-#define SHOW_BLACK_HOLE 1
-
 #define hash
 
 uniform sampler2D environmentTexture;
@@ -86,6 +84,7 @@ vec2 sphericalToUV(vec2 sphereCoords){
                         Warp Table
 ***********************************************************/
 #ifdef hash
+
 float ShadowAngle() {
     // Critical impact parameter for a Schwarzschild black hole in geometric units.
     float b_crit = 3.0 * sqrt(3.0) / 2.0;  // ~2.598
@@ -115,17 +114,10 @@ ivec2 getClosestWarpIndices(float phi) {
     int idx1 = int(min(float(num_rays - 1), ceil(idx_f))) * (layerCount + 1);
 
     return ivec2(idx0, idx1);
-    // float phi0 = schwarzschildWarpTable[idx0];
-    // float phi1 = schwarzschildWarpTable[idx1];
-
-    // // Determine which is closer
-    // if (abs(phi - phi0) < abs(phi - phi1)) {
-    //     return ivec2(idx0, idx1);
-    // } else {
-    //     return ivec2(idx1, idx0);
-    // }
 }
+
 #else
+
 ivec2 bstWarpTable(float phi, int layer){
     float midPhi = -1.0f;
     float deltaPhi = -1.0f;
@@ -174,7 +166,9 @@ ivec2 bstWarpTable(float phi, int layer){
 
     return v1 < v2 ? ivec2(closestIndex * tableNodeSize, nextClosestIndex * tableNodeSize) : ivec2(nextClosestIndex * tableNodeSize, closestIndex * tableNodeSize);
 }
+
 #endif
+
 float interpelateWarpTable(int indexStart, int indexEnd, float localPhi, int layer){
     float envMapPhiStart = schwarzschildWarpTable[indexStart + layer];
     float envMapPhiEnd = schwarzschildWarpTable[indexEnd + layer];
