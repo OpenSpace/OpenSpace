@@ -1,6 +1,7 @@
 #include "kerr.h"
 #include <cuda_runtime.h>
 #include "device_launch_parameters.h"
+#include "vector_functions.h"
 #include <cmath>
 #include <cstdio>
 #include <vector>
@@ -17,16 +18,49 @@
 // Device constants (set at compile time; you may also update via cudaMemcpyToSymbol)
 __constant__ float c_a = 0.99f;
 __constant__ float c_rs = 1;
-__constant__ unsigned int c_num_steps = 1000;
+__constant__ unsigned int c_num_steps = 15000;
 __constant__ unsigned int c_layers = 1;
 __constant__ float c_M = 1.0f;     // Mass parameter
 __constant__ float c_epsilon = 1e-10;   // Numerical tolerance
+__constant__ float3 worldUp = { 0.0f, 1.0f, 0.0f };
+
+
 
 // Additional simulation parameters
-__constant__ float c_h = 0.1f;            // Integration step size
+__constant__ float c_h = 0.01f;            // Integration step size
 
 // ---------------------------------------------------------------------
 // Coordinate convertion functions
+
+// helper math (as before)
+__device__ float3 crossf3(const float3& a, const float3& b) {
+    return make_float3(
+        a.y * b.z - a.z * b.y,
+        a.z * b.x - a.x * b.z,
+        a.x * b.y - a.y * b.x
+    );
+}
+
+__device__ float3 normalizef3(const float3& v) {
+    float len2 = v.x * v.x + v.y * v.y + v.z * v.z;
+    float invLen = 1.0f / sqrtf(len2);
+    return make_float3(v.x * invLen,
+        v.y * invLen,
+        v.z * invLen);
+}
+
+
+__device__ inline float3 operator*(const float3& v, float s) {
+    return make_float3(v.x * s, v.y * s, v.z * s);
+}
+
+__device__ inline float3 operator*(float s, const float3& v) {
+    return make_float3(v.x * s, v.y * s, v.z * s);
+}
+
+__device__ inline float3 operator+(const float3& a, const float3& b) {
+    return make_float3(a.x + b.x, a.y + b.y, a.z + b.z);
+}
 
 __device__ float3 spherical_to_cartesian(float r, float theta, float phi) {
     return make_float3(
@@ -40,16 +74,16 @@ __device__ void cartesian_to_boyer_lindquist(float x, float x_vel,
     float y, float y_vel,
     float z, float z_vel,
     float A, float* out) {
-    float r2 = x * x + y * y + z * z;
-    float A2 = A * A;
-    float root = sqrtf(A2 * (A2 - 2.0f * (x * x + y * y) + 2.0f * z * z) + r2 * r2);
-    float radius = sqrtf((-A2 + r2 + root) * 0.5f);
+    double r2 = x * x + y * y + z * z;
+    double A2 = A * A;
+    double root = sqrt(A2 * (A2 - 2.0 * (x * x + y * y) + 2.0 * z * z) + r2 * r2);
+    double radius = sqrt((-A2 + r2 + root) * 0.5);
 
     float azimuthal_angle = atan2f(y, x);
     float polar_angle = acosf(z / radius);
 
-    float denom = 2.0f * radius * radius + A2 - r2;
-    float radius_velocity = (radius * (x * x_vel + y * y_vel + z * z_vel)) / denom +
+    double denom = 2.0 * radius * radius + A2 - r2;
+    double radius_velocity = (radius * (x * x_vel + y * y_vel + z * z_vel)) / denom +
         A2 * z * z_vel / (radius * denom);
 
     float polar_denom = radius * sqrtf(radius * radius - z * z);
@@ -208,6 +242,7 @@ __device__ void rk4(float* y, float h, float E, float L, float k_val) {
 // The output trajectory (state vector per step) and the number of steps per ray
 // are stored in contiguous device memory.
 __global__ void simulateRayKernel(float3 pos, size_t num_rays_per_dim, float* lookup_table) {
+    //printf("%.2f %.2f %.2f \n", pos.x ,pos.y, pos.z);
     int const idx = blockIdx.x * blockDim.x + threadIdx.x;
     int const num_rays = num_rays_per_dim * num_rays_per_dim;
     if (idx >= num_rays) return;
@@ -215,11 +250,29 @@ __global__ void simulateRayKernel(float3 pos, size_t num_rays_per_dim, float* lo
     int const idx_theta = idx / num_rays_per_dim;
     int const idx_phi = idx % num_rays_per_dim;
 
-    float theta = 0.1f + (M_PI - 0.1f) * idx_theta / (num_rays_per_dim - 1);
+    float theta = (M_PI * idx_theta) / num_rays_per_dim;
     float phi = (2.0f * M_PI * idx_phi) / num_rays_per_dim;
 
     // @TODO: (Investigate); Might need to rotate outgoing dirs to account for camera orientation
-    float3 const dir = spherical_to_cartesian(1.0f, theta, phi);
+    float3 camPos  = make_float3(pos.x, pos.y, pos.z);  // camera world pos
+    float3 forward = normalizef3(make_float3(
+        -camPos.x,   // since modelCenter == (0,0,0)
+        -camPos.y,
+        -camPos.z
+    ));
+
+    float3 right = normalizef3(crossf3(forward, worldUp));
+    float3 upVec = crossf3(right, forward);
+
+    // now build your ray as before:
+    float sinT = sinf(theta), cosT = cosf(theta);
+    float sinP = sinf(phi),   cosP = cosf(phi);
+
+    float3 dir = 
+        sinT * ( cosP * right + sinP * upVec )
+      + cosT * forward;
+
+    dir = normalizef3(dir);
 
     float const x_vel = M_C * dir.x;
     float const y_vel = M_C * dir.y;
@@ -250,6 +303,7 @@ __global__ void simulateRayKernel(float3 pos, size_t num_rays_per_dim, float* lo
     // Set up the initial state vector: [r, theta, phi, p_r, p_theta]
     float y[5];
     y[0] = r0; y[1] = theta0; y[2] = phi0; y[3] = p_r0; y[4] = p_theta0;
+    //printf("%.2f, %.2f\n", theta0, phi0);
 
     // Pointer to this ray's lookup data. @TODO Correct index calculation old form trejectory
     float* entry = &lookup_table[idx * (1 + c_layers) * 2];

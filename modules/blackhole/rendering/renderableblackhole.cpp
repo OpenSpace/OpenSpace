@@ -20,7 +20,7 @@
 #include <filesystem>
 #include <vector>
 
-#define M_Kerr false
+#define M_Kerr true
 #if M_Kerr
 #include <modules/blackhole/cuda/kerr.h>
 #else
@@ -114,7 +114,7 @@ namespace openspace {
     bool RenderableBlackHole::isReady() const {
         return _program != nullptr;
     }
-
+    bool rerender = true;
     void RenderableBlackHole::update(const UpdateData& data) {
         if (data.modelTransform.translation != _chachedTranslation) {
             _chachedTranslation = data.modelTransform.translation;
@@ -124,10 +124,23 @@ namespace openspace {
         _viewport.updateViewGrid(global::renderEngine->renderingResolution());
 
         #if M_Kerr
-        glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3() - _chachedTranslation;
-        if (glm::distance(cameraPosition, _chacedCameraPos) > 0.01f) {
-            kerr(cameraPosition.x, cameraPosition.y, cameraPosition.z, _rs, 0.99f, _rayCount, _stepsCount, _schwarzschildWarpTable);
+        // world-space camera
+        glm::dvec3 camW = global::navigationHandler->camera()->positionVec3();
+
+        // 1) Translate into model-centered space
+        glm::dvec3 v = camW - data.modelTransform.translation;
+
+        // 2) Remove the rotation: for an orthonormal matrix, inverse == transpose
+        glm::dvec3 v_rot = glm::transpose(data.modelTransform.rotation) * v;
+
+        // 3) Remove scaling (component-wise)
+        glm::dvec3 cameraPosition = v_rot / data.modelTransform.scale;
+
+        if (glm::distance(cameraPosition, _chacedCameraPos) > 0.01f && rerender) {
+            //kerr(2e11, 0, 0, _rs, 0.99f, _rayCount, _stepsCount, _schwarzschildWarpTable);
+            kerr(cameraPosition.x, cameraPosition.y, cameraPosition.z, _rs, 0.5f, _rayCount, _stepsCount, _schwarzschildWarpTable);
             _chacedCameraPos = cameraPosition;
+            //rerender = false;
         }
 #else
         glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
@@ -185,13 +198,13 @@ namespace openspace {
         
         _program->setUniform(
             _uniformCache.cameraRotationMatrix,
-             glm::mat4(glm::mat4_cast(camRot.localRotation)) * CameraPlaneRotation
+            glm::mat4(glm::mat4_cast(camRot.localRotation)) * CameraPlaneRotation
         );
 
-        _program->setUniform(
-            _uniformCache.worldRotationMatrix,
-            glm::mat4(glm::mat4_cast(camRot.globalRotation))
-            );
+        //_program->setUniform(
+        //    _uniformCache.worldRotationMatrix,
+        //    glm::mat4(glm::mat4_cast(camRot.globalRotation))
+        //    );
 #if !M_Kerr
         if (_uniformCache.r_0 != -1) {
             _program->setUniform(
@@ -299,8 +312,8 @@ namespace openspace {
     }
 
     void RenderableBlackHole::loadEnvironmentTexture() {
-        //const std::string texturePath = "${MODULE_BLACKHOLE}/rendering/uv.png";
-        const std::string texturePath = "${BASE}/sync/http/milkyway_textures/2/DarkUniverse_mellinger_8k.jpg";
+        const std::string texturePath = "${MODULE_BLACKHOLE}/rendering/uv.png";
+        //const std::string texturePath = "${BASE}/sync/http/milkyway_textures/2/DarkUniverse_mellinger_8k.jpg";
         //const std::string texturePath = "${MODULE_BLACKHOLE}/rendering/skybox.jpg";
 
         _environmentTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(texturePath), 2);

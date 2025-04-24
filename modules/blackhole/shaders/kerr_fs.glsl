@@ -39,9 +39,7 @@ const int num_rays = schwarzschildWarpTable.length() / (layerCount + 1);
 
 
 const float max_theta = PI;
-const float delta_theta = 0.1f;
 const float max_phi = 2*PI;
-const float delta_phi = 0;
 const int num_rays_per_dim = 100;
 /**********************************************************
                         Math
@@ -91,47 +89,72 @@ vec2 sphericalToUV(vec2 sphereCoords){
 ***********************************************************/
 
 vec2 getInterpolatedWarpAngles(float input_theta, float input_phi, int layer) {
-    // Convert angles to floating-point grid indices
-    float theta_f = (input_theta - delta_theta) * float(num_rays_per_dim - 1) / (max_theta - delta_theta);
-    float phi_f = input_phi * float(num_rays_per_dim) / (2.0 * PI);
+    // 1) Convert to float grid indices
+    float theta_f = (input_theta)
+                  * float(num_rays_per_dim - 1)
+                  / (max_theta);
+    float phi_f   =  input_phi
+                  * float(num_rays_per_dim -1)
+                  / (2.0 * PI);
 
-    // Clamp theta indices (no wrap)
-    int theta_low = int(clamp(floor(theta_f), 0.0, float(num_rays_per_dim - 2)));
-    int theta_high = theta_low + 1;
+    // 2) Integer bounds
+    int theta_low  = int(clamp(floor(theta_f), 0.0, float(num_rays_per_dim-1)));
+    int theta_high = int(clamp(theta_low + 1, 0, num_rays_per_dim-1));
 
-    // Wrap phi indices
-    int phi_low = int(floor(phi_f)) % num_rays_per_dim;
+    int phi_low  = int(floor(phi_f)) % num_rays_per_dim;
     int phi_high = (phi_low + 1) % num_rays_per_dim;
 
+    // 3) Flat indices
+    int N = num_rays_per_dim;
+    int idx00 = theta_low  * N + phi_low;
+    int idx10 = theta_high * N + phi_low;
+    int idx01 = theta_low  * N + phi_high;
+    int idx11 = theta_high * N + phi_high;
+
+    // 4) Record stride & per-layer offset
     int record_stride = 2 + layerCount * 2;
-    int offset = 2 + layer * 2;
+    int offset        = 2 + layer * 2;
 
-    // Flat index computation
-    int idx00 = theta_low  * num_rays_per_dim + phi_low;
-    int idx10 = theta_high * num_rays_per_dim + phi_low;
-    int idx01 = theta_low  * num_rays_per_dim + phi_high;
-    int idx11 = theta_high * num_rays_per_dim + phi_high;
-
-    // Base offsets into warp table
+    // 5) Base pointers into the table
     int base00 = idx00 * record_stride;
     int base10 = idx10 * record_stride;
     int base01 = idx01 * record_stride;
     int base11 = idx11 * record_stride;
 
-    // Interpolation weights
-    float t = (input_theta - schwarzschildWarpTable[base00]) / (schwarzschildWarpTable[base10] - schwarzschildWarpTable[base00]);
-    float u = (input_phi - schwarzschildWarpTable[base00+1]) / (schwarzschildWarpTable[base10+1] - schwarzschildWarpTable[base00+1]);
+    // 6) Extract the original theta/phi stored in the table
+    float theta00 = schwarzschildWarpTable[base00    ];
+    float phi00   = schwarzschildWarpTable[base00 + 1];
+    float theta10 = schwarzschildWarpTable[base10    ];
+    float phi01   = schwarzschildWarpTable[base01 + 1];
 
-    // Fetch surrounding values
-    vec2 v00 = vec2(schwarzschildWarpTable[base00 + offset],     schwarzschildWarpTable[base00 + offset + 1]);
-    vec2 v10 = vec2(schwarzschildWarpTable[base10 + offset],     schwarzschildWarpTable[base10 + offset + 1]);
-    vec2 v01 = vec2(schwarzschildWarpTable[base01 + offset],     schwarzschildWarpTable[base01 + offset + 1]);
-    vec2 v11 = vec2(schwarzschildWarpTable[base11 + offset],     schwarzschildWarpTable[base11 + offset + 1]);
+    // 7) Interpolation weights
+    float t = (input_theta - theta00) / (theta10 - theta00);
+    float u = (input_phi   - phi00)   / (phi01   - phi00);
+
+    // 8) Fetch the four target warp‐angle pairs
+    vec2 v00 = vec2(
+      schwarzschildWarpTable[base00 + offset    ],
+      schwarzschildWarpTable[base00 + offset + 1]
+    );
+    vec2 v10 = vec2(
+      schwarzschildWarpTable[base10 + offset    ],
+      schwarzschildWarpTable[base10 + offset + 1]
+    );
+    vec2 v01 = vec2(
+      schwarzschildWarpTable[base01 + offset    ],
+      schwarzschildWarpTable[base01 + offset + 1]
+    );
+    vec2 v11 = vec2(
+      schwarzschildWarpTable[base11 + offset    ],
+      schwarzschildWarpTable[base11 + offset + 1]
+    );
     return v00;
-    // Bilinear interpolation
-    vec2 interp = mix(mix(v00, v10, t), mix(v01, v11, t), u);
-    return interp;
+    // 9) Bilinear interpolate
+    vec2 interp_low  = mix(v00, v10, t);
+    vec2 interp_high = mix(v01, v11, t);
+    return mix(interp_low, interp_high, u);
 }
+
 
 vec2 applyBlackHoleWarp(vec2 cameraOutAngles, int layer){
     float theta = cameraOutAngles.x;
@@ -278,7 +301,6 @@ Fragment getFragment() {
     vec4 rotatedViewCoords = cameraRotationMatrix * viewCoords;
     
     vec2 sphericalCoords;
-    vec2 envMapSphericalCoords;
     
     vec4 accumulatedColor = vec4(0.0f);
     float accumulatedWeight = 0.0f;  // Track total weight of blending
@@ -286,20 +308,19 @@ Fragment getFragment() {
     // Apply black hole warping to spherical coordinates
     for (int l = 0; l < layerCount; ++l) {
         sphericalCoords = cartesianToSpherical(rotatedViewCoords.xyz);
-        envMapSphericalCoords = applyBlackHoleWarp(sphericalCoords, l);
-
-        if (isnan(envMapSphericalCoords.x)) {
+        sphericalCoords = applyBlackHoleWarp(sphericalCoords, l);
+        if (isnan(sphericalCoords.x)) {
             // If inside the event horizon
             frag.color = vec4(.5f);
             return frag;
         }
 
-        vec4 envMapCoords = vec4(sphericalToCartesian(envMapSphericalCoords.x, envMapSphericalCoords.y), 0.0f);
+        // vec4 envMapCoords = vec4(sphericalToCartesian(sphericalCoords.x, sphericalCoords.y), 0.0f);
 
         // User world input rotation of the black hole
-        envMapCoords = worldRotationMatrix * envMapCoords;
+        // envMapCoords = worldRotationMatrix * envMapCoords;
 
-        sphericalCoords = cartesianToSpherical(envMapCoords.xyz);
+        // sphericalCoords = cartesianToSpherical(envMapCoords.xyz);
         // vec4 starColor = searchNearestStar(vec3(0.0f, sphericalCoords.x, sphericalCoords.y), l);
 
         // if (starColor.a > 0.0) {
@@ -315,7 +336,7 @@ Fragment getFragment() {
     vec4 texColor = texture(environmentTexture, uv);
 
     // frag.color.rgb = accumulatedColor.rgb * accumulatedWeight + texColor.rgb * (1.0 - accumulatedWeight);
-    frag.color.a = 1.0;
     frag.color.rgb = texColor.rgb;
+    frag.color.a = 1.0;
     return frag;
 }
