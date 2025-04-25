@@ -57,3 +57,14 @@ end)
 asset.onDeinitialize(function()
   openspace.unloadMission(Mission)
 end)
+
+
+
+asset.meta = {
+  Name = "Apollo - Mission overview",
+  Description = [[This mission file provides information about the Apollo missions and
+    their respective timelines.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

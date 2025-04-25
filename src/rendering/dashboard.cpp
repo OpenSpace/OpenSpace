@@ -65,7 +65,12 @@ namespace openspace {
 Dashboard::Dashboard()
     : properties::PropertyOwner({ "Dashboard" })
     , _isEnabled(EnabledInfo, true)
-    , _startPositionOffset(StartPositionOffsetInfo, glm::ivec2(10, -10))
+    , _startPositionOffset(
+        StartPositionOffsetInfo,
+        glm::ivec2(10, 10),
+        glm::ivec2(0),
+        glm::ivec2(8192)
+    )
     , _refreshRate(RefreshRateInfo, 0, 0, 1000)
     , _lastRefresh(std::chrono::steady_clock::now())
 {
@@ -145,7 +150,7 @@ void Dashboard::clearDashboardItems() {
 void Dashboard::render(glm::vec2& penPosition) {
     ZoneScoped;
 
-    if (!_isEnabled) {
+    if (!_isEnabled || _items.empty()) {
         return;
     }
 
@@ -165,8 +170,8 @@ void Dashboard::render(glm::vec2& penPosition) {
     }
 }
 
-glm::vec2 Dashboard::getStartPositionOffset() {
-    return _startPositionOffset.value();
+glm::ivec2 Dashboard::startPositionOffset() {
+    return _startPositionOffset;
 }
 
 std::vector<DashboardItem*> Dashboard::dashboardItems() const {

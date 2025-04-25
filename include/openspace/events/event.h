@@ -259,7 +259,7 @@ struct EventTimeOfInterestReached : public Event {
 
 
 /**
- * This event is created when a mission is added 
+ * This event is created when a mission is added.
  */
 struct EventMissionAdded : public Event {
     static constexpr Type Type = Event::Type::MissionAdded;
@@ -267,15 +267,15 @@ struct EventMissionAdded : public Event {
     /**
      * Creates an instance of an EventMissionAdded event.
      * 
-     * \param missionName The name of the mission added
+     * \param identifier The identifier of the mission added
      */
-    EventMissionAdded(std::string_view name);
+    EventMissionAdded(std::string_view identifier);
 
-    const tstring name;
+    const tstring identifier;
 };
 
 /**
- * This event is created when a mission is removed
+ * This event is created when a mission is removed.
  */
 struct EventMissionRemoved : public Event {
     static constexpr Type Type = Event::Type::MissionRemoved;
@@ -283,13 +283,12 @@ struct EventMissionRemoved : public Event {
     /**
      * Creates an instance of an EventMissionRemoved event.
      *
-     * \param missionName The name of the mission removed
+     * \param identifier The identifier of the mission removed
      */
-    EventMissionRemoved(std::string_view name);
+    EventMissionRemoved(std::string_view identifier);
 
-    const tstring name;
+    const tstring identifier;
 };
-
 
 /**
  * This event is created when the end of a mission phase is reached. This event is
@@ -298,7 +297,7 @@ struct EventMissionRemoved : public Event {
 struct EventMissionEventReached : public Event {
     static constexpr Type Type = Event::Type::MissionEventReached;
 
-    // Not sure which kind of parameters we want to pass here
+    // Not sure which kind of parameters we want to pass here.
     EventMissionEventReached();
 };
 
@@ -311,7 +310,7 @@ struct EventPlanetEclipsed : public Event {
 
     /**
      * Creates an instance of an EventPlanetEclipsed event.
-     *
+     
      * \param eclipsee_ The scene graph node that is eclipsed by another object
      * \param eclipser_ The scene graph node that is eclipsing the other object
      *

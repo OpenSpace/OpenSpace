@@ -157,7 +157,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
     {
         const char* sTime = "time";
         const json& jTmp = *(jFile.begin()); // First field line in the file
-        _triggerTime = Time::convertTime(jTmp[sTime]);
+        _triggerTime = Time::convertTime(jTmp[sTime].get<std::string>());
 
         const char* sColumns = "columns";
         const json::value_type& variableNameVec = jTmp[sTrace][sColumns];
@@ -173,7 +173,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
         }
 
         for (size_t i = nPosComponents; i < nVariables; i++) {
-            _extraQuantityNames.push_back(variableNameVec[i]);
+            _extraQuantityNames.push_back(variableNameVec[i].get<std::string>());
         }
     }
 
@@ -185,7 +185,8 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
     for (json::iterator lineIter = jFile.begin(); lineIter != jFile.end(); ++lineIter) {
         // The 'data' field in the 'trace' variable contains all vertex positions and the
         // extra quantities. Each element is an array related to one vertex point.
-        const std::vector<std::vector<float>>& jData = (*lineIter)[sTrace][sData];
+        const std::vector<std::vector<float>>& jData =
+            (*lineIter)[sTrace][sData].get<std::vector<std::vector<float>>>();
         const size_t nPoints = jData.size();
 
         for (size_t j = 0; j < nPoints; j++) {

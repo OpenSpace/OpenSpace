@@ -32,10 +32,9 @@
 #include <openspace/engine/windowdelegate.h>
 
 namespace openspace {
-    bool BrowserClient::_hasFocus = false; // Define the static member variable
-}
 
-namespace openspace {
+bool BrowserClient::_hasFocus = false; // Define the static member variable
+
 BrowserClient::BrowserClient(WebRenderHandler* handler,
                              WebKeyboardHandler* keyboardHandler)
     : _renderHandler(handler)
@@ -51,7 +50,6 @@ BrowserClient::BrowserClient(WebRenderHandler* handler,
     _displayHandler = new BrowserClient::DisplayHandler;
     _loadHandler = new BrowserClient::LoadHandler;
     _focusHandler = new BrowserClient::FocusHandler;
-
 }
 
 CefRefPtr<CefContextMenuHandler> BrowserClient::GetContextMenuHandler() {
@@ -86,7 +84,6 @@ CefRefPtr<CefFocusHandler> BrowserClient::GetFocusHandler() {
     return _focusHandler;
 }
 
-
 bool BrowserClient::NoContextMenuHandler::RunContextMenu(CefRefPtr<CefBrowser>,
                                                          CefRefPtr<CefFrame>,
                                                          CefRefPtr<CefContextMenuParams>,
@@ -95,6 +92,23 @@ bool BrowserClient::NoContextMenuHandler::RunContextMenu(CefRefPtr<CefBrowser>,
 {
     // Disable the context menu.
     return true;
+}
+
+void BrowserClient::FocusHandler::OnTakeFocus(CefRefPtr<CefBrowser>, bool) {
+    _hasFocus = false;
+}
+
+bool BrowserClient::FocusHandler::OnSetFocus(CefRefPtr<CefBrowser>, FocusSource) {
+    _hasFocus = true;
+    return false;
+}
+
+void BrowserClient::LoadHandler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame>,
+    int) {
+    // Focus status can be lost. Try to restore it
+    if (_hasFocus && browser && browser->GetHost()) {
+        browser->GetHost()->SetFocus(true);
+    }
 }
 
 bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser>, CefCursorHandle,

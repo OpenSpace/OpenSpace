@@ -42,10 +42,10 @@ MissionManager::MissionManagerException::MissionManagerException(std::string err
 
 MissionManager::MissionManager() : _currentMission(_missionMap.end()) {}
 
-void MissionManager::setCurrentMission(const std::string& missionName) {
-    ghoul_assert(!missionName.empty(), "missionName must not be empty");
+void MissionManager::setCurrentMission(const std::string& identifier) {
+    ghoul_assert(!identifier.empty(), "missionName must not be empty");
 
-    auto it = _missionMap.find(missionName);
+    auto it = _missionMap.find(identifier);
     if (it == _missionMap.end()) {
         throw MissionManagerException("Mission has not been loaded");
     }
@@ -62,35 +62,35 @@ bool MissionManager::hasCurrentMission() const {
 std::string MissionManager::loadMission(Mission mission) {
     // Changing the values might invalidate the _currentMission iterator
     const std::string currentMission = hasCurrentMission() ? _currentMission->first : "";
-    const std::string missionName = mission.identifier();
-    _missionMap.insert({ missionName, std::move(mission) });
+    const std::string identifier = mission.identifier();
+    _missionMap.insert({ identifier, std::move(mission) });
     if (_missionMap.size() == 1) {
-        setCurrentMission(missionName);
+        setCurrentMission(identifier);
     }
 
     if (!currentMission.empty()) {
         setCurrentMission(currentMission);
     }
 
-    global::eventEngine->publishEvent<events::EventMissionAdded>(missionName);
-    return missionName;
+    global::eventEngine->publishEvent<events::EventMissionAdded>(identifier);
+    return identifier;
 }
 
-void MissionManager::unloadMission(const std::string& missionName) {
-    ghoul_assert(!missionName.empty(), "missionName must not be empty");
-    auto it = _missionMap.find(missionName);
+void MissionManager::unloadMission(const std::string& identifier) {
+    ghoul_assert(!identifier.empty(), "missionName must not be empty");
+    auto it = _missionMap.find(identifier);
     ghoul_assert(it != _missionMap.end(), "missionName must be a loaded mission");
 
     if (it == _currentMission) {
         _currentMission = _missionMap.end();
     }
 
-    global::eventEngine->publishEvent<events::EventMissionRemoved>(missionName);
+    global::eventEngine->publishEvent<events::EventMissionRemoved>(identifier);
     _missionMap.erase(it);
 }
 
-bool MissionManager::hasMission(const std::string& missionName) {
-    return _missionMap.find(missionName) != _missionMap.end();
+bool MissionManager::hasMission(const std::string& identifier) {
+    return _missionMap.find(identifier) != _missionMap.end();
 }
 
 const Mission& MissionManager::currentMission() {

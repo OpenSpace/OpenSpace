@@ -68,10 +68,4 @@ void DashboardItemCameraOrientation::update() {
     );
 }
 
-glm::vec2 DashboardItemCameraOrientation::size() const {
-    ZoneScoped;
-
-    return _font->boundingBox("Yaw: 0.00\nPitch: 0.00\nRoll: 0.00");
-}
-
 } // namespace openspace

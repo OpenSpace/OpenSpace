@@ -917,7 +917,7 @@ openspace::HorizonsFile HorizonsDialog::handleAnswer(nlohmann::json& answer) {
     }
 
     // Return a new file with the result
-    return openspace::HorizonsFile(filePath, *result);
+    return openspace::HorizonsFile(filePath, result->get<std::string>());
 }
 
 bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {

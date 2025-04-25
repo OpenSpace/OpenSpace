@@ -32,7 +32,7 @@ MonitorBox::MonitorBox(QRect widgetSize, const std::vector<QRect>& monitorResolu
                        QWidget* parent)
     : QWidget(parent)
 {
-    constexpr float MarginFractionWidgetSize = 0.05f;
+    constexpr float MarginFractionWidgetSize = 0.02f;
 
     //
     // Calculate the collective size of the monitors
@@ -132,7 +132,7 @@ void MonitorBox::paintEvent(QPaintEvent*) {
                 _monitorDimensionsScaled[i].top() + 24.0
             );
             QFont f = QFont("Arial");
-            f.setPixelSize(24);
+            f.setPixelSize(18);
             painter.setFont(f);
             painter.drawText(textPos, "Primary");
         }
@@ -148,6 +148,9 @@ void MonitorBox::paintEvent(QPaintEvent*) {
             std::clamp(x, 0.0, static_cast<double>(size().width()) - 10.0),
             std::clamp(y, 20.0, static_cast<double>(size().height()))
         );
+        QFont f = QFont("Arial");
+        f.setPixelSize(18);
+        painter.setFont(f);
         painter.drawText(p, QString::number(i + 1));
     }
 

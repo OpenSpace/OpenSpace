@@ -257,10 +257,4 @@ void DashboardItemPropertyValue::update() {
     }
 }
 
-glm::vec2 DashboardItemPropertyValue::size() const {
-    ZoneScoped;
-
-    return _font->boundingBox(_displayString.value());
-}
-
 } // namespace openspace

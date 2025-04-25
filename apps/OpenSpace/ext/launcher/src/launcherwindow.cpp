@@ -26,6 +26,7 @@
 
 #include "profile/profileedit.h"
 #include "backgroundimage.h"
+#include "notificationwindow.h"
 #include "settingsdialog.h"
 #include "splitcombobox.h"
 #include <openspace/openspace.h>
@@ -45,8 +46,10 @@
 using namespace openspace;
 
 namespace {
-    constexpr int ScreenWidth = 480;
-    constexpr int ScreenHeight = 640;
+    constexpr int MainScreenWidth = 480;
+    constexpr int MainScreenHeight = 640;
+    constexpr int FullScreenWidth = MainScreenWidth;
+    constexpr int FullScreenHeight = 706;
 
     constexpr int LeftRuler = 40;
     constexpr int TopRuler = 80;
@@ -55,10 +58,12 @@ namespace {
     constexpr int SmallItemWidth = 100;
     constexpr int SmallItemHeight = SmallItemWidth / 4;
 
+    constexpr int NotificationShelfHeight = FullScreenHeight - MainScreenHeight;
+
     constexpr int SettingsIconSize = 35;
 
     namespace geometry {
-        constexpr QRect BackgroundImage(0, 0, ScreenWidth, ScreenHeight);
+        constexpr QRect BackgroundImage(0, 0, MainScreenWidth, MainScreenHeight);
         constexpr QRect LogoImage(LeftRuler, TopRuler, ItemWidth, ItemHeight);
         constexpr QRect ChooseLabel(LeftRuler + 10, TopRuler + 80, 151, 24);
         constexpr QRect ProfileBox(LeftRuler, TopRuler + 110, ItemWidth, ItemHeight);
@@ -80,14 +85,19 @@ namespace {
             LeftRuler, TopRuler + 400, ItemWidth, ItemHeight
         );
         constexpr QRect VersionString(
-            5, ScreenHeight - SmallItemHeight, ItemWidth, SmallItemHeight
+            5, MainScreenHeight - SmallItemHeight, ItemWidth, SmallItemHeight
         );
         constexpr QRect SettingsButton(
-            ScreenWidth - SettingsIconSize - 5,
-            ScreenHeight - SettingsIconSize - 5,
+            MainScreenWidth - SettingsIconSize - 5,
+            MainScreenHeight - SettingsIconSize - 5,
             SettingsIconSize,
             SettingsIconSize
         );
+        constexpr QRect NotificationShelf(
+            0,
+            MainScreenHeight,
+            MainScreenWidth,
+            NotificationShelfHeight);
     } // namespace geometry
 
 
@@ -132,7 +142,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
     );
 
     setWindowTitle("OpenSpace Launcher");
-    setFixedSize(ScreenWidth, ScreenHeight);
+    setFixedSize(FullScreenWidth, FullScreenHeight);
     setAutoFillBackground(false);
 
     {
@@ -161,6 +171,12 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         logoImage->setObjectName("clear");
         logoImage->setGeometry(geometry::LogoImage);
         logoImage->setPixmap(QPixmap(":/images/openspace-horiz-logo-small.png"));
+    }
+
+    {
+        NotificationWindow* notificationWindow = new NotificationWindow(centralWidget);
+        notificationWindow->setGeometry(geometry::NotificationShelf);
+        notificationWindow->show();
     }
 
     //

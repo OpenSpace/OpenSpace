@@ -24,6 +24,7 @@
 
 #include <modules/server/include/jsonconverters.h>
 
+#include <openspace/interaction/action.h>
 #include <openspace/properties/property.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -67,6 +68,31 @@ void to_json(json& j, const PropertyOwner* p) {
 }
 
 } // namespace openspace::properties
+
+namespace openspace::interaction {
+
+    void to_json(json& j, const Action& action) {
+        j = {
+            { "identifier", action.identifier },
+            { "name", action.name },
+            { "isLocal", action.isLocal == Action::IsLocal::Yes },
+            { "documentation", action.documentation },
+            { "guiPath", action.guiPath }
+        };
+
+        // Add the color if we have it
+        if (action.color.has_value()) {
+            // Convert to std as nlohmann doesn't understand glm
+            glm::vec4 color = action.color.value();
+            j["color"] = { color.r, color.g, color.b, color.a };
+        }
+    }
+
+    void to_json(json& j, const Action* pA) {
+        // Use reference converter instead of pointer
+        j = *pA;
+    }
+} // namespace openspace::interaction
 
 namespace ghoul {
 

@@ -108,9 +108,14 @@ void SettingsDialog::createWidgets() {
             "If this setting is checked, the application will remember the profile that "
             "was loaded into OpenSpace and will use it at the next startup as well"
         );
+        
         connect(
             _rememberLastProfile,
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
+            &QCheckBox::checkStateChanged,
+#else // ^^^^ >=6.7.0 // !WIN32 <6.7.0
             &QCheckBox::stateChanged,
+#endif // (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             [this]() {
                 if (_rememberLastProfile->isChecked()) {
                     _currentEdit.rememberLastProfile = true;
@@ -166,7 +171,11 @@ void SettingsDialog::createWidgets() {
         );
         connect(
             _rememberLastConfiguration,
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
+            &QCheckBox::checkStateChanged,
+#else // ^^^^ >=6.7.0 // !WIN32 <6.7.0
             &QCheckBox::stateChanged,
+#endif // (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             [this]() {
                 if (_rememberLastConfiguration->isChecked()) {
                     _currentEdit.rememberLastConfiguration = true;
@@ -241,7 +250,11 @@ void SettingsDialog::createWidgets() {
         );
         connect(
             _bypassLauncher,
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
+            &QCheckBox::checkStateChanged,
+#else // ^^^^ >=6.7.0 // !WIN32 <6.7.0
             &QCheckBox::stateChanged,
+#endif // (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             [this]() {
                 if (_bypassLauncher->isChecked()) {
                     _currentEdit.bypassLauncher = _bypassLauncher->isChecked();
@@ -313,7 +326,11 @@ void SettingsDialog::createWidgets() {
         );
         connect(
             _mrf.isEnabled,
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
+            &QCheckBox::checkStateChanged,
+#else // ^^^^ >=6.7.0 // !WIN32 <6.7.0
             &QCheckBox::stateChanged,
+#endif // (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             [this]() {
                 if (_mrf.isEnabled->isChecked()) {
                     _currentEdit.mrf.isEnabled = _mrf.isEnabled->isChecked();

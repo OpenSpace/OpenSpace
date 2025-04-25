@@ -38,7 +38,7 @@ local Object = {
     }
   },
   GUI = {
-    Name = "Exoplanets",
+    Name = "Exoplanet Systems",
     Path = "/Milky Way/Exoplanets",
     Description = [[Extrasolar planets, or exoplanets, are a relatively new phenomenon in
       astronomy - no observational evidence was available until 1995. To the eye,

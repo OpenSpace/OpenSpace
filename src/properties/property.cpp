@@ -64,9 +64,9 @@ const std::string& Property::identifier() const {
     return _identifier;
 }
 
-std::string Property::uri() const {
-    const std::string& ownerUri = owner()->uri();
-    return !ownerUri.empty() ? std::format("{}.{}", ownerUri, _identifier) : "";
+std::string_view Property::uri() const {
+    ZoneScoped;
+    return _uriCache;
 }
 
 const std::type_info& Property::type() const {
@@ -233,6 +233,7 @@ const PropertyOwner* Property::owner() const {
 
 void Property::setPropertyOwner(PropertyOwner* owner) {
     _owner = owner;
+    updateUriCache();
 }
 
 void Property::notifyChangeListeners() {
@@ -254,6 +255,11 @@ bool Property::hasChanged() const {
 
 void Property::resetToUnchanged() {
     _isValueDirty = false;
+}
+
+void Property::updateUriCache() {
+    const std::string& ownerUri = _owner ? _owner->uri() : "";
+    _uriCache = !ownerUri.empty() ? std::format("{}.{}", ownerUri, _identifier) : "";
 }
 
 nlohmann::json Property::generateJsonDescription() const {
