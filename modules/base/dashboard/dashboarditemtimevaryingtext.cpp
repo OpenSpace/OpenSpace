@@ -34,14 +34,12 @@
 #include <fstream>
 
 namespace {
-    constexpr std::string_view _loggerCat = "DashboardItemTimeVaryingText";
-
     constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {
         "FormatString",
         "Format String",
         "The format text describing how this dashboard item renders its text. This text "
-        "must contain exactly one {} which is a placeholder that will contain the date "
-        "in the format as specified by `TimeFormat`.",
+        "must contain exactly one {} which is a placeholder that will be replaced "
+        "with the values read from the file provided in `DataFile`",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
