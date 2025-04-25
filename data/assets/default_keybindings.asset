@@ -64,3 +64,13 @@ asset.onDeinitialize(function()
 
   openspace.clearKey("F1")           -- actions.ToggleNativeUi
 end)
+
+
+
+asset.meta = {
+  Name = "Default Keybindings",
+  Description ="Asset with default key bindings that are useful for all profiles",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
