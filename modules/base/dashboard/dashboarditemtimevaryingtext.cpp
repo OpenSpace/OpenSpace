@@ -52,6 +52,8 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // This `DashboardItem` displays text based on the content of a provided data file. The
+    // value that is displayed depends on the current in-game simulation time.
     struct [[codegen::Dictionary(DashboardItemTimeVaryingText)]] Parameters {
         // [[codegen::verbatim(FormatStringInfo.description)]]
         std::optional<std::string> formatString;
