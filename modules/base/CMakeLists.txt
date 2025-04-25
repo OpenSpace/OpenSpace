@@ -64,6 +64,7 @@ set(HEADER_FILES
   rendering/renderablesphere.h
   rendering/renderablesphereimagelocal.h
   rendering/renderablesphereimageonline.h
+  rendering/renderableswitch.h
   rendering/renderabletimevaryingsphere.h
   rendering/renderabletrail.h
   rendering/renderabletrailorbit.h
@@ -76,6 +77,7 @@ set(HEADER_FILES
   rotation/timelinerotation.h
   rotation/constantrotation.h
   rotation/fixedrotation.h
+  rotation/globerotation.h
   rotation/luarotation.h
   rotation/multirotation.h
   rotation/staticrotation.h
@@ -87,6 +89,7 @@ set(HEADER_FILES
   scale/timelinescale.h
   timeframe/timeframeinterval.h
   timeframe/timeframeunion.h
+  translation/globetranslation.h
   translation/luatranslation.h
   translation/multitranslation.h
   translation/statictranslation.h
@@ -134,6 +137,7 @@ set(SOURCE_FILES
   rendering/renderablesphere.cpp
   rendering/renderablesphereimagelocal.cpp
   rendering/renderablesphereimageonline.cpp
+  rendering/renderableswitch.cpp
   rendering/renderabletimevaryingsphere.cpp
   rendering/renderabletrail.cpp
   rendering/renderabletrailorbit.cpp
@@ -147,6 +151,7 @@ set(SOURCE_FILES
   rotation/timelinerotation.cpp
   rotation/constantrotation.cpp
   rotation/fixedrotation.cpp
+  rotation/globerotation.cpp
   rotation/luarotation.cpp
   rotation/multirotation.cpp
   rotation/staticrotation.cpp
@@ -158,6 +163,7 @@ set(SOURCE_FILES
   scale/timelinescale.cpp
   timeframe/timeframeinterval.cpp
   timeframe/timeframeunion.cpp
+  translation/globetranslation.cpp
   translation/luatranslation.cpp
   translation/multitranslation.cpp
   translation/statictranslation.cpp

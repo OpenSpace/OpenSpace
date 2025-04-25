@@ -587,19 +587,10 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
     return {
         "pathnavigation",
         {
-            codegen::lua::IsFlying,
             codegen::lua::ContinuePath,
             codegen::lua::PausePath,
             codegen::lua::StopPath,
             codegen::lua::SkipToEnd,
-            codegen::lua::FlyTo,
-            codegen::lua::FlyToHeight,
-            codegen::lua::FlyToNavigationState,
-            codegen::lua::ZoomToFocus,
-            codegen::lua::ZoomToDistance,
-            codegen::lua::ZoomToDistanceRelative,
-            codegen::lua::JumpTo,
-            codegen::lua::JumpToNavigationState,
             codegen::lua::CreatePath
         }
     };

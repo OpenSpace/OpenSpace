@@ -449,7 +449,7 @@ TEST_CASE("SessionRecording: 01.00 Ascii Linux", "[sessionrecording]") {
         CHECK(e.simulationTime == 762933562.877);
         REQUIRE(std::holds_alternative<SessionRecording::Entry::Script>(e.value));
         const auto& script = std::get<SessionRecording::Entry::Script>(e.value);
-        CHECK(script == "openspace.pathnavigation.flyTo(\"Mars\")");
+        CHECK(script == "openspace.navigation.flyTo(\"Mars\")");
     }
     {
         const SessionRecording::Entry& e = rec.entries[4];

@@ -22,46 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBETRANSLATION___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBETRANSLATION___H__
+#ifndef __OPENSPACE_MODULE_BASE___TIMEFRAMEKERNEL___H__
+#define __OPENSPACE_MODULE_BASE___TIMEFRAMEKERNEL___H__
 
-#include <openspace/scene/translation.h>
+#include <openspace/scene/timeframe.h>
 
-#include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/util/timerange.h>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-class RenderableGlobe;
-
-class GlobeTranslation : public Translation {
+class TimeFrameKernel : public TimeFrame {
 public:
-    explicit GlobeTranslation(const ghoul::Dictionary& dictionary);
+    explicit TimeFrameKernel(const ghoul::Dictionary& dictionary);
 
-    void update(const UpdateData& data) override;
-    glm::dvec3 position(const UpdateData& data) const override;
+    bool initialize() override;
+    void update(const Time& time) override;
 
     static documentation::Documentation Documentation();
 
 private:
-    void fillAttachedNode();
-    void setUpdateVariables();
+    ghoul::Dictionary _initialization;
 
-    properties::StringProperty _globe;
-    properties::DoubleProperty _latitude;
-    properties::DoubleProperty _longitude;
-    properties::DoubleProperty _altitude;
-    properties::BoolProperty _useHeightmap;
-    properties::BoolProperty _useCamera;
-    properties::BoolProperty _useCameraAltitude;
-
-    RenderableGlobe* _attachedNode = nullptr;
-
-    mutable bool _positionIsDirty = true;
-    mutable glm::dvec3 _position = glm::dvec3(0.0);
+    std::vector<TimeRange> _timeRangesSPK;
+    std::vector<TimeRange> _timeRangesCK;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GLOBETRANSLATION___H__
+#endif // __OPENSPACE_MODULE_BASE___TIMEFRAMEKERNEL___H__

@@ -1800,13 +1800,13 @@ void setCameraFromProfile(const Profile& p) {
                 std::string geoScript;
                 if (geo.altitude.has_value()) {
                     geoScript = std::format(
-                        "openspace.globebrowsing.flyToGeo([[{}]], {}, {}, {}, 0)",
+                        "openspace.navigation.flyToGeo([[{}]], {}, {}, {}, 0)",
                         geo.anchor, geo.latitude, geo.longitude, *geo.altitude
                     );
                 }
                 else {
                     geoScript = std::format(
-                        "openspace.globebrowsing.flyToGeo2([[{}]], {}, {}, false, 0)",
+                        "openspace.navigation.flyToGeo2([[{}]], {}, {}, false, 0)",
                         geo.anchor, geo.latitude, geo.longitude
                     );
                 }

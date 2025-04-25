@@ -6,11 +6,14 @@ local guiCustomization = asset.require("customization/gui")
 -- Select which commit hashes to use for the frontend and backend
 local frontendHash = "580386a78b0fda3808c4c00c120ab18aace7dc22"
 
+-- The name of the file to download from the server
+local file = "frontend.zip"
+
 local frontend = asset.resource({
   Identifier = "WebGuiFrontend",
   Name = "Web Gui Frontend",
   Type = "UrlSynchronization",
-  Url = "http://data.openspaceproject.com/files/webgui/frontend/" ..  frontendHash .. "/frontend.zip"
+  Url = "http://data.openspaceproject.com/files/webgui/frontend/" ..  frontendHash .. "/" .. file
 })
 
 
@@ -18,7 +21,7 @@ asset.onInitialize(function()
   -- Unzip the frontend bundle
   local dest = frontend .. "frontend"
   if not openspace.directoryExists(dest) then
-    openspace.unzipFile(frontend .. "frontend.zip", dest, true)
+    openspace.unzipFile(frontend .. file, dest, true)
   end
 
   -- Disable the server, add production gui endpoint, and restart server.

@@ -157,15 +157,15 @@ add_custom_target(
   ALL DEPENDS
     "${CMAKE_CURRENT_BINARY_DIR}/__codegen.h"
 )
-add_dependencies(run_codegen codegen)
+add_dependencies(run_codegen codegen-tool)
 add_custom_command(
   OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/__codegen.h"
-  COMMAND codegen ARGS "modules" "src"
+  COMMAND codegen-tool ARGS "modules" "src"
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
   VERBATIM
 )
 set_target_properties(codegen-lib PROPERTIES FOLDER "support")
-set_target_properties(codegen PROPERTIES FOLDER "support")
+set_target_properties(codegen-tool PROPERTIES FOLDER "support")
 set_target_properties(run_codegen PROPERTIES FOLDER "support")
 
 

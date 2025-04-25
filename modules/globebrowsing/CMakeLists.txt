@@ -29,12 +29,9 @@ set(HEADER_FILES
   src/asynctiledataprovider.h
   src/basictypes.h
   src/dashboarditemglobelocation.h
-  src/ellipsoid.h
   src/gdalwrapper.h
   src/geodeticpatch.h
   src/globelabelscomponent.h
-  src/globetranslation.h
-  src/globerotation.h
   src/gpulayergroup.h
   src/layer.h
   src/layeradjustment.h
@@ -84,12 +81,9 @@ set(SOURCE_FILES
   globebrowsingmodule_lua.inl
   src/asynctiledataprovider.cpp
   src/dashboarditemglobelocation.cpp
-  src/ellipsoid.cpp
   src/gdalwrapper.cpp
   src/geodeticpatch.cpp
   src/globelabelscomponent.cpp
-  src/globetranslation.cpp
-  src/globerotation.cpp
   src/gpulayergroup.cpp
   src/layer.cpp
   src/layeradjustment.cpp

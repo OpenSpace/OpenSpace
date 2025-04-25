@@ -57,6 +57,7 @@
 #include <modules/base/rendering/renderablenodeline.h>
 #include <modules/base/rendering/renderablesphereimagelocal.h>
 #include <modules/base/rendering/renderablesphereimageonline.h>
+#include <modules/base/rendering/renderableswitch.h>
 #include <modules/base/rendering/renderabletrailorbit.h>
 #include <modules/base/rendering/renderabletrailtrajectory.h>
 #include <modules/base/rendering/renderableplaneimagelocal.h>
@@ -71,6 +72,7 @@
 #include <modules/base/rendering/screenspacerenderablerenderable.h>
 #include <modules/base/rotation/constantrotation.h>
 #include <modules/base/rotation/fixedrotation.h>
+#include <modules/base/rotation/globerotation.h>
 #include <modules/base/rotation/luarotation.h>
 #include <modules/base/rotation/multirotation.h>
 #include <modules/base/rotation/staticrotation.h>
@@ -82,6 +84,7 @@
 #include <modules/base/scale/timedependentscale.h>
 #include <modules/base/scale/timelinescale.h>
 #include <modules/base/translation/timelinetranslation.h>
+#include <modules/base/translation/globetranslation.h>
 #include <modules/base/translation/luatranslation.h>
 #include <modules/base/translation/multitranslation.h>
 #include <modules/base/translation/statictranslation.h>
@@ -184,6 +187,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableSphereImageOnline>(
         "RenderableSphereImageOnline"
     );
+    fRenderable->registerClass<RenderableSwitch>("RenderableSwitch");
     fRenderable->registerClass<RenderableSphericalGrid>("RenderableSphericalGrid");
     fRenderable->registerClass<RenderableTrailOrbit>("RenderableTrailOrbit");
     fRenderable->registerClass<RenderableTrailTrajectory>("RenderableTrailTrajectory");
@@ -195,6 +199,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
 
     fRotation->registerClass<ConstantRotation>("ConstantRotation");
     fRotation->registerClass<FixedRotation>("FixedRotation");
+    fRotation->registerClass<GlobeRotation>("GlobeRotation");
     fRotation->registerClass<LuaRotation>("LuaRotation");
     fRotation->registerClass<MultiRotation>("MultiRotation");
     fRotation->registerClass<StaticRotation>("StaticRotation");
@@ -224,6 +229,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
         FactoryManager::ref().factory<Translation>();
     ghoul_assert(fTranslation, "Ephemeris factory was not created");
 
+    fTranslation->registerClass<GlobeTranslation>("GlobeTranslation");
     fTranslation->registerClass<LuaTranslation>("LuaTranslation");
     fTranslation->registerClass<MultiTranslation>("MultiTranslation");
     fTranslation->registerClass<StaticTranslation>("StaticTranslation");
@@ -275,6 +281,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderableSphereImageLocal::Documentation(),
         RenderableSphereImageOnline::Documentation(),
         RenderableSphericalGrid::Documentation(),
+        RenderableSwitch::Documentation(),
         RenderableTimeVaryingSphere::Documentation(),
         RenderableTrailOrbit::Documentation(),
         RenderableTrailTrajectory::Documentation(),
@@ -289,6 +296,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
 
         ConstantRotation::Documentation(),
         FixedRotation::Documentation(),
+        GlobeRotation::Documentation(),
         LuaRotation::Documentation(),
         MultiRotation::Documentation(),
         StaticRotation::Documentation(),
@@ -304,6 +312,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         TimeFrameInterval::Documentation(),
         TimeFrameUnion::Documentation(),
 
+        GlobeTranslation::Documentation(),
         LuaTranslation::Documentation(),
         MultiTranslation::Documentation(),
         StaticTranslation::Documentation(),

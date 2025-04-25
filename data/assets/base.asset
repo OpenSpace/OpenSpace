@@ -42,7 +42,7 @@ asset.require("scene/digitaluniverse/digitaluniverse")
 asset.require("nightsky/nightsky")
 
 asset.require("customization/globebrowsing")
-asset.require("actions/default_actions")
+asset.require("actions/solarsystem_actions")
 
 asset.require("modules/exoplanets/exoplanets")
 asset.require("modules/skybrowser/skybrowser")

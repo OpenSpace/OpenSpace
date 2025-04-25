@@ -1049,7 +1049,7 @@ GeoJsonManager& RenderableGlobe::geoJsonManager() {
     return _geoJsonManager;
 }
 
-const Ellipsoid& RenderableGlobe::ellipsoid() const {
+Ellipsoid RenderableGlobe::ellipsoid() const {
     return _ellipsoid;
 }
 
