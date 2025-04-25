@@ -48,6 +48,7 @@ private:
     bool _isSubscribedTo = false;
     int _onChangeHandle = UnsetCallbackHandle;
     int _onDeleteHandle = UnsetCallbackHandle;
+    int _onMetaDataChangeHandle = UnsetCallbackHandle;
     properties::Property* _prop = nullptr;
 };
 
