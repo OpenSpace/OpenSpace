@@ -21,8 +21,6 @@ asset.onInitialize(function()
   openspace.bindKey("TAB", actions.ToggleMainGui)
   openspace.bindKey("Shift+TAB", actions.ToggleOverlays)
 
-  openspace.bindKey("Alt+R", actions.ToggleMasterRendering)
-
   openspace.bindKey("Right", actions.NextDeltaStepInterpolate)
   openspace.bindKey("Shift+Right", actions.NextDeltaStepImmediate)
 
@@ -46,8 +44,6 @@ asset.onDeinitialize(function()
 
   openspace.clearKey("Shift+Right")  -- actions.NextDeltaStepImmediate
   openspace.clearKey("Right")        -- actions.NextDeltaStepInterpolate
-
-  openspace.clearKey("Alt+R")        -- actions.ToggleMasterRendering
 
   openspace.clearKey("Shift+TAB")    -- actions.ToggleOverlays
   openspace.clearKey("TAB")          -- actions.ToggleMainGui
