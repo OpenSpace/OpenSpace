@@ -46,7 +46,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DataFileInfo = {
         "DataFile",
         "Data File Path",
-        "The file path to the JSON data.",
+        "The file path to the JSON data. The JSON must contain a 'data' array with "
+        "timestamp-value pairs."
+        "{\"data\": [[\"2024-05-10T00:00:00Z\", 2.33], [\"2024-05-10T03:00:00Z\", 3.0]]}",
         openspace::properties::Property::Visibility::User
     };
 
