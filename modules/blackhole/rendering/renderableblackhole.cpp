@@ -89,7 +89,7 @@ namespace openspace {
     RenderableBlackHole::~RenderableBlackHole() {}
 
     void RenderableBlackHole::initialize() {
-        _schwarzschildWarpTable = std::vector<float>(_rayCount * 2, std::numeric_limits<double>::quiet_NaN());
+        _blackHoleWarpTable = std::vector<float>(_rayCount * 2, std::numeric_limits<double>::quiet_NaN());
     }
 
     void RenderableBlackHole::initializeGL() {
@@ -147,10 +147,10 @@ namespace openspace {
         float distanceToAnchor = static_cast<float>(glm::distance(cameraPosition, _chachedTranslation));
         if (abs(_rCamera * _rs - distanceToAnchor) > _rs * 0.1) {
             _rCamera = distanceToAnchor / _rs;
-            schwarzschild({ _rCamera * 2.0f, _rCamera * 2.5f, _rCamera * 4.0f}, _rayCount, _stepsCount, _rCamera, _stepLength, _schwarzschildWarpTable);
+            schwarzschild({ _rCamera * 2.0f, _rCamera * 2.5f, _rCamera * 4.0f}, _rayCount, _stepsCount, _rCamera, _stepLength, _blackHoleWarpTable);
         }
 #endif
-        bindSSBOData(_program, "ssbo_warp_table", _ssboSchwarzschildDataBinding, _ssboSchwarzschildWarpTable);
+        bindSSBOData(_program, "ssbo_warp_table", _ssboBlackHoleDataBinding, _ssboBlackHoleWarpTable);
 #if !M_Kerr
         bindSSBOData(_program, "ssbo_star_map_start_indices", _ssboStarIndicesDataBinding, _ssboStarKDTreeIndices);
         bindSSBOData(_program, "ssbo_star_map", _ssboStarDataBinding, _ssboStarKDTree);
@@ -200,12 +200,12 @@ namespace openspace {
             _uniformCache.cameraRotationMatrix,
             glm::mat4(glm::mat4_cast(camRot.localRotation)) * CameraPlaneRotation
         );
-
-        //_program->setUniform(
-        //    _uniformCache.worldRotationMatrix,
-        //    glm::mat4(glm::mat4_cast(camRot.globalRotation))
-        //    );
 #if !M_Kerr
+        _program->setUniform(
+            _uniformCache.worldRotationMatrix,
+            glm::mat4(glm::mat4_cast(camRot.globalRotation))
+            );
+
         if (_uniformCache.r_0 != -1) {
             _program->setUniform(
                 _uniformCache.r_0,
@@ -224,14 +224,14 @@ namespace openspace {
 
     void RenderableBlackHole::SendSchwarzschildTableToShader()
     {
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboSchwarzschildWarpTable);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboBlackHoleWarpTable);
 
-        const size_t indexBufferSize = _schwarzschildWarpTable.size() * sizeof(float);
+        const size_t indexBufferSize = _blackHoleWarpTable.size() * sizeof(float);
 
         glBufferData(
             GL_SHADER_STORAGE_BUFFER,
             indexBufferSize,
-            _schwarzschildWarpTable.data(),
+            _blackHoleWarpTable.data(),
             GL_STREAM_DRAW
         );
 
@@ -286,8 +286,8 @@ namespace openspace {
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
                 return global::renderEngine->buildRenderProgram(
                     "BlackHoleProgram",
-                    absPath("${MODULE_BLACKHOLE}/shaders/blackhole_vs.glsl"),
-                    absPath("${MODULE_BLACKHOLE}/shaders/blackhole_fs.glsl")
+                    absPath("${MODULE_BLACKHOLE}/shaders/schwarzschild_vs.glsl"),
+                    absPath("${MODULE_BLACKHOLE}/shaders/schwarzschild_fs.glsl")
                 );
             }
         );

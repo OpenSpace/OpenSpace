@@ -63,12 +63,12 @@ namespace openspace {
 
 
 
-        std::vector<float> _schwarzschildWarpTable;
+        std::vector<float> _blackHoleWarpTable;
         std::vector<float> flatDataStar;
         StarMaps _starKDTree{};
 
         std::unique_ptr<ghoul::opengl::BufferBinding<
-            ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboSchwarzschildDataBinding;
+            ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboBlackHoleDataBinding;
         std::unique_ptr<ghoul::opengl::BufferBinding<
             ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboStarDataBinding;
         std::unique_ptr<ghoul::opengl::BufferBinding<
@@ -76,7 +76,7 @@ namespace openspace {
 
         GLuint _quadVao = 0;
         GLuint _quadVbo = 0;
-        GLuint _ssboSchwarzschildWarpTable = 0;
+        GLuint _ssboBlackHoleWarpTable = 0;
         GLuint _ssboStarKDTree = 0;
         GLuint _ssboStarKDTreeIndices = 0;
 

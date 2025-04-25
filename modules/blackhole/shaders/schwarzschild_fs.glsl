@@ -257,7 +257,7 @@ vec4 searchTree(int treeStart, int treeNodeCount, vec3 sphericalCoords) {
             bestLocalIndex = cur.index;
         }
         
-        // Determine axis (1 or 2) using depth (sphericalCoords: index 1=theta, index 2=phi)
+        // Determine axis (1 or 2) using depth (sphericalCoords: index 1 = theta, index 2 = phi)
         int axis = cur.depth % 2 + 1;
         float diff = sphericalCoords[axis] - starMapKDTrees[base + axis];
         
