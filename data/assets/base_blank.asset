@@ -9,9 +9,6 @@ asset.require("dashboard/default_dashboard")
 asset.require("actions/default_actions")
 asset.require("./default_keybindings")
 
--- Load web gui
-local webGui = asset.require("util/webgui")
-
 -- Scale the different UI components based on the operating system's DPI scaling value
 asset.require("util/dpiscaling")
 
@@ -21,9 +18,11 @@ asset.require("util/launcher_images")
 -- Modules and component settings
 asset.require("modules/touch/default_settings")
 
+-- Load web gui
+local webGui = asset.require("util/webgui")
+
 
 asset.onInitialize(function()
-  webGui.setCefRoute("onscreen")
   openspace.setPropertyValueSingle("RenderEngine.VerticalLogOffset", 0.1)
   openspace.setPropertyValueSingle("Dashboard.StartPositionOffset", { 15.0,-49.0 })
   openspace.setPropertyValueSingle("RenderEngine.ShowCamera", false)
