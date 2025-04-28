@@ -212,7 +212,7 @@ std::string OptionProperty::stringValue() const {
 
 
 nlohmann::json OptionProperty::generateAdditionalJsonDescription() const {
-    nlohmann::json data = {};
+    nlohmann::json data;
 
     for (const Option& option : _options) {
         data[std::to_string(option.value)] = option.description;
