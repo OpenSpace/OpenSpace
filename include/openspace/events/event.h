@@ -64,6 +64,8 @@ struct Event {
         ApplicationShutdown,
         CameraFocusTransition,
         TimeOfInterestReached,
+        MissionAdded,
+        MissionRemoved,
         MissionEventReached,
         PlanetEclipsed,
         InterpolationFinished,
@@ -257,13 +259,45 @@ struct EventTimeOfInterestReached : public Event {
 
 
 /**
+ * This event is created when a mission is added.
+ */
+struct EventMissionAdded : public Event {
+    static constexpr Type Type = Event::Type::MissionAdded;
+
+    /**
+     * Creates an instance of an EventMissionAdded event.
+     * 
+     * \param identifier The identifier of the mission added
+     */
+    EventMissionAdded(std::string_view identifier);
+
+    const tstring identifier;
+};
+
+/**
+ * This event is created when a mission is removed.
+ */
+struct EventMissionRemoved : public Event {
+    static constexpr Type Type = Event::Type::MissionRemoved;
+
+    /**
+     * Creates an instance of an EventMissionRemoved event.
+     *
+     * \param identifier The identifier of the mission removed
+     */
+    EventMissionRemoved(std::string_view identifier);
+
+    const tstring identifier;
+};
+
+/**
  * This event is created when the end of a mission phase is reached. This event is
  * currently unused.
  */
 struct EventMissionEventReached : public Event {
     static constexpr Type Type = Event::Type::MissionEventReached;
 
-    // Not sure which kind of parameters we want to pass here
+    // Not sure which kind of parameters we want to pass here.
     EventMissionEventReached();
 };
 
@@ -276,7 +310,7 @@ struct EventPlanetEclipsed : public Event {
 
     /**
      * Creates an instance of an EventPlanetEclipsed event.
-     *
+     
      * \param eclipsee_ The scene graph node that is eclipsed by another object
      * \param eclipser_ The scene graph node that is eclipsing the other object
      *

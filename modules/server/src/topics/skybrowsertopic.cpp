@@ -101,16 +101,14 @@ void SkyBrowserTopic::sendBrowserData() {
     data.setValue("cameraInSolarSystem", module->isCameraInSolarSystem());
 
     // Pass data for all the browsers and the corresponding targets
-    if (module->isCameraInSolarSystem()) {
-        const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->pairs();
-        ghoul::Dictionary targets;
-        for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
-            const std::string id = pair->browserId();
-            const ghoul::Dictionary target = pair->dataAsDictionary();
-            targets.setValue(id, target);
-        }
-        data.setValue("browsers", targets);
+    const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->pairs();
+    ghoul::Dictionary targets;
+    for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
+        const std::string id = pair->browserId();
+        const ghoul::Dictionary target = pair->dataAsDictionary();
+        targets.setValue(id, target);
     }
+    data.setValue("browsers", targets);
 
     std::string jsonString = ghoul::formatJson(data);
 

@@ -1,17 +1,82 @@
 {
-    "0": { "id": "scene", "name": "Scene", "visible": true, "enabled": true },
-    "1": { "id": "settings", "name": "Settings", "visible": false, "enabled": true },
-    "2": { "id": "navigation", "name": "Navigation", "visible": true, "enabled": true },
-    "3": { "id": "timePanel", "name": "Date & Time", "visible": true, "enabled": true },
-    "4": { "id": "sessionRecording", "name": "Session Recording", "visible": true, "enabled": true },
-    "5": { "id": "geoLocation", "name": "Geo Location", "visible": true, "enabled": true },
-    "6": { "id": "screenSpaceRenderables", "name": "ScreenSpace Renderables", "visible": true, "enabled": true },
-    "7": { "id": "exoplanets", "name": "Exoplanets", "visible": true, "enabled": true },
-    "8": { "id": "userPanels", "name": "User Panels", "visible": true, "enabled": true },
-    "9": { "id": "actions", "name": "Actions", "visible": true, "enabled": true },
-    "10": { "id": "skyBrowser", "name": "SkyBrowser", "visible": true, "enabled": true },
-    "11": { "id": "mission", "name": "Mission", "visible": false, "enabled": false },
-    "12": { "id": "flightControl", "name": "Flight Control", "visible": false, "enabled": true },
-    "13": { "id": "keybindingsLayout", "name": "Keybindings", "visible": true, "enabled": true },
-    "14": { "id": "gettingStartedTour", "name": "Getting Started Tour", "visible": true, "enabled": true }
+    "0": {
+        "name": "Scene",
+        "id": "scene",
+        "visible": true
+    },
+    "1": {
+        "name": "Settings",
+        "id": "settings",
+        "visible": false
+    },
+    "2": {
+        "name": "Navigation",
+        "id": "navigation",
+        "visible": true
+    },
+    "3": {
+        "name": "Time Panel",
+        "id": "timePanel",
+        "visible": true
+    },
+    "4": {
+        "name": "Session Recording",
+        "id": "sessionRecording",
+        "visible": true
+    },
+    "5": {
+        "name": "Geo Location",
+        "id": "geoLocation",
+        "visible": true
+    },
+    "6": {
+        "name": "Screenspace Renderables",
+        "id": "screenSpaceRenderables",
+        "visible": true
+    },
+    "7": {
+        "name": "Exoplanets",
+        "id": "exoplanets",
+        "visible": false
+    },
+    "8": {
+        "name": "User Panels",
+        "id": "userPanels",
+        "visible": true
+    },
+    "9": {
+        "name": "Actions",
+        "id": "actions",
+        "visible": true
+    },
+    "10": {
+        "name": "SkyBrowser",
+        "id": "skyBrowser",
+        "visible": false
+    },
+    "11": {
+        "name": "Mission",
+        "id": "mission",
+        "visible": false
+    },
+    "12": {
+        "name": "Flight Control",
+        "id": "flightControl",
+        "visible": true
+    },
+    "13": {
+        "name": "Keybindings Layout",
+        "id": "keybindingsLayout",
+        "visible": false
+    },
+    "14": {
+        "name": "Getting Started Tour",
+        "id": "gettingStartedTour",
+        "visible": true
+    },
+    "15": {
+        "name": "Script Log",
+        "id": "scriptLogPanel",
+        "visible": false
+    }
 }

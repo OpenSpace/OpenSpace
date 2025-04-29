@@ -2,8 +2,6 @@ local actions = asset.require("actions/default_actions")
 
 
 asset.onInitialize(function()
-  openspace.bindKey("F1", actions.ToggleNativeUi)
-
   openspace.bindKey("Ctrl+Q", actions.ToggleShutdown)
 
   openspace.bindKey("F12", actions.TakeScreenshot)
@@ -18,8 +16,10 @@ asset.onInitialize(function()
 
   openspace.bindKey("B", actions.FadeToBlack)
 
-  openspace.bindKey("TAB", actions.ToggleMainGui)
-  openspace.bindKey("Shift+TAB", actions.ToggleOverlays)
+  openspace.bindKey("F1", actions.ToggleNativeUi)
+
+  openspace.bindKey("F2", actions.ToggleMainGui)
+  openspace.bindKey("Shift+F2", actions.ToggleOverlays)
 
   openspace.bindKey("Right", actions.NextDeltaStepInterpolate)
   openspace.bindKey("Shift+Right", actions.NextDeltaStepImmediate)
@@ -45,8 +45,10 @@ asset.onDeinitialize(function()
   openspace.clearKey("Shift+Right")  -- actions.NextDeltaStepImmediate
   openspace.clearKey("Right")        -- actions.NextDeltaStepInterpolate
 
-  openspace.clearKey("Shift+TAB")    -- actions.ToggleOverlays
-  openspace.clearKey("TAB")          -- actions.ToggleMainGui
+  openspace.clearKey("Shift+F2")     -- actions.ToggleOverlays
+  openspace.clearKey("F2")           -- actions.ToggleMainGui
+
+  openspace.clearKey("F1")           -- actions.ToggleNativeUi
 
   openspace.clearKey("B")            -- actions.FadeToBlack
 
@@ -61,8 +63,6 @@ asset.onDeinitialize(function()
   openspace.clearKey("PRINT_SCREEN") -- actions.TakeScreenshot
 
   openspace.clearKey("Ctrl+Q")       -- actions.ToggleShutdown
-
-  openspace.clearKey("F1")           -- actions.ToggleNativeUi
 end)
 
 
