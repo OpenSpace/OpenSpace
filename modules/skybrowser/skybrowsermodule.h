@@ -96,7 +96,6 @@ private:
     void incrementallyRotateCamera();
     void incrementallyAnimateTargets();
 
-    properties::BoolProperty _enabled;
     properties::BoolProperty _allowCameraRotation;
     properties::DoubleProperty _cameraRotationSpeed;
     properties::DoubleProperty _targetAnimationSpeed;
