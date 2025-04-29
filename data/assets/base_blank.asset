@@ -24,6 +24,6 @@ local webGui = asset.require("util/webgui")
 
 asset.onInitialize(function()
   openspace.setPropertyValueSingle("RenderEngine.VerticalLogOffset", 0.1)
-  openspace.setPropertyValueSingle("Dashboard.StartPositionOffset", { 15.0,-49.0 })
+  openspace.setPropertyValueSingle("Dashboard.StartPositionOffset", { 15.0, 49.0 })
   openspace.setPropertyValueSingle("RenderEngine.ShowCamera", false)
 end)
