@@ -21,9 +21,12 @@ __constant__ float c_rs = 1;
 __constant__ unsigned int c_num_steps = 15000;
 __constant__ unsigned int c_layers = 1;
 __constant__ float c_M = 1.0f;     // Mass parameter
-__constant__ float c_epsilon = 1e-10;   // Numerical tolerance
+__constant__ float c_epsilon = 1e-5;   // Numerical tolerance
 __constant__ float3 worldUp = { 0.0f, 0.0f, 1.0f };
 
+__constant__ float accretion_disk_inner_radius = 6.0f;  // in Schwarzschild radius units
+__constant__ float accretion_disk_outer_radius = 20.0f; // in Schwarzschild radius units
+__constant__ float accretion_disk_tolerance_theta = 0.01f; // small tolerance around theta = pi/2
 
 
 // Additional simulation parameters
@@ -204,6 +207,17 @@ __device__ float dp_theta(float r, float theta, float E, float L) {
     return -dW_theta_val / (2.0f * sig);
 }
 
+// @TODO: Might need to do a line segment between points
+__device__ bool check_accretion_disk_collision(float r, float theta) {
+    if (r >= accretion_disk_inner_radius && r <= accretion_disk_outer_radius) {
+        if (fabs(theta - M_PI / 2.0f) < accretion_disk_tolerance_theta) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
 // ---------------------------------------------------------------------
 // RK4 integration using c_a loop to compute k coefficients
 // The state vector y has 5 components.
@@ -330,9 +344,19 @@ __global__ void simulateRayKernel(float3 pos, size_t num_rays_per_dim, float* lo
                 break;
             }
         }
+        else if (check_accretion_disk_collision(y[0], y[1])) {
+            while (idx_entry <= c_layers) {
+                entry[idx_entry] = 1;
+                entry[idx_entry + 1] = 1;
+                idx_entry += 2;
+            }
+            break;
+        }
+
         // Advance one RK4 step.
         rk4(y, c_h, E, L, k_val);
-
+        y[1] = fmodf(y[1], M_PI);
+        y[2] = fmodf(y[2], 2.0f * M_PI);
     }
     if (idx_entry <= c_layers) {
         entry[idx_entry] = y[1];
@@ -364,7 +388,7 @@ void kerr(float x, float y, float z, float rs, float Kerr, size_t num_rays_per_d
     int blocks = (int)((num_rays + threadsPerBlock - 1) / threadsPerBlock);
 
     // Launch the simulation kernel.
-    simulateRayKernel << <blocks, threadsPerBlock >> > (make_float3(x, y, z), num_rays_per_dim, d_lookup_table);
+    simulateRayKernel << <blocks, threadsPerBlock >> > (make_float3(x, z, -y), num_rays_per_dim, d_lookup_table);
     cudaDeviceSynchronize();
 
     // Copy the results back to host.

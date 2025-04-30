@@ -23,12 +23,10 @@ const int NODE_SIZE = 6;
 const int layerCount = 1;
 const float starRadius = 0.002f;
 const int STACKSIZE = 32;
-const int tableSize = schwarzschildWarpTable.length() / 2;
-const int num_rays = schwarzschildWarpTable.length() / (layerCount + 1);
-
+const int num_rays = schwarzschildWarpTable.length() / ((layerCount + 1) * 2);
+const int num_rays_per_dim = int(sqrt(num_rays));
 const float max_theta = PI;
 const float max_phi = 2.0 * PI;
-const int num_rays_per_dim = 250;
 
 /**********************************************************
                         Math

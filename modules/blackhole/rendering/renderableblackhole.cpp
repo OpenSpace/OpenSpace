@@ -19,6 +19,7 @@
 
 #include <filesystem>
 #include <vector>
+#include <chrono>
 
 #define M_Kerr true
 #if M_Kerr
@@ -60,6 +61,8 @@ namespace {
         std::optional<float> SolarMass;
         std::string colorMap;
     };
+
+    auto lastTime = std::chrono::high_resolution_clock::now();
     
 #include "renderableblackhole_codegen.cpp"
 }
@@ -114,7 +117,7 @@ namespace openspace {
     bool RenderableBlackHole::isReady() const {
         return _program != nullptr;
     }
-    bool rerender = true;
+    bool highres = false;
     void RenderableBlackHole::update(const UpdateData& data) {
         if (data.modelTransform.translation != _chachedTranslation) {
             _chachedTranslation = data.modelTransform.translation;
@@ -136,11 +139,21 @@ namespace openspace {
         // 3) Remove scaling (component-wise)
         glm::dvec3 cameraPosition = v_rot / data.modelTransform.scale;
 
-        if (glm::distance(cameraPosition, _chacedCameraPos) > 0.01f && rerender) {
-            //kerr(2e11, 0, 0, _rs, 0.99f, _rayCount, _stepsCount, _schwarzschildWarpTable);
-            kerr(cameraPosition.x, cameraPosition.y, cameraPosition.z, _rs, 0.99f, _rayCount, _stepsCount, _schwarzschildWarpTable);
+        if (glm::distance(cameraPosition, _chacedCameraPos) > 0.01f * _rs) {
+            //kerr(2e11, 0, 0, _rs, 0.99f, _rayCount, _stepsCount, _blackHoleWarpTable);
+            kerr(cameraPosition.x, cameraPosition.y, cameraPosition.z, _rs, 0.99f, _rayCount, _stepsCount, _blackHoleWarpTable);
             _chacedCameraPos = cameraPosition;
-            //rerender = false;
+            highres = false;
+            lastTime = std::chrono::high_resolution_clock::now();
+        }
+        else if (!highres){
+            auto currentTime = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<float> deltaTime = currentTime - lastTime;
+            float deltaTimeSeconds = deltaTime.count();
+            if (deltaTimeSeconds > .05f) {
+                kerr(cameraPosition.x, cameraPosition.y, cameraPosition.z, _rs, 0.99f, _rayCountHighRes, _stepsCount, _blackHoleWarpTable);
+                highres = true;
+            }
         }
 #else
         glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
@@ -312,8 +325,8 @@ namespace openspace {
     }
 
     void RenderableBlackHole::loadEnvironmentTexture() {
-        const std::string texturePath = "${MODULE_BLACKHOLE}/rendering/uv.png";
-        //const std::string texturePath = "${BASE}/sync/http/milkyway_textures/2/DarkUniverse_mellinger_8k.jpg";
+        //const std::string texturePath = "${MODULE_BLACKHOLE}/rendering/uv.png";
+        const std::string texturePath = "${BASE}/sync/http/milkyway_textures/2/DarkUniverse_mellinger_8k.jpg";
         //const std::string texturePath = "${MODULE_BLACKHOLE}/rendering/skybox.jpg";
 
         _environmentTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(texturePath), 2);

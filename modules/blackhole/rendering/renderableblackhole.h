@@ -47,6 +47,7 @@ namespace openspace {
         glm::dvec3 _chachedTranslation{};
         glm::dvec3 _chacedCameraPos{};
         static constexpr size_t _rayCount{ 250 };
+        static constexpr size_t _rayCountHighRes{ 2000 };
         static constexpr size_t _stepsCount = 100000;
         static constexpr float _stepLength = 0.0001f;
         static constexpr size_t _mapCount = 3;
