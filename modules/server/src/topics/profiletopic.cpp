@@ -38,11 +38,12 @@ bool ProfileTopic::isDone() const {
 
 void ProfileTopic::handleJson(const nlohmann::json&) {
     // @TODO (2025-04-30, emmbr) If we expose the json converters from profile.cpp, we
-    // could use those her einstead and minimize the risk of getting the dat aout of sync
+    // could use those here instead and minimize the risk of getting the serialization of
+    // the data out of sync
     nlohmann::json data = {
         { "uiPanelVisibility", global::profile->uiPanelVisibility },
         { "markNodes", global::profile->markNodes },
-        { "filePath", global::configuration->profile},
+        { "filePath", global::configuration->profile}
     };
 
     if (global::profile->meta.has_value()) {
