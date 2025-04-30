@@ -47,7 +47,7 @@ namespace openspace {
         glm::dvec3 _chachedTranslation{};
         glm::dvec3 _chacedCameraPos{};
         static constexpr size_t _rayCount{ 250 };
-        static constexpr size_t _rayCountHighRes{ 2000 };
+        static constexpr size_t _rayCountHighRes{ 1500 };
         static constexpr size_t _stepsCount = 100000;
         static constexpr float _stepLength = 0.0001f;
         static constexpr size_t _mapCount = 3;
@@ -61,8 +61,6 @@ namespace openspace {
         float _rCamera = 20.0f;
 
         ViewPort _viewport{};
-
-
 
         std::vector<float> _blackHoleWarpTable;
         std::vector<float> flatDataStar;

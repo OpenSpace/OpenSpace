@@ -92,7 +92,7 @@ namespace openspace {
     RenderableBlackHole::~RenderableBlackHole() {}
 
     void RenderableBlackHole::initialize() {
-        _blackHoleWarpTable = std::vector<float>(_rayCount * 2, std::numeric_limits<double>::quiet_NaN());
+        _blackHoleWarpTable.reserve(_rayCountHighRes * _rayCountHighRes * 4);
     }
 
     void RenderableBlackHole::initializeGL() {
@@ -141,7 +141,7 @@ namespace openspace {
 
         if (glm::distance(cameraPosition, _chacedCameraPos) > 0.01f * _rs) {
             //kerr(2e11, 0, 0, _rs, 0.99f, _rayCount, _stepsCount, _blackHoleWarpTable);
-            kerr(cameraPosition.x, cameraPosition.y, cameraPosition.z, _rs, 0.99f, _rayCount, _stepsCount, _blackHoleWarpTable);
+            kerr(cameraPosition.x, cameraPosition.y, cameraPosition.z, _rs, 0.99f, 3.5f * glm::distance(cameraPosition, {0,0,0}) / (0.99f * _rs), _rayCount, _stepsCount, _blackHoleWarpTable);
             _chacedCameraPos = cameraPosition;
             highres = false;
             lastTime = std::chrono::high_resolution_clock::now();
@@ -150,8 +150,8 @@ namespace openspace {
             auto currentTime = std::chrono::high_resolution_clock::now();
             std::chrono::duration<float> deltaTime = currentTime - lastTime;
             float deltaTimeSeconds = deltaTime.count();
-            if (deltaTimeSeconds > .05f) {
-                kerr(cameraPosition.x, cameraPosition.y, cameraPosition.z, _rs, 0.99f, _rayCountHighRes, _stepsCount, _blackHoleWarpTable);
+            if (deltaTimeSeconds > 1.0f) {
+                kerr(cameraPosition.x, cameraPosition.y, cameraPosition.z, _rs, 0.99f, 3.5f * glm::distance(cameraPosition, { 0,0,0 }) / (0.99f*_rs), _rayCountHighRes, _stepsCount, _blackHoleWarpTable);
                 highres = true;
             }
         }
