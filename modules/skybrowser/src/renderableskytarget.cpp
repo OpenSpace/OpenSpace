@@ -236,7 +236,8 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
     cameraOrientedRotation[1] = glm::dvec4(_upVector, 0.0);
     cameraOrientedRotation[2] = glm::dvec4(normal, 0.0);
 
-    const glm::dmat4 rotationTransform = _billboard ?
+    const glm::dmat4 rotationTransform =
+        _renderOption.value() != OrientationOption::FixedRotation ?
         cameraOrientedRotation :
         glm::dmat4(data.modelTransform.rotation);
 
