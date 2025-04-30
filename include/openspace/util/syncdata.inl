@@ -30,7 +30,10 @@ template<class T>
 SyncData<T>::SyncData(const T& val) : _data(val) {}
 
 template<class T>
-SyncData<T>::SyncData(const SyncData<T>& o) : _data(o._data) {}
+SyncData<T>::SyncData(const SyncData<T>& o)
+    : _data(o._data)
+    , _doubleBufferedData(o._doubleBufferedData)
+{}
 
 template<class T>
 SyncData<T>& SyncData<T>::operator=(const T& rhs) {
