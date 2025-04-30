@@ -114,12 +114,29 @@ vec2 getInterpolatedWarpAngles(float input_theta, float input_phi, int layer) {
     vec2 v01 = FETCH(theta0, phi1);
     vec2 v11 = FETCH(theta1, phi1);
 
-    bool onDisk = v00.x == DISK || v10.x == DISK || v11.x == DISK || v10.x == DISK; 
-    if(onDisk){
-        float low  = mix(v00.y, v10.y, t);
-        float high = mix(v01.y, v11.y, t);
-        return vec2(DISK, mix(low,high, u));
+    // detect which corners are on the disk
+    bool d00 = (v00.x == DISK);
+    bool d10 = (v10.x == DISK);
+    bool d01 = (v01.x == DISK);
+    bool d11 = (v11.x == DISK);
+
+    // only mix low/high if *both* edges had at least one on-disk sample
+    bool onDisk = d00 || d10 || d01 || d11;
+
+    if (onDisk) {
+        // interpolat only if both points are on disk,
+        // otherwise pick the one that is on-disk (or 0.0 if neither)
+        float low = (d00 && d10)
+            ? mix(v00.y, v10.y, t)
+            : (d00 ? v00.y : (d10 ? v10.y : 0.0));
+
+        float high = (d01 && d11)
+            ? mix(v01.y, v11.y, t)
+            : (d01 ? v01.y : (d11 ? v11.y : 0.0));
+
+        return vec2(DISK, mix(low, high, u));
     }
+
     bool beyoundTheHorizion = isnan(v00.x) || isnan(v10.x) || isnan(v01.x) || isnan(v11.x);
     if (beyoundTheHorizion) {
       return vec2(HORIZION);
