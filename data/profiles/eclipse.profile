@@ -45,7 +45,7 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "OpenSpace profile to highlight solar eclipses on the Earth from 1900 to 2100",
+    "description": "OpenSpace profile to highlight solar eclipses on the Earth from 1900 to 2100.",
     "license": "MIT License",
     "name": "Default",
     "url": "https://www.openspaceproject.com",
