@@ -26,6 +26,7 @@
 
 #include <modules/server/include/connection.h>
 #include <modules/server/include/jsonconverters.h>
+#include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scene/profile.h>
 
@@ -36,13 +37,24 @@ bool ProfileTopic::isDone() const {
 }
 
 void ProfileTopic::handleJson(const nlohmann::json&) {
-    const std::string name = global::profile->meta->name.value_or("");
-
-    const nlohmann::json data = {
+    // @TODO (2025-04-30, emmbr) If we expose the json converters from profile.cpp, we
+    // could use those her einstead and minimize the risk of getting the dat aout of sync
+    nlohmann::json data = {
         { "uiPanelVisibility", global::profile->uiPanelVisibility },
         { "markNodes", global::profile->markNodes },
-        { "name", name }
+        { "filePath", global::configuration->profile},
     };
+
+    if (global::profile->meta.has_value()) {
+        data["name"] = global::profile->meta->name.value_or("");
+
+        data["author"] = global::profile->meta->author.value_or("");
+        data["description"] = global::profile->meta->description.value_or("");
+        data["license"] = global::profile->meta->license.value_or("");
+        data["url"] = global::profile->meta->url.value_or("");
+        data["version"] = global::profile->meta->version.value_or("");
+    }
+
     _connection->sendJson(wrappedPayload(data));
 }
 
