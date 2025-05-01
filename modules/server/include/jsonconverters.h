@@ -42,12 +42,10 @@ void to_json(nlohmann::json& j, const PropertyOwner* p);
 } // namespace openspace::properties
 
 namespace openspace::interaction {
-
-    class Action;
+    struct Action;
 
     void to_json(nlohmann::json& j, const Action& a);
     void to_json(nlohmann::json& j, const Action* pA);
-
 } // namespace openspace::interaction
 
 namespace openspace {
