@@ -54,12 +54,16 @@
     "url": "https://www.openspaceproject.com",
     "version": "0.1"
   },
+  "panel_visibility": {
+    "mission": true
+  },
   "time": {
+    "is_paused": false,
     "type": "absolute",
     "value": "2016-07-01T10:05:00"
   },
   "version": {
     "major": 1,
-    "minor": 0
+    "minor": 4
   }
 }

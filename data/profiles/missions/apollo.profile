@@ -53,7 +53,7 @@
     },
     {
       "action": "os.apollo.FocusEarth",
-      "key": "Home"
+      "key": "HOME"
     },
     {
       "action": "os.apollo.FocusMoon",
@@ -88,6 +88,9 @@
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
+  "panel_visibility": {
+    "mission": true
+  },
   "properties": [
     {
       "name": "NavigationHandler.OrbitalNavigator.LimitZoom.MinimumAllowedDistance",
@@ -101,11 +104,12 @@
     }
   ],
   "time": {
+    "is_paused": false,
     "type": "absolute",
     "value": "1968-12-21T12:51:51"
   },
   "version": {
     "major": 1,
-    "minor": 1
+    "minor": 4
   }
 }

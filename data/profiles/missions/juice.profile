@@ -56,6 +56,9 @@
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
+  "panel_visibility": {
+    "mission": true
+  },
   "properties": [
     {
       "name": "NavigationHandler.OrbitalNavigator.LimitZoom.MinimumAllowedDistance",
@@ -130,6 +133,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 2
+    "minor": 4
   }
 }

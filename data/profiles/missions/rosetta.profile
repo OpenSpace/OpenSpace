@@ -96,6 +96,9 @@
     "url": "https://www.openspaceproject.com",
     "version": "1.2"
   },
+  "panel_visibility": {
+    "mission": true
+  },
   "properties": [
     {
       "name": "Scene.67P.Renderable.PerformShading",
@@ -115,6 +118,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 2
+    "minor": 4
   }
 }

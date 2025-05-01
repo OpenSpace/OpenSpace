@@ -47,6 +47,9 @@
       "notLoadedInstruction": "openspace.printFatal('Could not load gaia profile due to missing module \"Gaia\"')"
     }
   ],
+  "panel_visibility": {
+    "mission": true
+  },
   "properties": [
     {
       "name": "Scene.Stars.Renderable.Enabled",
@@ -55,11 +58,12 @@
     }
   ],
   "time": {
+    "is_paused": false,
     "type": "absolute",
     "value": "2019-06-10T00:00:00"
   },
   "version": {
     "major": 1,
-    "minor": 0
+    "minor": 4
   }
 }
