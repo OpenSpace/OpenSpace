@@ -41,7 +41,7 @@ Fragment getFragment() {
   float radius = length(st);
 
   // Discard if normal is perpendicular to the camera direction
-  if (abs(dot(vs_normal, vec3(0.0, 0.0, 1.0))) <= 1.0e-3) {
+  if (abs(dot(normalize(vs_normal), vec3(0.0, 0.0, 1.0))) <= 1.0e-3) {
     discard;
   }
 
