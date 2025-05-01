@@ -181,7 +181,7 @@ asset.export(Station6Frag3Model)
 asset.meta = {
   Name = "Apollo 17 - Boulder Station 6",
   Description = [[This asset shows 3D models of the fragments at station 6, which have
-    been reconstructed from the imagery taken of the Apollo 17 crew.]]",
+    been reconstructed from the imagery taken of the Apollo 17 crew.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

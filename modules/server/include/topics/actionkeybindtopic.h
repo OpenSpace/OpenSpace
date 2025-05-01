@@ -22,28 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/topics/profiletopic.h>
+#ifndef __OPENSPACE_MODULE_SERVER___ACTIONKEYBIND_TOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___ACTIONKEYBIND_TOPIC___H__
 
-#include <modules/server/include/connection.h>
-#include <modules/server/include/jsonconverters.h>
-#include <openspace/engine/globals.h>
-#include <openspace/scene/profile.h>
+#include <modules/server/include/topics/topic.h>
 
 namespace openspace {
 
-bool ProfileTopic::isDone() const {
-    return true;
-}
+class ActionKeybindTopic : public Topic {
+public:
+    ~ActionKeybindTopic() override = default;
 
-void ProfileTopic::handleJson(const nlohmann::json&) {
-    const std::string name = global::profile->meta->name.value_or("");
+    void handleJson(const nlohmann::json& input) override;
+    bool isDone() const override;
 
-    const nlohmann::json data = {
-        { "uiPanelVisibility", global::profile->uiPanelVisibility },
-        { "markNodes", global::profile->markNodes },
-        { "name", name }
-    };
-    _connection->sendJson(wrappedPayload(data));
-}
+private:
+    void sendData(nlohmann::json data) const;
+    nlohmann::json allActionsKeybinds() const;
+    nlohmann::json action(const std::string& identifier) const;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SERVER___ACTIONKEYBIND_TOPIC___H__

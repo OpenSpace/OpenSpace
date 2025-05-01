@@ -22,28 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/topics/profiletopic.h>
+#include <modules/base/task/convertmodeltask.h>
 
-#include <modules/server/include/connection.h>
-#include <modules/server/include/jsonconverters.h>
-#include <openspace/engine/globals.h>
-#include <openspace/scene/profile.h>
+#include <ghoul/io/model/modelgeometry.h>
+#include <ghoul/io/model/modelreaderassimp.h>
+
+namespace {
+    // This task converts a 3D model format from a format that is natively supported both
+    // by OpenSpace and common 3D modelling tools and converts it into an OpenSpace
+    // proprietary format that can be loaded more efficiently, but more important can be
+    // distributed without violating terms of service for various 3D model hosting
+    // websites.
+    // 
+    // The resulting output file can be used everywhere in OpenSpace in place of the
+    // source material.
+    // 
+    // The list of supported files can be found here:
+    // https://github.com/assimp/assimp/blob/master/doc/Fileformats.md
+    struct [[codegen::Dictionary(ConvertModelTask)]] Parameters {
+        // The path to the source file
+        std::filesystem::path inputFilePath;
+        // The path to the output file
+        std::filesystem::path outputFilePath [[codegen::mustexist(false)]];
+    };
+#include "convertmodeltask_codegen.cpp"
+} // namespace
 
 namespace openspace {
 
-bool ProfileTopic::isDone() const {
-    return true;
+documentation::Documentation ConvertModelTask::Documentation() {
+    return codegen::doc<Parameters>("base_convert_model_task");
 }
 
-void ProfileTopic::handleJson(const nlohmann::json&) {
-    const std::string name = global::profile->meta->name.value_or("");
+ConvertModelTask::ConvertModelTask(const ghoul::Dictionary& dictionary) {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    const nlohmann::json data = {
-        { "uiPanelVisibility", global::profile->uiPanelVisibility },
-        { "markNodes", global::profile->markNodes },
-        { "name", name }
-    };
-    _connection->sendJson(wrappedPayload(data));
+    _inFilePath = p.inputFilePath;
+    _outFilePath = p.outputFilePath;
+}
+
+std::string ConvertModelTask::description() {
+    return "This task converts a 3D model format from a format that is natively "
+        "supported both by OpenSpace and common 3D modelling tools and converts it into "
+        "an OpenSpace proprietary format that can be loaded more efficiently, but more "
+        "important can be distributed without violating terms of service for various 3D "
+        "model hosting websites";
+}
+
+void ConvertModelTask::perform(const Task::ProgressCallback&) {
+    ghoul::io::ModelReaderAssimp reader;
+
+    std::unique_ptr<ghoul::modelgeometry::ModelGeometry> geometry =
+        reader.loadModel(_inFilePath, false, true);
+    geometry->saveToCacheFile(_outFilePath);
 }
 
 } // namespace openspace

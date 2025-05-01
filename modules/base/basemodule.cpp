@@ -83,6 +83,7 @@
 #include <modules/base/scale/staticscale.h>
 #include <modules/base/scale/timedependentscale.h>
 #include <modules/base/scale/timelinescale.h>
+#include <modules/base/task/convertmodeltask.h>
 #include <modules/base/translation/timelinetranslation.h>
 #include <modules/base/translation/globetranslation.h>
 #include <modules/base/translation/luatranslation.h>
@@ -227,13 +228,20 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
 
     ghoul::TemplateFactory<Translation>* fTranslation =
         FactoryManager::ref().factory<Translation>();
-    ghoul_assert(fTranslation, "Ephemeris factory was not created");
+    ghoul_assert(fTranslation, "Translation factory was not created");
 
     fTranslation->registerClass<GlobeTranslation>("GlobeTranslation");
     fTranslation->registerClass<LuaTranslation>("LuaTranslation");
     fTranslation->registerClass<MultiTranslation>("MultiTranslation");
     fTranslation->registerClass<StaticTranslation>("StaticTranslation");
     fTranslation->registerClass<TimelineTranslation>("TimelineTranslation");
+
+
+    ghoul::TemplateFactory<Task>* fTask =
+        FactoryManager::ref().factory<Task>();
+    ghoul_assert(fTask, "Task factory was not created");
+
+    fTask->registerClass<ConvertModelTask>("ConvertModelTask");
 }
 
 void BaseModule::internalDeinitializeGL() {
@@ -316,7 +324,9 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         LuaTranslation::Documentation(),
         MultiTranslation::Documentation(),
         StaticTranslation::Documentation(),
-        TimelineTranslation::Documentation()
+        TimelineTranslation::Documentation(),
+
+        ConvertModelTask::Documentation()
     };
 }
 

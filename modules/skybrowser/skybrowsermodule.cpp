@@ -39,20 +39,6 @@
 #include "skybrowsermodule_lua.inl"
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "Decides if the GUI for this module should be enabled.",
-        openspace::properties::Property::Visibility::User
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ShowTitleInGuiBrowserInfo = {
-        "ShowTitleInGuiBrowser",
-        "Show Title in Gui Browser",
-        "If true, the name of the currently selected sky browser is shown in the WebGUI "
-        "browser.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
 
     constexpr openspace::properties::Property::PropertyInfo AllowRotationInfo = {
         "AllowCameraRotation",
@@ -124,9 +110,6 @@ namespace {
 
 
     struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
-
         // [[codegen::verbatim(AllowRotationInfo.description)]]
         std::optional<bool> allowCameraRotation;
 
@@ -166,8 +149,6 @@ documentation::Documentation SkyBrowserModule::Documentation() {
 
 SkyBrowserModule::SkyBrowserModule()
     : OpenSpaceModule(SkyBrowserModule::Name)
-    , _enabled(EnabledInfo)
-    , _showTitleInGuiBrowser(ShowTitleInGuiBrowserInfo, true)
     , _allowCameraRotation(AllowRotationInfo, true)
     , _cameraRotationSpeed(CameraRotSpeedInfo, 0.5, 0.0, 1.0)
     , _targetAnimationSpeed(TargetSpeedInfo, 0.2, 0.0, 1.0)
@@ -181,8 +162,6 @@ SkyBrowserModule::SkyBrowserModule()
         "https://data.openspaceproject.com/wwt/1/imagecollection.wtml"
     )
 {
-    addProperty(_enabled);
-    addProperty(_showTitleInGuiBrowser);
     addProperty(_allowCameraRotation);
     addProperty(_cameraRotationSpeed);
     addProperty(_targetAnimationSpeed);
@@ -252,7 +231,6 @@ SkyBrowserModule::SkyBrowserModule()
 void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
 
-    _enabled = p.enabled.value_or(_enabled);
     _allowCameraRotation = p.allowCameraRotation.value_or(_allowCameraRotation);
     _cameraRotationSpeed = p.cameraRotSpeed.value_or(_cameraRotationSpeed);
     _targetAnimationSpeed = p.targetSpeed.value_or(_targetAnimationSpeed);
