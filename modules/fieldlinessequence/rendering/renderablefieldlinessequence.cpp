@@ -1021,36 +1021,21 @@ void RenderableFieldlinesSequence::firstUpdate() {
     const std::vector<std::vector<float>>& quantities = file->state.extraQuantities();
     const std::vector<std::string>& extraNamesVec =
         file->state.extraQuantityNames();
-    //////////////// Before GUI rewrite, this is the temporary fix to ////////////////////
-    //////////////////////// have GUI properties update in GUI ///////////////////////////
-    ////////////// In addition when potentially removing, check to see if ////////////////
-    //////////////// colorQuantity option {-1, "dummy default} is needed//////////////////
-    //_colorQuantity.clearOptions();
-    //_maskingQuantity.clearOptions();
-
-    //_colorGroup.removeProperty(_colorUniform);
-    //_colorGroup.removeProperty(_colorMethod);
-    //_colorGroup.removeProperty(_colorQuantity);
-    //_colorGroup.removeProperty(_selectedColorRange);
-    //_colorGroup.removeProperty(_colorTablePath);
-
-    //_maskingGroup.removeProperty(_maskingQuantity);
-    //_maskingGroup.removeProperty(_maskingEnabled);
-    //_maskingGroup.removeProperty(_selectedMaskingRange);
 
     for (int i = 0; i < quantities.size(); ++i) {
         _colorQuantity.addOption(i, extraNamesVec[i]);
         _maskingQuantity.addOption(i, extraNamesVec[i]);
     }
+    _colorQuantity = _colorQuantityTemp;
+    _maskingQuantity = _maskingQuantityTemp;
 
-    //_colorGroup.addProperty(_colorUniform);
-    //_colorGroup.addProperty(_colorMethod);
-    //_colorGroup.addProperty(_colorQuantity);
-    //_selectedColorRange.setViewOption(
-    //    properties::Property::ViewOptions::MinMaxRange
-    //);
-    //_colorGroup.addProperty(_selectedColorRange);
-    //_colorGroup.addProperty(_colorTablePath);
+    if (_colorTablePaths.size() > _colorQuantity) {
+        _colorTablePath = _colorTablePaths[_colorQuantity].string();
+    }
+    else {
+        _colorTablePath = _colorTablePaths[0].string();
+    }
+
     std::filesystem::path newPath = absPath(_colorTablePath);
     if (std::filesystem::exists(newPath)) {
         _transferFunction = std::make_unique<TransferFunction>(newPath.string());
@@ -1061,14 +1046,6 @@ void RenderableFieldlinesSequence::firstUpdate() {
         _transferFunction = std::make_unique<TransferFunction>(_colorTablePath.stringValue());
     }
 
-    //_maskingGroup.addProperty(_maskingEnabled);
-    //_maskingGroup.addProperty(_maskingQuantity);
-    //_selectedMaskingRange.setViewOption(properties::Property::ViewOptions::MinMaxRange);
-    //_maskingGroup.addProperty(_selectedMaskingRange);
-    //////////////////////////// End of temporary solution ///////////////////////////////
-    _firstLoad = false;
-    _colorQuantity = _colorQuantityTemp;
-    _maskingQuantity = _maskingQuantityTemp;
 
     _shouldUpdateColorBuffer = true;
     _shouldUpdateMaskingBuffer = true;
@@ -1088,6 +1065,8 @@ void RenderableFieldlinesSequence::firstUpdate() {
         }
         _havePrintedQuantityRange = true;
     }
+
+    _firstLoad = false;
 }
 
 void RenderableFieldlinesSequence::update(const UpdateData& data) {
@@ -1240,6 +1219,9 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
                 return;
             }
         }
+    }
+    else {
+        return;
     }
 
     const FieldlinesState& state = _files[loadedIndex].state;
