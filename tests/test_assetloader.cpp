@@ -42,7 +42,7 @@
 TEST_CASE("AssetLoader: Assertion", "[assetloader]") {
     using namespace openspace;
 
-    const Scene scene = Scene(std::make_unique<SceneInitializer>(1u));
+    const Scene scene = Scene(std::make_unique<SceneInitializer>());
     ghoul::lua::LuaState* state = global::scriptEngine->luaState();
     AssetManager assetLoader(state, absPath("${TESTDIR}/AssetLoaderTest/"));
 
@@ -51,12 +51,11 @@ TEST_CASE("AssetLoader: Assertion", "[assetloader]") {
 }
 
 TEST_CASE("AssetLoader: Basic Export Import", "[assetloader]") {
-    openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
-    ghoul::lua::LuaState* state = openspace::global::scriptEngine->luaState();
-    openspace::AssetManager assetLoader(
-        state,
-        absPath("${TESTDIR}/AssetLoaderTest/").string()
-    );
+    using namespace openspace;
+
+    Scene scene = Scene(std::make_unique<SceneInitializer>());
+    ghoul::lua::LuaState* state = global::scriptEngine->luaState();
+    AssetManager assetLoader(state, absPath("${TESTDIR}/AssetLoaderTest/"));
 
     CHECK_NOTHROW(assetLoader.add("require"));
 }

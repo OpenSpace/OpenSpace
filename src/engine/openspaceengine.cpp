@@ -803,14 +803,12 @@ void OpenSpaceEngine::loadAssets() {
     std::unique_ptr<SceneInitializer> sceneInitializer;
     if (global::configuration->useMultithreadedInitialization) {
         const unsigned int nThreads = std::max(
-            std::thread::hardware_concurrency() / 4,
-            4u
+            std::thread::hardware_concurrency() / 2, 2u
         );
-        unsigned int nThreads = nAvailableThreads == 0 ? 2 : nAvailableThreads;
         sceneInitializer = std::make_unique<SceneInitializer>(nThreads);
     }
     else {
-        sceneInitializer = std::make_unique<SceneInitializer>(1u);
+        sceneInitializer = std::make_unique<SceneInitializer>();
     }
 
     _scene = std::make_unique<Scene>(std::move(sceneInitializer));

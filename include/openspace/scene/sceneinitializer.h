@@ -33,9 +33,15 @@ namespace openspace {
 
 class SceneGraphNode;
 
+/**
+ * This class is responsible for initializing nodes, in a multithreaded fashion if needed,
+ * that are passed into it. The constructor takes the number of extra separate threads
+ * that are used to initialize nodes. Passing `0` for the number of threads results in
+ * nodes being initialized on the main thread instead.
+ */
 class SceneInitializer {
 public:
-    SceneInitializer(unsigned int nThreads);
+    SceneInitializer(unsigned int nThreads = 0);
 
     void initializeNode(SceneGraphNode* node);
     std::vector<SceneGraphNode*> takeInitializedNodes();
@@ -44,6 +50,7 @@ public:
 private:
     std::vector<SceneGraphNode*> _initializedNodes;
     std::unordered_set<SceneGraphNode*> _initializingNodes;
+    const unsigned int _nThreads;
     ThreadPool _threadPool;
     mutable std::mutex _mutex;
 };
