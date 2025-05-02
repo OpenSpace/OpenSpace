@@ -121,6 +121,11 @@ private:
     std::vector<File> _files;
     std::vector<RenderableFieldlinesSequence::File>::iterator
         insertToFilesInOrder(File& file);
+    // The function loads the file in the sense that it creates the FieldlineState object in
+    // the File object. The function also deletes the oldest file if the loadedFiles queue
+    // is full. The currentTime is given a default value because the function is also called
+    // if loadingType = StaticLoading where things initializes in the constructor where
+    // current time is not set yet. In that case, the current time is also irrelevant here.
     void loadFile(File& file);
     void trackOldest(File& file);
 

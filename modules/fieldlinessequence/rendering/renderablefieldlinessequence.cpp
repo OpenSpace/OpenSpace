@@ -412,7 +412,6 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         _model = fls::Model::Invalid;
     }
 
-    //maybe this should be called even if model is invalid
     setModelDependentConstants();
 
     // setting scaling factor after model to support unknown model (model = invalid, but
@@ -505,14 +504,9 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         _colorMethod = static_cast<int>(ColorMethod::Uniform);
     }
     _colorQuantityTemp = p.colorQuantity.value_or(_colorQuantityTemp);
-    //_colorQuantity.addOption(-1, "dummy_default");
-    //_colorQuantity = -1;
 
     if (p.colorTableRanges.has_value()) {
         _colorTableRanges = *p.colorTableRanges;
-        // This causes error since colorTableRanges has not had its option assigned to
-        // it yet:
-        //_selectedColorRange = _colorTableRanges[_colorQuantityTemp];
     }
     else {
         _colorTableRanges.push_back(glm::vec2(0.f, 1.f));
@@ -749,10 +743,7 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
             _selectedMaskingRange = _maskingRanges[0];
         }
         else {
-            LERROR(std::format(
-                "Cannot set selected masking range with: "//,
-                //_maskingRanges[_maskingQuantity].x
-            ));
+            LERROR("Cannot set selected masking range with: ");
         }
     });
 
@@ -893,11 +884,7 @@ void RenderableFieldlinesSequence::computeSequenceEndTime() {
         _sequenceEndTime = lastTriggerTime + 3 * averageCadence;
     }
 }
-// The function loads the file in the sense that it creates the FieldlineState object in
-// the File object. The function also deletes the oldest file if the loadedFiles queue
-// is full. The currentTime is given a default value because the function is also called
-// if loadingType = StaticLoading where things initializes in the constructor where
-// current time is not set yet. In that case, the current time is also irrelevant here.
+
 void RenderableFieldlinesSequence::loadFile(File& file) {
     _isLoadingStateFromDisk = true;
     try {

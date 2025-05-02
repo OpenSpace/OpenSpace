@@ -1,33 +1,16 @@
+local startupImage = asset.resource("/start.PNG")
 local Mission = {
     Identifier = "WSA",
     Name = "The WSA Simulation Model",
     TimeRange = { Start = "2006 SEP 18 11:54:00", End = "2025 MAR 24 00:00:00" },
-    Description = "The WSA (Wang-Sheeley-Arge) model has 3 components.\nThe inner most from the photospheric surface (r = 1 solar radius) to a source surface (r = 2.5 solar radii) is a potential field source surface (PFSS) model of the inner coronal magnetic field. This ingests a map of the surface flux and constructs a potential field solution using a spherical harmonic expansion that matches the photospheric surface flux and also forces the solution to be radial at the source surface.\nThe second component is a pseudo-potential extension of the field solution from the source surface (2.5 solar radii) to 5 solar radii. This component is based on an approach first implemented by Schatten to add a realistic current sheet base and helmet streamer above the global neutral line, and is referred to as the Schatten Current Sheet (CS) component. It does this by temporarily forcing all radial field values to be positive, solving a potential field problem between 2.5 and 5 solar radii to match the solution from the inner PFSS component at 2.5 solar radiii, then correcting the sign of the radial field. By following this procedure, all fieldlines that are open at the source surface must remain open, but otherwise the field above 2.5 solar radii retains the lowest energy space filling characteristics of a potential field solution. This has the effect of creating a thin current sheet and a helmet streamer above the global neutral line. (Note: some non-radial smoothing of the shape of fieldlines is applied across the boundary between the inner PFSS component and the CS component to prevent unnatural cusps appearing in the fieldlines.)\nThe third and final component of the WSA model uses the field solution at 5 solar radii to generate a wind speed. The local wind speed is determined from an empirical formula which is a function of the local rate of expansion of the magnetic flux tube compared with that of a purely radial field, and on the distance of the photospheric footpoint of the local field line to the nearest coronal hole boundary.",
-    --Actions = { "os.apollo.moon.ToggleKaguyaLayer", "os.apollo.ToggleMoonShading", "os.apollo.ShowInsignias", "os.apollo.HideInsignias" },
+    Description = "This profile shows the sun as it is right now. The visualizations are results from the WSA model version 5.4 and all the data is downloaded dynamically. In the Scene menu, under Solar System/ Heliosphere you will be able to find the assets. Under WSA Coronal Model 5.4 submenu you find additional fieldline options and solar surface options. For each asset, there are options for apperance as well as the option to save the downloaded content for next time, since the data is not cached on default. For the surfaces there are also diffrent layers to choose from. The white line shooting out from the Sun is always connected to the center of the Earth, along with the white arch. The yellow arch is the carrington prime meridian and the green grid is seperated with 10 degrees. Additionally, under the Actions panel you can find an option to toggle a white background. If no data is showing, most likely either files failed to download or time is set outside of data range. For more information on the simulation model, see https://ccmc.gsfc.nasa.gov/models/WSA~5.4.",
+    --Image = startupImage,
     Milestones = {
-      --{
-      --  Name = "Version 4.4",
-      --  Date = "2017 JUL 01 00:42:02",
-      --  Description = "For version 4.4 of WSA a period of 3 months has 4 different sets of fieldlines available, traced from different locations in different components of the model. End = 2017 SEP 30 22:43:18",
-      --  Image = "https://upload.wikimedia.org/wikipedia/commons/4/47/Ap8-S68-56531.jpg"
-      --},
-      --{
-      --  Name = "Version 4.5",
-      --  Date = "2006 SEP 19 11:54:00",
-      --  Description = "For version 4.5 of WSA a period of 14 years has sun surface data available until 2020 NOV 23 15:04:00. 4 different sets of fieldlines are traced from different locations in different components of the model. The scope of the fieldline data is between 2019-09-06 and 2020-01-13",
-      --  Image = "https://upload.wikimedia.org/wikipedia/commons/4/47/Ap8-S68-56531.jpg"
-      --},
       {
         Name = "Version 5.4",
         Date = "2022 DEC 09 16:14:00",
         Description = "For version 5.4 of WSA fieldline data and solar surfaces from end of 2022 until today."
-      }--,
-      --{
-      --  Name = "Version 5.x",
-      --  Date = "2014 JAN 01 01:04:00",
-      --  Description = "For version 5.x of WSA has fieldline data in this period. It also comes magnetograms mapped to the solar surface, available between 2022-09-29 to 2022-12-09",
-      --  Image = "https://upload.wikimedia.org/wikipedia/commons/4/47/Ap8-S68-56531.jpg"
-      --}
+      }
     }
 }
 

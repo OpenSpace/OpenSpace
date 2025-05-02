@@ -34,8 +34,7 @@ namespace {
 
 namespace openspace {
 
-std::string formulateDataHttpRequest(double minTime, double maxTime,
-                                                       std::pair<int, std::string> dataID,
+std::string formulateDataHttpRequest(double minTime, double maxTime, int dataID,
                                                                 const std::string baseURL)
 {
     // formulate a min and a max time from time
@@ -56,7 +55,7 @@ std::string formulateDataHttpRequest(double minTime, double maxTime,
     std::string minText = "&time.min=" + min;
     std::string maxText = "&time.max=" + max;
 
-    return baseURL + std::to_string(dataID.first) + minText + maxText;
+    return baseURL + std::to_string(dataID) + minText + maxText;
 }
 
 DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
@@ -67,15 +66,12 @@ DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
     , _dataURL(dataURL)
     , _nOfFilesToQueue(nOfFilesToQ)
 {
-    FieldlineOption fieldlineOption;
-
-    std::string name = fieldlineOption.optionName(dataID);
     _syncDir = absPath(
         "${SYNC}/dynamically_downloaded/" + std::to_string(dataID)
     );
 
-    _dataID = { dataID, name };
-    std::string httpInfoRequest = _infoURL + std::to_string(_dataID.first);
+    _dataID = dataID;
+    std::string httpInfoRequest = _infoURL + std::to_string(_dataID);
     requestDataInfo(httpInfoRequest);
     std::string httpDataRequest = formulateDataHttpRequest(
         _dataMinTime, _dataMaxTime, _dataID, _dataURL
@@ -280,10 +276,6 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
     }
     //maybe sort vector if some data set is order in a different parameter.
 
-    // TODO: do something with time.max and time.min if they don't match the request.
-    //_dataMaxTime = jsonResult["time.max"];
-    //_dataMinTime = jsonResult["time.min"];
-
     _tempCadence = calculateCadence();
     for (File& element : _availableData) {
         element.cadence = _tempCadence;
@@ -293,10 +285,9 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
 double DynamicFileSequenceDownloader::calculateCadence() {
     double averageTime = 0.0;
     if (_availableData.size() < 2) {
-        //if 0 or 1 files there is no cadence
+        // If 0 or 1 files there is no cadence
         return averageTime;
     }
-
     double time1 = Time::convertTime(_availableData.begin()->timestep);
     double timeN = Time::convertTime(_availableData.rbegin()->timestep);
     averageTime = (timeN - time1) / _availableData.size();
@@ -329,7 +320,7 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
 
     std::vector<File*>::iterator currentIt = _filesCurrentlyDownloading.begin();
 
-    // since size of filesCurrentlyDownloading can change per iteration, keep size-call
+    // Since size of filesCurrentlyDownloading can change per iteration, keep size-call
     for (size_t i = 0; i != _filesCurrentlyDownloading.size(); ++i) {
 
         File* file = *currentIt;
@@ -344,9 +335,6 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
                 --i;
             }
             else {
-                std::filesystem::path path = dl->destination();
-                //_downloadedFiles.push_back(std::move(*currentIt));
-                //std::vector<std::filesystem::path> downloadedFiles;
                 _downloadedFiles.push_back(dl->destination());
                 file->state = File::State::Downloaded;
                 currentIt = _filesCurrentlyDownloading.erase(currentIt);
@@ -357,7 +345,6 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
         else if (dl->hasFailed()) {
             LERROR(std::format("File '{}' failed to download. Removing file", file->URL));
             std::string filename;
-            //remove file here
             size_t lastSlash = file->URL.find_last_of('/');
             if (lastSlash == std::string::npos || lastSlash + 1 >= file->URL.size()) {
                 filename = "";
@@ -379,7 +366,7 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
             }
 
             currentIt = _filesCurrentlyDownloading.erase(currentIt);
-            // if one is removed, i is reduced, else we'd skip one in the list
+            // If one is removed, i is reduced, else we'd skip one in the list
             --i;
         }
         // The file is not finnished downloading, move on to next
@@ -435,7 +422,7 @@ void DynamicFileSequenceDownloader::putOnQueue() {
     }
     else {
         end = _availableData.begin();
-        // to catch first file (since begin points to a file but end() does not
+        // To catch first file (since begin points to a file but end() does not
         if (_thisFile == end && _thisFile->state == File::State::Available) {
             _queuedFilesToDownload.push_back(&*_thisFile);
             _thisFile->state = File::State::OnQueue;
@@ -443,7 +430,7 @@ void DynamicFileSequenceDownloader::putOnQueue() {
         }
     }
 
-    // if forward iterate from now to end. else reverse from now to begin
+    // If forward iterate from now to end. else reverse from now to begin
     size_t notToMany = 0;
     for (std::vector<File>::iterator it = _thisFile; it != end; _forward ? ++it : --it) {
         if (it->state == File::State::Available) {
@@ -452,7 +439,9 @@ void DynamicFileSequenceDownloader::putOnQueue() {
         }
         ++notToMany;
         // exit out early if enough files are queued / already downloaded
-        if (notToMany == _nOfFilesToQueue) break;
+        if (notToMany == _nOfFilesToQueue) {
+            break;
+        }
     }
 }
 
@@ -470,12 +459,11 @@ void DynamicFileSequenceDownloader::update(const double time, const double delta
         }
         return;
     }
-    // TODO figure out how to adapt the speedThreshhold
     // More than 2hrs a second would generally be unfeasable
     // for a regular internet connection to operate at
     int speedThreshhold = 7200;
     if (abs(deltaTime) > speedThreshhold) {
-        // to fast, do nothing
+        // to fast, do nothing. This is not optimal since it prints a lot
         LWARNING("Dynamic file sequence downloader: Paused. Time moves to fast.");
         return;
     }
@@ -547,19 +535,11 @@ void DynamicFileSequenceDownloader::update(const double time, const double delta
         _thisFile = closestFileToNow(time);
     }
 
-    if (_downloadedFiles.size() > 20) {
-        // cache files.
-        // But because we now already save the files (not using HttpMemoryDownload),
-        // this might not be needed
-        // Maybe instead we should check if we have to many cached files and remove them
-    }
-
     if (_filesCurrentlyDownloading.size() > 0) {
         checkForFinishedDownloads();
     }
 
     putOnQueue();
-
     downloadFile();
 }
 
@@ -578,16 +558,10 @@ std::vector<File*>& DynamicFileSequenceDownloader::filesCurrentlyDownloading() {
     return _filesCurrentlyDownloading;
 }
 
-//reference or no reference? return path to where they are instead?
 const std::vector<std::filesystem::path>&
 DynamicFileSequenceDownloader::downloadedFiles()
 {
     return _downloadedFiles;
-    // Maybe do...
-    // temp = _downloadedFiles
-    // _downloadedFiles.clear()
-    // return temp;
-    // ... to make sure not the same file gets loaded as state in renderable?
 }
 
 } // openspace namespace

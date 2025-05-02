@@ -117,13 +117,13 @@ namespace {
     };
     constexpr openspace::properties::Property::PropertyInfo FitsLayerInfo = {
         "FitsLayer",
-        "Fits Layer",
-        "This value specifies which index in the fits file to extract and use as texture",
+        "Surface Layer",
+        "This value specifies which index in the fits file to use as texture",
         openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo FitsLayerNameInfo = {
         "FitsLayerName",
-        "Fits Layer Name",
+        "Surface Layer Options",
         "This value specifies which name of the fits layer to use as texture",
         openspace::properties::Property::Visibility::User
     };
