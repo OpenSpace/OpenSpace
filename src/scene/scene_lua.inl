@@ -109,7 +109,7 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
         nodeName = regex.substr(0, wildPos);
         propertyName = regex.substr(wildPos + 1, regex.length());
 
-        // If none then malformed regular expression
+        // If property and node is empty, the regex must be * meaning all properties
         if (propertyName.empty() && nodeName.empty()) {
             LERRORC(
                 "findMatchesInAllProperties",
@@ -251,17 +251,21 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
                 global::sessionRecordingHandler->savePropertyBaseline(*prop);
             }
             if (interpolationDuration == 0.0) {
-                global::renderEngine->scene()->removePropertyInterpolation(prop);
+                if (Scene* scene = global::renderEngine->scene();  scene) {
+                    scene->removePropertyInterpolation(prop);
+                }
                 prop->setLuaValue(L);
             }
             else {
                 prop->setLuaInterpolationTarget(L);
-                global::renderEngine->scene()->addPropertyInterpolation(
-                    prop,
-                    static_cast<float>(interpolationDuration),
-                    postScript,
-                    easingFunction
-                );
+                if (Scene* scene = global::renderEngine->scene();  scene) {
+                    scene->addPropertyInterpolation(
+                        prop,
+                        static_cast<float>(interpolationDuration),
+                        postScript,
+                        easingFunction
+                    );
+                }
             }
         }
     }
@@ -322,15 +326,15 @@ int setPropertyCallSingle(properties::Property& prop, const std::string& uri,
             global::sessionRecordingHandler->savePropertyBaseline(prop);
         }
         if (duration == 0.0) {
-            if (global::renderEngine->scene()) {
-                global::renderEngine->scene()->removePropertyInterpolation(&prop);
+            if (Scene* scene = global::renderEngine->scene();  scene) {
+                scene->removePropertyInterpolation(&prop);
             }
             prop.setLuaValue(L);
         }
         else {
             prop.setLuaInterpolationTarget(L);
-            if (global::renderEngine->scene()) {
-                global::renderEngine->scene()->addPropertyInterpolation(
+            if (Scene* scene = global::renderEngine->scene();  scene) {
+                scene->addPropertyInterpolation(
                     &prop,
                     static_cast<float>(duration),
                     std::move(postScript),
@@ -422,7 +426,7 @@ int propertySetValue(lua_State* L) {
         }
     }
 
-    if (optimization) {
+    if constexpr (optimization) {
         properties::Property* prop = property(uriOrRegex);
         if (!prop) {
             LERRORC(
