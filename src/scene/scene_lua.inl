@@ -322,17 +322,21 @@ int setPropertyCallSingle(properties::Property& prop, const std::string& uri,
             global::sessionRecordingHandler->savePropertyBaseline(prop);
         }
         if (duration == 0.0) {
-            global::renderEngine->scene()->removePropertyInterpolation(&prop);
+            if (global::renderEngine->scene()) {
+                global::renderEngine->scene()->removePropertyInterpolation(&prop);
+            }
             prop.setLuaValue(L);
         }
         else {
             prop.setLuaInterpolationTarget(L);
-            global::renderEngine->scene()->addPropertyInterpolation(
-                &prop,
-                static_cast<float>(duration),
-                std::move(postScript),
-                easingFunction
-            );
+            if (global::renderEngine->scene()) {
+                global::renderEngine->scene()->addPropertyInterpolation(
+                    &prop,
+                    static_cast<float>(duration),
+                    std::move(postScript),
+                    easingFunction
+                );
+            }
         }
     }
     return 0;

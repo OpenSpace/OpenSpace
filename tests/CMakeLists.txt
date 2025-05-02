@@ -35,6 +35,7 @@ add_executable(
   test_latlonpatch.cpp
   test_lrucache.cpp
   test_lua_createsinglecolorimage.cpp
+  test_lua_setpropertyvalue.cpp
   test_profile.cpp
   test_rawvolumeio.cpp
   test_scriptscheduler.cpp
