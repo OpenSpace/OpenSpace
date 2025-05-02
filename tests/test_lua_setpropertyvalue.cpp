@@ -347,68 +347,95 @@ TEST_CASE("SetPropertyValue: PostScript", "[setpropertyvalue]") {
 }
 
 TEST_CASE("SetPropertyValue: Wildcard Basic", "[setpropertyvalue]") {
-    PropertyOwner owner = PropertyOwner({ "base" });
-    global::rootPropertyOwner->addPropertySubOwner(owner);
+    PropertyOwner owner1 = PropertyOwner({ "base1" });
+    global::rootPropertyOwner->addPropertySubOwner(owner1);
     properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
-    owner.addProperty(p1);
+    owner1.addProperty(p1);
+
+    PropertyOwner owner2 = PropertyOwner({ "base2" });
+    global::rootPropertyOwner->addPropertySubOwner(owner2);
+    properties::FloatProperty p21(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner2.addProperty(p21);
+
     LogMgr.resetMessageCounters();
 
     global::scriptEngine->queueScript(
-        "openspace.setPropertyValue('base.*', 2.0)"
+        "openspace.setPropertyValue('base1.*', 2.0)"
     );
 
     CHECK(p1 == 1.f);
+    CHECK(p21 == 1.f);
     triggerScriptRun();
     CHECK(p1 == 2.f);
+    CHECK(p21 == 1.f);
 
     LogMgr.resetMessageCounters();
-    global::rootPropertyOwner->removePropertySubOwner(owner);
+    global::rootPropertyOwner->removePropertySubOwner(owner1);
+    global::rootPropertyOwner->removePropertySubOwner(owner2);
 }
 
 TEST_CASE("SetPropertyValue: Wildcard Basic Multiple", "[setpropertyvalue]") {
-    PropertyOwner owner = PropertyOwner({ "base" });
-    global::rootPropertyOwner->addPropertySubOwner(owner);
+    PropertyOwner owner1 = PropertyOwner({ "base1" });
+    global::rootPropertyOwner->addPropertySubOwner(owner1);
     properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
-    owner.addProperty(p1);
+    owner1.addProperty(p1);
     properties::FloatProperty p2(properties::Property::PropertyInfo("p2", "a", "b"), 1.f);
-    owner.addProperty(p2);
+    owner1.addProperty(p2);
+
+    PropertyOwner owner2 = PropertyOwner({ "base2" });
+    global::rootPropertyOwner->addPropertySubOwner(owner2);
+    properties::FloatProperty p21(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner2.addProperty(p21);
+
     LogMgr.resetMessageCounters();
 
     global::scriptEngine->queueScript(
-        "openspace.setPropertyValue('base.*', 2.0)"
+        "openspace.setPropertyValue('base1.*', 2.0)"
     );
 
     CHECK(p1 == 1.f);
     CHECK(p2 == 1.f);
+    CHECK(p21 == 1.f);
     triggerScriptRun();
     CHECK(p1 == 2.f);
     CHECK(p2 == 2.f);
+    CHECK(p21 == 1.f);
 
     LogMgr.resetMessageCounters();
-    global::rootPropertyOwner->removePropertySubOwner(owner);
+    global::rootPropertyOwner->removePropertySubOwner(owner1);
+    global::rootPropertyOwner->removePropertySubOwner(owner2);
 }
 
 TEST_CASE("SetPropertyValue: Wildcard Basic Multiple / 2", "[setpropertyvalue]") {
-    PropertyOwner owner = PropertyOwner({ "base" });
-    global::rootPropertyOwner->addPropertySubOwner(owner);
+    PropertyOwner owner1 = PropertyOwner({ "base1" });
+    global::rootPropertyOwner->addPropertySubOwner(owner1);
     properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
-    owner.addProperty(p1);
+    owner1.addProperty(p1);
     properties::FloatProperty p2(properties::Property::PropertyInfo("p2", "a", "b"), 1.f);
-    owner.addProperty(p2);
+    owner1.addProperty(p2);
+
+    PropertyOwner owner2 = PropertyOwner({ "base2" });
+    global::rootPropertyOwner->addPropertySubOwner(owner2);
+    properties::FloatProperty p21(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner2.addProperty(p21);
+
     LogMgr.resetMessageCounters();
 
     global::scriptEngine->queueScript(
-        "openspace.setPropertyValue('base.p*', 2.0)"
+        "openspace.setPropertyValue('base1.p*', 2.0)"
     );
 
     CHECK(p1 == 1.f);
     CHECK(p2 == 1.f);
+    CHECK(p21 == 1.f);
     triggerScriptRun();
     CHECK(p1 == 2.f);
     CHECK(p2 == 2.f);
+    CHECK(p21 == 1.f);
 
     LogMgr.resetMessageCounters();
-    global::rootPropertyOwner->removePropertySubOwner(owner);
+    global::rootPropertyOwner->removePropertySubOwner(owner1);
+    global::rootPropertyOwner->removePropertySubOwner(owner2);
 }
 
 TEST_CASE("SetPropertyValue: Wildcard Interpolation", "[setpropertyvalue]") {
@@ -417,24 +444,33 @@ TEST_CASE("SetPropertyValue: Wildcard Interpolation", "[setpropertyvalue]") {
     );
     global::renderEngine->setScene(scene.get());
 
-    PropertyOwner owner = PropertyOwner({ "base" });
-    global::rootPropertyOwner->addPropertySubOwner(owner);
+    PropertyOwner owner1 = PropertyOwner({ "base1" });
+    global::rootPropertyOwner->addPropertySubOwner(owner1);
     properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
-    owner.addProperty(p1);
+    owner1.addProperty(p1);
+
+    PropertyOwner owner2 = PropertyOwner({ "base2" });
+    global::rootPropertyOwner->addPropertySubOwner(owner2);
+    properties::FloatProperty p21(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner2.addProperty(p21);
+
     LogMgr.resetMessageCounters();
 
     global::scriptEngine->queueScript(
-        "openspace.setPropertyValue('base.*', 2.0, 1.0)"
+        "openspace.setPropertyValue('base1.*', 2.0, 1.0)"
     );
 
     CHECK(p1 == 1.f);
+    CHECK(p21 == 1.f);
     triggerScriptRun();
     updateInterpolations(std::chrono::milliseconds(100));
     CHECK(p1 > 1.f);
     CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.1, 0.05));
+    CHECK(p21 == 1.f);
 
     LogMgr.resetMessageCounters();
-    global::rootPropertyOwner->removePropertySubOwner(owner);
+    global::rootPropertyOwner->removePropertySubOwner(owner1);
+    global::rootPropertyOwner->removePropertySubOwner(owner2);
     global::renderEngine->setScene(nullptr);
 }
 
@@ -444,29 +480,38 @@ TEST_CASE("SetPropertyValue: Wildcard Interpolation Multiple", "[setpropertyvalu
     );
     global::renderEngine->setScene(scene.get());
 
-    PropertyOwner owner = PropertyOwner({ "base" });
-    global::rootPropertyOwner->addPropertySubOwner(owner);
+    PropertyOwner owner1 = PropertyOwner({ "base1" });
+    global::rootPropertyOwner->addPropertySubOwner(owner1);
     properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
-    owner.addProperty(p1);
+    owner1.addProperty(p1);
     properties::FloatProperty p2(properties::Property::PropertyInfo("p2", "a", "b"), 1.f);
-    owner.addProperty(p2);
+    owner1.addProperty(p2);
+
+    PropertyOwner owner2 = PropertyOwner({ "base2" });
+    global::rootPropertyOwner->addPropertySubOwner(owner2);
+    properties::FloatProperty p21(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner2.addProperty(p21);
+
     LogMgr.resetMessageCounters();
 
     global::scriptEngine->queueScript(
-        "openspace.setPropertyValue('base.*', 2.0, 1.0)"
+        "openspace.setPropertyValue('base1.*', 2.0, 1.0)"
     );
 
     CHECK(p1 == 1.f);
     CHECK(p2 == 1.f);
+    CHECK(p21 == 1.f);
     triggerScriptRun();
     updateInterpolations(std::chrono::milliseconds(100));
     CHECK(p1 > 1.f);
     CHECK(p2 > 1.f);
     CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.1, 0.05));
     CHECK_THAT(p2, Catch::Matchers::WithinAbs(1.1, 0.05));
+    CHECK(p21 == 1.f);
 
     LogMgr.resetMessageCounters();
-    global::rootPropertyOwner->removePropertySubOwner(owner);
+    global::rootPropertyOwner->removePropertySubOwner(owner1);
+    global::rootPropertyOwner->removePropertySubOwner(owner2);
     global::renderEngine->setScene(nullptr);
 }
 
@@ -476,174 +521,219 @@ TEST_CASE("SetPropertyValue: Wildcard Interpolation Multiple /2", "[setpropertyv
     );
     global::renderEngine->setScene(scene.get());
 
-    PropertyOwner owner = PropertyOwner({ "base" });
-    global::rootPropertyOwner->addPropertySubOwner(owner);
+    PropertyOwner owner1 = PropertyOwner({ "base1" });
+    global::rootPropertyOwner->addPropertySubOwner(owner1);
     properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
-    owner.addProperty(p1);
+    owner1.addProperty(p1);
     properties::FloatProperty p2(properties::Property::PropertyInfo("p2", "a", "b"), 1.f);
-    owner.addProperty(p2);
+    owner1.addProperty(p2);
+
+    PropertyOwner owner2 = PropertyOwner({ "base2" });
+    global::rootPropertyOwner->addPropertySubOwner(owner2);
+    properties::FloatProperty p21(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner2.addProperty(p21);
+
     LogMgr.resetMessageCounters();
 
     global::scriptEngine->queueScript(
-        "openspace.setPropertyValue('base.p*', 2.0, 1.0)"
+        "openspace.setPropertyValue('base1.p*', 2.0, 1.0)"
     );
 
     CHECK(p1 == 1.f);
     CHECK(p2 == 1.f);
+    CHECK(p21 == 1.f);
     triggerScriptRun();
     updateInterpolations(std::chrono::milliseconds(100));
     CHECK(p1 > 1.f);
     CHECK(p2 > 1.f);
     CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.1, 0.05));
     CHECK_THAT(p2, Catch::Matchers::WithinAbs(1.1, 0.05));
+    CHECK(p21 == 1.f);
 
     LogMgr.resetMessageCounters();
-    global::rootPropertyOwner->removePropertySubOwner(owner);
+    global::rootPropertyOwner->removePropertySubOwner(owner1);
+    global::rootPropertyOwner->removePropertySubOwner(owner2);
     global::renderEngine->setScene(nullptr);
 }
 
-TEST_CASE("SetPropertyValue: Easing Multiple", "[setpropertyvalue]") {
+TEST_CASE("SetPropertyValue: Wildcard Easing Multiple", "[setpropertyvalue]") {
     std::unique_ptr<Scene> scene = std::make_unique<Scene>(
         std::make_unique<SceneInitializer>()
     );
     global::renderEngine->setScene(scene.get());
 
-    PropertyOwner owner = PropertyOwner({ "base" });
-    global::rootPropertyOwner->addPropertySubOwner(owner);
+    PropertyOwner owner1 = PropertyOwner({ "base1" });
+    global::rootPropertyOwner->addPropertySubOwner(owner1);
     properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
-    owner.addProperty(p1);
+    owner1.addProperty(p1);
     properties::FloatProperty p2(properties::Property::PropertyInfo("p2", "a", "b"), 1.f);
-    owner.addProperty(p2);
+    owner1.addProperty(p2);
+
+    PropertyOwner owner2 = PropertyOwner({ "base2" });
+    global::rootPropertyOwner->addPropertySubOwner(owner2);
+    properties::FloatProperty p21(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner2.addProperty(p21);
+
     LogMgr.resetMessageCounters();
 
     global::scriptEngine->queueScript(
-        "openspace.setPropertyValue('base.*', 2.0, 1.0, 'ExponentialEaseOut')"
+        "openspace.setPropertyValue('base1.*', 2.0, 1.0, 'ExponentialEaseOut')"
     );
 
     CHECK(p1 == 1.f);
     CHECK(p2 == 1.f);
+    CHECK(p21 == 1.f);
     triggerScriptRun();
     updateInterpolations(std::chrono::milliseconds(100));
     CHECK(p1 > 1.f);
     CHECK(p2 > 1.f);
     CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.5, 0.075));
     CHECK_THAT(p2, Catch::Matchers::WithinAbs(1.5, 0.075));
+    CHECK(p21 == 1.f);
 
     LogMgr.resetMessageCounters();
-    global::rootPropertyOwner->removePropertySubOwner(owner);
+    global::rootPropertyOwner->removePropertySubOwner(owner1);
+    global::rootPropertyOwner->removePropertySubOwner(owner2);
     global::renderEngine->setScene(nullptr);
 }
 
-TEST_CASE("SetPropertyValue: Easing Multiple /2", "[setpropertyvalue]") {
+TEST_CASE("SetPropertyValue: Wildcard Easing Multiple /2", "[setpropertyvalue]") {
     std::unique_ptr<Scene> scene = std::make_unique<Scene>(
         std::make_unique<SceneInitializer>()
     );
     global::renderEngine->setScene(scene.get());
 
-    PropertyOwner owner = PropertyOwner({ "base" });
-    global::rootPropertyOwner->addPropertySubOwner(owner);
+    PropertyOwner owner1 = PropertyOwner({ "base1" });
+    global::rootPropertyOwner->addPropertySubOwner(owner1);
     properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
-    owner.addProperty(p1);
+    owner1.addProperty(p1);
     properties::FloatProperty p2(properties::Property::PropertyInfo("p2", "a", "b"), 1.f);
-    owner.addProperty(p2);
+    owner1.addProperty(p2);
+
+    PropertyOwner owner2 = PropertyOwner({ "base2" });
+    global::rootPropertyOwner->addPropertySubOwner(owner2);
+    properties::FloatProperty p21(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner2.addProperty(p21);
+
     LogMgr.resetMessageCounters();
 
     global::scriptEngine->queueScript(
-        "openspace.setPropertyValue('base.p*', 2.0, 1.0, 'ExponentialEaseOut')"
+        "openspace.setPropertyValue('base1.p*', 2.0, 1.0, 'ExponentialEaseOut')"
     );
 
     CHECK(p1 == 1.f);
     CHECK(p2 == 1.f);
+    CHECK(p21 == 1.f);
     triggerScriptRun();
     updateInterpolations(std::chrono::milliseconds(100));
     CHECK(p1 > 1.f);
     CHECK(p2 > 1.f);
     CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.5, 0.075));
     CHECK_THAT(p2, Catch::Matchers::WithinAbs(1.5, 0.075));
+    CHECK(p21 == 1.f);
 
     LogMgr.resetMessageCounters();
-    global::rootPropertyOwner->removePropertySubOwner(owner);
+    global::rootPropertyOwner->removePropertySubOwner(owner1);
+    global::rootPropertyOwner->removePropertySubOwner(owner2);
     global::renderEngine->setScene(nullptr);
 }
 
-TEST_CASE("SetPropertyValue: PostScript Multiple", "[setpropertyvalue]") {
+TEST_CASE("SetPropertyValue: Wildcard PostScript Multiple", "[setpropertyvalue]") {
     std::unique_ptr<Scene> scene = std::make_unique<Scene>(
         std::make_unique<SceneInitializer>()
     );
     global::renderEngine->setScene(scene.get());
 
-    PropertyOwner owner = PropertyOwner({ "base" });
-    global::rootPropertyOwner->addPropertySubOwner(owner);
+    PropertyOwner owner1 = PropertyOwner({ "base1" });
+    global::rootPropertyOwner->addPropertySubOwner(owner1);
     properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
-    owner.addProperty(p1);
+    owner1.addProperty(p1);
     properties::FloatProperty p2(properties::Property::PropertyInfo("p2", "a", "b"), 1.f);
-    owner.addProperty(p2);
+    owner1.addProperty(p2);
     properties::FloatProperty q1(properties::Property::PropertyInfo("q1", "a", "b"), 1.f);
-    owner.addProperty(q1);
+    owner1.addProperty(q1);
+
+    PropertyOwner owner2 = PropertyOwner({ "base2" });
+    global::rootPropertyOwner->addPropertySubOwner(owner2);
+    properties::FloatProperty p21(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner2.addProperty(p21);
+
     LogMgr.resetMessageCounters();
 
     global::scriptEngine->queueScript(R"(
         openspace.setPropertyValue(
-            'base.*',
+            'base1.*',
             2.0,
             0.1,
             'ExponentialEaseOut',
-            [[openspace.setPropertyValue('base.q1', 0.75)]]
+            [[openspace.setPropertyValue('base1.q1', 0.75)]]
         )
     )");
 
     CHECK(p1 == 1.f);
     CHECK(p2 == 1.f);
     CHECK(q1 == 1.f);
+    CHECK(p21 == 1.f);
     triggerScriptRun();
     updateInterpolations(std::chrono::milliseconds(150));
     triggerScriptRun();
     CHECK(p1 == 2.0);
     CHECK(p2 == 2.0);
     CHECK(q1 == 0.75);
+    CHECK(p21 == 1.f);
 
     LogMgr.resetMessageCounters();
-    global::rootPropertyOwner->removePropertySubOwner(owner);
+    global::rootPropertyOwner->removePropertySubOwner(owner1);
+    global::rootPropertyOwner->removePropertySubOwner(owner2);
     global::renderEngine->setScene(nullptr);
 }
 
-TEST_CASE("SetPropertyValue: PostScript Multiple /2", "[setpropertyvalue]") {
+TEST_CASE("SetPropertyValue: Wildcard PostScript Multiple /2", "[setpropertyvalue]") {
     std::unique_ptr<Scene> scene = std::make_unique<Scene>(
         std::make_unique<SceneInitializer>()
     );
     global::renderEngine->setScene(scene.get());
 
-    PropertyOwner owner = PropertyOwner({ "base" });
-    global::rootPropertyOwner->addPropertySubOwner(owner);
+    PropertyOwner owner1 = PropertyOwner({ "base1" });
+    global::rootPropertyOwner->addPropertySubOwner(owner1);
     properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
-    owner.addProperty(p1);
+    owner1.addProperty(p1);
     properties::FloatProperty p2(properties::Property::PropertyInfo("p2", "a", "b"), 1.f);
-    owner.addProperty(p2);
+    owner1.addProperty(p2);
     properties::FloatProperty q1(properties::Property::PropertyInfo("q1", "a", "b"), 1.f);
-    owner.addProperty(q1);
+    owner1.addProperty(q1);
+
+    PropertyOwner owner2 = PropertyOwner({ "base2" });
+    global::rootPropertyOwner->addPropertySubOwner(owner2);
+    properties::FloatProperty p21(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner2.addProperty(p21);
+
     LogMgr.resetMessageCounters();
 
     global::scriptEngine->queueScript(R"(
         openspace.setPropertyValue(
-            'base.p*',
+            'base1.p*',
             2.0,
             0.1,
             'ExponentialEaseOut',
-            [[openspace.setPropertyValue('base.q1', 0.75)]]
+            [[openspace.setPropertyValue('base1.q1', 0.75)]]
         )
     )");
 
     CHECK(p1 == 1.f);
     CHECK(p2 == 1.f);
     CHECK(q1 == 1.f);
+    CHECK(p21 == 1.f);
     triggerScriptRun();
     updateInterpolations(std::chrono::milliseconds(150));
     triggerScriptRun();
     CHECK(p1 == 2.0);
     CHECK(p2 == 2.0);
     CHECK(q1 == 0.75);
+    CHECK(p21 == 1.f);
 
     LogMgr.resetMessageCounters();
-    global::rootPropertyOwner->removePropertySubOwner(owner);
+    global::rootPropertyOwner->removePropertySubOwner(owner1);
+    global::rootPropertyOwner->removePropertySubOwner(owner2);
     global::renderEngine->setScene(nullptr);
 }
