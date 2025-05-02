@@ -61,7 +61,7 @@ TEST_CASE("SetPropertyValueSingle: Basic", "[setpropertyvalue]") {
     PropertyOwner owner = PropertyOwner({ "base" });
     global::rootPropertyOwner->addPropertySubOwner(owner);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner); };
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner.addProperty(p1);
 
     {
@@ -83,7 +83,7 @@ TEST_CASE("SetPropertyValueSingle: Wrong Type", "[setpropertyvalue]") {
     PropertyOwner owner = PropertyOwner({ "base" });
     global::rootPropertyOwner->addPropertySubOwner(owner);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner); };
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner.addProperty(p1);
 
     {
@@ -103,7 +103,7 @@ TEST_CASE("SetPropertyValueSingle: Non-existing", "[setpropertyvalue]") {
     PropertyOwner owner = PropertyOwner({ "base" });
     global::rootPropertyOwner->addPropertySubOwner(owner);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner); };
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner.addProperty(p1);
     {
         LogMgr.resetMessageCounters();
@@ -128,7 +128,7 @@ TEST_CASE("SetPropertyValueSingle: Interpolation", "[setpropertyvalue]") {
     PropertyOwner owner = PropertyOwner({ "base" });
     global::rootPropertyOwner->addPropertySubOwner(owner);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner); };
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner.addProperty(p1);
 
     {
@@ -158,7 +158,7 @@ TEST_CASE("SetPropertyValueSingle: Easing", "[setpropertyvalue]") {
     PropertyOwner owner = PropertyOwner({ "base" });
     global::rootPropertyOwner->addPropertySubOwner(owner);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner); };
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner.addProperty(p1);
 
     {
@@ -188,9 +188,9 @@ TEST_CASE("SetPropertyValueSingle: PostScript", "[setpropertyvalue]") {
     PropertyOwner owner = PropertyOwner({ "base" });
     global::rootPropertyOwner->addPropertySubOwner(owner);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner); };
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner.addProperty(p1);
-    properties::FloatProperty p2(properties::Property::PropertyInfo("p2", "a", "b"), 1.f);
+    FloatProperty p2 = FloatProperty(Property::PropertyInfo("p2", "a", "b"), 1.f);
     owner.addProperty(p2);
 
     {
@@ -221,7 +221,7 @@ TEST_CASE("SetPropertyValue: Basic", "[setpropertyvalue]") {
     PropertyOwner owner = PropertyOwner({ "base" });
     global::rootPropertyOwner->addPropertySubOwner(owner);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner); };
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner.addProperty(p1);
 
     {
@@ -242,7 +242,7 @@ TEST_CASE("SetPropertyValue: Wrong Type", "[setpropertyvalue]") {
     PropertyOwner owner = PropertyOwner({ "base" });
     global::rootPropertyOwner->addPropertySubOwner(owner);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner); };
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner.addProperty(p1);
 
     {
@@ -262,7 +262,7 @@ TEST_CASE("SetPropertyValue: Non-existing", "[setpropertyvalue]") {
     PropertyOwner owner = PropertyOwner({ "base" });
     global::rootPropertyOwner->addPropertySubOwner(owner);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner); };
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner.addProperty(p1);
 
     {
@@ -288,7 +288,7 @@ TEST_CASE("SetPropertyValue: Interpolation", "[setpropertyvalue]") {
     PropertyOwner owner = PropertyOwner({ "base" });
     global::rootPropertyOwner->addPropertySubOwner(owner);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner); };
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner.addProperty(p1);
 
     {
@@ -318,7 +318,7 @@ TEST_CASE("SetPropertyValue: Easing", "[setpropertyvalue]") {
     PropertyOwner owner = PropertyOwner({ "base" });
     global::rootPropertyOwner->addPropertySubOwner(owner);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner); };
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner.addProperty(p1);
 
     {
@@ -348,9 +348,9 @@ TEST_CASE("SetPropertyValue: PostScript", "[setpropertyvalue]") {
     PropertyOwner owner = PropertyOwner({ "base" });
     global::rootPropertyOwner->addPropertySubOwner(owner);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner); };
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner.addProperty(p1);
-    properties::FloatProperty p2(properties::Property::PropertyInfo("p2", "a", "b"), 1.f);
+    FloatProperty p2 = FloatProperty(Property::PropertyInfo("p2", "a", "b"), 1.f);
     owner.addProperty(p2);
 
     {
@@ -382,13 +382,13 @@ TEST_CASE("SetPropertyValue: Wildcard Basic", "[setpropertyvalue]") {
     PropertyOwner owner1 = PropertyOwner({ "base1" });
     global::rootPropertyOwner->addPropertySubOwner(owner1);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner1); };
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner1.addProperty(p1);
 
     PropertyOwner owner2 = PropertyOwner({ "base2" });
     global::rootPropertyOwner->addPropertySubOwner(owner2);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner2); };
-    properties::FloatProperty p21(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p21 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner2.addProperty(p21);
 
     {
@@ -409,7 +409,7 @@ TEST_CASE("SetPropertyValue: Wildcard Basic", "[setpropertyvalue]") {
 
     {
         LogMgr.resetMessageCounters();
-        defer{ LogMgr.resetMessageCounters(); };
+        defer { LogMgr.resetMessageCounters(); };
 
         global::scriptEngine->queueScript("openspace.setPropertyValue('*.p1', 2.0)");
 
@@ -425,15 +425,15 @@ TEST_CASE("SetPropertyValue: Wildcard Basic Multiple", "[setpropertyvalue]") {
     PropertyOwner owner1 = PropertyOwner({ "base1" });
     global::rootPropertyOwner->addPropertySubOwner(owner1);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner1); };
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner1.addProperty(p1);
-    properties::FloatProperty p2(properties::Property::PropertyInfo("p2", "a", "b"), 1.f);
+    FloatProperty p2 = FloatProperty(Property::PropertyInfo("p2", "a", "b"), 1.f);
     owner1.addProperty(p2);
 
     PropertyOwner owner2 = PropertyOwner({ "base2" });
     global::rootPropertyOwner->addPropertySubOwner(owner2);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner2); };
-    properties::FloatProperty p21(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p21 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner2.addProperty(p21);
 
     {
@@ -475,15 +475,15 @@ TEST_CASE("SetPropertyValue: Wildcard Basic Multiple / 2", "[setpropertyvalue]")
     PropertyOwner owner1 = PropertyOwner({ "base1" });
     global::rootPropertyOwner->addPropertySubOwner(owner1);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner1); };
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner1.addProperty(p1);
-    properties::FloatProperty p2(properties::Property::PropertyInfo("p2", "a", "b"), 1.f);
+    FloatProperty p2 = FloatProperty(Property::PropertyInfo("p2", "a", "b"), 1.f);
     owner1.addProperty(p2);
 
     PropertyOwner owner2 = PropertyOwner({ "base2" });
     global::rootPropertyOwner->addPropertySubOwner(owner2);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner2); };
-    properties::FloatProperty p21(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p21 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner2.addProperty(p21);
 
     {
@@ -514,13 +514,13 @@ TEST_CASE("SetPropertyValue: Wildcard Interpolation", "[setpropertyvalue]") {
     PropertyOwner owner1 = PropertyOwner({ "base1" });
     global::rootPropertyOwner->addPropertySubOwner(owner1);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner1); };
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner1.addProperty(p1);
 
     PropertyOwner owner2 = PropertyOwner({ "base2" });
     global::rootPropertyOwner->addPropertySubOwner(owner2);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner2); };
-    properties::FloatProperty p21(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p21 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner2.addProperty(p21);
 
     {
@@ -552,15 +552,15 @@ TEST_CASE("SetPropertyValue: Wildcard Interpolation Multiple", "[setpropertyvalu
     PropertyOwner owner1 = PropertyOwner({ "base1" });
     global::rootPropertyOwner->addPropertySubOwner(owner1);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner1); };
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner1.addProperty(p1);
-    properties::FloatProperty p2(properties::Property::PropertyInfo("p2", "a", "b"), 1.f);
+    FloatProperty p2 = FloatProperty(Property::PropertyInfo("p2", "a", "b"), 1.f);
     owner1.addProperty(p2);
 
     PropertyOwner owner2 = PropertyOwner({ "base2" });
     global::rootPropertyOwner->addPropertySubOwner(owner2);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner2); };
-    properties::FloatProperty p21(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p21 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner2.addProperty(p21);
 
     {
@@ -593,7 +593,7 @@ TEST_CASE("SetPropertyValue: Wildcard Interpolation Multiple", "[setpropertyvalu
 
     {
         LogMgr.resetMessageCounters();
-        defer{ LogMgr.resetMessageCounters(); };
+        defer { LogMgr.resetMessageCounters(); };
 
         global::scriptEngine->queueScript(
             "openspace.setPropertyValue('*.p1', 2.0, 1.0)"
@@ -626,15 +626,15 @@ TEST_CASE("SetPropertyValue: Wildcard Interpolation Multiple /2", "[setpropertyv
     PropertyOwner owner1 = PropertyOwner({ "base1" });
     global::rootPropertyOwner->addPropertySubOwner(owner1);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner1); };
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner1.addProperty(p1);
-    properties::FloatProperty p2(properties::Property::PropertyInfo("p2", "a", "b"), 1.f);
+    FloatProperty p2 = FloatProperty(Property::PropertyInfo("p2", "a", "b"), 1.f);
     owner1.addProperty(p2);
 
     PropertyOwner owner2 = PropertyOwner({ "base2" });
     global::rootPropertyOwner->addPropertySubOwner(owner2);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner2); };
-    properties::FloatProperty p21(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p21 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner2.addProperty(p21);
 
     {
@@ -672,15 +672,15 @@ TEST_CASE("SetPropertyValue: Wildcard Easing Multiple", "[setpropertyvalue]") {
     PropertyOwner owner1 = PropertyOwner({ "base1" });
     global::rootPropertyOwner->addPropertySubOwner(owner1);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner1); };
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner1.addProperty(p1);
-    properties::FloatProperty p2(properties::Property::PropertyInfo("p2", "a", "b"), 1.f);
+    FloatProperty p2 = FloatProperty(Property::PropertyInfo("p2", "a", "b"), 1.f);
     owner1.addProperty(p2);
 
     PropertyOwner owner2 = PropertyOwner({ "base2" });
     global::rootPropertyOwner->addPropertySubOwner(owner2);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner2); };
-    properties::FloatProperty p21(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p21 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner2.addProperty(p21);
 
     {
@@ -713,7 +713,7 @@ TEST_CASE("SetPropertyValue: Wildcard Easing Multiple", "[setpropertyvalue]") {
 
     {
         LogMgr.resetMessageCounters();
-        defer{ LogMgr.resetMessageCounters(); };
+        defer { LogMgr.resetMessageCounters(); };
 
         global::scriptEngine->queueScript(
             "openspace.setPropertyValue('*.p1', 2.0, 1.0, 'ExponentialEaseOut')"
@@ -746,15 +746,15 @@ TEST_CASE("SetPropertyValue: Wildcard Easing Multiple /2", "[setpropertyvalue]")
     PropertyOwner owner1 = PropertyOwner({ "base1" });
     global::rootPropertyOwner->addPropertySubOwner(owner1);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner1); };
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner1.addProperty(p1);
-    properties::FloatProperty p2(properties::Property::PropertyInfo("p2", "a", "b"), 1.f);
+    FloatProperty p2 = FloatProperty(Property::PropertyInfo("p2", "a", "b"), 1.f);
     owner1.addProperty(p2);
 
     PropertyOwner owner2 = PropertyOwner({ "base2" });
     global::rootPropertyOwner->addPropertySubOwner(owner2);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner2); };
-    properties::FloatProperty p21(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p21 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner2.addProperty(p21);
 
     {
@@ -792,17 +792,17 @@ TEST_CASE("SetPropertyValue: Wildcard PostScript Multiple", "[setpropertyvalue]"
     PropertyOwner owner1 = PropertyOwner({ "base1" });
     global::rootPropertyOwner->addPropertySubOwner(owner1);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner1); };
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner1.addProperty(p1);
-    properties::FloatProperty p2(properties::Property::PropertyInfo("p2", "a", "b"), 1.f);
+    FloatProperty p2 = FloatProperty(Property::PropertyInfo("p2", "a", "b"), 1.f);
     owner1.addProperty(p2);
-    properties::FloatProperty q1(properties::Property::PropertyInfo("q1", "a", "b"), 1.f);
+    FloatProperty q1 = FloatProperty(Property::PropertyInfo("q1", "a", "b"), 1.f);
     owner1.addProperty(q1);
 
     PropertyOwner owner2 = PropertyOwner({ "base2" });
     global::rootPropertyOwner->addPropertySubOwner(owner2);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner2); };
-    properties::FloatProperty p21(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p21 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner2.addProperty(p21);
 
     {
@@ -843,7 +843,7 @@ TEST_CASE("SetPropertyValue: Wildcard PostScript Multiple", "[setpropertyvalue]"
 
     {
         LogMgr.resetMessageCounters();
-        defer{ LogMgr.resetMessageCounters(); };
+        defer { LogMgr.resetMessageCounters(); };
 
         global::scriptEngine->queueScript(R"(
             openspace.setPropertyValue(
@@ -883,17 +883,17 @@ TEST_CASE("SetPropertyValue: Wildcard PostScript Multiple /2", "[setpropertyvalu
     PropertyOwner owner1 = PropertyOwner({ "base1" });
     global::rootPropertyOwner->addPropertySubOwner(owner1);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner1); };
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner1.addProperty(p1);
-    properties::FloatProperty p2(properties::Property::PropertyInfo("p2", "a", "b"), 1.f);
+    FloatProperty p2 = FloatProperty(Property::PropertyInfo("p2", "a", "b"), 1.f);
     owner1.addProperty(p2);
-    properties::FloatProperty q1(properties::Property::PropertyInfo("q1", "a", "b"), 1.f);
+    FloatProperty q1 = FloatProperty(Property::PropertyInfo("q1", "a", "b"), 1.f);
     owner1.addProperty(q1);
 
     PropertyOwner owner2 = PropertyOwner({ "base2" });
     global::rootPropertyOwner->addPropertySubOwner(owner2);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner2); };
-    properties::FloatProperty p21(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p21 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner2.addProperty(p21);
 
     {
