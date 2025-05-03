@@ -754,8 +754,8 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
             continue;
         }
         std::string uriOrRegex = prop.name;
-        std::string groupName;
-        if (doesUriContainGroupTag(uriOrRegex, groupName)) {
+        std::string groupName = groupTag(uriOrRegex);
+        if (!groupName.empty()) {
             // Remove group name from start of regex and replace with '*'
             uriOrRegex = removeGroupNameFromUri(uriOrRegex);
         }
