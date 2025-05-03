@@ -143,8 +143,9 @@ TEST_CASE("SetPropertyValueSingle: Interpolation", "[setpropertyvalue]") {
         CHECK(p1 == 1.f);
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
+        const double v = glm::mix(1.0, 2.0, 0.1);
         CHECK(p1 > 1.f);
-        CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.1, 0.05));
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.05));
     }
 }
 
@@ -174,7 +175,9 @@ TEST_CASE("SetPropertyValueSingle: Easing", "[setpropertyvalue]") {
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
         CHECK(p1 > 1.f);
-        CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.5, 0.075));
+        const double t = ghoul::exponentialEaseOut(0.1);
+        const double v = glm::mix(1.0, 2.0, t);
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.075));
     }
 }
 
@@ -303,8 +306,9 @@ TEST_CASE("SetPropertyValue: Interpolation", "[setpropertyvalue]") {
         CHECK(p1 == 1.f);
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
+        const double v = glm::mix(1.0, 2.0, 0.1);
         CHECK(p1 > 1.f);
-        CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.1, 0.05));
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.05));
     }
 }
 
@@ -334,7 +338,9 @@ TEST_CASE("SetPropertyValue: Easing", "[setpropertyvalue]") {
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
         CHECK(p1 > 1.f);
-        CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.5, 0.075));
+        const double t = ghoul::exponentialEaseOut(0.1);
+        const double v = glm::mix(1.0, 2.0, t);
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.075));
     }
 }
 
@@ -536,8 +542,9 @@ TEST_CASE("SetPropertyValue: Wildcard Interpolation", "[setpropertyvalue]") {
         CHECK(p21 == 1.f);
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
+        const double v = glm::mix(1.0, 2.0, 0.1);
         CHECK(p1 > 1.f);
-        CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.1, 0.05));
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.05));
         CHECK(p21 == 1.f);
     }
 }
@@ -580,10 +587,11 @@ TEST_CASE("SetPropertyValue: Wildcard Interpolation Multiple", "[setpropertyvalu
         CHECK(p21 == 1.f);
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
+        const double v = glm::mix(1.0, 2.0, 0.1);
         CHECK(p1 > 1.f);
-        CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.1, 0.05));
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.05));
         CHECK(p2 > 1.f);
-        CHECK_THAT(p2, Catch::Matchers::WithinAbs(1.1, 0.05));
+        CHECK_THAT(p2, Catch::Matchers::WithinAbs(v, 0.05));
         CHECK(p21 == 1.f);
     }
 
@@ -608,11 +616,12 @@ TEST_CASE("SetPropertyValue: Wildcard Interpolation Multiple", "[setpropertyvalu
         CHECK(p21 == 1.f);
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
+        const double v = glm::mix(1.0, 2.0, 0.1);
         CHECK(p1 > 1.f);
-        CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.1, 0.05));
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.05));
         CHECK(p2 == 1.f);
         CHECK(p21 > 1.f);
-        CHECK_THAT(p21, Catch::Matchers::WithinAbs(1.1, 0.05));
+        CHECK_THAT(p21, Catch::Matchers::WithinAbs(v, 0.05));
     }
 }
 
@@ -654,10 +663,11 @@ TEST_CASE("SetPropertyValue: Wildcard Interpolation Multiple /2", "[setpropertyv
         CHECK(p21 == 1.f);
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
+        const double v = glm::mix(1.0, 2.0, 0.1);
         CHECK(p1 > 1.f);
-        CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.1, 0.05));
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.05));
         CHECK(p2 > 1.f);
-        CHECK_THAT(p2, Catch::Matchers::WithinAbs(1.1, 0.05));
+        CHECK_THAT(p2, Catch::Matchers::WithinAbs(v, 0.05));
         CHECK(p21 == 1.f);
     }
 }
@@ -700,10 +710,12 @@ TEST_CASE("SetPropertyValue: Wildcard Easing Multiple", "[setpropertyvalue]") {
         CHECK(p21 == 1.f);
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
+        const double t = ghoul::exponentialEaseOut(0.1);
+        const double v = glm::mix(1.0, 2.0, t);
         CHECK(p1 > 1.f);
-        CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.5, 0.075));
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.075));
         CHECK(p2 > 1.f);
-        CHECK_THAT(p2, Catch::Matchers::WithinAbs(1.5, 0.075));
+        CHECK_THAT(p2, Catch::Matchers::WithinAbs(v, 0.075));
         CHECK(p21 == 1.f);
     }
 
@@ -728,11 +740,13 @@ TEST_CASE("SetPropertyValue: Wildcard Easing Multiple", "[setpropertyvalue]") {
         CHECK(p21 == 1.f);
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
+        const double t = ghoul::exponentialEaseOut(0.1);
+        const double v = glm::mix(1.0, 2.0, t);
         CHECK(p1 > 1.f);
-        CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.5, 0.075));
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.075));
         CHECK(p2 == 1.f);
         CHECK(p21 > 1.f);
-        CHECK_THAT(p21, Catch::Matchers::WithinAbs(1.5, 0.075));
+        CHECK_THAT(p21, Catch::Matchers::WithinAbs(v, 0.075));
     }
 }
 
@@ -774,10 +788,12 @@ TEST_CASE("SetPropertyValue: Wildcard Easing Multiple /2", "[setpropertyvalue]")
         CHECK(p21 == 1.f);
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
+        const double t = ghoul::exponentialEaseOut(0.1);
+        const double v = glm::mix(1.0, 2.0, t);
         CHECK(p1 > 1.f);
-        CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.5, 0.075));
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.075));
         CHECK(p2 > 1.f);
-        CHECK_THAT(p2, Catch::Matchers::WithinAbs(1.5, 0.075));
+        CHECK_THAT(p2, Catch::Matchers::WithinAbs(v, 0.075));
         CHECK(p21 == 1.f);
     }
 }
@@ -1033,8 +1049,9 @@ TEST_CASE("SetPropertyValue: Tags Interpolation", "[setpropertyvalue]") {
         CHECK(p21 == 1.f);
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
+        const double v = glm::mix(1.0, 2.0, 0.1);
         CHECK(p1 > 1.f);
-        CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.1, 0.05));
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.05));
         CHECK(p21 == 1.f);
     }
 }
@@ -1087,12 +1104,13 @@ TEST_CASE("SetPropertyValue: Tags Interpolation Multiple", "[setpropertyvalue]")
         CHECK(p31 == 1.f);
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
+        const double v = glm::mix(1.0, 2.0, 0.1);
         CHECK(p1 > 1.f);
-        CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.1, 0.05));
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.05));
         CHECK(p2 == 1.f);
         CHECK(p21 == 1.f);
         CHECK(p31 > 1.f);
-        CHECK_THAT(p31, Catch::Matchers::WithinAbs(1.1, 0.05));
+        CHECK_THAT(p31, Catch::Matchers::WithinAbs(v, 0.05));
     }
 }
 
@@ -1144,12 +1162,14 @@ TEST_CASE("SetPropertyValue: Tags Easing Multiple", "[setpropertyvalue]") {
         CHECK(p31 == 1.f);
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
+        const double t = ghoul::exponentialEaseOut(0.1);
+        const double v = glm::mix(1.0, 2.0, t);
         CHECK(p1 > 1.f);
-        CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.5, 0.075));
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.075));
         CHECK(p2 == 1.f);
         CHECK(p21 == 1.f);
         CHECK(p31 > 1.f);
-        CHECK_THAT(p31, Catch::Matchers::WithinAbs(1.5, 0.075));
+        CHECK_THAT(p31, Catch::Matchers::WithinAbs(v, 0.075));
     }
 }
 
