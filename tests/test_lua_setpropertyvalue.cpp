@@ -1078,7 +1078,7 @@ TEST_CASE("SetPropertyValue: Tags Interpolation Multiple", "[setpropertyvalue]")
         );
         defer {
             scene->removePropertyInterpolation(&p1);
-            scene->removePropertyInterpolation(&p2);
+            scene->removePropertyInterpolation(&p31);
         };
 
         CHECK(p1 == 1.f);
@@ -1135,7 +1135,7 @@ TEST_CASE("SetPropertyValue: Tags Easing Multiple", "[setpropertyvalue]") {
         );
         defer {
             scene->removePropertyInterpolation(&p1);
-            scene->removePropertyInterpolation(&p2);
+            scene->removePropertyInterpolation(&p31);
         };
 
         CHECK(p1 == 1.f);
@@ -1200,7 +1200,7 @@ TEST_CASE("SetPropertyValue: Tags PostScript Multiple", "[setpropertyvalue]") {
         )");
         defer {
             scene->removePropertyInterpolation(&p1);
-            scene->removePropertyInterpolation(&p2);
+            scene->removePropertyInterpolation(&p31);
         };
 
         CHECK(p1 == 1.f);
