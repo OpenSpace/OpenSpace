@@ -927,3 +927,294 @@ TEST_CASE("SetPropertyValue: Wildcard PostScript Multiple /2", "[setpropertyvalu
         CHECK(p21 == 1.f);
     }
 }
+
+TEST_CASE("SetPropertyValue: Tags Basic", "[setpropertyvalue]") {
+    PropertyOwner owner1 = PropertyOwner({ "base1" });
+    owner1.addTag("tag1");
+    global::rootPropertyOwner->addPropertySubOwner(owner1);
+    defer { global::rootPropertyOwner->removePropertySubOwner(owner1); };
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner1.addProperty(p1);
+
+    PropertyOwner owner2 = PropertyOwner({ "base2" });
+    owner2.addTag("tag2");
+    global::rootPropertyOwner->addPropertySubOwner(owner2);
+    defer { global::rootPropertyOwner->removePropertySubOwner(owner2); };
+    FloatProperty p21 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner2.addProperty(p21);
+
+    {
+        LogMgr.resetMessageCounters();
+        defer { LogMgr.resetMessageCounters(); };
+
+        global::scriptEngine->queueScript("openspace.setPropertyValue('{tag1}.p1', 2.0)");
+
+        CHECK(p1 == 1.f);
+        CHECK(p21 == 1.f);
+        triggerScriptRun();
+        CHECK(p1 == 2.f);
+        CHECK(p21 == 1.f);
+    }
+}
+
+TEST_CASE("SetPropertyValue: Tags Basic Multiple", "[setpropertyvalue]") {
+    PropertyOwner owner1 = PropertyOwner({ "base1" });
+    owner1.addTag("tag1");
+    global::rootPropertyOwner->addPropertySubOwner(owner1);
+    defer { global::rootPropertyOwner->removePropertySubOwner(owner1); };
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner1.addProperty(p1);
+    FloatProperty p2 = FloatProperty(Property::PropertyInfo("p2", "a", "b"), 1.f);
+    owner1.addProperty(p2);
+
+    PropertyOwner owner2 = PropertyOwner({ "base2" });
+    owner2.addTag("tag2");
+    global::rootPropertyOwner->addPropertySubOwner(owner2);
+    defer { global::rootPropertyOwner->removePropertySubOwner(owner2); };
+    FloatProperty p21 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner2.addProperty(p21);
+
+    PropertyOwner owner3 = PropertyOwner({ "base3" });
+    owner3.addTag("tag1");
+    global::rootPropertyOwner->addPropertySubOwner(owner3);
+    defer { global::rootPropertyOwner->removePropertySubOwner(owner3); };
+    FloatProperty p31 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner3.addProperty(p31);
+
+    {
+        LogMgr.resetMessageCounters();
+        defer { LogMgr.resetMessageCounters(); };
+
+        global::scriptEngine->queueScript("openspace.setPropertyValue('{tag1}.p1', 2.0)");
+
+        CHECK(p1 == 1.f);
+        CHECK(p2 == 1.f);
+        CHECK(p21 == 1.f);
+        CHECK(p31 == 1.f);
+        triggerScriptRun();
+        CHECK(p1 == 2.f);
+        CHECK(p2 == 1.f);
+        CHECK(p21 == 1.f);
+        CHECK(p31 == 2.f);
+    }
+}
+
+TEST_CASE("SetPropertyValue: Tags Interpolation", "[setpropertyvalue]") {
+    std::unique_ptr<Scene> scene = std::make_unique<Scene>(
+        std::make_unique<SceneInitializer>()
+    );
+    global::renderEngine->setScene(scene.get());
+    defer { global::renderEngine->setScene(nullptr); };
+
+    PropertyOwner owner1 = PropertyOwner({ "base1" });
+    owner1.addTag("tag1");
+    global::rootPropertyOwner->addPropertySubOwner(owner1);
+    defer { global::rootPropertyOwner->removePropertySubOwner(owner1); };
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner1.addProperty(p1);
+
+    PropertyOwner owner2 = PropertyOwner({ "base2" });
+    owner2.addTag("tag2");
+    global::rootPropertyOwner->addPropertySubOwner(owner2);
+    defer { global::rootPropertyOwner->removePropertySubOwner(owner2); };
+    FloatProperty p21 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner2.addProperty(p21);
+
+    {
+        LogMgr.resetMessageCounters();
+        defer { LogMgr.resetMessageCounters(); };
+
+        global::scriptEngine->queueScript(
+            "openspace.setPropertyValue('{tag1}.p1', 2.0, 1.0)"
+        );
+        defer { scene->removePropertyInterpolation(&p1); };
+
+        CHECK(p1 == 1.f);
+        CHECK(p21 == 1.f);
+        triggerScriptRun();
+        updateInterpolations(std::chrono::milliseconds(100));
+        CHECK(p1 > 1.f);
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.1, 0.05));
+        CHECK(p21 == 1.f);
+    }
+}
+
+TEST_CASE("SetPropertyValue: Tags Interpolation Multiple", "[setpropertyvalue]") {
+    std::unique_ptr<Scene> scene = std::make_unique<Scene>(
+        std::make_unique<SceneInitializer>()
+    );
+    global::renderEngine->setScene(scene.get());
+    defer { global::renderEngine->setScene(nullptr); };
+
+    PropertyOwner owner1 = PropertyOwner({ "base1" });
+    owner1.addTag("tag1");
+    global::rootPropertyOwner->addPropertySubOwner(owner1);
+    defer { global::rootPropertyOwner->removePropertySubOwner(owner1); };
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner1.addProperty(p1);
+    FloatProperty p2 = FloatProperty(Property::PropertyInfo("p2", "a", "b"), 1.f);
+    owner1.addProperty(p2);
+
+    PropertyOwner owner2 = PropertyOwner({ "base2" });
+    owner2.addTag("tag2");
+    global::rootPropertyOwner->addPropertySubOwner(owner2);
+    defer { global::rootPropertyOwner->removePropertySubOwner(owner2); };
+    FloatProperty p21 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner2.addProperty(p21);
+
+    PropertyOwner owner3 = PropertyOwner({ "base3" });
+    owner3.addTag("tag1");
+    global::rootPropertyOwner->addPropertySubOwner(owner3);
+    defer{ global::rootPropertyOwner->removePropertySubOwner(owner3); };
+    FloatProperty p31 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner3.addProperty(p31);
+
+    {
+        LogMgr.resetMessageCounters();
+        defer { LogMgr.resetMessageCounters(); };
+
+        global::scriptEngine->queueScript(
+            "openspace.setPropertyValue('{tag1}.p1', 2.0, 1.0)"
+        );
+        defer {
+            scene->removePropertyInterpolation(&p1);
+            scene->removePropertyInterpolation(&p2);
+        };
+
+        CHECK(p1 == 1.f);
+        CHECK(p2 == 1.f);
+        CHECK(p21 == 1.f);
+        CHECK(p31 == 1.f);
+        triggerScriptRun();
+        updateInterpolations(std::chrono::milliseconds(100));
+        CHECK(p1 > 1.f);
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.1, 0.05));
+        CHECK(p2 == 1.f);
+        CHECK(p21 == 1.f);
+        CHECK(p31 > 1.f);
+        CHECK_THAT(p31, Catch::Matchers::WithinAbs(1.1, 0.05));
+    }
+}
+
+TEST_CASE("SetPropertyValue: Tags Easing Multiple", "[setpropertyvalue]") {
+    std::unique_ptr<Scene> scene = std::make_unique<Scene>(
+        std::make_unique<SceneInitializer>()
+    );
+    global::renderEngine->setScene(scene.get());
+    defer { global::renderEngine->setScene(nullptr); };
+
+    PropertyOwner owner1 = PropertyOwner({ "base1" });
+    owner1.addTag("tag1");
+    global::rootPropertyOwner->addPropertySubOwner(owner1);
+    defer { global::rootPropertyOwner->removePropertySubOwner(owner1); };
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner1.addProperty(p1);
+    FloatProperty p2 = FloatProperty(Property::PropertyInfo("p2", "a", "b"), 1.f);
+    owner1.addProperty(p2);
+
+    PropertyOwner owner2 = PropertyOwner({ "base2" });
+    owner2.addTag("tag2");
+    global::rootPropertyOwner->addPropertySubOwner(owner2);
+    defer { global::rootPropertyOwner->removePropertySubOwner(owner2); };
+    FloatProperty p21 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner2.addProperty(p21);
+
+    PropertyOwner owner3 = PropertyOwner({ "base3" });
+    owner3.addTag("tag1");
+    global::rootPropertyOwner->addPropertySubOwner(owner3);
+    defer{ global::rootPropertyOwner->removePropertySubOwner(owner3); };
+    FloatProperty p31 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner3.addProperty(p31);
+
+    {
+        LogMgr.resetMessageCounters();
+        defer { LogMgr.resetMessageCounters(); };
+
+        global::scriptEngine->queueScript(
+            "openspace.setPropertyValue('{tag1}.p1', 2.0, 1.0, 'ExponentialEaseOut')"
+        );
+        defer {
+            scene->removePropertyInterpolation(&p1);
+            scene->removePropertyInterpolation(&p2);
+        };
+
+        CHECK(p1 == 1.f);
+        CHECK(p2 == 1.f);
+        CHECK(p21 == 1.f);
+        CHECK(p31 == 1.f);
+        triggerScriptRun();
+        updateInterpolations(std::chrono::milliseconds(100));
+        CHECK(p1 > 1.f);
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.5, 0.075));
+        CHECK(p2 == 1.f);
+        CHECK(p21 == 1.f);
+        CHECK(p31 > 1.f);
+        CHECK_THAT(p31, Catch::Matchers::WithinAbs(1.5, 0.075));
+    }
+}
+
+TEST_CASE("SetPropertyValue: Tags PostScript Multiple", "[setpropertyvalue]") {
+    std::unique_ptr<Scene> scene = std::make_unique<Scene>(
+        std::make_unique<SceneInitializer>()
+    );
+    global::renderEngine->setScene(scene.get());
+    defer { global::renderEngine->setScene(nullptr); };
+
+    PropertyOwner owner1 = PropertyOwner({ "base1" });
+    owner1.addTag("tag1");
+    global::rootPropertyOwner->addPropertySubOwner(owner1);
+    defer { global::rootPropertyOwner->removePropertySubOwner(owner1); };
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner1.addProperty(p1);
+    FloatProperty p2 = FloatProperty(Property::PropertyInfo("p2", "a", "b"), 1.f);
+    owner1.addProperty(p2);
+    FloatProperty q1 = FloatProperty(Property::PropertyInfo("q1", "a", "b"), 1.f);
+    owner1.addProperty(q1);
+
+    PropertyOwner owner2 = PropertyOwner({ "base2" });
+    owner2.addTag("tag2");
+    global::rootPropertyOwner->addPropertySubOwner(owner2);
+    defer { global::rootPropertyOwner->removePropertySubOwner(owner2); };
+    FloatProperty p21 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner2.addProperty(p21);
+
+    PropertyOwner owner3 = PropertyOwner({ "base3" });
+    owner3.addTag("tag1");
+    global::rootPropertyOwner->addPropertySubOwner(owner3);
+    defer{ global::rootPropertyOwner->removePropertySubOwner(owner3); };
+    FloatProperty p31 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner3.addProperty(p31);
+
+    {
+        LogMgr.resetMessageCounters();
+        defer { LogMgr.resetMessageCounters(); };
+
+        global::scriptEngine->queueScript(R"(
+            openspace.setPropertyValue(
+                '{tag1}.p1',
+                2.0,
+                0.1,
+                'ExponentialEaseOut',
+                [[openspace.setPropertyValue('base1.q1', 0.75)]]
+            )
+        )");
+        defer {
+            scene->removePropertyInterpolation(&p1);
+            scene->removePropertyInterpolation(&p2);
+        };
+
+        CHECK(p1 == 1.f);
+        CHECK(p2 == 1.f);
+        CHECK(q1 == 1.f);
+        CHECK(p21 == 1.f);
+        CHECK(p31 == 1.f);
+        triggerScriptRun();
+        updateInterpolations(std::chrono::milliseconds(150));
+        triggerScriptRun();
+        CHECK(p1 == 2.f);
+        CHECK(p2 == 1.f);
+        CHECK(q1 == 0.75f);
+        CHECK(p21 == 1.f);
+        CHECK(p31 == 2.f);
+    }
+}
