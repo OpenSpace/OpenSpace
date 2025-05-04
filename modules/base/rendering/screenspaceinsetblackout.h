@@ -48,7 +48,8 @@ private:
     public:
         class PointOwner : public properties::PropertyOwner {
         public:
-            struct Point {
+            class Point {
+            public:
                 Point(glm::vec2& inData, std::string identifier,
                     std::string guiName);
 
