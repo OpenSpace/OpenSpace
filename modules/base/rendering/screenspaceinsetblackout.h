@@ -26,11 +26,9 @@
 #define __OPENSPACE_MODULE_BASE___SCREENSPACEINSETBLACKOUT___H__
 
 #include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/properties/vector/vec2property.h>
 
+#include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/misc/optionproperty.h>
-#include <shared_mutex>
-#include <deque>
 
 namespace openspace {
 
@@ -46,108 +44,84 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    struct BlackoutShape;
+    class BlackoutShape : public properties::PropertyOwner {
+    public:
+        class PointOwner : public properties::PropertyOwner {
+        public:
+            struct Point {
+                Point(glm::vec2& inData, std::string identifier,
+                    std::string guiName);
 
-    // Struct that defines a spline segment
-    struct Spline : properties::PropertyOwner {
-        enum class Side {
-            Top = 0,
-            Right,
-            Bottom,
-            Left
+                void updateData();
+
+                std::unique_ptr<properties::Property::PropertyInfo> propInfo = nullptr;
+                std::unique_ptr<properties::Vec2Property> prop = nullptr;
+                glm::vec2* dataptr;
+            };
+
+            PointOwner(std::vector<glm::vec2>& inData, std::string identifier,
+                std::string guiName);
+
+            std::vector<glm::vec2>& data;
+            std::vector<std::unique_ptr<Point>> points;
+            bool dataHasChanged = true;
         };
 
-        explicit Spline(const ghoul::Dictionary& dictionary, BlackoutShape& shape,
-            const std::string identifier, const std::string guiName,
-            const std::string basePointIdentifier, const std::string basePointName,
-            const Spline::Side side);
+        class Spline : public PointOwner {
+        public:
+            Spline (std::vector<glm::vec2>& inData, std::string baseString);
 
-        // Struct to make sure that we always use same size of char array
-        struct char16 {
-            char cstr[16];
+            void addPoint();
+            void removePoint();
+
+            std::string base;
+            bool pointAdded = false;
+            bool pointRemoved = false;
+
+        private:
+            void buildTree();
+
+            properties::Vec2Property newPointPosition;
+            properties::OptionProperty addSelector;
+            properties::TriggerProperty addButton;
+            properties::OptionProperty removeSelector;
+            properties::TriggerProperty removeButton;            
         };
 
-        // Struct that holds information about each point on the spline
-        struct Point {
-            explicit Point(glm::vec2& dataRef, const std::string& id, const std::string& name);
-            ~Point();
-            char16 guiName;
-            char16 propIdentifier;
-            properties::Property::PropertyInfo* propInfo = nullptr;
-            properties::Vec2Property* prop = nullptr;
-            glm::vec2* rawDataPointer;
-
-            void updateRawDataPointerValue();
+        class Corners : public PointOwner {
+        public:
+            explicit Corners(std::vector<glm::vec2>& inData);
         };
 
-        const std::string baseIdentifier;
-        const std::string baseGuiName;
-
-        BlackoutShape& parentShape;
-        std::vector<glm::vec2> rawData;
-        std::vector<std::unique_ptr<Point>> points;
-
-        bool isTextureDirty = false;
-        bool addPointFlag = false;
-        bool removePointFlag = false;
-
-        Spline::Side shapeSide;
-        properties::TriggerProperty addControlPoint;
-        properties::TriggerProperty removeControlPoint;
-        properties::OptionProperty removeSelector;
-        properties::OptionProperty addSelector;
-        properties::Vec2Property newPointPosition;
-
-        void generateProperties();
-        void addSelectionOptions();
-        void createPropertyTree();
-        void updatePropertyTree();
-        void cleanPropertyTree();
-
-        void addPoint();
-        void removePoint();
-        void updateCornerData();
-
-        /**
-        * Synchronizes the shared data for corner0 and corner1 to corresponding Point
-        * in points vector.
-        **/
-        void syncCornerData();
-    };
-
-    // Main struct that contains the splines and controls the blackout shape
-    struct BlackoutShape : properties::PropertyOwner {
         explicit BlackoutShape(const ghoul::Dictionary& dictionary);
-        Spline top;
-        Spline right;
-        Spline bottom;
-        Spline left;
+        ~BlackoutShape();
 
-        properties::TriggerProperty copyToClipboardTrigger;
-        properties::BoolProperty enableCalibrationPattern;
+        bool checkHasChanged();
+        void resetHasChanged();
+        void checkAndUpdateGUI();
+
+        std::vector<glm::vec2> cornerData;
+        std::vector<glm::vec2> topSplineData;
+        std::vector<glm::vec2> rightSplineData;
+        std::vector<glm::vec2> bottomSplineData;
+        std::vector<glm::vec2> leftSplineData;
         properties::BoolProperty enableCalibrationColor;
-        properties::StringProperty calibrationTexturePath;
+        properties::BoolProperty enableCalibrationPattern;
 
-        bool isTextureDirty = false;
-
-        // Holds corner points as they need to be shared between adjacent splines
-        glm::vec2 topLeftCorner;
-        glm::vec2 topRightCorner;
-        glm::vec2 bottomRightCorner;
-        glm::vec2 bottomLeftCorner;
-        std::shared_mutex cornerMutex;
-
+    private:
         void copyToClipboard();
-        std::string formatLine(std::string id, const std::vector<glm::vec2>& data,
-			const bool isCorner = false);
-        bool checkTextureStatus();
-        void updateSplineAndGui();
-        void resetDirtyTextureFlag();
-        void setCornerData(const Spline::Side& side, const glm::vec2 corner0,
-            const glm::vec2 corner1);
-        std::pair<glm::vec2, glm::vec2> readCornerData(const Spline::Side& side);
+        std::string formatLine(std::string id, const std::vector<glm::vec2>& data);
+
+        Corners* corners;
+        Spline* topSpline;
+        Spline* rightSpline;
+        Spline* bottomSpline;
+        Spline* leftSpline;
+        bool textureTypeHasChanged = false;
+        properties::StringProperty calibrationTexturePath;
+        properties::TriggerProperty copyToClipboardTrigger;
     };
-    BlackoutShape _shape;
+    BlackoutShape _blackoutShape;
 
     std::vector<glm::vec2> _vboData;
     GLuint _vao = 0;
@@ -162,14 +136,12 @@ private:
     void initializeShadersAndFBO();
     void generateTexture();
     void generateVertexArray();
-    void copyToPointsVector(const std::vector<std::unique_ptr<Spline::Point>>& points,
-        std::vector<glm::vec2>& vertexData);
-    glm::vec2 calculateCatmullRom(const glm::vec2 &p0, const glm::vec2 &p1,
-        const glm::vec2 &p2, const glm::vec2 &p3, const float t);
-    std::vector<glm::vec2> sampleSpline(const std::vector<glm::vec2> &controlPoints);
-    void offsetCoordinates(std::vector<glm::vec2> &vec);
-    std::pair<glm::vec2, glm::vec2> calculatePadding(
-	    const std::vector<std::unique_ptr<ScreenSpaceInsetBlackout::Spline::Point>>& pVec);
+
+    std::pair<glm::vec2, glm::vec2> calculatePadding(const std::vector<glm::vec2>& pVec);
+    std::vector<glm::vec2> sampleSpline(const std::vector<glm::vec2>& controlPoints);
+    glm::vec2 calculateCatmullRom(const float t, const glm::vec2& p0, const glm::vec2& p1,
+        const glm::vec2& p2, const glm::vec2& p3);
+    void offsetCoordinates(std::vector<glm::vec2>& vec);
 
     // Program
     ghoul::opengl::ProgramObject* _fboProgram = nullptr;
