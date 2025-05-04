@@ -334,6 +334,48 @@ int setPropertyCallSingle(openspace::properties::Property& prop, const std::stri
     return 0;
 }
 
+
+template <typename T>
+void createCustomProperty(openspace::properties::Property::PropertyInfo info,
+                          std::optional<std::string> onChange)
+{
+    T* p = new T(info);
+    if (onChange.has_value() && !onChange->empty()) {
+        p->onChange(
+            [p, script = *onChange]() {
+                using namespace ghoul::lua;
+                LuaState s;
+                openspace::global::scriptEngine->initializeLuaState(s);
+                ghoul::lua::push(s, p->value());
+                lua_setglobal(s, "value");
+                ghoul::lua::runScript(s, script);
+            }
+        );
+    }
+    openspace::global::userPropertyOwner->addProperty(p);
+}
+
+template <>
+void createCustomProperty<openspace::properties::TriggerProperty>(
+                                       openspace::properties::Property::PropertyInfo info,
+                                                      std::optional<std::string> onChange)
+{
+    using namespace openspace::properties;
+    TriggerProperty* p = new TriggerProperty(info);
+    if (onChange.has_value() && !onChange->empty()) {
+        p->onChange(
+            [script = *onChange]() {
+                using namespace ghoul::lua;
+                LuaState s;
+                openspace::global::scriptEngine->initializeLuaState(s);
+                ghoul::lua::runScript(s, script);
+            }
+        );
+    }
+    openspace::global::userPropertyOwner->addProperty(p);
+}
+
+
 } // namespace
 
 namespace openspace::luascriptfunctions {
@@ -511,100 +553,15 @@ namespace {
         regex = removeGroupNameFromUri(regex);
     }
 
-    // Extract the property and node name to be searched for from regex
-    bool isLiteral = false;
-    std::string propertyName;
-    std::string nodeName;
-    size_t wildPos = regex.find_first_of("*");
-    if (wildPos != std::string::npos) {
-        nodeName = regex.substr(0, wildPos);
-        propertyName = regex.substr(wildPos + 1, regex.length());
+    std::vector<properties::Property*> props =
+        findMatchesInAllProperties(regex, allProperties(), groupName);
 
-        // If none then malformed regular expression
-        if (propertyName.empty() && nodeName.empty()) {
-            throw ghoul::lua::LuaError(std::format(
-                "Malformed regular expression: '{}': Empty both before and after '*'",
-                regex
-            ));
-        }
-
-        // Currently do not support several wildcards
-        if (regex.find_first_of("*", wildPos + 1) != std::string::npos) {
-            throw ghoul::lua::LuaError(std::format(
-                "Malformed regular expression: '{}': Currently only one '*' is supported",
-                regex
-            ));
-        }
-    }
-    // Literal or tag
-    else {
-        propertyName = regex;
-        if (groupName.empty()) {
-            isLiteral = true;
-        }
-    }
-
-    // Get all matching property uris and save to res
-    std::vector<properties::Property*> props = allProperties();
-    std::vector<std::string> res;
+    std::vector<std::string> matches;
+    matches.reserve(props.size());
     for (properties::Property* prop : props) {
-        // Check the regular expression for all properties
-        const std::string_view uri = prop->uri();
-
-        if (isLiteral && uri != propertyName) {
-            continue;
-        }
-        else if (!propertyName.empty()) {
-            size_t propertyPos = uri.find(propertyName);
-            if (propertyPos != std::string::npos) {
-                // Check that the propertyName fully matches the property in id
-                if ((propertyPos + propertyName.length() + 1) < uri.length()) {
-                    continue;
-                }
-
-                // Match node name
-                if (!nodeName.empty() && uri.find(nodeName) == std::string::npos) {
-                    continue;
-                }
-
-                // Check tag
-                if (!groupName.empty()) {
-                    const properties::PropertyOwner* matchingTaggedOwner =
-                        findPropertyOwnerWithMatchingGroupTag(prop, groupName);
-                    if (!matchingTaggedOwner) {
-                        continue;
-                    }
-                }
-            }
-            else {
-                continue;
-            }
-        }
-        else if (!nodeName.empty()) {
-            size_t nodePos = uri.find(nodeName);
-            if (nodePos != std::string::npos) {
-                // Check tag
-                if (!groupName.empty()) {
-                    const properties::PropertyOwner* matchingTaggedOwner =
-                        findPropertyOwnerWithMatchingGroupTag(prop, groupName);
-                    if (!matchingTaggedOwner) {
-                        continue;
-                    }
-                }
-                // Check that the nodeName fully matches the node in id
-                else if (nodePos != 0) {
-                    continue;
-                }
-            }
-            else {
-                continue;
-            }
-        }
-
-        res.push_back(std::string(uri));
+        matches.emplace_back(prop->uri());
     }
-
-    return res;
+    return matches;
 }
 
 /**
@@ -643,14 +600,14 @@ namespace {
             "Scene";
         logError(e, cat);
 
-        throw ghoul::lua::LuaError(
-            std::format("Error loading scene graph node: {}", e.what())
-        );
+        throw ghoul::lua::LuaError(std::format(
+            "Error loading scene graph node: {}", e.what()
+        ));
     }
     catch (const ghoul::RuntimeError& e) {
-        throw ghoul::lua::LuaError(
-            std::format("Error loading scene graph node: {}", e.what())
-        );
+        throw ghoul::lua::LuaError(std::format(
+            "Error loading scene graph node: {}", e.what()
+        ));
     }
 }
 
@@ -659,7 +616,7 @@ namespace {
  * the parameter is a table.
  */
 [[codegen::luawrap]] void removeSceneGraphNode(
-    std::variant<std::string, ghoul::Dictionary> node)
+                                        std::variant<std::string, ghoul::Dictionary> node)
 {
     using namespace openspace;
     std::string identifier;
@@ -733,43 +690,8 @@ namespace {
     const std::vector<SceneGraphNode*>& nodes =
         global::renderEngine->scene()->allSceneGraphNodes();
 
-    // Extract the property and node name to be searched for from name
-    bool isLiteral = false;
-    std::string propertyName;
-    std::string nodeName;
-    size_t wildPos = name.find_first_of("*");
-    if (wildPos != std::string::npos) {
-        nodeName = name.substr(0, wildPos);
-        propertyName = name.substr(wildPos + 1, name.length());
+    auto [nodeName, propertyName, isLiteral] = parseRegex(name);
 
-        // If none then malformed regular expression
-        if (propertyName.empty() && nodeName.empty()) {
-            throw ghoul::lua::LuaError(
-                std::format(
-                    "Malformed regular expression: '{}': Empty both before and after '*'",
-                    name
-                )
-            );
-        }
-
-        // Currently do not support several wildcards
-        if (name.find_first_of("*", wildPos + 1) != std::string::npos) {
-            throw ghoul::lua::LuaError(
-                std::format(
-                    "Malformed regular expression: '{}': "
-                    "Currently only one '*' is supported",
-                    name
-                )
-            );
-        }
-    }
-    // Literal or tag
-    else {
-        propertyName = name;
-        isLiteral = true;
-    }
-
-    bool foundMatch = false;
     std::vector<SceneGraphNode*> markedList;
     for (SceneGraphNode* node : nodes) {
         const std::string& identifier = node->identifier();
@@ -777,50 +699,44 @@ namespace {
         if (isLiteral && identifier != propertyName) {
             continue;
         }
-        else if (!propertyName.empty()) {
-            size_t propertyPos = identifier.find(propertyName);
-            if (propertyPos != std::string::npos) {
-                // Check that the propertyName fully matches the property in id
-                if ((propertyPos + propertyName.length() + 1) < identifier.length()) {
-                    continue;
-                }
 
+        if (!propertyName.empty()) {
+            const size_t propertyPos = identifier.find(propertyName);
+            if (
+                // Check if the propertyName appears in the URI at all
+                (propertyPos == std::string::npos) ||
+                // Check that the propertyName fully matches the property in uri
+                ((propertyPos + propertyName.length() + 1) < identifier.length()) ||
                 // Match node name
-                if (!nodeName.empty() && identifier.find(nodeName) == std::string::npos) {
-                    continue;
-                }
-            }
-            else {
+                (!nodeName.empty() && identifier.find(nodeName) == std::string::npos))
+            {
                 continue;
             }
         }
         else if (!nodeName.empty()) {
             size_t nodePos = identifier.find(nodeName);
-            if (nodePos != std::string::npos) {
-                // Check that the nodeName fully matches the node in id
-                if (nodePos != 0) {
-                    continue;
-                }
+            if (nodePos == std::string::npos) {
+                continue;
             }
-            else {
+
+            // Check that the nodeName fully matches the node in id
+            if (nodePos != 0) {
                 continue;
             }
         }
 
-        foundMatch = true;
         SceneGraphNode* parent = node->parent();
         if (!parent) {
             throw ghoul::lua::LuaError("Cannot remove root node");
         }
-        else {
-            markedList.push_back(node);
-        }
+
+        markedList.push_back(node);
     }
 
-    if (!foundMatch) {
-        throw ghoul::lua::LuaError(
-            std::format("Did not find a match for identifier: {}", name)
-        );
+    if (markedList.empty()) {
+        throw ghoul::lua::LuaError(std::format(
+            "Did not find a match for identifier: {}", name
+        ));
     }
 
     // Add all the children
@@ -937,9 +853,9 @@ namespace {
     using namespace openspace;
     SceneGraphNode* node = sceneGraphNode(identifier);
     if (!node) {
-        throw ghoul::lua::LuaError(
-            std::format("Did not find a match for identifier: {} ", identifier)
-        );
+        throw ghoul::lua::LuaError(std::format(
+            "Did not find a match for identifier: {} ", identifier
+        ));
     }
 
     glm::dvec3 pos = node->worldPosition();
@@ -954,9 +870,9 @@ namespace {
     using namespace openspace;
     SceneGraphNode* node = sceneGraphNode(identifier);
     if (!node) {
-        throw ghoul::lua::LuaError(
-            std::format("Did not find a match for identifier: {} ", identifier)
-        );
+        throw ghoul::lua::LuaError(std::format(
+            "Did not find a match for identifier: {} ", identifier
+        ));
     }
 
     glm::dmat3 rot = node->worldRotationMatrix();
@@ -1018,46 +934,6 @@ namespace {
 
     double is = node->interactionSphere();
     return is;
-}
-
-template <typename T>
-void createCustomProperty(openspace::properties::Property::PropertyInfo info,
-                          std::optional<std::string> onChange)
-{
-    T* p = new T(info);
-    if (onChange.has_value() && !onChange->empty()) {
-        p->onChange(
-            [p, script = *onChange]() {
-                using namespace ghoul::lua;
-                LuaState s;
-                openspace::global::scriptEngine->initializeLuaState(s);
-                ghoul::lua::push(s, p->value());
-                lua_setglobal(s, "value");
-                ghoul::lua::runScript(s, script);
-            }
-        );
-    }
-    openspace::global::userPropertyOwner->addProperty(p);
-}
-
-template <>
-void createCustomProperty<openspace::properties::TriggerProperty>(
-                                       openspace::properties::Property::PropertyInfo info,
-                                                      std::optional<std::string> onChange)
-{
-    using namespace openspace::properties;
-    TriggerProperty* p = new TriggerProperty(info);
-    if (onChange.has_value() && !onChange->empty()) {
-        p->onChange(
-            [script = *onChange]() {
-                using namespace ghoul::lua;
-                LuaState s;
-                openspace::global::scriptEngine->initializeLuaState(s);
-                ghoul::lua::runScript(s, script);
-            }
-        );
-    }
-    openspace::global::userPropertyOwner->addProperty(p);
 }
 
 enum class [[codegen::enum]] CustomPropertyType {
@@ -1244,15 +1120,14 @@ enum class [[codegen::enum]] CustomPropertyType {
 [[codegen::luawrap]] void removeCustomProperty(std::string identifier) {
     using namespace openspace;
     properties::Property* p = global::userPropertyOwner->property(identifier);
-    if (p) {
-        global::userPropertyOwner->removeProperty(p);
-        delete p;
-    }
-    else {
+    if (p == nullptr) {
         throw ghoul::lua::LuaError(std::format(
             "Could not find user-defined property '{}'", identifier
         ));
     }
+
+    global::userPropertyOwner->removeProperty(p);
+    delete p;
 }
 
 /**

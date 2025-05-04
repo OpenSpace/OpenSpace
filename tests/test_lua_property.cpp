@@ -143,18 +143,25 @@ TEST_CASE("Property: Multiple", "[property]") {
                 REQUIRE(d.hasValue<ghoul::Dictionary>("1"));
                 ghoul::Dictionary e = d.value<ghoul::Dictionary>("1");
                 REQUIRE(e.size() == 2);
+
+                // Sorting the results as the property return order is undefined
+                std::array<std::string, 2> r;
                 {
                     REQUIRE(e.hasKey("1"));
                     REQUIRE(e.hasValue<std::string>("1"));
                     const std::string v = e.value<std::string>("1");
-                    CHECK(v == p1.uri());
+                    r[0] = v;
                 }
                 {
                     REQUIRE(e.hasKey("2"));
                     REQUIRE(e.hasValue<std::string>("2"));
                     const std::string v = e.value<std::string>("2");
-                    CHECK(v == p2.uri());
+                    r[1] = v;
                 }
+
+                std::sort(r.begin(), r.end());
+                CHECK(r[0] == p1.uri());
+                CHECK(r[1] == p2.uri());
             }
         });
 
@@ -191,18 +198,24 @@ TEST_CASE("Property: Multiple / 2", "[property]") {
                 REQUIRE(d.hasValue<ghoul::Dictionary>("1"));
                 ghoul::Dictionary e = d.value<ghoul::Dictionary>("1");
                 REQUIRE(e.size() == 2);
+
+                // Sorting the results as the property return order is undefined
+                std::array<std::string, 2> r;
                 {
                     REQUIRE(e.hasKey("1"));
                     REQUIRE(e.hasValue<std::string>("1"));
                     const std::string v = e.value<std::string>("1");
-                    CHECK(v == p1.uri());
+                    r[0] = v;
                 }
                 {
                     REQUIRE(e.hasKey("2"));
                     REQUIRE(e.hasValue<std::string>("2"));
                     const std::string v = e.value<std::string>("2");
-                    CHECK(v == p2.uri());
+                    r[1] = v;
                 }
+                std::sort(r.begin(), r.end());
+                CHECK(r[0] == p1.uri());
+                CHECK(r[1] == p2.uri());
             }
         });
 
@@ -221,18 +234,24 @@ TEST_CASE("Property: Multiple / 2", "[property]") {
                 REQUIRE(d.hasValue<ghoul::Dictionary>("1"));
                 ghoul::Dictionary e = d.value<ghoul::Dictionary>("1");
                 REQUIRE(e.size() == 2);
+
+                // Sorting the results as the property return order is undefined
+                std::array<std::string, 2> r;
                 {
                     REQUIRE(e.hasKey("1"));
                     REQUIRE(e.hasValue<std::string>("1"));
                     const std::string v = e.value<std::string>("1");
-                    CHECK(v == p1.uri());
+                    r[0] = v;
                 }
                 {
                     REQUIRE(e.hasKey("2"));
                     REQUIRE(e.hasValue<std::string>("2"));
                     const std::string v = e.value<std::string>("2");
-                    CHECK(v == p21.uri());
+                    r[1] = v;
                 }
+                std::sort(r.begin(), r.end());
+                CHECK(r[0] == p1.uri());
+                CHECK(r[1] == p21.uri());
             }
         });
 
