@@ -467,7 +467,7 @@ target_include_directories(openspace-core
 target_link_libraries(openspace-core PUBLIC nlohmann_json)
 
 if (UNIX)
-  # On ArchLinux, if you have the package `oneapi` installed, this influences including
+  # On Arch Linux, if you have the package `oneapi` installed, this influences including
   # the <exception> header and causes the header /usr/include/oneapi/tbb/task_group.h be
   # pulled in, causing a compile problem
   target_compile_definitions(
