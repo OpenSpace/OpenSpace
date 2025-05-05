@@ -110,7 +110,7 @@ namespace {
             catch (...) {
                 return false;
             }
-            };
+        };
 
         if (value == "true" || value == "false") {
             return openspace::PropertyValueType::Boolean;
@@ -847,69 +847,112 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "setPropertyValue",
                 &luascriptfunctions::propertySetValue<false>,
-                {},
+                {
+                    { "uri", "String" },
+                    { "value", "String | Number | Boolean | Table" },
+                    { "duration", "Number?", "0.0" },
+                    { "easing", "EasingFunction?", "Linear" },
+                    { "postscript", "String?", "" }
+                },
                 "",
-                "Sets all property(s) identified by the URI (with potential wildcards) "
-                "in the first argument. The second argument can be any type, but it has "
-                "to match the type that the property (or properties) expect. If the "
-                "third is not present or is '0', the value changes instantly, otherwise "
-                "the change will take that many seconds and the value is interpolated at "
-                "each step in between. The fourth parameter is an optional easing "
-                "function if a 'duration' has been specified. If 'duration' is 0, this "
-                "parameter value is ignored. Otherwise, it can be one of many supported "
-                "easing functions. See easing.h for available functions. The fifth "
-                "argument is another Lua script that will be executed when the "
-                "interpolation provided in parameter 3 finishes.\n"
-                "The URI is interpreted using a wildcard in which '*' is expanded to "
-                "'(.*)' and bracketed components '{ }' are interpreted as group tag "
-                "names. Then, the passed value will be set on all properties that fit "
-                "the regex + group name combination.",
-                {}
+                R"(Sets the property or properties identified by the URI to the specified
+value. The `uri` identifies which property or properties are affected by this function
+call and can include both wildcards `*` which match anything, as well as tags (`{tag}`)
+which match scene graph nodes that have this tag. If no wildcards or tags are provided at
+most one property value will be changed. With wildchards or tags all properties that match
+the URI are changed instead. The second argument's type must match the type of the
+property or properties or an error is raised. If a duration is provided, the requested
+change will occur over the provided number of seconds. If no duration is provided or the
+duration is 0, the change occurs instantaneously.
+
+If you only want to change a single property value, also see the #setPropertyValueSingle
+function as it will do so in a more efficient way. The `setPropertyValue` function will
+work for individual property value, but is more computationally expensive.
+
+\\param uri The URI that identifies the property or properties whose values should be
+changed. The URI can contain 0 or 1 wildcard `*` characters or one tag `{tag}` that
+identifies a property owner
+\\param value The new value to which the property/properties identified by the `uri`
+should be changed to. The type of this parameter must agree with the type of the selected
+property
+\\param duration The number of seconds over which the change will occur. If not provided
+or the provided value is 0, the change is instantaneously.
+\\param easing If a duration larger than 0 is provided, this parameter controls the manner
+in which the parameter is interpolated. Has to be one of "Linear", "QuadraticEaseIn",
+"QuadraticEaseOut", "QuadraticEaseInOut", "CubicEaseIn", "CubicEaseOut", "CubicEaseInOut",
+"QuarticEaseIn", "QuarticEaseOut", "QuarticEaseInOut", "QuinticEaseIn", "QuinticEaseOut",
+"QuinticEaseInOut", "SineEaseIn", "SineEaseOut", "SineEaseInOut", "CircularEaseIn",
+"CircularEaseOut", "CircularEaseInOut", "ExponentialEaseIn", "ExponentialEaseOut",
+"ExponentialEaseInOut", "ElasticEaseIn", "ElasticEaseOut", "ElasticEaseInOut",
+"BounceEaseIn", "BounceEaseOut", "BounceEaseInOut"
+\\param postscript This parameter specifies a Lua script that will be executed once the
+change of property value is completed. If a duration larger than 0 was provided, it is
+at the end of the interpolation. If 0 was provided, the script runs immediately.
+)",
+                { "src/scene/scene_lua.inl", 378 }
             },
             {
                 "setPropertyValueSingle",
                 &luascriptfunctions::propertySetValue<true>,
-                {},
+                {
+                    { "uri", "String" },
+                    { "value", "String | Number | Boolean | Table" },
+                    { "duration", "Number?", "0.0" },
+                    { "easing", "EasingFunction?", "Linear" },
+                    { "postscript", "String?", "" }
+                },
                 "",
-                "Sets the property identified by the URI in the first argument. The "
-                "second argument can be any type, but it has to match the type that the "
-                "property expects. If the third is not present or is '0', the value "
-                "changes instantly, otherwise the change will take that many seconds and "
-                "the value is interpolated at each step in between. The fourth "
-                "parameter is an optional easing function if a 'duration' has been "
-                "specified. If 'duration' is 0, this parameter value is ignored. "
-                "Otherwise, it has to be one of the easing functions defined in the list "
-                "below. This is the same as calling the setValue method and passing "
-                "'single' as the fourth argument to setPropertyValue. The fifth argument "
-                "is another Lua script that will be executed when the interpolation "
-                "provided in parameter 3 finishes.\n Avaiable easing functions: "
-                "Linear, QuadraticEaseIn, QuadraticEaseOut, QuadraticEaseInOut, "
-                "CubicEaseIn, CubicEaseOut, CubicEaseInOut, QuarticEaseIn, "
-                "QuarticEaseOut, QuarticEaseInOut, QuinticEaseIn, QuinticEaseOut, "
-                "QuinticEaseInOut, SineEaseIn, SineEaseOut, SineEaseInOut, "
-                "CircularEaseIn, CircularEaseOut, CircularEaseInOut, ExponentialEaseIn, "
-                "ExponentialEaseOut, ExponentialEaseInOut, ElasticEaseIn, "
-                "ElasticEaseOut, ElasticEaseInOut, BounceEaseIn, BounceEaseOut, "
-                "BounceEaseInOut",
-                {}
+                R"(Sets the single property identified by the URI to the specified value.
+The `uri` identifies which property isaffected by this function call. The second
+argument's type must match the type of the property or an error is raised. If a duration
+is provided, the requested change will occur over the provided number of seconds. If no
+duration is provided or the duration is 0, the change occurs instantaneously.
+
+If you only want to change multiple property values simultaneously, also see the
+#setPropertyValue function. The `setPropertyValueSingle` function however will work more
+efficiently for individual property value.
+
+\\param uri The URI that identifies the property
+\\param value The new value to which the property identified by the `uri` should be
+changed to. The type of this parameter must agree with the type of the selected property
+\\param duration The number of seconds over which the change will occur. If not provided
+or the provided value is 0, the change is instantaneously.
+\\param easing If a duration larger than 0 is provided, this parameter controls the manner
+in which the parameter is interpolated. Has to be one of "Linear", "QuadraticEaseIn",
+"QuadraticEaseOut", "QuadraticEaseInOut", "CubicEaseIn", "CubicEaseOut", "CubicEaseInOut",
+"QuarticEaseIn", "QuarticEaseOut", "QuarticEaseInOut", "QuinticEaseIn", "QuinticEaseOut",
+"QuinticEaseInOut", "SineEaseIn", "SineEaseOut", "SineEaseInOut", "CircularEaseIn",
+"CircularEaseOut", "CircularEaseInOut", "ExponentialEaseIn", "ExponentialEaseOut",
+"ExponentialEaseInOut", "ElasticEaseIn", "ElasticEaseOut", "ElasticEaseInOut",
+"BounceEaseIn", "BounceEaseOut", "BounceEaseInOut"
+\\param postscript This parameter specifies a Lua script that will be executed once the
+change of property value is completed. If a duration larger than 0 was provided, it is
+at the end of the interpolation. If 0 was provided, the script runs immediately.
+)",
+                { "src/scene/scene_lua.inl", 378 }
             },
             {
                 "getPropertyValue",
                 &luascriptfunctions::propertyGetValueDeprecated,
-                {},
-                "",
+                {
+                    { "uri", "String" }
+                },
+                "String | Number | Boolean | Table",
                 "Returns the value the property, identified by the provided URI. "
                 "Deprecated in favor of the 'propertyValue' function",
-                {}
+                { "src/scene/scene_lua.inl", 495 }
             },
             {
                 "propertyValue",
                 &luascriptfunctions::propertyGetValue,
-                {},
-                "",
-                "Returns the value the property, identified by the provided URI. "
-                "Deprecated in favor of the 'propertyValue' function",
-                {}
+                {
+                    { "uri", "String" }
+                },
+                "String | Number | Boolean | Table",
+                "Returns the value the property, identified by the provided URI. This "
+                "function will provide an error message if no property matching the URI "
+                "is found.",
+                { "src/scene/scene_lua.inl", 495 }
             },
             codegen::lua::HasProperty,
             codegen::lua::PropertyDeprecated,
