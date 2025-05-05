@@ -10,7 +10,6 @@ local carrington_prime_meridian = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      --Rotation = { 0.0, 0.0, -0.523598776 } -- -30 degrees
       Rotation = { 0.0, 0.0, -1.57079633 } -- -90 degrees
     },
     Scale = {
@@ -45,7 +44,6 @@ local grid_slice = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      --Rotation = { 0.0, 0.0, -0.523598776 } -- -30 degrees
       Rotation = { 0.0, 0.0, -1.57079633 } -- -90 degrees
     },
     Scale = {
@@ -114,9 +112,9 @@ asset.export(grid_10deg)
 
 
 asset.meta = {
-  Name = "10 Degree Grid",
+  Name = "Real Time Sun Grid lines",
   Version = "1.0",
-  Description = [[A grid with 10 degree seperationg between line segments]],
+  Description = [[Grids to guide the orientation of the Sun and its rotation in relation to Earth.]],
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license"

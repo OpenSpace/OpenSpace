@@ -1,6 +1,6 @@
 local ToggleWhiteBackground = {
   Identifier = "os.todayssun.ToggleWhiteBackground",
-  Name = "Toggle between black space with stars and a white background",
+  Name = "Toggle white background on and off",
   Command = [[
     if not openspace.propertyValue("Scene.WhiteBackground_sphere.Renderable.Enabled") then
       openspace.setPropertyValueSingle("Scene.WhiteBackground_sphere.Renderable.Fade",0)

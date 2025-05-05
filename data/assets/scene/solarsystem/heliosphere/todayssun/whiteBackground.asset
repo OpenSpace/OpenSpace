@@ -41,5 +41,5 @@ Name = "White Background",
 Description = "A big sphere that works as a white background when inside the solarsystem",
 Author = "CCMC",
 URL = "",
-License = "MIT"
+License = "MIT license"
 }

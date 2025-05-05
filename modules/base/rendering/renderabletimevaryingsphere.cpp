@@ -290,39 +290,10 @@ void RenderableTimeVaryingSphere::deinitializeGL() {
     _texture = nullptr;
     _files.clear();
 
-    // Stall main thread until thread that's loading states is done
-    //bool printedWarning = false;
-    //while (_dynamicFileDownloader != nullptr &&
-    //       _dynamicFileDownloader->areFilesCurrentlyDownloading())
-    //{
-    //    if (!printedWarning) {
-    //        LWARNING("Currently downloading file, exiting might take longer than usual");
-    //        printedWarning = true;
-    //    }
-    //    _dynamicFileDownloader->checkForFinishedDownloads();
-    //    std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    //}
-
-    // instead of stalling and waiting until they finish downloading, cancle and remove
-    std::vector<openspace::File*>& currentlyDownloadingFiles =
-        _dynamicFileDownloader->filesCurrentlyDownloading();
-    for (auto file : currentlyDownloadingFiles) {
-        file->download->cancel();
-        std::filesystem::remove(file->URL);
-        LWARNING(std::format("Removing unfinished download: {}", file->URL));
-    }
-
-    if (_dynamicFileDownloader != nullptr &&
-        !_saveDownloadsOnShutdown &&
-        _loadingType == LoadingType::DynamicDownloading)
+    if (_loadingType == LoadingType::DynamicDownloading &&
+        _dynamicFileDownloader != nullptr)
     {
-        std::filesystem::path syncDir = _dynamicFileDownloader->destinationDirectory();
-        if (!std::filesystem::exists(syncDir)) {
-            return;
-        }
-        for (auto& file : std::filesystem::directory_iterator(syncDir)) {
-            std::filesystem::remove(file);
-        }
+        _dynamicFileDownloader->deinitialize(_saveDownloadsOnShutdown);
     }
     RenderableSphere::deinitializeGL();
 }

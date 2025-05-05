@@ -1,5 +1,5 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
-local rot = asset.require("./carrington_to_heeq_rotation")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local transformsHelio = asset.require("scene/solarsystem/sun/transforms_heliosphere")
 
 
 
@@ -20,13 +20,10 @@ local TexturesPathMeridial = asset.resource({
 
 local EquatorialCutplane = {
   Identifier = "EquatorialCutplane-bastille-day-2000",
-  Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
+  Parent = transforms.SunIAU.Identifier,
   -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
   -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
   InteractionSphere = 695700000.0,
-  Transform = {
-    Rotation = rot.CarringtonLongitudeToHEEQ180Rotation
-  },
   Renderable = {
     Type = "RenderablePlaneTimeVaryingImage",
     Size = 157000000000,
@@ -46,7 +43,7 @@ local EquatorialCutplane = {
 
 local MeridialCutplane = {
   Identifier = "MeridialCutplane-bastille-day-2000",
-  Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
+  Parent = transformsHelio.HeliocentricEarthEquatorial180.Identifier,
   -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
   -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
   InteractionSphere = 695700000,

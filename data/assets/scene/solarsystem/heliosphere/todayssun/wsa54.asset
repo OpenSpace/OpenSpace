@@ -164,8 +164,8 @@ local fieldlinesSCS = {
     DataURL = dataURL,
     DataID = 2286,
     ShowAtAllTimes = false,
-    ColorMethod = "ByQuantity", -- Color by Quantity
-    ColorQuantity = 0, -- Wind speed & polarity
+    ColorMethod = "ByQuantity",
+    ColorQuantity = 0, -- Polarity & solar wind speed
     ColorTablePaths = {
       windSpeedPolarityColorTable,
       currentSheetColorTable
@@ -173,13 +173,7 @@ local fieldlinesSCS = {
     ColorTableRanges = {
         { -1.0, 1.0 },
         { 0.0, 1.0 },
-    }--,
-    --MaskingEnabled = true,
-    --MaskingQuantity = 0,
-    --MaskingRanges = {
-    --  { -10000.0, 10000.0 },
-    --  { 1.0, 1.0 },
-    --},
+    }
   },
   GUI = {
     Name = "Fieldlines: Corona SCS (Out-In Tracing)",
@@ -207,8 +201,8 @@ local fieldlinesOI = {
     DataURL = dataURL,
     DataID = 2285,
     ShowAtAllTimes = false,
-    ColorMethod = "ByQuantity", -- Color by Quantity
-    ColorQuantity = 0, -- Wind speed & polarity
+    ColorMethod = "ByQuantity",
+    ColorQuantity = 0, -- Polarity & solar wind speed
     ColorTablePaths = {
       windSpeedPolarityColorTable,
       currentSheetColorTable
@@ -244,8 +238,8 @@ local fieldlinesIO = {
     DataURL = dataURL,
     DataID = 2284,
     ShowAtAllTimes = false,
-    ColorMethod = "ByQuantity", -- Color by Quantity
-    ColorQuantity = 0, -- Wind speed & polarity
+    ColorMethod = "ByQuantity",
+    ColorQuantity = 0, -- Open/closed lines
     ColorTablePaths = {
       opennessColorTable
     },
@@ -279,8 +273,8 @@ local fieldlinesEarth = {
     DataURL = dataURL,
     DataID = 2287,
     ShowAtAllTimes = false,
-    ColorMethod = "ByQuantity", -- Color by Quantity
-    ColorQuantity = 0, -- Wind speed & polarity
+    ColorMethod = "ByQuantity",
+    ColorQuantity = 0, -- Polarity
     ColorTablePaths = {
       windSpeedPolarityColorTable,
       subEarthLevelColorTable

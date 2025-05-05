@@ -36,35 +36,12 @@
 
 namespace openspace {
 
-// Two things can be generalized here instead.
-// 1. the options could/should be read from a json file hosted on a server
-// 2. if things other than fieldlines are being supported,
-// they could be added in another struct
-struct FieldlineOption {
-    std::unordered_map<int, std::string> _keyToValue;
-    std::unordered_map<std::string, int> _valueToKey;
-
-    void insert(int key, std::string value) {
-        _keyToValue[key] = value;
-        _valueToKey[value] = key;
-    }
-
-    int id(std::string value) {
-        auto it = _valueToKey.find(value);
-        return (it != _valueToKey.end()) ? it->second : 0;
-    }
-
-    std::string optionName(int key) {
-        auto it = _keyToValue.find(key);
-        return (it != _keyToValue.end()) ? it->second : "";
-    }
-};
-
 struct File {
     std::unique_ptr<HttpFileDownload> download;
     std::string timestep;
     double time;
     std::string URL;
+    std::filesystem::path path;
     //TODO: need Cadence?
     double cadence;
     int availableIndex;
@@ -84,6 +61,7 @@ public:
     DynamicFileSequenceDownloader(
         int dataID, const std::string infoURL, const std::string dataURL, size_t nOfFilesToQ
     );
+    void deinitialize(bool cacheFiles);
     void requestDataInfo(std::string httpInfoRequest);
     void requestAvailableFiles(std::string httpDataRequest, std::filesystem::path syncdir);
     std::vector<File>::iterator closestFileToNow(const double time); //const File&

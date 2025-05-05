@@ -271,11 +271,9 @@ namespace {
 
         // choose type of loading:
         //0: static loading and static downloading
-        //1: dynamic loading and static downloading
-        //2: dynamic loading and dynamic downloading
+        //1: dynamic loading and dynamic downloading
         enum class [[codegen::map(openspace::RenderableFieldlinesSequence::LoadingType)]] LoadingType {
             StaticLoading,
-            DynamicLoading,
             DynamicDownloading
         };
         std::optional<LoadingType> loadingType;
@@ -383,16 +381,14 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         _loadingType = LoadingType::StaticLoading;
     }
 
-    if ((_loadingType == LoadingType::DynamicDownloading ||
-         _loadingType == LoadingType::DynamicLoading) &&
+    if (_loadingType == LoadingType::DynamicDownloading &&
         _inputFileType == SourceFileType::Cdf)
     {
         throw ghoul::RuntimeError(
             "Dynamic loading (or downloading) is only supported for osfls and json files"
         );
     }
-    if ((_loadingType == LoadingType::StaticLoading ||
-         _loadingType == LoadingType::DynamicLoading) &&
+    if (_loadingType == LoadingType::StaticLoading &&
         !p.sourceFolder.has_value())
     {
         throw ghoul::RuntimeError(
@@ -838,27 +834,10 @@ void RenderableFieldlinesSequence::deinitializeGL() {
     _files.clear();
 
     bool printedWarning = false;
-    while (_dynamicFileDownloader != nullptr &&
-        _dynamicFileDownloader->areFilesCurrentlyDownloading())
+    if (_loadingType == LoadingType::DynamicDownloading &&
+        _dynamicFileDownloader != nullptr)
     {
-        if (!printedWarning) {
-            LWARNING("Currently downloading file, exiting might take longer than usual");
-            printedWarning = true;
-        }
-        _dynamicFileDownloader->checkForFinishedDownloads();
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    }
-    if (_dynamicFileDownloader != nullptr &&
-        !_saveDownloadsOnShutdown &&
-        _loadingType == LoadingType::DynamicDownloading)
-    {
-        std::filesystem::path syncDir = _dynamicFileDownloader->destinationDirectory();
-        if (!std::filesystem::exists(syncDir)) {
-            return;
-        }
-        for (auto& file : std::filesystem::directory_iterator(syncDir)) {
-            std::filesystem::remove(file);
-        }
+        _dynamicFileDownloader->deinitialize(_saveDownloadsOnShutdown);
     }
 }
 
@@ -1098,7 +1077,6 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
             return;
         }
         File& file = _files[_activeIndex];
-        // here, for DynamicLoading, the dataset is known, but files not loaded yet
         if (file.status == File::FileStatus::Downloaded) {
             // if LoadingType is StaticLoading all files will be Loaded
             // would be optimal if loading of next file would happen in the background

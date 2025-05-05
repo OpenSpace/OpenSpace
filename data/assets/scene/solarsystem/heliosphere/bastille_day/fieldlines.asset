@@ -1,5 +1,4 @@
-local heliosphereTransforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
-local rot = asset.require("./carrington_to_heeq_rotation")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -16,12 +15,11 @@ local SunRadius = 695700000
 -- Fieldlies from binaries
 local Fieldlines = {
   Identifier = "MAS-MHD-Fieldlines-bastille-day-2000",
-  Parent = heliosphereTransforms.HeliocentricEarthEquatorial180.Identifier,
+  Parent = sunTransforms.SunIAU.Identifier,
   -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
   -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
   InteractionSphere = 1 / SunRadius,
   Transform = {
-    Rotation = rot.CarringtonLongitudeToHEEQ180Rotation,
     Scale = {
       Type = "StaticScale",
       Scale = SunRadius

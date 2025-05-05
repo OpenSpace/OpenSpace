@@ -79,6 +79,35 @@ DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
     requestAvailableFiles(httpDataRequest, _syncDir);
 }
 
+void DynamicFileSequenceDownloader::deinitialize(bool cacheFiles) {
+    std::vector<openspace::File*>& currentlyDownloadingFiles =
+        filesCurrentlyDownloading();
+    for (auto file : currentlyDownloadingFiles) {
+        file->download->cancel();
+
+        std::error_code ec;
+        std::filesystem::remove(file->path, ec);
+        if (ec) {
+            LERROR(std::format("Failed to delete unfinished file: {}", file->path));
+        }
+        else {
+            LINFO(std::format("Removing unfinished download:: {}", file->path));
+        }
+    }
+    if (!cacheFiles) {
+        if (!std::filesystem::exists(_syncDir)) {
+            return;
+        }
+        for (auto& file : std::filesystem::directory_iterator(_syncDir)) {
+            std::error_code ec;
+            std::filesystem::remove(file.path(), ec);
+            if (ec) {
+                LERROR(std::format("Failed to delete file: {}", file.path()));
+            }
+        }
+    }
+}
+
 void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest) {
     HttpMemoryDownload response(httpInfoRequest);
     response.start();
@@ -256,6 +285,7 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
         fileElement.timestep = timestamp;
         fileElement.time = time;
         fileElement.URL = url;
+        fileElement.path = destination;
         fileElement.cadence = 0;
         fileElement.availableIndex = index;
         if (std::filesystem::exists(destination)) {
@@ -361,7 +391,7 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
                     LERROR(std::format("Failed to delete file: {}", filepath));
                 }
                 else {
-                    LINFO(std::format("Deleted file after failed download: "), filepath);
+                    LINFO(std::format("Deleted file after failed download: {}", filepath));
                 }
             }
 

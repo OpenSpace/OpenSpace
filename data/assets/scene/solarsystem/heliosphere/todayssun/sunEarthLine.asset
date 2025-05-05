@@ -23,5 +23,15 @@ asset.onDeinitialize(function()
 end)
 
 
-
 asset.export("NodeLine", SunEarthLine)
+
+
+
+asset.meta = {
+  Name = "Sun Earth Line",
+  Version = "1.0",
+  Description = [[A line to guide the Suns rotation in relation to Earth.]],
+  Author = "CCMC",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

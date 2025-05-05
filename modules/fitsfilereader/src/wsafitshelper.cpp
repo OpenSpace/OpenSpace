@@ -18,8 +18,9 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         std::unique_ptr<FITS> file = std::make_unique<FITS>(path.string(), Read, true);
         if (!file.get()) {
             LERROR(
-                std::format("Failed to open fits file '{}'", path.string())
+                std::format("Failed to open, therefor removing file {}", path.string())
             );
+            std::filesystem::remove(path);
             return nullptr;
         }
         // Convert fits path with fits-file-reader functions
@@ -81,16 +82,22 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         LERROR(
             std::format("Failed to open fits file '{}'. '{}'", path.string(), e.message())
         );
+        std::filesystem::remove(path);
+        return nullptr;
     }
     catch (std::exception& e) {
         LERROR(
             std::format("Failed to open fits file '{}'. '{}'", path.string(), e.what())
         );
+        std::filesystem::remove(path);
+        return nullptr;
     }
     catch (...) {
         LERROR(
             std::format("Unknown exception caught for file '{}'", path.string())
         );
+        std::filesystem::remove(path);
+        return nullptr;
     }
 }
 

@@ -98,23 +98,6 @@ local HeliocentricEarthEcliptic = {
   }
 }
 
-local TransformGONG = {
-  Identifier = "TransformGONG",
-  Parent = HeliocentricEarthEquatorial180.Identifier,
-  Transform = {
-    Rotation = {
-      Type = "StaticRotation",
-      --Rotation = {0, 0, 2.09439510239} -- 120 degrees
-      Rotation = {0, 0, 0.34906585} -- 20 degrees
-    }
-  },
-  GUI = {
-    Name = "Transform GONG fieldlines (w Rotation Offset)",
-    Path = "/Solar System/Sun",
-    Hidden = true
-  }
-}
-
 local WSAOffset60 = {
   Identifier = "WSAOffset60",
   Parent = HeliocentricEarthEquatorial.Identifier,
@@ -140,14 +123,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(HeliocentricEarthEquatorial180)
   openspace.addSceneGraphNode(HeliocentricEarthEquatorial)
   openspace.addSceneGraphNode(HeliocentricEarthEcliptic)
-  openspace.addSceneGraphNode(TransformGONG)
   openspace.addSceneGraphNode(WSAOffset60)
 
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(WSAOffset60)
-  openspace.removeSceneGraphNode(TransformGONG)
   openspace.removeSceneGraphNode(HeliocentricEarthEcliptic)
   openspace.removeSceneGraphNode(HeliocentricEarthEquatorial)
   openspace.removeSceneGraphNode(HeliocentricEarthEquatorial180)
@@ -159,14 +140,14 @@ end)
 asset.export(HeliocentricEarthEquatorial180)
 asset.export(HeliocentricEarthEquatorial)
 asset.export(HeliocentricEarthEcliptic)
-asset.export(TransformGONG)
 asset.export(WSAOffset60)
 
 
 
 asset.meta = {
   Name = "Sun Transform, HEE, HEEQ and HEEQ180",
-  Description = "Sun transform: HEE, HEEQ and HEEQ180",
+  Description = [[Sun transform: HEE, HEEQ, HEEQ180 and a 60 degree fixed rotation that WSA
+   is using]],
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license"
