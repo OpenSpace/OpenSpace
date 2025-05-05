@@ -140,16 +140,94 @@ namespace {
 #include "screenspaceinsetblackout_codegen.cpp"
 } // namespace
 
+namespace {
+std::pair<glm::vec2, glm::vec2> calculatePadding(const std::vector<glm::vec2>& pVec) {
+    const glm::vec2& pf0 = pVec[0];
+    const glm::vec2& pf1 = pVec[1];
+    const glm::vec2& pb0 = pVec[pVec.size() - 1];
+    const glm::vec2& pb1 = pVec[pVec.size() - 2];
+    const glm::vec2 firstPaddingPoint = pf0 + ((pf0 - pf1) * -1.f);
+    const glm::vec2 lastPaddingPoint = pb0 + ((pb0 - pb1) * -1.f);
+    return std::pair(firstPaddingPoint, lastPaddingPoint);
+}
+
+glm::vec2 calculateCatmullRom(float t,
+                                const glm::vec2& p0,
+                                const glm::vec2& p1,
+                                const glm::vec2& p2,
+                                const glm::vec2& p3)
+{
+    glm::vec2 newPoint;
+    const float t3 = powf(t, 3.f);
+    const float t2 = powf(t, 2.f);
+    const float alpha = 0.5f;
+
+    const float p0t = (-t + (2.f * t2) - t3);
+    const float p1t = (2.f - (5.f * t2) + (3.f * t3));
+    const float p2t = (t + (4.f * t2) - (3.f * t3));
+    const float p3t = (-t2 + t3);
+
+    const glm::vec2 np0 = p0 * p0t;
+    const glm::vec2 np1 = p1 * p1t;
+    const glm::vec2 np2 = p2 * p2t;
+    const glm::vec2 np3 = p3 * p3t;
+
+    newPoint = alpha * (np0 + np1 + np2 + np3);
+
+    return newPoint;
+}
+
+std::vector<glm::vec2> sampleSpline(const std::vector<glm::vec2>& controlPoints) {
+    const int subdivisions = 250;
+    std::vector<glm::vec2> splineData;
+    const int numberOfSegments = static_cast<int>(controlPoints.size() - 3);
+    const float stepSize = 1.f / subdivisions;
+    for (int i = 0; i < numberOfSegments; ++i) {
+        for (int s = 0; s < subdivisions; ++s) {
+            float tValue = stepSize * s;
+            splineData.push_back(calculateCatmullRom(
+                tValue,
+                *(controlPoints.begin() + i + 0),
+                *(controlPoints.begin() + i + 1),
+                *(controlPoints.begin() + i + 2),
+                *(controlPoints.begin() + i + 3)
+            ));
+        }
+    }
+    return splineData;
+}
+
+void offsetCoordinates(std::vector<glm::vec2>& vec) {
+    for (int i = 0; i < vec.size(); ++i) {
+        vec[i].x = (vec[i].x * 2.f) - 1.f;
+        vec[i].y = (vec[i].y * 2.f) - 1.f;
+    }
+}
+
+}
+
 namespace openspace {
 
 documentation::Documentation ScreenSpaceInsetBlackout::Documentation() {
     return codegen::doc<Parameters>("base_screenspace_inset_blackout");
 }
 
+void checkCornerSpecification(std::vector<glm::vec2> corners) {
+    if (corners.size() != 4) {
+        documentation::TestResult res;
+        res.offenses.push_back(documentation::TestResult::Offense());
+        res.success = false;
+        res.offenses[0].offender = "ScreenSpaceInsetBlackout.Blackoutshape.Corners";
+        res.offenses[0].explanation = "Asset must contain exactly 4 corners";
+        res.offenses[0].reason = documentation::TestResult::Offense::Reason::Verification;
+        throw documentation::SpecificationError(res, "ScreenSpaceInsetBlackout");
+    }
+}
+
 ScreenSpaceInsetBlackout::BlackoutShape::PointOwner::Point::Point(
-                                                            glm::vec2& inData,
-                                                            std::string identifier,
-                                                            std::string guiName)
+                                                                glm::vec2& inData,
+                                                                std::string identifier,
+                                                                std::string guiName)
 {
     // Creates PropertyInfo used to create Property
     propInfo = std::make_unique<properties::Property::PropertyInfo>(
@@ -175,9 +253,9 @@ void ScreenSpaceInsetBlackout::BlackoutShape::PointOwner::Point::updateData() {
 
 
 ScreenSpaceInsetBlackout::BlackoutShape::PointOwner::PointOwner(
-                                                    std::vector<glm::vec2>& inData,
-                                                    std::string identifier,
-                                                    std::string guiName)
+                                                        std::vector<glm::vec2>& inData,
+                                                        std::string identifier,
+                                                        std::string guiName)
     : properties::PropertyOwner({ identifier , guiName, "" })
     , data(inData)
 {
@@ -476,18 +554,6 @@ ScreenSpaceInsetBlackout::ScreenSpaceInsetBlackout(const ghoul::Dictionary& dict
     generateTexture();
 }
 
-void ScreenSpaceInsetBlackout::checkCornerSpecification(std::vector<glm::vec2> corners) {
-    if (corners.size() != 4) {
-        documentation::TestResult res;
-        res.offenses.push_back(documentation::TestResult::Offense());
-        res.success = false;
-        res.offenses[0].offender = "ScreenSpaceInsetBlackout.Blackoutshape.Corners";
-        res.offenses[0].explanation = "Asset must contain exactly 4 corners";
-        res.offenses[0].reason = documentation::TestResult::Offense::Reason::Verification;
-        throw documentation::SpecificationError(res, "ScreenSpaceInsetBlackout");
-    }
-}
-
 void ScreenSpaceInsetBlackout::initializeShadersAndFBO() {
     // Setup vertex buffer
     glGenVertexArrays(1, &_vao);
@@ -722,72 +788,5 @@ bool ScreenSpaceInsetBlackout::deinitializeGL() {
     }
 
     return ScreenSpaceRenderable::deinitializeGL();
-}
-
-std::pair<glm::vec2, glm::vec2> ScreenSpaceInsetBlackout::calculatePadding(
-                                                    const std::vector<glm::vec2>& pVec)
-{
-    const glm::vec2& pf0 = pVec[0];
-    const glm::vec2& pf1 = pVec[1];
-    const glm::vec2& pb0 = pVec[pVec.size() - 1];
-    const glm::vec2& pb1 = pVec[pVec.size() - 2];
-    const glm::vec2 firstPaddingPoint = pf0 + ((pf0 - pf1) * -1.f);
-    const glm::vec2 lastPaddingPoint = pb0 + ((pb0 - pb1) * -1.f);
-    return std::pair(firstPaddingPoint, lastPaddingPoint);
-}
-
-std::vector<glm::vec2> ScreenSpaceInsetBlackout::sampleSpline(
-                                            const std::vector<glm::vec2>& controlPoints)
-{
-    const int subdivisions = 250;
-    std::vector<glm::vec2> splineData;
-    const int numberOfSegments = static_cast<int>(controlPoints.size() - 3);
-    const float stepSize = 1.f / subdivisions;
-    for (int i = 0; i < numberOfSegments; ++i) {
-        for (int s = 0; s < subdivisions; ++s) {
-            float tValue = stepSize * s;
-            splineData.push_back(calculateCatmullRom(
-                tValue,
-                *(controlPoints.begin() + i + 0),
-                *(controlPoints.begin() + i + 1),
-                *(controlPoints.begin() + i + 2),
-                *(controlPoints.begin() + i + 3)
-            ));
-        }
-    }
-    return splineData;
-}
-
-glm::vec2 ScreenSpaceInsetBlackout::calculateCatmullRom(float t,
-                                                        const glm::vec2& p0,
-                                                        const glm::vec2& p1,
-                                                        const glm::vec2& p2,
-                                                        const glm::vec2& p3)
-{
-    glm::vec2 newPoint;
-    const float t3 = powf(t, 3.f);
-    const float t2 = powf(t, 2.f);
-    const float alpha = 0.5f;
-
-    const float p0t = (-t + (2.f * t2) - t3);
-    const float p1t = (2.f - (5.f * t2) + (3.f * t3));
-    const float p2t = (t + (4.f * t2) - (3.f * t3));
-    const float p3t = (-t2 + t3);
-
-    const glm::vec2 np0 = p0 * p0t;
-    const glm::vec2 np1 = p1 * p1t;
-    const glm::vec2 np2 = p2 * p2t;
-    const glm::vec2 np3 = p3 * p3t;
-
-    newPoint = alpha * (np0 + np1 + np2 + np3);
-
-    return newPoint;
-}
-
-void ScreenSpaceInsetBlackout::offsetCoordinates(std::vector<glm::vec2> &vec) {
-    for (int i = 0; i < vec.size(); ++i) {
-        vec[i].x = (vec[i].x * 2.f) - 1.f;
-        vec[i].y = (vec[i].y * 2.f) - 1.f;
-    }
 }
 } // namespace openspace
