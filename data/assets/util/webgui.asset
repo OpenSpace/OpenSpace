@@ -39,7 +39,16 @@ asset.onInitialize(function()
   -- Add user directory for webpanels
   directories[#directories + 1] = "webpanels"
   directories[#directories + 1] = openspace.absPath("${USER_WEBPANELS}")
-
+  -- Add user directories for showcompower
+  directories[#directories + 1] = "showcomposer"
+  directories[#directories + 1] = openspace.absPath("${USER_SHOWCOMPOSER}")
+  directories[#directories + 1] = "showcomposer/hub"
+  directories[#directories + 1] = openspace.absPath("${USER_SHOWCOMPOSER}")
+  directories[#directories + 1] = "showcomposer/uploads"
+  directories[#directories + 1] = openspace.absPath("${USER_SHOWCOMPOSER_UPLOADS}")
+  directories[#directories + 1] = "showcomposer/projects"
+  directories[#directories + 1] = openspace.absPath("${USER_SHOWCOMPOSER_PROJECTS}")
+  
   openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
   openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "frontend")
   openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", enabled)
