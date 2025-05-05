@@ -22,80 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/topics/errorlogtopic.h>
-
 #include <modules/server/include/logging/notificationlog.h>
-#include <ghoul/logging/logmanager.h>
-
-namespace {
-    constexpr std::string_view StartSubscription = "start_subscription";
-    constexpr std::string_view StopSubscription = "stop_subscription";
-
-    constexpr std::string_view SettingsKey = "settings";
-    constexpr std::string_view LogLevelKey = "logLevel";
-} // namespace
 
 namespace openspace {
 
-ErrorLogTopic::~ErrorLogTopic() {
-    if (_log) {
-        ghoul::logging::LogManager::ref().removeLog(_log);
-        _log = nullptr;
+NotificationLog::NotificationLog(CallbackFunction callbackFunction,
+                                 ghoul::logging::LogLevel minimumLogLevel)
+    : ghoul::logging::Log(TimeStamping::Yes
+        , DateStamping::Yes
+        , CategoryStamping::Yes
+        , LogLevelStamping::Yes
+        , minimumLogLevel)
+    , _callbackFunction(std::move(callbackFunction))
+{}
+
+void NotificationLog::log(ghoul::logging::LogLevel level, std::string_view category,
+    std::string_view message) {
+    ZoneScoped;
+
+    {
+        const std::lock_guard lock(_mutex);
+        const std::string timeStamp = timeString();
+        const std::string dateStamp = dateString();
+        _callbackFunction(timeStamp, dateStamp, category, level, message);
     }
-}
-
-void ErrorLogTopic::handleJson(const nlohmann::json& json) {
-    const std::string& event = json.at("event").get<std::string>();
-
-    if (event == StartSubscription) {
-        // Default settings for logging
-        ghoul::logging::LogLevel logLevel = ghoul::logging::LogLevel::AllLogging;
-
-        // Check if we got log settings on subscription
-        auto settings = json.find(SettingsKey);
-
-        if (settings != json.end()) {
-            if (auto ls = settings->find(LogLevelKey); ls != settings->end()) {
-                std::string level = ls->get<std::string>();
-                logLevel = ghoul::from_string<ghoul::logging::LogLevel>(level);
-            }
-
-        }
-
-        auto onLogging = [this](std::string_view timeStamp, std::string_view dateStamp,
-            std::string_view category, ghoul::logging::LogLevel level,
-            std::string_view message) {
-
-            nlohmann::json payload = {
-                { "level", level },
-                { "category", category },
-                { "message", message },
-                { "timeStamp", timeStamp },
-                { "dateStamp", dateStamp }
-            };
-            _connection->sendJson(wrappedPayload(std::move(payload)));
-        };
-
-        auto log = std::make_unique<NotificationLog>(
-            onLogging,
-            logLevel
-        );
-        _log = log.get();
-
-        ghoul::logging::LogManager::ref().addLog(std::move(log));
-        _isSubscribedTo = true;
-    }
-
-    if (event == StopSubscription) {
-        _isSubscribedTo = false;
-
-        ghoul::logging::LogManager::ref().removeLog(_log);
-        _log = nullptr;
-    }
-}
-
-bool ErrorLogTopic::isDone() const {
-    return !_isSubscribedTo;
 }
 
 } // namespace openspace
