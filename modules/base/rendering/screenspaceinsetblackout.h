@@ -50,8 +50,7 @@ private:
         public:
             class Point {
             public:
-                Point(glm::vec2& inData, std::string identifier,
-                    std::string guiName);
+                Point(glm::vec2& inData, std::string identifier, std::string guiName);
 
                 void updateData();
 
@@ -65,7 +64,7 @@ private:
 
             std::vector<glm::vec2>& data;
             std::vector<std::unique_ptr<Point>> points;
-            bool dataHasChanged = true;
+            bool dataHasChanged = false;
         };
 
         class Spline : public PointOwner {
@@ -122,32 +121,28 @@ private:
         properties::StringProperty calibrationTexturePath;
         properties::TriggerProperty copyToClipboardTrigger;
     };
-    BlackoutShape _blackoutShape;
-
-    std::vector<glm::vec2> _vboData;
-    GLuint _vao = 0;
-    GLuint _vbo = 0;
-    GLuint _fbo = 0;
-    std::unique_ptr<ghoul::opengl::Texture> _blackoutTexture;
-    std::unique_ptr<ghoul::opengl::Texture> _calibrationTexture;
 
     void bindTexture() override;
 
     void checkCornerSpecification(std::vector<glm::vec2> corners);
     void initializeShadersAndFBO();
     void generateTexture();
-    void generateVertexArray();
+    void generateVertexArrayData();
 
     std::pair<glm::vec2, glm::vec2> calculatePadding(const std::vector<glm::vec2>& pVec);
     std::vector<glm::vec2> sampleSpline(const std::vector<glm::vec2>& controlPoints);
-    glm::vec2 calculateCatmullRom(const float t, const glm::vec2& p0, const glm::vec2& p1,
+    glm::vec2 calculateCatmullRom(float t, const glm::vec2& p0, const glm::vec2& p1,
         const glm::vec2& p2, const glm::vec2& p3);
     void offsetCoordinates(std::vector<glm::vec2>& vec);
 
-    // Program
+    BlackoutShape _blackoutShape;
+    std::vector<glm::vec2> _vboData;
+    std::unique_ptr<ghoul::opengl::Texture> _blackoutTexture;
+    std::unique_ptr<ghoul::opengl::Texture> _calibrationTexture;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
+    GLuint _fbo = 0;
     ghoul::opengl::ProgramObject* _fboProgram = nullptr;
-
-    // Uniform Cache
     UniformCache(color) _uniformCache;
 };
 

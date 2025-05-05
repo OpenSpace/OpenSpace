@@ -69,7 +69,7 @@
 #include <modules/base/rendering/screenspaceframebuffer.h>
 #include <modules/base/rendering/screenspaceimagelocal.h>
 #include <modules/base/rendering/screenspaceimageonline.h>
-#include <modules/base/rendering/ScreenSpaceInsetBlackout.h>
+#include <modules/base/rendering/screenspaceinsetblackout.h>
 #include <modules/base/rendering/screenspacerenderablerenderable.h>
 #include <modules/base/rotation/constantrotation.h>
 #include <modules/base/rotation/fixedrotation.h>
