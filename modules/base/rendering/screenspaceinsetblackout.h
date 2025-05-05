@@ -56,12 +56,14 @@ private:
 
                 std::unique_ptr<properties::Property::PropertyInfo> propInfo = nullptr;
                 std::unique_ptr<properties::Vec2Property> prop = nullptr;
+                /// Pointer to data used when user modifies the point position
                 glm::vec2* dataptr;
             };
 
             PointOwner(std::vector<glm::vec2>& inData, std::string identifier,
                 std::string guiName);
 
+            /// Vector of references to the original data
             std::vector<glm::vec2>& data;
             std::vector<std::unique_ptr<Point>> points;
             bool dataHasChanged = false;
@@ -79,12 +81,18 @@ private:
             bool pointRemoved = false;
 
         private:
+            /// Build the property tree that is shown in the GUI
             void buildTree();
 
+            /// Position for the new point used when adding a new point to a spline
             properties::Vec2Property newPointPosition;
+            /// Selects which place in the list where the new point should be inserted
             properties::OptionProperty addSelector;
+            /// Adds a new point based on given position and place in the list
             properties::TriggerProperty addButton;
+            /// Selects which point to remove
             properties::OptionProperty removeSelector;
+            /// Removes a point
             properties::TriggerProperty removeButton;            
         };
 
@@ -105,10 +113,19 @@ private:
         std::vector<glm::vec2> rightSplineData;
         std::vector<glm::vec2> bottomSplineData;
         std::vector<glm::vec2> leftSplineData;
+        /**
+        * Enables a brighted color for the shape which makes it easier to see the
+        * boundaries of the shape during setup
+        **/
         properties::BoolProperty enableCalibrationColor;
+        /**
+        * Enables a calibration texture instead of the shape which can be used to check
+        * which position values to use during shape setup
+        **/
         properties::BoolProperty enableCalibrationPattern;
 
     private:
+        /// Copies the current spline configuration to the clipboard
         void copyToClipboard();
         std::string formatLine(std::string id, const std::vector<glm::vec2>& data);
 
