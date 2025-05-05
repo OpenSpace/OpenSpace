@@ -100,13 +100,38 @@ namespace {
         openspace::properties::Property::Visibility::Developer
     };
 
+    // A ScreenSpaceInsetBlackout can be used to render a screen-space shape used to 
+    // black out part of the renderin. This can be useful in a dome environemnt where 
+    // you have a secondary presentation projector that can project on the dome surface. 
+    // This renderable can be used to black out some part of the dome OpenSpace rendering 
+    // in order to avoid overlapping rendering between the dome projectors and the
+    // presentation projector.
     struct [[codegen::Dictionary(ScreenSpaceInsetBlackout)]] Parameters {
         struct BlackoutShape {
+            // List of all the corners positions for the blackout shape. The order of 
+            // corner points are Top-Left, Top-Right, Bottom-Right, Bottom-Left with the
+            // range of 0 to 1 for [X,Y], where [0,1] is the Top-Left corner and [1,0]
+            // is the Bottom-Right corner.
             std::vector<glm::vec2> corners;
+
+            // List of all points between the two corners that will be used to define
+            // top spline of the blackout shape.
             std::optional<std::vector<glm::vec2>> top;
+
+            // List of all points between the two corners that will be used to define
+            // bottom spline of the blackout shape.
             std::optional<std::vector<glm::vec2>> bottom;
+
+            // List of all points between the two corners that will be used to define
+            // left spline of the blackout shape.
             std::optional<std::vector<glm::vec2>> left;
+
+            // List of all points between the two corners that will be used to define
+            // right spline of the blackout shape.
             std::optional<std::vector<glm::vec2>> right;
+
+            // File path for the texture that should be used when displaying the
+            // calibration grid.
             std::optional<std::string> calibrationTexturePath;
         };
         BlackoutShape blackoutshape;
