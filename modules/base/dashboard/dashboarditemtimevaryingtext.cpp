@@ -46,14 +46,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DataFileInfo = {
         "DataFile",
         "Data File Path",
-        "The file path to the JSON data. The JSON must contain a 'data' array with "
-        "timestamp-value pairs. Example format: "
-        "{\"data\": [[\"2024-05-10T00:00:00Z\", 2.33], [\"2024-05-10T03:00:00Z\", 3.0]]}",
+        "The file path to the JSON data.",
         openspace::properties::Property::Visibility::User
     };
 
     // This `DashboardItem` displays text based on the content of a provided data file. The
-    // value that is displayed depends on the current in-game simulation time.
+    // value that is displayed depends on the current in-game simulation time.  
+    // The JSON must contain a 'data' array with timestamp-value pairs. Example format:
+    // {\"data\": [[\"2024-05-10T00:00:00Z\", 2.33], [\"2024-05-10T03:00:00Z\", 3.0]]}
     struct [[codegen::Dictionary(DashboardItemTimeVaryingText)]] Parameters {
         // [[codegen::verbatim(FormatStringInfo.description)]]
         std::optional<std::string> formatString;
