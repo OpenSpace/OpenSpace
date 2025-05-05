@@ -89,6 +89,9 @@
     "url": "https://www.openspaceproject.com",
     "version": "1.1"
   },
+  "panel_visibility": {
+    "mission": true
+  },
   "properties": [
     {
       "name": "Scene.PlutoBarycenterTrail.Renderable.Enabled",
@@ -97,11 +100,12 @@
     }
   ],
   "time": {
+    "is_paused": false,
     "type": "absolute",
     "value": "1977-09-10T12:00:00"
   },
   "version": {
     "major": 1,
-    "minor": 1
+    "minor": 4
   }
 }

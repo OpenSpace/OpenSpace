@@ -1256,7 +1256,7 @@ localPositionFromGeoDeprecated(std::string nodeIdentifier, double latitude,
 
     bool setTime = (ns.timestamp.has_value() && useTimeStamp.value_or(false));
 
-    const std::string script = std::format(
+    std::string script = std::format(
         "openspace.navigation.setNavigationState({}, {})",
         ghoul::formatLua(ns.dictionary()), setTime
     );
@@ -1268,7 +1268,7 @@ localPositionFromGeoDeprecated(std::string nodeIdentifier, double latitude,
         );
     }
     else {
-        global::navigationHandler->triggerFadeToTransition(script);
+        global::navigationHandler->triggerFadeToTransition(std::move(script));
     }
 }
 
@@ -1288,7 +1288,7 @@ localPositionFromGeoDeprecated(std::string nodeIdentifier, double latitude,
         throw ghoul::lua::LuaError("Unknown node name: " + nodeIdentifier);
     }
 
-    const std::string script = std::format(
+    std::string script = std::format(
         "openspace.navigation.flyTo('{}', 0)", nodeIdentifier
     );
 
@@ -1299,7 +1299,7 @@ localPositionFromGeoDeprecated(std::string nodeIdentifier, double latitude,
         );
     }
     else {
-        global::navigationHandler->triggerFadeToTransition(script);
+        global::navigationHandler->triggerFadeToTransition(std::move(script));
     }
 }
 

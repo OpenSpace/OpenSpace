@@ -128,6 +128,9 @@
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
+  "panel_visibility": {
+    "mission": true
+  },
   "properties": [
     {
       "name": "{earth_satellites}.Renderable.Enabled",
@@ -257,6 +260,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 2
+    "minor": 4
   }
 }

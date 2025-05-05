@@ -22,26 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___SHORTCUT_TOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___SHORTCUT_TOPIC___H__
+#include "usericon.h"
 
-#include <modules/server/include/topics/topic.h>
+#include <QPainter>
 
-namespace openspace {
+QIcon userIcon() {
+    QPixmap px = QPixmap(40, 50);
+    px.fill(Qt::transparent);
 
-class ShortcutTopic : public Topic {
-public:
-    ~ShortcutTopic() override = default;
+    QPainter painter = QPainter(&px);
+    painter.setBrush(QColor(183, 211, 149, 255));
+    painter.drawEllipse(0, 10, 38, 38);
 
-    void handleJson(const nlohmann::json& input) override;
-    bool isDone() const override;
-
-private:
-    void sendData(nlohmann::json data) const;
-    std::vector<nlohmann::json> shortcutsJson() const;
-    nlohmann::json shortcutJson(const std::string& identifier) const;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SERVER___SHORTCUT_TOPIC___H__
+    QFont f = QFont("Arial");
+    f.setPixelSize(28);
+    f.setBold(true);
+    painter.setFont(f);
+    painter.drawText(0, 10, 40, 40, Qt::AlignCenter, "U");
+    return QIcon(px);
+}

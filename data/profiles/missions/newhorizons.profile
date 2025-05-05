@@ -131,6 +131,9 @@
     "url": "https://www.openspaceproject.com",
     "version": "1.1"
   },
+  "panel_visibility": {
+    "mission": true
+  },
   "properties": [
     {
       "name": "Scene.Pluto.Renderable.Enabled",
@@ -184,11 +187,12 @@
     }
   ],
   "time": {
+    "is_paused": false,
     "type": "absolute",
     "value": "2015-07-14T08:00:00"
   },
   "version": {
     "major": 1,
-    "minor": 1
+    "minor": 4
   }
 }

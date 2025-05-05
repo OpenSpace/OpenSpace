@@ -36,7 +36,6 @@
     315360000.0,
     630720000.0
   ],
-  "keybindings": [],
   "mark_nodes": [
     "Earth",
     "Moon",
@@ -64,11 +63,12 @@
     }
   ],
   "time": {
+    "is_paused": false,
     "type": "relative",
     "value": "-1d"
   },
   "version": {
     "major": 1,
-    "minor": 1
+    "minor": 4
   }
 }

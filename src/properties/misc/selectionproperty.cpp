@@ -33,8 +33,6 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "SelectionProperty";
-
-    constexpr std::string_view OptionsKey = "Options";
 } // namespace
 
 namespace openspace::properties {
@@ -104,7 +102,7 @@ void SelectionProperty::setOptions(const std::vector<std::string>& keys) {
         _isValueDirty = true;
     }
 
-    notifyChangeListeners();
+    notifyMetaDataChangeListeners();
 }
 
 void SelectionProperty::addOption(const std::string& key) {
@@ -115,7 +113,8 @@ void SelectionProperty::addOption(const std::string& key) {
 
     _options.push_back(key);
     sortOptions();
-    notifyChangeListeners();
+    notifyMetaDataChangeListeners();
+    _isValueDirty = true;
 }
 
 void SelectionProperty::clearSelection() {
@@ -125,8 +124,9 @@ void SelectionProperty::clearSelection() {
 }
 
 void SelectionProperty::clearOptions() {
-    _options.clear();
     clearSelection();
+    _options.clear();
+    notifyMetaDataChangeListeners();
 }
 
 void SelectionProperty::getLuaValue(lua_State* state) const {
@@ -166,12 +166,9 @@ bool SelectionProperty::removeInvalidKeys(std::set<std::string>& keys) const {
     return changed;
 }
 
-std::string SelectionProperty::generateAdditionalJsonDescription() const {
+nlohmann::json SelectionProperty::generateAdditionalJsonDescription() const {
     const nlohmann::json optionsJson(_options);
-    std::string result = std::format(
-        R"({{ "{}": {} }})", OptionsKey, optionsJson.dump()
-    );
-    return result;
+    return optionsJson;
 }
 
 } // namespace openspace::properties

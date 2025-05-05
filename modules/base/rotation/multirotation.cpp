@@ -64,6 +64,12 @@ MultiRotation::MultiRotation(const ghoul::Dictionary& dictionary)
     }
 }
 
+void MultiRotation::update(const UpdateData& data) {
+    for (const ghoul::mm_unique_ptr<Rotation>& rot : _rotations) {
+        rot->update(data);
+    }
+}
+
 glm::dmat3 MultiRotation::matrix(const UpdateData& data) const {
     glm::dmat3 res = glm::dmat3(1.0);
     for (const ghoul::mm_unique_ptr<Rotation>& rot : _rotations) {

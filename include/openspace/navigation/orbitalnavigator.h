@@ -192,7 +192,7 @@ private:
     void updatePreviousAnchorState();
     void updatePreviousAimState();
 
-    Camera* _camera;
+    Camera* _camera = nullptr;
 
     Friction _friction;
 
