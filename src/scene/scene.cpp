@@ -771,7 +771,6 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
         applyRegularExpression(
             L,
             uriOrRegex,
-            allProperties(),
             0.0,
             groupName,
             ghoul::EasingFunction::Linear,
@@ -813,7 +812,7 @@ void Scene::propertyPushProfileValueToLua(ghoul::lua::LuaState& L,
 std::vector<properties::Property*> Scene::propertiesMatchingRegex(
                                                           std::string_view propertyString)
 {
-    return findMatchesInAllProperties(propertyString, allProperties(), "");
+    return findMatchesInAllProperties(propertyString, "");
 }
 
 std::vector<std::string> Scene::allTags() const {

@@ -63,32 +63,37 @@
 
 namespace {
 
-template <class T>
-const openspace::properties::PropertyOwner* findPropertyOwnerWithMatchingGroupTag(T* prop,
-                                                            const std::string& tagToMatch)
+/**
+ * Returns the Property that matches the provided tag. First the provided owner is checked
+ * and if that does not contain the requested tag, its own owners are checked recursively.
+ */
+bool ownerMatchesGroupTag(const openspace::properties::PropertyOwner* owner,
+                          std::string_view tagToMatch)
 {
     using namespace openspace;
 
-    const properties::PropertyOwner* tagMatchOwner = nullptr;
-
-    if (const properties::PropertyOwner* owner = prop->owner();  owner) {
-        const std::vector<std::string>& tags = owner->tags();
-        for (const std::string& currTag : tags) {
-            if (tagToMatch == currTag) {
-                tagMatchOwner = owner;
-                break;
-            }
-        }
-
-        // Call recursively until we find an owner with matching tag or the top of the
-        // ownership list
-        if (tagMatchOwner == nullptr) {
-            tagMatchOwner = findPropertyOwnerWithMatchingGroupTag(owner, tagToMatch);
-        }
+    if (!owner) {
+        return false;
     }
-    return tagMatchOwner;
+
+    const std::vector<std::string>& tags = owner->tags();
+    auto it = std::find(tags.begin(), tags.end(), tagToMatch);
+    if (it != tags.end()) {
+        return true;
+    }
+    else {
+        return ownerMatchesGroupTag(owner->owner(), tagToMatch);
+    }
 }
 
+/**
+ * Parses the provided regex and splits it based on the location of the optional wildcard
+ * character (*). If a wildcard existed in the regex, the returned tuple will be the
+ * substring prior to the wildcard, the substring following to the wildcard, and `false`
+ * as the first value. If there was no wildcard, the first return value is the empty
+ * string, the second value is the full regular expression, and the third value is `true`,
+ * indicating that it was a literal value.
+ */
 std::tuple<std::string_view, std::string_view, bool> parseRegex(std::string_view regex) {
     if (size_t wildPos = regex.find_first_of("*");  wildPos != std::string::npos) {
         std::string_view preName = regex.substr(0, wildPos);
@@ -120,7 +125,6 @@ std::tuple<std::string_view, std::string_view, bool> parseRegex(std::string_view
 
 std::vector<openspace::properties::Property*> findMatchesInAllProperties(
                                                                    std::string_view regex,
-                          const std::vector<openspace::properties::Property*>& properties,
                                                              const std::string& groupName)
 {
     using namespace openspace;
@@ -132,6 +136,8 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
         isLiteral = false;
     }
 
+    const std::vector<properties::Property*>& properties = allProperties();
+
     std::vector<properties::Property*> matches;
 
     std::mutex mutex;
@@ -140,7 +146,6 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
         properties.cbegin(),
         properties.cend(),
         [&](properties::Property* prop) {
-            // Check the regular expression for all properties
             const std::string_view uri = prop->uri();
 
             if (isLiteral && uri != propertyName) {
@@ -160,13 +165,11 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
                     return;
                 }
 
-                // Check tag
-                if (isGroupMode) {
-                    const properties::PropertyOwner* matchingTaggedOwner =
-                        findPropertyOwnerWithMatchingGroupTag(prop, groupName);
-                    if (!matchingTaggedOwner) {
-                        return;
-                    }
+                // At this point we know that the property name matches, so another way
+                // this property to fail is if we provided a tag and the owner doesn't
+                // match it
+                if (isGroupMode && !ownerMatchesGroupTag(prop->owner(), groupName)) {
+                    return;
                 }
             }
             else if (!nodeName.empty()) {
@@ -177,9 +180,7 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
 
                 // Check tag
                 if (isGroupMode) {
-                    const properties::PropertyOwner* matchingTaggedOwner =
-                        findPropertyOwnerWithMatchingGroupTag(prop, groupName);
-                    if (!matchingTaggedOwner) {
+                    if (!ownerMatchesGroupTag(prop->owner(), groupName)) {
                         return;
                     }
                 }
@@ -198,7 +199,6 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
 }
 
 void applyRegularExpression(lua_State* L, const std::string& regex,
-                          const std::vector<openspace::properties::Property*>& properties,
                                                              double interpolationDuration,
                                                              const std::string& groupName,
                                                      ghoul::EasingFunction easingFunction,
@@ -212,7 +212,6 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
     // 1. Retrieve all properties that match the regex
     std::vector<properties::Property*> matchingProps = findMatchesInAllProperties(
         regex,
-        properties,
         groupName
     );
 
@@ -489,7 +488,6 @@ int propertySetValue(lua_State* L) {
         applyRegularExpression(
             L,
             uriOrRegex,
-            allProperties(),
             interpolationDuration,
             groupName,
             easingMethod,
@@ -554,7 +552,7 @@ namespace {
     }
 
     std::vector<properties::Property*> props =
-        findMatchesInAllProperties(regex, allProperties(), groupName);
+        findMatchesInAllProperties(regex, groupName);
 
     std::vector<std::string> matches;
     matches.reserve(props.size());
