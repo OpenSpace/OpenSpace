@@ -48,7 +48,7 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "A work in progress profile for juno.",
+    "description": "A work in progress profile for Juno.",
     "license": "MIT License",
     "name": "Juno",
     "url": "https://www.openspaceproject.com",

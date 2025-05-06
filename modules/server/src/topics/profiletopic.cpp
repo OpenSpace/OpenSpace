@@ -43,7 +43,7 @@ void ProfileTopic::handleJson(const nlohmann::json&) {
     nlohmann::json data = {
         { "uiPanelVisibility", global::profile->uiPanelVisibility },
         { "markNodes", global::profile->markNodes },
-        { "filePath", global::configuration->profile}
+        { "filePath", global::configuration->profile }
     };
 
     if (global::profile->meta.has_value()) {
