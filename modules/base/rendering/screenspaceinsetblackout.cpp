@@ -142,11 +142,6 @@ namespace {
 } // namespace
 
 namespace {
-
-glm::vec2 mirrorPoint() {
-
-}
-
 std::pair<glm::vec2, glm::vec2> calculatePadding(const std::vector<glm::vec2>& v) {
     const glm::vec2& pf0 = v[1];
     const glm::vec2& pf1 = v[2];
