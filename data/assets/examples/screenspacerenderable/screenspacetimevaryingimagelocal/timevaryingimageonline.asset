@@ -1,0 +1,16 @@
+-- Basic
+-- Create a time-varying screenspace image plane that shows the content of images from
+-- web URLs based on in-game simulation tme.
+
+local Item = {
+    Type = "ScreenSpaceTimeVaryingImageOnline",
+    Identifier = "ScreenSpaceTimeVaryingImageOnline_Example",
+    JsonFilePath = asset.resource("data/dummydata.json")
+}
+asset.onInitialize(function()
+    openspace.addScreenSpaceRenderable(Item)
+end)
+
+asset.onDeinitialize(function()
+    openspace.removeScreenSpaceRenderable(Item)
+end)
