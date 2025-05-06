@@ -96,7 +96,7 @@ namespace {
         auto result = answer.find("result");
         CHECK(result != answer.end());
 
-        const HorizonsFile horizonsFile(filePath, *result);
+        const HorizonsFile horizonsFile(filePath, result->get<std::string>());
         HorizonsResultCode resultCode = isValidHorizonsFile(horizonsFile.file());
         CHECK(resultCode == expectedResultCode);
 

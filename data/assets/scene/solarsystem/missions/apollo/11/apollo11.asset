@@ -261,3 +261,14 @@ asset.export(Apollo11LemDescentModel)
 asset.export(Apollo11LemLandedModel)
 asset.export(Apollo11MoonTrail)
 asset.export(Apollo11LemTrail)
+
+
+
+asset.meta = {
+  Name = "Apollo 11",
+  Description = [[A meta asset that will include all of the other assets to show the
+    Apollo 11 launch, orbit, and landing sequence.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

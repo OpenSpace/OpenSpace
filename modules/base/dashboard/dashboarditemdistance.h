@@ -45,8 +45,6 @@ public:
 
     void update() override;
 
-    glm::vec2 size() const override;
-
     static documentation::Documentation Documentation();
 
 private:

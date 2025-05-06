@@ -22,26 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___SHORTCUT_TOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___SHORTCUT_TOPIC___H__
+#ifndef __OPENSPACE_CORE___CONVERTMODELTASK___H__
+#define __OPENSPACE_CORE___CONVERTMODELTASK___H__
 
-#include <modules/server/include/topics/topic.h>
+#include <openspace/util/task.h>
+
+#include <filesystem>
+#include <string>
 
 namespace openspace {
 
-class ShortcutTopic : public Topic {
+class ConvertModelTask : public Task {
 public:
-    ~ShortcutTopic() override = default;
+    explicit ConvertModelTask(const ghoul::Dictionary& dictionary);
+    ~ConvertModelTask() override = default;
 
-    void handleJson(const nlohmann::json& input) override;
-    bool isDone() const override;
+    std::string description() override;
+    void perform(const Task::ProgressCallback& processCallback) override;
+
+    static documentation::Documentation Documentation();
 
 private:
-    void sendData(nlohmann::json data) const;
-    std::vector<nlohmann::json> shortcutsJson() const;
-    nlohmann::json shortcutJson(const std::string& identifier) const;
+    std::filesystem::path _inFilePath;
+    std::filesystem::path _outFilePath;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___SHORTCUT_TOPIC___H__
+#endif // __OPENSPACE_CORE___CONVERTMODELTASK___H__

@@ -149,8 +149,7 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
 void DashboardItemGlobeLocation::update() {
     ZoneScoped;
 
-    GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
-    const glm::dvec3 position = module->geoPosition();
+    const glm::dvec3 position = geoPositionFromCamera();
     double lat = position.x;
     double lon = position.y;
     const double altitude = position.z;
@@ -207,14 +206,6 @@ void DashboardItemGlobeLocation::update() {
     }
 
     _buffer = std::string(_localBuffer.data(), end - _localBuffer.data());
-}
-
-glm::vec2 DashboardItemGlobeLocation::size() const {
-    ZoneScoped;
-
-    return _font->boundingBox(
-        std::format("Position: {}, {}  Altitude: {}", 1.f, 1.f, 1.f)
-    );
 }
 
 } // namespace openspace

@@ -22,16 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/src/globetranslation.h>
+#include <modules/base/translation/globetranslation.h>
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
-#include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
+#include <openspace/util/geodetic.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
 
@@ -39,7 +40,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo GlobeInfo = {
         "Globe",
         "Attached Globe",
-        "The globe on which the longitude/latitude is specified.",
+        "The node on which the longitude/latitude is specified. If the node is a globe, "
+        "the correct height information for the globe is used. Otherwise, the position "
+        "is specified based on the longitude and latitude on the node's interaction "
+        "sphere",
         openspace::properties::Property::Visibility::User
     };
 
@@ -93,10 +97,21 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This `Translation` places the scene graph node at a specific location relative to
+    // another scene graph node. The position is identified via the longitude, latitude,
+    // and altitude parameters. If the provided scene graph node is a globe, the positions
+    // correspond to the native coordinate frame of that object. If it is a node without a
+    // renderable or a non-globe renderable, the latitude/longitude grid used is the
+    // node's interaction sphere.
+    // This class is useful in conjunction with the
+    // [GlobeRotation](#base_rotation_globerotation) rotation to orient a scene graph node
+    // away from the center of the body.
+    //
+    // If the `UseCamera` value is set, the object's position automatically updates based
+    // on the current camera location.
     struct [[codegen::Dictionary(GlobeTranslation)]] Parameters {
         // [[codegen::verbatim(GlobeInfo.description)]]
-        std::string globe
-            [[codegen::annotation("A valid scene graph node with a RenderableGlobe")]];
+        std::string globe [[codegen::identifier()]];
 
         // [[codegen::verbatim(LatitudeInfo.description)]]
         std::optional<double> latitude;
@@ -119,15 +134,15 @@ namespace {
 #include "globetranslation_codegen.cpp"
 } // namespace
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 documentation::Documentation GlobeTranslation::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_translation_globetranslation");
+    return codegen::doc<Parameters>("base_translation_globetranslation");
 }
 
 GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     : Translation(dictionary)
-    , _globe(GlobeInfo)
+    , _sceneGraphNode(GlobeInfo)
     , _latitude(LatitudeInfo, 0.0, -90.0, 90.0)
     , _longitude(LongitudeInfo, 0.0, -180.0, 180.0)
     , _altitude(AltitudeInfo, 0.0, -1e12, 1e12)
@@ -137,12 +152,12 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _globe = p.globe;
-    _globe.onChange([this]() {
+    _sceneGraphNode = p.globe;
+    _sceneGraphNode.onChange([this]() {
         fillAttachedNode();
         setUpdateVariables();
     });
-    addProperty(_globe);
+    addProperty(_sceneGraphNode);
 
     _latitude = p.latitude.value_or(_latitude);
     _latitude.onChange([this]() { setUpdateVariables(); });
@@ -172,20 +187,16 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
 }
 
 void GlobeTranslation::fillAttachedNode() {
-    SceneGraphNode* n = sceneGraphNode(_globe);
-    if (n && n->renderable() && dynamic_cast<RenderableGlobe*>(n->renderable())) {
-        _attachedNode = dynamic_cast<RenderableGlobe*>(n->renderable());
-    }
-    else {
+    SceneGraphNode* n = sceneGraphNode(_sceneGraphNode);
+    if (!n || !n->renderable()) {
         LERRORC(
             "GlobeTranslation",
-            "Could not set attached node as it does not have a RenderableGlobe"
+            "Could not set attached node as it does not have a renderable"
         );
-        if (_attachedNode) {
-            // Reset the globe name to its previous name
-            _globe = _attachedNode->identifier();
-        }
+        return;
     }
+
+    _attachedNode = n;
 }
 
 void GlobeTranslation::setUpdateVariables() {
@@ -194,6 +205,11 @@ void GlobeTranslation::setUpdateVariables() {
 }
 
 void GlobeTranslation::update(const UpdateData& data) {
+    if (!_attachedNode) [[unlikely]] {
+        fillAttachedNode();
+        _positionIsDirty = true;
+    }
+
     if (_useHeightmap || _useCamera) {
         // If we use the heightmap, we have to compute the height every frame
         setUpdateVariables();
@@ -203,15 +219,6 @@ void GlobeTranslation::update(const UpdateData& data) {
 }
 
 glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
-    if (!_attachedNode) {
-        // @TODO(abock): The const cast should be removed on a redesign of the translation
-        //               to make the position function not constant. Const casting this
-        //               away is fine as the factories that create the translations don't
-        //               create them as constant objects
-        const_cast<GlobeTranslation*>(this)->fillAttachedNode();
-        _positionIsDirty = true;
-    }
-
     if (!_positionIsDirty) [[likely]] {
         return _position;
     }
@@ -219,19 +226,17 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
     if (!_attachedNode) {
         LERRORC(
             "GlobeRotation",
-            std::format("Could not find attached node '{}'", _globe.value())
+            std::format("Could not find attached node '{}'", _sceneGraphNode.value())
         );
         return _position;
     }
-
-    GlobeBrowsingModule* mod = global::moduleEngine->module<GlobeBrowsingModule>();
 
     double lat = _latitude;
     double lon = _longitude;
     double alt = _altitude;
 
     if (_useCamera) {
-        const glm::dvec3 position = mod->geoPosition();
+        const glm::dvec3 position = geoPositionFromCamera();
         lat = position.x;
         lon = position.y;
         if (_useCameraAltitude) {
@@ -240,7 +245,7 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
     }
 
     if (_useHeightmap) {
-        const glm::vec3 groundPos = mod->cartesianCoordinatesFromGeo(
+        const glm::vec3 groundPos = cartesianCoordinatesFromGeo(
             *_attachedNode,
             lat,
             lon,
@@ -251,24 +256,23 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
             groundPos
         );
 
-        _position = mod->cartesianCoordinatesFromGeo(
+        _position = cartesianCoordinatesFromGeo(
             *_attachedNode,
             lat,
             lon,
             h.heightToSurface + alt
         );
-        return _position;
     }
     else {
-        _position = mod->cartesianCoordinatesFromGeo(
+        _position = cartesianCoordinatesFromGeo(
             *_attachedNode,
             lat,
             lon,
             alt
         );
         _positionIsDirty = false;
-        return _position;
     }
+    return _position;
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

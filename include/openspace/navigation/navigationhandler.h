@@ -174,7 +174,7 @@ public:
      * \param fadeDuration An optional duration for the fading. If unspecified, use the
      *                     JumpToFadeDuration property
      */
-    void triggerFadeToTransition(const std::string& transitionScript,
+    void triggerFadeToTransition(std::string transitionScript,
         std::optional<float> fadeDuration = std::nullopt);
 
     /**

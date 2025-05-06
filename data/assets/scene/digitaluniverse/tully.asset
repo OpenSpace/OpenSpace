@@ -102,7 +102,7 @@ local TullyGalaxiesImages = {
     }
   },
   GUI = {
-    Name = "Tully Galaxies Images",
+    Name = "Tully Galaxy Images",
     Path = "/Universe/Nearby Surveys",
     Description = [[Each Tully galaxy is represented by an image that represents its
       morphological type (spiral, elliptical, etc.). Most of these come from The Galaxy

@@ -80,3 +80,14 @@ end)
 
 asset.export(Apollo8Launch)
 asset.export(Apollo8LaunchModel)
+
+
+
+asset.meta = {
+  Name = "Apollo 8 Launch Model",
+  Description = [[Contains the 3D model of the Apollo 8 command module for use during the
+    launch of the spacecraft from Earth.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -72,6 +72,13 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
+    _horizonsFiles.onChange([this]() {
+        requireUpdate();
+        notifyObservers();
+        loadData();
+        });
+    addProperty(_horizonsFiles);
+
     if (std::holds_alternative<std::filesystem::path>(p.horizonsTextFile)) {
         std::filesystem::path file = std::get<std::filesystem::path>(p.horizonsTextFile);
         _horizonsFiles = { file.string() };
@@ -89,13 +96,6 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
         );
         _horizonsFiles = f;
     }
-
-    _horizonsFiles.onChange([this](){
-        requireUpdate();
-        notifyObservers();
-        loadData();
-    });
-    addProperty(_horizonsFiles);
 }
 
 glm::dvec3 HorizonsTranslation::position(const UpdateData& data) const {

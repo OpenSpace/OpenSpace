@@ -109,14 +109,4 @@ void DashboardItemDate::update() {
     }
 }
 
-glm::vec2 DashboardItemDate::size() const {
-    ZoneScoped;
-
-    std::string_view time = global::timeManager->time().UTC();
-    // @CPP26(abock): This can be replaced with std::runtime_format
-    return _font->boundingBox(
-        std::vformat(_formatString.value(), std::make_format_args(time))
-    );
-}
-
 } // namespace openspace

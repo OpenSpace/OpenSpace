@@ -22,46 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBETRANSLATION___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBETRANSLATION___H__
+#ifndef __OPENSPACE_MODULE_SERVER___ACTIONKEYBIND_TOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___ACTIONKEYBIND_TOPIC___H__
 
-#include <openspace/scene/translation.h>
+#include <modules/server/include/topics/topic.h>
 
-#include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/doubleproperty.h>
+namespace openspace {
 
-namespace openspace::globebrowsing {
-
-class RenderableGlobe;
-
-class GlobeTranslation : public Translation {
+class ActionKeybindTopic : public Topic {
 public:
-    explicit GlobeTranslation(const ghoul::Dictionary& dictionary);
+    ~ActionKeybindTopic() override = default;
 
-    void update(const UpdateData& data) override;
-    glm::dvec3 position(const UpdateData& data) const override;
-
-    static documentation::Documentation Documentation();
+    void handleJson(const nlohmann::json& input) override;
+    bool isDone() const override;
 
 private:
-    void fillAttachedNode();
-    void setUpdateVariables();
-
-    properties::StringProperty _globe;
-    properties::DoubleProperty _latitude;
-    properties::DoubleProperty _longitude;
-    properties::DoubleProperty _altitude;
-    properties::BoolProperty _useHeightmap;
-    properties::BoolProperty _useCamera;
-    properties::BoolProperty _useCameraAltitude;
-
-    RenderableGlobe* _attachedNode = nullptr;
-
-    mutable bool _positionIsDirty = true;
-    mutable glm::dvec3 _position = glm::dvec3(0.0);
+    void sendData(nlohmann::json data) const;
+    nlohmann::json allActionsKeybinds() const;
+    nlohmann::json action(const std::string& identifier) const;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GLOBETRANSLATION___H__
+#endif // __OPENSPACE_MODULE_SERVER___ACTIONKEYBIND_TOPIC___H__

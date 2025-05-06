@@ -46,14 +46,37 @@ namespace {
      */
     int mapFromGlfwToWindows(openspace::Key key) {
         switch (key) {
-            case openspace::Key::BackSpace:   return 8;
-            case openspace::Key::Tab:         return 9;
-            case openspace::Key::Enter:       return 13;
-            case openspace::Key::Left:        return 37;
-            case openspace::Key::Up:          return 38;
-            case openspace::Key::Right:       return 39;
-            case openspace::Key::Down:        return 40;
-            case openspace::Key::Delete:      return 46;
+            case openspace::Key::BackSpace:      return 8;
+            case openspace::Key::Tab:            return 9;
+            case openspace::Key::Enter:          return 13;
+            case openspace::Key::KeypadEnter:    return 13;
+            case openspace::Key::LeftShift:      return 16;
+            case openspace::Key::RightShift:     return 16;
+            case openspace::Key::LeftControl:    return 17;
+            case openspace::Key::RightControl:   return 17;
+            case openspace::Key::LeftAlt:        return 18;
+            case openspace::Key::RightAlt:       return 18;
+            case openspace::Key::Escape:         return 27;
+            case openspace::Key::Left:           return 37;
+            case openspace::Key::Up:             return 38;
+            case openspace::Key::Right:          return 39;
+            case openspace::Key::Down:           return 40;
+            case openspace::Key::Delete:         return 46;
+            case openspace::Key::Keypad0:        return 96;
+            case openspace::Key::Keypad1:        return 97;
+            case openspace::Key::Keypad2:        return 98;
+            case openspace::Key::Keypad3:        return 99;
+            case openspace::Key::Keypad4:        return 100;
+            case openspace::Key::Keypad5:        return 101;
+            case openspace::Key::Keypad6:        return 102;
+            case openspace::Key::Keypad7:        return 103;
+            case openspace::Key::Keypad8:        return 104;
+            case openspace::Key::Keypad9:        return 105;
+            case openspace::Key::KeypadMultiply: return 106;
+            case openspace::Key::KeypadAdd:      return 107;
+            case openspace::Key::KeypadSubtract: return 109;
+            case openspace::Key::KeypadDecimal:  return 110;
+            case openspace::Key::KeypadDivide:   return 111;
             default:                          return static_cast<int>(key);
         }
     }
@@ -400,6 +423,7 @@ bool EventHandler::mouseWheelCallback(glm::ivec2 delta) {
 
 bool EventHandler::charCallback(unsigned int charCode, KeyModifier modifier) {
     CefKeyEvent keyEvent;
+
     keyEvent.windows_key_code = mapFromGlfwToWindows(Key(charCode));
     keyEvent.character = mapFromGlfwToCharacter(Key(charCode));
     keyEvent.native_key_code = mapFromGlfwToNative(Key(charCode));
@@ -422,7 +446,18 @@ bool EventHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction act
     keyEvent.modifiers = mapToCefModifiers(modifier);
     keyEvent.type = keyEventType(action);
 
-    return _browserInstance->sendKeyEvent(keyEvent);
+    const bool KeyEventFlag = _browserInstance->sendKeyEvent(keyEvent);
+
+    // The `Enter` key does not produce a `charCallback` event like other character keys.
+    // Some web elements (e.g., buttons) rely on receiving a char event in addition to
+    // `keydown` to properly register an `onClick`. Since GLFW does not generate this
+    // event for Enter, we manually invoke it to ensure expected behavior.
+    constexpr int EnterKeyCode = 13;
+    if (keyEvent.windows_key_code == EnterKeyCode && keyEvent.type == KEYEVENT_KEYDOWN) {
+        return charCallback(static_cast<unsigned int>(Key::Enter), modifier);
+    }
+
+    return KeyEventFlag;    
 }
 
 bool EventHandler::specialKeyEvent(Key key, KeyModifier mod, KeyAction action) {
@@ -450,6 +485,16 @@ bool EventHandler::specialKeyEvent(Key key, KeyModifier mod, KeyAction action) {
             keyEvent.windows_key_code = mapFromGlfwToWindows(Key::KeypadDecimal);
             keyEvent.character = mapFromGlfwToCharacter(Key::KeypadDecimal);
             keyEvent.native_key_code = mapFromGlfwToNative(Key::KeypadDecimal);
+            keyEvent.modifiers = static_cast<uint32_t>(mod);
+            keyEvent.type = keyEventType(action);
+            _browserInstance->sendKeyEvent(keyEvent);
+            return true;
+        }
+        case Key::Apostrophe: {
+            CefKeyEvent keyEvent;
+            keyEvent.windows_key_code = mapFromGlfwToWindows(Key(222));
+            keyEvent.character = mapFromGlfwToCharacter(Key(222));
+            keyEvent.native_key_code = mapFromGlfwToNative(Key(222));
             keyEvent.modifiers = static_cast<uint32_t>(mod);
             keyEvent.type = keyEventType(action);
             _browserInstance->sendKeyEvent(keyEvent);

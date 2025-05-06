@@ -1,0 +1,42 @@
+-- SPK Multiple
+-- This example creates a time frame based on the information provided by multiple SPICE
+-- kernel files that contain position information about the same object. The created scene
+-- graph node will only be valid whenever any window in any of the provided kernels
+-- contains information about object "VOYAGER 1".
+
+-- We need a SPICE kernel to work with in this example
+local data = asset.resource({
+  Name = "Voyager 1 Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "voyager1_spice",
+  Version = 2
+})
+
+local Node = {
+  Identifier = "TimeFrameKernel_Example_SPK_Multiple",
+  TimeFrame = {
+    Type = "TimeFrameKernel",
+    SPK = {
+      Kernels = {
+        data .. "vgr1_jup230.bsp",
+        data .. "vgr1_sat337.bsp"
+      },
+      Object = "VOYAGER 1"
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "TimeFrameKernel - Basic (SPK, Multiple)",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

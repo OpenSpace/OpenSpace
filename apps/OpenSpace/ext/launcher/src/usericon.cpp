@@ -22,46 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEROTATION___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEROTATION___H__
+#include "usericon.h"
 
-#include <openspace/scene/rotation.h>
+#include <QPainter>
 
-#include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/doubleproperty.h>
+QIcon userIcon() {
+    QPixmap px = QPixmap(40, 50);
+    px.fill(Qt::transparent);
 
-namespace openspace::globebrowsing {
+    QPainter painter = QPainter(&px);
+    painter.setBrush(QColor(183, 211, 149, 255));
+    painter.drawEllipse(0, 10, 38, 38);
 
-class RenderableGlobe;
-
-class GlobeRotation : public Rotation {
-public:
-    explicit GlobeRotation(const ghoul::Dictionary& dictionary);
-
-    void update(const UpdateData& data) override;
-    glm::dmat3 matrix(const UpdateData& data) const override;
-
-    static documentation::Documentation Documentation();
-
-private:
-    void findGlobe();
-    void setUpdateVariables();
-    glm::vec3 computeSurfacePosition(double latitude, double longitude) const;
-
-    properties::StringProperty _globe;
-    properties::DoubleProperty _latitude;
-    properties::DoubleProperty _longitude;
-    properties::DoubleProperty _angle;
-    properties::BoolProperty _useHeightmap;
-    properties::BoolProperty _useCamera;
-
-    RenderableGlobe* _globeNode = nullptr;
-
-    mutable bool _matrixIsDirty = true;
-    mutable glm::dmat3 _matrix = glm::dmat3(0.0);
-};
-
-} // namespace openspace::globebrowsing
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEROTATION___H__
+    QFont f = QFont("Arial");
+    f.setPixelSize(28);
+    f.setBold(true);
+    painter.setFont(f);
+    painter.drawText(0, 10, 40, 40, Qt::AlignCenter, "U");
+    return QIcon(px);
+}

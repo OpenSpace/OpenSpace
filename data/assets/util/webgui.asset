@@ -3,14 +3,17 @@ local guiCustomization = asset.require("customization/gui")
 
 
 
--- Select which commit hashes to use for the frontend and backend
-local frontendHash = "1e64af3b19764af15ad844dec543b1fffec99fe9"
+-- Select which commit hashes to use for the UI frontend
+local frontendHash = "f899267b30691a10c8833c0afccc16976797d0fe"
+
+-- The name of the file to download from the server
+local file = "frontend.zip"
 
 local frontend = asset.resource({
   Identifier = "WebGuiFrontend",
   Name = "Web Gui Frontend",
   Type = "UrlSynchronization",
-  Url = "http://data.openspaceproject.com/files/webgui/frontend/" ..  frontendHash .. "/frontend.zip"
+  Url = "http://data.openspaceproject.com/files/webgui/frontend/" ..  frontendHash .. "/" .. file
 })
 
 
@@ -18,7 +21,7 @@ asset.onInitialize(function()
   -- Unzip the frontend bundle
   local dest = frontend .. "frontend"
   if not openspace.directoryExists(dest) then
-    openspace.unzipFile(frontend .. "frontend.zip", dest, true)
+    openspace.unzipFile(frontend .. file, dest, true)
   end
 
   -- Disable the server, add production gui endpoint, and restart server.
@@ -51,6 +54,18 @@ asset.onInitialize(function()
       openspace.setPropertyValueSingle("Dashboard.SimulationIncrement.Enabled", false)
     end
   end
+
+  -- Set the GUI default endpoint
+  local port = openspace.propertyValue("Modules.WebGui.Port")
+  -- As a developer, you can manually serve the webgui from port 4690
+  -- with the command `npm start` in the web gui repository
+  if guiCustomization.webguiDevelopmentMode then
+    port = 4690
+  end
+  openspace.setPropertyValueSingle(
+    "Modules.CefWebGui.GuiUrl",
+    "http://127.0.0.1:" .. port .. "/frontend/"
+  )
 end)
 
 asset.onDeinitialize(function()
@@ -74,23 +89,6 @@ asset.onDeinitialize(function()
   -- need to address in webguimodule.cpp
   --openspace.setPropertyValueSingle("Modules.WebGui.Directories", newDirectories)
 end)
-
-function setCefRoute(route)
-  local port = openspace.propertyValue("Modules.WebGui.Port")
-  -- As a developer, you can manually serve the webgui from port 4690
-  -- with the command `npm start` in the web gui repository
-  if guiCustomization.webguiDevelopmentMode then
-    port = 4690
-  end
-  openspace.setPropertyValueSingle(
-    "Modules.CefWebGui.GuiUrl",
-    "http://127.0.0.1:" .. port .. "/frontend/#/" .. route
-  )
-end
-
-asset.export("setCefRoute", setCefRoute)
-
-
 
 asset.meta = {
   Name = "WebGUI",
