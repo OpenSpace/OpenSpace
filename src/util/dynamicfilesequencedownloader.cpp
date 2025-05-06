@@ -106,6 +106,9 @@ void DynamicFileSequenceDownloader::deinitialize(bool cacheFiles) {
             }
         }
     }
+    if (std::filesystem::is_empty(_syncDir)) {
+        std::filesystem::remove(_syncDir);
+    }
 }
 
 void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest) {
