@@ -69,6 +69,7 @@
 #include <modules/base/rendering/screenspacedashboard.h>
 #include <modules/base/rendering/screenspaceimagelocal.h>
 #include <modules/base/rendering/screenspaceimageonline.h>
+#include <modules/base/rendering/screenspacetimevaryingimageonline.h>
 #include <modules/base/rendering/screenspaceframebuffer.h>
 #include <modules/base/rendering/screenspacerenderablerenderable.h>
 #include <modules/base/rotation/constantrotation.h>
@@ -115,6 +116,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fSsRenderable->registerClass<ScreenSpaceDashboard>("ScreenSpaceDashboard");
     fSsRenderable->registerClass<ScreenSpaceImageLocal>("ScreenSpaceImageLocal");
     fSsRenderable->registerClass<ScreenSpaceImageOnline>("ScreenSpaceImageOnline");
+    fSsRenderable->registerClass<ScreenSpaceTimeVaryingImageOnline>("ScreenSpaceTimeVaryingImageOnline");
     fSsRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
     fSsRenderable->registerClass<ScreenSpaceRenderableRenderable>(
         "ScreenSpaceRenderableRenderable"
@@ -305,6 +307,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         ScreenSpaceFramebuffer::Documentation(),
         ScreenSpaceImageLocal::Documentation(),
         ScreenSpaceImageOnline::Documentation(),
+        ScreenSpaceTimeVaryingImageOnline::Documentation(),
         ScreenSpaceRenderableRenderable::Documentation(),
 
         ConstantRotation::Documentation(),
