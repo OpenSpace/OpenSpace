@@ -158,8 +158,7 @@ namespace {
         // [[codegen::verbatim(GridTypeInfo.description)]]
         std::optional<std::string> gridType [[codegen::inlist("Spherical", "Cartesian")]];
 
-        // @TODO Missing documentation
-        std::optional<ghoul::Dictionary> clipPlanes;
+        std::optional<std::vector<ghoul::Dictionary>> clipPlanes [[codegen::reference("volume_volumeclipplane")]];
     };
 #include "renderabletimevaryingvolume_codegen.cpp"
 } // namespace
@@ -209,10 +208,8 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _secondsBefore = p.secondsBefore.value_or(_secondsBefore);
     _secondsAfter = p.secondsAfter;
 
-    const ghoul::Dictionary clipPlanesDict = p.clipPlanes.value_or(ghoul::Dictionary());
-    _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanesDict);
-    _clipPlanes->setIdentifier("clipPlanes");
-    _clipPlanes->setGuiName("Clip Planes");
+    const std::vector<ghoul::Dictionary> clipPlanes = p.clipPlanes.value_or(std::vector<ghoul::Dictionary>());
+    _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanes);
 
     if (p.gridType.has_value()) {
         const VolumeGridType gridType = volume::parseGridType(*p.gridType);

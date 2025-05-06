@@ -32,6 +32,8 @@
 
 namespace ghoul { class Dictionary; }
 
+namespace openspace::documentation {  struct Documentation; } 
+
 namespace openspace::volume {
 
 class VolumeClipPlane : public properties::PropertyOwner {
@@ -41,6 +43,8 @@ public:
 
     glm::vec3 normal() const;
     glm::vec2 offsets() const;
+
+    static documentation::Documentation Documentation();
 
 private:
     properties::Vec3Property _normal;

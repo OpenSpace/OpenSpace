@@ -25,6 +25,7 @@
 #include <modules/volume/volumemodule.h>
 
 #include <modules/volume/rendering/renderabletimevaryingvolume.h>
+#include <modules/volume/rendering/volumeclipplane.h>
 #include <modules/volume/tasks/generaterawvolumetask.h>
 #include <modules/volume/tasks/generaterawvolumefromfiletask.h>
 #include <openspace/documentation/documentation.h>
@@ -57,7 +58,8 @@ void VolumeModule::internalInitialize(const ghoul::Dictionary&) {
 std::vector<documentation::Documentation> VolumeModule::documentations() const {
     return {
         RenderableTimeVaryingVolume::Documentation(),
-        GenerateRawVolumeTask::Documentation()
+        GenerateRawVolumeTask::Documentation(),
+        VolumeClipPlane::Documentation()
     };
 }
 
