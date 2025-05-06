@@ -34,6 +34,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/clipboard.h>
+#include <ghoul/misc/interpolator.h>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo CopyToClipboardInfo = {
@@ -141,40 +142,19 @@ namespace {
 } // namespace
 
 namespace {
-std::pair<glm::vec2, glm::vec2> calculatePadding(const std::vector<glm::vec2>& pVec) {
-    const glm::vec2& pf0 = pVec[0];
-    const glm::vec2& pf1 = pVec[1];
-    const glm::vec2& pb0 = pVec[pVec.size() - 1];
-    const glm::vec2& pb1 = pVec[pVec.size() - 2];
-    const glm::vec2 firstPaddingPoint = pf0 + ((pf0 - pf1) * -1.f);
-    const glm::vec2 lastPaddingPoint = pb0 + ((pb0 - pb1) * -1.f);
-    return std::pair(firstPaddingPoint, lastPaddingPoint);
+
+glm::vec2 mirrorPoint() {
+
 }
 
-glm::vec2 calculateCatmullRom(float t,
-                                const glm::vec2& p0,
-                                const glm::vec2& p1,
-                                const glm::vec2& p2,
-                                const glm::vec2& p3)
-{
-    glm::vec2 newPoint;
-    const float t3 = powf(t, 3.f);
-    const float t2 = powf(t, 2.f);
-    const float alpha = 0.5f;
-
-    const float p0t = (-t + (2.f * t2) - t3);
-    const float p1t = (2.f - (5.f * t2) + (3.f * t3));
-    const float p2t = (t + (4.f * t2) - (3.f * t3));
-    const float p3t = (-t2 + t3);
-
-    const glm::vec2 np0 = p0 * p0t;
-    const glm::vec2 np1 = p1 * p1t;
-    const glm::vec2 np2 = p2 * p2t;
-    const glm::vec2 np3 = p3 * p3t;
-
-    newPoint = alpha * (np0 + np1 + np2 + np3);
-
-    return newPoint;
+std::pair<glm::vec2, glm::vec2> calculatePadding(const std::vector<glm::vec2>& v) {
+    const glm::vec2& pf0 = v[1];
+    const glm::vec2& pf1 = v[2];
+    const glm::vec2& pb0 = v[v.size() - 1];
+    const glm::vec2& pb1 = v[v.size() - 2];
+    const glm::vec2 firstPaddingPoint = pf0 + ((pf1 - pf0) * -1.f);
+    const glm::vec2 lastPaddingPoint = pb0 + ((pb1 - pb0) * -1.f);
+    return std::pair(firstPaddingPoint, lastPaddingPoint);
 }
 
 std::vector<glm::vec2> sampleSpline(const std::vector<glm::vec2>& controlPoints) {
@@ -185,7 +165,7 @@ std::vector<glm::vec2> sampleSpline(const std::vector<glm::vec2>& controlPoints)
     for (int i = 0; i < numberOfSegments; ++i) {
         for (int s = 0; s < subdivisions; ++s) {
             float tValue = stepSize * s;
-            splineData.push_back(calculateCatmullRom(
+            splineData.push_back(ghoul::interpolateCatmullRom(
                 tValue,
                 *(controlPoints.begin() + i + 0),
                 *(controlPoints.begin() + i + 1),
@@ -243,7 +223,7 @@ ScreenSpaceInsetBlackout::BlackoutShape::PointOwner::Point::Point(
         *dataptr,
         glm::vec2(0.f),
         glm::vec2(1.f),
-        glm::vec2(0.001f)
+        glm::vec2(0.01f)
     );
 }
 
@@ -621,67 +601,66 @@ void ScreenSpaceInsetBlackout::generateVertexArrayData() {
         };
     }
     else {
-        // Create vectors for calculated spline points and insert first temporary value
-        std::vector<glm::vec2> topPoints = { glm::vec2(0.f) };
-        std::vector<glm::vec2> rightPoints = { glm::vec2(0.f) };
-        std::vector<glm::vec2> bottomPoints = { glm::vec2(0.f) };
-        std::vector<glm::vec2> leftPoints = { glm::vec2(0.f) };
+        std::vector<glm::vec2> pointsTop = { glm::vec2(0.f) };
+        std::vector<glm::vec2> pointsRight = { glm::vec2(0.f) };
+        std::vector<glm::vec2> pointsBottom = { glm::vec2(0.f) };
+        std::vector<glm::vec2> pointsLeft = { glm::vec2(0.f) };
 
         // Push first corner to each spline
-        topPoints.push_back(_blackoutShape.cornerData[0]);
-        rightPoints.push_back(_blackoutShape.cornerData[1]);
-        bottomPoints.push_back(_blackoutShape.cornerData[2]);
-        leftPoints.push_back(_blackoutShape.cornerData[3]);
+        pointsTop.push_back(_blackoutShape.cornerData[0]);
+        pointsRight.push_back(_blackoutShape.cornerData[1]);
+        pointsBottom.push_back(_blackoutShape.cornerData[2]);
+        pointsLeft.push_back(_blackoutShape.cornerData[3]);
 
         // Insert the existing control points for each spline
-        topPoints.insert(
-            topPoints.begin() + 2,
+        pointsTop.insert(
+            pointsTop.begin() + 2,
             _blackoutShape.topSplineData.begin(),
             _blackoutShape.topSplineData.end()
         );
-        rightPoints.insert(
-            rightPoints.begin() + 2,
+        pointsRight.insert(
+            pointsRight.begin() + 2,
             _blackoutShape.rightSplineData.begin(),
             _blackoutShape.rightSplineData.end()
         );
-        bottomPoints.insert(
-            bottomPoints.begin() + 2,
+        pointsBottom.insert(
+            pointsBottom.begin() + 2,
             _blackoutShape.bottomSplineData.begin(),
             _blackoutShape.bottomSplineData.end()
         );
-        leftPoints.insert(
-            leftPoints.begin() + 2,
+        pointsLeft.insert(
+            pointsLeft.begin() + 2,
             _blackoutShape.leftSplineData.begin(),
             _blackoutShape.leftSplineData.end()
         );
 
         // Push the last corner for each spline
-        topPoints.push_back(_blackoutShape.cornerData[1]);
-        rightPoints.push_back(_blackoutShape.cornerData[2]);
-        bottomPoints.push_back(_blackoutShape.cornerData[3]);
-        leftPoints.push_back(_blackoutShape.cornerData[0]);
+        pointsTop.push_back(_blackoutShape.cornerData[1]);
+        pointsRight.push_back(_blackoutShape.cornerData[2]);
+        pointsBottom.push_back(_blackoutShape.cornerData[3]);
+        pointsLeft.push_back(_blackoutShape.cornerData[0]);
 
         // Calculates the extra first and last point needed during spline sampling step
-        std::pair<glm::vec2, glm::vec2> tPad = calculatePadding(topPoints);
-        std::pair<glm::vec2, glm::vec2> rPad = calculatePadding(rightPoints);
-        std::pair<glm::vec2, glm::vec2> bPad = calculatePadding(bottomPoints);
-        std::pair<glm::vec2, glm::vec2> lPad = calculatePadding(leftPoints);
+        std::pair<glm::vec2, glm::vec2> tPad = calculatePadding(pointsTop);
+        std::pair<glm::vec2, glm::vec2> rPad = calculatePadding(pointsRight);
+        std::pair<glm::vec2, glm::vec2> bPad = calculatePadding(pointsBottom);
+        std::pair<glm::vec2, glm::vec2> lPad = calculatePadding(pointsLeft);
 
         // Adds the extra points
-        topPoints[0] = tPad.first;
-        rightPoints[0] = rPad.first;
-        bottomPoints[0] = bPad.first;
-        leftPoints[0] = lPad.first;
-        topPoints.push_back(tPad.second);
-        rightPoints.push_back(rPad.second);
-        bottomPoints.push_back(bPad.second);
-        leftPoints.push_back(lPad.second);
+        pointsTop[0] = tPad.first;
+        pointsRight[0] = rPad.first;
+        pointsBottom[0] = bPad.first;
+        pointsLeft[0] = lPad.first;
+        pointsTop.push_back(tPad.second);
+        pointsRight.push_back(rPad.second);
+        pointsBottom.push_back(bPad.second);
+        pointsLeft.push_back(lPad.second);
 
         // Samples the spline and returns all points along the spline curve
-        std::vector<glm::vec2> splineTop = sampleSpline(topPoints);
-        std::vector<glm::vec2> splineRight = sampleSpline(rightPoints);
-        std::vector<glm::vec2> splineBottom = sampleSpline(bottomPoints);
-        std::vector<glm::vec2> splineLeft = sampleSpline(leftPoints);
+        std::vector<glm::vec2> splineTop = sampleSpline(pointsTop);
+        std::vector<glm::vec2> splineRight = sampleSpline(pointsRight);
+        std::vector<glm::vec2> splineBottom = sampleSpline(pointsBottom);
+        std::vector<glm::vec2> splineLeft = sampleSpline(pointsLeft);
 
         // Translate points from range [0,1] to [-1,1] for X and Y
         offsetCoordinates(splineTop);
