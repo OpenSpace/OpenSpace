@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___NOTIFICATION_LOG___H__
-#define __OPENSPACE_MODULE_SERVER___NOTIFICATION_LOG___H__
+#ifndef __OPENSPACE_MODULE_SERVER___NOTIFICATIONLOG___H__
+#define __OPENSPACE_MODULE_SERVER___NOTIFICATIONLOG___H__
 
 #include <ghoul/logging/log.h>
 
@@ -69,9 +69,8 @@ public:
 private:
     CallbackFunction _callbackFunction;
     TracyLockable(std::mutex, _mutex);
-
 };
 
 } // namespace ghoul::logging
 
-#endif // __OPENSPACE_MODULE_SERVER___NOTIFICATION_LOG___H__
+#endif // __OPENSPACE_MODULE_SERVER___NOTIFICATIONLOG___H__

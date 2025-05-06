@@ -63,8 +63,9 @@ void ErrorLogTopic::handleJson(const nlohmann::json& json) {
         }
 
         auto onLogging = [this](std::string_view timeStamp, std::string_view dateStamp,
-            std::string_view category, ghoul::logging::LogLevel level,
-            std::string_view message) {
+                                std::string_view category, ghoul::logging::LogLevel level,
+                                std::string_view message)
+        {
 
             nlohmann::json payload = {
                 { "level", level },
