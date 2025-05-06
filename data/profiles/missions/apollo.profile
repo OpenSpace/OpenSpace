@@ -82,7 +82,7 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "This profile contains all the apollo assets in openspace. Apollo 8,11,17 and some associated materials. ",
+    "description": "This profile contains all the apollo assets in openspace. Apollo 8,11,17 and some associated materials.",
     "license": "MIT License",
     "name": "Apollo",
     "url": "https://www.openspaceproject.com",
