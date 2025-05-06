@@ -84,7 +84,7 @@ void DynamicFileSequenceDownloader::deinitialize(bool cacheFiles) {
         filesCurrentlyDownloading();
     for (auto file : currentlyDownloadingFiles) {
         file->download->cancel();
-
+        file->download->wait();
         std::error_code ec;
         std::filesystem::remove(file->path, ec);
         if (ec) {
