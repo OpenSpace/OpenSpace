@@ -58,7 +58,7 @@ CefHost::CefHost([[maybe_unused]] const std::string& helperLocation) {
     attachDebugSettings(settings);
 
     // cf. https://github.com/chromiumembedded/cef/issues/3685
-    setings.chrome_runtime = true;
+    settings.chrome_runtime = true;
 
 #ifdef __APPLE__
     // Load the CEF framework library at runtime instead of linking directly as required
