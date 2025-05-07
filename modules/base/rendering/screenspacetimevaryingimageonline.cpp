@@ -52,8 +52,8 @@ namespace {
     // Example JSON format:
     // {
     //   "files": [
-    //     {"timestamp": "2024-05-10 15:00:17.0","url": "https://example.com/image1.png"},
-    //     {"timestamp": "2024-05-10 15:02:17.0","url": "https://example.com/image2.png"}
+    //     {"timestamp": "2024-05-10 15:00:00.0","url": "https://example.com/image1.png"},
+    //     {"timestamp": "2024-05-10 15:02:00.0","url": "https://example.com/image2.png"}
     //   ]
     // }
     struct [[codegen::Dictionary(ScreenSpaceTimeVaryingImageOnline)]] Parameters {

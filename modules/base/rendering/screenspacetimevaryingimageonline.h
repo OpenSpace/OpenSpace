@@ -53,12 +53,12 @@ private:
     int activeIndex(double currentTime) const;
 
     properties::StringProperty _jsonFilePath;
-    std::vector<double> _timestamps;
-    std::map<double, std::string> _urls;
-    std::string _currentUrl;
 
     std::future<DownloadManager::MemoryFile> _imageFuture;
+    std::map<double, std::string> _urls;
+    std::string _currentUrl;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::vector<double> _timestamps;
 
     int _activeIndex = -1;
     double _sequenceEndTime = 0.0;
