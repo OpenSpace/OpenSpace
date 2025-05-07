@@ -120,6 +120,7 @@ private:
     std::map<int, std::string> _layerNames;
     int _fitsLayerTemp;
     int _fitsLayerNameTemp;
+    float _fitsDataCapValue = 50.f;
     // An option to keep or delete the downloads from dynamic downloader on shutdown
     // Deletes on default
     properties::BoolProperty _saveDownloadsOnShutdown;

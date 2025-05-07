@@ -53,9 +53,15 @@ local WSA_Magnetograms = {
 local WSA_Magnetograms_Adapt = {
   Identifier = "WSA_54_Magnetograms_ADAPT",
   Parent = transforms.WSAOffset60.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = {0.0, 0.0, -2.00712864}
+    }
+  },
   Renderable = {
     Type = "RenderableTimeVaryingSphere",
-    Enabled = false,
+    Enabled = true,
     Size = sunRadius * 1.002,
     LoadingType = "DynamicDownloading",
     InfoURL = infoURL,
@@ -73,6 +79,7 @@ local WSA_Magnetograms_Adapt = {
       ['7'] = "Distance to current sheet at outer boundary (degrees)"
     },
     ColorMap = blueBlackRed,
+    UseColorMap = false,
     CacheData = false,
     ShowAtAllTimes = false,
     Opacity = 1,
@@ -89,6 +96,12 @@ local WSA_Magnetograms_Adapt = {
 local WSA_Velocity_Adapt = {
   Identifier = "WSA_54_velocity_ADAPT",
   Parent = transforms.WSAOffset60.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = {0.0, 0.0, -2.00712864}
+    }
+  },
   Renderable = {
     Type = "RenderableTimeVaryingSphere",
     Enabled = false,

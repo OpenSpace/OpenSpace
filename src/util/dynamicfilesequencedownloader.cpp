@@ -437,8 +437,9 @@ std::vector<File>::iterator DynamicFileSequenceDownloader::closestFileToNow(
     if (it == _availableData.begin()) {
         return it;
     }
+
     std::vector<File>::iterator prev = std::prev(it);
-    if (std::abs(prev->time - time) <= std::abs(it->time - time)) {
+    if (_forward) {
         return prev;
     }
     else {

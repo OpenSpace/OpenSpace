@@ -18,20 +18,16 @@ struct ImageData {
     int width;
     int height;
 };
-
+// path of file to load, layerIndex is which layer in the fits file to make into a texture
+// and minMax is the value, positive and negative, in which to cap the data between
+// to cause overexposure of higher and lower values.;
 std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
                                                          const std::filesystem::path path,
-                                                         int layerIndex);
-std::shared_ptr<ImageData<float>> callCorrectImageReader(
-                                               const std::unique_ptr<CCfits::FITS>& file);
+                                                         int layerIndex, float minMax);
+
 int nLayers(const std::filesystem::path path);
-//template<typename T>
-//std::shared_ptr<ImageData<T>> readImageInternal(CCfits::ExtHDU& image);
 template<typename T, typename U>
 std::shared_ptr<ImageData<T>> readImageInternal(U& image);
-float readHeaderValueFloat(
-                        const std::string key, const std::unique_ptr<CCfits::FITS>& file);
-
 
 } // namespace openspace
 

@@ -162,6 +162,10 @@ namespace {
         // An index specifying which layer in the fits file to display
         std::optional<int> fitsLayer;
         std::optional<ghoul::Dictionary> layerNames;
+        // A positive number to be used to cap where the color range will lie.
+        // Values higher than this number, and values lower than the negative of
+        // this value will be overexposed.
+        std::optional<float> fitsDataCapValue;
         // This is set to false by default and will delete all the downloaded content when
         // OpenSpace is shut down. Set to true to save all the downloaded files.
         std::optional<bool> cacheData;
@@ -203,6 +207,7 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     }
     if (_loadingType == LoadingType::DynamicDownloading) {
         setupDynamicDownloading(p.dataID, p.numberOfFilesToQueue, p.infoURL, p.dataURL);
+        _fitsDataCapValue = p.fitsDataCapValue.value_or(_fitsDataCapValue);
     }
     if (p.fitsLayer.has_value()) {
         _fitsLayerTemp = *p.fitsLayer;
@@ -321,7 +326,8 @@ void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
     newFile.path = path;
     newFile.status = File::FileStatus::Loaded;
     newFile.time = extractTriggerTimeFromFitsFileName(path);
-    std::unique_ptr<ghoul::opengl::Texture> t = loadTextureFromFits(path, _fitsLayer);
+    std::unique_ptr<ghoul::opengl::Texture> t =
+        loadTextureFromFits(path, _fitsLayer, _fitsDataCapValue);
     if (t == nullptr) {
         return;
     }
@@ -458,7 +464,8 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
             updateActiveTriggerTimeIndex(currentTime);
             File& file = _files[_activeTriggerTimeIndex];
             if (file.status == File::FileStatus::Downloaded) {
-                file.texture = loadTextureFromFits(file.path, _fitsLayer);
+                file.texture =
+                    loadTextureFromFits(file.path, _fitsLayer, _fitsDataCapValue);
                 file.status = File::FileStatus::Loaded;
             }
             if (previousIndex != _activeTriggerTimeIndex) {
@@ -620,7 +627,8 @@ void RenderableTimeVaryingSphere::definePropertyCallbackFunctions() {
         else {
             if (_isFitsFormat) {
                 for (auto file = _files.begin(); file != _files.end(); ++file) {
-                    file->texture = loadTextureFromFits(file->path, _fitsLayer);
+                    file->texture =
+                        loadTextureFromFits(file->path, _fitsLayer, _fitsDataCapValue);
                     file->texture->uploadTexture();
                     file->texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
                 }
@@ -636,7 +644,8 @@ void RenderableTimeVaryingSphere::definePropertyCallbackFunctions() {
         else {
             if (_isFitsFormat) {
                 for (auto file = _files.begin(); file != _files.end(); ++file) {
-                    file->texture = loadTextureFromFits(file->path, _fitsLayerName);
+                    file->texture =
+                        loadTextureFromFits(file->path, _fitsLayerName, _fitsDataCapValue);
                     file->texture->uploadTexture();
                     file->texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
                 }

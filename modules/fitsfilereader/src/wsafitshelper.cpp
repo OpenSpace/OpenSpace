@@ -12,7 +12,7 @@ namespace openspace {
 
 std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
                                                          const std::filesystem::path path,
-                                                         int layerIndex)
+                                                         int layerIndex, float minMax)
 {
     try {
         std::unique_ptr<FITS> file = std::make_unique<FITS>(path.string(), Read, true);
@@ -24,7 +24,8 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
             return nullptr;
         }
         // Convert fits path with fits-file-reader functions
-        const std::shared_ptr<ImageData<float>> fitsValues = callCorrectImageReader(file);
+        const std::shared_ptr<ImageData<float>> fitsValues =
+            readImageInternal<float>(file->pHDU());
         int layerSize = fitsValues->width * fitsValues->height;
 
         int nLayers = fitsValues->contents.size() / layerSize;
@@ -40,19 +41,9 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         std::valarray<float> layerValues =
             fitsValues->contents[std::slice(layerIndex*layerSize, layerSize, 1)];
 
-        // Calculate median:
-        //std::valarray<float> sorted = layerValues;
-        //std::sort(std::begin(sorted), std::end(sorted));
-        //float median;
-        //if (sorted.size() % 2 == 0)
-        //    median = (sorted[sorted.size() / 2 - 1] + sorted[sorted.size() / 2]) / 2;
-        //else
-        //    median = sorted[sorted.size() / 2];
-
-        const float maxValue = 50.f;// layerValues.max();
-        const float minValue = -50.f;// layerValues.min();
+        const float maxValue = minMax; // layerValues.max();
+        const float minValue = -minMax; // layerValues.min();
         float* imageData = new float[layerValues.size()];
-        //test.assign(std::begin(layerValues), std::end(layerValues));
         std::vector<glm::vec3> rgbLayers;
         for (size_t i = 0; i < layerValues.size(); i++) {
             // normalization
@@ -111,7 +102,8 @@ int nLayers(const std::filesystem::path path) {
             return -1;
         }
         // Convirt fits path with fits-file-reader functions
-        const std::shared_ptr<ImageData<float>> fitsValues = callCorrectImageReader(file);
+        const std::shared_ptr<ImageData<float>> fitsValues =
+            readImageInternal<float>(file->pHDU());
         int layerSize = fitsValues->width * fitsValues->height;
 
         return fitsValues->contents.size() / layerSize;
@@ -133,44 +125,6 @@ int nLayers(const std::filesystem::path path) {
     }
 }
 
-// It was easier to make this into a little function to return right away than store it
-// passed the if-statements
-std::shared_ptr<ImageData<float>> callCorrectImageReader(const std::unique_ptr<FITS>& file) {
-    try {
-//        bool isPrimaryHDU = file->extension().empty();
-//        isPrimaryHDU = true;
-//        if (isPrimaryHDU) {
-            return readImageInternal<float>(file->pHDU());
-//        }
-//        else {
-//            return readImageInternal<float>(file->currentExtension());
-//        }
-    }
-    catch (const FitsException& e) {
-        LERROR("Could not read FITS image from table. " + e.message());
-    }
-}
-
-// This is pretty annoying, the read method is not derived from the HDU class
-// in CCfits - need to explicitly cast to the sub classes to access read
-//template<typename T>
-//std::shared_ptr<ImageData<T>> readImageInternal(ExtHDU& image) {
-//    try {
-//        std::valarray<T> contents;
-//        image.read(contents);
-//        ImageData<T> im = {
-//            .contents = std::move(contents),
-//            .width = static_cast<int>(image.axis(0)),
-//            .height = static_cast<int>(image.axis(1))
-//        };
-//        return std::make_shared<ImageData<T>>(im);
-//    }
-//    catch (const FitsException& e) {
-//        LERROR("Could not read FITS image EXTHDU. " + e.message());
-//    }
-//    return nullptr;
-//}
-
 template<typename T, typename U>
 std::shared_ptr<ImageData<T>> readImageInternal(U& image) {
     try {
@@ -187,12 +141,5 @@ std::shared_ptr<ImageData<T>> readImageInternal(U& image) {
         LERROR("Could not read FITS layer");
     }
     return nullptr;
-}
-
-float readHeaderValueFloat(const std::string key, const std::unique_ptr<FITS>& file) {
-    float value;
-    HDU& image = static_cast<HDU&>(file->pHDU());
-    image.readKey(key, value);
-    return value;
 }
 } // namespace openspace
