@@ -49,28 +49,21 @@ public:
      * NodesTelemetry and the PlanetsSonification. More documentation for the elevation
      * part of the angles is located further below.
      *
-     * Horizontal: Calculate the angle to the object in the horizontal direction within
-     *             the camera plane. This mode is suitable for flat displays or forward
-     *             facing immersive environments (such as the Norrköping dome theater).
-     *             The camera plane is the plane of the camera view direction + camera
-     *             left direction (i.e. the negative camera right direction), with the
-     *             camera up direction as the normal. The angle goes from -pi to pi in
-     *             radians and zero degrees would be forward in the camera view direction.
-     *             When the object is located towards the left relative the camera view
-     *             direction, then the angle will be a positive value. If instead, the
-     *             object is located towards the right, the angle will become negative.
+     * Horizontal: This angle calculation mode is suitable for flat displays or
+     *             forward-facing immersive environments, such as the Visualization Center
+     *             dome theater in Norrköping, Sweden. For more information, see the page
+     *             "Angle Calculations" on the OpenSpace documentation page. This angle
+     *             determines where the object is placed within a horizontal plane of
+     *             reference in relation to the camera.
      *
-     * Circular: Calculate the angle to the object in circular space around the center
-     *           point in the camera view plane. This mode is suitable for centered
-     *           fisheye displays or omnidirectional immersive environments (such as the
-     *           Hayden planetarium). The camera view plane is the plane of the camera up
-     *           direction + camera left direction (i.e. the negative camera right
-     *           direction), with the negative camera view direction as the normal. The
-     *           angle goes from -pi to pi in radians and zero degrees would be forward in
-     *           the camera view direction. When the object is located towards the left
-     *           relative the center of the screen, then the angle will be a positive
-     *           value. If instead, the object is located towards the right, the angle
-     *           will become negative.
+     * Circular: This angle calculation mode is suitable for centered fisheye displays or
+     *           omnidirectional immersive environments, such as the Hayden Planetarium at
+     *           the American Museum of Natural History in New York, USA. For more
+     *           information, see the page "Angle Calculations" on the OpenSpace
+     *           documentation page. This angle determines where the object is placed in a
+     *           circular space around the center of the screen. The difference in this
+     *           mode compared to the horizontal one is that this mode calculates the
+     *           angles in a circular (or radial) manner around the center of the screen.
      */
     enum class AngleCalculationMode {
         Horizontal = 0,

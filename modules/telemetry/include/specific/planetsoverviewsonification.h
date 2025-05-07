@@ -55,7 +55,7 @@ private:
      * \param camera The camera in the scene (not used in this case)
      * \return `true` if the data was updated, otherwise `false`
      */
-    bool updateData(const Camera*) override;
+    bool updateData(const Camera* camera) override;
 
     /**
      * Send current planets overview sonification settings to the Open Sound Control

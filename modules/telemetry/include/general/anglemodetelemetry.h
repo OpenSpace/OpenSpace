@@ -44,7 +44,7 @@ private:
      * \param camera The camera in the scene (not used in this case)
      * \return `true` if the data is new compared to before, otherwise `false`
      */
-    bool updateData(const Camera*) override;
+    bool updateData(const Camera* camera) override;
 
     /**
      * Send the current angle settings telemetry information to the Open Sound Control

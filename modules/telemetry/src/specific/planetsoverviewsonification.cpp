@@ -50,8 +50,8 @@ namespace {
     {
         "PlanetsOverviewSonification",
         "Planets Overview Sonification",
-        "Sonification that gives an overview of the planets in the solar system with "
-        "fewer audible features for each planet compared to the regular planets "
+        "Sonification that gives an overview of the planets in the Solar System with "
+        "fewer audible features for each planet compared to the full planets "
         "sonification."
     };
 

@@ -185,8 +185,8 @@ namespace {
         "LowDistancePrecision",
         "Distance Precision (Low)",
         "The precision in meters used to determine when to send updated distance data "
-        "to the Open Sound Control receiver. This is the lower precision used, for "
-        "planets that are not the current focus.",
+        "to the Open Sound Control receiver. This is the low precision value (low level "
+        "of detail) that is used for objects that are not the current focus.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -194,8 +194,8 @@ namespace {
         "HighDistancePrecision",
         "Distance Precision (High)",
         "The precision in meters used to determine when to send updated distance data "
-        "to the Open Sound Control receiver. This is the higher precision used, for the "
-        "planet that is the current focus.",
+        "to the Open Sound Control receiver. This is the high precision value (high "
+        "level of detail) that is used for the object the is currently in focus.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -203,8 +203,8 @@ namespace {
         "LowAnglePrecision",
         "Angle Precision (Low)",
         "The precision in radians used to determine when to send updated angle data "
-        "to the Open Sound Control receiver. This is the lower precision used, for "
-        "planets that are not the current focus.",
+        "to the Open Sound Control receiver. This is the low precision value (low level "
+        "of detail) that is used for objects that are not the current focus.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -212,8 +212,8 @@ namespace {
         "HighAnglePrecision",
         "Angle Precision (High)",
         "The precision in radians used to determine when to send updated angle data "
-        "to the Open Sound Control receiver. This is the higher precision used, for the "
-        "planet that is the current focus.",
+        "to the Open Sound Control receiver. This is the high precision value (high "
+        "level of detail) that is used for the object the is currently in focus.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -409,9 +409,9 @@ void PlanetsSonification::update(const Camera* camera) {
     }
 
     bool compareEnabled = compare->enabled();
-    bool overviewEnabled = overview->enabled();
+    _overviewEnabled = overview->enabled();
 
-    if (!_enabled && !compareEnabled && !overviewEnabled) {
+    if (!_enabled && !compareEnabled && !_overviewEnabled) {
         return;
     }
 
@@ -560,19 +560,45 @@ bool PlanetsSonification::updateData(const Camera* camera, int planetIndex,
         return false;
     }
 
-    double horizontalAngle =
-        calculateAngleTo(camera, _planets[planetIndex].name, angleCalculationMode);
-
-    double verticalAngle = 0.0;
-    if (includeElevation) {
-        verticalAngle = calculateElevationAngleTo(
+    // Calculate the angles depending on the Angle calculation mode and if the overview
+    // mode is enabled, then calculate the angles with respect to the Sun instead of
+    // the camera.
+    double horizontalAngle = 0.0;
+    if (_overviewEnabled) {
+        horizontalAngle = calculateAngleFromAToB(
             camera,
+            "Sun",
             _planets[planetIndex].name,
             angleCalculationMode
         );
     }
+    else {
+        horizontalAngle =
+            calculateAngleTo(camera, _planets[planetIndex].name, angleCalculationMode);
+    }
 
-    // Also calculate angle to moons
+    double verticalAngle = 0.0;
+    if (includeElevation) {
+        if (_overviewEnabled) {
+            verticalAngle = calculateElevationAngleFromAToB(
+                camera,
+                "Sun",
+                _planets[planetIndex].name,
+                angleCalculationMode
+            );
+        }
+        else {
+            verticalAngle = calculateElevationAngleTo(
+                camera,
+                _planets[planetIndex].name,
+                angleCalculationMode
+            );
+        }
+    }
+
+    // Calculate the angles to the moons from the planet. These angles are used for the
+    // sonification of the moons. The reason why the angle is calculated from the planet
+    // and not the camera is to give a feeling that the moons are orbiting the audience.
     bool dataWasUpdated = false;
     for (DataBody& moon : _planets[planetIndex].moons) {
         double dist = calculateDistanceTo(camera, moon.name, DistanceUnit::Kilometer);

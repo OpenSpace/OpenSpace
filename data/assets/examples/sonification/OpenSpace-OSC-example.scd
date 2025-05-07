@@ -25,7 +25,30 @@
 NetAddr.langPort;
 NetAddr.localAddr;
 
+/*****************************************************************************************
+ * This is a SuperCollider file that needs to be run in the SuperCollider application    *
+ * that can be downloaded here: https://supercollider.github.io/                         *
+ *                                                                                       *
+ * This is an example file that shows all the messages that the Telemetry module in      *
+ * OpenSpace can send over Open Sound Control (OSC). SuperCollider can then listen to    *
+ * these OSC messages and create sounds based on their content (a sonification). This    *
+ * example only listens to the messages and displays their content in the log to the     *
+ * right in the SuperCollider application. For a more extensive example that shows how   *
+ * to create sounds in SuperCollider based on the data from OpenSpace, see the           *
+ * planetsSonification.scd example file.                                                 *
+ *                                                                                       *
+ * To run a SuperCollider file, click any line within the parentheses below, such as the *
+ * marked line. When you have selected a line, press the CTRL and ENTER keys on your     *
+ * keyboard at the same time, and SuperCollider will run the code. You will see a        *
+ * message appear in the log to the right, the message should be:                        *
+ * "-> OSCdef(Neptune, /Neptune, nil, nil, nil)". At this point, SuperCollider is ready  *
+ * to receive messages from OpenSpace. For a guide on how to enable the Telemetry module *
+ * inside OpenSpace, see this documentation page: LINK                                   *
+ ****************************************************************************************/
+
 (
+
+// Click this line and press CTRL + ENTER on the keyboard to run this example
 
 // Camera sonification
 OSCdef.new(
@@ -34,20 +57,23 @@ OSCdef.new(
 		arg msg;
 
 		// msg[0] = OSC Label
-		// msg[1] = The current X position of the camera in the world, specified in
-		//          relation to the Solar System barycenter
-		// msg[2] = The Y position of the camera in the world
-		// msg[3] = The Z position of the camera in the world
-		// msg[4] = The angle in radians for the current quaternion rotation of the
-		//          camera (w)
-		// msg[5] = The X component of the unit rotation axis in the current quaternion
-		//          rotation of the camera
-		// msg[6] = The Y component of the rotation axis in the quaternion rotation
-		// msg[7] = The Z component of the rotation axis in the quaternion rotation
-		// msg[8] = The current speed of the camera, specified in the selected distance
-		//          unit per second
-		// msg[9] = The selected distance unit for the speed of the camera, as a string
-		//          with the first letter capitalized
+		// msg[1] = The x position of the camera in the world
+		// msg[2] = The y position of the camera in the world
+		// msg[3] = The z position of the camera in the world
+		// msg[4] = The w component of the quaternion rotation of the camera
+		// msg[5] = The x component of the quaternion rotation of the camera
+		// msg[6] = The y component of the quaternion rotation of the camera
+		// msg[7] = The z component of the quaternion rotation of the camera
+		// msg[8] = The movement speed of the camera, in the distance unit per second
+		//          specified by the next item
+		// msg[9] = The distance unit for the movement speed of the camera, as a string in
+		//          singular form with the first letter capitalized. For example,
+		//          "Kilometer"
+		//
+		// Note that the first seven items describe the position and orientation of the
+		// camera. The first three items specify the x, y, and z positions of the camera
+		// in the world, in relation to the solar system barycenter. The next four items
+		// are the quaternion rotation of the camera in the order of w, x, y, and z.
 
 		("Camera: " + msg).postln;
 	},
@@ -61,8 +87,7 @@ OSCdef.new(
 		arg msg;
 
 		// msg[0] = OSC Label
-		// msg[1] = The name of the currently set focus node in OpenSpace as a string.
-		//          For example, Earth or ISS.
+		// msg[1] = The identifier of the new focus in OpenSpace, as a string
 
 		("Focus: " + msg).postln;
 	},
@@ -76,17 +101,16 @@ OSCdef.new(
 		arg msg;
 
 		// msg[0] = OSC Label
-		// msg[1] = Angle Calculation Mode. Determines what type of angle the other
-		//          Sonifications are sending. More documentaiton on how these angles
-		//          work can be found on the general OpenSpace documentation page
-		//          https://docs.openspaceproject.com/latest/
-		//          0 -> Horizontal, the angle is horizontal to the screen and any
-		//                           additional elevatoin angle is up/down the screen.
-		//          1 -> Circular, the angle is a circular azimuth angle. Similar to
-		//                         polar coordinates. In the case of an added elevation
-		//                         angle, this would be the radius angle.
-		// msg[2] = Whether the elevation angles have been calculated or not. In case of
-		//          false, the elevation angles will always be set to 0.0.
+		// msg[1] = The first item is an integer value that specifies what method was used
+		//          to calculate the angles. If the value is 0, then the method used was
+		//          the Horizontal angle calculation mode. In the case where the value is
+		//          1, then the Circular angle calculation mode was used. See the
+		//          documentation page LINK for more information about the angle
+		//          calculation modes.
+		// msg[2] = The second value is an integer value of either 0 or 1 that determines
+		//          if the additional elevation angle is used or not. If the value is 1,
+		//          the additional elevation angle is calculated. Otherwise, if 0, the
+		//          elevation angle is always set to 0.0.
 
 		("Mode: " + msg).postln;
 	},
@@ -100,13 +124,16 @@ OSCdef.new(
 		arg msg;
 
 		// msg[0] = OSC Label
-		// msg[1] = Speed of simulation time, specified in the selected time unit in the
-		//          simulation per real-life second
+		// msg[1] = The speed of the simulation time, specified in the selected time unit
+		//          in the simulation, per real-life second. For example, 10 simulated
+		//          seconds per real-life second means that the simulation goes 10 times
+		//          faster than real-life.
 		// msg[2] = The selected time unit for the speed of simulation time, as a string
-		//          with the first letter capitalized
-		// msg[3] = Current simulation time specified in J2000 seconds. J2000 seconds are
-		//          the number of seconds past the J2000 epoch (January 1,
-		//          2000 12:00:00 TT)
+		//          in singular form with the first letter capitalized. For example,
+		//          "Day".
+		// msg[3] = The current simulation time in OpenSpace specified in J2000 seconds,
+		//          that is, the number of seconds past the J2000 epoch
+		//          (i.e. January 1, 2000 12:00:00 TT).
 
 		("Time: " + msg).postln;
 	},
@@ -115,14 +142,16 @@ OSCdef.new(
 
 // Nodes sonification, data map:
 // msg[0] = OSC Label (The identifier for each node)
-// msg[1] = The distance from the camera to the node, specified in the selected
-//          distance unit
-// msg[2] = The horizontal angle in radians to the node on the master screen, with the
-//          current surround mode taken into account
-// msg[3] = The vertical/elevation angle in radians to the node on the master screen,
-//          with the current angle calculation mode taken into account
-// msg[4] = The selected distance unit for the distance to the camera, as a string with
-//          the first letter capitalized
+// msg[1] = The distance from the camera to the node, in the distance unit specified in
+//          the last item
+// msg[2] = The horizontal angle to the node, in radians, with the current angle
+//          calculation mode taken into account. See the documentation page LINK for more
+//          information about the angle calculation modes.
+// msg[3] = The elevation angle to the node, in radians, with the current angle
+//          calculation mode taken into account. Again, see the documentation page LINK
+//          for more information about the angle calculation modes.
+// msg[4] = The unit for the distance to the camera, as a string in singular form with the
+//          first letter capitalized. For example, "Meter".
 
 // ISS node
 OSCdef.new(
@@ -159,26 +188,30 @@ OSCdef.new(
 		arg msg;
 
 		// msg[0] = OSC Label
-		// msg[1] = The first planet to be compared
-		//          0 -> None selected
-		//          1 -> Mercury
-		//          2 -> Venus
-		//          3 -> Earth
-		//          4 -> Mars
-		//          5 -> Jupiter
-		//          6 -> Saturn
-		//          7 -> Uranus
-		//          8 -> Neptune
-		// msg[2] = The second planet to be compared, see list above (will never be the
-		//          same as the first)
-		// msg[3] = List of GUI settings for the comparison, which aspects of the
-		//          sonification should be turned on or off
-		//          msg[3][0] = Size/day, 0: off, 1: on
-		//          msg[3][1] = Gravity
-		//          msg[3][2] = Temperature
-		//          msg[3][3] = Atmosphere
-		//          msg[3][4] = Moons
-		//          msg[3][5] = Rings
+		// msg[1] = The index of the first planet to be compared. See the list below on
+		//          how to convert the index to a planet name:
+		//            0 -> None selected
+		//            1 -> Mercury
+		//            2 -> Venus
+		//            3 -> Earth
+		//            4 -> Mars
+		//            5 -> Jupiter
+		//            6 -> Saturn
+		//            7 -> Uranus
+		//            8 -> Neptune
+		// msg[2] = The index of the second planet to be compared (will never be the same
+		//          as the first).
+		// msg[3] = List of user interface settings for the comparison, which determines
+		//          which aspects of the sonification should be turned on or off. A value
+		//          of 0 means that a setting is turned off, and 1 means that it is turned
+		//          on. The order of the settings can be seen in the list below:
+		//            msg[3][0] = Size/day. 1 -> Size/day is turned on.
+		//                                  0 -> Size/day is turned off.
+		//            msg[3][1] = Gravity
+		//            msg[3][2] = Temperature
+		//            msg[3][3] = Atmosphere
+		//            msg[3][4] = Moons
+		//            msg[3][5] = Rings
 
 		("Compare: " + msg).postln;
 
@@ -193,16 +226,19 @@ OSCdef.new(
 		arg msg;
 
 		// msg[0] = OSC Label
-		// msg[1] = List of planets for the overview, which planets of the overview
-		//          sonification should be turned on or off
-		//          msg[1][0] = Mercury, 0: off, 1: on
-		//          msg[1][1] = Venus
-		//          msg[1][2] = Earth
-		//          msg[1][3] = Mars
-		//          msg[1][4] = Jupiter
-		//          msg[1][5] = Saturn
-		//          msg[1][5] = Uranus
-		//          msg[1][6] = Neptune
+		// msg[1] = List of user interface settings for the planets overview. This
+		//          determines which planets are part of the sonification or not. A value
+		//          of 0 means that the planet is turned off, and a 1 means that it is
+		//          turned on. The order of the settings can be seen in the list below:
+		//            msg[1][0] = Mercury. 1 -> Mercury is turned on.
+		//                                 0 -> Mercury is turned off.
+		//            msg[1][1] = Venus
+		//            msg[1][2] = Earth
+		//            msg[1][3] = Mars
+		//            msg[1][4] = Jupiter
+		//            msg[1][5] = Saturn
+		//            msg[1][5] = Uranus
+		//            msg[1][6] = Neptune
 
 		("Overview: " + msg).postln;
 	},
@@ -212,29 +248,33 @@ OSCdef.new(
 // Planets sonifications, data map:
 // msg[0] = OSC Label (The name of the planet)
 // msg[1] = The distance from the camera to the planet in kilometers
-// msg[2] = The horizontal angle in radians to the planet on the master screen, with the
-//          current angle calculation mode taken into account
-// msg[3] = The vertical/elevation angle in radians to the planet on the master screen,
-//          with the current angle calculation mode taken into account
-// msg[4] = List of GUI settings for the planet, what features of the sonification should
-//          be turned on or off. If the setting does not exist for a planet, the value is
-//          always 0
-//          msg[4][0] = Size/day, 0: off, 1: on
-//          msg[4][1] = Gravity
-//          msg[4][2] = Temperature
-//          msg[4][3] = Atmosphere
-//          msg[4][4] = Moons
-//          msg[4][5] = Rings
+// msg[2] = The horizontal angle in radians to the planet, with the current angle
+//          calculation mode taken into account. See the documentation page LINK for more
+//          information about the angle calculation modes.
+// msg[3] = The elevation angle in radians to the planet, with the current angle
+//          calculation mode taken into account. Again, see the documentation page LINK
+//          for more information about the angle calculation modes.
+// msg[4] = List of user interface settings for the planet sonification, which aspects of
+//          the sonification should be turned on or off. A value of 0 means that it is
+//          turned off, and a 1 means that it is turned on. The order of the settings can
+//          be seen in the table below. If the setting does not exist for a planet, the
+//          value is always 0.
+//            msg[4][0] = Size/day. 1 -> Size/day is turned on.
+//                                  0 -> Size/day is turned off.
+//            msg[4][1] = Gravity
+//            msg[4][2] = Temperature
+//            msg[4][3] = Atmosphere
+//            msg[4][4] = Moons
+//            msg[4][5] = Rings
 // msg[5] = The distance from the camera to the first moon in kilometers
-// msg[6] = Horizontal angle in radians from the planet to the first moon, with the
-//          current angle calculation mode taken into account
-// msg[7] = Vertical/Elevation angle in radians from the planet to the first moon, with
-//          the current angle calculation mode taken into account
+// msg[6] = The horizontal angle in radians to the first moon
+// msg[7] = The elevation angle in radians to the first moon
 // msg[8] = The distance from the camera to the second moon in kilometers
-// msg[9] = Horizontal angle in radians from the planet to the second moon
-// msg[10] = Vertical/Elevation angle in radians from the planet to the second moon
-// msg[...] = Data continues in the same pattern for as many moons there are for the
-//            planet
+// msg[9] = The horizontal angle in radians to the second moon
+// msg[10] = The elevation angle in radians to the second moon
+// msg[...] = The data then continues in the same pattern for as many moons as the planet
+//            has, with three values per moon. The moons are in the order of distance to
+//            the planet, the closest moon first and the farthest away moon last.
 
 // Mercury
 OSCdef.new(
@@ -314,7 +354,7 @@ OSCdef.new(
 
 		// Follow the planets sonification data map above
 		// Jupiter does not have the GUI settings:
-		//    - Rings (there are rings in real life, but not in OpenSpace)
+		//    - Rings (there are rings in real-life, but not in OpenSpace)
 		// Jupiter have moon data for 4 moons in the following order:
 		//    - Io
 		//    - Europa
@@ -356,7 +396,7 @@ OSCdef.new(
 
 		// Follow the planets sonification data map above
 		// Uranus does not have the GUI settings:
-		//    - Rings (there are rings in real life, but not in OpenSpace)
+		//    - Rings (there are rings in real-life, but not in OpenSpace)
 		// Uranus have moon data for 5 moons in the following order:
 		//    - Ariel
 		//    - Miranda
@@ -377,7 +417,7 @@ OSCdef.new(
 
 		// Follow the planets sonification data map above
 		// Neptune does not have the GUI settings:
-		//    - Rings (there are rings in real life, but not in OpenSpace)
+		//    - Rings (there are rings in real-life, but not in OpenSpace)
 		// Neptune have moon data for 2 moons in the following order:
 		//    - Triton
 		//    - Nereid

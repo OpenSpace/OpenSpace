@@ -87,7 +87,7 @@ private:
      * \param camera The camera in the scene (not used in this case)
      * \return Always return `false` (this function is empty)
      */
-    bool updateData(const Camera*) override;
+    bool updateData(const Camera* camera) override;
 
     /**
      * For this telemetry, a more advanced custom sendData function is needed with

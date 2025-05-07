@@ -68,8 +68,8 @@ namespace {
         "LowDistancePrecision",
         "Distance Precision (Low)",
         "The precision in meters used to determine when to send updated distance data "
-        "to the Open Sound Control receiver. This is the lower precision used, for nodes "
-        "that are not the current focus.",
+        "to the Open Sound Control receiver. This is the low precision value (low level "
+        "of detail) that is used for objects that are not the current focus.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -77,8 +77,8 @@ namespace {
         "HighDistancePrecision",
         "Distance Precision (High)",
         "The precision in meters used to determine when to send updated distance data "
-        "to the Open Sound Control receiver. This is the higher precision used, for the "
-        "current focus node.",
+        "to the Open Sound Control receiver. This is the high precision value (high "
+        "level of detail) that is used for the object the is currently in focus.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -86,8 +86,8 @@ namespace {
         "LowAnglePrecision",
         "Angle Precision (Low)",
         "The precision in radians used to determine when to send updated angle data "
-        "to the Open Sound Control receiver. This is the lower precision used, for nodes "
-        "that are not the current focus.",
+        "to the Open Sound Control receiver. This is the low precision value (low level "
+        "of detail) that is used for objects that are not the current focus.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -95,8 +95,8 @@ namespace {
         "HighAnglePrecision",
         "Angle Precision (High)",
         "The precision in radians used to determine when to send updated angle data "
-        "to the Open Sound Control receiver. This is the higher precision used, for the "
-        "current focus node.",
+        "to the Open Sound Control receiver. This is the high precision value (high "
+        "level of detail) that is used for the object the is currently in focus.",
         openspace::properties::Property::Visibility::User
     };
 
