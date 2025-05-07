@@ -97,11 +97,11 @@ void ErrorLogTopic::createLog(ghoul::logging::LogLevel logLevel) {
         {
 
             nlohmann::json payload = {
-                { "level", level },
-                { "category", category },
-                { "message", message },
                 { "timeStamp", timeStamp },
-                { "dateStamp", dateStamp }
+                { "dateStamp", dateStamp },
+                { "category", category },
+                { "level", level },
+                { "message", message }
             };
             _connection->sendJson(wrappedPayload(std::move(payload)));
         };

@@ -50,6 +50,7 @@ public:
     /**
      * Constructor that calls Log constructor.
      *
+     * \param callbackFunction The callback function that is called for each log message
      * \param minimumLogLevel The minimum log level that this logger will accept
      */
     NotificationLog(CallbackFunction callbackFunction,
