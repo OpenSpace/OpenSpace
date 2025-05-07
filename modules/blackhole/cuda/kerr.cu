@@ -16,7 +16,7 @@
 
 #define HORIZION nanf("")
 #define DISK -1337.0f
-
+#define MAX_LAYERS 8
 // ---------------------------------------------------------------------
 // Device constants (set at compile time; you may also update via cudaMemcpyToSymbol)
 __constant__ float c_a = 0.99f;
@@ -24,14 +24,14 @@ __constant__ float c_rs = 1;
 __constant__ unsigned int c_num_steps = 5000;
 __constant__ unsigned int c_layers = 1;
 __constant__ float c_M = 1.0f;     // Mass parameter
-__constant__ float c_epsilon = 1e-5;   // Numerical tolerance
+__constant__ float c_epsilon = 1e-3;   // Numerical tolerance
 __constant__ float3 world_up = { 0.0f, 0.0f, 1.0f };
 __constant__ float c_env_map = 100.0f;
+__constant__ float c_env_r_values[MAX_LAYERS];
 
 __constant__ float accretion_disk_inner_radius = 6.0f;  // in Schwarzschild radius units
 __constant__ float accretion_disk_outer_radius = 20.0f; // in Schwarzschild radius units
 __constant__ float accretion_disk_tolerance_theta = 0.01f; // small tolerance around theta = pi/2
-
 
 // Additional simulation parameters
 __constant__ float c_h = 0.1f;            // Integration step size
@@ -104,6 +104,10 @@ __device__ void cartesian_to_boyer_lindquist(float x, float x_vel,
     out[3] = polar_velocity;
     out[4] = azimuthal_angle;
     out[5] = azimuthal_velocity;
+}
+
+__device__ inline float wrapPi(float x) {
+    return x - 2.0f * M_PI * floorf((x + M_PI) / (2.0f * M_PI));
 }
 
 // ---------------------------------------------------------------------
@@ -269,10 +273,10 @@ __global__ void simulateRayKernel(float3 pos, size_t num_rays_per_dim, float* lo
     int const idx_phi = idx % num_rays_per_dim;
 
     float theta = (M_PI * idx_theta) / num_rays_per_dim;
-    float phi = (2.0f * M_PI * idx_phi) / num_rays_per_dim;
+    float phi = (2.0f * M_PI * idx_phi) / num_rays_per_dim - M_PI;
 
     // @TODO: (Investigate); Might need to rotate outgoing dirs to account for camera orientation
-    float3 camPos  = make_float3(pos.x, pos.y, pos.z);  // camera world pos
+    float3 camPos = make_float3(pos.x, pos.y, pos.z);  // camera world pos
     float3 forward = normalizef3(make_float3(
         camPos.x,   // since modelCenter == (0,0,0)
         camPos.y,
@@ -284,11 +288,11 @@ __global__ void simulateRayKernel(float3 pos, size_t num_rays_per_dim, float* lo
 
     // now build your ray as before:
     float sinT = sinf(theta), cosT = cosf(theta);
-    float sinP = sinf(phi),   cosP = cosf(phi);
+    float sinP = sinf(phi), cosP = cosf(phi);
 
-    float3 dir = 
-        sinT * ( cosP * right + sinP * upVec )
-      + cosT * forward;
+    float3 dir =
+        sinT * (cosP * right + sinP * upVec)
+        + cosT * forward;
 
     dir = normalizef3(dir);
 
@@ -330,39 +334,42 @@ __global__ void simulateRayKernel(float3 pos, size_t num_rays_per_dim, float* lo
     entry[idx_entry] = theta;
     entry[idx_entry + 1] = phi;
     idx_entry += 2;
-    for (int step = 0; step < c_num_steps; step++) {
-        // Terminate integration if ray is inside the horizon or outside the environment.
-        if (y[0] < 2.f) {
-            while (idx_entry < (c_layers + 1) * 2) {
-                entry[idx_entry] = HORIZION;
-                entry[idx_entry + 1] = HORIZION;
-                idx_entry += 2;
-            }
-            break;
-        }
-        else if (y[0] > c_env_map) { //TODO Check collision with the correct env map and save to entry
-            entry[idx_entry] = y[1];
-            entry[idx_entry + 1] = y[2];
-            idx_entry += 2;
-            if (idx_entry > (c_layers + 1) * 2) {
+    for (size_t l = 0; l < c_layers + 1; l++) {
+        for (int step = 0; step < c_num_steps; step++) {
+            // Terminate integration if ray is inside the horizon or outside the environment.
+            if (y[0] < 2.f) {
+                while (idx_entry < (c_layers + 1) * 2) {
+                    entry[idx_entry] = HORIZION;
+                    entry[idx_entry + 1] = HORIZION;
+                    idx_entry += 2;
+                }
                 break;
             }
-        }
-        else if (check_accretion_disk_collision(y[0], y[1])) {
-            while (idx_entry < (c_layers + 1) * 2) {
-                entry[idx_entry] = DISK;
-                entry[idx_entry + 1] = 1 - abs((y[0] - accretion_disk_inner_radius) / accretion_disk_outer_radius);
+            else if (y[0] > c_env_r_values[l]) {
+                entry[idx_entry] = y[1];
+                entry[idx_entry + 1] = y[2];
                 idx_entry += 2;
+                if (idx_entry > (c_layers + 1) * 2) {
+                    break;
+                }
             }
-            break;
-        }
+            else if (check_accretion_disk_collision(y[0], y[1])) {
+                while (idx_entry < (c_layers + 1) * 2) {
+                    entry[idx_entry] = DISK;
+                    entry[idx_entry + 1] = 1 - abs((y[0] - accretion_disk_inner_radius) / accretion_disk_outer_radius);
+                    idx_entry += 2;
+                }
+                break;
+            }
 
-        // Advance one RK4 step.
-        rk4(y, c_h, E, L, k_val);
-        y[1] = fmodf(y[1], M_PI);
-        y[2] = fmodf(y[2], 2.0f * M_PI);
+            // Advance one RK4 step.
+            rk4(y, c_h, E, L, k_val);
+
+            y[1] = y[1];
+            y[2] = wrapPi(y[2]);
+        }
     }
-    if (idx_entry <= c_layers) {
+    if (idx_entry < (c_layers + 1) * 2) {
         entry[idx_entry] = y[1];
         entry[idx_entry + 1] = y[2];
         idx_entry += 2;
@@ -375,17 +382,26 @@ __global__ void simulateRayKernel(float3 pos, size_t num_rays_per_dim, float* lo
 // It accepts the number of rays, number of integration steps, and an array
 // of initial conditions (size: num_rays * 6). It outputs the trajectory data
 // (num_rays * num_steps * 5 float values) and the number of steps for each ray.
-void kerr(float x, float y, float z, float rs, float kerr, float env_map_r, size_t num_rays_per_dim, size_t num_steps, std::vector<float>& lookup_table_host) {
+void kerr(float x, float y, float z, float rs, float kerr, std::vector<float> env_r_values, size_t num_rays_per_dim, size_t num_steps, std::vector<float>& lookup_table_host) {
     // Calculate sizes for memory allocation.
 
+    unsigned int const layers = env_r_values.size();
+    size_t output_size = (layers + 1) * 2;
     size_t num_rays = num_rays_per_dim * num_rays_per_dim;
-    size_t lookup_size = num_rays * 4 * sizeof(float);
+    size_t lookup_size = num_rays * output_size * sizeof(float);
 
-    cudaMemcpyToSymbol(c_env_map, &env_map_r, sizeof(float));
+    cudaMemcpyToSymbol(c_layers, &layers, sizeof(unsigned int));
     cudaMemcpyToSymbol(c_a, &kerr, sizeof(float));
     cudaMemcpyToSymbol(c_rs, &rs, sizeof(float));
+
+    cudaMemcpyToSymbol(
+        c_env_r_values,
+        env_r_values.data(),
+        env_r_values.size() * sizeof(float)
+    );
+
     // Allocate device memory.
-    float* d_lookup_table = nullptr;
+    float* __restrict__ d_lookup_table;
     cudaMalloc(&d_lookup_table, lookup_size);
 
     // Determine kernel launch configuration.
@@ -397,7 +413,7 @@ void kerr(float x, float y, float z, float rs, float kerr, float env_map_r, size
     cudaDeviceSynchronize();
 
     // Copy the results back to host.
-    lookup_table_host.resize(num_rays * 4);
+    lookup_table_host.resize(num_rays * output_size);
     cudaMemcpy(lookup_table_host.data(), d_lookup_table, lookup_size, cudaMemcpyDeviceToHost);
 
     // Free device memory.

@@ -1,4 +1,5 @@
 #include "fragment.glsl"
+#include "stars.glsl"
 
 in vec2 TexCoord;
 
@@ -9,7 +10,7 @@ in vec2 TexCoord;
 
 uniform sampler2D environmentTexture;
 uniform sampler2D viewGrid;
-uniform sampler1D colorBVMap;
+
 uniform mat4 cameraRotationMatrix;
 uniform mat4 worldRotationMatrix;
 
@@ -17,15 +18,14 @@ layout (std430) buffer ssbo_warp_table {
   float schwarzschildWarpTable[];
 };
 
+#ifndef INF
+#define INF 1.0 / 0.0
+#endif
+
 const float PI = 3.1415926535897932384626433832795f;
 const float VIEWGRIDZ = -1.0f;
-const float INF = 1.0f/0.0f;
-const float LUM_LOWER_CAP = 0.01;
 
-const int NODE_SIZE = 6;
-const int layerCount = 1;
-const float starRadius = 0.002f;
-const int STACKSIZE = 32;
+const int layerCount = starMapKDTreesIndices.length();;
 const int num_rays = schwarzschildWarpTable.length() / ((layerCount + 1) * 2);
 const int num_rays_per_dim = int(sqrt(num_rays));
 const float max_theta = PI;
@@ -56,9 +56,9 @@ vec2 cartesianToSpherical(vec3 cartesian) {
     float phi = atan2(cartesian.y, cartesian.x);
 
     // Remap phi from [-PI, +PI] to [0, 2*PI)
-    if (phi < 0.0) {
-        phi += 2.0 * PI;
-    }
+    // if (phi < 0.0) {
+    //     phi += PI;
+    // }
 
     return vec2(theta, phi);
 }
@@ -78,6 +78,13 @@ vec2 sphericalToUV(vec2 sphereCoords){
     return vec2(u, v);
 }
 
+float mixAngle(float a, float b, float t) {
+    float diff = b - a;
+    // Wrap it into [-PI, +PI)
+    diff -= floor((diff + PI) / (2.0 * PI)) * (2.0 * PI);
+    return a + t * diff;
+}
+
 /**********************************************************
                         Warp Table
 ***********************************************************/
@@ -88,7 +95,7 @@ vec2 getInterpolatedWarpAngles(float input_theta, float input_phi, int layer) {
 
     float theta_f = clamp(theta / max_theta * float(num_rays_per_dim - 1),
                           0.0, float(num_rays_per_dim - 1));
-    float phi_f   = clamp(phi   / max_phi * float(num_rays_per_dim - 1),
+    float phi_f   = clamp((phi + PI) / max_phi * float(num_rays_per_dim - 1),
                           0.0, float(num_rays_per_dim - 1));
 
     int theta0 = int(floor(theta_f));
@@ -142,9 +149,14 @@ vec2 getInterpolatedWarpAngles(float input_theta, float input_phi, int layer) {
       return vec2(HORIZION);
     }
 
-    vec2 low  = mix(v00, v10, t);
-    vec2 high = mix(v01, v11, t);
-    return mix(low, high, u);
+    float lowTheta  = mix(v00.x, v10.x, t);
+    float highTheta = mix(v01.x, v11.x, t);
+    float outTheta = mix(lowTheta, highTheta, u);
+
+    float lowPhi  = mixAngle(v00.y, v10.y, t);
+    float highPhi = mixAngle(v01.y, v11.y, t);
+    float outPhi = mixAngle(lowPhi, highPhi, u);
+    return vec2(outTheta, outPhi);
 }
 #undef FETCH
 
@@ -179,12 +191,21 @@ Fragment getFragment() {
             frag.color = vec4(clamp(sphericalCoords.y, 0.0, 0.9));
             return frag;
         }
+        vec4 starColor = searchNearestStar(vec3(0.0f, sphericalCoords.x, sphericalCoords.y), l);
+
+        if (starColor.a > 0.0) {
+            float layerWeight = exp(-0.5 * l);  // Earlier layers have more weight
+
+            // Blend using weighted alpha blending
+            accumulatedColor.rgb = (accumulatedColor.rgb * accumulatedWeight + starColor.rgb * starColor.a * layerWeight) / (accumulatedWeight + starColor.a * layerWeight);
+            accumulatedWeight += starColor.a * layerWeight;
+        }
     }
 
     vec2 uv = sphericalToUV(sphericalCoords);
     vec4 texColor = texture(environmentTexture, uv);
 
-    frag.color.rgb = texColor.rgb;
+    frag.color.rgb = accumulatedColor.rgb * accumulatedWeight + texColor.rgb * (1.0 - accumulatedWeight);
     frag.color.a = 1.0;
     return frag;
 }

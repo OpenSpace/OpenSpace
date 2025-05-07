@@ -141,17 +141,19 @@ namespace openspace {
 
         if (glm::distance(cameraPosition, _chacedCameraPos) > 0.01f * _rs) {
             //kerr(2e11, 0, 0, _rs, 0.99f, _rayCount, _stepsCount, _blackHoleWarpTable);
-            kerr(cameraPosition.x, cameraPosition.y, cameraPosition.z, _rs, 0.99f, 3.5f * glm::distance(cameraPosition, {0,0,0}) / (0.99f * _rs), _rayCount, _stepsCount, _blackHoleWarpTable);
+            float env_scale = glm::distance(cameraPosition, { 0,0,0 }) / (0.99f * _rs);
+            kerr(cameraPosition.x, cameraPosition.y, cameraPosition.z, _rs, 0.99f, { 3.5f * env_scale, 3.8f * env_scale, 4.0f * env_scale }, _rayCount, _stepsCount, _blackHoleWarpTable);
             _chacedCameraPos = cameraPosition;
             highres = false;
             lastTime = std::chrono::high_resolution_clock::now();
         }
         else if (!highres){
+            float env_scale = glm::distance(cameraPosition, { 0,0,0 }) / (0.99f * _rs);
             auto currentTime = std::chrono::high_resolution_clock::now();
             std::chrono::duration<float> deltaTime = currentTime - lastTime;
             float deltaTimeSeconds = deltaTime.count();
             if (deltaTimeSeconds > 1.0f) {
-                kerr(cameraPosition.x, cameraPosition.y, cameraPosition.z, _rs, 0.99f, 3.5f * glm::distance(cameraPosition, { 0,0,0 }) / (0.99f*_rs), _rayCountHighRes, _stepsCount, _blackHoleWarpTable);
+                kerr(cameraPosition.x, cameraPosition.y, cameraPosition.z, _rs, 0.99f, { 3.5f * env_scale, 3.8f * env_scale, 4.0f * env_scale }, _rayCountHighRes, _stepsCount, _blackHoleWarpTable);
                 highres = true;
             }
         }
@@ -164,10 +166,8 @@ namespace openspace {
         }
 #endif
         bindSSBOData(_program, "ssbo_warp_table", _ssboBlackHoleDataBinding, _ssboBlackHoleWarpTable);
-#if !M_Kerr
         bindSSBOData(_program, "ssbo_star_map_start_indices", _ssboStarIndicesDataBinding, _ssboStarKDTreeIndices);
         bindSSBOData(_program, "ssbo_star_map", _ssboStarDataBinding, _ssboStarKDTree);
-#endif
     }
 
     void RenderableBlackHole::render(const RenderData& renderData, RendererTasks&) {
@@ -185,17 +185,13 @@ namespace openspace {
         if (!bindTexture(_uniformCache.viewGrid, viewGridUnit, _viewport.viewGrid)) {
             LWARNING("UniformCache is missing 'viewGrid'");
         }
-#if !M_Kerr
         ghoul::opengl::TextureUnit colorBVMapUnit;
         if (!bindTexture(_uniformCache.colorBVMap, colorBVMapUnit, _colorBVMapTexture)) {
             LWARNING("UniformCache is missing 'colorBVMap'");
         }
-#endif
 
         SendSchwarzschildTableToShader();
-#if !M_Kerr
         SendStarKDTreeToShader();
-#endif
 
         interaction::OrbitalNavigator::CameraRotationDecomposition camRot = global::navigationHandler->orbitalNavigator().decomposeCameraRotationSurface(
             CameraPose{renderData.camera.positionVec3(), renderData.camera.rotationQuaternion()},
