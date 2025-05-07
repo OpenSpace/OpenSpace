@@ -2,19 +2,15 @@
  "files": [
   {
    "timestamp": "2024-05-10 15:00:17.0",
-   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_150017_zcut_mp.gif"
+   "url": "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg"
   },
   {
    "timestamp": "2024-05-10 15:10:17.0",
-   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_150217_zcut_mp.gif"
+   "url": "https://images.squarespace-cdn.com/content/v1/5a769958b0786976fb16bcf6/1542282853508-9NJRS30YDM5TSXIE41CE/openspace-color-on-black.png?format=2500w"
   },
   {
    "timestamp": "2024-05-10 15:20:17.0",
-   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_150417_zcut_mp.gif"
-  },
-  {
-   "timestamp": "2024-05-10 15:30:17.0",
-   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_150617_zcut_mp.gif"
+   "url": "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg"
   }
  ]
 }

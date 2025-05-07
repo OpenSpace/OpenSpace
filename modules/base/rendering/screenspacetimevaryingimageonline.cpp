@@ -142,6 +142,13 @@ void ScreenSpaceTimeVaryingImageOnline::update() {
 
     double current = global::timeManager->time().j2000Seconds();
 
+    if (current < _timestamps.front() || current >= _sequenceEndTime) {
+        _activeIndex = -1;
+        _texture = nullptr;
+        _currentUrl.clear();
+        return;
+    }
+
     if (current >= _timestamps.front() && current < _sequenceEndTime) {
         int idx = activeIndex(current);
         if (idx != _activeIndex) {
