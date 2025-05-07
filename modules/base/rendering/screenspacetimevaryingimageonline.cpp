@@ -140,44 +140,25 @@ void ScreenSpaceTimeVaryingImageOnline::update() {
     double current = global::timeManager->time().j2000Seconds();
 
     if (current >= _timestamps.front() && current < _sequenceEndTime) {
-        int newIdx = activeIndex(current);
-        if (newIdx != _activeIndex) {
-            _activeIndex = newIdx;
+        int idx = activeIndex(current);
+        if (idx != _activeIndex) {
+            _activeIndex = idx;
             std::string url = _urls[_timestamps[_activeIndex]];
-            loadImage(url);
+            if (_currentUrl != url) {
+                _currentUrl = url;
+                loadImage(url);
+            }
         }
     }
     else {
         _activeIndex = -1;
     }
-}
-
-int ScreenSpaceTimeVaryingImageOnline::activeIndex(double currentTime) const {
-    auto it = std::upper_bound(_timestamps.begin(), _timestamps.end(), currentTime);
-    if (it != _timestamps.end()) {
-        if (it != _timestamps.begin()) {
-            return static_cast<int>(std::distance(_timestamps.begin(), it)) - 1;
-        }
-        return 0;
-    }
-    return static_cast<int>(_timestamps.size()) - 1;
-}
-
-void ScreenSpaceTimeVaryingImageOnline::loadImage(const std::string& imageUrl) {
-    if (!_imageFuture.valid()) {
-        _imageFuture = global::downloadManager->fetchFile(
-            imageUrl,
-            [](const DownloadManager::MemoryFile&) {},
-            [](const std::string& e) {
-                LERROR(std::format("Download failed: {}", e));
-            }
-        );
-    }
 
     if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
         const DownloadManager::MemoryFile imageFile = _imageFuture.get();
+        _imageFuture = std::future<DownloadManager::MemoryFile>();
         if (imageFile.corrupted) {
-            LERROR(std::format("Corrupted image: {}", imageUrl));
+            LERROR(std::format("Error loading image from URL '{}'", _currentUrl));
             return;
         }
 
@@ -208,6 +189,29 @@ void ScreenSpaceTimeVaryingImageOnline::loadImage(const std::string& imageUrl) {
         catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
             LERRORC(e.component, e.message);
         }
+    }
+}
+
+int ScreenSpaceTimeVaryingImageOnline::activeIndex(double currentTime) const {
+    auto it = std::upper_bound(_timestamps.begin(), _timestamps.end(), currentTime);
+    if (it != _timestamps.end()) {
+        if (it != _timestamps.begin()) {
+            return static_cast<int>(std::distance(_timestamps.begin(), it)) - 1;
+        }
+        return 0;
+    }
+    return static_cast<int>(_timestamps.size()) - 1;
+}
+
+void ScreenSpaceTimeVaryingImageOnline::loadImage(const std::string& imageUrl) {
+    if (!_imageFuture.valid()) {
+        _imageFuture = global::downloadManager->fetchFile(
+            imageUrl,
+            [](const DownloadManager::MemoryFile&) {},
+            [](const std::string& e) {
+                LERROR(std::format("Download failed: {}", e));
+            }
+        );
     }
 }
 

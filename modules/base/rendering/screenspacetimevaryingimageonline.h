@@ -54,6 +54,7 @@ private:
     properties::StringProperty _jsonFilePath;
     std::vector<double> _timestamps;
     std::map<double, std::string> _urls;
+    std::string _currentUrl;
 
     std::future<DownloadManager::MemoryFile> _imageFuture;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
