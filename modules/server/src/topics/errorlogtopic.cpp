@@ -30,6 +30,7 @@
 namespace {
     constexpr std::string_view StartSubscription = "start_subscription";
     constexpr std::string_view StopSubscription = "stop_subscription";
+    constexpr std::string_view UpdateLogLevel = "update_logLevel";
 
     constexpr std::string_view SettingsKey = "settings";
     constexpr std::string_view LogLevelKey = "logLevel";
@@ -62,9 +63,37 @@ void ErrorLogTopic::handleJson(const nlohmann::json& json) {
 
         }
 
-        auto onLogging = [this](std::string_view timeStamp, std::string_view dateStamp,
-                                std::string_view category, ghoul::logging::LogLevel level,
-                                std::string_view message)
+        createLog(logLevel);
+        _isSubscribedTo = true;
+    }
+
+    if (event == StopSubscription) {
+        _isSubscribedTo = false;
+
+        ghoul::logging::LogManager::ref().removeLog(_log);
+        _log = nullptr;
+    }
+
+    if (event == UpdateLogLevel) {
+        ghoul::logging::LogManager::ref().removeLog(_log);
+        _log = nullptr;
+
+
+        std::string level = json.at(LogLevelKey).get<std::string>();
+        auto logLevel = ghoul::from_string<ghoul::logging::LogLevel>(level);
+
+        createLog(logLevel);
+    }
+}
+
+void ErrorLogTopic::createLog(ghoul::logging::LogLevel logLevel) {
+    if (_log) {
+        return;
+    }
+
+    auto onLogging = [this](std::string_view timeStamp, std::string_view dateStamp,
+        std::string_view category, ghoul::logging::LogLevel level,
+        std::string_view message)
         {
 
             nlohmann::json payload = {
@@ -77,22 +106,12 @@ void ErrorLogTopic::handleJson(const nlohmann::json& json) {
             _connection->sendJson(wrappedPayload(std::move(payload)));
         };
 
-        auto log = std::make_unique<NotificationLog>(
-            onLogging,
-            logLevel
-        );
-        _log = log.get();
-
-        ghoul::logging::LogManager::ref().addLog(std::move(log));
-        _isSubscribedTo = true;
-    }
-
-    if (event == StopSubscription) {
-        _isSubscribedTo = false;
-
-        ghoul::logging::LogManager::ref().removeLog(_log);
-        _log = nullptr;
-    }
+    auto log = std::make_unique<NotificationLog>(
+        onLogging,
+        logLevel
+    );
+    _log = log.get();
+    ghoul::logging::LogManager::ref().addLog(std::move(log));
 }
 
 bool ErrorLogTopic::isDone() const {
