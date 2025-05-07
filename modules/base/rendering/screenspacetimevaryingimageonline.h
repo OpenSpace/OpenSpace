@@ -39,6 +39,7 @@ namespace documentation { struct Documentation; }
 class ScreenSpaceTimeVaryingImageOnline : public ScreenSpaceRenderable {
 public:
     explicit ScreenSpaceTimeVaryingImageOnline(const ghoul::Dictionary& dictionary);
+    bool initialize() override;
     bool deinitializeGL() override;
     void update() override;
 

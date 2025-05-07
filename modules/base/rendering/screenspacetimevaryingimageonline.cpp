@@ -79,12 +79,15 @@ ScreenSpaceTimeVaryingImageOnline::ScreenSpaceTimeVaryingImageOnline(
     _jsonFilePath.onChange([this]() {
         loadJsonData(_jsonFilePath);
         });
-
-    loadJsonData(_jsonFilePath);
 }
 
 documentation::Documentation ScreenSpaceTimeVaryingImageOnline::Documentation() {
     return codegen::doc<Parameters>("base_screenspace_time_varying_image_online");
+}
+
+bool ScreenSpaceTimeVaryingImageOnline::initialize() {
+    loadJsonData(_jsonFilePath.value());
+    return ScreenSpaceRenderable::initialize();
 }
 
 bool ScreenSpaceTimeVaryingImageOnline::deinitializeGL() {
