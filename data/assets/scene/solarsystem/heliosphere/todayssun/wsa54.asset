@@ -52,13 +52,14 @@ local WSA_Magnetograms = {
 
 local WSA_Magnetograms_Adapt = {
   Identifier = "WSA_54_Magnetograms_ADAPT",
-  Parent = transforms.WSAOffset60.Identifier,
-  Transform = {
-    Rotation = {
-      Type = "StaticRotation",
-      Rotation = {0.0, 0.0, -2.00712864}
-    }
-  },
+  Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
+--    Parent = transforms.WSAOffset60.Identifier,
+--  Transform = {
+--    Rotation = {
+--      Type = "StaticRotation",
+--      Rotation = {0.0, 0.0, -2.00712864} --120 degree offset compared to Gong
+--    }
+--  },
   Renderable = {
     Type = "RenderableTimeVaryingSphere",
     Enabled = true,
@@ -95,8 +96,14 @@ local WSA_Magnetograms_Adapt = {
 
 local WSA_Velocity_Adapt = {
   Identifier = "WSA_54_velocity_ADAPT",
-  Parent = transforms.WSAOffset60.Identifier,
-  Transform = {
+  Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
+--    Parent = transforms.WSAOffset60.Identifier,
+--  Transform = {
+--    Rotation = {
+--      Type = "StaticRotation",
+--      Rotation = {0.0, 0.0, -2.00712864} --120 degree offset compared to Gong
+--    }
+--  },  Transform = {
     Rotation = {
       Type = "StaticRotation",
       Rotation = {0.0, 0.0, -2.00712864}
