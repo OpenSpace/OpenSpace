@@ -38,6 +38,7 @@ set(HEADER_FILES
   dashboard/dashboarditemsimulationincrement.h
   dashboard/dashboarditemspacing.h
   dashboard/dashboarditemtext.h
+  dashboard/dashboarditemtimevaryingtext.h
   dashboard/dashboarditemvelocity.h
   lightsource/cameralightsource.h
   lightsource/scenegraphlightsource.h
@@ -112,6 +113,7 @@ set(SOURCE_FILES
   dashboard/dashboarditemsimulationincrement.cpp
   dashboard/dashboarditemspacing.cpp
   dashboard/dashboarditemtext.cpp
+  dashboard/dashboarditemtimevaryingtext.cpp
   dashboard/dashboarditemvelocity.cpp
   lightsource/cameralightsource.cpp
   lightsource/scenegraphlightsource.cpp

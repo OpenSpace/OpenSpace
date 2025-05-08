@@ -22,41 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/topics/profiletopic.h>
+ #ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMTIMEVARYINGTEXT___H__
+ #define __OPENSPACE_MODULE_BASE___DASHBOARDITEMTIMEVARYINGTEXT___H__
 
-#include <modules/server/include/connection.h>
-#include <modules/server/include/jsonconverters.h>
-#include <openspace/engine/configuration.h>
-#include <openspace/engine/globals.h>
-#include <openspace/scene/profile.h>
+ #include <openspace/rendering/dashboardtextitem.h>
 
-namespace openspace {
+ #include <openspace/properties/misc/stringproperty.h>
 
-bool ProfileTopic::isDone() const {
-    return true;
-}
+ namespace openspace {
 
-void ProfileTopic::handleJson(const nlohmann::json&) {
-    // @TODO (2025-04-30, emmbr) If we expose the json converters from profile.cpp, we
-    // could use those here instead and minimize the risk of getting the serialization of
-    // the data out of sync
-    nlohmann::json data = {
-        { "uiPanelVisibility", global::profile->uiPanelVisibility },
-        { "markNodes", global::profile->markNodes },
-        { "filePath", global::configuration->profile }
-    };
+ namespace documentation { struct Documentation; }
 
-    if (global::profile->meta.has_value()) {
-        data["name"] = global::profile->meta->name.value_or("");
+ class DashboardItemTimeVaryingText : public DashboardTextItem {
+ public:
+     explicit DashboardItemTimeVaryingText(const ghoul::Dictionary& dictionary);
+     ~DashboardItemTimeVaryingText() override = default;
 
-        data["author"] = global::profile->meta->author.value_or("");
-        data["description"] = global::profile->meta->description.value_or("");
-        data["license"] = global::profile->meta->license.value_or("");
-        data["url"] = global::profile->meta->url.value_or("");
-        data["version"] = global::profile->meta->version.value_or("");
-    }
+     void update() override;
 
-    _connection->sendJson(wrappedPayload(data));
-}
+     static documentation::Documentation Documentation();
 
-} // namespace openspace
+ private:
+     void loadDataFromJson(const std::string& filePath);
+     void computeSequenceEndTime();
+     int updateActiveTriggerTimeIndex(double currentTime) const;
+
+     properties::StringProperty _formatString;
+     properties::StringProperty _dataFile;
+
+     std::unordered_map<double, double> _data;
+     std::vector<double> _startTimes;
+
+     int _activeTriggerTimeIndex = -1;
+     double _sequenceEndTime = 0.0;
+ };
+ } // namespace openspace
+
+ #endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMTIMEVARYINGTEXT___H__

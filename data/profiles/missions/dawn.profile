@@ -49,7 +49,7 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "work in progress profile for the dawn mission",
+    "description": "A work in progress profile for the dawn mission.",
     "license": "MIT License",
     "name": "Dawn",
     "url": "https://www.openspaceproject.com",

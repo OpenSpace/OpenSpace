@@ -240,7 +240,7 @@ private:
     struct {
         properties::BoolProperty showChunkEdges;
         properties::BoolProperty levelByProjectedAreaElseDistance;
-        properties::BoolProperty resetTileProviders;
+        properties::TriggerProperty resetTileProviders;
         properties::BoolProperty performFrustumCulling;
         properties::IntProperty  modelSpaceRenderingCutoffLevel;
         properties::IntProperty  dynamicLodIterationCount;
@@ -300,6 +300,7 @@ private:
     bool _nLayersIsDirty = true;
     bool _allChunksAvailable = true;
     bool _layerManagerDirty = true;
+    bool _resetTileProviders = false;
     size_t _iterationsOfAvailableData = 0;
     size_t _iterationsOfUnavailableData = 0;
     Layer* _lastChangedLayer = nullptr;

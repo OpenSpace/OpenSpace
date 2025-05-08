@@ -33,9 +33,15 @@
 
 function(set_current_cef_build_platform)
   if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
-    set(CEF_PLATFORM "macosx64" PARENT_SCOPE)
+    if ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm64")
+      set(CEF_PLATFORM "macosarm64" PARENT_SCOPE)
+    else()
+      set(CEF_PLATFORM "macosx64" PARENT_SCOPE)
+    endif()
   elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-    if (CMAKE_SIZEOF_VOID_P MATCHES 8)
+    if ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm64")
+      set(CEF_PLATFORM "linuxarm64" PARENT_SCOPE)
+    elseif (CMAKE_SIZEOF_VOID_P MATCHES 8)
       set(CEF_PLATFORM "linux64" PARENT_SCOPE)
     else ()
       set(CEF_PLATFORM "linux32" PARENT_SCOPE)
@@ -52,7 +58,7 @@ endfunction ()
 # Download the CEF binary distribution for |platform| and |version| to
 # |download_dir|. The |CEF_ROOT| variable will be set in global scope pointing
 # to the extracted location.
-# Visit http://opensource.spotify.com/cefbuilds/index.html for the list of
+# Visit https://cef-builds.spotifycdn.com/index.html for the list of
 # supported platforms and versions.
 
 function(download_cef platform version download_dir)
