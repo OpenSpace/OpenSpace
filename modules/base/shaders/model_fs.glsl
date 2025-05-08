@@ -67,6 +67,8 @@ uniform bool has_shadow_depth_map;
 uniform sampler2D shadow_depth_map;
 in vec4 lightspace_position;
 
+uniform bool has_override_color;
+uniform vec4 override_color;
 
 Fragment getFragment() {
   Fragment frag;
@@ -199,5 +201,11 @@ Fragment getFragment() {
   }
 
   frag.color.a = diffuseAlbedo.a * opacity;
+
+  if (has_override_color) {
+    frag.color = override_color;
+  }
+
+  // frag.color = frag.color * 0.00000000000000000000001 + override_color ;
   return frag;
 }

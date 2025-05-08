@@ -33,6 +33,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/io/model/modelreader.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -124,6 +125,8 @@ private:
     properties::BoolProperty _castShadow;
     std::string _lightSource;
     std::string _shadowGroup;
+    properties::BoolProperty _useOverrideColor;
+    properties::Vec4Property _overrideColor;
 
     bool _autoSizeFrustum = false;
 

@@ -223,6 +223,20 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo UseOverrideColorInfo = {
+        "UseOverrideColor",
+        "Use Override Color",
+        "Wether or not to render model with a single color.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo OverrideColorInfo = {
+        "OverrideColor",
+        "Override Color",
+        "The single color to use for entire model (RGBA).",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(RenderableModel)]] Parameters {
         // The file or files that should be loaded in this RenderableModel. The file can
         // contain filesystem tokens. This specifies the model that is rendered by
@@ -353,6 +367,12 @@ namespace {
         std::optional<std::string> lightSource;
 
         std::optional<std::string> shadowGroup;
+
+        // [[codegen::verbatim(UseOverrideColorInfo.description)]]
+        std::optional<bool> useOverrideColor;
+
+        // [[codegen::verbatim(OverrideColorInfo.description)]]
+        std::optional<glm::vec4> overrideColor;
     };
 #include "renderablemodel_codegen.cpp"
 } // namespace
@@ -396,6 +416,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         properties::OptionProperty::DisplayType::Dropdown
     )
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
+    , _useOverrideColor(UseOverrideColorInfo, false)
+    , _overrideColor(OverrideColorInfo, glm::vec4(0, 0, 0, 1))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -515,6 +537,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _castShadow = p.castShadow.value_or(_castShadow);
     _lightSource = p.lightSource.value_or("");
     _shadowGroup = p.shadowGroup.value_or("");
+    _useOverrideColor = p.useOverrideColor.value_or(_useOverrideColor);
+    _overrideColor = p.overrideColor.value_or(_overrideColor);
 
     addProperty(_enableAnimation);
     addPropertySubOwner(_lightSourcePropertyOwner);
@@ -532,6 +556,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_pivot);
     addProperty(_rotationVec);
     addProperty(_useCache);
+    addProperty(_useOverrideColor);
+    addProperty(_overrideColor);
 
     addProperty(_modelScale);
     _modelScale.setExponent(20.f);
@@ -1057,6 +1083,11 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
                 }
             }
         }
+    }
+
+    _program->setUniform("has_override_color", _useOverrideColor);
+    if (_useOverrideColor) {
+        _program->setUniform("override_color", _overrideColor);
     }
 
     if (!_shouldRenderTwice) {
