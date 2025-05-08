@@ -81,7 +81,6 @@ void ErrorLogTopic::handleJson(const nlohmann::json& json) {
 
         std::string level = json.at(LogLevelKey).get<std::string>();
         auto logLevel = ghoul::from_string<ghoul::logging::LogLevel>(level);
-
         createLog(logLevel);
     }
 }
@@ -92,19 +91,18 @@ void ErrorLogTopic::createLog(ghoul::logging::LogLevel logLevel) {
     }
 
     auto onLogging = [this](std::string_view timeStamp, std::string_view dateStamp,
-        std::string_view category, ghoul::logging::LogLevel level,
-        std::string_view message)
-        {
-
-            nlohmann::json payload = {
-                { "timeStamp", timeStamp },
-                { "dateStamp", dateStamp },
-                { "category", category },
-                { "level", level },
-                { "message", message }
-            };
-            _connection->sendJson(wrappedPayload(std::move(payload)));
+                            std::string_view category, ghoul::logging::LogLevel level,
+                            std::string_view message)
+    {
+        nlohmann::json payload = {
+            { "timeStamp", timeStamp },
+            { "dateStamp", dateStamp },
+            { "category", category },
+            { "level", level },
+            { "message", message }
         };
+        _connection->sendJson(wrappedPayload(std::move(payload)));
+    };
 
     auto log = std::make_unique<NotificationLog>(
         onLogging,
