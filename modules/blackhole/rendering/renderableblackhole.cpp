@@ -21,7 +21,7 @@
 #include <vector>
 #include <chrono>
 
-#define M_Kerr true
+#define M_Kerr false
 #if M_Kerr
 #include <modules/blackhole/cuda/kerr.h>
 #else
@@ -121,7 +121,7 @@ namespace openspace {
     void RenderableBlackHole::update(const UpdateData& data) {
         if (data.modelTransform.translation != _chachedTranslation) {
             _chachedTranslation = data.modelTransform.translation;
-            _starKDTree.build("${BASE}/sync/http/stars_du/6/stars.speck", _chachedTranslation, { {0, 25 }, {25, 50}, { 50, 100 } });
+            _starKDTree.build("${BASE}/sync/http/stars_du/6/stars.speck", _chachedTranslation, { {0, 25 }, {25, 50}, { 50, -1 } });
         }
 
         _viewport.updateViewGrid(global::renderEngine->renderingResolution());
@@ -162,7 +162,7 @@ namespace openspace {
         float distanceToAnchor = static_cast<float>(glm::distance(cameraPosition, _chachedTranslation));
         if (abs(_rCamera * _rs - distanceToAnchor) > _rs * 0.1) {
             _rCamera = distanceToAnchor / _rs;
-            schwarzschild({ _rCamera * 2.0f, _rCamera * 2.5f, _rCamera * 4.0f}, _rayCount, _stepsCount, _rCamera, _stepLength, _blackHoleWarpTable);
+            schwarzschild({ 12.5f / _rs * static_cast<float>(distanceconstants::Parsec), 37.5f / _rs * static_cast<float>(distanceconstants::Parsec), 40.f / _rs * static_cast<float>(distanceconstants::Parsec)}, _rayCount, _stepsCount, _rCamera, _stepLength, _blackHoleWarpTable);
         }
 #endif
         bindSSBOData(_program, "ssbo_warp_table", _ssboBlackHoleDataBinding, _ssboBlackHoleWarpTable);

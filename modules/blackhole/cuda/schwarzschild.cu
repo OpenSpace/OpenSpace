@@ -4,6 +4,8 @@
 #include "device_launch_parameters.h"
 #include "schwarzschild.h"
 
+#define HORIZION nanf("")
+
 constexpr float PI = 3.1415926535897932384626433832795f;
 
 __device__ float zamoconv(float r0, float psi) {
@@ -68,24 +70,37 @@ __global__ void solveGeodesicKernel(float u_0, float h, float* envmap_r_values, 
     float u = u_0;
     float phi = 0.0f;
 
-    auto out_of_bounds = [&u, &envmap_r_values](size_t index) -> bool {
-        return (1.0f / u > envmap_r_values[index]);
+    auto out_of_bounds = [&u, &envmap_r_values](unsigned int index) -> bool {
+        return (1.0f > envmap_r_values[index] * u);
         };
 
     auto inside_singularity = [&u]() -> bool {
-        return (1.0f / u < 1);
+        return (1.0f < u);
         };
 
-    size_t env_index = 0;
-    for (size_t step = 0; step < num_steps && !out_of_bounds(num_envmaps - 1) && !inside_singularity(); step++) {
+    float* entry = &angles_out[idx * outNodeSize];
+
+    unsigned int idx_entry = 0;
+    entry[idx_entry++] = alpha;
+    for (size_t step = 0; step < num_steps; step++) {
         rk4_step(u, dudphi, phi, h);
-        if (out_of_bounds(env_index)) {
-            angles_out[idx * outNodeSize + 1 + env_index++] = phi;
+
+        bool in_singularity = inside_singularity();
+        bool is_out_of_bounds = out_of_bounds(idx_entry - 1);
+        if (in_singularity | is_out_of_bounds) {
+            if (in_singularity) {
+                while (idx_entry < outNodeSize) {
+                    entry[idx_entry++] = HORIZION;
+                }
+                break;
+            }
+            if (is_out_of_bounds) {
+                entry[idx_entry++] = phi;
+                if (idx_entry > num_envmaps) {
+                    break;
+                }
+            }
         }
-    }
-    angles_out[idx * outNodeSize + num_envmaps] = phi;
-    for (size_t i = 0; i < num_envmaps; ++i) {
-        angles_out[idx * outNodeSize + 1 + i] = !inside_singularity() ? angles_out[idx * outNodeSize + 1 + i] : nanf("");
     }
 }
 

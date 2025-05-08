@@ -6,7 +6,7 @@
 #endif
 
 const float LUM_LOWER_CAP = 0.01;
-const float starRadius = 0.002f;
+const float starRadius = 0.0012f;
 const int NODE_SIZE = 6;
 const int STACKSIZE = 32;
 
@@ -75,13 +75,13 @@ vec4 searchTree(int treeStart, int treeNodeCount, vec3 sphericalCoords) {
     int base = bestAbsIndex * NODE_SIZE;
 
     float observedDistance = starMapKDTrees[base];
-    float luminosity = pow(10.0, 1.89 - 0.4 * starMapKDTrees[base + 4]) / pow(observedDistance, 1.1);
+    float luminosity = pow(10.0, 1.89 - 0.4 * starMapKDTrees[base + 4]) / (0.9 * observedDistance);
     luminosity = max(luminosity, LUM_LOWER_CAP);
 
-    float alpha = 1.0 - pow(bestDist / starRadius, 2.2);
+    float alpha = (1.0 - pow(bestDist / starRadius, 2.0)) * luminosity;
     vec3 starColor = BVIndex2rgb(starMapKDTrees[base + 3]);
 
-    return vec4(starColor * alpha * luminosity, alpha * luminosity);
+    return vec4(starColor * alpha * luminosity, alpha);
 }
 
 vec4 searchNearestStar(vec3 sphericalCoords, int layer) {

@@ -49,7 +49,7 @@ namespace openspace {
         for (const auto& entry : dataset.entries) {
             float radius = entry.position.x;
             for (size_t i = 0; i < numTrees; ++i) {
-                if (radius >= renderSpans[i].first && radius < renderSpans[i].second) {
+                if (radius >= renderSpans[i].first && (renderSpans[i].second == -1 || radius < renderSpans[i].second)) {
                     kdTrees[i].emplace_back(entry.position, entry.data[0], entry.data[1], entry.data[2]);
                     break;
                 }
