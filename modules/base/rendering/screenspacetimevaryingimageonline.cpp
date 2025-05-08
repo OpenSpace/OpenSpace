@@ -203,14 +203,20 @@ void ScreenSpaceTimeVaryingImageOnline::update() {
 }
 
 int ScreenSpaceTimeVaryingImageOnline::activeIndex(double currentTime) const {
+    if (_timestamps.empty()) {
+        return -1;
+    }
+
     auto it = std::upper_bound(_timestamps.begin(), _timestamps.end(), currentTime);
-    if (it != _timestamps.end()) {
-        if (it != _timestamps.begin()) {
-            return static_cast<int>(std::distance(_timestamps.begin(), it)) - 1;
-        }
+    if (it == _timestamps.begin()) {
         return 0;
     }
-    return static_cast<int>(_timestamps.size()) - 1;
+    else if (it != _timestamps.end()) {
+        return static_cast<int>(std::distance(_timestamps.begin(), it)) - 1;
+    }
+    else {
+        return static_cast<int>(_timestamps.size()) - 1;
+    }
 }
 
 void ScreenSpaceTimeVaryingImageOnline::loadImage(const std::string& imageUrl) {
