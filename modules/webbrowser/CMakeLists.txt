@@ -29,7 +29,13 @@ set(WEBBROWSER_MODULE_NAME WebBrowser)
 set(WEBBROWSER_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "WEBBROWSER_MODULE_PATH")
 
 # wanted by CEF
-set(PROJECT_ARCH "x86_64")
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+    set(PROJECT_ARCH "arm64") # For macOS on ARM64
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
+    set(PROJECT_ARCH "armv8-a") # For Ubuntu/Linux on ARM64 - or should it be aarch64? Builds OK on Ubuntu with armv8-a
+else()
+    set(PROJECT_ARCH "x86_64") # Default to x86_64
+endif()
 
 ##########################################################################################
 # Download CEF
