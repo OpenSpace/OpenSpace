@@ -1,5 +1,5 @@
 #include "fragment.glsl"
-#include "stars.glsl"
+#include <${MODULE_BLACKHOLE}/shaders/stars.glsl>
 
 in vec2 TexCoord;
 
@@ -34,10 +34,6 @@ const float max_phi = 2.0 * PI;
 /**********************************************************
                         Math
 ***********************************************************/
-
-float lerp(float P0, float P1, float t) {
-    return P0 + t * (P1 - P0);
-}
 
 float atan2(float a, float b){
     if (b != 0.0f) return atan(a, b);
@@ -188,7 +184,7 @@ Fragment getFragment() {
             frag.color = vec4(0.0f);
             return frag;
         } else if(sphericalCoords.x == DISK){
-            frag.color = vec4(clamp(sphericalCoords.y, 0.0, 0.9));
+            frag.color = vec4(clamp(sphericalCoords.y, 0.0, 1.0), 0.3*clamp(sphericalCoords.y, 0.0, 1.0), 0.15*clamp(sphericalCoords.y, 0.0, 1.0), 1.0f);
             return frag;
         }
         vec4 starColor = searchNearestStar(vec3(0.0f, sphericalCoords.x, sphericalCoords.y), l);

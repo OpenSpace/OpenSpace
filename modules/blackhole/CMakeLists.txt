@@ -46,6 +46,7 @@ set(SHADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/schwarzschild_fs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/kerr_vs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/kerr_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/stars.glsl
 )
 
 # Organize Files into Groups
