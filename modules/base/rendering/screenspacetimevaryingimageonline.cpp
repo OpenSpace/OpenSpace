@@ -65,23 +65,23 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation ScreenSpaceTimeVaryingImageOnline::Documentation() {
+    return codegen::doc<Parameters>("base_screenspace_time_varying_image_online");
+}
+
 ScreenSpaceTimeVaryingImageOnline::ScreenSpaceTimeVaryingImageOnline(
                                                       const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
-    , _jsonFilePath(JsonFileInfo, "")
+    , _jsonFilePath(FileInfo, "")
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _jsonFilePath = p.jsonFilePath;
+    _jsonFilePath = p.filePath.string();
     addProperty(_jsonFilePath);
 
     _jsonFilePath.onChange([this]() {
-        loadJsonData(_jsonFilePath);
+        loadJsonData(_jsonFilePath.value());
     });
-}
-
-documentation::Documentation ScreenSpaceTimeVaryingImageOnline::Documentation() {
-    return codegen::doc<Parameters>("base_screenspace_time_varying_image_online");
 }
 
 bool ScreenSpaceTimeVaryingImageOnline::initialize() {

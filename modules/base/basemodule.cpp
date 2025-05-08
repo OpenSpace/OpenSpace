@@ -114,13 +114,13 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
 
     fSsRenderable->registerClass<ScreenSpaceDashboard>("ScreenSpaceDashboard");
+    fSsRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
     fSsRenderable->registerClass<ScreenSpaceImageLocal>("ScreenSpaceImageLocal");
     fSsRenderable->registerClass<ScreenSpaceImageOnline>("ScreenSpaceImageOnline");
-    fSsRenderable->registerClass<ScreenSpaceTimeVaryingImageOnline>("ScreenSpaceTimeVaryingImageOnline");
-    fSsRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
     fSsRenderable->registerClass<ScreenSpaceRenderableRenderable>(
         "ScreenSpaceRenderableRenderable"
     );
+    fSsRenderable->registerClass<ScreenSpaceTimeVaryingImageOnline>("ScreenSpaceTimeVaryingImageOnline");
 
 
     ghoul::TemplateFactory<DashboardItem>* fDashboard =
@@ -307,8 +307,8 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         ScreenSpaceFramebuffer::Documentation(),
         ScreenSpaceImageLocal::Documentation(),
         ScreenSpaceImageOnline::Documentation(),
-        ScreenSpaceTimeVaryingImageOnline::Documentation(),
         ScreenSpaceRenderableRenderable::Documentation(),
+        ScreenSpaceTimeVaryingImageOnline::Documentation(),
 
         ConstantRotation::Documentation(),
         FixedRotation::Documentation(),

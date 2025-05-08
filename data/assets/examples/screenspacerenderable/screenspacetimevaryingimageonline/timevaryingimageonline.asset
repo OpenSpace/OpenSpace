@@ -5,7 +5,7 @@
 local Item = {
   Type = "ScreenSpaceTimeVaryingImageOnline",
   Identifier = "ScreenSpaceTimeVaryingImageOnline_Example",
-  FilePath = asset.resource("data/dummydata.json")
+  FilePath = asset.resource("data/example.json")
 }
 
 asset.onInitialize(function()
