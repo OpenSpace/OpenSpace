@@ -29,6 +29,7 @@
 
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/properties/misc/stringproperty.h>
+#include <filesystem>
 
 namespace ghoul::opengl { class Texture; }
 
@@ -39,6 +40,7 @@ namespace documentation { struct Documentation; }
 class ScreenSpaceTimeVaryingImageOnline : public ScreenSpaceRenderable {
 public:
     explicit ScreenSpaceTimeVaryingImageOnline(const ghoul::Dictionary& dictionary);
+
     bool initialize() override;
     bool deinitializeGL() override;
     void update() override;
@@ -47,7 +49,7 @@ public:
 
 private:
     void bindTexture() override;
-    void loadJsonData(const std::string& path);
+    void loadJsonData(const std::filesystem::path& path);
     void computeSequenceEndTime();
     void loadImage(const std::string& imageUrl);
     int activeIndex(double currentTime) const;

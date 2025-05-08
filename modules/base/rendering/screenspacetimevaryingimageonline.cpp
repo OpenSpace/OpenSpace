@@ -38,10 +38,10 @@
 namespace {
     constexpr std::string_view _loggerCat = "ScreenSpaceTimeVaryingImageOnline";
 
-    constexpr openspace::properties::Property::PropertyInfo JsonFileInfo = {
-        "JsonFilePath",
-        "JSON File Path",
-        "The file path to the JSON data.",
+    constexpr openspace::properties::Property::PropertyInfo FileInfo = {
+        "FilePath",
+        "File Path",
+        "The file path to the data containing information about when to display which image.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -57,8 +57,8 @@ namespace {
     //   ]
     // }
     struct [[codegen::Dictionary(ScreenSpaceTimeVaryingImageOnline)]] Parameters {
-        // [[codegen::verbatim(JsonFileInfo.description)]]
-        std::string jsonFilePath;
+        // [[codegen::verbatim(FileInfo.description)]]
+        std::filesystem::path filePath;
     };
 #include "screenspacetimevaryingimageonline_codegen.cpp"
 } // namespace
@@ -72,13 +72,12 @@ ScreenSpaceTimeVaryingImageOnline::ScreenSpaceTimeVaryingImageOnline(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-
-    _jsonFilePath = absPath(p.jsonFilePath).string();
+    _jsonFilePath = p.jsonFilePath;
     addProperty(_jsonFilePath);
 
     _jsonFilePath.onChange([this]() {
         loadJsonData(_jsonFilePath);
-        });
+    });
 }
 
 documentation::Documentation ScreenSpaceTimeVaryingImageOnline::Documentation() {
@@ -86,8 +85,9 @@ documentation::Documentation ScreenSpaceTimeVaryingImageOnline::Documentation() 
 }
 
 bool ScreenSpaceTimeVaryingImageOnline::initialize() {
+    const bool ret = ScreenSpaceRenderable::initialize();
     loadJsonData(_jsonFilePath.value());
-    return ScreenSpaceRenderable::initialize();
+    return ret;
 }
 
 bool ScreenSpaceTimeVaryingImageOnline::deinitializeGL() {
@@ -95,11 +95,10 @@ bool ScreenSpaceTimeVaryingImageOnline::deinitializeGL() {
     return ScreenSpaceRenderable::deinitializeGL();
 }
 
-void ScreenSpaceTimeVaryingImageOnline::loadJsonData(const std::string& path) {
-    std::ifstream file(path);
+void ScreenSpaceTimeVaryingImageOnline::loadJsonData(const std::filesystem::path& path) {
+    std::ifstream file = std::ifstream(path);
     if (!file.is_open()) {
         throw ghoul::RuntimeError(std::format("Could not open JSON file at '{}'", path));
-        return;
     }
 
     nlohmann::json json;
@@ -114,7 +113,7 @@ void ScreenSpaceTimeVaryingImageOnline::loadJsonData(const std::string& path) {
     _timestamps.clear();
     _urls.clear();
 
-    for (const auto& entry : json["files"]) {
+    for (const nlohmann::json& entry : json["files"]) {
         const std::string& timestamp = entry["timestamp"].get<std::string>();
         double j2000 = Time::convertTime(timestamp);
         _timestamps.push_back(j2000);
@@ -126,13 +125,15 @@ void ScreenSpaceTimeVaryingImageOnline::loadJsonData(const std::string& path) {
 }
 
 void ScreenSpaceTimeVaryingImageOnline::computeSequenceEndTime() {
-    if (_timestamps.size() > 1) {
-        double first = _timestamps.front();
-        double last = _timestamps.back();
-        double avg = (last - first) / static_cast<double>(_timestamps.size() - 1);
-        // Extend end time so the last value remains visible for one more interval
-        _sequenceEndTime = last + avg;
+    if (_timestamps.size() <= 1) {
+        return;
     }
+    
+    double first = _timestamps.front();
+    double last = _timestamps.back();
+    double avg = (last - first) / static_cast<double>(_timestamps.size() - 1);
+    // Extend end time so the last value remains visible for one more interval
+    _sequenceEndTime = last + avg;
 }
 
 void ScreenSpaceTimeVaryingImageOnline::update() {
@@ -140,7 +141,7 @@ void ScreenSpaceTimeVaryingImageOnline::update() {
         return;
     }
 
-    double current = global::timeManager->time().j2000Seconds();
+    const double current = global::timeManager->time().j2000Seconds();
 
     if (current < _timestamps.front() || current >= _sequenceEndTime) {
         _activeIndex = -1;
@@ -150,8 +151,7 @@ void ScreenSpaceTimeVaryingImageOnline::update() {
     }
 
     if (current >= _timestamps.front() && current < _sequenceEndTime) {
-        int idx = activeIndex(current);
-        if (idx != _activeIndex) {
+        if (int idx = activeIndex(current);  idx != _activeIndex) {
             _activeIndex = idx;
             std::string url = _urls[_timestamps[_activeIndex]];
             if (_currentUrl != url) {
@@ -214,15 +214,17 @@ int ScreenSpaceTimeVaryingImageOnline::activeIndex(double currentTime) const {
 }
 
 void ScreenSpaceTimeVaryingImageOnline::loadImage(const std::string& imageUrl) {
-    if (!_imageFuture.valid()) {
-        _imageFuture = global::downloadManager->fetchFile(
-            imageUrl,
-            [](const DownloadManager::MemoryFile&) {},
-            [](const std::string& e) {
-                LERROR(std::format("Download failed: {}", e));
-            }
-        );
+    if (_imageFuture.valid()) {
+        return;
     }
+    
+    _imageFuture = global::downloadManager->fetchFile(
+        imageUrl,
+        [](const DownloadManager::MemoryFile&) {},
+        [](const std::string& e) {
+            LERROR(std::format("Download failed: {}", e));
+        }
+    );
 }
 
 void ScreenSpaceTimeVaryingImageOnline::bindTexture() {
