@@ -131,20 +131,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo latUpperBoundInfo = {
-        "LatUpperBound",
-        "Latitude upper bound",
-        "Limit the volume's Latitude.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo latLowerBoundInfo = {
-        "LatLowerBound",
-        "Latitude lower bound",
-        "Limit the volume's latitude.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     struct [[codegen::Dictionary(RenderableTimeVaryingVolume)]] Parameters {
         // [[codegen::verbatim(SourceDirectoryInfo.description)]]
         std::filesystem::path sourceDirectory [[codegen::directory()]];
@@ -190,8 +176,6 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     , _brightness(BrightnessInfo, 0.33f, 0.f, 1.f)
     , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
     , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
-    , _latUpperBound(latUpperBoundInfo, 1.f, 0.f, 2.f)
-    , _latLowerBound(latLowerBoundInfo, 0.f, 0.f, 2.f)
     , _secondsBefore(SecondsBeforeInfo, 0.f, 0.01f, SecondsInOneDay)
     , _secondsAfter(SecondsAfterInfo, 0.f, 0.01f, SecondsInOneDay)
     , _sourceDirectory(SourceDirectoryInfo)
@@ -330,8 +314,6 @@ void RenderableTimeVaryingVolume::initializeGL() {
     addProperty(_jumpToTimestep);
     addProperty(_rNormalization);
     addProperty(_rUpperBound);
-    addProperty(_latUpperBound);
-    addProperty(_latLowerBound);
     addProperty(_gridType);
 
     _raycaster->setGridType(static_cast<VolumeGridType>(_gridType.value()));
@@ -481,8 +463,6 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
         _raycaster->setBrightness(_brightness * opacity());
         _raycaster->setRNormalization(_rNormalization);
         _raycaster->setRUpperBound(_rUpperBound);
-        _raycaster->setLatUpperBound(_latUpperBound);
-        _raycaster->setLatLowerBound(_latLowerBound);
     }
 }
 

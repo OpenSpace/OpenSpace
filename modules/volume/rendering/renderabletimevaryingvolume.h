@@ -84,8 +84,6 @@ private:
     properties::FloatProperty _brightness;
     properties::FloatProperty _rNormalization;
     properties::FloatProperty _rUpperBound;
-    properties::FloatProperty _latUpperBound;
-    properties::FloatProperty _latLowerBound;
     properties::FloatProperty _secondsBefore;
     properties::FloatProperty _secondsAfter;
     properties::StringProperty _sourceDirectory;

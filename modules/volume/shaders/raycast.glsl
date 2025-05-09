@@ -42,8 +42,6 @@ const float SamplingIntervalReferenceFactor = 500.0;
 uniform float rNormalization_#{id} = 0.0;
 
 uniform float rUpperBound_#{id} = 1.0;
-uniform float latUpperBound_#{id} = 1.0;
-uniform float latLowerBound_#{id} = 1.0;
 
 
 void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
@@ -68,19 +66,12 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
   }
 
   clipAlpha *= 1.0 - smoothstep(rUpperBound_#{id} - 0.01, rUpperBound_#{id} + 0.01, transformedPos.x);
-  //clipAlpha *= smoothstep(0.01, 0.011, transformedPos.x);
-  clipAlpha *= 1.0 - smoothstep(latUpperBound_#{id}, latUpperBound_#{id} + 0.02, transformedPos.y);
-  clipAlpha *= smoothstep(latLowerBound_#{id}, latLowerBound_#{id} + 0.02, transformedPos.y);
-
-  //clipAlpha *= 1.0 - smoothstep(0.647, 0.667, transformedPos.y);
-  //clipAlpha *= smoothstep(0.3036, 0.3236, transformedPos.y);
 
   if (clipAlpha > 0) {
     float val = texture(volumeTexture_#{id}, transformedPos).r;
 
     if (rNormalization_#{id} > 0 && gridType_#{id} == 1) {
       val *= pow(transformedPos.x, rNormalization_#{id});
-      val *= abs(transformedPos.y);
     }
 
     vec4 color = texture(transferFunction_#{id}, val);
