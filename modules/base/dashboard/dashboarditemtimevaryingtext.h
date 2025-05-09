@@ -22,34 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__
-#define __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__
+ #ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMTIMEVARYINGTEXT___H__
+ #define __OPENSPACE_MODULE_BASE___DASHBOARDITEMTIMEVARYINGTEXT___H__
 
-#include <openspace/scene/translation.h>
+ #include <openspace/rendering/dashboardtextitem.h>
 
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/util/timeline.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
+ #include <openspace/properties/misc/stringproperty.h>
 
-namespace openspace {
+ namespace openspace {
 
-struct UpdateData;
+ namespace documentation { struct Documentation; }
 
-namespace documentation { struct Documentation; }
+ class DashboardItemTimeVaryingText : public DashboardTextItem {
+ public:
+     explicit DashboardItemTimeVaryingText(const ghoul::Dictionary& dictionary);
+     ~DashboardItemTimeVaryingText() override = default;
 
-class TimelineTranslation : public Translation {
-public:
-    explicit TimelineTranslation(const ghoul::Dictionary& dictionary);
+     void update() override;
 
-    void update(const UpdateData& data) override;
-    glm::dvec3 position(const UpdateData& data) const override;
-    static documentation::Documentation Documentation();
+     static documentation::Documentation Documentation();
 
-private:
-    Timeline<ghoul::mm_unique_ptr<Translation>> _timeline;
-    properties::BoolProperty _shouldInterpolate;
-};
+ private:
+     void loadDataFromJson(const std::string& filePath);
+     void computeSequenceEndTime();
+     int updateActiveTriggerTimeIndex(double currentTime) const;
 
-} // namespace openspace
+     properties::StringProperty _formatString;
+     properties::StringProperty _dataFile;
 
-#endif // __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__
+     std::unordered_map<double, double> _data;
+     std::vector<double> _startTimes;
+
+     int _activeTriggerTimeIndex = -1;
+     double _sequenceEndTime = 0.0;
+ };
+ } // namespace openspace
+
+ #endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMTIMEVARYINGTEXT___H__
