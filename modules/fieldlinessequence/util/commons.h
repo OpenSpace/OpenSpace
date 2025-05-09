@@ -29,28 +29,6 @@
 
 namespace openspace::fls { // (F)ield(L)ines(S)equence
 
-struct ExtraVariable {
-    enum VariableType {
-        numerical,
-        text
-    };
-    VariableType type;
-    std::string name;
-    std::string unit;
-    // probably only need two of these + maybe one should be a property?
-    glm::vec2 absolutMinMaxRange;
-    //glm::vec2 displayedMinMaxRange;
-    //glm::vec2 selectedRange;
-
-    //std::string unit(std::string n) {
-    //    return somewhereelse::lookUpUnit(n);
-    //}
-
-    //std::string name(std::string u) {
-    //    return somewhereelse::lookUpName(u);
-    //}
-};
-
 enum class Model : int {
     Batsrus = 0,
     Enlil,
