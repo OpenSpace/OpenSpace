@@ -24,7 +24,7 @@ local Object = {
     },
     -- Use fixed orientation, and rotate planes based on orientation information in
     -- the dataset
-    OrientationRenderOption = "Fixed Rotation",
+    Billboard = "Fixed Rotation",
     UseOrientationData = true,
     Unit = "pc",
     Fading = {

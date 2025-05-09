@@ -64,12 +64,19 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
+    enum OrientationOption {
+        ViewDirection = 0,
+        PositionNormal,
+        FixedRotation
+    };
+
     virtual void bindTexture();
     virtual void unbindTexture();
     void createPlane();
+    glm::dmat4 rotationMatrix(const RenderData& data) const;
 
     properties::OptionProperty _blendMode;
-    properties::BoolProperty _billboard;
+    properties::OptionProperty _renderOption;
     properties::BoolProperty _mirrorBackside;
     properties::Vec2Property _size;
     properties::BoolProperty _autoScale;
