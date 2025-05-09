@@ -61,7 +61,7 @@ properties::PropertyOwner* propertyOwner(const std::string& uri) {
     return property;
 }
 
-std::vector<properties::Property*> allProperties() {
+const std::vector<properties::Property*>& allProperties() {
     return global::openSpaceEngine->allProperties();
 }
 
