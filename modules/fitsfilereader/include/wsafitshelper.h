@@ -23,7 +23,7 @@ struct ImageData {
 // to cause overexposure of higher and lower values.;
 std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
                                                          const std::filesystem::path path,
-                                                         int layerIndex, float minMax);
+                                                         size_t layerIndex, float minMax);
 
 int nLayers(const std::filesystem::path path);
 template<typename T, typename U>

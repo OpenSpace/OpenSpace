@@ -62,13 +62,13 @@ local WSA_Magnetograms_Adapt = {
 --  },
   Renderable = {
     Type = "RenderableTimeVaryingSphere",
-    Enabled = true,
+    Enabled = false,
     Size = sunRadius * 1.002,
     LoadingType = "DynamicDownloading",
     InfoURL = infoURL,
     DataURL = dataURL,
     DataID = 2149,
-    FitsLayer = 4,
+    FitsLayer = 5,
     LayerNames = {
       ['0'] = "Coronal Magnetic Field at 5 Solar Radii (nT)",
       ['1'] = "Flux tube expansion factor evaluated at the source surface",
@@ -103,7 +103,8 @@ local WSA_Velocity_Adapt = {
 --      Type = "StaticRotation",
 --      Rotation = {0.0, 0.0, -2.00712864} --120 degree offset compared to Gong
 --    }
---  },  Transform = {
+--  },
+  Transform = {
     Rotation = {
       Type = "StaticRotation",
       Rotation = {0.0, 0.0, -2.00712864}
@@ -118,13 +119,10 @@ local WSA_Velocity_Adapt = {
     DataURL = dataURL,
     DataID = 2218,
     FitsLayer = 0,
-    --LayerNames = {
-   --   0 = {"a"},
-   --   1 = {"b"},
-   --   2 = {"c"},
-   --   3 = {"d"},
-   --   4 = {"e"}
-   -- },
+    LayerNames = {
+      ['0'] = "Coronal Magnetic Field at 21.5 Solar Radii",
+      ['1'] = "Solar Wind Speed at 21.5 Solar Radii (km/s)}"
+    },
     ColorMap = blueBlackRed,
     CacheData = false,
     ShowAtAllTimes = false,
@@ -151,13 +149,10 @@ local WSA_Velocity_Gong = {
     DataURL = dataURL,
     DataID = 2217,
     FitsLayer = 0,
-    --LayerNames = {
-   --   0 = {"a"},
-   --   1 = {"b"},
-   --   2 = {"c"},
-   --   3 = {"d"},
-   --   4 = {"e"}
-   -- },
+    LayerNames = {
+      ['0'] = "Coronal Magnetic Field at 21.5 Solar Radii",
+      ['1'] = "Solar Wind Speed at 21.5 Solar Radii (km/s)}"
+    },
     ColorMap = blueBlackRed,
     CacheData = false,
     ShowAtAllTimes = false,

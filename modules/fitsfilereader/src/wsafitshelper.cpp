@@ -12,7 +12,7 @@ namespace openspace {
 
 std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
                                                          const std::filesystem::path path,
-                                                         int layerIndex, float minMax)
+                                                         size_t layerIndex, float minMax)
 {
     try {
         std::unique_ptr<FITS> file = std::make_unique<FITS>(path.string(), Read, true);
@@ -36,8 +36,8 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
             ));
             layerIndex = 0;
         }
-        // The numbers 64800, 16200 means: grab the fifth layer in the fits file, where the
-        // magnetogram map is, in the wsa file
+        // The numbers 64800, 16200 means: grab the fifth layer in the fits file,
+        // where the magnetogram map is, in the wsa file
         std::valarray<float> layerValues =
             fitsValues->contents[std::slice(layerIndex*layerSize, layerSize, 1)];
 
@@ -48,8 +48,8 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         for (size_t i = 0; i < layerValues.size(); i++) {
             // normalization
             float normalizedValue = (layerValues[i] - minValue) / (maxValue - minValue);
-            // clamping causes overexposure above and below max and min values intentionally
-            // as desired by Nick Arge from WSA
+            // clamping causes overexposure above and below max and min values
+            // intentionally as desired by Nick Arge from WSA
             normalizedValue = std::clamp(normalizedValue, 0.f, 1.f);
 
             imageData[i] = normalizedValue;

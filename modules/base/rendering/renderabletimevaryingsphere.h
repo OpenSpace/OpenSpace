@@ -117,6 +117,7 @@ private:
     std::string _dataURL = "";
     properties::OptionProperty _fitsLayer;
     properties::OptionProperty _fitsLayerName;
+    bool _hasLayerNames = false;
     std::map<int, std::string> _layerNames;
     int _fitsLayerTemp;
     int _fitsLayerNameTemp;
@@ -146,7 +147,6 @@ private:
     bool _textureIsDirty = true;
 
 };
-
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_BASE___RENDERABLETIMEVARYINGSPHERE___H__

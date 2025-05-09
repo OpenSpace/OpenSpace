@@ -249,9 +249,11 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
             ));
             _fitsLayerTemp = 0;
         }
+        _hasLayerNames = true;
         addProperty(_fitsLayerName);
     }
     else {
+        _hasLayerNames = false;
         addProperty(_fitsLayer);
     }
 
@@ -305,20 +307,26 @@ void RenderableTimeVaryingSphere::deinitializeGL() {
 
 void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
     if (!_layerOptionsAdded) {
-        for (int i = 0; i < nLayers(path); ++i) {
-            _fitsLayer.addOption(i, std::to_string(i+1));
-            auto it = _layerNames.find(i);
-            if (it != _layerNames.end()) {
-                _fitsLayerName.addOption(it->first, it->second);
+        if (_hasLayerNames) {
+            for (int i = 0; i < nLayers(path); ++i) {
+                auto it = _layerNames.find(i);
+                if (it != _layerNames.end()) {
+                    _fitsLayerName.addOption(it->first, it->second);
+                }
+                else {
+                    LERROR(std::format(
+                        "Could not add fits layer name"
+                    ));
+                }
             }
-            else {
-                LERROR(std::format(
-                    "Could not add fits layer name"
-                ));
-            }
+            _fitsLayerName = _fitsLayerTemp;
         }
-        _fitsLayerName = _fitsLayerTemp;
-        _fitsLayer = _fitsLayerTemp;
+        else {
+            for (int i = 0; i < nLayers(path); ++i) {
+                _fitsLayer.addOption(i, std::to_string(i + 1));
+            }
+            _fitsLayer = _fitsLayerTemp;
+        }
         _layerOptionsAdded = true;
     }
 
@@ -326,8 +334,9 @@ void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
     newFile.path = path;
     newFile.status = File::FileStatus::Loaded;
     newFile.time = extractTriggerTimeFromFitsFileName(path);
+    size_t layer = _hasLayerNames ? _fitsLayerName : _fitsLayer;
     std::unique_ptr<ghoul::opengl::Texture> t =
-        loadTextureFromFits(path, _fitsLayer, _fitsDataCapValue);
+        loadTextureFromFits(path, layer, _fitsDataCapValue);
     if (t == nullptr) {
         return;
     }
@@ -420,8 +429,8 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
         }
         std::string fileExtention = e.path().extension().string();
         if (fileExtention == ".fits") {
-            readFileFromFits(e.path());
             _isFitsFormat = true;
+            readFileFromFits(e.path());
         }
         else {
             readFileFromImage(e.path());
@@ -538,8 +547,8 @@ void RenderableTimeVaryingSphere::updateDynamicDownloading(const double currentT
     for (std::filesystem::path filePath : filesToRead) {
         std::string fileExtention = filePath.extension().string();
         if (fileExtention == ".fits") {
-            readFileFromFits(filePath);
             _isFitsFormat = true;
+            readFileFromFits(filePath);
         }
         else {
             readFileFromImage(filePath);
