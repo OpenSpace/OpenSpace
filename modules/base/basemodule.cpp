@@ -71,6 +71,7 @@
 #include <modules/base/rendering/screenspaceimageonline.h>
 #include <modules/base/rendering/screenspaceframebuffer.h>
 #include <modules/base/rendering/screenspacerenderablerenderable.h>
+#include <modules/base/rendering/screenspacetimevaryingimageonline.h>
 #include <modules/base/rotation/constantrotation.h>
 #include <modules/base/rotation/fixedrotation.h>
 #include <modules/base/rotation/globerotation.h>
@@ -113,12 +114,13 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
 
     fSsRenderable->registerClass<ScreenSpaceDashboard>("ScreenSpaceDashboard");
+    fSsRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
     fSsRenderable->registerClass<ScreenSpaceImageLocal>("ScreenSpaceImageLocal");
     fSsRenderable->registerClass<ScreenSpaceImageOnline>("ScreenSpaceImageOnline");
-    fSsRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
     fSsRenderable->registerClass<ScreenSpaceRenderableRenderable>(
         "ScreenSpaceRenderableRenderable"
     );
+    fSsRenderable->registerClass<ScreenSpaceTimeVaryingImageOnline>("ScreenSpaceTimeVaryingImageOnline");
 
 
     ghoul::TemplateFactory<DashboardItem>* fDashboard =
@@ -306,6 +308,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         ScreenSpaceImageLocal::Documentation(),
         ScreenSpaceImageOnline::Documentation(),
         ScreenSpaceRenderableRenderable::Documentation(),
+        ScreenSpaceTimeVaryingImageOnline::Documentation(),
 
         ConstantRotation::Documentation(),
         FixedRotation::Documentation(),

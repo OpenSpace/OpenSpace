@@ -1,0 +1,16 @@
+{
+ "files": [
+  {
+   "timestamp": "2024-05-10 15:00:00.0",
+   "url": "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg"
+  },
+  {
+   "timestamp": "2024-05-10 15:10:00.0",
+   "url": "https://data.openspaceproject.com/examples/renderableplaneimageonline_2.jpg"
+  },
+  {
+   "timestamp": "2024-05-10 15:20:00.0",
+   "url": "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg"
+  }
+ ]
+}
