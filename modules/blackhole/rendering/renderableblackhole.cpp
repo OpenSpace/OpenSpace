@@ -190,6 +190,13 @@ namespace openspace {
             LWARNING("UniformCache is missing 'colorBVMap'");
         }
 
+#ifdef M_Kerr
+        ghoul::opengl::TextureUnit accretionDiskUnit;
+        if (!bindTexture(_uniformCache.accretionDisk, accretionDiskUnit, _accretionDiskTexture)) {
+            LWARNING("UniformCache is missing 'accretionDisk'");
+        }
+#endif // M_Kerr
+
         SendSchwarzschildTableToShader();
         SendStarKDTreeToShader();
 
@@ -343,7 +350,13 @@ namespace openspace {
         else {
             LWARNING(std::format("Failed to load environment texture from path '{}'", absPath(_colorBVMapTexturePath).string()));
         }
-        
+#if M_Kerr
+        _accretionDiskTexture = ghoul::io::TextureReader::ref().loadTexture(absPath("${MODULE_BLACKHOLE}/rendering/accretion_disk.png"), 1);
+
+        if (_accretionDiskTexture) {
+            _accretionDiskTexture->uploadTexture();
+        }
+#endif
     }
 
     void RenderableBlackHole::bindFramebuffer() {

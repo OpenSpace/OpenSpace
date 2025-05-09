@@ -79,11 +79,12 @@ namespace openspace {
         GLuint _ssboStarKDTree = 0;
         GLuint _ssboStarKDTreeIndices = 0;
 
-        UniformCache(environmentTexture, viewGrid, worldRotationMatrix, cameraRotationMatrix, colorBVMap, r_0) _uniformCache;
+        UniformCache(environmentTexture, viewGrid, worldRotationMatrix, cameraRotationMatrix, colorBVMap, r_0, accretionDisk) _uniformCache;
 
         std::unique_ptr<ghoul::opengl::Texture> _warpTableTex;
         std::unique_ptr<ghoul::opengl::Texture> _environmentTexture;
         std::unique_ptr<ghoul::opengl::Texture> _colorBVMapTexture;
+        std::unique_ptr<ghoul::opengl::Texture> _accretionDiskTexture;
     };
 
 } // openspace namespace
