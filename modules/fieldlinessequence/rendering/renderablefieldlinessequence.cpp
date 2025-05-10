@@ -290,6 +290,7 @@ namespace {
             Json,
             Osfls
         };
+        // Specify file type: Cdf, Json or Osfls
         SourceFileType inputFileType;
 
         // Path to folder containing the input files
@@ -309,7 +310,7 @@ namespace {
 } // namespace
 
 namespace openspace {
-const double extractTriggerTimeFromFilename(std::filesystem::path filePath);
+double extractTriggerTimeFromFilename(std::filesystem::path filePath);
 
 documentation::Documentation RenderableFieldlinesSequence::Documentation() {
     return codegen::doc<Parameters>("fieldlinessequence_renderablefieldlinessequence");
@@ -795,7 +796,7 @@ void RenderableFieldlinesSequence::setModelDependentConstants() {
     _domainR = glm::vec2(0.f, limit * 1.5f);
 }
 
-const double extractTriggerTimeFromFilename(std::filesystem::path filePath) {
+double extractTriggerTimeFromFilename(std::filesystem::path filePath) {
     // number of  characters in filename (excluding '.osfls')
     //constexpr int FilenameSize = 23;
     // size(".osfls")
@@ -833,7 +834,6 @@ void RenderableFieldlinesSequence::deinitializeGL() {
 
     _files.clear();
 
-    bool printedWarning = false;
     if (_loadingType == LoadingType::DynamicDownloading &&
         _dynamicFileDownloader != nullptr)
     {
@@ -1024,10 +1024,10 @@ void RenderableFieldlinesSequence::firstUpdate() {
             std::string min = std::to_string(minNr);
             float maxNr = *std::max_element(q.begin(), q.end());
             std::string max = std::to_string(maxNr);
-            LWARNING(std::format("min :{}", min));
-            LWARNING(std::format("max :{}", max));
+            LINFO(std::format("min :{}", min));
+            LINFO(std::format("max :{}", max));
             std::string name = extraNamesVec[i];
-            LWARNING(std::format("name:{}", name));
+            LINFO(std::format("name:{}", name));
         }
         _havePrintedQuantityRange = true;
     }
@@ -1190,8 +1190,6 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
     }
 
     const FieldlinesState& state = _files[loadedIndex].state;
-    double timeTest = _files[_activeIndex].timestamp;
-    ghoul_assert(timeTest != -1.0, "trying to use an empty state in render");
     glMultiDrawArrays(
         GL_LINE_STRIP,
         state.lineStart().data(),
