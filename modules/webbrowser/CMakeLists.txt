@@ -172,13 +172,14 @@ set(WEBBROWSER_RESOURCES_SRCS
 
 # Place Helper in separate executable
 # The naming style "<ApplicationName> Helper" is required by Chromium.
-if (OS_MACOSX)
-  set(CEF_HELPER_TARGET "OpenSpace Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
-else ()
-  set(CEF_HELPER_TARGET "OpenSpace_Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
-endif ()
-set(CEF_HELPER_TARGET_GPU "OpenSpace Helper (GPU)" CACHE INTERNAL "CEF_HELPER_TARGET_GPU")
-set(CEF_HELPER_TARGET_RENDERER "OpenSpace Helper (Renderer)" CACHE INTERNAL "CEF_HELPER_TARGET_RENDERER")
+set(CEF_HELPER_TARGET "OpenSpace_Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
+set(CEF_HELPER_TARGET_OUTPUT_NAME "OpenSpace Helper" CACHE INTERNAL "")
+
+set(CEF_HELPER_TARGET_GPU "OpenSpace_Helper_GPU" CACHE INTERNAL "CEF_HELPER_TARGET_GPU")
+set(CEF_HELPER_TARGET_GPU_OUTPUT_NAME "OpenSpace Helper (GPU)" CACHE INTERNAL "")
+
+set(CEF_HELPER_TARGET_RENDERER "OpenSpace_Helper_Renderer" CACHE INTERNAL "CEF_HELPER_TARGET_RENDERER")
+set(CEF_HELPER_TARGET_RENDERER_OUTPUT_NAME "OpenSpace Helper (Renderer)" CACHE INTERNAL "")
 
 #
 # CEF platform-specific config
@@ -198,6 +199,7 @@ if (OS_MACOSX)
     target_link_libraries(${target} libcef_dll_wrapper ${CEF_STANDARD_LIBS})
     set_target_properties(${target} PROPERTIES
       MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/mac/helper-Info.plist
+      OUTPUT_NAME "${target}_OUTPUT_NAME"
     )
 
     target_compile_options(${target} PRIVATE -Wno-deprecated-declarations)
