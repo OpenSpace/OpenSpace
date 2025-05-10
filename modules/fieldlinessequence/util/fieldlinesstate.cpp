@@ -418,7 +418,7 @@ void FieldlinesState::setTriggerTime(double t) {
 
 // Returns one of the extra quantity vectors, _extraQuantities[index].
 // If index is out of scope an empty vector is returned and the referenced bool is false.
-std::vector<float> FieldlinesState::extraQuantity(int index, bool& isSuccessful) const
+std::vector<float> FieldlinesState::extraQuantity(size_t index, bool& isSuccessful) const
 {
     if (index == -1) {
         isSuccessful = false;

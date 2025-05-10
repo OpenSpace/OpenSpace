@@ -186,7 +186,6 @@ LuaConsole::LuaConsole()
 void LuaConsole::initialize() {
     ZoneScoped;
 
-    ghoul_assert(FileSys.cacheManager(), "CacheManager did not initialize");
     const std::filesystem::path filename = FileSys.cacheManager()->cachedFilename(
         HistoryFile,
         ""

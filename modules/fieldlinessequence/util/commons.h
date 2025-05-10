@@ -36,7 +36,6 @@ enum class Model : int {
     Invalid
 };
 
-
 Model stringToModel(const std::string& s);
 
 constexpr float AuToMeter = 149597870700.f; // Astronomical Units

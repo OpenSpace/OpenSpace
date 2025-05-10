@@ -12,10 +12,10 @@
     "scene/solarsystem/planets/earth/satellites/satellites"
   ],
   "camera": {
-    "altitude": 6778000000.0,
+    "altitude": 4578000000.0,
     "anchor": "Sun",
     "latitude": 1.5877,
-    "longitude": -27.1924,
+    "longitude": -150.1924,
     "type": "goToGeo"
   },
   "delta_times": [
@@ -123,6 +123,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 1
+    "minor": 4
   }
 }
