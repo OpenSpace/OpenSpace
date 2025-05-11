@@ -72,18 +72,96 @@ bool ownerMatchesGroupTag(const openspace::properties::PropertyOwner* owner,
 {
     using namespace openspace;
 
+    constexpr char Intersection = '&';
+    constexpr char Negation = '~';
+    constexpr char Union = '|';
+
     if (!owner) {
         return false;
     }
 
     const std::vector<std::string>& tags = owner->tags();
-    auto it = std::find(tags.begin(), tags.end(), tagToMatch);
-    if (it != tags.end()) {
+
+    if (size_t i = tagToMatch.find(Intersection);  i != std::string_view::npos) {
+        // We have an intersection instruction
+        if (tagToMatch.find(Negation) != std::string_view::npos) {
+            throw ghoul::RuntimeError(std::format(
+                "Only a single instruction to combine tags is allowed. {}",
+                tagToMatch
+            ));
+        }
+        if (tagToMatch.find(Union) != std::string_view::npos) {
+            throw ghoul::RuntimeError(std::format(
+                "Only a single instruction to combine tags is allowed. {}",
+                tagToMatch
+            ));
+        }
+
+        std::string_view t1 = tagToMatch.substr(0, i);
+        auto t1It = std::find(tags.begin(), tags.end(), t1);
+        std::string_view t2 = tagToMatch.substr(i + 1);
+        auto t2It = std::find(tags.begin(), tags.end(), t2);
+        if (t1It != tags.end() && t2It != tags.end()) {
+            return true;
+        }
+    }
+    if (size_t i = tagToMatch.find(Negation);  i != std::string_view::npos) {
+        // We have an negation instruction
+        if (tagToMatch.find(Intersection) != std::string_view::npos) {
+            throw ghoul::RuntimeError(std::format(
+                "Only a single instruction to combine tags is allowed. {}",
+                tagToMatch
+            ));
+        }
+        if (tagToMatch.find(Union) != std::string_view::npos) {
+            throw ghoul::RuntimeError(std::format(
+                "Only a single instruction to combine tags is allowed. {}",
+                tagToMatch
+            ));
+        }
+
+        std::string_view t1 = tagToMatch.substr(0, i);
+        auto t1It = std::find(tags.begin(), tags.end(), t1);
+        std::string_view t2 = tagToMatch.substr(i + 1);
+        auto t2It = std::find(tags.begin(), tags.end(), t2);
+        if (t1It != tags.end() && t2It == tags.end()) {
+            return true;
+        }
+    }
+    if (size_t i = tagToMatch.find(Union);  i != std::string_view::npos) {
+        // We have an union instruction
+        if (tagToMatch.find(Negation) != std::string_view::npos) {
+            throw ghoul::RuntimeError(std::format(
+                "Only a single instruction to combine tags is allowed. {}",
+                tagToMatch
+            ));
+        }
+        if (tagToMatch.find(Intersection) != std::string_view::npos) {
+            throw ghoul::RuntimeError(std::format(
+                "Only a single instruction to combine tags is allowed. {}",
+                tagToMatch
+            ));
+        }
+
+        std::string_view t1 = tagToMatch.substr(0, i);
+        auto t1It = std::find(tags.begin(), tags.end(), t1);
+        std::string_view t2 = tagToMatch.substr(i + 1);
+        auto t2It = std::find(tags.begin(), tags.end(), t2);
+        if (t1It != tags.end() || t2It != tags.end()) {
+            return true;
+        }
+    }
+
+    // We are dealing with a tag without any combinations
+    auto match = std::find(tags.begin(), tags.end(), tagToMatch);
+    if (match != tags.end()) {
         return true;
     }
-    else {
-        return ownerMatchesGroupTag(owner->owner(), tagToMatch);
-    }
+
+    // If we got this far, we have an owner and we haven't found a match, so we have to
+    // try one level higher
+    ghoul_assert(owner, "Owner does not exist");
+    return ownerMatchesGroupTag(owner->owner(), tagToMatch);
 }
 
 // Checks to see if URI contains a group tag (with { } around the first term)
