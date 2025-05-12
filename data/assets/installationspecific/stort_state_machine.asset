@@ -2,11 +2,27 @@ local util = asset.require('./utility_functions')
 local flyHome = asset.require('./fly_home_alternatives')
 local defaultTime = asset.require('./default_time').time
 
+local inactivityView = {}
+
 ----------------------------------------------------------------
 -- STATES
 ----------------------------------------------------------------
 local startState = {
   Identifier = "Start",
+}
+
+local inactiveState = {
+  Identifier = "Inactive",
+  Enter = [[
+  ]] .. util.jumpToNode("Earth", 6000000) .. [[
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.EnableMaximumAllowedDistance", false)
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", true);
+    openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', true);
+  ]],
+  Exit = [[
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", false);
+      openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', false);
+    ]]
 }
 
 local homeState = {
@@ -50,13 +66,19 @@ local substateApollo = asset.require('./substates/missions/apollo')
 local substateMarsRovers = asset.require('./substates/missions/mars_rovers')
 local substateCassini = asset.require('./substates/missions/cassini')
 local substateVoyagerPioneer = asset.require('./substates/missions/voyager_pioneer')
+local substateJuice = asset.require('./substates/missions/juice')
 
 -- Others
+local substateUniverse = asset.require('./substates/universe')
 local substateCBR = asset.require('./substates/cbr')
 local substateExoplanets = asset.require('./substates/exoplanets')
+local subStateDwarfPlanets = asset.require('./substates/dwarfplanets')
+local subStatePluto = asset.require('./substates/pluto')
+local subStateCeres = asset.require('./substates/ceres')
 
 local states = {
   startState,
+  inactiveState,
   homeState,
   solarSystemState
 }
@@ -65,8 +87,13 @@ util.appendTable(states, substateApollo.states)
 util.appendTable(states, substateMarsRovers.states)
 util.appendTable(states, substateCassini.states)
 util.appendTable(states, substateVoyagerPioneer.states)
+util.appendTable(states, substateJuice.states)
+util.appendTable(states, substateUniverse.states)
 util.appendTable(states, substateCBR.states)
 util.appendTable(states, substateExoplanets.states)
+util.appendTable(states, subStateDwarfPlanets.states)
+util.appendTable(states, subStatePluto.states)
+util.appendTable(states, subStateCeres.states)
 
 ----------------------------------------------------------------
 -- TRANSITIONS
@@ -105,6 +132,44 @@ local transitions = {
     From = "Home",
     To = "SolarSystem"
   },
+  -- Home <-> Inactive
+  {
+    From = "Home",
+    To = "Inactive",
+    Action = [[
+      openspace.setPropertyValueSingle("Scene.MercuryTrail.Renderable.Enabled", false);
+      openspace.setPropertyValueSingle("Scene.VenusTrail.Renderable.Enabled", false);
+      openspace.setPropertyValueSingle("Scene.EarthTrail.Renderable.Enabled", false);
+      openspace.setPropertyValueSingle("Scene.MarsTrail.Renderable.Enabled", false);
+      openspace.setPropertyValueSingle("Scene.JupiterTrail.Renderable.Enabled", false);
+      openspace.setPropertyValueSingle("Scene.SaturnTrail.Renderable.Enabled", false);
+      openspace.setPropertyValueSingle("Scene.NeptuneTrail.Renderable.Enabled", false);
+      openspace.setPropertyValueSingle("Scene.UranusTrail.Renderable.Enabled", false);
+      openspace.setPropertyValueSingle("Scene.MoonTrail.Renderable.Enabled", false);
+      openspace.setPropertyValueSingle("Scene.ISS_trail.Renderable.Enabled", false);
+    ]]
+  },
+  {
+    From = "Inactive",
+    To = "Home",
+    Action = [[
+      local anchor = openspace.propertyValue("NavigationHandler.OrbitalNavigator.Anchor")
+      if (anchor ~= 'Sun-Handle' ) then ]]
+        .. flyHome.cameraPath ..
+      [[end
+
+      openspace.setPropertyValueSingle("Scene.MercuryTrail.Renderable.Enabled", true);
+      openspace.setPropertyValueSingle("Scene.VenusTrail.Renderable.Enabled", true);
+      openspace.setPropertyValueSingle("Scene.EarthTrail.Renderable.Enabled", true);
+      openspace.setPropertyValueSingle("Scene.MarsTrail.Renderable.Enabled", true);
+      openspace.setPropertyValueSingle("Scene.JupiterTrail.Renderable.Enabled", true);
+      openspace.setPropertyValueSingle("Scene.SaturnTrail.Renderable.Enabled", true);
+      openspace.setPropertyValueSingle("Scene.NeptuneTrail.Renderable.Enabled", true);
+      openspace.setPropertyValueSingle("Scene.UranusTrail.Renderable.Enabled", true);
+      openspace.setPropertyValueSingle("Scene.MoonTrail.Renderable.Enabled", true);
+      openspace.setPropertyValueSingle("Scene.ISS_trail.Renderable.Enabled", true);
+    ]]
+  }
   -- The rest are in the substates
 }
 
@@ -112,8 +177,13 @@ util.appendTable(transitions, substateApollo.transitions)
 util.appendTable(transitions, substateMarsRovers.transitions)
 util.appendTable(transitions, substateCassini.transitions)
 util.appendTable(transitions, substateVoyagerPioneer.transitions)
+util.appendTable(transitions, substateJuice.transitions)
+util.appendTable(transitions, substateUniverse.transitions)
 util.appendTable(transitions, substateCBR.transitions)
 util.appendTable(transitions, substateExoplanets.transitions)
+util.appendTable(transitions, subStateDwarfPlanets.transitions)
+util.appendTable(transitions, subStatePluto.transitions)
+util.appendTable(transitions, subStateCeres.transitions)
 
 asset.onInitialize(function()
     openspace.statemachine.createStateMachine(states, transitions, "Start")

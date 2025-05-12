@@ -35,14 +35,19 @@ local states = { exoplanetsState }
 local transitions = {
   -- Transition to/from this state
   {
-    From = "Home",
+    From = "Universe",
     To = "Exoplanets"
   },
   {
     From = "Exoplanets",
-    To = "Home"
+    To = "Universe"
     -- No action. Should already be at the desired distance
-  }
+  },
+  {
+    From = "Exoplanets",
+    To = "Home",
+    Action = flyHome.linearFlight
+  },
 }
 
 asset.export("states", states)

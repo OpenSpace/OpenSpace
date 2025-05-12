@@ -1,0 +1,111 @@
+local util = asset.require('./../../utility_functions')
+local flyHome = asset.require('./../../fly_home_alternatives')
+local defaultTime = asset.require('./../../default_time').time
+
+-- local predefinedTime = "2025-04-15T14:00:00.505"
+
+local heightNear = 10
+local heightFar = 1.0E12
+
+----------------------------------------------------------------
+-- STATES
+----------------------------------------------------------------
+local trails = { "JuiceTrail", "JuiceTrailEarth", "JuiceTrailJupiter", "JuiceTrailGanymede" }
+
+local juiceNavigationState = [[{
+  Anchor="Juice",
+  Pitch = 1.3745455550924389e-05,
+  Position = { -12.507247924804688, 3.0131072998046875, -1.77764892578125 },
+  ReferenceFrame = "Root",
+  Up = { 0.04795887271975485, -0.352338472374508, -0.934643005329975 },
+  Yaw = -9.46004722316628e-06
+}]]
+
+local juiceState = {
+  Identifier = "Juice"
+}
+
+local juiceGoToNearState = {
+  Identifier = "JuiceGoToNear",
+  Enter = util.flyLinearlyToHeightInTime(heightNear, 3),
+  Exit = [[]]
+}
+
+local juiceGoToFarState = {
+  Identifier = "JuiceGoToFar",
+  Enter = util.flyLinearlyToHeightInTime(heightFar, 3),
+  Exit = [[]]
+}
+
+local states = {
+  juiceState,
+  juiceGoToNearState,
+  juiceGoToFarState
+}
+
+----------------------------------------------------------------
+-- TRANSITIONS within this substate
+----------------------------------------------------------------
+-- The action we want to happen when moving from any of the substates back
+-- to the Home state
+local onLeavingMainStateAction = [[
+  ]] .. util.setTime(defaultTime) .. [[
+  ]] .. flyHome.jumpFlight .. [[
+  ]] .. util.disableRoll() .. [[
+  ]] .. util.stopOrbiting() .. [[
+  ]] .. util.fadeOutNodes(trails) .. [[
+]]
+
+local arrivalDistance = 25.0
+local transitions = {
+  {
+    -- Note:  Juice mission is only valid until 2035 OCT 05. After this this part of the code will result in incorrect visuals :)
+    From = "Home",
+    To = "Juice",
+    Action = [[
+      ]] .. util.setCurveType("AvoidCollisionWithLookAt") .. [[
+      ]] .. util.orbitConstantLatitudeOnArrival() .. [[
+      ]] .. util.enableRoll() .. [[
+      ]] .. util.fadeInNodes({ "JuiceTrail" }) .. [[
+      ]] .. util.jumpToNavState(juiceNavigationState) .. [[
+    ]]
+  },
+
+  -- Juice to X transition
+  {
+    From = "Juice",
+    To = "JuiceGoToFar"
+  },
+
+  -- Near to X transitions
+  {
+    From = "JuiceGoToNear",
+    To = "JuiceGoToFar",
+  },
+
+  -- Far to X transitions
+  {
+    From = "JuiceGoToFar",
+    To = "JuiceGoToNear"
+  },
+
+  -- Home transitions
+  {
+    From = "Juice",
+    To = "Home",
+    Action = onLeavingMainStateAction
+  },
+  {
+    From = "JuiceGoToNear",
+    To = "Home",
+    Action = onLeavingMainStateAction
+  },
+  {
+    From = "JuiceGoToFar",
+    To = "Home",
+    Action = onLeavingMainStateAction
+  },
+}
+
+ asset.export("states", states)
+ asset.export("transitions", transitions)

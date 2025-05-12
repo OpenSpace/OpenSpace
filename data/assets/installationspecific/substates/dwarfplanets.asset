@@ -1,0 +1,60 @@
+local util = asset.require('./../utility_functions')
+local flyHome = asset.require('./../fly_home_alternatives')
+
+----------------------------------------------------------------
+-- STATES
+----------------------------------------------------------------
+local dwarfPlanetState = {
+  Identifier = "DwarfPlanets",
+  Enter = [[
+    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    ]] .. util.startOrbiting() .. [[
+    ]] .. util.orbitAroundUpOnArrival() .. [[
+    openspace.setPropertyValueSingle("Scene.Jupiter.Renderable.Layers.ColorLayers.JupiterVideo.TileProvider.VideoPlayer.Play", nil)
+  ]],
+  Exit = [[
+    openspace.setPropertyValue('{moonTrail_minor}.Renderable.Enabled', false);
+    openspace.setPropertyValueSingle("Scene.Jupiter.Renderable.Layers.ColorLayers.JupiterVideo.TileProvider.VideoPlayer.Pause", nil)
+    ]] .. util.stopOrbiting() .. [[
+  ]]
+}
+
+local states = { dwarfPlanetState }
+
+----------------------------------------------------------------
+-- TRANSITIONS within this substate
+----------------------------------------------------------------
+local transitions = {
+  -- Transition to/from this state
+  {
+    From = "SolarSystem",
+    To = "DwarfPlanets"
+  },
+  {
+    From = "DwarfPlanets",
+    To = "Pluto"
+  },
+  {
+    From = "DwarfPlanets",
+    To = "Ceres"
+  },
+  {
+    From = "Pluto",
+    To = "DwarfPlanets"
+  },
+  {
+    From = "Ceres",
+    To = "DwarfPlanets"
+  },
+  {
+    From = "DwarfPlanets",
+    To = "SolarSystem"
+  },
+  {
+    From = "DwarfPlanets",
+    To = "Home"
+  }
+}
+
+asset.export("states", states)
+asset.export("transitions", transitions)

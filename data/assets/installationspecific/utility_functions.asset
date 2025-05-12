@@ -117,9 +117,21 @@ local flyToNavState = function(state)
   ]]
 end
 
-local flyLinearlyToHeight = function(height)
+local jumpToNavState = function(state)
+  return [[
+    openspace.pathnavigation.flyToNavigationState(]] .. state .. [[, 0)
+  ]]
+end
+
+local flyLinearlyToHeight = function(height, seconds)
   return [[
     openspace.pathnavigation.zoomToDistance(]] .. tostring(height) .. [[)
+  ]]
+end
+
+local flyLinearlyToHeightInTime = function(height, seconds)
+  return [[
+    openspace.pathnavigation.zoomToDistance(]] .. tostring(height) .. "," .. seconds .. [[)
   ]]
 end
 
@@ -130,6 +142,17 @@ local flyLinearlyToNode = function(node, distance)
       Target = ']] .. node ..[[',
       Height = ]] .. tostring(distance or nil) .. [[,
       PathType = "Linear"
+    })
+  ]]
+end
+
+local jumpToNode = function(node, distance)
+  return [[
+    openspace.pathnavigation.createPath({
+      TargetType = 'Node',
+      Target = ']] .. node ..[[',
+      Height = ]] .. tostring(distance or nil) .. [[,
+      Duration = 0.0
     })
   ]]
 end
@@ -223,8 +246,11 @@ asset.export("changeAnchor", changeAnchor)
 asset.export("enableRoll", enableRoll)
 asset.export("disableRoll", disableRoll)
 asset.export("flyToNavState", flyToNavState)
+asset.export("jumpToNavState", jumpToNavState)
 asset.export("flyLinearlyToHeight", flyLinearlyToHeight)
+asset.export("flyLinearlyToHeightInTime", flyLinearlyToHeightInTime)
 asset.export("flyLinearlyToNode", flyLinearlyToNode)
+asset.export("jumpToNode", jumpToNode)
 asset.export("setCurveType", setCurveType)
 asset.export("setTime", setTime)
 asset.export("interpolateTime", interpolateTime)

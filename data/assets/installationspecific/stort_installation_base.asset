@@ -44,6 +44,14 @@ asset.require("scene/solarsystem/missions/apollo/insignias_map")
 -- Voyager & Pioneer mission
 asset.require("scene/solarsystem/missions/voyagerpioneer/voyager1_2__pioneer10_11")
 
+-- Juice mission
+asset.require("scene/solarsystem/missions/juice/model")
+asset.require("scene/solarsystem/missions/juice/fieldlines")
+asset.require("scene/solarsystem/missions/juice/trails/ssb")
+asset.require("scene/solarsystem/missions/juice/trails/earth")
+asset.require("scene/solarsystem/missions/juice/trails/jupiter")
+asset.require("scene/solarsystem/missions/juice/trails/ganymede")
+
 -- ISS
 asset.require("scene/solarsystem/planets/earth/satellites/misc/iss")
 
@@ -112,6 +120,24 @@ asset.onInitialize(function ()
 
   -- Have Cassini missing trails faded out per default
   openspace.setPropertyValue("{cassini_trail}.Renderable.Fade", 0.0)
+
+  -- Hides Juice trails by default
+  openspace.setPropertyValueSingle("Scene.JuiceTrail.Renderable.Enabled", false)
+  openspace.setPropertyValueSingle("Scene.JuiceTrail.Renderable.Fade", 0.0)
+  openspace.setPropertyValueSingle("Scene.JuiceTrailEarth.Renderable.Enabled", false)
+  openspace.setPropertyValueSingle("Scene.JuiceTrailEarth.Renderable.Fade", 0.0)
+  openspace.setPropertyValueSingle("Scene.JuiceTrailJupiter.Renderable.Enabled", false)
+  openspace.setPropertyValueSingle("Scene.JuiceTrailJupiter.Renderable.Fade", 0.0)
+  openspace.setPropertyValueSingle("Scene.JuiceTrailGanymede.Renderable.Enabled", false)
+  openspace.setPropertyValueSingle("Scene.JuiceTrailGanymede.Renderable.Fade", 0.0)
+
+  -- Enable Ganymede Magnetosphere flow animation for fieldlines and hides them by default
+  openspace.setPropertyValueSingle("Scene.GanymedeMagnetosphere.Renderable.Enabled", false)
+  openspace.setPropertyValueSingle("Scene.GanymedeMagnetosphere.Renderable.Fade", 0.0)
+  --openspace.setPropertyValueSingle("Scene.GanymedeMagnetosphere.Renderable.DomainEnabled", false)
+  --openspace.setPropertyValueSingle("Scene.GanymedeMagnetosphere.Renderable.FlowEnabled", true)
+
+
 
   -- Other planet color layers
   openspace.setPropertyValueSingle("Scene.Neptune.Renderable.Layers.ColorLayers.Texture.Enabled", true)

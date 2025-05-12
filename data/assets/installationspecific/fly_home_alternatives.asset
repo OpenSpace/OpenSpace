@@ -30,5 +30,10 @@ local linearFlight = [[
   ]] .. util.flyLinearlyToNode('Sun-Handle', solarTargetDistance) .. [[
 ]]
 
+local jumpFlight = [[
+  ]] .. util.jumpToNode('Sun-Handle', solarTargetDistance) .. [[
+]]
+
 asset.export("cameraPath", cameraPath)
 asset.export("linearFlight", linearFlight)
+asset.export("jumpFlight", jumpFlight)

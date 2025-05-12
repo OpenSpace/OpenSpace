@@ -4,40 +4,37 @@ local flyHome = asset.require('./../fly_home_alternatives')
 ----------------------------------------------------------------
 -- STATES
 ----------------------------------------------------------------
-
--- No zoom, can "zoom" to predetermined distances using the buttons on the webpage
-local cbrState = {
-    Identifier = "CBR",
-    Enter = [[
-        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-        ]] .. util.startOrbiting() .. [[
-        ]] .. util.orbitOnArrival() .. [[
-    ]],
-    Exit = [[
-        ]] .. util.stopOrbiting() .. [[
-    ]]
+local ceresState = {
+  Identifier = "Ceres",
+  Enter = [[]],
+  Exit = [[]]
 }
 
-local states = { cbrState }
+local states = { ceresState }
 
 ----------------------------------------------------------------
 -- TRANSITIONS within this substate
 ----------------------------------------------------------------
-
 local transitions = {
   -- Transition to/from this state
   {
-    From = "Universe",
-    To = "CBR",
-    Action = [[]] -- This flight happens on the webpage
+    From = "DwarfPlanets",
+    To = "Ceres"
   },
   {
-    From = "CBR",
-    To = "Universe",
-    Action = flyHome.linearFlight
+    From = "Ceres",
+    To = "Pluto"
   },
   {
-    From = "CBR",
+    From = "Pluto",
+    To = "Ceres"
+  },
+  {
+    From = "Ceres",
+    To = "DwarfPlanets"
+  },
+  {
+    From = "Ceres",
     To = "Home",
     Action = flyHome.linearFlight
   }
