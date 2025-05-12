@@ -72,22 +72,12 @@
     "version": "1.0"
   },
   "panel_visibility": {
-    "actions": true,
     "exoplanets": false,
     "flightControl": false,
     "geoLocation": false,
     "gettingStartedTour": false,
-    "keybindingsLayout": false,
     "mission": true,
-    "navigation": true,
-    "scene": true,
-    "screenSpaceRenderables": true,
-    "scriptLogPanel": false,
-    "sessionRecording": true,
-    "settings": false,
-    "skyBrowser": false,
-    "timePanel": true,
-    "userPanels": true
+    "skyBrowser": false
   },
   "properties": [
     {

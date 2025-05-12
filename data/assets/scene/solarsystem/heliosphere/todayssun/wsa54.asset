@@ -1,17 +1,29 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
 
-local transferFunctions = asset.resource("transferfunctions")
+
+
+
+local transferFunctions = asset.resource({
+  Type = "HttpSynchronization",
+  Name = "Today's Sun Transfer Functions",
+  Identifier = "todayssun_transferfunctions",
+  Version = 1
+})
+
+
 local windSpeedPolarityColorTable = transferFunctions .. "/polarity_spec.txt"
 local subEarthLevelColorTable = transferFunctions .. "/subearth_spec.txt"
 local blueBlackRed = transferFunctions .. "/blue-black-red.txt"
 local currentSheetColorTable = transferFunctions .. "/currentsheet_spec.txt"
 local opennessColorTable = transferFunctions .."/openness_spec.txt"
 
-
-infoURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id="
-dataURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID="
+local infoURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id="
+local dataURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID="
 
 local sunRadius = 695508000
+    -- This small 0.2% increase is an arbitrary number but
+    -- necessary to make sure it is not within the Sun sphere
+local extendedRadius = sunRadius * 1.002
 
 local WSA_Magnetograms = {
   Identifier = "WSA_54_Magnetograms_GONGZ",
@@ -19,33 +31,32 @@ local WSA_Magnetograms = {
   Renderable = {
     Type = "RenderableTimeVaryingSphere",
     Enabled = true,
-    Size = sunRadius * 1.002,
+    Size = extendedRadius,
     LoadingType = "DynamicDownloading",
     InfoURL = infoURL,
     DataURL = dataURL,
     DataID = 2148,
     FitsLayer = 4,
     LayerNames = {
-      ['0'] = "Coronal Magnetic Field at 5 Solar Radii (nT)",
-      ['1'] = "Flux tube expansion factor evaluated at the source surface",
-      ['2'] = "Colatitude of open field footpoints at photosphere (rad)",
-      ['3'] = "Longitude of open field footpoints (rad)",
-      ['4'] = "Observed Photospheric Field (Gauss)",
-      ['5'] = "Distance from open field footpoint to nearest coronal boundary (deg)",
-      ['6'] = "Open (1,2,3) and closed (0) regions on the photosphere [1=in-to-out tracing; 2=out-to-in tracing; 3=both] (no units)",
-      ['7'] = "Distance to current sheet at outer boundary (degrees)"
+      "Coronal Magnetic Field at 5 Solar Radii (nT)",
+      "Flux tube expansion factor evaluated at the source surface",
+      "Colatitude of open field footpoints at photosphere (rad)",
+      "Longitude of open field footpoints (rad)",
+      "Observed Photospheric Field (Gauss)",
+      "Distance from open field footpoint to nearest coronal boundary (deg)",
+      "Open (1,2,3) and closed (0) regions on the photosphere [1=in-to-out tracing; 2=out-to-in tracing; 3=both] (no units)",
+      "Distance to current sheet at outer boundary (degrees)"
     },
     ColorMap = blueBlackRed,
     UseColorMap = false,
     CacheData = true,
-    ShowAtAllTimes = false,
-    Opacity = 1,
+    ShowPastFirstAndLastImage = false,
     Segments = 132
   },
   GUI = {
     Name = "Solar Surface (GONG-Z)",
-    Path = "/Solar System/Heliosphere/WSA Coronal Model 5.4",
-    Description = [[Texture sequence of simulation model WSA 5.4. ]]..
+    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Description = [[Texture sequence of simulation model WSA 5.4. ]] ..
     [[Output: fits files using GONG-Z Map (RADOUT =  5.0). Dynamically downloaded]]
   }
 }
@@ -56,33 +67,32 @@ local WSA_Magnetograms_Adapt = {
   Renderable = {
     Type = "RenderableTimeVaryingSphere",
     Enabled = false,
-    Size = sunRadius * 1.002,
+    Size = extendedRadius,
     LoadingType = "DynamicDownloading",
     InfoURL = infoURL,
     DataURL = dataURL,
     DataID = 2149,
     FitsLayer = 5,
     LayerNames = {
-      ['0'] = "Coronal Magnetic Field at 5 Solar Radii (nT)",
-      ['1'] = "Flux tube expansion factor evaluated at the source surface",
-      ['2'] = "Colatitude of open field footpoints at photosphere (rad)",
-      ['3'] = "Longitude of open field footpoints (rad)",
-      ['4'] = "Observed Photospheric Field (Gauss)",
-      ['5'] = "Distance from open field footpoint to nearest coronal boundary (deg)",
-      ['6'] = "Open (1,2,3) and closed (0) regions on the photosphere [1=in-to-out tracing; 2=out-to-in tracing; 3=both] (no units)",
-      ['7'] = "Distance to current sheet at outer boundary (degrees)"
+      "Coronal Magnetic Field at 5 Solar Radii (nT)",
+      "Flux tube expansion factor evaluated at the source surface",
+      "Colatitude of open field footpoints at photosphere (rad)",
+      "Longitude of open field footpoints (rad)",
+      "Observed Photospheric Field (Gauss)",
+      "Distance from open field footpoint to nearest coronal boundary (deg)",
+      "Open (1,2,3) and closed (0) regions on the photosphere [1=in-to-out tracing; 2=out-to-in tracing; 3=both] (no units)",
+      "Distance to current sheet at outer boundary (degrees)"
     },
     ColorMap = blueBlackRed,
     UseColorMap = false,
     CacheData = false,
-    ShowAtAllTimes = false,
-    Opacity = 1,
+    ShowPastFirstAndLastImage = false,
     Segments = 132
   },
   GUI = {
     Name = "Solar Surface (GONG ADAPT)",
-    Path = "/Solar System/Heliosphere/WSA Coronal Model 5.4",
-    Description = [[Texture sequence of simulation model WSA 5.4. ]]..
+    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Description = [[Texture sequence of simulation model WSA 5.4. ]] ..
     [[Output fits file using ADAPT GONG realization 000 to 011 Maps (RADOUT =  5.0)]]
   }
 }
@@ -93,26 +103,25 @@ local WSA_Velocity_Adapt = {
   Renderable = {
     Type = "RenderableTimeVaryingSphere",
     Enabled = false,
-    Size = sunRadius * 1.002,
+    Size = extendedRadius,
     LoadingType = "DynamicDownloading",
     InfoURL = infoURL,
     DataURL = dataURL,
     DataID = 2218,
     FitsLayer = 1,
     LayerNames = {
-      ['0'] = "Coronal Magnetic Field at 21.5 Solar Radii",
-      ['1'] = "Solar Wind Speed at 21.5 Solar Radii (km/s)}"
+      "Coronal Magnetic Field at 21.5 Solar Radii",
+      "Solar Wind Speed at 21.5 Solar Radii (km/s)}"
     },
     ColorMap = blueBlackRed,
     CacheData = false,
-    ShowAtAllTimes = false,
-    Opacity = 1,
+    ShowPastFirstAndLastImage = false,
     Segments = 132
   },
   GUI = {
     Name = "Solar Surface Velocity (GONG-ADAPT)",
-    Path = "/Solar System/Heliosphere/WSA Coronal Model 5.4",
-    Description = [[Texture sequence of simulation model WSA 5.4. ]]..
+    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Description = [[Texture sequence of simulation model WSA 5.4. ]] ..
     [[Output fits file using ADAPT GONG realization 000-011 Maps (RADOUT =  21.5)]]
   }
 }
@@ -123,26 +132,25 @@ local WSA_Velocity_Gong = {
   Renderable = {
     Type = "RenderableTimeVaryingSphere",
     Enabled = false,
-    Size = sunRadius * 1.002,
+    Size = extendedRadius,
     LoadingType = "DynamicDownloading",
     InfoURL = infoURL,
     DataURL = dataURL,
     DataID = 2217,
     FitsLayer = 0,
     LayerNames = {
-      ['0'] = "Coronal Magnetic Field at 21.5 Solar Radii",
-      ['1'] = "Solar Wind Speed at 21.5 Solar Radii (km/s)}"
+      "Coronal Magnetic Field at 21.5 Solar Radii",
+      "Solar Wind Speed at 21.5 Solar Radii (km/s)}"
     },
     ColorMap = blueBlackRed,
     CacheData = false,
-    ShowAtAllTimes = false,
-    Opacity = 1,
+    ShowPastFirstAndLastImage = false,
     Segments = 132
   },
   GUI = {
     Name = "Solar Surface Velocity (GONG-Z)",
-    Path = "/Solar System/Heliosphere/WSA Coronal Model 5.4",
-    Description = [[Texture sequence of simulation model WSA 5.4. ]]..
+    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Description = [[Texture sequence of simulation model WSA 5.4. ]] ..
     [[Output fits file using GONG-Z Map (RADOUT =  21.5)]]
   }
 }
@@ -150,6 +158,12 @@ local WSA_Velocity_Gong = {
 local fieldlinesSCS = {
   Identifier = "WSA_54_Fieldlines_SCS_OI",
   Parent = transforms.WSAOffset60.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = sunRadius
+    },
+  },
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     Enabled = false,
@@ -167,27 +181,27 @@ local fieldlinesSCS = {
       currentSheetColorTable
     },
     ColorTableRanges = {
-        { -1.0, 1.0 },
-        { 0.0, 1.0 },
+      { -1.0, 1.0 },
+      { 0.0, 1.0 },
     }
   },
   GUI = {
     Name = "Fieldlines: Corona SCS (Out-In Tracing)",
-    Path = "/Solar System/Heliosphere/WSA Coronal Model 5.4",
-    Description = [[WSA 5.4 real-time output of the fieldline trace from]]..
-      [[ the SCS outer boundary to the source surface using GONGZ as input]]
-  },
-  Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = sunRadius
-    },
+    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Description = [[WSA 5.4 real-time output of the fieldline trace from ]] ..
+      [[the SCS outer boundary to the source surface using GONGZ as input]]
   }
 }
 
 local fieldlinesOI = {
   Identifier = "WSA_54_Fieldlines_PFSS_OI",
   Parent = transforms.WSAOffset60.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = sunRadius
+    },
+  },
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     Enabled = true,
@@ -205,27 +219,27 @@ local fieldlinesOI = {
       currentSheetColorTable
     },
     ColorTableRanges = {
-        { -1.0, 1.0 },
-        { 0.0, 1.0 },
+      { -1.0, 1.0 },
+      { 0.0, 1.0 },
     },
   },
   GUI = {
     Name = "Fieldlines: Corona PFSS (Out-In Tracing)",
-    Path = "/Solar System/Heliosphere/WSA Coronal Model 5.4",
-    Description = [[WSA 5.4 real-time output of the fieldline trace from]]..
-      [[ the source surface to the solar surface using GONGZ as input]]
-  },
-  Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = sunRadius
-    },
+    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Description = [[WSA 5.4 real-time output of the fieldline trace from ]] ..
+      [[the source surface to the solar surface using GONGZ as input]]
   }
 }
 
 local fieldlinesIO = {
   Identifier = "WSA_54_Fieldlines_PFSS_IO",
   Parent = transforms.WSAOffset60.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = sunRadius
+    },
+  },
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     Enabled = true,
@@ -242,26 +256,26 @@ local fieldlinesIO = {
       opennessColorTable
     },
     ColorTableRanges = {
-        { 0.0, 2.0 }
+      { 0.0, 2.0 }
     },
   },
   GUI = {
     Name = "Fieldlines: Corona PFSS (In-Out Tracing)",
-    Path = "/Solar System/Heliosphere/WSA Coronal Model 5.4",
-    Description = [[WSA 5.4 real-time output of the fieldline trace from]] ..
-      [[ the solar surface to the source surface using GONGZ as input]]
-  },
-  Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = sunRadius
-    },
+    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Description = [[WSA 5.4 real-time output of the fieldline trace from ]] ..
+      [[the solar surface to the source surface using GONGZ as input]]
   }
 }
 
 local fieldlinesEarth = {
   Identifier = "WSA_54_Fieldlines_Earth",
   Parent = transforms.WSAOffset60.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = sunRadius
+    },
+  },
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     Enabled = false,
@@ -279,21 +293,15 @@ local fieldlinesEarth = {
       subEarthLevelColorTable
     },
     ColorTableRanges = {
-        { 0.0, 1.0 },
-        { 0.0, 2.0 }
+      { 0.0, 1.0 },
+      { 0.0, 2.0 }
     },
   },
   GUI = {
     Name = "Fieldlines: Tracing from Earth",
-    Path = "/Solar System/Heliosphere/WSA Coronal Model 5.4",
-    Description = [[WSA 5.4 real-time output of the field line trace from]] ..
-      [[ the Earth using GONGZ as input]]
-  },
-  Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = sunRadius
-    },
+    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Description = [[WSA 5.4 real-time output of the field line trace from ]] ..
+      [[the Earth using GONGZ as input]]
   }
 }
 

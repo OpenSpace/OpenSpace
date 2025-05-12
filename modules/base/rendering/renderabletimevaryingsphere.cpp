@@ -161,7 +161,7 @@ namespace {
         std::optional<std::string> dataURL;
         // An index specifying which layer in the fits file to display
         std::optional<int> fitsLayer;
-        std::optional<ghoul::Dictionary> layerNames;
+        std::optional<std::vector<std::string>> layerNames;
         // A positive number to be used to cap where the color range will lie.
         // Values higher than this number, and values lower than the negative of
         // this value will be overexposed.
@@ -169,8 +169,8 @@ namespace {
         // This is set to false by default and will delete all the downloaded content when
         // OpenSpace is shut down. Set to true to save all the downloaded files.
         std::optional<bool> cacheData;
-        // Set if first/last file should render forever
-        std::optional<bool> showAtAllTimes;
+        // Set if first/last file should render outside of the sequence interval
+        std::optional<bool> showPastFirstAndLastImage;
         enum class [[codegen::map(openspace::RenderableTimeVaryingSphere::TextureFilter)]] TextureFilter {
             NearestNeighbor,
             Linear,
@@ -219,7 +219,7 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     else {
         _textureFilter = TextureFilter::Unspecified;
     }
-    _renderForever = p.showAtAllTimes.value_or(_renderForever);
+    _renderForever = p.showPastFirstAndLastImage.value_or(_renderForever);
 
     if (_loadingType == LoadingType::StaticLoading) {
         extractMandatoryInfoFromSourceFolder();
@@ -233,13 +233,9 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
         setupDynamicDownloading(p.dataID, p.numberOfFilesToQueue, p.infoURL, p.dataURL);
         _fitsDataCapValue = p.fitsDataCapValue.value_or(_fitsDataCapValue);
         if (p.layerNames.has_value()) {
-            const ghoul::Dictionary d = *p.layerNames;
-            std::set<int> intKeys;
-            for (std::string_view key : d.keys()) {
-                std::string keyStr = std::string(key);
-                std::pair<int, std::string> pair {
-                    std::stoi(keyStr), d.value<std::string>(key)
-                };
+            const std::vector<std::string> nameList = *p.layerNames;
+            for (int i = 0; i < nameList.size(); ++i) {
+                std::pair<int, std::string> pair{ i, nameList[i]};
                 _layerNames.emplace(pair);
             }
             if (!p.fitsLayer.has_value()) {

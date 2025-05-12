@@ -79,7 +79,7 @@ local BatsrusJ12OpenClosed = {
     ColorTableRanges = colorRanges,
     MaskingEnabled = true,
     MaskingQuantity = 4, -- Topology
-    MaskingRange = { 2.5, 3.0 } -- Corresponds to closed fieldlines only
+    MaskingRanges = { { 2.5, 3.0 } } -- Corresponds to closed fieldlines only
   },
   GUI = {
     Name = "Fieldlines BATSRUS J12 Open/Closed",

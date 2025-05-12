@@ -54,12 +54,14 @@ end)
 
 asset.onDeinitialize(function()
   for i, imagename in ipairs(magnetograms) do
-    openspace.globebrowsing.deleteLayer("Sun", "ColorLayers", "magnetograms" .. i)
+    openspace.globebrowsing.deleteLayer("Sun", "ColorLayers", "magnetogram-" .. i)
   end
   openspace.action.removeAction(SwitchColorLayer)
 end)
 
 asset.export("SwitchColorLayer", SwitchColorLayer.Identifier)
+
+
 
 asset.meta = {
   Name = "Bastille Day magnetogram textures",

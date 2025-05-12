@@ -1,31 +1,30 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
+
+
 local size = 700000000
 
-
 local carrington_prime_meridian = {
-  Identifier = "carrington_prime_meridian",
+  Identifier = "CarringtonPrimeMeridian",
   Parent = sunTransforms.SunIAU.Identifier,
   Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 3500000, 0, 0 }
+    },
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { 0.0, 0.0, -1.57079633 } -- -90 degrees
+      Rotation = { 0.0, 0.0, -math.pi / 2.0 } -- -90 degrees
     },
     Scale = {
       Type = "StaticScale",
       Scale = 698000000
-    },
-    Translation = {
-      Type = "StaticTranslation",
-      Position = { 3500000, 0, 0 }
     }
   },
   Renderable = {
     Type = "RenderableSphericalGrid",
-    Enabled = true,
     Size = size,
-    Opacity = 1.0,
     Color = { 1.0, 1.0, 0.0 },
     LineWidth = 2.0,
     LongSegments = 2,
@@ -39,12 +38,12 @@ local carrington_prime_meridian = {
 }
 
 local grid_slice = {
-  Identifier = "WSA_grid_slice",
+  Identifier = "WSA_GridSlice",
   Parent = transforms.HeliocentricEarthEquatorial.Identifier,
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { 0.0, 0.0, -1.57079633 } -- -90 degrees
+      Rotation = { 0.0, 0.0, -math.pi / 2.0 } -- -90 degrees
     },
     Scale = {
       Type = "StaticScale",
@@ -53,23 +52,21 @@ local grid_slice = {
   },
   Renderable = {
     Type = "RenderableSphericalGrid",
-    Enabled = true,
     Size = size,
-    Opacity = 1.0,
     Color = { 0.8, 0.8, 0.8 },
     LineWidth = 2.0,
     LongSegments = 2,
     LatSegments = 64
   },
   GUI = {
-    Name = "Longitude at Sun-Earth line",
+    Name = "Solar longitude facing the Earth",
     Path =  "/Solar System/Heliosphere",
-    Description = [[A grid with 10 degree seperationg between line segments]]
+    Description = [[An arch on the Sun suface that always faces Earth]]
   }
 }
 
 local grid_10deg = {
-  Identifier = "WSA_grid_10_degrees",
+  Identifier = "WSA_Grid10Degrees",
   Parent = transforms.HeliocentricEarthEquatorial.Identifier,
   Transform = {
     Scale = {
@@ -79,9 +76,7 @@ local grid_10deg = {
   },
   Renderable = {
     Type = "RenderableSphericalGrid",
-    Enabled = true,
     Size = size,
-    Opacity = 1.0,
     Color = { 0.035, 0.675, 0.255 },
     LineWidth = 1.0,
     Segments = 36
@@ -89,7 +84,8 @@ local grid_10deg = {
   GUI = {
     Name = "Grid on Sun",
     Path =  "/Solar System/Heliosphere",
-    Description = [[A grid aligned with the Sun-Earth line. 10 degree seperationg between line segments on default]]
+    Description = [[A grid aligned with the Sun-Earth line.
+      10 degree seperationg between line segments on default.]]
   }
 }
 
@@ -114,7 +110,8 @@ asset.export(grid_10deg)
 asset.meta = {
   Name = "Real Time Sun Grid lines",
   Version = "1.0",
-  Description = [[Grids to guide the orientation of the Sun and its rotation in relation to Earth.]],
+  Description = [[Grids to guide the orientation of the Sun and
+    its rotation in relation to Earth.]],
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -1,6 +1,8 @@
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
 local sun = asset.require("scene/solarsystem/sun/sun")
 
+
+
 local SunEarthLine = {
   Identifier = "RenderableNodeLine_Sun_Earth",
   Renderable = {
@@ -30,7 +32,7 @@ asset.export("NodeLine", SunEarthLine)
 asset.meta = {
   Name = "Sun Earth Line",
   Version = "1.0",
-  Description = [[A line to guide the Suns rotation in relation to Earth.]],
+  Description = [[A line between the Sun and the Earth to help orient you.]],
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license"

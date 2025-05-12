@@ -104,7 +104,7 @@ local WSAOffset60 = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {0, 0, -1.04719755} -- -60 deg
+      Rotation = { 0, 0, -math.rad(60) }
     }
   },
   GUI = {

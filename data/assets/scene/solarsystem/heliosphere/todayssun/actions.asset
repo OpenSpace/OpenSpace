@@ -3,18 +3,18 @@ local ToggleWhiteBackground = {
   Name = "Toggle white background on and off",
   Command = [[
     if not openspace.propertyValue("Scene.WhiteBackground_sphere.Renderable.Enabled") then
-      openspace.setPropertyValueSingle("Scene.WhiteBackground_sphere.Renderable.Fade",0)
+      openspace.setPropertyValueSingle("Scene.WhiteBackground_sphere.Renderable.Fade", 0.0)
       openspace.setPropertyValueSingle("Scene.WhiteBackground_sphere.Renderable.Enabled", true)
-      openspace.setPropertyValueSingle("Scene.WhiteBackground_sphere.Renderable.Fade",1,1)
-      openspace.setPropertyValueSingle("Scene.Stars.Renderable.Fade",0,1)
+      openspace.setPropertyValueSingle("Scene.WhiteBackground_sphere.Renderable.Fade", 1.0, 1.0)
+      openspace.setPropertyValueSingle("Scene.Stars.Renderable.Fade", 0.0, 1.0)
       openspace.setPropertyValueSingle("Scene.Stars.Renderable.Enabled", false)
       openspace.setPropertyValue("Scene.WSA*.Renderable.ABlendingEnabled", false)
     else
-      openspace.setPropertyValueSingle("Scene.WhiteBackground_sphere.Renderable.Fade",0,1)
+      openspace.setPropertyValueSingle("Scene.WhiteBackground_sphere.Renderable.Fade", 0.0, 1.0)
       openspace.setPropertyValueSingle("Scene.WhiteBackground_sphere.Renderable.Enabled", false)
-      openspace.setPropertyValueSingle("Scene.Stars.Renderable.Fade",0)
+      openspace.setPropertyValueSingle("Scene.Stars.Renderable.Fade", 0.0)
       openspace.setPropertyValueSingle("Scene.Stars.Renderable.Enabled", true)
-      openspace.setPropertyValueSingle("Scene.Stars.Renderable.Fade",1,1)
+      openspace.setPropertyValueSingle("Scene.Stars.Renderable.Fade", 1.0, 1.0)
       openspace.setPropertyValue("Scene.WSA*.Renderable.ABlendingEnabled", true)
     end
   ]],
