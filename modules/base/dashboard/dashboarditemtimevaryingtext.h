@@ -22,40 +22,42 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
- #ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMTIMEVARYINGTEXT___H__
- #define __OPENSPACE_MODULE_BASE___DASHBOARDITEMTIMEVARYINGTEXT___H__
+#ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMTIMEVARYINGTEXT___H__
+#define __OPENSPACE_MODULE_BASE___DASHBOARDITEMTIMEVARYINGTEXT___H__
 
- #include <openspace/rendering/dashboardtextitem.h>
+#include <openspace/rendering/dashboardtextitem.h>
 
- #include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/json.h>
 
- namespace openspace {
+namespace openspace {
 
- namespace documentation { struct Documentation; }
+namespace documentation { struct Documentation; }
 
- class DashboardItemTimeVaryingText : public DashboardTextItem {
- public:
-     explicit DashboardItemTimeVaryingText(const ghoul::Dictionary& dictionary);
-     ~DashboardItemTimeVaryingText() override = default;
+class DashboardItemTimeVaryingText : public DashboardTextItem {
+public:
+    explicit DashboardItemTimeVaryingText(const ghoul::Dictionary& dictionary);
+    ~DashboardItemTimeVaryingText() override = default;
 
-     void update() override;
+    void update() override;
 
-     static documentation::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
- private:
-     void loadDataFromJson(const std::string& filePath);
-     void computeSequenceEndTime();
-     int updateActiveTriggerTimeIndex(double currentTime) const;
+private:
+    void loadDataFromJson(const std::string& filePath);
+    void computeSequenceEndTime();
+    int updateActiveTriggerTimeIndex(double currentTime) const;
 
-     properties::StringProperty _formatString;
-     properties::StringProperty _dataFile;
+    properties::StringProperty _formatString;
+    properties::StringProperty _dataFile;
 
-     std::unordered_map<double, double> _data;
-     std::vector<double> _startTimes;
+    std::unordered_map<double, nlohmann::json> _data;
+    std::vector<double> _startTimes;
 
-     int _activeTriggerTimeIndex = -1;
-     double _sequenceEndTime = 0.0;
+    int _activeTriggerTimeIndex = -1;
+    double _sequenceEndTime = 0.0;
  };
- } // namespace openspace
+
+} // namespace openspace
 
  #endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMTIMEVARYINGTEXT___H__

@@ -4,7 +4,7 @@
 
 local Item = {
   Type = "DashboardItemTimeVaryingText",
-  Identifier = "DashboardItemTimeVaryingText_Example-Styled",
+  Identifier = "DashboardItemTimeVaryingText_Example_Styled",
   DataFile = asset.resource("data/dummydata.json"),
   FormatString = "Observed KP index: {}",
   FontSize = 40
