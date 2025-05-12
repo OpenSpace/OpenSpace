@@ -37,7 +37,7 @@ local WSA_Magnetograms = {
     },
     ColorMap = blueBlackRed,
     UseColorMap = false,
-    CacheData = false,
+    CacheData = true,
     ShowAtAllTimes = false,
     Opacity = 1,
     Segments = 132
@@ -53,13 +53,6 @@ local WSA_Magnetograms = {
 local WSA_Magnetograms_Adapt = {
   Identifier = "WSA_54_Magnetograms_ADAPT",
   Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
---    Parent = transforms.WSAOffset60.Identifier,
---  Transform = {
---    Rotation = {
---      Type = "StaticRotation",
---      Rotation = {0.0, 0.0, -2.00712864} --120 degree offset compared to Gong
---    }
---  },
   Renderable = {
     Type = "RenderableTimeVaryingSphere",
     Enabled = false,
@@ -97,19 +90,6 @@ local WSA_Magnetograms_Adapt = {
 local WSA_Velocity_Adapt = {
   Identifier = "WSA_54_velocity_ADAPT",
   Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
---    Parent = transforms.WSAOffset60.Identifier,
---  Transform = {
---    Rotation = {
---      Type = "StaticRotation",
---      Rotation = {0.0, 0.0, -2.00712864} --120 degree offset compared to Gong
---    }
---  },
-  Transform = {
-    Rotation = {
-      Type = "StaticRotation",
-      Rotation = {0.0, 0.0, -2.00712864}
-    }
-  },
   Renderable = {
     Type = "RenderableTimeVaryingSphere",
     Enabled = false,
@@ -179,6 +159,7 @@ local fieldlinesSCS = {
     DataURL = dataURL,
     DataID = 2286,
     ShowAtAllTimes = false,
+    CacheData = false,
     ColorMethod = "ByQuantity",
     ColorQuantity = 0, -- Polarity & solar wind speed
     ColorTablePaths = {
@@ -216,6 +197,7 @@ local fieldlinesOI = {
     DataURL = dataURL,
     DataID = 2285,
     ShowAtAllTimes = false,
+    CacheData = false,
     ColorMethod = "ByQuantity",
     ColorQuantity = 0, -- Polarity & solar wind speed
     ColorTablePaths = {
@@ -253,6 +235,7 @@ local fieldlinesIO = {
     DataURL = dataURL,
     DataID = 2284,
     ShowAtAllTimes = false,
+    CacheData = true,
     ColorMethod = "ByQuantity",
     ColorQuantity = 0, -- Open/closed lines
     ColorTablePaths = {
@@ -288,6 +271,7 @@ local fieldlinesEarth = {
     DataURL = dataURL,
     DataID = 2287,
     ShowAtAllTimes = false,
+    CacheData = false,
     ColorMethod = "ByQuantity",
     ColorQuantity = 0, -- Polarity
     ColorTablePaths = {

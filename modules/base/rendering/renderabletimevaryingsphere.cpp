@@ -205,10 +205,6 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     else {
         _loadingType = LoadingType::StaticLoading;
     }
-    if (_loadingType == LoadingType::DynamicDownloading) {
-        setupDynamicDownloading(p.dataID, p.numberOfFilesToQueue, p.infoURL, p.dataURL);
-        _fitsDataCapValue = p.fitsDataCapValue.value_or(_fitsDataCapValue);
-    }
     if (p.fitsLayer.has_value()) {
         _fitsLayerTemp = *p.fitsLayer;
     }
@@ -230,35 +226,40 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
         computeSequenceEndTime();
         loadTexture();
     }
-    addProperty(_textureSourcePath);
+    addProperty(_textureSourcePath); // Added only to show in GUI which file is active
     addProperty(_textureFilterProperty);
 
-    if (p.layerNames.has_value()) {
-        const ghoul::Dictionary d = *p.layerNames;
-        std::set<int> intKeys;
-        for (std::string_view key : d.keys()) {
-            std::string keyStr = std::string(key);
-            std::pair<int, std::string> p { std::stoi(keyStr), d.value<std::string>(key)};
-            _layerNames.emplace(p);
+    if (_loadingType == LoadingType::DynamicDownloading) {
+        setupDynamicDownloading(p.dataID, p.numberOfFilesToQueue, p.infoURL, p.dataURL);
+        _fitsDataCapValue = p.fitsDataCapValue.value_or(_fitsDataCapValue);
+        if (p.layerNames.has_value()) {
+            const ghoul::Dictionary d = *p.layerNames;
+            std::set<int> intKeys;
+            for (std::string_view key : d.keys()) {
+                std::string keyStr = std::string(key);
+                std::pair<int, std::string> pair {
+                    std::stoi(keyStr), d.value<std::string>(key)
+                };
+                _layerNames.emplace(pair);
+            }
+            if (!p.fitsLayer.has_value()) {
+                LWARNING(std::format(
+                    "Specify 'FitsLayer' for scene graph node with DataID: {}.",
+                    "Assuming first layer",
+                    _dataID
+                ));
+                _fitsLayerTemp = 0;
+            }
+            _hasLayerNames = true;
+            addProperty(_fitsLayerName);
         }
-        if (!p.fitsLayer.has_value()) {
-            LWARNING(std::format(
-                "Specify 'FitsLayer' for scene graph node with DataID: {}.",
-                "Assuming first layer",
-                _dataID
-            ));
-            _fitsLayerTemp = 0;
+        else {
+            _hasLayerNames = false;
+            addProperty(_fitsLayer);
         }
-        _hasLayerNames = true;
-        addProperty(_fitsLayerName);
+        _saveDownloadsOnShutdown = p.cacheData.value_or(_saveDownloadsOnShutdown);
+        addProperty(_saveDownloadsOnShutdown);
     }
-    else {
-        _hasLayerNames = false;
-        addProperty(_fitsLayer);
-    }
-
-    _saveDownloadsOnShutdown = p.cacheData.value_or(_saveDownloadsOnShutdown);
-    addProperty(_saveDownloadsOnShutdown);
 
     definePropertyCallbackFunctions();
 }

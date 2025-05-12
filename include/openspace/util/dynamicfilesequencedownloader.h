@@ -83,6 +83,7 @@ private:
     bool _secondFrame = true;
 
     std::filesystem::path _syncDir;
+    std::filesystem::path _trackSynced;
     int _dataID;
     const std::string _infoURL;
     const std::string _dataURL;

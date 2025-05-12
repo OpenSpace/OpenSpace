@@ -28,11 +28,40 @@
 #include <openspace/json.h>
 #include <ghoul/filesystem/filesystem.h>
 
+#include <unordered_set>
+
 namespace {
     constexpr const char* _loggerCat = "DynamicFileSequenceDownloader";
 } // namepace
 
 namespace openspace {
+
+void trackFinnishedDownloads(const std::filesystem::path& syncFilePath,
+                                                 const std::filesystem::path& newFilePath)
+{
+    std::unordered_set<std::string> existingEntries;
+    std::ifstream inFile(syncFilePath);
+    std::string line;
+
+    //load existing entries
+    while (std::getline(inFile, line)) {
+        if (!line.empty()) {
+            existingEntries.insert(std::filesystem::path(line).filename().string());
+        }
+    }
+    inFile.close();
+
+    const std::string fileName = newFilePath.filename().string();
+    const std::string filePath = newFilePath.string();
+
+    if (existingEntries.find(fileName) == existingEntries.end()) {
+        std::ofstream outFile(syncFilePath, std::ios::app);
+        if (outFile.is_open()) {
+            outFile << filePath << std::endl;
+        }
+        outFile.close();
+    }
+}
 
 std::string formulateDataHttpRequest(double minTime, double maxTime, int dataID,
                                                                 const std::string baseURL)
@@ -69,6 +98,35 @@ DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
     _syncDir = absPath(
         "${SYNC}/dynamically_downloaded/" + std::to_string(dataID)
     );
+
+    std::filesystem::path syncFile = _syncDir / std::format("{}.synced", dataID);
+    _trackSynced = syncFile;
+    //Just to create the folder
+    std::filesystem::path folder = _trackSynced.parent_path();
+    std::filesystem::create_directories(folder);
+    //Just to create the file
+    std::ofstream file(_trackSynced, std::ios::app);
+
+    //Delete the files in the folder whos file name is not in the _trackSynced file
+    std::unordered_set<std::string> keepFiles;
+    std::ifstream listFile(_trackSynced);
+    std::string filename;
+    while (std::getline(listFile, filename)) {
+        if (!filename.empty()) {
+            keepFiles.insert(std::filesystem::path(filename).filename().string());
+        }
+    }
+    for (const auto& entry : std::filesystem::directory_iterator(folder)) {
+        if (!entry.is_regular_file()) {
+            continue;
+        }
+        std::string name = entry.path().filename().string();
+        if (name != _trackSynced.filename().string() &&
+                keepFiles.find(name) == keepFiles.end())
+        {
+            std::filesystem::remove(entry.path());
+        }
+    }
 
     _dataID = dataID;
     std::string httpInfoRequest = _infoURL + std::to_string(_dataID);
@@ -292,12 +350,10 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
         fileElement.cadence = 0;
         fileElement.availableIndex = index;
         if (std::filesystem::exists(destination)) {
-            if (std::filesystem::file_size(destination) == 0) {
-                //TODO flag as failed, maybe do twice, then warn or something, skipping
-            }
             fileElement.download = nullptr;
-            fileElement.state = File::State::Downloaded;
             _downloadedFiles.push_back(destination);
+            fileElement.state = File::State::Downloaded;
+            trackFinnishedDownloads(_trackSynced, destination);
         }
         else {
             fileElement.download = std::make_unique<HttpFileDownload>(url, destination);
@@ -370,6 +426,7 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
             else {
                 _downloadedFiles.push_back(dl->destination());
                 file->state = File::State::Downloaded;
+                trackFinnishedDownloads(_trackSynced, file->path);
                 currentIt = _filesCurrentlyDownloading.erase(currentIt);
                 // if one is removed, i is reduced, else we'd skip one in the list
                 --i;
