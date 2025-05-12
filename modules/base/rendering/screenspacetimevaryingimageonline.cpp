@@ -49,6 +49,7 @@ namespace {
     // simulation time. The image shown is selected from a JSON file containing
     // timestamp-URL pairs. The image with the closest timestamp before or equal to the
     // current time is displayed.
+    //
     // Example JSON format:
     // {
     //   "files": [
@@ -77,11 +78,10 @@ ScreenSpaceTimeVaryingImageOnline::ScreenSpaceTimeVaryingImageOnline(
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _jsonFilePath = p.filePath.string();
-    addProperty(_jsonFilePath);
-
     _jsonFilePath.onChange([this]() {
         loadJsonData(_jsonFilePath.value());
     });
+    addProperty(_jsonFilePath);
 }
 
 bool ScreenSpaceTimeVaryingImageOnline::initialize() {
