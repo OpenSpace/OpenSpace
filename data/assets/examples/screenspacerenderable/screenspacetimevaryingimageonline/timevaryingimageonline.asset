@@ -1,6 +1,7 @@
 -- Basic
 -- Create a time-varying screenspace image plane that shows the content of images from
--- web URLs based on in-game simulation time. The data in this example has images shown at 2024-05-10 between 15:00:00 and 15:20:00.
+-- web URLs based on in-game simulation time. The data in this example has images shown at
+-- 2024-05-10 between 15:00:00 and 15:20:00.
 
 local Item = {
   Type = "ScreenSpaceTimeVaryingImageOnline",
