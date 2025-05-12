@@ -77,13 +77,11 @@ protected:
     properties::BoolProperty _isUsingColorMap;
 
 private:
-    void definePropertyCallbackFunctions();
     std::unique_ptr<Sphere> _sphere;
     bool _sphereIsDirty = false;
 
     properties::StringProperty _transferFunctionPath;
     std::unique_ptr<TransferFunction> _transferFunction;
-
 
     UniformCache(opacity, modelViewProjection, modelViewTransform, modelViewRotation,
         colorTexture, mirrorTexture) _uniformCache;

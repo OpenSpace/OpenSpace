@@ -91,15 +91,10 @@ private:
     void extractMandatoryInfoFromSourceFolder();
     void readFileFromImage(std::filesystem::path path);
     void readFileFromFits(std::filesystem::path path);
-    void setMinMaxValues(std::unique_ptr<ghoul::opengl::Texture>& t, File& file);
+    glm::vec2 minMaxTextureDataValues(std::unique_ptr<ghoul::opengl::Texture>& t);
     void updateActiveTriggerTimeIndex(double currenttime);
     void computeSequenceEndTime();
-    void setupDynamicDownloading(const std::optional<int>& dataID,
-        const std::optional<int>& numberOfFiles,
-        const std::optional<std::string>& infoURL,
-        const std::optional<std::string>& dataURL);
     void updateDynamicDownloading(const double currentTime, const double deltaTime);
-    void definePropertyCallbackFunctions();
 
     // If there's just one state it should never disappear!
     double _sequenceEndTime = std::numeric_limits<double>::max();
@@ -134,8 +129,6 @@ private:
     //  data downloaded from the web.
     std::unique_ptr<DynamicFileSequenceDownloader> _dynamicFileDownloader;
     properties::OptionProperty _textureFilterProperty;
-    TextureFilter _textureFilter;
-
     std::vector<File> _files;
     int _activeTriggerTimeIndex = 0;
 

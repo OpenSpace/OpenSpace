@@ -91,9 +91,10 @@ DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
     const std::string infoURL,
     const std::string dataURL,
     size_t nOfFilesToQ)
-    : _infoURL(infoURL)
+    : _dataID(dataID)
+    , _infoURL(infoURL)
     , _dataURL(dataURL)
-    , _nOfFilesToQueue(nOfFilesToQ)
+    , _nFilesToQueue(nOfFilesToQ)
 {
     _syncDir = absPath(
         "${SYNC}/dynamically_downloaded/" + std::to_string(dataID)
@@ -128,7 +129,6 @@ DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
         }
     }
 
-    _dataID = dataID;
     std::string httpInfoRequest = _infoURL + std::to_string(_dataID);
     requestDataInfo(httpInfoRequest);
     std::string httpDataRequest = formulateDataHttpRequest(
@@ -496,7 +496,7 @@ std::vector<File>::iterator DynamicFileSequenceDownloader::closestFileToNow(
     }
 
     std::vector<File>::iterator prev = std::prev(it);
-    if (_forward) {
+    if (_isForwardDirection) {
         return prev;
     }
     else {
@@ -508,29 +508,32 @@ void DynamicFileSequenceDownloader::putOnQueue() {
     ZoneScoped;
 
     std::vector<File>::iterator end;
-    if (_forward) {
+    if (_isForwardDirection) {
         end = _availableData.end();
     }
     else {
         end = _availableData.begin();
         // To catch first file (since begin points to a file but end() does not
-        if (_thisFile == end && _thisFile->state == File::State::Available) {
-            _queuedFilesToDownload.push_back(&*_thisFile);
-            _thisFile->state = File::State::OnQueue;
+        if (_currentFile == end && _currentFile->state == File::State::Available) {
+            _queuedFilesToDownload.push_back(&*_currentFile);
+            _currentFile->state = File::State::OnQueue;
             return;
         }
     }
 
     // If forward iterate from now to end. else reverse from now to begin
     size_t notToMany = 0;
-    for (std::vector<File>::iterator it = _thisFile; it != end; _forward ? ++it : --it) {
+    for (std::vector<File>::iterator it = _currentFile;
+        it != end;
+        _isForwardDirection ? ++it : --it)
+    {
         if (it->state == File::State::Available) {
             _queuedFilesToDownload.push_back(&*it);
             it->state = File::State::OnQueue;
         }
         ++notToMany;
         // exit out early if enough files are queued / already downloaded
-        if (notToMany == _nOfFilesToQueue) {
+        if (notToMany == _nFilesToQueue) {
             break;
         }
     }
@@ -539,14 +542,14 @@ void DynamicFileSequenceDownloader::putOnQueue() {
 void DynamicFileSequenceDownloader::update(const double time, const double deltaTime) {
     ZoneScoped;
     // First frame cannot guarantee time and deltatime has been set yet.
-    if (_firstFrame) {
-        _firstFrame = false;
+    if (_isFirstFrame) {
+        _isFirstFrame = false;
         return;
     }
-    if (_secondFrame) {
+    if (_isSecondFrame) {
         if (_availableData.size() != 0) {
-            _secondFrame = false;
-            _thisFile = closestFileToNow(time);
+            _isSecondFrame = false;
+            _currentFile = closestFileToNow(time);
         }
         return;
     }
@@ -560,8 +563,8 @@ void DynamicFileSequenceDownloader::update(const double time, const double delta
     }
 
     // if delta time direction got changed
-    if (_forward && deltaTime < 0 || !_forward && deltaTime > 0) {
-        _forward = !_forward;
+    if (_isForwardDirection && deltaTime < 0 || !_isForwardDirection && deltaTime > 0) {
+        _isForwardDirection = !_isForwardDirection;
         // Remove from queue when time changed, to start downloading most relevant files
         for (auto file : _queuedFilesToDownload) {
             file->state = File::State::Available;
@@ -569,61 +572,61 @@ void DynamicFileSequenceDownloader::update(const double time, const double delta
         _queuedFilesToDownload.clear();
     }
 
-    if (_forward && _thisFile != _availableData.end()) {
+    if (_isForwardDirection && _currentFile != _availableData.end()) {
         // if files are there and time is between next file (+1) and +2 file
         // (meaning the this file is active from now till next file)
         // change this to be next
-        if (_thisFile + 1 != _availableData.end() &&
-            _thisFile + 2 != _availableData.end() &&
-            //_thisFile->time + _thisFile->cadence > time &&
-            (_thisFile + 1)->time < time &&
-            (_thisFile + 2)->time > time)
+        if (_currentFile + 1 != _availableData.end() &&
+            _currentFile + 2 != _availableData.end() &&
+            //_currentFile->time + _currentFile->cadence > time &&
+            (_currentFile + 1)->time < time &&
+            (_currentFile + 2)->time > time)
         {
-            ++_thisFile;
+            ++_currentFile;
         }
         // if its beyond the +2 file, arguably that can mean delta time is to fast
         // and files might be missed. But we also know we went past beyond the next so
         // we no longer know where we are so we reinitialize
-        else if (_thisFile + 1 != _availableData.end() &&
-                 _thisFile + 2 != _availableData.end() &&
-                (_thisFile + 2)->time < time)
+        else if (_currentFile + 1 != _availableData.end() &&
+                 _currentFile + 2 != _availableData.end() &&
+                 (_currentFile + 2)->time < time)
         {
-            _thisFile = closestFileToNow(time);
+            _currentFile = closestFileToNow(time);
         }
         // We've jumped back without interpolating to a previous time step,
         // past circa 2 files worth of time and without changing delta time
         // >>>>>>>we jumped to here>>>>>>>>>now>>>>>>>
-        else if (_thisFile->time - 2 * _thisFile->cadence > time) {
-            _thisFile = closestFileToNow(time);
+        else if (_currentFile->time - 2 * _currentFile->cadence > time) {
+            _currentFile = closestFileToNow(time);
         }
     }
-    else if (!_forward && _thisFile != _availableData.begin()) {
+    else if (!_isForwardDirection && _currentFile != _availableData.begin()) {
         // if file is there and time is between prev and this file
         // then change this to be prev. Same goes here as if time is moving forward
         // we will use forward 'usage', meaning file is active from now till next
-        if (_thisFile - 1 != _availableData.begin() &&
-            (_thisFile)->time < time &&
-            (_thisFile - 1)->time > time)
-        //_thisFile->time + _thisFile->cadence < time &&
+        if (_currentFile - 1 != _availableData.begin() &&
+            (_currentFile)->time < time &&
+            (_currentFile - 1)->time > time)
+        //_currentFile->time + _currentFile->cadence < time &&
         {
-            --_thisFile;
+            --_currentFile;
         }
         // if we are beyond the prev file, again delta time might be to fast, but we
         // no longer know where we are so we reinitialize
-        else if (_thisFile - 1 != _availableData.begin() &&
-                (_thisFile - 1)->time > time)
+        else if (_currentFile - 1 != _availableData.begin() &&
+                (_currentFile - 1)->time > time)
         {
-            _thisFile = closestFileToNow(time);
+            _currentFile = closestFileToNow(time);
         }
         // We've jumped forward without interpolating to a future time step,
         // past circa 2 files worth of time and without changing delta time
         // <<<<<<now<<<<<<<<<we jumped to here<<<<<<<
-        else if (_thisFile->time - 2 * _thisFile->cadence < time) {
-            _thisFile = closestFileToNow(time);
+        else if (_currentFile->time - 2 * _currentFile->cadence < time) {
+            _currentFile = closestFileToNow(time);
         }
     }
-    else if (_thisFile->download == nullptr && !_availableData.empty()) {
-        _thisFile = closestFileToNow(time);
+    else if (_currentFile->download == nullptr && !_availableData.empty()) {
+        _currentFile = closestFileToNow(time);
     }
 
     if (_filesCurrentlyDownloading.size() > 0) {
