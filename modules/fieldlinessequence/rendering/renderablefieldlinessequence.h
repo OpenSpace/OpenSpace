@@ -101,13 +101,9 @@ public:
 //    };
 //    std::optional<std::map<std::string, VariableInfo>> variables;
 private:
-    void definePropertyCallbackFunctions();
     void setupProperties();
     void setModelDependentConstants();
-    void setupDynamicDownloading(const std::optional<int>& dataID,
-                                 const std::optional<int>& numberOfFiles,
-                                 const std::optional<std::string>& infoURL,
-                                 const std::optional<std::string>& dataURL);
+
     //bool shouldUpdateColorBuffer();
     //bool shouldUpdateMaskingBuffer();
     int updateActiveIndex(const double currentTime);
@@ -119,8 +115,6 @@ private:
                              const std::optional<std::string>& traceVariable);
 
     std::vector<File> _files;
-    std::vector<RenderableFieldlinesSequence::File>::iterator
-        insertToFilesInOrder(File& file);
     // The function loads the file in the sense that it creates the FieldlineState object in
     // the File object. The function also deletes the oldest file if the loadedFiles queue
     // is full. The currentTime is given a default value because the function is also called

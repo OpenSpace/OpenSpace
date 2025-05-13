@@ -30,14 +30,14 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/updatestructures.h>
 #include <openspace/util/timemanager.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
-#include <thread>
 #include <iostream>
+#include <thread>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableFieldlinesSequence";
@@ -49,105 +49,120 @@ namespace {
         "examples, temperature or particle density.",
         openspace::properties::Property::Visibility::User
     };
+
     constexpr openspace::properties::Property::PropertyInfo ColorQuantityInfo = {
         "ColorQuantity",
         "Quantity to Color By",
         "Quantity used to color lines if the 'By Quantity' color method is selected.",
         openspace::properties::Property::Visibility::User
     };
+
     constexpr openspace::properties::Property::PropertyInfo ColorMinMaxInfo = {
         "ColorQuantityMinMax",
         "ColorTable Min Value",
         "Value to map to the lowest and highest end of the color table.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
+
     constexpr openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
         "ColorTablePath",
         "Path to Color Table",
         "Color Table/Transfer Function to use for 'By Quantity' coloring.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
+
     constexpr openspace::properties::Property::PropertyInfo ColorUniformInfo = {
         "Color",
         "Uniform Line Color",
         "The uniform color of lines shown when 'Color Method' is set to 'Uniform'.",
         openspace::properties::Property::Visibility::NoviceUser
     };
+
     constexpr openspace::properties::Property::PropertyInfo ColorUseABlendingInfo = {
         "ABlendingEnabled",
         "Additive Blending",
         "Activate/deactivate additive blending.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
+
     constexpr openspace::properties::Property::PropertyInfo DomainEnabledInfo = {
         "DomainEnabled",
         "Domain Limits",
         "Enable/Disable domain limits.",
         openspace::properties::Property::Visibility::User
     };
+
     constexpr openspace::properties::Property::PropertyInfo DomainXInfo = {
         "LimitsX",
         "X-limits",
         "Valid range along the X-axis. [Min, Max].",
         openspace::properties::Property::Visibility::AdvancedUser
     };
+
     constexpr openspace::properties::Property::PropertyInfo DomainYInfo = {
         "LimitsY",
         "Y-limits",
         "Valid range along the Y-axis. [Min, Max].",
         openspace::properties::Property::Visibility::AdvancedUser
     };
+
     constexpr openspace::properties::Property::PropertyInfo DomainZInfo = {
         "LimitsZ",
         "Z-limits",
         "Valid range along the Z-axis. [Min, Max].",
         openspace::properties::Property::Visibility::AdvancedUser
     };
+
     constexpr openspace::properties::Property::PropertyInfo DomainRInfo = {
         "LimitsR",
         "Radial limits",
         "Valid radial range. [Min, Max].",
         openspace::properties::Property::Visibility::AdvancedUser
     };
+
     constexpr openspace::properties::Property::PropertyInfo FlowEnabledInfo = {
         "FlowEnabled",
         "Flow Enabled",
         "Toggles the rendering of moving particles along the lines. Can, for example, "
         "illustrate magnetic flow.",
-        // @VISIBILITY(1.33)
         openspace::properties::Property::Visibility::NoviceUser
     };
+
     constexpr openspace::properties::Property::PropertyInfo FlowColorInfo = {
         "FlowColor",
         "Flow Color",
-        "Color of particles flow direction indication",
-        // @VISIBILITY(1.67)
+        "Color of particles flow direction indication.",
         openspace::properties::Property::Visibility::NoviceUser
     };
+
     constexpr openspace::properties::Property::PropertyInfo FlowReversedInfo = {
         "Reversed",
         "Reversed Flow",
         "Toggle to make the flow move in the opposite direction.",
         openspace::properties::Property::Visibility::User
     };
+
     constexpr openspace::properties::Property::PropertyInfo FlowParticleSizeInfo = {
         "ParticleSize",
         "Particle Size",
         "Size of the particles.",
         openspace::properties::Property::Visibility::User
     };
+
     constexpr openspace::properties::Property::PropertyInfo FlowParticleSpacingInfo = {
         "ParticleSpacing",
         "Particle Spacing",
         "Spacing inbetween particles.",
         openspace::properties::Property::Visibility::User
     };
+
     constexpr openspace::properties::Property::PropertyInfo FlowSpeedInfo = {
         "Speed",
         "Speed",
         "Speed of the flow.",
         openspace::properties::Property::Visibility::User
     };
+
     constexpr openspace::properties::Property::PropertyInfo MaskingEnabledInfo = {
         "MaskingEnabled",
         "Masking Enabled",
@@ -157,37 +172,43 @@ namespace {
         "topologies like solar wind & closed lines.",
         openspace::properties::Property::Visibility::User
     };
+
     constexpr openspace::properties::Property::PropertyInfo MaskingMinMaxInfo = {
         "MaskingMinLimit",
         "Lower Limit",
         "Lower and upper limit of the valid masking range.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
+
     constexpr openspace::properties::Property::PropertyInfo MaskingQuantityInfo = {
         "MaskingQuantity",
         "Quantity used for Masking",
         "Quantity used for masking.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
+
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
         "This value specifies the line width of the fieldlines.",
         openspace::properties::Property::Visibility::NoviceUser
     };
+
     constexpr openspace::properties::Property::PropertyInfo TimeJumpButtonInfo = {
         "TimeJumpToStart",
         "Jump to Start Of Sequence",
         "Performs a time jump to the start of the sequence.",
         openspace::properties::Property::Visibility::NoviceUser
     };
+
     constexpr openspace::properties::Property::PropertyInfo SaveDownloadsOnShutdown = {
         "SaveDownloadsOnShutdown",
         "Save Downloads On Shutdown",
         "This is an option for if dynamically downloaded should be saved between runs "
-        "or not. Deletes on default",
+        "or not.",
         openspace::properties::Property::Visibility::User
     };
+
     struct [[codegen::Dictionary(RenderableFieldlinesSequence)]] Parameters {
         enum class [[codegen::map(openspace::RenderableFieldlinesSequence::ColorMethod)]] ColorMethod {
             Uniform = 0,
@@ -201,7 +222,7 @@ namespace {
         std::optional<glm::vec4> color [[codegen::color()]];
         // A list of paths to transferfunction .txt files containing color tables
         // used for colorizing the fieldlines according to different parameters
-        std::optional<std::vector<std::string>> colorTablePaths;
+        std::optional<std::vector<std::filesystem::path>> colorTablePaths;
         // Ranges for which their corresponding parameters values will be
         // colorized by. Should be entered as min value, max value
         std::optional<std::vector<glm::vec2>> colorTableRanges;
@@ -343,12 +364,11 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _domainY(DomainYInfo)
     , _domainZ(DomainZInfo)
     , _domainR(DomainRInfo)
-
     , _flowEnabled(FlowEnabledInfo, false)
     , _flowGroup({ "Flow" })
     , _flowColor(
         FlowColorInfo,
-        glm::vec4(0.96f, 0.88f, 0.8f, 1.0f),
+        glm::vec4(0.96f, 0.88f, 0.8f, 1.f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
@@ -356,7 +376,6 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _flowParticleSpacing(FlowParticleSpacingInfo, 60, 0, 500)
     , _flowReversed(FlowReversedInfo, false)
     , _flowSpeed(FlowSpeedInfo, 20, 0, 1000)
-
     , _maskingEnabled(MaskingEnabledInfo, false)
     , _maskingGroup({ "Masking" })
     , _selectedMaskingRange(
@@ -383,27 +402,20 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     }
 
     if (_loadingType == LoadingType::DynamicDownloading &&
-        _inputFileType == SourceFileType::Cdf)
-    {
+        _inputFileType == SourceFileType::Cdf) {
         throw ghoul::RuntimeError(
             "Dynamic loading (or downloading) is only supported for osfls and json files"
         );
     }
     if (_loadingType == LoadingType::StaticLoading &&
-        !p.sourceFolder.has_value())
-    {
+        !p.sourceFolder.has_value()) {
         throw ghoul::RuntimeError(
             "specify dynamic downloading parameters or a syncfolder"
         );
     }
 
     if (p.simulationModel.has_value()) {
-        try {
-            _model = codegen::map<openspace::fls::Model>(*p.simulationModel);
-        }
-        catch (const std::exception&) {
-            _model = fls::Model::Invalid;
-        }
+        _model = codegen::map<openspace::fls::Model>(*p.simulationModel);
     }
     else {
         _model = fls::Model::Invalid;
@@ -416,7 +428,26 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     _scalingFactor = p.scaleToMeters.value_or(_scalingFactor);
 
     if (_loadingType == LoadingType::DynamicDownloading) {
-        setupDynamicDownloading(p.dataID, p.numberOfFilesToQueue, p.infoURL, p.dataURL);
+        _dataID = p.dataID.value_or(_dataID);
+        if (!_dataID) {
+            throw ghoul::RuntimeError(
+                "If running with dynamic downloading, dataID needs to be specified"
+            );
+        }
+        _nOfFilesToQueue = static_cast<size_t>(
+            p.numberOfFilesToQueue.value_or(_nOfFilesToQueue)
+            );
+        _infoURL = p.infoURL.value();
+        if (_infoURL.empty()) {
+            throw ghoul::RuntimeError("InfoURL has to be provided");
+        }
+        _dataURL = p.dataURL.value();
+        if (_dataURL.empty()) {
+            throw ghoul::RuntimeError("DataURL has to be provided");
+        }
+        _dynamicFileDownloader = std::make_unique<DynamicFileSequenceDownloader>(
+            _dataID, _infoURL, _dataURL, _nOfFilesToQueue
+        );
     }
     else {
         ghoul_assert(
@@ -424,20 +455,23 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             "sourceFolder not specified though it should not be able to get here"
         );
         std::filesystem::path path = p.sourceFolder.value();
-        namespace fsm = std::filesystem;
-        for (const fsm::directory_entry& e : fsm::directory_iterator(path)) {
+        namespace fs = std::filesystem;
+        for (const fs::directory_entry& e : fs::directory_iterator(path)) {
             if (!e.is_regular_file()) {
                 continue;
             }
-            File file;
-            file.path = e.path();
-            file.status = File::FileStatus::Downloaded;
-            file.timestamp = -1.0;
+            File file = {
+                .status = File::FileStatus::Downloaded,
+                .path = e.path(),
+                .timestamp = -1.0
+            };
             _files.push_back(std::move(file));
             if (_files[0].path.empty()) {
-                throw ghoul::RuntimeError(
-                    "path didnt transfer"
-                );
+                throw ghoul::RuntimeError(std::format(
+                    "Error finding file {} in folder {}" ,
+                    e.path().filename(),
+                    path
+                ));
             }
         }
         _maxLoadedFiles = _files.size();
@@ -466,17 +500,13 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     // Color group
     _colorTablePath = FieldlinesSequenceModule::DefaultTransferFunctionFile.string();
     if (p.colorTablePaths.has_value()) {
-        for (auto path : *p.colorTablePaths) {
+        for (const std::filesystem::path& path : *p.colorTablePaths) {
             if (std::filesystem::exists(path)) {
                 _colorTablePaths.emplace_back(path);
             }
             else {
-                _colorTablePaths.emplace_back(
-                    FieldlinesSequenceModule::DefaultTransferFunctionFile
-                );
-                LERROR(std::format(
-                    "Color table path {} is not a valid file.",
-                    "Used a default transferfunction instead.",
+                throw ghoul::RuntimeError(std::format(
+                    "Color table path {} is not a valid file. ",
                     path
                 ));
             }
@@ -519,9 +549,6 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     // What is given from the asset, is stored as the selected range.
     if (p.maskingRanges.has_value()) {
         _maskingRanges = p.maskingRanges.value_or(_maskingRanges);
-        //if (!_maskingRanges.empty()) {
-        //    _selectedMaskingRange = _maskingRanges[_maskingQuantityTemp];
-        //}
     }
     else {
         _maskingRanges.push_back(glm::vec2(0.f, 1.f));
@@ -533,161 +560,8 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         _selectedMaskingRange.setMaxValue(glm::vec2(p.maskingMinMaxRange->y));
     }
 
-    setupProperties();
-    definePropertyCallbackFunctions();
-}
-
-void RenderableFieldlinesSequence::setupDynamicDownloading(
-                                           const std::optional<int>& dataID,
-                                           const std::optional<int>& numberOfFilesToQueue,
-                                           const std::optional<std::string>& infoURL,
-                                           const std::optional<std::string>& dataURL)
-{
-    _dataID = dataID.value_or(_dataID);
-    if (!_dataID) {
-        throw ghoul::RuntimeError(
-            "If running with dynamic downloading, dataID needs to be specified"
-        );
-    }
-    _nOfFilesToQueue = static_cast<size_t>(
-        numberOfFilesToQueue.value_or(_nOfFilesToQueue)
-    );
-    _infoURL = infoURL.value();
-    if (_infoURL.empty()) { throw ghoul::RuntimeError("InfoURL has to be provided"); }
-    _dataURL = dataURL.value();
-    if (_dataURL.empty()) { throw ghoul::RuntimeError("DataURL has to be provided"); }
-    _dynamicFileDownloader = std::make_unique<DynamicFileSequenceDownloader>(
-        _dataID, _infoURL, _dataURL, _nOfFilesToQueue
-    );
-}
-
-void RenderableFieldlinesSequence::staticallyLoadFiles(
-                           const std::optional<std::filesystem::path>& seedPointDirectory,
-                           const std::optional<std::string>& tracingVariable)
-{
-    std::vector<std::thread> openThreads;
-    for (File& file : _files) {
-        bool loadSuccess = false;
-        switch (_inputFileType) {
-            case SourceFileType::Cdf: {
-                _seedPointDirectory = seedPointDirectory.value_or(_seedPointDirectory);
-                _tracingVariable = tracingVariable.value_or(_tracingVariable);
-                std::vector<std::string> extraMagVars =
-                    fls::extractMagnitudeVarsFromStrings(_extraVars);
-                std::unordered_map<std::string, std::vector<glm::vec3>> seedsPerFiles =
-                    fls::extractSeedPointsFromFiles(_seedPointDirectory);
-                if (seedsPerFiles.empty()) {
-                    LERROR("No seed files found");
-                }
-                loadSuccess = fls::convertCdfToFieldlinesState(
-                    file.state,
-                    file.path.string(),
-                    seedsPerFiles,
-                    _manualTimeOffset,
-                    _tracingVariable,
-                    _extraVars,
-                    extraMagVars
-                );
-                break;
-            }
-            case SourceFileType::Json:
-                loadSuccess =
-                    file.state.loadStateFromJson(
-                        file.path.string(), _model, _scalingFactor
-                    );
-                break;
-            case SourceFileType::Osfls: {
-                loadFile(file);
-                //openThreads.push_back(std::move(thread));
-                // loadSuccess = true;
-                break;
-            }
-            default:
-                break;
-        }
-    }
-
-    _isLoadingStateFromDisk = false;
-    for (auto& file : _files) {
-        if (!file.path.empty() && file.status != File::FileStatus::Loaded) {
-            file.status = File::FileStatus::Loaded;
-            file.timestamp = extractTriggerTimeFromFilename(file.path);
-            _atLeastOneFileLoaded = true;
-        }
-    }
-    std::sort(_files.begin(), _files.end());
-}
-
-void RenderableFieldlinesSequence::initialize() {
-// not needed here because color path (singular) will be set in firstupdate()
-//    _transferFunction = std::make_unique<TransferFunction>(
-//        absPath(_colorTablePath).string()
-//    );
-    _firstLoad = true;
-}
-
-void RenderableFieldlinesSequence::initializeGL() {
-    _shaderProgram = global::renderEngine->buildRenderProgram(
-        "FieldlinesSequenceNew",
-        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_vs.glsl"),
-        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl")
-    );
-
-    glGenVertexArrays(1, &_vertexArrayObject);
-    glGenBuffers(1, &_vertexPositionBuffer);
-    glGenBuffers(1, &_vertexColorBuffer);
-    glGenBuffers(1, &_vertexMaskingBuffer);
-
-    // Needed for additive blending
-    setRenderBin(Renderable::RenderBin::Overlay);
-}
-
-void RenderableFieldlinesSequence::setupProperties() {
-    addProperty(_colorABlendEnabled);
-    addProperty(_lineWidth);
-    addProperty(_jumpToStartBtn);
-
-    // Add Property Groups
-    addPropertySubOwner(_colorGroup);
-    addPropertySubOwner(_domainGroup);
-    addPropertySubOwner(_flowGroup);
-    addPropertySubOwner(_maskingGroup);
-
-    _colorUniform.setViewOption(properties::Property::ViewOptions::Color);
-    _colorGroup.addProperty(_colorUniform);
-    _colorGroup.addProperty(_colorMethod);
-    _colorGroup.addProperty(_colorQuantity);
-    _selectedColorRange.setViewOption(
-        properties::Property::ViewOptions::MinMaxRange
-    );
-    _colorGroup.addProperty(_selectedColorRange);
-    _colorGroup.addProperty(_colorTablePath);
-
-    _domainGroup.addProperty(_domainEnabled);
-    _domainGroup.addProperty(_domainX);
-    _domainGroup.addProperty(_domainY);
-    _domainGroup.addProperty(_domainZ);
-    _domainGroup.addProperty(_domainR);
-
-    _flowGroup.addProperty(_flowEnabled);
-    _flowGroup.addProperty(_flowReversed);
-    _flowColor.setViewOption(properties::Property::ViewOptions::Color);
-    _flowGroup.addProperty(_flowColor);
-    _flowGroup.addProperty(_flowParticleSize);
-    _flowGroup.addProperty(_flowParticleSpacing);
-    _flowGroup.addProperty(_flowSpeed);
-
-    _maskingGroup.addProperty(_maskingEnabled); //hasExtra
-    _maskingGroup.addProperty(_maskingQuantity);
-    _selectedMaskingRange.setViewOption(properties::Property::ViewOptions::MinMaxRange);
-    _maskingGroup.addProperty(_selectedMaskingRange);
-
-    addProperty(_saveDownloadsOnShutdown);
-}
-
-void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
     _colorQuantity.onChange([this]() {
-        if (_colorTablePaths.size() == 0){
+        if (_colorTablePaths.size() == 0) {
             return;
         }
         _shouldUpdateColorBuffer = true;
@@ -734,13 +608,13 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
         _shouldUpdateMaskingBuffer = true;
         _havePrintedQuantityRange = false;
         if (_maskingRanges.size() > _maskingQuantity) {
-            _selectedMaskingRange= _maskingRanges[_maskingQuantity];
+            _selectedMaskingRange = _maskingRanges[_maskingQuantity];
         }
         else if (_maskingRanges.size() > 0) {
             _selectedMaskingRange = _maskingRanges[0];
         }
         else {
-            LERROR("Cannot set selected masking range with: ");
+            LERROR("Cannot set selected masking range");
         }
     });
 
@@ -755,27 +629,147 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
             global::timeManager->setTimeNextFrame(Time(_files[0].timestamp));
         }
     });
+    setupProperties();
+}
+
+void RenderableFieldlinesSequence::staticallyLoadFiles(
+                           const std::optional<std::filesystem::path>& seedPointDirectory,
+                           const std::optional<std::string>& tracingVariable)
+{
+    std::vector<std::thread> openThreads;
+    for (File& file : _files) {
+        bool loadSuccess = false;
+        switch (_inputFileType) {
+            case SourceFileType::Cdf: {
+                _seedPointDirectory = seedPointDirectory.value_or(_seedPointDirectory);
+                _tracingVariable = tracingVariable.value_or(_tracingVariable);
+                std::vector<std::string> extraMagVars =
+                    fls::extractMagnitudeVarsFromStrings(_extraVars);
+                std::unordered_map<std::string, std::vector<glm::vec3>> seedsPerFiles =
+                    fls::extractSeedPointsFromFiles(_seedPointDirectory);
+                if (seedsPerFiles.empty()) {
+                    LERROR("No seed files found");
+                }
+                loadSuccess = fls::convertCdfToFieldlinesState(
+                    file.state,
+                    file.path.string(),
+                    seedsPerFiles,
+                    _manualTimeOffset,
+                    _tracingVariable,
+                    _extraVars,
+                    extraMagVars
+                );
+                break;
+            }
+            case SourceFileType::Json:
+                loadSuccess = file.state.loadStateFromJson(
+                    file.path.string(),
+                    _model,
+                    _scalingFactor
+                );
+                break;
+            case SourceFileType::Osfls: {
+                loadFile(file);
+                //openThreads.push_back(std::move(thread));
+                // loadSuccess = true;
+                break;
+            }
+            default:
+                break;
+        }
+    }
+
+    _isLoadingStateFromDisk = false;
+    for (File& file : _files) {
+        if (!file.path.empty() && file.status != File::FileStatus::Loaded) {
+            file.status = File::FileStatus::Loaded;
+            file.timestamp = extractTriggerTimeFromFilename(file.path);
+            _atLeastOneFileLoaded = true;
+        }
+    }
+    std::sort(_files.begin(), _files.end());
+}
+
+void RenderableFieldlinesSequence::initialize() {
+    _firstLoad = true;
+}
+
+void RenderableFieldlinesSequence::initializeGL() {
+    _shaderProgram = global::renderEngine->buildRenderProgram(
+        "FieldlinesSequenceNew",
+        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_vs.glsl"),
+        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl")
+    );
+
+    glGenVertexArrays(1, &_vertexArrayObject);
+    glGenBuffers(1, &_vertexPositionBuffer);
+    glGenBuffers(1, &_vertexColorBuffer);
+    glGenBuffers(1, &_vertexMaskingBuffer);
+
+    // Needed for additive blending
+    setRenderBin(Renderable::RenderBin::Overlay);
+}
+
+void RenderableFieldlinesSequence::setupProperties() {
+    addProperty(_colorABlendEnabled);
+    addProperty(_lineWidth);
+    addProperty(_jumpToStartBtn);
+
+    // Add Property Groups
+    addPropertySubOwner(_colorGroup);
+    addPropertySubOwner(_domainGroup);
+    addPropertySubOwner(_flowGroup);
+    addPropertySubOwner(_maskingGroup);
+
+    _colorUniform.setViewOption(properties::Property::ViewOptions::Color);
+    _colorGroup.addProperty(_colorUniform);
+    _colorGroup.addProperty(_colorMethod);
+    _colorGroup.addProperty(_colorQuantity);
+    _selectedColorRange.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    _colorGroup.addProperty(_selectedColorRange);
+    _colorGroup.addProperty(_colorTablePath);
+
+    _domainGroup.addProperty(_domainEnabled);
+    _domainGroup.addProperty(_domainX);
+    _domainGroup.addProperty(_domainY);
+    _domainGroup.addProperty(_domainZ);
+    _domainGroup.addProperty(_domainR);
+
+    _flowGroup.addProperty(_flowEnabled);
+    _flowGroup.addProperty(_flowReversed);
+    _flowColor.setViewOption(properties::Property::ViewOptions::Color);
+    _flowGroup.addProperty(_flowColor);
+    _flowGroup.addProperty(_flowParticleSize);
+    _flowGroup.addProperty(_flowParticleSpacing);
+    _flowGroup.addProperty(_flowSpeed);
+
+    _maskingGroup.addProperty(_maskingEnabled);
+    _maskingGroup.addProperty(_maskingQuantity);
+    _selectedMaskingRange.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    _maskingGroup.addProperty(_selectedMaskingRange);
+
+    addProperty(_saveDownloadsOnShutdown);
 }
 
 void RenderableFieldlinesSequence::setModelDependentConstants() {
     float limit = 100.f; // Just used as a default value.
     switch (_model) {
-    case fls::Model::Batsrus:
-        _scalingFactor = fls::ReToMeter;
-        limit = 300.f; // Should include a long magnetotail
-        break;
-    case fls::Model::Enlil:
-        _flowReversed = true;
-        _scalingFactor = fls::AuToMeter;
-        limit = 50.f; // Should include Plutos furthest distance from the Sun
-        break;
-    case fls::Model::Pfss:
-        _scalingFactor = fls::RsToMeter;
-        limit = 100.f; // Just a default value far away from the solar surface
-        break;
-    default:
-        break;
-    }
+        case fls::Model::Batsrus:
+            _scalingFactor = fls::ReToMeter;
+            limit = 300.f; // Should include a long magnetotail
+            break;
+        case fls::Model::Enlil:
+            _flowReversed = true;
+            _scalingFactor = fls::AuToMeter;
+            limit = 50.f; // Should include Plutos furthest distance from the Sun
+            break;
+        case fls::Model::Pfss:
+            _scalingFactor = fls::RsToMeter;
+            limit = 100.f; // Just a default value far away from the solar surface
+            break;
+        default:
+            break;
+        }
     _domainX.setMinValue(glm::vec2(-limit));
     _domainX.setMaxValue(glm::vec2(limit));
 
@@ -797,12 +791,7 @@ void RenderableFieldlinesSequence::setModelDependentConstants() {
 }
 
 double extractTriggerTimeFromFilename(std::filesystem::path filePath) {
-    // number of  characters in filename (excluding '.osfls')
-    //constexpr int FilenameSize = 23;
-    // size(".osfls")
-    //std::string wholefileName = filePath.filename().string();
-    //std::string extension = filePath.extension().string();
-    //int ExtSize = extension.length(); // 6 for .osfls
+    // number of characters in filename (excluding '.osfls')
     std::string fileName = filePath.stem().string(); // excludes extention
 
     // Ensure the separators are correct
@@ -834,15 +823,13 @@ void RenderableFieldlinesSequence::deinitializeGL() {
 
     _files.clear();
 
-    if (_loadingType == LoadingType::DynamicDownloading &&
-        _dynamicFileDownloader != nullptr)
-    {
+    if (_loadingType == LoadingType::DynamicDownloading && _dynamicFileDownloader) {
         _dynamicFileDownloader->deinitialize(_saveDownloadsOnShutdown);
     }
 }
 
 void RenderableFieldlinesSequence::computeSequenceEndTime() {
-    if (_files.size() == 0) {
+    if (_files.empty()) {
         _sequenceEndTime = 0.f;
     }
     else if (_files.size() == 1) {
@@ -878,18 +865,9 @@ void RenderableFieldlinesSequence::loadFile(File& file) {
             );
         }
     }
-    catch(const std::exception& e ) {
+    catch(const std::exception& e) {
         LERROR(e.what());
     }
-    // So far uncleare why model is needed and if scalingFactor can be changed afterwards.
-    // If these 2 things can be desided afterwards, without affecting Ganamyde fieldlines
-    // that are using json input, then changes to fieldlinesstate function
-    // loadStateFromJson can be changed. That will result in the option to dynamicaly
-    // load and download json files as well.
-    //
-    // I don't think it matters if model is invalid and scalingFactor is 1.f when loading
-    // json files anyway.
-
 }
 
 void RenderableFieldlinesSequence::trackOldest(File& file) {
@@ -908,29 +886,23 @@ void RenderableFieldlinesSequence::trackOldest(File& file) {
     }
 }
 
-std::vector<RenderableFieldlinesSequence::File>::iterator
-RenderableFieldlinesSequence::insertToFilesInOrder(File& file) {
-    const std::vector<File>::const_iterator iter = std::upper_bound(
-        _files.begin(), _files.end(),
-        file.timestamp,
-        [](double timeRef, const File& fileRef) {
-            return timeRef < fileRef.timestamp;
-        }
-    );
-    auto iterToInserted = _files.insert(iter, std::move(file));
-    return iterToInserted;
-}
-
 int RenderableFieldlinesSequence::updateActiveIndex(const double currentTime) {
-    if (_files.empty()) return -1;
+    if (_files.empty()) {
+        return -1;
+    }
     // if == currentTime, sets correct index if exactly the same
     // if size == 1 at this point, we can expect to not have a sequence and wants to show
     // the one files fieldlines at any point in time
-    if (_files.begin()->timestamp == currentTime || _files.size() == 1) return 0;
+    if (_files.begin()->timestamp == currentTime || _files.size() == 1) {
+        return 0;
+    }
 
     int index = 0;
     const std::vector<File>::const_iterator iter = std::upper_bound(
-        _files.begin(), _files.end(), currentTime, [](double timeRef, const File& fileRef) {
+        _files.begin(),
+        _files.end(),
+        currentTime,
+        [](double timeRef, const File& fileRef) {
             return timeRef < fileRef.timestamp;
         }
     );
@@ -951,23 +923,27 @@ bool RenderableFieldlinesSequence::isReady() const {
     return _shaderProgram != nullptr;
 }
 
-void RenderableFieldlinesSequence::updateDynamicDownloading(const double currentTime,
-                                                                   const double deltaTime)
+void RenderableFieldlinesSequence::updateDynamicDownloading(double currentTime,
+                                                                         double deltaTime)
 {
     _dynamicFileDownloader->update(currentTime, deltaTime);
     const std::vector<std::filesystem::path>& filesToRead =
         _dynamicFileDownloader->downloadedFiles();
-    for (std::filesystem::path filePath : filesToRead) {
-        File newFile;
-        newFile.path = filePath;
-        newFile.status = File::FileStatus::Downloaded;
-        const double time = extractTriggerTimeFromFilename(filePath.filename());
-        newFile.timestamp = time;
-
-        auto inserted = insertToFilesInOrder(newFile);
-    }
-    if (!filesToRead.empty()) {
-        _activeIndex = updateActiveIndex(currentTime);
+    for (const std::filesystem::path& filePath : filesToRead) {
+        File newFile = {
+            .status = File::FileStatus::Downloaded,
+            .path = filePath,
+            .timestamp = extractTriggerTimeFromFilename(filePath.filename())
+        };
+        const std::vector<File>::const_iterator iter = std::upper_bound(
+            _files.begin(),
+            _files.end(),
+            newFile.timestamp,
+            [](double timeRef, const File& fileRef) {
+                return timeRef < fileRef.timestamp;
+            }
+        );
+        _files.insert(iter, std::move(newFile));
     }
 
     // if all files are moved into _sourceFiles then we can
@@ -976,10 +952,11 @@ void RenderableFieldlinesSequence::updateDynamicDownloading(const double current
 }
 
 void RenderableFieldlinesSequence::firstUpdate() {
-    std::vector<File>::iterator file =
-        std::find_if( _files.begin(), _files.end(), [](File& f) {
-                return f.status == File::FileStatus::Loaded;
-        });
+    std::vector<File>::iterator file = std::find_if(
+        _files.begin(),
+        _files.end(),
+        [](File& f) { return f.status == File::FileStatus::Loaded; }
+    );
     if (file == _files.end()) {
         return;
     }
@@ -1002,9 +979,8 @@ void RenderableFieldlinesSequence::firstUpdate() {
         _colorTablePath = _colorTablePaths[0].string();
     }
 
-    std::filesystem::path newPath = absPath(_colorTablePath);
-    if (std::filesystem::exists(newPath)) {
-        _transferFunction = std::make_unique<TransferFunction>(newPath.string());
+    if (std::filesystem::exists(_colorTablePath.value())) {
+        _transferFunction = std::make_unique<TransferFunction>(_colorTablePath.value());
     }
     else {
         LWARNING("Invalid path to transferfunction, please enter new path.");

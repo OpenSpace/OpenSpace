@@ -30,7 +30,6 @@
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/util/dynamicfilesequencedownloader.h>
 
-//namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
@@ -52,10 +51,10 @@ public:
     enum class TextureFilter {
         NearestNeighbor = 0,
         Linear = 1,
-        Unspecified =2
+        Unspecified = 2
     };
 
-    RenderableTimeVaryingSphere(const ghoul::Dictionary& dictionary);
+    explicit RenderableTimeVaryingSphere(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -71,13 +70,13 @@ public:
             Downloaded,
             Loaded
         };
-        FileStatus status;
+        FileStatus status = FileStatus::Downloaded;
         std::filesystem::path path;
-        double time;
+        double time = 0.0;
         std::unique_ptr<ghoul::opengl::Texture> texture;
-        glm::vec2 dataMinMax;
+        glm::vec2 dataMinMax = { 0.0, 1.0 };
 
-        bool operator< (const File& other) const {
+        bool operator<(const File& other) const noexcept{
             return time < other.time;
         }
     };

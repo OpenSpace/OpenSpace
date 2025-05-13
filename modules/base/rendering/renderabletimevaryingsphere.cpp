@@ -372,7 +372,7 @@ void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
     size_t layer = _hasLayerNames ? _fitsLayerName : _fitsLayer;
     std::unique_ptr<ghoul::opengl::Texture> t =
         loadTextureFromFits(path, layer, _fitsDataCapValue);
-    if (t == nullptr) {
+    if (!t) {
         return;
     }
     if (_textureFilterProperty == static_cast<int>(TextureFilter::NearestNeighbor) ||
@@ -380,7 +380,7 @@ void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
     {
         t->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
     }
-    else if(_textureFilterProperty == static_cast<int>(TextureFilter::Linear)) {
+    else if (_textureFilterProperty == static_cast<int>(TextureFilter::Linear)) {
         t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
     }
     glm::vec2 minMaxDataValues = minMaxTextureDataValues(t);
@@ -394,7 +394,8 @@ void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
     };
 
     const std::vector<File>::const_iterator iter = std::upper_bound(
-        _files.begin(), _files.end(),
+        _files.begin(),
+        _files.end(),
         newFile.time,
         [](double timeRef, const File& fileRef) {
             return timeRef < fileRef.time;
@@ -428,7 +429,8 @@ void RenderableTimeVaryingSphere::readFileFromImage(std::filesystem::path path) 
     };
 
     const std::vector<File>::const_iterator iter = std::upper_bound(
-        _files.begin(), _files.end(),
+        _files.begin(),
+        _files.end(),
         newFile.time,
         [](double timeRef, const File& fileRef) {
             return timeRef < fileRef.time;
@@ -440,12 +442,30 @@ void RenderableTimeVaryingSphere::readFileFromImage(std::filesystem::path path) 
 glm::vec2 RenderableTimeVaryingSphere::minMaxTextureDataValues(
                                                std::unique_ptr<ghoul::opengl::Texture>& t)
 {
-    const void* rawData = t->pixelData();
-    const float* pixelData = static_cast<const float*>(rawData);
-    size_t dataSize = t->dimensions().x * t->dimensions().y;
-    float min = *std::min_element(pixelData, pixelData + dataSize);
-    float max = *std::max_element(pixelData, pixelData + dataSize);
-    return glm::vec2(min, max);
+    const glm::ivec3 dims = glm::ivec3(t->dimensions());
+    const int width = dims.x;
+    const int height = dims.y;
+
+    std::vector<float> pixelValues;
+    pixelValues.reserve(width * height * 4);
+
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            glm::vec4 texel = t->texelAsFloat(x, y);
+            pixelValues.push_back(texel.r);
+            pixelValues.push_back(texel.g);
+            pixelValues.push_back(texel.b);
+            pixelValues.push_back(texel.a);
+        }
+    }
+    if (!pixelValues.empty()) {
+        float min = *std::min_element(pixelValues.begin(), pixelValues.end());
+        float max = *std::max_element(pixelValues.begin(), pixelValues.end());
+        return glm::vec2(min, max);
+    }
+    else {
+        return glm::vec2(0.0, 1.0);
+    }
 }
 
 void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
@@ -465,7 +485,7 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
         if (!e.is_regular_file()) {
             continue;
         }
-        std::string fileExtention = e.path().extension().string();
+        std::filesystem::path fileExtention = e.path().extension();
         if (fileExtention == ".fits") {
             _isFitsFormat = true;
             readFileFromFits(e.path());
@@ -495,7 +515,7 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
         updateDynamicDownloading(currentTime, deltaTime);
     }
 
-    _inInterval = _files.size() > 0 &&
+    _inInterval = !_files.empty() &&
         currentTime >= _files[0].time &&
         currentTime < _sequenceEndTime;
 
@@ -521,9 +541,8 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
             }
         }
         // The case when we jumped passed last file. where nextIdx is not < file.size()
-        else if (currentTime >= _files[_activeTriggerTimeIndex].time &&
-            _texture == nullptr)
-        {
+        else if (currentTime >=
+            _files[_activeTriggerTimeIndex].time && !_texture) {
             loadTexture();
         }
     }
@@ -537,10 +556,7 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
 }
 
 void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks& task) {
-    if (_files.empty()) {
-        return;
-    }
-    if (!_inInterval && !_renderForever) {
+    if (_files.empty() || (!_inInterval && !_renderForever)) {
         return;
     }
     RenderableSphere::render(data, task);
@@ -576,14 +592,14 @@ void RenderableTimeVaryingSphere::updateActiveTriggerTimeIndex(double currentTim
     }
 }
 
-void RenderableTimeVaryingSphere::updateDynamicDownloading(const double currentTime,
-                                                                   const double deltaTime)
+void RenderableTimeVaryingSphere::updateDynamicDownloading(double currentTime,
+                                                                         double deltaTime)
 {
     _dynamicFileDownloader->update(currentTime, deltaTime);
     const std::vector<std::filesystem::path>& filesToRead =
         _dynamicFileDownloader->downloadedFiles();
-    for (std::filesystem::path filePath : filesToRead) {
-        std::string fileExtention = filePath.extension().string();
+    for (const std::filesystem::path filePath : filesToRead) {
+        std::filesystem::path fileExtention = filePath.extension();
         if (fileExtention == ".fits") {
             _isFitsFormat = true;
             readFileFromFits(filePath);
@@ -597,7 +613,7 @@ void RenderableTimeVaryingSphere::updateDynamicDownloading(const double currentT
         updateActiveTriggerTimeIndex(currentTime);
     }
     if (_firstUpdate) {
-        const bool isInInterval = _files.size() > 0 &&
+        const bool isInInterval = !_files.empty() &&
             currentTime >= _files[0].time &&
             currentTime < _sequenceEndTime;
         if (isInInterval &&
@@ -614,21 +630,23 @@ void RenderableTimeVaryingSphere::updateDynamicDownloading(const double currentT
 }
 
 void RenderableTimeVaryingSphere::computeSequenceEndTime() {
-    if (_files.size() == 0) {
+    if (_files.empty()) {
         _sequenceEndTime = 0.f;
     }
     else if (_files.size() == 1) {
         _sequenceEndTime = _files[0].time + 7200.f;
         if (_loadingType == LoadingType::StaticLoading && !_renderForever) {
             //TODO: Alternativly check at construction and throw exeption.
-            LWARNING("Only one file in data set, but ShowAtAllTimes set to false. "
-                "Using arbitrary duration to visualize data file instead");
+            LWARNING(
+                "Only one file in data set, but ShowAtAllTimes set to false. "
+                "Using arbitrary duration to visualize data file instead"
+            );
         }
     }
     else if (_files.size() > 1) {
         const double lastTriggerTime = _files[_files.size() - 1].time;
         const double sequenceDuration = lastTriggerTime - _files[0].time;
-        const double averageCadence=
+        const double averageCadence =
             sequenceDuration / (static_cast<double>(_files.size()) - 1.0);
         // A multiplier of 3 to the average cadence is added at the end as a buffer
         // 3 because if you start it just before new data came in, you might just be

@@ -46,17 +46,13 @@ Fragment getFragment() {
   if (mirrorTexture) {
     texCoord.x = 1.0 - texCoord.x;
   }
-  if(usingTransferFunction) {
+  if (usingTransferFunction) {
     vec4 dataValue = texture(colorTexture, texCoord);
     float lookUpVal =
       (dataValue.x - dataMinMaxValues.x) /
       (dataMinMaxValues.y - dataMinMaxValues.x);
-    //if opacity in tf:
-    //frag.color = texture(transferFunction, lookUpVal);
-    frag.color = vec4(
-      texture(transferFunction, lookUpVal).rgb,
-      1.0
-    );
+    frag.color = vec4(texture(transferFunction,
+      lookUpVal).rgb, 1.0);
   }
   else {
     frag.color = texture(colorTexture, texCoord);
