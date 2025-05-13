@@ -1,6 +1,300 @@
-asset.require("actions/trails/toggle_all_trails")
-asset.require("actions/trails/toggle_trails_planets_moons")
-asset.require("actions/planets/planet_lighting")
-asset.require("actions/system/undo_event_fades")
-asset.require("actions/trails/toggle_all_minor_moon_trails")
-asset.require("actions/trails/on_off_all_minor_moons")
+local ToggleShutdown = {
+  Identifier = "os.ToggleShutdown",
+  Name = "Toggle shutdown",
+  Command = "openspace.toggleShutdown()",
+  Documentation = [[
+    Toggles the shutdown that will stop OpenSpace after a grace period. Press again to
+    cancel the shutdown during this period]],
+  GuiPath = "/System",
+  IsLocal = true
+}
+
+-- Friction actions
+
+local ToggleRotationFriction = {
+  Identifier = "os.ToggleRotationFriction",
+  Name = "Toggle rotation friction",
+  Command = [[openspace.invertBooleanProperty("NavigationHandler.OrbitalNavigator.Friction.RotationalFriction")]],
+  Documentation = [[Toggles the rotational friction of the camera. If it is disabled, the
+    camera rotates around the focus object indefinitely]],
+  GuiPath = "/Navigation",
+  IsLocal = true
+}
+
+local ToggleZoomFriction = {
+  Identifier = "os.ToggleZoomFriction",
+  Name = "Toggle zoom friction",
+  Command = [[openspace.invertBooleanProperty("NavigationHandler.OrbitalNavigator.Friction.ZoomFriction")]],
+  Documentation = [[Toggles the zoom friction of the camera. If it is disabled, the camera
+    rises up from or closes in towards the focus object indefinitely]],
+  GuiPath = "/Navigation",
+  IsLocal = true
+}
+
+local ToggleRollFriction = {
+  Identifier = "os.ToggleRollFriction",
+  Name = "Toggle roll friction",
+  Command = [[openspace.invertBooleanProperty("NavigationHandler.OrbitalNavigator.Friction.RollFriction")]],
+  Documentation = [[Toggles the roll friction of the camera. If it is disabled, the camera
+    rolls around its own axis indefinitely]],
+  GuiPath = "/Navigation",
+  IsLocal = true
+}
+
+
+-- UI actions
+
+local ToggleMainGui = {
+  Identifier = "os.ToggleMainGui",
+  Name = "Toggle main GUI",
+  Command = [[openspace.invertBooleanProperty("Modules.CefWebGui.Visible")]],
+  Documentation = "Toggles the main GUI",
+  GuiPath = "/System/GUI",
+  IsLocal = true
+}
+
+local ToggleNativeUi = {
+  Identifier = "os.ToggleNativeUi",
+  Name = "Show native GUI",
+  Command = [[openspace.invertBooleanProperty("Modules.ImGUI.Enabled")]],
+  Documentation = "Shows or hides the native UI",
+  GuiPath = "/System/GUI",
+  IsLocal = true
+}
+
+local ReloadGui = {
+  Identifier = "os.ReloadGui",
+  Name = "Reload GUI",
+  Command = [[openspace.setPropertyValueSingle("Modules.CefWebGui.Reload", nil)]],
+  Documentation = "Reloads the GUI",
+  GuiPath = "/System/GUI",
+  IsLocal = true
+}
+
+
+-- Rendering actions
+
+local TakeScreenshot = {
+  Identifier = "os.TakeScreenshot",
+  Name = "Take screenshot",
+  Command = "openspace.takeScreenshot()",
+  Documentation = [[Saves the contents of the screen to a file in the ${SCREENSHOTS}
+    directory]],
+  GuiPath = "/System/Rendering",
+  IsLocal = true
+}
+
+local FadeToBlack = {
+  Identifier = "os.FadeToBlack",
+  Name = "Fade to/from black",
+  Command = [[
+    if openspace.propertyValue("RenderEngine.BlackoutFactor") > 0.5 then
+      openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 0.0, 3)
+    else
+      openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 1.0, 3)
+    end
+  ]],
+  Documentation = [[Toggles the fade to black within 3 seconds or shows the rendering
+    after 3 seconds]],
+  GuiPath = "/Rendering",
+  IsLocal = false
+}
+
+local ToggleOverlays = {
+  Identifier = "os.ToggleOverlays",
+  Name = "Toggle dashboard and overlays",
+  Command = [[
+    local isEnabled = openspace.propertyValue("Dashboard.IsEnabled")
+    openspace.setPropertyValueSingle("Dashboard.IsEnabled", not isEnabled)
+    openspace.setPropertyValueSingle("RenderEngine.ShowLog", not isEnabled)
+    openspace.setPropertyValueSingle("RenderEngine.ShowVersion", not isEnabled)
+    openspace.setPropertyValueSingle("RenderEngine.ShowCamera", not isEnabled)
+  ]],
+  Documentation = "Toggles the dashboard and overlays",
+  GuiPath = "/System/GUI",
+  IsLocal = true
+}
+
+local ToggleMasterRendering = {
+  Identifier = "os.ToggleMasterRendering",
+  Name = "Toggle rendering on master",
+  Command = [[openspace.invertBooleanProperty("RenderEngine.DisableMasterRendering")]],
+  Documentation = "Toggles the rendering on master",
+  GuiPath = "/System/Rendering",
+  IsLocal = true
+}
+
+
+-- Time actions
+
+local TogglePauseInterpolated = {
+  Identifier = "os.TogglePauseInterpolated",
+  Name = "Toggle pause (interpolate)",
+  Command = "openspace.time.pauseToggleViaKeyboard()",
+  Documentation = "Smoothly starts and stops the simulation time",
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = true
+}
+
+local TogglePauseImmediate = {
+  Identifier = "os.TogglePauseImmediate",
+  Name = "Toggle pause (immediate)",
+  Command = "openspace.time.togglePause()",
+  Documentation = "Immediately starts and stops the simulation time",
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = true
+}
+
+local NextDeltaStepInterpolate = {
+  Identifier = "os.NextDeltaStepInterpolate",
+  Name = "Next simulation time step (interpolate)",
+  Command = "openspace.time.interpolateNextDeltaTimeStep()",
+  Documentation = [[Smoothly interpolates the simulation speed to the next simulation time
+    step, if one exists]],
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = true
+}
+
+local NextDeltaStepImmediate = {
+  Identifier = "os.NextDeltaStepImmediate",
+  Name = "Next simulation time step (immediate)",
+  Command = "openspace.time.setNextDeltaTimeStep()",
+  Documentation = [[Immediately set the simulation speed to the next simulation time step,
+    if one exists]],
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = true
+}
+
+local PreviousDeltaStepInterpolate = {
+  Identifier = "os.PreviousDeltaStepInterpolate",
+  Name = "Previous simulation time step (interpolate)",
+  Command = "openspace.time.interpolatePreviousDeltaTimeStep()",
+  Documentation = [[Smoothly interpolates the simulation speed to the previous simulation
+      time step, if one exists]],
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = true
+}
+
+local PreviousDeltaStepImmediate = {
+  Identifier = "os.PreviousDeltaStepImmediate",
+  Name = "Previous simulation time step (immediate)",
+  Command = "openspace.time.setPreviousDeltaTimeStep()",
+  Documentation = [[Immediately set the simulation speed to the previous simulation time
+    step, if one exists]],
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = true
+}
+
+local RealTimeDeltaStepInterpolate = {
+  Identifier = "os.RealTimeDeltaStepInterpolate",
+  Name = "Reset the simulation time to realtime (interpolate)",
+  Command = "openspace.time.interpolateDeltaTime(1)",
+  Documentation = "Smoothly interpolate the simulation speed to match real-time speed",
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = true
+}
+
+local RealTimeDeltaStepImmediate = {
+  Identifier = "os.RealTimeDeltaStepImmediate",
+  Name = "Reset the simulation time to realtime (immediate)",
+  Command = "openspace.time.setDeltaTime(1)",
+  Documentation = "Immediately set the simulation speed to match real-time speed",
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = true
+}
+
+
+asset.onInitialize(function()
+  openspace.action.registerAction(ToggleShutdown)
+
+  -- Friction
+  openspace.action.registerAction(ToggleRotationFriction)
+  openspace.action.registerAction(ToggleZoomFriction)
+  openspace.action.registerAction(ToggleRollFriction)
+
+  -- UI
+  openspace.action.registerAction(ToggleMainGui)
+  openspace.action.registerAction(ToggleNativeUi)
+  openspace.action.registerAction(ReloadGui)
+
+  -- Rendering
+  openspace.action.registerAction(TakeScreenshot)
+  openspace.action.registerAction(FadeToBlack)
+  openspace.action.registerAction(ToggleOverlays)
+  openspace.action.registerAction(ToggleMasterRendering)
+
+  -- Time
+  openspace.action.registerAction(TogglePauseInterpolated)
+  openspace.action.registerAction(TogglePauseImmediate)
+  openspace.action.registerAction(NextDeltaStepInterpolate)
+  openspace.action.registerAction(NextDeltaStepImmediate)
+  openspace.action.registerAction(PreviousDeltaStepInterpolate)
+  openspace.action.registerAction(PreviousDeltaStepImmediate)
+  openspace.action.registerAction(RealTimeDeltaStepInterpolate)
+  openspace.action.registerAction(RealTimeDeltaStepImmediate)
+end)
+
+asset.onDeinitialize(function()
+  -- Time
+  openspace.action.removeAction(RealTimeDeltaStepImmediate)
+  openspace.action.removeAction(RealTimeDeltaStepInterpolate)
+  openspace.action.removeAction(PreviousDeltaStepImmediate)
+  openspace.action.removeAction(PreviousDeltaStepInterpolate)
+  openspace.action.removeAction(NextDeltaStepImmediate)
+  openspace.action.removeAction(NextDeltaStepInterpolate)
+  openspace.action.removeAction(TogglePauseImmediate)
+  openspace.action.removeAction(TogglePauseInterpolated)
+
+  -- Rendering
+  openspace.action.removeAction(ToggleMasterRendering)
+  openspace.action.removeAction(ToggleOverlays)
+  openspace.action.removeAction(FadeToBlack)
+  openspace.action.removeAction(TakeScreenshot)
+
+  -- UI
+  openspace.action.removeAction(ReloadGui)
+  openspace.action.removeAction(ToggleNativeUi)
+  openspace.action.removeAction(ToggleMainGui)
+
+  -- Friction
+  openspace.action.removeAction(ToggleRollFriction)
+  openspace.action.removeAction(ToggleZoomFriction)
+  openspace.action.removeAction(ToggleRotationFriction)
+
+  openspace.action.removeAction(ToggleShutdown)
+end)
+
+
+asset.export("ToggleShutdown", ToggleShutdown.Identifier)
+
+asset.export("ToggleRotationFriction", ToggleRotationFriction.Identifier)
+asset.export("ToggleZoomFriction", ToggleZoomFriction.Identifier)
+asset.export("ToggleRollFriction", ToggleRollFriction.Identifier)
+
+asset.export("ToggleMainGui", ToggleMainGui.Identifier)
+asset.export("ToggleNativeUi", ToggleNativeUi.Identifier)
+asset.export("ReloadGui", ReloadGui.Identifier)
+
+asset.export("TakeScreenshot", TakeScreenshot.Identifier)
+asset.export("FadeToBlack", FadeToBlack.Identifier)
+asset.export("ToggleOverlays", ToggleOverlays.Identifier)
+asset.export("ToggleMasterRendering", ToggleMasterRendering.Identifier)
+
+asset.export("TogglePauseInterpolated", TogglePauseInterpolated.Identifier)
+asset.export("TogglePauseImmediate", TogglePauseImmediate.Identifier)
+asset.export("NextDeltaStepInterpolate", NextDeltaStepInterpolate.Identifier)
+asset.export("NextDeltaStepImmediate", NextDeltaStepImmediate.Identifier)
+asset.export("PreviousDeltaStepInterpolate", PreviousDeltaStepInterpolate.Identifier)
+asset.export("PreviousDeltaStepImmediate", PreviousDeltaStepImmediate.Identifier)
+asset.export("RealTimeDeltaStepInterpolate", RealTimeDeltaStepInterpolate.Identifier)
+asset.export("RealTimeDeltaStepImmediate", RealTimeDeltaStepImmediate.Identifier)
+
+
+
+asset.meta = {
+  Name = "Actions - Default",
+  Description = "Asset providing default actions that are useful in every profile",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

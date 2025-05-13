@@ -125,7 +125,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
                                                       const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _doSimplification(SimplificationInfo, true)
-    , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _requestedUnit(RequestedUnitInfo)
     , _transitionFormat(
         TransitionFormatInfo,
         "Simulation increment: {:.1f} {:s} / second{:s} (current: {:.1f} {:s})"
@@ -224,31 +224,6 @@ void DashboardItemSimulationIncrement::update() {
     catch (const std::format_error&) {
         LERRORC("DashboardItemDate", "Illegal format string");
     }
-}
-
-glm::vec2 DashboardItemSimulationIncrement::size() const {
-    ZoneScoped;
-
-    const double t = global::timeManager->targetDeltaTime();
-    std::pair<double, std::string> deltaTime;
-    if (_doSimplification) {
-        deltaTime = simplifyTime(t);
-    }
-    else {
-        const TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
-        const double convertedT = convertTime(t, TimeUnit::Second, unit);
-        deltaTime = std::pair(
-            convertedT,
-            std::string(nameForTimeUnit(unit, convertedT != 1.0))
-        );
-    }
-
-    return _font->boundingBox(
-        std::format(
-            "Simulation increment: {:.1f} {:s} / second",
-            deltaTime.first, deltaTime.second
-        )
-    );
 }
 
 } // namespace openspace

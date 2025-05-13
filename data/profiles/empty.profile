@@ -22,7 +22,6 @@
   "delta_times": [
     1.0
   ],
-  "mark_nodes": [],
   "meta": {
     "author": "OpenSpace Team",
     "description": "An empty profile, without anything special at all.",
@@ -32,11 +31,12 @@
     "version": "1.0"
   },
   "time": {
+    "is_paused": false,
     "type": "relative",
     "value": "-1d"
   },
   "version": {
     "major": 1,
-    "minor": 0
+    "minor": 4
   }
 }

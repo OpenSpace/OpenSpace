@@ -36,7 +36,6 @@
     315360000.0,
     630720000.0
   ],
-  "keybindings": [],
   "mark_nodes": [
     "Earth",
     "Moon",
@@ -45,7 +44,7 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "OpenSpace profile to highlight solar eclipses on the Earth from 1900 to 2100",
+    "description": "OpenSpace profile to highlight solar eclipses on the Earth from 1900 to 2100.",
     "license": "MIT License",
     "name": "Default",
     "url": "https://www.openspaceproject.com",
@@ -64,11 +63,12 @@
     }
   ],
   "time": {
+    "is_paused": false,
     "type": "relative",
     "value": "-1d"
   },
   "version": {
     "major": 1,
-    "minor": 1
+    "minor": 4
   }
 }

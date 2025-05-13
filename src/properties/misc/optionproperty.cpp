@@ -1,5 +1,4 @@
 /*****************************************************************************************
-
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -32,11 +31,31 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "OptionProperty";
+
+    using Option = openspace::properties::OptionProperty::Option;
+
+    bool addOptionInternal(int value, std::string desc, std::vector<Option>& options) {
+        Option option = { .value = value, .description = std::move(desc) };
+
+        for (const Option& o : options) {
+            if (o.value == option.value) {
+                LWARNING(std::format(
+                    "The value of option {{ {} -> {} }} was already registered when "
+                    "trying to add option {{ {} -> {} }}",
+                    o.value, o.description, option.value, option.description
+
+                ));
+                return false;
+            }
+        }
+        options.push_back(std::move(option));
+        return true;
+    }
 } // namespace
 
 namespace openspace::properties {
 
-const std::string OptionProperty::OptionsKey = "Options";
+const std::string OptionProperty::OptionsKey = "options";
 
 OptionProperty::OptionProperty(PropertyInfo info)
     : NumericalProperty<int>(
@@ -46,18 +65,6 @@ OptionProperty::OptionProperty(PropertyInfo info)
         std::numeric_limits<int>::max(),
         1
     )
-    , _displayType(DisplayType::Radio)
-{}
-
-OptionProperty::OptionProperty(PropertyInfo info, DisplayType displayType)
-    : NumericalProperty<int>(
-        std::move(info),
-        0,
-        std::numeric_limits<int>::lowest(),
-        std::numeric_limits<int>::max(),
-        1
-    )
-    , _displayType(displayType)
 {}
 
 std::string_view OptionProperty::className() const {
@@ -70,48 +77,41 @@ ghoul::lua::LuaTypes OptionProperty::typeLua() const {
     );
 }
 
-OptionProperty::DisplayType OptionProperty::displayType() const {
-    return _displayType;
-}
-
 const std::vector<OptionProperty::Option>& OptionProperty::options() const {
     return _options;
 }
 
-void OptionProperty::addOption(int value, std::string desc) {
-    Option option = { .value = value, .description = std::move(desc) };
-
-    for (const Option& o : _options) {
-        if (o.value == option.value) {
-            LWARNING(std::format(
-                "The value of option {{ {} -> {} }} was already registered when trying "
-                "to add option {{ {} -> {} }}",
-                o.value, o.description, option.value, option.description
-
-            ));
-            return;
-        }
+void OptionProperty::addOption(int value, std::string description) {
+    bool success = addOptionInternal(value, description, _options);
+    if (success) {
+        // Set default value to option added first
+        NumericalProperty::setValue(_options[0].value);
     }
-    _options.push_back(std::move(option));
-    // Set default value to option added first
-    NumericalProperty::setValue(_options[0].value);
+    notifyMetaDataChangeListeners();
 }
 
 void OptionProperty::addOptions(std::vector<std::pair<int, std::string>> options) {
     for (std::pair<int, std::string>& p : options) {
-        addOption(p.first, std::move(p.second));
+        addOptionInternal(p.first, std::move(p.second), _options);
     }
+    // Set default value to option added first
+    NumericalProperty::setValue(_options[0].value);
+    notifyMetaDataChangeListeners();
 }
 
 void OptionProperty::addOptions(std::vector<std::string> options) {
     for (int i = 0; i < static_cast<int>(options.size()); i++) {
-        addOption(i, std::move(options[i]));
+        addOptionInternal(i, std::move(options[i]), _options);
     }
+    // Set default value to option added first
+    NumericalProperty::setValue(_options[0].value);
+    notifyMetaDataChangeListeners();
 }
 
 void OptionProperty::clearOptions() {
+    NumericalProperty::setValue(0);
     _options.clear();
-    _value = 0;
+    notifyMetaDataChangeListeners();
 }
 
 void OptionProperty::setValue(int value) {
@@ -194,7 +194,7 @@ void OptionProperty::setLuaValue(lua_State* state) {
         if (it == _options.cend()) {
             throw ghoul::RuntimeError(
                 std::format("Could not find option '{}'", value),
-                uri()
+                std::string(uri())
             );
         }
         thisValue = it->value;
@@ -210,27 +210,15 @@ std::string OptionProperty::stringValue() const {
     return formatJson(_value);
 }
 
-std::string OptionProperty::generateAdditionalJsonDescription() const {
-    // @REFACTOR from selectionproperty.cpp, possible refactoring? ---abock
-    std::string result = "{ \"" + OptionsKey + "\": [";
-    for (size_t i = 0; i < _options.size(); i++) {
-        const Option& o = _options[i];
-        const std::string v = std::to_string(o.value);
-        const std::string vSan = escapedJson(v);
-        const std::string d = o.description;
-        const std::string dSan = escapedJson(d);
 
-        result += '{';
-        result += std::format(R"("{}": "{}")", vSan, dSan);
-        result += '}';
+nlohmann::json OptionProperty::generateAdditionalJsonDescription() const {
+    nlohmann::json data;
 
-        if (i != _options.size() - 1) {
-            result += ",";
-        }
+    for (const Option& option : _options) {
+        data[std::to_string(option.value)] = option.description;
     }
 
-    result += "] }";
-    return result;
+    return { { OptionsKey, data } };
 }
 
 int OptionProperty::toValue(lua_State* state) const {

@@ -803,13 +803,12 @@ void OpenSpaceEngine::loadAssets() {
     std::unique_ptr<SceneInitializer> sceneInitializer;
     if (global::configuration->useMultithreadedInitialization) {
         const unsigned int nThreads = std::max(
-            std::thread::hardware_concurrency() / 4,
-            4u
+            std::thread::hardware_concurrency() / 2, 2u
         );
-        sceneInitializer = std::make_unique<MultiThreadedSceneInitializer>(nThreads);
+        sceneInitializer = std::make_unique<SceneInitializer>(nThreads);
     }
     else {
-        sceneInitializer = std::make_unique<SingleThreadedSceneInitializer>();
+        sceneInitializer = std::make_unique<SceneInitializer>();
     }
 
     _scene = std::make_unique<Scene>(std::move(sceneInitializer));
@@ -1726,6 +1725,19 @@ LoadingScreen* OpenSpaceEngine::loadingScreen() {
     return _loadingScreen.get();
 }
 
+void OpenSpaceEngine::invalidatePropertyCache() {
+    _isAllPropertiesCacheDirty = true;
+}
+
+const std::vector<properties::Property*>& OpenSpaceEngine::allProperties() const {
+    if (_isAllPropertiesCacheDirty) {
+        _allPropertiesCache = global::rootPropertyOwner->propertiesRecursive();
+        _isAllPropertiesCacheDirty = false;
+    }
+
+    return _allPropertiesCache;
+}
+
 AssetManager& OpenSpaceEngine::assetManager() {
     ghoul_assert(_assetManager, "Asset Manager must not be nullptr");
     return *_assetManager;
@@ -1787,13 +1799,13 @@ void setCameraFromProfile(const Profile& p) {
                 std::string geoScript;
                 if (geo.altitude.has_value()) {
                     geoScript = std::format(
-                        "openspace.globebrowsing.flyToGeo([[{}]], {}, {}, {}, 0)",
+                        "openspace.navigation.flyToGeo([[{}]], {}, {}, {}, 0)",
                         geo.anchor, geo.latitude, geo.longitude, *geo.altitude
                     );
                 }
                 else {
                     geoScript = std::format(
-                        "openspace.globebrowsing.flyToGeo2([[{}]], {}, {}, false, 0)",
+                        "openspace.navigation.flyToGeo2([[{}]], {}, {}, false, 0)",
                         geo.anchor, geo.latitude, geo.longitude
                     );
                 }

@@ -43,11 +43,14 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "Default OpenSpace Profile. Adds Earth satellites not contained in other profiles",
+    "description": "Default OpenSpace Profile. Adds Earth satellites not contained in other profiles.",
     "license": "MIT License",
     "name": "Default",
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
+  },
+  "panel_visibility": {
+    "mission": true
   },
   "properties": [
     {
@@ -178,6 +181,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 3
+    "minor": 4
   }
 }

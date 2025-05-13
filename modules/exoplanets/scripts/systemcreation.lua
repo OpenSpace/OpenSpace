@@ -374,6 +374,7 @@ function addExoplanetSystem(data)
       Type = "RenderableRadialGrid",
       Enabled = showCircle,
       Radii = { 0.0, 1.0 },
+      GridSegments = { 1, 1 }, -- 1 segment in each direction, makes the grid a ring
       Color = circleColor,
       CircleSegments = 64,
       LineWidth = 2.0
@@ -388,7 +389,7 @@ function addExoplanetSystem(data)
         Scale = AstronomicalUnit
       }
     },
-    Tag = { "exoplanet_1au_ring" },
+    Tag = { "exoplanet_1au_ring" }, -- Used in GUI
     GUI = {
       Name = "1 AU Size Comparison Circle",
       Path = guiPath,
@@ -427,7 +428,7 @@ function addExoplanetSystem(data)
           Rotation = data.MeanOrbitRotation
         }
       },
-      Tag = { "exoplanet_habitable_zone" },
+      Tag = { "exoplanet_habitable_zone" }, -- Used in GUI
       GUI = {
         Name = data.StarName .. " Habitable Zone",
         Path = guiPath,
@@ -597,7 +598,7 @@ function addExoplanetSystem(data)
     --------------------------------------------------------------------
     -- Planet Orbit Uncertainty
     --------------------------------------------------------------------
-    local showUncertaintyDisc = openspace.propertyValue("Modules.Exoplanets.ShowHabitableZone")
+    local showUncertaintyDisc = openspace.propertyValue("Modules.Exoplanets.ShowOrbitUncertainty")
     local discTexture = openspace.propertyValue("Modules.Exoplanets.OrbitDiscTexture")
 
     if hasValue(planetData.SemiMajorAxisUncertainty) then
@@ -619,7 +620,7 @@ function addExoplanetSystem(data)
           Offset = planetData.SemiMajorAxisUncertainty,
           Opacity = 0.25
         },
-        Tag = { "exoplanet_uncertainty_disc" },
+        Tag = { "exoplanet_uncertainty_disc" }, -- Used in GUI
         GUI = {
           Name = planetData.Name .. " Disc",
           Path = guiPath,

@@ -40,7 +40,7 @@ local Object = {
     }
   },
   GUI = {
-    Name = "Exoplanetary Candidates",
+    Name = "Exoplanet Candidates",
     Path = "/Milky Way/Exoplanets",
     Description = [[The exoplanet candidate stars are likely hosts for exoplanets. These
       are stars plucked from NASA's Kepler and TESS space telescopes. Further observations

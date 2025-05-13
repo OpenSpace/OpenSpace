@@ -186,7 +186,9 @@ namespace {
             // Orbit Mean-Elements Message in the KVN notation.
             OMM,
             // JPL's Small Bodies Database.
-            SBDB
+            SBDB,
+            // Minor Planet Center.
+            MPC
         };
         // The file format that is contained in the file.
         Format format;
@@ -258,10 +260,7 @@ RenderableOrbitalKepler::Appearance::Appearance()
     , pointSizeExponent(PointSizeExponentInfo, 1.0f, 0.f, 11.f)
     , enableMaxSize(EnableMaxSizeInfo, true)
     , maxSize(MaxSizeInfo, 5.f, 0.f, 45.f)
-    , renderingModes(
-        RenderingModeInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , renderingModes(RenderingModeInfo)
     , trailFade(TrailFadeInfo, 20.f, 0.f, 30.f)
     , enableOutline(EnableOutlineInfo, true)
     , outlineColor(OutlineColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))

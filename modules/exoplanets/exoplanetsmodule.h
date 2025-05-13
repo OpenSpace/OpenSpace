@@ -68,7 +68,6 @@ public:
 protected:
     void internalInitialize(const ghoul::Dictionary& dict) override;
 
-    properties::BoolProperty _enabled;
     properties::StringProperty _exoplanetsDataFolder;
     properties::StringProperty _bvColorMapPath;
     properties::StringProperty _starTexturePath;

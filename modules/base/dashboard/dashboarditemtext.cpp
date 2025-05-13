@@ -68,10 +68,4 @@ void DashboardItemText::update() {
     _buffer = _text.value();
 }
 
-glm::vec2 DashboardItemText::size() const {
-    ZoneScoped;
-
-    return _font->boundingBox(_text.value());
-}
-
 } // namespace openspace

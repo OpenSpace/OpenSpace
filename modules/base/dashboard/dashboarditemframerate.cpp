@@ -197,7 +197,7 @@ documentation::Documentation DashboardItemFramerate::Documentation() {
 
 DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary)
-    , _frametimeType(FrametimeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _frametimeType(FrametimeInfo)
     , _clearCache(ClearCacheInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -261,20 +261,6 @@ void DashboardItemFramerate::update() {
         _maxDeltaTimeCache
     );
     _buffer = std::string(_localBuffer.data(), end - _localBuffer.data());
-}
-
-glm::vec2 DashboardItemFramerate::size() const {
-    ZoneScoped;
-
-    const FrametimeType t = FrametimeType(_frametimeType.value());
-    char* end = format(_localBuffer, t, _minDeltaTimeCache, _maxDeltaTimeCache);
-    const std::string_view res = std::string_view(_buffer.data(), end - _buffer.data());
-
-    if (res.empty()) {
-        return { 0.f, 0.f };
-    }
-
-    return _font->boundingBox(res);
 }
 
 } // namespace openspace

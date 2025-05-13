@@ -23,10 +23,12 @@ local Object = {
     Texture = textures .. "mwHalpha-f.png",
     Orientation = "Inside",
     MirrorTexture = true,
-    FadeOutThreshold = 0.025
+    FadeOutThreshold = 0.025,
+    BlendingOption = "Additive",
+    DisableDepth = true
   },
   GUI = {
-    Name = "Hydrogen Alpha",
+    Name = "Hydrogen-alpha All-sky",
     Path = "/Milky Way/All Sky Images",
     Description = [[Hydrogen-alpha is a term that describes light from the ground state of
       the hydrogen atom. When an electron in an atom moves from one energy level to a

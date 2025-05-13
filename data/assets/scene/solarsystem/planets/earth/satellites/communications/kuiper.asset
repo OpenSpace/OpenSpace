@@ -1,0 +1,56 @@
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+
+
+
+local omm = asset.resource({
+  Name = "Satellite OMM Data (Kuiper)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_kuiper",
+  Url = "https://celestrak.org/NORAD/elements/supplemental/sup-gp.php?FILE=kuiper&FORMAT=kvn",
+  Filename = "kuiper.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+
+local KuiperSatellites = {
+  Identifier = "KuiperSatellites",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "kuiper.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.95, 0.82, 0.25 },
+    TrailFade = 5,
+    PointSizeExponent = 5.0,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Kuiper",
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Description = [[LEO satellite constellation launched by Amazon to provide broadband
+      internet access.]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(KuiperSatellites)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(KuiperSatellites)
+end)
+
+asset.export(KuiperSatellites)
+
+
+
+asset.meta = {
+  Name = "Satellites Communications - Kuiper",
+  Description = "Satellites asset for Communications - Kuipter. Data from Celestrak",
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/NORAD/elements/",
+  License = "Celestrak"
+}

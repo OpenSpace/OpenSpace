@@ -71,6 +71,8 @@ struct CommandlineArguments {
     std::optional<std::string> profile;
     std::optional<std::string> propertyVisibility;
     std::optional<bool> bypassLauncher;
+
+    std::optional<std::string> task;
 };
 
 class OpenSpaceEngine : public properties::PropertyOwner {
@@ -132,6 +134,9 @@ public:
     AssetManager& assetManager();
     LoadingScreen* loadingScreen();
 
+    void invalidatePropertyCache();
+    const std::vector<properties::Property*>& allProperties() const;
+
     void createUserDirectoriesIfNecessary();
 
     uint64_t ramInUse() const;
@@ -174,6 +179,9 @@ private:
 
     int _nextCallbackHandle = 0;
     std::vector<std::pair<CallbackHandle, ModeChangeCallback>> _modeChangeCallbacks;
+
+    mutable bool _isAllPropertiesCacheDirty = true;
+    mutable std::vector<properties::Property*> _allPropertiesCache;
 };
 
 /**

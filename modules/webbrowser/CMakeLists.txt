@@ -29,7 +29,13 @@ set(WEBBROWSER_MODULE_NAME WebBrowser)
 set(WEBBROWSER_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "WEBBROWSER_MODULE_PATH")
 
 # wanted by CEF
-set(PROJECT_ARCH "x86_64")
+if (CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+  set(PROJECT_ARCH "arm64") # For macOS on ARM64
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
+  set(PROJECT_ARCH "armv8-a") # For Ubuntu/Linux on ARM64 - or should it be aarch64? Builds OK on Ubuntu with armv8-a
+else ()
+  set(PROJECT_ARCH "x86_64") # Default to x86_64
+endif ()
 
 ##########################################################################################
 # Download CEF
@@ -38,7 +44,7 @@ set(PROJECT_ARCH "x86_64")
 # reserved. Use of this source code is governed by a BSD-style license that
 # can be found in the LICENSE file.
 
-cmake_minimum_required(VERSION 2.8.12.1)
+cmake_minimum_required(VERSION 3.10)
 
 # Use folders in the resulting project files.
 set_property(GLOBAL PROPERTY OS_FOLDERS ON)
@@ -166,13 +172,14 @@ set(WEBBROWSER_RESOURCES_SRCS
 
 # Place Helper in separate executable
 # The naming style "<ApplicationName> Helper" is required by Chromium.
-if (OS_MACOSX)
-  set(CEF_HELPER_TARGET "OpenSpace Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
-else ()
-  set(CEF_HELPER_TARGET "OpenSpace_Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
-endif ()
-set(CEF_HELPER_TARGET_GPU "OpenSpace Helper (GPU)" CACHE INTERNAL "CEF_HELPER_TARGET_GPU")
-set(CEF_HELPER_TARGET_RENDERER "OpenSpace Helper (Renderer)" CACHE INTERNAL "CEF_HELPER_TARGET_RENDERER")
+set(CEF_HELPER_TARGET "OpenSpace_Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
+set(CEF_HELPER_TARGET_OUTPUT_NAME "OpenSpace Helper" CACHE INTERNAL "")
+
+set(CEF_HELPER_TARGET_GPU "OpenSpace_Helper_GPU" CACHE INTERNAL "CEF_HELPER_TARGET_GPU")
+set(CEF_HELPER_TARGET_GPU_OUTPUT_NAME "OpenSpace Helper (GPU)" CACHE INTERNAL "")
+
+set(CEF_HELPER_TARGET_RENDERER "OpenSpace_Helper_Renderer" CACHE INTERNAL "CEF_HELPER_TARGET_RENDERER")
+set(CEF_HELPER_TARGET_RENDERER_OUTPUT_NAME "OpenSpace Helper (Renderer)" CACHE INTERNAL "")
 
 #
 # CEF platform-specific config
@@ -192,6 +199,7 @@ if (OS_MACOSX)
     target_link_libraries(${target} libcef_dll_wrapper ${CEF_STANDARD_LIBS})
     set_target_properties(${target} PROPERTIES
       MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/mac/helper-Info.plist
+      OUTPUT_NAME "${target}_OUTPUT_NAME"
     )
 
     target_compile_options(${target} PRIVATE -Wno-deprecated-declarations)

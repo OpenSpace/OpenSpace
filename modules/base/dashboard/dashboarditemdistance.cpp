@@ -159,21 +159,15 @@ documentation::Documentation DashboardItemDistance::Documentation() {
 DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _doSimplification(SimplificationInfo, true)
-    , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _requestedUnit(RequestedUnitInfo)
     , _formatString(FormatStringInfo, "Distance from {} to {}: {:f} {}")
     , _source{
-        properties::OptionProperty(
-            SourceTypeInfo,
-            properties::OptionProperty::DisplayType::Dropdown
-        ),
+        properties::OptionProperty(SourceTypeInfo),
         properties::StringProperty(SourceNodeIdentifierInfo),
         nullptr
     }
     , _destination{
-        properties::OptionProperty(
-            DestinationTypeInfo,
-            properties::OptionProperty::DisplayType::Dropdown
-        ),
+        properties::OptionProperty(DestinationTypeInfo),
         properties::StringProperty(DestinationNodeIdentifierInfo),
         nullptr
     }
@@ -361,25 +355,6 @@ void DashboardItemDistance::update() {
     catch (const std::format_error&) {
         LERRORC("DashboardItemDate", "Illegal format string");
     }
-}
-
-glm::vec2 DashboardItemDistance::size() const {
-    ZoneScoped;
-
-    const double d = glm::length(1e20);
-    std::pair<double, std::string_view> dist;
-    if (_doSimplification) {
-        dist = simplifyDistance(d);
-    }
-    else {
-        const DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
-        const double convertedD = convertMeters(d, unit);
-        dist = std::pair(convertedD, nameForDistanceUnit(unit, convertedD != 1.0));
-    }
-
-    return _font->boundingBox(
-        std::format("Distance from focus: {} {}", dist.first, dist.second)
-    );
 }
 
 } // namespace openspace

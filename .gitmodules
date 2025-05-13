@@ -45,3 +45,6 @@
 [submodule "modules/audio/ext/soloud"]
 	path = modules/audio/ext/soloud
 	url = https://github.com/jarikomppa/soloud
+[submodule "ext/json"]
+	path = ext/json
+	url = https://github.com/nlohmann/json
