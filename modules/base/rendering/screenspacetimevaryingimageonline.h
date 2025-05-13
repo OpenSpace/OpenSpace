@@ -22,42 +22,50 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMTIMEVARYINGTEXT___H__
-#define __OPENSPACE_MODULE_BASE___DASHBOARDITEMTIMEVARYINGTEXT___H__
+#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACETIMEVARYINGIMAGEONLINE___H__
+#define __OPENSPACE_MODULE_BASE___SCREENSPACETIMEVARYINGIMAGEONLINE___H__
 
-#include <openspace/rendering/dashboardtextitem.h>
+#include <openspace/rendering/screenspacerenderable.h>
 
+#include <openspace/engine/downloadmanager.h>
 #include <openspace/properties/misc/stringproperty.h>
-#include <openspace/json.h>
+#include <filesystem>
+
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class DashboardItemTimeVaryingText : public DashboardTextItem {
+class ScreenSpaceTimeVaryingImageOnline : public ScreenSpaceRenderable {
 public:
-    explicit DashboardItemTimeVaryingText(const ghoul::Dictionary& dictionary);
-    ~DashboardItemTimeVaryingText() override = default;
+    explicit ScreenSpaceTimeVaryingImageOnline(const ghoul::Dictionary& dictionary);
 
+    bool initialize() override;
+    bool deinitializeGL() override;
     void update() override;
 
     static documentation::Documentation Documentation();
 
 private:
-    void loadDataFromJson(const std::string& filePath);
+    void bindTexture() override;
+    void loadJsonData(const std::filesystem::path& path);
     void computeSequenceEndTime();
-    int updateActiveTriggerTimeIndex(double currentTime) const;
+    void loadImage(const std::string& imageUrl);
+    int activeIndex(double currentTime) const;
 
-    properties::StringProperty _formatString;
-    properties::StringProperty _dataFile;
+    properties::StringProperty _jsonFilePath;
 
-    std::unordered_map<double, nlohmann::json> _data;
-    std::vector<double> _startTimes;
+    std::future<DownloadManager::MemoryFile> _imageFuture;
+    std::map<double, std::string> _urls;
+    std::string _currentUrl;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::vector<double> _timestamps;
 
-    int _activeTriggerTimeIndex = -1;
+    int _activeIndex = -1;
     double _sequenceEndTime = 0.0;
- };
+};
 
 } // namespace openspace
 
- #endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMTIMEVARYINGTEXT___H__
+#endif // __OPENSPACE_MODULE_BASE___SCREENSPACETIMEVARYINGIMAGEONLINE___H__
