@@ -25,13 +25,14 @@ __constant__ unsigned int c_num_steps = 5000;
 __constant__ unsigned int c_layers = 1;
 __constant__ float c_M = 1.0f;     // Mass parameter
 __constant__ float c_epsilon = 1e-3;   // Numerical tolerance
-__constant__ float3 world_up = { 0.0f, 0.0f, 1.0f };
+__constant__ float3 c_world_up = { 0.0f, 0.0f, 1.0f };
 __constant__ float c_env_map = 100.0f;
 __constant__ float c_env_r_values[MAX_LAYERS];
 
-__constant__ float accretion_disk_inner_radius = 6.0f;  // in Schwarzschild radius units
-__constant__ float accretion_disk_outer_radius = 20.0f; // in Schwarzschild radius units
-__constant__ float accretion_disk_tolerance_theta = 0.01f; // small tolerance around theta = pi/2
+__constant__ bool c_accretion_disk_enabled = true;
+__constant__ float c_accretion_disk_inner_radius = 6.0f;  // in Schwarzschild radius units
+__constant__ float c_accretion_disk_outer_radius = 20.0f; // in Schwarzschild radius units
+__constant__ float c_accretion_disk_tolerance_theta = 0.01f; // small tolerance around theta = pi/2
 
 // Additional simulation parameters
 __constant__ float c_h = 0.1f;            // Integration step size
@@ -217,8 +218,8 @@ __device__ float dp_theta(float r, float theta, float E, float L) {
 
 // @TODO: Might need to do a line segment between points
 __device__ bool check_accretion_disk_collision(float r, float theta) {
-    if (r >= accretion_disk_inner_radius && r <= accretion_disk_outer_radius) {
-        if (fabs(theta - M_PI / 2.0f) < accretion_disk_tolerance_theta) {
+    if (c_accretion_disk_enabled && r >= c_accretion_disk_inner_radius && r <= c_accretion_disk_outer_radius) {
+        if (fabs(theta - M_PI / 2.0f) < c_accretion_disk_tolerance_theta) {
             return true;
         }
     }
@@ -283,7 +284,7 @@ __global__ void simulateRayKernel(float3 pos, size_t num_rays_per_dim, float* lo
         camPos.z
     ));
 
-    float3 right = normalizef3(crossf3(forward, world_up));
+    float3 right = normalizef3(crossf3(forward, c_world_up));
     float3 upVec = crossf3(right, forward);
 
     // now build your ray as before:
@@ -356,7 +357,7 @@ __global__ void simulateRayKernel(float3 pos, size_t num_rays_per_dim, float* lo
             else if (check_accretion_disk_collision(y[0], y[1])) {
                 while (idx_entry < (c_layers + 1) * 2) {
                     entry[idx_entry] = DISK;
-                    entry[idx_entry + 1] = 1 - abs((y[0] - accretion_disk_inner_radius) / accretion_disk_outer_radius);
+                    entry[idx_entry + 1] = 1 - abs((y[0] - c_accretion_disk_inner_radius) / c_accretion_disk_outer_radius);
                     idx_entry += 2;
                 }
                 break;
