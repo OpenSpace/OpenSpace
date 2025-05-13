@@ -153,7 +153,7 @@ std::pair<glm::vec2, glm::vec2> calculatePadding(const std::vector<glm::vec2>& v
 }
 
 std::vector<glm::vec2> sampleSpline(const std::vector<glm::vec2>& controlPoints) {
-    const int subdivisions = 250;
+    const int subdivisions = 50;
     std::vector<glm::vec2> splineData;
     const int numberOfSegments = static_cast<int>(controlPoints.size() - 3);
     const float stepSize = 1.f / subdivisions;
