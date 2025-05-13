@@ -408,6 +408,7 @@ void ScreenSpaceInsetBlackout::BlackoutShape::checkAndUpdateGUI() {
     };
 
     // Check which splines that needs to be updated and perform correct actions
+    // Note: Need to remove propertySubOwner and add it again for GUI to work properly
     bool updatePropertyTree = false;
     for (Spline*& spline : refs) {
         if (spline->pointAdded) {
@@ -596,6 +597,7 @@ void ScreenSpaceInsetBlackout::generateVertexArrayData() {
         };
     }
     else {
+        // Create vector with a temporary element as first element
         std::vector<glm::vec2> pointsTop = { glm::vec2(0.f) };
         std::vector<glm::vec2> pointsRight = { glm::vec2(0.f) };
         std::vector<glm::vec2> pointsBottom = { glm::vec2(0.f) };
