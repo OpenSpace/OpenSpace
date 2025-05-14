@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "catch2/catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <openspace/properties/list/doublelistproperty.h>
 #include <openspace/properties/list/intlistproperty.h>
@@ -35,10 +35,10 @@
 #include <vector>
 
 TEST_CASE("StringListProperty: Class Name and Default Value", "[stringlistproperty]") {
-    openspace::properties::StringListProperty p({ "id", "gui", "desc" });
+    const openspace::properties::StringListProperty p({ "id", "gui", "desc" });
 
     CHECK(p.className() == "StringListProperty");
-    CHECK(p.value() == std::vector<std::string>());
+    CHECK(p.value().empty());
 }
 
 TEST_CASE("StringListProperty: Set Value", "[stringlistproperty]") {
@@ -51,7 +51,7 @@ TEST_CASE("StringListProperty: Set Value", "[stringlistproperty]") {
 
     // Empty value
     p.setValue({});
-    CHECK(p.value() == std::vector<std::string>());
+    CHECK(p.value().empty());
 }
 
 TEST_CASE("StringListProperty: Get String Value", "[stringlistproperty]") {
@@ -70,7 +70,7 @@ TEST_CASE("StringListProperty: Set Lua Value", "[stringlistproperty]") {
 
     const std::vector<std::string> list{ "a", "b", "c" };
 
-    ghoul::lua::LuaState L;
+    const ghoul::lua::LuaState L;
     ghoul::lua::push(L, list);
 
     p.setLuaValue(L);
@@ -81,22 +81,20 @@ TEST_CASE("StringListProperty: Set Lua Value", "[stringlistproperty]") {
 TEST_CASE("StringListProperty: Set Lua Value - Empty", "[stringlistproperty]") {
     openspace::properties::StringListProperty p({ "id", "gui", "desc" });
 
-    ghoul::lua::LuaState L;
+    const ghoul::lua::LuaState L;
     ghoul::lua::push(L, std::vector<std::string>{});
     p.setLuaValue(L);
 
-    CHECK(p.value() == std::vector<std::string>{});
+    CHECK(p.value().empty());
 }
 
 TEST_CASE("StringListProperty: Invalid Set Lua Value - Not List", "[stringlistproperty]") {
     openspace::properties::StringListProperty p({ "id", "gui", "desc" });
 
-    ghoul::lua::LuaState L;
+    const ghoul::lua::LuaState L;
     ghoul::lua::push(L, 2); // Not a list
 
-    bool success = p.setLuaValue(L);
-
-    CHECK(!success);
+    CHECK_THROWS(p.setLuaValue(L));
 }
 
 TEST_CASE("StringListProperty: Get Lua Value", "[stringlistproperty]") {
@@ -105,7 +103,7 @@ TEST_CASE("StringListProperty: Get Lua Value", "[stringlistproperty]") {
     const std::vector<std::string> list{ "a", "b", "c" };
     p.setValue(list);
 
-    ghoul::lua::LuaState L;
+    const ghoul::lua::LuaState L;
     p.getLuaValue(L);
 
     CHECK(ghoul::lua::luaValueToString(L, 1) ==
@@ -114,9 +112,9 @@ TEST_CASE("StringListProperty: Get Lua Value", "[stringlistproperty]") {
 }
 
 TEST_CASE("StringListProperty: Get Empty Lua Value", "[stringlistproperty]") {
-    openspace::properties::StringListProperty p({ "id", "gui", "desc" });
+    const openspace::properties::StringListProperty p({ "id", "gui", "desc" });
 
-    ghoul::lua::LuaState L;
+    const ghoul::lua::LuaState L;
     p.getLuaValue(L);
 
     CHECK(ghoul::lua::luaValueToString(L, 1) == "{}");
@@ -134,10 +132,10 @@ TEST_CASE("StringListProperty: Value From Copying Variable", "[stringlistpropert
 // IntListProperty
 
 TEST_CASE("IntListProperty: Class Name and Default Value", "[intlistproperty]") {
-    openspace::properties::IntListProperty p({ "id", "gui", "desc" });
+    const openspace::properties::IntListProperty p({ "id", "gui", "desc" });
 
     CHECK(p.className() == "IntListProperty");
-    CHECK(p.value() == std::vector<int>());
+    CHECK(p.value().empty());
 }
 
 TEST_CASE("IntListProperty: Set Value", "[intlistproperty]") {
@@ -150,7 +148,7 @@ TEST_CASE("IntListProperty: Set Value", "[intlistproperty]") {
 
     // Empty value
     p.setValue({});
-    CHECK(p.value() == std::vector<int>());
+    CHECK(p.value().empty());
 }
 
 TEST_CASE("IntListProperty: Get String Value", "[intlistproperty]") {
@@ -169,7 +167,7 @@ TEST_CASE("IntListProperty: Set Lua Value", "[intlistproperty]") {
 
     const std::vector<int> list{ 1, 2, 3 };
 
-    ghoul::lua::LuaState L;
+    const ghoul::lua::LuaState L;
     ghoul::lua::push(L, list);
 
     p.setLuaValue(L);
@@ -180,33 +178,29 @@ TEST_CASE("IntListProperty: Set Lua Value", "[intlistproperty]") {
 TEST_CASE("IntListProperty: Set Lua Value - Empty", "[intlistproperty]") {
     openspace::properties::IntListProperty p({ "id", "gui", "desc" });
 
-    ghoul::lua::LuaState L;
+    const ghoul::lua::LuaState L;
     ghoul::lua::push(L, std::vector<int>());
     p.setLuaValue(L);
 
-    CHECK(p.value() == std::vector<int>());
+    CHECK(p.value().empty());
 }
 
 TEST_CASE("IntListProperty: Set Lua Value - Non-number", "[intlistproperty]") {
     openspace::properties::IntListProperty p({ "id", "gui", "desc" });
 
-    ghoul::lua::LuaState L;
+    const ghoul::lua::LuaState L;
     ghoul::lua::push(L, std::vector{ "not a number", "oops" });
-    bool success = p.setLuaValue(L);
-
-    CHECK(success == false);
-    CHECK(p.value() == std::vector<int>());
+    CHECK_THROWS(p.setLuaValue(L));
+    CHECK(p.value().empty());
 }
 
 TEST_CASE("IntListProperty: Invalid Set Lua Value - Not List", "[intlistproperty]") {
     openspace::properties::IntListProperty p({ "id", "gui", "desc" });
 
-    ghoul::lua::LuaState L;
+    const ghoul::lua::LuaState L;
     ghoul::lua::push(L, 2); // Not a list
 
-    bool success = p.setLuaValue(L);
-
-    CHECK(!success);
+    CHECK_THROWS(p.setLuaValue(L));
 }
 
 TEST_CASE("IntListProperty: Get Lua Value", "[intlistproperty]") {
@@ -215,7 +209,7 @@ TEST_CASE("IntListProperty: Get Lua Value", "[intlistproperty]") {
     const std::vector<int> list{ 1, 2, 3 };
     p.setValue(list);
 
-    ghoul::lua::LuaState L;
+    const ghoul::lua::LuaState L;
     p.getLuaValue(L);
 
     CHECK(ghoul::lua::luaValueToString(L, 1) ==
@@ -224,9 +218,9 @@ TEST_CASE("IntListProperty: Get Lua Value", "[intlistproperty]") {
 }
 
 TEST_CASE("IntListProperty: Get Empty Lua Value", "[intlistproperty]") {
-    openspace::properties::IntListProperty p({ "id", "gui", "desc" });
+    const openspace::properties::IntListProperty p({ "id", "gui", "desc" });
 
-    ghoul::lua::LuaState L;
+    const ghoul::lua::LuaState L;
     p.getLuaValue(L);
 
     CHECK(ghoul::lua::luaValueToString(L, 1) == "{}");
@@ -244,10 +238,10 @@ TEST_CASE("IntListProperty: Value From Copying Variable", "[intlistproperty]") {
 // DoubleListProperty
 
 TEST_CASE("DoubleListProperty: Class Name and Default Value", "[doublelistproperty]") {
-    openspace::properties::DoubleListProperty p({ "id", "gui", "desc" });
+    const openspace::properties::DoubleListProperty p({ "id", "gui", "desc" });
 
     CHECK(p.className() == "DoubleListProperty");
-    CHECK(p.value() == std::vector<double>());
+    CHECK(p.value().empty());
 }
 
 TEST_CASE("DoubleListProperty: Set Value", "[doublelistproperty]") {
@@ -260,7 +254,7 @@ TEST_CASE("DoubleListProperty: Set Value", "[doublelistproperty]") {
 
     // Empty value
     p.setValue({});
-    CHECK(p.value() == std::vector<double>());
+    CHECK(p.value().empty());
 }
 
 TEST_CASE("DoubleListProperty: Get String Value", "[doublelistproperty]") {
@@ -279,7 +273,7 @@ TEST_CASE("DoubleListProperty: Set Lua Value", "[doublelistproperty]") {
 
     const std::vector<double> list{ 1.0, 2.0, 3.0 };
 
-    ghoul::lua::LuaState L;
+    const ghoul::lua::LuaState L;
     ghoul::lua::push(L, list);
 
     p.setLuaValue(L);
@@ -290,32 +284,29 @@ TEST_CASE("DoubleListProperty: Set Lua Value", "[doublelistproperty]") {
 TEST_CASE("DoubleListProperty: Set Lua Value - Empty", "[doublelistproperty]") {
     openspace::properties::DoubleListProperty p({ "id", "gui", "desc" });
 
-    ghoul::lua::LuaState L;
+    const ghoul::lua::LuaState L;
     ghoul::lua::push(L, std::vector<double>());
     p.setLuaValue(L);
 
-    CHECK(p.value() == std::vector<double>());
+    CHECK(p.value().empty());
 }
 
 TEST_CASE("DoubleListProperty: Set Lua Value - Non-number", "[doublelistproperty]") {
     openspace::properties::DoubleListProperty p({ "id", "gui", "desc" });
 
-    ghoul::lua::LuaState L;
+    const ghoul::lua::LuaState L;
     ghoul::lua::push(L, std::vector{"not a number", "oops"});
-    bool success = p.setLuaValue(L);
-
-    CHECK(success == false);
-    CHECK(p.value() == std::vector<double>());
+    CHECK_THROWS(p.setLuaValue(L));
+    CHECK(p.value().empty());
 }
 
 TEST_CASE("DoubleListProperty: Invalid Set Lua Value - Not List", "[doublelistproperty]") {
     openspace::properties::DoubleListProperty p({ "id", "gui", "desc" });
 
-    ghoul::lua::LuaState L;
+    const ghoul::lua::LuaState L;
     ghoul::lua::push(L, 2); // Not a list
 
-    bool success = p.setLuaValue(L);
-    CHECK(!success);
+    CHECK_THROWS(p.setLuaValue(L));
 }
 
 TEST_CASE("DoubleListProperty: Get Lua Value", "[doublelistproperty]") {
@@ -324,7 +315,7 @@ TEST_CASE("DoubleListProperty: Get Lua Value", "[doublelistproperty]") {
     const std::vector<double> list{ 1.0, 2.1, 3.2 };
     p.setValue(list);
 
-    ghoul::lua::LuaState L;
+    const ghoul::lua::LuaState L;
     p.getLuaValue(L);
 
     CHECK(ghoul::lua::luaValueToString(L, 1) ==
@@ -333,9 +324,9 @@ TEST_CASE("DoubleListProperty: Get Lua Value", "[doublelistproperty]") {
 }
 
 TEST_CASE("DoubleListProperty: Get Empty Lua Value", "[doublelistproperty]") {
-    openspace::properties::DoubleListProperty p({ "id", "gui", "desc" });
+    const openspace::properties::DoubleListProperty p({ "id", "gui", "desc" });
 
-    ghoul::lua::LuaState L;
+    const ghoul::lua::LuaState L;
     p.getLuaValue(L);
 
     CHECK(ghoul::lua::luaValueToString(L, 1) == "{}");

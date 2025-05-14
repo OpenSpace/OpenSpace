@@ -1,10 +1,13 @@
-local globeIdentifier = asset.require("../../mars").Mars.Identifier
+local globe = asset.require("../../mars")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "Viking_MDIM_Utah",
   Name = "Viking MDIM [Utah]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("viking_mdim_utah.wms"),
+  ZIndex = 10,
+  FilePath = asset.resource("viking_mdim_utah.wms"),
   Description = [[This global image map of Mars has a resolution of 256 pixels/degree
     (scale approximately 232 meters per pixel (m) at the equator). The colorized
     mosaic was completed by NASA AMES which warped the original Viking colorized
@@ -23,24 +26,24 @@ local layer = {
     as an accurate basemap on which data from future missions can be plotted.
     (Description from URL). <br><br> References: Williams, D. R. (2018). Viking
     Mission to Mars. https://nssdc.gsfc.nasa.gov/planetary/viking.html Additional
-    references available here: http://astrogeology.usgs.gov/maps/mdim-2-1]],
+    references available here: http://astrogeology.usgs.gov/maps/mdim-2-1]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Mars.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Mars.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 
 asset.meta = {
   Name = "Viking MDIM [Utah]",
-  Version = "1.1",
   Description = [[Alternate image layer for Mars. This map is hosted on the OpenSpace
     server in Utah]],
   Author = "USGS",

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GEODETICPATCH___H__
 
 #include <modules/globebrowsing/src/basictypes.h>
+#include <openspace/util/geodetic.h>
 
 namespace openspace::globebrowsing {
 
@@ -40,20 +41,20 @@ public:
 
     GeodeticPatch(const GeodeticPatch& patch) = default;
 
-    GeodeticPatch(const TileIndex& tileIndex);
+    explicit GeodeticPatch(const TileIndex& tileIndex);
 
     void setCenter(Geodetic2 center);
     void setHalfSize(Geodetic2 halfSize);
 
     /**
-     * Returns the latitude boundary which is closest to the equator
+     * Returns the latitude boundary which is closest to the equator.
      */
     double edgeLatitudeNearestEquator() const;
 
     /**
-     * Returns \c true if the center above the equator
+     * Returns `true` if the center above the equator.
      */
-    double isNorthern() const;
+    bool isNorthern() const;
 
     Geodetic2 corner(Quad q) const;
 
@@ -63,34 +64,34 @@ public:
     double maxLon() const;
 
     /**
-     * Returns \c true if the specified coordinate is contained within the patch
+     * Returns `true` if the specified coordinate is contained within the patch.
      */
     bool contains(const Geodetic2& p) const;
 
 
     /**
-     * Clamps a point to the patch region
+     * Clamps a point to the patch region.
      */
     Geodetic2 clamp(const Geodetic2& p) const;
 
     /**
-     * Returns the corner of the patch that is closest to the given point p
+     * Returns the corner of the patch that is closest to the given point p.
      */
     Geodetic2 closestCorner(const Geodetic2& p) const;
 
     /**
-     * Returns a point on the patch that minimizes the great-circle distance to
-     * the given point p.
+     * Returns a point on the patch that minimizes the great-circle distance to the given
+     * point p.
      */
     Geodetic2 closestPoint(const Geodetic2& p) const;
 
     /**
-     * Returns the minimum tile level of the patch (based on largest side)
+     * Returns the minimum tile level of the patch (based on largest side).
      */
     double minimumTileLevel() const;
 
     /**
-     * Returns the maximum level of the patch (based on smallest side)
+     * Returns the maximum level of the patch (based on smallest side).
      */
     double maximumTileLevel() const;
 

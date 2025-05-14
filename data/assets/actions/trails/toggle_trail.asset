@@ -1,6 +1,6 @@
-local toggle_trail = {
-  Identifier = "os.toggle_trail",
-  Name = "Toggle Trail",
+local ToggleTrail = {
+  Identifier = "os.ToggleTrail",
+  Name = "Toggle trail",
   Command = [[
     local node
     if is_declared("args") then
@@ -29,7 +29,7 @@ local toggle_trail = {
         return
       end
     else
-      visibility = not openspace.getPropertyValue("Scene." .. trail .. ".Renderable.Enabled")
+      visibility = not openspace.propertyValue("Scene." .. trail .. ".Renderable.Enabled")
     end
 
     if visibility then
@@ -42,13 +42,12 @@ local toggle_trail = {
     This action takes optional arguments to 1) determine which trail to hide (as the
     'Node') and 2) the transition direction (as 'After' and 'Before')]],
   GuiPath = "/Trails",
-  IsLocal = true
+  IsLocal = false
 }
-asset.export("toggle_trail", toggle_trail.Identifier)
 
-local hide_trail = {
-  Identifier = "os.hide_trail",
-  Name = "Hide Trail",
+local HideTrail = {
+  Identifier = "os.HideTrail",
+  Name = "Hide trail",
   Command = [[
     local node
     if is_declared("args") then
@@ -56,7 +55,7 @@ local hide_trail = {
     else
       node = openspace.navigation.getNavigationState().Anchor
     end
-    
+
     if openspace.hasSceneGraphNode(node .. "Trail") then
       openspace.setPropertyValueSingle("Scene." .. node .. "Trail.Renderable.Fade", 0.0, 1.0)
     elseif openspace.hasSceneGraphNode(node .. "_trail") then
@@ -67,13 +66,12 @@ local hide_trail = {
     optional argument to determine whose trail to hide. If no argument is provided, the
     current focus node is used instead]],
   GuiPath = "/Trails",
-  IsLocal = true
+  IsLocal = false
 }
-asset.export("hide_trail", hide_trail.Identifier)
 
-local show_trail = {
-  Identifier = "os.show_trail",
-  Name = "Show Trail",
+local ShowTrail = {
+  Identifier = "os.ShowTrail",
+  Name = "Show trail",
   Command = [[
     local node
     if is_declared("args") then
@@ -81,7 +79,7 @@ local show_trail = {
     else
       node = openspace.navigation.getNavigationState().Anchor
     end
-    
+
     if openspace.hasSceneGraphNode(node .. "Trail") then
       openspace.setPropertyValueSingle("Scene." .. node .. "Trail.Renderable.Fade", 1.0, 1.0)
     elseif openspace.hasSceneGraphNode(node .. "_trail") then
@@ -92,26 +90,30 @@ local show_trail = {
     optional argument to determine whose trail to hide. If no argument is provided, the
     current focus node is used instead]],
   GuiPath = "/Trails",
-  IsLocal = true
+  IsLocal = false
 }
-asset.export("show_trail", show_trail.Identifier)
+
 
 asset.onInitialize(function()
-  openspace.action.registerAction(toggle_trail)
-  openspace.action.registerAction(show_trail)
-  openspace.action.registerAction(hide_trail)
+  openspace.action.registerAction(ToggleTrail)
+  openspace.action.registerAction(HideTrail)
+  openspace.action.registerAction(ShowTrail)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(toggle_trail)
-  openspace.action.removeAction(show_trail)
-  openspace.action.removeAction(hide_trail)
+  openspace.action.removeAction(ShowTrail)
+  openspace.action.removeAction(HideTrail)
+  openspace.action.removeAction(ToggleTrail)
 end)
+
+asset.export("ToggleTrail", ToggleTrail.Identifier)
+asset.export("HideTrail", HideTrail.Identifier)
+asset.export("ShowTrail", ShowTrail.Identifier)
+
 
 
 asset.meta = {
   Name = "Actions - Toggle current Trails",
-  Version = "1.0",
   Description = "Asset providing actions to toggle trails",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

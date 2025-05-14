@@ -1,6 +1,8 @@
-local transforms = asset.require("./transforms")
-asset.require("spice/base")
 asset.require("./trail")
+local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
+
+
 
 local Neptune = {
   Identifier = "Neptune",
@@ -8,20 +10,18 @@ local Neptune = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "NEPTUNE",
-      Observer = "NEPTUNE BARYCENTER"
+      Target = coreKernels.ID.Neptune,
+      Observer = coreKernels.ID.NeptuneBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_NEPTUNE",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.Neptune,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 24764000.0, 24764000.0, 24314000.0 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 24764000.0, 24764000.0, 24314000.0 }
   },
   Tag = { "planet_solarSystem", "planet_giants" },
   GUI = {
@@ -35,33 +35,38 @@ local NeptuneLabel = {
   Identifier = "NeptuneLabel",
   Parent = Neptune.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Neptune",
     FontSize = 70.0,
-    Size = 8.96,
-    MinMaxSize = { 1, 100 },
+    Size = 9.0,
+    MinMaxSize = { 1, 80 },
     OrientationOption = "Camera View Direction",
-    BlendMode = "Additive"
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 6.0, 120.0 },
+    FadeWidths = { 2.0, 150.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {
     Name = "Neptune Label",
     Path = "/Solar System/Planets/Neptune",
-    Description = "Main planet label for Neptune",
+    Description = "Main planet label for Neptune"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Neptune)
   openspace.addSceneGraphNode(NeptuneLabel)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NeptuneLabel)
   openspace.removeSceneGraphNode(Neptune)
 end)
-    
+
 asset.export(Neptune)
 asset.export(NeptuneLabel)
 
@@ -69,7 +74,6 @@ asset.export(NeptuneLabel)
 
 asset.meta = {
   Name = "Neptune",
-  Version = "1.1",
   Description = "Neptune globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

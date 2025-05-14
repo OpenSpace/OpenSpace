@@ -1,30 +1,33 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Light Pollution - Artificial Sky Brightness"
 local Identifier = "noaa-sos-land-nightsky"
-local Description = [[Light pollution in urban centers creates a sky glow that can blot 
-out the stars. The brighter the area in this map the harder it is to see stars and 
+local Description = [[Light pollution in urban centers creates a sky glow that can blot
+out the stars. The brighter the area in this map the harder it is to see stars and
 constellations in the night sky]]
 local URL = "https://sos.noaa.gov/catalog/datasets/light-pollution-artificial-sky-brightness/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
   Version = 1
 })
 
-local layer = {
+
+local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "4096.jpg",
   Description = Description
 }
 
-local legend = {
+local Legend = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -34,23 +37,24 @@ local legend = {
   CartesianPosition = { 0.75, 0.0, -2.0 }
 }
 
-asset.onInitialize(function() 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(legend);  
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Legend)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.removeScreenSpaceRenderable(legend)
+  openspace.removeScreenSpaceRenderable(Legend)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export(layer)
-asset.export(legend)
+asset.export(Layer)
+asset.export(Legend)
+
 
 
 asset.meta = {
   Name = Name,
-  Version = "1.0",
   Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,

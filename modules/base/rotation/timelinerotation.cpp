@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/time.h>
 #include <optional>
@@ -35,9 +36,14 @@ namespace {
         "ShouldInterpolate",
         "Should Interpolate",
         "If this value is set to 'true', an interpolation is applied between the given "
-        "keyframes. If this value is set to 'false', the interpolation is not applied"
+        "keyframes. If this value is set to 'false', the interpolation is not applied.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This `Rotation` uses a timeline of other `Rotation` classes to calculate the
+    // final rotation for the attached scene graph node. The current in-game time is
+    // used to determine which specific keyframe to currently use. It is also possible to
+    // interpolate between two adjacent keyframes.
     struct [[codegen::Dictionary(TimelineRotation)]] Parameters {
         // A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS and values
         // that are valid Rotation objects
@@ -57,7 +63,8 @@ documentation::Documentation TimelineRotation::Documentation() {
 }
 
 TimelineRotation::TimelineRotation(const ghoul::Dictionary& dictionary)
-    : _shouldInterpolate(ShouldInterpolateInfo, true)
+    : Rotation(dictionary)
+    , _shouldInterpolate(ShouldInterpolateInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -67,13 +74,25 @@ TimelineRotation::TimelineRotation(const ghoul::Dictionary& dictionary)
         ghoul::mm_unique_ptr<Rotation> rotation = Rotation::createFromDictionary(
             kf.second
         );
-        if (rotation) {
-            _timeline.addKeyframe(t, std::move(rotation));
-        }
+        rotation->setIdentifier(makeIdentifier(kf.first));
+        addPropertySubOwner(rotation.get());
+        _timeline.addKeyframe(t, std::move(rotation));
     }
 
     _shouldInterpolate = p.shouldInterpolate.value_or(_shouldInterpolate);
     addProperty(_shouldInterpolate);
+}
+
+void TimelineRotation::update(const UpdateData& data) {
+    const double now = data.time.j2000Seconds();
+    using KeyframePointer = const Keyframe<ghoul::mm_unique_ptr<Rotation>>*;
+
+    if (KeyframePointer prev = _timeline.lastKeyframeBefore(now, true);  prev) {
+        prev->data->update(data);
+    }
+    if (KeyframePointer next = _timeline.firstKeyframeAfter(now, true);  next) {
+        next->data->update(data);
+    }
 }
 
 glm::dmat3 TimelineRotation::matrix(const UpdateData& data) const {
@@ -106,14 +125,8 @@ glm::dmat3 TimelineRotation::matrix(const UpdateData& data) const {
         return glm::dmat3(glm::slerp(prevRot, nextRot, t));
     }
     else {
-        if (prevTime <= now && now < nextTime) {
-            return prev->data->matrix(data);
-        }
-        else if (nextTime <= now) {
-            return next->data->matrix(data);
-        }
+        return now < nextTime ? prev->data->matrix(data) : next->data->matrix(data);
     }
-    return glm::dmat3(0.0);
 }
 
 } // namespace openspace

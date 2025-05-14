@@ -1,0 +1,53 @@
+<VRTDataset rasterXSize="131072" rasterYSize="65536">
+  <SRS>GEOGCS["GCS_Moon_2000",DATUM["D_Moon_2000",SPHEROID["Moon_2000_IAU_IAG",1737400,0]],PRIMEM["Reference_Meridian",0],UNIT["degree",0.0174532925199433]]</SRS>
+  <GeoTransform> -1.8000000000000000e+02,  2.7465820312500000e-03,  0.0000000000000000e+00,  9.0000000000000000e+01,  0.0000000000000000e+00, -2.7465820312500000e-03</GeoTransform>
+  <VRTRasterBand dataType="Byte" band="1">
+    <NoDataValue>0</NoDataValue>
+    <ColorInterp>Red</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">Balmer_Basin.wms</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="131072" RasterYSize="65536" DataType="Byte" BlockXSize="256" BlockYSize="256" />
+      <SrcRect xOff="0" yOff="0" xSize="131072" ySize="65536" />
+      <DstRect xOff="0" yOff="0" xSize="131072" ySize="65536" />
+      <NODATA>0</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+  <VRTRasterBand dataType="Byte" band="2">
+    <NoDataValue>0</NoDataValue>
+    <ColorInterp>Green</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">Balmer_Basin.wms</SourceFilename>
+      <SourceBand>2</SourceBand>
+      <SourceProperties RasterXSize="131072" RasterYSize="65536" DataType="Byte" BlockXSize="256" BlockYSize="256" />
+      <SrcRect xOff="0" yOff="0" xSize="131072" ySize="65536" />
+      <DstRect xOff="0" yOff="0" xSize="131072" ySize="65536" />
+      <NODATA>0</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+  <VRTRasterBand dataType="Byte" band="3">
+    <NoDataValue>0</NoDataValue>
+    <ColorInterp>Blue</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">Balmer_Basin.wms</SourceFilename>
+      <SourceBand>3</SourceBand>
+      <SourceProperties RasterXSize="131072" RasterYSize="65536" DataType="Byte" BlockXSize="256" BlockYSize="256" />
+      <SrcRect xOff="0" yOff="0" xSize="131072" ySize="65536" />
+      <DstRect xOff="0" yOff="0" xSize="131072" ySize="65536" />
+      <NODATA>0</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+  <VRTRasterBand dataType="Byte" band="4">
+    <ColorInterp>Alpha</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">Balmer_Basin.wms</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="131072" RasterYSize="65536" DataType="Byte" BlockXSize="256" BlockYSize="256" />
+      <SrcRect xOff="0" yOff="0" xSize="131072" ySize="65536" />
+      <DstRect xOff="0" yOff="0" xSize="131072" ySize="65536" />
+      <ScaleOffset>255</ScaleOffset>
+      <ScaleRatio>0</ScaleRatio>
+      <NODATA>0</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+</VRTDataset>

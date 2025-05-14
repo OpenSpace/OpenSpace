@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,10 +24,7 @@
 
 #include <modules/digitaluniverse/digitaluniversemodule.h>
 
-#include <modules/digitaluniverse/rendering/renderablebillboardscloud.h>
 #include <modules/digitaluniverse/rendering/renderabledumeshes.h>
-#include <modules/digitaluniverse/rendering/renderableplanescloud.h>
-#include <modules/digitaluniverse/rendering/renderablepoints.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
@@ -37,7 +34,6 @@
 namespace openspace {
 
 ghoul::opengl::ProgramObjectManager DigitalUniverseModule::ProgramObjectManager;
-ghoul::opengl::TextureManager DigitalUniverseModule::TextureManager;
 
 DigitalUniverseModule::DigitalUniverseModule()
     : OpenSpaceModule(DigitalUniverseModule::Name)
@@ -48,22 +44,15 @@ void DigitalUniverseModule::internalInitialize(const ghoul::Dictionary&) {
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
 
-    fRenderable->registerClass<RenderablePoints>("RenderablePoints");
-    fRenderable->registerClass<RenderableBillboardsCloud>("RenderableBillboardsCloud");
-    fRenderable->registerClass<RenderablePlanesCloud>("RenderablePlanesCloud");
     fRenderable->registerClass<RenderableDUMeshes>("RenderableDUMeshes");
 }
 
 void DigitalUniverseModule::internalDeinitializeGL() {
     ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
-    TextureManager.releaseAll(ghoul::opengl::TextureManager::Warnings::Yes);
 }
 
 std::vector<documentation::Documentation> DigitalUniverseModule::documentations() const {
     return {
-        RenderablePoints::Documentation(),
-        RenderableBillboardsCloud::Documentation(),
-        RenderablePlanesCloud::Documentation(),
         RenderableDUMeshes::Documentation()
     };
 }

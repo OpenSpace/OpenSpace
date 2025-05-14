@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,9 +29,9 @@
 
 #include <modules/skybrowser/include/utility.h>
 #include <modules/skybrowser/include/wwtdatahandler.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <filesystem>
 
 namespace openspace {
@@ -60,7 +60,9 @@ public:
 
     // Rotation, animation, placement
     void lookAtTarget(const std::string& id);
-    void startRotatingCamera(glm::dvec3 endAnimation); // Pass in galactic coordinate
+
+    // Pass in galactic coordinate
+    void startRotatingCamera(const glm::dvec3& endAnimation);
     double targetAnimationSpeed() const;
     double browserAnimationSpeed() const;
     double spaceCraftAnimationTime() const;
@@ -72,11 +74,11 @@ public:
     bool isSelectedPairUsingRae() const;
 
     // Managing the target browser pairs
-    void removeTargetBrowserPair(const std::string& browserId);
+    void removeTargetBrowserPair(const std::string& id);
     void addTargetBrowserPair(const std::string& targetId, const std::string& browserId);
 
     // Hover circle
-    void moveHoverCircle(int i, bool useScript = true);
+    void moveHoverCircle(const std::string& imageUrl, bool useScript = true);
     void disableHoverCircle(bool useScript = true);
 
     // Image collection handling
@@ -85,6 +87,7 @@ public:
 
     scripting::LuaLibrary luaLibrary() const override;
     std::vector<documentation::Documentation> documentations() const override;
+    static documentation::Documentation Documentation();
 
 protected:
     void internalInitialize(const ghoul::Dictionary& dict) override;
@@ -93,8 +96,6 @@ private:
     void incrementallyRotateCamera();
     void incrementallyAnimateTargets();
 
-    properties::BoolProperty _enabled;
-    properties::BoolProperty _showTitleInGuiBrowser;
     properties::BoolProperty _allowCameraRotation;
     properties::DoubleProperty _cameraRotationSpeed;
     properties::DoubleProperty _targetAnimationSpeed;

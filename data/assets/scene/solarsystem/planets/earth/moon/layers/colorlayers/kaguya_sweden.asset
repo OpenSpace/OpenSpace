@@ -1,35 +1,38 @@
-local globeIdentifier = asset.require("../../moon").Moon.Identifier
+local globe = asset.require("../../moon")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "Kaguya_Sweden",
   Name = "Kaguya [Sweden]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("kaguya_sweden.vrt"),
+  ZIndex = 20,
+  FilePath = asset.resource("kaguya_sweden.vrt"),
   Settings = {
     Gamma = 1.0,
     Multiplier = 1.23
   },
-  Description = [[This near-global mosaic was generated using data from the SELenological 
-    and Engineering Explorer (SELENE) "Kaguya" Terrain Camera (TC) instrument. TC source 
+  Description = [[This near-global mosaic was generated using data from the SELenological
+    and Engineering Explorer (SELENE) "Kaguya" Terrain Camera (TC) instrument. TC source
     data originated as map-projected tiles at ~10 meters per pixel (m) spatial
     resolution]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Moon.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Moon.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 
 asset.meta = {
   Name = "Kaguya [Sweden]",
-  Version = "1.1",
   Description = [[Moon SELENE Kaguya TC Global Orthomosaic 474m v2 layer for Moon globe.
     This map is hosted on the OpenSpace server in Sweden]],
   Author = "USGS",

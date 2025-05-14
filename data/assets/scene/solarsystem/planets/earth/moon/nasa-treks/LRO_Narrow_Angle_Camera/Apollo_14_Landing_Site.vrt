@@ -1,0 +1,29 @@
+<VRTDataset rasterXSize="33554432" rasterYSize="16777216">
+  <SRS>GEOGCS["Moon2000",DATUM["D_Moon_2000",SPHEROID["Moon_2000_IAU_IAG",1737400,0]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]</SRS>
+  <GeoTransform> -1.8000000000000000e+02,  1.0728836059570313e-05,  0.0000000000000000e+00,  9.0000000000000000e+01,  0.0000000000000000e+00, -1.0728836059570313e-05</GeoTransform>
+  <VRTRasterBand dataType="Byte" band="1">
+    <NoDataValue>0</NoDataValue>
+    <ColorInterp>Gray</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">Apollo_14_Landing_Site.wms</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="33554432" RasterYSize="16777216" DataType="Byte" BlockXSize="256" BlockYSize="256" />
+      <SrcRect xOff="0" yOff="0" xSize="33554432" ySize="16777216" />
+      <DstRect xOff="0" yOff="0" xSize="33554432" ySize="16777216" />
+      <NODATA>0</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+  <VRTRasterBand dataType="Byte" band="2">
+    <ColorInterp>Alpha</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">Apollo_14_Landing_Site.wms</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="33554432" RasterYSize="16777216" DataType="Byte" BlockXSize="256" BlockYSize="256" />
+      <SrcRect xOff="0" yOff="0" xSize="33554432" ySize="16777216" />
+      <DstRect xOff="0" yOff="0" xSize="33554432" ySize="16777216" />
+      <ScaleOffset>255</ScaleOffset>
+      <ScaleRatio>0</ScaleRatio>
+      <NODATA>0</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+</VRTDataset>

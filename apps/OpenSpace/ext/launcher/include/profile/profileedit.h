@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,27 +40,26 @@ class ProfileEdit final : public QDialog {
 Q_OBJECT
 public:
     /**
-     * Constructor for ProfileEdit class
+     * Constructor for ProfileEdit class.
      *
-     * \param profile The #openspace::Profile object containing all data of the
-     *                new or imported profile.
+     * \param profile The #openspace::Profile object containing all data of the new or
+     *        imported profile
      * \param profileName The name of the profile to create
      * \param assetBasePath The path to the folder where the assets live
      * \param userAssetBasePath The path to the folder where the user assets live
-     * \param profileName The path to the folder in which all profiles live
-     * \param profilesReadOnly vector list of profile names that are read-only and must
-     *                         not be overwritten
+     * \param builtInProfileBasePath The path to the folder in which the built-in profiles
+     *        live
+     * \param profileBasePath The path to the folder in which all profiles live
      * \param parent Pointer to parent Qt widget
      */
-    ProfileEdit(openspace::Profile& profile, const std::string& profileName,
-        std::string assetBasePath, std::string userAssetBasePath,
-        std::string profileBasePath,
-        const std::vector<std::string>& profilesReadOnly, QWidget* parent);
+    ProfileEdit(openspace::Profile& profile, std::string profileName,
+        std::filesystem::path assetBasePath, std::filesystem::path userAssetBasePath,
+        std::filesystem::path profileBasePath, QWidget* parent);
 
     /**
      * Gets the status of the save when the window is closed; was the file saved?
      *
-     * \return true if the file was saved (false if cancel)
+     * \return `true` if the file was saved (false if cancel)
      */
     bool wasSaved() const;
 
@@ -68,59 +67,66 @@ public:
      * Gets the profile name from the top save/edit window. This can be changed by user in
      * order to save to a different file.
      *
-     * \return the profile name
+     * \return The profile name
      */
     std::string specifiedFilename() const;
 
     /**
-     * Handles keypress while the Qt dialog window is open
+     * Handles keypress while the Qt dialog window is open.
      *
-     * \param evt #QKeyEvent object for the key press event
+     * \param evt The QKeyEvent object for the key press event
      */
     virtual void keyPressEvent(QKeyEvent* evt) override;
 
+    void reject() override;
+    void closeWithoutSaving();
+    void promptUserOfUnsavedChanges();
+
+signals:
+    void raiseExitWindow();
+
 private slots:
-    void duplicateProfile();
-    void openMeta();
     void openProperties();
-    void openModules();
-    void openKeybindings();
     void openAssets();
-    void openTime();
-    void openAddedScripts();
+    void openKeybindings();
+    void openMeta();
+    void openMarkNodes();
     void openDeltaTimes();
     void openCamera();
-    void openMarkNodes();
-    void cancel();
+    void openTime();
+    void openModules();
+    void openUiPanels();
+    void openAddedScripts();
     void approved();
 
 private:
-    void createWidgets(const std::string& profileName);
+    void createWidgets();
     void initSummaryTextForEachCategory();
 
     openspace::Profile& _profile;
-    const std::string _assetBasePath;
-    const std::string _userAssetBasePath;
-    const std::string _profileBasePath;
+    const std::filesystem::path _assetBasePath;
+    const std::filesystem::path _userAssetBasePath;
+    const std::filesystem::path _profileBasePath;
+    const std::filesystem::path _builtInProfilesPath;
     bool _saveSelected = false;
-    const std::vector<std::string>& _readOnlyProfiles;
+
+    std::string _profileFilename;
 
     QLineEdit* _profileEdit = nullptr;
-    QLabel* _modulesLabel = nullptr;
-    QLabel* _assetsLabel = nullptr;
-    QTextEdit* _assetsEdit = nullptr;
     QLabel* _propertiesLabel = nullptr;
     QTextEdit* _propertiesEdit = nullptr;
+    QLabel* _assetsLabel = nullptr;
+    QTextEdit* _assetsEdit = nullptr;
     QLabel* _keybindingsLabel = nullptr;
     QTextEdit* _keybindingsEdit = nullptr;
-    QLabel* _deltaTimesLabel = nullptr;
+    QLabel* _metaLabel = nullptr;
     QLabel* _interestingNodesLabel = nullptr;
+    QLabel* _deltaTimesLabel = nullptr;
     QLabel* _cameraLabel = nullptr;
     QLabel* _timeLabel = nullptr;
-    QLabel* _metaLabel = nullptr;
+    QLabel* _modulesLabel = nullptr;
+    QLabel* _uiPanelVisibilityLabel = nullptr;
     QLabel* _additionalScriptsLabel = nullptr;
-
-    QLabel* _errorMsg = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___PROFILEEDIT___H__

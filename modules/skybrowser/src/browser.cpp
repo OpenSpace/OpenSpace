@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,22 +39,28 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DimensionsInfo = {
         "Dimensions",
         "Browser Dimensions",
-        "Set the dimensions of the web browser window"
+        "Set the dimensions of the web browser window.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UrlInfo = {
         "Url",
         "URL",
-        "The URL to load"
+        "The URL to load.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
-        "Reload the web browser"
+        "Reload the web browser.",
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(Browser)]] Parameters {
+        // [[codegen::verbatim(DimensionsInfo.description)]]
+        std::optional<glm::ivec2> dimensions;
+
         // [[codegen::verbatim(UrlInfo.description)]]
         std::optional<std::string> url;
 
@@ -78,27 +84,33 @@ void Browser::RenderHandler::setTexture(GLuint t) {
 Browser::Browser(const ghoul::Dictionary& dictionary)
     : _browserDimensions(
         DimensionsInfo,
-        global::windowDelegate->currentSubwindowSize(),
+        glm::vec2(1000.f),
         glm::vec2(10.f),
         glm::vec2(3000.f)
     )
     , _url(UrlInfo)
     , _reload(ReloadInfo)
+    , _renderHandler(new RenderHandler)
+    , _keyboardHandler(new WebKeyboardHandler)
+    , _browserInstance(
+        std::make_unique<BrowserInstance>(_renderHandler.get(), _keyboardHandler.get())
+    )
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _url = p.url.value_or(_url);
     _url.onChange([this]() { _isUrlDirty = true; });
-    
+
+    _browserDimensions = p.dimensions.value_or(_browserDimensions);
     _browserDimensions.onChange([this]() { _isDimensionsDirty = true; });
+
     _reload.onChange([this]() { _shouldReload = true; });
 
     // Create browser and render handler
-    _renderHandler = new RenderHandler();
-    _keyboardHandler = new WebKeyboardHandler();
     _browserInstance = std::make_unique<BrowserInstance>(
         _renderHandler.get(),
-        _keyboardHandler.get()
+        _keyboardHandler.get(),
+        false
     );
 
     WebBrowserModule* webBrowser = global::moduleEngine->module<WebBrowserModule>();
@@ -119,6 +131,9 @@ void Browser::initializeGL() {
 
     _browserInstance->initialize();
     _browserInstance->loadUrl(_url);
+    // Update the dimensions upon initialization. Do this with flag as it affects
+    // derived classes as well
+    _isDimensionsDirty = true;
 }
 
 void Browser::deinitializeGL() {
@@ -126,7 +141,7 @@ void Browser::deinitializeGL() {
 
     _texture = nullptr;
 
-    LDEBUG(fmt::format("Deinitializing browser: {}", _url.value()));
+    LDEBUG(std::format("Deinitializing browser '{}'", _url.value()));
 
     _browserInstance->close(true);
 
@@ -153,11 +168,7 @@ void Browser::update() {
     }
 
     if (_isDimensionsDirty) {
-        glm::vec2 dim = _browserDimensions;
-        if (dim.x > 0 && dim.y > 0) {
-            _browserInstance->reshape(dim);
-            _isDimensionsDirty = false;
-        }
+        updateBrowserDimensions();
     }
 
     if (_shouldReload) {
@@ -167,11 +178,7 @@ void Browser::update() {
 }
 
 bool Browser::isReady() const {
-    return _texture.get();
-}
-
-glm::vec2 Browser::browserPixelDimensions() const {
-    return _browserDimensions;
+    return _texture != nullptr;
 }
 
 // Updates the browser size to match the size of the texture
@@ -180,7 +187,17 @@ void Browser::updateBrowserSize() {
 }
 
 void Browser::reload() {
-    _reload.set(true);
+    _reload.trigger();
+}
+
+void Browser::setRatio(float ratio) {
+    const float relativeRatio = ratio / browserRatio();
+    const float newX = static_cast<float>(_browserDimensions.value().x) * relativeRatio;
+    _browserDimensions = {
+        static_cast<int>(std::floor(newX)),
+        _browserDimensions.value().y
+    };
+    _isDimensionsDirty = true;
 }
 
 float Browser::browserRatio() const {
@@ -188,19 +205,23 @@ float Browser::browserRatio() const {
            static_cast<float>(_texture->dimensions().y);
 }
 
-void Browser::setCallbackDimensions(const std::function<void(const glm::dvec2&)>& func) {
-    _browserDimensions.onChange([&]() {
-        func(_browserDimensions.value());
-    });
+void Browser::updateBrowserDimensions() {
+    const glm::ivec2 dim = _browserDimensions;
+    if (dim.x > 0 && dim.y > 0) {
+        _texture->setDimensions(glm::uvec3(_browserDimensions.value(), 1));
+        _browserInstance->reshape(dim);
+        _isDimensionsDirty = false;
+    }
 }
 
 void Browser::executeJavascript(const std::string& script) const {
     // Make sure that the browser has a main frame
-    bool browserExists = _browserInstance && _browserInstance->getBrowser();
-    bool frameIsLoaded = browserExists && _browserInstance->getBrowser()->GetMainFrame();
+    const bool browserExists = _browserInstance && _browserInstance->getBrowser();
+    const bool frameIsLoaded =
+        browserExists && _browserInstance->getBrowser()->GetMainFrame();
 
     if (frameIsLoaded) {
-        CefRefPtr<CefFrame> frame = _browserInstance->getBrowser()->GetMainFrame();
+        const CefRefPtr<CefFrame> frame = _browserInstance->getBrowser()->GetMainFrame();
         frame->ExecuteJavaScript(script, frame->GetURL(), 0);
     }
 }

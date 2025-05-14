@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,21 +27,22 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/transferfunction.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <atomic>
+#include <filesystem>
 
 namespace openspace {
 
 class RenderableFluxNodes : public Renderable {
 public:
-    RenderableFluxNodes(const ghoul::Dictionary& dictionary);
+    explicit RenderableFluxNodes(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;
@@ -129,7 +130,7 @@ private:
     // Transfer function used to color lines when _colorMethod is set to by_flux_value
     std::unique_ptr<TransferFunction> _transferFunction;
 
-    std::vector<std::string> _binarySourceFiles;
+    std::vector<std::filesystem::path> _binarySourceFiles;
     // Contains the _triggerTimes for all streams in the sequence
     std::vector<double> _startTimes;
     // Contains vertexPositions

@@ -1,0 +1,47 @@
+local coreKernels = asset.require("spice/core")
+
+
+
+local data = asset.resource({
+  Name = "Ceres Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "ceres_kernels",
+  Version = 1
+})
+
+
+local kernels = {
+  data .. "ceres_v01.tpc",
+  data .. "sb_ceres_140724.bsp",
+  data .. "sb_ceres_110211.bsp"
+}
+
+local ID = {
+  Ceres = "CERES"
+}
+
+local Frame = {
+  Ceres = coreKernels.Frame.Ceres
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels)
+end)
+
+asset.export("ID", ID)
+asset.export("Frame", Frame)
+
+
+
+asset.meta = {
+  Name = "Ceres Spice Kernels",
+  Description = "SPICE kernels for Ceres",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "NASA"
+}

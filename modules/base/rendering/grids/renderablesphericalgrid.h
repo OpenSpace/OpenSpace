@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,21 +27,21 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/space/labelscomponent.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/rendering/labelscomponent.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace ghoul::opengl { class ProgramObject; }
 
-namespace openspace::documentation { struct Documentation; }
-
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 class RenderableSphericalGrid : public Renderable {
 public:
-    RenderableSphericalGrid(const ghoul::Dictionary& dictionary);
+    explicit RenderableSphericalGrid(const ghoul::Dictionary& dictionary);
     ~RenderableSphericalGrid() override = default;
 
     void initialize() override;
@@ -63,24 +63,18 @@ protected:
     ghoul::opengl::ProgramObject* _gridProgram;
 
     properties::Vec3Property _color;
-    properties::IntProperty _segments;
+    properties::IntProperty _longSegments;
+    properties::IntProperty _latSegments;
     properties::FloatProperty _lineWidth;
-
-    bool _gridIsDirty = true;
 
     GLuint _vaoID = 0;
     GLuint _vBufferID = 0;
     GLuint _iBufferID = 0;
 
-    GLenum _mode = GL_LINES;
-    unsigned int _isize = 0;
-    unsigned int _vsize = 0;
-    std::vector<Vertex> _varray;
-    std::vector<int> _iarray;
+    bool _gridIsDirty = true;
 
     // Labels
     bool _hasLabels = false;
-    properties::BoolProperty _drawLabels;
     std::unique_ptr<LabelsComponent> _labels;
 };
 

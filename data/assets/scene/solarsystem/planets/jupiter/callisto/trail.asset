@@ -1,6 +1,6 @@
 local transforms = asset.require("../transforms")
-asset.require("spice/base")
-local kernel = asset.require("../kernels").jup310
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -11,38 +11,36 @@ local CallistoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CALLISTO",
-      Observer = "JUPITER BARYCENTER",
-      Kernels = kernel
+      Target = kernels.ID.Callisto,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 17.0,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter" },
+  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter", "moonTrail_major_jupiter" },
   GUI = {
     Name = "Callisto Trail",
-    Path = "/Solar System/Planets/Jupiter/Moons"
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Callisto"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(CallistoTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(CallistoTrail)
 end)
-  
+
 asset.export(CallistoTrail)
 
 
 
 asset.meta = {
   Name = "Callisto Trail",
-  Version = "1.1",
-  Description = [[Trail of Callisto as observed by the Jupiter. Data from NASA Spice
-    (see base spice asset)]],
+  Description = "Trail of Callisto as observed by the Jupiter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

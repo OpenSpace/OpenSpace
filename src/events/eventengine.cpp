@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,8 +26,13 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/actionmanager.h>
+#include <ghoul/logging/logmanager.h>
 
 #include "eventengine_lua.inl"
+
+namespace {
+    constexpr std::string_view _loggerCat = "EventEngine";
+} // namespace
 
 namespace openspace {
 
@@ -50,8 +55,7 @@ void EventEngine::postFrameCleanup() {
 #endif // _DEBUG
 }
 
-void EventEngine::registerEventAction(events::Event::Type type,
-                                      std::string identifier,
+void EventEngine::registerEventAction(events::Event::Type type, std::string identifier,
                                       std::optional<ghoul::Dictionary> filter)
 {
     ActionInfo ai;
@@ -71,9 +75,19 @@ void EventEngine::registerEventAction(events::Event::Type type,
     nextRegisteredEventId++;
 }
 
+void EventEngine::registerEventTopic(size_t topicId, events::Event::Type type,
+                                     ScriptCallback callback)
+{
+    TopicInfo ti;
+    ti.id = static_cast<uint32_t>(topicId);
+    ti.callback = std::move(callback);
+
+    _eventTopics[type].push_back(ti);
+}
+
 void EventEngine::unregisterEventAction(events::Event::Type type,
                                         const std::string& identifier,
-                                        std::optional<ghoul::Dictionary> filter)
+                                        const std::optional<ghoul::Dictionary>& filter)
 {
     const auto it = _eventActions.find(type);
     if (it != _eventActions.end()) {
@@ -110,23 +124,61 @@ void EventEngine::unregisterEventAction(uint32_t identifier) {
     }
 
     // If we get this far, we haven't found the identifier
-    throw ghoul::RuntimeError(fmt::format(
-        "Could not find event with identifier {}", identifier
+    throw ghoul::RuntimeError(std::format(
+        "Could not find event with identifier '{}'", identifier
     ));
+}
+
+void EventEngine::unregisterEventTopic(size_t topicId, events::Event::Type type) {
+    const auto it = _eventTopics.find(type);
+    if (it != _eventTopics.end()) {
+        const auto jt = std::find_if(
+            it->second.begin(), it->second.end(),
+            [topicId](const TopicInfo& ti) {
+                return ti.id == topicId;
+            }
+        );
+        if (jt != it->second.end()) {
+            it->second.erase(jt);
+
+            // This might have been the last action so we might need to remove the
+            // entry alltogether
+            if (it->second.empty()) {
+                _eventTopics.erase(it);
+            }
+        }
+        else {
+            LWARNING(std::format("Could not find registered event '{}' with topicId: {}",
+                events::toString(type), topicId)
+            );
+        }
+    }
+    else {
+        LWARNING(std::format("Could not find registered event '{}'",
+            events::toString(type))
+        );
+    }
 }
 
 std::vector<EventEngine::ActionInfo> EventEngine::registeredActions() const {
     std::vector<EventEngine::ActionInfo> result;
     result.reserve(_eventActions.size());
-    for (const std::pair<const events::Event::Type, std::vector<ActionInfo>>& p : _eventActions)
-    {
+    using Type = events::Event::Type;
+    for (const std::pair<const Type, std::vector<ActionInfo>>& p : _eventActions) {
         result.insert(result.end(), p.second.begin(), p.second.end());
     }
     return result;
 }
 
+const std::unordered_map<events::Event::Type, std::vector<EventEngine::ActionInfo>>&
+EventEngine::eventActions() const
+{
+    return _eventActions;
+}
+
 void EventEngine::enableEvent(uint32_t identifier) {
-    for (std::pair<const events::Event::Type, std::vector<ActionInfo>>& p : _eventActions) {
+    using Type = events::Event::Type;
+    for (std::pair<const Type, std::vector<ActionInfo>>& p : _eventActions) {
         for (ActionInfo& ai : p.second) {
             if (ai.id == identifier) {
                 ai.isEnabled = true;
@@ -137,7 +189,8 @@ void EventEngine::enableEvent(uint32_t identifier) {
 }
 
 void EventEngine::disableEvent(uint32_t identifier) {
-    for (std::pair<const events::Event::Type, std::vector<ActionInfo>>& p : _eventActions) {
+    using Type = events::Event::Type;
+    for (std::pair<const Type, std::vector<ActionInfo>>& p : _eventActions) {
         for (ActionInfo& ai : p.second) {
             if (ai.id == identifier) {
                 ai.isEnabled = false;
@@ -157,13 +210,40 @@ void EventEngine::triggerActions() const {
     while (e) {
         const auto it = _eventActions.find(e->type);
         if (it != _eventActions.end()) {
-            ghoul::Dictionary params = toParameter(*e);
+            const ghoul::Dictionary params = toParameter(*e);
             for (const ActionInfo& ai : it->second) {
                 if (ai.isEnabled &&
                     (!ai.filter.has_value() || params.isSubset(*ai.filter)))
                 {
-                    global::actionManager->triggerAction(ai.action, params);
+                    // No sync because events are always synced and sent to the connected
+                    // nodes and peers
+                    global::actionManager->triggerAction(
+                        ai.action,
+                        params,
+                        interaction::ActionManager::ShouldBeSynchronized::No
+                    );
                 }
+            }
+        }
+
+        e = e->next;
+    }
+}
+
+void EventEngine::triggerTopics() const {
+    if (_eventTopics.empty()) {
+        // Nothing to do here
+        return;
+    }
+
+    const events::Event* e = _firstEvent;
+    while (e) {
+        const auto it = _eventTopics.find(e->type);
+
+        if (it != _eventTopics.end()) {
+            const ghoul::Dictionary params = toParameter(*e);
+            for (const TopicInfo& ti : it->second) {
+                ti.callback(params);
             }
         }
 
@@ -183,5 +263,4 @@ scripting::LuaLibrary EventEngine::luaLibrary() {
         }
     };
 }
-
 } // namespace openspace

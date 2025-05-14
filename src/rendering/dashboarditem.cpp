@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,30 +36,30 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
-        "Is Enabled",
-        "If this value is set to 'true' this dashboard item is shown in the dashboard"
+        "Enabled",
+        "If this value is set to 'true' this dashboard item is shown in the dashboard. "
+        "Otherwise it will be hidden."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo IdentifierInfo = {
-        "Identifier",
-        "Identifier",
-        ""
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo GuiNameInfo = {
-        "GuiName",
-        "Gui Name",
-        ""
-    };
-
+    // A `DashboardItem` is an item that is rendered in a dashboard. There are multiple
+    // dashboards that can exist in the system. One dashboard is created by default, which
+    // is rendered to the top left of the screen. Others can be added through the
+    // [ScreenSpaceDashboard](#base_screenspace_dashboard). Each `DashboardItem` shows its
+    // respective text in the dashboard if it is enabled and it depends on the concrete
+    // type of `DashboardItem` to determine what that information is.
     struct [[codegen::Dictionary(DashboardItem)]] Parameters {
+        // Determines the type of the DashbordItem that should be created.
         std::string type;
 
-        // [[codegen::verbatim(IdentifierInfo.description)]]
-        std::string identifier;
+        // The unique identifier for this DashboardItem.
+        std::string identifier [[codegen::identifier()]];
 
-        // [[codegen::verbatim(GuiNameInfo.description)]]
+        // The name for the DashboardItem that is used when showing it in the user
+        // interface.
         std::optional<std::string> guiName;
+
+        // [[codegen::verbatim(EnabledInfo.description)]]
+        std::optional<bool> enabled;
     };
 #include "dashboarditem_codegen.cpp"
 } // namespace
@@ -71,7 +71,7 @@ documentation::Documentation DashboardItem::Documentation() {
 }
 
 std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
-                                                             ghoul::Dictionary dictionary)
+                                                      const ghoul::Dictionary& dictionary)
 {
     ghoul::TemplateFactory<DashboardItem>* factory =
         FactoryManager::ref().factory<DashboardItem>();
@@ -79,13 +79,15 @@ std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
 
     const std::string& dashboardType = dictionary.value<std::string>(KeyType);
 
-    DashboardItem* item = factory->create(dashboardType, std::move(dictionary));
+    DashboardItem* item = factory->create(dashboardType, dictionary);
+    item->_type = dashboardType;
+
     return std::unique_ptr<DashboardItem>(item);
 }
 
 DashboardItem::DashboardItem(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "", "" })
-    , _isEnabled(EnabledInfo, true)
+    , _enabled(EnabledInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -94,11 +96,12 @@ DashboardItem::DashboardItem(const ghoul::Dictionary& dictionary)
         setGuiName(*p.guiName);
     }
 
-    addProperty(_isEnabled);
+    _enabled = p.enabled.value_or(_enabled);
+    addProperty(_enabled);
 }
 
 bool DashboardItem::isEnabled() const {
-    return _isEnabled;
+    return _enabled;
 }
 
 } // namespace openspace

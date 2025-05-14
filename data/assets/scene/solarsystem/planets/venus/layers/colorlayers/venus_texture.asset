@@ -1,37 +1,53 @@
-local globeIdentifier = asset.require("../../venus").Venus.Identifier
+local globe = asset.require("../../venus")
 
-local texturesPath = asset.syncedResource({
+
+
+local texturesPath = asset.resource({
   Name = "Venus Textures",
   Type = "HttpSynchronization",
   Identifier = "venus_textures",
-  Version = 1
+  Version = 2
 })
 
-local layer = {
+
+local Clouds = {
+  Identifier = "Clouds",
+  FilePath = texturesPath .. "venus_clouds.jpg",
+  Enabled = asset.enabled,
+  ZIndex = 20,
+  CacheSettings = { Enabled = false }
+}
+
+local Layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "venus.jpg",
   Enabled = asset.enabled,
+  ZIndex = 5,
   Settings = {
     Opacity = 0.48,
     Gamma = 0.48
-  }
+  },
+  CacheSettings = { Enabled = false }
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Venus.Identifier, "ColorLayers", Clouds)
+  openspace.globebrowsing.addLayer(globe.Venus.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Venus.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(globe.Venus.Identifier, "ColorLayers", Clouds)
 end)
 
-asset.export("layer", layer)
+asset.export(Layer)
+asset.export(Clouds)
 
 
 
 asset.meta = {
   Name = "Venus Texture",
-  Version = "1.0",
   Description = "This asset supplies a default texture for Venus",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

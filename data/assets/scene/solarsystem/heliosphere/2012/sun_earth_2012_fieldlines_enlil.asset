@@ -1,27 +1,37 @@
-local transforms = asset.require('scene/solarsystem/sun/transforms_heliosphere.asset')
-asset.require('scene/solarsystem/heliosphere/2012/reset_loop_action.asset')
+asset.require("scene/solarsystem/heliosphere/2012/reset_loop_action")
+local transforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
 
-local transferFunctions = asset.syncedResource({
+
+
+local transferFunctions = asset.resource({
   Name = "Fieldlines Transfer Functions",
   Type = "HttpSynchronization",
   Identifier = "sun_earth_event_july_2012-fieldlines_transferfunctions",
   Version = 1
 })
 
-local fieldlineData  = asset.syncedResource({
+local fieldlineData = asset.resource({
   Name = "Fieldlines Data ENLIL",
   Type = "HttpSynchronization",
   Identifier = "sun_earth_event_july_2012-enlil",
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
 
-local loop = {
-  Documentation = "Sets time to start of data, sets high delta time and loops back from start when at end of data",
-  GuiPath = "2012July",
-  Identifier = "2012july.loop_enlil",
-  IsLocal = false,
+
+local LoopEnlil = {
+  Identifier = "os.2012july.LoopEnlil",
   Name = "Loop ENLIL",
-  Command = "openspace.scriptScheduler.clear();\nopenspace.time.setDeltaTime(43200);\nopenspace.time.setTime('2012-JUL-01 07:00:00.00');\nlocal StarttimescriptENLILLoop = \"openspace.time.setTime('2012 JUL 01 07:00:00')\";\nopenspace.scriptScheduler.loadScheduledScript('2012 AUG 01 06:58:00', StarttimescriptENLILLoop);"
+  Command = [[
+    openspace.scriptScheduler.clear()
+    openspace.time.setDeltaTime(43200)
+    openspace.time.setTime("2012-JUL-01 07:00:00.000")
+    local StartTimeScriptEnlilLoop = "openspace.time.setTime('2012 JUL 01 07:00:00')"
+    openspace.scriptScheduler.loadScheduledScript("2012 AUG 01 06:58:00", StartTimeScriptEnlilLoop)
+  ]],
+  Documentation = "Sets time to start of data, sets high delta time and loops back from start when at end of data",
+  GuiPath = "/2012July",
+  IsLocal = false
 }
 
 local enlilDensityColorTable = transferFunctions .. "enlil_density.txt"
@@ -41,12 +51,12 @@ local colorRanges = {
   { 100, 2000 }
 }
 
-local interactionSphere = 695700000
+local InteractionSphere = 695700000
 
 local ENLILSliceEqPlane11AU1 = {
   Identifier = "FL_ENLIL_slice_eqPlane_011AU_1",
-  Parent = transforms.HEEQ180ReferenceFrame.Identifier,
-  InteractionSphere = interactionSphere,
+  Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
+  InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.EqPlane011AU1,
@@ -56,7 +66,7 @@ local ENLILSliceEqPlane11AU1 = {
     ColorQuantity = 1, -- Velocity
     ColorTablePaths = {
       enlilDensityColorTable,
-      enlilVelocityColorTable,
+      enlilVelocityColorTable
     },
     ColorTableRanges = colorRanges
   },
@@ -68,8 +78,8 @@ local ENLILSliceEqPlane11AU1 = {
 
 local ENLILSliceEqPlane11AU2 = {
   Identifier = "FL_ENLIL_slice_eqPlane_011AU_2",
-  Parent = transforms.HEEQ180ReferenceFrame.Identifier,
-  InteractionSphere = interactionSphere,
+  Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
+  InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.EqPlane011AU2,
@@ -79,7 +89,7 @@ local ENLILSliceEqPlane11AU2 = {
     ColorQuantity = 1, -- Velocity
     ColorTablePaths = {
       enlilDensityColorTable,
-      enlilVelocityColorTable,
+      enlilVelocityColorTable
     },
     ColorTableRanges = colorRanges
   },
@@ -91,8 +101,8 @@ local ENLILSliceEqPlane11AU2 = {
 
 local ENLILSliceLat411AU1 = {
   Identifier = "FL_ENLIL_slice_lat4_011AU_1",
-  Parent = transforms.HEEQ180ReferenceFrame.Identifier,
-  InteractionSphere = interactionSphere,
+  Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
+  InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.Lat4011AU1,
@@ -103,7 +113,7 @@ local ENLILSliceLat411AU1 = {
     ColorQuantity = 1, -- Velocity
     ColorTablePaths = {
       enlilDensityColorTable,
-      enlilVelocityColorTable,
+      enlilVelocityColorTable
     },
     ColorTableRanges = colorRanges
   },
@@ -115,8 +125,8 @@ local ENLILSliceLat411AU1 = {
 
 local ENLILSliceLat411AU2 = {
   Identifier = "FL_ENLIL_slice_lat4_011AU_2",
-  Parent = transforms.HEEQ180ReferenceFrame.Identifier,
-  InteractionSphere = interactionSphere,
+  Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
+  InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.Lat4011AU2,
@@ -127,7 +137,7 @@ local ENLILSliceLat411AU2 = {
     ColorQuantity = 1, -- Velocity
     ColorTablePaths = {
       enlilDensityColorTable,
-      enlilVelocityColorTable,
+      enlilVelocityColorTable
     },
     ColorTableRanges = colorRanges
   },
@@ -139,8 +149,8 @@ local ENLILSliceLat411AU2 = {
 
 local ENLILEarth = {
   Identifier = "FL_ENLIL_earth",
-  Parent = transforms.HEEQ180ReferenceFrame.Identifier,
-  InteractionSphere = interactionSphere,
+  Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
+  InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.Earth,
@@ -148,7 +158,7 @@ local ENLILEarth = {
     Color = { 1.0, 1.0, 1.0, 0.6 },
     ColorTablePaths = {
       enlilDensityColorTable,
-      enlilVelocityColorTable,
+      enlilVelocityColorTable
     },
     ColorTableRanges = colorRanges
   },
@@ -160,8 +170,8 @@ local ENLILEarth = {
 
 local ENLILStereoA = {
   Identifier = "FL_ENLIL_stereoa",
-  Parent = transforms.HEEQ180ReferenceFrame.Identifier,
-  InteractionSphere = interactionSphere,
+  Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
+  InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.StereoA,
@@ -169,7 +179,7 @@ local ENLILStereoA = {
     Color = { 1.0, 1.0, 1.0, 0.6 },
     ColorTablePaths = {
       enlilDensityColorTable,
-      enlilVelocityColorTable,
+      enlilVelocityColorTable
     },
     ColorTableRanges = colorRanges,
     FlowEnabled = true,
@@ -184,33 +194,9 @@ local ENLILStereoA = {
   }
 }
 
-asset.onInitialize(function ()
-  openspace.action.registerAction(loop)
 
-  if not openspace.directoryExists(unzippedDataDestination.EqPlane011AU1) then
-    openspace.printInfo("Extracting " .. "Fieldlines from ENLIL model of 2012 event")
-    openspace.unzipFile(fieldlineData .. "011AU_eq_plane_1.zip", unzippedDataDestination.EqPlane011AU1, true)
-  end
-  if not openspace.directoryExists(unzippedDataDestination.EqPlane011AU2) then
-    openspace.printInfo("Extracting " .. "Fieldlines from ENLIL model of 2012 event")
-    openspace.unzipFile(fieldlineData .. "011AU_eq_plane_2.zip", unzippedDataDestination.EqPlane011AU2, true)
-  end
-  if not openspace.directoryExists(unzippedDataDestination.Lat4011AU1) then
-    openspace.printInfo("Extracting " .. "Fieldlines from ENLIL model of 2012 event")
-    openspace.unzipFile(fieldlineData .. "011AU_lat4_1.zip", unzippedDataDestination.Lat4011AU1, true)
-  end
-  if not openspace.directoryExists(unzippedDataDestination.Lat4011AU2) then
-    openspace.printInfo("Extracting " .. "Fieldlines from ENLIL model of 2012 event")
-    openspace.unzipFile(fieldlineData .. "011AU_lat4_2.zip", unzippedDataDestination.Lat4011AU2, true)
-  end
-  if not openspace.directoryExists(unzippedDataDestination.Earth) then
-    openspace.printInfo("Extracting " .. "Fieldlines from ENLIL model of 2012 event")
-    openspace.unzipFile(fieldlineData .. "earth.zip", unzippedDataDestination.Earth, true)
-  end
-  if not openspace.directoryExists(unzippedDataDestination.StereoA) then
-    openspace.printInfo("Extracting " .. "Fieldlines from ENLIL model of 2012 event")
-    openspace.unzipFile(fieldlineData .. "stereoa.zip", unzippedDataDestination.StereoA, true)
-  end
+asset.onInitialize(function()
+openspace.action.registerAction(LoopEnlil)
 
   openspace.addSceneGraphNode(ENLILSliceEqPlane11AU1)
   openspace.addSceneGraphNode(ENLILSliceEqPlane11AU2)
@@ -218,10 +204,9 @@ asset.onInitialize(function ()
   openspace.addSceneGraphNode(ENLILSliceLat411AU2)
   openspace.addSceneGraphNode(ENLILEarth)
   openspace.addSceneGraphNode(ENLILStereoA)
-
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ENLILStereoA)
   openspace.removeSceneGraphNode(ENLILEarth)
   openspace.removeSceneGraphNode(ENLILSliceLat411AU2)
@@ -229,12 +214,21 @@ asset.onDeinitialize(function ()
   openspace.removeSceneGraphNode(ENLILSliceEqPlane11AU2)
   openspace.removeSceneGraphNode(ENLILSliceEqPlane11AU1)
 
-  openspace.action.removeAction(loop)
+  openspace.action.removeAction(LoopEnlil)
 end)
+
+asset.export("LoopEnlil", LoopEnlil.Identifier)
+asset.export(ENLILSliceEqPlane11AU1)
+asset.export(ENLILSliceEqPlane11AU2)
+asset.export(ENLILSliceLat411AU1)
+asset.export(ENLILSliceLat411AU2)
+asset.export(ENLILEarth)
+asset.export(ENLILStereoA)
+
+
 
 asset.meta = {
   Name = "Fieldlines from ENLIL model of 2012 event",
-  Version = "1.0",
   Description = "Magnetic fieldlines from ENLIL model for a 2012 CME event",
   Author = "CCMC",
   URL = "",

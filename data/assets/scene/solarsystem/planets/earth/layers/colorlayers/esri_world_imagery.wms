@@ -1,12 +1,12 @@
 <GDAL_WMS>
   <Service name="TMS">
-    <ServerUrl>http://wi.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/WMTS/tile/1.0.0/World_Imagery/default/default/${z}/${y}/${x}.jpg</ServerUrl>
+    <ServerUrl>https://wi.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}.jpg</ServerUrl>
   </Service>
   <DataWindow>
     <UpperLeftX>-180.0</UpperLeftX>
     <UpperLeftY>90</UpperLeftY>
     <LowerRightX>180</LowerRightX>
-    <LowerRightY>-89.999999</LowerRightY>
+    <LowerRightY>-90</LowerRightY>
     <TileLevel>19</TileLevel>
     <TileCountX>2</TileCountX>
     <TileCountY>1</TileCountY>

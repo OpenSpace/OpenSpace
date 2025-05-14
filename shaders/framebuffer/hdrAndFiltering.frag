@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -58,10 +58,10 @@ void main() {
 
   vec4 color = texture(hdrFeedingTexture, st);
   color.rgb *= blackoutFactor;
-    
+
   // Applies TMO
   vec3 tColor = toneMappingOperator(color.rgb, hdrExposure);
-    
+
   // Color control
   vec3 hsvColor = rgb2hsv(tColor);
   hsvColor.x = (hsvColor.x + Hue);

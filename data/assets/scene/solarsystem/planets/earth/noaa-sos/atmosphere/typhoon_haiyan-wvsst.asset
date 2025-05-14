@@ -1,35 +1,37 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Typhoon Haiyan: Water Vapor and SST - Oct - Nov 2013"
 local Identifier = "noaa-sos-atmosphere-typhoon_haiyan-wvsst"
-local Description = [[Typhoon Haiyan, also known in the Phillippines as Typhoon Yolanda, 
-may be the strongest recorded tropical cyclone to make landfall with sustained speeds up 
-to 195 mph. If confirmed, it would beat the previous record holder, Hurricane Camille 
-(1969). This dataset is taken from the Real-Time Linear IR satellite dataset and 
+local Description = [[Typhoon Haiyan, also known in the Phillippines as Typhoon Yolanda,
+may be the strongest recorded tropical cyclone to make landfall with sustained speeds up
+to 195 mph. If confirmed, it would beat the previous record holder, Hurricane Camille
+(1969). This dataset is taken from the Real-Time Linear IR satellite dataset and
 Real-time: SST from October 30th to November 12th, 2013]]
 local URL = "https://sos.noaa.gov/catalog/datasets/typhoon-haiyan-water-vapor-and-sst-oct-nov-2013/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
 
-local imagesDestination = syncedDirectory .. "images"
 
-local layer = {
+local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "ImageSequenceTileLayer",
-  FolderPath = imagesDestination,
+  ZIndex = 100,
+  Type = "ImageSequenceTileProvider",
+  FolderPath = syncedDirectory .. "2048",
   Description = Description
 }
 
-local track = {
+local Track = {
   Identifier = Identifier .. "-track",
   Name = Name .. " (Track)",
   Enabled = asset.enabled,
@@ -37,28 +39,24 @@ local track = {
   Description = Description
 }
 
-asset.onInitialize(function()
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "2048.zip", imagesDestination, true)
-  end
 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", track)
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Track)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", track)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Track)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export(layer)
-asset.export(track)
+asset.export(Layer)
+asset.export(Track)
+
 
 
 asset.meta = {
   Name = Name,
-  Version = "1.0",
   Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,

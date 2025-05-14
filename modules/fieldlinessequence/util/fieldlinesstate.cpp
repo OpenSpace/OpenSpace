@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,7 @@
 
 #include <openspace/json.h>
 #include <openspace/util/time.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <fstream>
 #include <iomanip>
@@ -122,7 +122,7 @@ bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
     allNamesInOne.assign(buffer.data(), byteSizeAllNames);
 
     size_t offset = 0;
-    for (size_t i = 0; i < nExtras; ++i) {
+    for (size_t i = 0; i < nExtras; i++) {
         auto endOfVarName = allNamesInOne.find('\0', offset);
         endOfVarName -= offset;
         const std::string varName = allNamesInOne.substr(offset, endOfVarName);
@@ -140,7 +140,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
     std::ifstream ifs(pathToJsonFile);
 
     if (!ifs.is_open()) {
-        LERROR(fmt::format("FAILED TO OPEN FILE: {}", pathToJsonFile));
+        LERROR(std::format("Failed to open file '{}'", pathToJsonFile));
         return false;
     }
 
@@ -157,7 +157,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
     {
         const char* sTime = "time";
         const json& jTmp = *(jFile.begin()); // First field line in the file
-        _triggerTime = Time::convertTime(jTmp[sTime]);
+        _triggerTime = Time::convertTime(jTmp[sTime].get<std::string>());
 
         const char* sColumns = "columns";
         const json::value_type& variableNameVec = jTmp[sTrace][sColumns];
@@ -172,8 +172,8 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
             return false;
         }
 
-        for (size_t i = nPosComponents ; i < nVariables ; ++i) {
-            _extraQuantityNames.push_back(variableNameVec[i]);
+        for (size_t i = nPosComponents; i < nVariables; i++) {
+            _extraQuantityNames.push_back(variableNameVec[i].get<std::string>());
         }
     }
 
@@ -185,10 +185,11 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
     for (json::iterator lineIter = jFile.begin(); lineIter != jFile.end(); ++lineIter) {
         // The 'data' field in the 'trace' variable contains all vertex positions and the
         // extra quantities. Each element is an array related to one vertex point.
-        const std::vector<std::vector<float>>& jData = (*lineIter)[sTrace][sData];
+        const std::vector<std::vector<float>>& jData =
+            (*lineIter)[sTrace][sData].get<std::vector<std::vector<float>>>();
         const size_t nPoints = jData.size();
 
-        for (size_t j = 0; j < nPoints; ++j) {
+        for (size_t j = 0; j < nPoints; j++) {
             const std::vector<float>& variables = jData[j];
 
             // Expects the x, y and z variables to be stored first!
@@ -205,7 +206,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
 
             // Add the extra quantites. Stored in the same array as the x,y,z variables.
             // Hence index of the first extra quantity = 3
-            for (size_t xtraIdx = 3, k = 0 ; k < nExtras; ++k, ++xtraIdx) {
+            for (size_t xtraIdx = 3, k = 0; k < nExtras; k++, xtraIdx++) {
                 _extraQuantities[k].push_back(variables[xtraIdx]);
             }
         }
@@ -252,7 +253,7 @@ void FieldlinesState::saveStateToOsfls(const std::string& absPath) {
 
     std::ofstream ofs(absPath + fileName, std::ofstream::binary | std::ofstream::trunc);
     if (!ofs.is_open()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Failed to save state to binary file: {}{}", absPath, fileName
         ));
         return;
@@ -326,12 +327,12 @@ void FieldlinesState::saveStateToJson(const std::string& absPath) {
     const char* ext = ".json";
     std::ofstream ofs(absPath + ext, std::ofstream::trunc);
     if (!ofs.is_open()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Failed to save state to json file at location: {}{}", absPath, ext
         ));
         return;
     }
-    LINFO(fmt::format("Saving fieldline state to: {}{}", absPath, ext));
+    LINFO(std::format("Saving fieldline state to: {}{}", absPath, ext));
 
     json jColumns = { "x", "y", "z" };
     for (const std::string& s : _extraQuantityNames) {
@@ -371,7 +372,7 @@ void FieldlinesState::saveStateToJson(const std::string& absPath) {
     const int indentationSpaces = 2;
     ofs << std::setw(indentationSpaces) << jFile << std::endl;
 
-    LINFO(fmt::format("Saved fieldline state to: {}{}", absPath, ext));
+    LINFO(std::format("Saved fieldline state to: {}{}", absPath, ext));
 }
 
 void FieldlinesState::setModel(fls::Model m) {

@@ -1,6 +1,6 @@
 local transforms = asset.require("../transforms")
-asset.require("spice/base")
-local kernel = asset.require("../kernels").jup310
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -11,38 +11,36 @@ local GanymedeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "GANYMEDE",
-      Observer = "JUPITER BARYCENTER",
-      Kernels = kernel
+      Target = kernels.ID.Ganymede,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.3 },
-    Period =  172.0 / 24.0,
+    Period = 172.0 / 24.0,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter" },
+  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter", "moonTrail_major_jupiter" },
   GUI = {
     Name = "Ganymede Trail",
-    Path = "/Solar System/Planets/Jupiter/Moons"
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Ganymede"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(GanymedeTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(GanymedeTrail)
 end)
-  
+
 asset.export(GanymedeTrail)
 
 
 
 asset.meta = {
   Name = "Ganymede Trail",
-  Version = "1.1",
-  Description = [[Trail of Ganymede as observed by the Jupiter. Data from NASA Spice
-    (see base spice asset)]],
+  Description = "Trail of Ganymede as observed by the Jupiter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

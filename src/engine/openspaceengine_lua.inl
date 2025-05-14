@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/documentation/documentation.h>
+#include <openspace/engine/downloadmanager.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/openspace.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/json_helper.h>
+#include <ghoul/filesystem/cachemanager.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/glm.h>
+#include <ghoul/io/texture/texturewriter.h>
+#include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/csvreader.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/texture.h>
+#include <filesystem>
 
 namespace {
 
@@ -38,7 +55,7 @@ namespace {
  * Writes out documentation files
  */
 [[codegen::luawrap]] void writeDocumentation() {
-    openspace::global::openSpaceEngine->writeDocumentation();
+    DocEng.writeJavascriptDocumentation();
 }
 
 // Sets the folder used for storing screenshots or session recording frames
@@ -56,7 +73,7 @@ namespace {
         ghoul::filesystem::FileSystem::Override::Yes
     );
 
-    global::windowDelegate->setScreenshotFolder(folder.string());
+    global::windowDelegate->setScreenshotFolder(std::move(folder));
 }
 
 // Adds a Tag to a SceneGraphNode identified by the provided uri
@@ -65,7 +82,7 @@ namespace {
 
     SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(uri);
     if (!node) {
-        throw ghoul::lua::LuaError(fmt::format("Unknown scene graph node '{}'", uri));
+        throw ghoul::lua::LuaError(std::format("Unknown scene graph node '{}'", uri));
     }
 
     node->addTag(std::move(tag));
@@ -77,7 +94,7 @@ namespace {
 
     SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(uri);
     if (!node) {
-        throw ghoul::lua::LuaError(fmt::format("Unknown scene graph node '{}'", uri));
+        throw ghoul::lua::LuaError(std::format("Unknown scene graph node '{}'", uri));
     }
 
     node->removeTag(tag);
@@ -89,7 +106,7 @@ namespace {
 {
     using namespace openspace;
 
-    LINFOC("OpenSpaceEngine", fmt::format("Downloading file from {}", url));
+    LINFOC("OpenSpaceEngine", std::format("Downloading file from '{}'", url));
     std::shared_ptr<DownloadManager::FileFuture> future =
         global::downloadManager->downloadFile(
             url,
@@ -102,7 +119,7 @@ namespace {
     if (waitForCompletion) {
         while (!future->isFinished && future->errorMessage.empty()) {
             // just wait
-            LTRACEC("OpenSpaceEngine", fmt::format("waiting {}", future->errorMessage));
+            LTRACEC("OpenSpaceEngine", std::format("waiting '{}'", future->errorMessage));
         }
     }
 }
@@ -135,40 +152,50 @@ namespace {
         );
     }
 
-    std::filesystem::path fileName = FileSys.cacheManager()->cachedFilename(
-        name + ".ppm",
-        ""
-    );
+    const std::string namePng = std::format("{}.png", name);
+    std::filesystem::path fileName = FileSys.cacheManager()->cachedFilename(namePng, "");
+
     const bool hasCachedFile = std::filesystem::is_regular_file(fileName);
     if (hasCachedFile) {
-        LDEBUGC("OpenSpaceEngine", fmt::format("Cached file '{}' used", fileName));
+        LDEBUGC("OpenSpaceEngine", std::format("Cached file '{}' used", fileName));
         return fileName;
     }
     else {
-        // Write the color to a ppm file
-        static std::mutex fileMutex;
-        std::lock_guard guard(fileMutex);
-        std::ofstream ppmFile(fileName, std::ofstream::binary | std::ofstream::trunc);
+        // Write the color to a new file
+        constexpr unsigned int Width = 1;
+        constexpr unsigned int Height = 1;
+        constexpr unsigned int Size = Width * Height;
+        std::array<GLubyte, Size * 3> img = {
+            static_cast<GLubyte>(255 * color.r),
+            static_cast<GLubyte>(255 * color.g),
+            static_cast<GLubyte>(255 * color.b)
+        };
 
-        unsigned int width = 1;
-        unsigned int height = 1;
-        unsigned int size = width * height;
-        std::vector<unsigned char> img(size * 3);
-        img[0] = static_cast<unsigned char>(255 * color.r);
-        img[1] = static_cast<unsigned char>(255 * color.g);
-        img[2] = static_cast<unsigned char>(255 * color.b);
+        using Texture = ghoul::opengl::Texture;
+        Texture textureFromData = Texture(
+            reinterpret_cast<void*>(img.data()),
+            glm::uvec3(Width, Height, 1),
+            GL_TEXTURE_2D,
+            Texture::Format::RGB
+        );
+        textureFromData.setDataOwnership(Texture::TakeOwnership::No);
 
-        if (!ppmFile.is_open()) {
-            throw ghoul::lua::LuaError("Could not open ppm file for writing");
+        try {
+            ghoul::io::TextureWriter::ref().saveTexture(
+                textureFromData,
+                fileName.string()
+            );
         }
-
-        ppmFile << "P6" << std::endl;
-        ppmFile << width << " " << height << std::endl;
-        ppmFile << 255 << std::endl;
-        ppmFile.write(reinterpret_cast<char*>(img.data()), size * 3);
-        ppmFile.close();
-        return fileName;
+        catch (const ghoul::io::TextureWriter::MissingWriterException& e) {
+            // This should not happen, as we know .png is a supported format
+            throw ghoul::lua::LuaError(e.message);
+        }
+        catch (const std::filesystem::filesystem_error& e) {
+            LERRORC("Exception: {}", e.what());
+        }
     }
+
+    return fileName;
 }
 
 /**
@@ -183,6 +210,7 @@ namespace {
 /**
  * This function returns information about the current OpenSpace version. The resulting
  * table has the structure:
+ * \code
  * Version = {
  *   Major = <number>
  *   Minor = <number>
@@ -190,20 +218,112 @@ namespace {
  * },
  * Commit = <string>
  * Branch = <string>
+ * \endcode
  */
 [[codegen::luawrap]] ghoul::Dictionary version() {
     ghoul::Dictionary res;
 
     ghoul::Dictionary version;
-    version.setValue("Major", openspace::OPENSPACE_VERSION_MAJOR);
-    version.setValue("Minor", openspace::OPENSPACE_VERSION_MINOR);
-    version.setValue("Patch", openspace::OPENSPACE_VERSION_PATCH);
+    version.setValue("Major", static_cast<int>(openspace::OPENSPACE_VERSION_MAJOR));
+    version.setValue("Minor", static_cast<int>(openspace::OPENSPACE_VERSION_MINOR));
+    version.setValue("Patch", static_cast<int>(openspace::OPENSPACE_VERSION_PATCH));
     res.setValue("Version", std::move(version));
 
     res.setValue("Commit", std::string(openspace::OPENSPACE_GIT_COMMIT));
     res.setValue("Branch", std::string(openspace::OPENSPACE_GIT_BRANCH));
 
     return res;
+}
+
+/**
+ * Loads the CSV file provided as a parameter and returns it as a vector containing the
+ * values of the each row. The inner vector has the same number of values as the CSV has
+ * columns. The second parameter controls whether the first entry in the returned outer
+ * vector is containing the names of the columns
+ */
+[[codegen::luawrap]] std::vector<std::vector<std::string>> readCSVFile(
+                                                               std::filesystem::path file,
+                                                            bool includeFirstLine = false)
+{
+    if (!std::filesystem::exists(file) || !std::filesystem::is_regular_file(file)) {
+        throw ghoul::lua::LuaError(std::format("Could not find file '{}'", file));
+    }
+
+    std::vector<std::vector<std::string>> r = ghoul::loadCSVFile(file, includeFirstLine);
+    return r;
+}
+
+/**
+ * Resets the camera position to the same position where the profile originally started
+ */
+[[codegen::luawrap]] void resetCamera() {
+    openspace::setCameraFromProfile(*openspace::global::profile);
+}
+
+/**
+ * Returns the whole configuration object as a Dictionary
+ */
+[[codegen::luawrap]] ghoul::Dictionary configuration() {
+    openspace::Configuration& config = *openspace::global::configuration;
+    return config.createDictionary();
+}
+
+/**
+ * Returns the current layer server from the configuration
+ */
+[[codegen::luawrap]] std::string layerServer() {
+    openspace::Configuration& config = *openspace::global::configuration;
+    return layerServerToString(config.layerServer);
+}
+
+/**
+ * Loads the provided JSON file and returns it back to the caller. Please note that if the
+ * JSON contains keys that array of an array type, they are converted into a Dictionary
+ * with numerical keys and the numerical keys start with 1.
+ */
+[[codegen::luawrap]] ghoul::Dictionary loadJson(std::filesystem::path path) {
+    if (!std::filesystem::exists(path)) {
+        throw ghoul::RuntimeError(std::format("File '{}' did not exist", path));
+    }
+
+    std::ifstream f(path);
+    std::string contents = std::string(
+        (std::istreambuf_iterator<char>(f)),
+        std::istreambuf_iterator<char>()
+    );
+    nlohmann::json json = nlohmann::json::parse(contents);
+    return openspace::jsonToDictionary(json);
+}
+
+/**
+ * Returns the target path for a Windows shortcut file. This function will produce an
+ * error on non-Windows operating systems. The `path` has to be a valid Windows Shell link
+ * file.
+ */
+[[codegen::luawrap]] std::filesystem::path resolveShortcut(std::filesystem::path path) {
+#ifdef WIN32
+    return FileSys.resolveShellLink(std::move(path));
+#else // ^^^^ WIN32 // !WIN32 vvvv
+    throw ghoul::lua::LuaError(std::format(
+        "Tried to resolve shortcut file '{}' on unsupported non-Windows platform", path
+    ));
+#endif // WIN32
+}
+
+/**
+ * Returns the number of bytes of video memory that is currently being used. This function
+ * only works on Windows.
+ */
+[[codegen::luawrap]] double vramInUse() {
+    return static_cast<double>(openspace::global::openSpaceEngine->vramInUse());
+}
+
+/**
+ * Returns the number of bytes of system memory that is currently being used. This
+ * function only works on Windows.
+ */
+[[codegen::luawrap]] double ramInUse() {
+    return static_cast<double>(openspace::global::openSpaceEngine->ramInUse());
 }
 
 #include "openspaceengine_lua_codegen.cpp"

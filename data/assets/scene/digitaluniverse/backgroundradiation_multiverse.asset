@@ -1,11 +1,12 @@
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Background Radiation Textures",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_backgroundradiation_textures",
   Version = 2
 })
 
-local multiverse_planck_1 = {
+
+local PlanckMultiverse1 = {
   Identifier = "PlanckMultiverse1",
   Transform = {
     Translation = {
@@ -18,7 +19,7 @@ local multiverse_planck_1 = {
     }
   },
   Renderable = {
-    Type = "RenderableSphere",
+    Type = "RenderableSphereImageLocal",
     Enabled = false,
     Size = 3975.41417036064E23,
     Segments = 80,
@@ -26,8 +27,9 @@ local multiverse_planck_1 = {
     Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    RenderBinMode = "PreDeferredTransparent",
-    FadeInThreshold = 0.4
+    FadeInThreshold = 0.4,
+    BlendingOption = "Additive",
+    DisableDepth = true
   },
   GUI = {
     Name = "Planck Multiverse 1",
@@ -35,7 +37,7 @@ local multiverse_planck_1 = {
   }
 }
 
-local multiverse_planck_2 = {
+local PlanckMultiverse2 = {
   Identifier = "PlanckMultiverse2",
   Transform = {
     Translation = {
@@ -48,7 +50,7 @@ local multiverse_planck_2 = {
     }
   },
   Renderable = {
-    Type = "RenderableSphere",
+    Type = "RenderableSphereImageLocal",
     Enabled = false,
     Size = 3975.41417036064E23,
     Segments = 80,
@@ -56,8 +58,9 @@ local multiverse_planck_2 = {
     Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    RenderBinMode = "PreDeferredTransparent",
-    FadeInThreshold = 0.4
+    FadeInThreshold = 0.4,
+    BlendingOption = "Additive",
+    DisableDepth = true
   },
   GUI = {
     Name = "Planck Multiverse 2",
@@ -65,7 +68,7 @@ local multiverse_planck_2 = {
   }
 }
 
-local multiverse_planck_3 = {
+local PlanckMultiverse3 = {
   Identifier = "PlanckMultiverse3",
   Transform = {
     Translation = {
@@ -78,7 +81,7 @@ local multiverse_planck_3 = {
     }
   },
   Renderable = {
-    Type = "RenderableSphere",
+    Type = "RenderableSphereImageLocal",
     Enabled = false,
     Size = 3975.41417036064E23,
     Segments = 80,
@@ -86,8 +89,9 @@ local multiverse_planck_3 = {
     Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    RenderBinMode = "PreDeferredTransparent",
-    FadeInThreshold = 0.4
+    FadeInThreshold = 0.4,
+    BlendingOption = "Additive",
+    DisableDepth = true
   },
   GUI = {
     Name = "Planck Multiverse 3",
@@ -95,7 +99,7 @@ local multiverse_planck_3 = {
   }
 }
 
-local multiverse_planck_4 = {
+local PlanckMultiverse4 = {
   Identifier = "PlanckMultiverse4",
   Transform = {
     Translation = {
@@ -108,7 +112,7 @@ local multiverse_planck_4 = {
     }
   },
   Renderable = {
-    Type = "RenderableSphere",
+    Type = "RenderableSphereImageLocal",
     Enabled = false,
     Size = 3975.41417036064E23,
     Segments = 80,
@@ -116,8 +120,9 @@ local multiverse_planck_4 = {
     Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    RenderBinMode = "PreDeferredTransparent",
-    FadeInThreshold = 0.4
+    FadeInThreshold = 0.4,
+    BlendingOption = "Additive",
+    DisableDepth = true
   },
   GUI = {
     Name = "Planck Multiverse 4",
@@ -127,29 +132,28 @@ local multiverse_planck_4 = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(multiverse_planck_1)
-  openspace.addSceneGraphNode(multiverse_planck_2)
-  openspace.addSceneGraphNode(multiverse_planck_3)
-  openspace.addSceneGraphNode(multiverse_planck_4)
+  openspace.addSceneGraphNode(PlanckMultiverse1)
+  openspace.addSceneGraphNode(PlanckMultiverse2)
+  openspace.addSceneGraphNode(PlanckMultiverse3)
+  openspace.addSceneGraphNode(PlanckMultiverse4)
 end)
-  
+
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(multiverse_planck_4)
-  openspace.removeSceneGraphNode(multiverse_planck_3)
-  openspace.removeSceneGraphNode(multiverse_planck_2)
-  openspace.removeSceneGraphNode(multiverse_planck_1)
+  openspace.removeSceneGraphNode(PlanckMultiverse4)
+  openspace.removeSceneGraphNode(PlanckMultiverse3)
+  openspace.removeSceneGraphNode(PlanckMultiverse2)
+  openspace.removeSceneGraphNode(PlanckMultiverse1)
 end)
-  
-asset.export(multiverse_planck_1)
-asset.export(multiverse_planck_2)
-asset.export(multiverse_planck_3)
-asset.export(multiverse_planck_4)
+
+asset.export(PlanckMultiverse1)
+asset.export(PlanckMultiverse2)
+asset.export(PlanckMultiverse3)
+asset.export(PlanckMultiverse4)
 
 
 
 asset.meta = {
   Name = "Multiverse Background Radiation",
-  Version = "2.1",
   Description = [[Non-physical representation of the location of hypothetical cosmic
     microwave background radiation images how they would be observed from other locations
     in the universe. <br> This is not a measured dataset]],

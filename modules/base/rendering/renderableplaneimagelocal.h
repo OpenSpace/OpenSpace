@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,12 +39,10 @@ namespace documentation { struct Documentation; }
 
 class RenderablePlaneImageLocal : public RenderablePlane {
 public:
-    RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary);
+    explicit RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
-
-    bool isReady() const override;
 
     void update(const UpdateData& data) override;
 
@@ -58,6 +56,7 @@ private:
 
     properties::StringProperty _texturePath;
     ghoul::opengl::Texture* _texture = nullptr;
+    glm::vec2 _textureDimensions = glm::vec2(0.f);
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
 
     bool _isLoadingLazily = false;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,9 +32,12 @@ namespace {
         "Position",
         "Position",
         "This value is used as a static offset (in meters) that is applied to the scene "
-        "graph node that this transformation is attached to relative to its parent"
+        "graph node that this transformation is attached to relative to its parent.",
+        openspace::properties::Property::Visibility::User
     };
 
+    // This `Translation` provides a fixed translation to the attached scene graph node
+    // that does not change unless the `Position` property is changed.
     struct [[codegen::Dictionary(StaticTranslation)]] Parameters {
         // [[codegen::verbatim(PositionInfo.description)]]
         glm::dvec3 position;
@@ -48,25 +51,21 @@ documentation::Documentation StaticTranslation::Documentation() {
     return codegen::doc<Parameters>("base_transform_translation_static");
 }
 
-StaticTranslation::StaticTranslation()
-    : _position(PositionInfo, glm::dvec3(0.0), glm::dvec3(-1e35), glm::dvec3(1e35))
+StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
+    : Translation(dictionary)
+    , _position(PositionInfo, glm::dvec3(0.0), glm::dvec3(-1e35), glm::dvec3(1e35))
 {
-    // @TODO (2021-06-24, emmbr) The exponential sliders do not handle ranges with
-    // negative values very well. When they do, this line can be uncommented
-    //_position.setExponent(20.f);
-    addProperty(_position);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
+    _position = p.position;
     _position.onChange([this]() {
         requireUpdate();
         notifyObservers();
     });
-}
-
-StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
-    : StaticTranslation()
-{
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-    _position = p.position;
+    // @TODO (2021-06-24, emmbr) The exponential sliders do not handle ranges with
+    // negative values very well. When they do, this line can be uncommented
+    //_position.setExponent(20.f);
+    addProperty(_position);
 }
 
 glm::dvec3 StaticTranslation::position(const UpdateData&) const {

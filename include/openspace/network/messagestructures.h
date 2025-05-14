@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,9 +25,10 @@
 #ifndef __OPENSPACE_CORE___MESSAGESTRUCTURES___H__
 #define __OPENSPACE_CORE___MESSAGESTRUCTURES___H__
 
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <cstring>
 #include <fstream>
@@ -46,11 +47,11 @@ enum class Type : uint32_t {
 
 struct CameraKeyframe {
     CameraKeyframe() = default;
-    CameraKeyframe(const std::vector<char>& buffer) {
+    explicit CameraKeyframe(const std::vector<char>& buffer) {
         deserialize(buffer);
     }
-    CameraKeyframe(glm::dvec3&& pos, glm::dquat&& rot, std::string&& focusNode,
-        bool&& followNodeRot, float&& scale)
+    CameraKeyframe(glm::dvec3 pos, glm::dquat rot, std::string focusNode,
+                   bool followNodeRot, float scale)
         : _position(pos)
         , _rotation(rot)
         , _followNodeRotation(followNodeRot)
@@ -66,7 +67,7 @@ struct CameraKeyframe {
 
     double _timestamp = 0.0;
 
-    void serialize(std::vector<char> &buffer) const {
+    void serialize(std::vector<char>& buffer) const {
         // Add position
         buffer.insert(
             buffer.end(),
@@ -188,17 +189,14 @@ struct CameraKeyframe {
 
     void write(std::stringstream& out) const {
         // Add camera position
-        out << std::fixed << std::setprecision(7) << _position.x << ' '
-            << std::fixed << std::setprecision(7) << _position.y << ' '
-            << std::fixed << std::setprecision(7) << _position.z << ' ';
+        out << std::setprecision(std::numeric_limits<double>::max_digits10);
+        out << _position.x << ' ' << _position.y << ' ' << _position.z << ' ';
         // Add camera rotation
-        out << std::fixed << std::setprecision(7) << _rotation.x << ' '
-            << std::fixed << std::setprecision(7) << _rotation.y << ' '
-            << std::fixed << std::setprecision(7) << _rotation.z << ' '
-            << std::fixed << std::setprecision(7) << _rotation.w << ' ';
-        out << std::fixed
-            << std::setprecision(std::numeric_limits<double>::max_digits10)
-            << _scale << ' ';
+        out << _rotation.x << ' '
+            << _rotation.y << ' '
+            << _rotation.z << ' '
+            << _rotation.w << ' ';
+        out << std::scientific << _scale << ' ';
         if (_followNodeRotation) {
             out << "F ";
         }
@@ -407,7 +405,7 @@ struct ScriptMessage {
         if (buffer.size() != (sizeof(uint32_t) + len)) {
             LERRORC(
                 "ParallelPeer",
-                fmt::format(
+                std::format(
                     "Received buffer with wrong size. Expected {} got {}",
                     len, buffer.size()
                 )
@@ -468,7 +466,7 @@ struct ScriptMessage {
         std::string tmpReadbackScript;
         _script.erase();
         for (int i = 0; i < numScriptLines; ++i) {
-            std::getline(iss, tmpReadbackScript);
+            ghoul::getline(iss, tmpReadbackScript);
             size_t start = tmpReadbackScript.find_first_not_of(" ");
             tmpReadbackScript = tmpReadbackScript.substr(start);
             _script.append(tmpReadbackScript);

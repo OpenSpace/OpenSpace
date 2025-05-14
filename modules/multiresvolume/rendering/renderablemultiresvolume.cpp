@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,7 @@
 #include <modules/multiresvolume/rendering/simpletfbrickselector.h>
 #include <modules/multiresvolume/rendering/tfbrickselector.h>
 #include <modules/multiresvolume/rendering/tsp.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycastermanager.h>
@@ -42,11 +43,11 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/fmt.h>
-#include <ghoul/glm.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
+#include <ghoul/glm.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/framebufferobject.h>
@@ -60,91 +61,115 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableMultiresVolume";
-    constexpr std::string_view KeyDataSource = "Source";
-    constexpr std::string_view KeyErrorHistogramsSource = "ErrorHistogramsSource";
-    constexpr std::string_view KeyTransferFunction = "TransferFunction";
-
-    constexpr std::string_view KeyBrickSelector = "BrickSelector";
-    constexpr std::string_view KeyStartTime = "StartTime";
-    constexpr std::string_view KeyEndTime = "EndTime";
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {
         "StepSizeCoefficient",
         "Stepsize Coefficient",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CurrentTimeInfo = {
         "CurrentTime",
         "Current Time",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MemoryBudgetInfo = {
         "MemoryBudget",
         "Memory Budget",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StreamingBudgetInfo = {
         "StreamingBudget",
         "Streaming Budget",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseGlobalTimeInfo = {
         "UseGlobalTime",
         "Global Time",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LoopInfo = {
         "Loop",
         "Loop",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SelectorNameInfo = {
         "Selector",
         "Brick Selector",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StatsToFileInfo = {
         "PrintStats",
         "Print Stats",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo StatsToFileNameInfo = {
         "PrintStatsFileName",
         "Stats Filename",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
         "ScalingExponent",
         "Scaling Exponent",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScalingInfo = {
         "Scaling",
         "Scaling",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TranslationInfo = {
         "Translation",
         "Translation",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
+
+    struct [[codegen::Dictionary(RenderableMultiresVolume)]] Parameters {
+        std::filesystem::path source;
+        std::optional<std::filesystem::path> errorHistogramsSource;
+        std::optional<int> scalingExponent;
+        std::optional<float> stepSizeCoefficient;
+        std::optional<glm::vec3> scaling;
+        std::optional<glm::vec3> translation;
+        std::optional<glm::vec3> rotation;
+
+        std::optional<std::string> startTime;
+        std::optional<std::string> endTime;
+
+        std::filesystem::path transferFunction;
+
+        std::optional<std::string> brickSelector;
+    };
+#include "renderablemultiresvolume_codegen.cpp"
 } // namespace
 
 namespace openspace {
@@ -170,49 +195,19 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     )
     , _scaling(ScalingInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f))
 {
-    if (dictionary.hasValue<std::string>(KeyDataSource)) {
-        _filename = absPath(dictionary.value<std::string>(KeyDataSource)).string();
-    }
-    else {
-        LERROR(fmt::format("Node did not contain a valid '{}'", KeyDataSource));
-        return;
-    }
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasValue<std::string>(KeyErrorHistogramsSource)) {
-        _errorHistogramsPath = absPath(
-            dictionary.value<std::string>(KeyErrorHistogramsSource)
-        );
-    }
+    _filename = p.source;
+    _errorHistogramsPath = p.errorHistogramsSource.value_or(_errorHistogramsPath);
+    _scalingExponent = p.scalingExponent.value_or(_scalingExponent);
+    _stepSizeCoefficient = p.stepSizeCoefficient.value_or(_stepSizeCoefficient);
+    _scaling = p.scaling.value_or(_scaling);
+    _translation = p.translation.value_or(_translation);
+    _rotation = p.rotation.value_or(_rotation);
 
-    if (dictionary.hasValue<double>("ScalingExponent")) {
-        _scalingExponent = static_cast<int>(dictionary.value<double>("ScalingExponent"));
-    }
-
-    if (dictionary.hasValue<double>("StepSizeCoefficient")) {
-        _stepSizeCoefficient = static_cast<float>(
-            dictionary.value<double>("StepSizeCoefficient")
-        );
-    }
-
-    if (dictionary.hasValue<glm::dvec3>("Scaling")) {
-        _scaling = dictionary.value<glm::dvec3>("Scaling");
-    }
-
-    if (dictionary.hasValue<glm::dvec3>("Translation")) {
-        _translation = dictionary.value<glm::dvec3>("Translation");
-    }
-
-    if (dictionary.hasValue<glm::dvec3>("Rotation")) {
-        _rotation = dictionary.value<glm::dvec3>("Rotation");
-    }
-
-    if (dictionary.hasValue<std::string>(KeyStartTime) &&
-        dictionary.hasValue<std::string>(KeyEndTime))
-    {
-        std::string startTimeString = dictionary.value<std::string>(KeyStartTime);
-        std::string endTimeString = dictionary.value<std::string>(KeyEndTime);
-        _startTime = SpiceManager::ref().ephemerisTimeFromDate(startTimeString);
-        _endTime = SpiceManager::ref().ephemerisTimeFromDate(endTimeString);
+    if (p.startTime.has_value() && p.endTime.has_value()) {
+        _startTime = SpiceManager::ref().ephemerisTimeFromDate(*p.startTime);
+        _endTime = SpiceManager::ref().ephemerisTimeFromDate(*p.endTime);
         _loop = false;
     }
     else {
@@ -220,44 +215,13 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
         LWARNING("Node does not provide time information. Viewing one image / frame");
     }
 
-    if (dictionary.hasValue<std::string>(KeyTransferFunction)) {
-        _transferFunctionPath = absPath(
-            dictionary.value<std::string>(KeyTransferFunction)
-        ).string();
-        _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
-    }
-    else {
-        LERROR(fmt::format("Node did not contain a valid '{}'", KeyTransferFunction));
-        return;
-    }
-
-    //_pscOffset = psc(glm::vec4(0.f));
-    //_boxScaling = glm::vec3(1.f);
-
-
-    /*if (dictionary.hasKey(KeyBoxScaling)) {
-        glm::vec4 scalingVec4(_boxScaling, _w);
-        success = dictionary.getValue(KeyBoxScaling, scalingVec4);
-        if (success) {
-            _boxScaling = scalingVec4.xyz;
-            _w = scalingVec4.w;
-        }
-        else {
-            success = dictionary.getValue(KeyBoxScaling, _boxScaling);
-            if (!success) {
-                LERROR("Node '" << name << "' did not contain a valid '" <<
-                    KeyBoxScaling << "'");
-                return;
-            }
-        }
-    }*/
+    _transferFunctionPath = p.transferFunction;
+    _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
 
     _tsp = std::make_shared<TSP>(_filename);
     _atlasManager = std::make_shared<AtlasManager>(_tsp.get());
 
-    if (dictionary.hasValue<std::string>(KeyBrickSelector)) {
-        _selectorName = dictionary.value<std::string>(KeyBrickSelector);
-    }
+    _selectorName = p.brickSelector.value_or(_selectorName);
 
     std::string selectorName = _selectorName;
     if (selectorName == "simple") {
@@ -271,7 +235,7 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     }
 
     addProperty(_selectorName);
-    _selectorName.onChange([&]() {
+    _selectorName.onChange([this]() {
         Selector s;
         std::string newSelectorName = _selectorName;
         if (newSelectorName == "simple") {
@@ -423,7 +387,7 @@ void RenderableMultiresVolume::initializeGL() {
 
     global::raycasterManager->attachRaycaster(*_raycaster);
 
-    auto onChange = [&](bool enabled) {
+    auto onChange = [this](bool enabled) {
         if (enabled) {
             global::raycasterManager->attachRaycaster(*_raycaster);
         }
@@ -456,36 +420,31 @@ bool RenderableMultiresVolume::initializeSelector() {
         case Selector::TF:
             if (_errorHistogramManager) {
                  std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
-                     fmt::format(
-                         "{}_{}_errorHistograms",
-                         std::filesystem::path(_filename).stem().string(), nHistograms
-                     ),
+                     std::format("{}_{}_errorHistograms", _filename.stem(), nHistograms),
                      ""
                 );
                 std::ifstream cacheFile(cached, std::ios::in | std::ios::binary);
                 if (cacheFile.is_open()) {
-                    // Read histograms from cache.
+                    // Read histograms from cache
                     cacheFile.close();
                     LINFO(
-                        fmt::format("Loading histograms from cache: {}", cached)
+                        std::format("Loading histograms from cache '{}'", cached)
                     );
                     success &= _errorHistogramManager->loadFromFile(cached);
                 }
                 else if (!_errorHistogramsPath.empty()) {
-                    // Read histograms from scene data.
-                    LINFO(fmt::format(
-                        "Loading histograms from scene data: {}", _errorHistogramsPath
+                    // Read histograms from scene data
+                    LINFO(std::format(
+                        "Loading histograms from scene data '{}'", _errorHistogramsPath
                     ));
-                    success &= _errorHistogramManager->loadFromFile(
-                        _errorHistogramsPath.string()
-                    );
+                    success &= _errorHistogramManager->loadFromFile(_errorHistogramsPath);
                 }
                 else {
-                    // Build histograms from tsp file.
-                    LWARNING(fmt::format("Failed to open {}", cached));
+                    // Build histograms from tsp file
+                    LWARNING(std::format("Failed to open '{}'", cached));
                     success &= _errorHistogramManager->buildHistograms(nHistograms);
                     if (success) {
-                        LINFO(fmt::format("Writing cache to {}", cached));
+                        LINFO(std::format("Writing cache to '{}'", cached));
                         _errorHistogramManager->saveToFile(cached);
                     }
                 }
@@ -496,27 +455,25 @@ bool RenderableMultiresVolume::initializeSelector() {
         case Selector::SIMPLE:
             if (_histogramManager) {
                 std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
-                    fmt::format("{}_{}_histogram",
-                        std::filesystem::path(_filename).stem().string(), nHistograms
-                    ),
+                    std::format("{}_{}_histogram", _filename.stem(), nHistograms),
                     ""
                 );
                 std::ifstream cacheFile(cached, std::ios::in | std::ios::binary);
                 if (cacheFile.is_open()) {
                     // Read histograms from cache.
                     cacheFile.close();
-                    LINFO(fmt::format("Loading histograms from {}", cached));
+                    LINFO(std::format("Loading histograms from '{}'", cached));
                     success &= _histogramManager->loadFromFile(cached);
                 }
                 else {
                     // Build histograms from tsp file.
-                    LWARNING(fmt::format("Failed to open {}", cached));
+                    LWARNING(std::format("Failed to open '{}'", cached));
                     success &= _histogramManager->buildHistograms(
                         _tsp.get(),
                         nHistograms
                     );
                     if (success) {
-                        LINFO(fmt::format("Writing cache to {}", cached));
+                        LINFO(std::format("Writing cache to '{}'", cached));
                         _histogramManager->saveToFile(cached);
                     }
                 }
@@ -527,9 +484,8 @@ bool RenderableMultiresVolume::initializeSelector() {
         case Selector::LOCAL:
             if (_localErrorHistogramManager) {
                  std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
-                    fmt::format(
-                        "{}_{}_localErrorHistograms",
-                        std::filesystem::path(_filename).stem().string(), nHistograms
+                    std::format(
+                        "{}_{}_localErrorHistograms", _filename.stem(), nHistograms
                     ),
                     ""
                 );
@@ -537,15 +493,15 @@ bool RenderableMultiresVolume::initializeSelector() {
                 if (cacheFile.is_open()) {
                     // Read histograms from cache.
                     cacheFile.close();
-                    LINFO(fmt::format("Loading histograms from {}", cached));
+                    LINFO(std::format("Loading histograms from '{}'", cached));
                     success &= _localErrorHistogramManager->loadFromFile(cached);
                 }
                 else {
                     // Build histograms from tsp file.
-                    LWARNING(fmt::format("Failed to open {}", cached));
+                    LWARNING(std::format("Failed to open '{}'", cached));
                     success &= _localErrorHistogramManager->buildHistograms(nHistograms);
                     if (success) {
-                        LINFO(fmt::format("Writing cache to {}", cached));
+                        LINFO(std::format("Writing cache to '{}'", cached));
                         _localErrorHistogramManager->saveToFile(cached);
                     }
                 }
@@ -563,7 +519,7 @@ void RenderableMultiresVolume::preResolve(ghoul::opengl::ProgramObject* program)
 
     std::stringstream ss;
     ss << "opacity_" << getId();
-    program->setUniform(ss.str(), visible ? 1.0f : 0.0f);
+    program->setUniform(ss.str(), visible ? 1.f : 0.f);
 
     ss.str(std::string());
     ss << "stepSizeCoefficient_" << getId();

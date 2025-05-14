@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -90,7 +90,7 @@ vec3 getLevelWeights(float distToVertexOnEllipsoid) {
 void main() {
   // Position in cameraspace
   vec3 p = bilinearInterpolation(in_uv);
-  
+
   // Calculate desired level based on distance to the vertex on the ellipsoid
   // Before any heightmapping is done
   float distToVertexOnEllipsoid = length(p + patchNormalCameraSpace * chunkMinHeight);
@@ -100,7 +100,7 @@ void main() {
 
   // Get the height value and apply skirts
   float height = getTileHeightScaled(in_uv, levelWeights) - getTileVertexSkirtLength() * 100.0;
-  
+
   // Translate the point along normal
   p += patchNormalCameraSpace * height;
 

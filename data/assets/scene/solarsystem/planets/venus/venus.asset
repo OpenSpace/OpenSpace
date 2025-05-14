@@ -1,13 +1,16 @@
-local transforms = asset.require("./transforms")
-asset.require("spice/base")
 asset.require("./trail")
+local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
 
-local labelsPath = asset.syncedResource({
+
+
+local labelsPath = asset.resource({
   Name = "Venus Labels",
   Type = "HttpSynchronization",
   Identifier = "venus_labels",
   Version = 1
 })
+
 
 local Venus = {
   Identifier = "Venus",
@@ -15,26 +18,19 @@ local Venus = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "VENUS",
-      Observer = "VENUS BARYCENTER"
+      Target = coreKernels.ID.Venus,
+      Observer = coreKernels.ID.VenusBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_VENUS",
-      DestinationFrame = "GALACTIC"
-    },
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = "VENUS",
-      Observer = "VENUS BARYCENTER"
+      SourceFrame = coreKernels.Frame.Venus,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
     --Radii = { 6051900.0, 6051900.0, 6051800.0 },
     Radii = { 6051900.0, 6051900.0, 6051900.0 },
-    SegmentsPerPatch = 64,
-    Layers = {},
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "venus.labels",
@@ -51,8 +47,7 @@ local Venus = {
   Tag = { "planet_solarSystem", "planet_terrestrial" },
   GUI = {
     Name = "Venus",
-    Path = "/Solar System/Planets/Venus",
-    Description = "Venus globe with labels and map layers"
+    Path = "/Solar System/Planets/Venus"
   }
 }
 
@@ -60,43 +55,46 @@ local VenusLabel = {
   Identifier = "VenusLabel",
   Parent = Venus.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Venus",
     FontSize = 70.0,
-    Size = 8.54,
-    MinMaxSize = { 1, 100 },
+    Size = 8.5,
+    MinMaxSize = { 1, 40 },
     OrientationOption = "Camera View Direction",
-    BlendMode = "Additive"
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 1.5, 25.0 },
+    FadeWidths = { 1.0, 35.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {
       Name = "Venus Label",
-      Path = "/Solar System/Planets/Venus",
-      Description = "Label for Venus, viewable within the solar system"
+      Path = "/Solar System/Planets/Venus"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Venus)
   openspace.addSceneGraphNode(VenusLabel)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(VenusLabel)
   openspace.removeSceneGraphNode(Venus)
 end)
-    
+
 asset.export(Venus)
 asset.export(VenusLabel)
 
 
 
 asset.meta = {
-    Name = "Venus",
-    Version = "1.1",
-    Description = "Venus globe with labels, and main planet label",
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Venus",
+  Description = "Venus globe with labels, and main planet label",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

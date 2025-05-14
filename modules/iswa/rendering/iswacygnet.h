@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/engine/downloadmanager.h>
-#include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/rendering/transferfunction.h>
 #include <ghoul/glm.h>
 #include <chrono>
@@ -43,7 +43,7 @@ class TransferFunction;
 class IswaCygnet : public Renderable {
 
 public:
-    IswaCygnet(const ghoul::Dictionary& dictionary);
+    explicit IswaCygnet(const ghoul::Dictionary& dictionary);
     virtual ~IswaCygnet();
 
     void initializeGL() override;
@@ -74,7 +74,7 @@ protected:
 
     /**
      * Registers the properties that are equal in all IswaCygnets regardless of being part
-     * of a group or not
+     * of a group or not.
      */
     virtual void registerProperties();
     virtual void unregisterProperties();
@@ -90,7 +90,7 @@ protected:
     /**
      * Should create a new texture and populate the _textures vector.
      *
-     * \return \c true if update was successful
+     * \return `true` if update was successful
      */
     virtual bool updateTexture() = 0;
 
@@ -98,7 +98,7 @@ protected:
      * Is called before updateTexture. For IswaCygnets getting data from a HTTP request,
      * this function should get the dataFile from the future object.
      *
-     * \return \c true if update was successful
+     * \return `true` if update was successful
      */
     virtual bool updateTextureResource() = 0;
 
@@ -107,14 +107,14 @@ protected:
      * Texture cygnets, this should be an image. For DataCygnets, this should be the data
      * file.
      *
-     * \return \c true if update was successful
+     * \return `true` if update was successful
      */
     virtual bool downloadTextureResource(double timestamp) = 0;
 
     virtual bool readyToRender() const = 0;
 
     /**
-     * Should set all uniforms needed to render
+     * Should set all uniforms needed to render.
      */
     virtual void setUniforms() = 0;
 

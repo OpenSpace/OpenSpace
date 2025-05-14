@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,32 +39,33 @@ namespace documentation { struct Documentation; }
  * The ResourceSynchronization class handles the download of persistent datasets, meaning
  * that the contents of the data is only downloaded once at the beginning of the
  * application. A ResourceSynchronization is created through the #createFromDictionary
- * function, whose dictionary must contain at least a \c Type value that specifies which
+ * function, whose dictionary must contain at least a `Type` value that specifies which
  * type of ResourceSynchronization should be create. Any type that is registered to the
  * global factory is a valid type here.
+ *
  * A ResourceSynchronization state can be in one of four states that can be queried
  * through the #isSyncing, #isResolved, and #isRejected functions. The available states
  * are:
- * \c Unsynchronized (#isSyncing = false, #isResolved = false, #isRejected = false),
- * \c Syncing (#isSyncing = true, #isResolved = false, #isRejected = false),
- * \c Resolved (#isSyncing = false, #isResolved = true, #isRejected = false),
- * \c Rejected (#isSyncing = false, #isResolved = false, #isRejected = true)
+ *   - `Unsynchronized` (#isSyncing = false, #isResolved = false, #isRejected = false)
+ *   - `Syncing` (#isSyncing = true, #isResolved = false, #isRejected = false)
+ *   - `Resolved` (#isSyncing = false, #isResolved = true, #isRejected = false)
+ *   - `Rejected` (#isSyncing = false, #isResolved = false, #isRejected = true)
  */
 class ResourceSynchronization {
 public:
     /**
      * Creates a new ResourceSynchronization based on the \p dictionary information that
-     * is passed into this function. The dictionary must contain at least a \c Type, an
-     * \c Identifier, and a \c Name, with other optional parameters depending on the
+     * is passed into this function. The dictionary must contain at least a `Type`, an
+     * `Identifier`, and a `Name`, with other optional parameters depending on the
      * specific subtype of ResourceSynchronization class is is specified through the
-     * provided \c Type.
+     * provided `Type`.
      *
      * \param dictionary The dictionary containing the parameters with which to choose the
      *        specific type of ResourceSynchronization and all the necessary parameters to
      *        initialize said ResourceSynchronization
      *
-     * \throw SpecificationError If the \p dictionary does not contain a \c Type, an
-     *        \c Identifier, and a \c Name
+     * \throw SpecificationError If the \p dictionary does not contain a `Type`, an
+     *        `Identifier`, and a `Name`
      */
     static std::unique_ptr<ResourceSynchronization> createFromDictionary(
         const ghoul::Dictionary& dictionary);
@@ -74,7 +75,9 @@ public:
      */
     virtual std::string generateUid() = 0;
 
-    /// Defaulted virtual constructor
+    /**
+     * Defaulted virtual constructor.
+     */
     virtual ~ResourceSynchronization() = default;
 
     /**
@@ -85,10 +88,14 @@ public:
      */
     virtual std::filesystem::path directory() const = 0;
 
-    /// Starts the synchronization for this ResourceSynchronization
+    /**
+     * Starts the synchronization for this ResourceSynchronization.
+     */
     virtual void start() = 0;
 
-    /// Cancels any ongoing synchronization of this ResourceSynchronization
+    /**
+     * Cancels any ongoing synchronization of this ResourceSynchronization.
+     */
     virtual void cancel() = 0;
 
     /**
@@ -113,8 +120,8 @@ public:
     size_t nTotalBytes() const;
 
     /**
-     * Returns \c true if the total number of bytes for this ResourceSynchronization is
-     * known. Will return \c false otherwise. This number always will only contain the
+     * Returns `true` if the total number of bytes for this ResourceSynchronization is
+     * known. Will return `false` otherwise. This number always will only contain the
      * number of bytes of actual payload data, not any additional data transfers that some
      * subtypes might require.
      *
@@ -140,27 +147,27 @@ public:
      * Returns whether this ResourceSynchronization is currently syncing its files and has
      * not finished doing so.
      *
-     * \return \c true if this object is currently synchronizing
+     * \return `true` if this object is currently synchronizing
      */
     bool isSyncing() const;
 
     /**
      * Returns whether this ResourceSynchronization has successfully finished
-     * synchronizing all of its files. Once this has returned \c true, it will stay so
+     * synchronizing all of its files. Once this has returned `true`, it will stay so
      * until the object is destroyed and it is guaranteed that no more files will be added
      * to the #directory.
      *
-     * \return \c true if this object is finished synchronizing
+     * \return `true` if this object is finished synchronizing
      */
     bool isResolved() const;
 
     /**
      * Returns whether this ResourceSynchronization has failed to synchronizing all or any
-     * of its files. Once this has returned \c true, it will stay so until the object is
+     * of its files. Once this has returned `true`, it will stay so until the object is
      * destroyed. Some subclasses might try to download as many files as possible, but no
      * general guarantee is provided regarding the completeness of the download.
      *
-     * \return \c true if this object has failed synchronizing one or more of the required
+     * \return `true` if this object has failed synchronizing one or more of the required
      *         files
      */
     bool isRejected() const;
@@ -168,10 +175,14 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    /// Empty constructor that just sets the synchronization root
+    /**
+     * Empty constructor that just sets the synchronization root.
+     */
     ResourceSynchronization(std::filesystem::path synchronizationRoot);
 
-    /// Representation of the state that this object can be in
+    /**
+     * Representation of the state that this object can be in.
+     */
     enum class State {
         Unsynced,
         Syncing,
@@ -179,11 +190,15 @@ protected:
         Rejected
     };
 
-    /// Creates a file next to the directory that indicates that this
-    /// ResourceSynchronization has successfully synchronized its contents
-    void createSyncFile() const;
+    /**
+     * Creates a file next to the directory that indicates that this.
+     * ResourceSynchronization has successfully synchronized its contents.
+     */
+    virtual void createSyncFile(bool isFullySynchronized = true) const;
 
-    /// Returns whether the synchronization file create in #createSyncFile exists
+    /**
+     * Returns whether the synchronization file create in #createSyncFile exists.
+     */
     bool hasSyncFile() const;
 
     /// The internal identifier for this ResourceSynchronization. It is not enforced but

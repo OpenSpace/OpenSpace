@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/dashboard.h>
@@ -50,31 +50,33 @@ namespace {
 
     ImFont* captionFont = nullptr;
 
-    constexpr std::array<const char*, 2> UniformNames = { "tex", "ortho" };
-
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
-        "Is Enabled",
-        "This setting determines whether this object will be visible or not"
+        "Enabled",
+        "This setting determines whether this object will be visible or not.",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo CollapsedInfo = {
         "Collapsed",
         "Is Collapsed",
-        "This setting determines whether this window is collapsed or not"
+        "This setting determines whether this window is collapsed or not.",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowHelpInfo = {
         "ShowHelpText",
         "Show tooltip help",
         "If this value is enabled these kinds of tooltips are shown for most properties "
-        "explaining what impact they have on the visuals"
+        "explaining what impact they have on the visuals.",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo HelpTextDelayInfo = {
         "HelpTextDelay",
         "Tooltip Delay (in s)",
-        "This value determines the delay in seconds after which the tooltip is shown"
+        "This value determines the delay in seconds after which the tooltip is shown.",
+        openspace::properties::Property::Visibility::Developer
     };
 } // namespace
 
@@ -125,14 +127,14 @@ ImGUIModule::ImGUIModule()
         addProperty(_helpTextDelay);
     }
 
-    global::callback::draw2D->emplace_back([&]() {
-        ZoneScopedN("ImGUI")
+    global::callback::draw2D->emplace_back([this]() {
+        ZoneScopedN("ImGUI");
 
         if (!_isEnabled) {
             return;
         }
 
-        WindowDelegate& delegate = *global::windowDelegate;
+        const WindowDelegate& delegate = *global::windowDelegate;
         const bool showGui = delegate.hasGuiWindow() ? delegate.isGuiWindow() : true;
         if (delegate.isMaster() && showGui) {
             const glm::ivec2 windowSize = delegate.currentSubwindowSize();
@@ -153,10 +155,10 @@ ImGUIModule::ImGUIModule()
     });
 
     global::callback::keyboard->emplace_back(
-        [&](Key key, KeyModifier mod, KeyAction action,
-            IsGuiWindow isGuiWindow) -> bool
+        [this](Key key, KeyModifier mod, KeyAction action,
+               IsGuiWindow isGuiWindow) -> bool
         {
-            ZoneScopedN("ImGUI")
+            ZoneScopedN("ImGUI");
 
             if (!isGuiWindow || !_isEnabled) {
                 return false;
@@ -166,10 +168,10 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::character->emplace_back(
-        [&](unsigned int codepoint, KeyModifier modifier,
-            IsGuiWindow isGuiWindow) -> bool
+        [this](unsigned int codepoint, KeyModifier modifier,
+               IsGuiWindow isGuiWindow) -> bool
         {
-            ZoneScopedN("ImGUI")
+            ZoneScopedN("ImGUI");
 
             if (!isGuiWindow || !_isEnabled) {
                 return false;
@@ -179,7 +181,7 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::mousePosition->emplace_back(
-        [&](double x, double y, IsGuiWindow isGuiWindow) {
+        [this](double x, double y, IsGuiWindow isGuiWindow) {
             if (!isGuiWindow) {
                 return; // do nothing
             }
@@ -188,10 +190,10 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::mouseButton->emplace_back(
-        [&](MouseButton button, MouseAction action, KeyModifier,
-            IsGuiWindow isGuiWindow) -> bool
+        [this](MouseButton button, MouseAction action, KeyModifier,
+               IsGuiWindow isGuiWindow) -> bool
         {
-            ZoneScopedN("ImGUI")
+            ZoneScopedN("ImGUI");
 
             if (!isGuiWindow) {
                 return false;
@@ -209,8 +211,8 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::mouseScrollWheel->emplace_back(
-        [&](double, double posY, IsGuiWindow isGuiWindow) -> bool {
-            ZoneScopedN("ImGUI")
+        [this](double, double posY, IsGuiWindow isGuiWindow) -> bool {
+            ZoneScopedN("ImGUI");
 
             if (!isGuiWindow || !_isEnabled) {
                 return false;
@@ -220,19 +222,19 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::touchDetected->emplace_back(
-        [&](TouchInput input) -> bool {
+        [this](TouchInput input) -> bool {
             return touchDetectedCallback(input);
         }
     );
 
     global::callback::touchUpdated->emplace_back(
-        [&](TouchInput input) -> bool {
+        [this](TouchInput input) -> bool {
             return touchUpdatedCallback(input);
         }
     );
 
     global::callback::touchExit->emplace_back(
-        [&](TouchInput input) {
+        [this](TouchInput input) {
             touchExitCallback(input);
         }
     );
@@ -256,7 +258,7 @@ void ImGUIModule::internalInitialize(const ghoul::Dictionary&) {
         global::screenSpaceRootPropertyOwner,
         global::moduleEngine,
         global::navigationHandler,
-        global::sessionRecording,
+        global::sessionRecordingHandler,
         global::timeManager,
         global::renderEngine,
         global::parallelPeer,
@@ -277,7 +279,7 @@ void ImGUIModule::internalDeinitialize() {
 
 void ImGUIModule::internalInitializeGL() {
     std::filesystem::path file = FileSys.cacheManager()->cachedFilename("imgui.ini", "");
-    LDEBUG(fmt::format("Using {} as ImGUI cache location", file));
+    LDEBUG(std::format("Using '{}' as ImGUI cache location", file));
 
     _iniFileBuffer.resize(file.string().size() + 1);
 
@@ -287,10 +289,10 @@ void ImGUIModule::internalInitializeGL() {
     strcpy(_iniFileBuffer.data(), file.c_str());
 #endif
 
-    int nWindows = global::windowDelegate->nWindows();
+    const int nWindows = global::windowDelegate->nWindows();
     _contexts.resize(nWindows);
 
-    for (int i = 0; i < nWindows; ++i) {
+    for (int i = 0; i < nWindows; i++) {
         _contexts[i] = ImGui::CreateContext();
         ImGui::SetCurrentContext(_contexts[i]);
 
@@ -322,13 +324,13 @@ void ImGUIModule::internalInitializeGL() {
         );
 
         ImGuiStyle& style = ImGui::GetStyle();
-        style.WindowPadding = { 4.f, 4.f };
+        style.WindowPadding = ImVec2(4.f, 4.f);
         style.WindowRounding = 0.f;
-        style.FramePadding = { 3.f, 3.f };
+        style.FramePadding = ImVec2(3.f, 3.f);
         style.FrameRounding = 0.f;
-        style.ItemSpacing = { 3.f, 2.f };
-        style.ItemInnerSpacing = { 3.f, 2.f };
-        style.TouchExtraPadding = { 1.f, 1.f };
+        style.ItemSpacing = ImVec2(3.f, 2.f);
+        style.ItemInnerSpacing = ImVec2(3.f, 2.f);
+        style.TouchExtraPadding = ImVec2(1.f, 1.f);
         style.IndentSpacing = 15.f;
         style.ScrollbarSize = 10.f;
         style.ScrollbarRounding = 0.f;
@@ -386,12 +388,12 @@ void ImGUIModule::internalInitializeGL() {
         absPath("${MODULE_IMGUI}/shaders/gui_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
     {
-        unsigned char* texData;
+        unsigned char* texData = nullptr;
         glm::ivec2 texSize = glm::ivec2(0, 0);
-        for (int i = 0; i < nWindows; ++i) {
+        for (int i = 0; i < nWindows; i++) {
             ImGui::SetCurrentContext(_contexts[i]);
 
             ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&texData, &texSize.x, &texSize.y);
@@ -405,8 +407,8 @@ void ImGUIModule::internalInitializeGL() {
         _fontTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
         _fontTexture->uploadTexture();
     }
-    for (int i = 0; i < nWindows; ++i) {
-        uintptr_t texture = static_cast<GLuint>(*_fontTexture);
+    for (int i = 0; i < nWindows; i++) {
+        const uintptr_t texture = static_cast<GLuint>(*_fontTexture);
         ImGui::SetCurrentContext(_contexts[i]);
         ImGui::GetIO().Fonts->TexID = reinterpret_cast<void*>(texture);
     }
@@ -421,9 +423,9 @@ void ImGUIModule::internalInitializeGL() {
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-    GLuint positionAttrib = _program->attributeLocation("in_position");
-    GLuint uvAttrib = _program->attributeLocation("in_uv");
-    GLuint colorAttrib = _program->attributeLocation("in_color");
+    const GLuint positionAttrib = _program->attributeLocation("in_position");
+    const GLuint uvAttrib = _program->attributeLocation("in_uv");
+    const GLuint colorAttrib = _program->attributeLocation("in_color");
 
     glEnableVertexAttribArray(positionAttrib);
     glVertexAttribPointer(
@@ -495,7 +497,7 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
 
     if (_program->isDirty()) {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
     }
 
    //
@@ -545,10 +547,10 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
 
     // Avoid rendering when minimized, scale coordinates for retina displays
     // (screen coordinates != framebuffer coordinates)
-    GLsizei fbWidth = static_cast<GLsizei>(
+    const GLsizei fbWidth = static_cast<GLsizei>(
         io.DisplaySize.x * io.DisplayFramebufferScale.x
     );
-    GLsizei fbHeight = static_cast<GLsizei>(
+    const GLsizei fbHeight = static_cast<GLsizei>(
         io.DisplaySize.y * io.DisplayFramebufferScale.y
     );
     if (fbWidth == 0 || fbHeight == 0) {
@@ -586,7 +588,7 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
 
     glBindVertexArray(vao);
 
-    for (int i = 0; i < drawData->CmdListsCount; ++i) {
+    for (int i = 0; i < drawData->CmdListsCount; i++) {
         const ImDrawList* cmdList = drawData->CmdLists[i];
         const ImDrawIdx* indexBufferOffset = nullptr;
 
@@ -641,14 +643,14 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
 }
 
 bool ImGUIModule::mouseButtonCallback(MouseButton, MouseAction) {
-    ImGuiIO& io = ImGui::GetIO();
-    bool consumeEvent = io.WantCaptureMouse;
+    const ImGuiIO& io = ImGui::GetIO();
+    const bool consumeEvent = io.WantCaptureMouse;
     return consumeEvent;
 }
 
 bool ImGUIModule::mouseWheelCallback(double position) {
     ImGuiIO& io = ImGui::GetIO();
-    bool consumeEvent = io.WantCaptureMouse;
+    const bool consumeEvent = io.WantCaptureMouse;
     if (consumeEvent) {
         io.MouseWheel = static_cast<float>(position);
     }
@@ -697,7 +699,7 @@ bool ImGUIModule::keyCallback(Key key, KeyModifier modifier, KeyAction action) {
 
 bool ImGUIModule::charCallback(unsigned int character, KeyModifier) {
     ImGuiIO& io = ImGui::GetIO();
-    bool consumeEvent = io.WantCaptureKeyboard;
+    const bool consumeEvent = io.WantCaptureKeyboard;
     if (consumeEvent) {
         io.AddInputCharacter(static_cast<unsigned short>(character));
     }
@@ -713,7 +715,7 @@ bool ImGUIModule::touchDetectedCallback(TouchInput input) {
         return false;
     }
     if (_validTouchStates.empty()) {
-        io.MousePos = { windowPos.x, windowPos.y };
+        io.MousePos = ImVec2(windowPos.x, windowPos.y);
         io.MouseClicked[0] = true;
     }
     _validTouchStates.push_back(input);
@@ -729,14 +731,14 @@ bool ImGUIModule::touchUpdatedCallback(TouchInput input) {
     auto it = std::find_if(
         _validTouchStates.cbegin(),
         _validTouchStates.cend(),
-        [&](const TouchInput& state) {
+        [&input](const TouchInput& state) {
             return state.fingerId == input.fingerId &&
                    state.touchDeviceId == input.touchDeviceId;
         }
     );
 
     if (it == _validTouchStates.cbegin()) {
-        glm::vec2 windowPos = input.currentWindowCoordinates();
+        const glm::vec2 windowPos = input.currentWindowCoordinates();
         io.MousePos = ImVec2(windowPos.x, windowPos.y);
         io.MouseClicked[0] = true;
         return true;
@@ -755,7 +757,7 @@ void ImGUIModule::touchExitCallback(TouchInput input) {
     const auto found = std::find_if(
         _validTouchStates.cbegin(),
         _validTouchStates.cend(),
-        [&](const TouchInput& state) {
+        [&input](const TouchInput& state) {
             return state.fingerId == input.fingerId &&
                    state.touchDeviceId == input.touchDeviceId;
         }
@@ -768,7 +770,7 @@ void ImGUIModule::touchExitCallback(TouchInput input) {
     ImGuiIO& io = ImGui::GetIO();
     _validTouchStates.erase(found);
     if (_validTouchStates.empty()) {
-        glm::vec2 windowPos = input.currentWindowCoordinates();
+        const glm::vec2 windowPos = input.currentWindowCoordinates();
         io.MousePos = ImVec2(windowPos.x, windowPos.y);
         io.MouseClicked[0] = false;
     }

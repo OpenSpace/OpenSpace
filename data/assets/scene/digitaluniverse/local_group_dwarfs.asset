@@ -1,0 +1,83 @@
+local textures = asset.resource({
+  Name = "Local Dwarfs Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_localdwarfs_textures",
+  Version = 1
+})
+
+local speck = asset.resource({
+  Name = "Local Dwarfs Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_localdwarfs_speck",
+  Version = 2
+})
+
+
+local Object = {
+  Identifier = "LocalDwarfGalaxies",
+  Renderable = {
+    Type = "RenderablePolygonCloud",
+    Enabled = false,
+    Opacity = 0.3,
+    File = speck .. "localgroup.speck",
+    Labels = {
+      File = speck .. "localgroup.label",
+      Color = { 0.3, 0.3, 1.0 },
+      Size = 18.4,
+      MinMaxSize = { 7, 20 },
+      Unit = "Mpc"
+    },
+    Coloring = {
+      FixedColor = { 0.5, 1.0, 1.0 },
+      ColorMapping = {
+        File = speck .. "localgroup.cmap",
+        ParameterOptions = {
+          { Key = "association" }
+        }
+      }
+    },
+    PolygonSides = 12,
+    Unit = "Mpc",
+    SizeSettings = {
+      ScaleExponent = 20.77,
+      MaxSize = 0.7,
+      EnableMaxSizeControl = true
+    }
+  },
+  GUI = {
+    Name = "Local Group",
+    Path = "/Universe/Nearby Surveys",
+    Description = [[A group of galaxies is typically composed of a small number of large
+      galaxies that are surrounded by a large number of small galaxies. The Milky Way
+      belongs to the Local Group, and is one of roughly 100 galaxies in that group. The
+      Milky Way, the Andromeda Galaxy (also known as Messier 31, or M31), and the
+      Triangulum Galaxy (M33) are three of the largest galaxies in the Local Group. Each
+      is a spiral galaxy containing hundreds of billions of stars. Surrounding the Milky
+      Way and Andromeda are a bevy of dwarf galaxies--smaller, often irregular galaxies,
+      that contain hundreds of millions to a few billion stars. Colors: Aqua are galaxies
+      associated with the Milky Way, Yellow shows galaxies huddled around the Andromeda
+      Galaxy, Green are other Local Group members, and Gray are neighboring galaxies not
+      in the Local Group. Census: 102 galaxies.]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Object)
+end)
+
+asset.export(Object)
+
+
+
+asset.meta = {
+  Name = "Local Group",
+  Description = Object.GUI.Description,
+  Author = "Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe"
+}

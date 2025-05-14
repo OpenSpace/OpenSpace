@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,7 +53,7 @@ float denormalizeFloat(float inpt) {
 /**
  * Compute the length of a vector.
  * Supporting huge vectors, where the square of any of the components is too large to be
- * represented as a float. 
+ * represented as a float.
  */
 float safeLength(vec4 v) {
   float m = max(max(max(abs(v.x), abs(v.y)), abs(v.z)), abs(v.w));

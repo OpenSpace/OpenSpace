@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___STRINGLISTPROPERTY___H__
 #define __OPENSPACE_CORE___STRINGLISTPROPERTY___H__
 
-#include <openspace/properties/listproperty.h>
+#include <openspace/properties/misc/listproperty.h>
 #include <string>
 
 namespace openspace::properties {
@@ -35,17 +35,17 @@ public:
     StringListProperty(Property::PropertyInfo info,
         std::vector<std::string> values = std::vector<std::string>());
 
-    std::string_view className() const override;
-    int typeLua() const override;
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
+    void getLuaValue(lua_State* state) const override final;
+
+    std::string stringValue() const override final;
     using TemplateProperty<std::vector<std::string>>::operator std::vector<std::string>;
     using TemplateProperty<std::vector<std::string>>::operator=;
 
-protected:
-    std::vector<std::string> fromLuaConversion(lua_State* state,
-        bool& success) const override;
-    void toLuaConversion(lua_State* state) const override;
-    std::string toStringConversion() const override;
+private:
+    std::vector< std::string> toValue(lua_State* state) const override final;
 };
 
 } // namespace openspace::properties

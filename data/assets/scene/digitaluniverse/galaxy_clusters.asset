@@ -1,0 +1,59 @@
+local transforms = asset.require("./transforms")
+
+
+
+local speck = asset.resource({
+  Name = "Clusters Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_clusters_speck",
+  Version = 2
+})
+
+
+local Object = {
+  Identifier = "GalaxyClusterLabels",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    Enabled = false,
+    Labels = {
+      Enabled = true,
+      File = speck .. "galclust.label",
+      Color = { 0.9, 0.5, 0.22 },
+      Size = 22,
+      MinMaxSize = { 8, 15 },
+      Unit = "Mpc",
+      TransformationMatrix = transforms.Supergalactic
+    },
+    Opacity = 0.65,
+    Unit = "Mpc",
+    TransformationMatrix = transforms.Supergalactic
+  },
+  GUI = {
+    Name = "Galaxy Cluster Labels",
+    Path = "/Universe/Nearby Surveys",
+    Description = [[The galaxy clusters dataset is a series of labels that mark where the
+      large clusters of galaxies are in the nearby universe. These labels must be used in
+      conjunction with the Tully galaxy group. Census: 15 galaxy cluster labels.]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Object)
+end)
+
+asset.export(Object)
+
+
+
+asset.meta = {
+  Name = "Galaxy Clusters Labels",
+  Description = Object.GUI.Description,
+  Author = "Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe"
+}

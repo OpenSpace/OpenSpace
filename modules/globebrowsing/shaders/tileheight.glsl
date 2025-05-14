@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -79,7 +79,7 @@ float getTileHeight(vec2 uv, vec3 levelWeights) {
 
 float getTileHeightScaled(vec2 uv, vec3 levelWeights) {
   float height = getTileHeight(uv, levelWeights);
-    
+
 #if USE_HEIGHTMAP
     height *= heightScale;
 #endif // USE_HEIGHTMAP

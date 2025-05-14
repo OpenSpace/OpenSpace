@@ -1,10 +1,13 @@
-local globeIdentifier = asset.require("../../mars").Mars.Identifier
+local globe = asset.require("../../mars")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "HiRISE-PSP",
   Name = "HiRISE",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("hirise.vrt"),
+  ZIndex = 70,
+  FilePath = asset.resource("hirise.vrt"),
   BlendMode = "Color",
   Settings = {
     Gamma = 1.0,
@@ -20,24 +23,24 @@ local layer = {
     construction of this layer were produced by the team at the University of Arizona.
     This tiled web service, as hosted by Esri, is made available using lossy Jpeg
     compression using an 8 bit data range, using a linear stretch from the original
-    10 bit range. (Description from URL)]],
+    10 bit range. (Description from URL)]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Mars.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Mars.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 
 asset.meta = {
   Name = "HiRISE",
-  Version = "1.1",
   Description = [[Updated HiRISE layer for Mars with raw unselected imagery. This map is
     hosted by ESRI]],
   Author = "esri_astro",

@@ -1,0 +1,30 @@
+-- Only Far Renderable
+-- This example uses only shows a textured plane when the camera is further than the
+-- specified distance from the object and shows nothing if the camera is closer than that
+-- distance
+
+local Node = {
+  Identifier = "RenderableSwitch_Example-Far",
+  Renderable = {
+    Type = "RenderableSwitch",
+    RenderableFar = {
+      Type = "RenderablePlaneImageLocal",
+      Size = 300000000000,
+      Texture = openspace.absPath("${DATA}/test.jpg")
+    },
+    DistanceThreshold = 3000000000000
+  },
+  GUI = {
+    Name = "RenderableSwitch - Far",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
+

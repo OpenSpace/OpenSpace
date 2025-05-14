@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,7 +55,12 @@ void GuiActionComponent::render() {
     for (const std::pair<const K, V>& p : binds) {
         boundActions.insert(p.second);
         if (ImGui::Button(ghoul::to_string(p.first).c_str())) {
-            global::actionManager->triggerAction(p.second, ghoul::Dictionary());
+            global::actionManager->triggerAction(
+                p.second,
+                ghoul::Dictionary(),
+                interaction::ActionManager::ShouldBeSynchronized::Yes,
+                interaction::ActionManager::ShouldBeLogged::Yes
+            );
         }
         ImGui::SameLine();
 
@@ -64,7 +69,7 @@ void GuiActionComponent::render() {
 
         const interaction::Action& a = global::actionManager->action(p.second);
         ImGui::Text("%s", a.documentation.c_str());
-        if (!a.synchronization) {
+        if (a.isLocal) {
             ImGui::SameLine();
             ImGui::Text("(%s)", "local");
         }
@@ -78,7 +83,12 @@ void GuiActionComponent::render() {
         }
 
         if (ImGui::Button(action.identifier.c_str())) {
-            global::actionManager->triggerAction(action.command, ghoul::Dictionary());
+            global::actionManager->triggerAction(
+                action.command,
+                ghoul::Dictionary(),
+                interaction::ActionManager::ShouldBeSynchronized::Yes,
+                interaction::ActionManager::ShouldBeLogged::Yes
+            );
         }
         ImGui::SameLine();
 
@@ -86,7 +96,7 @@ void GuiActionComponent::render() {
         ImGui::SetCursorPosX(350.f);
 
         ImGui::Text("%s", action.documentation.c_str());
-        if (!action.synchronization) {
+        if (action.isLocal) {
             ImGui::SameLine();
             ImGui::Text("(%s)", "local");
         }

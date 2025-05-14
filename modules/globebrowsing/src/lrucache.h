@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,8 +32,8 @@
 namespace openspace::globebrowsing::cache {
 
 /**
- * Templated class implementing a Least-Recently-Used Cache.
- * <code>KeyType</code> needs to be an enumerable type.
+ * Templated class implementing a Least-Recently-Used Cache. `KeyType` needs to be an
+ * enumerable type.
  */
 template <typename KeyType, typename ValueType, typename HasherType>
 class LRUCache {
@@ -42,9 +42,9 @@ public:
     using Items = std::list<Item>;
 
     /**
-     * \param size is the maximum size of the cache given in number of cached items.
+     * \param size This is the maximum size of the cache given in number of cached items
      */
-    LRUCache(size_t size);
+    explicit LRUCache(size_t size);
 
     void put(KeyType key, ValueType value);
     std::vector<Item> putAndFetchPopped(KeyType key, ValueType value);
@@ -53,7 +53,8 @@ public:
 
     /**
      * If value exists, the value is bumped to the front of the queue.
-     * \returns true if value of this key exists.
+     *
+     * \return `true` if value of this key exists
      */
     bool touch(const KeyType& key);
     bool isEmpty() const;

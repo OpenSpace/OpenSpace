@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,14 +39,14 @@ namespace openspace {
 class TransferFunction {
 public:
     using TfChangedCallback = std::function<void (const TransferFunction&)>;
-
-    TransferFunction(const std::string& filepath,
+    
+    explicit TransferFunction(const std::filesystem::path& filepath,
         TfChangedCallback tfChangedCallback = TfChangedCallback());
     ~TransferFunction();
 
     TransferFunction(TransferFunction&& rhs) = default;
 
-    void setPath(const std::string& filepath);
+    void setPath(const std::filesystem::path& filepath);
     ghoul::opengl::Texture& texture();
     void bind();
     void update();

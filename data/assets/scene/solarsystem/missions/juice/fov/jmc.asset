@@ -1,5 +1,6 @@
-local transforms = asset.require('../transforms')
-local kernels = asset.require('../kernels')
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+
 
 
 local JMC1 = {
@@ -12,8 +13,8 @@ local JMC1 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_JMC-1",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.JMC1,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_JMC-1",
@@ -21,8 +22,7 @@ local JMC1 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "JUICE_JMC-1 FOV",
@@ -41,8 +41,8 @@ local JMC2 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_JMC-2",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.JMC2,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_JMC-2",
@@ -50,8 +50,7 @@ local JMC2 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "JUICE_JMC-2 FOV",
@@ -75,9 +74,9 @@ asset.export(JMC1)
 asset.export(JMC2)
 
 
+
 asset.meta = {
   Name = "JMC",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the Juice Monitoring Cameras (JMC) onboard Juice, which
     provide status information about the deployment of various Juice systems, like the

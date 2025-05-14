@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -98,10 +98,10 @@ void main() {
   vec3 accumulatedAlpha = vec3(0.f);
 
 
-  for (nSteps = 0; 
-      (accumulatedAlpha.r < ALPHA_LIMIT || accumulatedAlpha.g < ALPHA_LIMIT || 
-       accumulatedAlpha.b < ALPHA_LIMIT) && nSteps < rayCastSteps; 
-       ++nSteps) 
+  for (nSteps = 0;
+      (accumulatedAlpha.r < ALPHA_LIMIT || accumulatedAlpha.g < ALPHA_LIMIT ||
+       accumulatedAlpha.b < ALPHA_LIMIT) && nSteps < rayCastSteps;
+       ++nSteps)
   {
     if (nextStepSize < raycastDepth / 10000000000.f) {
       break;
@@ -125,7 +125,7 @@ void main() {
 
   finalColor = vec4(accumulatedColor, (accumulatedAlpha.r + accumulatedAlpha.g + accumulatedAlpha.b) / 3.f);
 
-  finalColor.rgb /= finalColor.a ;
+  finalColor.rgb /= finalColor.a;
 
   gl_FragDepth = normalizeFloat(entryDepth);
 }

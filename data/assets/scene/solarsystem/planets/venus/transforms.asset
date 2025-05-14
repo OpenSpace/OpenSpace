@@ -1,5 +1,7 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
+
+
 
 local VenusBarycenter = {
   Identifier = "VenusBarycenter",
@@ -7,33 +9,32 @@ local VenusBarycenter = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "VENUS BARYCENTER",
-      Observer = "SSB"
+      Target = coreKernels.ID.VenusBarycenter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
   },
   GUI = {
     Name = "Venus Barycenter",
     Path = "/Solar System/Planets/Venus",
-    Hidden = true,
-    Description = "Position for Venus Barycenter"
+    Hidden = true
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(VenusBarycenter)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(VenusBarycenter)
 end)
-  
+
 asset.export(VenusBarycenter)
 
 
 
 asset.meta = {
   Name = "Venus Transforms",
-  Version = "1.1",
   Description = "Spice translation for Venus Barycenter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

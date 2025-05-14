@@ -1,0 +1,35 @@
+-- Basic
+-- This asset creates a rotation provided by a SPICE kernel and applies it to a scene
+-- graph node that only displays coordinate axes. The rotation of the coordinate axes are
+-- determined by SPICE, in this case pretending that the coordinate axes are rotating at
+-- the same rate as Earth.
+-- For more information about SPICE see: https://naif.jpl.nasa.gov/naif/
+
+-- Load the default SPICE kernels, which are the planetary constants and the DE430 kernel
+asset.require("spice/core")
+
+local Node = {
+  Identifier = "SpiceRotation_Example",
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_EARTH",
+      DestinationFrame = "GALACTIC"
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "SpiceRotation - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

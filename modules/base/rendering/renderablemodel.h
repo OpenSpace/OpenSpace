@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,14 +26,13 @@
 #define __OPENSPACE_MODULE_BASE___RENDERABLEMODEL___H__
 
 #include <openspace/rendering/renderable.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/matrix/dmat4property.h>
 #include <openspace/properties/matrix/mat3property.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <openspace/util/distanceconversion.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/io/model/modelreader.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -56,7 +55,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableModel : public Renderable {
 public:
-    RenderableModel(const ghoul::Dictionary& dictionary);
+    explicit RenderableModel(const ghoul::Dictionary& dictionary);
     ~RenderableModel() override = default;
 
     void initialize() override;
@@ -79,13 +78,15 @@ private:
         BounceInfinitely
     };
 
+    std::filesystem::path _file;
     std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
-    double _modelScale = 1.0;
     bool _invertModelScale = false;
     bool _forceRenderInvisible = false;
     bool _notifyInvisibleDropped = true;
+    bool _modelHasAnimation = false;
     std::string _animationStart;
     AnimationMode _animationMode = AnimationMode::Once;
+    double _animationTimeScale = 1.0;
     properties::BoolProperty _enableAnimation;
 
     properties::FloatProperty _ambientIntensity;
@@ -93,21 +94,26 @@ private:
     properties::FloatProperty _specularIntensity;
 
     properties::BoolProperty _performShading;
-    properties::BoolProperty _disableFaceCulling;
+    properties::BoolProperty _enableFaceCulling;
     properties::DMat4Property _modelTransform;
+    properties::Vec3Property _pivot;
+    properties::DoubleProperty _modelScale;
     properties::Vec3Property _rotationVec;
 
-    properties::BoolProperty _disableDepthTest;
-    properties::BoolProperty _enableOpacityBlending;
+    properties::BoolProperty _enableDepthTest;
     properties::OptionProperty _blendingFuncOption;
 
-    std::string _vertexShaderPath;
-    std::string _fragmentShaderPath;
+    std::filesystem::path _vertexShaderPath;
+    std::filesystem::path _fragmentShaderPath;
     ghoul::opengl::ProgramObject* _program = nullptr;
-    UniformCache(opacity, nLightSources, lightDirectionsViewSpace, lightIntensities,
-        modelViewTransform, normalTransform, projectionTransform,
-        performShading, ambientIntensity, diffuseIntensity,
-        specularIntensity, opacityBlending) _uniformCache;
+    UniformCache(modelViewTransform, projectionTransform, normalTransform, meshTransform,
+        meshNormalTransform, ambientIntensity, diffuseIntensity,
+        specularIntensity, performShading, use_forced_color, has_texture_diffuse,
+        has_texture_normal, has_texture_specular, has_color_specular,
+        texture_diffuse, texture_normal, texture_specular, color_diffuse,
+        color_specular, opacity, nLightSources, lightDirectionsViewSpace,
+        lightIntensities, performManualDepthTest, gBufferDepthTexture, resolution
+    ) _uniformCache;
 
     std::vector<std::unique_ptr<LightSource>> _lightSources;
 
@@ -116,6 +122,20 @@ private:
     std::vector<glm::vec3> _lightDirectionsViewSpaceBuffer;
 
     properties::PropertyOwner _lightSourcePropertyOwner;
+
+    // Framebuffer and screen space quad
+    GLuint _framebuffer = 0;
+    GLuint _quadVao = 0;
+    GLuint _quadVbo = 0;
+    bool _shouldRenderTwice = false;
+
+    // Opacity program
+    ghoul::opengl::ProgramObject* _quadProgram = nullptr;
+    UniformCache(opacity, colorTexture, depthTexture, viewport,
+        resolution) _uniformOpacityCache;
+
+    // Store the original RenderBin
+    Renderable::RenderBin _originalRenderBin;
 };
 
 }  // namespace openspace

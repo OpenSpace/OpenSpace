@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,21 +40,34 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo XColorInfo = {
         "XColor",
         "X Color",
-        "This value determines the color of the x axis"
+        "The color of the x-axis.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo YColorInfo = {
         "YColor",
         "Y Color",
-        "This value determines the color of the y axis"
+        "The color of the y-axis.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZColorInfo = {
         "ZColor",
         "Z Color",
-        "This value determines the color of the z axis"
+        "The color of the z-axis.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
+    // The RenderableCartesianAxes can be used to render the local Cartesian coordinate
+    // system, or reference frame, of another scene graph node. The colors of the axes
+    // can be customized but are per default set to Red, Green and Blue, for the X-, Y-
+    // and Z-axis, respectively.
+    //
+    // To add the axes, create a scene graph node with the RenderableCartesianAxes
+    // renderable and add it as a child to the other scene graph node, i.e. specify the
+    // other node as the `Parent` of the node with this renderable. Also, the axes have to
+    // be scaled to match the parent object for the axes to be visible in the scene, for
+    // example using a [StaticScale](#base_transform_scale_static).
     struct [[codegen::Dictionary(RenderableCartesianAxes)]] Parameters {
         // [[codegen::verbatim(XColorInfo.description)]]
         std::optional<glm::vec3> xColor [[codegen::color()]];
@@ -64,7 +77,6 @@ namespace {
 
         // [[codegen::verbatim(ZColorInfo.description)]]
         std::optional<glm::vec3> zColor [[codegen::color()]];
-
     };
 #include "renderablecartesianaxes_codegen.cpp"
 } // namespace
@@ -83,6 +95,9 @@ RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictio
     , _zColor(ZColorInfo, glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    addProperty(Fadeable::_opacity);
+
     _xColor = p.xColor.value_or(_xColor);
     _xColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_xColor);
@@ -117,14 +132,14 @@ void RenderableCartesianAxes::initializeGL() {
     glGenVertexArrays(1, &_vaoId);
     glBindVertexArray(_vaoId);
 
-    std::vector<Vertex> vertices({
+    constexpr std::array<Vertex, 4> vertices = {
         Vertex{0.f, 0.f, 0.f},
         Vertex{1.f, 0.f, 0.f},
         Vertex{0.f, 1.f, 0.f},
         Vertex{0.f, 0.f, 1.f}
-    });
+    };
 
-    std::vector<int> indices = {
+    constexpr std::array<int, 6> indices = {
         0, 1,
         0, 2,
         0, 3
@@ -172,16 +187,10 @@ void RenderableCartesianAxes::deinitializeGL() {
     _program = nullptr;
 }
 
-void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&){
+void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&) {
     _program->activate();
 
-    const glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
-                                          modelTransform;
+    const glm::dmat4 modelViewTransform = calcModelViewTransform(data);
 
     _program->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _program->setUniform("projectionTransform", data.camera.projectionMatrix());
@@ -189,12 +198,17 @@ void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&){
     _program->setUniform("xColor", _xColor);
     _program->setUniform("yColor", _yColor);
     _program->setUniform("zColor", _zColor);
+    _program->setUniform("opacity", opacity());
 
     // Changes GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
     glEnable(GL_LINE_SMOOTH);
-    glLineWidth(3.0);
+#ifndef __APPLE__
+    glLineWidth(3.f);
+#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
+    glLineWidth(1.f);
+#endif // __APPLE__
 
     glBindVertexArray(_vaoId);
     glDrawElements(GL_LINES, 6, GL_UNSIGNED_INT, nullptr);

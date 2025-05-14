@@ -1,15 +1,18 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local sssb = asset.syncedResource({
+
+
+local sssb = asset.resource({
   Name = "Small SolarSystem Body Data (Centaur Asteroid)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_centaur_asteroid",
-  Version = 1
+  Version = 4
 })
 
-local object = {
+
+local Object = {
   Identifier = "sssb_centaur_asteroid",
-  Parent = transforms.SunECLIPJ2000.Identifier,
+  Parent = transforms.SunEclipJ2000.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = sssb .. "sssb_data_centaur_asteroid.csv",
@@ -17,7 +20,8 @@ local object = {
     Segments = 200,
     SegmentQuality = 6,
     Color = { 0.94, 0.96, 0.94 },
-    TrailFade = 18
+    TrailFade = 18,
+    PointSizeExponent = 10.2
   },
   GUI = {
     Name = "Centaur Asteroids",
@@ -27,26 +31,26 @@ local object = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
-  
+
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
-  
-asset.export(object)
-  
+
+asset.export(Object)
+
 
 
 asset.meta = {
   Name = "Centaur Asteroids",
-  Version = "1.1",
   Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
     the Centaur group]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",
   URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
   License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010.
-    All documents available from this server may be protected under the U.S. and 
+    All documents available from this server may be protected under the U.S. and
     Foreign Copyright Laws]]
 }

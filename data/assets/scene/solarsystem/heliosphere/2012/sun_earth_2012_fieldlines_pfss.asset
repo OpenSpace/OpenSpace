@@ -1,26 +1,38 @@
-local transforms = asset.require('scene/solarsystem/sun/transforms_heliosphere.asset')
+local transforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
 
-local transferFunctions = asset.syncedResource({
+
+
+local transferFunctions = asset.resource({
   Name = "Fieldlines Transfer Functions",
   Type = "HttpSynchronization",
   Identifier = "sun_earth_event_july_2012-fieldlines_transferfunctions",
   Version = 1
 })
 
-local fieldlineData  = asset.syncedResource({
+local fieldlineData = asset.resource({
   Name = "Fieldlines Data PFSS",
   Type = "HttpSynchronization",
   Identifier = "sun_earth_event_july_2012-pfss",
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
 
-local darkenSun = {
-  Documentation = "Makes the Sun turn black",
-  GuiPath = "2012July",
-  Identifier = "2012july.dark_sun",
-  IsLocal = false,
+
+local DarkSun = {
+  Identifier = "os.2012july.DarkSun",
   Name = "Dark sun",
-  Command = "local textureMultiplier = openspace.getPropertyValue(\"Scene.Sun.Renderable.Layers.ColorLayers.Texture.Settings.Multiplier\");\nif(textureMultiplier < 0.01) then\nopenspace.setPropertyValueSingle(\"Scene.Sun.Renderable.Layers.ColorLayers.Texture.Settings.Multiplier\", 1.0, 1);\nelse\nopenspace.setPropertyValueSingle(\"Scene.Sun.Renderable.Layers.ColorLayers.Texture.Settings.Multiplier\", 0.0, 1)\nend"
+  Command = [[
+    local property = "Scene.Sun.Renderable.Layers.ColorLayers.Texture.Settings.Multiplier"
+    local textureMultiplier = openspace.propertyValue(property)
+    if (textureMultiplier < 0.01) then
+      openspace.setPropertyValueSingle(property, 1.0, 1)
+    else
+      openspace.setPropertyValueSingle(property, 0.0, 1)
+    end
+  ]],
+  Documentation = "Makes the Sun turn black",
+  GuiPath = "/2012July",
+  IsLocal = false
 }
 
 local pfssTransitionColorTable = transferFunctions .. "pfss_transition.txt"
@@ -31,15 +43,17 @@ local PFSSPaths = {
   SolarSoft = fieldlineData .. "leilas_solar_soft/"
 }
 
+local InteractionSphere = 695700000
+
 local PFSS = {
   Identifier = "FL_PFSS",
-  Parent = transforms.HEEQ180ReferenceFrame.Identifier,
-  InteractionSphere = 695700000,
+  Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
+  InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = PFSSPaths.SolarSoft,
     InputFileType = "Osfls",
-    Color = {0.35, 0.51, 0.875, 0.22},
+    Color = { 0.35, 0.51, 0.875, 0.22 },
     FlowEnabled = true,
     ReversedFlow = true,
     FlowColor = { 1, 0.9, 1, 0.74 },
@@ -48,12 +62,12 @@ local PFSS = {
     FlowSpeed = 75,
     ColorTablePaths = {
       pfssTopologyColorTable,
-      pfssBsignColorTable,
+      pfssBsignColorTable
     },
     ColorTableRanges = {
       { 0, 2 },
-      { -1, 1 },
-    },
+      { -1, 1 }
+    }
   },
   GUI = {
     Name = "Fieldlines PFSS",
@@ -61,32 +75,24 @@ local PFSS = {
   }
 }
 
-asset.onInitialize(function ()
-  openspace.action.registerAction(darkenSun)
 
-  if not openspace.directoryExists(PFSSPaths.SolarSoft) then
-    openspace.printInfo("Extracting " .. "Fieldlines from PFSS model of 2012 event")
-    openspace.unzipFile(fieldlineData .. "leilas_solar_soft.zip", PFSSPaths.SolarSoft, true)
-  end
-
+asset.onInitialize(function()
+  openspace.action.registerAction(DarkSun)
   openspace.addSceneGraphNode(PFSS)
-
-  -- openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.FlowEnabled", true)
-  -- openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.Reversed", true)
-  --openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.particleSize", 5)
-  --openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.particleSpacing", 250)
-  --openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.speed", 75.0)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PFSS)
-  openspace.action.removeAction(darkenSun)
-
+  openspace.action.removeAction(DarkSun)
 end)
+
+asset.export(PFSS)
+asset.export("DarkSun", DarkSun.Identifier)
+
+
 
 asset.meta = {
   Name = "Fieldlines from PFSS model of 2012 event",
-  Version = "1.0",
   Description = "Magnetic fieldlines from PFSS model for a 2012 CME event",
   Author = "CCMC",
   URL = "",

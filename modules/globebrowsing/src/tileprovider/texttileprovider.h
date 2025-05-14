@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,14 +31,15 @@ namespace openspace::globebrowsing {
 
 class TextTileProvider : public TileProvider {
 public:
-    TextTileProvider(TileTextureInitData initData, size_t fontSize = 48);
+    explicit TextTileProvider(TileTextureInitData initData_, size_t fontSize_ = 48);
     ~TextTileProvider() override;
 
     void reset() override;
 
 protected:
     Tile renderTile(const TileIndex& tileIndex, const std::string& text,
-        const glm::vec2& position, const glm::vec4& color);
+        const glm::vec2& position, const glm::vec4& color,
+        const glm::vec4& backgroundColor = glm::vec4(0.0));
 
     const TileTextureInitData initData;
 

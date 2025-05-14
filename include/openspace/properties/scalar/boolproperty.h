@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,38 +25,28 @@
 #ifndef __OPENSPACE_CORE___BOOLPROPERTY___H__
 #define __OPENSPACE_CORE___BOOLPROPERTY___H__
 
- /**
- * \file boolproperty.h
- *
- * \addtogroup openspace
- * @{
- * \addtogroup properties
- * @{
-
- * \class BoolProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>bool</code>.
-
- * @} @}
- */
-
 #include <openspace/properties/templateproperty.h>
 
 namespace openspace::properties {
 
+/**
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type `bool`.
+ */
 class BoolProperty : public TemplateProperty<bool> {
 public:
     BoolProperty(Property::PropertyInfo info, bool value = false);
 
-    std::string_view className() const override;
-    int typeLua() const override;
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
+    void getLuaValue(lua_State* state) const override final;
+
+    std::string stringValue() const override final;
     using TemplateProperty<bool>::operator=;
 
-protected:
-    bool fromLuaConversion(lua_State* state, bool& success) const override;
-    void toLuaConversion(lua_State* state) const override;
-    std::string toStringConversion() const override;
+private:
+    bool toValue(lua_State* state) const override final;
 };
 
 } // namespace openspace::properties

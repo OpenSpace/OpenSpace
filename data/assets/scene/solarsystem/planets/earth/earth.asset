@@ -1,30 +1,31 @@
 local transforms = asset.require("./transforms")
 
-local labelsPath = asset.syncedResource({
+
+
+local labelsPath = asset.resource({
   Name = "Earth Labels",
   Type = "HttpSynchronization",
   Identifier = "earth_labels",
   Version = 1
 })
 
--- local earthEllipsoid = { 6378137.0, 6378137.0, 6356752.314245 }
-local earthEllipsoid = { 6378137.0, 6378137.0, 6378137.0 }
+
+-- local EarthEllipsoid = { 6378137.0, 6378137.0, 6356752.314245 }
+local EarthEllipsoid = { 6378137.0, 6378137.0, 6378137.0 }
 
 local Earth = {
   Identifier = "Earth",
   Parent = transforms.EarthIAU.Identifier,
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = earthEllipsoid,
-    SegmentsPerPatch = 64,
+    Radii = EarthEllipsoid,
     PerformShading = false,
-    Layers = {},
     ShadowGroup = {
       Sources = {
-        { Name = "Sun", Radius = 696.3E6 },
+        { Name = "Sun", Radius = 696300000 },
       },
       Casters = {
-        { Name = "Moon", Radius = 1.737E6 },
+        { Name = "Moon", Radius = 1737000 },
       }
     },
     Labels = {
@@ -52,18 +53,18 @@ local EarthLabel = {
   Identifier = "EarthLabel",
   Parent = Earth.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Earth",
     FontSize = 70.0,
-    Size = 8.77,
-    MinMaxSize = { 1, 100 },
+    Size = 8.50,
+    MinMaxSize = { 1, 50 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "au",
-    FadeDistances = { 1.5, 15.0 },
-    FadeWidths = { 1.0, 25.0 }
+    FadeDistances = { 1.5, 30.0 },
+    FadeWidths = { 1.0, 40.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {
@@ -73,16 +74,50 @@ local EarthLabel = {
   }
 }
 
+local FocusEarth = {
+  Identifier = "os.solarsystem.FocusEarth",
+  Name = "Focus on Earth",
+  Command = [[
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Earth")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+  ]],
+  Documentation = "Set camera focus on the Earth",
+  GuiPath = "/Solar System/Earth",
+  IsLocal = false
+}
+
+local ToggleSatelliteTrails = {
+  Identifier = "os.solarsystem.ToggleSatelliteTrails",
+  Name = "Toggle satellite trails",
+  Command = [[
+    local list = openspace.property("{earth_satellites}.Renderable.Enabled")
+    for _,v in pairs(list) do
+      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
+    end
+  ]],
+  Documentation = "Toggle trails on or off for satellites around Earth",
+  GuiPath = "/Solar System/Earth",
+  IsLocal = false
+}
+
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Earth)
   openspace.addSceneGraphNode(EarthLabel)
+
+  openspace.action.registerAction(FocusEarth)
+  openspace.action.registerAction(ToggleSatelliteTrails)
 end)
-    
+
 asset.onDeinitialize(function()
+  openspace.action.removeAction(ToggleSatelliteTrails)
+  openspace.action.removeAction(FocusEarth)
+
   openspace.removeSceneGraphNode(EarthLabel)
   openspace.removeSceneGraphNode(Earth)
 end)
-    
+
 asset.export(Earth)
 asset.export(EarthLabel)
 
@@ -90,7 +125,6 @@ asset.export(EarthLabel)
 
 asset.meta = {
   Name = "Earth",
-  Version = "1.0",
   Description = "Earth is a special planet with special needs",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

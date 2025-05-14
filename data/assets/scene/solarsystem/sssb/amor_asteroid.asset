@@ -1,15 +1,18 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local sssb = asset.syncedResource({
+
+
+local sssb = asset.resource({
   Name = "Small SolarSystem Body Data (Amor Asteroid)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_amor_asteroid",
-  Version = 1
+  Version = 4
 })
 
-local object = {
+
+local Object = {
   Identifier = "sssb_amor_asteroid",
-  Parent = transforms.SunECLIPJ2000.Identifier,
+  Parent = transforms.SunEclipJ2000.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = sssb .. "sssb_data_amor_asteroid.csv",
@@ -17,7 +20,8 @@ local object = {
     Segments = 200,
     SegmentQuality = 4,
     Color = { 1.0, 1.0, 1.0 },
-    TrailFade = 11
+    TrailFade = 11,
+    PointSizeExponent = 9.2
   },
   GUI = {
     Name = "Amor Asteroids",
@@ -26,22 +30,22 @@ local object = {
       Earth's but interior to Mars'.]]
   }
 }
-  
+
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
-  
+
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
-  
-asset.export(object)
+
+asset.export(Object)
 
 
 
 asset.meta = {
   Name = "Amor Asteroids",
-  Version = "1.1",
   Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
     the Amor group]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",

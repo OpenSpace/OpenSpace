@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,8 +29,10 @@
 
 namespace openspace {
 
-// Templated abstract base class representing a job to be done.
-// Client code derive from this class and implement the virtual execute() method
+/**
+ * Templated abstract base class representing a job to be done. Client code derive from
+ * this class and implement the virtual execute() method.
+ */
 template <typename P>
 struct Job {
     Job() = default;

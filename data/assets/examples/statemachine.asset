@@ -1,18 +1,21 @@
 -- Create a state machine with a few different states. The state machine can be controlled through
 -- the scripting commands from the state machine module.
 
-local targetNode = function(nodeIdentifier) 
+asset.require("scene/solarsystem/planets/earth/earth")
+asset.require("scene/digitaluniverse/constellations")
+
+local function targetNode(nodeIdentifier)
   return [[
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
     openspace.setPropertyValueSingle(
-      "NavigationHandler.OrbitalNavigator.Anchor", 
+      "NavigationHandler.OrbitalNavigator.Anchor",
       "]] .. nodeIdentifier ..  [["
     )
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "")
   ]]
 end
 
-local states = {
+local States = {
   {
     Identifier = "Constellations",
     Enter = [[
@@ -24,15 +27,15 @@ local states = {
   },
   {
     Identifier = "Earth",
-    Enter = 'openspace.setPropertyValueSingle("Scene.EarthLabel.Renderable.Enabled", true)',
-    Exit = 'openspace.setPropertyValueSingle("Scene.EarthLabel.Renderable.Enabled", false)'
+    Enter = [[openspace.setPropertyValueSingle("Scene.EarthLabel.Renderable.Enabled", true)]],
+    Exit = [[openspace.setPropertyValueSingle("Scene.EarthLabel.Renderable.Enabled", false)]]
   },
   {
     Identifier = "Moon"
   }
 }
 
-local transitions = {
+local Transitions = {
   {
     From = "Earth",
     To = "Moon",
@@ -45,7 +48,7 @@ local transitions = {
   },
   {
     From = "Earth",
-    To = "Constellations",
+    To = "Constellations"
   },
   {
     From = "Constellations",
@@ -63,10 +66,22 @@ local transitions = {
   }
 }
 
+
 asset.onInitialize(function()
   -- Setup (could be done in the profile)
   openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Enabled", true)
   openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Opacity", 0.0)
 
-  openspace.statemachine.createStateMachine(states, transitions, "Earth")
+  openspace.statemachine.createStateMachine(States, Transitions, "Earth")
 end)
+
+
+
+asset.meta = {
+  Name = "State Machine",
+  Description = [[Example of how to create a state machine in OpenSpace, where each
+    state and transition between states may trigger different behaviors.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

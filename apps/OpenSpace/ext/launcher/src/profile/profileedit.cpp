@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,23 +35,31 @@
 #include "profile/modulesdialog.h"
 #include "profile/propertiesdialog.h"
 #include "profile/timedialog.h"
+#include "profile/uipanelsdialog.h"
 #include <openspace/scene/profile.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <QDialogButtonBox>
+#include <QFileDialog>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QWidget>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
+
+#ifdef WIN32
+#include <Windows.h>
+#endif // WIN32
 
 using namespace openspace;
 
 namespace {
-    QString labelText(size_t size, QString title) {
+    QString labelText(size_t size, const QString& title) {
         QString label;
         if (size > 0) {
             label = title + " (" + QString::number(size) + ")";
@@ -65,7 +73,7 @@ namespace {
     std::string summarizeAssets(const std::vector<std::string>& assets) {
         std::string results;
         for (const std::string& a : assets) {
-            results += a + '\n';
+            results += std::format("{}<br>", a);
         }
         return results;
     }
@@ -74,14 +82,14 @@ namespace {
                                      const std::vector<Profile::Action>& actions)
     {
         std::string results;
-        for (Profile::Keybinding k : keybindings) {
+        for (const Profile::Keybinding& k : keybindings) {
             const auto it = std::find_if(
                 actions.cbegin(), actions.cend(),
                 [id = k.action](const Profile::Action& a) { return a.identifier == id; }
             );
 
             std::string name = it != actions.end() ? it->name : "Unknown action";
-            results += fmt::format("{} ({})\n", name, ghoul::to_string(k.key));
+            results += std::format("{} ({})<br>", name, ghoul::to_string(k.key));
         }
         return results;
     }
@@ -89,32 +97,31 @@ namespace {
     std::string summarizeProperties(const std::vector<Profile::Property>& properties) {
         std::string results;
         for (openspace::Profile::Property p : properties) {
-            results += fmt::format("{} = {}\n", p.name, p.value);
+            results += std::format("{} = {}<br>", p.name, p.value);
         }
         return results;
     }
 } // namespace
 
-ProfileEdit::ProfileEdit(Profile& profile, const std::string& profileName, 
-                         std::string assetBasePath,
-                         std::string userAssetBasePath,
-                         std::string profileBasePath,
-                         const std::vector<std::string>& readOnlyProfiles,
+ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
+                         std::filesystem::path assetBasePath,
+                         std::filesystem::path userAssetBasePath,
+                         std::filesystem::path profileBasePath,
                          QWidget* parent)
     : QDialog(parent)
     , _profile(profile)
     , _assetBasePath(std::move(assetBasePath))
     , _userAssetBasePath(std::move(userAssetBasePath))
     , _profileBasePath(std::move(profileBasePath))
-    , _readOnlyProfiles(readOnlyProfiles)
+    , _profileFilename(std::move(profileName))
 {
     setWindowTitle("Profile Editor");
-    createWidgets(profileName);
+    createWidgets();
 
     initSummaryTextForEachCategory();
 }
 
-void ProfileEdit::createWidgets(const std::string& profileName) {
+void ProfileEdit::createWidgets() {
     QBoxLayout* layout = new QVBoxLayout(this);
     QBoxLayout* topLayout = new QHBoxLayout;
     QBoxLayout* leftLayout = new QVBoxLayout;
@@ -124,19 +131,12 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         profileLabel->setObjectName("profile");
         container->addWidget(profileLabel);
 
-        _profileEdit = new QLineEdit(QString::fromStdString(profileName));
+        _profileEdit = new QLineEdit(QString::fromStdString(_profileFilename));
         container->addWidget(_profileEdit);
-
-        QPushButton* duplicateButton = new QPushButton("Duplicate Profile");
-        connect(
-            duplicateButton, &QPushButton::clicked,
-            this, &ProfileEdit::duplicateProfile
-        );
-        container->addWidget(duplicateButton);
-
         layout->addLayout(container);
     }
     layout->addWidget(new Line);
+
     {
         QGridLayout* container = new QGridLayout;
         container->setColumnStretch(1, 1);
@@ -146,16 +146,18 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         _propertiesLabel->setWordWrap(true);
         container->addWidget(_propertiesLabel, 0, 0);
 
+        _propertiesEdit = new QTextEdit;
+        _propertiesEdit->setReadOnly(true);
+        _propertiesEdit->setAccessibleName("Property value settings");
+        container->addWidget(_propertiesEdit, 1, 0, 1, 3);
+
         QPushButton* editProperties = new QPushButton("Edit");
         connect(
             editProperties, &QPushButton::clicked,
             this, &ProfileEdit::openProperties
         );
+        editProperties->setAccessibleName("Edit properties");
         container->addWidget(editProperties, 0, 2);
-
-        _propertiesEdit = new QTextEdit;
-        _propertiesEdit->setReadOnly(true);
-        container->addWidget(_propertiesEdit, 1, 0, 1, 3);
 
         leftLayout->addLayout(container);
     }
@@ -169,13 +171,15 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         _assetsLabel->setWordWrap(true);
         container->addWidget(_assetsLabel, 0, 0);
 
-        QPushButton* assetsProperties = new QPushButton("Edit");
-        connect(assetsProperties, &QPushButton::clicked, this, &ProfileEdit::openAssets);
-        container->addWidget(assetsProperties, 0, 2);
-
         _assetsEdit = new QTextEdit;
         _assetsEdit->setReadOnly(true);
+        _assetsEdit->setAccessibleName("Loaded assets");
         container->addWidget(_assetsEdit, 1, 0, 1, 3);
+
+        QPushButton* assetsProperties = new QPushButton("Edit");
+        connect(assetsProperties, &QPushButton::clicked, this, &ProfileEdit::openAssets);
+        assetsProperties->setAccessibleName("Edit assets");
+        container->addWidget(assetsProperties, 0, 2);
 
         leftLayout->addLayout(container);
     }
@@ -184,27 +188,26 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         QGridLayout* container = new QGridLayout;
         container->setColumnStretch(1, 1);
 
-        _keybindingsLabel = new QLabel("Keybindings");
+        _keybindingsLabel = new QLabel("Actions & Keybindings");
         _keybindingsLabel->setObjectName("heading");
-        _keybindingsLabel->setWordWrap(true);
         container->addWidget(_keybindingsLabel, 0, 0);
+
+        _keybindingsEdit = new QTextEdit;
+        _keybindingsEdit->setReadOnly(true);
+        _keybindingsEdit->setAccessibleName("Loaded action and keybindings");
+        container->addWidget(_keybindingsEdit, 1, 0, 1, 3);
 
         QPushButton* keybindingsProperties = new QPushButton("Edit");
         connect(
             keybindingsProperties, &QPushButton::clicked,
             this, &ProfileEdit::openKeybindings
         );
+        keybindingsProperties->setAccessibleName("Edit actions and keybindings");
         container->addWidget(keybindingsProperties, 0, 2);
-
-        _keybindingsEdit = new QTextEdit;
-        _keybindingsEdit->setReadOnly(true);
-        container->addWidget(_keybindingsEdit, 1, 0, 1, 3);
 
         leftLayout->addLayout(container);
     }
     topLayout->addLayout(leftLayout, 3);
-
-    topLayout->addWidget(new Line);
 
     QBoxLayout* rightLayout = new QVBoxLayout;
     {
@@ -217,6 +220,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         QPushButton* metaEdit = new QPushButton("Edit");
         connect(metaEdit, &QPushButton::clicked, this, &ProfileEdit::openMeta);
         metaEdit->setLayoutDirection(Qt::RightToLeft);
+        metaEdit->setAccessibleName("Edit metadata");
         container->addWidget(metaEdit);
         rightLayout->addLayout(container);
     }
@@ -234,6 +238,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
             this, &ProfileEdit::openMarkNodes
         );
         interestingNodesEdit->setLayoutDirection(Qt::RightToLeft);
+        interestingNodesEdit->setAccessibleName("Edit interesting nodes");
         container->addWidget(interestingNodesEdit);
         rightLayout->addLayout(container);
     }
@@ -251,6 +256,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
             this, &ProfileEdit::openDeltaTimes
         );
         deltaTimesEdit->setLayoutDirection(Qt::RightToLeft);
+        deltaTimesEdit->setAccessibleName("Edit simulation time increments");
         container->addWidget(deltaTimesEdit);
         rightLayout->addLayout(container);
     }
@@ -265,6 +271,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         QPushButton* cameraEdit = new QPushButton("Edit");
         connect(cameraEdit, &QPushButton::clicked, this, &ProfileEdit::openCamera);
         cameraEdit->setLayoutDirection(Qt::RightToLeft);
+        cameraEdit->setAccessibleName("Edit camera");
         container->addWidget(cameraEdit);
         rightLayout->addLayout(container);
     }
@@ -279,6 +286,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         QPushButton* timeEdit = new QPushButton("Edit");
         connect(timeEdit, &QPushButton::clicked, this, &ProfileEdit::openTime);
         timeEdit->setLayoutDirection(Qt::RightToLeft);
+        timeEdit->setAccessibleName("Edit time");
         container->addWidget(timeEdit);
         rightLayout->addLayout(container);
     }
@@ -293,7 +301,23 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         QPushButton* modulesEdit = new QPushButton("Edit");
         connect(modulesEdit, &QPushButton::clicked, this, &ProfileEdit::openModules);
         modulesEdit->setLayoutDirection(Qt::RightToLeft);
+        modulesEdit->setAccessibleName("Edit modules");
         container->addWidget(modulesEdit);
+        rightLayout->addLayout(container);
+    }
+    rightLayout->addWidget(new Line);
+    {
+        QBoxLayout* container = new QVBoxLayout;
+        _uiPanelVisibilityLabel = new QLabel("User Interface Panels");
+        _uiPanelVisibilityLabel->setObjectName("heading");
+        _uiPanelVisibilityLabel->setWordWrap(true);
+        container->addWidget(_uiPanelVisibilityLabel);
+
+        QPushButton* uiPanelEdit = new QPushButton("Edit");
+        connect(uiPanelEdit, &QPushButton::clicked, this, &ProfileEdit::openUiPanels);
+        uiPanelEdit->setLayoutDirection(Qt::RightToLeft);
+        uiPanelEdit->setAccessibleName("Edit user interface panels");
+        container->addWidget(uiPanelEdit);
         rightLayout->addLayout(container);
     }
     rightLayout->addWidget(new Line);
@@ -310,9 +334,11 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
             this, &ProfileEdit::openAddedScripts
         );
         additionalScriptsEdit->setLayoutDirection(Qt::RightToLeft);
+        additionalScriptsEdit->setAccessibleName("Edit additional scripts");
         container->addWidget(additionalScriptsEdit);
         rightLayout->addLayout(container);
     }
+    rightLayout->addStretch();
     topLayout->addLayout(rightLayout);
     layout->addLayout(topLayout);
 
@@ -320,11 +346,6 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
 
     {
         QBoxLayout* footer = new QHBoxLayout;
-        _errorMsg = new QLabel;
-        _errorMsg->setObjectName("error-message");
-        _errorMsg->setWordWrap(true);
-        footer->addWidget(_errorMsg);
-
         QDialogButtonBox* buttons = new QDialogButtonBox;
         buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
         connect(buttons, &QDialogButtonBox::accepted, this, &ProfileEdit::approved);
@@ -345,7 +366,9 @@ void ProfileEdit::initSummaryTextForEachCategory() {
         QString::fromStdString(summarizeProperties(_profile.properties))
     );
 
-    _keybindingsLabel->setText(labelText(_profile.keybindings.size(), "Keybindings"));
+    _keybindingsLabel->setText(
+        labelText(_profile.keybindings.size(), "Actions & Keybindings")
+    );
     _keybindingsEdit->setText(QString::fromStdString(
         summarizeKeybindings(_profile.keybindings, _profile.actions)
     ));
@@ -358,62 +381,21 @@ void ProfileEdit::initSummaryTextForEachCategory() {
     );
 }
 
-void ProfileEdit::duplicateProfile() {
-    _errorMsg->clear();
-    std::string profile = _profileEdit->text().toStdString();
-    if (profile.empty()) {
-        return;
-    }
-
-    constexpr char Separator = '_';
-    int version = 0;
-    if (size_t it = profile.rfind(Separator); it != std::string::npos) {
-        // If the value exists, we have a profile that potentially already has a version
-        // number attached to it
-        std::string versionStr = profile.substr(it + 1);
-        try {
-            version = std::stoi(versionStr);
-
-            // We will re-add the separator with the new version string to the file, so we
-            // will remove the suffix here first
-            profile = profile.substr(0, it);
-        }
-        catch (const std::invalid_argument&) {
-            // If this exception is thrown, we did find a separator character but the
-            // substring afterwards was not a number, so the user just added a separator
-            // by themselves. In this case we don't do anything
-        }
-    }
-
-    // By this point we have our current profile (without any suffix) in 'profile' and the
-    // currently active version in 'version'. Now we need to put both together again and
-    // also make sure that we don't pick a version number that already exists
-    while (true) {
-        version++;
-
-        std::string candidate = profile + Separator + std::to_string(version);
-        std::string candidatePath = _profileBasePath + candidate + ".profile";
-
-        if (!std::filesystem::exists(candidatePath)) {
-            _profileEdit->setText(QString::fromStdString(std::move(candidate)));
-            return;
-        }
-    }
-}
 
 void ProfileEdit::openMeta() {
-    _errorMsg->clear();
     MetaDialog(this, &_profile.meta).exec();
 }
 
 void ProfileEdit::openModules() {
-    _errorMsg->clear();
     ModulesDialog(this, &_profile.modules).exec();
     _modulesLabel->setText(labelText(_profile.modules.size(), "Modules"));
 }
 
+void ProfileEdit::openUiPanels() {
+    UiPanelsDialog(this, &_profile.uiPanelVisibility).exec();
+}
+
 void ProfileEdit::openProperties() {
-    _errorMsg->clear();
     PropertiesDialog(this, &_profile.properties).exec();
     _propertiesLabel->setText(labelText(_profile.properties.size(), "Properties"));
     _propertiesEdit->setText(
@@ -422,7 +404,6 @@ void ProfileEdit::openProperties() {
 }
 
 void ProfileEdit::openKeybindings() {
-    _errorMsg->clear();
     ActionDialog(this, &_profile.actions, &_profile.keybindings).exec();
     _keybindingsLabel->setText(labelText(_profile.keybindings.size(), "Keybindings"));
     _keybindingsEdit->setText(QString::fromStdString(
@@ -431,19 +412,16 @@ void ProfileEdit::openKeybindings() {
 }
 
 void ProfileEdit::openAssets() {
-    _errorMsg->clear();
     AssetsDialog(this, &_profile, _assetBasePath, _userAssetBasePath).exec();
     _assetsLabel->setText(labelText(_profile.assets.size(), "Assets"));
     _assetsEdit->setText(QString::fromStdString(summarizeAssets(_profile.assets)));
 }
 
 void ProfileEdit::openTime() {
-    _errorMsg->clear();
     TimeDialog(this, &_profile.time).exec();
 }
 
 void ProfileEdit::openDeltaTimes() {
-    _errorMsg->clear();
     DeltaTimesDialog(this, &_profile.deltaTimes).exec();
     _deltaTimesLabel->setText(
         labelText(_profile.deltaTimes.size(), "Simulation Time Increments")
@@ -451,17 +429,14 @@ void ProfileEdit::openDeltaTimes() {
 }
 
 void ProfileEdit::openAddedScripts() {
-    _errorMsg->clear();
     AdditionalScriptsDialog(this, &_profile.additionalScripts).exec();
 }
 
 void ProfileEdit::openCamera() {
-    _errorMsg->clear();
     CameraDialog(this, &_profile.camera).exec();
 }
 
 void ProfileEdit::openMarkNodes() {
-    _errorMsg->clear();
     MarkNodesDialog(this, &_profile.markNodes).exec();
     _interestingNodesLabel->setText(
         labelText(_profile.markNodes.size(), "Mark Interesting Nodes")
@@ -473,32 +448,93 @@ bool ProfileEdit::wasSaved() const {
 }
 
 std::string ProfileEdit::specifiedFilename() const {
-    return _profileEdit->text().toStdString();
-}
-
-void ProfileEdit::cancel() {
-    _saveSelected = false;
-    reject();
+    return _profileFilename;
 }
 
 void ProfileEdit::approved() {
-    std::string profileName = _profileEdit->text().toStdString();
-    if (profileName.empty()) {
-        _errorMsg->setText("Profile name must be specified");
+    // Show the save dialog
+    std::filesystem::path fullPath =
+        _profileBasePath / _profileEdit->text().toStdString();
+
+    // We might need to create intermediate directories if the user specified them in the
+    // name field. We do a "parent_path" here, since the last component of the path is the
+    // actual desired filename
+    std::filesystem::create_directories(std::filesystem::path(fullPath).parent_path());
+
+    const QString path = QFileDialog::getSaveFileName(
+        this,
+        "Save Profile",
+        QString::fromStdString(fullPath.string()),
+        "Profile (*.profile)",
+        nullptr
+#ifdef __linux__
+        // Linux in Qt5 and Qt6 crashes when trying to access the native dialog here
+        , QFileDialog::DontUseNativeDialog
+#endif // __linux__
+    );
+
+    // The user canceled the saving
+    if (path.isEmpty()) {
         return;
     }
 
-    auto it = std::find(_readOnlyProfiles.begin(), _readOnlyProfiles.end(), profileName);
-    if (it == _readOnlyProfiles.end()) {
-        _saveSelected = true;
-        _errorMsg->setText("");
-        accept();
-    }
-    else {
-        _errorMsg->setText(
-            "This is a read-only profile. Click 'Duplicate' or rename & save"
+    //
+    // If we got this far then we have a new or existing file that the user wanted to save
+    // the profile into
+
+    // Check if the user saved the profile in the correct folder
+    std::string profileBase = std::filesystem::canonical(_profileBasePath).string();
+    std::string file = std::filesystem::weakly_canonical(path.toStdString()).string();
+    if (!file.starts_with(profileBase)) {
+        QMessageBox::critical(
+            this,
+            "File Location",
+            "Profiles can only be stored directly in the user profile folder or "
+            "subfolders inside it"
         );
+        return;
     }
+    // +1 for the directory separator
+    std::string filename = file.substr(profileBase.size() + 1);
+
+    try {
+        std::ofstream outFile;
+        outFile.exceptions(std::ofstream::badbit | std::ofstream::failbit);
+        outFile.open(path.toStdString(), std::ofstream::out);
+        outFile << _profile.serialize();
+    }
+    catch (const std::ofstream::failure& e) {
+#ifdef WIN32
+        if (std::filesystem::exists(file)) {
+            // Check if the file is hidden, since that causes ofstream to fail
+            DWORD res = GetFileAttributesA(file.c_str());
+            if (res & FILE_ATTRIBUTE_HIDDEN) {
+                QMessageBox::critical(
+                    this,
+                    "Exception",
+                    QString::fromStdString(std::format(
+                        "Error writing data to file '{}' as file is marked hidden", file
+                    ))
+                );
+                return;
+            }
+        }
+#endif // WIN32
+        QMessageBox::critical(
+            this,
+            "Exception",
+            QString::fromStdString(std::format(
+                "Error writing data to file '{}': {}", file, e.what()
+            ))
+        );
+        return;
+    }
+
+    std::filesystem::path p = filename;
+    p.replace_extension("");
+    _profileFilename = p.string();
+    _saveSelected = true;
+    accept();
 }
 
 void ProfileEdit::keyPressEvent(QKeyEvent* evt) {
@@ -508,3 +544,36 @@ void ProfileEdit::keyPressEvent(QKeyEvent* evt) {
     QDialog::keyPressEvent(evt);
 }
 
+
+void ProfileEdit::reject()  {
+    // We hijack the reject (i.e., exit window) and emit the signal. The actual shutdown
+    // of the window comes at a later stage.
+    emit raiseExitWindow();
+}
+
+void ProfileEdit::closeWithoutSaving() {
+    _saveSelected = false;
+    QDialog::reject();
+}
+
+void ProfileEdit::promptUserOfUnsavedChanges() {
+    QMessageBox msgBox;
+    msgBox.setText("There are unsaved changes");
+    msgBox.setInformativeText("Do you want to save your changes");
+    msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Save);
+    int ret = msgBox.exec();
+
+    switch (ret) {
+        case QMessageBox::Save:
+            approved();
+            break;
+        case QMessageBox::Discard:
+            closeWithoutSaving();
+            break;
+        case QMessageBox::Cancel:
+            break;
+        default:
+            break;
+    }
+}

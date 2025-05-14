@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,11 +22,17 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/set_openspace_compile_settings.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/set_openspace_compile_settings.cmake)
 
 set(HEADER_FILES
+  include/backgroundimage.h
   include/filesystemaccess.h
   include/launcherwindow.h
+  include/notificationwindow.h
+  include/settingsdialog.h
+  include/splitcombobox.h
+  include/usericon.h
+  include/windowcolors.h
   include/profile/actiondialog.h
   include/profile/additionalscriptsdialog.h
   include/profile/assetsdialog.h
@@ -44,17 +50,22 @@ set(HEADER_FILES
   include/profile/timedialog.h
   include/profile/profileedit.h
   include/profile/propertiesdialog.h
+  include/profile/uipanelsdialog.h
   include/sgctedit/displaywindowunion.h
   include/sgctedit/monitorbox.h
-  include/sgctedit/orientationdialog.h
-  include/sgctedit/settingswidget.h
   include/sgctedit/sgctedit.h
   include/sgctedit/windowcontrol.h
 )
 
 set(SOURCE_FILES
+  src/backgroundimage.cpp
   src/launcherwindow.cpp
   src/filesystemaccess.cpp
+  src/notificationwindow.cpp
+  src/settingsdialog.cpp
+  src/splitcombobox.cpp
+  src/usericon.cpp
+  src/windowcolors.cpp
   src/profile/actiondialog.cpp
   src/profile/additionalscriptsdialog.cpp
   src/profile/assetsdialog.cpp
@@ -72,11 +83,10 @@ set(SOURCE_FILES
   src/profile/timedialog.cpp
   src/profile/profileedit.cpp
   src/profile/propertiesdialog.cpp
+  src/profile/uipanelsdialog.cpp
   src/sgctedit/sgctedit.cpp
   src/sgctedit/displaywindowunion.cpp
   src/sgctedit/monitorbox.cpp
-  src/sgctedit/orientationdialog.cpp
-  src/sgctedit/settingswidget.cpp
   src/sgctedit/windowcontrol.cpp
 )
 
@@ -113,8 +123,6 @@ target_include_directories(
   openspace-ui-launcher
   PUBLIC
   include
-  ${OPENSPACE_APPS_DIR}/OpenSpace/ext/sgct/include
-  ${OPENSPACE_APPS_DIR}/OpenSpace/ext/sgct/sgct/ext/glm
 )
 target_link_libraries(
   openspace-ui-launcher
@@ -125,6 +133,8 @@ target_link_libraries(
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Network
+  PRIVATE
+    sgct
 )
 
 target_precompile_headers(openspace-ui-launcher PRIVATE

@@ -1,13 +1,13 @@
 ##
 # Download most recent exoplanet data from NASA Exoplanet Archive using the TAP service
-# More info at: https://exoplanetarchive.ipac.caltech.edu/docs/TAP/usingTAP.html 
+# More info at: https://exoplanetarchive.ipac.caltech.edu/docs/TAP/usingTAP.html
 #
-# The data table is the Planetary Systems Composite dataset, where multiple sources have 
-# been combined into one row per planet. 
+# The data table is the Planetary Systems Composite dataset, where multiple sources have
+# been combined into one row per planet.
 # https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=PSCompPars
 #
-# The script downloads the columns needed for the visualization in OpenSpace and for the 
-# exoplanets datapreparation task, but more columns can be added if needed. 
+# The script downloads the columns needed for the visualization in OpenSpace and for the
+# exoplanets datapreparation task, but more columns can be added if needed.
 ##
 
 import pandas as pd

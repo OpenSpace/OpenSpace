@@ -1,15 +1,17 @@
 local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local sun = asset.require("scene/solarsystem/sun/sun")
-local kernels = asset.require("./kernels").kernels
+local sun = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
-local models = asset.syncedResource({
+
+
+local models = asset.resource({
   Name = "Apollo Models",
   Type = "HttpSynchronization",
   Identifier = "apollo_models",
   Version = 4
 })
 
-local apolloSpiceId = -908
 
 local Apollo8 = {
   Identifier = "Apollo8",
@@ -22,15 +24,14 @@ local Apollo8 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = apolloSpiceId,
-      Observer = "EARTH BARYCENTER",
-      Frame = "GALACTIC",
-      Kernels = kernels
+      Target = kernels.ID.Apollo8,
+      Observer = coreKernels.ID.EarthBarycenter,
+      Frame = coreKernels.Frame.Galactic
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "A8_EARTHRISE",
-      DestinationFrame = "GALACTIC",
+      SourceFrame = kernels.Frame.Apollo8Earthrise,
+      DestinationFrame = coreKernels.Frame.Galactic,
       TimeFrame = {
         -- The orientation of Apollo 8 is only available during the few minutes
         -- when the Earthrise picture was taken.
@@ -42,7 +43,7 @@ local Apollo8 = {
   },
   GUI = {
     Name = "Apollo 8",
-    Path = "/Solar System/Missions/Apollo"
+    Path = "/Solar System/Missions/Apollo/8"
   }
 }
 
@@ -57,7 +58,7 @@ local Apollo8Model = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {0.0, 0.0, -math.pi / 2}
+      Rotation = { 0.0, 0.0, -math.pi / 2 }
     }
   },
   Renderable = {
@@ -67,13 +68,12 @@ local Apollo8Model = {
     LightSources = {
       sun.LightSource
     },
-    PerformShading = true,
-    DisableFaceCulling = true
+    PerformShading = true
   },
   GUI = {
-    Hidden = true,
     Name = "Apollo 8 Model",
-    Path = "/Solar System/Missions/Apollo"
+    Path = "/Solar System/Missions/Apollo/8",
+    Hidden = true
   }
 }
 
@@ -89,22 +89,34 @@ local Apollo8Pivot = {
   },
   GUI = {
     Name = "Apollo 8 Pivot",
-    Path = "/Solar System/Missions/Apollo"
+    Path = "/Solar System/Missions/Apollo/8"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Apollo8)
   openspace.addSceneGraphNode(Apollo8Model)
   openspace.addSceneGraphNode(Apollo8Pivot)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Apollo8Pivot)
   openspace.removeSceneGraphNode(Apollo8Model)
   openspace.removeSceneGraphNode(Apollo8)
 end)
-    
+
 asset.export(Apollo8)
 asset.export(Apollo8Model)
 asset.export(Apollo8Pivot)
+
+
+
+asset.meta = {
+  Name = "Apollo 8 Model",
+  Description = [[Contains the 3D model of the Apollo 8 command module for use during the
+    launch of the spacecraft from Earth and the Earthrise moment.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,9 +26,10 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___RINGSCOMPONENT___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/fadeable.h>
 
 #include <modules/globebrowsing/src/shadowcomponent.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
@@ -48,14 +49,14 @@ namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class RingsComponent : public properties::PropertyOwner {
+class RingsComponent : public properties::PropertyOwner, public Fadeable {
 public:
     enum class RenderPass {
         GeometryOnly,
         GeometryAndShading
     };
 
-    RingsComponent(const ghoul::Dictionary& dictionary);
+    explicit RingsComponent(const ghoul::Dictionary& dictionary);
 
     void initialize();
     void initializeGL();
@@ -95,15 +96,16 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     std::unique_ptr<ghoul::opengl::ProgramObject> _geometryOnlyShader;
     UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
-        sunPosition, ringTexture, shadowMatrix, shadowMapTexture, zFightingPercentage
+        sunPosition, ringTexture, shadowMatrix, shadowMapTexture, zFightingPercentage,
+        opacity
     ) _uniformCache;
     UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
         sunPosition, sunPositionObj, camPositionObj, ringTextureFwrd, ringTextureBckwrd,
         ringTextureUnlit, ringTextureColor, ringTextureTransparency, shadowMatrix,
-        shadowMapTexture, zFightingPercentage
+        shadowMapTexture, zFightingPercentage, opacity
     ) _uniformCacheAdvancedRings;
-    UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture
-    ) _geomUniformCache;
+    UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture) _geomUniformCache;
+
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::unique_ptr<ghoul::opengl::Texture> _textureForwards;
     std::unique_ptr<ghoul::opengl::Texture> _textureBackwards;

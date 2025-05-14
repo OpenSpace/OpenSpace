@@ -1,0 +1,35 @@
+-- Basic
+-- This example draws a line between two nodes in the scene, in this case the planets
+-- Earth and Mars.
+--
+-- Note that this example asset is used in another example, for
+-- [RenderableDistanceLabel](#base_renderable_distancelabel). Due to this, we export the
+-- `Node` table so we can access and refer to its identifier in the other example, the
+-- same way as we do for Earth and Mars in this asset.
+
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local mars = asset.require("scene/solarsystem/planets/mars/mars")
+
+local Node = {
+  Identifier = "RenderableNodeLine_Example",
+  Renderable = {
+    Type = "RenderableNodeLine",
+    StartNode = earth.Earth.Identifier,
+    EndNode = mars.Mars.Identifier
+  },
+  GUI = {
+    Name = "RenderableNodeLine - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
+
+-- Export the Node table so it can be used in another example
+asset.export("NodeLine", Node)

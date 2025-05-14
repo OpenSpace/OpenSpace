@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,15 +40,13 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 namespace scripting { struct LuaLibrary; }
 
-class ScreenSpaceDashboard: public ScreenSpaceFramebuffer {
+class ScreenSpaceDashboard : public ScreenSpaceFramebuffer {
 public:
-    ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
     virtual ~ScreenSpaceDashboard() override = default;
 
     bool initializeGL() override;
-    bool deinitializeGL() override;
 
-    bool isReady() const override;
     void update() override;
 
     Dashboard& dashboard();
@@ -61,10 +59,6 @@ public:
 private:
     Dashboard _dashboard;
     properties::BoolProperty _useMainDashboard;
-    //std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
-
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
 };
 
 } // namespace openspace

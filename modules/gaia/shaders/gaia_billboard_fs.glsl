@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,7 +44,7 @@ uniform int renderOption;
 // Keep in sync with gaiaoptions.h:RenderOption enum
 const int RENDEROPTION_STATIC = 0;
 const int RENDEROPTION_COLOR = 1;
-const int RENDEROPTION_MOTION = 2; 
+const int RENDEROPTION_MOTION = 2;
 const float ONE_PARSEC = 3.08567758e16; // 1 Parsec
 const float FLT_MAX  = 3.402823466e38; // Max float constant in GLSL
 const float LUM_LOWER_CAP = 0.01;

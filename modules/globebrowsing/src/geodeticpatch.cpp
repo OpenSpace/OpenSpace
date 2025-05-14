@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -64,7 +64,7 @@ GeodeticPatch::GeodeticPatch(const TileIndex& tileIndex) {
     const double deltaLon = (2 * glm::pi<double>()) /
                             (static_cast<double>(1 << tileIndex.level));
     const Geodetic2 nwCorner{
-        glm::pi<double>() / 2.0 - deltaLat * tileIndex.y,
+        glm::half_pi<double>() - deltaLat * tileIndex.y,
         -glm::pi<double>() + deltaLon * tileIndex.x
     };
     _halfSize = Geodetic2{ deltaLat / 2.0, deltaLon / 2.0 };
@@ -81,12 +81,12 @@ void GeodeticPatch::setHalfSize(Geodetic2 halfSize) {
 
 double GeodeticPatch::maximumTileLevel() const {
     // Numerator is just pi, not 2*pi, since we are dealing with HALF sizes
-    return log2(glm::pi<double>() / glm::min(_halfSize.lat, _halfSize.lon));
+    return std::log2(glm::pi<double>() / std::min(_halfSize.lat, _halfSize.lon));
 }
 
 double GeodeticPatch::minimumTileLevel() const {
     // Numerator is just pi, not 2*pi, since we are dealing with HALF sizes
-    return log2(glm::pi<double>() / glm::max(_halfSize.lat, _halfSize.lon));
+    return std::log2(glm::pi<double>() / std::max(_halfSize.lat, _halfSize.lon));
 }
 
 const Geodetic2& GeodeticPatch::center() const {
@@ -106,10 +106,10 @@ Geodetic2 GeodeticPatch::size() const {
 
 Geodetic2 GeodeticPatch::corner(Quad q) const {
     switch (q) {
-        case NORTH_WEST:  return Geodetic2{ maxLat(), minLon() };// northWestCorner();
-        case NORTH_EAST:  return Geodetic2{ maxLat(), maxLon() };// northEastCorner();
-        case SOUTH_WEST:  return Geodetic2{ minLat(), minLon() };// southWestCorner();
-        case SOUTH_EAST:  return Geodetic2{ minLat(), maxLon() };// southEastCorner();
+        case NORTH_WEST:  return Geodetic2{ maxLat(), minLon() }; // northWestCorner();
+        case NORTH_EAST:  return Geodetic2{ maxLat(), maxLon() }; // northEastCorner();
+        case SOUTH_WEST:  return Geodetic2{ minLat(), minLon() }; // southWestCorner();
+        case SOUTH_EAST:  return Geodetic2{ minLat(), maxLon() }; // southEastCorner();
         default:          throw ghoul::MissingCaseException();
     }
 }
@@ -132,17 +132,17 @@ double GeodeticPatch::maxLon() const {
 
 bool GeodeticPatch::contains(const Geodetic2& p) const {
     const Geodetic2 diff = {
-        _center.lat - p.lat,
-        _center.lon - p.lon
+        .lat = _center.lat - p.lat,
+        .lon = _center.lon - p.lon
     };
-    return glm::abs(diff.lat) <= _halfSize.lat && glm::abs(diff.lon) <= _halfSize.lon;
+    return std::abs(diff.lat) <= _halfSize.lat && std::abs(diff.lon) <= _halfSize.lon;
 }
 
 double GeodeticPatch::edgeLatitudeNearestEquator() const {
     return _center.lat + _halfSize.lat * (isNorthern() ? -1.0 : 1.0);
 }
 
-double GeodeticPatch::isNorthern() const {
+bool GeodeticPatch::isNorthern() const {
     return _center.lat > 0.0;
 }
 
@@ -154,20 +154,20 @@ Geodetic2 GeodeticPatch::clamp(const Geodetic2& p) const {
     //        --> Just clamping pointLat would be clamp(330, -10, 10) = 10 // WRONG!
     //    Instead, if we first normalize 330 deg around 0, we get -30 deg
     //        --> clamp(-30, -10, 10) = -10 // CORRECT!
-    double pointLat = normalizedAngleAround(p.lat, _center.lat);
-    double pointLon = normalizedAngleAround(p.lon, _center.lon);
+    const double pointLat = normalizedAngleAround(p.lat, _center.lat);
+    const double pointLon = normalizedAngleAround(p.lon, _center.lon);
 
     return {
-        glm::clamp(pointLat, minLat(), maxLat()),
-        glm::clamp(pointLon, minLon(), maxLon())
+        std::clamp(pointLat, minLat(), maxLat()),
+        std::clamp(pointLon, minLon(), maxLon())
     };
 }
 
 Geodetic2 GeodeticPatch::closestCorner(const Geodetic2& p) const {
     // LatLon vector from patch center to the point
     const Geodetic2 centerToPoint = {
-        p.lat - _center.lat,
-        p.lon - _center.lon
+        .lat = p.lat - _center.lat,
+        .lon = p.lon - _center.lon
     };
 
     // Normalize the difference angles to be centered around 0.
@@ -219,8 +219,8 @@ Geodetic2 GeodeticPatch::closestPoint(const Geodetic2& p) const {
 
     // Normalize point with respect to center. This is done because the point
     // will later be clamped. See LatLonPatch::clamp(const LatLon&) for explanation
-    double pointLat = normalizedAngleAround(p.lat, _center.lat);
-    double pointLon = normalizedAngleAround(p.lon, _center.lon);
+    const double pointLat = normalizedAngleAround(p.lat, _center.lat);
+    const double pointLon = normalizedAngleAround(p.lon, _center.lon);
 
     // Calculate the longitud difference between center and point. We normalize around
     // zero because we want the "shortest distance" difference, i.e the difference
@@ -228,21 +228,21 @@ Geodetic2 GeodeticPatch::closestPoint(const Geodetic2& p) const {
     const double centerToPointLon = normalizedAngleAround(_center.lon - pointLon, 0.0);
 
     // Calculate the longitudinal distance to the closest patch edge
-    const double lonDistanceToClosestPatch = glm::abs(centerToPointLon) - _halfSize.lon;
+    const double lonDistanceToClosestPatch = std::abs(centerToPointLon) - _halfSize.lon;
 
     // If the longitude distance to the closest patch edge is larger than 90 deg
     // the latitude will have to be clamped to its closest corner, as explained in
     // the example above.
     const double clampedLat =
         lonDistanceToClosestPatch > glm::half_pi<double>() ?
-        glm::clamp(
+        std::clamp(
             normalizedAngleAround(glm::pi<double>() - pointLat, _center.lat),
             minLat(),
             maxLat()) :
-        glm::clamp(pointLat, minLat(), maxLat());
+        std::clamp(pointLat, minLat(), maxLat());
 
     // Longitude is just clamped normally
-    const double clampedLon = glm::clamp(pointLon, minLon(), maxLon());
+    const double clampedLon = std::clamp(pointLon, minLon(), maxLon());
 
     return Geodetic2{ clampedLat, clampedLon };
 }

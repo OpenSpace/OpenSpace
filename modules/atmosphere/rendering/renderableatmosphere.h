@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -65,7 +65,7 @@ namespace planetgeometry { class PlanetGeometry; }
 
 class RenderableAtmosphere : public Renderable {
 public:
-    RenderableAtmosphere(const ghoul::Dictionary& dictionary);
+    explicit RenderableAtmosphere(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -79,6 +79,7 @@ public:
 private:
     glm::dmat4 computeModelTransformMatrix(const openspace::TransformData& data);
     void updateAtmosphereParameters();
+    void setDimmingCoefficient(const glm::dmat4& modelTransform);
 
     properties::FloatProperty _atmosphereHeight;
     properties::FloatProperty _groundAverageReflectance;
@@ -95,6 +96,9 @@ private:
     properties::FloatProperty _sunIntensity;
     properties::BoolProperty _sunFollowingCameraEnabled;
     properties::BoolProperty _hardShadowsEnabled;
+    properties::FloatProperty _sunAngularSize;
+    SceneGraphNode* _lightSourceNode = nullptr;
+    properties::StringProperty _lightSourceNodeName;
 
     // Atmosphere dimming
     properties::FloatProperty _atmosphereDimmingHeight;

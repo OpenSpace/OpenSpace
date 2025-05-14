@@ -1,29 +1,31 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Climate Model: Temperature Change Comparison (GFDL a1b and b1)"
 local Identifier = "noaa-sos-models-ipcc_temp-compare"
-local Description = [["The Intergovernmental Panel on Climate Change (IPCC) was 
-established by WMO and UNEP to assess scientific, technical and socio- economic 
-information relevant for the understanding of climate change, its potential impacts and 
-options for adaptation and mitigation. It is open to all members of the UN and of WMO." 
-- from www.ipcc.ch. In an effort to better visualize the future of climate change, the 
-IPCC releases assessment reports on the current state of the atmosphere and what the 
-future could hold. Models from various atmospheric and oceanic organizations are included 
-in these reports in order to establish a broad understanding of the science. Data from 
-three of the IPCC models following temperature change from 1870 - 2100 have been 
+local Description = [["The Intergovernmental Panel on Climate Change (IPCC) was
+established by WMO and UNEP to assess scientific, technical and socio- economic
+information relevant for the understanding of climate change, its potential impacts and
+options for adaptation and mitigation. It is open to all members of the UN and of WMO."
+- from www.ipcc.ch. In an effort to better visualize the future of climate change, the
+IPCC releases assessment reports on the current state of the atmosphere and what the
+future could hold. Models from various atmospheric and oceanic organizations are included
+in these reports in order to establish a broad understanding of the science. Data from
+three of the IPCC models following temperature change from 1870 - 2100 have been
 formatted for Science On a Sphere]]
 local URL = "https://sos.noaa.gov/catalog/datasets/climate-model-temperature-change-comparison-gfdl-a1b-and-b1/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
   Version = 1
 })
 
-local layers_names = {
+
+local layersNames = {
   "2025_gfdl_a1b",
   "2025_gfdl_b1",
   "2050_gfdl_a1b",
@@ -35,19 +37,20 @@ local layers_names = {
 }
 
 local layers = {}
-for i,v in ipairs(layers_names) do
+for i,v in ipairs(layersNames) do
   local layer = {
     Identifier = Identifier .. v,
     Name = Name,
-  Enabled = asset.enabled,
-  FilePath = syncedDirectory .. v .. ".png",
+    Enabled = asset.enabled,
+    ZIndex = 100,
+    FilePath = syncedDirectory .. v .. ".png",
     Description = Description
   }
 
   table.insert(layers, layer)
 end
 
-local colorbar = {
+local Colorbar = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -60,28 +63,29 @@ local colorbar = {
 }
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   for i,v in ipairs(layers) do
-    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", v)
+    openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", v)
   end
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(Colorbar)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Colorbar)
   for i,v in ipairs(layers) do
-    openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", v)
+    openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", v)
   end
-  openspace.removeScreenSpaceRenderable(colorbar)
 end)
 
 for _,v in ipairs(layers) do
   asset.export(v)
 end
+asset.export(Colorbar)
+
 
 
 asset.meta = {
   Name = Name,
-  Version = "1.0",
   Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,

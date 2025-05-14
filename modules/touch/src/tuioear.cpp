@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,59 +34,53 @@ using namespace TUIO;
 
 namespace openspace {
 
-void TuioEar::addTuioObject(TuioObject*) { }
+void TuioEar::addTuioObject(TuioObject*) {}
 
-void TuioEar::updateTuioObject(TuioObject*) { }
+void TuioEar::updateTuioObject(TuioObject*) {}
 
-void TuioEar::removeTuioObject(TuioObject*) { }
+void TuioEar::removeTuioObject(TuioObject*) {}
 
 void TuioEar::addTuioCursor(TuioCursor* tcur) {
-    _mx.lock();
-    TouchInput input(
+    std::unique_lock lock(_mx);
+    _inputList.emplace_back(
         static_cast<size_t>(tcur->getTuioSourceID()),
         static_cast<size_t>(tcur->getCursorID()),
         tcur->getX(),
         tcur->getY(),
         static_cast<double>(tcur->getTuioTime().getTotalMilliseconds()) / 1000.0
     );
-    _inputList.emplace_back(input);
-    _mx.unlock();
 }
 
 void TuioEar::updateTuioCursor(TuioCursor* tcur) {
-    _mx.lock();
-    TouchInput input(
+    std::unique_lock lock(_mx);
+    _inputList.emplace_back(
         static_cast<size_t>(tcur->getTuioSourceID()),
         static_cast<size_t>(tcur->getCursorID()),
         tcur->getX(),
         tcur->getY(),
         static_cast<double>(tcur->getTuioTime().getTotalMilliseconds()) / 1000.0
     );
-    _inputList.emplace_back(input);
-    _mx.unlock();
 }
 
 // save id to be removed and remove it in clearInput
 void TuioEar::removeTuioCursor(TuioCursor* tcur) {
-    _mx.lock();
-    TouchInput input(
+    std::unique_lock lock(_mx);
+    _removalList.emplace_back(
         static_cast<size_t>(tcur->getTuioSourceID()),
         static_cast<size_t>(tcur->getCursorID()),
         tcur->getX(),
         tcur->getY(),
         static_cast<double>(tcur->getTuioTime().getTotalMilliseconds()) / 1000.0
     );
-    _removalList.emplace_back(input);
-    _mx.unlock();
 }
 
-void TuioEar::addTuioBlob(TuioBlob*) { }
+void TuioEar::addTuioBlob(TuioBlob*) {}
 
-void TuioEar::updateTuioBlob(TuioBlob*) { }
+void TuioEar::updateTuioBlob(TuioBlob*) {}
 
-void TuioEar::removeTuioBlob(TuioBlob*) { }
+void TuioEar::removeTuioBlob(TuioBlob*) {}
 
-void TuioEar::refresh(TuioTime) { } // about every 15ms
+void TuioEar::refresh(TuioTime) {} // about every 15ms
 
 std::vector<TouchInput> TuioEar::takeInput() {
     std::vector<TouchInput> outputList;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,7 @@
 
 #include <openspace/properties/scalar/intproperty.h>
 
+#include <openspace/util/json_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
 
 namespace openspace::properties {
@@ -37,19 +38,28 @@ std::string_view IntProperty::className() const {
     return "IntProperty";
 }
 
-int IntProperty::typeLua() const {
-    return LUA_TNUMBER;
+ghoul::lua::LuaTypes IntProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Number;
 }
 
-int IntProperty::fromLuaConversion(lua_State* state, bool& success) const {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        int val = static_cast<int>(lua_tonumber(state, -1));
-        return val;
+void IntProperty::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
+int IntProperty::toValue(lua_State* state) const {
+    if (ghoul::lua::hasValue<double>(state)) {
+        return static_cast<int>(ghoul::lua::value<double>(state));
+    }
+    else if (ghoul::lua::hasValue<int>(state)) {
+        return ghoul::lua::value<int>(state);
     }
     else {
-        return 0;
+        throw ghoul::RuntimeError("Error extracting value in IntProperty");
     }
+}
+
+std::string IntProperty::stringValue() const {
+    return formatJson(_value);
 }
 
 } // namespace openspace::properties

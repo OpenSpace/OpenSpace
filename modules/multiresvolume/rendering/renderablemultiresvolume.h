@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
@@ -58,7 +58,7 @@ class TSP;
 
 class RenderableMultiresVolume : public Renderable {
 public:
-    RenderableMultiresVolume(const ghoul::Dictionary& dictionary);
+    explicit RenderableMultiresVolume(const ghoul::Dictionary& dictionary);
     ~RenderableMultiresVolume();
 
     enum Selector {
@@ -117,12 +117,12 @@ private:
 
     int _timestep = 0;
 
-    std::string _filename;
+    std::filesystem::path _filename;
 
     std::string _transferFunctionName;
     std::string _volumeName;
 
-    std::string _transferFunctionPath;
+    std::filesystem::path _transferFunctionPath;
     std::filesystem::path _errorHistogramsPath;
 
     std::shared_ptr<TransferFunction> _transferFunction;

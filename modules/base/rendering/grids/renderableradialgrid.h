@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,13 +27,13 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/space/labelscomponent.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/rendering/helper.h>
+#include <openspace/rendering/labelscomponent.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace ghoul::opengl { class ProgramObject; }
@@ -44,7 +44,7 @@ namespace openspace {
 
 class RenderableRadialGrid : public Renderable {
 public:
-    RenderableRadialGrid(const ghoul::Dictionary& dictionary);
+    explicit RenderableRadialGrid(const ghoul::Dictionary& dictionary);
     ~RenderableRadialGrid() override = default;
 
     void initialize() override;
@@ -60,14 +60,14 @@ public:
 
 protected:
     struct GeometryData {
-        GeometryData(GLenum renderMode);
+        explicit GeometryData(GLenum renderMode);
         GeometryData(GeometryData&& other) noexcept;
         GeometryData& operator=(const GeometryData& other) = delete;
         GeometryData& operator=(GeometryData&& other) noexcept;
         ~GeometryData();
 
-        void update();
-        void render();
+        void update() const;
+        void render() const;
 
         std::vector<rendering::helper::VertexXYZ> varray;
         GLuint vao = 0;
@@ -90,7 +90,6 @@ protected:
 
     // Labels
     bool _hasLabels = false;
-    properties::BoolProperty _drawLabels;
     std::unique_ptr<LabelsComponent> _labels;
 };
 

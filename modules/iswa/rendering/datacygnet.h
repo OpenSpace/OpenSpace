@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,8 +27,8 @@
 
 #include <modules/iswa/rendering/iswacygnet.h>
 
-#include <openspace/properties/selectionproperty.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/selectionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <glm/gtx/std_based_type.hpp>
 
@@ -39,11 +39,11 @@ class DataProcessor;
 /**
  * This class abstracts away the the loading of data and creation of textures for all data
  * cygnets. It specifies the interface that needs to be implemented for all concrete
- * subclasses
+ * subclasses.
  */
 class DataCygnet : public IswaCygnet {
 public:
-    DataCygnet(const ghoul::Dictionary& dictionary);
+    explicit DataCygnet(const ghoul::Dictionary& dictionary);
     ~DataCygnet();
 
 protected:
@@ -69,13 +69,13 @@ protected:
     void setPropertyCallbacks();
 
     /**
-     * Subscribes to the group events that are shared by all DataCygnets
+     * Subscribes to the group events that are shared by all DataCygnets.
      */
     void subscribeToGroup();
 
     /**
      * Optional interface method. this has an implementation in datacygnet.cpp, but needs
-     * to be overriden for kameleonplane
+     * to be overriden for KameleonPlane.
      */
     virtual bool updateTextureResource() override;
 

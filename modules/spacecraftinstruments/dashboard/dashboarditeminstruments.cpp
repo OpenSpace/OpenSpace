@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,34 +44,24 @@ namespace {
         "Active Color",
         "This value determines the color that the active instrument is rendered in. "
         "Shortly after activation, the used color is mixture of this and the flash "
-        "color. The default value is (0.6, 1.0, 0.0)"
+        "color. The default value is (0.6, 1.0, 0.0).",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FlashColorInfo = {
         "FlashColor",
         "Flash Color",
         "This value determines the color that is used shortly after an instrument "
-        "activation. The default value is (0.9, 1.0, 0.75)"
+        "activation. The default value is (0.9, 1.0, 0.75).",
+        openspace::properties::Property::Visibility::User
     };
 
-    std::string progressToStr(int size, double t) {
-        std::string progress = "|";
-        const int g = std::max(0, static_cast<int>((t * (size - 1)) + 1));
-        for (int i = 0; i < g; i++) {
-            progress.append("-");
-        }
-        progress.append(">");
-        for (int i = 0; i < size - g; i++) {
-            progress.append(" ");
-        }
-        progress.append("|");
-        return progress;
-    }
-
-    glm::vec2 addToBoundingbox(glm::vec2 lhs, glm::vec2 rhs) {
-        return { std::max(lhs.x, rhs.x), lhs.y + rhs.y };
-    }
-
+    // This dashboard item shows information about the status of individual instruments
+    // onboard a spacecraft with regards to upcoming image capture. An image sequence has
+    // to be registered in order to be able to show the necessary information. The
+    // dashboard item shows a visual representation on how much time has passed since the
+    // previous image capture and how much time remains until the instrument captures the
+    // next image.
     struct [[codegen::Dictionary(DashboardItemInstruments)]] Parameters {
         // [[codegen::verbatim(ActiveColorInfo.description)]]
         std::optional<glm::vec3> activeColor [[codegen::color()]];
@@ -115,23 +105,25 @@ DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dict
     addProperty(_activeFlash);
 }
 
-void DashboardItemInstruments::render(glm::vec2& penPosition) {
-    ZoneScoped
+void DashboardItemInstruments::update() {}
 
-    double currentTime = global::timeManager->time().j2000Seconds();
+void DashboardItemInstruments::render(glm::vec2& penPosition) {
+    ZoneScoped;
+
+    const double currentTime = global::timeManager->time().j2000Seconds();
 
     if (!ImageSequencer::ref().isReady()) {
         return;
     }
     ImageSequencer& sequencer = ImageSequencer::ref();
 
-    penPosition.y -= 25.f;
+    penPosition.y -= _font->height();
 
     constexpr glm::vec4 targetColor(0.f, 0.75f, 1.f, 1.f);
 
-    double previous = sequencer.prevCaptureTime(currentTime);
-    double next = sequencer.nextCaptureTime(currentTime);
-    double remaining = next - currentTime;
+    const double previous = sequencer.prevCaptureTime(currentTime);
+    const double next = sequencer.nextCaptureTime(currentTime);
+    const double remaining = next - currentTime;
     float t = static_cast<float>(1.0 - remaining / (next - previous));
     t = std::clamp(t, 0.f, 1.f);
 
@@ -148,15 +140,15 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
 
         // If the remaining time is below 5 minutes, we switch over to seconds display
         if (remaining < 5 * 60) {
-            remainingConv = { remaining, "seconds" };
+            remainingConv = std::pair(remaining, "seconds");
         }
 
         const int Size = 25;
-        int p = std::max(static_cast<int>((t * (Size - 1)) + 1), 0);
+        const int p = std::max(static_cast<int>((t * (Size - 1)) + 1), 0);
         RenderFont(
             *_font,
             penPosition,
-            fmt::format(
+            std::format(
                 "{:4.0f} {:s} |{:s}>{:s}| {:.1f} %",
                 remainingConv.first,
                 remainingConv.second,
@@ -176,7 +168,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
         RenderFont(
             *_font,
             penPosition,
-            fmt::format("Data acquisition time: {}", str),
+            std::format("Data acquisition time: {}", str),
             glm::vec4(_activeColor.value(), 1.f),
             ghoul::fontrendering::CrDirection::Down
         );
@@ -199,7 +191,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
     RenderFont(
         *_font,
         penPosition,
-        fmt::format(
+        std::format(
             "Next image: [{:02d}:{:02d}:{:02d}]", tlh.count(), tlm.count(), tls.count()
         ),
         targetColor,
@@ -211,7 +203,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
     const std::vector<std::pair<std::string, bool>>& activeMap =
         sequencer.activeInstruments(currentTime);
 
-    glm::vec4 firing = glm::vec4(0.58f - t, 1.f - t, 1.f - t, 1.f);
+    const glm::vec4 firing = glm::vec4(0.58f - t, 1.f - t, 1.f - t, 1.f);
 
     RenderFont(
         *_font,
@@ -230,7 +222,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             RenderFont(*_font, penPosition, "  |", glm::vec4(0.3f, 0.3f, 0.3f, 1.f));
             RenderFont(*_font,
                 penPosition,
-                fmt::format("    {:5s}", m.first),
+                std::format("    {:5s}", m.first),
                 glm::vec4(_activeColor.value(), 1.f),
                 ghoul::fontrendering::CrDirection::Down
             );
@@ -240,93 +232,16 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format("    {:5s}", m.first),
+                std::format("    {:5s}", m.first),
                 glm::vec4(0.3f, 0.3f, 0.3f, 1.f),
                 ghoul::fontrendering::CrDirection::Down
             );
         }
     }
-}
 
-glm::vec2 DashboardItemInstruments::size() const {
-    glm::vec2 size = glm::vec2(0.f);
-    double currentTime = global::timeManager->time().j2000Seconds();
-
-    if (!ImageSequencer::ref().isReady()) {
-        return glm::vec2(0.f);
-    }
-    ImageSequencer& sequencer = ImageSequencer::ref();
-
-    double previous = sequencer.prevCaptureTime(currentTime);
-    double next = sequencer.nextCaptureTime(currentTime);
-    double remaining = sequencer.nextCaptureTime(currentTime) - currentTime;
-    const float t = static_cast<float>(1.0 - remaining / (next - previous));
-
-    const std::string& str = SpiceManager::ref().dateFromEphemerisTime(
-        sequencer.nextCaptureTime(currentTime),
-        "YYYY MON DD HR:MN:SC"
-    );
-
-    if (remaining > 0.0) {
-        std::string progress = progressToStr(25, t);
-
-        size = addToBoundingbox(size, _font->boundingBox("Next instrument activity:"));
-
-        size = addToBoundingbox(
-            size,
-            _font->boundingBox(
-                fmt::format("{:.0f} s {:s} {:.1f} %", remaining, progress, t * 100.f)
-            )
-        );
-
-        size = addToBoundingbox(
-            size,
-            _font->boundingBox(fmt::format("Data acquisition time: {}", str))
-        );
-    }
-    std::pair<double, std::string> nextTarget = sequencer.nextTarget(currentTime);
-    std::pair<double, std::string> currentTarget = sequencer.currentTarget(currentTime);
-
-    if (currentTarget.first <= 0.0) {
-        return size;
-    }
-
-    const int timeleft = static_cast<int>(nextTarget.first - currentTime);
-
-    const int hour = timeleft / 3600;
-    int second = timeleft % 3600;
-    const int minute = second / 60;
-    second = second % 60;
-
-
-    std::string hh;
-    if (hour < 10) {
-        hh = "0";
-    }
-    std::string mm;
-    if (minute < 10) {
-        mm = "0";
-    }
-    std::string ss;
-    if (second < 10) {
-        ss = "0";
-    }
-
-    hh.append(std::to_string(hour));
-    mm.append(std::to_string(minute));
-    ss.append(std::to_string(second));
-
-    size = addToBoundingbox(
-        size,
-        _font->boundingBox(
-            fmt::format("Data acquisition adjacency: [{}:{}:{}]", hh, mm, ss)
-        )
-    );
-
-    size.y += _font->height();
-
-    size = addToBoundingbox(size, _font->boundingBox("Active Instruments:"));
-    return size;
+    // The last item added a CR but we want to undo it since it's the next item's
+    // responsibility to move down
+    penPosition.y += _font->height();
 }
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,7 @@
 
 #include <openspace/mission/missionmanager.h>
 
+#include <openspace/events/eventengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/file.h>
@@ -41,10 +42,10 @@ MissionManager::MissionManagerException::MissionManagerException(std::string err
 
 MissionManager::MissionManager() : _currentMission(_missionMap.end()) {}
 
-void MissionManager::setCurrentMission(const std::string& missionName) {
-    ghoul_assert(!missionName.empty(), "missionName must not be empty");
+void MissionManager::setCurrentMission(const std::string& identifier) {
+    ghoul_assert(!identifier.empty(), "missionName must not be empty");
 
-    auto it = _missionMap.find(missionName);
+    auto it = _missionMap.find(identifier);
     if (it == _missionMap.end()) {
         throw MissionManagerException("Mission has not been loaded");
     }
@@ -57,45 +58,39 @@ bool MissionManager::hasCurrentMission() const {
     return _currentMission != _missionMap.end();
 }
 
-std::string MissionManager::loadMission(const std::string& filename) {
-    ghoul_assert(!filename.empty(), "filename must not be empty");
-    ghoul_assert(!FileSys.containsToken(filename), "filename must not contain tokens");
-    ghoul_assert(
-        std::filesystem::is_regular_file(filename),
-        "filename " + filename + " must exist"
-    );
 
+std::string MissionManager::loadMission(Mission mission) {
     // Changing the values might invalidate the _currentMission iterator
-    std::string currentMission =  hasCurrentMission() ? _currentMission->first : "";
-
-    Mission mission = missionFromFile(filename);
-    std::string missionName = mission.name();
-    _missionMap.insert({ missionName, std::move(mission) });
+    const std::string currentMission = hasCurrentMission() ? _currentMission->first : "";
+    const std::string identifier = mission.identifier();
+    _missionMap.insert({ identifier, std::move(mission) });
     if (_missionMap.size() == 1) {
-        setCurrentMission(missionName);
+        setCurrentMission(identifier);
     }
 
     if (!currentMission.empty()) {
         setCurrentMission(currentMission);
     }
 
-    return missionName;
+    global::eventEngine->publishEvent<events::EventMissionAdded>(identifier);
+    return identifier;
 }
 
-void MissionManager::unloadMission(const std::string& missionName) {
-    ghoul_assert(!missionName.empty(), "missionName must not be empty");
-    auto it = _missionMap.find(missionName);
+void MissionManager::unloadMission(const std::string& identifier) {
+    ghoul_assert(!identifier.empty(), "missionName must not be empty");
+    auto it = _missionMap.find(identifier);
     ghoul_assert(it != _missionMap.end(), "missionName must be a loaded mission");
 
     if (it == _currentMission) {
         _currentMission = _missionMap.end();
     }
 
+    global::eventEngine->publishEvent<events::EventMissionRemoved>(identifier);
     _missionMap.erase(it);
 }
 
-bool MissionManager::hasMission(const std::string& missionName) {
-    return _missionMap.find(missionName) != _missionMap.end();
+bool MissionManager::hasMission(const std::string& identifier) {
+    return _missionMap.find(identifier) != _missionMap.end();
 }
 
 const Mission& MissionManager::currentMission() {
@@ -103,6 +98,10 @@ const Mission& MissionManager::currentMission() {
         throw MissionManagerException("No current mission has been specified");
     }
     return _currentMission->second;
+}
+
+const std::map<std::string, Mission>& MissionManager::missionMap() {
+    return _missionMap;
 }
 
 scripting::LuaLibrary MissionManager::luaLibrary() {
@@ -118,6 +117,4 @@ scripting::LuaLibrary MissionManager::luaLibrary() {
 }
 
 // Singleton
-
-
 }  // namespace openspace

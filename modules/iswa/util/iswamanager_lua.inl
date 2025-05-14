@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,6 +21,8 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
+#include <ghoul/lua/lua_helper.h>
 
 namespace {
 
@@ -50,8 +52,8 @@ namespace {
     info->selected = true;
 
     if (global::renderEngine->screenSpaceRenderable(name)) {
-        throw ghoul::lua::LuaError(fmt::format(
-            "A cygnet with the name \"{}\" already exist", name
+        throw ghoul::lua::LuaError(std::format(
+            "A cygnet with the name '{}' already exist", name
         ));
     }
     else {
@@ -68,10 +70,8 @@ namespace {
 
 // Remove a Cygnets.
 [[codegen::luawrap]] void removeCygnet(std::string name) {
-    using namespace openspace;
-    global::scriptEngine->queueScript(
-        "openspace.removeSceneGraphNode('" + name + "')",
-        scripting::ScriptEngine::RemoteScripting::Yes
+    openspace::global::scriptEngine->queueScript(
+        "openspace.removeSceneGraphNode('" + name + "')"
     );
 }
 
@@ -90,14 +90,10 @@ namespace {
     std::shared_ptr<CygnetInfo> info = cygnetInformation[id];
     info->selected = false;
 
-    std::string script = fmt::format(
+    std::string script = std::format(
         "openspace.unregisterScreenSpaceRenderable('{}');", cygnetInformation[id]->name
     );
-
-    global::scriptEngine->queueScript(
-        script,
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
+    global::scriptEngine->queueScript(script);
 }
 
 // Remove a group of Cygnets.

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,39 +25,31 @@
 #ifndef __OPENSPACE_CORE___FLOATPROPERTY___H__
 #define __OPENSPACE_CORE___FLOATPROPERTY___H__
 
- /**
- * \file floatproperty.h
- *
- * \addtogroup openspace
- * @{
- * \addtogroup properties
- * @{
-
- * \class FloatProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>float</code>.
-
- * @} @}
- */
-
 #include <openspace/properties/numericalproperty.h>
 #include <limits>
 
 namespace openspace::properties {
 
+/**
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type `float`.
+ */
 class FloatProperty : public NumericalProperty<float> {
 public:
     FloatProperty(Property::PropertyInfo info, float value = 0.f,
         float minValue = std::numeric_limits<float>::lowest(),
         float maxValue = std::numeric_limits<float>::max(), float stepValue = 0.01f);
 
-    std::string_view className() const override;
-    int typeLua() const override;
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
+    void getLuaValue(lua_State* state) const override final;
+
+    std::string stringValue() const override final;
     using TemplateProperty<float>::operator=;
 
-protected:
-    float fromLuaConversion(lua_State* state, bool& success) const override;
+private:
+    float toValue(lua_State* state) const override final;
 };
 
 } // namespace openspace::properties

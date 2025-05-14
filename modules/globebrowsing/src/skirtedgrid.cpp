@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -87,12 +87,12 @@ namespace {
         for (int y = -1; y < ySegments + 2; y++) {
             for (int x = -1; x < xSegments + 2; x++) {
                 textureCoordinates.emplace_back(
-                    glm::clamp(
+                    std::clamp(
                         static_cast<float>(x) / static_cast<float>(xSegments),
                         0.f - 1.f / (2.f * xSegments),
                         1.f + 1.f / (2.f * xSegments)
                     ),
-                    glm::clamp(
+                    std::clamp(
                         static_cast<float>(y) / static_cast<float>(ySegments),
                         0.f - 1.f / (2.f * ySegments),
                         1.f + 1.f / (2.f * ySegments)
@@ -117,13 +117,13 @@ void SkirtedGrid::initializeGL() {
     std::vector<GLushort> elementData = createElements(xSegments, ySegments);
 
     struct Vertex {
-        GLfloat texture[2];
+        std::array<GLfloat, 2> texture;
     };
 
 
     std::vector<glm::vec2> textures = createTextureCoordinates(xSegments, ySegments);
     std::vector<Vertex> vertexData(textures.size());
-    for (size_t i = 0; i < textures.size(); ++i) {
+    for (size_t i = 0; i < textures.size(); i++) {
         vertexData[i].texture[0] = textures[i][0];
         vertexData[i].texture[1] = textures[i][1];
     }

@@ -3,7 +3,7 @@ var parseJson = (elementId) => {
   return JSON.parse(jsonElement.innerHTML);
 };
 
-var urlifyFunction = (options, context) => {  
+var urlifyFunction = (options, context) => {
 	var data = context.data;
 
   var identifier = options.replace(/ /g, '');
@@ -48,8 +48,8 @@ var copyTextToClipboard = (text) => {
 var sidebarNavigate = (index) => {
   var subtreeSelector = "#index" + index + "-subtree";
 
-  if ((currentDocumentation == documentation[index]) 
-    && (document.querySelector(subtreeSelector).innerHTML != "")) 
+  if ((currentDocumentation == documentation[index])
+    && (document.querySelector(subtreeSelector).innerHTML != ""))
   {
       var subtreeSelector = "#index" + index + "-subtree";
       document.querySelector(subtreeSelector).innerHTML = "";
@@ -89,7 +89,7 @@ var sidebarNavigate = (index) => {
     subTreeHTML += "</li>";
   }
 
-  //find our subtree and fill it with data 
+  //find our subtree and fill it with data
   document.querySelector(subtreeSelector).innerHTML = subTreeHTML;
 };
 

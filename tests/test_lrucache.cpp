@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "catch2/catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <modules/globebrowsing/src/lrucache.h>
 #include <glm/glm.hpp>
@@ -46,7 +46,7 @@ namespace {
         return o << key.x << ", " << key.y;
     }
 
-    // custom specialization 
+    // custom specialization
     struct DefaultHasherMyKey {
         unsigned long long operator()(const MyKey& s) const {
             return s.x ^ (s.y << 1);

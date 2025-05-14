@@ -1,0 +1,83 @@
+local MinorMoonsOn = {
+  Identifier = "os.MinorMoonsOn",
+  Name = "Turn on minor moons and trails",
+  Command = [[
+    local trails = openspace.property("{moonTrail_minor}.Renderable.Enabled")
+    local trails_fade = openspace.property("{moonTrail_minor}.Renderable.Fade")
+
+    local moons = openspace.property("{moon_minor}.Renderable.Enabled")
+    local moons_fade = openspace.property("{moon_minor}.Renderable.Fade")
+
+    for i, v in pairs(trails_fade) do
+      openspace.setPropertyValueSingle(trails[i], true)
+      openspace.setPropertyValueSingle(v, 1, 2, "Linear")
+    end
+
+    for i, v in pairs(moons_fade) do
+      openspace.setPropertyValueSingle(moons[i], true)
+      openspace.setPropertyValueSingle(v, 1, 2, "Linear")
+    end
+  ]],
+  Documentation = "Turn ON minor moons and their trails for all planets in the solar system",
+  GuiPath = "/Solar System/Minor Moons",
+  IsLocal = false
+}
+
+local MinorMoonsOff = {
+  Identifier = "os.MinorMoonsOff",
+  Name = "Turn off minor moons and trails",
+  Command = [[
+    local trails = openspace.property("{moonTrail_minor}.Renderable.Enabled")
+    local trails_fade = openspace.property("{moonTrail_minor}.Renderable.Fade")
+
+    local moons = openspace.property("{moon_minor}.Renderable.Enabled")
+    local moons_fade = openspace.property("{moon_minor}.Renderable.Fade")
+
+    for i, v in pairs(trails_fade) do
+      openspace.setPropertyValueSingle(
+        v,
+        0,
+        2,
+        "Linear",
+        "openspace.setPropertyValueSingle('" .. trails[i] .. "', false)"
+      )
+    end
+
+    for i, v in pairs(moons_fade) do
+      openspace.setPropertyValueSingle(
+        v,
+        0,
+        2,
+        "Linear",
+        "openspace.setPropertyValueSingle('" .. moons[i] .. "', false)"
+      )
+    end
+  ]],
+  Documentation = "Turn OFF minor moons and their trails for all planets in the solar system",
+  GuiPath = "/Solar System/Minor Moons",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.action.registerAction(MinorMoonsOn)
+  openspace.action.registerAction(MinorMoonsOff)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(MinorMoonsOff)
+  openspace.action.removeAction(MinorMoonsOn)
+end)
+
+asset.export("MinorMoonsOn", MinorMoonsOn.Identifier)
+asset.export("MinorMoonsOff", MinorMoonsOff.Identifier)
+
+
+
+asset.meta = {
+  Name = "Actions - Turn ON/OFF all Minor Moons",
+  Description = "Asset providing actions to turn  ON/OFF all minor moons and their trails",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

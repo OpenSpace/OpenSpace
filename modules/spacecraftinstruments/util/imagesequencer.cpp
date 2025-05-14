@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,7 +45,7 @@ ImageSequencer& ImageSequencer::ref() {
 void ImageSequencer::initialize() {
     ghoul_assert(_instance == nullptr, "Instance already has been initialized");
     _instance = new ImageSequencer;
-    _instance->_defaultCaptureImage = absPath("${DATA}/placeholder.png").string();
+    _instance->_defaultCaptureImage = absPath("${DATA}/placeholder.png");
 }
 
 void ImageSequencer::deinitialize() {
@@ -125,6 +125,10 @@ Image ImageSequencer::latestImageForInstrument(const std::string& instrumentID) 
     else {
         return Image();
     }
+}
+
+const std::vector<double>& ImageSequencer::captureProgression() const {
+    return _captureProgression;
 }
 
 std::vector<std::pair<std::string, bool>> ImageSequencer::activeInstruments(double time) {
@@ -221,7 +225,8 @@ std::vector<Image> ImageSequencer::imagePaths(const std::string& projectee,
     // create temporary storage
     std::vector<Image> captures;
     // what to look for
-    Image findPrevious, findCurrent;
+    Image findPrevious;
+    Image findCurrent;
     findPrevious.timeRange.start = sinceTime;
     findCurrent.timeRange.start = time;
 
@@ -241,7 +246,7 @@ std::vector<Image> ImageSequencer::imagePaths(const std::string& projectee,
     std::copy_if(
         prev,
         curr,
-        back_inserter(captures),
+        std::back_inserter(captures),
         [instrument](const Image& i) { return i.activeInstruments[0] == instrument; }
     );
 
@@ -250,7 +255,7 @@ std::vector<Image> ImageSequencer::imagePaths(const std::string& projectee,
     }
 
     std::vector<int> toDelete;
-    for (std::vector<Image>::iterator it = captures.begin(); it != captures.end(); ++it) {
+    for (auto it = captures.begin(); it != captures.end(); it++) {
         if (!it->isPlaceholder) {
             continue;
         }
@@ -270,10 +275,10 @@ std::vector<Image> ImageSequencer::imagePaths(const std::string& projectee,
         }
     }
 
-    for (size_t i = 0; i < toDelete.size(); ++i) {
+    for (size_t i = 0; i < toDelete.size(); i++) {
         // We have to subtract i here as we already have deleted i value before this and
         // we need to adjust the location
-        int v = toDelete[i] - static_cast<int>(i);
+        const int v = toDelete[i] - static_cast<int>(i);
         captures.erase(captures.begin() + v);
     }
 
@@ -345,27 +350,37 @@ void ImageSequencer::runSequenceParser(SequenceParser& parser) {
 
         // simple search function
         double min = 10;
-        auto findMin = [&](const std::vector<Image>& vec) -> double {
-            for (size_t i = 1; i < vec.size(); ++i) {
-                double e = std::abs(vec[i].timeRange.start - vec[i - 1].timeRange.start);
+        auto findMin = [&min](const std::vector<Image>& vec) -> double {
+            for (size_t i = 1; i < vec.size(); i++) {
+                const double e = std::abs(
+                    vec[i].timeRange.start - vec[i - 1].timeRange.start
+                );
                 min = std::min(e, min);
             }
             return min;
         };
 
         // find the smallest separation of images in time
-        double epsilon;
-        epsilon = findMin(destination);
+        double epsilon = findMin(destination);
         // set epsilon as 1% smaller than min
         epsilon -= min * 0.01;
 
         // IFF images have same time as mission planned capture, erase that event
         // from 'predicted event file' (mission-playbook)
-        for (Image& i : source) {
+        for (const Image& i : source) {
             for (const Image& j : destination) {
+                if (source.empty()) {
+                    break;
+                }
+
                 const double diff = std::abs(i.timeRange.start - j.timeRange.start);
                 if (diff < epsilon) {
-                    source.erase(source.begin() + 1);
+                    if (source.size() == 1) {
+                        source.erase(source.begin());
+                    }
+                    else {
+                        source.erase(source.begin() + 1);
+                    }
                 }
             }
         }

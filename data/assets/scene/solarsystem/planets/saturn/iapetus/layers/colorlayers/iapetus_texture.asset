@@ -1,24 +1,30 @@
-local globeIdentifier = asset.require("../../iapetus").Iapetus.Identifier
+local globe = asset.require("../../iapetus")
 
-local texturesPath = asset.syncedResource({
+
+
+local texturesPath = asset.resource({
   Name = "Iapetus textures",
   Type = "HttpSynchronization",
   Identifier = "iapetus_textures",
   Version = 1
 })
 
+
 local layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "iapetus.jpg",
-  Enabled = asset.enabled
+  Enabled = asset.enabled,
+  ZIndex = 5,
+  CacheSettings = { Enabled = false }
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Iapetus.Identifier, "ColorLayers", layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Iapetus.Identifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
@@ -27,7 +33,6 @@ asset.export("layer", layer)
 
 asset.meta = {
   Name = "Iapetus Texutre",
-  Version = "1.0",
   Description = "Default jpg texture for Iapetus",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

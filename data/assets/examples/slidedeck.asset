@@ -1,10 +1,11 @@
 local helper = asset.require("util/slide_deck_helper")
 local deck = nil
 
-asset.onInitialize(function ()
+
+asset.onInitialize(function()
   deck = helper.createDeck("example", {
     UseRadiusAzimuthElevation = true,
-    RadiusAzimuthElevation = {1.0, 0.0, 0.0}, -- use for dome
+    RadiusAzimuthElevation = { 1.0, 0.0, 0.0 }, -- use for dome
     UsePerspectiveProjection = true,
     FaceCamera = true,
     Scale = 0.7
@@ -17,7 +18,7 @@ asset.onInitialize(function ()
 
   -- Add global functions for controlling slide deck and bind to keys
   rawset(_G, "nextSlide", function()
-    helper.goToNextSlide(deck, interpolationDuration) 
+    helper.goToNextSlide(deck, interpolationDuration)
   end)
 
   rawset(_G, "previousSlide", function()
@@ -38,7 +39,7 @@ asset.onInitialize(function ()
     GuiPath = "/Slides",
     IsLocal = false
   })
-  openspace.bindKey("KP_4", "slide_deck.prevslide");
+  openspace.bindKey("KP_4", "slide_deck.prevslide")
 
   openspace.action.registerAction({
     Identifier = "slide_deck.nextslide",
@@ -64,8 +65,11 @@ end)
 
 
 asset.onDeinitialize(function()
-  openspace.clearKey("KP_6")
   openspace.clearKey("KP_4")
+  openspace.action.removeAction("slide_deck.prevslide")
+  openspace.clearKey("KP_6")
+  openspace.action.removeAction("slide_deck.nextslide")
   openspace.clearKey("KP_0")
+  openspace.action.removeAction("slide_deck.toggleslides")
   helper.removeDeck(deck)
 end)

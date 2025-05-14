@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__DEFAULTTILEPROVIDER___H__
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
-
+#include <modules/globebrowsing/src/tilecacheproperties.h>
 #include <modules/globebrowsing/src/asynctiledataprovider.h>
 #include <memory>
 
@@ -34,7 +34,7 @@ namespace openspace::globebrowsing {
 
 class DefaultTileProvider : public TileProvider {
 public:
-    DefaultTileProvider(const ghoul::Dictionary& dictionary);
+    explicit DefaultTileProvider(const ghoul::Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
     Tile::Status tileStatus(const TileIndex& index) override final;
@@ -48,7 +48,8 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void initAsyncTileDataReader(TileTextureInitData initData);
+    void initAsyncTileDataReader(TileTextureInitData initData,
+        TileCacheProperties cacheProperties);
 
     properties::StringProperty _filePath;
     properties::IntProperty _tilePixelSize;
@@ -56,7 +57,7 @@ private:
     std::unique_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
     layers::Group::ID _layerGroupID = layers::Group::ID::Unknown;
     bool _performPreProcessing = false;
-    bool _padTiles = true;
+    TileCacheProperties _cacheProperties;
 };
 
 } // namespace openspace::globebrowsing

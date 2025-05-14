@@ -1,183 +1,902 @@
-local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
 local kernels = asset.require("../kernels")
-local kernel375 = kernels.sat375
-local kernel393 = kernels.sat393
+local kernels415 = asset.require("../kernels415")
+local kernels452 = asset.require("../kernels452")
+local coreKernels = asset.require("spice/core")
 
 
 
-local parentIdentifier = transforms.SaturnBarycenter.Identifier
-local parentSpice = "SATURN BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_other", "moon_minor" }
-local trailColor = { 0.5, 0.3, 0.3 }
-local trailTags = { 
-  "moonTrail_solarSystem",
-  "moonTrail_giants",
-  "moonTrail_saturn",
-  "moonTrail_minor"
-}
-
-local otherGroup = {
-  {
-    Identifier = "Aegaeon",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "AEGAEON",
-    Radii = { 500, 500, 500 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 0.80812,
-    Kernels = kernel393
+local Aegaeon = {
+  Identifier = "Aegaeon",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Aegaeon,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
   },
-  {
-    Identifier = "Methone",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "METHONE",
-    Radii = { 3200, 3200, 3200 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1.00957,
-    Kernels = kernel393
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 500, 500, 500 }
   },
-  {
-    Identifier = "Anthe",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "ANTHE",
-    Radii = { 1800, 1800, 1800 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1.05089,
-    Kernels = kernel393
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
   },
-  {
-    Identifier = "Pallene",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "PALLENE",
-    Radii = { 6000, 6000, 4000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1.370218,
-    Kernels = kernel393
-  },
-  {
-    Identifier = "Telesto",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "TELESTO",
-    Radii = { 33000, 24000, 20000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1.887802,
-    Kernels = kernel375
-  },
-  {
-    Identifier = "Calypso",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "CALYPSO",
-    Radii = { 30000, 23000, 14000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1.887802,
-    Kernels = kernel375
-  },
-  {
-    Identifier = "Helene",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "HELENE",
-    Radii = { 43000, 38000, 26000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 2.736915,
-    Kernels = kernel375
-  },
-  {
-    Identifier = "Polydeuces",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "POLYDEUCES",
-    Radii = { 3000, 2000, 1000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 2.736915,
-    Kernels = kernel393
+  GUI = {
+    Name = "Aegaeon",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Aegaeon"
   }
 }
 
-local nodes = proceduralGlobes.createGlobes(otherGroup)
+local AegaeonTrail = {
+  Identifier = "AegaeonTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Aegaeon,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 0.80812,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Aegaeon Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Aegaeon"
+  }
+}
+
+local AegaeonLabel = {
+  Identifier = "AegaeonLabel",
+  Parent = Aegaeon.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Aegaeon",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 250.0, 1500.0 },
+    FadeWidths = { 100.0, 1500.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "Aegaeon Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Aegaeon"
+  }
+}
+
+local Methone = {
+  Identifier = "Methone",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Methone,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3200, 3200, 3200 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Methone",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Methone"
+  }
+}
+
+local MethoneTrail = {
+  Identifier = "MethoneTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Methone,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1.00957,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Methone Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Methone"
+  }
+}
+
+local MethoneLabel = {
+  Identifier = "MethoneLabel",
+  Parent = Methone.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Methone",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 250.0, 1500.0 },
+    FadeWidths = { 100.0, 1500.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "Methone Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Methone"
+  }
+}
+
+local Anthe = {
+  Identifier = "Anthe",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Anthe,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1800, 1800, 1800 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Anthe",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Anthe"
+  }
+}
+
+local AntheTrail = {
+  Identifier = "AntheTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Anthe,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1.05089,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Anthe Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Anthe"
+  }
+}
+
+local AntheLabel = {
+  Identifier = "AntheLabel",
+  Parent = Anthe.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Anthe",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 250.0, 1500.0 },
+    FadeWidths = { 100.0, 1500.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "Anthe Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Anthe"
+  }
+}
+
+local Pallene = {
+  Identifier = "Pallene",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Pallene,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Pallene",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Pallene"
+  }
+}
+
+local PalleneTrail = {
+  Identifier = "PalleneTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Pallene,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1.370218,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Pallene Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Pallene"
+  }
+}
+
+local PalleneLabel = {
+  Identifier = "PalleneLabel",
+  Parent = Pallene.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Pallene",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 250.0, 1500.0 },
+    FadeWidths = { 100.0, 1500.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "Pallene Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Pallene"
+  }
+}
+
+local Telesto = {
+  Identifier = "Telesto",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Telesto,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 33000, 24000, 20000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Telesto",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Telesto"
+  }
+}
+
+local TelestoTrail = {
+  Identifier = "TelestoTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Telesto,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1.887802,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Telesto Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Telesto"
+  }
+}
+
+local TelestoLabel = {
+  Identifier = "TelestoLabel",
+  Parent = Telesto.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Telesto",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 250.0, 1500.0 },
+    FadeWidths = { 100.0, 1500.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "Telesto Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Telesto"
+  }
+}
+
+local Calypso = {
+  Identifier = "Calypso",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Calypso,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 30000, 23000, 14000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Calypso",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Calypso"
+  }
+}
+
+local CalypsoTrail = {
+  Identifier = "CalypsoTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Calypso,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1.887802,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Calypso Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Calypso"
+  }
+}
+
+local CalypsoLabel = {
+  Identifier = "CalypsoLabel",
+  Parent = Calypso.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Calypso",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 250.0, 1500.0 },
+    FadeWidths = { 100.0, 1500.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "Calypso Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Calypso"
+  }
+}
+
+local Helene = {
+  Identifier = "Helene",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Helene,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 43000, 38000, 26000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Helene",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Helene"
+  }
+}
+
+local HeleneTrail = {
+  Identifier = "HeleneTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Helene,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 2.736915,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Helene Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Helene"
+  }
+}
+
+local HeleneLabel = {
+  Identifier = "HeleneLabel",
+  Parent = Helene.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Helene",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 250.0, 1500.0 },
+    FadeWidths = { 100.0, 1500.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "Helene Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Helene"
+  }
+}
+
+local Polydeuces = {
+  Identifier = "Polydeuces",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Polydeuces,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 2000, 1000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Polydeuces",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Polydeuces"
+  }
+}
+
+local PolydeucesTrail = {
+  Identifier = "PolydeucesTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Polydeuces,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 2.736915,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Polydeuces Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Polydeuces"
+  }
+}
+
+local PolydeucesLabel = {
+  Identifier = "PolydeucesLabel",
+  Parent = Polydeuces.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Polydeuces",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 250.0, 1500.0 },
+    FadeWidths = { 100.0, 1500.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "Polydeuces Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Polydeuces"
+  }
+}
+
+local S2004S24 = {
+  Identifier = "S2004S24",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels452.ID.S2004S24,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 24",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/S2004S24"
+  }
+}
+
+local S2004S24Trail = {
+  Identifier = "S2004S24Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels452.ID.S2004S24,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1293.85,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 24 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/S2004S24"
+  }
+}
+
+local S2004S24Label = {
+  Identifier = "S2004S24Label",
+  Parent = S2004S24.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2004 S 24",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 250.0, 1500.0 },
+    FadeWidths = { 100.0, 1500.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2004 S 24 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/S2004S24"
+  }
+}
+
 
 asset.onInitialize(function()
-  for _, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.addSceneGraphNode(Aegaeon)
+  openspace.addSceneGraphNode(AegaeonTrail)
+  openspace.addSceneGraphNode(AegaeonLabel)
+
+  openspace.addSceneGraphNode(Methone)
+  openspace.addSceneGraphNode(MethoneTrail)
+  openspace.addSceneGraphNode(MethoneLabel)
+
+  openspace.addSceneGraphNode(Anthe)
+  openspace.addSceneGraphNode(AntheTrail)
+  openspace.addSceneGraphNode(AntheLabel)
+
+  openspace.addSceneGraphNode(Pallene)
+  openspace.addSceneGraphNode(PalleneTrail)
+  openspace.addSceneGraphNode(PalleneLabel)
+
+  openspace.addSceneGraphNode(Telesto)
+  openspace.addSceneGraphNode(TelestoTrail)
+  openspace.addSceneGraphNode(TelestoLabel)
+
+  openspace.addSceneGraphNode(Calypso)
+  openspace.addSceneGraphNode(CalypsoTrail)
+  openspace.addSceneGraphNode(CalypsoLabel)
+
+  openspace.addSceneGraphNode(Helene)
+  openspace.addSceneGraphNode(HeleneTrail)
+  openspace.addSceneGraphNode(HeleneLabel)
+
+  openspace.addSceneGraphNode(Polydeuces)
+  openspace.addSceneGraphNode(PolydeucesTrail)
+  openspace.addSceneGraphNode(PolydeucesLabel)
+
+  openspace.addSceneGraphNode(S2004S24)
+  openspace.addSceneGraphNode(S2004S24Trail)
+  openspace.addSceneGraphNode(S2004S24Label)
 end)
-  
+
 asset.onDeinitialize(function()
-  for i = #nodes, 1, -1 do
-    openspace.removeSceneGraphNode(nodes[i])
-  end
+  openspace.removeSceneGraphNode(AegaeonLabel)
+  openspace.removeSceneGraphNode(AegaeonTrail)
+  openspace.removeSceneGraphNode(Aegaeon)
+
+  openspace.removeSceneGraphNode(MethoneLabel)
+  openspace.removeSceneGraphNode(MethoneTrail)
+  openspace.removeSceneGraphNode(Methone)
+
+  openspace.removeSceneGraphNode(AntheLabel)
+  openspace.removeSceneGraphNode(AntheTrail)
+  openspace.removeSceneGraphNode(Anthe)
+
+  openspace.removeSceneGraphNode(PalleneLabel)
+  openspace.removeSceneGraphNode(PalleneTrail)
+  openspace.removeSceneGraphNode(Pallene)
+
+  openspace.removeSceneGraphNode(TelestoLabel)
+  openspace.removeSceneGraphNode(TelestoTrail)
+  openspace.removeSceneGraphNode(Telesto)
+
+  openspace.removeSceneGraphNode(CalypsoLabel)
+  openspace.removeSceneGraphNode(CalypsoTrail)
+  openspace.removeSceneGraphNode(Calypso)
+
+  openspace.removeSceneGraphNode(HeleneLabel)
+  openspace.removeSceneGraphNode(HeleneTrail)
+  openspace.removeSceneGraphNode(Helene)
+
+  openspace.removeSceneGraphNode(PolydeucesLabel)
+  openspace.removeSceneGraphNode(PolydeucesTrail)
+  openspace.removeSceneGraphNode(Polydeuces)
+
+  openspace.removeSceneGraphNode(S2004S24Label)
+  openspace.removeSceneGraphNode(S2004S24Trail)
+  openspace.removeSceneGraphNode(S2004S24)
 end)
-  
-for _, node in ipairs(nodes) do
-  asset.export(node)
-end
+
+asset.export(Aegaeon)
+asset.export(AegaeonTrail)
+asset.export(AegaeonLabel)
+
+asset.export(Methone)
+asset.export(MethoneTrail)
+asset.export(MethoneLabel)
+
+asset.export(Anthe)
+asset.export(AntheTrail)
+asset.export(AntheLabel)
+
+asset.export(Pallene)
+asset.export(PalleneTrail)
+asset.export(PalleneLabel)
+
+asset.export(Telesto)
+asset.export(TelestoTrail)
+asset.export(TelestoLabel)
+
+asset.export(Calypso)
+asset.export(CalypsoTrail)
+asset.export(CalypsoLabel)
+
+asset.export(Helene)
+asset.export(HeleneTrail)
+asset.export(HeleneLabel)
+
+asset.export(Polydeuces)
+asset.export(PolydeucesTrail)
+asset.export(PolydeucesLabel)
+
+asset.export(S2004S24)
+asset.export(S2004S24Trail)
+asset.export(S2004S24Label)
+
 
 
 asset.meta = {
   Name = "Saturn Other Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Saturn's Other Group moons: Aegaeon,
     Methone, Anthe, Pallene, Telesto, Calypso, Helene, Polydeuces. Blank globes and SPICE
     trails are generated for each moon]],

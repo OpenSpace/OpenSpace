@@ -1,0 +1,19 @@
+{
+  "profile": "voyager",
+  "commands": [
+    { "type": "time", "value": "2020-01-01T00:00:00.00" },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Sun",
+        "pitch": -0.296905E-2,
+        "position": [ -5.701493E12, 2.431929E13, -4.495678E13 ],
+        "up": [ -0.117936E0, 0.867082E0, 0.484003E0 ],
+        "yaw": -0.189846E-1
+      }
+    },
+    { "type": "action", "value": "os.FadeDownTrails" },
+    { "type": "wait", "value": 2 },
+    { "type": "screenshot" }
+  ]
+}

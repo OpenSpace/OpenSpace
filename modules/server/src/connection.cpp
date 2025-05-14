@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,15 +26,19 @@
 
 #include <modules/server/include/topics/authorizationtopic.h>
 #include <modules/server/include/topics/bouncetopic.h>
+#include <modules/server/include/topics/camerapathtopic.h>
 #include <modules/server/include/topics/cameratopic.h>
 #include <modules/server/include/topics/documentationtopic.h>
 #include <modules/server/include/topics/enginemodetopic.h>
+#include <modules/server/include/topics/errorlogtopic.h>
+#include <modules/server/include/topics/eventtopic.h>
 #include <modules/server/include/topics/flightcontrollertopic.h>
 #include <modules/server/include/topics/getpropertytopic.h>
 #include <modules/server/include/topics/luascripttopic.h>
+#include <modules/server/include/topics/missiontopic.h>
 #include <modules/server/include/topics/sessionrecordingtopic.h>
 #include <modules/server/include/topics/setpropertytopic.h>
-#include <modules/server/include/topics/shortcuttopic.h>
+#include <modules/server/include/topics/actionkeybindtopic.h>
 #include <modules/server/include/topics/skybrowsertopic.h>
 #include <modules/server/include/topics/subscriptiontopic.h>
 #include <modules/server/include/topics/timetopic.h>
@@ -43,12 +47,13 @@
 #include <modules/server/include/topics/versiontopic.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/io/socket/socket.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
 #include <ghoul/io/socket/websocketserver.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
-#include <fmt/format.h>
+#include <include/topics/profiletopic.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "ServerModule: Connection";
@@ -56,6 +61,7 @@ namespace {
     constexpr std::string_view MessageKeyType = "type";
     constexpr std::string_view MessageKeyPayload = "payload";
     constexpr std::string_view MessageKeyTopic = "topic";
+
 } // namespace
 
 namespace openspace {
@@ -81,66 +87,71 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
         }
     );
 
+    _topicFactory.registerClass<BounceTopic>("bounce");
+    _topicFactory.registerClass<CameraTopic>("camera");
+    _topicFactory.registerClass<CameraPathTopic>("cameraPath");
     _topicFactory.registerClass<DocumentationTopic>("documentation");
+    _topicFactory.registerClass<EngineModeTopic>("engineMode");
+    _topicFactory.registerClass<ErrorLogTopic>("errorLog");
+    _topicFactory.registerClass<EventTopic>("event");
+    _topicFactory.registerClass<FlightControllerTopic>("flightcontroller");
     _topicFactory.registerClass<GetPropertyTopic>("get");
     _topicFactory.registerClass<LuaScriptTopic>("luascript");
-    _topicFactory.registerClass<EngineModeTopic>("engineMode");
+    _topicFactory.registerClass<MissionTopic>("missions");
+    _topicFactory.registerClass<ProfileTopic>("profile");
     _topicFactory.registerClass<SessionRecordingTopic>("sessionRecording");
     _topicFactory.registerClass<SetPropertyTopic>("set");
-    _topicFactory.registerClass<ShortcutTopic>("shortcuts");
+    _topicFactory.registerClass<ActionKeybindTopic>("actionsKeybinds");
+    _topicFactory.registerClass<SkyBrowserTopic>("skybrowser");
     _topicFactory.registerClass<SubscriptionTopic>("subscribe");
     _topicFactory.registerClass<TimeTopic>("time");
     _topicFactory.registerClass<TriggerPropertyTopic>("trigger");
-    _topicFactory.registerClass<BounceTopic>("bounce");
-    _topicFactory.registerClass<FlightControllerTopic>("flightcontroller");
     _topicFactory.registerClass<VersionTopic>("version");
-    _topicFactory.registerClass<SkyBrowserTopic>("skybrowser");
-    _topicFactory.registerClass<CameraTopic>("camera");
 }
 
 void Connection::handleMessage(const std::string& message) {
-    ZoneScoped
+    ZoneScoped;
 
     try {
-        nlohmann::json j = nlohmann::json::parse(message.c_str());
+        const nlohmann::json j = nlohmann::json::parse(message.c_str());
         try {
             handleJson(j);
         }
         catch (const std::domain_error& e) {
-            LERROR(fmt::format("JSON handling error from: {}. {}", message, e.what()));
+            LERROR(std::format("JSON handling error from: {}. {}", message, e.what()));
         }
     }
     catch (const std::out_of_range& e) {
-        LERROR(fmt::format("JSON handling error from: {}. {}", message, e.what()));
+        LERROR(std::format("JSON handling error from: {}. {}", message, e.what()));
     }
     catch (const std::exception& e) {
         LERROR(e.what());
-    } catch (...) {
+    }
+    catch (...) {
         if (!isAuthorized()) {
             _socket->disconnect();
-            LERROR(fmt::format(
-                "Could not parse JSON: '{}'. Connection is unauthorized. Disconnecting",
+            LERROR(std::format(
+                "Could not parse JSON '{}'. Connection is unauthorized. Disconnecting",
                 message
             ));
             return;
         }
-        else {
-            std::string sanitizedString = message;
-            std::transform(
-                message.begin(),
-                message.end(),
-                sanitizedString.begin(),
-                [](wchar_t c) {
-                    return std::isprint(c, std::locale("")) ? char(c) : ' ';
-                }
-            );
-            LERROR(fmt::format("Could not parse JSON: '{}'", sanitizedString));
-        }
+
+        std::string sanitizedString = message;
+        std::transform(
+            message.begin(),
+            message.end(),
+            sanitizedString.begin(),
+            [](wchar_t c) {
+                return std::isprint(c, std::locale("")) ? char(c) : ' ';
+            }
+        );
+        LERROR(std::format("Could not parse JSON '{}'", sanitizedString));
     }
 }
 
 void Connection::handleJson(const nlohmann::json& json) {
-    ZoneScoped
+    ZoneScoped;
 
     auto topicJson = json.find(MessageKeyTopic);
     auto payloadJson = json.find(MessageKeyPayload);
@@ -156,19 +167,22 @@ void Connection::handleJson(const nlohmann::json& json) {
     }
 
     // The topic id may be an already discussed topic, or a new one.
-    TopicId topicId = *topicJson;
+    const TopicId topicId = topicJson->get<TopicId>();
     auto topicIt = _topics.find(topicId);
 
     if (topicIt == _topics.end()) {
+        ZoneScopedN("New Topic");
+
         // The topic id is not registered: Initialize a new topic.
         auto typeJson = json.find(MessageKeyType);
         if (typeJson == json.end() || !typeJson->is_string()) {
             LERROR("Type must be specified as a string when a new topic is initialized");
             return;
         }
-        std::string type = *typeJson;
+        const std::string type = typeJson->get<std::string>();
+        ZoneText(type.c_str(), type.size());
 
-        if (!isAuthorized() && type != "authorize") {
+        if (!isAuthorized() && (type != "authorize")) {
             LERROR("Connection is not authorized");
             return;
         }
@@ -181,6 +195,8 @@ void Connection::handleJson(const nlohmann::json& json) {
         }
     }
     else {
+        ZoneScopedN("Existing Topic");
+
         if (!isAuthorized()) {
             LERROR("Connection is not authorized");
             return;
@@ -196,13 +212,13 @@ void Connection::handleJson(const nlohmann::json& json) {
 }
 
 void Connection::sendMessage(const std::string& message) {
-    ZoneScoped
+    ZoneScoped;
 
     _socket->putMessage(message);
 }
 
 void Connection::sendJson(const nlohmann::json& json) {
-    ZoneScoped
+    ZoneScoped;
 
     sendMessage(json.dump());
 }

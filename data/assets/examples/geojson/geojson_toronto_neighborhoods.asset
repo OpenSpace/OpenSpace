@@ -1,0 +1,45 @@
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+
+
+local data = asset.resource({
+  Name = "GeoJSON Example Toronto Neighborhoods",
+  Type = "UrlSynchronization",
+  Identifier = "geojson_example_toronto_neighborhoods",
+  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/toronto_neighborhoods.geojson"
+})
+
+
+local ExampleToronto = {
+  Identifier = "Toronto-Neighborhoods",
+  File = data .. "toronto_neighborhoods.geojson",
+  HeightOffset = 1000.0,
+  DefaultProperties = {
+    Color = { 0.0, 1.0, 0.0 },
+    FillColor = { 0.2, 0.33, 0.2 },
+    LineWidth = 2.0
+  },
+  Name = "Toronto Neighbourhoods"
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, ExampleToronto)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, ExampleToronto)
+end)
+
+asset.export(ExampleToronto)
+
+
+
+asset.meta = {
+  Name = "GeoJson Example - Toronto neighborhoods",
+  Description = [[GeoJson example asset that shows the neighborhoods of the city Toronto,
+    Canada, as polygons. Data source: https://handsondataviz.org/geojsonio.html]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

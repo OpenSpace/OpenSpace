@@ -1,0 +1,44 @@
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
+
+
+
+local Trail = {
+  Identifier = "GonggongTrail",
+  Parent = sunTransforms.SunEclipJ2000.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Enabled = asset.enabled,
+    Color = { 0.2, 0.8, 0.3 },
+    Period = 201582.9642396014,
+    Resolution = 10000,
+    Fade = 1.24,
+    Translation = transforms.Translation
+  },
+  Tag = { "planetTrail_dwarf" },
+  GUI = {
+    Name = "Gonggong Trail",
+    Path = "/Solar System/Dwarf Planets/Gonggong"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Trail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Trail)
+end)
+
+asset.export("Trail", Trail)
+
+
+
+asset.meta = {
+  Name = "Gonggong Trail",
+  Description = [[Trail of Gonggong]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

@@ -1,26 +1,30 @@
-local globeIdentifier = asset.require("../../pluto").Pluto.Identifier
+local pluto = asset.require("../../pluto")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "Greyscale_USGS",
   Name = "Black & White [USGS]",
   Enabled = asset.enabled,
-  FilePath = "WMS:https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/pluto/pluto_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=NEWHORIZONS_PLUTO_MOSAIC&SRS=EPSG:4326&BBOX=-180,-90,360,90",
+  ZIndex = 10,
+  FilePath = "WMS:https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/pluto/pluto_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=NEWHORIZONS_PLUTO_MOSAIC&SRS=EPSG:4326&BBOX=-180,-90,360,90"
 }
 
-asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(pluto.Pluto.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(pluto.Pluto.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
+
 
 
 asset.meta = {
   Name = "Pluto Black & White [USGS]",
-  Version = "1.0",
   Description = [[This detailed, high-quality global mosaic of Pluto was assembled from
     nearly all of the highest-resolution images obtained by the Long-Range
     Reconnaissance Imager (LORRI) and the Multispectral Visible Imaging Camera (MVIC)
@@ -31,7 +35,7 @@ asset.meta = {
     parallax - or the difference in the apparent relative positions - of features on
     the surface obtained at different viewing angles during the encounter. Scientists
     use these parallax displacements of high and low terrain to estimate landform
-    heights.The mosaic is available in Equirectangular projection at an equatorial 
+    heights.The mosaic is available in Equirectangular projection at an equatorial
     pixel scale of 300 meters per pixel (m). (Description from URL)]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Pluto/NewHorizons/" ..

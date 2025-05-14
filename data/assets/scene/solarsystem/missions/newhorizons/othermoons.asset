@@ -3,12 +3,36 @@ local Kerberos = asset.require("scene/solarsystem/dwarf_planets/pluto/minor/kerb
 local Nix = asset.require("scene/solarsystem/dwarf_planets/pluto/minor/nix")
 local Styx = asset.require("scene/solarsystem/dwarf_planets/pluto/minor/styx")
 
-local hydraTextures = asset.syncedResource({
+
+
+local hydraTextures = asset.resource({
   Name = "Hydra Textures",
   Type = "HttpSynchronization",
   Identifier = "hydra_textures",
   Version = 1
 })
+
+local kerberosTextures = asset.resource({
+  Name = "Kerberos Textures",
+  Type = "HttpSynchronization",
+  Identifier = "kerberos_textures",
+  Version = 1
+})
+
+local nixTextures = asset.resource({
+  Name = "Nix Textures",
+  Type = "HttpSynchronization",
+  Identifier = "nix_textures",
+  Version = 1
+})
+
+local styxTextures = asset.resource({
+  Name = "Styx Textures",
+  Type = "HttpSynchronization",
+  Identifier = "styx_textures",
+  Version = 1
+})
+
 
 local HydraText = {
   Identifier = "HydraText",
@@ -21,7 +45,7 @@ local HydraText = {
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    Size = 10.0^6.3,
+    Size = 1995262.315,
     Origin = "Center",
     Billboard = true,
     Texture = hydraTextures .. "Hydra-Text.png",
@@ -32,13 +56,6 @@ local HydraText = {
     Path = "/Solar System/Dwarf Planets/Pluto"
   }
 }
-
-local kerberosTextures = asset.syncedResource({
-  Name = "Kerberos Textures",
-  Type = "HttpSynchronization",
-  Identifier = "kerberos_textures",
-  Version = 1
-})
 
 local KerberosText = {
   Identifier = "KerberosText",
@@ -51,7 +68,7 @@ local KerberosText = {
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    Size = 10^6.3,
+    Size = 19952623.15,
     Origin = "Center",
     Billboard = true,
     Texture = kerberosTextures .. "Kerberos-Text.png",
@@ -63,19 +80,12 @@ local KerberosText = {
   }
 }
 
-local nixTextures = asset.syncedResource({
-  Name = "Nix Textures",
-  Type = "HttpSynchronization",
-  Identifier = "nix_textures",
-  Version = 1
-})
-
 local NixText = {
   Identifier = "NixText",
   Parent = Nix.Nix.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    Size = 10^6.3,
+    Size = 19952623.15,
     Origin = "Center",
     Billboard = true,
     Texture = nixTextures .. "Nix-Text.png",
@@ -86,13 +96,6 @@ local NixText = {
     Path = "/Solar System/Dwarf Planets/Pluto"
   }
 }
-
-local styxTextures = asset.syncedResource({
-    Name = "Styx Textures",
-    Type = "HttpSynchronization",
-    Identifier = "styx_textures",
-    Version = 1
-})
 
 local StyxText = {
   Identifier = "StyxText",
@@ -105,7 +108,7 @@ local StyxText = {
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    Size = 10^6.3,
+    Size = 19952623.15,
     Origin = "Center",
     Billboard = true,
     Texture = styxTextures .. "Styx-Text.png",
@@ -117,20 +120,21 @@ local StyxText = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(HydraText)
   openspace.addSceneGraphNode(KerberosText)
   openspace.addSceneGraphNode(NixText)
   openspace.addSceneGraphNode(StyxText)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(StyxText)
   openspace.removeSceneGraphNode(NixText)
   openspace.removeSceneGraphNode(KerberosText)
   openspace.removeSceneGraphNode(HydraText)
 end)
-    
+
 asset.export(HydraText)
 asset.export(KerberosText)
 asset.export(NixText)

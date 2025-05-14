@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,8 @@
 
 #include <modules/space/rendering/renderableconstellationsbase.h>
 
+#include <ghoul/opengl/uniformcache.h>
+
 namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
@@ -38,13 +40,14 @@ namespace documentation { struct Documentation; }
  * http://cdsarc.u-strasbg.fr/viz-bin/Cat?cat=VI%2F49. It contains the bounds on the
  * celestial sky for the different constellations and is used to determine in which region
  * of the sky a specific object is located.
- * The bounds are drawn as lines on a sphere with variable radius, set by the
- * <code>_distance</code> property. Currently, all constellation bounds are lines, which
- * leads to artifacts if the radius is very small.
+ *
+ * The bounds are drawn as lines on a sphere with variable radius, set by the `_distance`
+ * property. Currently, all constellation bounds are lines, which leads to artifacts if
+ * the radius is very small.
  */
 class RenderableConstellationBounds : public RenderableConstellationsBase {
 public:
-    RenderableConstellationBounds(const ghoul::Dictionary& dictionary);
+    explicit RenderableConstellationBounds(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;
@@ -52,18 +55,23 @@ public:
 
     bool isReady() const override;
 
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void render(const RenderData& data, RendererTasks& tasks) override;
 
     static documentation::Documentation Documentation();
 
 private:
-    /// Stores the constellation bounds
+    /**
+     * Stores the constellation bounds.
+     */
     struct ConstellationBound {
-        std::string constellationAbbreviation; ///< The abbreviation of the constellation
+        /// The abbreviation of the constellation
+        std::string constellationAbbreviation;
         std::string constellationFullName;
         bool isEnabled = false;
-        GLsizei startIndex; ///< The index of the first vertex describing the bounds
-        GLsizei nVertices; ///< The number of vertices describing the bounds
+        /// The index of the first vertex describing the bounds
+        GLsizei startIndex;
+        /// The number of vertices describing the bounds
+        GLsizei nVertices;
     };
 
     /**
@@ -71,14 +79,13 @@ private:
      * variable, as well as the _vertexValues list. If this method fails, the content of
      * either destination is undefined.
      *
-     * \return \c true if the loading succeeded, \c false otherwise
+     * \return `true` if the loading succeeded, `false` otherwise
      */
     bool loadVertexFile();
     bool loadData();
 
     /**
-     * Callback method that gets triggered when <code>_constellationSelection</code>
-     * changes.
+     * Callback method that gets triggered when `_constellationSelection` changes.
      */
     void selectionPropertyHasChanged() override;
 
@@ -102,6 +109,8 @@ private:
 
     GLuint _vao = 0;
     GLuint _vbo = 0;
+    UniformCache(campos, objpos, camrot, scaling, ViewProjection, ModelTransform, color,
+        opacity) _uniformCache;
 };
 
 } // namespace openspace

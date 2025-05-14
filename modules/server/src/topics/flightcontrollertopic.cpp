@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,7 @@
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <iterator>
@@ -118,7 +118,7 @@ namespace {
     constexpr const char* Friction = "friction";
     constexpr const char* Lua = "lua";
 
-    const static std::unordered_map<std::string, AxisType> AxisIndexMap ({
+    const std::unordered_map<std::string, AxisType> AxisIndexMap ({
         { OrbitX, AxisType::OrbitX },
         { OrbitY, AxisType::OrbitY },
         { ZoomIn, AxisType::ZoomIn },
@@ -131,7 +131,7 @@ namespace {
         { PanY, AxisType::PanY }
     });
 
-    const static std::unordered_map<std::string, Command> CommandMap ({
+    const std::unordered_map<std::string, Command> CommandMap ({
         { Connect, Command::Connect },
         { Disconnect, Command::Disconnect },
         { InputState, Command::InputState },
@@ -147,7 +147,7 @@ using nlohmann::json;
 namespace openspace {
 
 FlightControllerTopic::FlightControllerTopic() {
-    for (auto it = AxisIndexMap.begin(); it != AxisIndexMap.end(); ++it) {
+    for (auto it = AxisIndexMap.begin(); it != AxisIndexMap.end(); it++) {
         global::navigationHandler->setWebsocketAxisMapping(
             int(std::distance(AxisIndexMap.begin(), it)),
             it->second
@@ -172,10 +172,10 @@ bool FlightControllerTopic::isDone() const {
 }
 
 void FlightControllerTopic::handleJson(const nlohmann::json& json) {
-    auto it = CommandMap.find(json[TypeKey]);
+    auto it = CommandMap.find(json[TypeKey].get<std::string>());
     if (it == CommandMap.end()) {
         LWARNING(
-            fmt::format("Poorly formatted JSON command: no '{}' in payload", TypeKey)
+            std::format("Malformed JSON command: no '{}' in payload", TypeKey)
         );
         return;
     }
@@ -203,7 +203,7 @@ void FlightControllerTopic::handleJson(const nlohmann::json& json) {
             processLua(json[Lua]);
             break;
         default:
-            LWARNING(fmt::format("Unrecognized action: {}", it->first));
+            LWARNING(std::format("Unrecognized action: {}", it->first));
             break;
     }
 }
@@ -213,7 +213,6 @@ void FlightControllerTopic::connect() {
     std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0.f);
     _payload[TypeKey] = Connect;
     setFocusNodes();
-    setInterestingTimes();
     _payload[Connect][FocusNodesKey] = _focusNodes;
     _payload[Connect][AllNodesKey] = _allNodes;
     _payload[Connect][InterestingTimesKey] = _interestingTimes;
@@ -258,25 +257,7 @@ void FlightControllerTopic::setFocusNodes() {
     }
 }
 
-void FlightControllerTopic::setInterestingTimes() {
-    std::vector<Scene::InterestingTime> times =
-        global::renderEngine->scene()->interestingTimes();
-
-    std::sort(
-        times.begin(),
-        times.end(),
-        [](Scene::InterestingTime lhs, Scene::InterestingTime rhs) {
-            return lhs.name < rhs.name;
-        }
-    );
-
-    for (const Scene::InterestingTime& t : times) {
-        _interestingTimes[t.name] = t.time;
-    }
-}
-
 void FlightControllerTopic::updateView(const nlohmann::json& json) const {
-
     if (json.find(RenderableKey) != json.end()) {
         setRenderableEnabled(json);
     }
@@ -287,30 +268,33 @@ void FlightControllerTopic::updateView(const nlohmann::json& json) const {
 
 void FlightControllerTopic::changeFocus(const nlohmann::json& json) const {
     if (json.find(FocusKey) == json.end()) {
-        const std::string j = json;
+        const std::string j = json.get<std::string>();
         LWARNING(
-            fmt::format("Could not find {} key in JSON. JSON was:\n{}", FocusKey, j)
+            std::format("Could not find '{}' key in JSON. JSON was:\n{}", FocusKey, j)
         );
         if (json.find(AimKey) == json.end()) {
             LWARNING(
-                fmt::format("Could not find {} key in JSON. JSON was:\n{}", AimKey, j)
+                std::format("Could not find '{}' key in JSON. JSON was:\n{}", AimKey, j)
             );
             if (json.find(AnchorKey) == json.end()) {
-                LWARNING(fmt::format(
-                    "Could not find {} key in JSON. JSON was:\n{}", AnchorKey, j
+                LWARNING(std::format(
+                    "Could not find '{}' key in JSON. JSON was:\n{}", AnchorKey, j
                 ));
                 return;
             }
         }
     }
 
-    const std::string focus = json.find(FocusKey) != json.end() ? json[FocusKey] : "";
-    const std::string aim = json.find(AimKey) != json.end() ? json[AimKey] : "";
-    const std::string anchor = json.find(AnchorKey) != json.end() ? json[AnchorKey] : "";
+    const std::string focus =
+        json.find(FocusKey) != json.end() ? json[FocusKey].get<std::string>() : "";
+    const std::string aim =
+        json.find(AimKey) != json.end() ? json[AimKey].get<std::string>() : "";
+    const std::string anchor =
+        json.find(AnchorKey) != json.end() ? json[AnchorKey].get<std::string>() : "";
 
-    const bool resetVelocities = json[ResetVelocitiesKey];
-    const bool retargetAnchor = json[RetargetAnchorKey];
-    const bool retargetAim = json[RetargetAimKey];
+    const bool resetVelocities = json[ResetVelocitiesKey].get<bool>();
+    const bool retargetAnchor = json[RetargetAnchorKey].get<bool>();
+    const bool retargetAim = json[RetargetAimKey].get<bool>();
 
     Scene* scene = global::renderEngine->scene();
     const SceneGraphNode* focusNode = scene->sceneGraphNode(focus);
@@ -341,19 +325,22 @@ void FlightControllerTopic::changeFocus(const nlohmann::json& json) const {
 
 void FlightControllerTopic::setRenderableEnabled(const nlohmann::json& json) const {
     if (json[RenderableKey].find(SceneNodeName) == json[RenderableKey].end()) {
-        const std::string j = json;
+        const std::string j = json.get<std::string>();
         LWARNING(
-            fmt::format("Could not find {} key in JSON. JSON was:\n{}", FocusKey, j)
+            std::format("Could not find '{}' key in JSON. JSON was:\n{}", FocusKey, j)
         );
         return;
     }
 
-    const std::string name = json[RenderableKey][SceneNodeName];
-    const bool enabled = json[RenderableKey][SceneNodeEnabled];
+    const std::string name = json[RenderableKey][SceneNodeName].get<std::string>();
+    const bool enabled = json[RenderableKey][SceneNodeEnabled].get<bool>();
 
     const SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(name);
     if (node && node->renderable() != nullptr) {
-        node->renderable()->property(RenderableEnabled)->set(enabled);
+        properties::Property* prop = node->renderable()->property(RenderableEnabled);
+        properties::BoolProperty* boolProp = dynamic_cast<properties::BoolProperty*>(prop);
+        ghoul_assert(boolProp, "Enabled is not a boolean property");
+        *boolProp = enabled;
     }
 }
 
@@ -379,9 +366,20 @@ void FlightControllerTopic::setFriction(bool roll, bool rotation, bool zoom) con
     const interaction::OrbitalNavigator& navigator =
         global::navigationHandler->orbitalNavigator();
 
-    navigator.property(RollFriction)->set(roll);
-    navigator.property(RotationalFriction)->set(rotation);
-    navigator.property(ZoomFriction)->set(zoom);
+    properties::Property* rollProp = navigator.property(RollFriction);
+    properties::BoolProperty* rollBoolProp = dynamic_cast<properties::BoolProperty*>(rollProp);
+    ghoul_assert(rollBoolProp, "RollFriction is not a boolean property");
+    *rollBoolProp = roll;
+
+    properties::Property* rotProp = navigator.property(RotationalFriction);
+    properties::BoolProperty* rotBoolProp = dynamic_cast<properties::BoolProperty*>(rotProp);
+    ghoul_assert(rotBoolProp, "RotationFriction is not a boolean property");
+    *rotBoolProp = rotation;
+
+    properties::Property* zoomProp = navigator.property(ZoomFriction);
+    properties::BoolProperty* zoomBoolProp = dynamic_cast<properties::BoolProperty*>(zoomProp);
+    ghoul_assert(zoomBoolProp, "ZoomFriction is not a boolean property");
+    *zoomBoolProp = zoom;
 
     // Update FlightController
     nlohmann::json j;
@@ -393,7 +391,11 @@ void FlightControllerTopic::setFriction(bool roll, bool rotation, bool zoom) con
 }
 
 void FlightControllerTopic::setFriction(const nlohmann::json& json) const {
-    setFriction(json[FrictionRollKey], json[FrictionRotationKey], json[FrictionZoomKey]);
+    setFriction(
+        json[FrictionRollKey].get<bool>(),
+        json[FrictionRotationKey].get<bool>(),
+        json[FrictionZoomKey].get<bool>()
+    );
 }
 
 void FlightControllerTopic::disengageAutopilot() const {
@@ -408,12 +410,14 @@ void FlightControllerTopic::engageAutopilot(const nlohmann::json &json) {
     std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0.f);
     _inputState.isConnected = true;
 
-    for (auto it = input.begin(); it != input.end(); ++it) {
+    for (auto it = input.begin(); it != input.end(); it++) {
         const auto mapIt = AxisIndexMap.find(it.key());
         if (mapIt == AxisIndexMap.end()) {
-            if (it.key() != TypeKey || CommandMap.find(it.value()) == CommandMap.end()) {
-                LWARNING(fmt::format(
-                    "No axis, button, or command named {} (value: {})",
+            if (it.key() != TypeKey ||
+                CommandMap.find(it->get<std::string>()) == CommandMap.end())
+            {
+                LWARNING(std::format(
+                    "No axis, button, or command named '{}' (value: {})",
                     it.key(), static_cast<int>(it.value())
                 ));
             }
@@ -424,7 +428,7 @@ void FlightControllerTopic::engageAutopilot(const nlohmann::json &json) {
 }
 
 void FlightControllerTopic::handleAutopilot(const nlohmann::json &json) {
-    const bool engaged = json[AutopilotEngagedKey];
+    const bool engaged = json[AutopilotEngagedKey].get<bool>();
 
     if (engaged) {
         engageAutopilot(json);
@@ -448,12 +452,14 @@ void FlightControllerTopic::processInputState(const nlohmann::json& json) {
     // Get "inputState" object from "payload"
     auto input = json[InputState][ValuesKey];
 
-    for (auto it = input.begin(); it != input.end(); ++it) {
+    for (auto it = input.begin(); it != input.end(); it++) {
         const auto mapIt = AxisIndexMap.find(it.key());
         if (mapIt == AxisIndexMap.end()) {
-            if (it.key() != TypeKey || CommandMap.find(it.value()) == CommandMap.end()) {
-                LWARNING(fmt::format(
-                    "No axis, button, or command named {} (value: {})",
+            if (it.key() != TypeKey ||
+                CommandMap.find(it->get<std::string>()) == CommandMap.end())
+            {
+                LWARNING(std::format(
+                    "No axis, button, or command named '{}' (value: {})",
                     it.key() , static_cast<int>(it.value())
                 ));
             }
@@ -464,11 +470,8 @@ void FlightControllerTopic::processInputState(const nlohmann::json& json) {
 }
 
 void FlightControllerTopic::processLua(const nlohmann::json &json) {
-    const std::string script = json[LuaScript];
-    global::scriptEngine->queueScript(
-        script,
-        openspace::scripting::ScriptEngine::RemoteScripting::Yes
-    );
+    const std::string script = json[LuaScript].get<std::string>();
+    global::scriptEngine->queueScript(script);
 }
 
 } // namespace openspace

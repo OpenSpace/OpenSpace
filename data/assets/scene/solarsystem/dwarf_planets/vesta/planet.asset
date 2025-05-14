@@ -1,0 +1,59 @@
+local sun = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
+
+
+
+local models = asset.resource({
+  Name = "Vesta Models",
+  Type = "HttpSynchronization",
+  Identifier = "vesta_model",
+  Version = 1
+})
+
+
+local VestaModel = {
+  Identifier = "VestaModel",
+  Parent = transforms.Position.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "ConstantRotation",
+      RotationAxis = { 0.0, 0.0, 1.0 },
+      RotationRate = 1.0 / (5.34212766 * 60.0 * 60.0)
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "VestaComet_5000.obj",
+    SpecularIntensity = 0.0,
+    AmbientIntensity = 0.0,
+    LightSources = {
+      sun.LightSource
+    }
+  },
+  GUI = {
+    Name = "Vesta",
+    Path = "/Solar System/Dwarf Planets/Vesta",
+    Description = "Model of Vesta"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(VestaModel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(VestaModel)
+end)
+
+asset.export("Planet", VestaModel)
+
+
+
+asset.meta = {
+  Name = "Vesta Model",
+  Description = [[Model of Vesta]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

@@ -10,7 +10,6 @@ asset.export("webguiDevelopmentMode", false)
 
 asset.meta = {
   Name = "Customization - User Interface",
-  Version = "1.0",
   Description = "This asset is used by developers working on the GUI",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

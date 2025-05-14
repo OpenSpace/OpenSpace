@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,14 +34,16 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 
 /**
- * Converts ascii based point data
+ * Converts ASCII based point data
+ * ```
  * int64_t n
  * (float x, float y, float z, float r, float g, float b) * n
+ * ```
  * to a binary (floating point) representation with the same layout.
  */
 class MilkywayPointsConversionTask : public Task {
 public:
-    MilkywayPointsConversionTask(const ghoul::Dictionary& dictionary);
+    explicit MilkywayPointsConversionTask(const ghoul::Dictionary& dictionary);
     ~MilkywayPointsConversionTask() override = default;
 
     std::string description() override;

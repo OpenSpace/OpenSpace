@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,77 +34,86 @@
 #include <ghoul/filesystem/filesystem.h>
 
 namespace {
-    constexpr std::array<const char*, 3> UniformNames = {
-        "modelViewProjectionTransform", "shadowColor", "opacity"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo NumberPointsInfo = {
-        "AmountOfPoints",
+        "NumberOfPoints",
         "Points",
-        "This value determines the number of control points that is used to construct "
-        "the shadow geometry. The higher this number, the more detailed the shadow is, "
-        "but it will have a negative impact on the performance"
+        "The number of control points used for constructing the shadow geometry. The "
+        "higher this number, the more detailed the shadow is, but it will have a "
+        "negative impact on the performance.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadowLengthInfo = {
         "ShadowLength",
         "Shadow Length",
-        "This value determines the length of the shadow that is cast by the target "
-        "object. The total distance of the shadow is equal to the distance from the "
-        "target to the Sun multiplied with this value"
+        "A factor that controls the length of the shadow that is cast by the target "
+        "object. The total length of the shadow is equal to the distance from the "
+        "target to the light source multiplied with this value.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadowColorInfo = {
         "ShadowColor",
         "Shadow Color",
-        "This value determines the color that is used for the shadow cylinder"
+        "The color used for the shadow cylinder.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo TerminatorTypeInfo = {
         "TerminatorType",
         "Terminator Type",
-        "This value determines the type of the terminator that is used to calculate the "
-        "shadow eclipse"
+        "Determines the type of terminator to use for calculating the shadow eclipse.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourceInfo = {
         "LightSource",
         "Light Source",
-        "This value determines the SPICE name of the object that is used as the "
-        "illuminator for computing the shadow cylinder"
+        "The SPICE name of the object that is used as the illuminator for computing the "
+        "shadow cylinder.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ObserverInfo = {
         "Observer",
         "Observer",
-        "This value specifies the SPICE name of the object that is the observer of the "
-        "shadow cylinder"
+        "The SPICE name of the object that is the observer.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BodyInfo = {
         "Body",
         "Target Body",
-        "This value is the SPICE name of target body that is used as the shadow caster "
-        "for the shadow cylinder"
+        "The SPICE name of target body that is used as the shadow caster.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BodyFrameInfo = {
         "BodyFrame",
         "Body Frame",
-        "This value is the SPICE name of the reference frame in which the shadow "
-        "cylinder is expressed"
+        "The SPICE name of the reference frame in which the shadow cylinder is "
+        "expressed.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AberrationInfo = {
         "Aberration",
         "Aberration",
-        "This value determines the aberration method that is used to compute the shadow "
-        "cylinder"
+        "The aberration method that is used for computing the shadow cylinder. The "
+        "options are \"NONE\", \"LT\" (Light Time), \"LT + S\" (Light Time Stellar), "
+        "\"CN\" (Converged Newtonian), and \"CN + S\" (Converged Newtonian Stellar).",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This Renderable displays the shadow cylinder behind a planetary body. Given the
+    // SPICE name of a planetary body and an observer, it will show a cylinder extending
+    // behind the body away from the observer to highlight the areas of space from which
+    // the observer is occluded by the body. A concrete example is using the Sun as the
+    // observer, in which case the shadow cylinder indicates the areas in which there is
+    // darkness.
     struct [[codegen::Dictionary(RenderableShadowCylinder)]] Parameters {
         // [[codegen::verbatim(NumberPointsInfo.description)]]
-        std::optional<int> numberOfPoints [[codegen::key("AmountOfPoints")]];
+        std::optional<int> numberOfPoints;
 
         // [[codegen::verbatim(ShadowLengthInfo.description)]]
         std::optional<float> shadowLength;
@@ -148,10 +157,7 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
     , _numberOfPoints(NumberPointsInfo, 190, 1, 300)
     , _shadowLength(ShadowLengthInfo, 0.1f, 0.f, 0.5f)
     , _shadowColor(ShadowColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _terminatorType(
-        TerminatorTypeInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _terminatorType(TerminatorTypeInfo)
     , _lightSource(LightSourceInfo)
     , _observer(ObserverInfo)
     , _body(BodyInfo)
@@ -160,8 +166,7 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
+    addProperty(Fadeable::_opacity);
 
     _numberOfPoints = p.numberOfPoints.value_or(_numberOfPoints);
     addProperty(_numberOfPoints);
@@ -181,11 +186,19 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
         static_cast<int>(codegen::map<SpiceManager::TerminatorType>(p.terminatorType));
     addProperty(_terminatorType);
 
-
     _lightSource = p.lightSource;
     _observer = p.observer;
     _body = p.body;
     _bodyFrame = p.bodyFrame;
+
+    _lightSource.setReadOnly(true);
+    addProperty(_lightSource);
+    _observer.setReadOnly(true);
+    addProperty(_observer);
+    _body.setReadOnly(true);
+    addProperty(_body);
+    _bodyFrame.setReadOnly(true);
+    addProperty(_bodyFrame);
 
     using T = SpiceManager::AberrationCorrection::Type;
     _aberration.addOptions({
@@ -194,12 +207,13 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
         { static_cast<int>(T::ConvergedNewtonianStellar), "Converged Newtonian Stellar" },
         { static_cast<int>(T::LightTime), "Light Time" },
         { static_cast<int>(T::LightTimeStellar), "Light Time Stellar" },
-
     });
-    SpiceManager::AberrationCorrection aberration = SpiceManager::AberrationCorrection(
+    const SpiceManager::AberrationCorrection abbcorr = SpiceManager::AberrationCorrection(
         p.aberration
     );
-    _aberration = static_cast<int>(aberration.type);
+    _aberration = static_cast<int>(abbcorr.type);
+    _aberration.setReadOnly(true);
+    addProperty(_aberration);
 }
 
 void RenderableShadowCylinder::initializeGL() {
@@ -221,7 +235,7 @@ void RenderableShadowCylinder::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 void RenderableShadowCylinder::deinitializeGL() {
@@ -240,7 +254,7 @@ void RenderableShadowCylinder::deinitializeGL() {
 }
 
 bool RenderableShadowCylinder::isReady() const {
-    return true;
+    return _shader != nullptr;
 }
 
 void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
@@ -250,15 +264,9 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
     _shader->activate();
 
     // Model transform and view transform needs to be in double precision
-    const glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
-
     _shader->setUniform(
         _uniformCache.modelViewProjectionTransform,
-        data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
+        glm::mat4(calcModelViewProjectionTransform(data))
     );
 
     _shader->setUniform(_uniformCache.shadowColor, _shadowColor);
@@ -283,7 +291,7 @@ void RenderableShadowCylinder::update(const UpdateData& data) {
 
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
     createCylinder(data.time.j2000Seconds());
 }
@@ -311,7 +319,7 @@ void RenderableShadowCylinder::createCylinder(double time) {
         [](const glm::dvec3& p) { return p * 1000.0; }
     );
 
-    double lt;
+    double lt = 0.0;
     glm::dvec3 vecLightSource = SpiceManager::ref().targetPosition(
         _body,
         _lightSource,

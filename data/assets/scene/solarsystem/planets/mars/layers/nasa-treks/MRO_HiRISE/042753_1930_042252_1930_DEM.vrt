@@ -1,0 +1,53 @@
+<VRTDataset rasterXSize="8388608" rasterYSize="4194304">
+  <SRS>GEOGCS["GCS_Mars_2000",DATUM["D_Mars_2000",SPHEROID["Mars_2000_IAU_IAG",3396190.0,169.8944472236118]],PRIMEM["Reference_Meridian",0.0],UNIT["Degree",0.0174532925199433]]</SRS>
+  <GeoTransform> -1.8000000000000000e+02,  4.2915344238281250e-05,  0.0000000000000000e+00,  9.0000000000000000e+01,  0.0000000000000000e+00, -4.2915344238281250e-05</GeoTransform>
+  <VRTRasterBand dataType="Byte" band="1">
+    <NoDataValue>0</NoDataValue>
+    <ColorInterp>Red</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">042753_1930_042252_1930_DEM.wms</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="8388608" RasterYSize="4194304" DataType="Byte" BlockXSize="256" BlockYSize="256" />
+      <SrcRect xOff="0" yOff="0" xSize="8388608" ySize="4194304" />
+      <DstRect xOff="0" yOff="0" xSize="8388608" ySize="4194304" />
+      <NODATA>0</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+  <VRTRasterBand dataType="Byte" band="2">
+    <NoDataValue>0</NoDataValue>
+    <ColorInterp>Green</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">042753_1930_042252_1930_DEM.wms</SourceFilename>
+      <SourceBand>2</SourceBand>
+      <SourceProperties RasterXSize="8388608" RasterYSize="4194304" DataType="Byte" BlockXSize="256" BlockYSize="256" />
+      <SrcRect xOff="0" yOff="0" xSize="8388608" ySize="4194304" />
+      <DstRect xOff="0" yOff="0" xSize="8388608" ySize="4194304" />
+      <NODATA>0</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+  <VRTRasterBand dataType="Byte" band="3">
+    <NoDataValue>0</NoDataValue>
+    <ColorInterp>Blue</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">042753_1930_042252_1930_DEM.wms</SourceFilename>
+      <SourceBand>3</SourceBand>
+      <SourceProperties RasterXSize="8388608" RasterYSize="4194304" DataType="Byte" BlockXSize="256" BlockYSize="256" />
+      <SrcRect xOff="0" yOff="0" xSize="8388608" ySize="4194304" />
+      <DstRect xOff="0" yOff="0" xSize="8388608" ySize="4194304" />
+      <NODATA>0</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+  <VRTRasterBand dataType="Byte" band="4">
+    <ColorInterp>Alpha</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">042753_1930_042252_1930_DEM.wms</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="8388608" RasterYSize="4194304" DataType="Byte" BlockXSize="256" BlockYSize="256" />
+      <SrcRect xOff="0" yOff="0" xSize="8388608" ySize="4194304" />
+      <DstRect xOff="0" yOff="0" xSize="8388608" ySize="4194304" />
+      <ScaleOffset>255</ScaleOffset>
+      <ScaleRatio>0</ScaleRatio>
+      <NODATA>0</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+</VRTDataset>

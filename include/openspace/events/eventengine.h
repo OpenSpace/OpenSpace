@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,6 +36,8 @@ namespace events { struct Event; }
 
 class EventEngine {
 public:
+    using ScriptCallback = std::function<void(ghoul::Dictionary)>;
+
     struct ActionInfo {
         events::Event::Type type;
         uint32_t id = std::numeric_limits<uint32_t>::max();
@@ -44,11 +46,16 @@ public:
         std::optional<ghoul::Dictionary> filter;
     };
 
+    struct TopicInfo {
+        uint32_t id = std::numeric_limits<uint32_t>::max();
+        ScriptCallback callback;
+    };
+
     /**
-     * This function returns the first event stored in the EventEngine, or \c nullptr if
+     * This function returns the first event stored in the EventEngine, or `nullptr` if
      * no event exists. To navigate the full list of events, you can access the returned
      * Event's next function. If the end of the list is reached, the next pointer will be
-     * a nullptr
+     * a `nullptr`.
      *
      * \return The first event stored in the EventEngine or nullptr if no event exists
      */
@@ -57,11 +64,11 @@ public:
     /**
      * Publish a new event of type T by providing optional arguments Args to the Event's
      * constructor. An example of usage is
-     * <code>engine.publishEvent<MyEvent>("a", 2.0);</code> which would call the
-     * constructor of \c MyEvent with a <code>const char*</code> and \c double parameter.
+     * `engine.publishEvent<MyEvent>("a", 2.0);` which would call the constructor of
+     * `MyEvent` with a `const char*` and `double` parameter.
      *
-     * \param args The arguments that are passed to the constructor of T
      * \tparam T The subclass of Event that is to be published
+     * \param args The arguments that are passed to the constructor of T
      */
     template <typename T, typename... Args>
     void publishEvent(Args&&... args);
@@ -77,7 +84,7 @@ public:
      * Registers a new action for a specific event type.
      *
      * \param type The type for which a new action is registered
-     * \param actionIdentifier The identifier of the action that will be triggered the
+     * \param identifier The identifier of the action that will be triggered the
      *        identifier must not exist at this moment, but must exist by the time the
      *        event is encountered next
      * \param filter If the filter is provided, it describes the event parameters that are
@@ -88,22 +95,41 @@ public:
         std::optional<ghoul::Dictionary> filter = std::nullopt);
 
     /**
+     * Registers a new topic for a specific event type.
+     *
+     * \param topicId The id of the topic that will be triggered
+     * \param type The type for which a new topic is registered
+     * \param callback The callback function that will be called on triggered event
+    */
+    void registerEventTopic(size_t topicId, events::Event::Type type,
+        ScriptCallback callback);
+
+    /**
      * Removing registration for a type/action combination.
      *
      * \param type The type of the action that should be unregistered
-     * \param actionIdentifier The identifier of the action that should be unregistered
+     * \param identifier The identifier of the action that should be unregistered
      * \param filter The optional filter applied to the event-action combination
      */
     void unregisterEventAction(events::Event::Type type,
         const std::string& identifier,
-        std::optional<ghoul::Dictionary> filter = std::nullopt);
+        const std::optional<ghoul::Dictionary>& filter = std::nullopt);
 
     /**
      * Removing registration for a specific event identified by the \p identifier.
-     * 
-     * \param identifier The unique identifier of the event that should be removed.
+     *
+     * \param identifier The unique identifier of the event that should be removed
      */
     void unregisterEventAction(uint32_t identifier);
+
+    /**
+     * Removing registration for a topic/type combination, does nothing if topicId or type
+     * combination does not exist
+     *
+     * \param topicId The id of the topic that should be unregistered
+     * \param type The type of the topic that should be unregistered
+    */
+    void unregisterEventTopic(size_t topicId, events::Event::Type type);
 
     /**
      * Returns the list of all registered actions, sorted by their identifiers.
@@ -111,6 +137,14 @@ public:
      * \return The list of all registered actions
      */
     std::vector<ActionInfo> registeredActions() const;
+
+    /**
+     * Returns the list of all registered actions, grouped by their event type.
+     *
+     * \return The unordered map of all registered actions
+     */
+    const std::unordered_map<events::Event::Type, std::vector<ActionInfo>>&
+        eventActions() const;
 
     /**
      * Enables the event identified by the \p identifier. If the event is already enabled,
@@ -130,9 +164,15 @@ public:
 
     /**
      * Triggers all actions that are registered for events that are in the current event
-     * queue
+     * queue.
      */
     void triggerActions() const;
+
+    /**
+     * Triggers all topics that are registered for events that are in the current event
+     * queue.
+    */
+    void triggerTopics() const;
 
     static scripting::LuaLibrary luaLibrary();
 
@@ -144,11 +184,12 @@ private:
     /// The last event in the chain of events stored in the memory pool
     events::Event* _lastEvent = nullptr;
 
-
-    // The type is duplicated in the ActionInfo as well, but we want it in the ActionInfo
-    // to be able to return them to a caller and we want it in this unordered_map to make
-    // the lookup really fast. So having this extra wasted memory is probably worth it
+    /// The type is duplicated in the ActionInfo as well, but we want it in the ActionInfo
+    /// to be able to return them to a caller and we want it in this unordered_map to make
+    /// the lookup really fast. So having this extra wasted memory is probably worth it
     std::unordered_map<events::Event::Type, std::vector<ActionInfo>> _eventActions;
+
+    std::unordered_map<events::Event::Type, std::vector<TopicInfo>> _eventTopics;
 
     static uint32_t nextRegisteredEventId;
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,42 +29,33 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/sphere.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
+
+namespace {
+    // The RenderableSphereSpout can be used to render a sphere with a texture that is
+    // provided by another application on the same computer using the SPOUT library.
+    // Note: The Spout library is only available on Windows
+    struct [[codegen::Dictionary(RenderableSphereSpout)]] Parameters {
+        // Specifies the GUI name of the RenderableSphereSpout
+        std::optional<std::string> name;
+    };
+#include "renderablespherespout_codegen.cpp"
+} // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableSphereSpout::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Renderable Sphere Spout",
-        "spout_sphere_spout",
-        {
-            {
-                "Name",
-                new StringVerifier,
-                Optional::Yes,
-                "Specifies the GUI name of the RenderableSphereSpout"
-            },
-            {
-                spout::SpoutReceiverPropertyProxy::NameInfoProperty().identifier,
-                new StringVerifier,
-                Optional::Yes,
-                spout::SpoutReceiverPropertyProxy::NameInfoProperty().description
-            }
-        }
-    };
+    return codegen::doc<Parameters>(
+        "spout_renderablespherespout",
+        spout::SpoutReceiverPropertyProxy::Documentation()
+    );
 }
 
 RenderableSphereSpout::RenderableSphereSpout(const ghoul::Dictionary& dictionary)
     : RenderableSphere(dictionary)
     , _spoutReceiver(*this, dictionary)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableSphereSpout"
-    );
+    codegen::bake<Parameters>(dictionary);
 
     int iIdentifier = 0;
     if (_identifier.empty()) {
@@ -77,7 +68,7 @@ RenderableSphereSpout::RenderableSphereSpout(const ghoul::Dictionary& dictionary
         else {
             setIdentifier("RenderableSphereSpout" + std::to_string(iIdentifier));
         }
-        ++id;
+        id++;
     }
 
     if (_guiName.empty()) {
@@ -102,7 +93,7 @@ void RenderableSphereSpout::bindTexture() {
         glBindTexture(GL_TEXTURE_2D, _spoutReceiver.spoutTexture());
     }
     else {
-        RenderableSphere::bindTexture();
+        RenderableSphere::unbindTexture();
     }
 }
 

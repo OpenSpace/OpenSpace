@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,9 +27,9 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/space/speckloader.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/data/dataloader.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
@@ -37,6 +37,7 @@
 #include <openspace/util/distanceconversion.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <filesystem>
 #include <unordered_map>
 
 namespace ghoul::filesystem { class File; }
@@ -103,7 +104,7 @@ private:
     bool loadData();
     bool readSpeckFile();
 
-    bool _hasSpeckFile = false;
+    bool _hasSpeckFile = true;
     bool _dataIsDirty = true;
     bool _textColorIsDirty = true;
     bool _hasLabel = false;
@@ -124,13 +125,13 @@ private:
         color) _uniformCache;
     std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
 
-    std::string _speckFile;
-    std::string _labelFile;
+    std::filesystem::path _speckFile;
+    std::filesystem::path _labelFile;
 
     DistanceUnit _unit = DistanceUnit::Parsec;
 
     std::vector<float> _fullData;
-    speck::Labelset _labelset;
+    dataloader::Labelset _labelset;
 
     std::unordered_map<int, glm::vec3> _meshColorMap;
     std::unordered_map<int, RenderingMesh> _renderingMeshesMap;

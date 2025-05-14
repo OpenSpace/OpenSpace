@@ -22,7 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/application_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/application_definition.cmake)
 
 set_source_files_properties(
   ${CMAKE_CURRENT_SOURCE_DIR}/openspace.icns
@@ -47,7 +47,7 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   set(CMAKE_BUILD_TYPE Debug CACHE STRING "CMAKE_BUILD_TYPE")
 
   if (WIN32)
-    set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/OpenSpace/openspace.rc)
+    set(RESOURCE_FILE openspace.rc)
   endif ()
 
   # Add the CEF binary distribution's cmake/ directory to the module path and

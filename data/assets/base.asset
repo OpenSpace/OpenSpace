@@ -4,9 +4,9 @@
 
 asset.require("./base_blank")
 
--- Modules and component settings
-asset.require("modules/exoplanets/exoplanets")
-asset.require("modules/skybrowser/skybrowser")
+-- We load the SDSS dataset first as that is the one that takes the longest, so the
+-- earlier we start, the sooner the loading is done
+asset.require("scene/digitaluniverse/sdss")
 
 -- Specifying which other assets should be loaded in this scene
 asset.require("scene/solarsystem/sun/sun")
@@ -14,7 +14,6 @@ asset.require("scene/solarsystem/sun/glare")
 asset.require("scene/solarsystem/sun/habitablezone")
 asset.require("scene/solarsystem/sun/default_layers")
 asset.require("scene/solarsystem/planets/planets")
-asset.require("scene/solarsystem/planets/default_layers")
 asset.require("scene/solarsystem/dwarf_planets/pluto/system")
 asset.require("scene/solarsystem/dwarf_planets/pluto/default_layers")
 asset.require("scene/solarsystem/dwarf_planets/pluto/charon/default_layers")
@@ -22,92 +21,43 @@ asset.require("scene/milkyway/milkyway/volume")
 asset.require("scene/milkyway/constellations/constellation_art")
 asset.require("scene/milkyway/constellations/constellation_keybinds")
 
-asset.require("scene/digitaluniverse/2dF")
-asset.require("scene/digitaluniverse/2mass")
-asset.require("scene/digitaluniverse/6dF")
-asset.require("scene/digitaluniverse/abell")
-asset.require("scene/digitaluniverse/alternatestarlabels")
-asset.require("scene/digitaluniverse/backgroundradiation")
-asset.require("scene/digitaluniverse/clusters")
-asset.require("scene/digitaluniverse/constellationbounds")
-asset.require("scene/digitaluniverse/constellations")
-asset.require("scene/digitaluniverse/deepsky")
-asset.require("scene/digitaluniverse/dwarfs")
-asset.require("scene/digitaluniverse/exoplanets")
-asset.require("scene/digitaluniverse/globularclusters")
-asset.require("scene/digitaluniverse/grids")
-asset.require("scene/digitaluniverse/groups")
-asset.require("scene/digitaluniverse/h2regions")
-asset.require("scene/digitaluniverse/kepler")
-asset.require("scene/digitaluniverse/localdwarfs")
-asset.require("scene/digitaluniverse/milkyway")
-asset.require("scene/digitaluniverse/milkyway_arm_labels")
-asset.require("scene/digitaluniverse/milkyway_label")
-asset.require("scene/digitaluniverse/milkyway_sphere")
-asset.require("scene/digitaluniverse/obassociations")
-asset.require("scene/digitaluniverse/openclusters")
-asset.require("scene/digitaluniverse/planetarynebulae")
-asset.require("scene/digitaluniverse/pulsars")
-asset.require("scene/digitaluniverse/quasars")
-asset.require("scene/digitaluniverse/sdss")
-asset.require("scene/digitaluniverse/starlabels")
-asset.require("scene/digitaluniverse/starorbits")
-asset.require("scene/digitaluniverse/stars")
-asset.require("scene/digitaluniverse/superclusters")
-asset.require("scene/digitaluniverse/supernovaremnants")
-asset.require("scene/digitaluniverse/tully")
-asset.require("scene/digitaluniverse/voids")
+-- Planet layers
+local server = openspace.layerServer();
+if (server == "All") then
+  asset.require("scene/solarsystem/planets/default_layers")
+elseif (server == "NewYork") then
+  asset.require("scene/solarsystem/planets/newyork_layers")
+elseif (server == "Sweden") then
+  asset.require("scene/solarsystem/planets/sweden_layers")
+elseif (server == "Utah") then
+  asset.require("scene/solarsystem/planets/utah_layers")
+elseif (server == "None") then
+  asset.require("scene/solarsystem/planets/base_layers")
+else
+  openspace.printWarning("Did not recognize the specified Layer server, defaults to 'All'")
+  asset.require("scene/solarsystem/planets/default_layers")
+end
+
+asset.require("scene/digitaluniverse/digitaluniverse")
+asset.require("nightsky/nightsky")
 
 asset.require("customization/globebrowsing")
-asset.require("util/default_actions")
+asset.require("actions/solarsystem_actions")
 
-local toggle_trails = {
-  Identifier = "os_default.toggle_trails",
-  Name = "Toggle Trails",
-  Command = [[
-    local list = openspace.getProperty("{planetTrail_solarSystem}.Renderable.Enabled");
-    for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end
-    
-    local moonlist = openspace.getProperty("{moonTrail_solarSystem}.Renderable.Enabled");
-    for _,v in pairs(moonlist) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end
-  ]],
-  Documentation = "Toggles the visibility of planet and moon trails",
-  GuiPath = "/Rendering",
-  IsLocal = false,
+asset.require("modules/exoplanets/exoplanets")
+asset.require("modules/skybrowser/skybrowser")
 
-  Key = "h"
-}
-
-local toggle_planet_labels = {
-  Identifier = "os_default.toggle_planet_labels",
-  Name = "Toggle planet labels",
-  Command = [[
-    local list = openspace.getProperty("{solarsystem_labels}.Renderable.Enabled");
-    for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end
-  ]],
-  Documentation = "Turns on visibility for all solar system labels",
-  GuiPath = "/Rendering",
-  IsLocal = false,
-
-  Key = "l"
-}
-
-local trailAction = asset.require("actions/trails/toggle_trails_planets_moons").toggle_trails
-
-asset.onInitialize(function ()
-  openspace.bindKey("h", trailAction.Identifier)
-
-  openspace.action.registerAction(toggle_planet_labels)
-  openspace.bindKey(toggle_planet_labels.Key, toggle_planet_labels.Identifier)
-
+asset.onInitialize(function()
   openspace.globebrowsing.loadWMSServersFromFile(
     openspace.absPath("${DATA}/globebrowsing_servers.lua")
   )
-end)
 
-asset.onDeinitialize(function ()
-  openspace.clearKey(toggle_trails.Key)
-
-  openspace.action.removeAction(toggle_planet_labels)
-  openspace.clearKey(toggle_planet_labels.Key)
+  openspace.setGuiOrder(
+    "/",
+    { "Solar System", "Milky Way", "Universe", "Night Sky", "Examples" }
+  )
+  openspace.setGuiOrder(
+    "/Solar System",
+    { "Planets", "Dwarf Planets", "Sun", "Solar System Barycenter" }
+  )
 end)

@@ -1,10 +1,13 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "ESRI_World_Imagery",
   Name = "ESRI World Imagery",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("esri_world_imagery.wms"),
+  ZIndex = 10,
+  FilePath = asset.resource("esri_world_imagery.wms"),
   Description = [[World Imagery provides one meter or better satellite and aerial
     imagery in many parts of the world and lower resolution satellite imagery
     worldwide. The map includes 15m TerraColor imagery at small and mid-scales
@@ -17,21 +20,21 @@ local layer = {
     ~1:280 scale. (Description from URL)]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 
 asset.meta = {
   Name = "ESRI World Imagery",
-  Version = "1.1",
   Description = "Main web loaded map layer for Earth. This layer is hosted by ESRI",
   Author = "ESRI",
   URL = "https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9",

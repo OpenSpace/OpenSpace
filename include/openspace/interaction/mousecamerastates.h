@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,13 +36,15 @@ class MouseCameraStates : public CameraInteractionStates {
 public:
     MouseCameraStates(double sensitivity, double velocityScaleFactor);
 
-    void updateStateFromInput(const MouseInputState& mouseinputState,
-        const KeyboardInputState& keyboardinputState, double deltaTime);
+    void updateStateFromInput(const MouseInputState& mouseState,
+        const KeyboardInputState& keyboardState, double deltaTime);
 
     void setInvertMouseButton(bool value);
 
 private:
     bool _isMouseButtonInverted = false;
+
+    double _currentSensitivityRamp = 1.0;
 };
 
 } // namespace openspace::interaction

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,14 +34,14 @@ namespace openspace {
 
 template <typename T> struct Job;
 
-/*
+/**
  * Templated Concurrent Job Manager
- * This class is used execute specific jobs on one (1) parallell thread
+ * This class is used execute specific jobs on one (1) parallel thread
  */
 template<typename P>
 class ConcurrentJobManager {
 public:
-    ConcurrentJobManager(ThreadPool pool);
+    explicit ConcurrentJobManager(ThreadPool pool);
 
     void enqueueJob(std::shared_ptr<Job<P>> job);
 

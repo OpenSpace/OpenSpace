@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,7 @@
 
 #include <openspace/properties/scalar/doubleproperty.h>
 
+#include <openspace/util/json_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
 
 namespace openspace::properties {
@@ -37,19 +38,20 @@ std::string_view DoubleProperty::className() const {
     return "DoubleProperty";
 }
 
-int DoubleProperty::typeLua() const {
-    return LUA_TNUMBER;
+ghoul::lua::LuaTypes DoubleProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Number;
 }
 
-double DoubleProperty::fromLuaConversion(lua_State* state, bool& success) const {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        double val = lua_tonumber(state, -1);
-        return val;
-    }
-    else {
-        return 0.0;
-    }
+void DoubleProperty::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
+double DoubleProperty::toValue(lua_State* state) const {
+    return ghoul::lua::value<double>(state);
+}
+
+std::string DoubleProperty::stringValue() const {
+    return formatJson(_value);
 }
 
 } // namespace openspace::properties

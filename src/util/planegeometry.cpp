@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,11 +34,6 @@ PlaneGeometry::PlaneGeometry(glm::vec2 size) : _size(std::move(size)) {}
 
 PlaneGeometry::PlaneGeometry(float size) : PlaneGeometry(glm::vec2(size, size)) {}
 
-PlaneGeometry::~PlaneGeometry() {
-    glDeleteBuffers(1, &_vBufferId);
-    glDeleteVertexArrays(1, &_vaoId);
-}
-
 void PlaneGeometry::initialize() {
     glGenVertexArrays(1, &_vaoId);
     glGenBuffers(1, &_vBufferId);
@@ -53,7 +48,7 @@ void PlaneGeometry::deinitialize() {
     _vBufferId = 0;
 }
 
-void PlaneGeometry::render() {
+void PlaneGeometry::render() const {
     glBindVertexArray(_vaoId);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
@@ -77,18 +72,18 @@ void PlaneGeometry::updateGeometry() {
         GLfloat t;
     };
 
-    VertexData vertices[] = {
-        { -size.x, -size.y, 0.f, 0.f },
-        {  size.x,  size.y, 1.f, 1.f },
-        { -size.x,  size.y, 0.f, 1.f },
-        { -size.x, -size.y, 0.f, 0.f },
-        {  size.x, -size.y, 1.f, 0.f },
-        {  size.x,  size.y, 1.f, 1.f }
+    const std::array<VertexData, 6> vertices = {
+        VertexData{ -size.x, -size.y, 0.f, 0.f },
+        VertexData{  size.x,  size.y, 1.f, 1.f },
+        VertexData{ -size.x,  size.y, 0.f, 1.f },
+        VertexData{ -size.x, -size.y, 0.f, 0.f },
+        VertexData{  size.x, -size.y, 1.f, 0.f },
+        VertexData{  size.x,  size.y, 1.f, 1.f }
     };
 
     glBindVertexArray(_vaoId);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), nullptr);
     glEnableVertexAttribArray(1);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "catch2/catch.hpp"
+#include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <openspace/json.h>
 #include <openspace/util/json_helper.h>
@@ -46,18 +47,17 @@ TEMPLATE_TEST_CASE("FormatJson", "[formatjson]", glm::vec2, glm::vec3,
     // Compare with Ghoul's Lua conversions. Note that Lua uses '{' for arrays,
     // while we here expect '[' for all glm types
     std::string luaValue = ghoul::to_string(val);
-    luaValue.replace(0, 1, "[");
-    luaValue.replace(luaValue.size() - 1, 1, "]");
-
+    luaValue.front() = '[';
+    luaValue.back() = ']';
     CHECK(json == luaValue);
 }
 
 TEST_CASE("FormatJson - Bool", "[formatjson]") {
-    bool trueVal = true;
-    bool falseVal = false;
+    constexpr bool TrueVal = true;
+    constexpr bool FalseVal = false;
 
-    CHECK(openspace::formatJson(trueVal) == "true");
-    CHECK(openspace::formatJson(falseVal) == "false");
+    CHECK(openspace::formatJson(TrueVal) == "true");
+    CHECK(openspace::formatJson(FalseVal) == "false");
 }
 
 TEST_CASE("FormatJson - Infinity & Nan", "[formatjson]") {

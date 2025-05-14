@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/rawtile.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
+#include <modules/globebrowsing/src/tilecacheproperties.h>
 #include <ghoul/misc/boolean.h>
 #include <string>
 #include <mutex>
@@ -48,11 +49,15 @@ public:
      * Opens a GDALDataset in readonly mode and calculates meta data required for
      * reading tile using a TileIndex.
      *
-     * \param filePath, a path to a specific file GDAL can read
-     * \param config, Configuration used for initialization
-     * \param baseDirectory, the base directory to use in future loading operations
+     * \param filePath the path to a specific file GDAL can read
+     * \param initData information about the textures that will be creatd by this reader
+     * \param cacheProperties contains settings about whether the reader should
+     *        utilize cache
+     * \param preprocess whether the loaded data should be calculate meta data about the
+     *        dataset
      */
     RawTileDataReader(std::string filePath, TileTextureInitData initData,
+        TileCacheProperties cacheProperties,
         PerformPreprocessing preprocess = PerformPreprocessing::No);
     ~RawTileDataReader();
 
@@ -65,6 +70,8 @@ public:
     glm::ivec2 fullPixelSize() const;
 
 private:
+    std::optional<std::string> mrfCache();
+
     void initialize();
 
     RawTile::ReadError rasterRead(int rasterBand, const IODescription& io,
@@ -74,13 +81,6 @@ private:
         char* imageDataDest) const;
 
     IODescription ioDescription(const TileIndex& tileIndex) const;
-
-    /**
-     * A recursive function that is able to perform wrapping in case the read region of
-     * the given IODescription is outside of the given write region.
-     */
-    RawTile::ReadError repeatedRasterRead(int rasterBand, const IODescription& fullIO,
-        char* dataDestination, int depth = 0) const;
 
     TileMetaData tileMetaData(RawTile& rawTile, const PixelRegion& region) const;
 
@@ -97,8 +97,9 @@ private:
     int _maxChunkLevel = -1;
 
     const TileTextureInitData _initData;
+    const TileCacheProperties _cacheProperties;
     const PerformPreprocessing _preprocess;
-    TileDepthTransform _depthTransform = { 0.f, 0.f };
+    TileDepthTransform _depthTransform = { .scale = 0.f, .offset = 0.f };
 
     mutable std::mutex _datasetLock;
 };

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,24 +25,27 @@
 #ifndef __OPENSPACE_CORE___LUALIBRARY___H__
 #define __OPENSPACE_CORE___LUALIBRARY___H__
 
-#include <ghoul/lua/ghoul_lua.h>
 #include <filesystem>
 #include <string>
 #include <vector>
 
+struct lua_State;
+
 namespace openspace::scripting {
 
 /**
- * This structure represents a Lua library, itself consisting of a unique #name and
- * an arbitrary number of #functions
+ * This structure represents a Lua library, itself consisting of a unique #name and an
+ * arbitrary number of #functions.
  */
 struct LuaLibrary {
     /**
-    * This structure represents a Lua function with its #name, #function pointer
-    * #argumentText describing the arguments this function takes, and the the #helpText
-    * describing the function.
-    */
+     * This structure represents a Lua function with its #name, #function pointer
+     * #arguments describe the arguments this function takes, and the #helpText describing
+     * the function.
+     */
     struct Function {
+        using lua_CFunction =int(*)(lua_State* L);
+
         /// The name of the function
         std::string name;
         /// The function pointer that is executed if the function is called
@@ -61,6 +64,11 @@ struct LuaLibrary {
         std::string returnType;
         /// A help text describing what the function does/
         std::string helpText;
+        /// The source location where the implementation for this Lua file is located
+        struct {
+            std::string file = "<none>";
+            int line = 0;
+        } sourceLocation;
     };
     /// The name of the library
     std::string name;

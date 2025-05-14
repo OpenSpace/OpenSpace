@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,12 +27,11 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::filesystem { class File; }
 
@@ -52,7 +51,7 @@ struct LinePoint;
 
 class RenderablePlane : public Renderable {
 public:
-    RenderablePlane(const ghoul::Dictionary& dictionary);
+    explicit RenderablePlane(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -72,7 +71,8 @@ protected:
     properties::OptionProperty _blendMode;
     properties::BoolProperty _billboard;
     properties::BoolProperty _mirrorBackside;
-    properties::FloatProperty _size;
+    properties::Vec2Property _size;
+    properties::BoolProperty _autoScale;
     properties::Vec3Property _multiplyColor;
 
     ghoul::opengl::ProgramObject* _shader = nullptr;
@@ -82,6 +82,9 @@ protected:
 
 private:
     bool _planeIsDirty = false;
+
+    UniformCache(modelViewProjection, modelViewTransform, colorTexture, opacity,
+        mirrorBackside, multiplyColor) _uniformCache;
 };
 
 } // namespace openspace

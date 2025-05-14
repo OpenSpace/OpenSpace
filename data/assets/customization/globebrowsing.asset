@@ -23,7 +23,7 @@ local vrt_folders = {
     -- if areas overlap (for example CTX and HiRISE) and CTX is specified *after* HiRISE,
     -- CTX will stomp over the HiRISE.
 
-    -- tl;dr:  Specify CTX folders first, then HiRISE 
+    -- tl;dr:  Specify CTX folders first, then HiRISE
     -- example:   "C:/OpenSpace/GlobeBrowsingData/Mars/CTX"
 
     -- We recommend using this folder for CTX
@@ -88,7 +88,7 @@ else
   vrt_folders["Earth"] = nil
 end
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   -- Add local patches described at the top of this file
   for obj, list in pairs(vrt_folders) do
     for _, dir in pairs(list) do
@@ -106,7 +106,6 @@ end)
 
 asset.meta = {
   Name = "Customization - GlobeBrowsing",
-  Version = "1.0",
   Description = [[This asset adds planetary images that can be downloaded separately
   and placed in the OpenSpaceData folder]],
   Author = "OpenSpace Team",

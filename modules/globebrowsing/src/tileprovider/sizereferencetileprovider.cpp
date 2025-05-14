@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/font/fontmanager.h>
+#include <ghoul/font/fontrenderer.h>
 #include <optional>
 #include <variant>
 
@@ -47,7 +48,7 @@ documentation::Documentation SizeReferenceTileProvider::Documentation() {
 SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
     : TextTileProvider(tileTextureInitData(layers::Group::ID::ColorLayers, false))
 {
-    ZoneScoped
+    ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -55,19 +56,19 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
 
     if (p.radii.has_value()) {
         if (std::holds_alternative<glm::dvec3>(*p.radii)) {
-            _ellipsoid = std::get<glm::dvec3>(*p.radii);
+            _ellipsoid = Ellipsoid(std::get<glm::dvec3>(*p.radii));
         }
         else {
             const double r = std::get<double>(*p.radii);
-            _ellipsoid = glm::dvec3(r, r, r);
+            _ellipsoid = Ellipsoid(glm::dvec3(r, r, r));
         }
     }
 }
 
 Tile SizeReferenceTileProvider::tile(const TileIndex& tileIndex) {
-    ZoneScoped
+    ZoneScoped;
 
-    const GeodeticPatch patch(tileIndex);
+    const GeodeticPatch patch = GeodeticPatch(tileIndex);
     const bool aboveEquator = patch.isNorthern();
     const double lat = aboveEquator ? patch.minLat() : patch.maxLat();
     const double lon1 = patch.minLon();
@@ -84,7 +85,7 @@ Tile SizeReferenceTileProvider::tile(const TileIndex& tileIndex) {
     }
     double tileLongitudalLength = l;
 
-    const char* unit;
+    const char* unit = nullptr;
     if (tileLongitudalLength > 9999) {
         tileLongitudalLength *= 0.001;
         unit = "km";
@@ -93,13 +94,13 @@ Tile SizeReferenceTileProvider::tile(const TileIndex& tileIndex) {
         unit = "m";
     }
 
-    std::string text = fmt::format(" {:.0f} {:s}", tileLongitudalLength, unit);
-    glm::vec2 textPosition = {
+    const std::string text = std::format("{:.0f} {:s}", tileLongitudalLength, unit);
+    const glm::vec2 textPosition = glm::vec2(
         0.f,
         aboveEquator ?
             fontSize / 2.f :
             initData.dimensions.y - 3.f * fontSize / 2.f
-    };
+    );
 
     return TextTileProvider::renderTile(tileIndex, text, textPosition, glm::vec4(1.f));
 }

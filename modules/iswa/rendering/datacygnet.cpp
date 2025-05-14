@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,7 @@
 #include <openspace/rendering/transferfunction.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -42,45 +43,51 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DataOptionsInfo = {
         "DataOptions",
         "Data Options",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseLogInfo = {
         "UseLog",
         "Use Logarithm",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseHistogramInfo = {
         "UseHistogram",
         "Auto Contrast",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AutoFilterInfo = {
         "AutoFilter",
         "Auto Filter",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo NormalizeValuesInfo = {
         "NormValues",
         "Normalize Values",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo BackgroundInfo = {
         "BackgroundValues",
         "Background Values",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionsFile = {
         "Transferfunctions",
         "Transfer Functions",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
-
 } // namespace
 
 namespace openspace {
@@ -273,7 +280,7 @@ void DataCygnet::readTransferFunctions(std::string tfPath) {
 
     if (tfFile.is_open()) {
         std::string line;
-        while (getline(tfFile, line)) {
+        while (ghoul::getline(tfFile, line)) {
             tfs.emplace_back(absPath(line).string());
         }
 
@@ -344,7 +351,7 @@ void DataCygnet::subscribeToGroup() {
     groupEvent.subscribe(
         identifier(),
         "dataOptionsChanged",
-        [&](const ghoul::Dictionary& dict) {
+        [this](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event dataOptionsChanged");
             if (dict.hasValue<std::vector<int>>("dataOptions")) {
                 std::vector<int> idx = dict.value<std::vector<int>>("dataOptions");
@@ -361,7 +368,7 @@ void DataCygnet::subscribeToGroup() {
     groupEvent.subscribe(
         identifier(),
         "normValuesChanged",
-        [&](const ghoul::Dictionary& dict) {
+        [this](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event normValuesChanged");
             if (dict.hasValue<glm::dvec2>("normValues")) {
                 _normValues = dict.value<glm::dvec2>("normValues");
@@ -372,7 +379,7 @@ void DataCygnet::subscribeToGroup() {
     groupEvent.subscribe(
         identifier(),
         "backgroundValuesChanged",
-        [&](const ghoul::Dictionary& dict) {
+        [this](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event backgroundValuesChanged");
             if (dict.hasValue<glm::dvec2>("backgroundValues")) {
                 _backgroundValues = dict.value<glm::dvec2>("backgroundValues");
@@ -383,7 +390,7 @@ void DataCygnet::subscribeToGroup() {
     groupEvent.subscribe(
         identifier(),
         "transferFunctionsChanged",
-        [&](const ghoul::Dictionary& dict) {
+        [this](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event transferFunctionsChanged");
             _transferFunctionsFile = dict.value<std::string>("transferFunctions");
         }
@@ -392,7 +399,7 @@ void DataCygnet::subscribeToGroup() {
     groupEvent.subscribe(
         identifier(),
         "useLogChanged",
-        [&](const ghoul::Dictionary& dict) {
+        [this](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event useLogChanged");
             _useLog = dict.value<bool>("useLog");
         }
@@ -401,7 +408,7 @@ void DataCygnet::subscribeToGroup() {
     groupEvent.subscribe(
         identifier(),
         "useHistogramChanged",
-        [&](const ghoul::Dictionary& dict) {
+        [this](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event useHistogramChanged");
             _useHistogram = dict.value<bool>("useHistogram");
         }
@@ -410,7 +417,7 @@ void DataCygnet::subscribeToGroup() {
     groupEvent.subscribe(
         identifier(),
         "autoFilterChanged",
-        [&](const ghoul::Dictionary& dict) {
+        [this](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event autoFilterChanged");
             _autoFilter = dict.value<bool>("autoFilter");
         }
@@ -419,7 +426,7 @@ void DataCygnet::subscribeToGroup() {
     groupEvent.subscribe(
         identifier(),
         "updateGroup",
-        [&](const ghoul::Dictionary&) {
+        [this](const ghoul::Dictionary&) {
             LDEBUG(identifier() + " Event updateGroup");
             if (_autoFilter) {
                 _backgroundValues = _dataProcessor->filterValues();

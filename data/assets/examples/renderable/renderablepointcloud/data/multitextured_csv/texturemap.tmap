@@ -1,0 +1,8 @@
+# The texture map is a mapping between an index and the name of an image file.
+# All the images should be located in the same folder, or the name need to be specified as a path relative
+# to a specific folder
+
+0 test3.jpg
+1 test2.jpg
+2 test.jpg
+3 openspace-horiz-logo.png

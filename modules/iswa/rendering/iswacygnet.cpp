@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,12 +45,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DeleteInfo = {
         "Delete",
         "Delete",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
     constexpr openspace::properties::Property::PropertyInfo AlphaInfo = {
         "Alpha",
         "Alpha",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::User
     };
 } // namespace
 
@@ -135,10 +137,9 @@ void IswaCygnet::initializeGL() {
     else {
         _delete.onChange([this]() {
             deinitialize();
-            global::scriptEngine->queueScript(
-                "openspace.removeSceneGraphNode('" + identifier() + "')",
-                scripting::ScriptEngine::RemoteScripting::Yes
-            );
+            global::scriptEngine->queueScript(std::format(
+                "openspace.removeSceneGraphNode('{}')", identifier()
+            ));
         });
     }
 
@@ -171,8 +172,8 @@ void IswaCygnet::render(const RenderData& data, RendererTasks&) {
     }
 
     glm::mat4 transform = glm::mat4(1.f);
-    for (int i = 0; i < 3; i++){
-        for (int j = 0; j < 3; j++){
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
             transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
         }
     }
@@ -282,7 +283,7 @@ void IswaCygnet::initializeGroup() {
     groupEvent.subscribe(
         identifier(),
         "enabledChanged",
-        [&](const ghoul::Dictionary& dict) {
+        [this](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event enabledChanged");
             _enabled = dict.value<bool>("enabled");
         }
@@ -291,19 +292,22 @@ void IswaCygnet::initializeGroup() {
     groupEvent.subscribe(
         identifier(),
         "alphaChanged",
-        [&](const ghoul::Dictionary& dict) {
+        [this](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event alphaChanged");
             _alpha = static_cast<float>(dict.value<double>("alpha"));
         }
     );
 
-    groupEvent.subscribe(identifier(), "clearGroup", [&](ghoul::Dictionary) {
-        LDEBUG(identifier() + " Event clearGroup");
-        global::scriptEngine->queueScript(
-            "openspace.removeSceneGraphNode('" + identifier() + "')",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    });
+    groupEvent.subscribe(
+        identifier(),
+        "clearGroup",
+        [this](ghoul::Dictionary) {
+            LDEBUG(identifier() + " Event clearGroup");
+            global::scriptEngine->queueScript(
+                "openspace.removeSceneGraphNode('" + identifier() + "')"
+            );
+        }
+    );
 }
 
 } //namespace openspace

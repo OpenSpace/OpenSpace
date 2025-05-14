@@ -1,8 +1,8 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
-
-local BENNU_BODY = 2101955
 
 local BennuBarycenter = {
   Identifier = "BennuBarycenter",
@@ -10,8 +10,8 @@ local BennuBarycenter = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = BENNU_BODY,
-      Observer = "SSB"
+      Target = kernels.ID.Bennu,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
   },
   GUI = {
@@ -20,12 +20,13 @@ local BennuBarycenter = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(BennuBarycenter)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(BennuBarycenter)
 end)
-  
+
 asset.export(BennuBarycenter)

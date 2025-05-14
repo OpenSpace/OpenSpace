@@ -1,5 +1,7 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
+
+
 
 local EarthBarycenter = {
   Identifier = "EarthBarycenter",
@@ -7,8 +9,8 @@ local EarthBarycenter = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "EARTH BARYCENTER",
-      Observer = "SSB"
+      Target = coreKernels.ID.EarthBarycenter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
   },
   GUI = {
@@ -24,8 +26,8 @@ local EarthCenter = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "EARTH",
-      Observer = "EARTH BARYCENTER"
+      Target = coreKernels.ID.Earth,
+      Observer = coreKernels.ID.EarthBarycenter
     }
   },
   GUI = {
@@ -42,8 +44,8 @@ local EarthInertial = {
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "J2000",
-      DestinationFrame = "GALACTIC",
+      SourceFrame = coreKernels.Frame.J2000,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   GUI = {
@@ -59,8 +61,8 @@ local EarthIAU = {
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_EARTH",
-      DestinationFrame = "GALACTIC",
+      SourceFrame = coreKernels.Frame.Earth,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   GUI = {
@@ -69,6 +71,7 @@ local EarthIAU = {
     Hidden = true
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EarthBarycenter)
@@ -89,9 +92,10 @@ asset.export(EarthCenter)
 asset.export(EarthInertial)
 asset.export(EarthIAU)
 
+
+
 asset.meta = {
   Name = "Earth Transforms",
-  Version = "1.1",
   Description = [[Earth transforms: Earth Barycenter, Earth Center, Earth Inertial, Earth
     IAU. A scene graph node is created for each transform]],
   Author = "OpenSpace Team",

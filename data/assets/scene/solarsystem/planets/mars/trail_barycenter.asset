@@ -1,5 +1,5 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -8,40 +8,39 @@ local MarsBarycenterTrail = {
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
+    Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MARS BARYCENTER",
-      Observer = "SSB"
+      Target = coreKernels.ID.MarsBarycenter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.814, 0.305, 0.220 },
     Period = 686.973,
-    Resolution = 1000,
-    Enabled = false
+    Resolution = 1000
   },
   Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
   GUI = {
     Name = "Mars Barycenter Trail",
     Path = "/Solar System/Planets/Mars",
-    Description = [[Trail of Mars' Barycenter as observed by the Sun. Data from NASA Spice
-      (see base spice asset)]],
+    Description = "Trail of Mars' Barycenter as observed by the Sun"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MarsBarycenterTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MarsBarycenterTrail)
 end)
-  
+
 asset.export(MarsBarycenterTrail)
 
 
 
 asset.meta = {
   Name = "Mars Trail",
-  Version = "1.1",
   Description = "Barycenter Mars trail from SPICE",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

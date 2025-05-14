@@ -1,34 +1,27 @@
 local transforms = asset.require("./transforms")
+local kernels = asset.require("./kernels")
 
-local textures = asset.syncedResource({
+
+
+local textures = asset.resource({
   Name = "Bennu Textures",
   Type = "HttpSynchronization",
   Identifier = "bennu_textures",
   Version = 1
 })
 
-local BENNU_BODY = "2101955"
+
+local BennuBodyId = "2101955"
 
 local ImagePlane = {
   Identifier = "ImagePlaneBennu",
   Parent = transforms.BennuBarycenter.Identifier,
-  Transform = {
-    -- Translation = {
-    --     Type = "StaticTranslation",
-    --     Position = { -0.2476, 0.2710, 0.3364 }
-    -- },
-    -- Rotation = {
-    --     Type = "SpiceRotation",
-    --     SourceFrame = "ORX_OCAMS_POLYCAM",
-    --     DestinationFrame = "ORX_SPACECRAFT"
-    -- }
-  },
   Renderable = {
     Type = "RenderablePlaneProjection",
-    Frame = "IAU_BENNU",
-    DefaultTarget = BENNU_BODY,
-    Spacecraft = "OSIRIS-REX",
-    Instrument = "ORX_OCAMS_POLYCAM",
+    Frame = kernels.Frame.Bennu,
+    DefaultTarget = BennuBodyId,
+    Spacecraft = kernels.ID.OsirisRex,
+    Instrument = kernels.Frame.Polycam,
     Moving = false,
     Texture = textures .. "defaultProj.png"
   },
@@ -42,9 +35,9 @@ local ImagePlane = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ImagePlane)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ImagePlane)
 end)
-  
+
 asset.export(ImagePlane)

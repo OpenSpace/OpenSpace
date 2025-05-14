@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,19 +22,16 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   globebrowsingmodule.h
   src/asynctiledataprovider.h
   src/basictypes.h
   src/dashboarditemglobelocation.h
-  src/ellipsoid.h
   src/gdalwrapper.h
   src/geodeticpatch.h
   src/globelabelscomponent.h
-  src/globetranslation.h
-  src/globerotation.h
   src/gpulayergroup.h
   src/layer.h
   src/layeradjustment.h
@@ -58,7 +55,13 @@ set(HEADER_FILES
   src/tileindex.h
   src/tileloadjob.h
   src/tiletextureinitdata.h
+  src/tilecacheproperties.h
   src/timequantizer.h
+  src/geojson/geojsoncomponent.h
+  src/geojson/geojsonmanager.h
+  src/geojson/geojsonproperties.h
+  src/geojson/globegeometryfeature.h
+  src/geojson/globegeometryhelper.h
   src/tileprovider/defaulttileprovider.h
   src/tileprovider/imagesequencetileprovider.h
   src/tileprovider/singleimagetileprovider.h
@@ -68,6 +71,7 @@ set(HEADER_FILES
   src/tileprovider/texttileprovider.h
   src/tileprovider/tileindextileprovider.h
   src/tileprovider/tileprovider.h
+  src/tileprovider/tileproviderbydate.h
   src/tileprovider/tileproviderbyindex.h
   src/tileprovider/tileproviderbylevel.h
 )
@@ -77,12 +81,9 @@ set(SOURCE_FILES
   globebrowsingmodule_lua.inl
   src/asynctiledataprovider.cpp
   src/dashboarditemglobelocation.cpp
-  src/ellipsoid.cpp
   src/gdalwrapper.cpp
   src/geodeticpatch.cpp
   src/globelabelscomponent.cpp
-  src/globetranslation.cpp
-  src/globerotation.cpp
   src/gpulayergroup.cpp
   src/layer.cpp
   src/layeradjustment.cpp
@@ -100,6 +101,11 @@ set(SOURCE_FILES
   src/tileloadjob.cpp
   src/tiletextureinitdata.cpp
   src/timequantizer.cpp
+  src/geojson/geojsoncomponent.cpp
+  src/geojson/geojsonmanager.cpp
+  src/geojson/geojsonproperties.cpp
+  src/geojson/globegeometryfeature.cpp
+  src/geojson/globegeometryhelper.cpp
   src/tileprovider/defaulttileprovider.cpp
   src/tileprovider/imagesequencetileprovider.cpp
   src/tileprovider/singleimagetileprovider.cpp
@@ -109,6 +115,7 @@ set(SOURCE_FILES
   src/tileprovider/texttileprovider.cpp
   src/tileprovider/tileindextileprovider.cpp
   src/tileprovider/tileprovider.cpp
+  src/tileprovider/tileproviderbydate.cpp
   src/tileprovider/tileproviderbyindex.cpp
   src/tileprovider/tileproviderbylevel.cpp
 )
@@ -118,6 +125,11 @@ set(SHADER_FILES
   shaders/advanced_rings_vs.glsl
   shaders/advanced_rings_fs.glsl
   shaders/blending.glsl
+  shaders/geojson_fs.glsl
+  shaders/geojson_points_fs.glsl
+  shaders/geojson_points_gs.glsl
+  shaders/geojson_points_vs.glsl
+  shaders/geojson_vs.glsl
   shaders/globalrenderer_vs.glsl
   shaders/localrenderer_vs.glsl
   shaders/renderer_fs.glsl
@@ -146,6 +158,7 @@ target_precompile_headers(${globebrowsing_module} PRIVATE
   <map>
 )
 
+# Gdal
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/gdal_data DESTINATION modules/globebrowsing)
 
 if (WIN32)
@@ -161,3 +174,12 @@ else (WIN32)
   target_link_libraries(openspace-module-globebrowsing PRIVATE ${GDAL_LIBRARY})
   mark_as_advanced(GDAL_CONFIG GDAL_INCLUDE_DIR GDAL_LIBRARY)
 endif () # WIN32
+
+begin_dependency("GEOS")
+add_subdirectory(ext/geos SYSTEM)
+target_link_libraries(openspace-module-globebrowsing PRIVATE geos)
+
+set_property(TARGET geos PROPERTY FOLDER "External")
+set_property(TARGET geos_c PROPERTY FOLDER "External")
+set_property(TARGET ryu PROPERTY FOLDER "External")
+end_dependency("GEOS")

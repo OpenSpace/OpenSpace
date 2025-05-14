@@ -1,34 +1,40 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
 
-local texturesPath = asset.syncedResource({
+
+
+local texturesPath = asset.resource({
   Name = "Earth Textures",
   Type = "HttpSynchronization",
   Identifier = "earth_textures",
   Version = 3
 })
 
-local layer = {
+
+local Layer = {
   Identifier = "Earth_Night_Texture",
   Name = "Earth Night Texture",
   Enabled = asset.enabled,
+  ZIndex = 5,
   FilePath = texturesPath .. "earth_night.png",
-  Description = "Earth's city lights are clearly visible from space"
+  Description = "Earth's city lights are clearly visible from space",
+  CacheSettings = { Enabled = false }
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "NightLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "NightLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "NightLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "NightLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
+
 
 
 asset.meta = {
   Name = "Blue Marble Night",
-  Version = "1.1",
   Description = "Fallback layer for earth night image if no internet is available",
   Author = "OpenSpace Team",
   URL = "https://visibleearth.nasa.gov/collection/1484/blue-marble",

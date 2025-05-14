@@ -1,5 +1,6 @@
-local transforms = asset.require('../transforms')
-local kernels = asset.require('../kernels')
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+
 
 
 local UVS = {
@@ -12,8 +13,8 @@ local UVS = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_UVS",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.UVS,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_UVS",
@@ -21,8 +22,7 @@ local UVS = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "UVS FOV",
@@ -43,9 +43,9 @@ end)
 asset.export(UVS)
 
 
+
 asset.meta = {
   Name = "UVS",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the Ultraviolet Spectograph (UVS), which is measuring the
     composition, chemistry, structure, and variability of Europa's atmopshere. See

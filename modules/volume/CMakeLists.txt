@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,7 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   envelope.h
@@ -49,6 +49,7 @@ set(HEADER_FILES
   rendering/volumeclipplane.h
   rendering/volumeclipplanes.h
   tasks/generaterawvolumetask.h
+  tasks/generaterawvolumefromfiletask.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -70,6 +71,7 @@ set(SOURCE_FILES
   rendering/volumeclipplane.cpp
   rendering/volumeclipplanes.cpp
   tasks/generaterawvolumetask.cpp
+  tasks/generaterawvolumefromfiletask.cpp
 )
 
 source_group("Source Files" FILES ${SOURCE_FILES})

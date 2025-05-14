@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/scene/timeframe.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 
@@ -43,14 +44,14 @@ public:
     static ghoul::mm_unique_ptr<Scale> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
-    Scale();
+    Scale(const ghoul::Dictionary& dictionary);
     virtual ~Scale() override = default;
 
     virtual bool initialize();
 
+    virtual void update(const UpdateData& data);
     glm::dvec3 scaleValue() const;
     virtual glm::dvec3 scaleValue(const UpdateData& data) const = 0;
-    virtual void update(const UpdateData& data);
 
     static documentation::Documentation Documentation();
 
@@ -59,6 +60,7 @@ protected:
 
 private:
     bool _needsUpdate = true;
+    ghoul::mm_unique_ptr<TimeFrame> _timeFrame;
     double _cachedTime = -std::numeric_limits<double>::max();
     glm::dvec3 _cachedScale = glm::dvec3(1.0);
 };

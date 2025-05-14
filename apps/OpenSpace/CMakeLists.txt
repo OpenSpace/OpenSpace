@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,9 +22,8 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
-include(${OPENSPACE_CMAKE_EXT_DIR}/application_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/application_definition.cmake)
 
 # We are getting all_enabled_modules from the handle_applications.cmake file which gets
 # it from the main CMakeLists file
@@ -43,14 +42,14 @@ if (OPENSPACE_OPENVR_SUPPORT)
     if (WIN32)
       find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
         NAMES SGCTOpenVR.h
-        PATHS ${OPENSPACE_BASE_DIR}/ext/sgct/additional_includes/openvr NO_DEFAULT_PATH
+        PATHS ${PROJECT_SOURCE_DIR}/ext/sgct/additional_includes/openvr NO_DEFAULT_PATH
         REQUIRED
       )
     else ()
       find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
         NAMES SGCTOpenVR.h
         PATH_SUFFIXES SGCTOpenVR
-        PATHS ${OPENSPACE_BASE_DIR}/ext/sgct/additional_includes/openvr
+        PATHS ${PROJECT_SOURCE_DIR}/ext/sgct/additional_includes/openvr
         REQUIRED
       )
     endif ()
@@ -114,24 +113,33 @@ begin_header("Dependency: SGCT")
 set(SGCT_TEXT OFF CACHE BOOL "" FORCE)
 set(SGCT_DEP_INCLUDE_FREETYPE OFF CACHE BOOL "" FORCE)
 set(SGCT_DEP_INCLUDE_FMT OFF CACHE BOOL "" FORCE)
+set(SGCT_DEP_INCLUDE_JSON OFF CACHE BOOL "" FORCE)
 set(SGCT_DEP_INCLUDE_SCN OFF CACHE BOOL "" FORCE)
+set(SGCT_DEP_INCLUDE_CATCH2 OFF CACHE BOOL "" FORCE)
 
+if (NOT OPENSPACE_HAVE_TESTS)
+  # Unless overriden, disable sgct tests if OpenSpace tests are disabled
+  set(SGCT_BUILD_TESTS FALSE CACHE BOOL "Enable ghoul unit tests")
+endif()
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct)
 target_link_libraries(OpenSpace PRIVATE sgct)
 
-set_folder_location(sgct "External")
-set_folder_location(glfw "External")
-set_folder_location(miniziplibstatic "External")
-set_folder_location(png16_static "External")
-set_folder_location(quat "External")
-set_folder_location(tinyxml2static "External")
-set_folder_location(vrpn "External")
-set_folder_location(zlibstatic "External")
-set_folder_location(SGCTTest "Unit Tests")
+set_target_properties(sgct PROPERTIES FOLDER "External")
+set_target_properties(glfw PROPERTIES FOLDER "External")
+if (TARGET SGCTTest)
+  set_target_properties(SGCTTest PROPERTIES FOLDER "External")
+endif ()
 
 if (UNIX AND (NOT APPLE))
   target_link_libraries(OpenSpace PRIVATE Xcursor Xinerama X11)
 endif ()
+
+add_custom_command(TARGET OpenSpace POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy
+  ${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct/sgct.schema.json
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../config/schema/sgct.schema.json
+  COMMAND_EXPAND_LISTS
+)
 
 end_header("Dependency: SGCT")
 
@@ -144,10 +152,9 @@ if (WIN32)
   # Find the windeployqt application
   get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
   get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
-  find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
   add_custom_command(
     TARGET OpenSpace POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E env PATH="${_qt_bin_dir}" "${WINDEPLOYQT_EXECUTABLE}" --verbose 0 --no-compiler-runtime \"$<TARGET_FILE:OpenSpace>\"
+    COMMAND "${WINDEPLOYQT_EXECUTABLE}" --verbose 0 --no-compiler-runtime --no-translations \"$<TARGET_FILE:OpenSpace>\"
     COMMENT "Deploying Qt libraries"
   )
 endif ()
@@ -161,7 +168,7 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   set(PROJECT_ARCH "x86_64")
 
   if (WIN32)
-    set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/OpenSpace/openspace.rc)
+    set(RESOURCE_FILE openspace.rc)
   endif ()
 
   # Add the CEF binary distribution's cmake/ directory to the module path and

@@ -1,5 +1,6 @@
-local transforms = asset.require('../transforms')
-local kernels = asset.require('../kernels')
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+
 
 
 -- Circle shapes are not support
@@ -13,8 +14,8 @@ local SwiCh2 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_SWI_CH2",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.SwiCH2,
     RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
       Name = "JUICE_SWI_CH2",
@@ -22,8 +23,7 @@ local SwiCh2 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "SWI CH2 FOV",
@@ -48,8 +48,8 @@ local SwiFull = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_SWI_FULL",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.SwiFull,
     RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
       Name = "JUICE_SWI_FULL",
@@ -57,8 +57,7 @@ local SwiFull = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "SWI Full FOV",
@@ -83,11 +82,11 @@ local SwiFullGCO500 = {
       -- These translations are eyeballed based on the existing model
       Position = { 0.465, -0.1, 0.95 }
     }
-  },  
+  },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_SWI_FULL_GCO500",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.SwiFullGCO500,
     RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
       Name = "JUICE_SWI_FULL_GCO500",
@@ -95,8 +94,7 @@ local SwiFullGCO500 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "SWI Full GCO500 FOV",
@@ -127,9 +125,9 @@ asset.export(SwiFull)
 -- asset.export(SwiFullGCO500)
 
 
+
 asset.meta = {
   Name = "SWI",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the Submillimetre Wave Instrument (SWI), which is measuring
     the chemistry, meteorology, and structure of Jupiters middle atmosphere as well as the

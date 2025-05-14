@@ -25,6 +25,7 @@ Thumbs.db
 /cache/
 /cache-*/
 /cache_gdal/
+/mrf_cache/
 /documentation/
 /logs/
 /screenshots/
@@ -39,3 +40,7 @@ COMMIT.md
 *_codegen.cpp
 # SkyBrowser Module downloaded data
 /modules/skybrowser/wwtimagedata
+doc
+config/schema/sgct.schema.json
+settings.json
+openspace.cfg.override

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,19 +25,30 @@
 #version __CONTEXT__
 
 in vec3 in_position;
-in vec4 in_bvLumAbsMagAppMag;
+in vec3 in_bvLumAbsMag;
 in vec3 in_velocity;
 in float in_speed;
 
-out vec4 vs_bvLumAbsMagAppMag;
+out vec3 vs_bvLumAbsMag;
 out vec3 vs_velocity;
 out float vs_speed;
 
+uniform int useProperMotion;
+uniform float diffTime;
 
 void main() {
-  vs_bvLumAbsMagAppMag = in_bvLumAbsMagAppMag;
+  vs_bvLumAbsMag = in_bvLumAbsMag;
   vs_velocity = in_velocity;
   vs_speed = in_speed;
 
-  gl_Position = vec4(in_position, 1.0);
+  if (useProperMotion == 1) {
+    // 1000 to get from km/s to m/s
+    dvec3 offsetInParsec = dvec3(in_velocity) * double(diffTime) * 1000.0;
+    vec3 pos = in_position + vec3(offsetInParsec);
+    gl_Position = vec4(pos, 1.0);
+  }
+  else {
+    gl_Position = vec4(in_position, 1.0);
+  }
+
 }

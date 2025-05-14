@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,13 +52,13 @@ public:
     /**
      * The constructor that retrieves the required Keplerian elements from the passed
      * \p dictionary. These values are then apssed to the setKeplerElements method for
-     * further processing.
-     * The \p dictionary is tested against the Documentation for conformance.
+     * further processing. The \p dictionary is tested against the Documentation for
+     * conformance.
      *
      * \param dictionary The ghoul::Dictionary containing all the information about the
      *        Keplerian elements (see Documentation)
      */
-    KeplerTranslation(const ghoul::Dictionary& dictionary);
+    explicit KeplerTranslation(const ghoul::Dictionary& dictionary);
 
     /// Default destructor
     ~KeplerTranslation() override = default;
@@ -66,7 +66,7 @@ public:
     /**
     * Method returning the translation vector at a given time.
     *
-    * \param time The time to use when doing the position lookup
+    * \param data Provides information from the engine about, for example, the time
     */
     glm::dvec3 position(const UpdateData& data) const override;
 
@@ -121,10 +121,9 @@ public:
         double ascendingNode, double argumentOfPeriapsis, double meanAnomalyAtEpoch,
         double orbitalPeriod, double epoch);
 
-    /// Default construct that initializes all the properties and member variables
-    KeplerTranslation();
-
-    /// Recombutes the rotation matrix used in the update method
+    /**
+     * Recombutes the rotation matrix used in the update method.
+     */
     void computeOrbitPlane() const;
 
 private:

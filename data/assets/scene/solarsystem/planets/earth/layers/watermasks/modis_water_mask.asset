@@ -1,27 +1,30 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "MODIS_Water_Mask",
   Name = "MODIS Water Mask",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("modis_water_mask.wms")
+  ZIndex = 20,
+  FilePath = asset.resource("modis_water_mask.wms")
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "WaterMasks", layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "WaterMasks", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "WaterMasks", layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "WaterMasks", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 
 asset.meta = {
   Name = "MODIS Water Mask",
-  Version = "1.0",
   Description = "MODIS Water Mask layer for Earth globe",
   Author = "NASA EOSDIS Global Imagery Browse Services",
   URL = "https://earthdata.nasa.gov/eosdis/science-system-description/"..

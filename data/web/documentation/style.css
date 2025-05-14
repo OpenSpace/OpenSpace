@@ -63,7 +63,7 @@
   font-style: italic;
 }
 
-.documentation-function-arguments, 
+.documentation-function-arguments,
 .documentation-function-return
 {
   font-size: 0.8em;
@@ -74,7 +74,7 @@
   font-style: italic;
 }
 
-.documentation-function-arguments > .arguments-type, 
+.documentation-function-arguments > .arguments-type,
 .documentation-function-return
 {
   color: #aaa;

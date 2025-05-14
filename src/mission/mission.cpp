@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #include <openspace/mission/mission.h>
 
 #include <openspace/documentation/verifier.h>
+#include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/lua/lua_helper.h>
@@ -38,17 +39,44 @@ namespace {
         // the user
         std::string name;
 
+        // The unique identifier for the mission
+        std::optional<std::string> identifier [[codegen::identifier()]];
+
         // A description of this mission or mission phase
         std::optional<std::string> description;
 
+        struct TimeRange {
+            std::string start
+                [[codegen::annotation("A string representing a valid date")]];
+            std::optional<std::string> end
+                [[codegen::annotation("A string representing a valid date")]];
+        };
         // The time range for which this mission or mission phase is valid. If no time
         // range is specified, the ranges of sub mission phases are used instead
-        std::optional<ghoul::Dictionary> timeRange
-            [[codegen::reference("core_util_timerange")]];
+        std::optional<TimeRange> timeRange;
 
         // The phases into which this mission or mission phase is separated
         std::optional<std::vector<ghoul::Dictionary>> phases
             [[codegen::reference("core_mission_mission")]];
+
+        // An image that can be presented to the user during this phase of a mission
+        std::optional<std::string> image;
+        std::optional<std::string> link;
+
+        // Actions associated with this phase
+        std::optional<std::vector<std::string>> actions;
+
+        // Important dates
+        struct Milestone {
+            // An image that can be presented to the user during this phase of a mission
+            std::string date;
+            std::string name;
+            std::optional<std::string> description;
+            std::optional<std::string> image;
+            std::optional<std::string> link;
+            std::optional<std::vector<std::string>> actions;
+        };
+        std::optional<std::vector<Milestone>> milestones;
     };
 #include "mission_codegen.cpp"
 } // namespace
@@ -63,9 +91,12 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _name = p.name;
+    _identifier = p.identifier.value_or(_identifier);
     _description = p.description.value_or(_description);
+    _image = p.image.value_or(_image);
+    _link = p.link.value_or(_link);
 
-    if (p.phases.has_value()) {
+    if (p.phases.has_value() && !p.phases->empty()) {
         _subphases.reserve(p.phases->size());
         for (const ghoul::Dictionary& phase : *p.phases) {
             _subphases.emplace_back(phase);
@@ -87,9 +118,16 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
 
         // user may specify an overall time range. In that case expand this timerange
         if (p.timeRange.has_value()) {
-            TimeRange overallTimeRange(*p.timeRange);
+            const std::string start = p.timeRange->start;
+            const std::string end = p.timeRange->end.value_or(start);
+
+            const TimeRange overallTimeRange = TimeRange(
+                SpiceManager::ref().ephemerisTimeFromDate(start),
+                SpiceManager::ref().ephemerisTimeFromDate(end)
+            );
+
             if (!overallTimeRange.includes(timeRangeSubPhases)) {
-                throw ghoul::RuntimeError(fmt::format(
+                throw ghoul::RuntimeError(std::format(
                     "User specified time range must at least include its subphases'",
                     "Mission ({})", _name
                 ));
@@ -105,19 +143,57 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
     }
     else {
         if (p.timeRange.has_value()) {
-            _timeRange = TimeRange(*p.timeRange); // throws exception if unable to parse
+            const std::string start = p.timeRange->start;
+            const std::string end = p.timeRange->end.value_or(start);
+
+            _timeRange = TimeRange(
+                SpiceManager::ref().ephemerisTimeFromDate(start),
+                SpiceManager::ref().ephemerisTimeFromDate(end)
+            );
         }
         else {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "If there are no subphases specified, the time range has to be specified",
                 "Mission ({})", _name
             ));
+        }
+    }
+
+    if (p.actions.has_value()) {
+        _actions = p.actions.value_or(_actions);
+    }
+
+    if (p.milestones.has_value()) {
+        _milestones.reserve(p.milestones->size());
+        for (const Parameters::Milestone& milestone : *p.milestones) {
+            std::string name = milestone.name;
+            Milestone newDate = {
+                .name = std::move(name),
+                .date = Time(milestone.date)
+            };
+            if (milestone.description.has_value()) {
+                newDate.description = milestone.description.value();
+            }
+            if (milestone.image.has_value()) {
+                newDate.image = milestone.image.value();
+            }
+            if (milestone.link.has_value()) {
+                newDate.link = milestone.link.value();
+            }
+            if (milestone.actions.has_value()) {
+                newDate.actions = milestone.actions.value();
+            }
+            _milestones.emplace_back(newDate);
         }
     }
 }
 
 const std::string& MissionPhase::name() const {
     return _name;
+}
+
+const std::string& MissionPhase::identifier() const {
+    return _identifier;
 }
 
 const TimeRange& MissionPhase::timeRange() const {
@@ -128,8 +204,24 @@ const std::string& MissionPhase::description() const {
     return _description;
 }
 
+const std::string& MissionPhase::image() const {
+    return _image;
+}
+
+const std::string& MissionPhase::link() const {
+    return _link;
+}
+
+const std::vector<Milestone>& MissionPhase::milestones() const {
+    return _milestones;
+}
+
 const std::vector<MissionPhase>& MissionPhase::phases() const {
     return _subphases;
+}
+
+const std::vector<std::string>& MissionPhase::actions() const {
+    return _actions;
 }
 
 MissionPhase::Trace MissionPhase::phaseTrace(double time, int maxDepth) const {
@@ -150,7 +242,7 @@ void MissionPhase::phaseTrace(double time, Trace& trace, int maxDepth) const {
 
     for (const MissionPhase& phase : _subphases) {
         if (phase.timeRange().includes(time)) {
-            trace.push_back(phase);
+            trace.emplace_back(phase);
             phase.phaseTrace(time, trace, maxDepth - 1);
             return;
         }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,8 +24,11 @@
 
 #include <openspace/util/factorymanager.h>
 
+#include <openspace/documentation/documentationengine.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/lightsource.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
@@ -46,29 +49,22 @@ FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
     ghoul_assert(!type.empty(), "Type must not be empty");
 }
 
-FactoryManager::FactoryManager()
-    : DocumentationGenerator(
-        "Factory Documentation",
-        "factory",
-        {
-            { "factoryTemplate", "${WEB}/documentation/factory.hbs" }
-        }
-    )
-{}
+FactoryManager::FactoryManager() {}
 
 void FactoryManager::initialize() {
     ghoul_assert(!_manager, "Factory Manager must not have been initialized");
 
     _manager = new FactoryManager;
+    _manager->addFactory<DashboardItem>("DashboardItem");
+    _manager->addFactory<LightSource>("LightSource");
     _manager->addFactory<Renderable>("Renderable");
-    _manager->addFactory<Translation>("Translation");
+    _manager->addFactory<ResourceSynchronization>("ResourceSynchronization");
     _manager->addFactory<Rotation>("Rotation");
     _manager->addFactory<Scale>("Scale");
-    _manager->addFactory<TimeFrame>("TimeFrame");
-    _manager->addFactory<LightSource>("LightSource");
+    _manager->addFactory<ScreenSpaceRenderable>("ScreenSpaceRenderable");
     _manager->addFactory<Task>("Task");
-    _manager->addFactory<ResourceSynchronization>("ResourceSynchronization");
-    _manager->addFactory<DashboardItem>("DashboardItem");
+    _manager->addFactory<TimeFrame>("TimeFrame");
+    _manager->addFactory<Translation>("Translation");
 }
 
 void FactoryManager::deinitialize() {
@@ -88,34 +84,8 @@ FactoryManager& FactoryManager::ref() {
     return *_manager;
 }
 
-std::string FactoryManager::generateJson() const {
-    std::stringstream json;
-
-    json << "[";
-    for (const FactoryInfo& factoryInfo : _factories) {
-        json << "{";
-        json << "\"name\": \"" << factoryInfo.name << "\",";
-        json << "\"classes\": [";
-
-        ghoul::TemplateFactoryBase* f = factoryInfo.factory.get();
-        const std::vector<std::string>& registeredClasses = f->registeredClasses();
-        for (const std::string& c : registeredClasses) {
-            json << "\"" << c << "\"";
-            if (&c != &registeredClasses.back()) {
-                json << ",";
-            }
-        }
-
-        json << "]}";
-        if (&factoryInfo != &_factories.back()) {
-            json << ",";
-        }
-    }
-
-    json << "]";
-
-    // I did not check the output of this for correctness ---abock
-    return json.str();
+const std::vector<FactoryManager::FactoryInfo>& FactoryManager::factories() const {
+    return _factories;
 }
 
 }  // namespace openspace
