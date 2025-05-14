@@ -190,7 +190,7 @@ namespace openspace {
             LWARNING("UniformCache is missing 'colorBVMap'");
         }
 
-#ifdef M_Kerr
+#if M_Kerr
         ghoul::opengl::TextureUnit accretionDiskUnit;
         if (!bindTexture(_uniformCache.accretionDisk, accretionDiskUnit, _accretionDiskTexture)) {
             LWARNING("UniformCache is missing 'accretionDisk'");
