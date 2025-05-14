@@ -7,6 +7,7 @@
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/bufferbinding.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/list/doublelistproperty.h>
 #include <modules/blackhole/rendering/kdtree.h>
 
 namespace openspace {
@@ -53,7 +54,23 @@ namespace openspace {
         static constexpr size_t _mapCount = 3;
 
         properties::FloatProperty _solarMass;
+        properties::FloatProperty _kerrRotation;
         properties::StringProperty _colorBVMapTexturePath;
+        properties::DoubleListProperty _starMapRanges;
+
+        struct LayerLayout {
+            std::vector<std::pair<float, float>> ranges;
+            std::vector<float> positions;
+            bool isDirty = false;
+            void calcPositions(float scale) {
+                positions.resize(ranges.size());
+                for (int i = 0; i < positions.size(); i++) {
+                    positions[i] = (ranges[i].first + ranges[i].second) / 2.0f * scale;
+                }
+            }
+        };
+
+        LayerLayout _layerLayout{};
 
 
         float _rs = 1.0f;

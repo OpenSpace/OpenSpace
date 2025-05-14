@@ -22,9 +22,7 @@ layout (std430) buffer ssbo_warp_table {
 const float PI = 3.1415926535897932384626433832795f;
 const float VIEWGRIDZ = -1.0f;
 
-const int layerCount = starMapKDTreesIndices.length();
-const int tableSize = schwarzschildWarpTable.length() / 2;
-const int num_rays = schwarzschildWarpTable.length() / (layerCount + 1);
+int layerCount, tableSize, num_rays;
 
 /**********************************************************
                         Math
@@ -136,6 +134,10 @@ vec2 applyBlackHoleWarp(vec2 cameraOutSphereCoords, int layer){
 
 Fragment getFragment() {
     Fragment frag;
+    layerCount = starMapKDTreesIndices.length();
+    tableSize = schwarzschildWarpTable.length() / 2;
+    num_rays = schwarzschildWarpTable.length() / (layerCount + 1);
+
 
     vec4 viewCoords = normalize(vec4(texture(viewGrid, TexCoord).xy, VIEWGRIDZ, 0.0f));
 

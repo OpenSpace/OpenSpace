@@ -23,6 +23,7 @@ namespace openspace {
     void StarMaps::build(std::string const& filePath, glm::dvec3 const& localWorldCenter,
         std::vector<std::pair<float, float>> const& renderSpans)
     {
+        isDirty = true;
         const std::filesystem::path file{ absPath(filePath) };
         dataloader::Dataset dataset = dataloader::data::loadFileWithCache(file);
 

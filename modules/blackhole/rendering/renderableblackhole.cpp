@@ -49,6 +49,20 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    constexpr openspace::properties::Property::PropertyInfo KerrRotationInfo = {
+        "KerrRotation",
+        "Kerr Rotation (a)",
+        "temp description",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo StarMapRangesInfo = {
+        "StarMapRanges",
+        "Star Map Ranges",
+        "temp description",
+         openspace::properties::Property::Visibility::User
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ColorTextureInfo = {
     "ColorMap",
     "Color Texture",
@@ -58,33 +72,59 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableModel)]] Parameters {
-        std::optional<float> SolarMass;
+        std::optional<float> solarMass;
+        std::optional<float> kerrRotation;
         std::string colorMap;
+        std::optional<std::vector<double>> starMapRanges;
     };
 
     auto lastTime = std::chrono::high_resolution_clock::now();
     
 #include "renderableblackhole_codegen.cpp"
+
+
 }
 
 namespace openspace {
 
     RenderableBlackHole::RenderableBlackHole(const ghoul::Dictionary& dictionary)
-        : Renderable(dictionary), _solarMass(SolarMassInfo, 4.297e6f), _colorBVMapTexturePath(ColorTextureInfo) {
-        //setRenderBin(Renderable::RenderBin::Background);
+        : Renderable(dictionary), _solarMass(SolarMassInfo, 4.297e6f), _kerrRotation(KerrRotationInfo, 0.5f, 0.0f, 0.999999f),
+        _colorBVMapTexturePath(ColorTextureInfo), _starMapRanges(StarMapRangesInfo, { 0.00035, 12.5002625, 12.5002625, 25.000175000000002, 25.000175000000002, 37.5000875, 37.5000875, 50.0 }) {
 
         const Parameters p = codegen::bake<Parameters>(dictionary);
 
-        _solarMass = p.SolarMass.value_or(_solarMass);
+        auto updateStarMapRanges = [this]() {
+            std::vector<double> mapRangeValus = _starMapRanges.value();
+            std::sort(mapRangeValus.begin(), mapRangeValus.end());
+            _starMapRanges.setValue(mapRangeValus);
+            _layerLayout.ranges.resize(_starMapRanges.value().size() / 2);
+            for (int i = 0; i < _layerLayout.ranges.size(); i++) {
+                _layerLayout.ranges[i] = { mapRangeValus[i * 2], mapRangeValus[i * 2 + 1] };
+            }
+            _layerLayout.isDirty = true;
+            };
+
+        addProperty(_starMapRanges);
+        _starMapRanges.onChange(updateStarMapRanges);
+        _starMapRanges.setValue(p.starMapRanges.value_or(_starMapRanges.value()));
+        updateStarMapRanges();
 
         constexpr float G = 6.67430e-11;
         constexpr float c = 2.99792458e8;
         constexpr float M = 1.9885e30;
 
-        _rs = 2.0f * G * 8.543e36 / (c * c);
+        auto calcRs = [this]() {
+                _rs = 2.0f * G * _solarMass * M / (c * c);
+                setInteractionSphere(_rs * 1.2);
+                setBoundingSphere(_rs * 20);
+        };
+        addProperty(_solarMass);
+        _solarMass.onChange(calcRs);
+        _solarMass.setValue(p.solarMass.value_or(_solarMass));
+        calcRs();
 
-        setInteractionSphere(_rs);
-        setBoundingSphere(_rs*20);
+        addProperty(_kerrRotation);
+        _kerrRotation.setValue(p.kerrRotation.value_or(_kerrRotation));
 
         _colorBVMapTexturePath = absPath(p.colorMap).string();
     }
@@ -119,9 +159,11 @@ namespace openspace {
     }
     bool highres = false;
     void RenderableBlackHole::update(const UpdateData& data) {
-        if (data.modelTransform.translation != _chachedTranslation) {
+        if (data.modelTransform.translation != _chachedTranslation || _layerLayout.isDirty) {
             _chachedTranslation = data.modelTransform.translation;
-            _starKDTree.build("${BASE}/sync/http/stars_du/6/stars.speck", _chachedTranslation, { {0, 25 }, {25, 50}, { 50, -1 } });
+            _layerLayout.calcPositions(distanceconstants::Parsec / _rs);
+            _starKDTree.build("${BASE}/sync/http/stars_du/6/stars.speck", _chachedTranslation, _layerLayout.ranges);
+            _layerLayout.isDirty = false;
         }
 
         _viewport.updateViewGrid(global::renderEngine->renderingResolution());
@@ -139,30 +181,27 @@ namespace openspace {
         // 3) Remove scaling (component-wise)
         glm::dvec3 cameraPosition = v_rot / data.modelTransform.scale;
 
-        if (glm::distance(cameraPosition, _chacedCameraPos) > 0.01f * _rs) {
-            //kerr(2e11, 0, 0, _rs, 0.99f, _rayCount, _stepsCount, _blackHoleWarpTable);
-            float env_scale = glm::distance(cameraPosition, { 0,0,0 }) / (0.99f * _rs);
-            kerr(cameraPosition.x, cameraPosition.y, cameraPosition.z, _rs, 0.99f, { 3.5f * env_scale, 3.8f * env_scale, 4.0f * env_scale }, _rayCount, _stepsCount, _blackHoleWarpTable);
+        if (glm::distance(cameraPosition, _chacedCameraPos) > 0.01f * _rs || _starKDTree.isDirty) {
+            kerr(cameraPosition.x, cameraPosition.y, cameraPosition.z, _rs, _kerrRotation, _layerLayout.positions, _rayCount, _stepsCount, _blackHoleWarpTable);
             _chacedCameraPos = cameraPosition;
             highres = false;
             lastTime = std::chrono::high_resolution_clock::now();
         }
         else if (!highres){
-            float env_scale = glm::distance(cameraPosition, { 0,0,0 }) / (0.99f * _rs);
             auto currentTime = std::chrono::high_resolution_clock::now();
             std::chrono::duration<float> deltaTime = currentTime - lastTime;
             float deltaTimeSeconds = deltaTime.count();
             if (deltaTimeSeconds > 1.0f) {
-                kerr(cameraPosition.x, cameraPosition.y, cameraPosition.z, _rs, 0.99f, { 3.5f * env_scale, 3.8f * env_scale, 4.0f * env_scale }, _rayCountHighRes, _stepsCount, _blackHoleWarpTable);
+                kerr(cameraPosition.x, cameraPosition.y, cameraPosition.z, _rs, _kerrRotation, _layerLayout.positions, _rayCountHighRes, _stepsCount, _blackHoleWarpTable);
                 highres = true;
             }
         }
 #else
         glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
         float distanceToAnchor = static_cast<float>(glm::distance(cameraPosition, _chachedTranslation));
-        if (abs(_rCamera * _rs - distanceToAnchor) > _rs * 0.1) {
+        if (abs(_rCamera * _rs - distanceToAnchor) > _rs * 0.1 || _starKDTree.isDirty) {
             _rCamera = distanceToAnchor / _rs;
-            schwarzschild({ 12.5f / _rs * static_cast<float>(distanceconstants::Parsec), 37.5f / _rs * static_cast<float>(distanceconstants::Parsec), 40.f / _rs * static_cast<float>(distanceconstants::Parsec)}, _rayCount, _stepsCount, _rCamera, _stepLength, _blackHoleWarpTable);
+            schwarzschild(_layerLayout.positions, _rayCount, _stepsCount, _rCamera, _stepLength, _blackHoleWarpTable);
         }
 #endif
         bindSSBOData(_program, "ssbo_warp_table", _ssboBlackHoleDataBinding, _ssboBlackHoleWarpTable);
@@ -190,7 +229,7 @@ namespace openspace {
             LWARNING("UniformCache is missing 'colorBVMap'");
         }
 
-#ifdef M_Kerr
+#if M_Kerr
         ghoul::opengl::TextureUnit accretionDiskUnit;
         if (!bindTexture(_uniformCache.accretionDisk, accretionDiskUnit, _accretionDiskTexture)) {
             LWARNING("UniformCache is missing 'accretionDisk'");
@@ -198,7 +237,10 @@ namespace openspace {
 #endif // M_Kerr
 
         SendSchwarzschildTableToShader();
-        SendStarKDTreeToShader();
+        if (_starKDTree.isDirty) {
+            SendStarKDTreeToShader();
+            _starKDTree.isDirty = false;
+        }
 
         interaction::OrbitalNavigator::CameraRotationDecomposition camRot = global::navigationHandler->orbitalNavigator().decomposeCameraRotationSurface(
             CameraPose{renderData.camera.positionVec3(), renderData.camera.rotationQuaternion()},

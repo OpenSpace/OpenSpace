@@ -30,6 +30,8 @@ namespace openspace {
             std::vector<std::pair<float, float>> const& renderSpans = {}
         );
 
+        bool isDirty = false;
+
     private:
         struct Node {
             glm::fvec3 position{};
