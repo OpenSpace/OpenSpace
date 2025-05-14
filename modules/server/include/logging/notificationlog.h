@@ -60,8 +60,7 @@ public:
      * Method that logs a message with a given level and category to the console.
      *
      * \param level The log level with which the message shall be logged
-     * \param category The category of this message. Can be used by each subclass
-     *        individually
+     * \param category The category of this message.
      * \param message The message body of the log message
      */
     void log(ghoul::logging::LogLevel level, std::string_view category,

@@ -78,7 +78,6 @@ void ErrorLogTopic::handleJson(const nlohmann::json& json) {
         ghoul::logging::LogManager::ref().removeLog(_log);
         _log = nullptr;
 
-
         std::string level = json.at(LogLevelKey).get<std::string>();
         auto logLevel = ghoul::from_string<ghoul::logging::LogLevel>(level);
         createLog(logLevel);
