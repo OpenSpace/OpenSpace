@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,7 +34,7 @@ namespace openspace {
 
 class KameleonVolumeToFieldlinesTask : public Task {
 public:
-    KameleonVolumeToFieldlinesTask(const ghoul::Dictionary& dictionary);
+    explicit KameleonVolumeToFieldlinesTask(const ghoul::Dictionary& dictionary);
 
     enum class OutputType {
         Json,
@@ -52,13 +52,12 @@ private:
     std::filesystem::path _inputPath;
     size_t _nthTimeStep = 1;
     std::vector<std::string> _sourceFiles;
-    //std::string _timeKernelPath = "";
     std::filesystem::path _seedpointsPath;
     size_t _nthSeedPoint = 1;
     OutputType _outputType;
     std::filesystem::path _outputFolder;
     // Manual time offset
-    float _manualTimeOffset = 0.0;
+    float _manualTimeOffset = 0.f;
 };
 
 } // namespace openspace

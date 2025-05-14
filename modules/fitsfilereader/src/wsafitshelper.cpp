@@ -1,3 +1,27 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2025                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
 #include <modules/fitsfilereader/include/wsafitshelper.h>
 #include <ghoul/opengl/textureconversion.h>
 #include <ghoul/logging/logmanager.h>
@@ -5,8 +29,8 @@
 
 constexpr std::string_view _loggerCat = "RenderableTimeVaryingSphere";
 
-
 using namespace CCfits;
+
 namespace openspace {
 
 
@@ -17,9 +41,9 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
     try {
         std::unique_ptr<FITS> file = std::make_unique<FITS>(path.string(), Read, true);
         if (!file.get()) {
-            LERROR(
-                std::format("Failed to open, therefor removing file {}", path.string())
-            );
+            LERROR(std::format(
+                "Failed to open, therefor removing file {}", path.string()
+            ));
             std::filesystem::remove(path);
             return nullptr;
         }
@@ -30,19 +54,18 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
 
         int nLayers = fitsValues->contents.size() / layerSize;
         if (layerIndex > nLayers -1) {
-            LERROR(std::format(
+            LERROR(
                 "Chosen layer in fits file is not supported. Index to high. ",
                 "First layer chosen instead"
-            ));
+            );
             layerIndex = 0;
         }
-        // The numbers 64800, 16200 means: grab the fifth layer in the fits file,
-        // where the magnetogram map is, in the wsa file
+
         std::valarray<float> layerValues =
             fitsValues->contents[std::slice(layerIndex*layerSize, layerSize, 1)];
 
-        const float maxValue = minMax; // layerValues.max();
-        const float minValue = -minMax; // layerValues.min();
+        const float maxValue = minMax;
+        const float minValue = -minMax;
         float* imageData = new float[layerValues.size()];
         std::vector<glm::vec3> rgbLayers;
         for (size_t i = 0; i < layerValues.size(); i++) {
@@ -69,36 +92,34 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         texture->uploadTexture();
         return texture;
     }
-    catch (CCfits::FitsException& e) {
-        LERROR(
-            std::format("Failed to open fits file '{}'. '{}'", path.string(), e.message())
-        );
+    catch (const CCfits::FitsException& e) {
+        LERROR(std::format(
+            "Failed to open fits file '{}'. '{}'", path.string(), e.message()
+        ));
         std::filesystem::remove(path);
         return nullptr;
     }
-    catch (std::exception& e) {
-        LERROR(
-            std::format("Failed to open fits file '{}'. '{}'", path.string(), e.what())
-        );
+    catch (const std::exception& e) {
+        LERROR(std::format(
+            "Failed to open fits file '{}'. '{}'", path, e.what()
+        ));
         std::filesystem::remove(path);
         return nullptr;
     }
     catch (...) {
-        LERROR(
-            std::format("Unknown exception caught for file '{}'", path.string())
-        );
+        LERROR(std::format(
+            "Unknown exception caught for file '{}'", path
+        ));
         std::filesystem::remove(path);
         return nullptr;
     }
 }
 
-int nLayers(const std::filesystem::path path) {
+int nLayers(const std::filesystem::path& path) {
     try {
         std::unique_ptr<FITS> file = std::make_unique<FITS>(path.string(), Read, true);
         if (!file.get()) {
-            LERROR(
-                std::format("Failed to open fits file '{}'", path.string())
-            );
+            LERROR(std::format("Failed to open fits file '{}'", path));
             return -1;
         }
         // Convirt fits path with fits-file-reader functions
@@ -109,19 +130,19 @@ int nLayers(const std::filesystem::path path) {
         return fitsValues->contents.size() / layerSize;
     }
     catch (CCfits::FitsException& e) {
-        LERROR(
-            std::format("Failed to open fits file '{}'. '{}'", path.string(), e.message())
-        );
+        LERROR(std::format(
+            "Failed to open fits file '{}'. '{}'", path, e.message()
+        ));
     }
     catch (std::exception& e) {
-        LERROR(
-            std::format("Failed to open fits file '{}'. '{}'", path.string(), e.what())
-        );
+        LERROR(std::format(
+            "Failed to open fits file '{}'. '{}'", path, e.what()
+        ));
     }
     catch (...) {
-        LERROR(
-            std::format("Unknown exception caught for file '{}'", path.string())
-        );
+        LERROR(std::format(
+            "Unknown exception caught for file '{}'", path
+        ));
     }
 }
 

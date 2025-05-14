@@ -29,6 +29,7 @@
 #include <openspace/util/spicemanager.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <memory>
 #include <fstream>
 
@@ -141,14 +142,12 @@ extractSeedPointsFromFiles(std::filesystem::path filePath, size_t nth)
 
     namespace fs = std::filesystem;
     for (const fs::directory_entry& spFile : fs::directory_iterator(filePath)) {
-        std::string seedFilePath = spFile.path().string();
-        if (!spFile.is_regular_file() ||
-            seedFilePath.substr(seedFilePath.find_last_of('.') + 1) != "txt")
-        {
+        std::filesystem::path seedFilePath = spFile.path();
+        if (!spFile.is_regular_file() || seedFilePath.extension() != "txt") {
             continue;
         }
 
-        std::ifstream seedFile(seedFilePath);
+        std::ifstream seedFile = std::ifstream(seedFilePath);
         if (!seedFile.good()) {
             LERROR(std::format("Could not open seed points file '{}'", seedFilePath));
             outMap.clear();
@@ -159,10 +158,10 @@ extractSeedPointsFromFiles(std::filesystem::path filePath, size_t nth)
         std::string line;
         std::vector<glm::vec3> outVec;
         int linenumber = 0;
-        while (std::getline(seedFile, line)) {
+        while (ghoul::getline(seedFile, line)) {
             if (linenumber % nth == 0) {
                 if (!line.empty() && line[0] == '#') {
-                    //ignore line, assume it's a comment
+                    // ignore line, assume it's a comment
                     continue;
                 }
                 std::stringstream ss(line);
@@ -183,12 +182,10 @@ extractSeedPointsFromFiles(std::filesystem::path filePath, size_t nth)
 
         if (outVec.empty()) {
             LERROR(std::format("Found no seed points in: {}", seedFilePath));
-            outMap.clear();
             return {};
         }
 
-        size_t lastIndex = seedFilePath.find_last_of('.');
-        std::string name = seedFilePath.substr(0, lastIndex);   // remove file extention
+        std::string name = seedFilePath.stem().string();   // remove file extention
         size_t dateAndTimeSeperator = name.find_last_of('_');
         std::string time = name.substr(dateAndTimeSeperator + 1, name.length());
         std::string date = name.substr(dateAndTimeSeperator - 8, 8);    // 8 for yyyymmdd
@@ -209,15 +206,8 @@ extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars)
         std::istringstream ss(str);
         std::string magVar;
         size_t counter = 0;
-        while (std::getline(ss, magVar, ',')) {
-            magVar.erase(
-                std::remove_if(
-                    magVar.begin(),
-                    magVar.end(),
-                    ::isspace
-                ),
-                magVar.end()
-            );
+        while (ghoul::getline(ss, magVar, ',')) {
+            std::erase_if(magVar, ::isspace);
             extraMagVars.push_back(magVar);
             counter++;
             if (counter == 3) {
@@ -247,7 +237,7 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
 
     switch (state.model()) {
         case fls::Model::Batsrus:
-            innerBoundaryLimit = 0.0f;  // TODO specify in Lua?
+            innerBoundaryLimit = 0.f;  // TODO specify in Lua?
             break;
         case fls::Model::Enlil:
             innerBoundaryLimit = 0.11f; // TODO specify in Lua?
@@ -286,7 +276,8 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
         const std::vector<ccmc::Point3f>& positions = ccmcFieldline.getPositions();
 
         if ((positions[0].component3 < 0.5 && positions[0].component3 > -0.5) &&
-            (positions[positions.size() - 1].component3 < 0.5 && positions[positions.size() - 1].component3 > -0.5))
+            (positions[positions.size() - 1].component3 < 0.5 &&
+            positions[positions.size() - 1].component3 > -0.5))
         {
             const size_t nLinePoints = positions.size();
 

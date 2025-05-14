@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,10 +24,11 @@
 
 #include <openspace/util/dynamicfilesequencedownloader.h>
 #include <openspace/util/httprequest.h>
-#include <openspace/util/timemanager.h>
-#include <openspace/json.h>
-#include <ghoul/filesystem/filesystem.h>
 
+#include <openspace/json.h>
+#include <openspace/util/timemanager.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/stringhelper.h>
 #include <unordered_set>
 
 namespace {
@@ -36,14 +37,14 @@ namespace {
 
 namespace openspace {
 
-void trackFinnishedDownloads(const std::filesystem::path& syncFilePath,
-                                                 const std::filesystem::path& newFilePath)
+void trackFinishedDownloads(const std::filesystem::path& syncFilePath,
+                            const std::filesystem::path& newFilePath)
 {
     std::unordered_set<std::string> existingEntries;
-    std::ifstream inFile(syncFilePath);
+    std::ifstream inFile = std::ifstream(syncFilePath);
     std::string line;
 
-    //load existing entries
+    // load existing entries
     while (std::getline(inFile, line)) {
         if (!line.empty()) {
             existingEntries.insert(std::filesystem::path(line).filename().string());
@@ -55,16 +56,15 @@ void trackFinnishedDownloads(const std::filesystem::path& syncFilePath,
     const std::string filePath = newFilePath.string();
 
     if (existingEntries.find(fileName) == existingEntries.end()) {
-        std::ofstream outFile(syncFilePath, std::ios::app);
+        std::ofstream outFile = std::ofstream(syncFilePath, std::ios::app);
         if (outFile.is_open()) {
             outFile << filePath << std::endl;
         }
-        outFile.close();
     }
 }
 
-std::string formulateDataHttpRequest(double minTime, double maxTime, int dataID,
-                                                                const std::string baseURL)
+std::string buildDataHttpRequest(double minTime, double maxTime, int dataID,
+                                                               const std::string& baseUrl)
 {
     // formulate a min and a max time from time
     // The thing is time might be "now" and no items
@@ -75,44 +75,39 @@ std::string formulateDataHttpRequest(double minTime, double maxTime, int dataID,
     // 30 days in seconds   : 2592000
     // 1 year in seconds    : 31556926
     // TODO: adapt min and max time dependent on the cadence
-    //std::string min = std::string(Time(time - 2592000.0).ISO8601());
-    //std::string max = std::string(Time(time + 2592000.0).ISO8601());
+    std::string_view min = Time(minTime).ISO8601();
+    std::string_view max = Time(maxTime).ISO8601();
 
-    std::string min = std::string(Time(minTime).ISO8601());
-    std::string max = std::string(Time(maxTime).ISO8601());
-
-    std::string minText = "&time.min=" + min;
-    std::string maxText = "&time.max=" + max;
-
-    return baseURL + std::to_string(dataID) + minText + maxText;
+    return std::format(
+        "{}{}&time.min={}&time.max={}", baseUrl, dataID, min, max
+    );
 }
 
 DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
-    const std::string infoURL,
-    const std::string dataURL,
-    size_t nOfFilesToQ)
+                                                                      std::string infoURL,
+                                                                      std::string dataURL,
+                                                                   size_t nOfFilesToQueue)
     : _dataID(dataID)
-    , _infoURL(infoURL)
-    , _dataURL(dataURL)
-    , _nFilesToQueue(nOfFilesToQ)
+    , _infoURL(std::move(infoURL))
+    , _dataURL(std::move(dataURL))
+    , _nFilesToQueue(nOfFilesToQueue)
 {
-    _syncDir = absPath(
-        "${SYNC}/dynamically_downloaded/" + std::to_string(dataID)
-    );
+    _syncDir = absPath("${SYNC}/dynamically_downloaded/" + std::to_string(dataID));
 
     std::filesystem::path syncFile = _syncDir / std::format("{}.synced", dataID);
     _trackSynced = syncFile;
-    //Just to create the folder
+    // Just to create the folder
     std::filesystem::path folder = _trackSynced.parent_path();
     std::filesystem::create_directories(folder);
-    //Just to create the file
-    std::ofstream file(_trackSynced, std::ios::app);
-
+    // Just to create the file
+    {
+        std::ofstream file(_trackSynced, std::ios::app);
+    }
     //Delete the files in the folder whos file name is not in the _trackSynced file
     std::unordered_set<std::string> keepFiles;
-    std::ifstream listFile(_trackSynced);
+    std::ifstream listFile = std::ifstream(_trackSynced);
     std::string filename;
-    while (std::getline(listFile, filename)) {
+    while (ghoul::getline(listFile, filename)) {
         if (!filename.empty()) {
             keepFiles.insert(std::filesystem::path(filename).filename().string());
         }
@@ -123,7 +118,7 @@ DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
         }
         std::string name = entry.path().filename().string();
         if (name != _trackSynced.filename().string() &&
-                keepFiles.find(name) == keepFiles.end())
+            keepFiles.find(name) == keepFiles.end())
         {
             std::filesystem::remove(entry.path());
         }
@@ -131,16 +126,18 @@ DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
 
     std::string httpInfoRequest = _infoURL + std::to_string(_dataID);
     requestDataInfo(httpInfoRequest);
-    std::string httpDataRequest = formulateDataHttpRequest(
-        _dataMinTime, _dataMaxTime, _dataID, _dataURL
+    std::string httpDataRequest = buildDataHttpRequest(
+        _dataMinTime,
+        _dataMaxTime,
+        _dataID,
+        _dataURL
     );
     requestAvailableFiles(httpDataRequest, _syncDir);
 }
 
 void DynamicFileSequenceDownloader::deinitialize(bool cacheFiles) {
-    std::vector<openspace::File*>& currentlyDownloadingFiles =
-        filesCurrentlyDownloading();
-    for (auto file : currentlyDownloadingFiles) {
+    std::vector<File*>& currentlyDownloadingFiles = filesCurrentlyDownloading();
+    for (File* file : currentlyDownloadingFiles) {
         file->download->cancel();
         file->download->wait();
         std::error_code ec;
@@ -170,17 +167,16 @@ void DynamicFileSequenceDownloader::deinitialize(bool cacheFiles) {
 }
 
 void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest) {
-    HttpMemoryDownload response(httpInfoRequest);
+    HttpMemoryDownload response = HttpMemoryDownload(httpInfoRequest);
     response.start();
     response.wait();
 
     bool success = false;
     int attempt = 0;
-    const int maxRetries = 1;
-    nlohmann::json jsonResult;
+    constexpr int maxRetries = 1;
 
     /********************
-    *   Example respons
+    *   Example response
     *********************
     *{
     *    "availability": {
@@ -194,12 +190,11 @@ void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest)
     ********************/
     while (attempt <= maxRetries && !success) {
         try {
-            auto responseText = response.downloadedData();
+            std::vector<char> responseText = response.downloadedData();
             if (responseText.empty()) {
                 throw std::runtime_error("Empty HTTP response");
             }
-
-            jsonResult = nlohmann::json::parse(responseText);
+            nlohmann::json jsonResult = nlohmann::json::parse(responseText);
             success = true;
             _dataMinTime = Time::convertTime(
                 jsonResult["availability"]["startDate"].get<std::string>()
@@ -207,20 +202,17 @@ void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest)
             _dataMaxTime = Time::convertTime(
                 jsonResult["availability"]["stopDate"].get<std::string>()
             );
-            //_dataIdDescription = jsonResult["description"];
         }
-        catch (nlohmann::json::parse_error& e) {
+        catch (const nlohmann::json::parse_error& e) {
             LWARNING(std::format("JSON parse error: {}", e.what()));
         }
-        catch (std::exception& e) {
+        catch (const std::exception& e) {
             LWARNING(std::format("HTTP or other error: {}", e.what()));
         }
-
         if (!success) {
             if (attempt < maxRetries) {
-                LINFO(std::format("Retry nr {}.", attempt+1));
+                LINFO(std::format("Retry number {}.", attempt + 1));
                 std::this_thread::sleep_for(std::chrono::seconds(2));
-
                 response.start();
                 response.wait();
             }
@@ -236,14 +228,14 @@ void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest)
 }
 
 void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRequest,
-                                                            std::filesystem::path syncDir)
+                                                          std::filesystem::path syncDir)
 {
     // Declaring big window. pair.first is timestep, pair.second is url to be downloaded
 
     // Get big window/ list of available files for the specified data set.
     // If it expands to more of a API call rather than a http-request, that code goes here
     // TODO: make_unique?
-    HttpMemoryDownload response(httpDataRequest);
+    HttpMemoryDownload response = HttpMemoryDownload(httpDataRequest);
     response.start();
     response.wait();
 
@@ -253,7 +245,7 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
     nlohmann::json jsonResult;
 
     /********************
-    *   Example respons
+    *   Example response
     *********************
     * {
     *  "dataID": 1234,
@@ -276,13 +268,13 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
     * *****************/
     while (attempt <= maxRetries && !success) {
         try {
-            const std::vector<char>& data = response.downloadedData();
+            std::vector<char> data = response.downloadedData();
             if (data.empty()) {
-                throw std::runtime_error("Empty HTTP response");
+                throw ghoul::RuntimeError("Empty HTTP response");
             }
             //TODO what value is actually to large to handle?
             if (data.size() > std::numeric_limits<std::size_t>::max()) {
-                throw std::runtime_error(
+                throw ghoul::RuntimeError(
                     "Http responds with list of available files to large"
                 );
             }
@@ -326,7 +318,7 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
     }
 
     int index = 0;
-    for (auto& element : jsonResult["files"]) {
+    for (const nlohmann::json& element : jsonResult["files"]) {
         std::string timestamp = element["timestamp"].get<std::string>();
         std::string url = element["url"].get<std::string>();
 
@@ -341,37 +333,35 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
         destination += fileName;
 
         double time = Time::convertTime(timestamp);
-
-        File fileElement;
-        fileElement.timestep = timestamp;
-        fileElement.time = time;
-        fileElement.URL = url;
-        fileElement.path = destination;
-        fileElement.cadence = 0;
-        fileElement.availableIndex = index;
+        File fileElement = {
+            .timestep = timestamp,
+            .time = time,
+            .URL = url,
+            .path = destination,
+            .cadence = 0,
+            .availableIndex = index
+        };
         if (std::filesystem::exists(destination)) {
             fileElement.download = nullptr;
-            _downloadedFiles.push_back(destination);
             fileElement.state = File::State::Downloaded;
-            trackFinnishedDownloads(_trackSynced, destination);
+            _downloadedFiles.push_back(destination);
+            trackFinishedDownloads(_trackSynced, destination);
         }
         else {
             fileElement.download = std::make_unique<HttpFileDownload>(url, destination);
             fileElement.state = File::State::Available;
         }
-
         _availableData.push_back(std::move(fileElement));
         ++index;
     }
-    //maybe sort vector if some data set is order in a different parameter.
 
-    _tempCadence = calculateCadence();
+    const double cadence = calculateCadence();
     for (File& element : _availableData) {
-        element.cadence = _tempCadence;
+        element.cadence = cadence;
     }
 }
 
-double DynamicFileSequenceDownloader::calculateCadence() {
+double DynamicFileSequenceDownloader::calculateCadence() const {
     double averageTime = 0.0;
     if (_availableData.size() < 2) {
         // If 0 or 1 files there is no cadence
@@ -395,7 +385,7 @@ void DynamicFileSequenceDownloader::downloadFile() {
                 "but its status is not OnQueue"
             );
         }
-        if (dl->download != nullptr) {
+        if (dl->download) {
             dl->download->start();
             _filesCurrentlyDownloading.push_back(dl);
             dl->state = File::State::Downloading;
@@ -411,14 +401,13 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
 
     // Since size of filesCurrentlyDownloading can change per iteration, keep size-call
     for (size_t i = 0; i != _filesCurrentlyDownloading.size(); ++i) {
-
         File* file = *currentIt;
         HttpFileDownload* dl = file->download.get();
 
         if (dl->hasSucceeded()) {
-            std::ifstream tempFile(file->URL);
+            std::ifstream tempFile = std::ifstream(file->URL);
             std::streampos size = tempFile.tellg();
-            if (size == 0){
+            if (size == 0) {
                 LERROR(std::format("File '{}' was 0kb, removing", dl->destination()));
                 currentIt = _filesCurrentlyDownloading.erase(currentIt);
                 --i;
@@ -426,7 +415,7 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
             else {
                 _downloadedFiles.push_back(dl->destination());
                 file->state = File::State::Downloaded;
-                trackFinnishedDownloads(_trackSynced, file->path);
+                trackFinishedDownloads(_trackSynced, file->path);
                 currentIt = _filesCurrentlyDownloading.erase(currentIt);
                 // if one is removed, i is reduced, else we'd skip one in the list
                 --i;
@@ -451,7 +440,9 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
                     LERROR(std::format("Failed to delete file: {}", filepath));
                 }
                 else {
-                    LINFO(std::format("Deleted file after failed download: {}", filepath));
+                    LINFO(std::format(
+                        "Deleted file after failed download: {}", filepath
+                    ));
                 }
             }
 
@@ -472,12 +463,11 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
     }
 }
 
-std::vector<File>::iterator DynamicFileSequenceDownloader::closestFileToNow(
-                                                                        const double time)
-{
+std::vector<File>::iterator DynamicFileSequenceDownloader::closestFileToNow(double time) {
     ZoneScoped;
     std::vector<File>::iterator closestIt = _availableData.begin();
-    double smallest = DBL_MAX;
+
+    double smallest = std::numeric_limits<double>::max();
 
     std::vector<File>::iterator it = std::lower_bound(
         _availableData.begin(),
@@ -522,7 +512,7 @@ void DynamicFileSequenceDownloader::putOnQueue() {
     }
 
     // If forward iterate from now to end. else reverse from now to begin
-    size_t notToMany = 0;
+    size_t nFileLimit = 0;
     for (std::vector<File>::iterator it = _currentFile;
         it != end;
         _isForwardDirection ? ++it : --it)
@@ -531,23 +521,24 @@ void DynamicFileSequenceDownloader::putOnQueue() {
             _queuedFilesToDownload.push_back(&*it);
             it->state = File::State::OnQueue;
         }
-        ++notToMany;
+        ++nFileLimit;
         // exit out early if enough files are queued / already downloaded
-        if (notToMany == _nFilesToQueue) {
+        if (nFileLimit == _nFilesToQueue) {
             break;
         }
     }
 }
 
-void DynamicFileSequenceDownloader::update(const double time, const double deltaTime) {
+void DynamicFileSequenceDownloader::update(double time, double deltaTime) {
     ZoneScoped;
-    // First frame cannot guarantee time and deltatime has been set yet.
+
+    // First frame cannot guarantee time and deltatime has been set yet
     if (_isFirstFrame) {
         _isFirstFrame = false;
         return;
     }
     if (_isSecondFrame) {
-        if (_availableData.size() != 0) {
+        if (!_availableData.empty()) {
             _isSecondFrame = false;
             _currentFile = closestFileToNow(time);
         }
@@ -555,10 +546,10 @@ void DynamicFileSequenceDownloader::update(const double time, const double delta
     }
     // More than 2hrs a second would generally be unfeasable
     // for a regular internet connection to operate at
-    int speedThreshhold = 7200;
-    if (abs(deltaTime) > speedThreshhold) {
-        // to fast, do nothing. This is not optimal since it prints a lot
-        LWARNING("Dynamic file sequence downloader: Paused. Time moves to fast.");
+    constexpr int SpeedThreshold = 7200;
+    if (abs(deltaTime) > SpeedThreshold) {
+        // Too fast, do nothing. This is not optimal since it prints a lot
+        LWARNING("Dynamic file sequence downloader: Paused. Time moves too fast");
         return;
     }
 
@@ -566,7 +557,7 @@ void DynamicFileSequenceDownloader::update(const double time, const double delta
     if (_isForwardDirection && deltaTime < 0 || !_isForwardDirection && deltaTime > 0) {
         _isForwardDirection = !_isForwardDirection;
         // Remove from queue when time changed, to start downloading most relevant files
-        for (auto file : _queuedFilesToDownload) {
+        for (File* file : _queuedFilesToDownload) {
             file->state = File::State::Available;
         }
         _queuedFilesToDownload.clear();
@@ -578,11 +569,10 @@ void DynamicFileSequenceDownloader::update(const double time, const double delta
         // change this to be next
         if (_currentFile + 1 != _availableData.end() &&
             _currentFile + 2 != _availableData.end() &&
-            //_currentFile->time + _currentFile->cadence > time &&
             (_currentFile + 1)->time < time &&
             (_currentFile + 2)->time > time)
         {
-            ++_currentFile;
+            _currentFile++;
         }
         // if its beyond the +2 file, arguably that can mean delta time is to fast
         // and files might be missed. But we also know we went past beyond the next so
@@ -605,16 +595,15 @@ void DynamicFileSequenceDownloader::update(const double time, const double delta
         // then change this to be prev. Same goes here as if time is moving forward
         // we will use forward 'usage', meaning file is active from now till next
         if (_currentFile - 1 != _availableData.begin() &&
-            (_currentFile)->time < time &&
+            _currentFile->time < time &&
             (_currentFile - 1)->time > time)
-        //_currentFile->time + _currentFile->cadence < time &&
         {
-            --_currentFile;
+            _currentFile--;
         }
         // if we are beyond the prev file, again delta time might be to fast, but we
         // no longer know where we are so we reinitialize
         else if (_currentFile - 1 != _availableData.begin() &&
-                (_currentFile - 1)->time > time)
+                 (_currentFile - 1)->time > time)
         {
             _currentFile = closestFileToNow(time);
         }
@@ -629,7 +618,7 @@ void DynamicFileSequenceDownloader::update(const double time, const double delta
         _currentFile = closestFileToNow(time);
     }
 
-    if (_filesCurrentlyDownloading.size() > 0) {
+    if (!_filesCurrentlyDownloading.empty()) {
         checkForFinishedDownloads();
     }
 
@@ -637,15 +626,16 @@ void DynamicFileSequenceDownloader::update(const double time, const double delta
     downloadFile();
 }
 
-std::filesystem::path DynamicFileSequenceDownloader::destinationDirectory() {
+const std::filesystem::path DynamicFileSequenceDownloader::destinationDirectory() const {
     return _syncDir;
 }
 
 void DynamicFileSequenceDownloader::clearDownloaded() {
     _downloadedFiles.clear();
 }
-bool DynamicFileSequenceDownloader::areFilesCurrentlyDownloading() {
-    return _filesCurrentlyDownloading.size() != 0;
+
+bool DynamicFileSequenceDownloader::areFilesCurrentlyDownloading() const {
+    return !_filesCurrentlyDownloading.empty();
 }
 
 std::vector<File*>& DynamicFileSequenceDownloader::filesCurrentlyDownloading() {

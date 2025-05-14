@@ -39,8 +39,8 @@ uniform mat4 modelViewProjection;
 
 // Uniforms needed to color by quantity
 uniform int colorMethod;
-uniform sampler1D colorTable; //transferfunction
-uniform vec2 colorTableRange; //selectedRange
+uniform sampler1D transferFunction;
+uniform vec2 selectedColorRange;
 
 // Uniforms needed for Particle Flow
 uniform vec4 flowColor;
@@ -69,8 +69,8 @@ const int colorByQuantity = 1;
 vec4 getTransferFunctionColor() {
   // Remap the color scalar to a [0,1] range
   float lookUpVal =
-    (in_color_scalar - colorTableRange.x) / (colorTableRange.y - colorTableRange.x);
-  return texture(colorTable, lookUpVal);
+    (in_color_scalar - selectedColorRange.x) / (selectedColorRange.y - selectedColorRange.x);
+  return texture(transferFunction, lookUpVal);
 }
 
 bool isPartOfParticle(double time, int vertexId, int particleSize, int particleSpeed,

@@ -71,13 +71,13 @@ public:
     const std::vector<std::filesystem::path>& downloadedFiles();
     void checkForFinishedDownloads();
     void clearDownloaded();
-    std::filesystem::path destinationDirectory();
-    bool areFilesCurrentlyDownloading();
+    const std::filesystem::path destinationDirectory() const;
+    bool areFilesCurrentlyDownloading() const;
     std::vector<File*>& filesCurrentlyDownloading();
 
 private:
     void downloadFile();
-    double calculateCadence();
+    double calculateCadence() const;
     void putOnQueue();
     bool _isForwardDirection = true;
     bool _isFirstFrame = true;
@@ -91,8 +91,7 @@ private:
 
     double _dataMinTime;
     double _dataMaxTime;
-    //Currently have both a global cadence and it's assigned to every element too.
-    double _tempCadence = 0;
+
     const size_t _nFilesToQueue = 0;
 
     //to iterate window

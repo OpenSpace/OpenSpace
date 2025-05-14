@@ -149,7 +149,8 @@ namespace {
         // [[codegen::verbatim(TextureSourceInfo.description)]]
         std::optional<std::string> textureSource;
 
-        enum class [[codegen::map(openspace::RenderableTimeVaryingSphere::LoadingType)]] LoadingType {
+        enum class [[codegen::map(openspace::RenderableTimeVaryingSphere::LoadingType)]]
+        LoadingType {
             StaticLoading,
             DynamicDownloading
         };
@@ -173,10 +174,10 @@ namespace {
         std::optional<bool> cacheData;
         // Set if first/last file should render outside of the sequence interval
         std::optional<bool> showPastFirstAndLastImage;
-        enum class [[codegen::map(openspace::RenderableTimeVaryingSphere::TextureFilter)]] TextureFilter {
+        enum class [[codegen::map(openspace::RenderableTimeVaryingSphere::TextureFilter)]]
+        TextureFilter {
             NearestNeighbor,
-            Linear,
-            Unspecified
+            Linear
         };
         std::optional<TextureFilter> textureFilter;
     };
@@ -239,7 +240,7 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
             }
             break;
         }
-        });
+    });
     addProperty(_textureFilterProperty);
 
     _fitsLayer.onChange([this]() {
@@ -257,7 +258,7 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
                 loadTexture();
             }
         }
-     });
+    });
 
     _fitsLayerName.onChange([this]() {
         if (_loadingType == LoadingType::StaticLoading) {
@@ -375,9 +376,7 @@ void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
     if (!t) {
         return;
     }
-    if (_textureFilterProperty == static_cast<int>(TextureFilter::NearestNeighbor) ||
-        _textureFilterProperty == static_cast<int>(TextureFilter::Unspecified))
-    {
+    if (_textureFilterProperty == static_cast<int>(TextureFilter::NearestNeighbor)) {
         t->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
     }
     else if (_textureFilterProperty == static_cast<int>(TextureFilter::Linear)) {
@@ -409,9 +408,7 @@ void RenderableTimeVaryingSphere::readFileFromImage(std::filesystem::path path) 
         ghoul::io::TextureReader::ref().loadTexture(path.string(), 2);
     t->setInternalFormat(GL_COMPRESSED_RGBA);
     t->uploadTexture();
-    if (_textureFilterProperty == static_cast<int>(TextureFilter::Linear) ||
-        _textureFilterProperty == static_cast<int>(TextureFilter::Unspecified))
-    {
+    if (_textureFilterProperty == static_cast<int>(TextureFilter::Linear)) {
         t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
     }
     else if (_textureFilterProperty == static_cast<int>(TextureFilter::NearestNeighbor)) {

@@ -40,33 +40,42 @@ namespace {
     struct [[codegen::Dictionary(KameleonVolumeToFieldlinesTask)]] Parameters {
         // The folder to the cdf files to extract data from
         std::filesystem::path input [[codegen::directory()]];
-        // Choose to decrese cadence and only use every nth time step/ input file
+
+        // Choose to decrease cadence and only use every nth time step/ input file
         std::optional<int> nthTimeStep;
+
         // A path to folder with text files with seedpoints.
         // The format of points: x1 y1 z1 x2 y2 z2 ...
         // Seedpoints are expressed in the native coordinate system of the model.
         // Filename must mutch date and time for CDF file
         std::filesystem::path seedpoints [[codegen::directory()]];
-        // Choose to only include every n:th seedpoint from each file.
+
+        // Choose to only include every nth seedpoint from each file.
         std::optional<int> nthSeedpoint;
+
         // If data sets parameter start_time differ from start of run,
         // elapsed_time_in_seconds might be in relation to start of run.
         // ManuelTimeOffset will be added to trigger time.
         std::optional<float> manualTimeOffset;
+
         // The name of the kameleon variable to use for tracing, like b, or u
         std::string tracingVar;
+
         // The folder to write the files to
         std::filesystem::path outputFolder [[codegen::directory()]];
 
-        enum class [[codegen::map(openspace::KameleonVolumeToFieldlinesTask::OutputType)]] OutputType {
+        enum class [[codegen::map(openspace::KameleonVolumeToFieldlinesTask::OutputType)]]
+        OutputType {
             Json,
             Osfls
         };
-        // Output type. Either osfls (OpenSpace FieldLineSequence) or json
+        // Output type
         OutputType outputType;
+
         // A list of scalar variables to extract along the fieldlines
         // like temperature or density
         std::optional<std::vector<std::string>> scalarVars;
+
         // A list of vector field variables. Must be in groups of 3,
         // for example \"bx, by, bz\", \"ux, uy, uz\"
         std::optional<std::vector<std::string>> magnitudeVars;
@@ -77,7 +86,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation KameleonVolumeToFieldlinesTask::Documentation() {
-    return codegen::doc<Parameters>("kameleon_volume_to_fieldlines_task");
+    return codegen::doc<Parameters>(
+        "fieldlinesequence_kameleon_volume_to_fieldlines_task"
+    );
 }
 
 KameleonVolumeToFieldlinesTask::KameleonVolumeToFieldlinesTask(
@@ -94,42 +105,25 @@ KameleonVolumeToFieldlinesTask::KameleonVolumeToFieldlinesTask(
     if (_outputFolder.string().back() != '/') {
         _outputFolder += '/';
     }
-    _outputType = codegen::map<OutputType>(
-        p.outputType
-    );
+    _outputType = codegen::map<OutputType>(p.outputType);
     _tracingVar = p.tracingVar;
 
-    if (p.scalarVars.has_value()) {
-        for (auto var : p.scalarVars.value()) {
-            _scalarVars.push_back(var);
-        }
-    }
-    else {
+    _scalarVars = p.scalarVars.value_or(std::vector<std::string>());
+    if (_scalarVars.empty()) {
         LINFO("No scalar variable was specified to be saved");
     }
 
-    if (p.magnitudeVars.has_value()) {
-        for (auto var : p.magnitudeVars.value()) {
-            _magnitudeVars.push_back(var);
-        }
-    }
-    else {
+    _magnitudeVars = p.magnitudeVars.value_or(std::vector<std::string>());
+    if (_magnitudeVars.empty()) {
         LINFO("No vector field variable was specified to be saved");
     }
 
-    if (!std::filesystem::is_directory(_inputPath)) {
-        LERROR(std::format(
-            "{} is not a valid directory",
-            _inputPath
-        ));
-    }
     for (const auto& e : std::filesystem::directory_iterator(_inputPath)) {
         if (e.is_regular_file()) {
             std::string eStr = e.path().string();
             _sourceFiles.push_back(eStr);
         }
     }
-
 }
 
 std::string KameleonVolumeToFieldlinesTask::description() {
@@ -153,7 +147,6 @@ void KameleonVolumeToFieldlinesTask::perform(
         return;
     }
 
-    //SpiceManager::ref().loadKernel(_timeKernelPath);
     size_t fileNumber = 0;
     for (const std::string& cdfPath : _sourceFiles) {
         if (fileNumber % _nthTimeStep == 0) {
@@ -162,16 +155,16 @@ void KameleonVolumeToFieldlinesTask::perform(
                 newState,
                 cdfPath,
                 seedPoints,
-                _manualTimeOffset, 
+                _manualTimeOffset,
                 _tracingVar,
                 _scalarVars,
                 extraMagVars
             );
 
             if (isSuccessful) {
-                switch(_outputType) {
+                switch (_outputType) {
                     case OutputType::Osfls:
-                        newState.saveStateToOsfls(absPath(_outputFolder).string());
+                        newState.saveStateToOsfls(_outputFolder.string());
                         break;
                     case OutputType::Json:
                         std::string timeStr =
@@ -189,8 +182,7 @@ void KameleonVolumeToFieldlinesTask::perform(
     }
     // Ideally, we would want to signal about progress earlier as well, but
     // convertCdfToFieldlinesState does all the work encapsulated in one function call.
-    progressCallback(1.0f);
+    progressCallback(1.f);
 }
-
 
 } // namespace openspace

@@ -50,8 +50,7 @@ public:
     };
     enum class TextureFilter {
         NearestNeighbor = 0,
-        Linear = 1,
-        Unspecified = 2
+        Linear = 1
     };
 
     explicit RenderableTimeVaryingSphere(const ghoul::Dictionary& dictionary);

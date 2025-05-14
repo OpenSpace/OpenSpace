@@ -42,13 +42,10 @@ namespace openspace {
 
 class RenderableFieldlinesSequence : public Renderable {
 public:
-    //0: static loading and static downloading
-    //1: dynamic loading and static downloading
-    //2: dynamic loading and dynamic downloading
     enum class LoadingType {
-        StaticLoading = 0,
-        DynamicLoading = 1,
-        DynamicDownloading = 2
+        StaticLoading,
+        DynamicLoading,
+        DynamicDownloading
     };
     enum class SourceFileType {
         Cdf,
@@ -57,8 +54,8 @@ public:
     };
     // Used to determine if lines should be colored uniformly or by a some data variable
     enum class ColorMethod {
-        Uniform = 0,
-        ByQuantity = 1
+        Uniform,
+        ByQuantity
     };
 
     RenderableFieldlinesSequence(const ghoul::Dictionary& dictionary);
@@ -70,15 +67,13 @@ public:
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
-    void updateDynamicDownloading(const double currentTime, const double deltaTime);
+    void updateDynamicDownloading(double currentTime, double deltaTime);
     void firstUpdate();
     void computeSequenceEndTime();
 
     static documentation::Documentation Documentation();
 
     struct File {
-        //explicit File() = default;
-        //explicit File(const File& file) = delete;
         enum class FileStatus {
             Downloaded,
             Loaded
@@ -89,30 +84,22 @@ public:
         double timestamp = -1.0;
         FieldlinesState state;
 
-        bool operator<(const File& other) const {
+        bool operator<(const File& other) const noexcept{
             return timestamp < other.timestamp;
         }
     };
 
-//    struct VariableInfo {
-//        std::optional<std::filesystem::path> transferFunction;
-//        std::optional<glm::vec2> minMaxRange;
-//        std::optional<glm::vec2> selectedRange;
-//    };
-//    std::optional<std::map<std::string, VariableInfo>> variables;
 private:
     void setupProperties();
     void setModelDependentConstants();
 
-    //bool shouldUpdateColorBuffer();
-    //bool shouldUpdateMaskingBuffer();
-    int updateActiveIndex(const double currentTime);
+    int updateActiveIndex(double currentTime);
     void updateVertexPositionBuffer();
     void updateVertexColorBuffer();
     void updateVertexMaskingBuffer();
 
     void staticallyLoadFiles(const std::optional<std::filesystem::path>& seed,
-                             const std::optional<std::string>& traceVariable);
+        const std::optional<std::string>& traceVariable);
 
     std::vector<File> _files;
     // The function loads the file in the sense that it creates the FieldlineState object in
@@ -143,13 +130,13 @@ private:
     // dataID that corresponds to what dataset to use if using DynamicDownloading
     int _dataID;
     // number of files to queue up at a time
-    size_t _nOfFilesToQueue = 10;
+    size_t _nFilesToQueue = 10;
     // to keep track of oldest file
     std::queue<File*> _loadedFiles;
     // max number of files loaded at onse
     size_t _maxLoadedFiles = 100;
-    std::string _infoURL = "";
-    std::string _dataURL = "";
+    std::string _infoURL;
+    std::string _dataURL;
     //  DynamicFileSequenceDownloader downloads and updates renderable field lines with
     //  field lines downloaded from the web.
     std::unique_ptr<DynamicFileSequenceDownloader> _dynamicFileDownloader;
@@ -186,10 +173,10 @@ private:
     properties::PropertyOwner _colorGroup;
     // Uniform/transfer function/topology?
     properties::OptionProperty _colorMethod;
-    // Index of the extra quantity to color lines by.
+    // Index of the extra quantity to color lines by
     properties::OptionProperty _colorQuantity;
     // Used to save property for later initialization, because firstUpdate needs to run
-    // first, to populate _colorQuantity with options.
+    // first, to populate _colorQuantity with options
     int _colorQuantityTemp;
     std::vector<glm::vec2> _colorTableRanges;
     // Color table/transfer function selected min and max range
@@ -251,7 +238,7 @@ private:
     properties::TriggerProperty _jumpToStartBtn;
 
     // At least one file in data set needs to be loaded to read extra variable
-    bool _firstLoad = true;
+    bool _isfirstLoad = true;
 };
 
 } // namespace openspace

@@ -28,9 +28,9 @@
 #include <openspace/util/time.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <cerrno>
 #include <fstream>
 #include <iomanip>
-#include <cerrno>
 
 namespace {
     constexpr std::string_view _loggerCat = "FieldlinesState";
@@ -66,9 +66,9 @@ FieldlinesState FieldlinesState::createStateFromOsfls(const std::string& path) {
     FieldlinesState s;
     const bool success = s.loadStateFromOsfls(path);
     if (!success) {
-        throw std::runtime_error(
-            std::format("loading state from osfls file {}", path)
-        );
+        throw std::runtime_error(std::format(
+            "loading state from osfls file {}", path
+        ));
     }
     return s;
 }
@@ -77,10 +77,10 @@ bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
     std::ifstream ifs(pathToOsflsFile, std::ifstream::binary);
 
     if (!ifs.is_open()) {
-        LERROR(
-            "Could not open file: " + pathToOsflsFile +
-            " Error code: " + std::strerror(errno)
-        );
+        LERROR(std::format(
+            "Could not open file: {}.Error code : {}",
+            pathToOsflsFile, std::strerror(errno)
+        ));
         return false;
     }
 
@@ -316,7 +316,6 @@ void FieldlinesState::saveStateToOsfls(const std::string& absPath) {
     ofs.write(allExtraQuantityNamesInOne.c_str(), nStringBytes);
 
     LINFO(std::format("Saving fieldline state to: {}", absPath));
-
 }
 
 // TODO: This should probably be rewritten, but this is the way the files were structured
@@ -422,7 +421,7 @@ std::vector<float> FieldlinesState::extraQuantity(size_t index, bool& isSuccessf
 {
     if (index == -1) {
         isSuccessful = false;
-        return {};
+        return std::vector<float>();
     }
     if (index < _extraQuantities.size()) {
         isSuccessful = true;
@@ -431,7 +430,7 @@ std::vector<float> FieldlinesState::extraQuantity(size_t index, bool& isSuccessf
     else {
         isSuccessful = false;
         LERROR("Provided Index was out of scope");
-        return {};
+        return std::vector<float>();
     }
 }
 

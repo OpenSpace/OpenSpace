@@ -42,8 +42,8 @@ std::vector<std::string>
 * renderablefieldlinesequence and cdf to osfls converter task.
 * \param path is the part to the seedpoint file
 */
- std::unordered_map<std::string, std::vector<glm::vec3>>
-    extractSeedPointsFromFiles(std::filesystem::path path, size_t nth=1);
+ std::unordered_map<std::string, std::vector<glm::vec3>> extractSeedPointsFromFiles(
+     std::filesystem::path path, size_t nth = 1);
 /**
  * Traces field lines from the provided cdf file using kameleon and stores the data in the
  * provided FieldlinesState. Returns `false` if it fails to create a valid state. Requires

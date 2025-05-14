@@ -210,7 +210,8 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableFieldlinesSequence)]] Parameters {
-        enum class [[codegen::map(openspace::RenderableFieldlinesSequence::ColorMethod)]] ColorMethod {
+        enum class [[codegen::map(openspace::RenderableFieldlinesSequence::ColorMethod)]]
+        ColorMethod {
             Uniform = 0,
             ByQuantity = 1
         };
@@ -293,7 +294,8 @@ namespace {
         // choose type of loading:
         //0: static loading and static downloading
         //1: dynamic loading and dynamic downloading
-        enum class [[codegen::map(openspace::RenderableFieldlinesSequence::LoadingType)]] LoadingType {
+        enum class [[codegen::map(openspace::RenderableFieldlinesSequence::LoadingType)]]
+        LoadingType {
             StaticLoading,
             DynamicDownloading
         };
@@ -306,7 +308,8 @@ namespace {
         std::optional<std::string> infoURL;
         std::optional<std::string> dataURL;
 
-        enum class [[codegen::map(openspace::RenderableFieldlinesSequence::SourceFileType)]] SourceFileType {
+        enum class [[codegen::map(openspace::RenderableFieldlinesSequence::SourceFileType)]]
+        SourceFileType {
             Cdf,
             Json,
             Osfls
@@ -434,8 +437,8 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
                 "If running with dynamic downloading, dataID needs to be specified"
             );
         }
-        _nOfFilesToQueue = static_cast<size_t>(
-            p.numberOfFilesToQueue.value_or(_nOfFilesToQueue)
+        _nFilesToQueue = static_cast<size_t>(
+            p.numberOfFilesToQueue.value_or(_nFilesToQueue)
             );
         _infoURL = p.infoURL.value();
         if (_infoURL.empty()) {
@@ -446,7 +449,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             throw ghoul::RuntimeError("DataURL has to be provided");
         }
         _dynamicFileDownloader = std::make_unique<DynamicFileSequenceDownloader>(
-            _dataID, _infoURL, _dataURL, _nOfFilesToQueue
+            _dataID, _infoURL, _dataURL, _nFilesToQueue
         );
     }
     else {
@@ -593,13 +596,11 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     });
 
     _colorTablePath.onChange([this]() {
-        std::filesystem::path newPath = absPath(_colorTablePath);
-
-        if (std::filesystem::exists(newPath)) {
-            _transferFunction = std::make_unique<TransferFunction>(newPath.string());
+        if (std::filesystem::exists(_colorTablePath.value())) {
+            _transferFunction =
+                std::make_unique<TransferFunction>(_colorTablePath.value());
         }
-        else
-        {
+        else {
             LWARNING("Invalid path to transferfunction, please enter new path.");
         }
     });
@@ -691,7 +692,7 @@ void RenderableFieldlinesSequence::staticallyLoadFiles(
 }
 
 void RenderableFieldlinesSequence::initialize() {
-    _firstLoad = true;
+    _isfirstLoad = true;
 }
 
 void RenderableFieldlinesSequence::initializeGL() {
@@ -988,7 +989,6 @@ void RenderableFieldlinesSequence::firstUpdate() {
         _transferFunction = std::make_unique<TransferFunction>(_colorTablePath.stringValue());
     }
 
-
     _shouldUpdateColorBuffer = true;
     _shouldUpdateMaskingBuffer = true;
 
@@ -1008,7 +1008,7 @@ void RenderableFieldlinesSequence::firstUpdate() {
         _havePrintedQuantityRange = true;
     }
 
-    _firstLoad = false;
+    _isfirstLoad = false;
 }
 
 void RenderableFieldlinesSequence::update(const UpdateData& data) {
@@ -1022,11 +1022,11 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         updateDynamicDownloading(currentTime, deltaTime);
         computeSequenceEndTime();
     }
-    if (_firstLoad && _atLeastOneFileLoaded) {
+    if (_isfirstLoad && _atLeastOneFileLoaded) {
         firstUpdate();
     }
 
-    _inInterval = _files.size() > 0 &&
+    _inInterval = !_files.empty() &&
         currentTime >= _files[0].timestamp &&
         currentTime < _sequenceEndTime;
 
@@ -1061,8 +1061,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
             loadFile(file);
             _isLoadingStateFromDisk = false;
             file.status = File::FileStatus::Loaded;
-            file.timestamp =
-                extractTriggerTimeFromFilename(file.path);
+            file.timestamp = extractTriggerTimeFromFilename(file.path);
             _atLeastOneFileLoaded = true;
             computeSequenceEndTime();
         }
@@ -1086,8 +1085,12 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 }
 
 void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&) {
-    if (_files.empty() || _firstLoad) return;
-    if (!_inInterval && !_renderForever) return;
+    if (_files.empty() || _isfirstLoad) {
+        return;
+    }
+    if (!_inInterval && !_renderForever) {
+        return;
+    }
 
     _shaderProgram->activate();
 
@@ -1099,8 +1102,10 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         glm::dmat4(glm::scale(glm::dmat4(1), glm::dvec3(data.modelTransform.scale)));
     const glm::dmat4 modelViewMat = data.camera.combinedViewMatrix() * modelMat;
 
-    _shaderProgram->setUniform("modelViewProjection",
-        data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
+    _shaderProgram->setUniform(
+        "modelViewProjection",
+        data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat)
+    );
 
     _shaderProgram->setUniform("colorMethod", _colorMethod);
     _shaderProgram->setUniform("lineColor", _colorUniform);
@@ -1111,8 +1116,8 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         ghoul::opengl::TextureUnit textureUnit;
         textureUnit.activate();
         _transferFunction->bind();
-        _shaderProgram->setUniform("colorTable", textureUnit);
-        _shaderProgram->setUniform("colorTableRange", _selectedColorRange);
+        _shaderProgram->setUniform("transferFunction", textureUnit);
+        _shaderProgram->setUniform("selectedColorRange", _selectedColorRange);
     }
 
     if (_maskingEnabled) {
@@ -1152,17 +1157,15 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
 #endif
 
     int loadedIndex = _activeIndex;
-    if (loadedIndex > -1) {
-        while (_files[loadedIndex].status != File::FileStatus::Loaded) {
-            --loadedIndex;
-            if (loadedIndex < 0) {
-                LWARNING("no file at or before current time is loaded");
-                return;
-            }
-        }
-    }
-    else {
+    if (loadedIndex == -1) {
         return;
+    }
+    while (_files[loadedIndex].status != File::FileStatus::Loaded) {
+        --loadedIndex;
+        if (loadedIndex < 0) {
+            LWARNING("no file at or before current time is loaded");
+            return;
+        }
     }
 
     const FieldlinesState& state = _files[loadedIndex].state;

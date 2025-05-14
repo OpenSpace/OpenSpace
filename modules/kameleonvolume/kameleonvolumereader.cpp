@@ -24,8 +24,8 @@
 
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 
-#include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/kameleon/include/kameleonhelper.h>
+#include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/volume/rawvolume.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
