@@ -22,34 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___ERRORLOGTOPIC____H__
-#define __OPENSPACE_MODULE_SERVER___ERRORLOGTOPIC____H__
+#ifndef __OPENSPACE_MODULE_SERVER___NOTIFICATIONLOG___H__
+#define __OPENSPACE_MODULE_SERVER___NOTIFICATIONLOG___H__
 
-#include <modules/server/include/topics/topic.h>
 #include <ghoul/logging/log.h>
+
+#include <ghoul/misc/profiling.h>
+#include <functional>
 
 namespace openspace {
 
-class ErrorLogTopic : public Topic {
+/**
+ * A concrete subclass of Log that passes logs to the provided callback function. The
+ * callback is specified using `std::function`. Trying to log messages when the callback
+ * object has been deleted results in undefined behavior.
+ */
+class NotificationLog : public ghoul::logging::Log {
 public:
-    ErrorLogTopic() = default;
-    ~ErrorLogTopic() override;
+    /// The type of function that is used as a callback in this log
+    using CallbackFunction = std::function<void(
+        std::string_view timeString,
+        std::string_view dateString,
+        std::string_view category,
+        ghoul::logging::LogLevel logLevel,
+        std::string_view message)>;
 
-    void handleJson(const nlohmann::json& json) override;
-    bool isDone() const override;
+    /**
+     * Constructor that calls Log constructor.
+     *
+     * \param callbackFunction The callback function that is called for each log message
+     * \param minimumLogLevel The minimum log level that this logger will accept
+     */
+    NotificationLog(CallbackFunction callbackFunction,
+        ghoul::logging::LogLevel minimumLogLevel = ghoul::logging::LogLevel::Warning);
+
+    /**
+     * Method that logs a message with a given level and category to the console.
+     *
+     * \param level The log level with which the message shall be logged
+     * \param category The category of this message.
+     * \param message The message body of the log message
+     */
+    void log(ghoul::logging::LogLevel level, std::string_view category,
+        std::string_view message) override;
 
 private:
-    /**
-     * Creates a log object and register it to the `LogManager`, does nothing if an active
-     * log already exists
-     */
-    void createLog(ghoul::logging::LogLevel logLevel);
-
-    bool _isSubscribedTo = false;
-    // Non owning but we remove the log from LogManager on destruction
-    ghoul::logging::Log* _log = nullptr;
+    CallbackFunction _callbackFunction;
+    TracyLockable(std::mutex, _mutex);
 };
 
-} // namespace openspace
+} // namespace ghoul::logging
 
-#endif // !__OPENSPACE_MODULE_SERVER___ERRORLOGTOPIC____H__
+#endif // __OPENSPACE_MODULE_SERVER___NOTIFICATIONLOG___H__

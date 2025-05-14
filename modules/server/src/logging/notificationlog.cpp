@@ -22,34 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___ERRORLOGTOPIC____H__
-#define __OPENSPACE_MODULE_SERVER___ERRORLOGTOPIC____H__
-
-#include <modules/server/include/topics/topic.h>
-#include <ghoul/logging/log.h>
+#include <modules/server/include/logging/notificationlog.h>
 
 namespace openspace {
 
-class ErrorLogTopic : public Topic {
-public:
-    ErrorLogTopic() = default;
-    ~ErrorLogTopic() override;
+NotificationLog::NotificationLog(CallbackFunction callbackFunction,
+                                 ghoul::logging::LogLevel minimumLogLevel)
+    : ghoul::logging::Log(
+        TimeStamping::Yes,
+        DateStamping::Yes,
+        CategoryStamping::Yes,
+        LogLevelStamping::Yes,
+        minimumLogLevel
+    )
+    , _callbackFunction(std::move(callbackFunction))
+{}
 
-    void handleJson(const nlohmann::json& json) override;
-    bool isDone() const override;
+void NotificationLog::log(ghoul::logging::LogLevel level, std::string_view category,
+                          std::string_view message)
+{
+    ZoneScoped;
 
-private:
-    /**
-     * Creates a log object and register it to the `LogManager`, does nothing if an active
-     * log already exists
-     */
-    void createLog(ghoul::logging::LogLevel logLevel);
-
-    bool _isSubscribedTo = false;
-    // Non owning but we remove the log from LogManager on destruction
-    ghoul::logging::Log* _log = nullptr;
-};
+    const std::lock_guard lock(_mutex);
+    const std::string timeStamp = timeString();
+    const std::string dateStamp = dateString();
+    _callbackFunction(timeStamp, dateStamp, category, level, message);
+}
 
 } // namespace openspace
-
-#endif // !__OPENSPACE_MODULE_SERVER___ERRORLOGTOPIC____H__
