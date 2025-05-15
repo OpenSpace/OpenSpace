@@ -108,7 +108,7 @@ namespace {
     // A `RenderablePlane` is a renderable that will shows some form of contents projected
     // on a two-dimensional plane, which in turn is placed in three-dimensional space as
     // any other `Renderable`. It is possible to specify the `Size` of the plane, whether
-    // it should always face the camera (`Orientation`), and other parameters shown below.
+    // it should always face the camera (`Billboard`), and other parameters shown below.
     struct [[codegen::Dictionary(RenderablePlane)]] Parameters {
         enum class [[codegen::map(RenderOption)]] RenderOption {
             ViewDirection [[codegen::key("Camera View Direction")]],
@@ -116,10 +116,11 @@ namespace {
             FixedRotation [[codegen::key("Fixed Rotation")]]
         };
 
-        // Controls whether the plane will be orientated as a billboard. Setting this
-        // value to `true` is the same as setting it to \"Camera Position Normal\",
-        // setting it to `false` is the same as setting it to \"Fixed Rotation\". If the
-        // value is not specified, the default value of `false` is used instead.
+        // Controls whether the plane will be oriented as a billboard. Setting this value
+        // to `true` is the same as setting it to \"Camera Position Normal\", setting it
+        // to `false` is the same as setting it to \"Fixed Rotation\". If the value is not
+        // specified, the default value of `false` is used instead.
+        //
         // \"Camera View Direction\" rotates the plane so that it is orthogonal to the
         // viewing direction of the camera (useful for planar displays), and \"Camera
         // Position Normal\" rotates the plane towards the position of the camera (useful

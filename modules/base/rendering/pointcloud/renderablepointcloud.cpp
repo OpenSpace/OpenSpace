@@ -383,18 +383,20 @@ namespace {
             PositionNormal [[codegen::key("Camera Position Normal")]],
             FixedRotation [[codegen::key("Fixed Rotation")]]
         };
-        // Controls whether the plane will be orientated as a billboard. Setting this
-        // value to `true` is the same as setting it to \"Camera View Direction\", setting
-        // it to `false` is the same as setting it to \"Fixed Rotation\". If the value is
-        // not specified, the default value of `true` is used instead.
-        // Controls how the planes for the points will be oriented. \"Camera View
-        // Direction\" rotates the points so that the plane is orthogonal to the viewing
-        // direction of the camera (useful for planar displays), and \"Camera Position
-        // Normal\" rotates the points towards the position of the camera (useful for
-        // spherical displays, like dome theaters). In both these cases the points will be
-        // billboarded towards the camera. In contrast, \"Fixed Rotation\" does not rotate
-        // the points at all based on the camera and should be used when the dataset
-        // contains orientation information for the points.
+
+        // Controls whether the planes for the points will be billboarded, that is
+        // oriented to face the camera. Setting this value to `true` is the same as
+        // setting it to \"Camera View Direction\", setting it to `false` is the same as
+        // setting it to \"Fixed Rotation\". If the value is not specified, the default
+        // value of `true` is used instead.
+        //
+        // \"Camera View Direction\" rotates the points so that the plane is orthogonal to
+        // the viewing direction of the camera (useful for planar displays), and \"Camera
+        // Position Normal\" rotates the points towards the position of the camera (useful
+        // for spherical displays, like dome theaters). In both these cases the points
+        // will be billboarded towards the camera. In contrast, \"Fixed Rotation\" does
+        // not rotate the points at all based on the camera and should be used when the
+        // dataset contains orientation information for the points.
         std::optional<std::variant<bool, RenderOption>> billboard;
 
         // [[codegen::verbatim(UseOrientationDataInfo.description)]]
@@ -1231,6 +1233,8 @@ void RenderablePointCloud::renderPoints(const RenderData& data,
     _program->setUniform(_uniformCache.up, glm::vec3(orthoUp));
     _program->setUniform(_uniformCache.right, glm::vec3(orthoRight));
     _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
+
+    _program->setUniform(_uniformCache.renderOption, _renderOption.value());
 
     _program->setUniform(_uniformCache.opacity, opacity());
 
