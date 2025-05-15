@@ -212,8 +212,8 @@ namespace {
     struct [[codegen::Dictionary(RenderableFieldlinesSequence)]] Parameters {
         enum class [[codegen::map(openspace::RenderableFieldlinesSequence::ColorMethod)]]
         ColorMethod {
-            Uniform = 0,
-            ByQuantity = 1
+            Uniform,
+            ByQuantity [[codegen::key("By Quantity")]]
         };
         // [[codegen::verbatim(ColorMethodInfo.description)]]
         std::optional<ColorMethod> colorMethod;

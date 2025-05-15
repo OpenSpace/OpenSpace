@@ -33,7 +33,7 @@ local CarringtonPrimeMeridian = {
   GUI = {
     Name = "Carrington Prime Meridian",
     Path =  "/Solar System/Heliosphere",
-    Description = [[An arch showing The Carrington prime meridian of the Sun.]] ..
+    Description = [[An arch showing the Carrington prime meridian of the Sun.]] ..
       [[The line from pole to pole at 0 degree longitude.]]
   }
 }
@@ -85,8 +85,8 @@ local WSA_Grid10Degrees = {
   GUI = {
     Name = "Grid on Sun",
     Path =  "/Solar System/Heliosphere",
-    Description = [[A grid aligned with the Sun-Earth line, with a 10-degree ]] ..
-      [[seperation between line segments by default.]]
+    Description = [[A grid aligned with the Sun-Earth line, with a 10-degree
+      separation between line segments by default.]]
   }
 }
 
@@ -111,8 +111,8 @@ asset.export(WSA_Grid10Degrees)
 asset.meta = {
   Name = "Real-time Sun Grid Lines",
   Version = "1.0",
-  Description = [[Grids to guide the orientation of the Sun and
-    its rotation in relation to Earth.]],
+  Description = [[Grids that help show the Sun's orientation and rotation in relation to
+    Earth, including the Carrington prime meridian and Earth-facing longitudes.]],
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license"

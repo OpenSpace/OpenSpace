@@ -110,7 +110,8 @@ local WSAOffset60 = {
   GUI = {
     Name = "WSA Data Offset 60 Degrees",
     Path = "/Solar System/Sun",
-    Description = "WSA outputs (FITS files) have the Sun-Earth line 60 degrees shifted from the edge.",
+    Description = [[WSA outputs (FITS files) have the Sun-Earth line 60 degrees shifted
+      from the edge.]],
     Hidden = true
   }
 }

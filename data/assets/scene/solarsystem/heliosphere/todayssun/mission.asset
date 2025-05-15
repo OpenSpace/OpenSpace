@@ -2,27 +2,37 @@ local Mission = {
   Identifier = "WSA",
   Name = "The WSA Simulation Model",
   TimeRange = { Start = "2006 SEP 18 11:54:00", End = "2025 MAR 24 00:00:00" },
-  Description = [[This profile shows the sun and its magnetic polarities. The visualizations are
-    results from the WSA model version 5.4 and all the data is downloaded dynamically, bringing
-    you the latest data from the model. In the Scene menu, under "Solar System/Heliosphere" you
-    will be able to find the assets. Under WSA Coronal Model 5.4 submenu you find additional
-    fieldline options and solar surface options. For each asset, there are options for appearance
-    as well as the option to save the downloaded content for next time, since the data is not
-    cached on default. For the surfaces, there are also different layers to choose from. Since
-    each data file is used until the next one in the sequence, it's recommended to make sure to
-    look in the GUI which file is being used under each assets Texture Source field. The white
-    line shooting out from the Sun is always connected to the center of the Earth, along with
-    the white arch. The yellow arch is the Carrington prime meridian and the green grid is
-    separated with 10 degrees. Additionally, under the Actions panel you can find an option
-    to toggle a white background. If no data is showing, most likely time is set outside of
-    data range or alternatively files failed to download. For more information on the simulation
-    model, see https://ccmc.gsfc.nasa.gov/models/WSA~5.4.]],
+  Description = [[
+    This profile shows the Sun and its magnetic polarities, using data from the WSA model
+    version 5.4. This model includes data for the solar surface as well as field lines.
+    All data is downloaded dynamically, bringing you the latest data from the model.
+    You can find these assets in the Scene menu under "Solar System/Heliosphere." Under
+    the "WSA Coronal Model 5.4" submenu, you will find extra options for the solar field
+    lines and surface features. The four different sets of field lines are all following
+    the magnetic fields but traced from different locations. They can be colored by their
+    different parameters in the data, for example polarity or open or closed field lines.
+    The two elements named "Solar Surface" show the magnetic polarities, but have other
+    options in the settings under "Surface Layer Options". Each asset includes settings
+    for appearance, as well as an option to save the downloaded data for future use
+    (by default, the data is not cached). Each data file remains active until the next
+    one in the sequence becomes available. To see which file is currently being used,
+    check the Texture Source field for each asset in the GUI. In the visualization, the
+    white line shooting out from the Sun, along with the white arch, always points in
+    the direction of Earth. The yellow arch is the Carrington prime meridian which is
+    longitude 0 of the Sun, and the green grid shows lines with a 10-degree separation.
+    You can also toggle a white background from the Actions panel. If no data is
+    showing, most likely the selected time is outside of the data range (e.g., too far
+    in the future or the past for the dynamic data to be available). Alternatively, the
+    files failed to download. For more information on the simulation model, see
+    https://ccmc.gsfc.nasa.gov/models/WSA~5.4.
+  ]],
   Actions = { "os.todayssun.ToggleWhiteBackground" },
   Milestones = {
     {
       Name = "Version 5.4",
       Date = "2022 DEC 09 16:14:00",
-      Description = "For version 5.4 of WSA fieldline data and solar surfaces from end of 2022 until today."
+      Description = [[For version 5.4 of WSA fieldline data and solar surfaces from end of
+        2022 until today.]]
     }
   }
 }
@@ -40,7 +50,7 @@ end)
 
 asset.meta = {
   Name = "Overview information panel - Mission panel",
-  Description = [[This information panel provides information about the simulation model
+  Description = [[This mission file provides information about the simulation model
     WSA and how to navigate the profile.]],
   Author = "CCMC",
   URL = "http://openspaceproject.com",

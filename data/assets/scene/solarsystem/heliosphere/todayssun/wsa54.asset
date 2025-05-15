@@ -20,8 +20,8 @@ local infoURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/D
 local dataURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID="
 
 local sunRadius = 695508000
-  -- This small 0.2% increase is an arbitrary number but necessary to make sure it is not
-  -- within the Sun sphere
+-- This small 0.2% increase is an arbitrary number but necessary to make sure it is not
+-- within the Sun sphere
 local extendedRadius = sunRadius * 1.002
 
 local WSA_Magnetograms = {
@@ -110,7 +110,7 @@ local WSA_Velocity_Adapt = {
     FitsLayer = 1,
     LayerNames = {
       "Coronal Magnetic Field at 21.5 Solar Radii",
-      "Solar Wind Speed at 21.5 Solar Radii (km/s)}"
+      "Solar Wind Speed at 21.5 Solar Radii (km/s)"
     },
     ColorMap = blueBlackRed,
     CacheData = false,
@@ -139,7 +139,7 @@ local WSA_Velocity_Gong = {
     FitsLayer = 0,
     LayerNames = {
       "Coronal Magnetic Field at 21.5 Solar Radii",
-      "Solar Wind Speed at 21.5 Solar Radii (km/s)}"
+      "Solar Wind Speed at 21.5 Solar Radii (km/s)"
     },
     ColorMap = blueBlackRed,
     CacheData = false,
@@ -173,7 +173,7 @@ local fieldlinesSCS = {
     DataID = 2286,
     ShowAtAllTimes = false,
     CacheData = false,
-    ColorMethod = "ByQuantity",
+    ColorMethod = "By Quantity",
     ColorQuantity = 0, -- Polarity & solar wind speed
     ColorTablePaths = {
       windSpeedPolarityColorTable,
@@ -211,7 +211,7 @@ local fieldlinesOI = {
     DataID = 2285,
     ShowAtAllTimes = false,
     CacheData = false,
-    ColorMethod = "ByQuantity",
+    ColorMethod = "By Quantity",
     ColorQuantity = 0, -- Polarity & solar wind speed
     ColorTablePaths = {
       windSpeedPolarityColorTable,
@@ -249,7 +249,7 @@ local fieldlinesIO = {
     DataID = 2284,
     ShowAtAllTimes = false,
     CacheData = true,
-    ColorMethod = "ByQuantity",
+    ColorMethod = "By Quantity",
     ColorQuantity = 0, -- Open/closed lines
     ColorTablePaths = {
       opennessColorTable
@@ -285,7 +285,7 @@ local fieldlinesEarth = {
     DataID = 2287,
     ShowAtAllTimes = false,
     CacheData = false,
-    ColorMethod = "ByQuantity",
+    ColorMethod = "By Quantity",
     ColorQuantity = 0, -- Polarity
     ColorTablePaths = {
       windSpeedPolarityColorTable,
@@ -340,11 +340,11 @@ asset.export(fieldlinesEarth)
 
 
 asset.meta = {
-  Name = "WSA 5.4. Streaming data dynamically",
+  Name = "WSA 5.4. Streaming Data Dynamically",
   Version = "1.0",
   Description = [[Downloading data from the WSA 5.4 simulation model, showing the dynamic
-    sun at any point. It includes .fits files for sun surface data and .osfls files
-    (OpenSpace FieldLine Sequence) for fieldlines.]],
+    sun at any point. It includes .fits files for solar surface data and .osfls files
+    (OpenSpace FieldLine Sequence) for field lines.]],
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license"

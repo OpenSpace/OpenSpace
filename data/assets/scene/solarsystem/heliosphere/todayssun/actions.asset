@@ -18,7 +18,8 @@ local ToggleWhiteBackground = {
       openspace.setPropertyValue("Scene.WSA*.Renderable.ABlendingEnabled", true)
     end
   ]],
-  Documentation = "This toggles a white sphere, the stars, and the addative blending of any fieldlines"
+  Documentation = [[This toggles a white sphere, the stars, and the addative blending of
+    any fieldlines]]
 }
 
 
@@ -34,7 +35,7 @@ end)
 
 asset.meta = {
   Name = "Todays Sun's Actions",
-  Description = "Actions related to the real time visualizations of the Sun",
+  Description = "Actions related to the real-time visualizations of the Sun",
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license"
