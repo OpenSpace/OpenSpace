@@ -169,7 +169,7 @@ TEST_CASE("Property: Multiple", "[property]") {
     }
 }
 
-TEST_CASE("Property: Multiple / 2", "[property]") {
+TEST_CASE("Property: Multiple/2", "[property]") {
     PropertyOwner owner1 = PropertyOwner({ "base1" });
     global::rootPropertyOwner->addPropertySubOwner(owner1);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner1); };
@@ -221,13 +221,49 @@ TEST_CASE("Property: Multiple / 2", "[property]") {
 
         triggerScriptRun();
     }
-    
+
     {
         LogMgr.resetMessageCounters();
         defer { LogMgr.resetMessageCounters(); };
 
         global::scriptEngine->queueScript({
             .code = "return openspace.property('*.p1')",
+            .callback = [&p1, &p21](ghoul::Dictionary d) {
+                REQUIRE(d.size() == 1);
+                REQUIRE(d.hasKey("1"));
+                REQUIRE(d.hasValue<ghoul::Dictionary>("1"));
+                ghoul::Dictionary e = d.value<ghoul::Dictionary>("1");
+                REQUIRE(e.size() == 2);
+
+                // Sorting the results as the property return order is undefined
+                std::array<std::string, 2> r;
+                {
+                    REQUIRE(e.hasKey("1"));
+                    REQUIRE(e.hasValue<std::string>("1"));
+                    const std::string v = e.value<std::string>("1");
+                    r[0] = v;
+                }
+                {
+                    REQUIRE(e.hasKey("2"));
+                    REQUIRE(e.hasValue<std::string>("2"));
+                    const std::string v = e.value<std::string>("2");
+                    r[1] = v;
+                }
+                std::sort(r.begin(), r.end());
+                CHECK(r[0] == p1.uri());
+                CHECK(r[1] == p21.uri());
+            }
+        });
+
+        triggerScriptRun();
+    }
+
+    {
+        LogMgr.resetMessageCounters();
+        defer { LogMgr.resetMessageCounters(); };
+
+        global::scriptEngine->queueScript({
+            .code = "return openspace.property('base*.p1')",
             .callback = [&p1, &p21](ghoul::Dictionary d) {
                 REQUIRE(d.size() == 1);
                 REQUIRE(d.hasKey("1"));

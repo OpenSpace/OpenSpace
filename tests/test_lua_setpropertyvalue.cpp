@@ -476,9 +476,28 @@ TEST_CASE("SetPropertyValue: Wildcard Basic Multiple", "[setpropertyvalue]") {
         CHECK(p2 == 1.f);
         CHECK(p21 == 2.f);
     }
+    
+    p1 = 1.f;
+    p2 = 1.f;
+    p21 = 1.f;
+
+    {
+        LogMgr.resetMessageCounters();
+        defer { LogMgr.resetMessageCounters(); };
+
+        global::scriptEngine->queueScript("openspace.setPropertyValue('base*.p1', 2.0)");
+
+        CHECK(p1 == 1.f);
+        CHECK(p2 == 1.f);
+        CHECK(p21 == 1.f);
+        triggerScriptRun();
+        CHECK(p1 == 2.f);
+        CHECK(p2 == 1.f);
+        CHECK(p21 == 2.f);
+    }
 }
 
-TEST_CASE("SetPropertyValue: Wildcard Basic Multiple / 2", "[setpropertyvalue]") {
+TEST_CASE("SetPropertyValue: Wildcard Basic Multiple/2", "[setpropertyvalue]") {
     PropertyOwner owner1 = PropertyOwner({ "base1" });
     global::rootPropertyOwner->addPropertySubOwner(owner1);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner1); };
@@ -624,9 +643,38 @@ TEST_CASE("SetPropertyValue: Wildcard Interpolation Multiple", "[setpropertyvalu
         CHECK(p21 > 1.f);
         CHECK_THAT(p21, Catch::Matchers::WithinAbs(v, 0.05));
     }
+    
+    p1 = 1.f;
+    p2 = 1.f;
+    p21 = 1.f;
+
+    {
+        LogMgr.resetMessageCounters();
+        defer { LogMgr.resetMessageCounters(); };
+
+        global::scriptEngine->queueScript(
+            "openspace.setPropertyValue('base*.p1', 2.0, 1.0)"
+        );
+        defer {
+            scene->removePropertyInterpolation(&p1);
+            scene->removePropertyInterpolation(&p2);
+        };
+
+        CHECK(p1 == 1.f);
+        CHECK(p2 == 1.f);
+        CHECK(p21 == 1.f);
+        triggerScriptRun();
+        updateInterpolations(std::chrono::milliseconds(100));
+        const double v = glm::mix(1.0, 2.0, 0.1);
+        CHECK(p1 > 1.f);
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.05));
+        CHECK(p2 == 1.f);
+        CHECK(p21 > 1.f);
+        CHECK_THAT(p21, Catch::Matchers::WithinAbs(v, 0.05));
+    }
 }
 
-TEST_CASE("SetPropertyValue: Wildcard Interpolation Multiple /2", "[setpropertyvalue]") {
+TEST_CASE("SetPropertyValue: Wildcard Interpolation Multiple/2", "[setpropertyvalue]") {
     std::unique_ptr<Scene> scene = std::make_unique<Scene>(
         std::make_unique<SceneInitializer>()
     );
@@ -749,9 +797,39 @@ TEST_CASE("SetPropertyValue: Wildcard Easing Multiple", "[setpropertyvalue]") {
         CHECK(p21 > 1.f);
         CHECK_THAT(p21, Catch::Matchers::WithinAbs(v, 0.075));
     }
+    
+    p1 = 1.f;
+    p2 = 1.f;
+    p21 = 1.f;
+
+    {
+        LogMgr.resetMessageCounters();
+        defer { LogMgr.resetMessageCounters(); };
+
+        global::scriptEngine->queueScript(
+            "openspace.setPropertyValue('base*.p1', 2.0, 1.0, 'ExponentialEaseOut')"
+        );
+        defer {
+            scene->removePropertyInterpolation(&p1);
+            scene->removePropertyInterpolation(&p2);
+        };
+
+        CHECK(p1 == 1.f);
+        CHECK(p2 == 1.f);
+        CHECK(p21 == 1.f);
+        triggerScriptRun();
+        updateInterpolations(std::chrono::milliseconds(100));
+        const double t = ghoul::exponentialEaseOut(0.1);
+        const double v = glm::mix(1.0, 2.0, t);
+        CHECK(p1 > 1.f);
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.075));
+        CHECK(p2 == 1.f);
+        CHECK(p21 > 1.f);
+        CHECK_THAT(p21, Catch::Matchers::WithinAbs(v, 0.075));
+    }
 }
 
-TEST_CASE("SetPropertyValue: Wildcard Easing Multiple /2", "[setpropertyvalue]") {
+TEST_CASE("SetPropertyValue: Wildcard Easing Multiple/2", "[setpropertyvalue]") {
     std::unique_ptr<Scene> scene = std::make_unique<Scene>(
         std::make_unique<SceneInitializer>()
     );
@@ -888,9 +966,45 @@ TEST_CASE("SetPropertyValue: Wildcard PostScript Multiple", "[setpropertyvalue]"
         CHECK(q1 == 0.75f);
         CHECK(p21 == 2.f);
     }
+    
+    p1 = 1.f;
+    p2 = 1.f;
+    q1 = 1.f;
+    p21 = 1.f;
+
+    {
+        LogMgr.resetMessageCounters();
+        defer { LogMgr.resetMessageCounters(); };
+
+        global::scriptEngine->queueScript(R"(
+            openspace.setPropertyValue(
+                'base*.p1',
+                2.0,
+                0.1,
+                'ExponentialEaseOut',
+                [[openspace.setPropertyValue('base1.q1', 0.75)]]
+            )
+        )");
+        defer {
+            scene->removePropertyInterpolation(&p1);
+            scene->removePropertyInterpolation(&p2);
+        };
+
+        CHECK(p1 == 1.f);
+        CHECK(p2 == 1.f);
+        CHECK(q1 == 1.f);
+        CHECK(p21 == 1.f);
+        triggerScriptRun();
+        updateInterpolations(std::chrono::milliseconds(150));
+        triggerScriptRun();
+        CHECK(p1 == 2.f);
+        CHECK(p2 == 1.f);
+        CHECK(q1 == 0.75f);
+        CHECK(p21 == 2.f);
+    }
 }
 
-TEST_CASE("SetPropertyValue: Wildcard PostScript Multiple /2", "[setpropertyvalue]") {
+TEST_CASE("SetPropertyValue: Wildcard PostScript Multiple/2", "[setpropertyvalue]") {
     std::unique_ptr<Scene> scene = std::make_unique<Scene>(
         std::make_unique<SceneInitializer>()
     );

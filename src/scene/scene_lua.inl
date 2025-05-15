@@ -86,14 +86,18 @@ bool ownerMatchesGroupTag(const openspace::properties::PropertyOwner* owner,
         // We have an intersection instruction
         if (tagToMatch.find(Negation) != std::string_view::npos) {
             throw ghoul::RuntimeError(std::format(
-                "Only a single instruction to combine tags is allowed. {}",
-                tagToMatch
+                "Only a single instruction to combine tags is supported. Found an "
+                "intersection ('{}') and a negation instruction ('{}') in the query: "
+                "'{}'",
+                Intersection, Negation, tagToMatch
             ));
         }
         if (tagToMatch.find(Union) != std::string_view::npos) {
             throw ghoul::RuntimeError(std::format(
-                "Only a single instruction to combine tags is allowed. {}",
-                tagToMatch
+                "Only a single instruction to combine tags is supported. Found an "
+                "intersection ('{}') and a union instruction ('{}') in the query: "
+                "'{}'",
+                Intersection, Union, tagToMatch
             ));
         }
 
@@ -109,14 +113,18 @@ bool ownerMatchesGroupTag(const openspace::properties::PropertyOwner* owner,
         // We have an negation instruction
         if (tagToMatch.find(Intersection) != std::string_view::npos) {
             throw ghoul::RuntimeError(std::format(
-                "Only a single instruction to combine tags is allowed. {}",
-                tagToMatch
+                "Only a single instruction to combine tags is supported. Found a "
+                "negation ('{}') and an intersection instruction ('{}') in the query: "
+                "'{}'",
+                Negation, Intersection, tagToMatch
             ));
         }
         if (tagToMatch.find(Union) != std::string_view::npos) {
             throw ghoul::RuntimeError(std::format(
-                "Only a single instruction to combine tags is allowed. {}",
-                tagToMatch
+                "Only a single instruction to combine tags is supported. Found a "
+                "negation ('{}') and a union instruction ('{}') in the query: "
+                "'{}'",
+                Negation, Union, tagToMatch
             ));
         }
 
@@ -132,14 +140,18 @@ bool ownerMatchesGroupTag(const openspace::properties::PropertyOwner* owner,
         // We have an union instruction
         if (tagToMatch.find(Negation) != std::string_view::npos) {
             throw ghoul::RuntimeError(std::format(
-                "Only a single instruction to combine tags is allowed. {}",
-                tagToMatch
+                "Only a single instruction to combine tags is supported. Found a union "
+                "('{}') and a negation instruction ('{}') in the query: "
+                "'{}'",
+                Union, Negation, tagToMatch
             ));
         }
         if (tagToMatch.find(Intersection) != std::string_view::npos) {
             throw ghoul::RuntimeError(std::format(
-                "Only a single instruction to combine tags is allowed. {}",
-                tagToMatch
+                "Only a single instruction to combine tags is supported. Found a union "
+                "('{}') and an intersection instruction ('{}') in the query: "
+                "'{}'",
+                Union, Intersection, tagToMatch
             ));
         }
 
@@ -175,7 +187,7 @@ std::string groupTag(const std::string& command) {
     }
 }
 
-std::string_view removeGroupNameFromUri(std::string_view uri) {
+std::string_view removeGroupTagFromUri(std::string_view uri) {
     size_t pos = uri.find_first_of(".");
     return pos == std::string::npos ? uri : uri.substr(pos);
 }
@@ -219,14 +231,14 @@ std::tuple<std::string_view, std::string_view, bool> parseRegex(std::string_view
 
 std::vector<openspace::properties::Property*> findMatchesInAllProperties(
                                                                    std::string_view regex,
-                                                               std::string_view groupName)
+                                                                std::string_view groupTag)
 {
     using namespace openspace;
     using namespace properties;
 
-    auto [nodeName, propertyName, isLiteral] = parseRegex(regex);
+    auto [nodeName, propertyIdentifier, isLiteral] = parseRegex(regex);
 
-    const bool isGroupMode = !groupName.empty();
+    const bool isGroupMode = !groupTag.empty();
     if (nodeName.empty() && isGroupMode) {
         isLiteral = false;
     }
@@ -243,17 +255,17 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
         [&](Property* prop) {
             const std::string_view uri = prop->uri();
 
-            if (isLiteral && uri != propertyName) {
+            if (isLiteral && uri != propertyIdentifier) {
                 return;
             }
 
-            if (!propertyName.empty()) {
-                const size_t propertyPos = uri.find(propertyName);
+            if (!propertyIdentifier.empty()) {
+                const size_t propertyPos = uri.find(propertyIdentifier);
                 if (
-                    // Check if the propertyName appears in the URI at all
+                    // Check if the propertyIdentifier appears in the URI at all
                     (propertyPos == std::string::npos) ||
-                    // Check that the propertyName fully matches the property in uri
-                    ((propertyPos + propertyName.length() + 1) < uri.length()) ||
+                    // Check that the propertyIdentifier fully matches the property in URI
+                    ((propertyPos + propertyIdentifier.length() + 1) < uri.length()) ||
                     // Match node name
                     (!nodeName.empty() && uri.find(nodeName) == std::string::npos))
                 {
@@ -263,7 +275,7 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
                 // At this point we know that the property name matches, so another way
                 // this property to fail is if we provided a tag and the owner doesn't
                 // match it
-                if (isGroupMode && !ownerMatchesGroupTag(prop->owner(), groupName)) {
+                if (isGroupMode && !ownerMatchesGroupTag(prop->owner(), groupTag)) {
                     return;
                 }
             }
@@ -275,12 +287,12 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
 
                 // Check tag
                 if (isGroupMode) {
-                    if (!ownerMatchesGroupTag(prop->owner(), groupName)) {
+                    if (!ownerMatchesGroupTag(prop->owner(), groupTag)) {
                         return;
                     }
                 }
                 else if (nodePos != 0) {
-                    // Check that the nodeName fully matches the node in id
+                    // Check that the node identifier  fully matches the node in URI
                     return;
                 }
             }
@@ -294,7 +306,7 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
 }
 
 void applyRegularExpression(lua_State* L, std::string_view regex,
-                            double interpolationDuration, std::string_view groupName,
+                            double interpolationDuration, std::string_view groupTag,
                             ghoul::EasingFunction easingFunction, std::string postScript)
 {
     using namespace openspace;
@@ -302,7 +314,7 @@ void applyRegularExpression(lua_State* L, std::string_view regex,
 
     //
     // 1. Retrieve all properties that match the regex
-    std::vector<Property*> matchingProps = findMatchesInAllProperties(regex, groupName);
+    std::vector<Property*> matchingProps = findMatchesInAllProperties(regex, groupTag);
 
     //
     // 2. Remove all properties that don't match the provided type
@@ -552,17 +564,17 @@ int propertySetValue(lua_State* L) {
         );
     }
     else {
-        std::string groupName = groupTag(uriOrRegex);
-        if (!groupName.empty()) {
-            // Remove group name from start of regex and replace with '*'
-            uriOrRegex = removeGroupNameFromUri(uriOrRegex);
+        std::string tag = groupTag(uriOrRegex);
+        if (!tag.empty()) {
+            // Remove group tag from start of regex and replace with '*'
+            uriOrRegex = removeGroupTagFromUri(uriOrRegex);
         }
 
         applyRegularExpression(
             L,
             uriOrRegex,
             interpolationDuration,
-            groupName,
+            tag,
             easingMethod,
             std::move(postScript)
         );
@@ -605,7 +617,19 @@ int propertyGetValueDeprecated(lua_State* L) {
 namespace {
 
 /**
- * Returns whether a property with the given URI exists
+ * Returns whether a property with the given URI exists. The `uri` identifies the property
+ * or properties that are checked by this function and can include both wildcards `*`
+ * which match anything, as well as tags (`{tag}`) which match scene graph nodes that have
+ * this tag. There is also the ability to combine two tags through the `&`, `|`, and `~`
+ * operators. `{tag1&tag2}` will match anything that has the tag1 and the tag2.
+ * `{tag1|tag2}` will match anything that has the tag1 or the tag 2, and `{tag1~tag2}`
+ * will match anything that has tag1 but not tag2. If no wildcards or tags are provided at
+ * most one property value will be changed. With wildcards or tags all properties that
+ * match the URI are changed instead.
+ *
+ * \param uri The URI that identifies the property or properties whose values should be
+ *            changed. The URI can contain 0 or 1 wildcard `*` characters or a tag
+ *            expression (`{tag}`) that identifies a property owner.
  */
 [[codegen::luawrap]] bool hasProperty(std::string uri) {
     openspace::properties::Property* prop = openspace::property(uri);
@@ -613,19 +637,30 @@ namespace {
 }
 
 /**
- * Returns a list of property identifiers that match the passed regular expression
+ * Returns a list of property identifiers that match the passed regular expression. The
+ * `uri` identifies the property or properties that are returned by this function and can
+ * include both wildcards `*` which match anything, as well as tags (`{tag}`) which match
+ * scene graph nodes that have this tag. There is also the ability to combine two tags
+ * through the `&`, `|`, and `~` operators. `{tag1&tag2}` will match anything that has the
+ * tag1 and the tag2. `{tag1|tag2}` will match anything that has the tag1 or the tag 2,
+ * and `{tag1~tag2}` will match anything that has tag1 but not tag2. If no wildcards or
+ * tags are provided at most one property value will be changed. With wildcards or tags
+ * all properties that match the URI are changed instead.
+ *
+ * \param uri The URI that identifies the property or properties whose values should be
+ *            changed. The URI can contain 0 or 1 wildcard `*` characters or a tag
+ *            expression (`{tag}`) that identifies a property owner.
  */
-[[codegen::luawrap]] std::vector<std::string> property(std::string regex) {
+[[codegen::luawrap]] std::vector<std::string> property(std::string uri) {
     using namespace openspace;
 
-    std::string groupName = groupTag(regex);
-    if (!groupName.empty()) {
+    std::string tag = groupTag(uri);
+    if (!tag.empty()) {
         // Remove group name from start of regex and replace with '*'
-        regex = removeGroupNameFromUri(regex);
+        uri = removeGroupTagFromUri(uri);
     }
 
-    std::vector<properties::Property*> props =
-        findMatchesInAllProperties(regex, groupName);
+    std::vector<properties::Property*> props = findMatchesInAllProperties(uri, tag);
 
     std::vector<std::string> matches;
     matches.reserve(props.size());
@@ -756,36 +791,37 @@ namespace {
 /**
  * Removes all SceneGraphNodes with identifiers matching the input regular expression.
  */
-[[codegen::luawrap]] void removeSceneGraphNodesFromRegex(std::string name) {
+[[codegen::luawrap]] void removeSceneGraphNodesFromRegex(std::string regex) {
     using namespace openspace;
     const std::vector<SceneGraphNode*>& nodes =
         global::renderEngine->scene()->allSceneGraphNodes();
 
-    auto [nodeName, propertyName, isLiteral] = parseRegex(name);
+    auto [nodeIdentifier, propertyIdentifier, isLiteral] = parseRegex(regex);
 
     std::vector<SceneGraphNode*> markedList;
     for (SceneGraphNode* node : nodes) {
         const std::string& identifier = node->identifier();
 
-        if (isLiteral && identifier != propertyName) {
+        if (isLiteral && identifier != propertyIdentifier) {
             continue;
         }
 
-        if (!propertyName.empty()) {
-            const size_t propertyPos = identifier.find(propertyName);
+        if (!propertyIdentifier.empty()) {
+            const size_t propertyPos = identifier.find(propertyIdentifier);
             if (
-                // Check if the propertyName appears in the URI at all
+                // Check if the propertyIdentifier appears in the URI at all
                 (propertyPos == std::string::npos) ||
-                // Check that the propertyName fully matches the property in uri
-                ((propertyPos + propertyName.length() + 1) < identifier.length()) ||
+                // Check that the propertyIdentifier fully matches the property in uri
+                ((propertyPos + propertyIdentifier.length() + 1) < identifier.length()) ||
                 // Match node name
-                (!nodeName.empty() && identifier.find(nodeName) == std::string::npos))
+                (!nodeIdentifier.empty() &&
+                    identifier.find(nodeIdentifier) == std::string::npos))
             {
                 continue;
             }
         }
-        else if (!nodeName.empty()) {
-            size_t nodePos = identifier.find(nodeName);
+        else if (!nodeIdentifier.empty()) {
+            size_t nodePos = identifier.find(nodeIdentifier);
             if (nodePos == std::string::npos) {
                 continue;
             }
@@ -806,7 +842,7 @@ namespace {
 
     if (markedList.empty()) {
         throw ghoul::lua::LuaError(std::format(
-            "Did not find a match for identifier: {}", name
+            "Did not find a match for identifier: {}", nodeIdentifier
         ));
     }
 

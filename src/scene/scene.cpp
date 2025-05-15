@@ -757,7 +757,7 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
         std::string groupName = groupTag(uriOrRegex);
         if (!groupName.empty()) {
             // Remove group name from start of regex and replace with '*'
-            uriOrRegex = removeGroupNameFromUri(uriOrRegex);
+            uriOrRegex = removeGroupTagFromUri(uriOrRegex);
         }
         _profilePropertyName = uriOrRegex;
         ghoul::lua::push(L, uriOrRegex);
@@ -858,20 +858,31 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 R"(Sets the property or properties identified by the URI to the specified
 value. The `uri` identifies which property or properties are affected by this function
 call and can include both wildcards `*` which match anything, as well as tags (`{tag}`)
-which match scene graph nodes that have this tag. If no wildcards or tags are provided at
-most one property value will be changed. With wildchards or tags all properties that match
-the URI are changed instead. The second argument's type must match the type of the
-property or properties or an error is raised. If a duration is provided, the requested
-change will occur over the provided number of seconds. If no duration is provided or the
-duration is 0, the change occurs instantaneously.
+which match scene graph nodes that have this tag. There is also the ability to combine two
+tags through the `&`, `|`, and `~` operators. `{tag1&tag2}` will match anything that has
+the tag1 and the tag2. `{tag1|tag2}` will match anything that has the tag1 or the tag 2,
+and `{tag1~tag2}` will match anything that has tag1 but not tag2. If no wildcards or tags
+are provided at most one property value will be changed. With wildcards or tags all
+properties that match the URI are changed instead. The second argument's type must match
+the type of the property or properties or an error is raised. If a duration is provided,
+the requested change will occur over the provided number of seconds. If no duration is
+provided or the duration is 0, the change occurs instantaneously.
+
+For example `openspace.setPropertyValue("*Trail.Renderable.Enabled", true)` will enable
+any property that ends with "Trail.Renderable.Enabled", for example
+"StarTrail.Renderable.Enabled", "EarthTrail.Renderable.Enabled", but not
+"EarthTrail.Renderable.Size".
+
+`openspace.setPropertyValue("{tag1}.Renderable.Enabled", true)` will enable any node in
+the scene that has the "tag1" assigned to it.
 
 If you only want to change a single property value, also see the #setPropertyValueSingle
 function as it will do so in a more efficient way. The `setPropertyValue` function will
 work for individual property value, but is more computationally expensive.
 
 \\param uri The URI that identifies the property or properties whose values should be
-changed. The URI can contain 0 or 1 wildcard `*` characters or one tag `{tag}` that
-identifies a property owner
+changed. The URI can contain 0 or 1 wildcard `*` characters or a tag expression (`{tag}`)
+that identifies a property owner
 \\param value The new value to which the property/properties identified by the `uri`
 should be changed to. The type of this parameter must agree with the type of the selected
 property
@@ -885,11 +896,10 @@ in which the parameter is interpolated. Has to be one of "Linear", "QuadraticEas
 "CircularEaseOut", "CircularEaseInOut", "ExponentialEaseIn", "ExponentialEaseOut",
 "ExponentialEaseInOut", "ElasticEaseIn", "ElasticEaseOut", "ElasticEaseInOut",
 "BounceEaseIn", "BounceEaseOut", "BounceEaseInOut"
-\\param postscript This parameter specifies a Lua script that will be executed once the
-change of property value is completed. If a duration larger than 0 was provided, it is
-at the end of the interpolation. If 0 was provided, the script runs immediately.
-)",
-                { "src/scene/scene_lua.inl", 378 }
+\\param postscript A Lua script that will be executed once the change of property value
+is completed. If a duration larger than 0 was provided, it is at the end of the
+interpolation. If 0 was provided, the script runs immediately.
+)"
             },
             {
                 "setPropertyValueSingle",
@@ -903,14 +913,14 @@ at the end of the interpolation. If 0 was provided, the script runs immediately.
                 },
                 "",
                 R"(Sets the single property identified by the URI to the specified value.
-The `uri` identifies which property isaffected by this function call. The second
+The `uri` identifies which property is affected by this function call. The second
 argument's type must match the type of the property or an error is raised. If a duration
 is provided, the requested change will occur over the provided number of seconds. If no
 duration is provided or the duration is 0, the change occurs instantaneously.
 
-If you only want to change multiple property values simultaneously, also see the
+If you want to change multiple property values simultaneously, also see the
 #setPropertyValue function. The `setPropertyValueSingle` function however will work more
-efficiently for individual property value.
+efficiently for individual property values.
 
 \\param uri The URI that identifies the property
 \\param value The new value to which the property identified by the `uri` should be
@@ -928,8 +938,7 @@ in which the parameter is interpolated. Has to be one of "Linear", "QuadraticEas
 \\param postscript This parameter specifies a Lua script that will be executed once the
 change of property value is completed. If a duration larger than 0 was provided, it is
 at the end of the interpolation. If 0 was provided, the script runs immediately.
-)",
-                { "src/scene/scene_lua.inl", 378 }
+)"
             },
             {
                 "getPropertyValue",
@@ -939,8 +948,7 @@ at the end of the interpolation. If 0 was provided, the script runs immediately.
                 },
                 "String | Number | Boolean | Table",
                 "Returns the value the property, identified by the provided URI. "
-                "Deprecated in favor of the 'propertyValue' function",
-                { "src/scene/scene_lua.inl", 495 }
+                "Deprecated in favor of the 'propertyValue' function"
             },
             {
                 "propertyValue",
@@ -949,10 +957,9 @@ at the end of the interpolation. If 0 was provided, the script runs immediately.
                     { "uri", "String" }
                 },
                 "String | Number | Boolean | Table",
-                "Returns the value the property, identified by the provided URI. This "
+                "Returns the value of the property identified by the provided URI. This "
                 "function will provide an error message if no property matching the URI "
-                "is found.",
-                { "src/scene/scene_lua.inl", 495 }
+                "is found."
             },
             codegen::lua::HasProperty,
             codegen::lua::PropertyDeprecated,
