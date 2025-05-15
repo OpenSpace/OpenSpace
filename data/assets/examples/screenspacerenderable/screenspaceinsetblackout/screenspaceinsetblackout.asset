@@ -1,4 +1,4 @@
--- basic
+-- Basic
 -- Create a screenspace image plane with controls to for a blackout shape.
 -- Can be used when using a secondary projector to project content on a dome surface.
 
@@ -17,19 +17,6 @@ local inset = {
     -- Must always contain four corners in the following order: 
     -- top-left, top-right, bottom-right, bottom-left
     Corners = { {0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}, {0.0, 0.0} },
-    
-    -- Contains control points for top spline in order left to right
-    Top = { },
-    
-    -- Contains control points for right spline in order top to bottom
-    Right = { },
-    
-    -- Contains control points for bottom spline in order right to left
-    Bottom = { },
-    
-    -- Contains control points for left spline in order bottom to top
-    Left = { },
-
     CalibrationTexturePath = texturePath .. "calibration-pattern.png";
   },
   Scale = 1.0
