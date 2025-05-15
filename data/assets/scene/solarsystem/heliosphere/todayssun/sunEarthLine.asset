@@ -32,7 +32,7 @@ asset.export("NodeLine", SunEarthLine)
 asset.meta = {
   Name = "Sun Earth Line",
   Version = "1.0",
-  Description = [[A line between the Sun and the Earth to help orient you.]],
+  Description = [[A line between the Sun and the Earth to help with spacial orientation.]],
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license"

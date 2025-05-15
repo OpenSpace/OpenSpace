@@ -35,7 +35,7 @@ local Fieldlines = {
     ColorTablePaths = {
       asset.resource("transferfunctions/density-fieldlines.txt")
     },
-    ColorMinMaxRange = {0, 1000000}
+    ColorMinMaxRange = { 0, 1000000 }
   },
   GUI = {
     Path = "/Solar System/Heliosphere/Bastille Day 2000",

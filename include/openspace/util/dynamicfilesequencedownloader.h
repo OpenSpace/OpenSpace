@@ -82,6 +82,7 @@ private:
     bool _isForwardDirection = true;
     bool _isFirstFrame = true;
     bool _isSecondFrame = true;
+    bool _hasNotifiedTooFast = false;
 
     std::filesystem::path _syncDir;
     std::filesystem::path _trackSynced;

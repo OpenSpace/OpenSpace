@@ -124,7 +124,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo FitsLayerNameInfo = {
-        "FitsLayerName",
+        "LayerNames",
         "Surface Layer Options",
         "This value specifies which name of the fits layer to use as texture.",
         openspace::properties::Property::Visibility::User
@@ -162,8 +162,9 @@ namespace {
         std::optional<int> numberOfFilesToQueue;
         std::optional<std::string> infoURL;
         std::optional<std::string> dataURL;
-        // An index specifying which layer in the fits file to display
+        // codegen::verbatim(FitsLayerInfo.description)]]
         std::optional<int> fitsLayer;
+        // codegen::verbatim(FitsLayerNameInfo.description)]]
         std::optional<std::vector<std::string>> layerNames;
         // A positive number to be used to cap where the color range will lie.
         // Values higher than this number, and values lower than the negative of
@@ -179,6 +180,7 @@ namespace {
             NearestNeighbor,
             Linear
         };
+        // codegen::verbatim(TextureFilterInfo.description)]]
         std::optional<TextureFilter> textureFilter;
     };
 #include "renderabletimevaryingsphere_codegen.cpp"
@@ -289,7 +291,7 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
                 "If running with dynamic downloading, dataID needs to be specified"
             );
         }
-        _nOfFilesToQueue = p.numberOfFilesToQueue.value_or(_nOfFilesToQueue);
+        _nFilesToQueue = p.numberOfFilesToQueue.value_or(_nFilesToQueue);
         _infoURL = p.infoURL.value();
         if (_infoURL.empty()) {
             throw ghoul::RuntimeError("InfoURL has to be provided");
@@ -299,7 +301,7 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
             throw ghoul::RuntimeError("DataURL has to be provided");
         }
         _dynamicFileDownloader = std::make_unique<DynamicFileSequenceDownloader>(
-            _dataID, _infoURL, _dataURL, _nOfFilesToQueue
+            _dataID, _infoURL, _dataURL, _nFilesToQueue
         );
 
         _fitsDataCapValue = p.fitsDataCapValue.value_or(_fitsDataCapValue);
@@ -543,7 +545,7 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
             loadTexture();
         }
     }
-    if (!_firstUpdate && _isUsingColorMap) {
+    if (!_firstUpdate && _useColorMap) {
         _dataMinMaxValues = _files[_activeTriggerTimeIndex].dataMinMax;
     }
     if (_textureIsDirty) [[unlikely]] {

@@ -2,7 +2,21 @@ local Mission = {
   Identifier = "WSA",
   Name = "The WSA Simulation Model",
   TimeRange = { Start = "2006 SEP 18 11:54:00", End = "2025 MAR 24 00:00:00" },
-  Description = "This profile shows the sun and its magnetic polarities. The visualizations are results from the WSA model version 5.4 and all the data is downloaded dynamically, bringing you the latest data from the model. In the Scene menu, under Solar System/ Heliosphere you will be able to find the assets. Under WSA Coronal Model 5.4 submenu you find additional fieldline options and solar surface options. For each asset, there are options for appearance as well as the option to save the downloaded content for next time, since the data is not cached on default. For the surfaces there are also diffrent layers to choose from. Since each data file is used until the next one in the sequence, it's recommended to make sure to look in the GUI which file is being used under each assets Texture Source field. The white line shooting out from the Sun is always connected to the center of the Earth, along with the white arch. The yellow arch is the carrington prime meridian and the green grid is seperated with 10 degrees. Additionally, under the Actions panel you can find an option to toggle a white background. If no data is showing, most likely time is set outside of data range or alternatively files failed to download. For more information on the simulation model, see https://ccmc.gsfc.nasa.gov/models/WSA~5.4.",
+  Description = [[This profile shows the sun and its magnetic polarities. The visualizations are
+    results from the WSA model version 5.4 and all the data is downloaded dynamically, bringing
+    you the latest data from the model. In the Scene menu, under "Solar System/Heliosphere" you
+    will be able to find the assets. Under WSA Coronal Model 5.4 submenu you find additional
+    fieldline options and solar surface options. For each asset, there are options for appearance
+    as well as the option to save the downloaded content for next time, since the data is not
+    cached on default. For the surfaces, there are also different layers to choose from. Since
+    each data file is used until the next one in the sequence, it's recommended to make sure to
+    look in the GUI which file is being used under each assets Texture Source field. The white
+    line shooting out from the Sun is always connected to the center of the Earth, along with
+    the white arch. The yellow arch is the Carrington prime meridian and the green grid is
+    separated with 10 degrees. Additionally, under the Actions panel you can find an option
+    to toggle a white background. If no data is showing, most likely time is set outside of
+    data range or alternatively files failed to download. For more information on the simulation
+    model, see https://ccmc.gsfc.nasa.gov/models/WSA~5.4.]],
   Actions = { "os.todayssun.ToggleWhiteBackground" },
   Milestones = {
     {

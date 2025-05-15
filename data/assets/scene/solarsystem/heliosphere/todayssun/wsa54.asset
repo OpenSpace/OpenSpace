@@ -2,7 +2,6 @@ local transforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
 
 
 
-
 local transferFunctions = asset.resource({
   Type = "HttpSynchronization",
   Name = "Today's Sun Transfer Functions",
@@ -21,8 +20,8 @@ local infoURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/D
 local dataURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID="
 
 local sunRadius = 695508000
-    -- This small 0.2% increase is an arbitrary number but
-    -- necessary to make sure it is not within the Sun sphere
+  -- This small 0.2% increase is an arbitrary number but necessary to make sure it is not
+  -- within the Sun sphere
 local extendedRadius = sunRadius * 1.002
 
 local WSA_Magnetograms = {
@@ -56,8 +55,8 @@ local WSA_Magnetograms = {
   GUI = {
     Name = "Solar Surface (GONG-Z)",
     Path = "/Solar System/Heliosphere/WSA Coronal Model",
-    Description = [[Texture sequence of simulation model WSA 5.4. ]] ..
-    [[Output: fits files using GONG-Z Map (RADOUT =  5.0). Dynamically downloaded]]
+    Description = [[Texture sequence of simulation model WSA 5.4. Output: FITS files using GONG-Z Map
+      (RADOUT =  5.0). Dynamically downloaded.]]
   }
 }
 
@@ -92,8 +91,8 @@ local WSA_Magnetograms_Adapt = {
   GUI = {
     Name = "Solar Surface (GONG ADAPT)",
     Path = "/Solar System/Heliosphere/WSA Coronal Model",
-    Description = [[Texture sequence of simulation model WSA 5.4. ]] ..
-    [[Output fits file using ADAPT GONG realization 000 to 011 Maps (RADOUT =  5.0)]]
+    Description = [[Texture sequence of simulation model WSA 5.4. Output: FITS file using
+      ADAPT GONG realization 000 to 011 Maps (RADOUT =  5.0).]]
   }
 }
 
@@ -121,8 +120,8 @@ local WSA_Velocity_Adapt = {
   GUI = {
     Name = "Solar Surface Velocity (GONG-ADAPT)",
     Path = "/Solar System/Heliosphere/WSA Coronal Model",
-    Description = [[Texture sequence of simulation model WSA 5.4. ]] ..
-    [[Output fits file using ADAPT GONG realization 000-011 Maps (RADOUT =  21.5)]]
+    Description = [[Texture sequence of simulation model WSA 5.4. Output: FITS file using ADAPT
+      GONG realization 000-011 Maps (RADOUT =  21.5).]]
   }
 }
 
@@ -150,8 +149,8 @@ local WSA_Velocity_Gong = {
   GUI = {
     Name = "Solar Surface Velocity (GONG-Z)",
     Path = "/Solar System/Heliosphere/WSA Coronal Model",
-    Description = [[Texture sequence of simulation model WSA 5.4. ]] ..
-    [[Output fits file using GONG-Z Map (RADOUT =  21.5)]]
+    Description = [[Texture sequence of simulation model WSA 5.4. Output: FITS file using GONG-Z
+      Map (RADOUT =  21.5).]]
   }
 }
 
@@ -188,8 +187,8 @@ local fieldlinesSCS = {
   GUI = {
     Name = "Fieldlines: Corona SCS (Out-In Tracing)",
     Path = "/Solar System/Heliosphere/WSA Coronal Model",
-    Description = [[WSA 5.4 real-time output of the fieldline trace from ]] ..
-      [[the SCS outer boundary to the source surface using GONGZ as input]]
+    Description = [[WSA 5.4 real-time output of the fieldline trace from the SCS outer boundary
+      to the source surface using GONGZ as input.]]
   }
 }
 
@@ -226,8 +225,8 @@ local fieldlinesOI = {
   GUI = {
     Name = "Fieldlines: Corona PFSS (Out-In Tracing)",
     Path = "/Solar System/Heliosphere/WSA Coronal Model",
-    Description = [[WSA 5.4 real-time output of the fieldline trace from ]] ..
-      [[the source surface to the solar surface using GONGZ as input]]
+    Description = [[WSA 5.4 real-time output of the fieldline trace from the source surface to
+      the solar surface using GONGZ as input.]]
   }
 }
 
@@ -262,8 +261,8 @@ local fieldlinesIO = {
   GUI = {
     Name = "Fieldlines: Corona PFSS (In-Out Tracing)",
     Path = "/Solar System/Heliosphere/WSA Coronal Model",
-    Description = [[WSA 5.4 real-time output of the fieldline trace from ]] ..
-      [[the solar surface to the source surface using GONGZ as input]]
+    Description = [[WSA 5.4 real-time output of the fieldline trace from the solar surface to
+      the source surface using GONGZ as input.]]
   }
 }
 
@@ -300,8 +299,8 @@ local fieldlinesEarth = {
   GUI = {
     Name = "Fieldlines: Tracing from Earth",
     Path = "/Solar System/Heliosphere/WSA Coronal Model",
-    Description = [[WSA 5.4 real-time output of the field line trace from ]] ..
-      [[the Earth using GONGZ as input]]
+    Description = [[WSA 5.4 real-time output of the field line trace from Earth using GONGZ
+      as input.]]
   }
 }
 
@@ -343,9 +342,9 @@ asset.export(fieldlinesEarth)
 asset.meta = {
   Name = "WSA 5.4. Streaming data dynamically",
   Version = "1.0",
-  Description = [[Downloading data from the WSA 5.4 simulation model, showing the ]]..
-    [[dynamic sun at any point. It includes .fits files for sun surface data and ]]..
-    [[.osfls files (OpenSpace FieldLine Sequence) for fieldlines]],
+  Description = [[Downloading data from the WSA 5.4 simulation model, showing the dynamic
+    sun at any point. It includes .fits files for sun surface data and .osfls files
+    (OpenSpace FieldLine Sequence) for fieldlines.]],
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license"

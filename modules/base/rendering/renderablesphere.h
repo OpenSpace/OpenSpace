@@ -74,13 +74,13 @@ protected:
 
     glm::vec2 _dataMinMaxValues;
     ghoul::opengl::ProgramObject* _shader = nullptr;
-    properties::BoolProperty _isUsingColorMap;
+    properties::BoolProperty _useColorMap;
 
 private:
     std::unique_ptr<Sphere> _sphere;
     bool _sphereIsDirty = false;
 
-    properties::StringProperty _transferFunctionPath;
+    properties::StringProperty _colorMap;
     std::unique_ptr<TransferFunction> _transferFunction;
 
     UniformCache(opacity, modelViewProjection, modelViewTransform, modelViewRotation,

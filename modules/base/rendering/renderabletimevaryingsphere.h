@@ -94,49 +94,49 @@ private:
     void computeSequenceEndTime();
     void updateDynamicDownloading(const double currentTime, const double deltaTime);
 
+    properties::OptionProperty _fitsLayer;
+    properties::OptionProperty _fitsLayerName;
+    // An option to keep or delete the downloads from dynamic downloader on shutdown
+    // Deletes on default
+    properties::BoolProperty _saveDownloadsOnShutdown;
+    properties::OptionProperty _textureFilterProperty;
+    properties::StringProperty _textureSourcePath;
+
     // If there's just one state it should never disappear!
     double _sequenceEndTime = std::numeric_limits<double>::max();
     // Static Loading on default / if not specified
     LoadingType _loadingType = LoadingType::StaticLoading;
-    // dataID that corresponds to what dataset to use if using DynamicDownloading
+    // A data ID that corresponds to what dataset to use if using DynamicDownloading
     int _dataID;
-    // number of files to queue up at a time
-    int _nOfFilesToQueue = 10;
-    // to keep track of oldest file
+    // Number of files to queue up at a time
+    int _nFilesToQueue = 10;
+    // To keep track of oldest file
     std::queue<File*> _loadedFiles;
-    // max number of files loaded at onse
+    // Max number of files loaded at once
     size_t _maxLoadedFiles = 100;
-    std::string _infoURL = "";
-    std::string _dataURL = "";
-    properties::OptionProperty _fitsLayer;
-    properties::OptionProperty _fitsLayerName;
+    std::string _infoURL;
+    std::string _dataURL;
     bool _hasLayerNames = false;
     std::map<int, std::string> _layerNames;
     int _fitsLayerTemp;
     int _fitsLayerNameTemp;
     float _fitsDataCapValue = 50.f;
-    // An option to keep or delete the downloads from dynamic downloader on shutdown
-    // Deletes on default
-    properties::BoolProperty _saveDownloadsOnShutdown;
     // If there's just one state it should never disappear
     bool _renderForever = false;
     bool _inInterval = false;
 
     bool _isLoadingStateFromDisk = false;
-    //  DynamicFileSequenceDownloader downloads and updates the renderable with
-    //  data downloaded from the web.
+    // DynamicFileSequenceDownloader downloads and updates the renderable with
+    // data downloaded from the web
     std::unique_ptr<DynamicFileSequenceDownloader> _dynamicFileDownloader;
-    properties::OptionProperty _textureFilterProperty;
     std::vector<File> _files;
     int _activeTriggerTimeIndex = 0;
 
-    properties::StringProperty _textureSourcePath;
     bool _isFitsFormat = false;
     bool _firstUpdate = true;
     bool _layerOptionsAdded = false;
     ghoul::opengl::Texture* _texture = nullptr;
     bool _textureIsDirty = true;
-
 };
 } // namespace openspace
 

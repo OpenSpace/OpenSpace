@@ -548,8 +548,14 @@ void DynamicFileSequenceDownloader::update(double time, double deltaTime) {
     // for a regular internet connection to operate at
     constexpr int SpeedThreshold = 7200;
     if (abs(deltaTime) > SpeedThreshold) {
-        // Too fast, do nothing. This is not optimal since it prints a lot
-        LWARNING("Dynamic file sequence downloader: Paused. Time moves too fast");
+        // Too fast, do nothing
+        if (!_hasNotifiedTooFast) {
+            LWARNING(
+                "Dynamic File Sequence Downloader: Setting time speed faster than 2h "
+                "per second will pause the downloader."
+            );
+            _hasNotifiedTooFast = true;
+        }
         return;
     }
 

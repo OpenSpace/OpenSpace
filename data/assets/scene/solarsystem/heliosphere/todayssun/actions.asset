@@ -1,6 +1,6 @@
 local ToggleWhiteBackground = {
   Identifier = "os.todayssun.ToggleWhiteBackground",
-  Name = "Toggle white background on and off",
+  Name = "Toggle white background",
   Command = [[
     if not openspace.propertyValue("Scene.WhiteBackground_sphere.Renderable.Enabled") then
       openspace.setPropertyValueSingle("Scene.WhiteBackground_sphere.Renderable.Fade", 0.0)
@@ -18,7 +18,7 @@ local ToggleWhiteBackground = {
       openspace.setPropertyValue("Scene.WSA*.Renderable.ABlendingEnabled", true)
     end
   ]],
-  Documentation = "This toggles a white sphere, the stars and the adative blending of any fieldlines"
+  Documentation = "This toggles a white sphere, the stars, and the addative blending of any fieldlines"
 }
 
 

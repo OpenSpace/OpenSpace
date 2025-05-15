@@ -108,9 +108,9 @@ local WSAOffset60 = {
     }
   },
   GUI = {
-    Name = "WSA data offset 60 degrees",
+    Name = "WSA Data Offset 60 Degrees",
     Path = "/Solar System/Sun",
-    Description = "WSA outputs (fits files) has the Sun-Earth line 60 degrees shifted from the edge",
+    Description = "WSA outputs (FITS files) have the Sun-Earth line 60 degrees shifted from the edge.",
     Hidden = true
   }
 }
@@ -124,7 +124,6 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(HeliocentricEarthEquatorial)
   openspace.addSceneGraphNode(HeliocentricEarthEcliptic)
   openspace.addSceneGraphNode(WSAOffset60)
-
 end)
 
 asset.onDeinitialize(function()

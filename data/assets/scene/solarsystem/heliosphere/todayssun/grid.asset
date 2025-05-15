@@ -5,7 +5,7 @@ local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local size = 700000000
 
-local carrington_prime_meridian = {
+local CarringtonPrimeMeridian = {
   Identifier = "CarringtonPrimeMeridian",
   Parent = sunTransforms.SunIAU.Identifier,
   Transform = {
@@ -33,11 +33,12 @@ local carrington_prime_meridian = {
   GUI = {
     Name = "Carrington Prime Meridian",
     Path =  "/Solar System/Heliosphere",
-    Description = [[A 2x64 spherical grid showing the Carrington prime meridian]]
+    Description = [[An arch showing The Carrington prime meridian of the Sun.]] ..
+      [[The line from pole to pole at 0 degree longitude.]]
   }
 }
 
-local grid_slice = {
+local WSA_GridSlice = {
   Identifier = "WSA_GridSlice",
   Parent = transforms.HeliocentricEarthEquatorial.Identifier,
   Transform = {
@@ -59,13 +60,13 @@ local grid_slice = {
     LatSegments = 64
   },
   GUI = {
-    Name = "Solar longitude facing the Earth",
+    Name = "Solar Longitude Facing the Earth",
     Path =  "/Solar System/Heliosphere",
-    Description = [[An arch on the Sun suface that always faces Earth]]
+    Description = [[An arch on the Sun suface that always faces Earth.]]
   }
 }
 
-local grid_10deg = {
+local WSA_Grid10Degrees = {
   Identifier = "WSA_Grid10Degrees",
   Parent = transforms.HeliocentricEarthEquatorial.Identifier,
   Transform = {
@@ -84,31 +85,31 @@ local grid_10deg = {
   GUI = {
     Name = "Grid on Sun",
     Path =  "/Solar System/Heliosphere",
-    Description = [[A grid aligned with the Sun-Earth line.
-      10 degree seperationg between line segments on default.]]
+    Description = [[A grid aligned with the Sun-Earth line, with a 10-degree ]] ..
+      [[seperation between line segments by default.]]
   }
 }
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(carrington_prime_meridian)
-  openspace.addSceneGraphNode(grid_slice)
-  openspace.addSceneGraphNode(grid_10deg)
+  openspace.addSceneGraphNode(CarringtonPrimeMeridian)
+  openspace.addSceneGraphNode(WSA_GridSlice)
+  openspace.addSceneGraphNode(WSA_Grid10Degrees)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(grid_10deg)
-  openspace.removeSceneGraphNode(grid_slice)
-  openspace.removeSceneGraphNode(carrington_prime_meridian)
+  openspace.removeSceneGraphNode(WSA_Grid10Degrees)
+  openspace.removeSceneGraphNode(WSA_GridSlice)
+  openspace.removeSceneGraphNode(CarringtonPrimeMeridian)
 end)
 
-asset.export(carrington_prime_meridian)
-asset.export(grid_slice)
-asset.export(grid_10deg)
+asset.export(CarringtonPrimeMeridian)
+asset.export(WSA_GridSlice)
+asset.export(WSA_Grid10Degrees)
 
 
 
 asset.meta = {
-  Name = "Real Time Sun Grid lines",
+  Name = "Real-time Sun Grid Lines",
   Version = "1.0",
   Description = [[Grids to guide the orientation of the Sun and
     its rotation in relation to Earth.]],
