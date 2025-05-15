@@ -4,7 +4,7 @@
 
 local texturePath = asset.resource({
   Type = "HttpSynchronization",
-  Identifier = "screenspaceinsetblackout_calibration_pattern",
+  Identifier = "calibration_pattern",
   Name = "ScreenSpaceInsetBlackout Calibration Pattern",
   Version = 1
 })
@@ -30,7 +30,7 @@ local inset = {
     -- Contains control points for left spline in order bottom to top
     Left = { },
 
-    CalibrationTexturePath = texturePath .. "calibration_pattern.png";
+    CalibrationTexturePath = texturePath .. "calibration-pattern.png";
   },
   Scale = 1.0
 }
