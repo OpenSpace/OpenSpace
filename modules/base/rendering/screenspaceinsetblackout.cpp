@@ -525,8 +525,8 @@ ScreenSpaceInsetBlackout::ScreenSpaceInsetBlackout(const ghoul::Dictionary& dict
     }
 }
 
-bool ScreenSpaceInsetBlackout::initializeGL() {
-    bool success = ScreenSpaceRenderable::initializeGL();
+void ScreenSpaceInsetBlackout::initializeGL() {
+    ScreenSpaceRenderable::initializeGL();
 
     // Setup vertex buffer
     glGenVertexArrays(1, &_vao);
@@ -588,11 +588,9 @@ bool ScreenSpaceInsetBlackout::initializeGL() {
     // Generate vertex data and texture
     generateVertexArrayData();
     generateTexture();
-
-    return success;
 }
 
-bool ScreenSpaceInsetBlackout::deinitializeGL() {
+void ScreenSpaceInsetBlackout::deinitializeGL() {
     _blackoutTexture = nullptr;
     _calibrationTexture = nullptr;
 
@@ -610,7 +608,7 @@ bool ScreenSpaceInsetBlackout::deinitializeGL() {
         _fboProgram = nullptr;
     }
 
-    return ScreenSpaceRenderable::deinitializeGL();
+    ScreenSpaceRenderable::deinitializeGL();
 }
 
 void ScreenSpaceInsetBlackout::update() {

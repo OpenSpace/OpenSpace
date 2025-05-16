@@ -38,8 +38,8 @@ class ScreenSpaceInsetBlackout : public ScreenSpaceRenderable {
 public:
     explicit ScreenSpaceInsetBlackout(const ghoul::Dictionary& dictionary);
 
-    bool initializeGL() override;
-    bool deinitializeGL() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
     void update() override;
 
     static documentation::Documentation Documentation();
