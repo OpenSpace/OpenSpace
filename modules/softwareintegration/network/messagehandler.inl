@@ -26,6 +26,8 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/engine/globals.h>
+#include <openspace/properties/scalar/intproperty.h>
+
 #include <ghoul/logging/logmanager.h>
 
 namespace openspace::softwareintegration::messagehandler {
@@ -45,7 +47,7 @@ bool handleEnumValue(
         simp::readValue(message, offset, newValue);
     }
     catch (const simp::SimpError& err) {
-        LERRORC("MessageHandler", fmt::format(
+        LERRORC("MessageHandler", std::format(
             "Error when parsing int32_t in DATA.{} message: {}",
             simp::getStringFromDataKey(dataKey), err.message
         ));
@@ -56,7 +58,7 @@ bool handleEnumValue(
         static_cast<T>(newValue);
     }
     catch (const std::exception& err) {
-        LERRORC("MessageHandler", fmt::format(
+        LERRORC("MessageHandler", std::format(
             "Error when casting {} to {} in DATA.{} message: {}",
             newValue, typeid(T).name(), simp::getStringFromDataKey(dataKey), err.what()
         ));
@@ -72,15 +74,16 @@ bool handleEnumValue(
         auto property = r->property(propertyName);
         if (!property) return;
 
-        // Update bool property of renderable
-        auto currentValue = std::any_cast<int>(property->get());
+        // Update int property of renderable
+        properties::FloatProperty* prop = static_cast<properties::FloatProperty*>(property);
+
+        int currentValue = int(prop->value());
         if (newValue != currentValue) {
             global::scriptEngine->queueScript(
-                fmt::format(
+                std::format(
                     "openspace.setPropertyValueSingle('Scene.{}.Renderable.{}', {});",
                     identifier, propertyName, ghoul::to_string(newValue)
-                ),
-                scripting::ScriptEngine::RemoteScripting::Yes
+                )
             );
         }
     };
@@ -89,7 +92,7 @@ bool handleEnumValue(
         {
             setEnumCallback,
             {},
-            fmt::format("Callback on property {}", propertyName), 
+            std::format("Callback on property {}", propertyName), 
         }
     );
 

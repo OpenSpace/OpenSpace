@@ -121,7 +121,7 @@ int32_t readInt32Value(const std::vector<std::byte>& message, size_t& offset) {
     }
     catch(std::exception &err) {
         throw SimpError(
-            fmt::format("Error when trying to parse an integer at offset {}", err.what())
+            std::format("Error when trying to parse an integer at offset {}", err.what())
         );
     }
 
@@ -139,7 +139,7 @@ bool readBoolValue(const std::vector<std::byte>& message, size_t& offset) {
     }
     catch(std::exception &err) {
         throw SimpError(
-            fmt::format("Error when trying to parse a bool at offset {}", err.what())
+            std::format("Error when trying to parse a bool at offset {}", err.what())
         );
     }
 
@@ -162,7 +162,7 @@ float readFloat32Value(const std::vector<std::byte>& message, size_t& offset) {
     }
     catch(std::exception &err) {
         throw SimpError(
-            fmt::format("Error when trying to parse a float at offset = {}", err.what())
+            std::format("Error when trying to parse a float at offset = {}", err.what())
         );
     }
     offset += 4;
@@ -206,11 +206,11 @@ std::string readString(const std::vector<std::byte>& message, size_t& offset) {
 }  // namespace
 
 SimpError::SimpError(const tools::ErrorCode _errorCode, const std::string& msg)
-    : errorCode{errorCode}, ghoul::RuntimeError(fmt::format("{}: Error Code: {} - {}", "SIMP error", static_cast<uint32_t>(_errorCode), msg), "Software Integration Messaging Protocol error")
+    : errorCode{errorCode}, ghoul::RuntimeError(std::format("{}: Error Code: {} - {}", "SIMP error", static_cast<uint32_t>(_errorCode), msg), "Software Integration Messaging Protocol error")
 {}
 
 SimpError::SimpError(const std::string& msg)
-    : errorCode{tools::ErrorCode::Generic}, ghoul::RuntimeError(fmt::format("{}: Error Code: {} - {}", "SIMP error", static_cast<uint32_t>(errorCode), msg), "Software Integration Messaging Protocol error")
+    : errorCode{tools::ErrorCode::Generic}, ghoul::RuntimeError(std::format("{}: Error Code: {} - {}", "SIMP error", static_cast<uint32_t>(errorCode), msg), "Software Integration Messaging Protocol error")
 {}
 
 MessageType getMessageType(const std::string& type) {
@@ -275,7 +275,7 @@ std::string yearIntToString(int32_t yearAsInt) {
     // (used in RenderablePointsCloud::updateVelocityT0) just converts 
     // negative values to small values
     if (yearAsInt < 0) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "The year can't be negative. The provided year: {}", 
             yearAsInt
         ));
@@ -311,14 +311,14 @@ std::string monthIntToString(int32_t monthAsInt) {
         case 12:
             return "DEC";
         default:
-            LERROR(fmt::format("There's no month {}", monthAsInt));
+            LERROR(std::format("There's no month {}", monthAsInt));
             return "";
     }
 }
 
 std::string dayIntToString(int32_t dayAsInt) {
     if (dayAsInt < 0 || dayAsInt > 31) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "There was an issue trying to convert the day as int to a string. The provided day as int: {}", 
             dayAsInt
         ));
@@ -337,7 +337,7 @@ std::string toDateString(glm::ivec3 dateVec) {
     dateString += simp::yearIntToString(dateVec[0]); // Year
     dateString += " " + simp::monthIntToString(dateVec[1]); // Month
     dateString += " " + simp::dayIntToString(dateVec[2]); // Day
-    LWARNING(fmt::format("dateString='{}'", dateString));
+    LWARNING(std::format("dateString='{}'", dateString));
 
     return dateString;
 }
@@ -354,7 +354,7 @@ bool readColorChannel(
         simp::readValue(message, offset, newChannelValue);
     }
     catch (const simp::SimpError& err) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Error when parsing float in {} message: {}",
             simp::getStringFromDataKey(dataKey), err.message
         ));
@@ -376,7 +376,7 @@ bool readDateValue(
         simp::readValue(message, offset, newTimeValue);
     }
     catch (const simp::SimpError& err) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Error when parsing int in {} message: {}",
             simp::getStringFromDataKey(dataKey), err.message
         ));

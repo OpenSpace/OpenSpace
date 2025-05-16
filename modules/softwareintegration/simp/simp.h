@@ -37,7 +37,7 @@ const uint8_t _version_patch = 1;
 
 } // namespace
 
-const std::string protocolVersion = fmt::format("{}.{}.{}", _version_major, _version_minor, _version_patch);
+const std::string protocolVersion = std::format("{}.{}.{}", _version_major, _version_minor, _version_patch);
 
 const char DELIM = ';';
 const std::byte DELIM_BYTES{ DELIM };

@@ -63,7 +63,7 @@ bool writeToFile(std::filesystem::path path, const std::vector<std::byte>& buffe
         return true;
     }
     catch (const std::ofstream::failure& e) {
-        errorMessage = fmt::format("Could not write to the file \"{}\". {}.", path.string(), e.what());
+        errorMessage = std::format("Could not write to the file \"{}\". {}.", path.string(), e.what());
         return false;
     }
 }
@@ -83,7 +83,7 @@ bool readFile(std::filesystem::path path, std::vector<std::byte>& buffer, std::s
         return true;
     }
     catch (const std::ifstream::failure& e) {
-        errorMessage = fmt::format("Couldn't read the file \"{}\". {}.", path.string(), e.what());
+        errorMessage = std::format("Couldn't read the file \"{}\". {}.", path.string(), e.what());
         return false;
     }
 }
@@ -101,7 +101,7 @@ bool saveSessionData(SyncableStorage& storage,
     }
 
     if (std::filesystem::exists(filePath)) {
-        errorMessage = fmt::format("The file \"{}\" already exists.", filePath.filename().string());
+        errorMessage = std::format("The file \"{}\" already exists.", filePath.filename().string());
         return false;
     }
 
@@ -120,7 +120,7 @@ bool softwareintegration::Session::loadSessionData(SoftwareIntegrationModule* mo
 ) {
     auto filePath = std::filesystem::path{filePathString};
     if (!std::filesystem::exists(filePath) || !std::filesystem::is_regular_file(filePath)) {
-        errorMessage = fmt::format("File {} doesn't exists...", filePathString);
+        errorMessage = std::format("File {} doesn't exists...", filePathString);
         LERROR(errorMessage);
         return false;
     }
@@ -136,7 +136,7 @@ bool softwareintegration::Session::loadSessionData(SoftwareIntegrationModule* mo
         module->_syncableStorage.store(byteStream);
     }
     catch (const std::exception& e) {
-        errorMessage = fmt::format("Couldn't store loaded data in Software Integration storage", e.what());
+        errorMessage = std::format("Couldn't store loaded data in Software Integration storage", e.what());
         LERROR(errorMessage);
         return false;
     }
@@ -149,11 +149,10 @@ bool softwareintegration::Session::loadSessionData(SoftwareIntegrationModule* mo
                                     " 1576800000000.0, 3153600000000.0,"
                                     " 15768000000000.0, 3153600000000.0 }";
     global::scriptEngine->queueScript(
-        fmt::format(
+        std::format(
             "openspace.time.setDeltaTimeSteps({});",
             largeTimeSteps
-        ),
-        scripting::ScriptEngine::RemoteScripting::Yes
+        )
     );
 
     return true;
@@ -168,12 +167,12 @@ bool softwareintegration::Session::saveSession(const std::string& wantedFileName
 
     auto dirPath = absPath("${USER_ASSETS}") / wantedFileName;
     if (std::filesystem::exists(dirPath)) {
-        errorMessage = fmt::format("A saved session with the name \"{}\" already exists.", dirPath.filename().string());
+        errorMessage = std::format("A saved session with the name \"{}\" already exists.", dirPath.filename().string());
         return false;
     }
 
     if (!std::filesystem::create_directory(dirPath)) {
-        errorMessage = fmt::format("Could not create the folder \"{}\" in the user assets folder.", dirPath);
+        errorMessage = std::format("Could not create the folder \"{}\" in the user assets folder.", dirPath);
         return false;
     }
 
@@ -280,7 +279,7 @@ bool softwareintegration::Session::saveSession(const std::string& wantedFileName
                   << INDENT << "end\n"
                   << "end)\n\n"
                   << "asset.meta = {\n"
-                  << INDENT << fmt::format("Name = \"{} (Software Integration session)\",", wantedFileName)
+                  << INDENT << std::format("Name = \"{} (Software Integration session)\",", wantedFileName)
                   << "\n"
                   << INDENT << "Version = \"1.0\",\n"
                   << INDENT << "Description = [[]],\n"
@@ -293,7 +292,7 @@ bool softwareintegration::Session::saveSession(const std::string& wantedFileName
         return true;
     }
     catch (std::ifstream::failure& err) {
-        errorMessage = fmt::format("An error occured when creating the asset file. {}.", err.what());
+        errorMessage = std::format("An error occured when creating the asset file. {}.", err.what());
         return false;
     }
 }

@@ -250,7 +250,7 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     , _color(ColorInfo, glm::vec4(glm::vec3(0.5f), 1.f), glm::vec4(0.f), glm::vec4(1.f), glm::vec4(.01f))
     , _size(SizeInfo, 1.f, 0.f, 500.f, .1f)
     , _pointUnit(PointUnitInfo, STRING_NOT_SET)
-    , _sizeOption(SizeOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _sizeOption(SizeOptionInfo)
     , _colormapMin(ColormapMinInfo)
     , _colormapMax(ColormapMaxInfo)
     , _colormapNanMode(ColormapNanModeInfo)
@@ -471,8 +471,20 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
 
     // Changes GL state:
     glEnablei(GL_BLEND, 0);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDepthMask(GL_FALSE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glDepthMask(false);
+
+    //glEnablei(GL_BLEND, 0);
+
+    //if (_useAdditiveBlending) {
+    //    glDepthMask(false);
+    //    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    //}
+    //else {
+    //    // Normal blending, with transparency
+    //    glDepthMask(true);
+    //    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //}
 
     glBindVertexArray(_vao);
     const GLsizei nPoints = static_cast<GLsizei>(pointDataSlice->size() / 3);
@@ -498,11 +510,11 @@ void RenderablePointsCloud::update(const UpdateData&) {
     if (updatedDataSlices) {
         if (_vao == 0) {
             glGenVertexArrays(1, &_vao);
-            LDEBUG(fmt::format("Generating Vertex Array id '{}'", _vao));
+            LDEBUG(std::format("Generating Vertex Array id '{}'", _vao));
         }
         if (_vbo == 0) {
             glGenBuffers(1, &_vbo);
-            LDEBUG(fmt::format("Generating Vertex Buffer Object id '{}'", _vbo));
+            LDEBUG(std::format("Generating Vertex Buffer Object id '{}'", _vbo));
         }
 
         glBindVertexArray(_vao);
@@ -668,11 +680,11 @@ void RenderablePointsCloud::loadPointData(SoftwareIntegrationModule* softwareInt
         pointUnit = distanceUnitFromString(_pointUnit.value().c_str());
     }
     catch (const ghoul::MissingCaseException& ) {
-        LERROR(fmt::format(
+
+        std::string err = std::format(
             "Error when parsing point unit."
-            "OpenSpace doesn't support the distance unit '{}'.",
-            _pointUnit
-        ));
+            "OpenSpace doesn't support the distance unit.");
+        LERROR(err);
         return;
     }
 
@@ -695,7 +707,7 @@ void RenderablePointsCloud::loadPointData(SoftwareIntegrationModule* softwareInt
     pointDataSlice->assign(pointData.begin(), pointData.end());
 
     softwareIntegrationModule->setDataLoaded(_identifier.value(), storage::Key::DataPoints);
-    LINFO(fmt::format(
+    LINFO(std::format(
         "New point data ({} points) has loaded. {} values are NaN values. "
         "Point's with at least one NaN value are hidden.", 
         (pointData.size() / 3), nNans
@@ -713,7 +725,7 @@ void RenderablePointsCloud::loadPointData(SoftwareIntegrationModule* softwareInt
     centroid[1] /= pointSize / 3;
     centroid[2] /= pointSize / 3;
 
-    LDEBUG(fmt::format("Centroid '{} {} {}'", centroid[0], centroid[1], centroid[2]));
+    LDEBUG(std::format("Centroid '{} {} {}'", centroid[0], centroid[1], centroid[2]));
 
 
 }
@@ -729,7 +741,7 @@ void RenderablePointsCloud::loadVelocityData(SoftwareIntegrationModule* software
     // Check that velocity data is same length as point data
     auto pointDataSlice = getDataSlice(DataSliceKey::Points);
     // if (pointDataSlice->size() != velocityData.size()) {
-    //     LWARNING(fmt::format(
+    //     LWARNING(std::format(
     //         "There is a mismatch in the amount of velocity data ({}) and the amount of points ({})",
     //         velocityData.size() / 3, pointDataSlice->size() / 3
     //     ));
@@ -745,12 +757,9 @@ void RenderablePointsCloud::loadVelocityData(SoftwareIntegrationModule* software
         velocityTimeUnit = timeUnitFromString(_velocityTimeUnit.value().c_str());
     }
     catch (const ghoul::MissingCaseException& ) {
-        LERROR(fmt::format(
-            "Error when parsing velocity units."
-            "OpenSpace doesn't support the velocity unit '{}/{}'.",
-            _velocityDistanceUnit,
-            _velocityTimeUnit
-        ));
+        LERROR(
+            "Error when parsing velocity units. OpenSpace doesn't support the velocity unit ."
+        );
         return;
     }
 
@@ -789,7 +798,7 @@ void RenderablePointsCloud::loadVelocityData(SoftwareIntegrationModule* software
     velocityDataSlice->assign(velocityData.begin(), velocityData.end());
     
     LINFO(
-        fmt::format(
+        std::format(
             "Viewing {} points with velocity ({} points in total). "
             "{} points have NaN-value velocity and are hidden or static.",
             velocityData.size()/3 - nNans/3,
@@ -843,7 +852,7 @@ void RenderablePointsCloud::loadColormapAttributeData(SoftwareIntegrationModule*
     // Check that colormap attribute data is same length as point data
     auto pointDataSlice = getDataSlice(DataSliceKey::Points);
     // if (pointDataSlice->size() / 3 != colormapAttributeData.size()) {
-    //     LWARNING(fmt::format(
+    //     LWARNING(std::format(
     //         "There is a mismatch in the amount of colormap attribute scalars ({}) and the amount of points ({})",
     //         colormapAttributeData.size(), pointDataSlice->size() / 3
     //     ));
@@ -870,14 +879,14 @@ void RenderablePointsCloud::loadLinearSizeAttributeData(SoftwareIntegrationModul
 
     // Check that linear size attribute data is same length as point data
     auto pointDataSlice = getDataSlice(DataSliceKey::Points);
-    // if (pointDataSlice->size() / 3 != linearSizeAttributeData.size()) {
-    //     LWARNING(fmt::format(
-    //         "There is a mismatch in the amount of linear size attribute scalars ({}) and the amount of points ({})",
-    //         linearSizeAttributeData.size(), pointDataSlice->size() / 3
-    //     ));
-    //     _linearSizeEnabled = false;
-    //     return;
-    // }
+     //if (pointDataSlice->size() / 3 != linearSizeAttributeData.size()) {
+     //    LWARNING(std::format(
+     //        "There is a mismatch in the amount of linear size attribute scalars ({}) and the amount of points ({})",
+     //        linearSizeAttributeData.size(), pointDataSlice->size() / 3
+     //    ));
+     //    _linearSizeEnabled = false;
+     //    return;
+     //}
 
     auto linearSizeAttributeDataSlice = getDataSlice(DataSliceKey::LinearSizeAttributes);
     linearSizeAttributeDataSlice->clear();
@@ -885,7 +894,7 @@ void RenderablePointsCloud::loadLinearSizeAttributeData(SoftwareIntegrationModul
 
     _hasLoadedLinearSizeAttributeData = true;
     softwareIntegrationModule->setDataLoaded(_identifier.value(), storage::Key::LinearSizeAttrData);
-    LDEBUG("New colormap attribute data has loaded");
+    LDEBUG("New SIZE attribute data has loaded");
 }
 
 std::shared_ptr<RenderablePointsCloud::DataSlice> RenderablePointsCloud::getDataSlice(DataSliceKey key) {
@@ -910,11 +919,10 @@ void RenderablePointsCloud::checkIfColormapCanBeEnabled() {
             }
 
             global::scriptEngine->queueScript(
-                fmt::format(
+                std::format(
                     "openspace.setPropertyValueSingle('Scene.{}.Renderable.ColormapEnabled', {});",
                     _identifier.value(), "false"
-                ),
-                scripting::ScriptEngine::RemoteScripting::Yes
+                )
             );
         }
     }
@@ -928,11 +936,10 @@ void RenderablePointsCloud::checkIfLinearSizeCanBeEnabled() {
     if (_linearSizeEnabled.value() && linearSizeAttributeData->empty()) {
         LINFO("Linear size attribute data not loaded. Has it been sent from external software?");
         global::scriptEngine->queueScript(
-            fmt::format(
+            std::format(
                 "openspace.setPropertyValueSingle('Scene.{}.Renderable.LinearSizeEnabled', {});",
                 _identifier.value(), "false"
-            ),
-            scripting::ScriptEngine::RemoteScripting::Yes
+            )
         );
     }
 }
@@ -945,18 +952,19 @@ void RenderablePointsCloud::checkIfMotionCanBeEnabled() {
     if (_motionEnabled.value() && velocityData->empty()) {
         LINFO("Velocity data not loaded. Has it been sent from external software?");
         global::scriptEngine->queueScript(
-            fmt::format(
+            std::format(
                 "openspace.setPropertyValueSingle('Scene.{}.Renderable.MotionEnabled', {});",
                 _identifier.value(), "false"
-            ),
-            scripting::ScriptEngine::RemoteScripting::Yes
+            )
         );
     }
 }
 
 void RenderablePointsCloud::checkColormapMinMax() {
-    float min = std::any_cast<float>(_colormapMin.get());
-    float max = std::any_cast<float>(_colormapMax.get());
+
+
+    float min = _colormapMin;
+    float max = _colormapMax;
 
     if (min > max) {
         float temp = min;

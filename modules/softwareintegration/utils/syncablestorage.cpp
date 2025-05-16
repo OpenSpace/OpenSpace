@@ -46,7 +46,8 @@ namespace {
         { "VelocityData", Key::VelocityData },
         { "Colormap", Key::Colormap },
         { "ColormapAttributeData", Key::ColormapAttrData },
-        { "LinearSizeAttributeData", Key::LinearSizeAttrData },
+        { "LinearSizeAttrData", Key::LinearSizeAttrData },
+        { "Unknown", Key::Unknown },
     };
 
 } // namespace
@@ -112,7 +113,7 @@ void SyncableStorage::setLoaded(const Identifier& identifier, const storage::Key
     auto simpDataKeys = simpDataKeysFromStorageKey(storageKey);
     for (auto key : simpDataKeys) {
         if (!count(identifier, key)) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "SceneGraphNode {} has no data with key '{}' in the syncable data storage",
                 identifier,
                 simp::getStringFromDataKey(key)
@@ -142,7 +143,7 @@ void SyncableStorage::store(
     const simp::DataKey key,
     const std::vector<std::byte>& data
 ) {
-    LDEBUG(fmt::format("Storing data in float data storage: {}-{}", identifier, simp::getStringFromDataKey(key)));
+    LDEBUG(std::format("Storing data in float data storage: {}-{}", identifier, simp::getStringFromDataKey(key)));
     std::lock_guard guard(_mutex);
     insertAssign(identifier, key, { data });
 }
@@ -278,7 +279,7 @@ std::vector<simp::DataKey> SyncableStorage::simpDataKeysFromStorageKey(const sto
             return { simp::DataKey::LinearSizeAttributeData };
         }
         default: { // Unknown
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "There's no storage key '{}'",
                 storage::getStorageKeyString(key)
             ));
@@ -302,7 +303,7 @@ bool SyncableStorage::fetchDimFloatData(
     size_t nValues = dimDataKeys.size();
 
     if (!count(identifier)) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "SceneGraphNode {} is missing from the syncable data storage", 
             identifier
         ));
@@ -313,7 +314,7 @@ bool SyncableStorage::fetchDimFloatData(
 
     for (size_t i = 0; i < nDimensions; i++) {
         if (!count(identifier, dimDataKeys[i])) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "SceneGraphNode {} is missing {} from the syncable data storage", 
                 identifier, simp::getStringFromDataKey(dimDataKeys[i])
             ));
@@ -324,7 +325,7 @@ bool SyncableStorage::fetchDimFloatData(
         
         // All dimensions must have same length
         if (i != 0 && nBytesPerDim != dimValues.size()) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Error while trying to fetch float data."
                 "The dimensions of values does not have the same length."
             ));
@@ -356,7 +357,7 @@ bool SyncableStorage::fetchDimFloatData(
                 );
             }
             catch (const simp::SimpError& err) {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Couldn't parse value on offset {} from storage for {}: {}", 
                     offset, simp::getStringFromDataKey(dimDataKeys[i]), err.message
                 ));
@@ -378,7 +379,7 @@ bool SyncableStorage::fetchDimFloatData(
             dataKeysString += prefix + simp::getStringFromDataKey(dimDataKeys[i]);
         }
         dataKeysString += ")";
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Mismatch in number of values in syncable storage ({}) and loaded values ({}), when loading {}.", 
             resultingData.size(), nAddedValues, dataKeysString
         ));
