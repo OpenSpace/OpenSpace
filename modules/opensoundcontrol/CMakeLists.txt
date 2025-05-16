@@ -45,7 +45,6 @@ create_new_module(
 begin_dependency("oscpack")
 add_subdirectory(ext/oscpack SYSTEM)
 set_target_properties(oscpack PROPERTIES FOLDER "External")
-target_include_directories(oscpack SYSTEM PRIVATE ext/oscpack)
 
 if (MSVC)
   target_compile_options(oscpack PRIVATE "/W0")

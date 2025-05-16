@@ -1,3 +1,9 @@
+-- For more information about sonification in OpenSpace and how to use it, see the
+-- documentation:
+-- https://docs.openspaceproject.com/latest/creating-data-assets/modules/telemetry/sonification.html
+
+asset.require("scene/solarsystem/planets/planets")
+
 asset.onInitialize(function ()
   -- Note that the planets need to be in this order
   local planets = {

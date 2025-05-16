@@ -80,8 +80,8 @@ namespace {
         "telemetries. The Horizontal mode, generally works well for flat displays or "
         "forward facing immersive environments. The Circular mode, generally works well "
         "for centered fisheye displays or omnidirectional immersive environments. For "
-        "more information, see the page \"Angle Calculations\" on the OpenSpace "
-        "documentation page.",
+        "more information, see the pages \"Angle Calculations\" and \"Surround Sound "
+        "Configurations\"on the OpenSpace documentation page.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -89,9 +89,12 @@ namespace {
         "IncludeElevationAngle",
         "Include Elevation Angle",
         "This setting determines if an additional elevation angle should be calculated "
-        "for the telemetries that calculate angles. The method used for this calculation "
-        "also depends on the angle calculation mode. For more information, see the page "
-        "\"Angle Calculations\" on the OpenSpace documentation page.",
+        "for the telemetries that calculate angles. This angle determines where the "
+        "object is placed within a vertical plane of reference in relation to the "
+        "camera, i.e the height in relation to the horizontal plane of reference. The "
+        "method used for this calculation also depends on the angle calculation mode. "
+        "For more information, see the page \"Angle Calculations\" on the OpenSpace "
+        "documentation page.",
         openspace::properties::Property::Visibility::User
     };
 

@@ -50,20 +50,20 @@ public:
      * part of the angles is located further below.
      *
      * Horizontal: This angle calculation mode is suitable for flat displays or
-     *             forward-facing immersive environments, such as the Visualization Center
-     *             dome theater in Norrköping, Sweden. For more information, see the page
-     *             "Angle Calculations" on the OpenSpace documentation page. This angle
-     *             determines where the object is placed within a horizontal plane of
-     *             reference in relation to the camera.
+     *             forward-facing immersive environments. For more information about
+     *             surround sound configurations, see "Surround Sound Configurations" on
+     *             the OpenSpace documentation page. This angle determines where the
+     *             object is placed within a horizontal plane of reference in relation to
+     *             the camera.
      *
      * Circular: This angle calculation mode is suitable for centered fisheye displays or
-     *           omnidirectional immersive environments, such as the Hayden Planetarium at
-     *           the American Museum of Natural History in New York, USA. For more
-     *           information, see the page "Angle Calculations" on the OpenSpace
-     *           documentation page. This angle determines where the object is placed in a
-     *           circular space around the center of the screen. The difference in this
-     *           mode compared to the horizontal one is that this mode calculates the
-     *           angles in a circular (or radial) manner around the center of the screen.
+     *           omnidirectional immersive environments. For more information about
+     *           surround sound configurations, see "Surround Sound Configurations" on
+     *           the OpenSpace documentation page. The computed angle determines the
+     *           object's position in a circular space around the center of the screen.
+     *           Compared to the horizontal mode, this mode calculates the angles in a
+     *           circular (or radial) manner around the center point instead of the
+     *           deviation from the camera view direction.
      */
     enum class AngleCalculationMode {
         Horizontal = 0,
@@ -150,13 +150,9 @@ private:
      * This setting only affects telemetries that send angle information. For example, the
      * NodesTelemetry and the PlanetsSonification.
      *
-     * `true`: An additional angle in the vertical direction within the camera view + up
-     *         plane is sent to the Open Sound Control receiver. The camera view + up
-     *         plane is the plane of the camera view direction + camera up direction, with
-     *         the camera right direction as the normal. The elevation angle goes from
-     *         -pi/2 to pi/2 in radians and zero is straight forward in the camera view
-     *         direction. Positive elevation angles is in the up direction of the camera,
-     *         and negative angles are in the down direction of the camera.
+     * `true`: This angle determines where the object is placed within a vertical plane of
+     *         reference in relation to the camera, i.e the height in relation to the
+     *         horizontal plane of reference.
      *
      * `false`: The elevation angle sent to the Open Sound Control receiver is always set
      *          to 0.0
