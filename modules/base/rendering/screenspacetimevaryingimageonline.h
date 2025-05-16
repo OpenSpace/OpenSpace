@@ -22,78 +22,50 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
+#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACETIMEVARYINGIMAGEONLINE___H__
+#define __OPENSPACE_MODULE_BASE___SCREENSPACETIMEVARYINGIMAGEONLINE___H__
 
-#include <openspace/rendering/renderable.h>
+#include <openspace/rendering/screenspacerenderable.h>
 
-#include <openspace/properties/misc/optionproperty.h>
-#include <openspace/properties/vector/vec2property.h>
-#include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
+#include <openspace/engine/downloadmanager.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <filesystem>
 
-namespace ghoul::filesystem { class File; }
-
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
-struct RenderData;
-struct UpdateData;
-
 namespace documentation { struct Documentation; }
 
-struct LinePoint;
-
-class RenderablePlane : public Renderable {
+class ScreenSpaceTimeVaryingImageOnline : public ScreenSpaceRenderable {
 public:
-    explicit RenderablePlane(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceTimeVaryingImageOnline(const ghoul::Dictionary& dictionary);
 
-    void initializeGL() override;
-    void deinitializeGL() override;
-
-    bool isReady() const override;
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
+    bool initialize() override;
+    bool deinitializeGL() override;
+    void update() override;
 
     static documentation::Documentation Documentation();
 
-protected:
-    enum OrientationOption {
-        ViewDirection = 0,
-        PositionNormal,
-        FixedRotation
-    };
-
-    virtual void bindTexture();
-    virtual void unbindTexture();
-    void createPlane();
-    glm::dmat4 rotationMatrix(const RenderData& data) const;
-
-    properties::OptionProperty _blendMode;
-    properties::OptionProperty _renderOption;
-    properties::BoolProperty _mirrorBackside;
-    properties::Vec2Property _size;
-    properties::BoolProperty _autoScale;
-    properties::Vec3Property _multiplyColor;
-
-    ghoul::opengl::ProgramObject* _shader = nullptr;
-
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
-
 private:
-    bool _planeIsDirty = false;
+    void bindTexture() override;
+    void loadJsonData(const std::filesystem::path& path);
+    void computeSequenceEndTime();
+    void loadImage(const std::string& imageUrl);
+    int activeIndex(double currentTime) const;
 
-    UniformCache(modelViewProjection, modelViewTransform, colorTexture, opacity,
-        mirrorBackside, multiplyColor) _uniformCache;
+    properties::StringProperty _jsonFilePath;
+
+    std::future<DownloadManager::MemoryFile> _imageFuture;
+    std::map<double, std::string> _urls;
+    std::string _currentUrl;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::vector<double> _timestamps;
+
+    int _activeIndex = -1;
+    double _sequenceEndTime = 0.0;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
+#endif // __OPENSPACE_MODULE_BASE___SCREENSPACETIMEVARYINGIMAGEONLINE___H__

@@ -22,78 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
+#ifndef __OPENSPACE_MODULE_SERVER___NOTIFICATIONLOG___H__
+#define __OPENSPACE_MODULE_SERVER___NOTIFICATIONLOG___H__
 
-#include <openspace/rendering/renderable.h>
+#include <ghoul/logging/log.h>
 
-#include <openspace/properties/misc/optionproperty.h>
-#include <openspace/properties/vector/vec2property.h>
-#include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
-
-namespace ghoul::filesystem { class File; }
-
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+#include <ghoul/misc/profiling.h>
+#include <functional>
 
 namespace openspace {
 
-struct RenderData;
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
-
-struct LinePoint;
-
-class RenderablePlane : public Renderable {
+/**
+ * A concrete subclass of Log that passes logs to the provided callback function. The
+ * callback is specified using `std::function`. Trying to log messages when the callback
+ * object has been deleted results in undefined behavior.
+ */
+class NotificationLog : public ghoul::logging::Log {
 public:
-    explicit RenderablePlane(const ghoul::Dictionary& dictionary);
+    /// The type of function that is used as a callback in this log
+    using CallbackFunction = std::function<void(
+        std::string_view timeString,
+        std::string_view dateString,
+        std::string_view category,
+        ghoul::logging::LogLevel logLevel,
+        std::string_view message)>;
 
-    void initializeGL() override;
-    void deinitializeGL() override;
+    /**
+     * Constructor that calls Log constructor.
+     *
+     * \param callbackFunction The callback function that is called for each log message
+     * \param minimumLogLevel The minimum log level that this logger will accept
+     */
+    NotificationLog(CallbackFunction callbackFunction,
+        ghoul::logging::LogLevel minimumLogLevel = ghoul::logging::LogLevel::Warning);
 
-    bool isReady() const override;
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
-
-    static documentation::Documentation Documentation();
-
-protected:
-    enum OrientationOption {
-        ViewDirection = 0,
-        PositionNormal,
-        FixedRotation
-    };
-
-    virtual void bindTexture();
-    virtual void unbindTexture();
-    void createPlane();
-    glm::dmat4 rotationMatrix(const RenderData& data) const;
-
-    properties::OptionProperty _blendMode;
-    properties::OptionProperty _renderOption;
-    properties::BoolProperty _mirrorBackside;
-    properties::Vec2Property _size;
-    properties::BoolProperty _autoScale;
-    properties::Vec3Property _multiplyColor;
-
-    ghoul::opengl::ProgramObject* _shader = nullptr;
-
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
+    /**
+     * Method that logs a message with a given level and category to the console.
+     *
+     * \param level The log level with which the message shall be logged
+     * \param category The category of this message.
+     * \param message The message body of the log message
+     */
+    void log(ghoul::logging::LogLevel level, std::string_view category,
+        std::string_view message) override;
 
 private:
-    bool _planeIsDirty = false;
-
-    UniformCache(modelViewProjection, modelViewTransform, colorTexture, opacity,
-        mirrorBackside, multiplyColor) _uniformCache;
+    CallbackFunction _callbackFunction;
+    TracyLockable(std::mutex, _mutex);
 };
 
-} // namespace openspace
+} // namespace ghoul::logging
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
+#endif // __OPENSPACE_MODULE_SERVER___NOTIFICATIONLOG___H__
