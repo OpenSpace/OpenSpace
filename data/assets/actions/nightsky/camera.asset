@@ -74,25 +74,6 @@ local LookingNorth = {
   IsLocal = false
 }
 
-local LookingSouth = {
-  Identifier = "os.nightsky.LookingSouth",
-  Name = "Looking South",
-  Command = [[
-    local currentNavState = openspace.navigation.getNavigationState()
-    local newNavState = {
-      Pitch = math.pi,
-      Anchor = currentNavState["Anchor"],
-      Yaw = currentNavState["Yaw"],
-      Position = currentNavState["Position"],
-      Up = { 0.0, 0.0, -1.0 }
-    }
-    openspace.navigation.setNavigationState(newNavState)
-  ]],
-  Documentation = "Sets the view looking up and South.",
-  GuiPath = "/Night Sky/View",
-  IsLocal = false
-}
-
 local LookingEast = {
   Identifier = "os.nightsky.LookingEast",
   Name = "Looking East",
@@ -112,6 +93,25 @@ local LookingEast = {
     openspace.navigation.setNavigationState(newNavState)
   ]],
   Documentation = "Sets the view looking up and East.",
+  GuiPath = "/Night Sky/View",
+  IsLocal = false
+}
+
+local LookingSouth = {
+  Identifier = "os.nightsky.LookingSouth",
+  Name = "Looking South",
+  Command = [[
+    local currentNavState = openspace.navigation.getNavigationState()
+    local newNavState = {
+      Pitch = math.pi,
+      Anchor = currentNavState["Anchor"],
+      Yaw = currentNavState["Yaw"],
+      Position = currentNavState["Position"],
+      Up = { 0.0, 0.0, -1.0 }
+    }
+    openspace.navigation.setNavigationState(newNavState)
+  ]],
+  Documentation = "Sets the view looking up and South.",
   GuiPath = "/Night Sky/View",
   IsLocal = false
 }
