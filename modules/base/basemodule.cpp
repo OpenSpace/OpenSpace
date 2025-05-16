@@ -67,9 +67,10 @@
 #include <modules/base/rendering/renderableprism.h>
 #include <modules/base/rendering/renderabletimevaryingsphere.h>
 #include <modules/base/rendering/screenspacedashboard.h>
+#include <modules/base/rendering/screenspaceframebuffer.h>
 #include <modules/base/rendering/screenspaceimagelocal.h>
 #include <modules/base/rendering/screenspaceimageonline.h>
-#include <modules/base/rendering/screenspaceframebuffer.h>
+#include <modules/base/rendering/screenspaceinsetblackout.h>
 #include <modules/base/rendering/screenspacerenderablerenderable.h>
 #include <modules/base/rendering/screenspacetimevaryingimageonline.h>
 #include <modules/base/rotation/constantrotation.h>
@@ -117,6 +118,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fSsRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
     fSsRenderable->registerClass<ScreenSpaceImageLocal>("ScreenSpaceImageLocal");
     fSsRenderable->registerClass<ScreenSpaceImageOnline>("ScreenSpaceImageOnline");
+    fSsRenderable->registerClass<ScreenSpaceInsetBlackout>("ScreenSpaceInsetBlackout");
     fSsRenderable->registerClass<ScreenSpaceRenderableRenderable>(
         "ScreenSpaceRenderableRenderable"
     );
@@ -307,6 +309,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         ScreenSpaceFramebuffer::Documentation(),
         ScreenSpaceImageLocal::Documentation(),
         ScreenSpaceImageOnline::Documentation(),
+        ScreenSpaceInsetBlackout::Documentation(),
         ScreenSpaceRenderableRenderable::Documentation(),
         ScreenSpaceTimeVaryingImageOnline::Documentation(),
 
