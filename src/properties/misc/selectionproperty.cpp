@@ -33,8 +33,6 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "SelectionProperty";
-
-    constexpr std::string_view OptionsKey = "Options";
 } // namespace
 
 namespace openspace::properties {

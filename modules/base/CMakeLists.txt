@@ -38,6 +38,7 @@ set(HEADER_FILES
   dashboard/dashboarditemsimulationincrement.h
   dashboard/dashboarditemspacing.h
   dashboard/dashboarditemtext.h
+  dashboard/dashboarditemtimevaryingtext.h
   dashboard/dashboarditemvelocity.h
   lightsource/cameralightsource.h
   lightsource/scenegraphlightsource.h
@@ -75,6 +76,7 @@ set(HEADER_FILES
   rendering/screenspaceimageonline.h
   rendering/screenspaceinsetblackout.h
   rendering/screenspacerenderablerenderable.h
+  rendering/screenspacetimevaryingimageonline.h
   rotation/timelinerotation.h
   rotation/constantrotation.h
   rotation/fixedrotation.h
@@ -113,6 +115,7 @@ set(SOURCE_FILES
   dashboard/dashboarditemsimulationincrement.cpp
   dashboard/dashboarditemspacing.cpp
   dashboard/dashboarditemtext.cpp
+  dashboard/dashboarditemtimevaryingtext.cpp
   dashboard/dashboarditemvelocity.cpp
   lightsource/cameralightsource.cpp
   lightsource/scenegraphlightsource.cpp
@@ -151,6 +154,7 @@ set(SOURCE_FILES
   rendering/screenspaceimageonline.cpp
   rendering/screenspaceinsetblackout.cpp
   rendering/screenspacerenderablerenderable.cpp
+  rendering/screenspacetimevaryingimageonline.cpp
   rotation/timelinerotation.cpp
   rotation/constantrotation.cpp
   rotation/fixedrotation.cpp

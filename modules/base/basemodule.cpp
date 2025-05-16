@@ -37,6 +37,7 @@
 #include <modules/base/dashboard/dashboarditemsimulationincrement.h>
 #include <modules/base/dashboard/dashboarditemspacing.h>
 #include <modules/base/dashboard/dashboarditemtext.h>
+#include <modules/base/dashboard/dashboarditemtimevaryingtext.h>
 #include <modules/base/dashboard/dashboarditemvelocity.h>
 #include <modules/base/lightsource/cameralightsource.h>
 #include <modules/base/lightsource/scenegraphlightsource.h>
@@ -71,6 +72,7 @@
 #include <modules/base/rendering/screenspaceimageonline.h>
 #include <modules/base/rendering/screenspaceinsetblackout.h>
 #include <modules/base/rendering/screenspacerenderablerenderable.h>
+#include <modules/base/rendering/screenspacetimevaryingimageonline.h>
 #include <modules/base/rotation/constantrotation.h>
 #include <modules/base/rotation/fixedrotation.h>
 #include <modules/base/rotation/globerotation.h>
@@ -120,6 +122,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fSsRenderable->registerClass<ScreenSpaceRenderableRenderable>(
         "ScreenSpaceRenderableRenderable"
     );
+    fSsRenderable->registerClass<ScreenSpaceTimeVaryingImageOnline>("ScreenSpaceTimeVaryingImageOnline");
 
 
     ghoul::TemplateFactory<DashboardItem>* fDashboard =
@@ -147,6 +150,9 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     );
     fDashboard->registerClass<DashboardItemSpacing>("DashboardItemSpacing");
     fDashboard->registerClass<DashboardItemText>("DashboardItemText");
+    fDashboard->registerClass<DashboardItemTimeVaryingText>(
+        "DashboardItemTimeVaryingText"
+    );
     fDashboard->registerClass<DashboardItemVelocity>("DashboardItemVelocity");
 
 
@@ -266,6 +272,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         DashboardItemSimulationIncrement::Documentation(),
         DashboardItemSpacing::Documentation(),
         DashboardItemText::Documentation(),
+        DashboardItemTimeVaryingText::Documentation(),
         DashboardItemVelocity::Documentation(),
 
         CameraLightSource::Documentation(),
@@ -304,6 +311,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         ScreenSpaceImageOnline::Documentation(),
         ScreenSpaceInsetBlackout::Documentation(),
         ScreenSpaceRenderableRenderable::Documentation(),
+        ScreenSpaceTimeVaryingImageOnline::Documentation(),
 
         ConstantRotation::Documentation(),
         FixedRotation::Documentation(),

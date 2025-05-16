@@ -604,7 +604,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _debugProperties({
         BoolProperty(ShowChunkEdgeInfo, false),
         BoolProperty(LevelProjectedAreaInfo, true),
-        BoolProperty(ResetTileProviderInfo, false),
+        TriggerProperty(ResetTileProviderInfo),
         BoolProperty(PerformFrustumCullingInfo, true),
         IntProperty(ModelSpaceRenderingInfo, 14, 1, 22),
         IntProperty(DynamicLodIterationCountInfo, 16, 4, 128)
@@ -728,6 +728,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 
     _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);
     _debugPropertyOwner.addProperty(_debugProperties.levelByProjectedAreaElseDistance);
+    _debugProperties.resetTileProviders.onChange([&]() { _resetTileProviders = true; });
     _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
     _debugPropertyOwner.addProperty(_debugProperties.performFrustumCulling);
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
@@ -998,9 +999,9 @@ void RenderableGlobe::update(const UpdateData& data) {
     _cachedModelTransform = translation * rotation * scaling;
     _cachedInverseModelTransform = glm::inverse(_cachedModelTransform);
 
-    if (_debugProperties.resetTileProviders) {
+    if (_resetTileProviders) [[unlikely]] {
         _layerManager.reset();
-        _debugProperties.resetTileProviders = false;
+        _resetTileProviders = false;
     }
 
     if (_ringsComponent) {

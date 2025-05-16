@@ -125,11 +125,14 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "This profile shows the acquisition of NASA New Horizons' images of the Plutonian system in July 2015. The profile starts at around 10:00 on July 14th, around 10 minutes before a new image campaign starts. By selecting Pluto as the Origin and moving time faster, you can see the imprint of the instrument's field-of-view on the planetary surface and see the images being projected. A timer on the top left of the screen shows when the next image is being taken",
+    "description": "This profile shows the acquisition of NASA New Horizons' images of the Plutonian system in July 2015. The profile starts at around 10:00 on July 14th, around 10 minutes before a new image campaign starts. By selecting Pluto as the Origin and moving time faster, you can see the imprint of the instrument's field-of-view on the planetary surface and see the images being projected. A timer on the top left of the screen shows when the next image is being taken.",
     "license": "MIT License",
     "name": "New Horizons",
     "url": "https://www.openspaceproject.com",
     "version": "1.1"
+  },
+  "panel_visibility": {
+    "mission": true
   },
   "properties": [
     {
@@ -184,11 +187,12 @@
     }
   ],
   "time": {
+    "is_paused": false,
     "type": "absolute",
     "value": "2015-07-14T08:00:00"
   },
   "version": {
     "major": 1,
-    "minor": 1
+    "minor": 4
   }
 }

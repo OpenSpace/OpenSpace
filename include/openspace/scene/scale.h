@@ -49,9 +49,9 @@ public:
 
     virtual bool initialize();
 
+    virtual void update(const UpdateData& data);
     glm::dvec3 scaleValue() const;
     virtual glm::dvec3 scaleValue(const UpdateData& data) const = 0;
-    virtual void update(const UpdateData& data);
 
     static documentation::Documentation Documentation();
 

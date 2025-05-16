@@ -30,6 +30,7 @@ set(HEADER_FILES
   include/connection.h
   include/connectionpool.h
   include/jsonconverters.h
+  include/logging/notificationlog.h
   include/serverinterface.h
   include/topics/actionkeybindtopic.h
   include/topics/authorizationtopic.h
@@ -61,6 +62,7 @@ set(SOURCE_FILES
   src/connection.cpp
   src/connectionpool.cpp
   src/jsonconverters.cpp
+  src/logging/notificationlog.cpp
   src/serverinterface.cpp
   src/topics/actionkeybindtopic.cpp
   src/topics/authorizationtopic.cpp
