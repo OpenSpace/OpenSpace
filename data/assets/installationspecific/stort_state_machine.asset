@@ -2,8 +2,6 @@ local util = asset.require('./utility_functions')
 local flyHome = asset.require('./fly_home_alternatives')
 local defaultTime = asset.require('./default_time').time
 
-local inactivityView = {}
-
 ----------------------------------------------------------------
 -- STATES
 ----------------------------------------------------------------
@@ -11,17 +9,34 @@ local startState = {
   Identifier = "Start",
 }
 
-local inactiveState = {
-  Identifier = "Inactive",
+local specialInactiveState = {
+  Identifier = "SpecialInactive",
   Enter = [[
-  ]] .. util.jumpToNode("Earth", 6000000) .. [[
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.EnableMaximumAllowedDistance", false)
-    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", true);
-    openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', true);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", true)
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.IdleBehavior.ShouldTriggerWhenIdle", false)
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior', false)
+    openspace.setPropertyValueSingle("NavigationHandler.PathNavigator.ApplyIdleBehaviorOnFinish", false)
+    openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', true)
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_World_Imagery.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.ISS.Renderable.Enabled", false)
+    openspace.time.setPause(false)
+    openspace.time.setDeltaTime(1)
+    openspace.time.setTime(']] .. defaultTime .. [[')
   ]],
   Exit = [[
-      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", false);
-      openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', false);
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", false)
+      openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', false)
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.IdleBehavior.ShouldTriggerWhenIdle", true)
+      openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior', true)
+      openspace.setPropertyValueSingle("NavigationHandler.PathNavigator.ApplyIdleBehaviorOnFinish", true)
+      openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled", true)
+      openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_World_Imagery.Enabled", false)
+      openspace.time.setTime(']] .. defaultTime .. [[')
+      openspace.time.setDeltaTime(1)
+      openspace.setPropertyValueSingle("Scene.ISS.Renderable.Enabled", true)
+      openspace.time.setPause(true)
     ]]
 }
 
@@ -33,14 +48,14 @@ local homeState = {
     ]] .. util.orbitAroundUpOnArrival() .. [[
     ]] .. util.enableRoll() .. [[
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.EnableMaximumAllowedDistance", false)
-    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", true);
-    openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', true);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", true)
+    openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', true)
   ]],
   Exit = [[
       ]] .. util.stopOrbiting() .. [[
       ]] .. util.disableRoll() .. [[
-        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", false);
-      openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', false);
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", false)
+      openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', false)
     ]]
 }
 
@@ -78,7 +93,7 @@ local subStateCeres = asset.require('./substates/ceres')
 
 local states = {
   startState,
-  inactiveState,
+  specialInactiveState,
   homeState,
   solarSystemState
 }
@@ -135,7 +150,7 @@ local transitions = {
   -- Home <-> Inactive
   {
     From = "Home",
-    To = "Inactive",
+    To = "SpecialInactive",
     Action = [[
       openspace.setPropertyValueSingle("Scene.MercuryTrail.Renderable.Enabled", false);
       openspace.setPropertyValueSingle("Scene.VenusTrail.Renderable.Enabled", false);
@@ -150,7 +165,7 @@ local transitions = {
     ]]
   },
   {
-    From = "Inactive",
+    From = "SpecialInactive",
     To = "Home",
     Action = [[
       local anchor = openspace.propertyValue("NavigationHandler.OrbitalNavigator.Anchor")

@@ -34,12 +34,12 @@ local transitions = {
   {
     From = "CBR",
     To = "Universe",
-    Action = flyHome.linearFlight
+    Action = [[]] -- This flight happens on the webpage
   },
   {
     From = "CBR",
     To = "Home",
-    Action = flyHome.linearFlight
+    Action = [[]] -- This flight happens on the webpage
   }
 }
 
