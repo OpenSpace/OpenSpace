@@ -30,6 +30,7 @@ local EquatorialLine = {
     GridSegments = { 1, 1 },
     Enabled = asset.enabled
   },
+  Tag = {"nightsky_marking"},
   GUI = {
     Name = "Celestial Equator",
     Description = "A line representation of the Equatorial plane.",

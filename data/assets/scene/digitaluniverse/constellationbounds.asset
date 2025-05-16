@@ -35,6 +35,7 @@ local Object = {
       Scale = 10e17
     }
   },
+  Tag = {"du_grid"},
   GUI = {
     Name = "Constellation Boundaries",
     Path = "/Milky Way/Constellations",

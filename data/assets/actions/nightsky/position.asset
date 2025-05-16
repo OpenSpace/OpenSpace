@@ -1,0 +1,64 @@
+local NorthPole = {
+  Identifier = "os.nightsky.position.NorthPole",
+  Name = "Jump to the North Pole",
+  Command = [[
+local wait = openspace.propertyValue("NavigationHandler.JumpToFadeDuration")
+local script = 'openspace.navigation.flyToGeo("Earth", 90.0001, 0.0001, 500, 0, true);'
+openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 0, wait)
+openspace.scheduleScript(script, wait)
+local script2 = 'local wait = openspace.propertyValue("NavigationHandler.JumpToFadeDuration")openspace.action.triggerAction("os.nightsky.LookUp");openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 1, wait)'
+openspace.scheduleScript(script2, wait + 0.1)
+  ]],
+  Documentation = "",
+  GuiPath = "/Night Sky/Position",
+  IsLocal = false
+}
+
+local SouthPole = {
+  Identifier = "os.nightsky.position.SouthPole",
+  Name = "Jump to the South Pole",
+  Command = [[
+local wait = openspace.propertyValue("NavigationHandler.JumpToFadeDuration")
+local script = 'openspace.navigation.flyToGeo("Earth", -89.9, 0.001, 2800, 0, true);'
+openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 0, wait)
+openspace.scheduleScript(script, wait)
+local script2 = 'local wait = openspace.propertyValue("NavigationHandler.JumpToFadeDuration")openspace.action.triggerAction("os.nightsky.LookUp");openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 1, wait)'
+openspace.scheduleScript(script2, wait + 0.1)
+  ]],
+  Documentation = "",
+  GuiPath = "/Night Sky/Position",
+  IsLocal = false
+}
+
+local Equator = {
+  Identifier = "os.nightsky.position.Equator",
+  Name = "Jump to the Equator",
+  Command = [[
+local wait = openspace.propertyValue("NavigationHandler.JumpToFadeDuration")
+local script = 'local _, long, _ = openspace.globebrowsing.geoPositionForCamera(false);openspace.navigation.flyToGeo("Earth", 0.0001, long, 500, 0, true);'
+openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 0, wait)
+openspace.scheduleScript(script, wait)
+local script2 = 'local wait = openspace.propertyValue("NavigationHandler.JumpToFadeDuration")openspace.action.triggerAction("os.nightsky.LookUp");openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 1, wait)'
+openspace.scheduleScript(script2, wait + 0.1)
+  ]],
+  Documentation = "",
+  GuiPath = "/Night Sky/Position",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.action.registerAction(NorthPole)
+  openspace.action.registerAction(SouthPole)
+  openspace.action.registerAction(Equator)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(NorthPole)
+  openspace.action.removeAction(SouthPole)
+  openspace.action.removeAction(Equator)
+end)
+
+asset.export("NorthPole", NorthPole.Identifier)
+asset.export("SouthPole", SouthPole.Identifier)
+asset.export("Equator", Equator.Identifier)
