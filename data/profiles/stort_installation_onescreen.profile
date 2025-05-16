@@ -74,7 +74,7 @@
     {
       "name": "Modules.CefWebGui.GuiScale",
       "type": "setPropertyValueSingle",
-      "value": "1.5"
+      "value": "1.0"
     },
     {
       "name": "Modules.CefWebGui.GuiUrl",
