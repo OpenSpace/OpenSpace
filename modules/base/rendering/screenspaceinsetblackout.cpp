@@ -72,7 +72,7 @@ namespace {
     std::vector<glm::vec2> sampleSpline(const std::vector<glm::vec2>& controlPoints) {
         ghoul_assert(controlPoints.size() >= 3, "Too few control points");
 
-        constexpr int Subdivisions = 50;
+        constexpr int Subdivisions = 100;
         std::vector<glm::vec2> splineData;
         const int numberOfSegments = static_cast<int>(controlPoints.size() - 3);
         const float stepSize = 1.f / Subdivisions;

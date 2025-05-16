@@ -146,7 +146,6 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _calibrationTexture;
     glm::ivec2 _calibrationTextureObjectSize = glm::ivec2(0);
     glm::ivec2 _blackoutTextureObjectSize = glm::ivec2(0);
-    glm::ivec2 _blackoutTextureDimensions = glm::ivec2(0);
     GLuint _vao = 0;
     GLuint _vbo = 0;
     GLuint _fbo = 0;
