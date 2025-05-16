@@ -342,29 +342,37 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     cameraOrientedRotation[1] = glm::dvec4(newUp, 0.0);
     cameraOrientedRotation[2] = glm::dvec4(normal, 0.0);
 
+
     if (_distanceScalingSettings.scaleByDistance) {
-        const glm::dvec3 cameraPosition = data.camera.positionVec3();
-        const glm::dvec3 modelPosition = data.modelTransform.translation;
+        if (global::windowDelegate->isFisheyeRendering()) {
+            LWARNINGC("RenderablePlane",
+                "Distance scaling is disabled in Fisheye rendering mode.");
+            _distanceScalingSettings.scaleByDistance = false;
+        }
+        else {
+            const glm::dvec3 cameraPosition = data.camera.positionVec3();
+            const glm::dvec3 modelPosition = data.modelTransform.translation;
 
-        const float fovDegrees = global::windowDelegate->horizFieldOfView(0);
-        const float fovRadians = glm::radians(fovDegrees);
-        const float halfFovTan = std::tan(fovRadians * 0.5f);
+            const float fovDegrees = global::windowDelegate->horizFieldOfView(0);
+            const float fovRadians = glm::radians(fovDegrees);
+            const float halfFovTan = std::tan(fovRadians * 0.5f);
 
-        const float distance = glm::distance(cameraPosition, modelPosition);
+            const float distance = glm::distance(cameraPosition, modelPosition);
 
-        float projectedHeight = 2.0f * distance * halfFovTan * _distanceScalingSettings.apparentSizeMultiplier;
-        projectedHeight = std::clamp(
-            projectedHeight,
-            _distanceScalingSettings.scaleByDistanceMinHeight.value(),
-            _distanceScalingSettings.scaleByDistanceMaxHeight.value()
-        );
+            float projectedHeight = 2.0f * distance * halfFovTan * _distanceScalingSettings.apparentSizeMultiplier;
+            projectedHeight = std::clamp(
+                projectedHeight,
+                _distanceScalingSettings.scaleByDistanceMinHeight.value(),
+                _distanceScalingSettings.scaleByDistanceMaxHeight.value()
+            );
 
-        glm::vec2 currentSize = _size.value();
+            glm::vec2 currentSize = _size.value();
 
-        if (currentSize.y > 0.f) {
-            float scaleFactor = projectedHeight / currentSize.y;
-            glm::vec2 scaledSize = currentSize * scaleFactor;
-            _size.setValue(scaledSize);
+            if (currentSize.y > 0.f) {
+                float scaleFactor = projectedHeight / currentSize.y;
+                glm::vec2 scaledSize = currentSize * scaleFactor;
+                _size.setValue(scaledSize);
+            }
         }
     }
 
