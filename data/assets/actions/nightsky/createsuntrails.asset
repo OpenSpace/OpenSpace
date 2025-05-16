@@ -53,11 +53,11 @@ local AddSunTrail = {
 
 
 asset.onInitialize(function()
-    openspace.action.registerAction(AddSunTrail)
+  openspace.action.registerAction(AddSunTrail)
 end)
 
 asset.onDeinitialize(function()
-    openspace.action.removeAction(AddSunTrail)
+  openspace.action.removeAction(AddSunTrail)
 end)
 
 asset.export("AddSunTrail", AddSunTrail.Identifier)

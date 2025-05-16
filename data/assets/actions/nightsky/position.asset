@@ -54,9 +54,9 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(NorthPole)
-  openspace.action.removeAction(SouthPole)
   openspace.action.removeAction(Equator)
+  openspace.action.removeAction(SouthPole)
+  openspace.action.removeAction(NorthPole)
 end)
 
 asset.export("NorthPole", NorthPole.Identifier)

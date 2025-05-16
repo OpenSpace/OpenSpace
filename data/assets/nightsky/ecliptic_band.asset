@@ -37,7 +37,7 @@ local EclipticLine = {
     GridSegments = { 1, 1 },
     Enabled = asset.enabled
   },
-  Tag = {"nightsky_marking"},
+  Tag = { "nightsky_marking" },
   GUI = {
     Name = "Ecliptic",
     Description = "A line representation of the Ecliptic plane.",
@@ -64,7 +64,7 @@ local EclipticBand = {
     Opacity = 0.05,
     Enabled = asset.enabled
   },
-  Tag = {"nightsky_marking"},
+  Tag = { "nightsky_marking" },
   GUI = {
     Name = "Ecliptic Band",
     Description = "A band representation of the Ecliptic plane.",

@@ -1,20 +1,20 @@
 {
   "actions": [
     {
-      "documentation": "Sets the stars back to their default values ",
+      "documentation": "Sets the stars back to their default values",
       "gui_path": "/Night Sky/Stars",
       "identifier": "os.nightsky.DefaultStars",
       "is_local": false,
       "name": "Set default star values",
-      "script": "openspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Core.Multiplier\", 15.000000)\nopenspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Core.Gamma\", 1.660000)\nopenspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Core.Scale\", 0.180000)\n\nopenspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Glare.Multiplier\", 0.650000)\nopenspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Glare.Gamma\", 1.000000)\nopenspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Glare.Scale\", 1.000000)"
+      "script": "openspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Core.Multiplier\", 15.0)\nopenspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Core.Gamma\", 1.66)\nopenspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Core.Scale\", 0.18)\n\nopenspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Glare.Multiplier\", 0.65)\nopenspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Glare.Gamma\", 1.0)\nopenspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Glare.Scale\", 1.0)"
     },
     {
-      "documentation": "Changes the values for Core/Glare on the Stars to be more pointlike",
+      "documentation": "Changes the values for Core/Glare on the Stars to be more point-like",
       "gui_path": "/Night Sky/Stars",
       "identifier": "os.nightsky.PointlikeStars",
       "is_local": false,
-      "name": "Set the star values to be more point like",
-      "script": "openspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Core.Multiplier\", 2.620000)\nopenspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Core.Gamma\", 1.600000)\nopenspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Core.Scale\", 1.000000)\nopenspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Glare.Multiplier\", 1.750000)\nopenspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Glare.Gamma\", 1.190000)\nopenspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Glare.Scale\", 0.160000)"
+      "name": "Set the star values to be more point-like",
+      "script": "openspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Core.Multiplier\", 2.62)\nopenspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Core.Gamma\", 1.6)\nopenspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Core.Scale\", 1.0)\nopenspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Glare.Multiplier\", 1.75)\nopenspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Glare.Gamma\", 1.19)\nopenspace.setPropertyValueSingle(\"Scene.Stars.Renderable.Glare.Scale\", 0.16)"
     }
   ],
   "additional_scripts": [

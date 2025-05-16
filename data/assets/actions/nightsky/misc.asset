@@ -7,8 +7,8 @@ local textures = asset.resource({
 
 
 local FadeInConstellationLabels = {
-  Identifier = "os.nightsky.FadeInConstalltionLabels",
-  Name = "Fade In Constelltion Labels",
+  Identifier = "os.nightsky.FadeInConstellationLabels",
+  Name = "Fade In Constellation Labels",
   Command = [[openspace.fadeIn("Scene.Constellations.Renderable.Labels",nil)]],
   Documentation = "Fades in the constllation labels",
   GuiPath = "/Constellations/Lines",
@@ -16,9 +16,9 @@ local FadeInConstellationLabels = {
 }
 
 local FadeOutConstellationLabels = {
-  Identifier = "os.nightsky.FadeOutConstalltionLabels",
-  Name = "Fade Out Constelltion Labels",
-  Command = [[openspace.fadeOut("Scene.Constellations.Renderable.Labels",nil)]],
+  Identifier = "os.nightsky.FadeOutConstellationLabels",
+  Name = "Fade Out Constellation Labels",
+  Command = [[openspace.fadeOut("Scene.Constellations.Renderable.Labels")]],
   Documentation = "Fades out the constellation labels",
   GuiPath = "/Constellations/Lines",
   IsLocal = false
@@ -26,7 +26,7 @@ local FadeOutConstellationLabels = {
 
 local ShowConstellationElements = {
   Identifier = "os.nightsky.ShowConstellationElements",
-  Name = "Show Constelltion Elements",
+  Name = "Show Constellation Elements",
   Command = [[
     local fadeSpeed = openspace.propertyValue("OpenSpaceEngine.FadeDuration")
     openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Fade", 0)
@@ -34,16 +34,16 @@ local ShowConstellationElements = {
     openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Fade", 1, fadeSpeed)
     openspace.setPropertyValueSingle("Scene.Constellations.Renderable.DrawElements", true)
   ]],
-  Documentation = "Shows the constllation lines with consideration of label state",
+  Documentation = "Shows the constellation lines with consideration of label state",
   GuiPath = "/Constellations/Lines",
   IsLocal = false
 }
 
 local HideConstellationElements = {
   Identifier = "os.nightsky.HideConstellationElements",
-  Name = "Hide Constelltion Elements",
+  Name = "Hide Constellation Elements",
   Command = [[
-    openspace.setPropertyValue("Scene.Constellations.Renderable.DrawElements", false)
+    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.DrawElements", false)
   ]],
   Documentation = "Hides the constellation lines with consideration of label state",
   GuiPath = "/Constellations/Lines",

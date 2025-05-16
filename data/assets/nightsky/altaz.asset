@@ -1,11 +1,14 @@
 local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
+
+
 local labels = asset.resource({
   Name = "AltAz Label Files",
   Type = "HttpSynchronization",
   Identifier = "alt_az_labels",
   Version = 1
 })
+
 
 local AltAzGridPosition = {
   Identifier = "AltAzGridPosition",
@@ -57,7 +60,7 @@ local AltAzGrid = {
     LineWidth = 2.0,
     RenderBinMode = "PostDeferredTransparent"
   },
-  Tag = {"nightsky_marking"},
+  Tag = { "nightsky_marking" },
   GUI = {
     Name = "Altitude-Azimuth Grid",
     Description = [[A local Altitude/Azimuth grid centered around your position on a
@@ -74,7 +77,7 @@ local AltAzGridLabels = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi / 2.0,math.pi, 0.0 }
+      Rotation = { -math.pi / 2.0, math.pi, 0.0 }
     }
   },
   Renderable = {
@@ -92,7 +95,7 @@ local AltAzGridLabels = {
     Opacity = 0.65,
     RenderBinMode = "PostDeferredTransparent"
   },
-  Tag = {"nightsky_marking"},
+  Tag = { "nightsky_marking" },
   GUI = {
     Name = "Altitude-Azimuth Grid Labels",
     Description = [[Labels for the Altitude-Azimuth Grid]],
