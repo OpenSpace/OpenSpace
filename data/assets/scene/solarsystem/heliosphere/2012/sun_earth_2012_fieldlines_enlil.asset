@@ -63,7 +63,7 @@ local ENLILSliceEqPlane11AU1 = {
     InputFileType = "Osfls",
     ShowAtAllTimes = false,
     Color = { 0.4, 0.15, 0.4, 0.6 },
-    ColorMethod = "ByQuantity",
+    ColorMethod = "By Quantity",
     ColorQuantity = 1, -- Velocity
     ColorTablePaths = {
       enlilDensityColorTable,
@@ -87,7 +87,7 @@ local ENLILSliceEqPlane11AU2 = {
     InputFileType = "Osfls",
     ShowAtAllTimes = false,
     Color = { 0.4, 0.15, 0.4, 0.6 },
-    ColorMethod = "ByQuantity",
+    ColorMethod = "By Quantity",
     ColorQuantity = 1, -- Velocity
     ColorTablePaths = {
       enlilDensityColorTable,
@@ -111,7 +111,7 @@ local ENLILSliceLat411AU1 = {
     InputFileType = "Osfls",
     ShowAtAllTimes = false,
     Color = { 0.4, 0.15, 0.4, 0.6 },
-    ColorMethod = "ByQuantity",
+    ColorMethod = "By Quantity",
     ColorQuantity = 1, -- Velocity
     ColorTablePaths = {
       enlilDensityColorTable,
@@ -135,7 +135,7 @@ local ENLILSliceLat411AU2 = {
     InputFileType = "Osfls",
     ShowAtAllTimes = false,
     Color = { 0.4, 0.15, 0.4, 0.6 },
-    ColorMethod = "ByQuantity",
+    ColorMethod = "By Quantity",
     ColorQuantity = 1, -- Velocity
     ColorTablePaths = {
       enlilDensityColorTable,

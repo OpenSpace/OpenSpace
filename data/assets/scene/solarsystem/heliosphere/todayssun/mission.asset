@@ -7,7 +7,7 @@ local Mission = {
     version 5.4. This model includes data for the solar surface as well as field lines.
     All data is downloaded dynamically, bringing you the latest data from the model.
     You can find these assets in the Scene menu under "Solar System/Heliosphere." Under
-    the "WSA Coronal Model 5.4" submenu, you will find extra options for the solar field
+    the "WSA Coronal Model" submenu, you will find extra options for the solar field
     lines and surface features. The four different sets of field lines are all following
     the magnetic fields but traced from different locations. They can be colored by their
     different parameters in the data, for example polarity or open or closed field lines.
@@ -17,8 +17,8 @@ local Mission = {
     (by default, the data is not cached). Each data file remains active until the next
     one in the sequence becomes available. To see which file is currently being used,
     check the Texture Source field for each asset in the GUI. In the visualization, the
-    white line shooting out from the Sun, along with the white arch, always points in
-    the direction of Earth. The yellow arch is the Carrington prime meridian which is
+    white line shooting out from the Sun, along with the white arc, always points in
+    the direction of Earth. The yellow arc is the Carrington prime meridian which is
     longitude 0 of the Sun, and the green grid shows lines with a 10-degree separation.
     You can also toggle a white background from the Actions panel. If no data is
     showing, most likely the selected time is outside of the data range (e.g., too far

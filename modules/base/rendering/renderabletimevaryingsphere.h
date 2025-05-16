@@ -27,117 +27,54 @@
 
 #include <modules/base/rendering/renderablesphere.h>
 
-#include <openspace/properties/misc/optionproperty.h>
-#include <openspace/util/dynamicfilesequencedownloader.h>
+#include <filesystem>
 
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
-struct RenderData;
-struct UpdateData;
+    struct RenderData;
+    struct UpdateData;
 
-namespace documentation { struct Documentation; }
+    namespace documentation { struct Documentation; }
 
-class RenderableTimeVaryingSphere : public RenderableSphere {
-public:
-    //0: static loading and static downloading
-    //1: dynamic loading and static downloading
-    //2: dynamic loading and dynamic downloading
-    enum class LoadingType {
-        StaticLoading = 0,
-        DynamicLoading = 1,
-        DynamicDownloading = 2
-    };
-    enum class TextureFilter {
-        NearestNeighbor = 0,
-        Linear = 1
-    };
+    class RenderableTimeVaryingSphere : public RenderableSphere {
+    public:
+        explicit RenderableTimeVaryingSphere(const ghoul::Dictionary& dictionary);
 
-    explicit RenderableTimeVaryingSphere(const ghoul::Dictionary& dictionary);
+        void initializeGL() override;
+        void deinitializeGL() override;
 
-    void initializeGL() override;
-    void deinitializeGL() override;
+        bool isReady() const override;
 
-    bool isReady() const override;
+        void update(const UpdateData& data) override;
 
-    void update(const UpdateData& data) override;
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
+        static documentation::Documentation Documentation();
 
-    static documentation::Documentation Documentation();
-    struct File {
-        enum class FileStatus {
-            Downloaded,
-            Loaded
+    protected:
+        void bindTexture() override;
+
+    private:
+        struct FileData {
+            std::filesystem::path path;
+            double time;
+            std::unique_ptr<ghoul::opengl::Texture> texture;
         };
-        FileStatus status = FileStatus::Downloaded;
-        std::filesystem::path path;
-        double time = 0.0;
-        std::unique_ptr<ghoul::opengl::Texture> texture;
-        glm::vec2 dataMinMax = { 0.0, 1.0 };
+        void loadTexture();
+        void extractMandatoryInfoFromSourceFolder();
+        void updateActiveTriggerTimeIndex(double currenttime);
+        void computeSequenceEndTime();
 
-        bool operator<(const File& other) const noexcept{
-            return time < other.time;
-        }
+        // If there's just one state it should never disappear!
+        double _sequenceEndTime = std::numeric_limits<double>::max();
+        std::vector<FileData> _files;
+        int _activeTriggerTimeIndex = 0;
+
+        properties::StringProperty _textureSourcePath;
+        ghoul::opengl::Texture* _texture = nullptr;
+        bool _textureIsDirty = false;
     };
-protected:
-    void bindTexture() override;
 
-private:
-    void loadTexture();
-    void trackOldest(File& file);
-    void showCorrectFileName();
-    void extractMandatoryInfoFromSourceFolder();
-    void readFileFromImage(std::filesystem::path path);
-    void readFileFromFits(std::filesystem::path path);
-    glm::vec2 minMaxTextureDataValues(std::unique_ptr<ghoul::opengl::Texture>& t);
-    void updateActiveTriggerTimeIndex(double currenttime);
-    void computeSequenceEndTime();
-    void updateDynamicDownloading(const double currentTime, const double deltaTime);
-
-    properties::OptionProperty _fitsLayer;
-    properties::OptionProperty _fitsLayerName;
-    // An option to keep or delete the downloads from dynamic downloader on shutdown
-    // Deletes on default
-    properties::BoolProperty _saveDownloadsOnShutdown;
-    properties::OptionProperty _textureFilterProperty;
-    properties::StringProperty _textureSourcePath;
-
-    // If there's just one state it should never disappear!
-    double _sequenceEndTime = std::numeric_limits<double>::max();
-    // Static Loading on default / if not specified
-    LoadingType _loadingType = LoadingType::StaticLoading;
-    // A data ID that corresponds to what dataset to use if using DynamicDownloading
-    int _dataID;
-    // Number of files to queue up at a time
-    int _nFilesToQueue = 10;
-    // To keep track of oldest file
-    std::queue<File*> _loadedFiles;
-    // Max number of files loaded at once
-    size_t _maxLoadedFiles = 100;
-    std::string _infoURL;
-    std::string _dataURL;
-    bool _hasLayerNames = false;
-    std::map<int, std::string> _layerNames;
-    int _fitsLayerTemp;
-    int _fitsLayerNameTemp;
-    float _fitsDataCapValue = 50.f;
-    // If there's just one state it should never disappear
-    bool _renderForever = false;
-    bool _inInterval = false;
-
-    bool _isLoadingStateFromDisk = false;
-    // DynamicFileSequenceDownloader downloads and updates the renderable with
-    // data downloaded from the web
-    std::unique_ptr<DynamicFileSequenceDownloader> _dynamicFileDownloader;
-    std::vector<File> _files;
-    int _activeTriggerTimeIndex = 0;
-
-    bool _isFitsFormat = false;
-    bool _firstUpdate = true;
-    bool _layerOptionsAdded = false;
-    ghoul::opengl::Texture* _texture = nullptr;
-    bool _textureIsDirty = true;
-};
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_BASE___RENDERABLETIMEVARYINGSPHERE___H__

@@ -36,7 +36,8 @@ namespace openspace {
 
 std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
                                                          const std::filesystem::path path,
-                                                         size_t layerIndex, float minMax)
+                                                                        size_t layerIndex,
+                                                           std::pair<float, float> minMax)
 {
     try {
         std::unique_ptr<FITS> file = std::make_unique<FITS>(path.string(), Read, true);
@@ -64,13 +65,11 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         std::valarray<float> layerValues =
             fitsValues->contents[std::slice(layerIndex*layerSize, layerSize, 1)];
 
-        const float maxValue = minMax;
-        const float minValue = -minMax;
         float* imageData = new float[layerValues.size()];
         std::vector<glm::vec3> rgbLayers;
         for (size_t i = 0; i < layerValues.size(); i++) {
             // normalization
-            float normalizedValue = (layerValues[i] - minValue) / (maxValue - minValue);
+            float normalizedValue = (layerValues[i] - minMax.first) / (minMax.second - minMax.first);
             // clamping causes overexposure above and below max and min values
             // intentionally as desired by Nick Arge from WSA
             normalizedValue = std::clamp(normalizedValue, 0.f, 1.f);

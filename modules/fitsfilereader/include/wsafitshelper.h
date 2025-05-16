@@ -48,7 +48,7 @@ struct ImageData {
 // and minMax is the value, positive and negative, in which to cap the data between
 // to cause overexposure of higher and lower values.;
 std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
-    const std::filesystem::path path, size_t layerIndex, float minMax);
+    const std::filesystem::path path, size_t layerIndex, std::pair<float, float> minMax);
 
 // return number of data layers in fits file.
 int nLayers(const std::filesystem::path& path);

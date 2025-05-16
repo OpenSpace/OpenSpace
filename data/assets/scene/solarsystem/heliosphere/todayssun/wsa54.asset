@@ -28,7 +28,7 @@ local WSA_Magnetograms = {
   Identifier = "WSA_54_Magnetograms_GONGZ",
   Parent = transforms.WSAOffset60.Identifier,
   Renderable = {
-    Type = "RenderableTimeVaryingSphere",
+    Type = "RenderableTimeVaryingFitsSphere",
     Enabled = true,
     Size = extendedRadius,
     LoadingType = "DynamicDownloading",
@@ -45,6 +45,14 @@ local WSA_Magnetograms = {
       ['5'] = "Distance from open field footpoint to nearest coronal boundary (deg)",
       ['6'] = "Open (1,2,3) and closed (0) regions on the photosphere [1=in-to-out tracing; 2=out-to-in tracing; 3=both] (no units)",
       ['7'] = "Distance to current sheet at outer boundary (degrees)"
+    },
+    LayerMinMaxCapValues = {
+      ['0'] = { -5000.0, 5000.0 },
+      ['1'] = { 0.0, 50.0 },
+      ['4'] = { -50.0, 50.0 },
+      ['5'] = { 0.0, 30.0 },
+      ['6'] = { 0.0, 4.0 },
+      ['7'] = { 0.0, 90.0 }
     },
     ColorMap = blueBlackRed,
     UseColorMap = false,
@@ -64,7 +72,7 @@ local WSA_Magnetograms_Adapt = {
   Identifier = "WSA_54_Magnetograms_ADAPT",
   Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
   Renderable = {
-    Type = "RenderableTimeVaryingSphere",
+    Type = "RenderableTimeVaryingFitsSphere",
     Enabled = false,
     Size = extendedRadius,
     LoadingType = "DynamicDownloading",
@@ -81,6 +89,14 @@ local WSA_Magnetograms_Adapt = {
       ['5'] = "Distance from open field footpoint to nearest coronal boundary (deg)",
       ['6'] = "Open (1,2,3) and closed (0) regions on the photosphere [1=in-to-out tracing; 2=out-to-in tracing; 3=both] (no units)",
       ['7'] = "Distance to current sheet at outer boundary (degrees)"
+    },
+    LayerMinMaxCapValues = {
+      ['0'] = { -5000.0, 5000.0 },
+      ['1'] = { 0.0, 50.0 },
+      ['4'] = { -50.0, 50.0 },
+      ['5'] = { 0.0, 30.0 },
+      ['6'] = { 0.0, 4.0 },
+      ['7'] = { 0.0, 90.0 }
     },
     ColorMap = blueBlackRed,
     UseColorMap = false,
@@ -100,7 +116,7 @@ local WSA_Velocity_Adapt = {
   Identifier = "WSA_54_velocity_ADAPT",
   Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
   Renderable = {
-    Type = "RenderableTimeVaryingSphere",
+    Type = "RenderableTimeVaryingFitsSphere",
     Enabled = false,
     Size = extendedRadius,
     LoadingType = "DynamicDownloading",
@@ -109,8 +125,12 @@ local WSA_Velocity_Adapt = {
     DataID = 2218,
     FitsLayer = 1,
     LayerNames = {
-      [0] = "Coronal Magnetic Field at 21.5 Solar Radii",
-      [1] = "Solar Wind Speed at 21.5 Solar Radii (km/s)"
+      ['0'] = "Coronal Magnetic Field at 21.5 Solar Radii (nT)",
+      ['1'] = "Solar Wind Speed at 21.5 Solar Radii (km/s)"
+    },
+    LayerMinMaxCapValues = {
+      ['0'] = { -200.0, 200.0 },
+      ['1'] = { 200.0, 850.0 }
     },
     ColorMap = blueBlackRed,
     CacheData = false,
@@ -129,7 +149,7 @@ local WSA_Velocity_Gong = {
   Identifier = "WSA_54_velocity_GONG",
   Parent = transforms.WSAOffset60.Identifier,
   Renderable = {
-    Type = "RenderableTimeVaryingSphere",
+    Type = "RenderableTimeVaryingFitsSphere",
     Enabled = false,
     Size = extendedRadius,
     LoadingType = "DynamicDownloading",
@@ -138,8 +158,12 @@ local WSA_Velocity_Gong = {
     DataID = 2217,
     FitsLayer = 1,
     LayerNames = {
-      ['0'] = "Coronal Magnetic Field at 21.5 Solar Radii",
+      ['0'] = "Coronal Magnetic Field at 21.5 Solar Radii (nT)",
       ['1'] = "Solar Wind Speed at 21.5 Solar Radii (km/s)"
+    },
+    LayerMinMaxCapValues = {
+      ['0'] = { -200.0, 200.0 },
+      ['1'] = { 200.0, 850.0 }
     },
     ColorMap = blueBlackRed,
     CacheData = false,

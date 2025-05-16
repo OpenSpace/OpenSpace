@@ -4,10 +4,10 @@
     "base_keybindings",
     "scene/solarsystem/heliosphere/todayssun/actions",
     "scene/solarsystem/heliosphere/todayssun/mission",
-    "scene/solarsystem/heliosphere/todayssun/whiteBackground",
+    "scene/solarsystem/heliosphere/todayssun/whitebackground",
     "scene/solarsystem/heliosphere/todayssun/wsa54",
     "scene/solarsystem/heliosphere/todayssun/grid",
-    "scene/solarsystem/heliosphere/todayssun/sunEarthLine",
+    "scene/solarsystem/heliosphere/todayssun/sunearthline",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites"
   ],
@@ -65,7 +65,7 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "Default OpenSpace Profile. Adds Earth satellites not contained in other profiles",
+    "description": "This profile uses simulation outputs in real time from the model WSA to visualize the magnetic fluctuations on the Sun.",
     "license": "MIT License",
     "name": "Default",
     "url": "https://www.openspaceproject.com",

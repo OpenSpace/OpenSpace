@@ -33,7 +33,7 @@ local CarringtonPrimeMeridian = {
   GUI = {
     Name = "Carrington Prime Meridian",
     Path =  "/Solar System/Heliosphere",
-    Description = [[An arch showing the Carrington prime meridian of the Sun.]] ..
+    Description = [[An arc showing the Carrington prime meridian of the Sun.]] ..
       [[The line from pole to pole at 0 degree longitude.]]
   }
 }
@@ -62,7 +62,7 @@ local WSA_GridSlice = {
   GUI = {
     Name = "Solar Longitude Facing the Earth",
     Path =  "/Solar System/Heliosphere",
-    Description = [[An arch on the Sun suface that always faces Earth.]]
+    Description = [[An arc on the Sun surface that always faces Earth.]]
   }
 }
 

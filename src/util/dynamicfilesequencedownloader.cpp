@@ -377,7 +377,7 @@ double DynamicFileSequenceDownloader::calculateCadence() const {
 void DynamicFileSequenceDownloader::downloadFile() {
     ZoneScoped;
 
-    if (_filesCurrentlyDownloading.size() < 4 && _queuedFilesToDownload.size() > 0) {
+    if (_filesCurrentlyDownloading.size() < 4 && !_queuedFilesToDownload.empty()) {
         File* dl = _queuedFilesToDownload.front();
         if (dl->state != File::State::OnQueue) {
             throw ghoul::RuntimeError(
@@ -408,7 +408,7 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
             std::ifstream tempFile = std::ifstream(file->URL);
             std::streampos size = tempFile.tellg();
             if (size == 0) {
-                LERROR(std::format("File '{}' was 0kb, removing", dl->destination()));
+                LERROR(std::format("File '{}' is size 0, removing", dl->destination()));
                 currentIt = _filesCurrentlyDownloading.erase(currentIt);
                 --i;
             }
@@ -467,15 +467,11 @@ std::vector<File>::iterator DynamicFileSequenceDownloader::closestFileToNow(doub
     ZoneScoped;
     std::vector<File>::iterator closestIt = _availableData.begin();
 
-    double smallest = std::numeric_limits<double>::max();
-
     std::vector<File>::iterator it = std::lower_bound(
         _availableData.begin(),
         _availableData.end(),
         time,
-        [](const File& file, double t) {
-            return file.time < t;
-        }
+        [](const File& file, double t) { return file.time < t; }
     );
 
     if (it == _availableData.end()) {
@@ -486,12 +482,7 @@ std::vector<File>::iterator DynamicFileSequenceDownloader::closestFileToNow(doub
     }
 
     std::vector<File>::iterator prev = std::prev(it);
-    if (_isForwardDirection) {
-        return prev;
-    }
-    else {
-        return it;
-    }
+    return _isForwardDirection ? prev : it;
 }
 
 void DynamicFileSequenceDownloader::putOnQueue() {
@@ -632,7 +623,7 @@ void DynamicFileSequenceDownloader::update(double time, double deltaTime) {
     downloadFile();
 }
 
-const std::filesystem::path DynamicFileSequenceDownloader::destinationDirectory() const {
+const std::filesystem::path& DynamicFileSequenceDownloader::destinationDirectory() const {
     return _syncDir;
 }
 

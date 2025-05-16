@@ -71,7 +71,7 @@ public:
     const std::vector<std::filesystem::path>& downloadedFiles();
     void checkForFinishedDownloads();
     void clearDownloaded();
-    const std::filesystem::path destinationDirectory() const;
+    const std::filesystem::path& destinationDirectory() const;
     bool areFilesCurrentlyDownloading() const;
     std::vector<File*>& filesCurrentlyDownloading();
 

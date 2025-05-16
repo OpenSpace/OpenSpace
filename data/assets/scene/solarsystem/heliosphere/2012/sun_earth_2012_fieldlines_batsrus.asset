@@ -67,7 +67,7 @@ local BatsrusJ12OpenClosed = {
     InputFileType = "Osfls",
     ShowAtAllTimes = false,
     Color = { 0.7, 0.4, 0.0, 0.6 },
-    ColorMethod = "ByQuantity",
+    ColorMethod = "By Quantity",
     ColorQuantity = 0, -- Temperature
     ColorTablePaths = {
       batsrusTemperatureColorTable,
@@ -97,7 +97,7 @@ local BatsrusJ12FlowLines = {
     SourceFolder = unzippedDataDestination.velocityFlow,
     InputFileType = "Osfls",
     ShowAtAllTimes = false,
-    ColorMethod = "ByQuantity",
+    ColorMethod = "By Quantity",
     ColorQuantity = 3, -- Velocity
     Color = { 0.7, 0.4, 0.0, 0.12 },
     ColorTablePaths = {

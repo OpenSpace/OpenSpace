@@ -2,23 +2,17 @@ local ToggleWhiteBackground = {
   Identifier = "os.todayssun.ToggleWhiteBackground",
   Name = "Toggle white background",
   Command = [[
-    if not openspace.propertyValue("Scene.WhiteBackground_sphere.Renderable.Enabled") then
-      openspace.setPropertyValueSingle("Scene.WhiteBackground_sphere.Renderable.Fade", 0.0)
-      openspace.setPropertyValueSingle("Scene.WhiteBackground_sphere.Renderable.Enabled", true)
-      openspace.setPropertyValueSingle("Scene.WhiteBackground_sphere.Renderable.Fade", 1.0, 1.0)
-      openspace.setPropertyValueSingle("Scene.Stars.Renderable.Fade", 0.0, 1.0)
-      openspace.setPropertyValueSingle("Scene.Stars.Renderable.Enabled", false)
-      openspace.setPropertyValue("Scene.WSA*.Renderable.ABlendingEnabled", false)
+    if openspace.propertyValue("Scene.WhiteBackground_sphere.Renderable.Enabled") then
+      openspace.fadeOut("Scene.WhiteBackground_sphere.Renderable")
+      openspace.fadeOut("Scene.Stars.Renderable")
+      openspace.setPropertyValue("Scene.WSA_54_Fieldlines*.Renderable.ABlendingEnabled", true)
     else
-      openspace.setPropertyValueSingle("Scene.WhiteBackground_sphere.Renderable.Fade", 0.0, 1.0)
-      openspace.setPropertyValueSingle("Scene.WhiteBackground_sphere.Renderable.Enabled", false)
-      openspace.setPropertyValueSingle("Scene.Stars.Renderable.Fade", 0.0)
-      openspace.setPropertyValueSingle("Scene.Stars.Renderable.Enabled", true)
-      openspace.setPropertyValueSingle("Scene.Stars.Renderable.Fade", 1.0, 1.0)
-      openspace.setPropertyValue("Scene.WSA*.Renderable.ABlendingEnabled", true)
+      openspace.fadeIn("Scene.WhiteBackground_sphere.Renderable")
+      openspace.fadeIn("Scene.Stars.Renderable")
+      openspace.setPropertyValue("Scene.WSA*.Renderable.ABlendingEnabled", false)
     end
   ]],
-  Documentation = [[This toggles a white sphere, the stars, and the addative blending of
+  Documentation = [[This toggles a white sphere, the stars, and the additive blending of
     any fieldlines]]
 }
 
