@@ -38,8 +38,7 @@
 #include <ghoul/misc/interpolator.h>
 
 namespace {
-    constexpr glm::uint width = 3840;
-    constexpr glm::uint height = 2160;
+    constexpr glm::uvec2 BlackoutTextureSize = glm::uvec2(3840, 2160);
 
     void checkCornerSpecification(std::vector<glm::vec2> corners) {
         if (corners.size() != 4) {
@@ -512,7 +511,6 @@ ScreenSpaceInsetBlackout::ScreenSpaceInsetBlackout(const ghoul::Dictionary& dict
                 texture->purgeFromRAM();
 
                 _calibrationTexture = std::move(texture);
-                _calibrationTextureObjectSize = _calibrationTexture->dimensions();
             }
         }
         else {
@@ -525,14 +523,11 @@ ScreenSpaceInsetBlackout::ScreenSpaceInsetBlackout(const ghoul::Dictionary& dict
             );
         }
     }
-
-    // Setup FBO and generate texture
-    initializeShadersAndFBO();
-    generateVertexArrayData();
-    generateTexture();
 }
 
-void ScreenSpaceInsetBlackout::initializeShadersAndFBO() {
+bool ScreenSpaceInsetBlackout::initializeGL() {
+    bool success = ScreenSpaceRenderable::initializeGL();
+
     // Setup vertex buffer
     glGenVertexArrays(1, &_vao);
     glGenBuffers(1, &_vbo);
@@ -554,7 +549,7 @@ void ScreenSpaceInsetBlackout::initializeShadersAndFBO() {
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
     _blackoutTexture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(width, height, 1),
+        glm::uvec3(BlackoutTextureSize, 1),
         GL_TEXTURE_2D,
         ghoul::opengl::Texture::Format::RGBA
     );
@@ -564,15 +559,14 @@ void ScreenSpaceInsetBlackout::initializeShadersAndFBO() {
         GL_TEXTURE_2D,
         0,
         GL_RGBA,
-        width,
-        height,
+        BlackoutTextureSize.x,
+        BlackoutTextureSize.y,
         0,
         GL_RGBA,
         GL_UNSIGNED_BYTE,
         nullptr
     );
 
-    _blackoutTextureObjectSize = _blackoutTexture->dimensions();
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -590,6 +584,42 @@ void ScreenSpaceInsetBlackout::initializeShadersAndFBO() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     _uniformCache.color = _fboProgram->uniformLocation("color");
+
+    // Generate vertex data and texture
+    generateVertexArrayData();
+    generateTexture();
+
+    return success;
+}
+
+bool ScreenSpaceInsetBlackout::deinitializeGL() {
+    _blackoutTexture = nullptr;
+    _calibrationTexture = nullptr;
+
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
+    glDeleteFramebuffers(1, &_fbo);
+
+    if (_fboProgram) {
+        BaseModule::ProgramObjectManager.release(
+            _fboProgram,
+            [](ghoul::opengl::ProgramObject* p) {
+                global::renderEngine->removeRenderProgram(p);
+            }
+        );
+        _fboProgram = nullptr;
+    }
+
+    return ScreenSpaceRenderable::deinitializeGL();
+}
+
+void ScreenSpaceInsetBlackout::update() {
+    _blackoutShape.checkAndUpdateGUI();
+    if (_blackoutShape.checkHasChanged()) {
+        generateVertexArrayData();
+        generateTexture();
+        _blackoutShape.resetHasChanged();
+    }
 }
 
 void ScreenSpaceInsetBlackout::generateVertexArrayData() {
@@ -713,7 +743,7 @@ void ScreenSpaceInsetBlackout::generateTexture() {
     bindTexture();
 
     // Clear current buffer
-    glViewport(0, 0, width, height);
+    glViewport(0, 0, BlackoutTextureSize.x, BlackoutTextureSize.y);
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -728,44 +758,15 @@ void ScreenSpaceInsetBlackout::generateTexture() {
     _fboProgram->deactivate();
 }
 
-void ScreenSpaceInsetBlackout::update() {
-    _blackoutShape.checkAndUpdateGUI();
-    if (_blackoutShape.checkHasChanged()) {
-        generateVertexArrayData();
-        generateTexture();
-        _blackoutShape.resetHasChanged();
-    }
-}
-
 void ScreenSpaceInsetBlackout::bindTexture() {
     if (_blackoutShape.enableCalibrationPattern && _calibrationTexture.get()) {
         _calibrationTexture->bind();
-        _objectSize = _calibrationTextureObjectSize;
+        _objectSize = _calibrationTexture->dimensions();
     }
     else {
         _blackoutTexture->bind();
-        _objectSize = _blackoutTextureObjectSize;
+        _objectSize = _blackoutTexture->dimensions();
     }
 }
 
-bool ScreenSpaceInsetBlackout::deinitializeGL() {
-    _blackoutTexture = nullptr;
-    _calibrationTexture = nullptr;
-
-    glDeleteVertexArrays(1, &_vao);
-    glDeleteBuffers(1, &_vbo);
-    glDeleteFramebuffers(1, &_fbo);
-
-    if (_fboProgram) {
-        BaseModule::ProgramObjectManager.release(
-            _fboProgram,
-            [](ghoul::opengl::ProgramObject* p) {
-                global::renderEngine->removeRenderProgram(p);
-            }
-        );
-        _fboProgram = nullptr;
-    }
-
-    return ScreenSpaceRenderable::deinitializeGL();
-}
 } // namespace openspace

@@ -38,6 +38,7 @@ class ScreenSpaceInsetBlackout : public ScreenSpaceRenderable {
 public:
     explicit ScreenSpaceInsetBlackout(const ghoul::Dictionary& dictionary);
 
+    bool initializeGL() override;
     bool deinitializeGL() override;
     void update() override;
 
@@ -136,7 +137,6 @@ private:
 
     void bindTexture() override;
 
-    void initializeShadersAndFBO();
     void generateTexture();
     void generateVertexArrayData();
 
@@ -144,8 +144,6 @@ private:
     std::vector<glm::vec2> _vboData;
     std::unique_ptr<ghoul::opengl::Texture> _blackoutTexture;
     std::unique_ptr<ghoul::opengl::Texture> _calibrationTexture;
-    glm::ivec2 _calibrationTextureObjectSize = glm::ivec2(0);
-    glm::ivec2 _blackoutTextureObjectSize = glm::ivec2(0);
     GLuint _vao = 0;
     GLuint _vbo = 0;
     GLuint _fbo = 0;
