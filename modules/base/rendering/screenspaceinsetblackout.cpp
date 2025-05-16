@@ -24,6 +24,7 @@
 
 #include <modules/base/rendering/screenspaceinsetblackout.h>
 #include <modules/base/basemodule.h>
+
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
@@ -37,6 +38,102 @@
 #include <ghoul/misc/interpolator.h>
 
 namespace {
+    constexpr glm::uint width = 3840;
+    constexpr glm::uint height = 2160;
+
+    void checkCornerSpecification(std::vector<glm::vec2> corners) {
+        if (corners.size() != 4) {
+            openspace::documentation::TestResult res;
+            res.success = false;
+            res.offenses.push_back(openspace::documentation::TestResult::Offense());
+            res.offenses[0].offender = "ScreenSpaceInsetBlackout.Blackoutshape.Corners";
+            res.offenses[0].explanation = "Asset must contain exactly 4 corners";
+            res.offenses[0].reason =
+                openspace::documentation::TestResult::Offense::Reason::Verification;
+            throw openspace::documentation::SpecificationError(
+                res,
+                "ScreenSpaceInsetBlackout"
+            );
+        }
+    }
+
+    std::pair<glm::vec2, glm::vec2> calculatePadding(const std::vector<glm::vec2>& v) {
+        ghoul_assert(v.size() >= 2, "Too few points in the list");
+
+        const glm::vec2& pf0 = v[1];
+        const glm::vec2& pf1 = v[2];
+        const glm::vec2& pb0 = v[v.size() - 1];
+        const glm::vec2& pb1 = v[v.size() - 2];
+        const glm::vec2 firstPaddingPoint = 2.f * pf0 - pf1;
+        const glm::vec2 lastPaddingPoint = 2.f * pb0 - pb1;
+        return std::pair(firstPaddingPoint, lastPaddingPoint);
+    }
+
+    std::vector<glm::vec2> sampleSpline(const std::vector<glm::vec2>& controlPoints) {
+        ghoul_assert(controlPoints.size() >= 3, "Too few control points");
+
+        constexpr int Subdivisions = 50;
+        std::vector<glm::vec2> splineData;
+        const int numberOfSegments = static_cast<int>(controlPoints.size() - 3);
+        const float stepSize = 1.f / Subdivisions;
+        for (int i = 0; i < numberOfSegments; i++) {
+            for (int s = 0; s < Subdivisions; s++) {
+                float tValue = stepSize * s;
+                splineData.push_back(ghoul::interpolateCatmullRom(
+                    tValue,
+                    *(controlPoints.begin() + i + 0),
+                    *(controlPoints.begin() + i + 1),
+                    *(controlPoints.begin() + i + 2),
+                    *(controlPoints.begin() + i + 3)
+                ));
+            }
+        }
+        return splineData;
+    }
+
+    void offsetCoordinates(std::vector<glm::vec2>& vec) {
+        for (glm::vec2& v : vec) {
+            v.x = (v.x * 2.f) - 1.f;
+            v.y = (v.y * 2.f) - 1.f;
+        }
+    }
+
+    std::string formatLine(std::string id, const std::vector<glm::vec2>& data)
+    {
+        if (data.empty()) {
+            return "";
+        }
+
+        std::string str = std::format("{} = {{ ", id);
+        for (int i = 0; i < data.size(); ++i) {
+            std::string xVal = std::format("{}", data[i].x);
+            std::string yVal = std::format("{}", data[i].y);
+            xVal += (xVal.find(".") == std::string::npos) ? ".0" : "";
+            yVal += (yVal.find(".") == std::string::npos) ? ".0" : "";
+            str.append(std::format("{{{}, {}}}", xVal, yVal));
+            std::string delimiter = (i < data.size() - 1) ? ", " : " ";
+            str.append(delimiter);
+        }
+        str.append("},\n");
+
+        return str;
+    }
+
+    void copyToClipboard(std::vector<glm::vec2>& cornerData,
+                         std::vector<glm::vec2>& topSplineData,
+                         std::vector<glm::vec2>& rightSplineData,
+                         std::vector<glm::vec2>& bottomSplineData,
+                         std::vector<glm::vec2>& leftSplineData)
+    {
+        std::string strCorners = formatLine("Corners", cornerData);
+        std::string strTop = formatLine("Top", topSplineData);
+        std::string strRight = formatLine("Right", rightSplineData);
+        std::string strBottom = formatLine("Bottom", bottomSplineData);
+        std::string strLeft = formatLine("Left", leftSplineData);
+
+        ghoul::setClipboardText(strCorners + strTop + strRight + strBottom + strLeft);
+    }
+
     constexpr openspace::properties::Property::PropertyInfo CopyToClipboardInfo = {
         "CopyToClipboard",
         "Copy to clipboard",
@@ -48,7 +145,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo CalibrationPatternInfo = {
         "EnableCalibrationPattern",
         "Enable Calibration Pattern",
-        "Enables the calibration pattern.",
+        "Enables the calibration pattern. The calibration can be used to find which "
+        "values to use when setting up the blackout shape.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -102,84 +200,50 @@ namespace {
     };
 
     // A ScreenSpaceInsetBlackout can be used to render a screen-space shape used to 
-    // black out part of the renderin. This can be useful in a dome environemnt where 
+    // black out part of the rendering. This can be useful in a dome environment where 
     // you have a secondary presentation projector that can project on the dome surface. 
-    // This renderable can be used to black out some part of the dome OpenSpace rendering 
-    // in order to avoid overlapping rendering between the dome projectors and the
-    // presentation projector.
+    // The blackout is used to avoid overlapping rendering between the dome projectors
+    // and the presentation projector.
     struct [[codegen::Dictionary(ScreenSpaceInsetBlackout)]] Parameters {
         struct BlackoutShape {
-            // List of all the corners positions for the blackout shape. The order of 
-            // corner points are Top-Left, Top-Right, Bottom-Right, Bottom-Left with the
-            // range of 0 to 1 for [X,Y], where [0,1] is the Top-Left corner and [1,0]
-            // is the Bottom-Right corner.
+            // List of corner positions for the blackout shape. The order of 
+            // corner points are Top-Left, Top-Right, Bottom-Right, Bottom-Left with the 
+            // range of 0 to 1 for `{X,Y}`, where `{0,1}` is the Top-Left corner and 
+            // `{1,0}` is the Bottom-Right corner.
             std::vector<glm::vec2> corners;
 
-            // List of all points between the two corners that will be used to define
-            // top spline of the blackout shape.
+            // List of points between the Top-Left and Top-Right corners that will be 
+            // used to define top spline of the blackout shape. Each point is specified 
+            // in the range of 0 to 1, where `{0,1}` is the Top-Left corner and `{1,1}` 
+            // is the Top-Right corner.
             std::optional<std::vector<glm::vec2>> top;
 
-            // List of all points between the two corners that will be used to define
-            // bottom spline of the blackout shape.
+            // List of points between the Bottom-Right and Bottom-Left corners that will 
+            // be used to define bottom spline of the blackout shape. Each point is 
+            // specified in the range of 0 to 1, where `{1,0}` is the Bottom-Right 
+            // corner and `{0,0}` is the Bottom-Left corner.
             std::optional<std::vector<glm::vec2>> bottom;
 
-            // List of all points between the two corners that will be used to define
-            // left spline of the blackout shape.
+            // List of points between the Bottom-Left and Top-Left corners that will be 
+            // used to define left spline of the blackout shape. Each point is specified 
+            // in the range of 0 to 1, where `{0,0}` is the Bottom-Left corner and 
+            // `{0,1}` is the Top-Left corner.
             std::optional<std::vector<glm::vec2>> left;
 
-            // List of all points between the two corners that will be used to define
-            // right spline of the blackout shape.
+            // List of points between the Top-Right and Bottom-Right corners that will 
+            // be used to define right spline of the blackout shape. Each point is 
+            // specified in the range of 0 to 1, where `{1,1}` is the Top-Right corner 
+            // and `{1,0}` is the Bottom-Right corner.
             std::optional<std::vector<glm::vec2>> right;
 
-            // File path for the texture that should be used when displaying the
+            // File path for the texture that should be used when displaying the 
             // calibration grid.
-            std::optional<std::string> calibrationTexturePath;
+            std::optional<std::filesystem::path> calibrationTexturePath;
         };
         BlackoutShape blackoutshape;
-        std::optional<std::string> identifier;
     };
 #include "screenspaceinsetblackout_codegen.cpp"
 } // namespace
-
-namespace {
-std::pair<glm::vec2, glm::vec2> calculatePadding(const std::vector<glm::vec2>& v) {
-    const glm::vec2& pf0 = v[1];
-    const glm::vec2& pf1 = v[2];
-    const glm::vec2& pb0 = v[v.size() - 1];
-    const glm::vec2& pb1 = v[v.size() - 2];
-    const glm::vec2 firstPaddingPoint = pf0 + ((pf1 - pf0) * -1.f);
-    const glm::vec2 lastPaddingPoint = pb0 + ((pb1 - pb0) * -1.f);
-    return std::pair(firstPaddingPoint, lastPaddingPoint);
-}
-
-std::vector<glm::vec2> sampleSpline(const std::vector<glm::vec2>& controlPoints) {
-    const int subdivisions = 50;
-    std::vector<glm::vec2> splineData;
-    const int numberOfSegments = static_cast<int>(controlPoints.size() - 3);
-    const float stepSize = 1.f / subdivisions;
-    for (int i = 0; i < numberOfSegments; ++i) {
-        for (int s = 0; s < subdivisions; ++s) {
-            float tValue = stepSize * s;
-            splineData.push_back(ghoul::interpolateCatmullRom(
-                tValue,
-                *(controlPoints.begin() + i + 0),
-                *(controlPoints.begin() + i + 1),
-                *(controlPoints.begin() + i + 2),
-                *(controlPoints.begin() + i + 3)
-            ));
-        }
-    }
-    return splineData;
-}
-
-void offsetCoordinates(std::vector<glm::vec2>& vec) {
-    for (int i = 0; i < vec.size(); ++i) {
-        vec[i].x = (vec[i].x * 2.f) - 1.f;
-        vec[i].y = (vec[i].y * 2.f) - 1.f;
-    }
-}
-
-}
 
 namespace openspace {
 
@@ -187,22 +251,9 @@ documentation::Documentation ScreenSpaceInsetBlackout::Documentation() {
     return codegen::doc<Parameters>("base_screenspace_inset_blackout");
 }
 
-void checkCornerSpecification(std::vector<glm::vec2> corners) {
-    if (corners.size() != 4) {
-        documentation::TestResult res;
-        res.offenses.push_back(documentation::TestResult::Offense());
-        res.success = false;
-        res.offenses[0].offender = "ScreenSpaceInsetBlackout.Blackoutshape.Corners";
-        res.offenses[0].explanation = "Asset must contain exactly 4 corners";
-        res.offenses[0].reason = documentation::TestResult::Offense::Reason::Verification;
-        throw documentation::SpecificationError(res, "ScreenSpaceInsetBlackout");
-    }
-}
-
-ScreenSpaceInsetBlackout::BlackoutShape::PointOwner::Point::Point(
-                                                                glm::vec2& inData,
-                                                                std::string identifier,
-                                                                std::string guiName)
+ScreenSpaceInsetBlackout::BlackoutShape::Point::Point(glm::vec2& inData,
+                                                                  std::string identifier,
+                                                                  std::string guiName)
 {
     // Creates PropertyInfo used to create Property
     propInfo = std::make_unique<properties::Property::PropertyInfo>(
@@ -222,25 +273,14 @@ ScreenSpaceInsetBlackout::BlackoutShape::PointOwner::Point::Point(
     );
 }
 
-void ScreenSpaceInsetBlackout::BlackoutShape::PointOwner::Point::updateData() {
+void ScreenSpaceInsetBlackout::BlackoutShape::Point::updateData() {
     *dataptr = prop->value();
 }
 
-
-ScreenSpaceInsetBlackout::BlackoutShape::PointOwner::PointOwner(
-                                                        std::vector<glm::vec2>& inData,
-                                                        std::string identifier,
-                                                        std::string guiName)
-    : properties::PropertyOwner({ identifier , guiName, "" })
+ScreenSpaceInsetBlackout::BlackoutShape::Spline::Spline(std::vector<glm::vec2>& inData,
+                                                        std::string baseString)
+    : properties::PropertyOwner({ baseString , baseString, "" })
     , data(inData)
-{
-
-}
-
-ScreenSpaceInsetBlackout::BlackoutShape::Spline::Spline(
-                                                    std::vector<glm::vec2>& inData,
-                                                    std::string baseString)
-    : PointOwner(inData, std::format("{}", baseString), baseString)
     , newPointPosition(NewPointPositionInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(1.f))
     , addSelector(AddSelectorInfo)
     , addButton(AddControlPointInfo)
@@ -248,10 +288,7 @@ ScreenSpaceInsetBlackout::BlackoutShape::Spline::Spline(
     , removeButton(RemoveControlPointInfo)
 {
     base = baseString;
-    buildTree();
-}
 
-void ScreenSpaceInsetBlackout::BlackoutShape::Spline::buildTree() {
     // Generate all Point objects and add them to GUI
     for (int i = 0; i < data.size(); i++) {
         points.push_back(std::make_unique<Point>(
@@ -276,23 +313,22 @@ void ScreenSpaceInsetBlackout::BlackoutShape::Spline::buildTree() {
     addProperty(addButton);
 
     // Add options used when inserting a new point
-    for (int i = 0; i < points.size()+1; ++i) {
-        addSelector.addOption(i, std::format("At position #{}", i+1));
+    for (int i = 0; i < points.size() + 1; i++) {
+        addSelector.addOption(i, std::format("At position #{}", i + 1));
     }
 
     // Only add controls for removing a point if there are any points that can be removed
-    if (data.size() > 0) {
+    if (!data.empty()) {
         removeButton.onChange([this]() {
             dataHasChanged = true;
             pointRemoved = true;
         });
         addProperty(removeSelector);
         addProperty(removeButton);
-        for (int i = 0; i < points.size(); ++i) {
+        for (int i = 0; i < points.size(); i++) {
             removeSelector.addOption(i, std::format("Point #{}", i + 1));
         }
     }
-
 }
 
 void ScreenSpaceInsetBlackout::BlackoutShape::Spline::addPoint() {
@@ -308,7 +344,8 @@ void ScreenSpaceInsetBlackout::BlackoutShape::Spline::removePoint() {
  }
 
 ScreenSpaceInsetBlackout::BlackoutShape::Corners::Corners(std::vector<glm::vec2>& inData)
-    : PointOwner(inData, "Corners", "Corners")
+    : properties::PropertyOwner({ "Corners" , "Corners", "" })
+    , data(inData)
 {
     // Create corner Points (TopLeft -> TopRight -> BottomRight -> BottomLeft)
     points.push_back(std::make_unique<Point>(data[0], "TopLeft", "Top-Left"));
@@ -335,26 +372,25 @@ ScreenSpaceInsetBlackout::BlackoutShape::BlackoutShape(const ghoul::Dictionary& 
 {
     const Parameters params = codegen::bake<Parameters>(dictionary);
 
-    // Stores all position data read from asset file
     cornerData = params.blackoutshape.corners;
+    corners = std::unique_ptr<Corners>(new Corners(cornerData));
+    addPropertySubOwner(*corners);
+
     topSplineData = params.blackoutshape.top.value_or(std::vector<glm::vec2>());
+    topSpline = std::unique_ptr<Spline>(new Spline(topSplineData, "Top"));
+    addPropertySubOwner(*topSpline);
+
     rightSplineData = params.blackoutshape.right.value_or(std::vector<glm::vec2>());
+    rightSpline = std::unique_ptr<Spline>(new Spline(rightSplineData, "Right"));
+    addPropertySubOwner(*rightSpline);
+
     bottomSplineData = params.blackoutshape.bottom.value_or(std::vector<glm::vec2>());
+    bottomSpline = std::unique_ptr<Spline>(new Spline(bottomSplineData, "Bottom"));
+    addPropertySubOwner(*bottomSpline);
+
     leftSplineData = params.blackoutshape.left.value_or(std::vector<glm::vec2>());
-
-    // Create sections
-    corners = new Corners(cornerData);
-    topSpline = new Spline(topSplineData, "Top");
-    rightSpline = new Spline(rightSplineData, "Right");
-    bottomSpline = new Spline(bottomSplineData, "Bottom");
-    leftSpline = new Spline(leftSplineData, "Left");
-
-    // Add to GUI
-    addPropertySubOwner(corners);
-    addPropertySubOwner(topSpline);
-    addPropertySubOwner(rightSpline);
-    addPropertySubOwner(bottomSpline);
-    addPropertySubOwner(leftSpline);
+    leftSpline = std::unique_ptr<Spline>(new Spline(leftSplineData, "Left"));
+    addPropertySubOwner(*leftSpline);
 
     // Add additional controls to GUI
     enableCalibrationPattern.onChange([this]() {
@@ -368,21 +404,19 @@ ScreenSpaceInsetBlackout::BlackoutShape::BlackoutShape(const ghoul::Dictionary& 
     addProperty(enableCalibrationColor);
 
     copyToClipboardTrigger.onChange([this]() {
-        copyToClipboard();
+        copyToClipboard(
+            cornerData,
+            topSplineData,
+            rightSplineData,
+            bottomSplineData,
+            leftSplineData
+        );
     });
     addProperty(copyToClipboardTrigger);
 }
 
-ScreenSpaceInsetBlackout::BlackoutShape::~BlackoutShape() {
-    delete corners;
-    delete topSpline;
-    delete rightSpline;
-    delete bottomSpline;
-    delete leftSpline;
-}
-
 bool ScreenSpaceInsetBlackout::BlackoutShape::checkHasChanged() {
-    return  textureTypeHasChanged ||
+    return textureTypeHasChanged ||
         corners->dataHasChanged ||
         topSpline->dataHasChanged ||
         rightSpline->dataHasChanged ||
@@ -400,7 +434,7 @@ void ScreenSpaceInsetBlackout::BlackoutShape::resetHasChanged() {
 }
 
 void ScreenSpaceInsetBlackout::BlackoutShape::checkAndUpdateGUI() {
-    std::array<std::reference_wrapper<Spline*>,4> refs = {
+    std::array<std::reference_wrapper<std::unique_ptr<Spline>>,4> refs = {
         std::ref(topSpline),
         std::ref(rightSpline),
         std::ref(bottomSpline),
@@ -410,24 +444,24 @@ void ScreenSpaceInsetBlackout::BlackoutShape::checkAndUpdateGUI() {
     // Check which splines that needs to be updated and perform correct actions
     // Note: Need to remove propertySubOwner and add it again for GUI to work properly
     bool updatePropertyTree = false;
-    for (Spline*& spline : refs) {
+    for (std::unique_ptr<Spline>& spline : refs) {
         if (spline->pointAdded) {
             std::string baseString = spline->base;
             std::vector<glm::vec2>& dataRef = spline->data;
-            removePropertySubOwner(spline);
+            removePropertySubOwner(*spline);
             spline->addPoint();
-            delete spline;
-            spline = new Spline(dataRef, baseString);
+            spline.reset();
+            spline = std::unique_ptr<Spline>(new Spline(dataRef, baseString));
             spline->dataHasChanged = true;
             updatePropertyTree = true;
         }
         else if (spline->pointRemoved) {
             std::string baseString = spline->base;
             std::vector<glm::vec2>& dataRef = spline->data;
-            removePropertySubOwner(spline);
+            removePropertySubOwner(*spline);
             spline->removePoint();
-            delete spline;
-            spline = new Spline(dataRef, baseString);
+            spline.reset();
+            spline = std::unique_ptr<Spline>(new Spline(dataRef, baseString));
             spline->dataHasChanged = true;
             updatePropertyTree = true;
         }
@@ -439,39 +473,11 @@ void ScreenSpaceInsetBlackout::BlackoutShape::checkAndUpdateGUI() {
         for (int i = 0; i < subs.size(); i++) {
             removePropertySubOwner(subs[i]);
         }
-        addPropertySubOwner(corners);
-        for (Spline*& spline : refs) {
-            addPropertySubOwner(spline);
+        addPropertySubOwner(*corners);
+        for (std::unique_ptr<Spline>& spline : refs) {
+            addPropertySubOwner(*spline);
         }
     }
-}
-
-void ScreenSpaceInsetBlackout::BlackoutShape::copyToClipboard() {
-    std::string strCorners = formatLine("Corners", cornerData);
-    std::string strTop = formatLine("Top", topSplineData);
-    std::string strRight = formatLine("Right", rightSplineData);
-    std::string strBottom = formatLine("Bottom", bottomSplineData);
-    std::string strLeft = formatLine("Left", leftSplineData);
-
-    ghoul::setClipboardText(strCorners + strTop + strRight + strBottom + strLeft);
-}
-
-std::string ScreenSpaceInsetBlackout::BlackoutShape::formatLine(std::string id,
-                                                    const std::vector<glm::vec2>& data)
-{
-    std::string str = std::format("{} = {{ ", id);
-    for (int i = 0; i < data.size(); ++i) {
-        std::string xVal = std::format("{}", data[i].x);
-        std::string yVal = std::format("{}", data[i].y);
-        xVal += (xVal.find(".") == std::string::npos) ? ".0" : "";
-        yVal += (yVal.find(".") == std::string::npos) ? ".0" : "";
-        str.append(std::format("{{{}, {}}}", xVal, yVal));
-        std::string delimiter = (i < data.size() - 1) ? ", " : " ";
-        str.append(delimiter);
-    }
-    str.append("},\n");
-
-    return str;
 }
 
 ScreenSpaceInsetBlackout::ScreenSpaceInsetBlackout(const ghoul::Dictionary& dictionary)
@@ -480,22 +486,18 @@ ScreenSpaceInsetBlackout::ScreenSpaceInsetBlackout(const ghoul::Dictionary& dict
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    std::string identifier = p.identifier.value_or("ScreenSpaceInsetBlackout");
-    setIdentifier(makeUniqueIdentifier(std::move(identifier)));
-
     // Makes sure that User has specified 4 corners in the asset file
     checkCornerSpecification(p.blackoutshape.corners);
 
-    // Add to GUI
     addPropertySubOwner(_blackoutShape);
 
     // Handling of calibration texture
-    std::optional<std::string> optTexturePath = p.blackoutshape.calibrationTexturePath;
+    std::optional<std::filesystem::path> optTexturePath =
+        p.blackoutshape.calibrationTexturePath;
     if (optTexturePath.has_value()) {
-        if (std::filesystem::is_regular_file(absPath(*optTexturePath))) {
-            std::filesystem::path path = absPath(*optTexturePath);
+        if (std::filesystem::is_regular_file(*optTexturePath)) {
             std::unique_ptr<ghoul::opengl::Texture> texture =
-                ghoul::io::TextureReader::ref().loadTexture(path, 2);
+                ghoul::io::TextureReader::ref().loadTexture(*optTexturePath, 2);
             if (texture) {
                 // Images don't need to start on 4-byte boundaries, for example if the
                 // image is only RGB
@@ -510,14 +512,14 @@ ScreenSpaceInsetBlackout::ScreenSpaceInsetBlackout(const ghoul::Dictionary& dict
                 texture->purgeFromRAM();
 
                 _calibrationTexture = std::move(texture);
-                _objectSize = _calibrationTexture->dimensions();
+                _calibrationTextureObjectSize = _calibrationTexture->dimensions();
             }
         }
         else {
             LWARNINGC(
                 "ScreenSpaceInsetBlackout",
                 std::format(
-                    "Calibration texture '{}' is missing.",
+                    "Could not find calibration texture '{}'.",
                     *optTexturePath
                 )
             );
@@ -551,27 +553,35 @@ void ScreenSpaceInsetBlackout::initializeShadersAndFBO() {
     glGenFramebuffers(1, &_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
-    _blackoutTexture = std::unique_ptr<ghoul::opengl::Texture>(
-        new ghoul::opengl::Texture(glm::uvec3(3840,2160,1),
-        GL_TEXTURE_2D,ghoul::opengl::Texture::Format::RGBA)
+    _blackoutTexture = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(width, height, 1),
+        GL_TEXTURE_2D,
+        ghoul::opengl::Texture::Format::RGBA
     );
 
     _blackoutTexture->bind();
     glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_RGBA, 3840, 2160, 0,GL_RGBA, GL_UNSIGNED_BYTE, NULL
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA,
+        width,
+        height,
+        0,
+        GL_RGBA,
+        GL_UNSIGNED_BYTE,
+        nullptr
     );
 
-    _objectSize = _blackoutTexture->dimensions();
+    _blackoutTextureObjectSize = _blackoutTexture->dimensions();
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     glFramebufferTexture2D(
-        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *_blackoutTexture, 0
-    );
-
-    ghoul_assert(
-        glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE,
-        "Failed to complete frame buffer creation"
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D,
+        *_blackoutTexture,
+        0
     );
 
     _blackoutTexture->purgeFromRAM();
@@ -579,7 +589,6 @@ void ScreenSpaceInsetBlackout::initializeShadersAndFBO() {
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    // Uniform Cache
     _uniformCache.color = _fboProgram->uniformLocation("color");
 }
 
@@ -588,93 +597,93 @@ void ScreenSpaceInsetBlackout::generateVertexArrayData() {
     _vboData.clear();
 
     // Set vertex buffer data based on calibration pattern or blackout shape
-    if (_blackoutShape.enableCalibrationPattern) {
+    if (_blackoutShape.enableCalibrationPattern && _calibrationTexture.get()) {
         _vboData = {
             glm::vec2(-1.f, 1.f),
             glm::vec2(1.f, 1.f),
             glm::vec2(1.f, -1.f),
             glm::vec2(-1.f, -1.f)
         };
+        return;
     }
-    else {
-        // Create vector with a temporary element as first element
-        std::vector<glm::vec2> pointsTop = { glm::vec2(0.f) };
-        std::vector<glm::vec2> pointsRight = { glm::vec2(0.f) };
-        std::vector<glm::vec2> pointsBottom = { glm::vec2(0.f) };
-        std::vector<glm::vec2> pointsLeft = { glm::vec2(0.f) };
 
-        // Push first corner to each spline
-        pointsTop.push_back(_blackoutShape.cornerData[0]);
-        pointsRight.push_back(_blackoutShape.cornerData[1]);
-        pointsBottom.push_back(_blackoutShape.cornerData[2]);
-        pointsLeft.push_back(_blackoutShape.cornerData[3]);
+    // Create vector with a temporary element as first element
+    std::vector<glm::vec2> pointsTop = { glm::vec2(0.f) };
+    std::vector<glm::vec2> pointsRight = { glm::vec2(0.f) };
+    std::vector<glm::vec2> pointsBottom = { glm::vec2(0.f) };
+    std::vector<glm::vec2> pointsLeft = { glm::vec2(0.f) };
 
-        // Insert the existing control points for each spline
-        pointsTop.insert(
-            pointsTop.begin() + 2,
-            _blackoutShape.topSplineData.begin(),
-            _blackoutShape.topSplineData.end()
-        );
-        pointsRight.insert(
-            pointsRight.begin() + 2,
-            _blackoutShape.rightSplineData.begin(),
-            _blackoutShape.rightSplineData.end()
-        );
-        pointsBottom.insert(
-            pointsBottom.begin() + 2,
-            _blackoutShape.bottomSplineData.begin(),
-            _blackoutShape.bottomSplineData.end()
-        );
-        pointsLeft.insert(
-            pointsLeft.begin() + 2,
-            _blackoutShape.leftSplineData.begin(),
-            _blackoutShape.leftSplineData.end()
-        );
+    // Push first corner to each spline
+    pointsTop.push_back(_blackoutShape.cornerData[0]);
+    pointsRight.push_back(_blackoutShape.cornerData[1]);
+    pointsBottom.push_back(_blackoutShape.cornerData[2]);
+    pointsLeft.push_back(_blackoutShape.cornerData[3]);
 
-        // Push the last corner for each spline
-        pointsTop.push_back(_blackoutShape.cornerData[1]);
-        pointsRight.push_back(_blackoutShape.cornerData[2]);
-        pointsBottom.push_back(_blackoutShape.cornerData[3]);
-        pointsLeft.push_back(_blackoutShape.cornerData[0]);
+    // Insert the existing control points for each spline
+    pointsTop.insert(
+        pointsTop.begin() + 2,
+        _blackoutShape.topSplineData.begin(),
+        _blackoutShape.topSplineData.end()
+    );
+    pointsRight.insert(
+        pointsRight.begin() + 2,
+        _blackoutShape.rightSplineData.begin(),
+        _blackoutShape.rightSplineData.end()
+    );
+    pointsBottom.insert(
+        pointsBottom.begin() + 2,
+        _blackoutShape.bottomSplineData.begin(),
+        _blackoutShape.bottomSplineData.end()
+    );
+    pointsLeft.insert(
+        pointsLeft.begin() + 2,
+        _blackoutShape.leftSplineData.begin(),
+        _blackoutShape.leftSplineData.end()
+    );
 
-        // Calculates the extra first and last point needed during spline sampling step
-        std::pair<glm::vec2, glm::vec2> tPad = calculatePadding(pointsTop);
-        std::pair<glm::vec2, glm::vec2> rPad = calculatePadding(pointsRight);
-        std::pair<glm::vec2, glm::vec2> bPad = calculatePadding(pointsBottom);
-        std::pair<glm::vec2, glm::vec2> lPad = calculatePadding(pointsLeft);
+    // Push the last corner for each spline
+    pointsTop.push_back(_blackoutShape.cornerData[1]);
+    pointsRight.push_back(_blackoutShape.cornerData[2]);
+    pointsBottom.push_back(_blackoutShape.cornerData[3]);
+    pointsLeft.push_back(_blackoutShape.cornerData[0]);
 
-        // Adds the extra points
-        pointsTop[0] = tPad.first;
-        pointsRight[0] = rPad.first;
-        pointsBottom[0] = bPad.first;
-        pointsLeft[0] = lPad.first;
-        pointsTop.push_back(tPad.second);
-        pointsRight.push_back(rPad.second);
-        pointsBottom.push_back(bPad.second);
-        pointsLeft.push_back(lPad.second);
+    // Calculates the extra first and last point needed during spline sampling step
+    std::pair<glm::vec2, glm::vec2> tPad = calculatePadding(pointsTop);
+    std::pair<glm::vec2, glm::vec2> rPad = calculatePadding(pointsRight);
+    std::pair<glm::vec2, glm::vec2> bPad = calculatePadding(pointsBottom);
+    std::pair<glm::vec2, glm::vec2> lPad = calculatePadding(pointsLeft);
 
-        // Samples the spline and returns all points along the spline curve
-        std::vector<glm::vec2> splineTop = sampleSpline(pointsTop);
-        std::vector<glm::vec2> splineRight = sampleSpline(pointsRight);
-        std::vector<glm::vec2> splineBottom = sampleSpline(pointsBottom);
-        std::vector<glm::vec2> splineLeft = sampleSpline(pointsLeft);
+    // Adds the extra points
+    pointsTop[0] = tPad.first;
+    pointsRight[0] = rPad.first;
+    pointsBottom[0] = bPad.first;
+    pointsLeft[0] = lPad.first;
+    pointsTop.push_back(tPad.second);
+    pointsRight.push_back(rPad.second);
+    pointsBottom.push_back(bPad.second);
+    pointsLeft.push_back(lPad.second);
 
-        // Translate points from range [0,1] to [-1,1] for X and Y
-        offsetCoordinates(splineTop);
-        offsetCoordinates(splineRight);
-        offsetCoordinates(splineBottom);
-        offsetCoordinates(splineLeft);
+    // Samples the spline and returns all points along the spline curve
+    std::vector<glm::vec2> splineTop = sampleSpline(pointsTop);
+    std::vector<glm::vec2> splineRight = sampleSpline(pointsRight);
+    std::vector<glm::vec2> splineBottom = sampleSpline(pointsBottom);
+    std::vector<glm::vec2> splineLeft = sampleSpline(pointsLeft);
 
-        // Incoming vertex data is: top -> right -> bottom -> left (clockwise)
-        // VBO data needs to be counter-clockwise for correct winding
-        // Also adds extra point first and last for Triangle Fan drawing
-        _vboData.push_back(glm::vec2(0.0, 0.0));
-        _vboData.insert(_vboData.end(), splineTop.rbegin(), splineTop.rend());
-        _vboData.insert(_vboData.end(), splineLeft.rbegin(), splineLeft.rend());
-        _vboData.insert(_vboData.end(), splineBottom.rbegin(), splineBottom.rend());
-        _vboData.insert(_vboData.end(), splineRight.rbegin(), splineRight.rend());
-        _vboData.push_back(splineTop.back());
-    }
+    // Translate points from range [0,1] to [-1,1] for X and Y
+    offsetCoordinates(splineTop);
+    offsetCoordinates(splineRight);
+    offsetCoordinates(splineBottom);
+    offsetCoordinates(splineLeft);
+
+    // Incoming vertex data is: top -> right -> bottom -> left (clockwise)
+    // VBO data needs to be counter-clockwise for correct winding
+    // Also adds extra point first and last for Triangle Fan drawing
+    _vboData.push_back(glm::vec2(0.f, 0.f));
+    _vboData.insert(_vboData.end(), splineTop.rbegin(), splineTop.rend());
+    _vboData.insert(_vboData.end(), splineLeft.rbegin(), splineLeft.rend());
+    _vboData.insert(_vboData.end(), splineBottom.rbegin(), splineBottom.rend());
+    _vboData.insert(_vboData.end(), splineRight.rbegin(), splineRight.rend());
+    _vboData.push_back(splineTop.back());
 }
 
 void ScreenSpaceInsetBlackout::generateTexture() {
@@ -692,23 +701,19 @@ void ScreenSpaceInsetBlackout::generateTexture() {
     glBindVertexArray(0);
 
     _fboProgram->activate();
-
-    // Set uniform
-    _fboProgram->setUniform("color",
+    _fboProgram->setUniform(
+        "color",
         _blackoutShape.enableCalibrationColor ? glm::vec3(0.f, 1.f, 0.f) : glm::vec3(0.f)
     );
 
-    // Resolution
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
-
-    // bind FBO and Texture
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
     bindTexture();
 
     // Clear current buffer
-    glViewport(0, 0, 3840, 2160);
+    glViewport(0, 0, width, height);
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -733,15 +738,13 @@ void ScreenSpaceInsetBlackout::update() {
 }
 
 void ScreenSpaceInsetBlackout::bindTexture() {
-    if (_blackoutShape.enableCalibrationPattern) {
-        if (_calibrationTexture) {
-            _calibrationTexture->bind();
-        }
+    if (_blackoutShape.enableCalibrationPattern && _calibrationTexture.get()) {
+        _calibrationTexture->bind();
+        _objectSize = _calibrationTextureObjectSize;
     }
     else {
-        if (_blackoutTexture) {
-            _blackoutTexture->bind();
-        }
+        _blackoutTexture->bind();
+        _objectSize = _blackoutTextureObjectSize;
     }
 }
 

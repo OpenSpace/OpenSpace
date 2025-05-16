@@ -27,8 +27,8 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 
-#include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 
 namespace openspace {
 
@@ -36,7 +36,7 @@ namespace documentation { struct Documentation; }
 
 class ScreenSpaceInsetBlackout : public ScreenSpaceRenderable {
 public:
-    ScreenSpaceInsetBlackout(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceInsetBlackout(const ghoul::Dictionary& dictionary);
 
     bool deinitializeGL() override;
     void update() override;
@@ -46,44 +46,34 @@ public:
 private:
     class BlackoutShape : public properties::PropertyOwner {
     public:
-        class PointOwner : public properties::PropertyOwner {
-        public:
-            class Point {
-            public:
-                Point(glm::vec2& inData, std::string identifier, std::string guiName);
+        struct Point {
+            Point(glm::vec2& inData, std::string identifier, std::string guiName);
 
-                void updateData();
+            void updateData();
 
-                std::unique_ptr<properties::Property::PropertyInfo> propInfo = nullptr;
-                std::unique_ptr<properties::Vec2Property> prop = nullptr;
-                /// Pointer to data used when user modifies the point position
-                glm::vec2* dataptr;
-            };
-
-            PointOwner(std::vector<glm::vec2>& inData, std::string identifier,
-                std::string guiName);
-
-            /// Vector of references to the original data
-            std::vector<glm::vec2>& data;
-            std::vector<std::unique_ptr<Point>> points;
-            bool dataHasChanged = false;
+            std::unique_ptr<properties::Property::PropertyInfo> propInfo = nullptr;
+            std::unique_ptr<properties::Vec2Property> prop = nullptr;
+            /// Pointer to data used when user modifies the point position
+            glm::vec2* dataptr;
         };
 
-        class Spline : public PointOwner {
+        class Spline : public properties::PropertyOwner {
         public:
-            Spline (std::vector<glm::vec2>& inData, std::string baseString);
+            Spline(std::vector<glm::vec2>& inData, std::string baseString);
 
             void addPoint();
             void removePoint();
 
+            /// Vector of references to the original data
+            std::vector<glm::vec2>& data;
             std::string base;
             bool pointAdded = false;
             bool pointRemoved = false;
+            bool dataHasChanged = false;
 
         private:
-            /// Build the property tree that is shown in the GUI
-            void buildTree();
-
+            /// Control points for the spline
+            std::vector<std::unique_ptr<Point>> points;
             /// Position for the new point used when adding a new point to a spline
             properties::Vec2Property newPointPosition;
             /// Selects which place in the list where the new point should be inserted
@@ -96,13 +86,20 @@ private:
             properties::TriggerProperty removeButton;            
         };
 
-        class Corners : public PointOwner {
+        class Corners : public properties::PropertyOwner {
         public:
             explicit Corners(std::vector<glm::vec2>& inData);
+
+            /// Vector of references to the original data
+            std::vector<glm::vec2>& data;
+            bool dataHasChanged = false;
+
+        private:
+            /// Control points for the spline
+            std::vector<std::unique_ptr<Point>> points;
         };
 
         explicit BlackoutShape(const ghoul::Dictionary& dictionary);
-        ~BlackoutShape();
 
         bool checkHasChanged();
         void resetHasChanged();
@@ -113,27 +110,25 @@ private:
         std::vector<glm::vec2> rightSplineData;
         std::vector<glm::vec2> bottomSplineData;
         std::vector<glm::vec2> leftSplineData;
+
         /**
-        * Enables a brighted color for the shape which makes it easier to see the
-        * boundaries of the shape during setup
-        **/
+         * Enables a brighted color for the shape which makes it easier to see the
+         * boundaries of the shape during setup
+         **/
         properties::BoolProperty enableCalibrationColor;
+
         /**
-        * Enables a calibration texture instead of the shape which can be used to check
-        * which position values to use during shape setup
-        **/
+         * Enables a calibration texture instead of the shape which can be used to check
+         * which position values to use during shape setup
+         **/
         properties::BoolProperty enableCalibrationPattern;
 
     private:
-        /// Copies the current spline configuration to the clipboard
-        void copyToClipboard();
-        std::string formatLine(std::string id, const std::vector<glm::vec2>& data);
-
-        Corners* corners;
-        Spline* topSpline;
-        Spline* rightSpline;
-        Spline* bottomSpline;
-        Spline* leftSpline;
+        std::unique_ptr<Corners> corners;
+        std::unique_ptr<Spline> topSpline;
+        std::unique_ptr<Spline> rightSpline;
+        std::unique_ptr<Spline> bottomSpline;
+        std::unique_ptr<Spline> leftSpline;
         bool textureTypeHasChanged = false;
         properties::StringProperty calibrationTexturePath;
         properties::TriggerProperty copyToClipboardTrigger;
@@ -149,6 +144,9 @@ private:
     std::vector<glm::vec2> _vboData;
     std::unique_ptr<ghoul::opengl::Texture> _blackoutTexture;
     std::unique_ptr<ghoul::opengl::Texture> _calibrationTexture;
+    glm::ivec2 _calibrationTextureObjectSize = glm::ivec2(0);
+    glm::ivec2 _blackoutTextureObjectSize = glm::ivec2(0);
+    glm::ivec2 _blackoutTextureDimensions = glm::ivec2(0);
     GLuint _vao = 0;
     GLuint _vbo = 0;
     GLuint _fbo = 0;
