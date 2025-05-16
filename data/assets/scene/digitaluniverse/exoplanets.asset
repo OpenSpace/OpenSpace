@@ -9,7 +9,7 @@ local speck = asset.resource({
   Name = "Exoplanets Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_exoplanets_speck",
-  Version = 4
+  Version = 5
 })
 
 
@@ -67,7 +67,7 @@ asset.export(Object)
 asset.meta = {
   Name = "Exoplanets",
   Description = Object.GUI.Description,
-  Author = "Brian Abbott, Zack Reeves (AMNH)",
+  Author = "Brian Abbott, Zack Reeves, Ally Baldelli (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }
