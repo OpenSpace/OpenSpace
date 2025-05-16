@@ -18,12 +18,15 @@ local Node = {
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    Size = 1,
+    Size = 100000,
     Texture = openspace.absPath("${DATA}/test2.jpg"),
-    ScaleByDistance = true,
-    ScaleRatio = 0.01,
-    ScaleByDistanceMaxHeight = 2000000,
-    ScaleByDistanceMinHeight = 30000
+    Billboard = true,
+    DistanceScalingSettings = {
+      ScaleByDistance = true,
+      ApparentSizeMultiplier = 0.01,
+      ScaleByDistanceMaxHeight = 200000,
+      ScaleByDistanceMinHeight = 30000
+    }
   },
   GUI = {
     Name = "RenderablePlaneImageLocal - ScaleByDistance",

@@ -83,27 +83,34 @@ namespace {
         "ScaleByDistance",
         "Scale By Distance",
         "Decides whether the plane should automatically adjust in size to based on "
-        "the distance to the camera. Otherwise it will remain in the given size."
+        "the distance to the camera. Otherwise it will remain in the given size.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScaleRatioInfo = {
-        "ScaleRatio",
-        "Scale Ratio",
-        "The scale ratio for scaling a plane by distance to camera."
+    constexpr openspace::properties::Property::PropertyInfo ApparentSizeMultiplierInfo = {
+        "ApparentSizeMultiplier",
+        "Apparent Size Multiplier",
+        "Value that controls the visual size of the object when using distance scaling."
+        "A value of 1.0 results in a natural angular size based on camera distance and "
+        "field of view. Smaller values (e.g., 0.01) make the object appear smaller, while"
+        " larger values make it appear bigger.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleByDistanceMaxHeightInfo =
     {
         "ScaleByDistanceMaxHeight",
         "Scale By Distance Max Height",
-        "The maximum height a plane can get while using the scale by distance."
+        "The maximum height in meters a plane can get when using distance scaling.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleByDistanceMinHeightInfo =
     {
         "ScaleByDistanceMinHeight",
         "Scale By Distance Min Height",
-        "The minimum height a plane can get while using the scale by distance."
+        "The minimum height in meters a plane can get when using distance scaling.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
@@ -138,17 +145,22 @@ namespace {
         // [[codegen::verbatim(AutoScaleInfo.description)]]
         std::optional<bool> autoScale;
 
-        // [[codegen::verbatim(ScaleByDistanceInfo.description)]]
-        std::optional<bool> scaleByDistance;
+        struct DistanceScalingSettings {
+            // [[codegen::verbatim(ScaleByDistanceInfo.description)]]
+            std::optional<bool> scaleByDistance;
 
-        // [[codegen::verbatim(ScaleRatioInfo.description)]]
-        std::optional<float> scaleRatio;
+            // [[codegen::verbatim(ApparentSizeMultiplierInfo.description)]]
+            std::optional<float> apparentSizeMultiplier [[codegen::greater(0.f)]];;
 
-        // [[codegen::verbatim(ScaleByDistanceMaxHeightInfo.description)]]
-        std::optional<float> scaleByDistanceMaxHeight;
+            // [[codegen::verbatim(ScaleByDistanceMaxHeightInfo.description)]]
+            std::optional<float> scaleByDistanceMaxHeight [[codegen::greater(0.f)]];;
 
-        // [[codegen::verbatim(ScaleByDistanceMinHeightInfo.description)]]
-        std::optional<float> scaleByDistanceMinHeight;
+            // [[codegen::verbatim(ScaleByDistanceMinHeightInfo.description)]]
+            std::optional<float> scaleByDistanceMinHeight [[codegen::greater(0.f)]];;
+        };
+
+        // Settings for scaling points based on camera distance
+        std::optional<DistanceScalingSettings> distanceScalingSettings;
 
         enum class [[codegen::map(BlendMode)]] BlendMode {
             Normal,
@@ -169,17 +181,39 @@ documentation::Documentation RenderablePlane::Documentation() {
     return codegen::doc<Parameters>("base_renderable_plane");
 }
 
+RenderablePlane::DistanceScalingSettings::DistanceScalingSettings(
+    const ghoul::Dictionary& dictionary)
+    : properties::PropertyOwner({ "DistanceScaling", "Distance Scaling", "" })
+    , scaleByDistance(ScaleByDistanceInfo, false)
+    , apparentSizeMultiplier(ApparentSizeMultiplierInfo, 1.f)
+    , scaleByDistanceMaxHeight(ScaleByDistanceMaxHeightInfo, 2000.f)
+    , scaleByDistanceMinHeight(ScaleByDistanceMinHeightInfo, 100.f)
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    if (p.distanceScalingSettings.has_value()) {
+        const Parameters::DistanceScalingSettings settings = *p.distanceScalingSettings;
+
+        scaleByDistance = settings.scaleByDistance.value_or(scaleByDistance);
+        apparentSizeMultiplier = settings.apparentSizeMultiplier.value_or(apparentSizeMultiplier);
+        scaleByDistanceMaxHeight = settings.scaleByDistanceMaxHeight.value_or(scaleByDistanceMaxHeight);
+        scaleByDistanceMinHeight = settings.scaleByDistanceMinHeight.value_or(scaleByDistanceMinHeight);
+    }
+
+    addProperty(scaleByDistance);
+    addProperty(apparentSizeMultiplier);
+    addProperty(scaleByDistanceMaxHeight);
+    addProperty(scaleByDistanceMinHeight);
+}
+
 RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary, { .automaticallyUpdateRenderBin = false })
     , _blendMode(BlendModeInfo)
+    , _distanceScalingSettings(dictionary)
     , _billboard(BillboardInfo, false)
     , _mirrorBackside(MirrorBacksideInfo, false)
     , _size(SizeInfo, glm::vec2(10.f), glm::vec2(0.f), glm::vec2(1e25f))
     , _autoScale(AutoScaleInfo, false)
-    , _scaleByDistance(ScaleByDistanceInfo, false)
-    , _scaleRatio(ScaleRatioInfo, 0.01f)
-    , _scaleByDistanceMaxHeight(ScaleByDistanceMaxHeightInfo, 200000.f)
-    , _scaleByDistanceMinHeight(ScaleByDistanceMinHeightInfo, 30000.f)
     , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
     Parameters p = codegen::bake<Parameters>(dictionary);
@@ -222,6 +256,8 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     }
     addProperty(_blendMode);
 
+    addPropertySubOwner(_distanceScalingSettings);
+
     _billboard = p.billboard.value_or(_billboard);
     addProperty(_billboard);
 
@@ -230,20 +266,6 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 
     _autoScale = p.autoScale.value_or(_autoScale);
     addProperty(_autoScale);
-
-    _scaleByDistance = p.scaleByDistance.value_or(_scaleByDistance);
-    addProperty(_scaleByDistance);
-
-    _scaleRatio = p.scaleRatio.value_or(_scaleRatio);
-    addProperty(_scaleRatio);
-
-    _scaleByDistanceMaxHeight =
-        p.scaleByDistanceMaxHeight.value_or(_scaleByDistanceMaxHeight);
-    addProperty(_scaleByDistanceMaxHeight);
-
-    _scaleByDistanceMinHeight =
-        p.scaleByDistanceMinHeight.value_or(_scaleByDistanceMinHeight);
-    addProperty(_scaleByDistanceMinHeight);
 
     _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
     _multiplyColor.setViewOption(properties::Property::ViewOptions::Color);
@@ -320,22 +342,21 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     cameraOrientedRotation[1] = glm::dvec4(newUp, 0.0);
     cameraOrientedRotation[2] = glm::dvec4(normal, 0.0);
 
-    if (_scaleByDistance) {
+    if (_distanceScalingSettings.scaleByDistance) {
         const glm::dvec3 cameraPosition = data.camera.positionVec3();
         const glm::dvec3 modelPosition = data.modelTransform.translation;
 
-        const float fovDegrees = global::windowDelegate->getHorizFieldOfView();
+        const float fovDegrees = global::windowDelegate->horizFieldOfView(0);
         const float fovRadians = glm::radians(fovDegrees);
         const float halfFovTan = std::tan(fovRadians * 0.5f);
 
         const float distance = glm::distance(cameraPosition, modelPosition);
 
-        // Projected height based on distance and FOV
-        float projectedHeight = 2.0f * distance * halfFovTan * _scaleRatio.value();
+        float projectedHeight = 2.0f * distance * halfFovTan * _distanceScalingSettings.apparentSizeMultiplier;
         projectedHeight = std::clamp(
             projectedHeight,
-            _scaleByDistanceMinHeight.value(),
-            _scaleByDistanceMaxHeight.value()
+            _distanceScalingSettings.scaleByDistanceMinHeight.value(),
+            _distanceScalingSettings.scaleByDistanceMaxHeight.value()
         );
 
         glm::vec2 currentSize = _size.value();
@@ -346,6 +367,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
             _size.setValue(scaledSize);
         }
     }
+
 
     const glm::dmat4 rotationTransform = _billboard ?
         cameraOrientedRotation :

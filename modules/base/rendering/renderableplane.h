@@ -73,11 +73,18 @@ protected:
     properties::BoolProperty _mirrorBackside;
     properties::Vec2Property _size;
     properties::BoolProperty _autoScale;
-    properties::BoolProperty _scaleByDistance;
-    properties::FloatProperty _scaleRatio;
-    properties::FloatProperty _scaleByDistanceMaxHeight;
-    properties::FloatProperty _scaleByDistanceMinHeight;
     properties::Vec3Property _multiplyColor;
+
+    struct DistanceScalingSettings : properties::PropertyOwner {
+        explicit DistanceScalingSettings(const ghoul::Dictionary& dictionary);
+
+        properties::BoolProperty scaleByDistance;
+        properties::FloatProperty apparentSizeMultiplier;
+        properties::FloatProperty scaleByDistanceMaxHeight;
+        properties::FloatProperty scaleByDistanceMinHeight;
+    };
+
+    DistanceScalingSettings _distanceScalingSettings;
 
     ghoul::opengl::ProgramObject* _shader = nullptr;
 
