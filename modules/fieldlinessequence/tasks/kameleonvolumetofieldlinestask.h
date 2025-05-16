@@ -22,71 +22,44 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__
+#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___KAMELEONVOLUMETOFIELDLINESTASK___H__
+#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___KAMELEONVOLUMETOFIELDLINESTASK___H__
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/transferfunction.h>
+#include <openspace/util/task.h>
 
-#include <openspace/properties/misc/optionproperty.h>
-#include <openspace/properties/vector/vec2property.h>
-#include <ghoul/opengl/uniformcache.h>
-
-namespace ghoul::opengl { class ProgramObject; }
+#include <ghoul/glm.h>
+#include <string>
 
 namespace openspace {
 
-class Sphere;
-struct RenderData;
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
-
-class RenderableSphere : public Renderable {
+class KameleonVolumeToFieldlinesTask : public Task {
 public:
-    explicit RenderableSphere(const ghoul::Dictionary& dictionary);
+    explicit KameleonVolumeToFieldlinesTask(const ghoul::Dictionary& dictionary);
 
-    void initializeGL() override;
-    void deinitializeGL() override;
+    enum class OutputType {
+        Json,
+        Osfls
+    };
 
-    bool isReady() const override;
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
-
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
     static documentation::Documentation Documentation();
 
-protected:
-    virtual void bindTexture() = 0;
-    virtual void unbindTexture();
-
-    properties::FloatProperty _size;
-    properties::IntProperty _segments;
-
-    properties::OptionProperty _orientation;
-    properties::BoolProperty _mirrorTexture;
-
-    properties::BoolProperty _disableFadeInDistance;
-    properties::FloatProperty _fadeInThreshold;
-    properties::FloatProperty _fadeOutThreshold;
-    properties::OptionProperty _blendingFuncOption;
-    properties::BoolProperty _disableDepth;
-
-    glm::vec2 _dataMinMaxValues;
-    ghoul::opengl::ProgramObject* _shader = nullptr;
-    properties::BoolProperty _useColorMap;
-
 private:
-    std::unique_ptr<Sphere> _sphere;
-    bool _sphereIsDirty = false;
-
-    properties::StringProperty _colorMap;
-    std::unique_ptr<TransferFunction> _transferFunction;
-
-    UniformCache(opacity, modelViewProjection, modelViewTransform, modelViewRotation,
-        colorTexture, mirrorTexture) _uniformCache;
+    std::string _tracingVar;
+    std::vector<std::string> _scalarVars;
+    std::vector<std::string> _magnitudeVars;
+    std::filesystem::path _inputPath;
+    size_t _nthTimeStep = 1;
+    std::vector<std::string> _sourceFiles;
+    std::filesystem::path _seedpointsPath;
+    size_t _nthSeedPoint = 1;
+    OutputType _outputType;
+    std::filesystem::path _outputFolder;
+    // Manual time offset
+    float _manualTimeOffset = 0.f;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__
+#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___KAMELEONVOLUMETOFIELDLINESTASK___H__

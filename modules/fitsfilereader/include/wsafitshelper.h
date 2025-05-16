@@ -22,71 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__
+#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___WSAFITSHELPER___H__
+#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___WSAFITSHELPER___H__
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/transferfunction.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/opengl/texture.h>
+#include <valarray>
 
-#include <openspace/properties/misc/optionproperty.h>
-#include <openspace/properties/vector/vec2property.h>
-#include <ghoul/opengl/uniformcache.h>
-
-namespace ghoul::opengl { class ProgramObject; }
+namespace CCfits {
+    class FITS;
+    class PHDU;
+    class ExtHDU;
+} // namespace CCfits
 
 namespace openspace {
 
-class Sphere;
-struct RenderData;
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
-
-class RenderableSphere : public Renderable {
-public:
-    explicit RenderableSphere(const ghoul::Dictionary& dictionary);
-
-    void initializeGL() override;
-    void deinitializeGL() override;
-
-    bool isReady() const override;
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
-
-    static documentation::Documentation Documentation();
-
-protected:
-    virtual void bindTexture() = 0;
-    virtual void unbindTexture();
-
-    properties::FloatProperty _size;
-    properties::IntProperty _segments;
-
-    properties::OptionProperty _orientation;
-    properties::BoolProperty _mirrorTexture;
-
-    properties::BoolProperty _disableFadeInDistance;
-    properties::FloatProperty _fadeInThreshold;
-    properties::FloatProperty _fadeOutThreshold;
-    properties::OptionProperty _blendingFuncOption;
-    properties::BoolProperty _disableDepth;
-
-    glm::vec2 _dataMinMaxValues;
-    ghoul::opengl::ProgramObject* _shader = nullptr;
-    properties::BoolProperty _useColorMap;
-
-private:
-    std::unique_ptr<Sphere> _sphere;
-    bool _sphereIsDirty = false;
-
-    properties::StringProperty _colorMap;
-    std::unique_ptr<TransferFunction> _transferFunction;
-
-    UniformCache(opacity, modelViewProjection, modelViewTransform, modelViewRotation,
-        colorTexture, mirrorTexture) _uniformCache;
+template<typename T>
+struct ImageData {
+    std::valarray<T> contents;
+    int width;
+    int height;
 };
+
+// path of file to load, layerIndex is which layer in the fits file to make into a texture
+// and minMax is the value, positive and negative, in which to cap the data between
+// to cause overexposure of higher and lower values.;
+std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
+    const std::filesystem::path path, size_t layerIndex, std::pair<float, float> minMax);
+
+// return number of data layers in fits file.
+int nLayers(const std::filesystem::path& path);
+
+template<typename T, typename U>
+std::shared_ptr<ImageData<T>> readImageInternal(U& image);
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__
+#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___WSAFITSHELPER___H__
