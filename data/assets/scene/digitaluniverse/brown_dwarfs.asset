@@ -9,7 +9,7 @@ local speck = asset.resource({
   Name = "Brown Dwarf Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_brown_dwarfs_speck",
-  Version = 1
+  Version = 2
 })
 
 
@@ -36,6 +36,13 @@ local Object = {
       ScaleExponent = 15.8,
       MaxSize = 0.7,
       EnableMaxSizeControl = true
+    },
+    Labels = {
+      File = speck .. "bd.label",
+      Color = { 0.6, 0.3, 0.4 },
+      Size = 13.75,
+      MinMaxSize = { 4, 30 },
+      Unit = "pc"
     }
   },
   GUI = {
@@ -72,7 +79,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Brown Dwarfs",
-  Author = "Brian Abbott, Zack Reeves, Jackie Faherty (AMNH)",
+  Author = "Brian Abbott, Zack Reeves, Ally Baldelli, Jackie Faherty (AMNH)",
   Description = Object.GUI.Description,
   License = "AMNH Digital Universe",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
