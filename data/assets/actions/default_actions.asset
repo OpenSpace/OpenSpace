@@ -108,7 +108,6 @@ local ToggleOverlays = {
     openspace.setPropertyValueSingle("Dashboard.IsEnabled", not isEnabled)
     openspace.setPropertyValueSingle("RenderEngine.ShowLog", not isEnabled)
     openspace.setPropertyValueSingle("RenderEngine.ShowVersion", not isEnabled)
-    openspace.setPropertyValueSingle("RenderEngine.ShowCamera", not isEnabled)
   ]],
   Documentation = "Toggles the dashboard and overlays",
   GuiPath = "/System/GUI",
