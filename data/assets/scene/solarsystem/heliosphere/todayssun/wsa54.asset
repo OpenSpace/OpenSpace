@@ -37,14 +37,14 @@ local WSA_Magnetograms = {
     DataID = 2148,
     FitsLayer = 4,
     LayerNames = {
-      "Coronal Magnetic Field at 5 Solar Radii (nT)",
-      "Flux tube expansion factor evaluated at the source surface",
-      "Colatitude of open field footpoints at photosphere (rad)",
-      "Longitude of open field footpoints (rad)",
-      "Observed Photospheric Field (Gauss)",
-      "Distance from open field footpoint to nearest coronal boundary (deg)",
-      "Open (1,2,3) and closed (0) regions on the photosphere [1=in-to-out tracing; 2=out-to-in tracing; 3=both] (no units)",
-      "Distance to current sheet at outer boundary (degrees)"
+      ['0'] = "Coronal Magnetic Field at 5 Solar Radii (nT)",
+      ['1'] = "Flux tube expansion factor evaluated at the source surface",
+      -- ['2'] = "Colatitude of open field footpoints at photosphere (rad)",
+      -- ['3'] = "Longitude of open field footpoints (rad)",
+      ['4'] = "Observed Photospheric Field (Gauss)",
+      ['5'] = "Distance from open field footpoint to nearest coronal boundary (deg)",
+      ['6'] = "Open (1,2,3) and closed (0) regions on the photosphere [1=in-to-out tracing; 2=out-to-in tracing; 3=both] (no units)",
+      ['7'] = "Distance to current sheet at outer boundary (degrees)"
     },
     ColorMap = blueBlackRed,
     UseColorMap = false,
@@ -71,16 +71,16 @@ local WSA_Magnetograms_Adapt = {
     InfoURL = infoURL,
     DataURL = dataURL,
     DataID = 2149,
-    FitsLayer = 5,
+    FitsLayer = 4,
     LayerNames = {
-      "Coronal Magnetic Field at 5 Solar Radii (nT)",
-      "Flux tube expansion factor evaluated at the source surface",
-      "Colatitude of open field footpoints at photosphere (rad)",
-      "Longitude of open field footpoints (rad)",
-      "Observed Photospheric Field (Gauss)",
-      "Distance from open field footpoint to nearest coronal boundary (deg)",
-      "Open (1,2,3) and closed (0) regions on the photosphere [1=in-to-out tracing; 2=out-to-in tracing; 3=both] (no units)",
-      "Distance to current sheet at outer boundary (degrees)"
+      ['0'] = "Coronal Magnetic Field at 5 Solar Radii (nT)",
+      ['1'] = "Flux tube expansion factor evaluated at the source surface",
+      -- ['2'] = "Colatitude of open field footpoints at photosphere (rad)",
+      -- ['3'] = "Longitude of open field footpoints (rad)",
+      ['4'] = "Observed Photospheric Field (Gauss)",
+      ['5'] = "Distance from open field footpoint to nearest coronal boundary (deg)",
+      ['6'] = "Open (1,2,3) and closed (0) regions on the photosphere [1=in-to-out tracing; 2=out-to-in tracing; 3=both] (no units)",
+      ['7'] = "Distance to current sheet at outer boundary (degrees)"
     },
     ColorMap = blueBlackRed,
     UseColorMap = false,
@@ -109,8 +109,8 @@ local WSA_Velocity_Adapt = {
     DataID = 2218,
     FitsLayer = 1,
     LayerNames = {
-      "Coronal Magnetic Field at 21.5 Solar Radii",
-      "Solar Wind Speed at 21.5 Solar Radii (km/s)"
+      [0] = "Coronal Magnetic Field at 21.5 Solar Radii",
+      [1] = "Solar Wind Speed at 21.5 Solar Radii (km/s)"
     },
     ColorMap = blueBlackRed,
     CacheData = false,
@@ -118,7 +118,7 @@ local WSA_Velocity_Adapt = {
     Segments = 132
   },
   GUI = {
-    Name = "Solar Surface Velocity (GONG-ADAPT)",
+    Name = "Velocity at Outer Boundary (GONG-ADAPT)",
     Path = "/Solar System/Heliosphere/WSA Coronal Model",
     Description = [[Texture sequence of simulation model WSA 5.4. Output: FITS file using ADAPT
       GONG realization 000-011 Maps (RADOUT =  21.5).]]
@@ -136,10 +136,10 @@ local WSA_Velocity_Gong = {
     InfoURL = infoURL,
     DataURL = dataURL,
     DataID = 2217,
-    FitsLayer = 0,
+    FitsLayer = 1,
     LayerNames = {
-      "Coronal Magnetic Field at 21.5 Solar Radii",
-      "Solar Wind Speed at 21.5 Solar Radii (km/s)"
+      ['0'] = "Coronal Magnetic Field at 21.5 Solar Radii",
+      ['1'] = "Solar Wind Speed at 21.5 Solar Radii (km/s)"
     },
     ColorMap = blueBlackRed,
     CacheData = false,
@@ -147,7 +147,7 @@ local WSA_Velocity_Gong = {
     Segments = 132
   },
   GUI = {
-    Name = "Solar Surface Velocity (GONG-Z)",
+    Name = "Velocity at Outer Boundary (GONG-Z)",
     Path = "/Solar System/Heliosphere/WSA Coronal Model",
     Description = [[Texture sequence of simulation model WSA 5.4. Output: FITS file using GONG-Z
       Map (RADOUT =  21.5).]]

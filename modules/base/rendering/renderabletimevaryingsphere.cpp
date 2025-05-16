@@ -165,7 +165,7 @@ namespace {
         // codegen::verbatim(FitsLayerInfo.description)]]
         std::optional<int> fitsLayer;
         // codegen::verbatim(FitsLayerNameInfo.description)]]
-        std::optional<std::vector<std::string>> layerNames;
+        std::optional<ghoul::Dictionary> layerNames;
         // A positive number to be used to cap where the color range will lie.
         // Values higher than this number, and values lower than the negative of
         // this value will be overexposed.
@@ -306,9 +306,13 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
 
         _fitsDataCapValue = p.fitsDataCapValue.value_or(_fitsDataCapValue);
         if (p.layerNames.has_value()) {
-            const std::vector<std::string> nameList = *p.layerNames;
-            for (int i = 0; i < nameList.size(); ++i) {
-                _layerNames.emplace( i, nameList[i] );
+            const ghoul::Dictionary d = *p.layerNames;
+            for (std::string_view key : d.keys()) {
+                std::pair<int, std::string> pair = {
+                    std::stoi(std::string(key)),
+                    d.value<std::string>(key)
+                };
+                _layerNames.emplace(pair);
             }
             if (!p.fitsLayer.has_value()) {
                 LWARNING(std::format(
@@ -351,16 +355,8 @@ void RenderableTimeVaryingSphere::deinitializeGL() {
 void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
     if (!_layerOptionsAdded) {
         if (_hasLayerNames) {
-            for (int i = 0; i < nLayers(path); ++i) {
-                auto it = _layerNames.find(i);
-                if (it != _layerNames.end()) {
-                    _fitsLayerName.addOption(it->first, it->second);
-                }
-                else {
-                    LERROR(std::format(
-                        "Could not add fits layer name"
-                    ));
-                }
+            for (std::pair<int, std::string> name : _layerNames) {
+                _fitsLayerName.addOption(name.first, name.second);
             }
             _fitsLayerName = _fitsLayerTemp;
         }
