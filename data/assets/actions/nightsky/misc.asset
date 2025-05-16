@@ -28,11 +28,10 @@ local ShowConstellationElements = {
   Identifier = "os.nightsky.ShowConstellationElements",
   Name = "Show Constellation Elements",
   Command = [[
+    openspace.setPropertyValueSingle('Scene.Constellations.Renderable.DrawElements', true)
+    openspace.setPropertyValueSingle('Scene.Constellations.Renderable.Fade', 0)
     local fadeSpeed = openspace.propertyValue("OpenSpaceEngine.FadeDuration")
-    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Fade", 0)
-    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Enabled", true)
-    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Fade", 1, fadeSpeed)
-    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.DrawElements", true)
+	  openspace.fadeIn("Scene.Constellations.Renderable", fadeSpeed, "")
   ]],
   Documentation = "Shows the constellation lines with consideration of label state",
   GuiPath = "/Constellations/Lines",
