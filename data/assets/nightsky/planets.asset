@@ -13,13 +13,20 @@ local textures = asset.resource({
   Version = 1
 })
 
+local csv = asset.resource({
+  Name = "Zero Point Data",
+  Type = "HttpSynchronization",
+  Identifier = "zeropoint_data",
+  Version = 1
+})
+
 
 local Mercury = {
   Identifier = "NightSkyMercury",
   Parent = mercury.MercuryBarycenter.Identifier,
   Renderable = {
     Type = "RenderablePointCloud",
-    File = asset.resource("zeropointdata.csv"),
+    File = csv .. "zeropointdata.csv",
     Coloring = {
       FixedColor = { 0.608, 0.604, 0.455 }
     },
@@ -51,7 +58,7 @@ local Venus = {
   Parent = venus.VenusBarycenter.Identifier,
   Renderable = {
     Type = "RenderablePointCloud",
-    File = asset.resource("zeropointdata.csv"),
+    File = csv .. "zeropointdata.csv",
     Coloring = {
       FixedColor = { 1.0 , 0.992, 0.757 }
     },
@@ -83,7 +90,7 @@ local Mars = {
   Parent = mars.MarsBarycenter.Identifier,
   Renderable = {
     Type = "RenderablePointCloud",
-    File = asset.resource("zeropointdata.csv"),
+    File = csv .. "zeropointdata.csv",
     Coloring = {
       FixedColor = { 0.756, 0.267, 0.054 }
     },
@@ -113,7 +120,7 @@ local Jupiter = {
   Parent = jupiter.JupiterBarycenter.Identifier,
   Renderable = {
     Type = "RenderablePointCloud",
-    File = asset.resource("zeropointdata.csv"),
+    File = csv .. "zeropointdata.csv",
     Coloring = {
       FixedColor = { 0.608, 0.604, 0.455 },
     },
@@ -145,7 +152,7 @@ local Saturn = {
   Parent = saturn.SaturnBarycenter.Identifier,
   Renderable = {
     Type = "RenderablePointCloud",
-    File = asset.resource("zeropointdata.csv"),
+    File = csv .. "zeropointdata.csv",
     Coloring = {
       FixedColor =  { 0.85098, 0.843137, 0.619608 },
     },
