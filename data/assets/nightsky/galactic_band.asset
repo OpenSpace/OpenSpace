@@ -19,6 +19,7 @@ local GalacticLine = {
     GridSegments = { 1, 1 },
     Enabled = asset.enabled
   },
+  Tag = { "nightsky_marking" },
   GUI = {
     Name = "Galactic Equator",
     Description = "A line representation of the Galactic Equator plane.",

@@ -43,7 +43,7 @@
                 "type": "FisheyeProjection",
                 "fov": 180.0,
                 "quality": "1k",
-                "tilt": 27.0,
+                "tilt": 90.0,
                 "background": { "r": 0.1, "g": 0.1, "b": 0.1, "a": 1.0 }
               }
             }

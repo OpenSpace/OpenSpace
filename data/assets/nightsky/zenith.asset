@@ -31,6 +31,7 @@ local ZenithPosition = {
       UseCamera = true
     }
   },
+  Tag = { "nightsky_marking" },
   GUI = {
     Name = "Zenith Position",
     Path = "/Night Sky/Coordinate Systems/Altitude-Azimuth",
@@ -56,6 +57,7 @@ local ZenithDot = {
     Texture = textures .. "point3A.png",
     BlendMode = "Additive"
   },
+  Tag = { "nightsky_marking" },
   GUI = {
     Name = "Zenith",
     Description = [[A dot representation of the Local Zenith, based on the camera's

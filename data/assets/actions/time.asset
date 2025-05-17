@@ -31,14 +31,92 @@ openspace.time.setTime(openspace.time.advancedTime(openspace.time.currentTime(),
   IsLocal = false
 }
 
+local SiderealWeekIncrease = {
+  Identifier = "os.time.siderealWeekIncrease",
+  Name = "Advance 1 sidereal week",
+  Command = [[
+    openspace.time.setTime(openspace.time.advancedTime(openspace.time.currentTime(), 86164.0905 * 7));
+  ]],
+  Documentation = [[Advances time by a sidereal week (Instant)]],
+  GuiPath = "/Time",
+  IsLocal = false
+}
+
+local SiderealWeekDecrease = {
+  Identifier = "os.time.siderealWeekDecrease",
+  Name = "Decrement 1 sidereal week",
+  Command = [[
+    openspace.time.setTime(openspace.time.advancedTime(openspace.time.currentTime(), -86164.0905 * 7));
+  ]],
+  Documentation = [[Decrements time by a sidereal week (Instant)]],
+  GuiPath = "/Time",
+  IsLocal = false
+}
+
+local SolarDayIncrease = {
+  Identifier = "os.time.SolarDayIncrease",
+  Name = "Advance 1 solar day",
+  Command = [[
+    openspace.time.setTime(openspace.time.advancedTime(openspace.time.UTC(), "1d"));
+  ]],
+  Documentation = [[Advances time by a solar day (Instant)]],
+  GuiPath = "/Time",
+  IsLocal = false
+}
+
+local SolarDayDecrease = {
+  Identifier = "os.time.SolarDayDecrease",
+  Name = "Decrement 1 solar day",
+  Command = [[
+    openspace.time.setTime(openspace.time.advancedTime(openspace.time.UTC(), "-1d"));
+  ]],
+  Documentation = [[Decrements time by a solar day (Instant)]],
+  GuiPath = "/Time",
+  IsLocal = false
+}
+
+local SolarWeekIncrease = {
+  Identifier = "os.time.SolarWeekIncrease",
+  Name = "Advance 1 solar week",
+  Command = [[
+    openspace.time.setTime(openspace.time.advancedTime(openspace.time.UTC(), "7d"));
+  ]],
+  Documentation = [[Advances time by a solar week (Instant)]],
+  GuiPath = "/Time",
+  IsLocal = false
+}
+
+local SolarWeekDecrease = {
+  Identifier = "os.time.SolarWeekDecrease",
+  Name = "Decrement 1 solar week",
+  Command = [[
+    openspace.time.setTime(openspace.time.advancedTime(openspace.time.UTC(), "-7d"));
+  ]],
+  Documentation = [[Decrements time by a solar week (Instant)]],
+  GuiPath = "/Time",
+  IsLocal = false
+}
+
 
 asset.onInitialize(function()
   openspace.action.registerAction(ReverseRate)
   openspace.action.registerAction(SiderealDayIncrease)
   openspace.action.registerAction(SiderealDayDecrease)
+  openspace.action.registerAction(SiderealWeekIncrease)
+  openspace.action.registerAction(SiderealWeekDecrease)
+  openspace.action.registerAction(SolarDayIncrease)
+  openspace.action.registerAction(SolarDayDecrease)
+  openspace.action.registerAction(SolarWeekIncrease)
+  openspace.action.registerAction(SolarWeekDecrease)
 end)
 
 asset.onDeinitialize(function()
+  openspace.action.removeAction(SolarWeekDecrease)
+  openspace.action.removeAction(SolarWeekIncrease)
+  openspace.action.removeAction(SolarDayDecrease)
+  openspace.action.removeAction(SolarDayIncrease)
+  openspace.action.removeAction(SiderealWeekDecrease)
+  openspace.action.removeAction(SiderealWeekIncrease)
   openspace.action.removeAction(SiderealDayDecrease)
   openspace.action.removeAction(SiderealDayIncrease)
   openspace.action.removeAction(ReverseRate)
@@ -47,6 +125,12 @@ end)
 asset.export("ReverseRate", ReverseRate.Identifier)
 asset.export("SiderealDayIncrease", SiderealDayIncrease.Identifier)
 asset.export("SiderealDayDecrease", SiderealDayDecrease.Identifier)
+asset.export("SiderealWeekIncrease", SiderealWeekIncrease.Identifier)
+asset.export("SiderealWeekDecrease", SiderealWeekDecrease.Identifier)
+asset.export("SolarDayIncrease", SolarDayIncrease.Identifier)
+asset.export("SolarDayDecrease", SolarDayDecrease.Identifier)
+asset.export("SolarWeekIncrease", SolarWeekIncrease.Identifier)
+asset.export("SolarWeekDecrease", SolarWeekDecrease.Identifier)
 
 
 
