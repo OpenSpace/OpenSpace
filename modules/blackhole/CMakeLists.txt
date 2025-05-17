@@ -30,6 +30,8 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableblackhole.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/viewport.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/kdtree.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/schwarzschild.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/kerr.h
 )
 
 # Define Source Files
@@ -38,6 +40,8 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableblackhole.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/viewport.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/kdtree.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/schwarzschild.cu
+  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/kerr.cu
 )
 
 # Define Shader Files
@@ -49,12 +53,23 @@ set(SHADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/stars.glsl
 )
 
+# Define Shader Files
+set(CUDA_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/schwarzschild.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/schwarzschild.cu
+  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/kerr.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/kerr.cu
+)
+
 # Organize Files into Groups
 source_group("Header Files" FILES ${HEADER_FILES})
 source_group("Source Files" FILES ${SOURCE_FILES})
 source_group("Shader Files" FILES ${SHADER_FILES})
+source_group("CUDA Files" FILES ${CUDA_FILES})
 
-# Create OpenSpace Module
+set(CMAKE_CUDA_PROPAGATE_HOST_FLAGS OFF CACHE BOOL "" FORCE)
+
+# Create OpenSpace Module (merged with CUDA)
 create_new_module(
   "BlackHole"
   black_hole_module
@@ -62,43 +77,27 @@ create_new_module(
   ${HEADER_FILES}
   ${SOURCE_FILES}
   ${SHADER_FILES}
+  ${CUDA_FILES}
 )
 
-project(blackhole_cuda_prj CUDA)
-find_package(CUDA REQUIRED)
-# Define CUDA Files
-set(CUDA_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/schwarzschild.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/schwarzschild.cu
-  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/kerr.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/cuda/kerr.cu
-)
-source_group("CUDA Files" FILES ${CUDA_FILES})
-
+# Ensure CUDA is found
+enable_language(CUDA)
 find_package(CUDAToolkit REQUIRED)
 include_directories(${CUDAToolkit_INCLUDE_DIRS})
 
+# Get the initial COMPILE_OPTIONS
+get_target_property(initial_compile_options openspace-module-blackhole COMPILE_OPTIONS)
+
+# Set COMPILE_OPTIONS conditionally for C++ sources
+set_target_properties(openspace-module-blackhole PROPERTIES
+  COMPILE_OPTIONS "$<$<COMPILE_LANGUAGE:CXX>:${initial_compile_options}>"
+)
+
 if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-    set(CMAKE_CUDA_ARCHITECTURES native)
+  set(CMAKE_CUDA_ARCHITECTURES native)
 endif()
 
-# Debug Messages
-message("CMAKE_CUDA_ARCHITECTURES: ${CMAKE_CUDA_ARCHITECTURES}")
-message("CMAKE_CUDA_LIBRARY_ROOT: ${CUDAToolkit_LIBRARY_ROOT}")
-message("CMAKE_CUDA_INCLUDE_DIRS: ${CUDAToolkit_INCLUDE_DIRS}")
-message("CMAKE_CUDA_LIBRARY_DIR: ${CUDAToolkit_LIBRARY_DIR}")
-
-message("ABC: ${CMAKE_CXX_FLAGS}")
-message("ABC: ${CMAKE_CUDA_FLAGS}")
-
-# Create CUDA Library
-add_library(blackhole_cuda STATIC ${CUDA_FILES})
-set_target_properties(blackhole_cuda PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-set_target_properties(blackhole_cuda PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
-target_link_libraries(blackhole_cuda PRIVATE CUDA::toolkit CUDA::cudart)
-
-target_link_libraries(openspace-module-blackhole PRIVATE blackhole_cuda)
-
-
-get_target_property(_compile_flags blackhole_cuda COMPILE_FLAGS)
-message("DEF: ${_compile_flags}")
+# Tell the module to link against CUDA runtime/toolkit
+target_link_libraries(openspace-module-blackhole
+  PRIVATE CUDA::cudart CUDA::toolkit
+)
