@@ -21,7 +21,7 @@
 #include <vector>
 #include <chrono>
 
-#define M_Kerr false
+#define M_Kerr true
 #if M_Kerr
 #include <modules/blackhole/cuda/kerr.h>
 #else
@@ -117,6 +117,7 @@ namespace openspace {
                 _rs = 2.0f * G * _solarMass * M / (c * c);
                 setInteractionSphere(_rs * 1.2);
                 setBoundingSphere(_rs * 20);
+                _layerLayout.calcPositions(distanceconstants::Parsec / _rs);
         };
         addProperty(_solarMass);
         _solarMass.onChange(calcRs);
@@ -256,7 +257,7 @@ namespace openspace {
         
         _program->setUniform(
             _uniformCache.cameraRotationMatrix,
-            glm::mat4(glm::mat4_cast(camRot.localRotation)) * CameraPlaneRotation
+            glm::mat4(glm::mat4_cast(camRot.globalRotation * camRot.localRotation)) * CameraPlaneRotation
         );
 #if !M_Kerr
         _program->setUniform(

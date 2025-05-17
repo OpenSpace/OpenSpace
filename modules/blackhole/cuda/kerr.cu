@@ -24,8 +24,9 @@ __constant__ float c_rs = 1;
 __constant__ unsigned int c_num_steps = 5000;
 __constant__ unsigned int c_layers = 1;
 __constant__ float c_M = 1.0f;     // Mass parameter
-__constant__ float c_epsilon = 1e-3;   // Numerical tolerance
+__constant__ float c_epsilon = 1e-8;   // Numerical tolerance
 __constant__ float3 c_world_up = { 0.0f, 0.0f, 1.0f };
+__constant__ float3 c_forward = { 0.0f, 1.0f, 0.0f };
 __constant__ float c_env_map = 100.0f;
 __constant__ float c_env_r_values[MAX_LAYERS];
 
@@ -273,19 +274,14 @@ __global__ void simulateRayKernel(float3 pos, size_t num_rays_per_dim, float* lo
     int const idx_theta = idx / num_rays_per_dim;
     int const idx_phi = idx % num_rays_per_dim;
 
-    float theta = (M_PI * idx_theta) / num_rays_per_dim;
+    float theta = M_PI - (M_PI * idx_theta) / num_rays_per_dim;
     float phi = (2.0f * M_PI * idx_phi) / num_rays_per_dim - M_PI;
 
     // @TODO: (Investigate); Might need to rotate outgoing dirs to account for camera orientation
     float3 camPos = make_float3(pos.x, pos.y, pos.z);  // camera world pos
-    float3 forward = normalizef3(make_float3(
-        camPos.x,   // since modelCenter == (0,0,0)
-        camPos.y,
-        camPos.z
-    ));
 
-    float3 right = normalizef3(crossf3(forward, c_world_up));
-    float3 upVec = crossf3(right, forward);
+    float3 right = normalizef3(crossf3(c_forward, c_world_up));
+    float3 upVec = crossf3(right, c_forward);
 
     // now build your ray as before:
     float sinT = sinf(theta), cosT = cosf(theta);
@@ -293,7 +289,7 @@ __global__ void simulateRayKernel(float3 pos, size_t num_rays_per_dim, float* lo
 
     float3 dir =
         sinT * (cosP * right + sinP * upVec)
-        + cosT * forward;
+        + cosT * c_forward;
 
     dir = normalizef3(dir);
 
@@ -410,7 +406,7 @@ void kerr(float x, float y, float z, float rs, float kerr, std::vector<float> en
     int blocks = (int)((num_rays + threadsPerBlock - 1) / threadsPerBlock);
 
     // Launch the simulation kernel.
-    simulateRayKernel << <blocks, threadsPerBlock >> > (make_float3(x, z, -y), num_rays_per_dim, d_lookup_table);
+    simulateRayKernel << <blocks, threadsPerBlock >> > (make_float3(x, -z, y), num_rays_per_dim, d_lookup_table);
     cudaDeviceSynchronize();
 
     // Copy the results back to host.

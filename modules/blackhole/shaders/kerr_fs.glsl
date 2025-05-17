@@ -67,7 +67,7 @@ vec3 sphericalToCartesian(float theta, float phi){
 }
 
 vec2 sphericalToUV(vec2 sphereCoords){
-    float u = 1 - (sphereCoords.y + PI) / (2.0f * PI); // phi ∈ [-π, π] → u ∈ [0, 1]
+    float u = (sphereCoords.y + PI) / (2.0f * PI); // phi ∈ [-π, π] → u ∈ [0, 1]
     float v = sphereCoords.x / PI;          // theta ∈ [0, π] → v ∈ [0, 1]
 
     return vec2(u, v);
@@ -173,19 +173,6 @@ Fragment getFragment() {
 
     vec4 viewCoords = normalize(vec4(texture(viewGrid, TexCoord).xy, VIEWGRIDZ, 0.0f));
 
-    float zAngle = 0;
-    mat3 rotX90 = mat3(
-            1.0,  0.0,  0.0,
-            0.0,  0.0,  1.0,
-            0.0, -1.0,  0.0
-        );
-    mat3 rotZ = mat3(
-        cos(zAngle), -sin(zAngle), 0.0,
-        sin(zAngle),  cos(zAngle), 0.0,
-        0.0,          0.0,         1.0
-    );
-    mat3 initRotation = rotZ * rotX90;
-
     vec4 rotatedViewCoords = cameraRotationMatrix * viewCoords;
 
     vec2 sphericalCoords;
@@ -206,11 +193,9 @@ Fragment getFragment() {
         vec4 starColor = searchNearestStar(vec3(0.0f, sphericalCoords.x, sphericalCoords.y), l);
 
         if (starColor.a > 0.0) {
-            float layerWeight = exp(-0.5 * l);  // Earlier layers have more weight
-
             // Blend using weighted alpha blending
-            accumulatedColor.rgb = (accumulatedColor.rgb * accumulatedWeight + starColor.rgb * starColor.a * layerWeight) / (accumulatedWeight + starColor.a * layerWeight);
-            accumulatedWeight += starColor.a * layerWeight;
+            accumulatedColor.rgb = (accumulatedColor.rgb * accumulatedWeight + starColor.rgb * starColor.a) / (accumulatedWeight + starColor.a);
+            accumulatedWeight += starColor.a;
         }
     }
 
