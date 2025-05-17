@@ -41,10 +41,12 @@
 [submodule "support/doxygen/css"]
 	path = support/doxygen/css
 	url = https://github.com/jothepro/doxygen-awesome-css.git
-
 [submodule "modules/audio/ext/soloud"]
 	path = modules/audio/ext/soloud
 	url = https://github.com/jarikomppa/soloud
+[submodule "modules/opensoundcontrol/ext/oscpack"]
+	path = modules/opensoundcontrol/ext/oscpack
+	url = https://github.com/OpenSpace/oscpack.git
 [submodule "ext/json"]
 	path = ext/json
 	url = https://github.com/nlohmann/json

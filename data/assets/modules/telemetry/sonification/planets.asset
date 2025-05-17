@@ -1,0 +1,81 @@
+-- For more information about sonification in OpenSpace and how to use it, see the
+-- documentation:
+-- https://docs.openspaceproject.com/latest/creating-data-assets/modules/telemetry/sonification.html
+
+asset.require("scene/solarsystem/planets/planets")
+
+asset.onInitialize(function ()
+  -- Note that the planets need to be in this order
+  local planets = {
+    {
+      Name = "Mercury"
+    },
+    {
+      Name = "Venus"
+    },
+    {
+      Name = "Earth",
+      Moons = {
+        "Moon"
+      }
+    },
+    {
+      Name = "Mars",
+      Moons = {
+        "Phobos",
+        "Deimos"
+      }
+    },
+    {
+      Name = "Jupiter",
+      Moons = {
+        "Io",
+        "Europa",
+        "Ganymede",
+        "Callisto"
+      }
+    },
+    {
+      Name = "Saturn",
+      Moons = {
+        "Dione",
+        "Enceladus",
+        "Hyperion",
+        "Iapetus",
+        "Mimas",
+        "Rhea",
+        "Tethys",
+        "Titan"
+      }
+    },
+    {
+      Name = "Uranus",
+      Moons = {
+        "Ariel",
+        "Miranda",
+        "Oberon",
+        "Titania",
+        "Umbriel"
+      }
+    },
+    {
+      Name = "Neptune",
+      Moons = {
+        "Triton",
+        "Nereid"
+      }
+    }
+  }
+
+  openspace.sonification.addPlanets(planets)
+end)
+
+
+asset.meta = {
+  Name = "PlanetSonification planets",
+  Version = "1.0",
+  Description = "The list of planets in the PlanetSonification",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
