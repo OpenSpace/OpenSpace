@@ -32,7 +32,6 @@ local fieldlinesSCS = {
   },
   Renderable = {
     Type = "RenderableFieldlinesSequence",
-    Enabled = false,
     InputFileType = "Osfls",
     LoadingType = "DynamicDownloading",
     InfoURL = infoURL,
@@ -70,7 +69,6 @@ local fieldlinesOI = {
   },
   Renderable = {
     Type = "RenderableFieldlinesSequence",
-    Enabled = true,
     InputFileType = "Osfls",
     LoadingType = "DynamicDownloading",
     InfoURL = infoURL,
@@ -108,7 +106,6 @@ local fieldlinesIO = {
   },
   Renderable = {
     Type = "RenderableFieldlinesSequence",
-    Enabled = true,
     InputFileType = "Osfls",
     LoadingType = "DynamicDownloading",
     InfoURL = infoURL,
@@ -144,7 +141,6 @@ local fieldlinesEarth = {
   },
   Renderable = {
     Type = "RenderableFieldlinesSequence",
-    Enabled = false,
     InputFileType = "Osfls",
     LoadingType = "DynamicDownloading",
     InfoURL = infoURL,

@@ -104,6 +104,56 @@
       "name": "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
       "type": "setPropertyValue",
       "value": "false"
+    },
+    {
+      "name": "Scene.WSA_54_velocity_GONGZ_Outer_Boundary.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.WSA_54_velocity_ADAPT_Outer_Boundary.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.WSA_54_Magnetograms_ADAPT.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.WSA_54_Magnetograms_GONGZ.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "true"
+    },
+    {
+      "name": "Scene.WSA_54_Magnetic_Field_ADAPT_5_Rs.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.WSA_54_Magnetic_Field_GONGZ_5_Rs.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.WSA_54_Fieldlines_PFSS_IO.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "true"
+    },
+    {
+      "name": "Scene.WSA_54_Fieldlines_PFSS_OI.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "true"
+    },
+    {
+      "name": "Scene.WSA_54_Fieldlines_SCS_OI.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.WSA_54_Fieldlines_Earth.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
     }
   ],
   "time": {
