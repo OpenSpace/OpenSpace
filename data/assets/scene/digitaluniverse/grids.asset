@@ -103,7 +103,8 @@ local EquatorialSphere = {
     Opacity = 1.0,
     Color = { 0.3, 0.3, 0.15 },
     LineWidth = 2.0,
-    GridSegments = { 18, 24 },
+    LatSegments = 36,
+    LongSegments = 24,
   },
   Tag = { "du_grid" },
   GUI = {
