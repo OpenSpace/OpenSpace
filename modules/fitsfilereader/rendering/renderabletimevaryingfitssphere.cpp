@@ -363,7 +363,6 @@ namespace openspace {
     void RenderableTimeVaryingFitsSphere::initialize() {
         if (_loadingType == LoadingType::DynamicDownloading) {
             const std::string& identifier = parent()->identifier();
-            LWARNING(std::format("identifier: {}", identifier));
             _dynamicFileDownloader = std::make_unique<DynamicFileSequenceDownloader>(
                 _dataID, identifier, _infoURL, _dataURL, _nFilesToQueue
             );
