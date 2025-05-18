@@ -452,26 +452,19 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
 
 ScreenSpaceRenderable::~ScreenSpaceRenderable() {}
 
-bool ScreenSpaceRenderable::initialize() {
-    return true;
-}
+void ScreenSpaceRenderable::initialize() {}
 
-bool ScreenSpaceRenderable::initializeGL() {
+void ScreenSpaceRenderable::initializeGL() {
     createShaders();
-    return isReady();
 }
 
-bool ScreenSpaceRenderable::deinitialize() {
-    return true;
-}
+void ScreenSpaceRenderable::deinitialize() {}
 
-bool ScreenSpaceRenderable::deinitializeGL() {
+void ScreenSpaceRenderable::deinitializeGL() {
     if (_shader) {
         global::renderEngine->removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
-
-    return true;
 }
 
 void ScreenSpaceRenderable::render(const RenderData& renderData) {

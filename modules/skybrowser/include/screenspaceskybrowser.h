@@ -40,8 +40,9 @@ public:
     explicit ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary);
     ~ScreenSpaceSkyBrowser() override;
 
-    bool initializeGL() override;
-    bool deinitializeGL() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
+
     glm::mat4 scaleMatrix() override;
     void render(const RenderData& renderData) override;
     void update() override;

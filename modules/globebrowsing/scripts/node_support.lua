@@ -10,8 +10,8 @@ openspace.globebrowsing.documentation = {
     },
     Documentation = [[
       Sets the position of a scene graph node that has a
-      [GlobeTranslation](#globebrowsing_translation_globetranslation) and/or
-      [GlobeRotation](#globebrowsing_rotation_globerotation).
+      [GlobeTranslation](#base_translation_globetranslation) and/or
+      [GlobeRotation](#base_rotation_globerotation).
 
       Usage:
       ```lua
@@ -37,8 +37,8 @@ openspace.globebrowsing.documentation = {
     },
     Documentation = [[
       Sets the position of a scene graph node that has a
-      [GlobeTranslation](#globebrowsing_translation_globetranslation) and/or
-      [GlobeRotation](#globebrowsing_rotation_globerotation) to match the camera. Only
+      [GlobeTranslation](#base_translation_globetranslation) and/or
+      [GlobeRotation](#base_rotation_globerotation) to match the camera. Only
       uses camera position not rotation. If useAltitude is true, then the position
       will also be updated to the camera's altitude.
 

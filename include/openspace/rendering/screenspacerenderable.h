@@ -70,10 +70,10 @@ public:
     };
     virtual void render(const RenderData& renderData);
 
-    virtual bool initialize();
-    virtual bool initializeGL();
-    virtual bool deinitialize();
-    virtual bool deinitializeGL();
+    virtual void initialize();
+    virtual void initializeGL();
+    virtual void deinitialize();
+    virtual void deinitializeGL();
 
     virtual void update();
     virtual bool isReady() const;
