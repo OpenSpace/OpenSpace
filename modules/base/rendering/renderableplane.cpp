@@ -239,7 +239,6 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary, { .automaticallyUpdateRenderBin = false })
     , _blendMode(BlendModeInfo)
     , _distanceScalingSettings(dictionary)
-    , _billboard(BillboardInfo, false)
     , _renderOption(OrientationRenderOptionInfo)
     , _mirrorBackside(MirrorBacksideInfo, false)
     , _size(SizeInfo, glm::vec2(10.f), glm::vec2(0.f), glm::vec2(1e25f))
@@ -286,8 +285,6 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     }
     addProperty(_blendMode);
 
-    _billboard = p.billboard.value_or(_billboard);
-    addProperty(_billboard);
     _renderOption.addOption(RenderOption::ViewDirection, "Camera View Direction");
     _renderOption.addOption(RenderOption::PositionNormal, "Camera Position Normal");
     _renderOption.addOption(RenderOption::FixedRotation, "Fixed Rotation");
@@ -379,19 +376,6 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform(_uniformCache.mirrorBackside, _mirrorBackside);
 
-
-    const glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - objPosWorld);
-    const glm::dvec3 newRight = glm::normalize(
-        glm::cross(data.camera.lookUpVectorWorldSpace(), normal)
-    );
-    const glm::dvec3 newUp = glm::cross(normal, newRight);
-
-    glm::dmat4 cameraOrientedRotation = glm::dmat4(1.0);
-    cameraOrientedRotation[0] = glm::dvec4(newRight, 0.0);
-    cameraOrientedRotation[1] = glm::dvec4(newUp, 0.0);
-    cameraOrientedRotation[2] = glm::dvec4(normal, 0.0);
-
-
     if (_distanceScalingSettings.scaleByDistance) {
         if (global::windowDelegate->isFisheyeRendering()) {
             LWARNINGC("RenderablePlane",
@@ -430,12 +414,6 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
             }
         }
     }
-
-
-
-    const glm::dmat4 rotationTransform = _billboard ?
-        cameraOrientedRotation :
-        glm::dmat4(data.modelTransform.rotation);
 
     glm::dmat4 rotationTransform = rotationMatrix(data);
     auto [modelTransform, modelViewTransform, modelViewProjectionTransform] =
