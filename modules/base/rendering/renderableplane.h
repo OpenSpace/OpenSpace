@@ -82,6 +82,17 @@ protected:
     properties::BoolProperty _autoScale;
     properties::Vec3Property _multiplyColor;
 
+    struct DistanceScalingSettings : properties::PropertyOwner {
+        explicit DistanceScalingSettings(const ghoul::Dictionary& dictionary);
+
+        properties::BoolProperty scaleByDistance;
+        properties::FloatProperty apparentSizeMultiplier;
+        properties::FloatProperty scaleByDistanceMaxHeight;
+        properties::FloatProperty scaleByDistanceMinHeight;
+    };
+
+    DistanceScalingSettings _distanceScalingSettings;
+
     ghoul::opengl::ProgramObject* _shader = nullptr;
 
     GLuint _quad = 0;
