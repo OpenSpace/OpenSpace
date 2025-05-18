@@ -353,28 +353,35 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
             const glm::dvec3 cameraPosition = data.camera.positionVec3();
             const glm::dvec3 modelPosition = data.modelTransform.translation;
 
-            const float fovDegrees = global::windowDelegate->horizFieldOfView(0);
-            const float fovRadians = glm::radians(fovDegrees);
-            const float halfFovTan = std::tan(fovRadians * 0.5f);
+            const double fovDegrees = static_cast<double>(
+                                             global::windowDelegate->horizFieldOfView(0));
+            const double fovRadians = glm::radians(fovDegrees);
+            const double halfFovTan = std::tan(fovRadians * 0.5);
 
-            const float distance = glm::distance(cameraPosition, modelPosition);
+            const double distance = glm::distance(cameraPosition, modelPosition);
 
-            float projectedHeight = 2.0f * distance * halfFovTan * _distanceScalingSettings.apparentSizeMultiplier;
+            double projectedHeight = 2.0 * distance * halfFovTan *
+                static_cast<double>(_distanceScalingSettings.apparentSizeMultiplier);
+
             projectedHeight = std::clamp(
                 projectedHeight,
-                _distanceScalingSettings.scaleByDistanceMinHeight.value(),
-                _distanceScalingSettings.scaleByDistanceMaxHeight.value()
+                static_cast<double>(
+                               _distanceScalingSettings.scaleByDistanceMinHeight.value()),
+                static_cast<double>(
+                                _distanceScalingSettings.scaleByDistanceMaxHeight.value())
             );
 
-            glm::vec2 currentSize = _size.value();
-
+            const glm::vec2 currentSize = _size.value();
             if (currentSize.y > 0.f) {
-                float scaleFactor = projectedHeight / currentSize.y;
-                glm::vec2 scaledSize = currentSize * scaleFactor;
+                const double scaleFactor = projectedHeight / static_cast<double>(
+                                                                           currentSize.y);
+                const glm::vec2 scaledSize = currentSize * static_cast<float>(
+                                                                             scaleFactor);
                 _size.setValue(scaledSize);
             }
         }
     }
+
 
 
     const glm::dmat4 rotationTransform = _billboard ?

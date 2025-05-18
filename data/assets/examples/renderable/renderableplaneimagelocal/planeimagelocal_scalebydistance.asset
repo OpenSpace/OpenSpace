@@ -8,19 +8,10 @@ local earth = asset.require("scene/solarsystem/planets/earth/earth")
 
 local Node = {
   Identifier = "RenderablePlaneImageLocal_Example_ScaleByDistance",
-  Parent = earth.Earth.Identifier,
-  Transform = {
-    Translation = {
-      Type = "GlobeTranslation",
-      Globe = earth.Earth.Identifier,
-      Altitude = 100000,
-    }
-  },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 100000,
     Texture = openspace.absPath("${DATA}/test2.jpg"),
-    Billboard = true,
     DistanceScalingSettings = {
       ScaleByDistance = true,
       ApparentSizeMultiplier = 0.01,
