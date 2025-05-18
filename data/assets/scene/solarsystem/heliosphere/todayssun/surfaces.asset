@@ -271,7 +271,7 @@ asset.meta = {
   Name = "WSA 5.4. Streaming Surface Data Dynamically",
   Version = "1.0",
   Description = [[Downloading data from the WSA 5.4 simulation model, showing the dynamic
-    sun at any point. It includes .fits files for solar surface data]],
+    sun at any point. It includes .fits files for solar surface data.]],
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license"
