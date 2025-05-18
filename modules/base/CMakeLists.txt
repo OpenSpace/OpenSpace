@@ -74,6 +74,7 @@ set(HEADER_FILES
   rendering/screenspaceframebuffer.h
   rendering/screenspaceimagelocal.h
   rendering/screenspaceimageonline.h
+  rendering/screenspaceinsetblackout.h
   rendering/screenspacerenderablerenderable.h
   rendering/screenspacetimevaryingimageonline.h
   rotation/timelinerotation.h
@@ -151,6 +152,7 @@ set(SOURCE_FILES
   rendering/screenspaceframebuffer.cpp
   rendering/screenspaceimagelocal.cpp
   rendering/screenspaceimageonline.cpp
+  rendering/screenspaceinsetblackout.cpp
   rendering/screenspacerenderablerenderable.cpp
   rendering/screenspacetimevaryingimageonline.cpp
   rotation/timelinerotation.cpp
@@ -207,6 +209,8 @@ set(SHADER_FILES
   shaders/renderabletrail_vs.glsl
   shaders/screenspace_fs.glsl
   shaders/screenspace_vs.glsl
+  shaders/screenspaceinsetblackout_vs.glsl
+  shaders/screenspaceinsetblackout_fs.glsl
   shaders/sphere_fs.glsl
   shaders/sphere_vs.glsl
 )

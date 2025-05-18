@@ -22,46 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGEONLINE___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGEONLINE___H__
+#include "fragment.glsl"
 
-#include <openspace/rendering/screenspacerenderable.h>
+uniform vec3 color;
 
-#include <openspace/engine/downloadmanager.h>
-#include <openspace/properties/misc/stringproperty.h>
-
-namespace ghoul::opengl { class Texture; }
-
-namespace openspace {
-
-namespace documentation { struct Documentation; }
-
-class ScreenSpaceImageOnline : public ScreenSpaceRenderable {
-public:
-    explicit ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceImageOnline() override;
-
-    void deinitializeGL() override;
-
-    void update() override;
-
-    static documentation::Documentation Documentation();
-
-protected:
-    bool _downloadImage = false;
-    bool _textureIsDirty;
-    std::future<DownloadManager::MemoryFile> _imageFuture;
-    properties::StringProperty _texturePath;
-
-private:
-    void bindTexture() override;
-
-    std::future<DownloadManager::MemoryFile> downloadImageToMemory(
-        const std::string& url);
-
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGEONLINE___H__
+Fragment getFragment() {
+  Fragment frag;
+  frag.color = vec4(color, 1.0);
+  return frag;
+}

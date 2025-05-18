@@ -337,7 +337,8 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
         globebrowsing::GeoJsonProperties::Documentation(),
         GlobeLabelsComponent::Documentation(),
         RingsComponent::Documentation(),
-        ShadowComponent::Documentation()
+        ShadowComponent::Documentation(),
+        DashboardItemGlobeLocation::Documentation()
     };
 }
 

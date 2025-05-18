@@ -1,0 +1,32 @@
+-- Calibration Pattern
+-- Creates a screenspace image plane with controls to for a blackout shape. Can be used
+-- when using a secondary projector to project content on a dome surface.
+
+local texturePath = asset.resource({
+  Type = "HttpSynchronization",
+  Identifier = "calibration_pattern",
+  Name = "ScreenSpaceInsetBlackout Calibration Pattern",
+  Version = 1
+})
+
+local inset = {
+  Identifier = "ScreenSpaceInsetBlackout_Example_Calibration_Pattern",
+  Type = "ScreenSpaceInsetBlackout",
+  Name = "ScreenSpaceInsetBlackout Example - Calibration Pattern",
+  Blackoutshape = {
+    -- Must always contain four corners in the following order: 
+    -- top-left, top-right, bottom-right, bottom-left
+    Corners = { {0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}, {0.0, 0.0} },
+
+    CalibrationTexturePath = texturePath .. "calibration-pattern.png";
+  },
+  Scale = 1.0
+}
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(inset)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(inset)
+end)

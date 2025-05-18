@@ -22,46 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGEONLINE___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGEONLINE___H__
-
-#include <openspace/rendering/screenspacerenderable.h>
-
-#include <openspace/engine/downloadmanager.h>
-#include <openspace/properties/misc/stringproperty.h>
-
-namespace ghoul::opengl { class Texture; }
+#include <modules/server/include/logging/notificationlog.h>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+NotificationLog::NotificationLog(CallbackFunction callbackFunction,
+                                 ghoul::logging::LogLevel minimumLogLevel)
+    : ghoul::logging::Log(
+        TimeStamping::Yes,
+        DateStamping::Yes,
+        CategoryStamping::Yes,
+        LogLevelStamping::Yes,
+        minimumLogLevel
+    )
+    , _callbackFunction(std::move(callbackFunction))
+{}
 
-class ScreenSpaceImageOnline : public ScreenSpaceRenderable {
-public:
-    explicit ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceImageOnline() override;
+void NotificationLog::log(ghoul::logging::LogLevel level, std::string_view category,
+                          std::string_view message)
+{
+    ZoneScoped;
 
-    void deinitializeGL() override;
-
-    void update() override;
-
-    static documentation::Documentation Documentation();
-
-protected:
-    bool _downloadImage = false;
-    bool _textureIsDirty;
-    std::future<DownloadManager::MemoryFile> _imageFuture;
-    properties::StringProperty _texturePath;
-
-private:
-    void bindTexture() override;
-
-    std::future<DownloadManager::MemoryFile> downloadImageToMemory(
-        const std::string& url);
-
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-};
+    const std::lock_guard lock(_mutex);
+    const std::string timeStamp = timeString();
+    const std::string dateStamp = dateString();
+    _callbackFunction(timeStamp, dateStamp, category, level, message);
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGEONLINE___H__

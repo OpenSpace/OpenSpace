@@ -84,15 +84,16 @@ ScreenSpaceTimeVaryingImageOnline::ScreenSpaceTimeVaryingImageOnline(
     addProperty(_jsonFilePath);
 }
 
-bool ScreenSpaceTimeVaryingImageOnline::initialize() {
-    const bool ret = ScreenSpaceRenderable::initialize();
+void ScreenSpaceTimeVaryingImageOnline::initialize() {
+    ScreenSpaceRenderable::initialize();
+
     loadJsonData(_jsonFilePath.value());
-    return ret;
 }
 
-bool ScreenSpaceTimeVaryingImageOnline::deinitializeGL() {
+void ScreenSpaceTimeVaryingImageOnline::deinitializeGL() {
     _texture = nullptr;
-    return ScreenSpaceRenderable::deinitializeGL();
+
+    ScreenSpaceRenderable::deinitializeGL();
 }
 
 void ScreenSpaceTimeVaryingImageOnline::loadJsonData(const std::filesystem::path& path) {

@@ -95,10 +95,10 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
     }
 }
 
-bool ScreenSpaceImageLocal::deinitializeGL() {
+void ScreenSpaceImageLocal::deinitializeGL() {
     _texture = nullptr;
 
-    return ScreenSpaceRenderable::deinitializeGL();
+    ScreenSpaceRenderable::deinitializeGL();
 }
 
 void ScreenSpaceImageLocal::update() {

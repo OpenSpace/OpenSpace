@@ -41,8 +41,8 @@ class ScreenSpaceTimeVaryingImageOnline : public ScreenSpaceRenderable {
 public:
     explicit ScreenSpaceTimeVaryingImageOnline(const ghoul::Dictionary& dictionary);
 
-    bool initialize() override;
-    bool deinitializeGL() override;
+    void initialize() override;
+    void deinitializeGL() override;
     void update() override;
 
     static documentation::Documentation Documentation();

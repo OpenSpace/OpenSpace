@@ -42,17 +42,29 @@
 #include <variant>
 
 namespace {
+    enum RenderOption {
+        ViewDirection = 0,
+        PositionNormal,
+        FixedRotation
+    };
+
     enum BlendMode {
         Normal = 0,
         Additive
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BillboardInfo = {
-        "Billboard",
-        "Billboard Mode",
-        "Specifies whether the plane should be a billboard, which means that it is "
-        "always facing the camera. If it is not, it can be oriented using other "
-        "transformations.",
+    constexpr openspace::properties::Property::PropertyInfo OrientationRenderOptionInfo =
+    {
+        "OrientationRenderOption",
+        "Orientation Render Option",
+        "Controls how the plane will be oriented. \"Camera View Direction\" rotates the "
+        "plane so that it is orthogonal to the viewing direction of the camera (useful "
+        "for planar displays), and \"Camera Position Normal\" rotates the plane towards "
+        "the position of the camera (useful for spherical displays, like dome theaters). "
+        "In both these cases the plane will be billboarded towards the camera but in a "
+        "slightly different way. In contrast, \"Fixed Rotation\" does not rotate the "
+        "plane at all based on the camera and should be used the plane should be "
+        "oriented in a fixed way.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -133,8 +145,25 @@ namespace {
     // any other `Renderable`. It is possible to specify the `Size` of the plane, whether
     // it should always face the camera (`Billboard`), and other parameters shown below.
     struct [[codegen::Dictionary(RenderablePlane)]] Parameters {
-        // [[codegen::verbatim(BillboardInfo.description)]]
-        std::optional<bool> billboard;
+        enum class [[codegen::map(RenderOption)]] RenderOption {
+            ViewDirection [[codegen::key("Camera View Direction")]],
+            PositionNormal [[codegen::key("Camera Position Normal")]],
+            FixedRotation [[codegen::key("Fixed Rotation")]]
+        };
+
+        // Controls whether the plane will be oriented as a billboard. Setting this value
+        // to `true` is the same as setting it to \"Camera Position Normal\", setting it
+        // to `false` is the same as setting it to \"Fixed Rotation\". If the value is not
+        // specified, the default value of `false` is used instead.
+        //
+        // \"Camera View Direction\" rotates the plane so that it is orthogonal to the
+        // viewing direction of the camera (useful for planar displays), and \"Camera
+        // Position Normal\" rotates the plane towards the position of the camera (useful
+        // for spherical displays, like dome theaters). In both these cases the plane will
+        // be billboarded towards the camera but in a slightly different way. In contrast,
+        // \"Fixed Rotation\" does not rotate the plane at all based on the camera and
+        // should be used the plane should be oriented in a fixed way.
+        std::optional<std::variant<bool, RenderOption>> billboard;
 
         // [[codegen::verbatim(MirrorBacksideInfo.description)]]
         std::optional<bool> mirrorBackside;
@@ -211,12 +240,13 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     , _blendMode(BlendModeInfo)
     , _distanceScalingSettings(dictionary)
     , _billboard(BillboardInfo, false)
+    , _renderOption(OrientationRenderOptionInfo)
     , _mirrorBackside(MirrorBacksideInfo, false)
     , _size(SizeInfo, glm::vec2(10.f), glm::vec2(0.f), glm::vec2(1e25f))
     , _autoScale(AutoScaleInfo, false)
     , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
-    Parameters p = codegen::bake<Parameters>(dictionary);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _opacity.onChange([this]() {
         if (_blendMode == static_cast<int>(BlendMode::Normal)) {
@@ -256,10 +286,34 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     }
     addProperty(_blendMode);
 
-    addPropertySubOwner(_distanceScalingSettings);
-
     _billboard = p.billboard.value_or(_billboard);
     addProperty(_billboard);
+    _renderOption.addOption(RenderOption::ViewDirection, "Camera View Direction");
+    _renderOption.addOption(RenderOption::PositionNormal, "Camera Position Normal");
+    _renderOption.addOption(RenderOption::FixedRotation, "Fixed Rotation");
+
+    if (p.billboard.has_value()) {
+        ghoul_assert(
+            std::holds_alternative<bool>(*p.billboard) ||
+            std::holds_alternative<Parameters::RenderOption>(*p.billboard),
+            "Wrong type"
+        );
+
+        if (std::holds_alternative<bool>(*p.billboard)) {
+            _renderOption = std::get<bool>(*p.billboard) ?
+                RenderOption::ViewDirection :
+                RenderOption::FixedRotation;
+        }
+        else {
+            _renderOption = codegen::map<RenderOption>(
+                std::get<Parameters::RenderOption>(*p.billboard)
+            );
+        }
+    }
+    else {
+        _renderOption = RenderOption::FixedRotation;
+    }
+    addProperty(_renderOption);
 
     _mirrorBackside = p.mirrorBackside.value_or(_mirrorBackside);
     addProperty(_mirrorBackside);
@@ -325,11 +379,6 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform(_uniformCache.mirrorBackside, _mirrorBackside);
 
-    const glm::dvec3 objPosWorld = glm::dvec3(
-        glm::translate(
-            glm::dmat4(1.0),
-            data.modelTransform.translation) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
-    );
 
     const glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - objPosWorld);
     const glm::dvec3 newRight = glm::normalize(
@@ -388,8 +437,9 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
         cameraOrientedRotation :
         glm::dmat4(data.modelTransform.rotation);
 
+    glm::dmat4 rotationTransform = rotationMatrix(data);
     auto [modelTransform, modelViewTransform, modelViewProjectionTransform] =
-        calcAllTransforms(data, { .rotation = rotationTransform });
+        calcAllTransforms(data, { .rotation = std::move(rotationTransform) });
 
     _shader->setUniform(
         _uniformCache.modelViewProjection,
@@ -471,6 +521,65 @@ void RenderablePlane::createPlane() {
         reinterpret_cast<void*>(sizeof(GLfloat) * 4)
     );
     glBindVertexArray(0);
+}
+
+glm::dmat4 RenderablePlane::rotationMatrix(const RenderData& data) const {
+    switch (_renderOption.value()) {
+        case RenderOption::ViewDirection:
+        {
+            glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
+            glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
+            glm::dvec3 orthoRight = glm::normalize(
+                glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
+            );
+            if (orthoRight == glm::dvec3(0.0)) {
+                glm::dvec3 otherVector = glm::vec3(
+                    cameraUpDirectionWorld.y,
+                    cameraUpDirectionWorld.x,
+                    cameraUpDirectionWorld.z
+                );
+                orthoRight = glm::normalize(
+                    glm::cross(otherVector, cameraViewDirectionWorld)
+                );
+            }
+            glm::dvec3 orthoUp = glm::normalize(
+                glm::cross(cameraViewDirectionWorld, orthoRight)
+            );
+
+            glm::dmat4 cameraOrientedRotation = glm::dmat4(1.0);
+            cameraOrientedRotation[0] = glm::dvec4(orthoRight, 0.0);
+            cameraOrientedRotation[1] = glm::dvec4(orthoUp, 0.0);
+            cameraOrientedRotation[2] = glm::dvec4(cameraViewDirectionWorld, 0.0);
+            return cameraOrientedRotation;
+        }
+        case RenderOption::PositionNormal:
+        {
+            const glm::dvec3 objPosWorld = glm::dvec3(
+                glm::translate(
+                    glm::dmat4(1.0),
+                    data.modelTransform.translation
+                ) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
+            );
+
+            const glm::dvec3 normal = glm::normalize(
+                data.camera.positionVec3() - objPosWorld
+            );
+            const glm::dvec3 newRight = glm::normalize(
+                glm::cross(data.camera.lookUpVectorWorldSpace(), normal)
+            );
+            const glm::dvec3 newUp = glm::cross(normal, newRight);
+
+            glm::dmat4 cameraOrientedRotation = glm::dmat4(1.0);
+            cameraOrientedRotation[0] = glm::dvec4(newRight, 0.0);
+            cameraOrientedRotation[1] = glm::dvec4(newUp, 0.0);
+            cameraOrientedRotation[2] = glm::dvec4(normal, 0.0);
+            return cameraOrientedRotation;
+        }
+        case RenderOption::FixedRotation:
+            return glm::dmat4(data.modelTransform.rotation);
+    }
+
+    throw std::logic_error("Missing case exception");
 }
 
 } // namespace openspace

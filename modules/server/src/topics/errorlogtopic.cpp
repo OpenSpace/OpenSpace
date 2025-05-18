@@ -24,18 +24,15 @@
 
 #include <modules/server/include/topics/errorlogtopic.h>
 
-#include <ghoul/logging/callbacklog.h>
+#include <modules/server/include/logging/notificationlog.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr std::string_view StartSubscription = "start_subscription";
     constexpr std::string_view StopSubscription = "stop_subscription";
+    constexpr std::string_view UpdateLogLevel = "update_logLevel";
 
     constexpr std::string_view SettingsKey = "settings";
-    constexpr std::string_view TimeStampingKey = "timeStamping";
-    constexpr std::string_view DateStampingKey = "dateStamping";
-    constexpr std::string_view CategoryStampingKey = "categoryStamping";
-    constexpr std::string_view LogLevelStampingKey = "logLevelStamping";
     constexpr std::string_view LogLevelKey = "logLevel";
 } // namespace
 
@@ -53,34 +50,12 @@ void ErrorLogTopic::handleJson(const nlohmann::json& json) {
 
     if (event == StartSubscription) {
         // Default settings for logging
-        auto timeStamping = ghoul::logging::Log::TimeStamping::Yes;
-        auto dateStamping = ghoul::logging::Log::DateStamping::Yes;
-        auto categoryStamping = ghoul::logging::Log::CategoryStamping::Yes;
-        auto logLevelStamping = ghoul::logging::Log::LogLevelStamping::Yes;
-        auto logLevel = ghoul::logging::LogLevel::AllLogging;
+        ghoul::logging::LogLevel logLevel = ghoul::logging::LogLevel::AllLogging;
 
         // Check if we got log settings on subscription
         auto settings = json.find(SettingsKey);
 
         if (settings != json.end()) {
-            if (auto ts = settings->find(TimeStampingKey); ts != settings->end()) {
-                timeStamping = ghoul::logging::Log::TimeStamping(ts->get<bool>()).value;
-            }
-
-            if (auto ds = settings->find(DateStampingKey); ds != settings->end()) {
-                dateStamping = ghoul::logging::Log::DateStamping(ds->get<bool>()).value;
-            }
-
-            if (auto cs = settings->find(CategoryStampingKey); cs != settings->end()) {
-                categoryStamping = ghoul::logging::Log::CategoryStamping(
-                    cs->get<bool>()).value;
-            }
-
-            if(auto lls = settings->find(LogLevelStampingKey); lls != settings->end()){
-                logLevelStamping = ghoul::logging::Log::LogLevelStamping(
-                    lls->get<bool>()).value;
-            }
-
             if (auto ls = settings->find(LogLevelKey); ls != settings->end()) {
                 std::string level = ls->get<std::string>();
                 logLevel = ghoul::from_string<ghoul::logging::LogLevel>(level);
@@ -88,21 +63,7 @@ void ErrorLogTopic::handleJson(const nlohmann::json& json) {
 
         }
 
-        auto onLogging = [this](std::string message) {
-            _connection->sendJson(wrappedPayload(std::move(message)));
-        };
-
-        auto log = std::make_unique<ghoul::logging::CallbackLog>(
-            onLogging,
-            timeStamping,
-            dateStamping,
-            categoryStamping,
-            logLevelStamping,
-            logLevel
-        );
-        _log = log.get();
-
-        ghoul::logging::LogManager::ref().addLog(std::move(log));
+        createLog(logLevel);
         _isSubscribedTo = true;
     }
 
@@ -112,6 +73,42 @@ void ErrorLogTopic::handleJson(const nlohmann::json& json) {
         ghoul::logging::LogManager::ref().removeLog(_log);
         _log = nullptr;
     }
+
+    if (event == UpdateLogLevel) {
+        ghoul::logging::LogManager::ref().removeLog(_log);
+        _log = nullptr;
+
+        std::string level = json.at(LogLevelKey).get<std::string>();
+        auto logLevel = ghoul::from_string<ghoul::logging::LogLevel>(level);
+        createLog(logLevel);
+    }
+}
+
+void ErrorLogTopic::createLog(ghoul::logging::LogLevel logLevel) {
+    if (_log) {
+        return;
+    }
+
+    auto onLogging = [this](std::string_view timeStamp, std::string_view dateStamp,
+                            std::string_view category, ghoul::logging::LogLevel level,
+                            std::string_view message)
+    {
+        nlohmann::json payload = {
+            { "timeStamp", timeStamp },
+            { "dateStamp", dateStamp },
+            { "category", category },
+            { "level", level },
+            { "message", message }
+        };
+        _connection->sendJson(wrappedPayload(std::move(payload)));
+    };
+
+    auto log = std::make_unique<NotificationLog>(
+        onLogging,
+        logLevel
+    );
+    _log = log.get();
+    ghoul::logging::LogManager::ref().addLog(std::move(log));
 }
 
 bool ErrorLogTopic::isDone() const {
