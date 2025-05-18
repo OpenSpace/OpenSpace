@@ -51,6 +51,7 @@ namespace openspace {
 
         explicit RenderableTimeVaryingFitsSphere(const ghoul::Dictionary& dictionary);
 
+        void initialize() override;
         void initializeGL() override;
         void deinitializeGL() override;
 

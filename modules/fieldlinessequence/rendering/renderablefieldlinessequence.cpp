@@ -448,9 +448,6 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         if (_dataURL.empty()) {
             throw ghoul::RuntimeError("DataURL has to be provided");
         }
-        _dynamicFileDownloader = std::make_unique<DynamicFileSequenceDownloader>(
-            _dataID, _infoURL, _dataURL, _nFilesToQueue
-        );
     }
     else {
         ghoul_assert(
@@ -693,6 +690,12 @@ void RenderableFieldlinesSequence::staticallyLoadFiles(
 
 void RenderableFieldlinesSequence::initialize() {
     _isfirstLoad = true;
+    if (_loadingType == LoadingType::DynamicDownloading) {
+        const std::string& identifier = parent()->identifier();
+        _dynamicFileDownloader = std::make_unique<DynamicFileSequenceDownloader>(
+            _dataID, identifier, _infoURL, _dataURL, _nFilesToQueue
+        );
+    }
 }
 
 void RenderableFieldlinesSequence::initializeGL() {
@@ -798,6 +801,7 @@ double extractTriggerTimeFromFilename(std::filesystem::path filePath) {
     // Ensure the separators are correct
     fileName.replace(4, 1, "-");
     fileName.replace(7, 1, "-");
+    fileName.replace(10, 1, "T");
     fileName.replace(13, 1, ":");
     fileName.replace(16, 1, ":");
     fileName.replace(19, 1, ".");
@@ -1007,7 +1011,6 @@ void RenderableFieldlinesSequence::firstUpdate() {
         }
         _havePrintedQuantityRange = true;
     }
-
     _isfirstLoad = false;
 }
 

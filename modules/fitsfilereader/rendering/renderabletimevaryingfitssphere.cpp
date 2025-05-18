@@ -281,6 +281,9 @@ namespace openspace {
                         file->texture->uploadTexture();
                         file->texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
                     }
+                    if (_fitsLayerName == 0) {
+                        _size = _size * 5;
+                    }
                     loadTexture();
                 }
             }
@@ -307,9 +310,6 @@ namespace openspace {
             if (_dataURL.empty()) {
                 throw ghoul::RuntimeError("DataURL has to be provided");
             }
-            _dynamicFileDownloader = std::make_unique<DynamicFileSequenceDownloader>(
-                _dataID, _infoURL, _dataURL, _nFilesToQueue
-            );
 
             if (p.layerMinMaxCapValues.has_value()) {
                 const ghoul::Dictionary d = *p.layerMinMaxCapValues;
@@ -358,6 +358,16 @@ namespace openspace {
 
     bool RenderableTimeVaryingFitsSphere::isReady() const {
         return RenderableSphere::isReady();
+    }
+
+    void RenderableTimeVaryingFitsSphere::initialize() {
+        if (_loadingType == LoadingType::DynamicDownloading) {
+            const std::string& identifier = parent()->identifier();
+            LWARNING(std::format("identifier: {}", identifier));
+            _dynamicFileDownloader = std::make_unique<DynamicFileSequenceDownloader>(
+                _dataID, identifier, _infoURL, _dataURL, _nFilesToQueue
+            );
+        }
     }
 
     void RenderableTimeVaryingFitsSphere::initializeGL() {

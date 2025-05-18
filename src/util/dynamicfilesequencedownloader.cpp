@@ -84,6 +84,7 @@ std::string buildDataHttpRequest(double minTime, double maxTime, int dataID,
 }
 
 DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
+                                                             const std::string identifier,
                                                                       std::string infoURL,
                                                                       std::string dataURL,
                                                                    size_t nOfFilesToQueue)
@@ -92,7 +93,8 @@ DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
     , _dataURL(std::move(dataURL))
     , _nFilesToQueue(nOfFilesToQueue)
 {
-    _syncDir = absPath("${SYNC}/dynamically_downloaded/" + std::to_string(dataID));
+    _syncDir = absPath("${SYNC}/dynamically_downloaded/" + std::to_string(dataID) +
+        + "/" + identifier);
 
     std::filesystem::path syncFile = _syncDir / std::format("{}.synced", dataID);
     _trackSynced = syncFile;

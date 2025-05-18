@@ -3,11 +3,12 @@
     "base",
     "base_keybindings",
     "scene/solarsystem/heliosphere/todayssun/actions",
-    "scene/solarsystem/heliosphere/todayssun/mission",
-    "scene/solarsystem/heliosphere/todayssun/whitebackground",
-    "scene/solarsystem/heliosphere/todayssun/wsa54",
+    "scene/solarsystem/heliosphere/todayssun/fieldlines",
     "scene/solarsystem/heliosphere/todayssun/grid",
+    "scene/solarsystem/heliosphere/todayssun/mission",
     "scene/solarsystem/heliosphere/todayssun/sunearthline",
+    "scene/solarsystem/heliosphere/todayssun/surfaces",
+    "scene/solarsystem/heliosphere/todayssun/whitebackground",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites"
   ],
@@ -59,7 +60,6 @@
     "Earth",
     "Mars",
     "Moon",
-    "Sun",
     "Venus",
     "ISS"
   ],
@@ -67,7 +67,7 @@
     "author": "OpenSpace Team",
     "description": "This profile uses simulation outputs in real time from the model WSA to visualize the magnetic fluctuations on the Sun.",
     "license": "MIT License",
-    "name": "Default",
+    "name": "Todays Sun",
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },

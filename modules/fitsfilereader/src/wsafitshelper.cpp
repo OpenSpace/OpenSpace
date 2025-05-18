@@ -40,6 +40,7 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
                                                            std::pair<float, float> minMax)
 {
     try {
+        readFitsHeader(path);
         std::unique_ptr<FITS> file = std::make_unique<FITS>(path.string(), Read, true);
         if (!file.get()) {
             LERROR(std::format(
@@ -112,6 +113,29 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         std::filesystem::remove(path);
         return nullptr;
     }
+}
+
+void readFitsHeader(const std::filesystem::path& path) {
+    std::unique_ptr<CCfits::FITS> file =
+        std::make_unique<CCfits::FITS>(path.string(), CCfits::Read, true);
+    CCfits::PHDU& pHDU = file->pHDU();
+    pHDU.readAllKeys();
+    const std::map<CCfits::String, CCfits::Keyword*>& keyNames = pHDU.keyWord();
+
+    std::string val;
+    pHDU.readKey("CARRLONG", val);
+    std::cout << "CARRLONG: " << val << std::endl;
+
+    //for (const auto& [name, keyWord] : keyNames) {
+    //    try {
+    //        std::string val;
+    //        keyWord->value(val);
+    //        std::cout << name << " = " << val << std::endl;
+    //    }
+    //    catch (const CCfits::FitsException& e) {
+    //        std::cerr << "Could not read value for key: " << name << " (" << e.message() << ")" << std::endl;
+    //    }
+    //}
 }
 
 int nLayers(const std::filesystem::path& path) {

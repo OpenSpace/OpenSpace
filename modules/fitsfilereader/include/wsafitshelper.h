@@ -50,6 +50,8 @@ struct ImageData {
 std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
     const std::filesystem::path path, size_t layerIndex, std::pair<float, float> minMax);
 
+void readFitsHeader(const std::filesystem::path& path);
+
 // return number of data layers in fits file.
 int nLayers(const std::filesystem::path& path);
 
