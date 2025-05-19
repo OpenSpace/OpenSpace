@@ -941,16 +941,6 @@ at the end of the interpolation. If 0 was provided, the script runs immediately.
 )"
             },
             {
-                "getPropertyValue",
-                &luascriptfunctions::propertyGetValueDeprecated,
-                {
-                    { "uri", "String" }
-                },
-                "String | Number | Boolean | Table",
-                "Returns the value the property, identified by the provided URI. "
-                "Deprecated in favor of the 'propertyValue' function"
-            },
-            {
                 "propertyValue",
                 &luascriptfunctions::propertyGetValue,
                 {
@@ -962,7 +952,6 @@ at the end of the interpolation. If 0 was provided, the script runs immediately.
                 "is found."
             },
             codegen::lua::HasProperty,
-            codegen::lua::PropertyDeprecated,
             codegen::lua::Property,
             codegen::lua::AddCustomProperty,
             codegen::lua::RemoveCustomProperty,
