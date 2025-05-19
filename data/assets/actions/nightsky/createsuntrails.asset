@@ -6,6 +6,8 @@ local AddSunTrail = {
     if is_declared("args") then
       if (args.Date == "NOW") then
         date = openspace.time.currentWallTime()
+      elseif (args.Date == "UTC") then
+        date = openspace.time.UTC()
       else
         date = args.Date
       end
