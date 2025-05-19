@@ -671,19 +671,6 @@ namespace {
 }
 
 /**
- * Returns a list of property identifiers that match the passed regular expression
- */
-[[codegen::luawrap("getProperty")]] std::vector<std::string> propertyDeprecated(
-                                                                        std::string regex)
-{
-    LWARNINGC(
-        "Deprecation",
-        "'getProperty' function is deprecated and should be replaced with 'property'"
-    );
-    return property(std::move(regex));
-}
-
-/**
  * Loads the SceneGraphNode described in the table and adds it to the SceneGraph.
  */
 [[codegen::luawrap]] void addSceneGraphNode(ghoul::Dictionary node) {

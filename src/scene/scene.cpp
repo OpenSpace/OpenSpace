@@ -962,7 +962,6 @@ at the end of the interpolation. If 0 was provided, the script runs immediately.
                 "is found."
             },
             codegen::lua::HasProperty,
-            codegen::lua::PropertyDeprecated,
             codegen::lua::Property,
             codegen::lua::AddCustomProperty,
             codegen::lua::RemoveCustomProperty,

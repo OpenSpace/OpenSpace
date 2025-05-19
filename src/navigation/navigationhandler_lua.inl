@@ -703,31 +703,6 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
     }
 }
 
-/**
- * Immediately move the camera to a geographic coordinate on a globe. If the node is a
- * globe, the longitude and latitude is expressed in the body's native coordinate system.
- * If it is not, the position on the surface of the interaction sphere is used instead.
- *
- * \param node The identifier of a scene graph node. If an empty string is provided, the
- *        current anchor node is used
- * \param latitude The latitude of the target coordinate, in degrees
- * \param longitude The longitude of the target coordinate, in degrees
- * \param altitude An optional altitude, given in meters over the reference surface of
- *                 the globe. If no altitude is provided, the altitude will be kept as
- *                 the current distance to the reference surface of the specified globe.
- */
-[[codegen::luawrap("goToGeo")]] void goToGeoDeprecated(std::string node, double latitude,
-                                                       double longitude,
-                                                       std::optional<double> altitude)
-{
-    LWARNINGC(
-        "Deprecation",
-        "'goToGeo' function is deprecated and should be replaced with 'jumpToGeo'"
-    );
-
-    return jumpToGeo(std::move(node), latitude, longitude, altitude, 0);
-}
-
 void flyToGeoInternal(std::string node, double latitude, double longitude,
                       std::optional<double> altitude, std::optional<double> duration,
                       std::optional<bool> shouldUseUpVector)
@@ -890,34 +865,6 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
 
     glm::vec3 p = cartesianCoordinatesFromGeo(*n, latitude, longitude, altitude);
     return { p.x, p.y, p.z };
-}
-
-/**
-* Returns the position in the local Cartesian coordinate system of the specified globe
-* that corresponds to the given geographic coordinates. In the local coordinate system,
-* the position (0,0,0) corresponds to the globe's center. If the node is a globe, the
-* longitude and latitude is expressed in the body's native coordinate system. If it is
-* not, the position on the surface of the interaction sphere is used instead.
-*
-* Deprecated in favor of `localPositionFromGeo`.
-*
-* \param globeIdentifier The identifier of the scene graph node
-* \param latitude The latitude of the geograpic position, in degrees
-* \param longitude The longitude of the geographic position, in degrees
-* \param altitude The altitude, in meters
-*/
-[[codegen::luawrap("getLocalPositionFromGeo")]]
-std::tuple<double, double, double>
-localPositionFromGeoDeprecated(std::string nodeIdentifier, double latitude,
-                               double longitude, double altitude)
-{
-    LWARNINGC(
-        "Deprecation",
-        "'getLocalPositionFromGeo' function is deprecated and should be replaced with "
-        "'localPositionFromGeo'"
-    );
-
-    return localPositionFromGeo(std::move(nodeIdentifier), latitude, longitude, altitude);
 }
 
 /**
