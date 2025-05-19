@@ -357,10 +357,6 @@ namespace openspace {
         return RenderableSphere::isReady();
     }
 
-    void RenderableTimeVaryingFitsSphere::initialize() {
-
-    }
-
     void RenderableTimeVaryingFitsSphere::initializeGL() {
         RenderableSphere::initializeGL();
     }

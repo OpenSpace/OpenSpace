@@ -910,7 +910,7 @@ int RenderableFieldlinesSequence::updateActiveIndex(const double currentTime) {
         index = 0;
     }
     else if (iter != _files.end()) {
-        index = static_cast<int>(std::distance(_files.cbegin(), iter));// TODO -1 here maybe?
+        index = static_cast<int>(std::distance(_files.cbegin(), iter));
     }
     else {
         index = static_cast<int>(_files.size()) - 1;
@@ -984,7 +984,8 @@ void RenderableFieldlinesSequence::firstUpdate() {
     else {
         LWARNING("Invalid path to transferfunction, please enter new path.");
         _colorTablePath = FieldlinesSequenceModule::DefaultTransferFunctionFile.string();
-        _transferFunction = std::make_unique<TransferFunction>(_colorTablePath.stringValue());
+        _transferFunction =
+            std::make_unique<TransferFunction>(_colorTablePath.stringValue());
     }
 
     _shouldUpdateColorBuffer = true;
