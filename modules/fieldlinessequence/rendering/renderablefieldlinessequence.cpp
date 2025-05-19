@@ -266,10 +266,6 @@ namespace {
         // Set if first/last file should render forever
         bool showAtAllTimes;
 
-        // If using dynamic downloading, files are not cached by default.
-        // Set this to true to save the downloaded files locally.
-        std::optional<bool> cacheData;
-
         // If data sets parameter start_time differ from start of run,
         // elapsed_time_in_seconds might be in relation to start of run.
         // ManuelTimeOffset will be added to trigger time.

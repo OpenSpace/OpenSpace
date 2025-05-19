@@ -190,521 +190,521 @@ namespace {
 
 namespace openspace {
 
-    documentation::Documentation RenderableTimeVaryingFitsSphere::Documentation() {
-        return codegen::doc<Parameters>(
-            "fitsfilereader_renderable_time_varying_fits_sphere");
+documentation::Documentation RenderableTimeVaryingFitsSphere::Documentation() {
+    return codegen::doc<Parameters>(
+        "fitsfilereader_renderable_time_varying_fits_sphere");
+}
+
+RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
+    const ghoul::Dictionary& dictionary)
+    : RenderableSphere(dictionary)
+    , _fitsLayer(FitsLayerInfo)
+    , _fitsLayerName(FitsLayerNameInfo)
+    , _saveDownloadsOnShutdown(SaveDownloadsOnShutdown, false)
+    , _textureFilterProperty(TextureFilterInfo)
+    , _textureSource(TextureSourceInfo)
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    if (p.textureSource.has_value()){
+        _textureSource = p.textureSource.value().string();
+    }
+    _textureSource.setReadOnly(true);
+    addProperty(_textureSource); // Added only to show in GUI which file is active
+    if (p.loadingType.has_value()) {
+        _loadingType = codegen::map<LoadingType>(*p.loadingType);
+    }
+    else {
+        _loadingType = LoadingType::StaticLoading;
+    }
+    if (p.fitsLayer.has_value()) {
+        _fitsLayerTemp = *p.fitsLayer;
     }
 
-    RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
-        const ghoul::Dictionary& dictionary)
-        : RenderableSphere(dictionary)
-        , _fitsLayer(FitsLayerInfo)
-        , _fitsLayerName(FitsLayerNameInfo)
-        , _saveDownloadsOnShutdown(SaveDownloadsOnShutdown, false)
-        , _textureFilterProperty(TextureFilterInfo)
-        , _textureSource(TextureSourceInfo)
-    {
-        const Parameters p = codegen::bake<Parameters>(dictionary);
-
-        if (p.textureSource.has_value()){
-            _textureSource = p.textureSource.value().string();
-        }
-        _textureSource.setReadOnly(true);
-        addProperty(_textureSource); // Added only to show in GUI which file is active
-        if (p.loadingType.has_value()) {
-            _loadingType = codegen::map<LoadingType>(*p.loadingType);
-        }
-        else {
-            _loadingType = LoadingType::StaticLoading;
-        }
-        if (p.fitsLayer.has_value()) {
-            _fitsLayerTemp = *p.fitsLayer;
-        }
-
-        _textureFilterProperty.addOptions({
-            {static_cast<int>(TextureFilter::NearestNeighbor), "No Filter"},
-            {static_cast<int>(TextureFilter::Linear), "Linear smoothing"}
-            });
-        if (p.textureFilter.has_value()) {
-            _textureFilterProperty =
-                static_cast<int>(codegen::map<TextureFilter>(*p.textureFilter));
-        }
-        else {
-            _textureFilterProperty = static_cast<int>(TextureFilter::NearestNeighbor);
-        }
-        _renderForever = p.showPastFirstAndLastImage.value_or(_renderForever);
-
-        _textureFilterProperty.onChange([this]() {
-            switch (_textureFilterProperty) {
-            case(0):
-                for (auto file = _files.begin(); file != _files.end(); ++file) {
-                    file->texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
-                }
-                break;
-            case(1):
-                for (auto file = _files.begin(); file != _files.end(); ++file) {
-                    file->texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-                }
-                break;
-            }
+    _textureFilterProperty.addOptions({
+        {static_cast<int>(TextureFilter::NearestNeighbor), "No Filter"},
+        {static_cast<int>(TextureFilter::Linear), "Linear smoothing"}
         });
-        addProperty(_textureFilterProperty);
+    if (p.textureFilter.has_value()) {
+        _textureFilterProperty =
+            static_cast<int>(codegen::map<TextureFilter>(*p.textureFilter));
+    }
+    else {
+        _textureFilterProperty = static_cast<int>(TextureFilter::NearestNeighbor);
+    }
+    _renderForever = p.showPastFirstAndLastImage.value_or(_renderForever);
 
-        _fitsLayer.onChange([this]() {
-            if (_loadingType == LoadingType::StaticLoading) {
-                extractMandatoryInfoFromSourceFolder();
+    _textureFilterProperty.onChange([this]() {
+        switch (_textureFilterProperty) {
+        case(0):
+            for (auto file = _files.begin(); file != _files.end(); ++file) {
+                file->texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
             }
-            else {
-                if (_isFitsFormat) {
-                    for (auto file = _files.begin(); file != _files.end(); ++file) {
-                        std::pair<float, float> minMax = _layerMinMaxCaps.at(_fitsLayer);
-                        file->texture =
-                            loadTextureFromFits(file->path, _fitsLayer, minMax);
-                        file->texture->uploadTexture();
-                        file->texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
-                    }
-                    loadTexture();
-                }
+            break;
+        case(1):
+            for (auto file = _files.begin(); file != _files.end(); ++file) {
+                file->texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
             }
-        });
+            break;
+        }
+    });
+    addProperty(_textureFilterProperty);
 
-        _fitsLayerName.onChange([this]() {
-            if (_loadingType == LoadingType::StaticLoading) {
-                extractMandatoryInfoFromSourceFolder();
-            }
-            else {
-                if (_isFitsFormat) {
-                    for (auto file = _files.begin(); file != _files.end(); ++file) {
-                        std::pair<float, float> minMax = _layerMinMaxCaps.at(_fitsLayerName);
-                        file->texture =
-                            loadTextureFromFits(file->path, _fitsLayerName, minMax);
-                        file->texture->uploadTexture();
-                        file->texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
-                    }
-                    loadTexture();
-                }
-            }
-        });
-
+    _fitsLayer.onChange([this]() {
         if (_loadingType == LoadingType::StaticLoading) {
             extractMandatoryInfoFromSourceFolder();
-            computeSequenceEndTime();
+        }
+        else {
+            if (_isFitsFormat) {
+                for (auto file = _files.begin(); file != _files.end(); ++file) {
+                    std::pair<float, float> minMax = _layerMinMaxCaps.at(_fitsLayer);
+                    file->texture =
+                        loadTextureFromFits(file->path, _fitsLayer, minMax);
+                    file->texture->uploadTexture();
+                    file->texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
+                }
+                loadTexture();
+            }
+        }
+    });
+
+    _fitsLayerName.onChange([this]() {
+        if (_loadingType == LoadingType::StaticLoading) {
+            extractMandatoryInfoFromSourceFolder();
+        }
+        else {
+            if (_isFitsFormat) {
+                for (auto file = _files.begin(); file != _files.end(); ++file) {
+                    std::pair<float, float> minMax = _layerMinMaxCaps.at(_fitsLayerName);
+                    file->texture =
+                        loadTextureFromFits(file->path, _fitsLayerName, minMax);
+                    file->texture->uploadTexture();
+                    file->texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
+                }
+                loadTexture();
+            }
+        }
+    });
+
+    if (_loadingType == LoadingType::StaticLoading) {
+        extractMandatoryInfoFromSourceFolder();
+        computeSequenceEndTime();
+        loadTexture();
+    }
+    if (_loadingType == LoadingType::DynamicDownloading) {
+        _dataID = p.dataID.value_or(_dataID);
+        if (!_dataID) {
+            throw ghoul::RuntimeError(
+                "If running with dynamic downloading, dataID needs to be specified"
+            );
+        }
+        _nFilesToQueue = p.numberOfFilesToQueue.value_or(_nFilesToQueue);
+        _infoURL = p.infoURL.value();
+        if (_infoURL.empty()) {
+            throw ghoul::RuntimeError("InfoURL has to be provided");
+        }
+        _dataURL = p.dataURL.value();
+        if (_dataURL.empty()) {
+            throw ghoul::RuntimeError("DataURL has to be provided");
+        }
+
+        if (p.layerMinMaxCapValues.has_value()) {
+            const ghoul::Dictionary d = *p.layerMinMaxCapValues;
+            for (std::string_view intKey : d.keys()) {
+                const ghoul::Dictionary& pair = d.value<ghoul::Dictionary>(intKey);
+                std::pair<float, float> minMax = {
+                    pair.value<double>("1"),
+                    pair.value<double>("2")
+                };
+                std::pair<int, std::pair<float, float>> mapPair{
+                    std::stoi(std::string(intKey)),
+                    minMax
+                };
+                _layerMinMaxCaps.emplace(mapPair);
+            }
+        }
+
+        if (p.layerNames.has_value()) {
+            const ghoul::Dictionary d = *p.layerNames;
+            for (std::string_view key : d.keys()) {
+                std::pair<int, std::string> pair = {
+                    std::stoi(std::string(key)),
+                    d.value<std::string>(key)
+                };
+                _layerNames.emplace(pair);
+            }
+            if (!p.fitsLayer.has_value()) {
+                LWARNING(std::format(
+                    "Specify 'FitsLayer' for scene graph node with DataID: {}.",
+                    "Assuming first layer",
+                    _dataID
+                ));
+                _fitsLayerTemp = 0;
+            }
+            _hasLayerNames = true;
+            addProperty(_fitsLayerName);
+        }
+        else {
+            _hasLayerNames = false;
+            addProperty(_fitsLayer);
+        }
+        _saveDownloadsOnShutdown = p.cacheData.value_or(_saveDownloadsOnShutdown);
+        addProperty(_saveDownloadsOnShutdown);
+    }
+}
+
+bool RenderableTimeVaryingFitsSphere::isReady() const {
+    return RenderableSphere::isReady();
+}
+
+void RenderableTimeVaryingFitsSphere::initializeGL() {
+    RenderableSphere::initializeGL();
+}
+
+void RenderableTimeVaryingFitsSphere::deinitializeGL() {
+    _texture = nullptr;
+    _files.clear();
+
+    if (_loadingType == LoadingType::DynamicDownloading && _dynamicFileDownloader) {
+        _dynamicFileDownloader->deinitialize(_saveDownloadsOnShutdown);
+    }
+    RenderableSphere::deinitializeGL();
+}
+
+void RenderableTimeVaryingFitsSphere::readFileFromFits(std::filesystem::path path) {
+    if (!_layerOptionsAdded) {
+        if (_hasLayerNames) {
+            for (std::pair<int, std::string> name : _layerNames) {
+                _fitsLayerName.addOption(name.first, name.second);
+            }
+            _fitsLayerName = _fitsLayerTemp;
+        }
+        else {
+            for (int i = 0; i < nLayers(path); ++i) {
+                _fitsLayer.addOption(i, std::to_string(i + 1));
+            }
+            _fitsLayer = _fitsLayerTemp;
+        }
+        _layerOptionsAdded = true;
+    }
+    size_t layer = _hasLayerNames ? _fitsLayerName : _fitsLayer;
+    std::pair<float, float> minMax = _layerMinMaxCaps.at(layer);
+    std::unique_ptr<ghoul::opengl::Texture> t =
+        loadTextureFromFits(path, layer, minMax);
+    if (!t) {
+        return;
+    }
+    if (_textureFilterProperty == static_cast<int>(TextureFilter::NearestNeighbor)) {
+        t->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
+    }
+    else if (_textureFilterProperty == static_cast<int>(TextureFilter::Linear)) {
+        t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+    }
+    glm::vec2 minMaxDataValues = minMaxTextureDataValues(t);
+
+    File newFile = {
+        .status = File::FileStatus::Loaded,
+        .path = path,
+        .time = extractTriggerTimeFromFitsFileName(path),
+        .texture = std::move(t),
+        .dataMinMax = minMaxDataValues
+    };
+
+    const std::vector<File>::const_iterator iter = std::upper_bound(
+        _files.begin(),
+        _files.end(),
+        newFile.time,
+        [](double timeRef, const File& fileRef) {
+            return timeRef < fileRef.time;
+        }
+    );
+    _files.insert(iter, std::move(newFile));
+}
+
+void RenderableTimeVaryingFitsSphere::readFileFromImage(std::filesystem::path path) {
+    std::unique_ptr<ghoul::opengl::Texture> t =
+        ghoul::io::TextureReader::ref().loadTexture(path.string(), 2);
+    t->setInternalFormat(GL_COMPRESSED_RGBA);
+    t->uploadTexture();
+    if (_textureFilterProperty == static_cast<int>(TextureFilter::Linear)) {
+        t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+    }
+    else if (_textureFilterProperty == static_cast<int>(TextureFilter::NearestNeighbor)) {
+        t->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
+    }
+    t->purgeFromRAM();
+    glm::vec2 minMaxDataValues = minMaxTextureDataValues(t);
+
+    File newFile = {
+        .status = File::FileStatus::Loaded,
+        .path = path,
+        .time = extractTriggerTimeFromISO8601FileName(path),
+        .texture = std::move(t),
+        .dataMinMax = minMaxDataValues
+    };
+
+    const std::vector<File>::const_iterator iter = std::upper_bound(
+        _files.begin(),
+        _files.end(),
+        newFile.time,
+        [](double timeRef, const File& fileRef) {
+            return timeRef < fileRef.time;
+        }
+    );
+    _files.insert(iter, std::move(newFile));
+}
+
+glm::vec2 RenderableTimeVaryingFitsSphere::minMaxTextureDataValues(
+    std::unique_ptr<ghoul::opengl::Texture>& t)
+{
+    const glm::ivec3 dims = glm::ivec3(t->dimensions());
+    const int width = dims.x;
+    const int height = dims.y;
+
+    std::vector<float> pixelValues;
+    pixelValues.reserve(width * height * 4);
+
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            glm::vec4 texel = t->texelAsFloat(x, y);
+            pixelValues.push_back(texel.r);
+            pixelValues.push_back(texel.g);
+            pixelValues.push_back(texel.b);
+            pixelValues.push_back(texel.a);
+        }
+    }
+    if (!pixelValues.empty()) {
+        float min = *std::min_element(pixelValues.begin(), pixelValues.end());
+        float max = *std::max_element(pixelValues.begin(), pixelValues.end());
+        return glm::vec2(min, max);
+    }
+    else {
+        return glm::vec2(0.0, 1.0);
+    }
+}
+
+void RenderableTimeVaryingFitsSphere::extractMandatoryInfoFromSourceFolder() {
+    // Ensure that the source folder exists and then extract
+    // the files with the same extension as <inputFileTypeString>
+    namespace fs = std::filesystem;
+    const fs::path sourceFolder = absPath(_textureSource);
+    if (!std::filesystem::is_directory(sourceFolder)) {
+        throw ghoul::RuntimeError(
+            "Source folder for RenderableTimeVaryingFitsSphere is not a valid directory"
+        );
+    }
+    // Extract all file paths from the provided folder
+    _files.clear();
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& e : fs::directory_iterator(sourceFolder)) {
+        if (!e.is_regular_file()) {
+            continue;
+        }
+        std::filesystem::path fileExtention = e.path().extension();
+        if (fileExtention == ".fits") {
+            _isFitsFormat = true;
+            readFileFromFits(e.path());
+        }
+        else {
+            readFileFromImage(e.path());
+        }
+    }
+    // Ensure that there are available and valid source files left
+    if (_files.empty()) {
+        throw ghoul::RuntimeError(
+            "Source folder for RenderableTimeVaryingFitsSphere contains no files"
+        );
+    }
+    else {
+        computeSequenceEndTime();
+    }
+}
+
+void RenderableTimeVaryingFitsSphere::update(const UpdateData& data) {
+    RenderableSphere::update(data);
+
+    const double currentTime = data.time.j2000Seconds();
+    const double deltaTime = global::timeManager->deltaTime();
+
+    if (!_dynamicFileDownloader && _loadingType == LoadingType::DynamicDownloading) {
+        const std::string& identifier = parent()->identifier();
+        _dynamicFileDownloader = std::make_unique<DynamicFileSequenceDownloader>(
+            _dataID, identifier, _infoURL, _dataURL, _nFilesToQueue
+        );
+    }
+    if (_loadingType == LoadingType::DynamicDownloading) {
+        updateDynamicDownloading(currentTime, deltaTime);
+    }
+
+    _inInterval = !_files.empty() &&
+        currentTime >= _files[0].time &&
+        currentTime < _sequenceEndTime;
+
+    if (_inInterval) {
+        const size_t nextIdx = _activeTriggerTimeIndex + 1;
+        if (
+            // true => We stepped back to a time represented by another state
+            currentTime < _files[_activeTriggerTimeIndex].time ||
+            // true => We stepped forward to a time represented by another state
+            (nextIdx < _files.size() && currentTime >= _files[nextIdx].time))
+        {
+            int previousIndex = _activeTriggerTimeIndex;
+            updateActiveTriggerTimeIndex(currentTime);
+            File& file = _files[_activeTriggerTimeIndex];
+            if (file.status == File::FileStatus::Downloaded) {
+                size_t layer = _hasLayerNames ? _fitsLayerName : _fitsLayer;
+                std::pair<float, float> minMax = _layerMinMaxCaps.at(layer);
+                file.texture =
+                    loadTextureFromFits(file.path, layer, minMax);
+                file.status = File::FileStatus::Loaded;
+            }
+            if (previousIndex != _activeTriggerTimeIndex) {
+                trackOldest(file);
+                loadTexture();
+            }
+        }
+        // The case when we jumped passed last file. where nextIdx is not < file.size()
+        else if (currentTime >=
+            _files[_activeTriggerTimeIndex].time && !_texture) {
             loadTexture();
         }
-        if (_loadingType == LoadingType::DynamicDownloading) {
-            _dataID = p.dataID.value_or(_dataID);
-            if (!_dataID) {
-                throw ghoul::RuntimeError(
-                    "If running with dynamic downloading, dataID needs to be specified"
-                );
-            }
-            _nFilesToQueue = p.numberOfFilesToQueue.value_or(_nFilesToQueue);
-            _infoURL = p.infoURL.value();
-            if (_infoURL.empty()) {
-                throw ghoul::RuntimeError("InfoURL has to be provided");
-            }
-            _dataURL = p.dataURL.value();
-            if (_dataURL.empty()) {
-                throw ghoul::RuntimeError("DataURL has to be provided");
-            }
-
-            if (p.layerMinMaxCapValues.has_value()) {
-                const ghoul::Dictionary d = *p.layerMinMaxCapValues;
-                for (std::string_view intKey : d.keys()) {
-                    const ghoul::Dictionary& pair = d.value<ghoul::Dictionary>(intKey);
-                    std::pair<float, float> minMax = {
-                        pair.value<double>("1"),
-                        pair.value<double>("2")
-                    };
-                    std::pair<int, std::pair<float, float>> mapPair{
-                        std::stoi(std::string(intKey)),
-                        minMax
-                    };
-                    _layerMinMaxCaps.emplace(mapPair);
-                }
-            }
-
-            if (p.layerNames.has_value()) {
-                const ghoul::Dictionary d = *p.layerNames;
-                for (std::string_view key : d.keys()) {
-                    std::pair<int, std::string> pair = {
-                        std::stoi(std::string(key)),
-                        d.value<std::string>(key)
-                    };
-                    _layerNames.emplace(pair);
-                }
-                if (!p.fitsLayer.has_value()) {
-                    LWARNING(std::format(
-                        "Specify 'FitsLayer' for scene graph node with DataID: {}.",
-                        "Assuming first layer",
-                        _dataID
-                    ));
-                    _fitsLayerTemp = 0;
-                }
-                _hasLayerNames = true;
-                addProperty(_fitsLayerName);
-            }
-            else {
-                _hasLayerNames = false;
-                addProperty(_fitsLayer);
-            }
-            _saveDownloadsOnShutdown = p.cacheData.value_or(_saveDownloadsOnShutdown);
-            addProperty(_saveDownloadsOnShutdown);
-        }
     }
-
-    bool RenderableTimeVaryingFitsSphere::isReady() const {
-        return RenderableSphere::isReady();
+    if (!_firstUpdate && _useColorMap && !_files.empty()) {
+        _dataMinMaxValues = _files[_activeTriggerTimeIndex].dataMinMax;
     }
-
-    void RenderableTimeVaryingFitsSphere::initializeGL() {
-        RenderableSphere::initializeGL();
+    if (_textureIsDirty) [[unlikely]] {
+        loadTexture();
+        _textureIsDirty = false;
     }
+}
 
-    void RenderableTimeVaryingFitsSphere::deinitializeGL() {
-        _texture = nullptr;
-        _files.clear();
-
-        if (_loadingType == LoadingType::DynamicDownloading && _dynamicFileDownloader) {
-            _dynamicFileDownloader->deinitialize(_saveDownloadsOnShutdown);
-        }
-        RenderableSphere::deinitializeGL();
+void RenderableTimeVaryingFitsSphere::render(const RenderData& data, RendererTasks& task) {
+    if (_files.empty() || (!_inInterval && !_renderForever)) {
+        return;
     }
+    RenderableSphere::render(data, task);
+}
 
-    void RenderableTimeVaryingFitsSphere::readFileFromFits(std::filesystem::path path) {
-        if (!_layerOptionsAdded) {
-            if (_hasLayerNames) {
-                for (std::pair<int, std::string> name : _layerNames) {
-                    _fitsLayerName.addOption(name.first, name.second);
-                }
-                _fitsLayerName = _fitsLayerTemp;
-            }
-            else {
-                for (int i = 0; i < nLayers(path); ++i) {
-                    _fitsLayer.addOption(i, std::to_string(i + 1));
-                }
-                _fitsLayer = _fitsLayerTemp;
-            }
-            _layerOptionsAdded = true;
-        }
-        size_t layer = _hasLayerNames ? _fitsLayerName : _fitsLayer;
-        std::pair<float, float> minMax = _layerMinMaxCaps.at(layer);
-        std::unique_ptr<ghoul::opengl::Texture> t =
-            loadTextureFromFits(path, layer, minMax);
-        if (!t) {
-            return;
-        }
-        if (_textureFilterProperty == static_cast<int>(TextureFilter::NearestNeighbor)) {
-            t->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
-        }
-        else if (_textureFilterProperty == static_cast<int>(TextureFilter::Linear)) {
-            t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        }
-        glm::vec2 minMaxDataValues = minMaxTextureDataValues(t);
-
-        File newFile = {
-            .status = File::FileStatus::Loaded,
-            .path = path,
-            .time = extractTriggerTimeFromFitsFileName(path),
-            .texture = std::move(t),
-            .dataMinMax = minMaxDataValues
-        };
-
-        const std::vector<File>::const_iterator iter = std::upper_bound(
-            _files.begin(),
-            _files.end(),
-            newFile.time,
-            [](double timeRef, const File& fileRef) {
-                return timeRef < fileRef.time;
-            }
-        );
-        _files.insert(iter, std::move(newFile));
+void RenderableTimeVaryingFitsSphere::bindTexture() {
+    if (_texture) {
+        _texture->bind();
     }
-
-    void RenderableTimeVaryingFitsSphere::readFileFromImage(std::filesystem::path path) {
-        std::unique_ptr<ghoul::opengl::Texture> t =
-            ghoul::io::TextureReader::ref().loadTexture(path.string(), 2);
-        t->setInternalFormat(GL_COMPRESSED_RGBA);
-        t->uploadTexture();
-        if (_textureFilterProperty == static_cast<int>(TextureFilter::Linear)) {
-            t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        }
-        else if (_textureFilterProperty == static_cast<int>(TextureFilter::NearestNeighbor)) {
-            t->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
-        }
-        t->purgeFromRAM();
-        glm::vec2 minMaxDataValues = minMaxTextureDataValues(t);
-
-        File newFile = {
-            .status = File::FileStatus::Loaded,
-            .path = path,
-            .time = extractTriggerTimeFromISO8601FileName(path),
-            .texture = std::move(t),
-            .dataMinMax = minMaxDataValues
-        };
-
-        const std::vector<File>::const_iterator iter = std::upper_bound(
-            _files.begin(),
-            _files.end(),
-            newFile.time,
-            [](double timeRef, const File& fileRef) {
-                return timeRef < fileRef.time;
-            }
-        );
-        _files.insert(iter, std::move(newFile));
+    else {
+        unbindTexture();
     }
+}
 
-    glm::vec2 RenderableTimeVaryingFitsSphere::minMaxTextureDataValues(
-        std::unique_ptr<ghoul::opengl::Texture>& t)
-    {
-        const glm::ivec3 dims = glm::ivec3(t->dimensions());
-        const int width = dims.x;
-        const int height = dims.y;
-
-        std::vector<float> pixelValues;
-        pixelValues.reserve(width * height * 4);
-
-        for (int y = 0; y < height; ++y) {
-            for (int x = 0; x < width; ++x) {
-                glm::vec4 texel = t->texelAsFloat(x, y);
-                pixelValues.push_back(texel.r);
-                pixelValues.push_back(texel.g);
-                pixelValues.push_back(texel.b);
-                pixelValues.push_back(texel.a);
-            }
-        }
-        if (!pixelValues.empty()) {
-            float min = *std::min_element(pixelValues.begin(), pixelValues.end());
-            float max = *std::max_element(pixelValues.begin(), pixelValues.end());
-            return glm::vec2(min, max);
+void RenderableTimeVaryingFitsSphere::updateActiveTriggerTimeIndex(double currentTime) {
+    auto iter = std::upper_bound(
+        _files.cbegin(),
+        _files.cend(),
+        currentTime,
+        [](double value, const File& f) { return value < f.time; }
+    );
+    if (iter != _files.cend()) {
+        if (iter != _files.cbegin()) {
+            const ptrdiff_t idx = std::distance(_files.cbegin(), iter);
+            _activeTriggerTimeIndex = static_cast<int>(idx - 1);
         }
         else {
-            return glm::vec2(0.0, 1.0);
+            _activeTriggerTimeIndex = 0;
         }
     }
+    else {
+        _activeTriggerTimeIndex = static_cast<int>(_files.size()) - 1;
+    }
+}
 
-    void RenderableTimeVaryingFitsSphere::extractMandatoryInfoFromSourceFolder() {
-        // Ensure that the source folder exists and then extract
-        // the files with the same extension as <inputFileTypeString>
-        namespace fs = std::filesystem;
-        const fs::path sourceFolder = absPath(_textureSource);
-        if (!std::filesystem::is_directory(sourceFolder)) {
-            throw ghoul::RuntimeError(
-                "Source folder for RenderableTimeVaryingFitsSphere is not a valid directory"
-            );
-        }
-        // Extract all file paths from the provided folder
-        _files.clear();
-        namespace fs = std::filesystem;
-        for (const fs::directory_entry& e : fs::directory_iterator(sourceFolder)) {
-            if (!e.is_regular_file()) {
-                continue;
-            }
-            std::filesystem::path fileExtention = e.path().extension();
-            if (fileExtention == ".fits") {
-                _isFitsFormat = true;
-                readFileFromFits(e.path());
-            }
-            else {
-                readFileFromImage(e.path());
-            }
-        }
-        // Ensure that there are available and valid source files left
-        if (_files.empty()) {
-            throw ghoul::RuntimeError(
-                "Source folder for RenderableTimeVaryingFitsSphere contains no files"
-            );
+void RenderableTimeVaryingFitsSphere::updateDynamicDownloading(double currentTime,
+    double deltaTime)
+{
+    _dynamicFileDownloader->update(currentTime, deltaTime);
+    const std::vector<std::filesystem::path>& filesToRead =
+        _dynamicFileDownloader->downloadedFiles();
+    for (const std::filesystem::path filePath : filesToRead) {
+        std::filesystem::path fileExtention = filePath.extension();
+        if (fileExtention == ".fits") {
+            _isFitsFormat = true;
+            readFileFromFits(filePath);
         }
         else {
-            computeSequenceEndTime();
+            readFileFromImage(filePath);
         }
     }
-
-    void RenderableTimeVaryingFitsSphere::update(const UpdateData& data) {
-        RenderableSphere::update(data);
-
-        const double currentTime = data.time.j2000Seconds();
-        const double deltaTime = global::timeManager->deltaTime();
-
-        if (!_dynamicFileDownloader && _loadingType == LoadingType::DynamicDownloading) {
-            const std::string& identifier = parent()->identifier();
-            _dynamicFileDownloader = std::make_unique<DynamicFileSequenceDownloader>(
-                _dataID, identifier, _infoURL, _dataURL, _nFilesToQueue
-            );
-        }
-        if (_loadingType == LoadingType::DynamicDownloading) {
-            updateDynamicDownloading(currentTime, deltaTime);
-        }
-
-        _inInterval = !_files.empty() &&
+    if (!filesToRead.empty()) {
+        computeSequenceEndTime();
+        updateActiveTriggerTimeIndex(currentTime);
+    }
+    if (_firstUpdate) {
+        const bool isInInterval = !_files.empty() &&
             currentTime >= _files[0].time &&
             currentTime < _sequenceEndTime;
-
-        if (_inInterval) {
-            const size_t nextIdx = _activeTriggerTimeIndex + 1;
-            if (
-                // true => We stepped back to a time represented by another state
-                currentTime < _files[_activeTriggerTimeIndex].time ||
-                // true => We stepped forward to a time represented by another state
-                (nextIdx < _files.size() && currentTime >= _files[nextIdx].time))
-            {
-                int previousIndex = _activeTriggerTimeIndex;
-                updateActiveTriggerTimeIndex(currentTime);
-                File& file = _files[_activeTriggerTimeIndex];
-                if (file.status == File::FileStatus::Downloaded) {
-                    size_t layer = _hasLayerNames ? _fitsLayerName : _fitsLayer;
-                    std::pair<float, float> minMax = _layerMinMaxCaps.at(layer);
-                    file.texture =
-                        loadTextureFromFits(file.path, layer, minMax);
-                    file.status = File::FileStatus::Loaded;
-                }
-                if (previousIndex != _activeTriggerTimeIndex) {
-                    trackOldest(file);
-                    loadTexture();
-                }
-            }
-            // The case when we jumped passed last file. where nextIdx is not < file.size()
-            else if (currentTime >=
-                _files[_activeTriggerTimeIndex].time && !_texture) {
-                loadTexture();
-            }
-        }
-        if (!_firstUpdate && _useColorMap && !_files.empty()) {
-            _dataMinMaxValues = _files[_activeTriggerTimeIndex].dataMinMax;
-        }
-        if (_textureIsDirty) [[unlikely]] {
+        if (isInInterval &&
+            _activeTriggerTimeIndex != -1 &&
+            _activeTriggerTimeIndex < _files.size())
+        {
+            _firstUpdate = false;
             loadTexture();
-            _textureIsDirty = false;
         }
     }
+    // if all files are moved into _sourceFiles then we can
+    // empty the DynamicFileSequenceDownloader _downloadedFiles;
+    _dynamicFileDownloader->clearDownloaded();
+}
 
-    void RenderableTimeVaryingFitsSphere::render(const RenderData& data, RendererTasks& task) {
-        if (_files.empty() || (!_inInterval && !_renderForever)) {
-            return;
-        }
-        RenderableSphere::render(data, task);
+void RenderableTimeVaryingFitsSphere::computeSequenceEndTime() {
+    if (_files.empty()) {
+        _sequenceEndTime = 0.f;
     }
-
-    void RenderableTimeVaryingFitsSphere::bindTexture() {
-        if (_texture) {
-            _texture->bind();
-        }
-        else {
-            unbindTexture();
-        }
-    }
-
-    void RenderableTimeVaryingFitsSphere::updateActiveTriggerTimeIndex(double currentTime) {
-        auto iter = std::upper_bound(
-            _files.cbegin(),
-            _files.cend(),
-            currentTime,
-            [](double value, const File& f) { return value < f.time; }
-        );
-        if (iter != _files.cend()) {
-            if (iter != _files.cbegin()) {
-                const ptrdiff_t idx = std::distance(_files.cbegin(), iter);
-                _activeTriggerTimeIndex = static_cast<int>(idx - 1);
-            }
-            else {
-                _activeTriggerTimeIndex = 0;
-            }
-        }
-        else {
-            _activeTriggerTimeIndex = static_cast<int>(_files.size()) - 1;
+    else if (_files.size() == 1) {
+        _sequenceEndTime = _files[0].time + 7200.f;
+        if (_loadingType == LoadingType::StaticLoading && !_renderForever) {
+            //TODO: Alternativly check at construction and throw exeption.
+            LWARNING(
+                "Only one file in data set, but ShowAtAllTimes set to false. "
+                "Using arbitrary duration to visualize data file instead"
+            );
         }
     }
+    else if (_files.size() > 1) {
+        const double lastTriggerTime = _files[_files.size() - 1].time;
+        const double sequenceDuration = lastTriggerTime - _files[0].time;
+        const double averageCadence =
+            sequenceDuration / (static_cast<double>(_files.size()) - 1.0);
+        // A multiplier of 3 to the average cadence is added at the end as a buffer
+        // 3 because if you start it just before new data came in, you might just be
+        // outside the sequence end time otherwise
+        _sequenceEndTime = lastTriggerTime + 3 * averageCadence;
+    }
+}
 
-    void RenderableTimeVaryingFitsSphere::updateDynamicDownloading(double currentTime,
-        double deltaTime)
+void RenderableTimeVaryingFitsSphere::loadTexture() {
+    if (_activeTriggerTimeIndex != -1 &&
+        static_cast<size_t>(_activeTriggerTimeIndex) < _files.size())
     {
-        _dynamicFileDownloader->update(currentTime, deltaTime);
-        const std::vector<std::filesystem::path>& filesToRead =
-            _dynamicFileDownloader->downloadedFiles();
-        for (const std::filesystem::path filePath : filesToRead) {
-            std::filesystem::path fileExtention = filePath.extension();
-            if (fileExtention == ".fits") {
-                _isFitsFormat = true;
-                readFileFromFits(filePath);
-            }
-            else {
-                readFileFromImage(filePath);
-            }
-        }
-        if (!filesToRead.empty()) {
-            computeSequenceEndTime();
-            updateActiveTriggerTimeIndex(currentTime);
-        }
-        if (_firstUpdate) {
-            const bool isInInterval = !_files.empty() &&
-                currentTime >= _files[0].time &&
-                currentTime < _sequenceEndTime;
-            if (isInInterval &&
-                _activeTriggerTimeIndex != -1 &&
-                _activeTriggerTimeIndex < _files.size())
-            {
-                _firstUpdate = false;
-                loadTexture();
-            }
-        }
-        // if all files are moved into _sourceFiles then we can
-        // empty the DynamicFileSequenceDownloader _downloadedFiles;
-        _dynamicFileDownloader->clearDownloaded();
+        _texture = _files[_activeTriggerTimeIndex].texture.get();
+        showCorrectFileName();
     }
+}
 
-    void RenderableTimeVaryingFitsSphere::computeSequenceEndTime() {
-        if (_files.empty()) {
-            _sequenceEndTime = 0.f;
-        }
-        else if (_files.size() == 1) {
-            _sequenceEndTime = _files[0].time + 7200.f;
-            if (_loadingType == LoadingType::StaticLoading && !_renderForever) {
-                //TODO: Alternativly check at construction and throw exeption.
-                LWARNING(
-                    "Only one file in data set, but ShowAtAllTimes set to false. "
-                    "Using arbitrary duration to visualize data file instead"
-                );
-            }
-        }
-        else if (_files.size() > 1) {
-            const double lastTriggerTime = _files[_files.size() - 1].time;
-            const double sequenceDuration = lastTriggerTime - _files[0].time;
-            const double averageCadence =
-                sequenceDuration / (static_cast<double>(_files.size()) - 1.0);
-            // A multiplier of 3 to the average cadence is added at the end as a buffer
-            // 3 because if you start it just before new data came in, you might just be
-            // outside the sequence end time otherwise
-            _sequenceEndTime = lastTriggerTime + 3 * averageCadence;
-        }
+void RenderableTimeVaryingFitsSphere::trackOldest(File& file) {
+    if (file.status == File::FileStatus::Loaded) {
+        _loadedFiles.push(&file);
     }
+    // Repopulate the queue if new File makes the queue full
+    if (!_loadedFiles.empty() &&
+        _loadingType != LoadingType::StaticLoading &&
+        _loadedFiles.size() >= _maxLoadedFiles)
+    {
+        File* oldest = _loadedFiles.front();
+        oldest->status = File::FileStatus::Downloaded;
+        oldest->texture = nullptr;
+        _loadedFiles.pop();
+    }
+}
 
-    void RenderableTimeVaryingFitsSphere::loadTexture() {
-        if (_activeTriggerTimeIndex != -1 &&
-            static_cast<size_t>(_activeTriggerTimeIndex) < _files.size())
-        {
-            _texture = _files[_activeTriggerTimeIndex].texture.get();
-            showCorrectFileName();
-        }
-    }
-
-    void RenderableTimeVaryingFitsSphere::trackOldest(File& file) {
-        if (file.status == File::FileStatus::Loaded) {
-            _loadedFiles.push(&file);
-        }
-        // Repopulate the queue if new File makes the queue full
-        if (!_loadedFiles.empty() &&
-            _loadingType != LoadingType::StaticLoading &&
-            _loadedFiles.size() >= _maxLoadedFiles)
-        {
-            File* oldest = _loadedFiles.front();
-            oldest->status = File::FileStatus::Downloaded;
-            oldest->texture = nullptr;
-            _loadedFiles.pop();
-        }
-    }
-
-    void RenderableTimeVaryingFitsSphere::showCorrectFileName() {
-        _textureSource = _files[_activeTriggerTimeIndex].path.filename().string();
-    }
+void RenderableTimeVaryingFitsSphere::showCorrectFileName() {
+    _textureSource = _files[_activeTriggerTimeIndex].path.filename().string();
+}
 
 } // namespace openspace
