@@ -116,7 +116,7 @@ s.waitForBoot{
 					doneAction:da
 				);
 
-				sig = PlayBuf.ar(2, buf, rate:rate, loop:loop, trigger:trig);
+				sig = PlayBuf.ar(1, buf, rate:rate, loop:loop, trigger:trig);
 				sig = mamp * sig;
 				sig = mute.lag(5) * (baseAmp*amp) * sig * env;
 
@@ -171,8 +171,6 @@ s.waitForBoot{
 			ReplaceOut.ar(bus, VSTPlugin.ar(In.ar(bus, 2), ~numChannels, bypass));
 		}).add;
 
-		//~allra = VSTPluginController(Synth(\allraDecoder)).open("AllRADecoder");
-
 		// a group for ambisonic master effects
 		~ambiMasterFXGroup = Group.before(~decoder.synth);
 	};
@@ -184,7 +182,6 @@ s.waitForBoot{
 		~ambiBus = Array.newClear(~numBus);
 		~ambiGroup = Array.newClear(~numBus);
 		~encoder = Array.newClear(~numBus);
-		//~ambiReverb = Array.newClear(~numBus);
 		~sounds = Array.newClear(~numBus);
 
 		// First Audio clip
@@ -208,7 +205,7 @@ s.waitForBoot{
 		~sounds[1].set(\baseAmp, 0.3);*/
 
 		// Debugging spatial position
-		~encoder[0].editor;
+		//~encoder[0].editor;
 
 		~sounds[0].set(\baseAmp, 0.3);
 
@@ -245,21 +242,52 @@ s.waitForBoot{
 
 	// Set which OSC labels to listen to
 	var oscDef = {
-		//Circular mode
-		//~modeElSign = -1;
-		//~modeElPhase = 0.75;
+
 
 		//Horizontal mode
 		~modeElSign = 1;
 		~modeElPhase = 0.5;
 
+		//Circular mode (switch manually)
+		//~modeElSign = -1;
+		//~modeElPhase = 0.75;
+
 		//Size of hearable area
-		//~distanceLimit = 10;
 		~distanceLimit = 0.5;
-		//~distanceLimit = 0.02;
 
 		//Ambient amp
 		~ambientAmp = 1.0;
+
+		OSCdef.new(\Mode,
+			{
+				arg msg;
+
+				//msg[1] == 0 ->  Horizontal
+				//msg[1] == 1 ->  Circular
+
+				//msg[2] == 0 ->  Elevation on
+				//msg[2] == 1 ->  Elevation off
+
+				("SurroundMode:" + msg[1]).postln;
+
+				//Horizontal
+				if(((msg[1]==0)),
+					{~modeElSign = 1;
+						~modeElPhase = 0.5;},
+					{}
+				);
+
+				//Circular
+				if(((msg[1]==1)),
+					{~modeElSign = -1;
+						~modeElPhase = 0.75;},
+					{}
+				);
+
+				("~modeElSign:" + ~modeElSign).postln;
+				("~modeElPhase:" + ~modeElPhase).postln;
+
+		},'/Mode');
 
 		OSCdef.new(
 			~oscLabel0,
@@ -278,7 +306,7 @@ s.waitForBoot{
 
 				distance = msg[1]/1000000;
 
-				invDistance = ~distanceLimit-distance;
+				//invDistance = ~distanceLimit-distance;
 
 				azimuth = (msg[2]/(2*pi))+0.5;
 				elevation = ~modeElSign*(msg[3]/(2*pi))+~modeElPhase;
@@ -286,7 +314,7 @@ s.waitForBoot{
 				if((~ampMode == 1),
 					{
 						if((distance < ~distanceLimit),
-							{amp = LinLin.kr(invDistance, 0, ~distanceLimit, 0, 1);
+							{amp = LinLin.kr(distance, 0, ~distanceLimit, 0, 1);
 
 							},
 							{amp = ~ambientAmp;}
@@ -297,6 +325,7 @@ s.waitForBoot{
 				(~oscLabel0 ++ "Amp: " ++ amp).postln;
 				~sounds[0].set(\amp, amp);
 				~encoder[0].do(_.set(6, azimuth));
+				~encoder[0].do(_.set(7, elevation));
 			},
 			~oscLabel0
 		);
@@ -318,7 +347,7 @@ s.waitForBoot{
 
 				distance = msg[1]/1000000;
 
-				invDistance = ~distanceLimit-distance;
+				//invDistance = ~distanceLimit-distance;
 
 				azimuth = (msg[2]/(2*pi))+0.5;
 				elevation = ~modeElSign*(msg[3]/(2*pi))+~modeElPhase;
@@ -326,7 +355,7 @@ s.waitForBoot{
 				if((~ampMode == 1),
 					{
 						if((distance < ~distanceLimit),
-							{amp = LinLin.kr(invDistance, 0, ~distanceLimit, 0, 1);
+							{amp = LinLin.kr(distance, 0, ~distanceLimit, 0, 1);
 
 							},
 							{amp = ~ambientAmp;}
@@ -337,6 +366,7 @@ s.waitForBoot{
 				(~oscLabel1 ++ "Amp: " ++ amp).postln;
 				~sounds[0].set(\amp, amp);
 				~encoder[0].do(_.set(6, azimuth));
+				~encoder[0].do(_.set(7, elevation));
 			},
 			~oscLabel1
 		);
@@ -363,7 +393,6 @@ s.waitForBoot{
 		0.2.wait;
 		oscDef.value;
 		"--Loaded the OSCdefs--".postln;
-
 		"---------- Sonification is ready ----------".postln;
 	});
 

@@ -241,8 +241,8 @@ OSCdef.new(
 		//            msg[1][3] = Mars
 		//            msg[1][4] = Jupiter
 		//            msg[1][5] = Saturn
-		//            msg[1][5] = Uranus
-		//            msg[1][6] = Neptune
+		//            msg[1][6] = Uranus
+		//            msg[1][7] = Neptune
 
 		("Overview: " + msg).postln;
 	},
