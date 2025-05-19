@@ -462,11 +462,6 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_CULL_FACE);
     }
 
-    // TODO this if statement should probably be replaced by
-    // instead forcing blendingFuncOption to be AdditiveBlending
-    if (_renderBin != Renderable::RenderBin::Opaque) {
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    }
     // Configure blending
     glEnablei(GL_BLEND, 0);
     switch (_blendingFuncOption) {
