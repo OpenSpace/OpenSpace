@@ -1,0 +1,21 @@
+-- Voyager sonification
+-- This example adds the Voyager 1 and Voyager 2 probes to the NodesTelemetry in the
+-- Telemetry module. This should be used together with the voyager-sonification.scd file
+-- in SuperCollider to listen to an example sonification of the Voyager probes.
+--
+-- This is a good foundation for creating your own sonification of any node(s) in
+-- OpenSpace. If you want to use this to create your own sonification, you can copy this
+-- file and the voyager-sonification.scd file to your own asset folder and modify them to
+-- your liking. In this file, that modification would be to replace the Voyager 1 and 2
+-- identifiers with the identifiers of the node(s) you want to sonify instead.
+--
+-- For more information about sonification in OpenSpace and how to use it, see the
+-- documentation:
+-- https://docs.openspaceproject.com/latest/creating-data-assets/modules/telemetry/sonification.html
+
+asset.require("scene/solarsystem/missions/voyager/voyager1")
+asset.require("scene/solarsystem/missions/voyager/voyager2")
+
+asset.onInitialize(function ()
+  openspace.telemetry.addNodes({ "Voyager_1", "Voyager_2" })
+end)
