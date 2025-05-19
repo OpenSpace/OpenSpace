@@ -1084,6 +1084,23 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             std::filesystem::remove(_horizonsFile.file());
             break;
         }
+        case HorizonsResultCode::News: {
+            std::string msg = std::format(
+                "The target '{}' is too simlar to the Horizons command 'NEWS'",
+                _targetName
+            );
+            appendLog(msg, HorizonsDialog::LogLevel::Error);
+
+            msg = std::format(
+                "Try to use '@{}' as target to avoid false positive matches with the "
+                "Horizons command 'NEWS'", _targetName
+            );
+            appendLog(msg, HorizonsDialog::LogLevel::Info);
+            styleLabel(_targetLabel, IsDirty::Yes);
+
+            std::filesystem::remove(_horizonsFile.file());
+            break;
+        }
         case HorizonsResultCode::MultipleObserver: {
             std::string msg = std::format(
                 "Multiple matches were found for observer '{}'", _observerName
