@@ -55,7 +55,7 @@ end)
 asset.meta = {
   Name = "Overview information panel - Mission panel",
   Description = [[This mission file provides information about the simulation model
-    WSA and how to navigate the profile.]],
+    WSA.]],
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license"

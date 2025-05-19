@@ -340,6 +340,7 @@ void RenderableSphere::deinitializeGL() {
         }
     );
     _shader = nullptr;
+    _transferFunction = nullptr;
 }
 
 void RenderableSphere::render(const RenderData& data, RendererTasks&) {

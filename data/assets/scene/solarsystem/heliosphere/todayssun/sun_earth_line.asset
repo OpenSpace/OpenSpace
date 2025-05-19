@@ -12,9 +12,10 @@ local SunEarthLine = {
   },
   GUI = {
     Name = "Sun Earth Line",
-    Path =  "/Solar System/Heliosphere"
+    Path = "/Solar System/Heliosphere"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(SunEarthLine)
@@ -24,7 +25,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(SunEarthLine)
 end)
 
-
 asset.export("NodeLine", SunEarthLine)
 
 
@@ -32,7 +32,7 @@ asset.export("NodeLine", SunEarthLine)
 asset.meta = {
   Name = "Sun Earth Line",
   Version = "1.0",
-  Description = [[A line between the Sun and the Earth to help with spacial orientation.]],
+  Description = [[A line between the Sun and the Earth to help with spatial orientation.]],
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license"

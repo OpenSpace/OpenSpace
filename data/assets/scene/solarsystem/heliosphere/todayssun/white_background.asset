@@ -1,6 +1,6 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local whiteTexture = openspace.createSingleColorImage(
-  "one_piexel_texture_color_white",
+  "one_pixel_texture_color_white",
   { 1.0, 1.0, 1.0 }
 )
 
