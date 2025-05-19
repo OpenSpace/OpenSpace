@@ -67,157 +67,158 @@ namespace {
 
 namespace openspace {
 
-    documentation::Documentation RenderableTimeVaryingSphere::Documentation() {
-        return codegen::doc<Parameters>("base_renderable_time_varying_sphere");
-    }
+documentation::Documentation RenderableTimeVaryingSphere::Documentation() {
+    return codegen::doc<Parameters>("base_renderable_time_varying_sphere");
+}
 
-    RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
-        const ghoul::Dictionary& dictionary)
-        : RenderableSphere(dictionary)
-        , _textureSourcePath(TextureSourceInfo)
-    {
-        const Parameters p = codegen::bake<Parameters>(dictionary);
+RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
+                                                      const ghoul::Dictionary& dictionary)
+    : RenderableSphere(dictionary)
+    , _textureSourcePath(TextureSourceInfo)
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-        _textureSourcePath = p.textureSource.string();
-    }
+    _textureSourcePath = p.textureSource.string();
+}
 
-    bool RenderableTimeVaryingSphere::isReady() const {
-        return RenderableSphere::isReady() && _texture;
-    }
+bool RenderableTimeVaryingSphere::isReady() const {
+    return RenderableSphere::isReady() && _texture;
+}
 
-    void RenderableTimeVaryingSphere::initializeGL() {
-        RenderableSphere::initializeGL();
+void RenderableTimeVaryingSphere::initializeGL() {
+    RenderableSphere::initializeGL();
 
-        extractMandatoryInfoFromSourceFolder();
-        computeSequenceEndTime();
-        loadTexture();
-    }
+    extractMandatoryInfoFromSourceFolder();
+    computeSequenceEndTime();
+    loadTexture();
+}
 
-    void RenderableTimeVaryingSphere::deinitializeGL() {
-        _texture = nullptr;
-        _files.clear();
+void RenderableTimeVaryingSphere::deinitializeGL() {
+    _texture = nullptr;
+    _files.clear();
 
-        RenderableSphere::deinitializeGL();
-    }
+    RenderableSphere::deinitializeGL();
+}
 
-    void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
-        // Ensure that the source folder exists and then extract
-        // the files with the same extension as <inputFileTypeString>
-        namespace fs = std::filesystem;
-        const fs::path sourceFolder = absPath(_textureSourcePath);
-        if (!std::filesystem::is_directory(sourceFolder)) {
-            throw ghoul::RuntimeError(
-                "Source folder for RenderableTimeVaryingSphere is not a valid directory"
-            );
-        }
-        // Extract all file paths from the provided folder
-        _files.clear();
-        namespace fs = std::filesystem;
-        for (const fs::directory_entry& e : fs::directory_iterator(sourceFolder)) {
-            if (!e.is_regular_file()) {
-                continue;
-            }
-            std::filesystem::path filePath = e.path();
-            const double time = extractTriggerTimeFromFileName(filePath);
-            std::unique_ptr<ghoul::opengl::Texture> t =
-                ghoul::io::TextureReader::ref().loadTexture(filePath, 2);
-
-            t->setInternalFormat(GL_COMPRESSED_RGBA);
-            t->uploadTexture();
-            t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-            t->purgeFromRAM();
-
-            _files.push_back({ std::move(filePath), time, std::move(t) });
-        }
-
-        std::sort(
-            _files.begin(),
-            _files.end(),
-            [](const FileData& a, const FileData& b) {
-                return a.time < b.time;
-            }
+void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
+    // Ensure that the source folder exists and then extract
+    // the files with the same extension as <inputFileTypeString>
+    namespace fs = std::filesystem;
+    const fs::path sourceFolder = absPath(_textureSourcePath);
+    if (!std::filesystem::is_directory(sourceFolder)) {
+        throw ghoul::RuntimeError(
+            "Source folder for RenderableTimeVaryingSphere is not a valid directory"
         );
-        // Ensure that there are available and valid source files left
-        if (_files.empty()) {
-            throw ghoul::RuntimeError(
-                "Source folder for RenderableTimeVaryingSphere contains no files"
-            );
+    }
+    // Extract all file paths from the provided folder
+    _files.clear();
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& e : fs::directory_iterator(sourceFolder)) {
+        if (!e.is_regular_file()) {
+            continue;
         }
+        std::filesystem::path filePath = e.path();
+        const double time = extractTriggerTimeFromFileName(filePath);
+        std::unique_ptr<ghoul::opengl::Texture> t =
+            ghoul::io::TextureReader::ref().loadTexture(filePath, 2);
+
+        t->setInternalFormat(GL_COMPRESSED_RGBA);
+        t->uploadTexture();
+        t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+        t->purgeFromRAM();
+
+        _files.push_back({ std::move(filePath), time, std::move(t) });
     }
 
-    void RenderableTimeVaryingSphere::update(const UpdateData& data) {
-        RenderableSphere::update(data);
+    std::sort(
+        _files.begin(),
+        _files.end(),
+        [](const FileData& a, const FileData& b) {
+            return a.time < b.time;
+        }
+    );
+    // Ensure that there are available and valid source files left
+    if (_files.empty()) {
+        throw ghoul::RuntimeError(
+            "Source folder for RenderableTimeVaryingSphere contains no files"
+        );
+    }
+}
 
-        const double currentTime = data.time.j2000Seconds();
-        const bool isInInterval = (currentTime >= _files[0].time) &&
-            (currentTime < _sequenceEndTime);
-        if (isInInterval) {
-            const size_t nextIdx = _activeTriggerTimeIndex + 1;
-            if (
-                // true => We stepped back to a time represented by another state
-                currentTime < _files[_activeTriggerTimeIndex].time ||
-                // true => We stepped forward to a time represented by another state
-                (nextIdx < _files.size() && currentTime >= _files[nextIdx].time))
-            {
-                updateActiveTriggerTimeIndex(currentTime);
-                _textureIsDirty = true;
-            } // else {we're still in same state as previous frame (no changes needed)}
+void RenderableTimeVaryingSphere::update(const UpdateData& data) {
+    RenderableSphere::update(data);
+
+    const double currentTime = data.time.j2000Seconds();
+    const bool isInInterval = (currentTime >= _files[0].time) &&
+        (currentTime < _sequenceEndTime);
+
+    if (isInInterval) {
+        const size_t nextIdx = _activeTriggerTimeIndex + 1;
+        if (
+            // true => We stepped back to a time represented by another state
+            currentTime < _files[_activeTriggerTimeIndex].time ||
+            // true => We stepped forward to a time represented by another state
+            (nextIdx < _files.size() && currentTime >= _files[nextIdx].time))
+        {
+            updateActiveTriggerTimeIndex(currentTime);
+            _textureIsDirty = true;
+        } // else {we're still in same state as previous frame (no changes needed)}
+    }
+    else {
+        // not in interval => set everything to false
+        _activeTriggerTimeIndex = 0;
+    }
+
+    if (_textureIsDirty) [[unlikely]] {
+        loadTexture();
+        _textureIsDirty = false;
+    }
+}
+
+void RenderableTimeVaryingSphere::bindTexture() {
+    if (_texture) {
+        _texture->bind();
+    }
+    else {
+        unbindTexture();
+    }
+}
+
+void RenderableTimeVaryingSphere::updateActiveTriggerTimeIndex(double currentTime) {
+    auto iter = std::upper_bound(
+        _files.cbegin(),
+        _files.cend(),
+        currentTime,
+        [](double value, const FileData& f) { return value < f.time; }
+    );
+    if (iter != _files.cend()) {
+        if (iter != _files.cbegin()) {
+            const ptrdiff_t idx = std::distance(_files.cbegin(), iter);
+            _activeTriggerTimeIndex = static_cast<int>(idx - 1);
         }
         else {
-            // not in interval => set everything to false
             _activeTriggerTimeIndex = 0;
         }
-
-        if (_textureIsDirty) [[unlikely]] {
-            loadTexture();
-            _textureIsDirty = false;
-        }
     }
-
-    void RenderableTimeVaryingSphere::bindTexture() {
-        if (_texture) {
-            _texture->bind();
-        }
-        else {
-            unbindTexture();
-        }
+    else {
+        _activeTriggerTimeIndex = static_cast<int>(_files.size()) - 1;
     }
+}
 
-    void RenderableTimeVaryingSphere::updateActiveTriggerTimeIndex(double currentTime) {
-        auto iter = std::upper_bound(
-            _files.cbegin(),
-            _files.cend(),
-            currentTime,
-            [](double value, const FileData& f) { return value < f.time; }
-        );
-        if (iter != _files.cend()) {
-            if (iter != _files.cbegin()) {
-                const ptrdiff_t idx = std::distance(_files.cbegin(), iter);
-                _activeTriggerTimeIndex = static_cast<int>(idx - 1);
-            }
-            else {
-                _activeTriggerTimeIndex = 0;
-            }
-        }
-        else {
-            _activeTriggerTimeIndex = static_cast<int>(_files.size()) - 1;
-        }
+void RenderableTimeVaryingSphere::computeSequenceEndTime() {
+    if (_files.size() > 1) {
+        const double lastTriggerTime = _files[_files.size() - 1].time;
+        const double sequenceDuration = lastTriggerTime - _files[0].time;
+        const double averageStateDuration =
+            sequenceDuration / (static_cast<double>(_files.size()) - 1.0);
+        _sequenceEndTime = lastTriggerTime + averageStateDuration;
     }
+}
 
-    void RenderableTimeVaryingSphere::computeSequenceEndTime() {
-        if (_files.size() > 1) {
-            const double lastTriggerTime = _files[_files.size() - 1].time;
-            const double sequenceDuration = lastTriggerTime - _files[0].time;
-            const double averageStateDuration =
-                sequenceDuration / (static_cast<double>(_files.size()) - 1.0);
-            _sequenceEndTime = lastTriggerTime + averageStateDuration;
-        }
+void RenderableTimeVaryingSphere::loadTexture() {
+    if (_activeTriggerTimeIndex != -1) {
+        _texture = _files[_activeTriggerTimeIndex].texture.get();
     }
-
-    void RenderableTimeVaryingSphere::loadTexture() {
-        if (_activeTriggerTimeIndex != -1) {
-            _texture = _files[_activeTriggerTimeIndex].texture.get();
-        }
-    }
+}
 
 } // namespace openspace

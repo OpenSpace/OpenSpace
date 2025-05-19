@@ -94,7 +94,6 @@ private:
 
     const size_t _nFilesToQueue = 0;
 
-    //to iterate window
     std::vector<File>::iterator _currentFile;
 
     std::vector<File> _availableData;

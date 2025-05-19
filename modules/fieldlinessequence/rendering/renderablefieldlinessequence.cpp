@@ -267,8 +267,8 @@ namespace {
         bool showAtAllTimes;
 
         // If using dynamic downloading, files are not cached by default.
-        // To save files locally , set this to true.
-        std::optional<bool> CacheData;
+        // Set this to true to save the downloaded files locally.
+        std::optional<bool> cacheData;
 
         // If data sets parameter start_time differ from start of run,
         // elapsed_time_in_seconds might be in relation to start of run.
@@ -291,19 +291,20 @@ namespace {
         // Using a different model? Set this to scale your vertex positions to meters.
         std::optional<float> scaleToMeters;
 
-        // choose type of loading:
-        //0: static loading and static downloading
-        //1: dynamic loading and dynamic downloading
+        // Choose type of loading:
+        // StaticLoading: Download and load files on startup.
+        // DynamicDownloading: Download and load files during run time.
         enum class [[codegen::map(openspace::RenderableFieldlinesSequence::LoadingType)]]
         LoadingType {
             StaticLoading,
             DynamicDownloading
         };
+        // Decides whether to use static or dynamic data downloading.
         std::optional<LoadingType> loadingType;
         // dataID that corresponds to what dataset to use if using dynamicWebContent
         std::optional<int> dataID;
-        // number Of Files To Queue is a max value of the amount of files to queue up
-        // so that not to big of a data set is downloaded nessesarily.
+        // Number Of Files To Queue is a max value of the amount of files to queue up
+        // so that not too big of a data set is downloaded unnessesarily.
         std::optional<int> numberOfFilesToQueue;
         std::optional<std::string> infoURL;
         std::optional<std::string> dataURL;

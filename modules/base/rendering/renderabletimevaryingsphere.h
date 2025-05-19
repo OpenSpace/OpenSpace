@@ -33,47 +33,47 @@ namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
-    struct RenderData;
-    struct UpdateData;
+struct RenderData;
+struct UpdateData;
 
-    namespace documentation { struct Documentation; }
+namespace documentation { struct Documentation; }
 
-    class RenderableTimeVaryingSphere : public RenderableSphere {
-    public:
-        explicit RenderableTimeVaryingSphere(const ghoul::Dictionary& dictionary);
+class RenderableTimeVaryingSphere : public RenderableSphere {
+public:
+    explicit RenderableTimeVaryingSphere(const ghoul::Dictionary& dictionary);
 
-        void initializeGL() override;
-        void deinitializeGL() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
-        bool isReady() const override;
+    bool isReady() const override;
 
-        void update(const UpdateData& data) override;
+    void update(const UpdateData& data) override;
 
-        static documentation::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
-    protected:
-        void bindTexture() override;
+protected:
+    void bindTexture() override;
 
-    private:
-        struct FileData {
-            std::filesystem::path path;
-            double time;
-            std::unique_ptr<ghoul::opengl::Texture> texture;
-        };
-        void loadTexture();
-        void extractMandatoryInfoFromSourceFolder();
-        void updateActiveTriggerTimeIndex(double currenttime);
-        void computeSequenceEndTime();
-
-        // If there's just one state it should never disappear!
-        double _sequenceEndTime = std::numeric_limits<double>::max();
-        std::vector<FileData> _files;
-        int _activeTriggerTimeIndex = 0;
-
-        properties::StringProperty _textureSourcePath;
-        ghoul::opengl::Texture* _texture = nullptr;
-        bool _textureIsDirty = false;
+private:
+    struct FileData {
+        std::filesystem::path path;
+        double time;
+        std::unique_ptr<ghoul::opengl::Texture> texture;
     };
+    void loadTexture();
+    void extractMandatoryInfoFromSourceFolder();
+    void updateActiveTriggerTimeIndex(double currenttime);
+    void computeSequenceEndTime();
+
+    // If there's just one state it should never disappear!
+    double _sequenceEndTime = std::numeric_limits<double>::max();
+    std::vector<FileData> _files;
+    int _activeTriggerTimeIndex = 0;
+
+    properties::StringProperty _textureSourcePath;
+    ghoul::opengl::Texture* _texture = nullptr;
+    bool _textureIsDirty = false;
+};
 
 } // namespace openspace
 
