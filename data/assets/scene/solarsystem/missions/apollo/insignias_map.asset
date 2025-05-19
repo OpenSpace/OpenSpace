@@ -222,3 +222,14 @@ asset.export(Apollo12)
 asset.export(Apollo14)
 asset.export(Apollo15)
 asset.export(Apollo16)
+
+
+
+asset.meta = {
+  Name = "Apollo - Insignias",
+  Description = [[This asset shows the location of the different landing sites of the
+    Apollo missions on the Moon by placing the missions' insignias.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

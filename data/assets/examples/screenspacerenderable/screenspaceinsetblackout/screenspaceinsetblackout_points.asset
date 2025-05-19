@@ -1,0 +1,35 @@
+-- Points
+-- Creates a screenspace image plane with controls to for a blackout shape. Can be used
+-- when using a secondary projector to project content on a dome surface.
+
+local inset = {
+  Identifier = "ScreenSpaceInsetBlackout_Example_Points",
+  Type = "ScreenSpaceInsetBlackout",
+  Name = "ScreenSpaceInsetBlackout Example - Points",
+  Blackoutshape = {
+    -- Must always contain four corners in the following order: 
+    -- top-left, top-right, bottom-right, bottom-left
+    Corners = { {0.0, 0.9}, {1.0, 0.9}, {0.9, 0.1}, {0.1, 0.1} },
+
+    -- Contains control points for top spline in order left to right
+    Top = { {0.5, 1.0} },
+
+    -- Contains control points for right spline in order top to bottom
+    Right = { },
+
+    -- Contains control points for bottom spline in order right to left
+    Bottom = { {0.7, 0.2}, {0.3, 0.2} },
+
+    -- Contains control points for left spline in order bottom to top
+    Left = { }
+  },
+  Scale = 1.0
+}
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(inset)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(inset)
+end)

@@ -131,15 +131,15 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     }
 }
 
-bool ScreenSpaceBrowser::initializeGL() {
-    createShaders();
+void ScreenSpaceBrowser::initializeGL() {
+    ScreenSpaceRenderable::initializeGL();
 
+    createShaders();
     _browserInstance->initialize();
     _browserInstance->loadUrl(_url);
-    return isReady();
 }
 
-bool ScreenSpaceBrowser::deinitializeGL() {
+void ScreenSpaceBrowser::deinitializeGL() {
     LDEBUG(std::format("Deinitializing ScreenSpaceBrowser: {}", _url.value()));
 
     _browserInstance->close(true);
@@ -148,7 +148,7 @@ bool ScreenSpaceBrowser::deinitializeGL() {
     webBrowser->removeBrowser(_browserInstance.get());
     _browserInstance.reset();
 
-    return ScreenSpaceRenderable::deinitializeGL();
+    ScreenSpaceRenderable::deinitializeGL();
 }
 
 void ScreenSpaceBrowser::render(const RenderData& renderData) {

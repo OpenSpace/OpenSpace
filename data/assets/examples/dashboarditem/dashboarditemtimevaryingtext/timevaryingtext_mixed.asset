@@ -1,0 +1,17 @@
+-- Mixed
+-- This example shows how to create a time-varying text dashboard item that is using a
+-- mixed type of data entries in the `DataFile`.
+
+local Item = {
+  Type = "DashboardItemTimeVaryingText",
+  Identifier = "DashboardItemTimeVaryingText_Example_Mixed",
+  DataFile = asset.resource("data/dummydata_mixed.json"),
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

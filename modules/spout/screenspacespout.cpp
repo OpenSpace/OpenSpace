@@ -69,10 +69,10 @@ ScreenSpaceSpout::ScreenSpaceSpout(const ghoul::Dictionary& dictionary)
     setIdentifier(std::move(identifier));
 }
 
-bool ScreenSpaceSpout::deinitializeGL() {
+void ScreenSpaceSpout::deinitializeGL() {
     _spoutReceiver.release();
 
-    return ScreenSpaceRenderable::deinitializeGL();
+    ScreenSpaceRenderable::deinitializeGL();
 }
 
 bool ScreenSpaceSpout::isReady() const {

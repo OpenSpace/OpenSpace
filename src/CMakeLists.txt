@@ -172,7 +172,9 @@ set(OPENSPACE_SOURCE
   util/collisionhelper.cpp
   util/coordinateconversion.cpp
   util/distanceconversion.cpp
+  util/ellipsoid.cpp
   util/factorymanager.cpp
+  util/geodetic.cpp
   util/httprequest.cpp
   util/json_helper.cpp
   util/keys.cpp
@@ -365,8 +367,10 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/util/coordinateconversion.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/distanceconstants.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/distanceconversion.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/util/ellipsoid.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/factorymanager.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/factorymanager.inl
+  ${PROJECT_SOURCE_DIR}/include/openspace/util/geodetic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/httprequest.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/job.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/json_helper.h
@@ -461,6 +465,17 @@ target_include_directories(openspace-core
 )
 
 target_link_libraries(openspace-core PUBLIC nlohmann_json)
+
+if (UNIX)
+  # On Arch Linux, if you have the package `oneapi` installed, this influences including
+  # the <exception> header and causes the header /usr/include/oneapi/tbb/task_group.h be
+  # pulled in, causing a compile problem
+  target_compile_definitions(
+    openspace-core
+      PUBLIC "_GLIBCXX_USE_TBB_PAR_BACKEND=0"
+      PUBLIC "_PSTL_PAR_BACKEND_SERIAL"
+  )
+endif ()
 
 target_precompile_headers(openspace-core PRIVATE
   <openspace/json.h>

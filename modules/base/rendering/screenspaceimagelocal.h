@@ -39,7 +39,7 @@ class ScreenSpaceImageLocal : public ScreenSpaceRenderable {
 public:
     explicit ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary);
 
-    bool deinitializeGL() override;
+    void deinitializeGL() override;
 
     void update() override;
 

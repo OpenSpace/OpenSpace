@@ -122,11 +122,14 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "James Webb Space Telescope Profile. Adds the James Webb Space Telescope model with an estimated trajectery",
+    "description": "James Webb Space Telescope Profile. Adds the James Webb Space Telescope model with an estimated trajectory.",
     "license": "MIT License",
     "name": "James Webb Space Telescope",
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
+  },
+  "panel_visibility": {
+    "mission": true
   },
   "properties": [
     {
@@ -257,6 +260,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 2
+    "minor": 4
   }
 }

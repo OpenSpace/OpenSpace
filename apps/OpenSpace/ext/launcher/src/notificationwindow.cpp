@@ -66,6 +66,11 @@ namespace {
         std::vector<Entry> entries;
 
         std::vector<std::string> lines = ghoul::tokenizeString(data, '\n');
+        if (lines.empty() || lines[0].empty()) {
+            // The notification file is empty and we don't want to show anything
+            return entries;
+        }
+
         std::vector<std::string>::const_iterator curr = lines.cbegin();
         while (curr != lines.end()) {
             Entry e = parseEntry(curr);
@@ -89,7 +94,7 @@ namespace {
         text = text.darker();
 
         if (date::sys_days(ymd) < date::sys_days(lastStartedDate)) {
-            QColor text = QColor(120, 120, 120);
+            const QColor textColor = QColor(120, 120, 120);
             return std::format(
                 "<tr>"
                     "<td width='15%'>"
@@ -99,7 +104,7 @@ namespace {
                         "<font color='#{2:x}{3:x}{4:x}'>{1}</font>"
                     "</td>"
                 "</tr>",
-                e.date, e.text, text.red(), text.green(), text.blue()
+                e.date, e.text, textColor.red(), textColor.green(), textColor.blue()
             );
         }
         else {

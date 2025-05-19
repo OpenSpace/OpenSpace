@@ -50,8 +50,8 @@ public:
     explicit ScreenSpaceRenderableRenderable(const ghoul::Dictionary& dictionary);
     virtual ~ScreenSpaceRenderableRenderable() override;
 
-    bool initializeGL() override;
-    bool deinitializeGL() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
     void update() override;
 
     static documentation::Documentation Documentation();

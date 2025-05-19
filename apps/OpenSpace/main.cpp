@@ -29,6 +29,9 @@
 #include <openspace/engine/settings.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/joystickinputstate.h>
+#include <openspace/util/progressbar.h>
+#include <openspace/util/task.h>
+#include <openspace/util/taskloader.h>
 #include <openspace/openspace.h>
 #include <ghoul/format.h>
 #include <ghoul/ghoul.h>
@@ -99,6 +102,11 @@ glm::ivec2 currentDrawResolution;
 #ifdef OPENVR_SUPPORT
 Window* FirstOpenVRWindow = nullptr;
 #endif
+
+// This value is specified from the commandline options and kept around to be run after
+// everything has been initialized. It's going to be std::nullopt unless a user wants to
+// run a task
+std::optional<std::string> taskToRun;
 
 //
 //  SPOUT-support
@@ -400,6 +408,40 @@ void mainInitFunc(GLFWwindow*) {
 
     // Query joystick status, those connected before start up
     checkJoystickStatus();
+
+    if (taskToRun.has_value()) {
+        // If a task was specified on the commandline line, we are loading that file and
+        // executing everything within
+
+        TaskLoader loader;
+        std::vector<std::unique_ptr<Task>> tasks = loader.tasksFromFile(*taskToRun);
+
+        size_t nTasks = tasks.size();
+        if (nTasks == 1) {
+            LINFO("Task queue has 1 item");
+        }
+        else {
+            LINFO(std::format("Task queue has {} items", tasks.size()));
+        }
+
+        for (size_t i = 0; i < tasks.size(); i++) {
+            Task& task = *tasks[i].get();
+            LINFO(std::format(
+                "Performing task {} out of {}: {}",
+                i + 1, tasks.size(), task.description()
+            ));
+            ProgressBar progressBar = ProgressBar(100);
+            auto onProgress = [&progressBar](float progress) {
+                progressBar.print(static_cast<int>(progress * 100.f));
+                };
+            task.perform(onProgress);
+        }
+        std::cout << "Done performing tasks" << std::endl;
+
+        // Done with the tasks, so we can terminate
+        Engine::instance().terminate();
+    }
+
 
     LTRACE("main::mainInitFunc(end)");
 }
@@ -1142,41 +1184,56 @@ int main(int argc, char* argv[]) {
 
     CommandlineArguments commandlineArguments;
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-        commandlineArguments.configuration, "--file", "-f",
+        commandlineArguments.configuration,
+        "--file",
+        "-f",
         "Provides the path to the OpenSpace configuration file. Only the '${TEMPORARY}' "
         "path token is available and any other path has to be specified relative to the "
         "current working directory"
     ));
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-        commandlineArguments.windowConfig, "--config", "-c",
+        commandlineArguments.windowConfig,
+        "--config",
+        "-c",
         "Specifies the window configuration file that should be used to start OpenSpace "
         "and that will override whatever is specified in the `openspace.cfg` or the "
         "settings. This value can include path tokens, so for example "
         "`${CONFIG}/single.json` is a valid value."
     ));
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-        commandlineArguments.profile, "--profile", "-p",
+        commandlineArguments.profile,
+        "--profile",
+        "-p",
         "Specifies the profile that should be used to start OpenSpace and that overrides "
         "the profile specified in the `openspace.cfg` and the settings."
     ));
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-        commandlineArguments.propertyVisibility, "--propertyVisibility", "",
+        commandlineArguments.propertyVisibility,
+        "--propertyVisibility",
+        "",
         "Specifies UI visibility settings for properties that this OpenSpace is using. "
         "This value overrides the values specified in the `openspace.cfg` and the "
         "settings and also the environment variable, if that value is provided. Allowed "
         "values for this parameter are: `Developer`, `AdvancedUser`, `User`, and "
         "`NoviceUser`."
     ));
+    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+        commandlineArguments.task,
+        "--task",
+        "-t",
+        "Specifies a task that will be run after OpenSpace has been initialized. Once "
+        "the task finishes, the application will automatically close again. All other "
+        "commandline arguments are ignored, if a task is specified."
+    ));
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommandZeroArguments>(
-        commandlineArguments.bypassLauncher, "--bypassLauncher", "-b",
+        commandlineArguments.bypassLauncher,
+        "--bypassLauncher",
+        "-b",
         "Specifies whether the Launcher should be shown at startup or not. This value "
         "overrides the value specified in the `openspace.cfg` and the settings."
     ));
 
-    // setCommandLine returns a reference to the vector that will be filled later
-    const std::vector<std::string>& sgctArguments = parser.setCommandLine(
-        { argv, argv + argc }
-    );
+    parser.setCommandLine({ argv, argv + argc });
 
     try {
         const bool showHelp = parser.execute();
@@ -1189,8 +1246,16 @@ int main(int argc, char* argv[]) {
         LFATALC(e.component, e.message);
         exit(EXIT_FAILURE);
     }
-    // Take an actual copy of the arguments
-    std::vector<std::string> arguments = sgctArguments;
+
+    if (commandlineArguments.task.has_value()) {
+        // If a task was specified, we want to overwrite the used window and profile and
+        // not display the launcher
+        commandlineArguments.windowConfig = "${CONFIG}/single.json";
+        commandlineArguments.profile = "empty";
+        commandlineArguments.bypassLauncher = true;
+
+        taskToRun = *commandlineArguments.task;
+    }
 
     //
     // Set up SGCT functions for window delegate
@@ -1487,17 +1552,7 @@ int main(int argc, char* argv[]) {
         saveSettings(settings, findSettings());
     }
 
-    // Prepend the outgoing sgctArguments with the program name
-    // as well as the configuration file that sgct is supposed to use
-    arguments.insert(arguments.begin(), argv[0]);
-    arguments.insert(arguments.begin() + 1, "-config");
-    arguments.insert(
-        arguments.begin() + 2,
-        absPath(global::configuration->windowConfiguration).string()
-    );
-
     // Need to set this before the creation of the sgct::Engine
-
     Log::instance().setLogToConsole(false);
     Log::instance().setShowTime(false);
     Log::instance().setShowLogLevel(false);
@@ -1507,9 +1562,14 @@ int main(int argc, char* argv[]) {
     glfwWindowHint(GLFW_STENCIL_BITS, 8);
 #endif
 
+    std::filesystem::path winConf =
+        commandlineArguments.windowConfig.has_value() ?
+        *commandlineArguments.windowConfig :
+        global::configuration->windowConfiguration;
+
     // Determining SGCT configuration file
     LINFO(std::format(
-        "SGCT Configuration file: {}", absPath(global::configuration->windowConfiguration)
+        "SGCT Configuration file: {}", absPath(winConf)
     ));
 
 
@@ -1520,9 +1580,7 @@ int main(int argc, char* argv[]) {
     LDEBUG("Loading cluster information");
     config::Cluster cluster;
     try {
-        cluster = loadCluster(
-            absPath(global::configuration->windowConfiguration).string()
-        );
+        cluster = loadCluster(absPath(winConf).string());
     }
     catch (const std::runtime_error& e) {
         LFATALC("main", e.what());

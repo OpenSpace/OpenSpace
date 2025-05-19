@@ -22,9 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/src/ellipsoid.h>
+#include <openspace/util/ellipsoid.h>
 
-#include <modules/globebrowsing/src/basictypes.h>
+#include <openspace/util/geodetic.h>
 #include <algorithm>
 #include <array>
 #include <vector>
@@ -33,10 +33,14 @@ namespace {
     constexpr size_t MaxIterations = 8;
 } // namespace
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 Ellipsoid::Ellipsoid(glm::dvec3 radii) : _radii(std::move(radii)) {
-    updateInternalCache();
+    // If the radii is equal to 0, all of the calculations below fail and result in nan's
+    // being raised all over the place
+    if (glm::length(radii) > 0.0) {
+        updateInternalCache();
+    }
 }
 
 void Ellipsoid::updateInternalCache() {
@@ -90,7 +94,7 @@ glm::dvec3 Ellipsoid::geodeticSurfaceNormalForGeocentricallyProjectedPoint(
                                                                 const glm::dvec3& p) const
 {
     const glm::dvec3 normal = p * _cached.oneOverRadiiSquared;
-    return glm::normalize(normal);
+    return glm::length(normal) > 0.0 ? glm::normalize(normal) : normal;
 }
 
 glm::dvec3 Ellipsoid::geodeticSurfaceNormal(const Geodetic2& geodetic2) const {
@@ -143,10 +147,12 @@ double Ellipsoid::greatCircleDistance(const Geodetic2& p1, const Geodetic2& p2) 
 
 Geodetic2 Ellipsoid::cartesianToGeodetic2(const glm::dvec3& p) const {
     const glm::dvec3 normal = geodeticSurfaceNormalForGeocentricallyProjectedPoint(p);
-    return {
-        std::asin(normal.z / glm::length(normal)),
-        std::atan2(normal.y, normal.x)
-    };
+    return glm::length(normal) ?
+        Geodetic2 {
+            std::asin(normal.z / glm::length(normal)),
+            std::atan2(normal.y, normal.x)
+        } :
+        Geodetic2 { 0.0, 0.0 };
 }
 
 glm::dvec3 Ellipsoid::cartesianSurfacePosition(const Geodetic2& geodetic2) const {
@@ -174,4 +180,4 @@ Ellipsoid::shadowConfigurationArray() const
     return _shadowConfArray;
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

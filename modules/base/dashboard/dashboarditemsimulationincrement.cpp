@@ -226,29 +226,4 @@ void DashboardItemSimulationIncrement::update() {
     }
 }
 
-glm::vec2 DashboardItemSimulationIncrement::size() const {
-    ZoneScoped;
-
-    const double t = global::timeManager->targetDeltaTime();
-    std::pair<double, std::string> deltaTime;
-    if (_doSimplification) {
-        deltaTime = simplifyTime(t);
-    }
-    else {
-        const TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
-        const double convertedT = convertTime(t, TimeUnit::Second, unit);
-        deltaTime = std::pair(
-            convertedT,
-            std::string(nameForTimeUnit(unit, convertedT != 1.0))
-        );
-    }
-
-    return _font->boundingBox(
-        std::format(
-            "Simulation increment: {:.1f} {:s} / second",
-            deltaTime.first, deltaTime.second
-        )
-    );
-}
-
 } // namespace openspace

@@ -38,6 +38,7 @@ set(HEADER_FILES
   dashboard/dashboarditemsimulationincrement.h
   dashboard/dashboarditemspacing.h
   dashboard/dashboarditemtext.h
+  dashboard/dashboarditemtimevaryingtext.h
   dashboard/dashboarditemvelocity.h
   lightsource/cameralightsource.h
   lightsource/scenegraphlightsource.h
@@ -64,6 +65,7 @@ set(HEADER_FILES
   rendering/renderablesphere.h
   rendering/renderablesphereimagelocal.h
   rendering/renderablesphereimageonline.h
+  rendering/renderableswitch.h
   rendering/renderabletimevaryingsphere.h
   rendering/renderabletrail.h
   rendering/renderabletrailorbit.h
@@ -72,10 +74,13 @@ set(HEADER_FILES
   rendering/screenspaceframebuffer.h
   rendering/screenspaceimagelocal.h
   rendering/screenspaceimageonline.h
+  rendering/screenspaceinsetblackout.h
   rendering/screenspacerenderablerenderable.h
+  rendering/screenspacetimevaryingimageonline.h
   rotation/timelinerotation.h
   rotation/constantrotation.h
   rotation/fixedrotation.h
+  rotation/globerotation.h
   rotation/luarotation.h
   rotation/multirotation.h
   rotation/staticrotation.h
@@ -85,8 +90,10 @@ set(HEADER_FILES
   scale/staticscale.h
   scale/timedependentscale.h
   scale/timelinescale.h
+  task/convertmodeltask.h
   timeframe/timeframeinterval.h
   timeframe/timeframeunion.h
+  translation/globetranslation.h
   translation/luatranslation.h
   translation/multitranslation.h
   translation/statictranslation.h
@@ -108,6 +115,7 @@ set(SOURCE_FILES
   dashboard/dashboarditemsimulationincrement.cpp
   dashboard/dashboarditemspacing.cpp
   dashboard/dashboarditemtext.cpp
+  dashboard/dashboarditemtimevaryingtext.cpp
   dashboard/dashboarditemvelocity.cpp
   lightsource/cameralightsource.cpp
   lightsource/scenegraphlightsource.cpp
@@ -134,6 +142,7 @@ set(SOURCE_FILES
   rendering/renderablesphere.cpp
   rendering/renderablesphereimagelocal.cpp
   rendering/renderablesphereimageonline.cpp
+  rendering/renderableswitch.cpp
   rendering/renderabletimevaryingsphere.cpp
   rendering/renderabletrail.cpp
   rendering/renderabletrailorbit.cpp
@@ -143,10 +152,13 @@ set(SOURCE_FILES
   rendering/screenspaceframebuffer.cpp
   rendering/screenspaceimagelocal.cpp
   rendering/screenspaceimageonline.cpp
+  rendering/screenspaceinsetblackout.cpp
   rendering/screenspacerenderablerenderable.cpp
+  rendering/screenspacetimevaryingimageonline.cpp
   rotation/timelinerotation.cpp
   rotation/constantrotation.cpp
   rotation/fixedrotation.cpp
+  rotation/globerotation.cpp
   rotation/luarotation.cpp
   rotation/multirotation.cpp
   rotation/staticrotation.cpp
@@ -156,8 +168,10 @@ set(SOURCE_FILES
   scale/staticscale.cpp
   scale/timedependentscale.cpp
   scale/timelinescale.cpp
+  task/convertmodeltask.cpp
   timeframe/timeframeinterval.cpp
   timeframe/timeframeunion.cpp
+  translation/globetranslation.cpp
   translation/luatranslation.cpp
   translation/multitranslation.cpp
   translation/statictranslation.cpp
@@ -195,6 +209,8 @@ set(SHADER_FILES
   shaders/renderabletrail_vs.glsl
   shaders/screenspace_fs.glsl
   shaders/screenspace_vs.glsl
+  shaders/screenspaceinsetblackout_vs.glsl
+  shaders/screenspaceinsetblackout_fs.glsl
   shaders/sphere_fs.glsl
   shaders/sphere_vs.glsl
 )

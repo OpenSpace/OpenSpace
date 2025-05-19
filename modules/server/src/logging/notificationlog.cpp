@@ -22,46 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEROTATION___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEROTATION___H__
+#include <modules/server/include/logging/notificationlog.h>
 
-#include <openspace/scene/rotation.h>
+namespace openspace {
 
-#include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/doubleproperty.h>
+NotificationLog::NotificationLog(CallbackFunction callbackFunction,
+                                 ghoul::logging::LogLevel minimumLogLevel)
+    : ghoul::logging::Log(
+        TimeStamping::Yes,
+        DateStamping::Yes,
+        CategoryStamping::Yes,
+        LogLevelStamping::Yes,
+        minimumLogLevel
+    )
+    , _callbackFunction(std::move(callbackFunction))
+{}
 
-namespace openspace::globebrowsing {
+void NotificationLog::log(ghoul::logging::LogLevel level, std::string_view category,
+                          std::string_view message)
+{
+    ZoneScoped;
 
-class RenderableGlobe;
+    const std::lock_guard lock(_mutex);
+    const std::string timeStamp = timeString();
+    const std::string dateStamp = dateString();
+    _callbackFunction(timeStamp, dateStamp, category, level, message);
+}
 
-class GlobeRotation : public Rotation {
-public:
-    explicit GlobeRotation(const ghoul::Dictionary& dictionary);
-
-    void update(const UpdateData& data) override;
-    glm::dmat3 matrix(const UpdateData& data) const override;
-
-    static documentation::Documentation Documentation();
-
-private:
-    void findGlobe();
-    void setUpdateVariables();
-    glm::vec3 computeSurfacePosition(double latitude, double longitude) const;
-
-    properties::StringProperty _globe;
-    properties::DoubleProperty _latitude;
-    properties::DoubleProperty _longitude;
-    properties::DoubleProperty _angle;
-    properties::BoolProperty _useHeightmap;
-    properties::BoolProperty _useCamera;
-
-    RenderableGlobe* _globeNode = nullptr;
-
-    mutable bool _matrixIsDirty = true;
-    mutable glm::dmat3 _matrix = glm::dmat3(0.0);
-};
-
-} // namespace openspace::globebrowsing
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEROTATION___H__
+} // namespace openspace
