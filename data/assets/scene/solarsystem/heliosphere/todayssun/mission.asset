@@ -12,19 +12,23 @@ local Mission = {
     the magnetic fields but traced from different locations. They can be colored by their
     different parameters in the data, for example polarity or open or closed field lines.
     The two elements named "Solar Surface" show the magnetic polarities, but have other
-    options in the settings under "Texture Layer Options". Each asset includes settings
-    for appearance, as well as an option to save the downloaded data for future use
-    (by default, the data is not cached). Each data file remains active until the next
-    one in the sequence becomes available. To see which file is currently being used,
-    check the Texture Source field for each asset in the GUI. In the visualization, the
-    white line shooting out from the Sun, along with the white arc, always points in
-    the direction of Earth. The yellow arc is the Carrington prime meridian which is
-    longitude 0 of the Sun, and the green grid shows lines with a 10-degree separation.
-    You can also toggle a white background from the Actions panel. If no data is
-    showing, most likely the selected time is outside of the data range (e.g., too far
-    in the future or the past for the dynamic data to be available). Alternatively, the
-    files failed to download. For more information on the simulation model, see
-    https://ccmc.gsfc.nasa.gov/models/WSA~5.4.
+    options in the settings under "Texture Layer Options". The same goes for the two named
+    "Velocity at Outer Boundary". The two named "Magnetic Field at 5Rs" (solar radii) does
+    not have other options. Each asset includes settings for appearance. If field lines
+    are looking too bright against a bright background, try changing the setting for
+    additive blending. When having multiple spheres on, try the "Orientation" option to
+    instead render the inside of the sphere. Additionally there is an option to save the
+    downloaded data for future use (by default, the data is not cached). Each data file
+    remains active until the next one in the sequence becomes available. To see which file
+    is currently being used, check the "Texture Source" field for each asset in the GUI.
+    In the visualization, the white line shooting out from the Sun, along with the white
+    arc, always points in the direction of Earth. The yellow arc is the Carrington prime
+    meridian which is longitude 0 of the Sun, and the green grid shows lines with a
+    10-degree separation. You can also toggle a white background from the Actions panel.
+    If no data is showing, most likely the selected time is outside of the data range
+    (e.g., too far in the future or the past for the dynamic data to be available).
+    Alternatively, the files failed to download. For more information on the simulation
+    model, see https://ccmc.gsfc.nasa.gov/models/WSA~5.4.
   ]],
   Actions = { "os.todayssun.ToggleWhiteBackground" },
   Milestones = {
