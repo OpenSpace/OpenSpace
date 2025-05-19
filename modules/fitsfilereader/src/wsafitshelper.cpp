@@ -173,7 +173,7 @@ std::shared_ptr<ImageData<T>> readImageInternal(U& image) {
         return std::make_shared<ImageData<T>>(im);
     }
     catch (CCfits::FitsException& e) {
-        LERROR(std::format("Could not read FITS layer, error: '{}'", e));
+        LERROR(std::format("Could not read FITS layer, error: '{}'", e.message()));
     }
     return nullptr;
 }
