@@ -30,14 +30,11 @@
 #include <openspace/query/query.h>
 
 namespace {
-    constexpr std::string_view _loggerCat = "TelemetryBase";
-
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "This setting determines whether this telemetry gathering is enabled or not.",
         openspace::properties::Property::Visibility::User
-
     };
 } // namespace
 
@@ -46,8 +43,8 @@ namespace openspace {
 TelemetryBase::TelemetryBase(properties::PropertyOwner::PropertyOwnerInfo info,
                              const std::string& ip, int port)
     : properties::PropertyOwner(info)
-    , _enabled(EnabledInfo, false)
     , _identifier(info.identifier)
+    , _enabled(EnabledInfo, false)
     , _connection(new OpenSoundControlConnection(ip, port))
 {
     addProperty(_enabled);

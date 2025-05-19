@@ -44,7 +44,7 @@ namespace {
     }
 
     openspace::NodesTelemetry* nodesTelemetry =
-        reinterpret_cast<openspace::NodesTelemetry*>(ptr);
+        dynamic_cast<openspace::NodesTelemetry*>(ptr);
 
     for (const std::string_view& k : nodes.keys()) {
         std::string node = nodes.value<std::string>(k);

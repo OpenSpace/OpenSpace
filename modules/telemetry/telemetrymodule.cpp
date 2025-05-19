@@ -43,8 +43,6 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr std::string_view _loggerCat = "TelemetryModule";
-
     // The default Open Sound Control receiver is SuperCollider with these default values.
     // However, the user can define any receiver in the openspace.cfg file as the
     // ModuleConfiguration for the Telemetry module.

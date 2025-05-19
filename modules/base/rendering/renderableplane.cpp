@@ -238,12 +238,12 @@ RenderablePlane::DistanceScalingSettings::DistanceScalingSettings(
 RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary, { .automaticallyUpdateRenderBin = false })
     , _blendMode(BlendModeInfo)
-    , _distanceScalingSettings(dictionary)
     , _renderOption(OrientationRenderOptionInfo)
     , _mirrorBackside(MirrorBacksideInfo, false)
     , _size(SizeInfo, glm::vec2(10.f), glm::vec2(0.f), glm::vec2(1e25f))
     , _autoScale(AutoScaleInfo, false)
     , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _distanceScalingSettings(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

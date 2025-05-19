@@ -28,8 +28,6 @@
 #include <openspace/util/memorymanager.h>
 
 namespace {
-    constexpr std::string_view _loggerCat = "PlanetsOverviewSonification";
-
     // Indices for data items
     constexpr int NumDataItems = 1;
     constexpr int GuiSettingsIndex = 0;
