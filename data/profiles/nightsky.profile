@@ -65,6 +65,9 @@
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
+  "panel_visibility": {
+    "nightSky": true
+  },
   "properties": [
     {
       "name": "{earth_satellites}.Renderable.Enabled",
