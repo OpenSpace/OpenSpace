@@ -122,7 +122,7 @@ void schwarzschild(std::vector<float> const& envmap_r_values, size_t const num_r
     solveGeodesicKernel << <numBlocks, threadsPerBlock >> > (u_0, h, d_envmap_r_values, envmap_r_values.size(), num_rays, num_steps, d_angle_values);
     cudaDeviceSynchronize();
 
-    angle_out.resize(num_rays * outValuesPerRay, std::numeric_limits<float>::quiet_NaN());
+    angle_out.resize(num_rays * outValuesPerRay);
     cudaMemcpy(angle_out.data(), d_angle_values, num_rays * outValuesPerRay * sizeof(float), cudaMemcpyDeviceToHost);
 
     cudaFree(d_envmap_r_values);

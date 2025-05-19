@@ -1,14 +1,21 @@
 #ifndef __OPENSPACE_MODULE_BLACKHOLE___RENDERABLECANVAS___H__
 #define __OPENSPACE_MODULE_BLACKHOLE___RENDERABLECANVAS___H__
 
-#include <openspace/rendering/renderable.h>
-#include <modules/blackhole/rendering/viewport.h>
+#include <ghoul/opengl/bufferbinding.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/opengl/bufferbinding.h>
-#include <openspace/properties/scalar/floatproperty.h>
+
+#include <openspace/rendering/renderable.h>
+
 #include <openspace/properties/list/doublelistproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+
+#include <modules/blackhole/rendering/viewport.h>
 #include <modules/blackhole/rendering/kdtree.h>
+
+
+
 
 namespace openspace {
 
@@ -48,7 +55,7 @@ namespace openspace {
         glm::dvec3 _chachedTranslation{};
         glm::dvec3 _chacedCameraPos{};
         static constexpr size_t _rayCount{ 250 };
-        static constexpr size_t _rayCountHighRes{ 1500 };
+        static constexpr size_t _rayCountHighRes{ 500 };
         static constexpr size_t _stepsCount = 100000;
         static constexpr float _stepLength = 0.0001f;
         static constexpr size_t _mapCount = 3;
@@ -57,6 +64,12 @@ namespace openspace {
         properties::FloatProperty _kerrRotation;
         properties::StringProperty _colorBVMapTexturePath;
         properties::DoubleListProperty _starMapRanges;
+        properties::OptionProperty _blackholeType;
+
+        enum class BlackHoleType{
+            schwarzschild,
+            kerr
+        };
 
         struct LayerLayout {
             std::vector<std::pair<float, float>> ranges;
@@ -72,6 +85,15 @@ namespace openspace {
 
         LayerLayout _layerLayout{};
 
+        struct BlackHoleShaderConfig {
+            std::string shaderName;
+            std::string programName;
+        };
+
+        inline static const std::unordered_map<BlackHoleType, BlackHoleShaderConfig> BlackHoleShaderConfigs {
+            { BlackHoleType::kerr,         { "kerr", "KerrBlackHoleProgram" } },
+            { BlackHoleType::schwarzschild, { "schwarzschild", "BlackHoleProgram" } }
+        };
 
         float _rs = 1.0f;
         float _rEnvmap = 60.0f;

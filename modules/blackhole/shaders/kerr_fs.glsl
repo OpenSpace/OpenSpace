@@ -169,6 +169,10 @@ Fragment getFragment() {
     Fragment frag;
 
     layerCount = starMapKDTreesIndices.length();
+    if(schwarzschildWarpTable.length() == 0){
+        frag.color = vec4(0.0f);
+        return frag;
+    }
     num_rays_per_dim = int(sqrt(schwarzschildWarpTable.length() / ((layerCount + 1) * 2)));
 
     vec4 viewCoords = normalize(vec4(texture(viewGrid, TexCoord).xy, VIEWGRIDZ, 0.0f));
@@ -183,7 +187,7 @@ Fragment getFragment() {
         sphericalCoords = cartesianToSpherical(rotatedViewCoords.xyz);
         sphericalCoords = applyBlackHoleWarp(sphericalCoords, l);
 
-        if (sphericalCoords == vec2(HORIZION)) {
+        if (isnan(sphericalCoords.x)) {
             frag.color = vec4(0.0f);
             return frag;
         } else if(sphericalCoords.x == DISK){

@@ -61,7 +61,7 @@ vec3 sphericalToCartesian(float theta, float phi){
 
 vec2 sphericalToUV(vec2 sphereCoords){
     float u = sphereCoords.y / (2.0f * PI) + 0.5f;
-    float v = mod(sphereCoords.x, PI) / PI;
+    float v = sphereCoords.x / PI;
     
     return vec2(u, v);
 }
@@ -127,7 +127,6 @@ vec2 applyBlackHoleWarp(vec2 cameraOutSphereCoords, int layer){
     return vec2(theta, phi);
 }
 
-
 /**********************************************************
                         Fragment shader
 ***********************************************************/
@@ -137,7 +136,6 @@ Fragment getFragment() {
     layerCount = starMapKDTreesIndices.length();
     tableSize = schwarzschildWarpTable.length() / 2;
     num_rays = schwarzschildWarpTable.length() / (layerCount + 1);
-
 
     vec4 viewCoords = normalize(vec4(texture(viewGrid, TexCoord).xy, VIEWGRIDZ, 0.0f));
 
@@ -170,7 +168,7 @@ Fragment getFragment() {
         vec4 starColor = searchNearestStar(vec3(0.0f, sphericalCoords.x, sphericalCoords.y), l);
 
         if (starColor.a > 0.0) {
-            float layerWeight = exp(-0.5 * l);  // Earlier layers have more weight
+            float layerWeight = 1;  // Earlier layers have more weight
 
             // Blend using weighted alpha blending
             accumulatedColor.rgb = (accumulatedColor.rgb * accumulatedWeight + starColor.rgb * starColor.a * layerWeight) / (accumulatedWeight + starColor.a * layerWeight);

@@ -1,10 +1,7 @@
-#include "kerr.h"
+#include <modules/blackhole/cuda/kerr.h>
 #include <cuda_runtime.h>
-#include "device_launch_parameters.h"
-#include "vector_functions.h"
-#include <cmath>
-#include <cstdio>
-#include <vector>
+#include <device_launch_parameters.h>
+#include <vector_functions.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846f
@@ -379,9 +376,8 @@ __global__ void simulateRayKernel(float3 pos, size_t num_rays_per_dim, float* lo
 // It accepts the number of rays, number of integration steps, and an array
 // of initial conditions (size: num_rays * 6). It outputs the trajectory data
 // (num_rays * num_steps * 5 float values) and the number of steps for each ray.
-void kerr(float x, float y, float z, float rs, float kerr, std::vector<float> env_r_values, size_t num_rays_per_dim, size_t num_steps, std::vector<float>& lookup_table_host) {
+void traceKerr(glm::vec3 position, float rs, float kerr, std::vector<float> env_r_values, size_t num_rays_per_dim, size_t num_steps, std::vector<float>& lookup_table_host) {
     // Calculate sizes for memory allocation.
-
     unsigned int const layers = env_r_values.size();
     size_t output_size = (layers + 1) * 2;
     size_t num_rays = num_rays_per_dim * num_rays_per_dim;
@@ -406,7 +402,7 @@ void kerr(float x, float y, float z, float rs, float kerr, std::vector<float> en
     int blocks = (int)((num_rays + threadsPerBlock - 1) / threadsPerBlock);
 
     // Launch the simulation kernel.
-    simulateRayKernel << <blocks, threadsPerBlock >> > (make_float3(x, -z, y), num_rays_per_dim, d_lookup_table);
+    simulateRayKernel << <blocks, threadsPerBlock >> > (make_float3(position.x, -position.z, position.y), num_rays_per_dim, d_lookup_table);
     cudaDeviceSynchronize();
 
     // Copy the results back to host.
