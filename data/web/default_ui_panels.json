@@ -1,82 +1,110 @@
 {
-    "0": {
-        "name": "Scene",
-        "id": "scene",
-        "visible": true
-    },
-    "1": {
-        "name": "Settings",
-        "id": "settings",
-        "visible": false
-    },
-    "2": {
-        "name": "Navigation",
-        "id": "navigation",
-        "visible": true
-    },
-    "3": {
-        "name": "Time Panel",
-        "id": "timePanel",
-        "visible": true
-    },
-    "4": {
-        "name": "Session Recording",
-        "id": "sessionRecording",
-        "visible": true
-    },
-    "5": {
-        "name": "Geo Location",
-        "id": "geoLocation",
-        "visible": true
-    },
-    "6": {
-        "name": "Screenspace Renderables",
-        "id": "screenSpaceRenderables",
-        "visible": true
-    },
-    "7": {
-        "name": "Exoplanets",
-        "id": "exoplanets",
-        "visible": true
-    },
-    "8": {
-        "name": "User Panels",
-        "id": "userPanels",
-        "visible": true
-    },
-    "9": {
-        "name": "Actions",
-        "id": "actions",
-        "visible": true
-    },
-    "10": {
-        "name": "SkyBrowser",
-        "id": "skyBrowser",
-        "visible": true
-    },
-    "11": {
-        "name": "Mission",
-        "id": "mission",
-        "visible": false
-    },
-    "12": {
-        "name": "Flight Control",
-        "id": "flightControl",
-        "visible": true
-    },
-    "13": {
-        "name": "Keybindings Layout",
-        "id": "keybindingsLayout",
-        "visible": false
-    },
-    "14": {
-        "name": "Getting Started Tour",
-        "id": "gettingStartedTour",
-        "visible": true
-    },
-    "15": {
-        "name": "Script Log",
-        "id": "scriptLogPanel",
-        "visible": false
-    }
+  "0": {
+    "id": "scene",
+    "visible": true,
+    "name": "Scene",
+    "isOpen": false
+  },
+  "1": {
+    "id": "settings",
+    "visible": false,
+    "name": "Settings",
+    "isOpen": false
+  },
+  "2": {
+    "id": "navigation",
+    "visible": true,
+    "name": "Navigation",
+    "isOpen": false
+  },
+  "3": {
+    "id": "timePanel",
+    "visible": true,
+    "name": "Time Panel",
+    "isOpen": false
+  },
+  "4": {
+    "id": "sessionRecording",
+    "visible": true,
+    "name": "Session Recording",
+    "isOpen": false
+  },
+  "5": {
+    "id": "geoLocation",
+    "visible": true,
+    "name": "Geo Location",
+    "isOpen": false
+  },
+  "6": {
+    "id": "screenSpaceRenderables",
+    "visible": true,
+    "name": "Screenspace Renderables",
+    "isOpen": false
+  },
+  "7": {
+    "id": "exoplanets",
+    "visible": true,
+    "name": "Exoplanets",
+    "isOpen": false
+  },
+  "8": {
+    "id": "userPanels",
+    "visible": true,
+    "name": "User Panels",
+    "isOpen": false
+  },
+  "9": {
+    "id": "actions",
+    "visible": true,
+    "name": "Actions",
+    "isOpen": false
+  },
+  "10": {
+    "id": "skyBrowser",
+    "visible": true,
+    "name": "SkyBrowser",
+    "isOpen": false
+  },
+  "11": {
+    "id": "mission",
+    "visible": false,
+    "name": "Mission",
+    "isOpen": false
+  },
+  "12": {
+    "id": "flightControl",
+    "visible": true,
+    "name": "Flight Control",
+    "isOpen": false
+  },
+  "13": {
+    "id": "keybindingsLayout",
+    "visible": false,
+    "name": "Keybinds",
+    "isOpen": false
+  },
+  "14": {
+    "id": "nightSky",
+    "visible": false,
+    "name": "Night Sky",
+    "isOpen": false
+  },
+  "15": {
+    "id": "gettingStartedTour",
+    "visible": true,
+    "name": "Getting Started Tour",
+    "isOpen": false
+  },
+  "16": {
+    "id": "scriptLogPanel",
+    "visible": false,
+    "name": "Script Log",
+    "isOpen": false
+  },
+  "17": {
+    "id": "devPanel",
+    "visible": false,
+    "name": "Dev Panel",
+    "isOpen": false
+  }
 }
