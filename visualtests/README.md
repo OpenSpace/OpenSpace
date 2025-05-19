@@ -1,7 +1,13 @@
 # Visual Test Specification
 All `.ostest` files in these folders specify visual image tests that are automatically run to ensure that changes in OpenSpace do not negatively impact the rendered results. The test results are available at https://regression.openspaceproject.com.
 
-The files are organized in folders, where the folder name is used as the "group" name for the tests within, and the filename of each test (without the `.ostest` extension) is used as the name of the test. In general, the top-level folder should name a profile or a specific use case that is tested by the files within, such as testing all renderables. Additional subfolders can be used within each top-level folder.
+The files are organized in folders, where the folder name is used as the "group" name for the tests within, and the filename of each test (without the `.ostest` extension) is used as the name of the test. The top-level folders are predetermined based on what the tests will be used for:
+  - `documentation`: Files that generate images used for the [documentation page](https://docs.openspaceproject.com)
+  - `profiles`: Integration test files that verify individual views for the different profiles
+  - `example`: Tests using the individual example asset files from the data/assets folder
+  - `misc`: Other tests that are testing various pieces of the rendering
+
+Top-level folders should generally only be sparingly added. Each folder can contain additional subfolders.
 
 ## Test Structure
 Each test must have a `screenshot` instruction as the **last** entry, which causes an image to be created that is used as the result of the test. Only exactly one `screenshot` instruction per test is currently supported. Each `.ostest` file is a JSON file with two top-level keys: `profile` provides the name of the profile that should be loaded before running these test instructions, and `commands` is a list of instructions that should be executed after the profile is loaded. All instructions must have a `type` and `value` key to determine which type of instruction it is and the parameters for that instruction.
