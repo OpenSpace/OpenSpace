@@ -49,8 +49,9 @@ local WSA_54_Magnetic_Field_GONGZ_5_Rs = {
   GUI = {
     Name = "Magnetic Field at 5Rs (GONG-Z)",
     Path = "/Solar System/Heliosphere/WSA Coronal Model",
-    Description = [[Texture sequence of simulation model WSA 5.4. Output: FITS files using GONG-Z Map
-      (RADOUT =  5.0). Dynamically downloaded.]]
+    Description = [[Texture sequence of simulation model WSA 5.4, showing the coronal
+      magnetic field on a sphere at 5 solar radii. Output: FITS files using GONG-Z Maps
+      (RADOUT =  5.0).]]
   }
 }
 
@@ -80,7 +81,8 @@ local WSA_54_Magnetic_Field_ADAPT_5_Rs = {
   GUI = {
     Name = "Magnetic Field at 5Rs (GONG ADAPT)",
     Path = "/Solar System/Heliosphere/WSA Coronal Model",
-    Description = [[Texture sequence of simulation model WSA 5.4. Output: FITS file using
+    Description = [[Texture sequence of simulation model WSA 5.4, showing the coronal
+      magnetic field on a sphere at 5 solar radii. Output: FITS file using
       ADAPT GONG realization 000 to 011 Maps (RADOUT =  5.0).]]
   }
 }
@@ -122,8 +124,9 @@ local WSA_54_Magnetograms_GONGZ = {
   GUI = {
     Name = "Solar Surface (GONG-Z)",
     Path = "/Solar System/Heliosphere/WSA Coronal Model",
-    Description = [[Texture sequence of simulation model WSA 5.4. Output: FITS files using GONG-Z Map
-      (RADOUT =  5.0). Dynamically downloaded.]]
+    Description = [[Texture sequence of simulation model WSA 5.4, showing data on the
+      solar surface with multiple options in the list under Texture Layer Options. Output:
+      FITS files using GONG-Z Maps (RADOUT =  5.0).]]
   }
 }
 
@@ -164,8 +167,9 @@ local WSA_54_Magnetograms_ADAPT = {
   GUI = {
     Name = "Solar Surface (GONG ADAPT)",
     Path = "/Solar System/Heliosphere/WSA Coronal Model",
-    Description = [[Texture sequence of simulation model WSA 5.4. Output: FITS file using
-      ADAPT GONG realization 000 to 011 Maps (RADOUT =  5.0).]]
+    Description = [[Texture sequence of simulation model WSA 5.4, showing data on the
+      solar surface with multiple options in the list under Texture Layer Options. Output:
+      FITS file using ADAPT GONG realization 000 to 011 Maps (RADOUT =  5.0).]]
   }
 }
 
@@ -196,8 +200,10 @@ local WSA_Velocity_Adapt_Outer_Boundary = {
   GUI = {
     Name = "Velocity at Outer Boundary (GONG-ADAPT)",
     Path = "/Solar System/Heliosphere/WSA Coronal Model",
-    Description = [[Texture sequence of simulation model WSA 5.4. Output: FITS file using ADAPT
-      GONG realization 000-011 Maps (RADOUT =  21.5).]]
+    Description = [[Texture sequence of simulation model WSA 5.4, showing data on a sphere
+      at the outer boundary of the simulation model, either solar wind speed or coronal
+      magnetic field. Output: FITS file using ADAPT GONG realization 000-011 Maps
+      (RADOUT =  21.5).]]
   }
 }
 
@@ -228,8 +234,9 @@ local WSA_Velocity_Gongz_Outer_Boundary = {
   GUI = {
     Name = "Velocity at Outer Boundary (GONG-Z)",
     Path = "/Solar System/Heliosphere/WSA Coronal Model",
-    Description = [[Texture sequence of simulation model WSA 5.4. Output: FITS file using GONG-Z
-      Map (RADOUT =  21.5).]]
+    Description = [[Texture sequence of simulation model WSA 5.4, showing data on a sphere
+      at the outer boundary of the simulation model, either solar wind speed or coronal
+      magnetic field. Output: FITS file using GONG-Z Maps (RADOUT =  21.5).]]
   }
 }
 

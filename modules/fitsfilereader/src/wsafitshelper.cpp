@@ -124,7 +124,7 @@ void readFitsHeader(const std::filesystem::path& path) {
 
     std::string val;
     pHDU.readKey("CARRLONG", val);
-    std::cout << "CARRLONG: " << val << std::endl;
+    //std::cout << "CARRLONG: " << val << std::endl;
 
     //for (const auto& [name, keyWord] : keyNames) {
     //    try {

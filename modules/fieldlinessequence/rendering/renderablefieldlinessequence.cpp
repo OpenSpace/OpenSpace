@@ -690,12 +690,6 @@ void RenderableFieldlinesSequence::staticallyLoadFiles(
 
 void RenderableFieldlinesSequence::initialize() {
     _isfirstLoad = true;
-    if (_loadingType == LoadingType::DynamicDownloading) {
-        const std::string& identifier = parent()->identifier();
-        _dynamicFileDownloader = std::make_unique<DynamicFileSequenceDownloader>(
-            _dataID, identifier, _infoURL, _dataURL, _nFilesToQueue
-        );
-    }
 }
 
 void RenderableFieldlinesSequence::initializeGL() {
@@ -996,21 +990,6 @@ void RenderableFieldlinesSequence::firstUpdate() {
     _shouldUpdateColorBuffer = true;
     _shouldUpdateMaskingBuffer = true;
 
-    if (!_havePrintedQuantityRange && !quantities.empty()) {
-        for (int i = 0; i < extraNamesVec.size(); ++i) {
-            //if not given range, use min and max of data?
-            std::vector<float> q = quantities[i];
-            float minNr = *std::min_element(q.begin(), q.end());
-            std::string min = std::to_string(minNr);
-            float maxNr = *std::max_element(q.begin(), q.end());
-            std::string max = std::to_string(maxNr);
-            LINFO(std::format("min :{}", min));
-            LINFO(std::format("max :{}", max));
-            std::string name = extraNamesVec[i];
-            LINFO(std::format("name:{}", name));
-        }
-        _havePrintedQuantityRange = true;
-    }
     _isfirstLoad = false;
 }
 
@@ -1022,6 +1001,12 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     const double deltaTime = global::timeManager->deltaTime();
 
     if (_loadingType == LoadingType::DynamicDownloading) {
+        if (!_dynamicFileDownloader) {
+            const std::string& identifier = parent()->identifier();
+            _dynamicFileDownloader = std::make_unique<DynamicFileSequenceDownloader>(
+                _dataID, identifier, _infoURL, _dataURL, _nFilesToQueue
+            );
+        }
         updateDynamicDownloading(currentTime, deltaTime);
         computeSequenceEndTime();
     }

@@ -118,14 +118,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FitsLayerInfo = {
         "FitsLayer",
-        "Surface Layer",
+        "Texture Layer",
         "This value specifies which index in the fits file to use as texture.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FitsLayerNameInfo = {
         "LayerNames",
-        "Surface Layer Options",
+        "Texture Layer Options",
         "This value specifies which name of the fits layer to use as texture.",
         openspace::properties::Property::Visibility::User
     };
@@ -281,9 +281,6 @@ namespace openspace {
                         file->texture->uploadTexture();
                         file->texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
                     }
-                    if (_fitsLayerName == 0) {
-                        _size = _size * 5;
-                    }
                     loadTexture();
                 }
             }
@@ -361,12 +358,7 @@ namespace openspace {
     }
 
     void RenderableTimeVaryingFitsSphere::initialize() {
-        if (_loadingType == LoadingType::DynamicDownloading) {
-            const std::string& identifier = parent()->identifier();
-            _dynamicFileDownloader = std::make_unique<DynamicFileSequenceDownloader>(
-                _dataID, identifier, _infoURL, _dataURL, _nFilesToQueue
-            );
-        }
+
     }
 
     void RenderableTimeVaryingFitsSphere::initializeGL() {
@@ -538,6 +530,12 @@ namespace openspace {
         const double currentTime = data.time.j2000Seconds();
         const double deltaTime = global::timeManager->deltaTime();
 
+        if (!_dynamicFileDownloader && _loadingType == LoadingType::DynamicDownloading) {
+            const std::string& identifier = parent()->identifier();
+            _dynamicFileDownloader = std::make_unique<DynamicFileSequenceDownloader>(
+                _dataID, identifier, _infoURL, _dataURL, _nFilesToQueue
+            );
+        }
         if (_loadingType == LoadingType::DynamicDownloading) {
             updateDynamicDownloading(currentTime, deltaTime);
         }
@@ -575,7 +573,7 @@ namespace openspace {
                 loadTexture();
             }
         }
-        if (!_firstUpdate && _useColorMap) {
+        if (!_firstUpdate && _useColorMap && !_files.empty()) {
             _dataMinMaxValues = _files[_activeTriggerTimeIndex].dataMinMax;
         }
         if (_textureIsDirty) [[unlikely]] {

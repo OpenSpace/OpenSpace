@@ -12,7 +12,7 @@ local Mission = {
     the magnetic fields but traced from different locations. They can be colored by their
     different parameters in the data, for example polarity or open or closed field lines.
     The two elements named "Solar Surface" show the magnetic polarities, but have other
-    options in the settings under "Surface Layer Options". Each asset includes settings
+    options in the settings under "Texture Layer Options". Each asset includes settings
     for appearance, as well as an option to save the downloaded data for future use
     (by default, the data is not cached). Each data file remains active until the next
     one in the sequence becomes available. To see which file is currently being used,
