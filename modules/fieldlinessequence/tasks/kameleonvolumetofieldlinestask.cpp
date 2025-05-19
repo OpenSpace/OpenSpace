@@ -149,37 +149,39 @@ void KameleonVolumeToFieldlinesTask::perform(
 
     size_t fileNumber = 0;
     for (const std::string& cdfPath : _sourceFiles) {
-        if (fileNumber % _nthTimeStep == 0) {
-            FieldlinesState newState;
-            bool isSuccessful = fls::convertCdfToFieldlinesState(
-                newState,
-                cdfPath,
-                seedPoints,
-                _manualTimeOffset,
-                _tracingVar,
-                _scalarVars,
-                extraMagVars
-            );
+        if (fileNumber % _nthTimeStep != 0) {
+            continue;
+        }
 
-            if (isSuccessful) {
-                switch (_outputType) {
-                    case OutputType::Osfls:
-                        newState.saveStateToOsfls(_outputFolder.string());
-                        break;
-                    case OutputType::Json:
-                        std::string timeStr =
-                            std::string(Time(newState.triggerTime()).ISO8601());
-                        timeStr.replace(13, 1, "-");
-                        timeStr.replace(16, 1, "-");
-                        timeStr.replace(19, 1, "-");
-                        std::string fileName = timeStr;
-                        newState.saveStateToJson(_outputFolder.string() + fileName);
-                        break;
-                }
+        FieldlinesState newState;
+        bool isSuccessful = fls::convertCdfToFieldlinesState(
+            newState,
+            cdfPath,
+            seedPoints,
+            _manualTimeOffset,
+            _tracingVar,
+            _scalarVars,
+            extraMagVars
+        );
+        if (isSuccessful) {
+            switch (_outputType) {
+            case OutputType::Osfls:
+                newState.saveStateToOsfls(_outputFolder.string());
+                break;
+            case OutputType::Json:
+                std::string timeStr =
+                    std::string(Time(newState.triggerTime()).ISO8601());
+                timeStr.replace(13, 1, "-");
+                timeStr.replace(16, 1, "-");
+                timeStr.replace(19, 1, "-");
+                std::string fileName = timeStr;
+                newState.saveStateToJson(_outputFolder.string() + fileName);
+                break;
             }
         }
         ++fileNumber;
     }
+
     // Ideally, we would want to signal about progress earlier as well, but
     // convertCdfToFieldlinesState does all the work encapsulated in one function call.
     progressCallback(1.f);

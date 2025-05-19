@@ -47,11 +47,13 @@ public:
         DynamicLoading,
         DynamicDownloading
     };
+
     enum class SourceFileType {
         Cdf,
         Json,
         Osfls
     };
+
     // Used to determine if lines should be colored uniformly or by a some data variable
     enum class ColorMethod {
         Uniform,

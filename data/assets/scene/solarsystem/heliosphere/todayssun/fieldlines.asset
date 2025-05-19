@@ -20,7 +20,6 @@ local dataURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/F
 
 local sunRadius = 695700000
 
-
 local fieldlinesSCS = {
   Identifier = "WSA_54_Fieldlines_SCS_OI",
   Parent = transforms.WSAOffset60.Identifier,
@@ -47,7 +46,7 @@ local fieldlinesSCS = {
     },
     ColorTableRanges = {
       { -1.0, 1.0 },
-      { 0.0, 1.0 },
+      { 0.0, 1.0 }
     }
   },
   GUI = {
@@ -84,7 +83,7 @@ local fieldlinesOI = {
     },
     ColorTableRanges = {
       { -1.0, 1.0 },
-      { 0.0, 1.0 },
+      { 0.0, 1.0 }
     },
   },
   GUI = {

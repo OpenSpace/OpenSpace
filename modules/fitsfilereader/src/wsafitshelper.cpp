@@ -54,10 +54,10 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
             readImageInternal<float>(file->pHDU());
         int layerSize = fitsValues->width * fitsValues->height;
 
-        int nLayers = fitsValues->contents.size() / layerSize;
+        int nLayers = static_cast<int>(fitsValues->contents.size()) / layerSize;
         if (layerIndex > nLayers -1) {
             LERROR(
-                "Chosen layer in fits file is not supported. Index to high. ",
+                "Chosen layer in fits file is not supported. Index to high. "
                 "First layer chosen instead"
             );
             layerIndex = 0;
@@ -70,7 +70,8 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         std::vector<glm::vec3> rgbLayers;
         for (size_t i = 0; i < layerValues.size(); i++) {
             // normalization
-            float normalizedValue = (layerValues[i] - minMax.first) / (minMax.second - minMax.first);
+            float normalizedValue =
+                (layerValues[i] - minMax.first) / (minMax.second - minMax.first);
             // clamping causes overexposure above and below max and min values
             // intentionally as desired by Nick Arge from WSA
             normalizedValue = std::clamp(normalizedValue, 0.f, 1.f);
@@ -120,22 +121,8 @@ void readFitsHeader(const std::filesystem::path& path) {
         std::make_unique<CCfits::FITS>(path.string(), CCfits::Read, true);
     CCfits::PHDU& pHDU = file->pHDU();
     pHDU.readAllKeys();
-    const std::map<CCfits::String, CCfits::Keyword*>& keyNames = pHDU.keyWord();
-
     std::string val;
     pHDU.readKey("CARRLONG", val);
-    //std::cout << "CARRLONG: " << val << std::endl;
-
-    //for (const auto& [name, keyWord] : keyNames) {
-    //    try {
-    //        std::string val;
-    //        keyWord->value(val);
-    //        std::cout << name << " = " << val << std::endl;
-    //    }
-    //    catch (const CCfits::FitsException& e) {
-    //        std::cerr << "Could not read value for key: " << name << " (" << e.message() << ")" << std::endl;
-    //    }
-    //}
 }
 
 int nLayers(const std::filesystem::path& path) {
@@ -150,22 +137,26 @@ int nLayers(const std::filesystem::path& path) {
             readImageInternal<float>(file->pHDU());
         int layerSize = fitsValues->width * fitsValues->height;
 
-        return fitsValues->contents.size() / layerSize;
+        return static_cast<int>(fitsValues->contents.size() / layerSize);
     }
     catch (CCfits::FitsException& e) {
         LERROR(std::format(
             "Failed to open fits file '{}'. '{}'", path, e.message()
         ));
+        return 0;
     }
     catch (std::exception& e) {
         LERROR(std::format(
             "Failed to open fits file '{}'. '{}'", path, e.what()
         ));
+        return 0;
+
     }
     catch (...) {
         LERROR(std::format(
             "Unknown exception caught for file '{}'", path
         ));
+        return 0;
     }
 }
 
@@ -181,8 +172,8 @@ std::shared_ptr<ImageData<T>> readImageInternal(U& image) {
         };
         return std::make_shared<ImageData<T>>(im);
     }
-    catch (const FitsException& e) {
-        LERROR("Could not read FITS layer");
+    catch (CCfits::FitsException& e) {
+        LERROR(std::format("Could not read FITS layer, error: '{}'", e));
     }
     return nullptr;
 }

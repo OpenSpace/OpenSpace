@@ -24,7 +24,7 @@
 
 #include <modules/fitsfilereader/fitsfilereadermodule.h>
 
-#include <modules/fitsfilereader/rendering/renderabletimevaryingfitssphere.h>
+#include <modules/fitsfilereader/include/renderabletimevaryingfitssphere.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/templatefactory.h>
@@ -42,7 +42,8 @@ void FitsFileReaderModule::internalInitialize(const ghoul::Dictionary&) {
 
 std::vector<documentation::Documentation> FitsFileReaderModule::documentations() const {
     return {
-        FitsFileReaderModule::Documentation()
+        FitsFileReaderModule::Documentation(),
+        RenderableTimeVaryingFitsSphere::Documentation()
     };
 }
 

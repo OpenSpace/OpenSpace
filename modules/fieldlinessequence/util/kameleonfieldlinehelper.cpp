@@ -275,9 +275,9 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
         );
         const std::vector<ccmc::Point3f>& positions = ccmcFieldline.getPositions();
 
-        if ((positions[0].component3 < 0.5 && positions[0].component3 > -0.5) &&
-            (positions[positions.size() - 1].component3 < 0.5 &&
-            positions[positions.size() - 1].component3 > -0.5))
+        if ((positions[0].component3 < 0.5f && positions[0].component3 > -0.5f) &&
+            (positions[positions.size() - 1].component3 < 0.5f &&
+                positions[positions.size() - 1].component3 > -0.5f))
         {
             const size_t nLinePoints = positions.size();
 

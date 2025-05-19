@@ -4,12 +4,12 @@ local ToggleWhiteBackground = {
   Command = [[
     if openspace.propertyValue("Scene.WhiteBackground_sphere.Renderable.Enabled") then
       openspace.fadeOut("Scene.WhiteBackground_sphere.Renderable")
-      openspace.fadeOut("Scene.Stars.Renderable")
+      openspace.fadeIn("Scene.Stars.Renderable")
       openspace.setPropertyValue("Scene.WSA_54_Fieldlines*.Renderable.ABlendingEnabled", true)
     else
       openspace.fadeIn("Scene.WhiteBackground_sphere.Renderable")
-      openspace.fadeIn("Scene.Stars.Renderable")
-      openspace.setPropertyValue("Scene.WSA*.Renderable.ABlendingEnabled", false)
+      openspace.fadeOut("Scene.Stars.Renderable")
+      openspace.setPropertyValue("Scene.WSA_54_Fieldlines*.Renderable.ABlendingEnabled", false)
     end
   ]],
   Documentation = [[This toggles a white sphere, the stars, and the additive blending of

@@ -85,16 +85,17 @@ std::string buildDataHttpRequest(double minTime, double maxTime, int dataID,
 
 DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
                                                              const std::string identifier,
-                                                                      std::string infoURL,
-                                                                      std::string dataURL,
-                                                                   size_t nOfFilesToQueue)
+                                                             std::string infoURL,
+                                                             std::string dataURL,
+                                                             size_t nOfFilesToQueue)
     : _dataID(dataID)
     , _infoURL(std::move(infoURL))
     , _dataURL(std::move(dataURL))
     , _nFilesToQueue(nOfFilesToQueue)
 {
-    _syncDir = absPath("${SYNC}/dynamically_downloaded/" + std::to_string(dataID) +
-        + "/" + identifier);
+    _syncDir = absPath(
+        std::format("${{SYNC}}/dynamically_downloaded/{}/{}", dataID, identifier)
+    );
 
     std::filesystem::path syncFile = _syncDir / std::format("{}.synced", dataID);
     _trackSynced = syncFile;
@@ -427,10 +428,7 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
             LERROR(std::format("File '{}' failed to download. Removing file", file->URL));
             std::string filename;
             size_t lastSlash = file->URL.find_last_of('/');
-            if (lastSlash == std::string::npos || lastSlash + 1 >= file->URL.size()) {
-                filename = "";
-            }
-            else {
+            if (lastSlash != std::string::npos && lastSlash + 1 < file->URL.size()) {
                 filename = file->URL.substr(lastSlash + 1);
             }
 

@@ -215,41 +215,55 @@ namespace {
             Uniform,
             ByQuantity [[codegen::key("By Quantity")]]
         };
+
         // [[codegen::verbatim(ColorMethodInfo.description)]]
         std::optional<ColorMethod> colorMethod;
+
         // [[codegen::verbatim(ColorQuantityInfo.description)]]
         std::optional<int> colorQuantity;
+
         // [[codegen::verbatim(ColorUniformInfo.description)]]
         std::optional<glm::vec4> color [[codegen::color()]];
+
         // A list of paths to transferfunction .txt files containing color tables
         // used for colorizing the fieldlines according to different parameters
         std::optional<std::vector<std::filesystem::path>> colorTablePaths;
+
         // Ranges for which their corresponding parameters values will be
         // colorized by. Should be entered as min value, max value
         std::optional<std::vector<glm::vec2>> colorTableRanges;
+
         // Specifies the total range
         std::optional<glm::vec2> colorMinMaxRange;
 
         // [[codegen::verbatim(FlowEnabledInfo.description)]]
         std::optional<bool> flowEnabled;
+
         // [[codegen::verbatim(FlowColorInfo.description)]]
         std::optional<glm::vec4> flowColor [[codegen::color()]];
+
         // [[codegen::verbatim(FlowReversedInfo.description)]]
         std::optional<bool> reversedFlow;
+
         // [[codegen::verbatim(FlowParticleSizeInfo.description)]]
         std::optional<int> particleSize;
+
         // [[codegen::verbatim(FlowParticleSpacingInfo.description)]]
         std::optional<int> particleSpacing;
+
         // [[codegen::verbatim(FlowSpeedInfo.description)]]
         std::optional<int> flowSpeed;
 
         // [[codegen::verbatim(MaskingEnabledInfo.description)]]
         std::optional<bool> maskingEnabled;
+
         // [[codegen::verbatim(MaskingQuantityInfo.description)]]
         std::optional<int> maskingQuantity;
+
         // Ranges for which their corresponding quantity parameter value will be
         // masked by. Should be entered as {min value, max value}
         std::optional<std::vector<glm::vec2>> maskingRanges;
+
         // Ranges for which their corresponding parameters values will be
         // masked by. Should be entered as min value, max value
         std::optional<glm::vec2> maskingMinMaxRange;
@@ -295,14 +309,19 @@ namespace {
             StaticLoading,
             DynamicDownloading
         };
+
         // Decides whether to use static or dynamic data downloading.
         std::optional<LoadingType> loadingType;
-        // dataID that corresponds to what dataset to use if using dynamicWebContent
+
+        // A data ID that corresponds to what dataset to use if using dynamicWebContent
         std::optional<int> dataID;
+
         // Number Of Files To Queue is a max value of the amount of files to queue up
         // so that not too big of a data set is downloaded unnessesarily.
         std::optional<int> numberOfFilesToQueue;
+
         std::optional<std::string> infoURL;
+
         std::optional<std::string> dataURL;
 
         enum class [[codegen::map(openspace::RenderableFieldlinesSequence::SourceFileType)]]
@@ -311,18 +330,23 @@ namespace {
             Json,
             Osfls
         };
+
         // Specify file type: Cdf, Json or Osfls
         SourceFileType inputFileType;
 
         // Path to folder containing the input files
         std::optional<std::filesystem::path> sourceFolder [[codegen::directory()]];
+
         // Path to a .txt file containing seed points. Mandatory if CDF as input.
         // Files need time stamp in file name like so: yyyymmdd_hhmmss.txt
         std::optional<std::filesystem::path> seedPointDirectory [[codegen::directory()]];
+
         // Extra variables such as rho, p or t
         std::optional<std::vector<std::string>> extraVariables;
+
         // Which variable in CDF file to trace. b is default for fieldline
         std::optional<std::string> tracingVariable;
+
         // This is set to false by default and will delete all the downloaded content when
         // OpenSpace is shut down. Set to true to save all the downloaded files.
         std::optional<bool> cacheData;
@@ -410,7 +434,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     if (_loadingType == LoadingType::StaticLoading &&
         !p.sourceFolder.has_value()) {
         throw ghoul::RuntimeError(
-            "specify dynamic downloading parameters or a syncfolder"
+            "Either dynamic downloading parameters or a sync folder must be specified"
         );
     }
 

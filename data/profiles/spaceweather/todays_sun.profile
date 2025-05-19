@@ -45,23 +45,11 @@
     {
       "action": "os.solarsystem.ToggleSatelliteTrails",
       "key": "S"
-    },
-    {
-      "action": "os.solarsystem.FocusIss",
-      "key": "I"
-    },
-    {
-      "action": "os.solarsystem.FocusEarth",
-      "key": "HOME"
     }
   ],
   "mark_nodes": [
     "Sun",
-    "Earth",
-    "Mars",
-    "Moon",
-    "Venus",
-    "ISS"
+    "Earth"
   ],
   "meta": {
     "author": "OpenSpace Team",

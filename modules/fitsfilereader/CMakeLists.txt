@@ -28,7 +28,7 @@ set(HEADER_FILES
   fitsfilereadermodule.h
   include/fitsfilereader.h
   include/wsafitshelper.h
-  rendering/renderabletimevaryingfitssphere.h
+  include/renderabletimevaryingfitssphere.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -36,7 +36,7 @@ set(SOURCE_FILES
   fitsfilereadermodule.cpp
   src/fitsfilereader.cpp
   src/wsafitshelper.cpp
-  rendering/renderabletimevaryingfitssphere.cpp
+  src/renderabletimevaryingfitssphere.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

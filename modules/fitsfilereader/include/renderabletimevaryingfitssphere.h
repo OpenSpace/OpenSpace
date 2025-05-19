@@ -30,12 +30,10 @@
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/util/dynamicfilesequencedownloader.h>
 
-
 namespace openspace {
 
 struct RenderData;
 struct UpdateData;
-
 namespace documentation { struct Documentation; }
 
 class RenderableTimeVaryingFitsSphere : public RenderableSphere {
@@ -44,22 +42,18 @@ public:
         StaticLoading,
         DynamicDownloading
     };
-    enum class TextureFilter {
-        NearestNeighbor,
-        Linear
-    };
 
     explicit RenderableTimeVaryingFitsSphere(const ghoul::Dictionary& dictionary);
 
-    void initializeGL() override;
     void deinitializeGL() override;
-
-    bool isReady() const override;
 
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
     static documentation::Documentation Documentation();
+protected:
+    void bindTexture() override;
+private:
     struct File {
         enum class FileStatus {
             Downloaded,
@@ -70,15 +64,10 @@ public:
         double time = 0.0;
         std::unique_ptr<ghoul::opengl::Texture> texture;
         glm::vec2 dataMinMax = { 0.0, 1.0 };
-
         bool operator<(const File& other) const noexcept {
             return time < other.time;
         }
     };
-protected:
-    void bindTexture() override;
-
-private:
     void loadTexture();
     void trackOldest(File& file);
     void showCorrectFileName();

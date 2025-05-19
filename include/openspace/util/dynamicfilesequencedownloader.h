@@ -61,6 +61,7 @@ public:
     // that it will keep around during run time instead of the default of 100 files.
     DynamicFileSequenceDownloader(int dataID, const std::string identifier,
         const std::string infoURL, const std::string dataURL, size_t nOfFilesToQ);
+
     void deinitialize(bool cacheFiles);
     void requestDataInfo(std::string httpInfoRequest);
     void requestAvailableFiles(std::string httpDataRequest,

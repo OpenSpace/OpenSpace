@@ -33,8 +33,8 @@ local CarringtonPrimeMeridian = {
   GUI = {
     Name = "Carrington Prime Meridian",
     Path =  "/Solar System/Heliosphere",
-    Description = [[An arc showing the Carrington prime meridian of the Sun.]] ..
-      [[The line from pole to pole at 0 degree longitude.]]
+    Description = [[An arc showing the Carrington prime meridian of the Sun.
+      The line from pole to pole at 0 degree longitude.]]
   }
 }
 
@@ -89,6 +89,7 @@ local WSA_Grid10Degrees = {
       separation between line segments by default.]]
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(CarringtonPrimeMeridian)

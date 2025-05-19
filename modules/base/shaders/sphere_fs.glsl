@@ -51,8 +51,10 @@ Fragment getFragment() {
     float lookUpVal =
       (dataValue.x - dataMinMaxValues.x) /
       (dataMinMaxValues.y - dataMinMaxValues.x);
-    frag.color = vec4(texture(transferFunction,
-      lookUpVal).rgb, 1.0);
+    frag.color = vec4(
+        texture(transferFunction, lookUpVal).rgb,
+        1.0
+    );
   }
   else {
     frag.color = texture(colorTexture, texCoord);
