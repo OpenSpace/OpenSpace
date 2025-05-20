@@ -54,11 +54,11 @@ namespace openspace {
         std::unique_ptr<ghoul::opengl::ProgramObject> _cullProgram = nullptr;
         glm::dvec3 _chachedTranslation{};
         glm::dvec3 _chacedCameraPos{};
-        static constexpr size_t _rayCount{ 250 };
-        static constexpr size_t _rayCountHighRes{ 500 };
+        static constexpr size_t _rayCount{ 300 };
+        static constexpr size_t _rayCountHighRes{ 750 };
         static constexpr size_t _stepsCount = 100000;
         static constexpr float _stepLength = 0.0001f;
-        static constexpr size_t _mapCount = 3;
+        static constexpr size_t _mapCount = 5;
 
         properties::FloatProperty _solarMass;
         properties::FloatProperty _kerrRotation;
@@ -95,9 +95,9 @@ namespace openspace {
             { BlackHoleType::schwarzschild, { "schwarzschild", "BlackHoleProgram" } }
         };
 
-        float _rs = 1.0f;
-        float _rEnvmap = 60.0f;
-        float _rCamera = 20.0f;
+        float _rs;
+        float _rEnvmap;
+        float _rCamera;
 
         ViewPort _viewport{};
 

@@ -59,11 +59,11 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorTextureInfo = {
-    "ColorMap",
-    "Color Texture",
-    "The path to the texture that is used to convert from the magnitude of the star "
-    "to its color. The texture is used as a one dimensional lookup function.",
-    openspace::properties::Property::Visibility::AdvancedUser
+        "ColorMap",
+        "Color Texture",
+        "The path to the texture that is used to convert from the magnitude of the star "
+        "to its color. The texture is used as a one dimensional lookup function.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlackHoleTypeInfo = {
