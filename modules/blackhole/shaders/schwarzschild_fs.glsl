@@ -22,6 +22,13 @@ layout (std430) buffer ssbo_warp_table {
 const float PI = 3.1415926535897932384626433832795f;
 const float VIEWGRIDZ = -1.0f;
 
+const mat4 alignToWorldAxisRotation = mat4(
+    1.0, 0.0, 0.0, 0.0,
+    0.0, 0.0, 1.0, 0.0,
+    0.0, -1.0, 0.0, 0.0,
+    0.0, 0.0, 0.0, 1.0
+);
+
 int layerCount, tableSize, num_rays;
 
 /**********************************************************
@@ -38,36 +45,6 @@ float atan2(float a, float b){
     if (a < 0.0f) return -PI / 2.0f;
         
     return 0.0f;
-}
-
-/**********************************************************
-                   Init rotations
-***********************************************************/
-
-mat4 rotationToKerrPosition() {
-    float angle = -PI/2;
-    float c = cos(angle);
-    float s = sin(angle);
-
-    mat4 rotX = mat4(
-        1.0, 0.0, 0.0, 0.0,
-        0.0,   c,  -s,  0.0,
-        0.0,   s,   c,  0.0,
-        0.0, 0.0, 0.0, 1.0
-    );
-    mat4 rotY = mat4(
-        c,   0.0,  -s,   0.0,
-        0.0, 1.0,  0.0,  0.0,
-        s,   0.0,   c,   0.0,
-        0.0, 0.0,  0.0,  1.0
-    );
-    mat4 rotZ = mat4(
-        -c,   s, 0.0, 0.0,
-        -s,  -c, 0.0, 0.0,
-       0.0, 0.0, 1.0, 0.0,
-       0.0, 0.0, 0.0, 1.0
-    );
-     return rotY * rotX * rotZ;
 }
 
 /**********************************************************
@@ -192,8 +169,7 @@ Fragment getFragment() {
         vec4 envMapCoords = vec4(sphericalToCartesian(envMapSphericalCoords.x, envMapSphericalCoords.y), 0.0f);
 
         // User world input rotation of the black hole
-        envMapCoords = worldRotationMatrix * envMapCoords;
-        envMapCoords = rotationToKerrPosition() * envMapCoords;
+        envMapCoords = alignToWorldAxisRotation * worldRotationMatrix * envMapCoords;
 
         sphericalCoords = cartesianToSpherical(envMapCoords.xyz);
         vec4 starColor = searchNearestStar(vec3(0.0f, sphericalCoords.x, sphericalCoords.y), l);
