@@ -1,16 +1,16 @@
 {
   "assets": [
     "base_blank",
-    "blackholes/schwarzschild"
+    "blackholes/black_holes"
   ],
   "camera": {
     "aim": "",
-    "anchor": "schwarzschild",
+    "anchor": "black_hole",
     "frame": "",
     "position": {
       "x": 0,
       "y": 0,
-      "z": 0.4607304725808E15
+      "z": 0.2158505698E12
     },
     "type": "setNavigationState",
     "up": {
@@ -24,13 +24,13 @@
     1.0
   ],
   "mark_nodes": [
-    "schwarzschild"
+    "black_hole"
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "An profile, with a Schwarzchild Black Hole",
+    "description": "An profile, with a Schwarzchild and Kerr black hole",
     "license": "MIT License",
-    "name": "Schwarzchild",
+    "name": "Black hole",
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
