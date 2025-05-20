@@ -769,15 +769,18 @@ void RingsComponent::createPlane() {
         GLfloat y;
         GLfloat s;
         GLfloat t;
+        GLfloat nx;
+        GLfloat ny;
+        GLfloat nz;
     };
 
     const std::array<VertexData, 6> vertices = {
-        VertexData{ -size, -size, 0.f, 0.f },
-        VertexData{  size,  size, 1.f, 1.f },
-        VertexData{ -size,  size, 0.f, 1.f },
-        VertexData{ -size, -size, 0.f, 0.f },
-        VertexData{  size, -size, 1.f, 0.f },
-        VertexData{  size,  size, 1.f, 1.f },
+        VertexData{ -size, -size, 0.f, 0.f, 0.f, 0.f, 1.f },
+        VertexData{  size,  size, 1.f, 1.f, 0.f, 0.f, 1.f },
+        VertexData{ -size,  size, 0.f, 1.f, 0.f, 0.f, 1.f },
+        VertexData{ -size, -size, 0.f, 0.f, 0.f, 0.f, 1.f },
+        VertexData{  size, -size, 1.f, 0.f, 0.f, 0.f, 1.f },
+        VertexData{  size,  size, 1.f, 1.f, 0.f, 0.f, 1.f },
     };
 
     glBindVertexArray(_quad);
@@ -800,6 +803,15 @@ void RingsComponent::createPlane() {
         GL_FALSE,
         sizeof(VertexData),
         reinterpret_cast<void*>(offsetof(VertexData, s))
+    );
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(
+        2,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(VertexData),
+        reinterpret_cast<void*>(offsetof(VertexData, nx))
     );
 }
 
