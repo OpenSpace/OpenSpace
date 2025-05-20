@@ -24,6 +24,7 @@
 
 #include <modules/volume/rendering/renderabletimevaryingvolume.h>
 
+#include <modules/base/basemodule.h>
 #include <modules/volume/rendering/basicvolumeraycaster.h>
 #include <modules/volume/rendering/volumeclipplanes.h>
 #include <modules/volume/transferfunctionhandler.h>
@@ -44,7 +45,9 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <filesystem>
 #include <optional>
 
@@ -133,6 +136,27 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo VolumeSliceNormalInfo = {
+        "VolumeSliceNormal",
+        "Slice Plane Normal",
+        "Normal of the volume slice plane.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo VolumeSliceOffsetInfo = {
+        "VolumeSliceOffset",
+        "Slice Plane Offset",
+        "Offset of the volume slice plane in the volume.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ShowVolumeSliceInfo = {
+        "Enabled",
+        "Show Volume Slice",
+        "Determine whether the volume slice plane should be visualized or not.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(RenderableTimeVaryingVolume)]] Parameters {
         // [[codegen::verbatim(SourceDirectoryInfo.description)]]
         std::filesystem::path sourceDirectory [[codegen::directory()]];
@@ -159,6 +183,16 @@ namespace {
         std::optional<std::string> gridType [[codegen::inlist("Spherical", "Cartesian")]];
 
         std::optional<std::vector<ghoul::Dictionary>> clipPlanes [[codegen::reference("volume_volumeclipplane")]];
+
+        // [[codegen::verbatim(VolumeSliceNormalInfo.description)]]
+        std::optional<glm::vec3> planeSliceNormal
+            [[codegen::inrange(glm::vec3(- 1.f),glm::vec3(1.f))]];
+
+        // [[codegen::verbatim(VolumeSliceOffsetInfo.description)]]
+        std::optional<float> planeSliceOffset [[codegen::inrange(-0.5f,0.5f)]];
+
+        // [[codegen::verbatim(ShowVolumeSliceInfo.description)]]
+        std::optional<bool> showVolumeSlice;
     };
 #include "renderabletimevaryingvolume_codegen.cpp"
 } // namespace
@@ -168,6 +202,23 @@ namespace openspace::volume {
 documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
     return codegen::doc<Parameters>("volume_renderable_timevaryingvolume");
 }
+
+RenderableTimeVaryingVolume::VolumeSliceSettings::VolumeSliceSettings()
+    : properties::PropertyOwner({
+        "SliceSettings",
+        "Slice Settings",
+        "Settings for the volume slice plane."
+        })
+    , normal(VolumeSliceNormalInfo, glm::vec3{ 1.f, 0.f, 0.f })
+    , offset(VolumeSliceOffsetInfo, 0, -0.5f, 0.5f)
+    , shouldRenderSlice(ShowVolumeSliceInfo, false)
+{
+    addProperty(shouldRenderSlice);
+    addProperty(normal);
+    addProperty(offset);
+}
+
+
 
 RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
                                                       const ghoul::Dictionary& dictionary)
@@ -208,7 +259,9 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _secondsBefore = p.secondsBefore.value_or(_secondsBefore);
     _secondsAfter = p.secondsAfter;
 
-    const std::vector<ghoul::Dictionary> clipPlanes = p.clipPlanes.value_or(std::vector<ghoul::Dictionary>());
+    const std::vector<ghoul::Dictionary> clipPlanes = p.clipPlanes.value_or(
+                                                          std::vector<ghoul::Dictionary>()
+    );
     _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanes);
 
     if (p.gridType.has_value()) {
@@ -218,6 +271,21 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
 
     addProperty(_brightness);
     addProperty(Fadeable::_opacity);
+
+    _volumeSlice.normal = p.planeSliceNormal.value_or(_volumeSlice.normal);
+    _volumeSlice.offset = p.planeSliceOffset.value_or(_volumeSlice.offset);
+    _volumeSlice.shouldRenderSlice = p.showVolumeSlice.value_or(
+                                                            _volumeSlice.shouldRenderSlice
+    );
+
+    _volumeSlice.normal.onChange([this]() {
+        _slicePlaneIsDirty = true;
+    });
+    _volumeSlice.offset.onChange([this]() {
+        _slicePlaneIsDirty = true;
+    });
+
+    addPropertySubOwner(_volumeSlice);
 }
 
 RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
@@ -355,6 +423,22 @@ void RenderableTimeVaryingVolume::initializeGL() {
         );
         _raycaster->setTransferFunction(_transferFunction);
     });
+
+    // Slice plane
+    glGenVertexArrays(1, &_quad);
+    glGenBuffers(1, &_vertexPositionBuffer);
+    createPlane();
+    _shader = BaseModule::ProgramObjectManager.request(
+        "SlicePlane",
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return global::renderEngine->buildRenderProgram(
+                "SlicePlane",
+                absPath("${MODULE_VOLUME}/shaders/plane_vs.glsl"),
+                absPath("${MODULE_VOLUME}/shaders/plane_fs.glsl")
+            );
+        }
+    );
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::filesystem::path& path)
@@ -457,20 +541,11 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
     if (_raycaster) {
         Timestep* t = currentTimestep();
 
-        // Set scale and translation matrices:
-        // The original data cube is a unit cube centered in 0
-        // ie with lower bound from (-0.5, -0.5, -0.5) and upper bound (0.5, 0.5, 0.5)
+        // Set scale matrix: The original data cube is a unit cube centered in 0, i.e.,
+        // with lower bound from (-0.5, -0.5, -0.5) and upper bound (0.5, 0.5, 0.5)
         if (t && t->texture) {
             if (_raycaster->gridType() == volume::VolumeGridType::Cartesian) {
-                const glm::dvec3 scale =
-                    t->metadata.upperDomainBound - t->metadata.lowerDomainBound;
-                const glm::dvec3 translation =
-                    (t->metadata.lowerDomainBound + t->metadata.upperDomainBound) * 0.5f;
-
-                glm::dmat4 modelTransform = glm::translate(glm::dmat4(1.0), translation);
-                const glm::dmat4 scaleMatrix = glm::scale(glm::dmat4(1.0), scale);
-                modelTransform = modelTransform * scaleMatrix;
-                _raycaster->setModelTransform(glm::mat4(modelTransform));
+                _raycaster->setModelTransform(calculateModelTransform());
             }
             else {
                 // The diameter is two times the maximum radius.
@@ -498,6 +573,11 @@ void RenderableTimeVaryingVolume::render(const RenderData& data, RendererTasks& 
     if (_raycaster && _raycaster->volumeTexture()) {
         tasks.raycasterTasks.push_back({ _raycaster.get(), data });
     }
+
+    if (_volumeSlice.shouldRenderSlice) {
+        renderVolumeSlice(data);
+    }
+
 }
 
 bool RenderableTimeVaryingVolume::isReady() const {
@@ -509,6 +589,119 @@ void RenderableTimeVaryingVolume::deinitializeGL() {
         global::raycasterManager->detachRaycaster(*_raycaster);
         _raycaster = nullptr;
     }
+
+    glDeleteVertexArrays(1, &_quad);
+    _quad = 0;
+
+    glDeleteBuffers(1, &_vertexPositionBuffer);
+    _vertexPositionBuffer = 0;
+
+    BaseModule::ProgramObjectManager.release(
+        "PlaneSlice",
+        [](ghoul::opengl::ProgramObject* p) {
+            global::renderEngine->removeRenderProgram(p);
+        }
+    );
+    _shader = nullptr;
+}
+
+glm::mat4 RenderableTimeVaryingVolume::calculateModelTransform() {
+    Timestep* t = currentTimestep();
+
+    if (!t) {
+        return glm::mat4(1.0f);
+    }
+
+    const glm::dvec3 scale =
+        t->metadata.upperDomainBound - t->metadata.lowerDomainBound;
+    //const glm::dvec3 translation =
+    //    (t->metadata.lowerDomainBound + t->metadata.upperDomainBound) * 0.5f;
+
+    //glm::dmat4 translationMatrix = glm::translate(glm::dmat4(1.0), translation);
+    const glm::dmat4 scaleMatrix = glm::scale(glm::dmat4(1.0), scale);
+    glm::dmat4 modelTransform = /*translationMatrix **/ scaleMatrix;
+    return glm::mat4(modelTransform);
+}
+
+void RenderableTimeVaryingVolume::createPlane() const {
+    const std::array<GLfloat, 36> vertexData = {
+    //   x     y  
+        -1.f, -1.f,
+         1.f,  1.f,
+        -1.f,  1.f,
+        -1.f, -1.f,
+         1.f, -1.f,
+         1.f,  1.f, 
+    };
+
+    glBindVertexArray(_quad);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData.data(), GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GL_FLOAT) * 2, nullptr);
+
+    glBindVertexArray(0);
+}
+
+void RenderableTimeVaryingVolume::renderVolumeSlice(const RenderData& data) {
+    Timestep* t = currentTimestep();
+
+    if (!t || !t->texture) {
+        return;
+    }
+
+    _shader->activate();
+    _shader->setUniform(_uniformCache.offset, _volumeSlice.offset);
+    _shader->setUniform(_uniformCache.normal, _volumeSlice.normal);
+
+    _shader->setUniform(_uniformCache.modelTransform,
+        glm::mat4(calculateModelTransform())
+    );
+
+    auto [modelTransform, modelViewTransform, modelViewProjectionTransform] =
+        calcAllTransforms(data);
+
+    _shader->setUniform(_uniformCache.modelViewProjection,
+        glm::mat4(modelViewProjectionTransform)
+    );
+    _shader->setUniform(_uniformCache.modelViewTransform, glm::mat4(modelViewTransform));
+
+    _shader->setUniform(_uniformCache.volumeResolution,
+        glm::vec3(t->metadata.dimensions)
+    );
+
+    // Upload volume texture
+    ghoul::opengl::TextureUnit textureUnit;
+    textureUnit.activate();
+    t->texture->bind();
+    _shader->setUniform(_uniformCache.volumeTexture, textureUnit);
+    // Upload transfer function texture
+    ghoul::opengl::TextureUnit transferFunctionUnit;
+    transferFunctionUnit.activate();
+    _transferFunction->texture().bind();
+    _shader->setUniform(_uniformCache.transferFunction, transferFunctionUnit);
+
+    if (_slicePlaneIsDirty) {
+        // Create basis to convert points on the 2D plane into volume 3D coordinates 
+        glm::vec3 n = glm::normalize(_volumeSlice.normal.value());
+
+        glm::vec3 up = glm::abs(n.z) < 0.999f ? glm::vec3(0.f, 0.f, 1.f)
+            : glm::vec3(1.f, 0.f, 0.f);
+
+        glm::vec3 tangent = glm::normalize(glm::cross(up, n));
+        glm::vec3 bitangent = glm::normalize(glm::cross(n, tangent));
+
+        _basisTransform = glm::mat3(tangent, bitangent, n); 
+    }
+
+    _shader->setUniform(_uniformCache.basis, _basisTransform);
+
+    glDisable(GL_CULL_FACE);
+    glBindVertexArray(_quad);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+    glEnable(GL_CULL_FACE);
+    _shader->deactivate();
 }
 
 } // namespace openspace::volume
