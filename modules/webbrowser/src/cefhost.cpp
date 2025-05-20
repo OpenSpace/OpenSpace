@@ -57,6 +57,9 @@ CefHost::CefHost([[maybe_unused]] const std::string& helperLocation) {
     settings.windowless_rendering_enabled = true;
     attachDebugSettings(settings);
 
+    // cf. https://github.com/chromiumembedded/cef/issues/3685
+    settings.chrome_runtime = true;
+
 #ifdef __APPLE__
     // Load the CEF framework library at runtime instead of linking directly as required
     // by the macOS sandbox implementation

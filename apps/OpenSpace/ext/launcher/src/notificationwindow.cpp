@@ -137,7 +137,10 @@ NotificationWindow::NotificationWindow(QWidget* parent)
         OPENSPACE_IS_RELEASE_BUILD ? OPENSPACE_VERSION_NUMBER : "master"
     );
 
-    _request = std::make_unique<HttpMemoryDownload>(std::string(URL));
+    _request = std::make_unique<HttpMemoryDownload>(
+        URL,
+        ghoul::logging::LogLevel::NoLogging
+    );
     _request->start(std::chrono::seconds(1));
 
     // The download has a timeout of 1s, so after 1250ms we'll definitely have answer.

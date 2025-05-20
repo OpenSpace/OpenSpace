@@ -337,7 +337,8 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
         globebrowsing::GeoJsonProperties::Documentation(),
         GlobeLabelsComponent::Documentation(),
         RingsComponent::Documentation(),
-        ShadowComponent::Documentation()
+        ShadowComponent::Documentation(),
+        DashboardItemGlobeLocation::Documentation()
     };
 }
 
@@ -506,11 +507,9 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             codegen::lua::AddLayer,
             codegen::lua::DeleteLayer,
             codegen::lua::Layers,
-            codegen::lua::LayersDeprecated,
             codegen::lua::MoveLayer,
             codegen::lua::GoToChunk,
             codegen::lua::GeoPositionForCamera,
-            codegen::lua::GeoPositionForCameraDeprecated,
             codegen::lua::LoadWMSCapabilities,
             codegen::lua::RemoveWMSServer,
             codegen::lua::CapabilitiesWMS,

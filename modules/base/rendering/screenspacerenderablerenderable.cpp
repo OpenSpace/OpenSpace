@@ -234,7 +234,7 @@ ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
 
 ScreenSpaceRenderableRenderable::~ScreenSpaceRenderableRenderable() {}
 
-bool ScreenSpaceRenderableRenderable::initializeGL() {
+void ScreenSpaceRenderableRenderable::initializeGL() {
     ScreenSpaceFramebuffer::initializeGL();
 
     _renderable->initializeGL();
@@ -277,13 +277,13 @@ bool ScreenSpaceRenderableRenderable::initializeGL() {
         RendererTasks tasks;
         _renderable->render(renderData, tasks);
     });
-    return true;
 }
 
-bool ScreenSpaceRenderableRenderable::deinitializeGL() {
+void ScreenSpaceRenderableRenderable::deinitializeGL() {
     _renderable->deinitializeGL();
     _renderable->deinitialize();
-    return ScreenSpaceFramebuffer::deinitializeGL();
+
+    ScreenSpaceFramebuffer::deinitializeGL();
 }
 
 void ScreenSpaceRenderableRenderable::update() {

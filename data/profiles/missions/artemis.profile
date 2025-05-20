@@ -56,7 +56,7 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "Artemis Profile. Adds the Orion capsule (Artemis-1) model with an estimated trajectery",
+    "description": "Artemis Profile. Adds the Orion capsule (Artemis-1) model with an estimated trajectery.",
     "license": "MIT License",
     "name": "Artemis",
     "url": "https://www.openspaceproject.com",

@@ -1,0 +1,74 @@
+{
+  "profile": "default",
+  "commands": [
+    { "type": "time", "value": "2019-01-01T05:00:00.00" },
+    { "type": "action", "value": "os.FadeDownTrails" },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Mars",
+        "pitch": 1.327145E0,
+        "position": [ 762210.4, -3288462, -385778.2 ],
+        "up": [ -0.0485709, -0.127474, 0.990652 ],
+        "yaw": 0.0224817
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_LiU.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_NewYork.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended.Enabled",
+        "value": true
+      }
+    },
+    { "type": "wait", "value": 100 },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Mars",
+        "pitch": 1.347758,
+        "position": [ 763526.4, -3287992, -385448.2 ],
+        "up": [ -0.0470953, -0.127084, 0.990773 ],
+        "yaw": 0.0463204
+      }
+    },
+    { "type": "wait", "value": 180 },
+    { "type": "screenshot" }
+  ]
+}
+
+

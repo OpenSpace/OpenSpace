@@ -1,0 +1,32 @@
+{
+  "profile": "juno",
+  "commands": [
+    { "type": "time", "value": "2016-07-01T00:00:01.00" },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Jupiter",
+        "pitch": -0.0884063,
+        "position": [ -273474700, 7875195000, -4723682000 ],
+        "up": [ -0.0318598, 0.513306, 0.857614 ],
+        "yaw": -0.311906
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.JunoTrail.Renderable.ShowFullTrail",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.JunoTrail.Renderable.Appearance.EnableFade",
+        "value": false
+      }
+    },
+    { "type": "wait", "value": 2 },
+    { "type": "screenshot" }
+  ]
+}

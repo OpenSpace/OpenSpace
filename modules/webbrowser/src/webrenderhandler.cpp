@@ -112,7 +112,7 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser>, CefRenderHandler::PaintEle
 }
 
 #ifdef WIN32
-void WebRenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
+void WebRenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser>,
                                           PaintElementType,
                                           const RectList& dirtyRects,
                                           const CefAcceleratedPaintInfo& info)

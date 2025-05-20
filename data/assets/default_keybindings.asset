@@ -16,10 +16,10 @@ asset.onInitialize(function()
 
   openspace.bindKey("B", actions.FadeToBlack)
 
-  openspace.bindKey("F1", actions.ToggleNativeUi)
+  openspace.bindKey("F1", actions.ToggleMainGui)
+  openspace.bindKey("Shift+F1", actions.ToggleOverlays)
 
-  openspace.bindKey("F2", actions.ToggleMainGui)
-  openspace.bindKey("Shift+F2", actions.ToggleOverlays)
+  openspace.bindKey("F2", actions.ToggleNativeUi)
 
   openspace.bindKey("Right", actions.NextDeltaStepInterpolate)
   openspace.bindKey("Shift+Right", actions.NextDeltaStepImmediate)
@@ -45,10 +45,10 @@ asset.onDeinitialize(function()
   openspace.clearKey("Shift+Right")  -- actions.NextDeltaStepImmediate
   openspace.clearKey("Right")        -- actions.NextDeltaStepInterpolate
 
-  openspace.clearKey("Shift+F2")     -- actions.ToggleOverlays
-  openspace.clearKey("F2")           -- actions.ToggleMainGui
+  openspace.clearKey("F2")           -- actions.ToggleNativeUi
 
-  openspace.clearKey("F1")           -- actions.ToggleNativeUi
+  openspace.clearKey("Shift+F1")     -- actions.ToggleOverlays
+  openspace.clearKey("F1")           -- actions.ToggleMainGui
 
   openspace.clearKey("B")            -- actions.FadeToBlack
 

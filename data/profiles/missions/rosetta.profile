@@ -90,7 +90,7 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "The Rosetta scene shows the entire mission of ESA's Rosetta spacecraft around comet 67P, also known as Churyumov-Gerasimenko. The spacecraft's images are projected onto the comet and the separation of the Philae lander is visible as well",
+    "description": "The Rosetta scene shows the entire mission of ESA's Rosetta spacecraft around comet 67P, also known as Churyumov-Gerasimenko. The spacecraft's images are projected onto the comet and the separation of the Philae lander is visible as well.",
     "license": "MIT License",
     "name": "Rosetta",
     "url": "https://www.openspaceproject.com",

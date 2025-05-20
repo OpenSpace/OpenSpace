@@ -65,8 +65,8 @@ public:
     explicit ScreenSpaceBrowser(const ghoul::Dictionary& dictionary);
     ~ScreenSpaceBrowser() override = default;
 
-    bool initializeGL() override;
-    bool deinitializeGL() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
     void render(const RenderData& renderData) override;
     void update() override;

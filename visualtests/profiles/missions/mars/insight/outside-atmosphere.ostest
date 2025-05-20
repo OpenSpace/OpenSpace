@@ -1,0 +1,18 @@
+{
+  "profile": "mars",
+  "commands": [
+    { "type": "time", "value": "2018-11-26T19:40:00.00" },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Insight",
+        "pitch": 0.0000129072,
+        "position": [ 5.481552, -11.65030, 1.829742 ],
+        "up": [ 0.494653, 0.357174, 0.792304 ],
+        "yaw": -0.00000892388
+      }
+    },
+    { "type": "wait", "value": 30 },
+    { "type": "screenshot" }
+  ]
+}

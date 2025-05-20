@@ -236,6 +236,10 @@ HorizonsResultCode isValidHorizonsAnswer(const json& answer) {
         else if (errorMsg.find("Multiple matching stations found") != std::string::npos) {
             return HorizonsResultCode::MultipleObserverStations;
         }
+        // News instead of request results
+        else if (errorMsg.find("Horizons On-Line System News") != std::string::npos) {
+            return HorizonsResultCode::News;
+        }
         // Unknown error
         else {
             LERROR(errorMsg);
