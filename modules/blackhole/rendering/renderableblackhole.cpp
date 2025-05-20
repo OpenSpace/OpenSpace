@@ -55,7 +55,7 @@ namespace {
         "StarMapRanges",
         "Star Map Ranges",
         "temp description",
-         openspace::properties::Property::Visibility::User
+         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorTextureInfo = {
@@ -173,9 +173,10 @@ namespace openspace {
     }
 
     void RenderableBlackHole::deinitializeGL() {
-        _warpTableTex = nullptr;
         _environmentTexture = nullptr;
         _viewport.viewGrid = nullptr;
+        _accretionDiskTexture = nullptr;
+        _colorBVMapTexture = nullptr;
         for (const auto& [_, config] : RenderableBlackHole::BlackHoleShaderConfigs) {
             BaseModule::ProgramObjectManager.release(config.programName);
         }
@@ -248,6 +249,7 @@ namespace openspace {
 
         glDisable(GL_DEPTH_TEST);
 
+
         ghoul::opengl::TextureUnit enviromentUnit;
         if (!bindTexture(_uniformCache.environmentTexture, enviromentUnit, _environmentTexture)) {
             LWARNING("UniformCache is missing 'environmentTexture'");
@@ -262,14 +264,7 @@ namespace openspace {
             LWARNING("UniformCache is missing 'colorBVMap'");
         }
 
-        if (_blackholeType.value() == static_cast<int>(BlackHoleType::kerr)) {
-            ghoul::opengl::TextureUnit accretionDiskUnit;
-            if (!bindTexture(_uniformCache.accretionDisk, accretionDiskUnit, _accretionDiskTexture)) {
-                LWARNING("UniformCache is missing 'accretionDisk'");
-            }
-        }
-
-        SendSchwarzschildTableToShader();
+        SendLookupTableToShader();
 
         if (_starKDTree.isDirty) {
             SendStarKDTreeToShader();
@@ -290,28 +285,31 @@ namespace openspace {
 
         if (_blackholeType.value() == static_cast<int>(BlackHoleType::kerr)) {
             _program->setUniform(
-                _uniformCache.cameraRotationMatrix,
+                _uniformKerrCache.cameraRotationMatrix,
                 glm::mat4(glm::mat4_cast(camRot.globalRotation * camRot.localRotation)) * CameraPlaneRotation
             );
+
+            ghoul::opengl::TextureUnit accretionDiskUnit;
+            if (!bindTexture(_uniformKerrCache.accretionDisk, accretionDiskUnit, _accretionDiskTexture)) {
+                LWARNING("UniformCache is missing 'accretionDisk'");
+            }
         }
 
         if (_blackholeType.value() == static_cast<int>(BlackHoleType::schwarzschild)) {
             _program->setUniform(
-                _uniformCache.cameraRotationMatrix,
+                _uniformSchwarzschildCache.cameraRotationMatrix,
                 glm::mat4(glm::mat4_cast(camRot.localRotation)) * CameraPlaneRotation
             );
 
             _program->setUniform(
-                _uniformCache.worldRotationMatrix,
+                _uniformSchwarzschildCache.worldRotationMatrix,
                 glm::mat4(glm::mat4_cast(camRot.globalRotation))
             );
 
-            if (_uniformCache.r_0 != -1) {
-                _program->setUniform(
-                    _uniformCache.r_0,
-                    _rCamera
-                );
-            }
+            _program->setUniform(
+                _uniformSchwarzschildCache.r_0,
+                _rCamera
+            );
         }
 
         drawQuad();
@@ -322,7 +320,7 @@ namespace openspace {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    void RenderableBlackHole::SendSchwarzschildTableToShader()
+    void RenderableBlackHole::SendLookupTableToShader()
     {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboBlackHoleWarpTable);
 
@@ -394,6 +392,16 @@ namespace openspace {
 
         if (!_program) {
             throw ghoul::RuntimeError("Shader program creation failed", "setupShaders");
+        }
+
+        switch (bhType)
+        {
+        case BlackHoleType::kerr:
+            ghoul::opengl::updateUniformLocations(*_program, _uniformKerrCache);
+            break;
+        default:
+            ghoul::opengl::updateUniformLocations(*_program, _uniformSchwarzschildCache);
+            break;
         }
 
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
