@@ -91,8 +91,8 @@ namespace openspace {
         };
 
         inline static const std::unordered_map<BlackHoleType, BlackHoleShaderConfig> BlackHoleShaderConfigs {
-            { BlackHoleType::kerr,         { "kerr", "KerrBlackHoleProgram" } },
-            { BlackHoleType::schwarzschild, { "schwarzschild", "BlackHoleProgram" } }
+            { BlackHoleType::schwarzschild, { "schwarzschild", "BlackHoleProgram" } },
+            { BlackHoleType::kerr,         { "kerr", "KerrBlackHoleProgram" } }
         };
 
         float _rs;
