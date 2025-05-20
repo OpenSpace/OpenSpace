@@ -41,6 +41,36 @@ float atan2(float a, float b){
 }
 
 /**********************************************************
+                   Init rotations
+***********************************************************/
+
+mat4 rotationToKerrPosition() {
+    float angle = -PI/2;
+    float c = cos(angle);
+    float s = sin(angle);
+
+    mat4 rotX = mat4(
+        1.0, 0.0, 0.0, 0.0,
+        0.0,   c,  -s,  0.0,
+        0.0,   s,   c,  0.0,
+        0.0, 0.0, 0.0, 1.0
+    );
+    mat4 rotY = mat4(
+        c,   0.0,  -s,   0.0,
+        0.0, 1.0,  0.0,  0.0,
+        s,   0.0,   c,   0.0,
+        0.0, 0.0,  0.0,  1.0
+    );
+    mat4 rotZ = mat4(
+        -c,   s, 0.0, 0.0,
+        -s,  -c, 0.0, 0.0,
+       0.0, 0.0, 1.0, 0.0,
+       0.0, 0.0, 0.0, 1.0
+    );
+     return rotY * rotX * rotZ;
+}
+
+/**********************************************************
                         Conversions
 ***********************************************************/
 
@@ -163,6 +193,7 @@ Fragment getFragment() {
 
         // User world input rotation of the black hole
         envMapCoords = worldRotationMatrix * envMapCoords;
+        envMapCoords = rotationToKerrPosition() * envMapCoords;
 
         sphericalCoords = cartesianToSpherical(envMapCoords.xyz);
         vec4 starColor = searchNearestStar(vec3(0.0f, sphericalCoords.x, sphericalCoords.y), l);

@@ -145,7 +145,7 @@ namespace openspace {
             };
 
         _blackholeType.onChange(changeBlackHoleType);
-        _blackholeType.setValue(p.blackHoleType.value_or(static_cast<int>(BlackHoleType::kerr)));
+        _blackholeType.setValue(p.blackHoleType.value_or(static_cast<int>(BlackHoleType::schwarzschild)));
 
 
         addProperty(_blackholeType);
