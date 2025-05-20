@@ -44,7 +44,7 @@ void main() {
     // Scale plane so that it will cover entire volume on the diagonal
     float quadScale = 1.42;
     pos *= quadScale;
-    vec3 sliceCenter = normal * offset;
+    vec3 sliceCenter = normalize(normal) * offset;
     // Convert 2D quad coordinates into 3D slice position
     vec3 localPos = sliceCenter + basis * vec3(pos, 0.0);
     // Remap texture coordinates to the range 0 to 1
