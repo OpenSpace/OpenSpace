@@ -443,7 +443,6 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
             codegen::lua::RemoveExoplanetSystem,
             codegen::lua::SystemData,
             codegen::lua::ListOfExoplanets,
-            codegen::lua::ListOfExoplanetsDeprecated,
             codegen::lua::ListAvailableExoplanetSystems,
             codegen::lua::LoadSystemDataFromCsv
         },

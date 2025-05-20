@@ -1,0 +1,12 @@
+{
+  "profile": "default",
+  "commands": [
+    { "type": "time", "value": "2019-01-01T05:00:00.00" },
+    {
+      "type": "property",
+      "value": { "property": "Scene.ISS_trail.Renderable.Enabled", "value": false }
+    },
+    { "type": "wait", "value": 30 },
+    { "type": "screenshot" }
+  ]
+}

@@ -31,7 +31,7 @@
 #include <ghoul/ghoul.h>
 #include <ghoul/logging/logmanager.h>
 
-int main(int argc, char** argv) {
+int main(int, char** argv) {
     using namespace openspace;
 
     ghoul::logging::LogManager::initialize(

@@ -39,6 +39,12 @@ public:
     bool isDone() const override;
 
 private:
+    /**
+     * Creates a log object and register it to the `LogManager`, does nothing if an active
+     * log already exists
+     */
+    void createLog(ghoul::logging::LogLevel logLevel);
+
     bool _isSubscribedTo = false;
     // Non owning but we remove the log from LogManager on destruction
     ghoul::logging::Log* _log = nullptr;

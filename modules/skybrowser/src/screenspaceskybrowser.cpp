@@ -191,13 +191,12 @@ ScreenSpaceSkyBrowser::~ScreenSpaceSkyBrowser() {
     }
 }
 
-bool ScreenSpaceSkyBrowser::initializeGL() {
+void ScreenSpaceSkyBrowser::initializeGL() {
     WwtCommunicator::initializeGL();
     // @TODO (ylvse, 2024-08-23) Remove this once the skybrowser has been rewritten
     ghoul::Dictionary dict;
     dict.setValue("useAcceleratedRendering", false);
     createShaders(dict);
-    return true;
 }
 
 glm::dvec2 ScreenSpaceSkyBrowser::fineTuneVector(const glm::dvec2& drag) {
@@ -317,10 +316,9 @@ ScreenSpaceSkyBrowser::showDisplayCopies() const
     return vec;
 }
 
-bool ScreenSpaceSkyBrowser::deinitializeGL() {
+void ScreenSpaceSkyBrowser::deinitializeGL() {
     ScreenSpaceRenderable::deinitializeGL();
     WwtCommunicator::deinitializeGL();
-    return true;
 }
 
 void ScreenSpaceSkyBrowser::render(const RenderData& renderData) {

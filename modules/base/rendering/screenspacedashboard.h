@@ -45,7 +45,7 @@ public:
     explicit ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
     virtual ~ScreenSpaceDashboard() override = default;
 
-    bool initializeGL() override;
+    void initializeGL() override;
 
     void update() override;
 

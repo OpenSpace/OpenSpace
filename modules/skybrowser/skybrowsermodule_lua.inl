@@ -333,20 +333,6 @@ std::string prunedIdentifier(std::string identifier) {
 }
 
 /**
- * Deprecated in favor of 'wwtImageCollectionUrl'
- */
-[[codegen::luawrap("getWwtImageCollectionUrl")]]
-ghoul::Dictionary wwtImageCollectionUrlDeprecated()
-{
-    LWARNINGC(
-        "Deprecation",
-        "'getWwtImageCollectionUrl' function is deprecated and should be replaced with "
-        "'wwtImageCollectionUrl'"
-    );
-    return wwtImageCollectionUrl();
-}
-
-/**
  * Returns a list of all the loaded AAS WorldWide Telescope images that have been loaded.
  * Each image has a name, thumbnail url, equatorial spherical coordinates RA and Dec,
  * equatorial Cartesian coordinates, if the image has celestial coordinates, credits text,
@@ -386,19 +372,6 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
     }
 
     return list;
-}
-
-/**
- * Deprecated in favor of 'listOfExoplanets'
- */
-[[codegen::luawrap("getListOfImages")]] ghoul::Dictionary listOfImagesDeprecated()
-{
-    LWARNINGC(
-        "Deprecation",
-        "'getListOfImages' function is deprecated and should be replaced with "
-        "'listOfImages'"
-    );
-    return listOfImages();
 }
 
 /**
@@ -469,17 +442,6 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
     }
 
     return data;
-}
-
-/**
- * Deprecated in favor of 'targetData'
- */
-[[codegen::luawrap("getTargetData")]] ghoul::Dictionary targetDataDeprecated() {
-    LWARNINGC(
-        "Deprecation",
-        "'getTargetData' function is deprecated and should be replaced with 'targetData'"
-    );
-    return targetData();
 }
 
 /**

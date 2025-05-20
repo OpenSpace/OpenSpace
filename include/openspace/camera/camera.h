@@ -137,11 +137,8 @@ public:
     } sgctInternal;
 
     // @TODO use Camera::SgctInternal interface instead
-    // [[deprecated("Replaced by Camera::SgctInternal::viewMatrix()")]]
     const glm::mat4& viewMatrix() const;
-    // [[deprecated("Replaced by Camera::SgctInternal::projectionMatrix()")]]
     const glm::mat4& projectionMatrix() const;
-    // [[deprecated("Replaced by Camera::SgctInternal::viewProjectionMatrix()")]]
     const glm::mat4& viewProjectionMatrix() const;
 
     std::vector<Syncable*> syncables();
