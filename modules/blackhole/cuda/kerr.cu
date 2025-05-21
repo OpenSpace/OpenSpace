@@ -7,15 +7,12 @@ constexpr float PI = 3.1415926535897932384626433832795f;
 constexpr float C = 299792458.0f;                            // Speed of light
 
 #define HORIZION nanf("")
+#define MAX_LAYERS 8
 
-constexpr float DISK = -1337.0f;
-constexpr unsigned int MAX_LAYERS = 8;
+constexpr  float DISK = -1337.0f;
 // ---------------------------------------------------------------------
-constexpr float R_S = 1.0f;                                 // Schwarzschild radius
 constexpr float M = 1.0f;                                   // Mass parameter
 constexpr float EPSILON = 1e-8;                             // Numerical tolerance
-__constant__ float3 c_world_up = { 0.0f, 0.0f, 1.0f };
-__constant__ float3 c_forward = { 0.0f, 1.0f, 0.0f };
 
 constexpr bool ACCRETION_DISK_ENABLED = true;
 constexpr float ACCRETION_DISK_INNER_RADIUS = 6.0f;         // in Schwarzschild radius units
@@ -27,6 +24,9 @@ __constant__ unsigned int c_layers = 1;
 __constant__ unsigned int c_num_steps = 5000;
 __constant__ float c_env_r_values[MAX_LAYERS];
 __constant__ float c_h = 0.1f;                              // Integration step size
+__constant__ float c_rs = 1.0f;                              // Schwarzschild radius
+__constant__ float3 c_world_up = { 0.0f, 0.0f, 1.0f };
+__constant__ float3 c_forward = { 0.0f, 1.0f, 0.0f };
 
 
 // ---------------------------------------------------------------------
@@ -288,17 +288,17 @@ __global__ void simulateRayKernel(float3 pos, size_t num_rays_per_dim, float* lo
     float const y_vel = C * dir.y;
     float const z_vel = C * dir.z;
 
-    float const A = c_a * R_S / 2;
+    float const A = c_a * c_rs / 2;
 
     float bl[6];
     cartesian_to_boyer_lindquist(pos.x, x_vel, pos.y, y_vel, pos.z, z_vel, A, bl);
 
-    float const r0 = 2.0f / R_S * bl[0];
+    float const r0 = 2.0f / c_rs * bl[0];
     float const theta0 = bl[2];
     float const phi0 = bl[4];
     float const dr0 = bl[1] / C;
-    float const dtheta0 = bl[3] * R_S / (2.0f * C);
-    float const dphi0 = bl[5] * R_S / (2.0f * C);
+    float const dtheta0 = bl[3] * c_rs / (2.0f * C);
+    float const dphi0 = bl[5] * c_rs / (2.0f * C);
 
     // Compute conserved quantities using Kerr equations.
     float E = E_func(r0, theta0, dr0, dtheta0, dphi0);
@@ -379,7 +379,7 @@ void traceKerr(glm::vec3 position, float rs, float kerr, std::vector<float> env_
 
     cudaMemcpyToSymbol(c_layers, &layers, sizeof(unsigned int));
     cudaMemcpyToSymbol(c_a, &kerr, sizeof(float));
-    cudaMemcpyToSymbol(R_S, &rs, sizeof(float));
+    cudaMemcpyToSymbol(c_rs, &rs, sizeof(float));
 
     cudaMemcpyToSymbol(
         c_env_r_values,
