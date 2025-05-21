@@ -142,6 +142,18 @@ namespace openspace {
         auto changeBlackHoleType = [this]() {
                 _shaderIsDirty = true;
                 _starKDTree.isDirty = true;
+
+                switch (static_cast<BlackHoleType>(_blackholeType.value()))
+                {
+                case BlackHoleType::kerr:
+                    //_kerrRotation.setReadOnly(false);
+                    _kerrRotation.setVisibility(properties::Property::Visibility::User);
+                    break;
+                default:
+                    //_kerrRotation.setReadOnly(true);
+                    _kerrRotation.setVisibility(properties::Property::Visibility::Hidden);
+                    break;
+                }
             };
 
         _blackholeType.onChange(changeBlackHoleType);
@@ -149,10 +161,10 @@ namespace openspace {
 
 
         addProperty(_blackholeType);
-        addProperty(_solarMass);
         addProperty(_kerrRotation);
+        addProperty(_solarMass);
         addProperty(_starMapRanges);
-
+        changeBlackHoleType();
 
         _colorBVMapTexturePath = absPath(p.colorMap).string();
     }
