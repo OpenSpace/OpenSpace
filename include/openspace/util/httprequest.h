@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___HTTPREQUEST___H__
 #define __OPENSPACE_CORE___HTTPREQUEST___H__
 
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/boolean.h>
 #include <atomic>
 #include <condition_variable>
@@ -113,10 +114,12 @@ public:
      * provided \p url.
      *
      * \param url The URL that should be requested by this HttpRequest
+     * \param failureVerbosity The verbosity of the log message when the download fails
      *
      * \pre \p url must not be empty
      */
-    explicit HttpRequest(std::string url);
+    explicit HttpRequest(std::string url,
+        ghoul::logging::LogLevel failureVerbosity = ghoul::logging::LogLevel::Error);
 
     /**
      * Registers a callback that will be called when the header for the request has been
@@ -187,6 +190,9 @@ private:
 
     /// The URL that this HttpRequest is going to request
     std::string _url;
+
+    /// The verbosity of the log message that is used if the download fails
+    const ghoul::logging::LogLevel _failureVerbosity;
 };
 
 /**
@@ -205,10 +211,12 @@ public:
      * \p url parameter as soon as the download is #start ed.
      *
      * \param url The URL that should be downloaded by this HttpDownload
+     * \param failureVerbosity The verbosity of the log message when the download fails
      *
      * \pre \p url must not be empty
      */
-    explicit HttpDownload(std::string url);
+    explicit HttpDownload(std::string url,
+        ghoul::logging::LogLevel failureVerbosity = ghoul::logging::LogLevel::Error);
 
     /**
      * Virtual destructor that will cancel the ongoing download and block until the
@@ -367,7 +375,8 @@ public:
      * Overwrite::Yes, the existing content at the \p destinationPath will be overwritten.
      */
     HttpFileDownload(std::string url, std::filesystem::path destinationPath,
-        Overwrite overwrite = Overwrite::No);
+        Overwrite overwrite = Overwrite::No,
+        ghoul::logging::LogLevel failureVerbosity = ghoul::logging::LogLevel::Error);
 
     /**
      * This destructor will cancel any ongoing download and wait for its completion, so it
@@ -441,7 +450,8 @@ public:
      *
      * \param url The URL whose contents should be downloaded
      */
-    explicit HttpMemoryDownload(std::string url);
+    explicit HttpMemoryDownload(std::string url,
+        ghoul::logging::LogLevel failureVerbosity = ghoul::logging::LogLevel::Error);
 
     /**
      * This destructor will cancel any ongoing download and wait for its completion, so it

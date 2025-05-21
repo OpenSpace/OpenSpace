@@ -55,8 +55,8 @@ void SettingsDialog::createWidgets() {
     // | Profile                                             |
     // | Starting Profile:          | [oooooooooooooooooooo] |
     // | [] Keep Last Profile                                |
-    // | Configuration                                       |
-    // | Starting Configuration:    | [oooooooooooooooooooo] |
+    // | Window Options                                      |
+    // | Starting Window Option:    | [oooooooooooooooooooo] |
     // | [] Keep Last Configuration                          |
     // | User Interface                                      |
     // | Property Visibility        | DDDDDDDDDDDDDDDDDDDDD> |
@@ -134,11 +134,11 @@ void SettingsDialog::createWidgets() {
     layout->addWidget(new Line(), 3, 0, 1, 2);
 
     {
-        QLabel* label = new QLabel("Configuration");
+        QLabel* label = new QLabel("Window Configuration");
         label->setObjectName("heading");
         layout->addWidget(label, 4, 0, 1, 2);
 
-        QLabel* conf = new QLabel("Starting Configuration");
+        QLabel* conf = new QLabel("Starting Window Configuration");
         conf->setToolTip(
             "With this setting, you can choose a window configuration that will be "
             "loaded the next time you start the application"

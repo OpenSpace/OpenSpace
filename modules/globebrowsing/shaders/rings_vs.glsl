@@ -28,10 +28,12 @@
 
 layout(location = 0) in vec2 in_position;
 layout(location = 1) in vec2 in_st;
+layout(location = 2) in vec3 in_normal;
 
 out vec2 vs_st;
 out float vs_screenSpaceDepth;
 out vec4 shadowCoords;
+out vec3 vs_normal;
 
 uniform dmat4 modelViewProjectionMatrix;
 
@@ -43,6 +45,7 @@ uniform dmat4 shadowMatrix;
 
 void main() {
   vs_st = in_st;
+  vs_normal = mat3(modelViewProjectionMatrix) * in_normal;
 
   dvec4 positionClipSpace  = modelViewProjectionMatrix * dvec4(in_position, 0.0, 1.0);
   vec4 positionClipSpaceZNorm = z_normalization(vec4(positionClipSpace));

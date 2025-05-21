@@ -602,16 +602,6 @@ int propertyGetValue(lua_State* L) {
     return 1;
 }
 
-int propertyGetValueDeprecated(lua_State* L) {
-    LWARNINGC(
-        "Deprecation",
-        "'getPropertyValue' function is deprecated and should be replaced with "
-        "'propertyValue'"
-    );
-
-    return propertyGetValue(L);
-}
-
 }  // namespace openspace::luascriptfunctions
 
 namespace {
