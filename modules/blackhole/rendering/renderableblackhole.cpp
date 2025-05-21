@@ -105,7 +105,7 @@ namespace openspace {
         auto updateStarMapRanges = [this]() {
             std::vector<double> mapRangeValus = _starMapRanges.value();
             std::sort(mapRangeValus.begin(), mapRangeValus.end());
-            _starMapRanges.setValue(mapRangeValus);
+            _starMapRanges = mapRangeValus;
             _layerLayout.ranges.resize(_starMapRanges.value().size() / 2);
             for (int i = 0; i < _layerLayout.ranges.size(); i++) {
                 _layerLayout.ranges[i] = { mapRangeValus[i * 2], mapRangeValus[i * 2 + 1] };
@@ -113,7 +113,7 @@ namespace openspace {
             _layerLayout.isDirty = true;
             };
         _starMapRanges.onChange(updateStarMapRanges);
-        _starMapRanges.setValue(p.starMapRanges.value_or(_starMapRanges.value()));
+        _starMapRanges = p.starMapRanges.value_or(_starMapRanges.value());
         updateStarMapRanges();
 
 
@@ -127,11 +127,11 @@ namespace openspace {
             _layerLayout.calcPositions(distanceconstants::Parsec / _rs);
             };
         _solarMass.onChange(calcRs);
-        _solarMass.setValue(p.solarMass.value_or(_solarMass));
+        _solarMass = p.solarMass.value_or(_solarMass);
         calcRs();
 
        
-        _kerrRotation.setValue(p.kerrRotation.value_or(_kerrRotation));
+        _kerrRotation = p.kerrRotation.value_or(_kerrRotation);
 
 
         _blackholeType.addOptions({
@@ -145,7 +145,7 @@ namespace openspace {
             };
 
         _blackholeType.onChange(changeBlackHoleType);
-        _blackholeType.setValue(p.blackHoleType.value_or(static_cast<int>(BlackHoleType::schwarzschild)));
+        _blackholeType = p.blackHoleType.value_or(static_cast<int>(BlackHoleType::schwarzschild));
 
 
         addProperty(_blackholeType);
