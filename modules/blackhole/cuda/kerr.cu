@@ -14,7 +14,6 @@ constexpr  float DISK = -1337.0f;
 constexpr float M = 1.0f;                                   // Mass parameter
 constexpr float EPSILON = 1e-8;                             // Numerical tolerance
 
-constexpr bool ACCRETION_DISK_ENABLED = true;
 constexpr float ACCRETION_DISK_INNER_RADIUS = 6.0f;         // in Schwarzschild radius units
 constexpr float ACCRETION_DISK_OUTER_RADIUS = 20.0f;        // in Schwarzschild radius units
 constexpr float ACCRETION_DISK_TOLERANCE_THETA = 0.01f;     // small tolerance around theta = pi/2
@@ -27,6 +26,7 @@ __constant__ float c_h = 0.1f;                              // Integration step 
 __constant__ float c_rs = 1.0f;                              // Schwarzschild radius
 __constant__ float3 c_world_up = { 0.0f, 0.0f, 1.0f };
 __constant__ float3 c_forward = { 0.0f, 1.0f, 0.0f };
+__constant__ bool c_accretion_disk_enabled = true;
 
 
 // ---------------------------------------------------------------------
@@ -210,7 +210,7 @@ __device__ float dp_theta(float r, float theta, float E, float L) {
 
 // @TODO: Might need to do a line segment between points
 __device__ bool check_accretion_disk_collision(float r, float theta) {
-    if (ACCRETION_DISK_ENABLED && r >= ACCRETION_DISK_INNER_RADIUS && r <= ACCRETION_DISK_OUTER_RADIUS) {
+    if (c_accretion_disk_enabled && r >= ACCRETION_DISK_INNER_RADIUS && r <= ACCRETION_DISK_OUTER_RADIUS) {
         if (fabs(theta - PI / 2.0f) < ACCRETION_DISK_TOLERANCE_THETA) {
             return true;
         }
@@ -370,7 +370,7 @@ __global__ void simulateRayKernel(float3 pos, size_t num_rays_per_dim, float* lo
 // It accepts the number of rays, number of integration steps, and an array
 // of initial conditions (size: num_rays * 6). It outputs the trajectory data
 // (num_rays * num_steps * 5 float values) and the number of steps for each ray.
-void traceKerr(glm::vec3 position, float rs, float kerr, std::vector<float> env_r_values, size_t num_rays_per_dim, size_t num_steps, std::vector<float>& lookup_table_host) {
+void traceKerr(glm::vec3 position, float rs, float kerr, std::vector<float> env_r_values, size_t num_rays_per_dim, size_t num_steps, std::vector<float>& lookup_table_host, bool accretion_disk_enabled) {
     // Calculate sizes for memory allocation.
     unsigned int const layers = env_r_values.size();
     size_t output_size = (layers + 1) * 2;
@@ -380,6 +380,8 @@ void traceKerr(glm::vec3 position, float rs, float kerr, std::vector<float> env_
     cudaMemcpyToSymbol(c_layers, &layers, sizeof(unsigned int));
     cudaMemcpyToSymbol(c_a, &kerr, sizeof(float));
     cudaMemcpyToSymbol(c_rs, &rs, sizeof(float));
+    cudaMemcpyToSymbol(c_accretion_disk_enabled, &accretion_disk_enabled, sizeof(bool));
+
 
     cudaMemcpyToSymbol(
         c_env_r_values,

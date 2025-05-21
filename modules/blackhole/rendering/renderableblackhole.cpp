@@ -51,6 +51,20 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    constexpr openspace::properties::Property::PropertyInfo RayCountInfo = {
+        "RayCountInfo",
+        "Number of rays per lookup dimension",
+        "temp description",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo KerrAccretionDiskEnabledInfo = {
+        "KerrAccretionDiskEnabled",
+        "Enable Kerr accretion disk",
+        "temp description",
+        openspace::properties::Property::Visibility::User
+    };
+
     constexpr openspace::properties::Property::PropertyInfo StarMapRangesInfo = {
         "StarMapRanges",
         "Star Map Ranges",
@@ -97,7 +111,8 @@ namespace openspace {
         _kerrRotation(KerrRotationInfo, 0.5f, 0.0f, 0.999999f),
         _colorBVMapTexturePath(ColorTextureInfo),
         _starMapRanges(StarMapRangesInfo, { 0.00035, 12.5002625, 12.5002625, 25.000175000000002, 25.000175000000002, 37.5000875, 37.5000875, 50.0 }),
-        _blackholeType(BlackHoleTypeInfo)
+        _blackholeType(BlackHoleTypeInfo),
+        _accretionDiskEnabled(KerrAccretionDiskEnabledInfo, true)
     {
         const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -132,12 +147,15 @@ namespace openspace {
 
        
         _kerrRotation = p.kerrRotation.value_or(_kerrRotation);
-
+        
+        
+        
 
         _blackholeType.addOptions({
             {static_cast<int>(BlackHoleType::schwarzschild), "Schwarzschild"},
             {static_cast<int>(BlackHoleType::kerr), "Kerr"}
             });
+
 
         auto changeBlackHoleType = [this]() {
                 _shaderIsDirty = true;
@@ -146,12 +164,12 @@ namespace openspace {
                 switch (static_cast<BlackHoleType>(_blackholeType.value()))
                 {
                 case BlackHoleType::kerr:
-                    //_kerrRotation.setReadOnly(false);
                     _kerrRotation.setVisibility(properties::Property::Visibility::User);
+                    _accretionDiskEnabled.setVisibility(properties::Property::Visibility::User);
                     break;
                 default:
-                    //_kerrRotation.setReadOnly(true);
                     _kerrRotation.setVisibility(properties::Property::Visibility::Hidden);
+                    _accretionDiskEnabled.setVisibility(properties::Property::Visibility::Hidden);
                     break;
                 }
             };
@@ -163,6 +181,7 @@ namespace openspace {
         addProperty(_blackholeType);
         addProperty(_kerrRotation);
         addProperty(_solarMass);
+        addProperty(_accretionDiskEnabled);
         addProperty(_starMapRanges);
         changeBlackHoleType();
 
@@ -229,7 +248,7 @@ namespace openspace {
             glm::dvec3 cameraPosition = v_rot / data.modelTransform.scale;
 
             if (glm::distance(cameraPosition, _chacedCameraPos) > 0.01f * _rs || _starKDTree.isDirty) {
-                traceKerr(cameraPosition, _rs, _kerrRotation, _layerLayout.positions, _rayCount, _stepsCount, _blackHoleWarpTable);
+                traceKerr(cameraPosition, _rs, _kerrRotation, _layerLayout.positions, _rayCount, _stepsCount, _blackHoleWarpTable, _accretionDiskEnabled.value());
                 _chacedCameraPos = cameraPosition;
                 highres = false;
                 lastTime = std::chrono::high_resolution_clock::now();
@@ -239,7 +258,7 @@ namespace openspace {
                 std::chrono::duration<float> deltaTime = currentTime - lastTime;
                 float deltaTimeSeconds = deltaTime.count();
                 if (deltaTimeSeconds > 1.0f) {
-                    traceKerr(cameraPosition, _rs, _kerrRotation, _layerLayout.positions, _rayCountHighRes, _stepsCount, _blackHoleWarpTable);
+                    traceKerr(cameraPosition, _rs, _kerrRotation, _layerLayout.positions, _rayCountHighRes, _stepsCount, _blackHoleWarpTable, _accretionDiskEnabled.value());
                     highres = true;
                 }
             }

@@ -54,8 +54,10 @@ namespace openspace {
         std::unique_ptr<ghoul::opengl::ProgramObject> _cullProgram = nullptr;
         glm::dvec3 _chachedTranslation{};
         glm::dvec3 _chacedCameraPos{};
+
         static constexpr size_t _rayCount{ 300 };
         static constexpr size_t _rayCountHighRes{ 750 };
+
         static constexpr size_t _stepsCount = 100000;
         static constexpr float _stepLength = 0.0001f;
         static constexpr size_t _mapCount = 5;
@@ -65,6 +67,7 @@ namespace openspace {
         properties::StringProperty _colorBVMapTexturePath;
         properties::DoubleListProperty _starMapRanges;
         properties::OptionProperty _blackholeType;
+        properties::BoolProperty _accretionDiskEnabled;
 
         enum class BlackHoleType{
             schwarzschild,

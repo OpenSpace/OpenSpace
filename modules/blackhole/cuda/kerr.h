@@ -3,5 +3,5 @@
 #include <vector>
 #include <glm/vec3.hpp>
 
-void traceKerr(glm::vec3 position, float rs, float kerr, std::vector<float> env_r_values, size_t num_rays_per_dim, size_t num_steps, std::vector<float>& lookup_table_host);
+void traceKerr(glm::vec3 position, float rs, float kerr, std::vector<float> env_r_values, size_t num_rays_per_dim, size_t num_steps, std::vector<float>& lookup_table_host, bool accretion_disk_enabled);
 #endif
