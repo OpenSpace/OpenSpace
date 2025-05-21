@@ -24,6 +24,8 @@
 
 #include <openspace/properties/property.h>
 
+#include <openspace/engine/globals.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/properties/propertyowner.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
@@ -101,6 +103,15 @@ std::string Property::groupIdentifier() const {
 void Property::setVisibility(Visibility visibility) {
     _metaData.visibility = visibility;
     notifyMetaDataChangeListeners();
+
+    // We only subscribe to meta data changes for visible properties, so if the
+    // visibility changes during runtime, we need to notify the property owner
+    // about the change for it to affect properties that are currently hidden
+    if (_owner) {
+        global::eventEngine->publishEvent<events::EventPropertyTreeUpdated>(
+            _owner->uri()
+        );
+    }
 }
 
 Property::Visibility Property::visibility() const {
