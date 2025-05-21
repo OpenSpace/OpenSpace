@@ -4,9 +4,10 @@
 #include "device_launch_parameters.h"
 #include "schwarzschild.h"
 
-#define HORIZION nanf("")
 
 constexpr float PI = 3.1415926535897932384626433832795f;
+
+#define HORIZION nanf("")
 
 __device__ float zamoconv(float r0, float psi) {
     // Compute the Schwarzschild lapse factor at r0:

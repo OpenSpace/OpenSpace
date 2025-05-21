@@ -3,37 +3,31 @@
 #include <device_launch_parameters.h>
 #include <vector_functions.h>
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846f
-#endif
-
-#ifndef M_C
-#define M_C 299792458.0f
-#endif
+constexpr float PI = 3.1415926535897932384626433832795f;
+constexpr float C = 299792458.0f;                            // Speed of light
 
 #define HORIZION nanf("")
-#define DISK -1337.0f
-#define MAX_LAYERS 8
+
+constexpr float DISK = -1337.0f;
+constexpr unsigned int MAX_LAYERS = 8;
 // ---------------------------------------------------------------------
-// Device constants (set at compile time; you may also update via cudaMemcpyToSymbol)
-__constant__ float c_a = 0.99f;
-__constant__ float c_rs = 1;
-__constant__ unsigned int c_num_steps = 5000;
-__constant__ unsigned int c_layers = 1;
-__constant__ float c_M = 1.0f;     // Mass parameter
-__constant__ float c_epsilon = 1e-8;   // Numerical tolerance
+constexpr float R_S = 1.0f;                                 // Schwarzschild radius
+constexpr float M = 1.0f;                                   // Mass parameter
+constexpr float EPSILON = 1e-8;                             // Numerical tolerance
 __constant__ float3 c_world_up = { 0.0f, 0.0f, 1.0f };
 __constant__ float3 c_forward = { 0.0f, 1.0f, 0.0f };
-__constant__ float c_env_map = 100.0f;
+
+constexpr bool ACCRETION_DISK_ENABLED = true;
+constexpr float ACCRETION_DISK_INNER_RADIUS = 6.0f;         // in Schwarzschild radius units
+constexpr float ACCRETION_DISK_OUTER_RADIUS = 20.0f;        // in Schwarzschild radius units
+constexpr float ACCRETION_DISK_TOLERANCE_THETA = 0.01f;     // small tolerance around theta = pi/2
+
+__constant__ float c_a = 0.99f;
+__constant__ unsigned int c_layers = 1;
+__constant__ unsigned int c_num_steps = 5000;
 __constant__ float c_env_r_values[MAX_LAYERS];
+__constant__ float c_h = 0.1f;                              // Integration step size
 
-__constant__ bool c_accretion_disk_enabled = true;
-__constant__ float c_accretion_disk_inner_radius = 6.0f;  // in Schwarzschild radius units
-__constant__ float c_accretion_disk_outer_radius = 20.0f; // in Schwarzschild radius units
-__constant__ float c_accretion_disk_tolerance_theta = 0.01f; // small tolerance around theta = pi/2
-
-// Additional simulation parameters
-__constant__ float c_h = 0.1f;            // Integration step size
 
 // ---------------------------------------------------------------------
 // Coordinate convertion functions
@@ -106,7 +100,7 @@ __device__ void cartesian_to_boyer_lindquist(float x, float x_vel,
 }
 
 __device__ inline float wrapPi(float x) {
-    return x - 2.0f * M_PI * floorf((x + M_PI) / (2.0f * M_PI));
+    return x - 2.0f * PI * floorf((x + PI) / (2.0f * PI));
 }
 
 // ---------------------------------------------------------------------
@@ -118,11 +112,11 @@ __device__ float sigma(float r, float theta) {
 }
 
 __device__ float delta_r(float r) {
-    return r * r + c_a * c_a - 2.0f * c_M * r;
+    return r * r + c_a * c_a - 2.0f * M * r;
 }
 
 __device__ float ddelta_r(float r) {
-    return 2.0f * (r - c_M);
+    return 2.0f * (r - M);
 }
 
 // ---------------------------------------------------------------------
@@ -140,14 +134,14 @@ __device__ float dWsquare_r(float r, float E, float L) {
 
 __device__ float W_theta(float theta, float E, float L) {
     float sin_theta = sin(theta);
-    sin_theta = fmax(sin_theta, c_epsilon);
+    sin_theta = fmax(sin_theta, EPSILON);
     return c_a * E * sin_theta - L / sin_theta;
 }
 
 __device__ float dWsquare_theta(float theta, float E, float L) {
     float sin_theta = sin(theta);
     float cos_theta = cos(theta);
-    sin_theta = fmax(sin_theta, c_epsilon);
+    sin_theta = fmax(sin_theta, EPSILON);
     float dW_dtheta = cos_theta * (c_a * E + L / (sin_theta * sin_theta));
     return 2.0f * W_theta(theta, E, L) * dW_dtheta;
 }
@@ -157,7 +151,7 @@ __device__ float dWsquare_theta(float theta, float E, float L) {
 
 __device__ float E_func(float r, float theta, float dr, float dtheta, float dphi) {
     float sin_theta = sin(theta);
-    sin_theta = fmax(sin_theta, c_epsilon);
+    sin_theta = fmax(sin_theta, EPSILON);
     float delta = delta_r(r);
     float term = ((c_a * c_a * sin_theta * sin_theta - delta) * (-dr * dr / delta - dtheta * dtheta)
         + (dphi * sin_theta) * (dphi * sin_theta) * delta);
@@ -166,7 +160,7 @@ __device__ float E_func(float r, float theta, float dr, float dtheta, float dphi
 
 __device__ float L_func(float r, float theta, float dphi, float E) {
     float sin_theta = sin(theta);
-    sin_theta = fmax(sin_theta, c_epsilon);
+    sin_theta = fmax(sin_theta, EPSILON);
     float delta = delta_r(r);
     float sigma_val = sigma(r, theta);
     float num = c_a * E * delta + (sigma_val * delta * dphi - c_a * E * (r * r + c_a * c_a));
@@ -195,7 +189,7 @@ __device__ float dphi_func(float r, float theta, float E, float L) {
     float sig = sigma(r, theta);
     float delta = delta_r(r);
     float sin_theta = sin(theta);
-    sin_theta = fmax(sin_theta, c_epsilon);
+    sin_theta = fmax(sin_theta, EPSILON);
     return (c_a * W_r(r, E, L) / delta - W_theta(theta, E, L) / sin_theta) / sig;
 }
 
@@ -216,8 +210,8 @@ __device__ float dp_theta(float r, float theta, float E, float L) {
 
 // @TODO: Might need to do a line segment between points
 __device__ bool check_accretion_disk_collision(float r, float theta) {
-    if (c_accretion_disk_enabled && r >= c_accretion_disk_inner_radius && r <= c_accretion_disk_outer_radius) {
-        if (fabs(theta - M_PI / 2.0f) < c_accretion_disk_tolerance_theta) {
+    if (ACCRETION_DISK_ENABLED && r >= ACCRETION_DISK_INNER_RADIUS && r <= ACCRETION_DISK_OUTER_RADIUS) {
+        if (fabs(theta - PI / 2.0f) < ACCRETION_DISK_TOLERANCE_THETA) {
             return true;
         }
     }
@@ -271,8 +265,8 @@ __global__ void simulateRayKernel(float3 pos, size_t num_rays_per_dim, float* lo
     int const idx_theta = idx / num_rays_per_dim;
     int const idx_phi = idx % num_rays_per_dim;
 
-    float theta = M_PI - (M_PI * idx_theta) / num_rays_per_dim;
-    float phi = (2.0f * M_PI * idx_phi) / num_rays_per_dim - M_PI;
+    float theta = PI - (PI * idx_theta) / num_rays_per_dim;
+    float phi = (2.0f * PI * idx_phi) / num_rays_per_dim - PI;
 
     // @TODO: (Investigate); Might need to rotate outgoing dirs to account for camera orientation
     float3 camPos = make_float3(pos.x, pos.y, pos.z);  // camera world pos
@@ -290,21 +284,21 @@ __global__ void simulateRayKernel(float3 pos, size_t num_rays_per_dim, float* lo
 
     dir = normalizef3(dir);
 
-    float const x_vel = M_C * dir.x;
-    float const y_vel = M_C * dir.y;
-    float const z_vel = M_C * dir.z;
+    float const x_vel = C * dir.x;
+    float const y_vel = C * dir.y;
+    float const z_vel = C * dir.z;
 
-    float const A = c_a * c_rs / 2;
+    float const A = c_a * R_S / 2;
 
     float bl[6];
     cartesian_to_boyer_lindquist(pos.x, x_vel, pos.y, y_vel, pos.z, z_vel, A, bl);
 
-    float const r0 = 2.0f / c_rs * bl[0];
+    float const r0 = 2.0f / R_S * bl[0];
     float const theta0 = bl[2];
     float const phi0 = bl[4];
-    float const dr0 = bl[1] / M_C;
-    float const dtheta0 = bl[3] * c_rs / (2.0f * M_C);
-    float const dphi0 = bl[5] * c_rs / (2.0f * M_C);
+    float const dr0 = bl[1] / C;
+    float const dtheta0 = bl[3] * R_S / (2.0f * C);
+    float const dphi0 = bl[5] * R_S / (2.0f * C);
 
     // Compute conserved quantities using Kerr equations.
     float E = E_func(r0, theta0, dr0, dtheta0, dphi0);
@@ -350,7 +344,7 @@ __global__ void simulateRayKernel(float3 pos, size_t num_rays_per_dim, float* lo
             else if (check_accretion_disk_collision(y[0], y[1])) {
                 while (idx_entry < (c_layers + 1) * 2) {
                     entry[idx_entry] = DISK;
-                    entry[idx_entry + 1] = 1 - abs((y[0] - c_accretion_disk_inner_radius) / c_accretion_disk_outer_radius);
+                    entry[idx_entry + 1] = 1 - abs((y[0] - ACCRETION_DISK_INNER_RADIUS) / ACCRETION_DISK_OUTER_RADIUS);
                     idx_entry += 2;
                 }
                 break;
@@ -385,7 +379,7 @@ void traceKerr(glm::vec3 position, float rs, float kerr, std::vector<float> env_
 
     cudaMemcpyToSymbol(c_layers, &layers, sizeof(unsigned int));
     cudaMemcpyToSymbol(c_a, &kerr, sizeof(float));
-    cudaMemcpyToSymbol(c_rs, &rs, sizeof(float));
+    cudaMemcpyToSymbol(R_S, &rs, sizeof(float));
 
     cudaMemcpyToSymbol(
         c_env_r_values,
