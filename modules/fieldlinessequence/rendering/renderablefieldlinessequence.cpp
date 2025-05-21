@@ -317,7 +317,7 @@ namespace {
         std::optional<int> dataID;
 
         // Number Of Files To Queue is a max value of the amount of files to queue up
-        // so that not too big of a data set is downloaded unnessesarily.
+        // so that not too big of a data set is downloaded.
         std::optional<int> numberOfFilesToQueue;
 
         std::optional<std::string> infoURL;
@@ -1026,7 +1026,11 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         if (!_dynamicFileDownloader) {
             const std::string& identifier = parent()->identifier();
             _dynamicFileDownloader = std::make_unique<DynamicFileSequenceDownloader>(
-                _dataID, identifier, _infoURL, _dataURL, _nFilesToQueue
+                _dataID,
+                identifier,
+                _infoURL,
+                _dataURL,
+                _nFilesToQueue
             );
         }
         updateDynamicDownloading(currentTime, deltaTime);

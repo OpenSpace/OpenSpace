@@ -115,7 +115,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UseColorMapInfo = {
         "UseColorMap",
         "Use Color Map",
-        "Used to toggle color map on or off on sphere. Mainly used to transform "
+        "Used to toggle color map on or off for the sphere. Mainly used to transform "
         "grayscale textures from data into color images.",
         openspace::properties::Property::Visibility::User
     };
@@ -274,6 +274,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
         _useColorMap = true;
     }
     addProperty(_useColorMap);
+
     _colorMap.onChange([this]() {
         if (!std::filesystem::exists(_colorMap.value())) {
             LWARNINGC(
@@ -285,8 +286,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
             );
             return;
         }
-        _transferFunction =
-            std::make_unique<TransferFunction>(_colorMap.value());
+        _transferFunction = std::make_unique<TransferFunction>(_colorMap.value());
     });
     addProperty(_colorMap);
 
@@ -324,9 +324,7 @@ void RenderableSphere::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 
     if (_useColorMap) {
-        _transferFunction = std::make_unique<TransferFunction>(
-            _colorMap.value()
-        );
+        _transferFunction = std::make_unique<TransferFunction>(_colorMap.value());
     }
 }
 

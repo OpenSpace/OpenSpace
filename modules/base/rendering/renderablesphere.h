@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__
 
 #include <openspace/rendering/renderable.h>
+
 #include <openspace/rendering/transferfunction.h>
 
 #include <openspace/properties/misc/optionproperty.h>

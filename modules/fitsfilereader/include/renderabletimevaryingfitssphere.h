@@ -79,7 +79,6 @@ private:
     void computeSequenceEndTime();
     void updateDynamicDownloading(const double currentTime, const double deltaTime);
 
-    properties::OptionProperty _fitsLayer;
     properties::OptionProperty _fitsLayerName;
     // An option to keep or delete the downloads from dynamic downloader on shutdown
     // Deletes on default
@@ -101,12 +100,10 @@ private:
     size_t _maxLoadedFiles = 100;
     std::string _infoURL;
     std::string _dataURL;
-    bool _hasLayerNames = false;
     std::map<int, std::string> _layerNames;
     std::map<int, std::pair<float, float>> _layerMinMaxCaps;
 
     int _fitsLayerTemp = -1;
-    int _fitsLayerNameTemp = -1;
     // If there's just one state it should never disappear
     bool _renderForever = false;
     bool _inInterval = false;

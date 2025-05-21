@@ -124,8 +124,8 @@ local fieldlinesIO = {
   GUI = {
     Name = "Fieldlines: Corona PFSS (In-Out Tracing)",
     Path = "/Solar System/Heliosphere/WSA Coronal Model",
-    Description = [[WSA 5.4 real-time output of the fieldline trace from the solar surface to
-      the source surface using GONGZ as input.]]
+    Description = [[WSA 5.4 real-time output of the fieldline trace from the solar surface
+      outwards using GONGZ as input.]]
   }
 }
 
@@ -172,7 +172,6 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(fieldlinesOI)
   openspace.addSceneGraphNode(fieldlinesIO)
   openspace.addSceneGraphNode(fieldlinesEarth)
-
 end)
 
 asset.onDeinitialize(function()
@@ -193,7 +192,7 @@ asset.meta = {
   Name = "WSA 5.4. Streaming Field Line Data Dynamically",
   Version = "1.0",
   Description = [[Downloading data from the WSA 5.4 simulation model, showing the dynamic
-    sun at any point. It includes .osfls files (OpenSpace FieldLine Sequence) for field
+    Sun at any point. It includes .osfls files (OpenSpace FieldLine Sequence) for field
     lines.]],
   Author = "CCMC",
   URL = "http://openspaceproject.com",

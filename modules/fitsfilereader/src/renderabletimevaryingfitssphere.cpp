@@ -101,7 +101,6 @@ namespace {
             << "00"
             << digits.substr(12, 2) << "." // Second
             << "000";
-        //<< digits.substr(14); // Milliseconds
 
         return openspace::Time::convertTime(oss.str());
     }
@@ -154,18 +153,21 @@ namespace {
             StaticLoading,
             DynamicDownloading
         };
+
+        // Decides whether to use static or dynamic data downloading.
         std::optional<LoadingType> loadingType;
 
-        // A data ID that corresponds to what dataset to use if using dynamicWebContent
+        // A data ID that corresponds to what dataset to use if using dynamicWebContent.
         std::optional<int> dataID;
 
-        // A number Of Files To Queue is a max value of the amount of files to queue up
-        // so that not to big of a data set is downloaded nessesarily.
+        // This is a max value of the amount of files to queue up
+        // so that not to big of a data set is downloaded.
         std::optional<int> numberOfFilesToQueue;
-        // A URL that returns a JSON formated page with metadata needed for the dataURL
+
+        // A URL that returns a JSON formated page with metadata needed for the dataURL.
         std::optional<std::string> infoURL;
 
-        // A URL that returns a JSON formated page with a list of each available file
+        // A URL that returns a JSON formated page with a list of each available file.
         std::optional<std::string> dataURL;
 
         // [[codegen::verbatim(FitsLayerInfo.description)]]
@@ -174,16 +176,15 @@ namespace {
         // [[codegen::verbatim(FitsLayerNameInfo.description)]]
         std::optional<ghoul::Dictionary> layerNames;
 
-        // A positive number to be used to cap where the color range will lie.
-        // Values higher than this number, and values lower than the negative of
-        // this value will be overexposed.
+        // A range per layer to be used to cap where the color range will lie.
+        // Values outside of range will be overexposed.
         std::optional<ghoul::Dictionary> layerMinMaxCapValues;
 
         // This is set to false by default and will delete all the downloaded content when
         // OpenSpace is shut down. Set to true to save all the downloaded files.
         std::optional<bool> cacheData;
 
-        // Set if first/last file should render outside of the sequence interval
+        // Set if first/last file should render outside of the sequence interval.
         std::optional<bool> showPastFirstAndLastImage;
     };
 #include "renderabletimevaryingfitssphere_codegen.cpp"
@@ -200,7 +201,6 @@ documentation::Documentation RenderableTimeVaryingFitsSphere::Documentation() {
 RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
                                                       const ghoul::Dictionary& dictionary)
     : RenderableSphere(dictionary)
-    , _fitsLayer(FitsLayerInfo)
     , _fitsLayerName(FitsLayerNameInfo)
     , _saveDownloadsOnShutdown(SaveDownloadsOnShutdown, false)
     , _textureFilterProperty(TextureFilterInfo)
@@ -220,6 +220,7 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
     else {
         _loadingType = LoadingType::StaticLoading;
     }
+
     if (p.fitsLayer.has_value()) {
         _fitsLayerTemp = *p.fitsLayer;
     }
@@ -250,21 +251,6 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
     });
     addProperty(_textureFilterProperty);
 
-    _fitsLayer.onChange([this]() {
-        if (_loadingType == LoadingType::StaticLoading) {
-            extractMandatoryInfoFromSourceFolder();
-        }
-        else if (_isFitsFormat) {
-            for (File& file : _files) {
-                std::pair<float, float> minMax = _layerMinMaxCaps.at(_fitsLayerName);
-                file.texture = loadTextureFromFits(file.path, _fitsLayerName, minMax);
-                file.texture->uploadTexture();
-                file.texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
-            }
-            loadTexture();
-        }
-    });
-
     _fitsLayerName.onChange([this]() {
         if (_loadingType == LoadingType::StaticLoading) {
             extractMandatoryInfoFromSourceFolder();
@@ -272,8 +258,8 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
         else {
             if (_isFitsFormat) {
                 for (File& file : _files) {
-                    std::pair<float, float> minMax = _layerMinMaxCaps.at(_fitsLayer);
-                    file.texture = loadTextureFromFits(file.path, _fitsLayer, minMax);
+                    std::pair<float, float> minMax = _layerMinMaxCaps.at(_fitsLayerName);
+                    file.texture = loadTextureFromFits(file.path, _fitsLayerName, minMax);
                     file.texture->uploadTexture();
                     file.texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
                 }
@@ -281,12 +267,14 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
             }
         }
     });
+    addProperty(_fitsLayerName);
 
     if (_loadingType == LoadingType::StaticLoading) {
         extractMandatoryInfoFromSourceFolder();
         computeSequenceEndTime();
         loadTexture();
     }
+
     if (_loadingType == LoadingType::DynamicDownloading) {
         if (!p.dataID.has_value()) {
             throw ghoul::RuntimeError(
@@ -311,7 +299,7 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
             );
         }
 
-        _dataURL = p.dataURL.value();
+        _dataURL = *p.dataURL;
 
         if (p.layerMinMaxCapValues.has_value()) {
             const ghoul::Dictionary d = *p.layerMinMaxCapValues;
@@ -329,33 +317,26 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
             }
         }
 
-        if (p.layerNames.has_value()) {
-            const ghoul::Dictionary d = *p.layerNames;
-            for (std::string_view key : d.keys()) {
-                std::pair<int, std::string> pair = {
-                    std::stoi(std::string(key)),
-                    d.value<std::string>(key)
-                };
-                _layerNames.emplace(pair);
-            }
-            if (!p.fitsLayer.has_value()) {
-                LWARNING(std::format(
-                    "Specify 'FitsLayer' for scene graph node with DataID: {}.",
-                    "Assuming first layer",
-                    _dataID
-                ));
-                _fitsLayerTemp = 0;
-            }
-            _hasLayerNames = true;
-            addProperty(_fitsLayerName);
+        if (!p.layerNames.has_value()) {
+            throw ghoul::RuntimeError("At least one name for one layer is required.");
         }
-        else {
-            _hasLayerNames = false;
-            addProperty(_fitsLayer);
+        const ghoul::Dictionary dictionary = *p.layerNames;
+        for (std::string_view key : dictionary.keys()) {
+            const int k = std::stoi(std::string(key));
+            std::string v = dictionary.value<std::string>(key);
+            _layerNames.emplace(k, std::move(v));
         }
-        _saveDownloadsOnShutdown = p.cacheData.value_or(_saveDownloadsOnShutdown);
-        addProperty(_saveDownloadsOnShutdown);
+        if (!p.fitsLayer.has_value()) {
+            LWARNING(std::format(
+                "Specify 'FitsLayer' for scene graph node with DataID: {}. ",
+                "Assuming first layer",
+                _dataID
+            ));
+            _fitsLayerTemp = 0;
+        }
     }
+    _saveDownloadsOnShutdown = p.cacheData.value_or(_saveDownloadsOnShutdown);
+    addProperty(_saveDownloadsOnShutdown);
 }
 
 void RenderableTimeVaryingFitsSphere::deinitializeGL() {
@@ -370,29 +351,22 @@ void RenderableTimeVaryingFitsSphere::deinitializeGL() {
 
 void RenderableTimeVaryingFitsSphere::readFileFromFits(std::filesystem::path path) {
     if (!_layerOptionsAdded) {
-        if (_hasLayerNames) {
-            for (std::pair<int, std::string> name : _layerNames) {
-                _fitsLayerName.addOption(name.first, name.second);
-            }
-            _fitsLayerName = _fitsLayerTemp;
+        for (std::pair<int, std::string> name : _layerNames) {
+            _fitsLayerName.addOption(name.first, name.second);
         }
-        else {
-            for (int i = 0; i < nLayers(path); ++i) {
-                _fitsLayer.addOption(i, std::to_string(i + 1));
-            }
-            _fitsLayer = _fitsLayerTemp;
-        }
+        _fitsLayerName = _fitsLayerTemp;
         _layerOptionsAdded = true;
     }
-    size_t layer = _hasLayerNames ? _fitsLayerName : _fitsLayer;
-    std::pair<float, float> minMax = _layerMinMaxCaps.at(layer);
+
+    std::pair<float, float> minMax = _layerMinMaxCaps.at(_fitsLayerName);
     std::unique_ptr<ghoul::opengl::Texture> t =
-        loadTextureFromFits(path, layer, minMax);
+        loadTextureFromFits(path, _fitsLayerName, minMax);
+
     if (!t) {
         return;
     }
-    if (_textureFilterProperty ==
-        static_cast<int>(ghoul::opengl::Texture::FilterMode::Nearest))
+    if (_textureFilterProperty == static_cast<int>(
+        ghoul::opengl::Texture::FilterMode::Nearest))
     {
         t->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
     }
@@ -401,6 +375,7 @@ void RenderableTimeVaryingFitsSphere::readFileFromFits(std::filesystem::path pat
     {
         t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
     }
+
     glm::vec2 minMaxDataValues = minMaxTextureDataValues(t);
 
     File newFile = {
@@ -427,16 +402,17 @@ void RenderableTimeVaryingFitsSphere::readFileFromImage(std::filesystem::path pa
         ghoul::io::TextureReader::ref().loadTexture(path.string(), 2);
     t->setInternalFormat(GL_COMPRESSED_RGBA);
     t->uploadTexture();
-    if (_textureFilterProperty ==
-        static_cast<int>(ghoul::opengl::Texture::FilterMode::Linear))
+    if (_textureFilterProperty == static_cast<int>(
+        ghoul::opengl::Texture::FilterMode::Linear))
     {
         t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
     }
-    else if (_textureFilterProperty ==
-        static_cast<int>(ghoul::opengl::Texture::FilterMode::Nearest))
+    else if (_textureFilterProperty == static_cast<int>(
+        ghoul::opengl::Texture::FilterMode::Nearest))
     {
         t->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
     }
+
     t->purgeFromRAM();
     glm::vec2 minMaxDataValues = minMaxTextureDataValues(t);
 
@@ -534,9 +510,14 @@ void RenderableTimeVaryingFitsSphere::update(const UpdateData& data) {
     if (!_dynamicFileDownloader && _loadingType == LoadingType::DynamicDownloading) {
         const std::string& identifier = parent()->identifier();
         _dynamicFileDownloader = std::make_unique<DynamicFileSequenceDownloader>(
-            _dataID, identifier, _infoURL, _dataURL, _nFilesToQueue
+            _dataID,
+            identifier,
+            _infoURL,
+            _dataURL,
+            _nFilesToQueue
         );
     }
+
     if (_loadingType == LoadingType::DynamicDownloading) {
         updateDynamicDownloading(currentTime, deltaTime);
     }
@@ -557,10 +538,9 @@ void RenderableTimeVaryingFitsSphere::update(const UpdateData& data) {
             updateActiveTriggerTimeIndex(currentTime);
             File& file = _files[_activeTriggerTimeIndex];
             if (file.status == File::FileStatus::Downloaded) {
-                size_t layer = _hasLayerNames ? _fitsLayerName : _fitsLayer;
-                std::pair<float, float> minMax = _layerMinMaxCaps.at(layer);
+                std::pair<float, float> minMax = _layerMinMaxCaps.at(_fitsLayerName);
                 file.texture =
-                    loadTextureFromFits(file.path, layer, minMax);
+                    loadTextureFromFits(file.path, _fitsLayerName, minMax);
                 file.status = File::FileStatus::Loaded;
             }
             if (previousIndex != _activeTriggerTimeIndex) {
@@ -570,13 +550,16 @@ void RenderableTimeVaryingFitsSphere::update(const UpdateData& data) {
         }
         // The case when we jumped passed last file. where nextIdx is not < file.size()
         else if (currentTime >=
-            _files[_activeTriggerTimeIndex].time && !_texture) {
+            _files[_activeTriggerTimeIndex].time && !_texture)
+        {
             loadTexture();
         }
     }
+
     if (!_firstUpdate && _useColorMap && !_files.empty()) {
         _dataMinMaxValues = _files[_activeTriggerTimeIndex].dataMinMax;
     }
+
     if (_textureIsDirty) [[unlikely]] {
         loadTexture();
         _textureIsDirty = false;
