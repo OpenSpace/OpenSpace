@@ -288,6 +288,7 @@ nlohmann::json Property::generateJsonDescription() const {
     const std::string groupId = groupIdentifier();
 
     nlohmann::json json = {
+        { "identifier", _identifier },
         { "description", _description },
         { "guiName", _guiName },
         { "group", groupId },
