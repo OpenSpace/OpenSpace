@@ -40,6 +40,7 @@ local Object = {
   GUI = {
     Name = "Oort Sphere",
     Path = "/Solar System/Comets/Oort Cloud",
+    Focusable = false,
     Description = [[The Oort cloud is a region of space surrounding the Sun where comets
       are believed to originate. It is believed to extend from 20,000-100,000 Astronomical
       Units (AU), with its greatest concentration around 50,000 AU (1 AU is the average

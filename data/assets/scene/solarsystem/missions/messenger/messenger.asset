@@ -59,7 +59,9 @@ local MessengerProbeBlack = {
   },
   GUI = {
     Name = "MessengerProbe Black",
-    Path = "/Solar System/Missions/Messenger"
+    Path = "/Solar System/Missions/Messenger",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -76,7 +78,9 @@ local MessengerProbeFoil = {
   },
   GUI = {
     Name = "MessengerProbe foil",
-    Path = "/Solar System/Missions/Messenger"
+    Path = "/Solar System/Missions/Messenger",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -93,7 +97,9 @@ local MessengerProbeHeatShield = {
   },
   GUI = {
     Name = "MessengerProbe Heat Shield",
-    Path = "/Solar System/Missions/Messenger"
+    Path = "/Solar System/Missions/Messenger",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -110,7 +116,9 @@ local MessengerProbeMetal = {
   },
   GUI = {
     Name = "MessengerProbe Metal",
-    Path = "/Solar System/Missions/Messenger"
+    Path = "/Solar System/Missions/Messenger",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -127,7 +135,9 @@ local MessengerProbePanels = {
   },
   GUI = {
     Name = "MessengerProbe Panels",
-    Path = "/Solar System/Missions/Messenger"
+    Path = "/Solar System/Missions/Messenger",
+    Focusable = false
+    Hidden = true
   }
 }
 
@@ -149,7 +159,8 @@ local MessengerTrail = {
   },
   GUI = {
     Name = "Messenger Trail",
-    Path = "/Solar System/Missions/Messenger"
+    Path = "/Solar System/Missions/Messenger",
+    Focusable = false
   }
 }
 

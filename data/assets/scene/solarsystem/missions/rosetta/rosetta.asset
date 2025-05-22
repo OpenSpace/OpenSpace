@@ -94,6 +94,7 @@ local PhilaePosition = {
   GUI = {
     Name = "Philae Position",
     Path = "/Solar System/Missions/Rosetta",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -126,7 +127,8 @@ local Philae = {
   },
   GUI = {
     Name = "Philae",
-    Path = "/Solar System/Missions/Rosetta"
+    Path = "/Solar System/Missions/Rosetta",
+    Focusable = false
   }
 }
 
@@ -134,7 +136,8 @@ local NavCam = {
   Identifier = "NAVCAM",
   Parent = RosettaPosition.Identifier,
   GUI = {
-    Path = "/Solar System/Missions/Rosetta/Instruments"
+    Path = "/Solar System/Missions/Rosetta/Instruments",
+    Focusable = false
   }
 }
 
@@ -158,7 +161,8 @@ local NavCamFov = {
   },
   GUI = {
     Name = "NAVCAM FOV",
-    Path = "/Solar System/Missions/Rosetta/Instruments"
+    Path = "/Solar System/Missions/Rosetta/Instruments",
+    Focusable = false
   }
 }
 
@@ -197,7 +201,8 @@ local RosettaCometTrail = {
   },
   GUI = {
     Name = "Rosetta Comet Trail",
-    Path = "/Solar System/Missions/Rosetta"
+    Path = "/Solar System/Missions/Rosetta",
+    Focusable = false
   }
 }
 
@@ -218,7 +223,8 @@ local PhilaeTrail = {
   },
   GUI = {
     Name = "Philae Trail",
-    Path = "/Solar System/Missions/Rosetta"
+    Path = "/Solar System/Missions/Rosetta",
+    Focusable = false
   }
 }
 

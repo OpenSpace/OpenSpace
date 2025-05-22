@@ -30,6 +30,7 @@ local Object = {
   GUI = {
     Name = "Hydrogen-alpha All-sky",
     Path = "/Milky Way/All Sky Images",
+    Focusable = false,
     Description = [[Hydrogen-alpha is a term that describes light from the ground state of
       the hydrogen atom. When an electron in an atom moves from one energy level to a
       higher one, we say the atom is excited. When the electron moves back down to the

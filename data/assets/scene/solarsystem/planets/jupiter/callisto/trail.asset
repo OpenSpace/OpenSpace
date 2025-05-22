@@ -18,10 +18,16 @@ local CallistoTrail = {
     Period = 17.0,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter", "moonTrail_major_jupiter" },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_major_jupiter"
+  },
   GUI = {
     Name = "Callisto Trail",
-    Path = "/Solar System/Planets/Jupiter/Major Moons/Callisto"
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Callisto",
+    Focusable = false
   }
 }
 

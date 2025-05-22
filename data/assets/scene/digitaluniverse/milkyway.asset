@@ -40,6 +40,7 @@ local Object = {
   GUI = {
     Name = "Milky Way Image",
     Path = "/Milky Way/Galaxy",
+    Focusable = false,
     Description = [[The exterior view of the Milky Way is represented here by a
       two-dimensional image. The image is that of NGC 1232, a galaxy thought to resemble
       our Milky Way. The image has been properly sized and approximately oriented to

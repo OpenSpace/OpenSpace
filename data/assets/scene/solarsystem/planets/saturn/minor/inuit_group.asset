@@ -56,7 +56,8 @@ local KiviuqTrail = {
   },
   GUI = {
     Name = "Kiviuq Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq",
+    Focusable = false
   }
 }
 
@@ -86,7 +87,8 @@ local KiviuqLabel = {
   },
   GUI = {
     Name = "Kiviuq Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq",
+    Focusable = false
   }
 }
 
@@ -142,7 +144,8 @@ local IjiraqTrail = {
   },
   GUI = {
     Name = "Ijiraq Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Ijiraq"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Ijiraq",
+    Focusable = false
   }
 }
 
@@ -172,7 +175,8 @@ local IjiraqLabel = {
   },
   GUI = {
     Name = "Ijiraq Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Ijiraq"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Ijiraq",
+    Focusable = false
   }
 }
 
@@ -228,7 +232,8 @@ local PaaliaqTrail = {
   },
   GUI = {
     Name = "Paaliaq Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Paaliaq"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Paaliaq",
+    Focusable = false
   }
 }
 
@@ -258,7 +263,8 @@ local PaaliaqLabel = {
   },
   GUI = {
     Name = "Paaliaq Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Paaliaq"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Paaliaq",
+    Focusable = false
   }
 }
 
@@ -314,7 +320,8 @@ local SiarnaqTrail = {
   },
   GUI = {
     Name = "Cyllene Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Cyllene"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Cyllene",
+    Focusable = false
   }
 }
 
@@ -344,7 +351,8 @@ local SiarnaqLabel = {
   },
   GUI = {
     Name = "Siarnaq Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq",
+    Focusable = false
   }
 }
 
@@ -400,7 +408,8 @@ local TarqeqTrail = {
   },
   GUI = {
     Name = "Tarqeq Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Tarqeq"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Tarqeq",
+    Focusable = false
   }
 }
 
@@ -430,7 +439,8 @@ local TarqeqLabel = {
   },
   GUI = {
     Name = "Tarqeq Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Tarqeq"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Tarqeq",
+    Focusable = false
   }
 }
 
@@ -486,7 +496,8 @@ local S2004S29Trail = {
   },
   GUI = {
     Name = "S/2004 S 29 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S29"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S29",
+    Focusable = false
   }
 }
 
@@ -516,7 +527,8 @@ local S2004S29Label = {
   },
   GUI = {
     Name = "S/2004 S 29 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S29"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S29",
+    Focusable = false
   }
 }
 
@@ -572,7 +584,8 @@ local S2004S31Trail = {
   },
   GUI = {
     Name = "S/2004 S 31 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S31"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S31",
+    Focusable = false
   }
 }
 
@@ -602,7 +615,8 @@ local S2004S31Label = {
   },
   GUI = {
     Name = "S/2004 S 31 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S31"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S31",
+    Focusable = false
   }
 }
 
@@ -658,7 +672,8 @@ local S2019S01Trail = {
   },
   GUI = {
     Name = "S/2019 S 01 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2019S01"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2019S01",
+    Focusable = false
   }
 }
 
@@ -688,7 +703,8 @@ local S2019S01Label = {
   },
   GUI = {
     Name = "S/2019 S 01 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2019S01"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2019S01",
+    Focusable = false
   }
 }
 

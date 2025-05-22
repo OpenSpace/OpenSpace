@@ -20,7 +20,8 @@ local MoonTrail = {
   },
   GUI = {
     Name = "Moon Trail",
-    Path = "/Solar System/Planets/Earth/Moon"
+    Path = "/Solar System/Planets/Earth/Moon",
+    Focusable = false
   }
 }
 

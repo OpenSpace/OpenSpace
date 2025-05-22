@@ -71,6 +71,7 @@ local EuropaLabel = {
   GUI = {
     Name = "Europa Label",
     Path = "/Solar System/Planets/Jupiter/Major Moons/Europa",
+    Focusable = false,
     Description = "Label for Jupiter's moon Europa"
   }
 }

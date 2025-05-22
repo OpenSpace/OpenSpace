@@ -21,6 +21,7 @@ local PlutoBarycenterTrail = {
   GUI = {
     Name = "Pluto Barycenter Trail",
     Path = "/Solar System/Dwarf Planets/Pluto",
+    Focusable = false,
     Description = [[Precise trail of Pluto from NASA SPICE data. Not containing full
       orbit]]
   }

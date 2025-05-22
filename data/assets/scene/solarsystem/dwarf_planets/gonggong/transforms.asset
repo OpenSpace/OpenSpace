@@ -24,6 +24,7 @@ local Position = {
   GUI = {
     Name = "Gonggong Position",
     Path = "/Solar System/Dwarf Planets/Gonggong",
+    Focusable = false,
     Hidden = true
   }
 }

@@ -26,6 +26,7 @@ local Object = {
   GUI = {
     Name = "Potentially Hazardous Asteroids",
     Path = "/Solar System/Small Bodies",
+    Focusable = false,
     Description = [[Asteroids that are deemed potentially hazardous to Earth based on
       their close approaches. All asteroids with an Earth Minimum Orbit Intersection
       Distance (MOID) of 0.05 AU or less, and with an absolute magnitude (H) of 22.0 or

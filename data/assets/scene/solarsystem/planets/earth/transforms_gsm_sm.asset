@@ -28,12 +28,12 @@ local GeocentricSolarMagnetospheric = {
   GUI = {
     Name = "Geocentric Solar Magnetospheric",
     Path = "/Solar System/Planets/Earth",
-    Description = [[ +X is parallel to the geometric earth-sun position vector.
-      +Z axis is normalized component of north centered geomagnetic dipole
-      vector orthogonal to GSM +X axis.
-      +Y completes the right-handed frame.
-      - the origin of this frame is the center of mass of the Earth.]],
-    Hidden = true
+    Focusable = false,
+    Hidden = true,
+    Description = [[+X is parallel to the geometric earth-sun position vector. +Z axis is
+      normalized component of north centered geomagnetic dipole vector orthogonal to GSM
+      +X axis. +Y completes the right-handed frame. The origin of this frame is the center
+      of mass of the Earth.]]
   }
 }
 
@@ -50,14 +50,13 @@ local SolarMagnetic = {
   GUI = {
     Name = "Solar Magnetic",
     Path = "/Solar System/Planets/Earth",
-    Description = [[+Z axis is the direction of Earth's magnetic dipole axis
-      (positive North); it's the primary vector.
-      +X axis is the projection of the geometric position of the
-      Sun relative to the Earth onto the plane perpendicular to the
-      Z axis.
-      +Y axis completes the right-handed system.
-      - the origin of this frame is the center of mass of the Earth.]],
-    Hidden = true
+    Focusable = false,
+    Hidden = true,
+    Description = [[+Z axis is the direction of Earth's magnetic dipole axis (positive
+      North); it's the primary vector. +X axis is the projection of the geometric position
+      of the Sun relative to the Earth onto the plane perpendicular to the Z axis. +Y axis
+      completes the right-handed system. The origin of this frame is the center of mass
+      of the Earth.]]
   }
 }
 
@@ -65,6 +64,7 @@ local SolarMagnetic = {
 asset.onInitialize(function()
   openspace.spice.loadKernel(earthcentricKernels .. "GSM.tf")
   openspace.spice.loadKernel(earthcentricKernels .. "SM.tf")
+
   openspace.addSceneGraphNode(GeocentricSolarMagnetospheric)
   openspace.addSceneGraphNode(SolarMagnetic)
 end)
@@ -72,6 +72,7 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(SolarMagnetic)
   openspace.removeSceneGraphNode(GeocentricSolarMagnetospheric)
+
   openspace.spice.unloadKernel(earthcentricKernels .. "SM.tf")
   openspace.spice.unloadKernel(earthcentricKernels .. "GSM.tf")
 end)
