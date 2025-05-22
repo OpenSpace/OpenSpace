@@ -46,7 +46,7 @@ local HideAllMarkings = {
     openspace.fadeOut("{nightsky_marking}")
     openspace.fadeOut("{du_grid}")
     openspace.fadeOut("{du_grid_labels}")
-    openspace.fadeOut("{ImageConstellation}")
+    openspace.fadeOut("{image_constellation}")
   ]],
   Documentation = "Hides all markings in the night sky",
   GuiPath = "/Night Sky/Markings",

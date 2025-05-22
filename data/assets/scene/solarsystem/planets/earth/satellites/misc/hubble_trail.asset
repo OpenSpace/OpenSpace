@@ -29,7 +29,7 @@ local HubblePosition = {
       DestinationFrame = coreKernels.Frame.J2000
     }
   },
-  Tag = { "earth_satellite", "hubble" },
+  Tag = { "earth_satellites", "hubble" },
   GUI = {
     Name = "Hubble Position",
     Path = "/Solar System/Planets/Earth/Satellites/Hubble",
@@ -53,7 +53,7 @@ local HubbleTrail = {
     Fade = 1.5,
     Resolution = 320
   },
-  Tag = { "earth_satellite", "hubble" },
+  Tag = { "earth_satellites", "hubble" },
   GUI = {
     Name = "Hubble Trail",
     Path = "/Solar System/Planets/Earth/Satellites/Hubble"
