@@ -151,6 +151,7 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
     const double currentTime = data.time.j2000Seconds();
     const bool isInInterval = (currentTime >= _files[0].time) &&
         (currentTime < _sequenceEndTime);
+
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
         if (
