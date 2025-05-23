@@ -29,6 +29,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <filesystem>
 #include <map>
+#include <memory>
 #include <queue>
 #include <string>
 #include <unordered_map>

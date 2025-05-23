@@ -37,6 +37,7 @@ class FieldlinesState;
 namespace fls {
 std::vector<std::string>
     extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars);
+
 /**
 * Extract seedpoints from a text file. Function is used both in
 * renderablefieldlinesequence and cdf to osfls converter task.

@@ -261,11 +261,11 @@ namespace {
         std::optional<int> maskingQuantity;
 
         // Ranges for which their corresponding quantity parameter value will be
-        // masked by. Should be entered as {min value, max value}
+        // masked by. Should be entered as a min value, max value pair.
         std::optional<std::vector<glm::vec2>> maskingRanges;
 
         // Ranges for which their corresponding parameters values will be
-        // masked by. Should be entered as min value, max value
+        // masked by. Should be entered as a min value, max value pair.
         std::optional<glm::vec2> maskingMinMaxRange;
 
         // [[codegen::verbatim(DomainEnabledInfo.description)]]
@@ -277,7 +277,7 @@ namespace {
         // [[codegen::verbatim(ColorUseABlendingInfo.description)]]
         std::optional<bool> alphaBlendingEnabled;
 
-        // Set if first/last file should render forever
+        // Set if first/last file should render forever.
         bool showAtAllTimes;
 
         // If data sets parameter start_time differ from start of run,
@@ -290,9 +290,9 @@ namespace {
             Enlil,
             Pfss
         };
-        // Currently supports: batsrus, enlil & pfss. Not specified -> model == invalid
-        // which just means that the scaleFactor (scaleToMeters) will be 1.f assuming
-        // meter as input
+
+        // If the simulation model is not specified, it means that the scaleFactor
+        // (scaleToMeters) will be 1.f assuming meter as input.
         std::optional<Model> simulationModel;
 
         // Convert the models distance unit, ex. AU to meters for Enlil.
@@ -301,27 +301,28 @@ namespace {
         // Using a different model? Set this to scale your vertex positions to meters.
         std::optional<float> scaleToMeters;
 
-        // Choose type of loading:
-        // StaticLoading: Download and load files on startup.
-        // DynamicDownloading: Download and load files during run time.
         enum class [[codegen::map(openspace::RenderableFieldlinesSequence::LoadingType)]]
         LoadingType {
             StaticLoading,
             DynamicDownloading
         };
 
-        // Decides whether to use static or dynamic data downloading.
+        // Choose type of loading:
+        // StaticLoading: Download and load files on startup.
+        // DynamicDownloading: Download and load files during run time.
         std::optional<LoadingType> loadingType;
 
         // A data ID that corresponds to what dataset to use if using dynamicWebContent
         std::optional<int> dataID;
 
-        // Number Of Files To Queue is a max value of the amount of files to queue up
+        // This is a max value of the amount of files to queue up
         // so that not too big of a data set is downloaded.
         std::optional<int> numberOfFilesToQueue;
 
+        // A URL that returns a JSON formated page with metadata needed for the dataURL.
         std::optional<std::string> infoURL;
 
+        // A URL that returns a JSON formated page with a list of each available file.
         std::optional<std::string> dataURL;
 
         enum class [[codegen::map(openspace::RenderableFieldlinesSequence::SourceFileType)]]
@@ -331,20 +332,20 @@ namespace {
             Osfls
         };
 
-        // Specify file type: Cdf, Json or Osfls
+        // Specify the file format of the data used.
         SourceFileType inputFileType;
 
-        // Path to folder containing the input files
+        // Path to folder containing the input files.
         std::optional<std::filesystem::path> sourceFolder [[codegen::directory()]];
 
-        // Path to a .txt file containing seed points. Mandatory if CDF as input.
-        // Files need time stamp in file name like so: yyyymmdd_hhmmss.txt
+        // Path to a .txt file containing seed points. It is mandatory if CDF is used as
+        // input. Files need time stamp in file name like so: yyyymmdd_hhmmss.txt
         std::optional<std::filesystem::path> seedPointDirectory [[codegen::directory()]];
 
-        // Extra variables such as rho, p or t
+        // Extra variables that can be used to color the field lines by.
         std::optional<std::vector<std::string>> extraVariables;
 
-        // Which variable in CDF file to trace. b is default for fieldline
+        // Which variable in CDF file to trace.
         std::optional<std::string> tracingVariable;
 
         // This is set to false by default and will delete all the downloaded content when
@@ -355,7 +356,7 @@ namespace {
 } // namespace
 
 namespace openspace {
-double extractTriggerTimeFromFilename(std::filesystem::path filePath);
+double extractTriggerTimeFromFilename(const std::filesystem::path& filePath);
 
 documentation::Documentation RenderableFieldlinesSequence::Documentation() {
     return codegen::doc<Parameters>("fieldlinessequence_renderablefieldlinessequence");
@@ -381,7 +382,6 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         glm::vec4(1.f)
     )
     , _colorABlendEnabled(ColorUseABlendingInfo, true)
-
     , _domainEnabled(DomainEnabledInfo, false)
     , _domainGroup({ "Domain" })
     , _domainX(DomainXInfo)
@@ -426,13 +426,13 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     }
 
     if (_loadingType == LoadingType::DynamicDownloading &&
-        _inputFileType == SourceFileType::Cdf) {
+        _inputFileType == SourceFileType::Cdf)
+    {
         throw ghoul::RuntimeError(
             "Dynamic loading (or downloading) is only supported for osfls and json files"
         );
     }
-    if (_loadingType == LoadingType::StaticLoading &&
-        !p.sourceFolder.has_value()) {
+    if (_loadingType == LoadingType::StaticLoading && !p.sourceFolder.has_value()) {
         throw ghoul::RuntimeError(
             "Either dynamic downloading parameters or a sync folder must be specified"
         );
@@ -452,23 +452,23 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     _scalingFactor = p.scaleToMeters.value_or(_scalingFactor);
 
     if (_loadingType == LoadingType::DynamicDownloading) {
-        _dataID = p.dataID.value_or(_dataID);
-        if (!_dataID) {
+        if (!p.dataID.has_value()) {
             throw ghoul::RuntimeError(
                 "If running with dynamic downloading, dataID needs to be specified"
             );
         }
+        _dataID = *p.dataID;
         _nFilesToQueue = static_cast<size_t>(
             p.numberOfFilesToQueue.value_or(_nFilesToQueue)
-            );
-        _infoURL = p.infoURL.value();
-        if (_infoURL.empty()) {
+        );
+        if (!p.infoURL.has_value()) {
             throw ghoul::RuntimeError("InfoURL has to be provided");
         }
-        _dataURL = p.dataURL.value();
-        if (_dataURL.empty()) {
+        _infoURL = *p.infoURL;
+        if (!p.dataURL.has_value()) {
             throw ghoul::RuntimeError("DataURL has to be provided");
         }
+        _dataURL = *p.dataURL;
     }
     else {
         ghoul_assert(
@@ -489,9 +489,8 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             _files.push_back(std::move(file));
             if (_files[0].path.empty()) {
                 throw ghoul::RuntimeError(std::format(
-                    "Error finding file {} in folder {}" ,
-                    e.path().filename(),
-                    path
+                    "Error finding file {} in folder {}",
+                    e.path().filename(), path
                 ));
             }
         }
@@ -522,15 +521,13 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     _colorTablePath = FieldlinesSequenceModule::DefaultTransferFunctionFile.string();
     if (p.colorTablePaths.has_value()) {
         for (const std::filesystem::path& path : *p.colorTablePaths) {
-            if (std::filesystem::exists(path)) {
-                _colorTablePaths.emplace_back(path);
-            }
-            else {
+            if (!std::filesystem::exists(path)) {
                 throw ghoul::RuntimeError(std::format(
-                    "Color table path {} is not a valid file. ",
+                    "Color table path {} is not a valid file",
                     path
                 ));
             }
+            _colorTablePaths.emplace_back(path);
         }
     }
     if (!p.colorTablePaths.has_value() || _colorTablePaths.empty()) {
@@ -582,7 +579,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     }
 
     _colorQuantity.onChange([this]() {
-        if (_colorTablePaths.size() == 0) {
+        if (_colorTablePaths.empty()) {
             return;
         }
         _shouldUpdateColorBuffer = true;
@@ -619,7 +616,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
                 std::make_unique<TransferFunction>(_colorTablePath.value());
         }
         else {
-            LWARNING("Invalid path to transferfunction, please enter new path.");
+            LWARNING("Invalid path to transferfunction, please enter new path");
         }
     });
 
@@ -629,7 +626,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         if (_maskingRanges.size() > _maskingQuantity) {
             _selectedMaskingRange = _maskingRanges[_maskingQuantity];
         }
-        else if (_maskingRanges.size() > 0) {
+        else if (!_maskingRanges.empty()) {
             _selectedMaskingRange = _maskingRanges[0];
         }
         else {
@@ -653,7 +650,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 
 void RenderableFieldlinesSequence::staticallyLoadFiles(
                            const std::optional<std::filesystem::path>& seedPointDirectory,
-                           const std::optional<std::string>& tracingVariable)
+                                        const std::optional<std::string>& tracingVariable)
 {
     std::vector<std::thread> openThreads;
     for (File& file : _files) {
@@ -661,13 +658,17 @@ void RenderableFieldlinesSequence::staticallyLoadFiles(
         switch (_inputFileType) {
             case SourceFileType::Cdf: {
                 _seedPointDirectory = seedPointDirectory.value_or(_seedPointDirectory);
+
                 _tracingVariable = tracingVariable.value_or(_tracingVariable);
+                if (!tracingVariable.has_value()) {
+                    throw("No tracing variable specified");
+                }
                 std::vector<std::string> extraMagVars =
                     fls::extractMagnitudeVarsFromStrings(_extraVars);
                 std::unordered_map<std::string, std::vector<glm::vec3>> seedsPerFiles =
                     fls::extractSeedPointsFromFiles(_seedPointDirectory);
                 if (seedsPerFiles.empty()) {
-                    LERROR("No seed files found");
+                    throw("No seed files found");
                 }
                 loadSuccess = fls::convertCdfToFieldlinesState(
                     file.state,
@@ -689,12 +690,8 @@ void RenderableFieldlinesSequence::staticallyLoadFiles(
                 break;
             case SourceFileType::Osfls: {
                 loadFile(file);
-                //openThreads.push_back(std::move(thread));
-                // loadSuccess = true;
                 break;
             }
-            default:
-                break;
         }
     }
 
@@ -710,7 +707,7 @@ void RenderableFieldlinesSequence::staticallyLoadFiles(
 }
 
 void RenderableFieldlinesSequence::initialize() {
-    _isfirstLoad = true;
+    _isFirstLoad = true;
 }
 
 void RenderableFieldlinesSequence::initializeGL() {
@@ -788,7 +785,7 @@ void RenderableFieldlinesSequence::setModelDependentConstants() {
             break;
         default:
             break;
-        }
+    }
     _domainX.setMinValue(glm::vec2(-limit));
     _domainX.setMaxValue(glm::vec2(limit));
 
@@ -809,7 +806,7 @@ void RenderableFieldlinesSequence::setModelDependentConstants() {
     _domainR = glm::vec2(0.f, limit * 1.5f);
 }
 
-double extractTriggerTimeFromFilename(std::filesystem::path filePath) {
+double extractTriggerTimeFromFilename(const std::filesystem::path& filePath) {
     // number of characters in filename (excluding '.osfls')
     std::string fileName = filePath.stem().string(); // excludes extention
 
@@ -856,8 +853,10 @@ void RenderableFieldlinesSequence::computeSequenceEndTime() {
         _sequenceEndTime = _files[0].timestamp + 7200.f;
         if (_loadingType == LoadingType::StaticLoading && !_renderForever) {
             //TODO: Alternativly check at construction and throw exeption.
-            LWARNING("Only one file in data set, but ShowAtAllTimes set to false. "
-                "Using arbitrary duration to visualize data file instead");
+            LWARNING(
+                "Only one file in data set, but ShowAtAllTimes set to false. Using a 2h "
+                "window after the files time stamp to visualize the data"
+            );
         }
     }
     else if (_files.size() > 1) {
@@ -885,7 +884,7 @@ void RenderableFieldlinesSequence::loadFile(File& file) {
             );
         }
     }
-    catch(const std::exception& e) {
+    catch (const std::runtime_error& e) {
         LERROR(e.what());
     }
 }
@@ -906,7 +905,7 @@ void RenderableFieldlinesSequence::trackOldest(File& file) {
     }
 }
 
-int RenderableFieldlinesSequence::updateActiveIndex(const double currentTime) {
+int RenderableFieldlinesSequence::updateActiveIndex(double currentTime) {
     if (_files.empty()) {
         return -1;
     }
@@ -944,7 +943,7 @@ bool RenderableFieldlinesSequence::isReady() const {
 }
 
 void RenderableFieldlinesSequence::updateDynamicDownloading(double currentTime,
-                                                                         double deltaTime)
+                                                            double deltaTime)
 {
     _dynamicFileDownloader->update(currentTime, deltaTime);
     const std::vector<std::filesystem::path>& filesToRead =
@@ -1003,7 +1002,7 @@ void RenderableFieldlinesSequence::firstUpdate() {
         _transferFunction = std::make_unique<TransferFunction>(_colorTablePath.value());
     }
     else {
-        LWARNING("Invalid path to transferfunction, please enter new path.");
+        LWARNING("Invalid path to transfer function, please enter new path");
         _colorTablePath = FieldlinesSequenceModule::DefaultTransferFunctionFile.string();
         _transferFunction =
             std::make_unique<TransferFunction>(_colorTablePath.stringValue());
@@ -1012,7 +1011,7 @@ void RenderableFieldlinesSequence::firstUpdate() {
     _shouldUpdateColorBuffer = true;
     _shouldUpdateMaskingBuffer = true;
 
-    _isfirstLoad = false;
+    _isFirstLoad = false;
 }
 
 void RenderableFieldlinesSequence::update(const UpdateData& data) {
@@ -1036,7 +1035,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         updateDynamicDownloading(currentTime, deltaTime);
         computeSequenceEndTime();
     }
-    if (_isfirstLoad && _atLeastOneFileLoaded) {
+    if (_isFirstLoad && _atLeastOneFileLoaded) {
         firstUpdate();
     }
 
@@ -1044,7 +1043,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         currentTime >= _files[0].timestamp &&
         currentTime < _sequenceEndTime;
 
-    // for the sake of this if statment, it is easiest to think of activeIndex as the
+    // For the sake of this if statment, it is easiest to think of activeIndex as the
     // previous index and nextIndex as the current
     const int nextIndex = _activeIndex + 1;
     // if _activeIndex is -1 but we are in interval, it means we were before the start
@@ -1070,8 +1069,6 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         if (file.status == File::FileStatus::Downloaded) {
             // if LoadingType is StaticLoading all files will be Loaded
             // would be optimal if loading of next file would happen in the background
-            //std::thread t = loadFile(_files[_activeIndex]);
-            //t.join();
             loadFile(file);
             _isLoadingStateFromDisk = false;
             file.status = File::FileStatus::Loaded;
@@ -1099,7 +1096,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 }
 
 void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&) {
-    if (_files.empty() || _isfirstLoad) {
+    if (_files.empty() || _isFirstLoad) {
         return;
     }
     if (!_inInterval && !_renderForever) {
@@ -1177,7 +1174,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
     while (_files[loadedIndex].status != File::FileStatus::Loaded) {
         --loadedIndex;
         if (loadedIndex < 0) {
-            LWARNING("no file at or before current time is loaded");
+            LWARNING("No file at or before current time is loaded");
             return;
         }
     }

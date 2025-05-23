@@ -34,12 +34,12 @@ namespace openspace {
 
 class KameleonVolumeToFieldlinesTask : public Task {
 public:
-    explicit KameleonVolumeToFieldlinesTask(const ghoul::Dictionary& dictionary);
-
     enum class OutputType {
         Json,
         Osfls
     };
+
+    explicit KameleonVolumeToFieldlinesTask(const ghoul::Dictionary& dictionary);
 
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;

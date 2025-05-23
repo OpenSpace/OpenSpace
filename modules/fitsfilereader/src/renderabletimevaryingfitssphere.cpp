@@ -154,7 +154,9 @@ namespace {
             DynamicDownloading
         };
 
-        // Decides whether to use static or dynamic data downloading.
+        // Choose type of loading:
+        // StaticLoading: Download and load files on startup.
+        // DynamicDownloading: Download and load files during run time.
         std::optional<LoadingType> loadingType;
 
         // A data ID that corresponds to what dataset to use if using dynamicWebContent.
@@ -351,7 +353,7 @@ void RenderableTimeVaryingFitsSphere::deinitializeGL() {
 
 void RenderableTimeVaryingFitsSphere::readFileFromFits(std::filesystem::path path) {
     if (!_layerOptionsAdded) {
-        for (std::pair<int, std::string> name : _layerNames) {
+        for (const std::pair<const int, std::string>& name : _layerNames) {
             _fitsLayerName.addOption(name.first, name.second);
         }
         _fitsLayerName = _fitsLayerTemp;
@@ -460,7 +462,7 @@ glm::vec2 RenderableTimeVaryingFitsSphere::minMaxTextureDataValues(
         return glm::vec2(min, max);
     }
     else {
-        return glm::vec2(0.0, 1.0);
+        return glm::vec2(0.f, 1.f);
     }
 }
 
@@ -548,15 +550,13 @@ void RenderableTimeVaryingFitsSphere::update(const UpdateData& data) {
                 loadTexture();
             }
         }
-        // The case when we jumped passed last file. where nextIdx is not < file.size()
-        else if (currentTime >=
-            _files[_activeTriggerTimeIndex].time && !_texture)
-        {
+        // The case when we jumped passed last file where nextIdx is not < file.size()
+        else if (currentTime >= _files[_activeTriggerTimeIndex].time && !_texture) {
             loadTexture();
         }
     }
 
-    if (!_firstUpdate && _useColorMap && !_files.empty()) {
+    if (!_firstUpdate && _isUsingColorMap && !_files.empty()) {
         _dataMinMaxValues = _files[_activeTriggerTimeIndex].dataMinMax;
     }
 
@@ -602,12 +602,12 @@ void RenderableTimeVaryingFitsSphere::updateActiveTriggerTimeIndex(double curren
 }
 
 void RenderableTimeVaryingFitsSphere::updateDynamicDownloading(double currentTime,
-                                                                         double deltaTime)
+                                                               double deltaTime)
 {
     _dynamicFileDownloader->update(currentTime, deltaTime);
     const std::vector<std::filesystem::path>& filesToRead =
         _dynamicFileDownloader->downloadedFiles();
-    for (const std::filesystem::path filePath : filesToRead) {
+    for (const std::filesystem::path& filePath : filesToRead) {
         std::filesystem::path fileExtention = filePath.extension();
         if (fileExtention == ".fits") {
             _isFitsFormat = true;

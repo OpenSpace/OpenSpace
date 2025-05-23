@@ -75,7 +75,7 @@ protected:
 
     glm::vec2 _dataMinMaxValues;
     ghoul::opengl::ProgramObject* _shader = nullptr;
-    properties::BoolProperty _useColorMap;
+    properties::BoolProperty _isUsingColorMap;
 
 private:
     std::unique_ptr<Sphere> _sphere;

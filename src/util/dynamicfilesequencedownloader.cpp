@@ -45,7 +45,7 @@ void trackFinishedDownloads(const std::filesystem::path& syncFilePath,
     std::string line;
 
     // load existing entries
-    while (std::getline(inFile, line)) {
+    while (ghoul::getline(inFile, line)) {
         if (!line.empty()) {
             existingEntries.insert(std::filesystem::path(line).filename().string());
         }
@@ -64,7 +64,7 @@ void trackFinishedDownloads(const std::filesystem::path& syncFilePath,
 }
 
 std::string buildDataHttpRequest(double minTime, double maxTime, int dataID,
-                                                               const std::string& baseUrl)
+                                 const std::string& baseUrl)
 {
     // formulate a min and a max time from time
     // The thing is time might be "now" and no items
@@ -106,7 +106,7 @@ DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
     {
         std::ofstream file(_trackSynced, std::ios::app);
     }
-    //Delete the files in the folder whos file name is not in the _trackSynced file
+    // Delete the files in the folder whos file name is not in the _trackSynced file
     std::unordered_set<std::string> keepFiles;
     std::ifstream listFile = std::ifstream(_trackSynced);
     std::string filename;
@@ -176,7 +176,7 @@ void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest)
 
     bool success = false;
     int attempt = 0;
-    constexpr int maxRetries = 1;
+    constexpr int MaxRetries = 1;
 
     /********************
     *   Example response
@@ -191,7 +191,7 @@ void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest)
     *        "id" : 1177
     *}
     ********************/
-    while (attempt <= maxRetries && !success) {
+    while (attempt <= MaxRetries && !success) {
         try {
             std::vector<char> responseText = response.downloadedData();
             if (responseText.empty()) {
@@ -209,11 +209,11 @@ void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest)
         catch (const nlohmann::json::parse_error& e) {
             LWARNING(std::format("JSON parse error: {}", e.what()));
         }
-        catch (const std::exception& e) {
+        catch (const ghoul::RuntimeError& e) {
             LWARNING(std::format("HTTP or other error: {}", e.what()));
         }
         if (!success) {
-            if (attempt < maxRetries) {
+            if (attempt < MaxRetries) {
                 LINFO(std::format("Retry number {}.", attempt + 1));
                 std::this_thread::sleep_for(std::chrono::seconds(2));
                 response.start();
@@ -221,7 +221,7 @@ void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest)
             }
             else {
                 LERROR(std::format(
-                    "Failed according to warning above with http request of url: {}",
+                    "Failed according to warning above with HTTP request of URL: {}",
                     httpInfoRequest
                 ));
             }
@@ -244,7 +244,7 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
 
     bool success = false;
     int attempt = 0;
-    const int maxRetries = 1;
+    constexpr int MaxRetries = 1;
     nlohmann::json jsonResult;
 
     /********************
@@ -269,7 +269,7 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
     * note that requested time can be month 10 but last entry in list is month 07,
     * meaning there are no more available files between month 7-10.
     * *****************/
-    while (attempt <= maxRetries && !success) {
+    while (attempt <= MaxRetries && !success) {
         try {
             std::vector<char> data = response.downloadedData();
             if (data.empty()) {
@@ -278,7 +278,7 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
             //TODO what value is actually to large to handle?
             if (data.size() > std::numeric_limits<std::size_t>::max()) {
                 throw ghoul::RuntimeError(
-                    "Http responds with list of available files to large"
+                    "Http responds with list of available files being too large"
                 );
             }
 
@@ -288,18 +288,12 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
         catch (const nlohmann::json::parse_error& ex) {
             LERROR(std::format("JSON parsing error: '{}'", ex.what()));
         }
-        catch (const std::bad_alloc& ex) {
-            LERROR(std::format(
-                "Memory allocation error while parsing JSON: '{}'",
-                ex.what()
-            ));
-        }
-        catch (const std::exception& ex) {
+        catch (const ghoul::RuntimeError& ex) {
             LERROR(std::format("An error occurred: '{}'", ex.what()));
         }
 
         if (!success) {
-            if (attempt < maxRetries) {
+            if (attempt < MaxRetries) {
                 LINFO(std::format("Retry nr {}.", attempt + 1));
                 std::this_thread::sleep_for(std::chrono::seconds(1));
 
@@ -308,7 +302,7 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
             }
             else {
                 LERROR(std::format(
-                    "Failed according to warning above with http request of url: {}",
+                    "Failed according to warning above with HTTP request of URL: {}",
                     httpDataRequest
                 ));
             }
@@ -384,8 +378,8 @@ void DynamicFileSequenceDownloader::downloadFile() {
         File* dl = _queuedFilesToDownload.front();
         if (dl->state != File::State::OnQueue) {
             throw ghoul::RuntimeError(
-                "Trying to download file from list of queued files,"
-                "but its status is not OnQueue"
+                "Trying to download file from list of queued files, but its status is "
+                "not OnQueue"
             );
         }
         if (dl->download) {

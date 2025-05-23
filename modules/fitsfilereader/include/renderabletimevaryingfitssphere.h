@@ -77,7 +77,7 @@ private:
     glm::vec2 minMaxTextureDataValues(std::unique_ptr<ghoul::opengl::Texture>& t);
     void updateActiveTriggerTimeIndex(double currenttime);
     void computeSequenceEndTime();
-    void updateDynamicDownloading(const double currentTime, const double deltaTime);
+    void updateDynamicDownloading(double currentTime, double deltaTime);
 
     properties::OptionProperty _fitsLayerName;
     // An option to keep or delete the downloads from dynamic downloader on shutdown

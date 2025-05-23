@@ -60,7 +60,7 @@ public:
         ByQuantity
     };
 
-    RenderableFieldlinesSequence(const ghoul::Dictionary& dictionary);
+    explicit RenderableFieldlinesSequence(const ghoul::Dictionary& dictionary);
     void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
@@ -86,7 +86,7 @@ public:
         double timestamp = -1.0;
         FieldlinesState state;
 
-        bool operator<(const File& other) const noexcept{
+        bool operator<(const File& other) const noexcept {
             return timestamp < other.timestamp;
         }
     };
@@ -117,13 +117,13 @@ private:
     LoadingType _loadingType;
     // path to directory with seed point files
     std::filesystem::path _seedPointDirectory;
-    // which tracing vaiable to trace. 'b' for magnetic field is default
-    std::string _tracingVariable = "b";
+    // Which tracing vaiable to trace. Often 'b' is for magnetic field
+    std::string _tracingVariable;
     // Extra variables such as rho, p or t
     std::vector<std::string> _extraVars;
     // Manual time offset
     float _manualTimeOffset = 0.0;
-    // Estimated/ calculated end of sequence.
+    // Estimated / calculated end of sequence.
     double _sequenceEndTime = 0.0;
     // If there's just one state it should never disappear
     bool _renderForever = false;
@@ -139,8 +139,8 @@ private:
     size_t _maxLoadedFiles = 100;
     std::string _infoURL;
     std::string _dataURL;
-    //  DynamicFileSequenceDownloader downloads and updates renderable field lines with
-    //  field lines downloaded from the web.
+    // DynamicFileSequenceDownloader downloads and updates renderable field lines with
+    // field lines downloaded from the web.
     std::unique_ptr<DynamicFileSequenceDownloader> _dynamicFileDownloader;
 
     // In setup it is used to scale JSON coordinates. During runtime it is used to scale
@@ -239,8 +239,8 @@ private:
     // Button which executes a time jump to start of sequence
     properties::TriggerProperty _jumpToStartBtn;
 
-    // At least one file in data set needs to be loaded to read extra variable
-    bool _isfirstLoad = true;
+    // At least one file in data set needs to be loaded to read extra variables
+    bool _isFirstLoad = true;
 };
 
 } // namespace openspace

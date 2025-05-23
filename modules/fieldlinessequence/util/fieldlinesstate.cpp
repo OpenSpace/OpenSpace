@@ -66,19 +66,19 @@ FieldlinesState FieldlinesState::createStateFromOsfls(const std::string& path) {
     FieldlinesState s;
     const bool success = s.loadStateFromOsfls(path);
     if (!success) {
-        throw std::runtime_error(std::format(
-            "loading state from osfls file {}", path
+        throw ghoul::RuntimeError(std::format(
+            "Failed to load state from osfls file {}", path
         ));
     }
     return s;
 }
 
 bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
-    std::ifstream ifs(pathToOsflsFile, std::ifstream::binary);
+    std::ifstream ifs = std::ifstream(pathToOsflsFile, std::ifstream::binary);
 
     if (!ifs.is_open()) {
         LERROR(std::format(
-            "Could not open file: {}.Error code : {}",
+            "Could not open file: {}. Error code : {}",
             pathToOsflsFile, std::strerror(errno)
         ));
         return false;

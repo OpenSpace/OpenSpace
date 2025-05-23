@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,6 +37,16 @@
 namespace {
     constexpr std::string_view _loggerCat = "KameleonVolumeToFieldlinesTask";
 
+    // This task class traces field lines from volume data. It takes a task file which
+    // specify a folder with .cdf files, as well as a file that lists seed points in which
+    // the tracing starts from. For the outputs, specify an `outputFolder` for where the
+    // field lines data will be saved and the `OutputType` parameter to be either `Osfls`
+    // which is an OpenSpace specific binary format for field lines, or `Json` for a
+    // readable version of the same data. Some knowledge of the data might be needed,
+    // especially if coloring the field lines according to some data parameter like
+    // temperature or density. These parameters needs to be specified in the `ScalarVars`
+    // and match the name in the input data. For the magnitude of a vector parameter, such
+    // as magnetic stength or velocity, there are specified in `MagntitudeVars`.
     struct [[codegen::Dictionary(KameleonVolumeToFieldlinesTask)]] Parameters {
         // The folder to the cdf files to extract data from
         std::filesystem::path input [[codegen::directory()]];
@@ -58,10 +68,10 @@ namespace {
         // ManuelTimeOffset will be added to trigger time.
         std::optional<float> manualTimeOffset;
 
-        // The name of the kameleon variable to use for tracing, like b, or u
+        // The name of the kameleon variable to use for tracing, like b, or u.
         std::string tracingVar;
 
-        // The folder to write the files to
+        // The folder to write the files to.
         std::filesystem::path outputFolder [[codegen::directory()]];
 
         enum class [[codegen::map(openspace::KameleonVolumeToFieldlinesTask::OutputType)]]
@@ -73,11 +83,11 @@ namespace {
         OutputType outputType;
 
         // A list of scalar variables to extract along the fieldlines
-        // like temperature or density
+        // like temperature or density.
         std::optional<std::vector<std::string>> scalarVars;
 
         // A list of vector field variables. Must be in groups of 3,
-        // for example \"bx, by, bz\", \"ux, uy, uz\"
+        // for example \"bx, by, bz\", \"ux, uy, uz\".
         std::optional<std::vector<std::string>> magnitudeVars;
     };
 #include "kameleonvolumetofieldlinestask_codegen.cpp"
@@ -118,7 +128,8 @@ KameleonVolumeToFieldlinesTask::KameleonVolumeToFieldlinesTask(
         LINFO("No vector field variable was specified to be saved");
     }
 
-    for (const auto& e : std::filesystem::directory_iterator(_inputPath)) {
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& e : fs::directory_iterator(_inputPath)) {
         if (e.is_regular_file()) {
             std::string eStr = e.path().string();
             _sourceFiles.push_back(eStr);
@@ -143,8 +154,7 @@ void KameleonVolumeToFieldlinesTask::perform(
     std::unordered_map<std::string, std::vector<glm::vec3>> seedPoints =
         fls::extractSeedPointsFromFiles(_seedpointsPath, _nthSeedPoint);
     if (seedPoints.empty()) {
-        LERROR("Falied to read seedpoints");
-        return;
+        throw ghoul::RuntimeError("Falied to read seedpoints");
     }
 
     size_t fileNumber = 0;

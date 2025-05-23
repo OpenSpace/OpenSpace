@@ -33,7 +33,6 @@ using namespace CCfits;
 
 namespace openspace {
 
-
 std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
                                                          const std::filesystem::path path,
                                                                         size_t layerIndex,
@@ -57,7 +56,7 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         int nLayers = static_cast<int>(fitsValues->contents.size()) / layerSize;
         if (layerIndex > nLayers -1) {
             LERROR(
-                "Chosen layer in fits file is not supported. Index to high. "
+                "Chosen layer in fits file is not supported. Index too high. "
                 "First layer chosen instead"
             );
             layerIndex = 0;
@@ -100,20 +99,14 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         std::filesystem::remove(path);
         return nullptr;
     }
-    catch (const std::exception& e) {
+    catch (const ghoul::MissingCaseException& e) {
         LERROR(std::format(
-            "Failed to open fits file '{}'. '{}'", path, e.what()
+            "Error when reading file '{}'. '{}'", path, e.what()
         ));
         std::filesystem::remove(path);
         return nullptr;
     }
-    catch (...) {
-        LERROR(std::format(
-            "Unknown exception caught for file '{}'", path
-        ));
-        std::filesystem::remove(path);
-        return nullptr;
-    }
+
 }
 
 void readFitsHeader(const std::filesystem::path& path) {
@@ -132,29 +125,16 @@ int nLayers(const std::filesystem::path& path) {
             LERROR(std::format("Failed to open fits file '{}'", path));
             return -1;
         }
-        // Convirt fits path with fits-file-reader functions
+        // Convert fits path with fits-file-reader functions
         const std::shared_ptr<ImageData<float>> fitsValues =
             readImageInternal<float>(file->pHDU());
         int layerSize = fitsValues->width * fitsValues->height;
 
         return static_cast<int>(fitsValues->contents.size() / layerSize);
     }
-    catch (CCfits::FitsException& e) {
+    catch (const CCfits::FitsException& e) {
         LERROR(std::format(
             "Failed to open fits file '{}'. '{}'", path, e.message()
-        ));
-        return 0;
-    }
-    catch (std::exception& e) {
-        LERROR(std::format(
-            "Failed to open fits file '{}'. '{}'", path, e.what()
-        ));
-        return 0;
-
-    }
-    catch (...) {
-        LERROR(std::format(
-            "Unknown exception caught for file '{}'", path
         ));
         return 0;
     }
@@ -172,8 +152,11 @@ std::shared_ptr<ImageData<T>> readImageInternal(U& image) {
         };
         return std::make_shared<ImageData<T>>(im);
     }
-    catch (CCfits::FitsException& e) {
-        LERROR(std::format("Could not read FITS layer, error: '{}'", e.message()));
+    catch (const CCfits::FitsException& e) {
+        LERROR(std::format(
+            "Could not read FITS layer. Error: {}",
+            e.message()
+        ));
     }
     return nullptr;
 }

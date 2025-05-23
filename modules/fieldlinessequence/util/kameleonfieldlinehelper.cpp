@@ -323,11 +323,8 @@ void addExtraQuantities(ccmc::Kameleon* kameleon,
         std::string varunit = kameleon->getNativeUnit(varname);
         std::string varVizUnit = kameleon->getVisUnit(varname);
         LINFO(std::format(
-            "Variable '{}' is : '{}'. Variable Unit: '{}'. Viz unit: '{}'. ",
-            i,
-            varname,
-            varunit,
-            varVizUnit
+            "Variable '{}' is : '{}'. Variable Unit: '{}'. Viz unit: '{}'.",
+            i, varname, varunit, varVizUnit
         ));
         variablesAttributeNames.push_back(varname);
     }
