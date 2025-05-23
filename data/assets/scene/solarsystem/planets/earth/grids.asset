@@ -36,7 +36,8 @@ local plane1lsec = {
   },
   GUI = {
     Name = "1lsec Grid",
-    Path = "/Solar System/Planets/Earth"
+    Path = "/Solar System/Planets/Earth",
+    Focusable = false
   }
 }
 
@@ -64,7 +65,8 @@ local plane1lmin = {
   },
   GUI = {
     Name = "1lmin Grid",
-    Path = "/Solar System/Planets/Earth"
+    Path = "/Solar System/Planets/Earth",
+    Focusable = false
   }
 }
 

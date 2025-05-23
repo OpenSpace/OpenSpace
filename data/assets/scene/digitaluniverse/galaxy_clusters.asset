@@ -31,6 +31,7 @@ local Object = {
   GUI = {
     Name = "Galaxy Cluster Labels",
     Path = "/Universe/Nearby Surveys",
+    Focusable = false,
     Description = [[The galaxy clusters dataset is a series of labels that mark where the
       large clusters of galaxies are in the nearby universe. These labels must be used in
       conjunction with the Tully galaxy group. Census: 15 galaxy cluster labels.]]

@@ -3,53 +3,54 @@ local transforms = asset.require("./mars")
 
 
 local Atmosphere = {
-    Identifier = "MarsAtmosphere",
-    Parent = transforms.Mars.Identifier,
-    Renderable = {
-      Type = "RenderableAtmosphere",
-      -- Atmosphere radius in Km
-      AtmosphereHeight = 3463.17495 - 3386.190,
-      PlanetRadius = 3386.190,
-      PlanetAverageGroundReflectance = 0.1,
-      GroundRadianceEmission = 0.37,
-      SunIntensity = 13.1,
-      MieScatteringExtinctionPropCoefficient = 0.23862,
-      Rayleigh = {
-        Coefficients = {
-          -- Wavelengths are given in 10^-9m
-          Wavelengths = { 680, 550, 440 },
-          -- Reflection coefficients are given in km^-1
-          Scattering = { 0.019918, 0.01357, 0.00575 }
-          -- In Rayleigh scattering, the coefficients of
-          -- absorption and scattering are the same.
-        },
-      -- Thickness of atmosphere if its density were uniform, in Km
-        H_R = 10.43979
+  Identifier = "MarsAtmosphere",
+  Parent = transforms.Mars.Identifier,
+  Renderable = {
+    Type = "RenderableAtmosphere",
+    -- Atmosphere radius in Km
+    AtmosphereHeight = 3463.17495 - 3386.190,
+    PlanetRadius = 3386.190,
+    PlanetAverageGroundReflectance = 0.1,
+    GroundRadianceEmission = 0.37,
+    SunIntensity = 13.1,
+    MieScatteringExtinctionPropCoefficient = 0.23862,
+    Rayleigh = {
+      Coefficients = {
+        -- Wavelengths are given in 10^-9m
+        Wavelengths = { 680, 550, 440 },
+        -- Reflection coefficients are given in km^-1
+        Scattering = { 0.019918, 0.01357, 0.00575 }
+        -- In Rayleigh scattering, the coefficients of
+        -- absorption and scattering are the same.
       },
-      -- Default
-      Mie = {
-        Coefficients = {
-          -- Reflection coefficients are given in km^-1
-          Scattering = { 0.05361771, 0.05361771, 0.05361771 },
-          -- Extinction coefficients are a fraction of the Scattering coefficients
-          Extinction = { 0.05361771 / 0.98979, 0.05361771 / 0.98979, 0.05361771 / 0.98979 }
-        },
-        -- Mie Height scale (atmosphere thickness for constant density) in Km
-        H_M = 3.09526,
-        -- Mie Phase Function Value (G e [-1.0, 1.0].
-        -- If G = 1.0, Mie phase function = Rayleigh Phase Function)
-        G = 0.85
-      },
-      Debug = {
-        PreCalculatedTextureScale = 1.0,
-        SaveCalculatedTextures = false
-      }
+    -- Thickness of atmosphere if its density were uniform, in Km
+      H_R = 10.43979
     },
-    GUI = {
-      Name = "Mars Atmosphere",
-      Path = "/Solar System/Planets/Mars",
-      Description = "Atmosphere of Mars"
+    -- Default
+    Mie = {
+      Coefficients = {
+        -- Reflection coefficients are given in km^-1
+        Scattering = { 0.05361771, 0.05361771, 0.05361771 },
+        -- Extinction coefficients are a fraction of the Scattering coefficients
+        Extinction = { 0.05361771 / 0.98979, 0.05361771 / 0.98979, 0.05361771 / 0.98979 }
+      },
+      -- Mie Height scale (atmosphere thickness for constant density) in Km
+      H_M = 3.09526,
+      -- Mie Phase Function Value (G e [-1.0, 1.0].
+      -- If G = 1.0, Mie phase function = Rayleigh Phase Function)
+      G = 0.85
+    },
+    Debug = {
+      PreCalculatedTextureScale = 1.0,
+      SaveCalculatedTextures = false
     }
+  },
+  GUI = {
+    Name = "Mars Atmosphere",
+    Path = "/Solar System/Planets/Mars",
+    Focusable = false,
+    Description = "Atmosphere of Mars"
+  }
 }
 
 

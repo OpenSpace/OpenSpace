@@ -28,7 +28,8 @@ local NoaaSatellites = {
   Tag = { "earth_satellites" },
   GUI = {
     Name = "NOAA",
-    Path = "/Solar System/Planets/Earth/Satellites"
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
   }
 }
 

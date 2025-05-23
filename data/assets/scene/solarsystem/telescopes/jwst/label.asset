@@ -23,6 +23,7 @@ local JWSTLabel = {
   GUI = {
     Name = "JWST Label",
     Path = "/Solar System/Telescopes/JWST",
+    Focusable = false,
     Description = "Main label for the James Webb Space Telescope."
   }
 }

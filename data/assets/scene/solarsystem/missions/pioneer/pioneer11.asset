@@ -55,6 +55,7 @@ local Pioneer11Trail = {
   GUI = {
     Name = "Pioneer 11 Trail (SPICE)",
     Path = "/Solar System/Missions/Pioneer",
+    Focusable = false,
     Description = [[Pioneer 11 Trail, spanning April 6th, 1973 to January 2nd, 1990.
       Data from SPICE]]
   }

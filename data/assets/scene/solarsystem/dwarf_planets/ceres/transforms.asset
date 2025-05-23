@@ -22,6 +22,7 @@ local CeresPosition = {
   GUI = {
     Name = "Ceres Position",
     Path = "/Solar System/Dwarf Planets/Ceres",
+    Focusable = false,
     Hidden = true
   }
 }

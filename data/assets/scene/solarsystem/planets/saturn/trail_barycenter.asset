@@ -22,6 +22,7 @@ local SaturnBarycenterTrail = {
   GUI = {
     Name = "Saturn Barycenter Trail",
     Path = "/Solar System/Planets/Saturn",
+    Focusable = false,
     Description = "Trail of Saturn's Barycenter as observed by the Sun"
   }
 }

@@ -62,6 +62,7 @@ local Stars = {
   GUI = {
     Name = "Stars",
     Path = "/Milky Way/Stars",
+    Focusable = false,
     Description = [[These are the nearby stars that surround the Sun and are close enough
       to get accurate distances. These include all the stars we see with the unaided eye
       and many stars dimmer than that. Over the entire night sky, all year round, and in
@@ -107,6 +108,7 @@ local SunStar = {
   GUI = {
     Name = "Sun",
     Path = "/Milky Way/Stars",
+    Focusable = false,
     Description = [[Individual star to represent the Sun when outside of the Solar
       System.]]
   }

@@ -28,7 +28,8 @@ local GlobalStarSatellites = {
   Tag = { "earth_satellites" },
   GUI = {
     Name = "GlobalStar",
-    Path = "/Solar System/Planets/Earth/Satellites"
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
   }
 }
 

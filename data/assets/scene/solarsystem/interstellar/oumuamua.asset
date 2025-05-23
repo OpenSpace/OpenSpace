@@ -32,6 +32,7 @@ local OumuamuaTrail = {
   GUI = {
     Name = "'Oumuamua Trail",
     Path = "/Solar System/Interstellar",
+    Focusable = false,
     Description = [[Trail of 'Oumuamua from 2014 JAN 01 00:00:00 to 2050 JAN 01 00:00:00.
       Data from JPL Horizons]]
   }

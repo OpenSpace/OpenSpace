@@ -30,7 +30,8 @@ local AstraeaTrail = {
   },
   GUI = {
     Name = "5 Astraea Trail",
-    Path = "/Solar System/Interstellar"
+    Path = "/Solar System/Interstellar",
+    Focusable = false
   }
 }
 

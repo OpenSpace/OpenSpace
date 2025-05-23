@@ -16,6 +16,7 @@ local MarsBarycenter = {
   GUI = {
     Name = "Mars Barycenter",
     Path = "/Solar System/Planets/Mars",
+    Focusable = false,
     Hidden = true
   }
 }

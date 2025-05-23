@@ -27,7 +27,8 @@ local SwiCh2 = {
   },
   GUI = {
     Name = "SWI CH2 FOV",
-    Path = "/Solar System/Missions/Juice/Instruments"
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false
   }
 }
 
@@ -62,6 +63,7 @@ local SwiFull = {
   GUI = {
     Name = "SWI Full FOV",
     Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false,
     Description = "The field-of-view for the full SWI instrument onboard Juice"
   }
 }
@@ -98,7 +100,8 @@ local SwiFullGCO500 = {
   },
   GUI = {
     Name = "SWI Full GCO500 FOV",
-    Path = "/Solar System/Missions/Juice/Instruments"
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false
   }
 }
 

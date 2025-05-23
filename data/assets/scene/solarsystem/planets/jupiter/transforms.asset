@@ -16,6 +16,7 @@ local JupiterBarycenter = {
   GUI = {
     Name = "Jupiter Barycenter",
     Path = "/Solar System/Planets/Jupiter",
+    Focusable = false,
     Hidden = true
   }
 }

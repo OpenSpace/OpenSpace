@@ -56,7 +56,8 @@ local TerraTrail = {
   Tag = { "earth_satellites", "Terra" },
   GUI = {
     Name = "Terra Trail",
-    Path = "/Solar System/Planets/Earth/Satellites/Terra"
+    Path = "/Solar System/Planets/Earth/Satellites/Terra",
+    Focusable = false
   }
 }
 
@@ -82,7 +83,8 @@ local TerraLabel = {
   Tag = { "solarsystem_labels" },
   GUI = {
     Name = "Terra Label",
-    Path = "/Solar System/Planets/Earth"
+    Path = "/Solar System/Planets/Earth/Satellites/Terra",
+    Focusable = false
   }
 }
 

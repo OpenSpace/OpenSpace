@@ -31,6 +31,7 @@ local Object = {
   GUI = {
     Name = "Visible All-sky",
     Path = "/Milky Way/All Sky Images",
+    Focusable = false,
     Description = [[An all-sky image of the night sky as our eye sees it (in the visible
       spectrum), with the stars removed. You will see the brightest part of the Galaxy if
       you look toward Galactic center toward the constellations Scorpius and Sagittarius.

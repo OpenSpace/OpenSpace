@@ -25,6 +25,7 @@ local Position = {
   GUI = {
     Name = "Orcus Position",
     Path = "/Solar System/Dwarf Planets/Orcus",
+    Focusable = false,
     Hidden = true
   }
 }

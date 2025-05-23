@@ -55,7 +55,8 @@ local FranciscoTrail = {
   },
   GUI = {
     Name = "Francisco Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Francisco"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Francisco",
+    Focusable = false
   }
 }
 
@@ -79,7 +80,8 @@ local FranciscoLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Francisco Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Francisco"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Francisco",
+    Focusable = false
   }
 }
 
@@ -134,7 +136,8 @@ local CalibanTrail = {
   },
   GUI = {
     Name = "Caliban Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Caliban"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Caliban",
+    Focusable = false
   }
 }
 
@@ -158,7 +161,8 @@ local CalibanLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Caliban Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Caliban"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Caliban",
+    Focusable = false
   }
 }
 
@@ -213,7 +217,8 @@ local StephanoTrail = {
   },
   GUI = {
     Name = "Stephano Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Stephano"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Stephano",
+    Focusable = false
   }
 }
 
@@ -237,7 +242,8 @@ local StephanoLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Stephano Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Stephano"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Stephano",
+    Focusable = false
   }
 }
 
@@ -292,7 +298,8 @@ local TrinculoTrail = {
   },
   GUI = {
     Name = "Trinculo Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Trinculo"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Trinculo",
+    Focusable = false
   }
 }
 
@@ -316,7 +323,8 @@ local TrinculoLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Trinculo Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Trinculo"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Trinculo",
+    Focusable = false
   }
 }
 
@@ -371,7 +379,8 @@ local SycoraxTrail = {
   },
   GUI = {
     Name = "Sycorax Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Sycorax"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Sycorax",
+    Focusable = false
   }
 }
 
@@ -395,7 +404,8 @@ local SycoraxLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Sycorax Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Sycorax"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Sycorax",
+    Focusable = false
   }
 }
 
@@ -450,7 +460,8 @@ local ProsperoTrail = {
   },
   GUI = {
     Name = "Prospero Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Prospero"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Prospero",
+    Focusable = false
   }
 }
 
@@ -474,7 +485,8 @@ local ProsperoLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Prospero Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Prospero"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Prospero",
+    Focusable = false
   }
 }
 
@@ -529,7 +541,8 @@ local SetebosTrail = {
   },
   GUI = {
     Name = "Setebos Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Setebos"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Setebos",
+    Focusable = false
   }
 }
 
@@ -553,7 +566,8 @@ local SetebosLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Setebos Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Setebos"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Setebos",
+    Focusable = false
   }
 }
 
@@ -608,7 +622,8 @@ local FerdinandTrail = {
   },
   GUI = {
     Name = "Ferdinand Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Ferdinand"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Ferdinand",
+    Focusable = false
   }
 }
 
@@ -632,7 +647,8 @@ local FerdinandLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Ferdinand Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Ferdinand"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Ferdinand",
+    Focusable = false
   }
 }
 

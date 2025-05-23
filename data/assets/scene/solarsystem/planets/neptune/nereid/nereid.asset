@@ -54,7 +54,8 @@ local NereidTrail = {
   },
   GUI = {
     Name = "Nereid Trail",
-    Path = "/Solar System/Planets/Neptune/Major Moons/Nereid"
+    Path = "/Solar System/Planets/Neptune/Major Moons/Nereid",
+    Focusable = false
   }
 }
 
@@ -79,6 +80,7 @@ local NereidLabel = {
   GUI = {
     Name = "Nereid Label",
     Path = "/Solar System/Planets/Neptune/Major Moons/Nereid",
+    Focusable = false,
     Description = "Label for Neptune's moon Nereid"
   }
 }

@@ -18,6 +18,7 @@ local HabitableZone = {
   GUI = {
     Name = "Sun's Habitable Zone",
     Path = "/Solar System/Sun",
+    Focusable = false,
     Description = "Habitable zone for the sun in our solar system"
   }
 }

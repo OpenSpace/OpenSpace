@@ -46,7 +46,8 @@ local HydraTrail = {
   },
   GUI = {
     Name = "Hydra Trail",
-    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Hydra"
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Hydra",
+    Focusable = false
   }
 }
 
@@ -71,6 +72,7 @@ local HydraLabel = {
   GUI = {
     Name = "Hydra Label",
     Path = "/Solar System/Dwarf Planets/Pluto/Moons/Hydra",
+    Focusable = false,
     Description = "Label for Pluto's moon Hydra"
   }
 }

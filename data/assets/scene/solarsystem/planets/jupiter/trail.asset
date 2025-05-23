@@ -20,7 +20,8 @@ local JupiterTrail = {
   Tag = { "planetTrail_solarSystem", "planetTrail_giants" },
   GUI = {
     Name = "Jupiter Trail",
-    Path = "/Solar System/Planets/Jupiter"
+    Path = "/Solar System/Planets/Jupiter",
+    Focusable = false
   }
 }
 

@@ -48,6 +48,7 @@ local Object = {
   GUI = {
     Name = "Brown Dwarfs",
     Path = "/Milky Way/Substellar Objects",
+    Focusable = false,
     Description = [[For decades it was believed that M stars were the coolest stars in
       the Galaxy. Some M stars, called red dwarfs, make up 70% of the stars in the
       Galaxy. However, a new class of objects, even cooler than M stars, was recently

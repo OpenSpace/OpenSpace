@@ -29,6 +29,7 @@ local Object = {
   GUI = {
     Name = "Milky Way (ESO)",
     Path = "/Milky Way/Milky Way",
+    Focusable = false,
     Description = "Milky Way Galaxy image (alternate)"
   }
 }

@@ -57,7 +57,8 @@ local S2010J2Trail = {
   },
   GUI = {
     Name = "S/2010 J 2 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2010J2"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2010J2",
+    Focusable = false
   }
 }
 
@@ -88,6 +89,7 @@ local S2010J2Label = {
   GUI = {
     Name = "S/2010 J 2 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2010J2",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2010 J 2 (Ananke group)"
   }
 }
@@ -144,7 +146,8 @@ local ThelxinoeTrail = {
   },
   GUI = {
     Name = "Thelxinoe Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thelxinoe"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thelxinoe",
+    Focusable = false
   }
 }
 
@@ -175,6 +178,7 @@ local ThelxinoeLabel = {
   GUI = {
     Name = "Thelxinoe Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thelxinoe",
+    Focusable = false,
     Description = "Label for Jupiter's moon Thelxinoe (Ananke group)"
   }
 }
@@ -231,7 +235,8 @@ local EuantheTrail = {
   },
   GUI = {
     Name = "Euanthe Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Euanthe"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Euanthe",
+    Focusable = false
   }
 }
 
@@ -262,6 +267,7 @@ local EuantheLabel = {
   GUI = {
     Name = "Euanthe Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Euanthe",
+    Focusable = false,
     Description = "Label for Jupiter's moon Euanthe (Ananke group)"
   }
 }
@@ -318,7 +324,8 @@ local IocasteTrail = {
   },
   GUI = {
     Name = "Iocaste Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Iocaste"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Iocaste",
+    Focusable = false
   }
 }
 
@@ -349,6 +356,7 @@ local IocasteLabel = {
   GUI = {
     Name = "Iocaste Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Iocaste",
+    Focusable = false,
     Description = "Label for Jupiter's moon Iocaste (Ananke group)"
   }
 }
@@ -405,7 +413,8 @@ local S2003J16Trail = {
   },
   GUI = {
     Name = "S/2003 J 16 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J16"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J16",
+    Focusable = false
   }
 }
 
@@ -436,6 +445,7 @@ local S2003J16Label = {
   GUI = {
     Name = "S/2003 J 16 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J16",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2003 J 16 (Ananke group)"
   }
 }
@@ -492,7 +502,8 @@ local PraxidikeTrail = {
   },
   GUI = {
     Name = "Praxidike Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Praxidike"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Praxidike",
+    Focusable = false
   }
 }
 
@@ -523,6 +534,7 @@ local PraxidikeLabel = {
   GUI = {
     Name = "Praxidike Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Praxidike",
+    Focusable = false,
     Description = "Label for Jupiter's moon Praxidike (Ananke group)"
   }
 }
@@ -579,7 +591,8 @@ local HarpalykeTrail = {
   },
   GUI = {
     Name = "Harpalyke Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Harpalyke"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Harpalyke",
+    Focusable = false
   }
 }
 
@@ -610,6 +623,7 @@ local HarpalykeLabel = {
   GUI = {
     Name = "Harpalyke Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Harpalyke",
+    Focusable = false,
     Description = "Label for Jupiter's moon Harpalyke (Ananke group)"
   }
 }
@@ -666,7 +680,8 @@ local MnemeTrail = {
   },
   GUI = {
     Name = "Mneme Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Mneme"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Mneme",
+    Focusable = false
   }
 }
 
@@ -697,6 +712,7 @@ local MnemeLabel = {
   GUI = {
     Name = "Mneme Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Mneme",
+    Focusable = false,
     Description = "Label for Jupiter's moon Mneme (Ananke group)"
   }
 }
@@ -753,7 +769,8 @@ local HermippeTrail = {
   },
   GUI = {
     Name = "Hermippe Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Hermippe"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Hermippe",
+    Focusable = false
   }
 }
 
@@ -784,6 +801,7 @@ local HermippeLabel = {
   GUI = {
     Name = "Hermippe Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Hermippe",
+    Focusable = false,
     Description = "Label for Jupiter's moon Hermippe (Ananke group)"
   }
 }
@@ -840,7 +858,8 @@ local ThyoneTrail = {
   },
   GUI = {
     Name = "Thyone Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thyone"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thyone",
+    Focusable = false
   }
 }
 
@@ -871,6 +890,7 @@ local ThyoneLabel = {
   GUI = {
     Name = "Thyone Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thyone",
+    Focusable = false,
     Description = "Label for Jupiter's moon Thyone (Ananke group)"
   }
 }
@@ -927,7 +947,8 @@ local AnankeTrail = {
   },
   GUI = {
     Name = "Ananke Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Ananke"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Ananke",
+    Focusable = false
   }
 }
 
@@ -958,6 +979,7 @@ local AnankeLabel = {
   GUI = {
     Name = "Ananke Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Ananke",
+    Focusable = false,
     Description = "Label for Jupiter's moon Ananke (Ananke group)"
   }
 }
@@ -1014,7 +1036,8 @@ local S2021J1Trail = {
   },
   GUI = {
     Name = "S/2021 J 1 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J1"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J1",
+    Focusable = false
   }
 }
 
@@ -1045,6 +1068,7 @@ local S2021J1Label = {
   GUI = {
     Name = "S/2021 J 1 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J1",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2021 J 1 (Ananke group)"
   }
 }
@@ -1101,7 +1125,8 @@ local S2021J2Trail = {
   },
   GUI = {
     Name = "S/2021 J 2 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J2"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J2",
+    Focusable = false
   }
 }
 
@@ -1132,6 +1157,7 @@ local S2021J2Label = {
   GUI = {
     Name = "S/2021 J 2 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J2",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2021 J 2 (Ananke group)"
   }
 }
@@ -1188,7 +1214,8 @@ local S2021J3Trail = {
   },
   GUI = {
     Name = "S/2021 J 3 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J3"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J3",
+    Focusable = false
   }
 }
 
@@ -1219,6 +1246,7 @@ local S2021J3Label = {
   GUI = {
     Name = "S/2021 J 3 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J3",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2021 J 3 (Ananke group)"
   }
 }
@@ -1275,7 +1303,8 @@ local S2022J3Trail = {
   },
   GUI = {
     Name = "S/2022 J 3 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2022J3"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2022J3",
+    Focusable = false
   }
 }
 
@@ -1306,6 +1335,7 @@ local S2022J3Label = {
   GUI = {
     Name = "S/2022 J 3 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2022J3",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2022 J 3 (Ananke group)"
   }
 }
@@ -1362,7 +1392,8 @@ local S2017J3Trail = {
   },
   GUI = {
     Name = "S/2017 J 3 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J3"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J3",
+    Focusable = false
   }
 }
 
@@ -1393,6 +1424,7 @@ local S2017J3Label = {
   GUI = {
     Name = "S/2017 J 3 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J3",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2017 J 3 (Ananke group)"
   }
 }
@@ -1449,7 +1481,8 @@ local S2017J7Trail = {
   },
   GUI = {
     Name = "S/2017 J 7 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J7"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J7",
+    Focusable = false
   }
 }
 
@@ -1480,6 +1513,7 @@ local S2017J7Label = {
   GUI = {
     Name = "S/2017 J 7 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J7",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2017 J 7 (Ananke group)"
   }
 }
@@ -1536,7 +1570,8 @@ local S2017J9Trail = {
   },
   GUI = {
     Name = "S/2017 J 9 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J9"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J9",
+    Focusable = false
   }
 }
 
@@ -1567,6 +1602,7 @@ local S2017J9Label = {
   GUI = {
     Name = "S/2017 J 9 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J9",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2017 J 9 (Ananke group)"
   }
 }
@@ -1623,7 +1659,8 @@ local S2003J2Trail = {
   },
   GUI = {
     Name = "S/2003 J 2 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J2"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J2",
+    Focusable = false
   }
 }
 
@@ -1654,6 +1691,7 @@ local S2003J2Label = {
   GUI = {
     Name = "S/2003 J 2 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J2",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2003 J 2 (Ananke group)"
   }
 }
@@ -1710,7 +1748,8 @@ local S2003J12Trail = {
   },
   GUI = {
     Name = "S/2003 J 12 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J12"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J12",
+    Focusable = false
   }
 }
 
@@ -1741,6 +1780,7 @@ local S2003J12Label = {
   GUI = {
     Name = "S/2003 J 12 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J12",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2003 J 12 (Ananke group)"
   }
 }

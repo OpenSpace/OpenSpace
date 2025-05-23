@@ -53,7 +53,8 @@ local HydraText = {
   },
   GUI = {
     Name = "Hydra Text",
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto",
+    Focusable = false
   }
 }
 
@@ -76,7 +77,8 @@ local KerberosText = {
   },
   GUI = {
     Name = "Kerberos Text",
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto",
+    Focusable = false
   }
 }
 
@@ -93,7 +95,8 @@ local NixText = {
   },
   GUI = {
     Name = "Nix Text",
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto",
+    Focusable = false
   }
 }
 
@@ -116,7 +119,8 @@ local StyxText = {
   },
   GUI = {
     Name = "Styx Text",
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto",
+    Focusable = false
   }
 }
 

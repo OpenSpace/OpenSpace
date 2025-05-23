@@ -27,6 +27,7 @@ local TitanTrail = {
   GUI = {
     Name = "Titan Trail",
     Path = "/Solar System/Planets/Saturn/Major Moons/Titan",
+    Focusable = false,
     Description = "Trail of Saturn's moon Titan as observed by Saturn"
   }
 }

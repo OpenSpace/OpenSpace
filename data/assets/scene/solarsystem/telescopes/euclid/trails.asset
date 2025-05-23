@@ -25,7 +25,8 @@ local EuclidTrailSun = {
   },
   GUI = {
     Name = "Euclid Trail (Sun)",
-    Path = "/Solar System/Telescopes/Euclid"
+    Path = "/Solar System/Telescopes/Euclid",
+    Focusable = false
   }
 }
 
@@ -46,7 +47,8 @@ local EuclidTrailEarth = {
   },
   GUI = {
     Name = "Euclid Trail (Earth)",
-    Path = "/Solar System/Telescopes/Euclid"
+    Path = "/Solar System/Telescopes/Euclid",
+    Focusable = false
   }
 }
 
@@ -73,6 +75,7 @@ local EuclidTrailOrbit = {
   GUI = {
     Name = "Euclid Orbit Trail",
     Path = "/Solar System/Telescopes/Euclid",
+    Focusable = false,
     Description = "Euclid Orbit Trail relative to L2"
   }
 }
@@ -100,6 +103,7 @@ local EuclidTrailCoRevOrbit = {
   GUI = {
     Name = "Euclid L2 Co-Revolving Orbit Trail",
     Path = "/Solar System/Telescopes/Euclid",
+    Focusable = false,
     Description = "Euclid Orbit Trail relative to L2"
   }
 }

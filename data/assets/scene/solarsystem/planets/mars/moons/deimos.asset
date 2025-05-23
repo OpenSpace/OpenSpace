@@ -68,6 +68,7 @@ local DeimosTrail = {
   GUI = {
     Name = "Deimos Trail",
     Path = "/Solar System/Planets/Mars/Moons/Deimos",
+    Focusable = false,
     Description = "Trail for Deimos"
   }
 }
@@ -93,6 +94,7 @@ local DeimosLabel = {
   GUI = {
     Name = "Deimos Label",
     Path = "/Solar System/Planets/Mars/Moons/Deimos",
+    Focusable = false,
     Description = "Label for Mars' moon Deimos"
   }
 }

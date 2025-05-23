@@ -53,6 +53,7 @@ local GaiaAbundanceApogee = {
   GUI = {
     Path = "/Milky Way/Gaia",
     Name = "Gaia Abundance Apogee",
+    Focusable = false,
     Description = "Data set of stars color coded by metallicity"
   }
 }

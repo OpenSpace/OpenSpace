@@ -28,7 +28,8 @@ local RadarSatellites = {
   Tag = { "earth_satellites" },
   GUI = {
     Name = "Radar Calibration",
-    Path = "/Solar System/Planets/Earth/Satellites"
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
   }
 }
 

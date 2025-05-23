@@ -28,7 +28,8 @@ local TrackingDataRelaySatellites = {
   Tag = { "earth_satellites" },
   GUI = {
     Name = "Tracking and Data Relay Satellite System (TDRSS)",
-    Path = "/Solar System/Planets/Earth/Satellites"
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
   }
 }
 

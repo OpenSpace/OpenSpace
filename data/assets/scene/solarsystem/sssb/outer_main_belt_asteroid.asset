@@ -26,6 +26,7 @@ local Object = {
   GUI = {
     Name = "Outer Main Asteroid Belt",
     Path = "/Solar System/Small Bodies",
+    Focusable = false,
     Description = [[Asteroids with a semi-major axis of between 3.2 and 4.6 AU.]]
   }
 }

@@ -53,6 +53,7 @@ local GaiaAbundanceGalah = {
   GUI = {
     Path = "/Milky Way/Gaia",
     Name = "Gaia Abundance Galah",
+    Focusable = false,
     Description = "Data set of stars color coded by metallicity"
   }
 }

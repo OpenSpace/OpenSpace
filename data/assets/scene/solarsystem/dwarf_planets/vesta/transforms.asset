@@ -5,28 +5,29 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 local AU = 1.496e+8
 
 local Translation = {
-    Type = "KeplerTranslation",
-    Eccentricity = 0.08875750498598881,
-    SemiMajorAxis = 2.363038212561438 * AU,
-    Inclination = 7.139257981928672,
-    AscendingNode = 103.7573001493549,
-    ArgumentOfPeriapsis = 151.5991639880173,
-    MeanAnomaly = 115.1329895974862,
-    Epoch = "2021 04 13 11:15:57",
-    Period = 1326.797192349944 * 60 * 60 * 24
+  Type = "KeplerTranslation",
+  Eccentricity = 0.08875750498598881,
+  SemiMajorAxis = 2.363038212561438 * AU,
+  Inclination = 7.139257981928672,
+  AscendingNode = 103.7573001493549,
+  ArgumentOfPeriapsis = 151.5991639880173,
+  MeanAnomaly = 115.1329895974862,
+  Epoch = "2021 04 13 11:15:57",
+  Period = 1326.797192349944 * 60 * 60 * 24
 }
 
 local Position = {
-    Identifier = "VestaPosition",
-    Parent = transforms.SunEclipJ2000.Identifier,
-    Transform = {
-      Translation = Translation
-    },
-    GUI = {
-      Name = "Vesta Position",
-      Path = "/Solar System/Dwarf Planets/Vesta",
-      Hidden = true
-    }
+  Identifier = "VestaPosition",
+  Parent = transforms.SunEclipJ2000.Identifier,
+  Transform = {
+    Translation = Translation
+  },
+  GUI = {
+    Name = "Vesta Position",
+    Path = "/Solar System/Dwarf Planets/Vesta",
+    Focusable = false,
+    Hidden = true
+  }
 }
 
 

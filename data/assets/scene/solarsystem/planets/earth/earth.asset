@@ -70,7 +70,8 @@ local EarthLabel = {
   GUI = {
     Name = "Earth Label",
     Path = "/Solar System/Planets/Earth",
-    Description = "Main label for Earth"
+    Description = "Main label for Earth",
+    Focusable = false
   }
 }
 

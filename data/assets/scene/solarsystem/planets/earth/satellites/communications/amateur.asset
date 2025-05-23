@@ -28,7 +28,8 @@ local AmateurSatellites = {
   Tag = { "earth_satellites" },
   GUI = {
     Name = "Amateur Radio",
-    Path = "/Solar System/Planets/Earth/Satellites"
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
   }
 }
 

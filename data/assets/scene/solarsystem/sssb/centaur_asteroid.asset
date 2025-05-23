@@ -26,6 +26,7 @@ local Object = {
   GUI = {
     Name = "Centaur Asteroids",
     Path = "/Solar System/Small Bodies",
+    Focusable = false,
     Description = [[Asteroids with either a perihelion or a semi-major axis between those
       of the four outer planets.]]
   }

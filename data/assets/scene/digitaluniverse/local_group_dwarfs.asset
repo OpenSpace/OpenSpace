@@ -47,6 +47,7 @@ local Object = {
   GUI = {
     Name = "Local Group",
     Path = "/Universe/Nearby Surveys",
+    Focusable = false,
     Description = [[A group of galaxies is typically composed of a small number of large
       galaxies that are surrounded by a large number of small galaxies. The Milky Way
       belongs to the Local Group, and is one of roughly 100 galaxies in that group. The

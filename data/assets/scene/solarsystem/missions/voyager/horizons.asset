@@ -32,6 +32,7 @@ local Voyager1 = {
   GUI = {
     Name = "Voyager 1 Trail (Horizons)",
     Path = "/Solar System/Missions/Voyager",
+    Focusable = false,
     Description = [[Voyager 1 Trail, spanning from September 6th, 1977 to January 1st,
       2030. Data from JPL Horizons]]
   }
@@ -61,6 +62,7 @@ local Voyager2 = {
   GUI = {
     Name = "Voyager 2 Trail (Horizons)",
     Path = "/Solar System/Missions/Voyager",
+    Focusable = false,
     Description = [[Voyager 2 Trail, spanning from August 21st, 1977 to January 1st, 2030.
       Data from JPL Horizons]]
   }

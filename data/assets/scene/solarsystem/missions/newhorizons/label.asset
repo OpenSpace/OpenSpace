@@ -18,7 +18,8 @@ local Labels = {
     AmbientIntensity = 0.8
   },
   GUI = {
-    Path = "/Solar System/Missions/New Horizons"
+    Path = "/Solar System/Missions/New Horizons",
+    Focusable = false
   }
 }
 

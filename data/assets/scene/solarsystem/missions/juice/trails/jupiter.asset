@@ -22,6 +22,7 @@ local JuiceTrailJupiter = {
   GUI = {
     Name = "Juice Trail (Jupiter)",
     Path = "/Solar System/Missions/Juice",
+    Focusable = false,
     Description = "Juice's trajectory relative to Jupiter"
   }
 }

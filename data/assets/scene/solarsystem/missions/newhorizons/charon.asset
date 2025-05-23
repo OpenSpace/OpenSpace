@@ -88,7 +88,8 @@ local CharonText = {
   },
   GUI = {
     Name = "Charon Text",
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto",
+    Focusable = false
   }
 }
 
@@ -107,7 +108,8 @@ local CharonShadow = {
   },
   GUI = {
     Name = "Charon Shadow",
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto",
+    Focusable = false
   }
 }
 

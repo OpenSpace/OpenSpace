@@ -27,13 +27,13 @@ local GeocentricSolarEcliptic = {
   GUI = {
     Name = "Geocentric Solar Ecliptic",
     Path = "/Solar System/Planets/Earth",
+    Focusable = false,
+    Hidden = true,
     Description = [[The X-Y plane is defined by the Earth Mean Ecliptic plane of date:
-        the +Z axis, primary vector, is the normal vector to this plane,
-        always pointing toward the North side of the invariant plane.
-        +X axis is the component of the Earth-Sun vector that is orthogonal
-        to the +Z axis.
-        +Y axis completes the right-handed system.]],
-    Hidden = true
+      the +Z axis, primary vector, is the normal vector to this plane, always pointing
+      toward the North side of the invariant plane. +X axis is the component of the
+      Earth-Sun vector that is orthogonal to the +Z axis. +Y axis completes the
+      right-handed system.]]
   }
 }
 

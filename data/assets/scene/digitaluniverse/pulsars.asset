@@ -41,6 +41,7 @@ local Object = {
   GUI = {
     Name = "Pulsars",
     Path = "/Milky Way/Stellar Remnants",
+    Focusable = false,
     Description = [[A pulsar is a spinning neutron star, an ultra-dense stellar remnant
       resulting from a supernova-driven collapse of the stellar core. Upon death, stars
       leave behind one of three possible remnants: a white dwarf, a neutron star, or a

@@ -28,8 +28,9 @@ local Object = {
   GUI = {
     Name = "Home Label",
     Path = "/Universe/Nearby Surveys",
-    Description = [[Label for the Milky Way titled 'Home', sized for viewing outside
-      the Milky Way Galaxy.]]
+    Focusable = false,
+    Description = [[Label for the Milky Way titled 'Home', sized for viewing outside the
+      Milky Way Galaxy.]]
   }
 }
 

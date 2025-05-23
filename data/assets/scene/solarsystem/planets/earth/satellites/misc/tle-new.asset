@@ -29,6 +29,7 @@ local Last30DaysSatellites = {
   GUI = {
     Name = "Last 30 Days",
     Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false,
     Description = [[All the satellites that have been launched in the last 30 days.]]
   }
 }

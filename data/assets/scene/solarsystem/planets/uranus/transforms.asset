@@ -16,6 +16,7 @@ local UranusBarycenter = {
   GUI = {
     Name = "Uranus Barycenter",
     Path = "/Solar System/Planets/Uranus",
+    Focusable = false,
     Hidden = true
   }
 }

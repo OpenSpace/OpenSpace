@@ -59,7 +59,8 @@ local TritonTrail = {
   },
   GUI = {
     Name = "Triton Trail",
-    Path = "/Solar System/Planets/Neptune/Major Moons/Triton"
+    Path = "/Solar System/Planets/Neptune/Major Moons/Triton",
+    Focusable = false
   }
 }
 
@@ -84,6 +85,7 @@ local TritonLabel = {
   GUI = {
     Name = "Triton Label",
     Path = "/Solar System/Planets/Neptune/Major Moons/Triton",
+    Focusable = false,
     Description = "Label for Neptune's moon Triton"
   }
 }

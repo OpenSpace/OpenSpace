@@ -22,6 +22,7 @@ local SerenaElenaAN01 = {
   GUI = {
     Name = "MPO Serena Elena AN01",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -44,6 +45,7 @@ local SerenaElenaAN02 = {
   GUI = {
     Name = "MPO Serena Elena AN02",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -66,6 +68,7 @@ local SerenaElenaAN03 = {
   GUI = {
     Name = "MPO Serena Elena AN03",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -88,6 +91,7 @@ local SerenaElenaAN04 = {
   GUI = {
     Name = "MPO Serena Elena AN04",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -110,6 +114,7 @@ local SerenaElenaAN05 = {
   GUI = {
     Name = "MPO Serena Elena AN05",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -132,6 +137,7 @@ local SerenaElenaAN06 = {
   GUI = {
     Name = "MPO Serena Elena AN06",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -154,6 +160,7 @@ local SerenaElenaAN07 = {
   GUI = {
     Name = "MPO Serena Elena AN07",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -176,6 +183,7 @@ local SerenaElenaAN08 = {
   GUI = {
     Name = "MPO Serena Elena AN08",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -198,6 +206,7 @@ local SerenaElenaAN09 = {
   GUI = {
     Name = "MPO Serena Elena AN09",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -220,6 +229,7 @@ local SerenaElenaAN10 = {
   GUI = {
     Name = "MPO Serena Elena AN10",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -242,6 +252,7 @@ local SerenaElenaAN11 = {
   GUI = {
     Name = "MPO Serena Elena AN11",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -264,6 +275,7 @@ local SerenaElenaAN12 = {
   GUI = {
     Name = "MPO Serena Elena AN12",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -286,6 +298,7 @@ local SerenaElenaAN13 = {
   GUI = {
     Name = "MPO Serena Elena AN13",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -308,6 +321,7 @@ local SerenaElenaAN14 = {
   GUI = {
     Name = "MPO Serena Elena AN14",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -330,6 +344,7 @@ local SerenaElenaAN15 = {
   GUI = {
     Name = "MPO Serena Elena AN15",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -352,6 +367,7 @@ local SerenaElenaAN16 = {
   GUI = {
     Name = "MPO Serena Elena AN16",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -374,6 +390,7 @@ local SerenaElenaAN17 = {
   GUI = {
     Name = "MPO Serena Elena AN17",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -396,6 +413,7 @@ local SerenaElenaAN18 = {
   GUI = {
     Name = "MPO Serena Elena AN18",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -418,6 +436,7 @@ local SerenaElenaAN19 = {
   GUI = {
     Name = "MPO Serena Elena AN19",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -440,6 +459,7 @@ local SerenaElenaAN20 = {
   GUI = {
     Name = "MPO Serena Elena AN20",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -462,6 +482,7 @@ local SerenaElenaAN21 = {
   GUI = {
     Name = "MPO Serena Elena AN21",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -484,6 +505,7 @@ local SerenaElenaAN22 = {
   GUI = {
     Name = "MPO Serena Elena AN22",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -506,6 +528,7 @@ local SerenaElenaAN23 = {
   GUI = {
     Name = "MPO Serena Elena AN23",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -528,6 +551,7 @@ local SerenaElenaAN24 = {
   GUI = {
     Name = "MPO Serena Elena AN24",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -550,6 +574,7 @@ local SerenaElenaAN25 = {
   GUI = {
     Name = "MPO Serena Elena AN25",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -572,6 +597,7 @@ local SerenaElenaAN26 = {
   GUI = {
     Name = "MPO Serena Elena AN26",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -594,6 +620,7 @@ local SerenaElenaAN27 = {
   GUI = {
     Name = "MPO Serena Elena AN27",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -616,6 +643,7 @@ local SerenaElenaAN28 = {
   GUI = {
     Name = "MPO Serena Elena AN28",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -638,6 +666,7 @@ local SerenaElenaAN29 = {
   GUI = {
     Name = "MPO Serena Elena AN29",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -660,6 +689,7 @@ local SerenaElenaAN30 = {
   GUI = {
     Name = "MPO Serena Elena AN30",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -682,6 +712,7 @@ local SerenaElenaAN31 = {
   GUI = {
     Name = "MPO Serena Elena AN31",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -704,6 +735,7 @@ local SerenaElenaAN32 = {
   GUI = {
     Name = "MPO Serena Elena AN32",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 

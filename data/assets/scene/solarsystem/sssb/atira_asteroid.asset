@@ -26,6 +26,7 @@ local Object = {
   GUI = {
     Name = "Atira Asteroids",
     Path = "/Solar System/Small Bodies",
+    Focusable = false,
     Description = [[Near-Earth-Asteroids whose orbits are contained entirely within the
       orbit of the Earth.]]
   }
