@@ -176,36 +176,14 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
         );
     }
 
-    ghoul::Dictionary res;
+    ghoul::Dictionary res = _browser->data();
     res.setValue("id", browserId());
     res.setValue("targetId", targetNodeId());
     res.setValue("name", browserGuiName());
-    res.setValue("fov", static_cast<double>(verticalFov()));
     res.setValue("ra", spherical.x);
     res.setValue("dec", spherical.y);
-    res.setValue("roll", targetRoll());
-    res.setValue("color", borderColor());
     res.setValue("cartesianDirection", cartesian);
-    res.setValue("ratio", static_cast<double>(_browser->browserRatio()));
-    res.setValue("isFacingCamera", isFacingCamera());
-    res.setValue("isUsingRae", isUsingRadiusAzimuthElevation());
     res.setValue("selectedImages", selectedImagesIndices);
-    res.setValue("scale", static_cast<double>(_browser->scale()));
-    res.setValue("opacities", _browser->opacities());
-    res.setValue("borderRadius", _browser->borderRadius());
-
-    std::vector<std::pair<std::string, glm::dvec3>> copies = displayCopies();
-    std::vector<std::pair<std::string, bool>> showCopies = _browser->showDisplayCopies();
-    ghoul::Dictionary copiesData;
-    for (size_t i = 0; i < copies.size(); i++) {
-        ghoul::Dictionary copy;
-        copy.setValue("position", copies[i].second);
-        copy.setValue("show", showCopies[i].second);
-        copy.setValue("idShowProperty", showCopies[i].first);
-        copiesData.setValue(copies[i].first, copy);
-    }
-    // Set table for the current target
-    res.setValue("displayCopies", copiesData);
 
     return res;
 }

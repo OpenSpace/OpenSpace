@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___SCREENSPACESKYBROWSER___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___SCREENSPACESKYBROWSER___H__
 
-#include <openspace/rendering/screenspacerenderable.h>
+#include <modules/webbrowser/include/screenspacebrowser.h>
 #include <modules/skybrowser/include/wwtcommunicator.h>
 
 #include <openspace/documentation/documentation.h>
@@ -35,29 +35,55 @@
 
 namespace openspace {
 
-class ScreenSpaceSkyBrowser : public ScreenSpaceRenderable, public WwtCommunicator {
+class ScreenSpaceSkyBrowser : public ScreenSpaceBrowser {
 public:
     explicit ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary);
     ~ScreenSpaceSkyBrowser() override;
 
-    void initializeGL() override;
-    void deinitializeGL() override;
-
-    glm::mat4 scaleMatrix() override;
     void render(const RenderData& renderData) override;
     void update() override;
 
-    float opacity() const noexcept override;
-    glm::dvec2 fineTuneVector(const glm::dvec2& drag);
+    void setImageOrder(const std::string& imageUrl, int order);
+
+    // Flags
     bool isInitialized() const;
     bool isPointingSpacecraft() const;
     bool shouldUpdateWhileTargetAnimates() const;
-
-    double setVerticalFovWithScroll(float scroll);
-    void setIdInBrowser() const;
     void setIsInitialized(bool isInitialized);
     void setPointSpaceCraft(bool shouldPoint);
 
+    glm::dvec2 fineTuneVector(const glm::dvec2& drag);
+
+    double verticalFov() const;
+
+    void updateBorderColor();
+    void hideChromeInterface();
+
+    glm::ivec3 borderColor() const;
+    double borderRadius() const;
+    void setTargetRoll(double roll);
+    glm::dvec2 fieldsOfView() const;
+    glm::dvec2 equatorialAim() const;
+    void setVerticalFov(double vfov);
+    void setEquatorialAim(glm::dvec2 equatorial);
+    void setBorderColor(glm::ivec3 color);
+    double browserRatio() const;
+
+    std::vector<std::string> selectedImages() const;
+    void selectImage(const std::string& url);
+
+    void addImageLayerToWwt(const std::string& imageUrl);
+    void removeSelectedImage(const std::string& imageUrl);
+    void loadImageCollection(const std::string& collection);
+
+    void setImageOpacity(const std::string& imageUrl, float opacity);
+    void reload();
+    double setVerticalFovWithScroll(float scroll);
+    void setBorderRadius(double radius);
+    void setRatio(double ratio);
+    void setImageCollectionIsLoaded(bool loaded);
+
+    void setIdInBrowser() const;
     void updateTextureResolution();
 
     // Copies rendered
@@ -65,6 +91,8 @@ public:
     void removeDisplayCopy();
     std::vector<std::pair<std::string, glm::dvec3>> displayCopies() const;
     std::vector<std::pair<std::string, bool>> showDisplayCopies() const;
+
+    ghoul::Dictionary data() const;
 
     static documentation::Documentation Documentation();
 
@@ -77,7 +105,23 @@ private:
     std::vector<std::unique_ptr<properties::Vec3Property>> _displayCopies;
     std::vector<std::unique_ptr<properties::BoolProperty>> _showDisplayCopies;
 
-    void bindTexture() override;
+    properties::DoubleProperty _verticalFov;
+
+    double _borderRadius = 0.0;
+    glm::ivec3 _wwtBorderColor = glm::ivec3(70);
+    glm::dvec2 _equatorialAim = glm::dvec2(0.0);
+    double _targetRoll = 0.0;
+
+    WwtCommunicator _wwtCommunicator;
+    // Time variables
+    // For capping the message passing to WWT
+    static constexpr std::chrono::milliseconds TimeUpdateInterval =
+        std::chrono::milliseconds(10);
+    std::chrono::system_clock::time_point _lastUpdateTime;
+
+    bool _borderColorIsDirty = false;
+    bool _equatorialAimIsDirty = false;
+    bool _isDimensionsDirty = false;
 
     // Flags
     bool _isInitialized = false;
