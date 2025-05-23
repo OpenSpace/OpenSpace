@@ -124,20 +124,36 @@ namespace {
     };
 
     std::string sanitizeInput(std::string str) {
-        // Remove carriage returns.
+        // Remove carriage returns
         str.erase(std::remove(str.begin(), str.end(), '\r'), str.end());
 
-        // Replace newlines with spaces.
         std::transform(
             str.begin(),
             str.end(),
             str.begin(),
-            [](char c) { return c == '\n' ? ' ' : c; }
+            [](char c) {
+                // Replace newlines with spaces
+                if (c == '\n') {
+                    return ' ';
+                }
+
+                // The documentation contains “ and ” which we convert to " to make them
+                // copy-and-pastable
+                if (c == -109 || c == -108) {
+                    return '"';
+                }
+
+                // Convert \ into / to make paths pastable
+                if (c == '\\') {
+                    return '/';
+                }
+
+                return c;
+            }
         );
 
         return str;
     }
-
 } // namespace
 
 namespace openspace {
