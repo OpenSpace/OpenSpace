@@ -49,9 +49,6 @@ public:
     ~CefHost();
 
     void doMessageLoopWork();
-
-private:
-    void attachDebugSettings(CefSettings&);
 };
 
 } // namespace openspace

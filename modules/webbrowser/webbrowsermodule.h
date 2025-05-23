@@ -75,7 +75,6 @@ private:
     std::vector<BrowserInstance*> _browsers;
     std::unique_ptr<EventHandler> _eventHandler;
     std::unique_ptr<CefHost> _cefHost;
-    std::filesystem::path _webHelperLocation;
     bool _enabled = true;
     static inline bool _disableAcceleratedRendering = false;
 };
