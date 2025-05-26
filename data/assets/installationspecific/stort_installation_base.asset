@@ -70,6 +70,8 @@ asset.require("scene/solarsystem/planets/saturn/minor_moons")
 asset.require("scene/solarsystem/planets/uranus/major_moons")
 asset.require("scene/solarsystem/planets/uranus/minor_moons")
 
+-- Required for Special Inactivity
+asset.require("installationspecific/others/iss_special_position")
 
 
 

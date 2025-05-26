@@ -1,0 +1,37 @@
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local coreKernels = asset.require("spice/core")
+
+
+-- Saved position used for the special inactivity view in order to garantuee proper view alignment
+local IssSpecialPosition = {
+  Identifier = "ISSSpecialPosition",
+  Parent = transforms.EarthInertial.Identifier,
+  BoundingSphere = 54.5, -- half the width
+  Transform = {
+    Translation = {
+      Type = "GPTranslation",
+      Observer = transforms.EarthInertial.Identifier,
+      File = asset.resource("iss_position_static.txt"),
+      Format = "OMM"
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.Galactic,
+      DestinationFrame = coreKernels.Frame.J2000
+    }
+  },
+  GUI = {
+    Name = "ISS Special Position",
+    Path = "/Solar System/Planets/Earth/Satellites/ISS",
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(IssSpecialPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(IssSpecialPosition)
+end)

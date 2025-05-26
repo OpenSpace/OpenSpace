@@ -1,6 +1,7 @@
 local util = asset.require('./utility_functions')
 local flyHome = asset.require('./fly_home_alternatives')
 local defaultTime = asset.require('./default_time').time
+local specialInactivityTime = asset.require('./default_time').specialInactivityTime
 
 ----------------------------------------------------------------
 -- STATES
@@ -23,7 +24,7 @@ local specialInactiveState = {
     openspace.setPropertyValueSingle("Scene.ISS.Renderable.Enabled", false)
     openspace.time.setPause(false)
     openspace.time.setDeltaTime(1)
-    openspace.time.setTime(']] .. defaultTime .. [[')
+    openspace.time.setTime(']] .. specialInactivityTime .. [[')
   ]],
   Exit = [[
       openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", false)
