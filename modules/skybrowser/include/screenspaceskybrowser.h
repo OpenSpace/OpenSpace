@@ -85,7 +85,6 @@ public:
 
 private:
     static constexpr int RadiusTimeOut = 25;
-    properties::FloatProperty _textureQuality;
     properties::BoolProperty _isHidden;
     properties::BoolProperty _isPointingSpacecraft;
     properties::BoolProperty _updateDuringTargetAnimation;
@@ -114,8 +113,6 @@ private:
     bool _isInitialized = false;
     bool _radiusIsDirty = false;
     int _borderRadiusTimer = -1;
-
-    float _lastTextureQuality = 1.f;
 };
 
 } // namespace openspace

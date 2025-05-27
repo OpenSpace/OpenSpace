@@ -145,7 +145,6 @@ documentation::Documentation ScreenSpaceSkyBrowser::Documentation() {
 
 ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary)
     : ScreenSpaceBrowser(dictionary)
-    , _textureQuality(TextureQualityInfo, 1.f, 0.25f, 1.f)
     , _isHidden(IsHiddenInfo, true)
     , _isPointingSpacecraft(PointSpacecraftInfo, false)
     , _updateDuringTargetAnimation(UpdateDuringAnimationInfo, true)
@@ -158,7 +157,6 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     // Handle target dimension property
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _textureQuality = p.textureQuality.value_or(_textureQuality);
     _isHidden = p.isHidden.value_or(_isHidden);
     _isPointingSpacecraft = p.pointSpacecraft.value_or(_isPointingSpacecraft);
     _updateDuringTargetAnimation = p.updateDuringTargetAnimation.value_or(
@@ -169,12 +167,9 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     _verticalFov.setReadOnly(true);
 
     addProperty(_isHidden);
-    addProperty(_textureQuality);
     addProperty(_verticalFov);
     addProperty(_isPointingSpacecraft);
     addProperty(_updateDuringTargetAnimation);
-
-    _textureQuality.onChange([this]() { _isDimensionsDirty = true; });
 
     _reload.onChange([this]() {
         _wwtCommunicator.setImageCollectionIsLoaded(false);
@@ -258,18 +253,11 @@ void ScreenSpaceSkyBrowser::setPointSpaceCraft(bool shouldPoint) {
 }
 
 void ScreenSpaceSkyBrowser::updateTextureResolution() {
-    // Check if texture quality has changed. If it has, adjust accordingly
-    if (std::abs(_textureQuality.value() - _lastTextureQuality) > glm::epsilon<float>()) {
-        const float diffTextureQuality = _textureQuality / _lastTextureQuality;
-        const glm::vec2 res = glm::vec2(_dimensions.value()) * diffTextureQuality;
-        // TODO ylvse 2025-05-23 set the dirty flag somehow?
-        _dimensions = glm::ivec2(res);
-        _lastTextureQuality = _textureQuality.value();
-    }
     _objectSize = glm::ivec3(_dimensions.value(), 1);
 
     // The radius has to be updated when the texture resolution has changed
     _radiusIsDirty = true;
+    _isDimensionsDirty = false;
     _borderRadiusTimer = 0;
 }
 
@@ -410,6 +398,7 @@ double ScreenSpaceSkyBrowser::borderRadius() const {
 }
 
 void ScreenSpaceSkyBrowser::setTargetRoll(double roll) {
+    _equatorialAimIsDirty = true;
     _targetRoll = roll;
 }
 
@@ -426,6 +415,7 @@ glm::dvec2 ScreenSpaceSkyBrowser::equatorialAim() const {
 
 void ScreenSpaceSkyBrowser::setVerticalFov(double vfov) {
     _equatorialAimIsDirty = true;
+    _verticalFov = vfov;
 }
 
 void ScreenSpaceSkyBrowser::setEquatorialAim(glm::dvec2 equatorial) {
@@ -470,7 +460,7 @@ void ScreenSpaceSkyBrowser::update() {
     }
     // After the texture has been updated, wait a little bit before updating the border
     // radius so the browser has time to update its size
-    if (_radiusIsDirty && _isInitialized && _borderRadiusTimer == RadiusTimeOut) {
+    if (_radiusIsDirty && _isInitialized && _borderRadiusTimer > RadiusTimeOut) {
         _wwtCommunicator.setBorderRadius(_borderRadius);
         _radiusIsDirty = false;
         _borderRadiusTimer = -1;
