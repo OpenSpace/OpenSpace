@@ -148,7 +148,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     , _textureQuality(TextureQualityInfo, 1.f, 0.25f, 1.f)
     , _isHidden(IsHiddenInfo, true)
     , _isPointingSpacecraft(PointSpacecraftInfo, false)
-    , _updateDuringTargetAnimation(UpdateDuringAnimationInfo, false)
+    , _updateDuringTargetAnimation(UpdateDuringAnimationInfo, true)
     , _verticalFov(VerticalFovInfo, 10.0, 0.00000000001, 70.0)
     , _wwtCommunicator(_browserInstance.get())
 
@@ -463,17 +463,10 @@ void ScreenSpaceSkyBrowser::update() {
         }
         _lastUpdateTime = std::chrono::system_clock::now();
     }
-    // TODO fix this
-   /* if (_shouldReload) {
-        _wwtCommunicator.setImageCollectionIsLoaded(false);
-    }*/
-   /* if (_shouldReload) {
-        _isInitialized = false;
-    }*/
 
     // Check for dirty flags
     if (_isDimensionsDirty) {
-        //updateTextureResolution();
+        updateTextureResolution();
     }
     // After the texture has been updated, wait a little bit before updating the border
     // radius so the browser has time to update its size
