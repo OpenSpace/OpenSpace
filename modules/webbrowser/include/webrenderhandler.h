@@ -51,9 +51,7 @@ namespace openspace {
 
 class WebRenderHandler : public CefRenderHandler {
 public:
-    // @TODO (ylvse 2024-08-20): Remove this argument when the skybrowser rewrite is done.
-    // It is necessary atm for making the skybrowser work.
-    explicit WebRenderHandler(bool accelerate = true);
+    explicit WebRenderHandler();
     using Pixel = glm::tvec4<char>;
 
     virtual void draw(void) = 0;
