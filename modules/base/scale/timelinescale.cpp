@@ -81,6 +81,18 @@ TimelineScale::TimelineScale(const ghoul::Dictionary& dictionary)
     addProperty(_shouldInterpolate);
 }
 
+void TimelineScale::update(const UpdateData& data) {
+    const double now = data.time.j2000Seconds();
+    using KeyframePointer = const Keyframe<ghoul::mm_unique_ptr<Scale>>*;
+
+    if (KeyframePointer prev = _timeline.lastKeyframeBefore(now, true);  prev) {
+        prev->data->update(data);
+    }
+    if (KeyframePointer next = _timeline.firstKeyframeAfter(now, true);  next) {
+        next->data->update(data);
+    }
+}
+
 glm::dvec3 TimelineScale::scaleValue(const UpdateData& data) const {
     const double now = data.time.j2000Seconds();
     using KeyframePointer = const Keyframe<ghoul::mm_unique_ptr<Scale>>*;

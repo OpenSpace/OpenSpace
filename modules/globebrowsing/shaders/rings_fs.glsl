@@ -31,6 +31,7 @@
 in vec2 vs_st;
 in float vs_screenSpaceDepth;
 in vec4 shadowCoords;
+in vec3 vs_normal;
 
 uniform sampler2DShadow shadowMapTexture;
 uniform sampler1D ringTexture;

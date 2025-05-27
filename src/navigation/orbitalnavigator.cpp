@@ -325,9 +325,9 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-        EnabledMinimumAllowedDistanceInfo =
+        EnableMinimumAllowedDistanceInfo =
     {
-        "EnabledMinimumAllowedDistance",
+        "EnableMinimumAllowedDistance",
         "Enable minimum allowed distance limit",
         "Enables or disables that the camera cannot go closer to an object than "
         "the set minimum allowed distance.",
@@ -342,7 +342,7 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledMaximumDistanceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EnableMaximumDistanceInfo = {
         "EnableMaximumAllowedDistance",
         "Enable Maximum Allowed Distance limit",
         "Enables or disables that the camera cannot go further away from an object than "
@@ -472,9 +472,9 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
 
 OrbitalNavigator::LimitZoom::LimitZoom()
     : properties::PropertyOwner(LimitZoomInfo)
-    , enableZoomInLimit(EnabledMinimumAllowedDistanceInfo, true)
+    , enableZoomInLimit(EnableMinimumAllowedDistanceInfo, true)
     , minimumAllowedDistance(MinimumDistanceInfo, 10.f, 0.f, 10000.f)
-    , enableZoomOutLimit(EnabledMaximumDistanceInfo, false)
+    , enableZoomOutLimit(EnableMaximumDistanceInfo, false)
     , maximumAllowedDistance(
         MaximumDistanceInfo,
         4e+27f,

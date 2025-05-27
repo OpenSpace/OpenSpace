@@ -59,8 +59,6 @@ public:
      */
     virtual void render(glm::vec2& penPosition) = 0;
 
-    virtual glm::vec2 size() const = 0;
-
     static documentation::Documentation Documentation();
 
 protected:

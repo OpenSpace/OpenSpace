@@ -123,7 +123,7 @@ void IswaKameleonGroup::readFieldlinePaths(const std::filesystem::path& indexFil
                 _fieldlines.addOption(it.key());
                 _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
                     identifier() + "/" + it.key(),
-                    it.value(),
+                    it->get<std::string>(),
                     false
                 );
                 i++;

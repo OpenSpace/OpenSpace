@@ -40,8 +40,9 @@ class ScreenSpaceVideo : public ScreenSpaceRenderable {
 public:
     explicit ScreenSpaceVideo(const ghoul::Dictionary& dictionary);
 
-    bool initializeGL() override;
-    bool deinitializeGL() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
+
     void update() override;
     void render(const RenderData& renderData) override;
 

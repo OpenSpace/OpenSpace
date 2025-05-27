@@ -37,7 +37,7 @@ local TiangongPosition = {
       DestinationFrame = coreKernels.Frame.J2000
     }
   },
-  Tag = { "earth_satellite" },
+  Tag = { "earth_satellites" },
   GUI = {
     Name = "Tiangong Position",
     Path = "/Solar System/Planets/Earth/Satellites/Tiangong",
@@ -65,7 +65,7 @@ local TiangongModel = {
     },
     PerformShading = true
   },
-  Tag = { "earth_satellite" },
+  Tag = { "earth_satellites" },
   GUI = {
     Name = "Tiangong",
     Path = "/Solar System/Planets/Earth/Satellites/Tiangong"
@@ -88,7 +88,7 @@ local TiangongTrail = {
     Fade = 1.5,
     Resolution = 320
   },
-  Tag = { "earth_satellite" },
+  Tag = { "earth_satellites" },
   GUI = {
     Name = "Tiangong Trail",
     Path = "/Solar System/Planets/Earth/Satellites/Tiangong"

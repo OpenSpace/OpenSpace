@@ -100,10 +100,24 @@ namespace {
     }
 
     std::optional<glm::vec3> hexToRgb(std::string_view hexColor) {
-        auto ret = scn::scan<int, int, int>(hexColor, "#{:2x}{:2x}{:2x}");
-        if (ret) {
-            auto [x, y, z] = ret->values();
-            return (1.f / 255.f) * glm::vec3(x, y, z);
+        // The string is supposed to have 7 characters:  #rrggbb
+        if (hexColor.size() != 7) {
+            return std::nullopt;
+        }
+
+        if (hexColor[0] == '#') {
+            hexColor = hexColor.substr(1);
+        }
+
+        auto retR = scn::scan<int>(hexColor.substr(0, 2), "{:x}");
+        auto retG = scn::scan<int>(hexColor.substr(2, 2), "{:x}");
+        auto retB = scn::scan<int>(hexColor.substr(4, 2), "{:x}");
+
+        if (retR && retG && retB) {
+            const int r = retR->value();
+            const int g = retG->value();
+            const int b = retB->value();
+            return (1.f / 255.f) * glm::vec3(r, g, b);
         }
         else {
             return std::nullopt;

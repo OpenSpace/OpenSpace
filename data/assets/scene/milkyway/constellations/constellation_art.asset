@@ -89,7 +89,7 @@ local function createConstellations(baseIdentifier, guiPath, constellationfile)
         Opacity = 0.1,
         DimInAtmosphere = true
       },
-      Tag = { "ImageConstellation", group, "daytime_hidden" },
+      Tag = { "image_constellation", "zodiac_" .. group, "daytime_hidden" },
       GUI = {
         Name = name .. " Image",
         Path = "/Milky Way/Constellations/" .. guiPath,

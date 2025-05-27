@@ -1225,7 +1225,7 @@ void RenderableTube::readDataFile() {
                            .index = colorDataIndex++, .name = dt.key()
                         });
                     }
-                    entry.data.push_back(dt.value());
+                    entry.data.push_back(dt.value().get<float>());
                 }
 
                 _colorDataset.entries.push_back(entry);

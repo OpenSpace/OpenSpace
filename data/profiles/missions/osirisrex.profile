@@ -77,11 +77,14 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "This profile demonstrates the entire lifetime of the NASA OSIRIS-REx spacecraft on its way to the asteroid Bennu and its subsequent journey back to Earth. The profile starts at Earth around the time of the spacecraft's launch and has information throughout the entire mission until its landing back on Earth in Utah. The models of OSIRIS-REx and Bennu are available, as well as a preliminary instrument timing, which uses the same image projection technique as employed in New Horizons and Rosetta",
+    "description": "This profile demonstrates the entire lifetime of the NASA OSIRIS-REx spacecraft on its way to the asteroid Bennu and its subsequent journey back to Earth. The profile starts at Earth around the time of the spacecraft's launch and has information throughout the entire mission until its landing back on Earth in Utah. The models of OSIRIS-REx and Bennu are available, as well as a preliminary instrument timing, which uses the same image projection technique as employed in New Horizons and Rosetta.",
     "license": "MIT License",
     "name": "Osiris-Rex",
     "url": "https://www.openspaceproject.com",
     "version": "1.1"
+  },
+  "panel_visibility": {
+    "mission": true
   },
   "properties": [
     {
@@ -96,11 +99,12 @@
     }
   ],
   "time": {
+    "is_paused": false,
     "type": "absolute",
     "value": "2018-10-30T23:00:00"
   },
   "version": {
     "major": 1,
-    "minor": 1
+    "minor": 4
   }
 }

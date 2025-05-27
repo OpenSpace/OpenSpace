@@ -48,3 +48,14 @@ asset.onDeinitialize(function()
   openspace.action.removeAction("os.lemFlipbook.NextFlip")
   openspace.action.removeAction("os.lemFlipbook.PrevFlip")
 end)
+
+
+
+asset.meta = {
+  Name = "Apollo 11 Landing Site Flipbook",
+  Description = [[This asset provides georeferenced images of the Apollo 11 landing site,
+    taken with different illumination angles.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

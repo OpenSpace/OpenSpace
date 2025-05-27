@@ -73,6 +73,7 @@ enum class HorizonsResultCode {
     ErrorObserverTargetSame,
     ErrorNoData,
     MultipleObserverStations,
+    News,
 
     // Errors/problems NOT caught by the error field in the json output
     MultipleObserver,

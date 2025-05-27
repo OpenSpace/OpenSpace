@@ -32,6 +32,8 @@
 namespace {
     constexpr std::string_view _loggerCat = "OptionProperty";
 
+    constexpr std::string_view OptionsKey = "options";
+
     using Option = openspace::properties::OptionProperty::Option;
 
     bool addOptionInternal(int value, std::string desc, std::vector<Option>& options) {
@@ -55,7 +57,6 @@ namespace {
 
 namespace openspace::properties {
 
-const std::string OptionProperty::OptionsKey = "Options";
 
 OptionProperty::OptionProperty(PropertyInfo info)
     : NumericalProperty<int>(
@@ -87,6 +88,7 @@ void OptionProperty::addOption(int value, std::string description) {
         // Set default value to option added first
         NumericalProperty::setValue(_options[0].value);
     }
+    notifyMetaDataChangeListeners();
 }
 
 void OptionProperty::addOptions(std::vector<std::pair<int, std::string>> options) {
@@ -95,6 +97,7 @@ void OptionProperty::addOptions(std::vector<std::pair<int, std::string>> options
     }
     // Set default value to option added first
     NumericalProperty::setValue(_options[0].value);
+    notifyMetaDataChangeListeners();
 }
 
 void OptionProperty::addOptions(std::vector<std::string> options) {
@@ -103,11 +106,13 @@ void OptionProperty::addOptions(std::vector<std::string> options) {
     }
     // Set default value to option added first
     NumericalProperty::setValue(_options[0].value);
+    notifyMetaDataChangeListeners();
 }
 
 void OptionProperty::clearOptions() {
     NumericalProperty::setValue(0);
     _options.clear();
+    notifyMetaDataChangeListeners();
 }
 
 void OptionProperty::setValue(int value) {
@@ -190,7 +195,7 @@ void OptionProperty::setLuaValue(lua_State* state) {
         if (it == _options.cend()) {
             throw ghoul::RuntimeError(
                 std::format("Could not find option '{}'", value),
-                uri()
+                std::string(uri())
             );
         }
         thisValue = it->value;
@@ -206,27 +211,15 @@ std::string OptionProperty::stringValue() const {
     return formatJson(_value);
 }
 
-std::string OptionProperty::generateAdditionalJsonDescription() const {
-    // @REFACTOR from selectionproperty.cpp, possible refactoring? ---abock
-    std::string result = "{ \"" + OptionsKey + "\": [";
-    for (size_t i = 0; i < _options.size(); i++) {
-        const Option& o = _options[i];
-        const std::string v = std::to_string(o.value);
-        const std::string vSan = escapedJson(v);
-        const std::string d = o.description;
-        const std::string dSan = escapedJson(d);
 
-        result += '{';
-        result += std::format(R"("{}": "{}")", vSan, dSan);
-        result += '}';
+nlohmann::json OptionProperty::generateAdditionalJsonDescription() const {
+    nlohmann::json data;
 
-        if (i != _options.size() - 1) {
-            result += ",";
-        }
+    for (const Option& option : _options) {
+        data[std::to_string(option.value)] = option.description;
     }
 
-    result += "] }";
-    return result;
+    return { { OptionsKey, data } };
 }
 
 int OptionProperty::toValue(lua_State* state) const {

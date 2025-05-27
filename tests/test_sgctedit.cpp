@@ -25,11 +25,11 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
+#include <openspace/engine/configuration.h>
+#include <openspace/json.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <nlohmann/json.hpp>
 #include <nlohmann/json-schema.hpp>
 #include <sgct/config.h>
-#include <openspace/engine/configuration.h>
 #include <filesystem>
 #include <fstream>
 #include <sstream>

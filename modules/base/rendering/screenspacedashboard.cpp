@@ -97,7 +97,7 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
     }
 }
 
-bool ScreenSpaceDashboard::initializeGL() {
+void ScreenSpaceDashboard::initializeGL() {
     ScreenSpaceFramebuffer::initializeGL();
 
     addRenderFunction([this]() {
@@ -110,8 +110,6 @@ bool ScreenSpaceDashboard::initializeGL() {
             _dashboard.render(penPosition);
         }
     });
-
-    return true;
 }
 
 void ScreenSpaceDashboard::update() {

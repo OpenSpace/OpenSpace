@@ -174,7 +174,7 @@ HorizonsResultCode isValidHorizonsAnswer(const json& answer) {
 
         if (auto version = signature->find("version");  version != signature->end()) {
             // Extract the major version from the version string
-            std::string v = *version;
+            std::string v = version->get<std::string>();
             v = v.substr(0, v.find('.'));
 
             if (v != CurrentMajorVersion) {
@@ -197,7 +197,7 @@ HorizonsResultCode isValidHorizonsAnswer(const json& answer) {
     // Errors
     if (auto it = answer.find("error");  it != answer.end()) {
         // There was an error
-        const std::string errorMsg = *it;
+        const std::string errorMsg = it->get<std::string>();
 
         // @CPP23 (malej, 2022-04-08) In all cases below, the string function contains
         // should be used instead of find
@@ -235,6 +235,10 @@ HorizonsResultCode isValidHorizonsAnswer(const json& answer) {
         // Multiple matching stations found.
         else if (errorMsg.find("Multiple matching stations found") != std::string::npos) {
             return HorizonsResultCode::MultipleObserverStations;
+        }
+        // News instead of request results
+        else if (errorMsg.find("Horizons On-Line System News") != std::string::npos) {
+            return HorizonsResultCode::News;
         }
         // Unknown error
         else {

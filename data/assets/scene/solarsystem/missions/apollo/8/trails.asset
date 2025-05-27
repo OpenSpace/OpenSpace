@@ -90,3 +90,17 @@ end)
 asset.export(LaunchTrail)
 asset.export(MoonTrail)
 asset.export(EarthBarycenterTrail)
+
+
+
+asset.meta = {
+  Name = "Apollo 8 Trail",
+  Description = [[Provides three trails for the Apollo 8 capsule: A launch trail that
+    corotates with the Earth and is thus valid for the first few hours of the mission,
+    an Earth-based non-rotating trail that will better represent the trajectory of the
+    capsule after the trans-lunar injection, and finally a Moon-centered trail that shows
+    the trajectory of the spacecraft in the Moon's reference frame.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

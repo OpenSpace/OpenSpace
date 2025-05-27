@@ -41,7 +41,6 @@ public:
     ~DashboardItemSimulationIncrement() override = default;
 
     void update() override;
-    glm::vec2 size() const override;
 
     static documentation::Documentation Documentation();
 

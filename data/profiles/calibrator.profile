@@ -24,7 +24,7 @@
   },
   "properties": [
     {
-      "name": "NavigationHandler.OrbitalNavigator.LimitZoom.EnabledMinimumAllowedDistance",
+      "name": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
       "type": "setPropertyValueSingle",
       "value": "false"
     }

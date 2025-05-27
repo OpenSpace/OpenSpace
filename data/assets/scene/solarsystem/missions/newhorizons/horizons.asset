@@ -1,0 +1,61 @@
+local ssb = asset.require("scene/solarsystem/sun/transforms")
+
+local newhorizons_horizons = asset.resource({
+  Name = "NewHorizons horizons",
+  Type = "HttpSynchronization",
+  Identifier = "newhorizons_horizons",
+  Version = 1
+})
+
+
+local NewHorizons = {
+  Identifier = "NewHorizons_Horizons",
+  Parent = ssb.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Enabled = false,
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = newhorizons_horizons .. "newhorizons.hrz"
+      -- Target: New Horizons (spacecraft) (-98)
+      -- Observer: SSB
+      -- Start time: 2006-Jan-19 19:51:18.3310 (first data point)
+      -- End time: 2030-Jan-01 00:00:00 (last data point)
+      -- Step size: 1440 minutes
+    },
+    Color = { 0.31, 0.71, 0.54 },
+    LineFadeAmount = 0.3,
+    StartTime = "2006 JAN 19 19:51:19",
+    EndTime = "2030 JAN 01 00:00:00",
+    SampleInterval = openspace.time.secondsPerDay()
+  },
+  GUI = {
+    Name = "New Horizons Trail (Horizons)",
+    Path = "/Solar System/Missions/New Horizons",
+    Description = [[New Horizons Trail, spanning from January 19th, 2006 to January 1st,
+      2030. Data from JPL Horizons]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(NewHorizons)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(NewHorizons)
+end)
+
+asset.export(NewHorizons)
+
+
+
+asset.meta = {
+  Name = "New Horizons Horizons Trails",
+  Description = [[New Horizons trail driven by JPL Horizons data for better performance
+    then SPICE but lower resolution. Data is from shortly after mission launch
+    until January 1st, 2030]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

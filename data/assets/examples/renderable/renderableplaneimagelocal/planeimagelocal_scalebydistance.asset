@@ -1,0 +1,34 @@
+-- Scale by Distance to Camera
+-- This example creates a textured plane that is scaled based on the distance to the
+-- camera, so that it stays a constant size in screen space. The scale is limited so that
+-- the plane does not become larger or smaller than a given max height and min height, in
+-- meters.
+
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+local Node = {
+  Identifier = "RenderablePlaneImageLocal_Example_ScaleByDistance",
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 100000,
+    Texture = openspace.absPath("${DATA}/test2.jpg"),
+    DistanceScalingSettings = {
+      ScaleByDistance = true,
+      ApparentSizeMultiplier = 0.01,
+      ScaleByDistanceMaxHeight = 200000,
+      ScaleByDistanceMinHeight = 30000
+    }
+  },
+  GUI = {
+    Name = "RenderablePlaneImageLocal - ScaleByDistance",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

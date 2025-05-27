@@ -34,7 +34,7 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "This scene contains a new rendering method to show the massive ESA Gaia stars dataset. By default, it loads the few million stars of the Gaia DR2 that contain radial velocities",
+    "description": "This scene contains a new rendering method to show the massive ESA Gaia stars dataset. By default, it loads the few million stars of the Gaia DR2 that contain radial velocities.",
     "license": "MIT License",
     "name": "Gaia",
     "url": "https://www.openspaceproject.com",
@@ -47,6 +47,9 @@
       "notLoadedInstruction": "openspace.printFatal('Could not load gaia profile due to missing module \"Gaia\"')"
     }
   ],
+  "panel_visibility": {
+    "mission": true
+  },
   "properties": [
     {
       "name": "Scene.Stars.Renderable.Enabled",
@@ -55,11 +58,12 @@
     }
   ],
   "time": {
+    "is_paused": false,
     "type": "absolute",
     "value": "2019-06-10T00:00:00"
   },
   "version": {
     "major": 1,
-    "minor": 0
+    "minor": 4
   }
 }

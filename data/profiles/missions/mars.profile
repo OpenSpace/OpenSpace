@@ -54,18 +54,22 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "This profile shows the landing of the NASA InSight lander on Mars. The final minutes of the approach are shown with the lander finishing on the surface of Mars.  This profile also includes the landing trail and model for the Mars2020 rover Perseverence. ",
+    "description": "This profile shows the landing of the NASA InSight lander on Mars. The final minutes of the approach are shown with the lander finishing on the surface of Mars.  This profile also includes the landing trail and model for the Mars2020 rover Perseverence.",
     "license": "MIT License",
     "name": "Mars",
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
+  "panel_visibility": {
+    "mission": true
+  },
   "time": {
+    "is_paused": false,
     "type": "relative",
     "value": "-1d"
   },
   "version": {
     "major": 1,
-    "minor": 1
+    "minor": 4
   }
 }

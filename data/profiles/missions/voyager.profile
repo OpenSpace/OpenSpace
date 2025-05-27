@@ -83,11 +83,14 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "This scene contains the NASA Voyager 1 and Voyager 2 missions as they were launched from Earth in the 1970s and observed the gas giants in the Solar System. The spacecraft models are included and are pointed accurately throughout the mission. Position and orientation information are available until the second half of the 21st century",
+    "description": "This scene contains the NASA Voyager 1 and Voyager 2 missions as they were launched from Earth in the 1970s and observed the gas giants in the Solar System. The spacecraft models are included and are pointed accurately throughout the mission. Position and orientation information are available until the second half of the 21st century.",
     "license": "MIT License",
     "name": "Voyager",
     "url": "https://www.openspaceproject.com",
     "version": "1.1"
+  },
+  "panel_visibility": {
+    "mission": true
   },
   "properties": [
     {
@@ -97,11 +100,12 @@
     }
   ],
   "time": {
+    "is_paused": false,
     "type": "absolute",
     "value": "1977-09-10T12:00:00"
   },
   "version": {
     "major": 1,
-    "minor": 1
+    "minor": 4
   }
 }

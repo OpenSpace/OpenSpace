@@ -917,7 +917,7 @@ openspace::HorizonsFile HorizonsDialog::handleAnswer(nlohmann::json& answer) {
     }
 
     // Return a new file with the result
-    return openspace::HorizonsFile(filePath, *result);
+    return openspace::HorizonsFile(filePath, result->get<std::string>());
 }
 
 bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
@@ -1080,6 +1080,23 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             }
             _chooseObserverCombo->setCurrentIndex(0);
             _chooseObserverCombo->show();
+
+            std::filesystem::remove(_horizonsFile.file());
+            break;
+        }
+        case HorizonsResultCode::News: {
+            std::string msg = std::format(
+                "The target '{}' is too simlar to the Horizons command 'NEWS'",
+                _targetName
+            );
+            appendLog(msg, HorizonsDialog::LogLevel::Error);
+
+            msg = std::format(
+                "Try to use '@{}' as target to avoid false positive matches with the "
+                "Horizons command 'NEWS'", _targetName
+            );
+            appendLog(msg, HorizonsDialog::LogLevel::Info);
+            styleLabel(_targetLabel, IsDirty::Yes);
 
             std::filesystem::remove(_horizonsFile.file());
             break;

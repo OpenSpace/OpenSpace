@@ -83,10 +83,10 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
 
 ScreenSpaceImageOnline::~ScreenSpaceImageOnline() {}
 
-bool ScreenSpaceImageOnline::deinitializeGL() {
+void ScreenSpaceImageOnline::deinitializeGL() {
     _texture = nullptr;
 
-    return ScreenSpaceRenderable::deinitializeGL();
+    ScreenSpaceRenderable::deinitializeGL();
 }
 
 void ScreenSpaceImageOnline::update() {

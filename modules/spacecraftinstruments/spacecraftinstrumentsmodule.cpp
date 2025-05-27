@@ -84,6 +84,7 @@ std::vector<documentation::Documentation>
 SpacecraftInstrumentsModule::documentations() const
 {
     return {
+        DashboardItemInstruments::Documentation(),
         RenderableCrawlingLine::Documentation(),
         RenderableFov::Documentation(),
         RenderableModelProjection::Documentation(),

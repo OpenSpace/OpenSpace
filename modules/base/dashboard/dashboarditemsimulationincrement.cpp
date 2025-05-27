@@ -38,7 +38,7 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo SimplificationInfo = {
         "Simplification",
-        "Time Simplification",
+        "Do Time Simplification",
         "If this value is enabled, the time is displayed in nuanced units, such as "
         "minutes, hours, days, years, etc. If this value is disabled, it is always "
         "displayed in seconds.",
@@ -153,7 +153,11 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
         _requestedUnit = static_cast<int>(unit);
         _doSimplification = false;
     }
-    _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
+    _requestedUnit.setVisibility(
+        _doSimplification ?
+        properties::Property::Visibility::Hidden :
+        properties::Property::Visibility::User
+    );
     addProperty(_requestedUnit);
 
     _transitionFormat = p.transitionFormat.value_or(_transitionFormat);
@@ -224,31 +228,6 @@ void DashboardItemSimulationIncrement::update() {
     catch (const std::format_error&) {
         LERRORC("DashboardItemDate", "Illegal format string");
     }
-}
-
-glm::vec2 DashboardItemSimulationIncrement::size() const {
-    ZoneScoped;
-
-    const double t = global::timeManager->targetDeltaTime();
-    std::pair<double, std::string> deltaTime;
-    if (_doSimplification) {
-        deltaTime = simplifyTime(t);
-    }
-    else {
-        const TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
-        const double convertedT = convertTime(t, TimeUnit::Second, unit);
-        deltaTime = std::pair(
-            convertedT,
-            std::string(nameForTimeUnit(unit, convertedT != 1.0))
-        );
-    }
-
-    return _font->boundingBox(
-        std::format(
-            "Simulation increment: {:.1f} {:s} / second",
-            deltaTime.first, deltaTime.second
-        )
-    );
 }
 
 } // namespace openspace

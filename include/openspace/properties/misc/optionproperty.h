@@ -141,8 +141,7 @@ public:
     std::string stringValue() const override final;
 
 private:
-    static const std::string OptionsKey;
-    std::string generateAdditionalJsonDescription() const override final;
+    nlohmann::json generateAdditionalJsonDescription() const override final;
     int toValue(lua_State* state) const override final;
 
     /// The list of options which have been registered with this OptionProperty

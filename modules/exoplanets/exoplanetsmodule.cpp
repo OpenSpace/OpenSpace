@@ -51,13 +51,6 @@
 #include "exoplanetsmodule_lua.inl"
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "Decides if the GUI for this module should be enabled.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     constexpr openspace::properties::Property::PropertyInfo DataFolderInfo = {
         "DataFolder",
         "Data Folder",
@@ -174,9 +167,6 @@ namespace {
     constexpr std::string_view TeffToBvConversionFileName = "teff_bv.txt";
 
     struct [[codegen::Dictionary(ExoplanetsModule)]] Parameters {
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
-
         // [[codegen::verbatim(DataFolderInfo.description)]]
         std::optional<std::filesystem::path> dataFolder [[codegen::directory()]];
 
@@ -232,7 +222,6 @@ documentation::Documentation ExoplanetsModule::Documentation() {
 
 ExoplanetsModule::ExoplanetsModule()
     : OpenSpaceModule(Name)
-    , _enabled(EnabledInfo)
     , _exoplanetsDataFolder(DataFolderInfo)
     , _bvColorMapPath(BvColorMapInfo)
     , _starTexturePath(StarTextureInfo)
@@ -254,8 +243,6 @@ ExoplanetsModule::ExoplanetsModule()
     , _habitableZoneOpacity(HabitableZoneOpacityInfo, 0.1f, 0.f, 1.f)
 {
     _exoplanetsDataFolder.setReadOnly(true);
-
-    addProperty(_enabled);
 
     _exoplanetsDataFolder.onChange([this]() {
         std::filesystem::path f = _exoplanetsDataFolder.value();
@@ -393,8 +380,6 @@ float ExoplanetsModule::habitableZoneOpacity() const {
 void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
 
-    _enabled = p.enabled.value_or(_enabled);
-
     if (p.dataFolder.has_value()) {
         _exoplanetsDataFolder = p.dataFolder->string();
     }
@@ -458,7 +443,6 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
             codegen::lua::RemoveExoplanetSystem,
             codegen::lua::SystemData,
             codegen::lua::ListOfExoplanets,
-            codegen::lua::ListOfExoplanetsDeprecated,
             codegen::lua::ListAvailableExoplanetSystems,
             codegen::lua::LoadSystemDataFromCsv
         },
