@@ -78,6 +78,7 @@ protected:
     properties::UVec2Property _dimensions;
     std::unique_ptr<BrowserInstance> _browserInstance;
     bool _isDimensionsDirty = false;
+    properties::TriggerProperty _reload;
 
 private:
     class ScreenSpaceRenderHandler : public WebRenderHandler {
@@ -94,7 +95,6 @@ private:
     void bindTexture() override;
 
     properties::StringProperty _url;
-    properties::TriggerProperty _reload;
 
     CefRefPtr<WebKeyboardHandler> _keyboardHandler;
 

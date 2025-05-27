@@ -176,6 +176,11 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
 
     _textureQuality.onChange([this]() { _isDimensionsDirty = true; });
 
+    _reload.onChange([this]() {
+        _wwtCommunicator.setImageCollectionIsLoaded(false);
+        _isInitialized = false;
+    });
+
     if (global::windowDelegate->isMaster()) {
         _wwtBorderColor = randomBorderColor();
     }
