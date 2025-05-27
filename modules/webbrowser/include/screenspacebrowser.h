@@ -77,6 +77,7 @@ public:
 protected:
     properties::UVec2Property _dimensions;
     std::unique_ptr<BrowserInstance> _browserInstance;
+    bool _isDimensionsDirty = false;
 
 private:
     class ScreenSpaceRenderHandler : public WebRenderHandler {
@@ -99,7 +100,6 @@ private:
 
     bool _useAcceleratedRendering = false;
     bool _isUrlDirty = false;
-    bool _isDimensionsDirty = false;
 };
 } // namespace openspace
 

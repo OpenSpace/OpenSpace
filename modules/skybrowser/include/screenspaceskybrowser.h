@@ -43,56 +43,43 @@ public:
     void render(const RenderData& renderData) override;
     void update() override;
 
-    void setImageOrder(const std::string& imageUrl, int order);
-
-    // Flags
+    // Getters
     bool isInitialized() const;
     bool isPointingSpacecraft() const;
     bool shouldUpdateWhileTargetAnimates() const;
-    void setIsInitialized(bool isInitialized);
-    void setPointSpaceCraft(bool shouldPoint);
-
-    glm::dvec2 fineTuneVector(const glm::dvec2& drag);
-
     double verticalFov() const;
-
-    void updateBorderColor();
-    void hideChromeInterface();
-
     glm::ivec3 borderColor() const;
     double borderRadius() const;
     void setTargetRoll(double roll);
     glm::dvec2 fieldsOfView() const;
     glm::dvec2 equatorialAim() const;
+    double browserRatio() const;
+
+    // Setters
+    void setIsInitialized(bool isInitialized);
+    void setPointSpaceCraft(bool shouldPoint);
     void setVerticalFov(double vfov);
     void setEquatorialAim(glm::dvec2 equatorial);
     void setBorderColor(glm::ivec3 color);
-    double browserRatio() const;
-
-    std::vector<std::string> selectedImages() const;
-    void selectImage(const std::string& url);
-
-    void addImageLayerToWwt(const std::string& imageUrl);
-    void removeSelectedImage(const std::string& imageUrl);
-    void loadImageCollection(const std::string& collection);
-
-    void setImageOpacity(const std::string& imageUrl, float opacity);
-    void reload();
     double setVerticalFovWithScroll(float scroll);
     void setBorderRadius(double radius);
     void setRatio(double ratio);
-    void setImageCollectionIsLoaded(bool loaded);
-
     void setIdInBrowser() const;
-    void updateTextureResolution();
 
-    // Copies rendered
+    glm::dvec2 fineTuneVector(const glm::dvec2& drag);
+    void updateBorderColor();
+    void updateTextureResolution();
+    void reload();
+
+    // Display copies rendered
     void addDisplayCopy(const glm::vec3& raePosition, int nCopies);
     void removeDisplayCopy();
     std::vector<std::pair<std::string, glm::dvec3>> displayCopies() const;
     std::vector<std::pair<std::string, bool>> showDisplayCopies() const;
 
     ghoul::Dictionary data() const;
+
+    WwtCommunicator* worldWideTelescope();
 
     static documentation::Documentation Documentation();
 

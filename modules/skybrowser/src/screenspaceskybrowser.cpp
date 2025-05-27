@@ -208,10 +208,6 @@ void ScreenSpaceSkyBrowser::updateBorderColor() {
     _borderColorIsDirty = true;
 }
 
-void ScreenSpaceSkyBrowser::hideChromeInterface() {
-    _wwtCommunicator.hideChromeInterface();
-}
-
 glm::dvec2 ScreenSpaceSkyBrowser::fineTuneVector(const glm::dvec2& drag) {
     // Fine tuning of target
     const glm::dvec2 wwtFov = fieldsOfView();
@@ -364,6 +360,10 @@ ghoul::Dictionary ScreenSpaceSkyBrowser::data() const {
     return res;
 }
 
+WwtCommunicator* ScreenSpaceSkyBrowser::worldWideTelescope() {
+    return &_wwtCommunicator;
+}
+
 void ScreenSpaceSkyBrowser::render(const RenderData& renderData) {
 
     if (!_isHidden) {
@@ -391,7 +391,7 @@ void ScreenSpaceSkyBrowser::render(const RenderData& renderData) {
                 glm::translate(glm::mat4(1.f), coordinates) *
                 localRotation *
                 scaleMatrix();
-            draw(mat, renderData);
+            draw(mat, renderData, true);
         }
     }
 }
@@ -438,30 +438,6 @@ double ScreenSpaceSkyBrowser::browserRatio() const {
         static_cast<double>(_dimensions.value().y);
 }
 
-std::vector<std::string> ScreenSpaceSkyBrowser::selectedImages() const {
-    return _wwtCommunicator.selectedImages();
-}
-
-void ScreenSpaceSkyBrowser::selectImage(const std::string& url) {
-    _wwtCommunicator.selectImage(url);
-}
-
-void ScreenSpaceSkyBrowser::addImageLayerToWwt(const std::string& imageUrl) {
-    _wwtCommunicator.addImageLayerToWwt(imageUrl);
-}
-
-void ScreenSpaceSkyBrowser::removeSelectedImage(const std::string& imageUrl) {
-    _wwtCommunicator.removeSelectedImage(imageUrl);
-}
-
-void ScreenSpaceSkyBrowser::loadImageCollection(const std::string& collection) {
-    _wwtCommunicator.loadImageCollection(collection);
-}
-
-void ScreenSpaceSkyBrowser::setImageOpacity(const std::string& imageUrl, float opacity) {
-    _wwtCommunicator.setImageOpacity(imageUrl, opacity);
-}
-
 void ScreenSpaceSkyBrowser::reload() {
     _browserInstance->reloadBrowser();
 }
@@ -492,7 +468,7 @@ void ScreenSpaceSkyBrowser::update() {
 
     // Check for dirty flags
     if (_isDimensionsDirty) {
-        updateTextureResolution();
+        //updateTextureResolution();
     }
     // After the texture has been updated, wait a little bit before updating the border
     // radius so the browser has time to update its size
@@ -504,10 +480,6 @@ void ScreenSpaceSkyBrowser::update() {
     _borderRadiusTimer++;
 
     ScreenSpaceBrowser::update();
-}
-
-void ScreenSpaceSkyBrowser::setImageOrder(const std::string& imageUrl, int order) {
-    _wwtCommunicator.setImageOrder(imageUrl, order);
 }
 
 double ScreenSpaceSkyBrowser::setVerticalFovWithScroll(float scroll) {
@@ -528,10 +500,8 @@ void ScreenSpaceSkyBrowser::setBorderRadius(double radius) {
 
 void ScreenSpaceSkyBrowser::setRatio(double ratio) {
     _radiusIsDirty = true;
-}
-
-void ScreenSpaceSkyBrowser::setImageCollectionIsLoaded(bool loaded) {
-    _wwtCommunicator.setImageCollectionIsLoaded(loaded);
+    _isDimensionsDirty = true;
+    _dimensions = { _dimensions.value().y * ratio, _dimensions.value().y };
 }
 
 } // namespace openspace

@@ -67,7 +67,7 @@ TargetBrowserPair::TargetBrowserPair(SceneGraphNode* targetNode,
 }
 
 void TargetBrowserPair::setImageOrder(const std::string& imageUrl, int order) {
-    _browser->setImageOrder(imageUrl, order);
+    _browser->worldWideTelescope()->setImageOrder(imageUrl, order);
 }
 
 void TargetBrowserPair::startFinetuningTarget() {
@@ -115,7 +115,7 @@ void TargetBrowserPair::initialize() {
     const glm::vec2 dim = _browser->screenSpaceDimensions();
     _targetRenderable->setRatio(dim.x / dim.y);
     _browser->updateBorderColor();
-    _browser->hideChromeInterface();
+    _browser->worldWideTelescope()->hideChromeInterface();
     _browser->setIsInitialized(true);
 }
 
@@ -159,7 +159,7 @@ double TargetBrowserPair::verticalFov() const {
 }
 
 std::vector<std::string> TargetBrowserPair::selectedImages() const {
-    return _browser->selectedImages();
+    return _browser->worldWideTelescope()->selectedImages();
 }
 
 ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
@@ -190,7 +190,7 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
 
 void TargetBrowserPair::selectImage(const ImageData& image) {
     // Load image into browser
-    _browser->selectImage(image.imageUrl);
+    _browser->worldWideTelescope()->selectImage(image.imageUrl);
 
     // If the image has coordinates, move the target
     if (image.hasCelestialCoords) {
@@ -203,23 +203,23 @@ void TargetBrowserPair::selectImage(const ImageData& image) {
 }
 
 void TargetBrowserPair::addImageLayerToWwt(const std::string& imageUrl) {
-    _browser->addImageLayerToWwt(imageUrl);
+    _browser->worldWideTelescope()->addImageLayerToWwt(imageUrl);
 }
 
 void TargetBrowserPair::removeSelectedImage(const std::string& imageUrl) {
-    _browser->removeSelectedImage(imageUrl);
+    _browser->worldWideTelescope()->removeSelectedImage(imageUrl);
 }
 
 void TargetBrowserPair::loadImageCollection(const std::string& collection) {
-    _browser->loadImageCollection(collection);
+    _browser->worldWideTelescope()->loadImageCollection(collection);
 }
 
 void TargetBrowserPair::setImageOpacity(const std::string& imageUrl, float opacity) {
-    _browser->setImageOpacity(imageUrl, opacity);
+    _browser->worldWideTelescope()->setImageOpacity(imageUrl, opacity);
 }
 
 void TargetBrowserPair::hideChromeInterface() {
-    _browser->hideChromeInterface();
+    _browser->worldWideTelescope()->hideChromeInterface();
 }
 
 void TargetBrowserPair::sendIdToBrowser() const {
@@ -227,6 +227,14 @@ void TargetBrowserPair::sendIdToBrowser() const {
 }
 std::vector<std::pair<std::string, glm::dvec3>> TargetBrowserPair::displayCopies() const {
     return _browser->displayCopies();
+}
+
+void TargetBrowserPair::addDisplayCopy(glm::vec3 position, int nCopies) {
+    _browser->addDisplayCopy(position, nCopies);
+}
+
+void TargetBrowserPair::removeDisplayCopy() {
+    _browser->removeDisplayCopy();
 }
 
 void TargetBrowserPair::setVerticalFov(double vfov) {
@@ -257,17 +265,25 @@ void TargetBrowserPair::setBrowserRatio(float ratio) {
     _targetRenderable->setRatio(ratio);
 }
 
+void TargetBrowserPair::setBrowserIsInitialized(bool initialized) {
+    _browser->setIsInitialized(initialized);
+}
+
 void TargetBrowserPair::setVerticalFovWithScroll(float scroll) {
     const double fov = _browser->setVerticalFovWithScroll(scroll);
     _targetRenderable->setVerticalFov(fov);
 }
 
 void TargetBrowserPair::setImageCollectionIsLoaded(bool isLoaded) {
-    _browser->setImageCollectionIsLoaded(isLoaded);
+    _browser->worldWideTelescope()->setImageCollectionIsLoaded(isLoaded);
 }
 
 void TargetBrowserPair::applyRoll() {
     _targetRenderable->applyRoll();
+}
+
+void TargetBrowserPair::reloadBrowser() {
+    _browser->reload();
 }
 
 void TargetBrowserPair::setPointSpaceCraft(bool shouldPoint) {
@@ -357,12 +373,12 @@ bool TargetBrowserPair::isFacingCamera() const {
     return _browser->isFacingCamera();
 }
 
-bool TargetBrowserPair::isUsingRadiusAzimuthElevation() const {
-    return _browser->isUsingRaeCoords();
+bool TargetBrowserPair::isInitialized() const {
+    return _browser->isInitialized();
 }
 
-ScreenSpaceSkyBrowser* TargetBrowserPair::browser() const {
-    return _browser;
+bool TargetBrowserPair::isUsingRadiusAzimuthElevation() const {
+    return _browser->isUsingRaeCoords();
 }
 
 } // namespace openspace
