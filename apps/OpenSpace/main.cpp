@@ -943,18 +943,6 @@ void setSgctDelegateFunctions() {
             w->setHorizFieldOfView(hFovDeg);
         }
     };
-    #ifdef WIN32
-    sgctDelegate.getNativeWindowHandle = [](size_t windowIndex) -> void* {
-        ZoneScoped;
-
-        Window* w = Engine::instance().windows()[windowIndex].get();
-        if (w) {
-            HWND hWnd = glfwGetWin32Window(w->windowHandle());
-            return reinterpret_cast<void*>(hWnd);
-        }
-        return nullptr;
-    };
-    #endif // WIN32
     sgctDelegate.frustumMode = []() {
         ZoneScoped;
 

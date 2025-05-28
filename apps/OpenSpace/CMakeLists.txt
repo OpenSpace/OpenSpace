@@ -199,14 +199,24 @@ add_custom_command(TARGET OpenSpace POST_BUILD
 
 end_header("Dependency: SGCT")
 
-# Handles dll copying and library linking for GStreamer functionality.
+# Handles pkg-config for the GStreamer dependencies
 if(SGCT_GSTREAMER_SUPPORT)
-	include(${PROJECT_SOURCE_DIR}/apps/OpenSpace/ext/sgct/ext/gstreamer/copy_gstreamer_libs.cmake)
-  copy_gstreamer_dlls(OpenSpace)
-  link_gstreamer_libs(OpenSpace)
-
-  target_compile_definitions(OpenSpace PUBLIC
-    $<$<BOOL:${SGCT_GSTREAMER_SUPPORT}>:SGCT_HAS_GSTREAMER>
-    "OPENSPACE_ROOT=\"${PROJECT_SOURCE_DIR}\"" # Path variable to be picked up in the GStreamer C++
-    )
+  find_package(PkgConfig REQUIRED)
+  find_package(GStreamer REQUIRED)
+  pkg_search_module(gstreamer REQUIRED IMPORTED_TARGET gstreamer-1.0)
+  pkg_search_module(gstreamer-base REQUIRED IMPORTED_TARGET gstreamer-base-1.0)
+  pkg_search_module(gstreamer-webrtc REQUIRED IMPORTED_TARGET gstreamer-webrtc-1.0)
+  pkg_search_module(gstreamer-video REQUIRED IMPORTED_TARGET gstreamer-video-1.0)
+  pkg_search_module(gstreamer-gl REQUIRED IMPORTED_TARGET gstreamer-gl-1.0)
+  pkg_search_module(gstreamer-app REQUIRED IMPORTED_TARGET gstreamer-app-1.0)
+  target_link_libraries(OpenSpace PUBLIC
+    PkgConfig::gstreamer
+    PkgConfig::gstreamer-base
+    PkgConfig::gstreamer-webrtc
+    PkgConfig::gstreamer-video
+    PkgConfig::gstreamer-gl
+    PkgConfig::gstreamer-app
+  )
+  target_compile_definitions(OpenSpace PUBLIC SGCT_HAS_GSTREAMER)
+  target_include_directories(OpenSpace PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct/ext/gstreamer")
 endif()
