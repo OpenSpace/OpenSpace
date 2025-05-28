@@ -54,11 +54,16 @@ CefHost::CefHost([[maybe_unused]] const std::string& helperLocation) {
     CefString(&settings.browser_subprocess_path).FromString(helperLocation);
 #endif // __APPLE__
 
-    settings.windowless_rendering_enabled = true;
-    attachDebugSettings(settings);
+    settings.windowless_rendering_enabled = 1;
+
+    settings.remote_debugging_port = 8088;
+    LDEBUG(std::format(
+        "Remote WebBrowser debugging available on http://localhost:{}",
+        settings.remote_debugging_port
+    ));
 
     // cf. https://github.com/chromiumembedded/cef/issues/3685
-    settings.chrome_runtime = true;
+    settings.chrome_runtime = 1;
 
 #ifdef __APPLE__
     // Load the CEF framework library at runtime instead of linking directly as required
@@ -72,21 +77,15 @@ CefHost::CefHost([[maybe_unused]] const std::string& helperLocation) {
     const CefRefPtr<WebBrowserApp> app = CefRefPtr<WebBrowserApp>(new WebBrowserApp);
 
     const CefMainArgs args;
-    CefInitialize(args, settings, app.get(), nullptr);
+    const bool success = CefInitialize(args, settings, app.get(), nullptr);
+    if (!success) {
+        throw ghoul::RuntimeError("Failed initializing CEF Browser");
+    }
     LDEBUG("Initializing CEF... done");
 }
 
 CefHost::~CefHost() {
     CefShutdown();
-}
-
-void CefHost::attachDebugSettings(CefSettings &settings) {
-    settings.remote_debugging_port = 8088;
-
-    LDEBUG(std::format(
-        "Remote WebBrowser debugging available on http://localhost:{}",
-        settings.remote_debugging_port
-    ));
 }
 
 void CefHost::doMessageLoopWork() {
