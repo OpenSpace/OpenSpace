@@ -64,7 +64,6 @@ private:
     void extractMandatoryInfoFromSourceFolder();
     void updateActiveTriggerTimeIndex(double currenttime);
     void computeSequenceEndTime();
-
     // If there's just one state it should never disappear!
     double _sequenceEndTime = std::numeric_limits<double>::max();
     std::vector<FileData> _files;

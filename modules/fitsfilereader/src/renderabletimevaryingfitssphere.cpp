@@ -44,21 +44,6 @@ namespace {
     constexpr std::string_view _loggerCat = "RenderableTimeVaryingFitsSphere";
 
     // Extract J2000 time from file names
-    // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.png'
-    double extractTriggerTimeFromISO8601FileName(const std::filesystem::path& filePath) {
-        // Extract the filename from the path (without extension)
-        std::string timeString = filePath.stem().string();
-
-        // Ensure the separators are correct
-        timeString.replace(4, 1, "-");
-        timeString.replace(7, 1, "-");
-        timeString.replace(13, 1, ":");
-        timeString.replace(16, 1, ":");
-        timeString.replace(19, 1, ".");
-
-        return openspace::Time::convertTime(timeString);
-    }
-    // Extract J2000 time from file names
     // Requires file to be named as example : 'wsa_202209291400R011_agong.fits'
     // Looks for timestamp after first '_'
     double extractTriggerTimeFromFitsFileName(const std::filesystem::path& filePath) {
@@ -108,9 +93,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureSourceInfo = {
         "TextureSource",
         "Texture Source",
-        "This value specifies a directory or file names from where files loaded from "
-        "disk and are used as a texture that is applied to this sphere. Images are "
-        "expected to be an equirectangular projection.",
+        "This value specifies a directory from where files are loaded from "
+        "disk and are used as a texture that is applied to this sphere.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -187,7 +171,7 @@ namespace {
         std::optional<bool> cacheData;
 
         // Set if first/last file should render outside of the sequence interval.
-        std::optional<bool> showPastFirstAndLastImage;
+        std::optional<bool> showPastFirstAndLastFile;
     };
 #include "renderabletimevaryingfitssphere_codegen.cpp"
 } // namespace
@@ -202,7 +186,7 @@ documentation::Documentation RenderableTimeVaryingFitsSphere::Documentation() {
 
 RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
                                                       const ghoul::Dictionary& dictionary)
-    : RenderableSphere(dictionary)
+    : RenderableTimeVaryingSphere(dictionary)
     , _fitsLayerName(FitsLayerNameInfo)
     , _saveDownloadsOnShutdown(SaveDownloadsOnShutdown, false)
     , _textureFilterProperty(TextureFilterInfo)
@@ -235,7 +219,7 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
         ghoul::opengl::Texture::FilterMode::Nearest
     );
 
-    _renderForever = p.showPastFirstAndLastImage.value_or(_renderForever);
+    _renderForever = p.showPastFirstAndLastFile.value_or(_renderForever);
 
     _textureFilterProperty.onChange([this]() {
         switch (_textureFilterProperty) {
@@ -258,15 +242,13 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
             extractMandatoryInfoFromSourceFolder();
         }
         else {
-            if (_isFitsFormat) {
-                for (File& file : _files) {
-                    std::pair<float, float> minMax = _layerMinMaxCaps.at(_fitsLayerName);
-                    file.texture = loadTextureFromFits(file.path, _fitsLayerName, minMax);
-                    file.texture->uploadTexture();
-                    file.texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
-                }
-                loadTexture();
+            for (File& file : _files) {
+                std::pair<float, float> minMax = _layerMinMaxCaps.at(_fitsLayerName);
+                file.texture = loadTextureFromFits(file.path, _fitsLayerName, minMax);
+                file.texture->uploadTexture();
+                file.texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
             }
+            loadTexture();
         }
     });
     addProperty(_fitsLayerName);
@@ -399,44 +381,6 @@ void RenderableTimeVaryingFitsSphere::readFileFromFits(std::filesystem::path pat
     _files.insert(iter, std::move(newFile));
 }
 
-void RenderableTimeVaryingFitsSphere::readFileFromImage(std::filesystem::path path) {
-    std::unique_ptr<ghoul::opengl::Texture> t =
-        ghoul::io::TextureReader::ref().loadTexture(path.string(), 2);
-    t->setInternalFormat(GL_COMPRESSED_RGBA);
-    t->uploadTexture();
-    if (_textureFilterProperty == static_cast<int>(
-        ghoul::opengl::Texture::FilterMode::Linear))
-    {
-        t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-    }
-    else if (_textureFilterProperty == static_cast<int>(
-        ghoul::opengl::Texture::FilterMode::Nearest))
-    {
-        t->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
-    }
-
-    t->purgeFromRAM();
-    glm::vec2 minMaxDataValues = minMaxTextureDataValues(t);
-
-    File newFile = {
-        .status = File::FileStatus::Loaded,
-        .path = path,
-        .time = extractTriggerTimeFromISO8601FileName(path),
-        .texture = std::move(t),
-        .dataMinMax = minMaxDataValues
-    };
-
-    const std::vector<File>::const_iterator iter = std::upper_bound(
-        _files.begin(),
-        _files.end(),
-        newFile.time,
-        [](double timeRef, const File& fileRef) {
-            return timeRef < fileRef.time;
-        }
-    );
-    _files.insert(iter, std::move(newFile));
-}
-
 glm::vec2 RenderableTimeVaryingFitsSphere::minMaxTextureDataValues(
                                                std::unique_ptr<ghoul::opengl::Texture>& t)
 {
@@ -483,13 +427,13 @@ void RenderableTimeVaryingFitsSphere::extractMandatoryInfoFromSourceFolder() {
         if (!e.is_regular_file()) {
             continue;
         }
-        std::filesystem::path fileExtention = e.path().extension();
-        if (fileExtention == ".fits") {
-            _isFitsFormat = true;
+        if (e.path().extension() == ".fits") {
             readFileFromFits(e.path());
         }
         else {
-            readFileFromImage(e.path());
+            throw ghoul::RuntimeError(
+                std::format("{} File extension required to be .fits", e.path())
+            );
         }
     }
     // Ensure that there are available and valid source files left
@@ -608,13 +552,8 @@ void RenderableTimeVaryingFitsSphere::updateDynamicDownloading(double currentTim
     const std::vector<std::filesystem::path>& filesToRead =
         _dynamicFileDownloader->downloadedFiles();
     for (const std::filesystem::path& filePath : filesToRead) {
-        std::filesystem::path fileExtention = filePath.extension();
-        if (fileExtention == ".fits") {
-            _isFitsFormat = true;
+        if (filePath.extension() == ".fits") {
             readFileFromFits(filePath);
-        }
-        else {
-            readFileFromImage(filePath);
         }
     }
     if (!filesToRead.empty()) {

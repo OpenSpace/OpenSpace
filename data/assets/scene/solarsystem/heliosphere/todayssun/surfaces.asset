@@ -42,7 +42,7 @@ local WSA_54_Magnetic_Field_GONGZ_5_Rs = {
     ColorMap = blueBlackRed,
     UseColorMap = false,
     CacheData = true,
-    ShowPastFirstAndLastImage = false,
+    ShowPastFirstAndLastFile = false,
     Segments = 132
   },
   GUI = {
@@ -74,7 +74,7 @@ local WSA_54_Magnetic_Field_ADAPT_5_Rs = {
     ColorMap = blueBlackRed,
     UseColorMap = false,
     CacheData = false,
-    ShowPastFirstAndLastImage = false,
+    ShowPastFirstAndLastFile = false,
     Segments = 132
   },
   GUI = {
@@ -117,7 +117,7 @@ local WSA_54_Magnetograms_GONGZ = {
     ColorMap = blueBlackRed,
     UseColorMap = false,
     CacheData = true,
-    ShowPastFirstAndLastImage = false,
+    ShowPastFirstAndLastFile = false,
     Segments = 132
   },
   GUI = {
@@ -160,7 +160,7 @@ local WSA_54_Magnetograms_ADAPT = {
     ColorMap = blueBlackRed,
     UseColorMap = false,
     CacheData = false,
-    ShowPastFirstAndLastImage = false,
+    ShowPastFirstAndLastFile = false,
     Segments = 132
   },
   GUI = {
@@ -193,7 +193,7 @@ local WSA_Velocity_Adapt_Outer_Boundary = {
     },
     ColorMap = blueBlackRed,
     CacheData = false,
-    ShowPastFirstAndLastImage = false,
+    ShowPastFirstAndLastFile = false,
     Segments = 132
   },
   GUI = {
@@ -227,7 +227,7 @@ local WSA_Velocity_Gongz_Outer_Boundary = {
     },
     ColorMap = blueBlackRed,
     CacheData = false,
-    ShowPastFirstAndLastImage = false,
+    ShowPastFirstAndLastFile = false,
     Segments = 132
   },
   GUI = {

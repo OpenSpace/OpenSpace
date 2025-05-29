@@ -34,6 +34,7 @@
 #include <ghoul/opengl/texture.h>
 
 namespace {
+
     // Extract J2000 time from file names
     // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.png'
     double extractTriggerTimeFromFileName(const std::filesystem::path& filePath) {

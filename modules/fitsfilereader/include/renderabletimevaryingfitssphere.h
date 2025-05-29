@@ -36,7 +36,7 @@ struct RenderData;
 struct UpdateData;
 namespace documentation { struct Documentation; }
 
-class RenderableTimeVaryingFitsSphere : public RenderableSphere {
+class RenderableTimeVaryingFitsSphere : public RenderableTimeVaryingSphere {
 public:
     enum class LoadingType {
         StaticLoading,
@@ -72,7 +72,6 @@ private:
     void trackOldest(File& file);
     void showCorrectFileName();
     void extractMandatoryInfoFromSourceFolder();
-    void readFileFromImage(std::filesystem::path path);
     void readFileFromFits(std::filesystem::path path);
     glm::vec2 minMaxTextureDataValues(std::unique_ptr<ghoul::opengl::Texture>& t);
     void updateActiveTriggerTimeIndex(double currenttime);
@@ -115,7 +114,6 @@ private:
     std::vector<File> _files;
     int _activeTriggerTimeIndex = 0;
 
-    bool _isFitsFormat = false;
     bool _firstUpdate = true;
     bool _layerOptionsAdded = false;
     ghoul::opengl::Texture* _texture = nullptr;
