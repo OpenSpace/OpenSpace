@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ISWA___ISWACYGNET___H__
-#define __OPENSPACE_MODULE_ISWA___ISWACYGNET___H__
+#ifndef __OPENSPACE_MODULE_ISWA___RENDERABLEISWACYGNET___H__
+#define __OPENSPACE_MODULE_ISWA___RENDERABLEISWACYGNET___H__
 
 #include <openspace/rendering/renderable.h>
 
@@ -40,11 +40,12 @@ namespace openspace {
 class IswaBaseGroup;
 class TransferFunction;
 
-class IswaCygnet : public Renderable {
+namespace documentation { struct Documentation; }
 
+class RenderableIswaCygnet : public Renderable {
 public:
-    explicit IswaCygnet(const ghoul::Dictionary& dictionary);
-    virtual ~IswaCygnet();
+    explicit RenderableIswaCygnet(const ghoul::Dictionary& dictionary);
+    virtual ~RenderableIswaCygnet();
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -52,6 +53,8 @@ public:
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
+
+    static documentation::Documentation Documentation();
 
 protected:
     struct Metadata {
@@ -148,4 +151,4 @@ private:
 
 } //namespace openspace
 
-#endif // __OPENSPACE_MODULE_ISWA___ISWACYGNET___H__
+#endif // __OPENSPACE_MODULE_ISWA___RENDERABLEISWACYGNET___H__

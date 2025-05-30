@@ -22,10 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/iswa/rendering/dataplane.h>
+#include <modules/iswa/rendering/renderabledataplane.h>
 
 #include <modules/iswa/rendering/iswabasegroup.h>
 #include <modules/iswa/util/dataprocessortext.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -33,10 +34,19 @@
 
 namespace openspace {
 
-DataPlane::DataPlane(const ghoul::Dictionary& dictionary) : DataCygnet(dictionary) {}
+documentation::Documentation RenderableDataPlane::Documentation() {
+    documentation::Documentation doc = RenderableDataCygnet::Documentation();
+    doc.name = "RenderableDataPlane";
+    doc.id = "iswa_renderable_dataplane";
+    return doc;
+}
 
-void DataPlane::initializeGL() {
-    IswaCygnet::initialize();
+RenderableDataPlane::RenderableDataPlane(const ghoul::Dictionary& dictionary)
+    : RenderableDataCygnet(dictionary)
+{}
+
+void RenderableDataPlane::initializeGL() {
+    RenderableDataCygnet::initializeGL();
 
     if (!_shader) {
         _shader = global::renderEngine->buildRenderProgram(
@@ -73,7 +83,12 @@ void DataPlane::initializeGL() {
     _autoFilter = true;
 }
 
-bool DataPlane::createGeometry() {
+void RenderableDataPlane::deinitializeGL() {
+    _shader = nullptr;
+    RenderableDataCygnet::deinitializeGL();
+}
+
+bool RenderableDataPlane::createGeometry() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
 
@@ -122,7 +137,7 @@ bool DataPlane::createGeometry() {
     return true;
 }
 
-bool DataPlane::destroyGeometry() {
+bool RenderableDataPlane::destroyGeometry() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 
@@ -132,19 +147,19 @@ bool DataPlane::destroyGeometry() {
     return true;
 }
 
-void DataPlane::renderGeometry() const {
+void RenderableDataPlane::renderGeometry() const {
     glBindVertexArray(_quad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-void DataPlane::setUniforms() {
+void RenderableDataPlane::setUniforms() {
     // set both data texture and transfer function texture
     setTextureUniforms();
     _shader->setUniform("backgroundValues", _backgroundValues);
     _shader->setUniform("transparency", _alpha);
 }
 
-std::vector<float*> DataPlane::textureData() {
+std::vector<float*> RenderableDataPlane::textureData() {
     // if the buffer in the datafile is empty, do not proceed
     if (_dataBuffer.empty()) {
         return std::vector<float*>();

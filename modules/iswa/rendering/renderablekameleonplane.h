@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ISWA___KAMELEONPLANE___H__
-#define __OPENSPACE_MODULE_ISWA___KAMELEONPLANE___H__
+#ifndef __OPENSPACE_MODULE_ISWA___RENDERABLEKAMELEONPLANE___H__
+#define __OPENSPACE_MODULE_ISWA___RENDERABLEKAMELEONPLANE___H__
 
-#include <modules/iswa/rendering/datacygnet.h>
+#include <modules/iswa/rendering/renderabledatacygnet.h>
 
 #include <openspace/properties/misc/selectionproperty.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -39,13 +39,15 @@ namespace openspace {
  * the planes. Interaction with the planes is possible through sliders that will move the
  * planes through the data volume.
  */
-class KameleonPlane : public DataCygnet {
+class RenderableKameleonPlane : public RenderableDataCygnet {
 public:
-    explicit KameleonPlane(const ghoul::Dictionary& dictionary);
-    ~KameleonPlane();
+    explicit RenderableKameleonPlane(const ghoul::Dictionary& dictionary);
+    ~RenderableKameleonPlane();
 
-     void initializeGL() override;
-     void deinitializeGL() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
+
+    static documentation::Documentation Documentation();
 
 private:
     /**
@@ -113,4 +115,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_ISWA___KAMELEONPLANE___H__
+#endif // __OPENSPACE_MODULE_ISWA___RENDERABLEKAMELEONPLANE___H__

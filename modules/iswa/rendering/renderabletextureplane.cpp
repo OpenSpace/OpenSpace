@@ -22,8 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/iswa/rendering/textureplane.h>
+#include <modules/iswa/rendering/renderabletextureplane.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -33,11 +34,20 @@
 
 namespace openspace {
 
-TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
-    : TextureCygnet(dictionary)
+documentation::Documentation RenderableTexturePlane::Documentation() {
+    documentation::Documentation doc = RenderableTextureCygnet::Documentation();
+    doc.name = "RenderableTexturePlane";
+    doc.id = "iswa_renderable_textureplane";
+    return doc;
+}
+
+RenderableTexturePlane::RenderableTexturePlane(const ghoul::Dictionary& dictionary)
+    : RenderableTextureCygnet(dictionary)
 {}
 
-void TexturePlane::initializeGL() {
+void RenderableTexturePlane::initializeGL() {
+    RenderableTextureCygnet::initializeGL();
+
     if (!_shader) {
         _shader = global::renderEngine->buildRenderProgram(
             "PlaneProgram",
@@ -47,7 +57,12 @@ void TexturePlane::initializeGL() {
     }
 }
 
-void TexturePlane::setUniforms() {
+void RenderableTexturePlane::deinitializeGL() {
+    _shader = nullptr;
+    RenderableTextureCygnet::deinitializeGL();
+}
+
+void RenderableTexturePlane::setUniforms() {
     ghoul::opengl::TextureUnit unit;
 
     unit.activate();
@@ -56,7 +71,7 @@ void TexturePlane::setUniforms() {
     _shader->setUniform("transparency", _alpha.value());
 }
 
-bool TexturePlane::createGeometry() {
+bool RenderableTexturePlane::createGeometry() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
 
@@ -98,7 +113,7 @@ bool TexturePlane::createGeometry() {
     return true;
 }
 
-bool TexturePlane::destroyGeometry() {
+bool RenderableTexturePlane::destroyGeometry() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 
@@ -108,7 +123,7 @@ bool TexturePlane::destroyGeometry() {
     return true;
 }
 
-void TexturePlane::renderGeometry() const {
+void RenderableTexturePlane::renderGeometry() const {
     glBindVertexArray(_quad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }

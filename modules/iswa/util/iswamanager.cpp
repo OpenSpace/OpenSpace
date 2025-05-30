@@ -24,14 +24,14 @@
 
 #include <modules/iswa/util/iswamanager.h>
 
-#include <modules/iswa/rendering/kameleonplane.h>
-#include <modules/iswa/rendering/dataplane.h>
-#include <modules/iswa/rendering/datasphere.h>
 #include <modules/iswa/rendering/iswabasegroup.h>
-#include <modules/iswa/rendering/iswacygnet.h>
 #include <modules/iswa/rendering/iswadatagroup.h>
 #include <modules/iswa/rendering/iswakameleongroup.h>
-#include <modules/iswa/rendering/textureplane.h>
+#include <modules/iswa/rendering/renderabledataplane.h>
+#include <modules/iswa/rendering/renderabledatasphere.h>
+#include <modules/iswa/rendering/renderableiswacygnet.h>
+#include <modules/iswa/rendering/renderablekameleonplane.h>
+#include <modules/iswa/rendering/renderabletextureplane.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/json.h>
 #include <openspace/engine/globals.h>
@@ -286,10 +286,10 @@ std::string IswaManager::iswaUrl(int id, double timestamp, const std::string& ty
 
 void IswaManager::registerGroup(std::string groupName, std::string type) {
     if (_groups.find(groupName) == _groups.end()) {
-        const bool dataGroup = (type == typeid(DataPlane).name()) ||
-                               (type == typeid(DataSphere).name());
+        const bool dataGroup = (type == typeid(RenderableDataPlane).name()) ||
+                               (type == typeid(RenderableDataSphere).name());
 
-        const bool kameleonGroup = (type == typeid(KameleonPlane).name());
+        const bool kameleonGroup = (type == typeid(RenderableKameleonPlane).name());
 
         if (dataGroup) {
             _groups[groupName] = std::make_shared<IswaDataGroup>(
@@ -527,10 +527,10 @@ void IswaManager::createPlane(MetadataFuture& data) {
     if (!data.group.empty()) {
         std::string type;
         if (data.type == CygnetType::Data) {
-            type = typeid(DataPlane).name();
+            type = typeid(RenderableDataPlane).name();
         }
         else {
-            type = typeid(TexturePlane).name();
+            type = typeid(RenderableTexturePlane).name();
         }
 
         registerGroup(data.group, type);
@@ -565,7 +565,7 @@ void IswaManager::createSphere(MetadataFuture& data) {
     );
 
     if (!data.group.empty()) {
-        std::string type = typeid(DataSphere).name();
+        std::string type = typeid(RenderableDataSphere).name();
         registerGroup(data.group, type);
 
         auto it = _groups.find(data.group);
@@ -594,7 +594,7 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
     std::filesystem::path ext = std::filesystem::path(absPath(info.path)).extension();
     if (std::filesystem::is_regular_file(absPath(info.path)) && ext == ".cdf") {
         if (!info.group.empty()) {
-            std::string type = typeid(KameleonPlane).name();
+            std::string type = typeid(RenderableKameleonPlane).name();
             registerGroup(info.group, type);
 
             auto it = _groups.find(info.group);

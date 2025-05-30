@@ -22,31 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ISWA___DATAPLANE___H__
-#define __OPENSPACE_MODULE_ISWA___DATAPLANE___H__
+#ifndef __OPENSPACE_MODULE_ISWA___RENDERABLEDATASPHERE___H__
+#define __OPENSPACE_MODULE_ISWA___RENDERABLEDATASPHERE___H__
 
-#include <modules/iswa/rendering/datacygnet.h>
-
-#include <ghoul/opengl/ghoul_gl.h>
+#include <modules/iswa/rendering/renderabledatacygnet.h>
 
 namespace openspace {
 
+class Sphere;
+namespace documentation { struct Documentation; }
+
 /**
- * DataPlane is a concrete IswaCygnet with data files as its input source. The class
- * handles creation, destruction and rendering of a plane geometry. It also specifies what
- * uniforms to use and what GUI properties it needs.
+ * DataSphere is a concrete IswaCygnet with data files as its input source. The class
+ * handles creation, destruction and rendering of a sphere geometry. It also specifies
+ * what uniforms to use and what GUI properties it needs.
  */
-class DataPlane : public DataCygnet {
-friend class IswaBaseGroup;
+class RenderableDataSphere : public RenderableDataCygnet {
 public:
-    explicit DataPlane(const ghoul::Dictionary& dictionary);
-     ~DataPlane() = default;
+    explicit RenderableDataSphere(const ghoul::Dictionary& dictionary);
+    ~RenderableDataSphere();
 
-     void initializeGL() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
-private:
+    static documentation::Documentation Documentation();
+
+protected:
     /**
-     * Creates a plane geometry.
+     * Creates a sphere geometry.
      */
     bool createGeometry() override;
     bool destroyGeometry() override;
@@ -54,10 +57,10 @@ private:
     void setUniforms() override;
     std::vector<float*> textureData() override;
 
-    GLuint _quad;
-    GLuint _vertexPositionBuffer;
+    std::unique_ptr<Sphere> _sphere;
+    float _radius;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_ISWA___DATAPLANE___H__
+#endif // __OPENSPACE_MODULE_ISWA___RENDERABLEDATASPHERE___H__

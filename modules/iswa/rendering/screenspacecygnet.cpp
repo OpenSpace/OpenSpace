@@ -29,13 +29,27 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/timemanager.h>
 
+namespace {
+    struct [[codegen::Dictionary(ScreenSpaceCygnet)]] Parameters {
+        int cygnetId;
+        int updateInterval;
+    };
+#include "screenspacecygnet_codegen.cpp"
+} // namespace
+
 namespace openspace {
+
+documentation::Documentation ScreenSpaceCygnet::Documentation() {
+    return codegen::doc<Parameters>("iswa_screenspace_cygnet");
+}
 
 ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     : ScreenSpaceImageOnline(dictionary)
 {
-    _cygnetId = static_cast<int>(dictionary.value<double>("CygnetId"));
-    _updateTime = static_cast<int>(dictionary.value<double>("UpdateInterval"));
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _cygnetId = p.cygnetId;
+    _updateTime = p.updateInterval;
 
     _downloadImage = true;
     _texturePath = IswaManager::ref().iswaUrl(

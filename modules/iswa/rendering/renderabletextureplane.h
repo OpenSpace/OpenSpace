@@ -22,41 +22,42 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ISWA___DATASPHERE___H__
-#define __OPENSPACE_MODULE_ISWA___DATASPHERE___H__
+#ifndef __OPENSPACE_MODULE_ISWA___RENDERABLETEXTUREPLANE___H__
+#define __OPENSPACE_MODULE_ISWA___RENDERABLETEXTUREPLANE___H__
 
-#include <modules/iswa/rendering/datacygnet.h>
+#include <modules/iswa/rendering/renderabletexturecygnet.h>
+
+#include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
 
-class Sphere;
+namespace documentation { struct Documentation; }
 
 /**
- * DataSphere is a concrete IswaCygnet with data files as its input source. The class
- * handles creation, destruction and rendering of a sphere geometry. It also specifies
- * what uniforms to use and what GUI properties it needs.
+ * TexturePlane is a "concrete" IswaCygnet with texture as its input source. It handles
+ * the creation, destruction and rendering of a plane geometry. It also specifies which
+ * shaders to use and the uniforms that it needs.
  */
-class DataSphere : public DataCygnet {
+class RenderableTexturePlane : public RenderableTextureCygnet {
 public:
-    explicit DataSphere(const ghoul::Dictionary& dictionary);
-    ~DataSphere();
+    explicit RenderableTexturePlane(const ghoul::Dictionary& dictionary);
+    virtual ~RenderableTexturePlane() = default;
 
-     void initializeGL() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
-protected:
-    /**
-     * Creates a sphere geometry.
-     */
+    static documentation::Documentation Documentation();
+
+private:
     bool createGeometry() override;
+    void setUniforms() override;
     bool destroyGeometry() override;
     void renderGeometry() const override;
-    void setUniforms() override;
-    std::vector<float*> textureData() override;
 
-    std::unique_ptr<Sphere> _sphere;
-    float _radius;
+    GLuint _quad = 0;
+    GLuint _vertexPositionBuffer = 0;
 };
 
-} // namespace openspace
+ } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_ISWA___DATASPHERE___H__
+#endif // __OPENSPACE_MODULE_ISWA___RENDERABLETEXTUREPLANE___H__

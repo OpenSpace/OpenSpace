@@ -22,29 +22,45 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/iswa/rendering/datasphere.h>
+#include <modules/iswa/rendering/renderabledatasphere.h>
 
+#include <modules/iswa/rendering/iswabasegroup.h>
+#include <modules/iswa/util/dataprocessorjson.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/sphere.h>
-#include <modules/iswa/util/dataprocessorjson.h>
-#include <modules/iswa/rendering/iswabasegroup.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/glm.h>
 
+namespace {
+    struct [[codegen::Dictionary(RenderableDataSphere)]] Parameters {
+        float radius;
+    };
+#include "renderabledatasphere_codegen.cpp"
+} // namespace
+
 namespace openspace {
 
-DataSphere::DataSphere(const ghoul::Dictionary& dictionary)
-    : DataCygnet(dictionary)
-{
-    _radius = static_cast<float>(dictionary.value<double>("Radius"));
+documentation::Documentation RenderableDataSphere::Documentation() {
+    return codegen::doc<Parameters>(
+        "iswa_renderable_datasphere",
+        RenderableDataCygnet::Documentation()
+    );
 }
 
-DataSphere::~DataSphere() {}
+RenderableDataSphere::RenderableDataSphere(const ghoul::Dictionary& dictionary)
+    : RenderableDataCygnet(dictionary)
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _radius = p.radius;
+}
 
-void DataSphere::initializeGL() {
-    IswaCygnet::initializeGL();
+RenderableDataSphere::~RenderableDataSphere() {}
+
+void RenderableDataSphere::initializeGL() {
+    RenderableDataCygnet::initializeGL();
 
     if (!_shader) {
         _shader = global::renderEngine->buildRenderProgram(
@@ -87,7 +103,13 @@ void DataSphere::initializeGL() {
     _autoFilter = true;
 }
 
-bool DataSphere::createGeometry() {
+void RenderableDataSphere::deinitializeGL() {
+    _shader = nullptr;
+
+    RenderableDataCygnet::deinitializeGL();
+}
+
+bool RenderableDataSphere::createGeometry() {
     const float radius = 6.371f * _radius * glm::pow(10.f, 6.f);
     int segments = 100;
     _sphere = std::make_unique<Sphere>(radius, segments);
@@ -95,18 +117,18 @@ bool DataSphere::createGeometry() {
     return true;
 }
 
-bool DataSphere::destroyGeometry() {
+bool RenderableDataSphere::destroyGeometry() {
     _sphere = nullptr;
     return true;
 }
 
-void DataSphere::renderGeometry() const {
+void RenderableDataSphere::renderGeometry() const {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     _sphere->render();
 }
 
-std::vector<float*> DataSphere::textureData() {
+std::vector<float*> RenderableDataSphere::textureData() {
     // if the buffer in the datafile is empty, do not proceed
     if (_dataBuffer.empty()) {
         return std::vector<float*>();
@@ -127,7 +149,7 @@ std::vector<float*> DataSphere::textureData() {
     return _dataProcessor->processData(_dataBuffer, _dataOptions, _textureDimensions);
 }
 
-void DataSphere::setUniforms() {
+void RenderableDataSphere::setUniforms() {
     // set both data texture and transfer function texture
     setTextureUniforms();
     _shader->setUniform("backgroundValues", _backgroundValues);
