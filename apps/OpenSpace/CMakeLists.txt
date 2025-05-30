@@ -218,5 +218,8 @@ if(SGCT_GSTREAMER_SUPPORT)
     PkgConfig::gstreamer-app
   )
   target_compile_definitions(OpenSpace PUBLIC SGCT_HAS_GSTREAMER)
-  target_include_directories(OpenSpace PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct/ext/gstreamer")
+  target_include_directories(OpenSpace PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct/ext/gstreamer" "${GStreamer_INCLUDE_DIR}/../libsoup-3.0")
+  target_compile_definitions(OpenSpace PUBLIC OPENSPACE_ROOT="${CMAKE_SOURCE_DIR}")
+
+  message(STATUS "${GStreamer_INCLUDE_DIR}/libsoup-3.0")
 endif()
