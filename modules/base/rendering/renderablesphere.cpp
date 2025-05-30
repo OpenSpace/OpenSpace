@@ -112,6 +112,22 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo UseColorMapInfo = {
+        "IsUsingColorMap",
+        "Use Color Map",
+        "Used to toggle color map on or off for the sphere. Mainly used to transform "
+        "grayscale textures from data into color images.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ColorMapInfo = {
+        "ColorMap",
+        "Transfer Function (Color Map) Path",
+        "Color map / Transfer Function to use if `IsUsingColorMap` is enabled."
+        "magnetograms on the sun.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
         "BlendingOption",
         "Blending Options",
@@ -161,6 +177,12 @@ namespace {
         // [[codegen::verbatim(FadeOutThresholdInfo.description)]]
         std::optional<float> fadeOutThreshold [[codegen::inrange(0.0, 1.0)]];
 
+        // [[codegen::verbatim(ColorMapInfo.description)]]
+        std::optional<std::filesystem::path> colorMap;
+
+        // [[codegen::verbatim(UseColorMapInfo.description)]]
+        std::optional<bool> useColorMap;
+
         // [[codegen::verbatim(BlendingOptionInfo.description)]]
         std::optional<std::string> blendingOption;
 
@@ -187,6 +209,8 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     , _fadeOutThreshold(FadeOutThresholdInfo, 0.f, 0.f, 1.f, 0.001f)
     , _blendingFuncOption(BlendingOptionInfo)
     , _disableDepth(DisableDepthInfo, false)
+    , _isUsingColorMap(UseColorMapInfo, false)
+    , _colorMap(ColorMapInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -244,6 +268,38 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     addProperty(_disableDepth);
 
     setBoundingSphere(_size);
+
+    if (p.colorMap.has_value()) {
+        _colorMap = p.colorMap->string();
+        _isUsingColorMap = true;
+    }
+    addProperty(_isUsingColorMap);
+
+    _colorMap.onChange([this]() {
+        if (!std::filesystem::exists(_colorMap.value())) {
+            LWARNINGC(
+                "RenderableSphere",
+                std::format(
+                    "Path {} to color map is invalid.",
+                    _colorMap.value()
+                )
+            );
+            return;
+        }
+        _transferFunction = std::make_unique<TransferFunction>(_colorMap.value());
+    });
+    addProperty(_colorMap);
+
+    // This check is after colormap in case a colormap is given
+    // but using it on start-up is set to false.
+    if (p.useColorMap.has_value()) {
+        if (!p.colorMap.has_value()) {
+            throw ghoul::RuntimeError(
+                "When using a color map, a color map path has to be provided."
+            );
+        }
+        _isUsingColorMap = *p.useColorMap;
+    }
 }
 
 bool RenderableSphere::isReady() const {
@@ -266,6 +322,10 @@ void RenderableSphere::initializeGL() {
     );
 
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+
+    if (_isUsingColorMap) {
+        _transferFunction = std::make_unique<TransferFunction>(_colorMap.value());
+    }
 }
 
 void RenderableSphere::deinitializeGL() {
@@ -278,6 +338,7 @@ void RenderableSphere::deinitializeGL() {
         }
     );
     _shader = nullptr;
+    _transferFunction = nullptr;
 }
 
 void RenderableSphere::render(const RenderData& data, RendererTasks&) {
@@ -362,6 +423,21 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     // Performance wise
     if (adjustedOpacity < 0.01f) {
         return;
+    }
+
+    // TextureUnit cannot be declared in if statement below
+    ghoul::opengl::TextureUnit transferfunctionUnit;
+    _shader->setUniform("usingTransferFunction", _isUsingColorMap);
+    _shader->setUniform("transferFunction", transferfunctionUnit);
+    _shader->setUniform("dataMinMaxValues", _dataMinMaxValues);
+    if (_isUsingColorMap) {
+        if (_transferFunction == nullptr) {
+            _transferFunction = std::make_unique<TransferFunction>(
+                absPath(_colorMap)
+            );
+        }
+        transferfunctionUnit.activate();
+        _transferFunction->bind();
     }
 
     _shader->setUniform(_uniformCache.opacity, adjustedOpacity);

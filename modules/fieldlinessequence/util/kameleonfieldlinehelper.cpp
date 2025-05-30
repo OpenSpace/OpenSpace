@@ -29,7 +29,9 @@
 #include <openspace/util/spicemanager.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <memory>
+#include <fstream>
 
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 
@@ -126,6 +128,101 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 }
 
+std::unordered_map<std::string, std::vector<glm::vec3>>
+extractSeedPointsFromFiles(std::filesystem::path filePath, size_t nth)
+{
+    std::unordered_map<std::string, std::vector<glm::vec3>> outMap;
+
+    if (!std::filesystem::is_directory(filePath)) {
+        LERROR(std::format(
+            "The specified seed point directory: '{}' does not exist", filePath
+        ));
+        return outMap;
+    }
+
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& spFile : fs::directory_iterator(filePath)) {
+        std::filesystem::path seedFilePath = spFile.path();
+        if (!spFile.is_regular_file() || seedFilePath.extension() != "txt") {
+            continue;
+        }
+
+        std::ifstream seedFile = std::ifstream(seedFilePath);
+        if (!seedFile.good()) {
+            LERROR(std::format("Could not open seed points file '{}'", seedFilePath));
+            outMap.clear();
+            return {};
+        }
+
+        LDEBUG(std::format("Reading seed points from file '{}'", seedFilePath));
+        std::string line;
+        std::vector<glm::vec3> outVec;
+        int linenumber = 0;
+        while (ghoul::getline(seedFile, line)) {
+            if (linenumber % nth == 0) {
+                if (!line.empty() && line[0] == '#') {
+                    // ignore line, assume it's a comment
+                    continue;
+                }
+                std::stringstream ss(line);
+                glm::vec3 point;
+                if (!(ss >> point.x) || !(ss >> point.y) || !(ss >> point.z)) {
+                    LERROR(std::format(
+                        "Could not read line '{}' in file '{}'. ",
+                        "Line is not formatted with 3 values representing a point",
+                        linenumber, seedFilePath
+                    ));
+                }
+                else {
+                    outVec.push_back(std::move(point));
+                }
+            }
+            ++linenumber;
+        }
+
+        if (outVec.empty()) {
+            LERROR(std::format("Found no seed points in: {}", seedFilePath));
+            return {};
+        }
+
+        std::string name = seedFilePath.stem().string();   // remove file extention
+        size_t dateAndTimeSeperator = name.find_last_of('_');
+        std::string time = name.substr(dateAndTimeSeperator + 1, name.length());
+        std::string date = name.substr(dateAndTimeSeperator - 8, 8);    // 8 for yyyymmdd
+        std::string dateAndTime = date + time;
+
+        // add outVec as value and time stamp as int as key
+        outMap[dateAndTime] = outVec;
+    }
+    return outMap;
+}
+std::vector<std::string>
+extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars)
+{
+    std::vector<std::string> extraMagVars;
+    for (int i = 0; i < static_cast<int>(extrVars.size()); i++) {
+        const std::string& str = extrVars[i];
+
+        std::istringstream ss(str);
+        std::string magVar;
+        size_t counter = 0;
+        while (ghoul::getline(ss, magVar, ',')) {
+            std::erase_if(magVar, ::isspace);
+            extraMagVars.push_back(magVar);
+            counter++;
+            if (counter == 3) {
+                break;
+            }
+        }
+        if (counter != 3 && counter > 0) {
+            extraMagVars.erase(extraMagVars.end() - counter, extraMagVars.end());
+        }
+        extrVars.erase(extrVars.begin() + i);
+        i--;
+    }
+    return extraMagVars;
+}
+
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 /**
  * Traces and adds line vertices to state.
@@ -140,7 +237,7 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
 
     switch (state.model()) {
         case fls::Model::Batsrus:
-            innerBoundaryLimit = 2.5f;  // TODO specify in Lua?
+            innerBoundaryLimit = 0.f;  // TODO specify in Lua?
             break;
         case fls::Model::Enlil:
             innerBoundaryLimit = 0.11f; // TODO specify in Lua?
@@ -178,15 +275,20 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
         );
         const std::vector<ccmc::Point3f>& positions = ccmcFieldline.getPositions();
 
-        const size_t nLinePoints = positions.size();
+        if ((positions[0].component3 < 0.5f && positions[0].component3 > -0.5f) &&
+            (positions[positions.size() - 1].component3 < 0.5f &&
+                positions[positions.size() - 1].component3 > -0.5f))
+        {
+            const size_t nLinePoints = positions.size();
 
-        std::vector<glm::vec3> vertices;
-        vertices.reserve(nLinePoints);
-        for (const ccmc::Point3f& p : positions) {
-            vertices.emplace_back(p.component1, p.component2, p.component3);
+            std::vector<glm::vec3> vertices;
+            vertices.reserve(nLinePoints);
+            for (const ccmc::Point3f& p : positions) {
+                vertices.emplace_back(p.component1, p.component2, p.component3);
+            }
+            state.addLine(vertices);
+            success |= (nLinePoints > 0);
         }
-        state.addLine(vertices);
-        success |= (nLinePoints > 0);
     }
 
     return success;
@@ -214,6 +316,18 @@ void addExtraQuantities(ccmc::Kameleon* kameleon,
                         std::vector<std::string>& extraMagVars,
                         FieldlinesState& state)
 {
+    int nVariableAttributes = kameleon->getNumberOfVariableAttributes();
+    std::vector<std::string> variablesAttributeNames;
+    for (int i = 0; i < nVariableAttributes; ++i) {
+        std::string varname = kameleon->getVariableAttributeName(i);
+        std::string varunit = kameleon->getNativeUnit(varname);
+        std::string varVizUnit = kameleon->getVisUnit(varname);
+        LINFO(std::format(
+            "Variable '{}' is : '{}'. Variable Unit: '{}'. Viz unit: '{}'.",
+            i, varname, varunit, varVizUnit
+        ));
+        variablesAttributeNames.push_back(varname);
+    }
 
     prepareStateAndKameleonForExtras(kameleon, extraScalarVars, extraMagVars, state);
 

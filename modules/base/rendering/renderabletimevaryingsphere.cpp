@@ -34,6 +34,7 @@
 #include <ghoul/opengl/texture.h>
 
 namespace {
+
     // Extract J2000 time from file names
     // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.png'
     double extractTriggerTimeFromFileName(const std::filesystem::path& filePath) {
@@ -151,6 +152,7 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
     const double currentTime = data.time.j2000Seconds();
     const bool isInInterval = (currentTime >= _files[0].time) &&
         (currentTime < _sequenceEndTime);
+
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
         if (

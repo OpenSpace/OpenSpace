@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
+local transforms = asset.require("scene/solarsystem/heliosphere/transforms_heliosphere")
 
 
 
@@ -53,6 +53,7 @@ local PFSS = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = PFSSPaths.SolarSoft,
     InputFileType = "Osfls",
+    ShowAtAllTimes = true,
     Color = { 0.35, 0.51, 0.875, 0.22 },
     FlowEnabled = true,
     ReversedFlow = true,
