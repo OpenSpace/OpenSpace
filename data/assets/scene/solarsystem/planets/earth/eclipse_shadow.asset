@@ -20,7 +20,8 @@ local EarthMoonShadow = {
   },
   GUI = {
     Name = "Earth/Moon Shadow",
-    Path = "/Solar System/Planets/Earth"
+    Path = "/Solar System/Planets/Earth",
+    Focusable = false
   }
 }
 

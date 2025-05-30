@@ -22,6 +22,7 @@ local MarsTrailEarth = {
   GUI = {
     Name = "Mars trail from Earth",
     Path = "/Solar System/Planets/Mars",
+    Focusable = false,
     Description = "Trail of Mars as observed by the Earth"
   }
 }

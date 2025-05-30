@@ -68,6 +68,7 @@ local RadioSphere = {
   GUI = {
     Name = "Radio Sphere",
     Path = "/Milky Way/Grids",
+    Focusable = false,
     Description = [[The radio sphere describes the theoretical extent of Earth's radio
       signals in space. Before television carrier waves, early-warning radar first used
       in World War II, and the detonation of atomic weapons, Earth was radio-quiet to the
@@ -110,6 +111,7 @@ local EquatorialSphere = {
   GUI = {
     Name = "Equatorial Coordinates",
     Path = "/Night Sky/Coordinate Systems/Equatorial",
+    Focusable = false,
     Description = [[An 80-light-year sphere representing equatorial coordinates (right
       ascension and declination).]]
   }
@@ -138,6 +140,7 @@ local EquatorialSphereLabels = {
   GUI = {
     Name = "Equatorial Coordinates Labels",
     Path = "/Night Sky/Coordinate Systems/Equatorial",
+    Focusable = false,
     Description = [[Labels on a sphere representing right ascension in hours and
       declination in degrees.]]
   }
@@ -167,6 +170,7 @@ local EclipticSphere = {
   GUI = {
     Name = "Ecliptic Coordinates",
     Path = "/Night Sky/Coordinate Systems/Ecliptic",
+    Focusable = false,
     Description = [[A 100-light-year sphere representing ecliptic coordinates (ecliptic
       longitude and latitude).]]
   }
@@ -195,6 +199,7 @@ local EclipticSphereLabels = {
   GUI = {
     Name = "Ecliptic Coordinates Labels",
     Path = "/Night Sky/Coordinate Systems/Ecliptic",
+    Focusable = false,
     Description = [[Labels on a sphere representing ecliptic longitude and latitude in
       degrees.]]
   }
@@ -220,6 +225,7 @@ local GalacticSphere = {
   GUI = {
     Name = "Galactic Coordinates",
     Path = "/Night Sky/Coordinate Systems/Galactic",
+    Focusable = false,
     Description = [[A 1000-light-year sphere representing galactic coordinates (galactic
       longitude and latitude).]]
   }
@@ -246,6 +252,7 @@ local GalacticSphereLabels = {
   GUI = {
     Name = "Galactic Coordinates Labels",
     Path = "/Night Sky/Coordinate Systems/Galactic",
+    Focusable = false,
     Description = [[Labels on a sphere representing galactic longitude and latitude in
       degrees.]]
   }
@@ -280,7 +287,9 @@ local Plane1lh = {
   GUI = {
     Name = "1-light-hour Grid",
     Path = "/Solar System/Grids",
-    Description = [[A 1-light-hour Cartesian grid aligned on the plane of the Solar System.]],
+    Focusable = false,
+    Description = [[A 1-light-hour Cartesian grid aligned on the plane of the Solar
+      System.]],
     OrderingNumber = LightHour
   }
 }
@@ -314,7 +323,9 @@ local Plane1ld = {
   GUI = {
     Name = "1-light-day Grid",
     Path = "/Solar System/Grids",
-    Description = [[A 1-light-day Cartesian grid aligned on the plane of the Solar System.]],
+    Focusable = false,
+    Description = [[A 1-light-day Cartesian grid aligned on the plane of the Solar
+      System.]],
     OrderingNumber = LightDay
   }
 }
@@ -348,7 +359,9 @@ local Plane1lm = {
   GUI = {
     Name = "1-light-month Grid",
     Path = "/Solar System/Grids",
-    Description = [[A 1-light-month Cartesian grid aligned on the plane of the Solar System.]],
+    Focusable = false,
+    Description = [[A 1-light-month Cartesian grid aligned on the plane of the Solar
+      System.]],
     OrderingNumber = LightMonth
   }
 }
@@ -382,7 +395,9 @@ local Plane1ly = {
   GUI = {
     Name = "1-light-year Grid",
     Path = "/Solar System/Grids",
-    Description = [[A 1-light-year Cartesian grid aligned on the plane of the Solar System.]],
+    Focusable = false,
+    Description = [[A 1-light-year Cartesian grid aligned on the plane of the Solar
+      System.]],
     OrderingNumber = LightYear
   }
 }
@@ -416,7 +431,9 @@ local Plane10ly = {
   GUI = {
     Name = "10-light-year Grid",
     Path = "/Milky Way/Grids",
-    Description = [[A 10-light-year Cartesian grid aligned on the plane of the Solar System.]],
+    Focusable = false,
+    Description = [[A 10-light-year Cartesian grid aligned on the plane of the Solar
+      System.]],
     OrderingNumber = 10 * LightYear
   }
 }
@@ -450,7 +467,9 @@ local Plane100ly = {
   GUI = {
     Name = "100-light-year Grid",
     Path = "/Milky Way/Grids",
-    Description = [[A 100-light-year Cartesian grid aligned on the plane of the Solar System.]],
+    Focusable = false,
+    Description = [[A 100-light-year Cartesian grid aligned on the plane of the Solar
+      System.]],
     OrderingNumber = 100 * LightYear
   }
 }
@@ -484,7 +503,9 @@ local Plane1kly = {
   GUI = {
     Name = "1,000-light-year Grid",
     Path = "/Milky Way/Grids",
-    Description = [[A 1,000-light-year Cartesian grid aligned on the plane of the Solar System.]],
+    Focusable = false,
+    Description = [[A 1,000-light-year Cartesian grid aligned on the plane of the Solar
+      System.]],
     OrderingNumber = 1000 * LightYear
   }
 }
@@ -518,7 +539,9 @@ local Plane10kly = {
   GUI = {
     Name = "10,000-light-year Grid",
     Path = "/Milky Way/Grids",
-    Description = [[A 10,000-light-year Cartesian grid aligned on the plane of the Solar System.]],
+    Focusable = false,
+    Description = [[A 10,000-light-year Cartesian grid aligned on the plane of the Solar
+      System.]],
     OrderingNumber = 10000 * LightYear
   }
 }
@@ -547,7 +570,9 @@ local Plane100kly = {
   GUI = {
     Name = "100,000-light-year Grid",
     Path = "/Universe/Grids",
-    Description = [[A 100,000-light-year Cartesian grid aligned on the plane of the Milky Way.]],
+    Focusable = false,
+    Description = [[A 100,000-light-year Cartesian grid aligned on the plane of the Milky
+      Way.]],
     OrderingNumber = 100000 * LightYear
   }
 }
@@ -576,7 +601,9 @@ local Plane1Mly = {
   GUI = {
     Name = "1-million-light-year Grid",
     Path = "/Universe/Grids",
-    Description = [[A 1-million-light-year Cartesian grid aligned on the plane of the Milky Way.]],
+    Focusable = false,
+    Description = [[A 1-million-light-year Cartesian grid aligned on the plane of the
+      Milky Way.]],
     OrderingNumber = 1E6 * LightYear
   }
 }
@@ -605,7 +632,9 @@ local Plane10Mly = {
   GUI = {
     Name = "10-million-light-year Grid",
     Path = "/Universe/Grids",
-    Description = [[A 10-million-light-year Cartesian grid aligned on the plane of the Milky Way.]],
+    Focusable = false,
+    Description = [[A 10-million-light-year Cartesian grid aligned on the plane of the
+      Milky Way.]],
     OrderingNumber = 10E6 * LightYear
   }
 }
@@ -634,7 +663,9 @@ local Plane100Mly = {
   GUI = {
     Name = "100-million-light-year Grid",
     Path = "/Universe/Grids",
-    Description = [[A 100-million-light-year Cartesian grid aligned on the plane of the Milky Way.]],
+    Focusable = false,
+    Description = [[A 100-million-light-year Cartesian grid aligned on the plane of the
+      Milky Way.]],
     OrderingNumber = 100E6 * LightYear
   }
 }
@@ -663,7 +694,9 @@ local Plane20Gly = {
   GUI = {
     Name = "20-billion-light-year Grid",
     Path = "/Universe/Grids",
-    Description = [[A 20-billion-light-year Cartesian grid aligned on the plane of the Milky Way.]],
+    Focusable = false,
+    Description = [[A 20-billion-light-year Cartesian grid aligned on the plane of the
+      Milky Way.]],
     OrderingNumber = 20E9 * LightYear
   }
 }

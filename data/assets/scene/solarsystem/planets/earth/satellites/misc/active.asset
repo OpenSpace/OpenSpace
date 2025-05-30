@@ -29,6 +29,7 @@ local ActiveSatellites = {
   GUI = {
     Name = "Active",
     Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false,
     Description = [[Satellites that employ active communication.]]
   }
 }

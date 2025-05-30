@@ -18,6 +18,7 @@ local L2Position = {
   GUI = {
     Name = "L2 Position",
     Path = "/Solar System/Planets/Earth/Lagrange Points",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -38,6 +39,7 @@ local L2CoRevFrame = {
   GUI = {
     Name = "L2 Co-revolving Reference Frame",
     Path = "/Solar System/Planets/Earth/Lagrange Points",
+    Focusable = false,
     Hidden = true
   }
 }

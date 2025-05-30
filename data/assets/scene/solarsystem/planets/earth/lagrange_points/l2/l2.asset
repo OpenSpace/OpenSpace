@@ -64,6 +64,7 @@ local L2SmallLabel = {
   GUI = {
     Name = "L2 Small Label",
     Path = "/Solar System/Planets/Earth/Lagrange Points",
+    Focusable = false,
     Description = "Small label for L2"
   }
 }
@@ -86,6 +87,7 @@ local L2Label = {
   GUI = {
     Name = "L2 Label",
     Path = "/Solar System/Planets/Earth/Lagrange Points",
+    Focusable = false,
     Description = "Main label for L2"
   }
 }

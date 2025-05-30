@@ -27,6 +27,7 @@ local RheaTrail = {
   GUI = {
     Name = "Rhea Trail",
     Path = "/Solar System/Planets/Saturn/Major Moons/Rhea",
+    Focusable = false,
     Description = "Trail of Saturn's moon Rhea as observed by Saturn"
   }
 }

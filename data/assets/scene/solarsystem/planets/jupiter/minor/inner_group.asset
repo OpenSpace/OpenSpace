@@ -56,7 +56,8 @@ local MetisTrail = {
   },
   GUI = {
     Name = "Metis Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Metis"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Metis",
+    Focusable = false
   }
 }
 
@@ -87,6 +88,7 @@ local MetisLabel = {
   GUI = {
     Name = "Metis Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Metis",
+    Focusable = false,
     Description = "Label for Jupiter's moon Metis (inner group)"
   }
 }
@@ -143,7 +145,8 @@ local AdrasteaTrail = {
   },
   GUI = {
     Name = "Adrastea Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Adrastea"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Adrastea",
+    Focusable = false
   }
 }
 
@@ -174,6 +177,7 @@ local AdrasteaLabel = {
   GUI = {
     Name = "Adrastea Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Adrastea",
+    Focusable = false,
     Description = "Label for Jupiter's moon Adrastea (inner group)"
   }
 }
@@ -230,7 +234,8 @@ local AmaltheaTrail = {
   },
   GUI = {
     Name = "Amalthea Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Amalthea"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Amalthea",
+    Focusable = false
   }
 }
 
@@ -261,6 +266,7 @@ local AmaltheaLabel = {
   GUI = {
     Name = "Amalthea Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Amalthea",
+    Focusable = false,
     Description = "Label for Jupiter's moon Amalthea (inner group)"
   }
 }
@@ -317,7 +323,8 @@ local ThebeTrail = {
   },
   GUI = {
     Name = "Thebe Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Thebe"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Thebe",
+    Focusable = false
   }
 }
 
@@ -348,6 +355,7 @@ local ThebeLabel = {
   GUI = {
     Name = "Thebe Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Thebe",
+    Focusable = false,
     Description = "Label for Jupiter's moon Thebe (inner group)"
   }
 }

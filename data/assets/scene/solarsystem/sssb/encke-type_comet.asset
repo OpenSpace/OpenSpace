@@ -26,6 +26,7 @@ local Object = {
   GUI = {
     Name = "Encke-type Comets",
     Path = "/Solar System/Small Bodies",
+    Focusable = false,
     Description = [[Comets with a Tisserand's parameter with respect to Jupiter of
       greater than 3 and a semi-major axis less than that of Jupiter.]]
   }

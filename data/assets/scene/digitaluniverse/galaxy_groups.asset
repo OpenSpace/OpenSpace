@@ -31,6 +31,7 @@ local Object = {
   GUI = {
     Name = "Galaxy Group Labels",
     Path = "/Universe/Nearby Surveys",
+    Focusable = false,
     Description = [[The Galaxy Groups data are a set of labels that mark the nearby
       galaxy groups. The Milky Way is in the Local Group, and we are surrounded by
       many other groups delineated by these labels. Census: 62 galaxy group labels.]]

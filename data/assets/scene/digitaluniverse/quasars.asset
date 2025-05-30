@@ -53,6 +53,7 @@ local Object = {
   GUI = {
     Name = "Quasars",
     Path = "/Universe/Deep Sky Surveys",
+    Focusable = false,
     Description = [[Quasars are the most distant objects we see. They are extremely
       active galaxies that contain supermassive black holes which gobble up material at a
       furious rate. As the material falls into the black hole, it forms a disk and emits

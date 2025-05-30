@@ -22,6 +22,7 @@ local NeptuneBarycenterTrail = {
   GUI = {
     Name = "Neptune Barycenter Trail",
     Path = "/Solar System/Planets/Neptune",
+    Focusable = false,
     Description = "BarycenterTrail of Neptune as observed by the Sun"
   }
 }

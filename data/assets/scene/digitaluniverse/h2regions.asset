@@ -41,6 +41,7 @@ local Object = {
   GUI = {
     Name = "HII Regions",
     Path = "/Milky Way/Nebulae",
+    Focusable = false,
     Description = [[HII (pronounced "H-two") regions are stellar nurseries for newborn
       stars. Stars are born from condensing clouds of hydrogen gas. As these clouds
       condense, the densities become high enough to form stars. An HII region is the

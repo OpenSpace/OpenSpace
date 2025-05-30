@@ -23,6 +23,7 @@ local Label = {
   GUI = {
     Name = "Gonggong Label",
     Path = "/Solar System/Dwarf Planets/Gonggong",
+    Focusable = false,
     Description = "Label for Gonggong, visible at the solarsystem overview zoom level"
   }
 }

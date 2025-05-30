@@ -28,7 +28,8 @@ local SarSatellites = {
   Tag = { "earth_satellites" },
   GUI = {
     Name = "Search & Rescue (SARSAT)",
-    Path = "/Solar System/Planets/Earth/Satellites"
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
   }
 }
 

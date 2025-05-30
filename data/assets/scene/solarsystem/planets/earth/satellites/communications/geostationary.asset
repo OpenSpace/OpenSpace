@@ -29,6 +29,7 @@ local GeoStationarySatellites = {
   GUI = {
     Name = "Geostationary",
     Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false,
     Description = [[Satellites that are currently active and in a Geosynchronous orbit,
       meaning their orbital period matches Earth's rotation.]]
   }

@@ -51,6 +51,7 @@ local Object = {
   GUI = {
     Name = "Abell Galaxy Clusters",
     Path = "/Universe/Deep Sky Surveys",
+    Focusable = false,
     Description = [[The Abell catalog includes all the nearby, and not so nearby, galaxy
       clusters. The northern hemisphere survey, published in 1958, was compiled by George
       Abell from the Palomar Sky Survey plates. A subsequent southern hemisphere catalog

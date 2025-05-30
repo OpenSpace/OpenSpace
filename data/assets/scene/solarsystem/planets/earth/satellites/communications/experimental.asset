@@ -28,7 +28,8 @@ local ExperimentalSatellites = {
   Tag = { "earth_satellites" },
   GUI = {
     Name = "Experimental",
-    Path = "/Solar System/Planets/Earth/Satellites"
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
   }
 }
 

@@ -28,7 +28,8 @@ local OtherCommunicationSatellites = {
   Tag = { "earth_satellites" },
   GUI = {
     Name = "Other comm",
-    Path = "/Solar System/Planets/Earth/Satellites"
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
   }
 }
 

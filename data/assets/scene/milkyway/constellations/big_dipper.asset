@@ -30,6 +30,7 @@ local BigDipper = {
   GUI = {
     Name = "Big Dipper",
     Path = "/Milky Way/Constellations",
+    Focusable = false,
     Description = [[This item only draws the big dipper, and not the rest of the
       lines of the Ursa Major constellation.]]
   }

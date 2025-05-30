@@ -49,6 +49,7 @@ local Object = {
   GUI = {
     Name = "OB Associations",
     Path = "/Milky Way/Star Clusters",
+    Focusable = false,
     Description = [[Stellar associations are loose agglomerations of stars that form from
       the same gas cloud. OB associations typically have on the order of dozens of O and
       B stars in them (hotter, massive, younger stars) in addition to cooler stars. Over

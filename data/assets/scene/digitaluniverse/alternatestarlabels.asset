@@ -25,6 +25,7 @@ local Object = {
   GUI = {
     Name = "Stars Labels - Alternate",
     Path = "/Milky Way/Stars",
+    Focusable = false,
     Description = [[Alternate star labels for the stars. Priority goes to Bayer IDs
       (Greek designations, like Alpha Orionis), then to Flamsteed numbers (like 1
       Orionis).]]

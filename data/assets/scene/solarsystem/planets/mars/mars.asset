@@ -81,6 +81,7 @@ local MarsLabel = {
   GUI = {
     Name = "Mars Label",
     Path = "/Solar System/Planets/Mars",
+    Focusable = false,
     Description = "Main label for Mars"
   }
 }

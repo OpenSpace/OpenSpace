@@ -151,6 +151,7 @@ local InsightParent = {
   GUI = {
     Name = "InsightParent",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -187,6 +188,7 @@ local Insight_Entry_CapsuleA = {
   GUI = {
     Name = "Insight Entry CapsuleA",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -207,6 +209,7 @@ local Insight_Entry_Capsule_Ring = {
   GUI = {
     Name = "Insight Entry Capsule Ring",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -227,6 +230,7 @@ local Insight_Entry_Capsule_Plugs = {
   GUI = {
     Name = "Insight Entry Capsule Plugs",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -247,6 +251,7 @@ local Insight_Entry_Heatshield = {
   GUI = {
     Name = "Insight Entry Heatshield",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -268,6 +273,7 @@ local Insight_Parachute_0 = {
   GUI = {
     Name = "Insight Parachute0",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -289,6 +295,7 @@ local Insight_Parachute_Cords_0 = {
   GUI = {
     Name = "Insight ParachuteC0",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -310,6 +317,7 @@ local Insight_Parachute_20 = {
   GUI = {
     Name = "Insight Parachute20",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -331,6 +339,7 @@ local Insight_Parachute_Cords_20 = {
   GUI = {
     Name = "Insight ParachuteC20",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -352,6 +361,7 @@ local Insight_Parachute_40 = {
   GUI = {
     Name = "Insight Parachute40",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -373,6 +383,7 @@ local Insight_Parachute_Cords_40 = {
   GUI = {
     Name = "Insight ParachuteC40",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -389,6 +400,7 @@ local Insight_Lander_A001 = {
   GUI = {
     Name = "Insight Lander A001",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -405,6 +417,7 @@ local Insight_Lander_A002 = {
   GUI = {
     Name = "Insight Lander A002",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -421,6 +434,7 @@ local Insight_Lander_A003 = {
   GUI = {
     Name = "Insight Lander A003",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -437,6 +451,7 @@ local Insight_Lander_A004 = {
   GUI = {
     Name = "Insight Lander A004",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -453,6 +468,7 @@ local Insight_Lander_A005 = {
   GUI = {
     Name = "Insight Lander A005",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -469,6 +485,7 @@ local Insight_Lander_A006 = {
   GUI = {
     Name = "Insight Lander A006",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -485,6 +502,7 @@ local Insight_Lander_A007 = {
   GUI = {
     Name = "Insight Lander A007",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -501,6 +519,7 @@ local Insight_Lander_A008 = {
   GUI = {
     Name = "Insight Lander A008",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -517,6 +536,7 @@ local Insight_Lander_foil1 = {
   GUI = {
     Name = "Insight Lander foil",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -533,6 +553,7 @@ local Insight_Lander_Tex01 = {
   GUI = {
     Name = "Insight Lander Tex01",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -549,6 +570,7 @@ local Insight_Lander_Tex02 = {
   GUI = {
     Name = "Insight Lander Tex02",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -570,6 +592,7 @@ local Insight_Legs_Stowed_tex = {
   GUI = {
     Name = "Insight legs_stow_tex",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -591,6 +614,7 @@ local Insight_Legs_Stowed_AO06 = {
   GUI = {
     Name = "Insight legs_stow_AO",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -611,6 +635,7 @@ local Insight_Legs_Deployed_tex = {
   GUI = {
     Name = "Insight legs_deploy_tex",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -631,6 +656,7 @@ local Insight_Legs_Deployed_AO06 = {
   GUI = {
     Name = "Insight legs_deploy_AO",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -647,6 +673,7 @@ local Insight_Panels_Stowed_tex = {
   GUI = {
     Name = "Insight panels_stow_tex",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -663,6 +690,7 @@ local Insight_Panels_Stowed_tex2 = {
   GUI = {
     Name = "Insight panels_stow_tex2",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -679,6 +707,7 @@ local Insight_Panels_Stowed_AO01 = {
   GUI = {
     Name = "Insight panels_stow_AO",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -699,6 +728,7 @@ local Insight_Panels_Deployed_tex = {
   GUI = {
     Name = "Insight panels_deploy_tex",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -718,7 +748,9 @@ local Insight_Panels_Deployed_tex2 = {
   },
   GUI = {
     Name = "Insight panels_deploy_tex2",
-    Path = "/Solar System/Missions/Insight"
+    Path = "/Solar System/Missions/Insight",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -738,6 +770,7 @@ local Insight_Panels_Deployed_AO06 = {
   GUI = {
     Name = "Insight panels_deploy_AO",
     Path = "/Solar System/Missions/Insight",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -766,7 +799,8 @@ local Insight_Trail = {
   },
   GUI = {
     Name = "Insight Trail",
-    Path = "/Solar System/Missions/Insight"
+    Path = "/Solar System/Missions/Insight",
+    Focusable = false
   }
 }
 

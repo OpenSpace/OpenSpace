@@ -27,6 +27,7 @@ local TethysTrail = {
   GUI = {
     Name = "Tethys Trail",
     Path = "/Solar System/Planets/Saturn/Major Moons/Tethys",
+    Focusable = false,
     Description = "Trail of Saturn's moon Tethys as observed by Saturn"
   }
 }

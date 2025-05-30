@@ -22,6 +22,7 @@ local MGNS = {
   GUI = {
     Name = "MPO MGNS",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 

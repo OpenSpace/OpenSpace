@@ -42,6 +42,7 @@ local Object = {
   GUI = {
     Name = "Supercluster Labels",
     Path = "/Universe/Deep Sky Surveys",
+    Focusable = false,
     Description = [[The superclusters dataset is a set of labels that mark the major
       galaxy superclusters in the local universe. They correspond to, and should be viewed
       with, the Abell clusters. Astronomers estimate there are 10 million superclusters in

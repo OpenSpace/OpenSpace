@@ -55,7 +55,8 @@ local MargaretTrail = {
   },
   GUI = {
     Name = "Margaret Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Prograde Moons/Margaret"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Prograde Moons/Margaret",
+    Focusable = false
   }
 }
 
@@ -79,7 +80,8 @@ local MargaretLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Margaret Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Prograde Moons/Margaret"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Prograde Moons/Margaret",
+    Focusable = false
   }
 }
 

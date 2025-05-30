@@ -41,6 +41,7 @@ local Object = {
   GUI = {
     Name = "Globular Clusters",
     Path = "/Milky Way/Star Clusters",
+    Focusable = false,
     Description = [[Globular star clusters are gravitationally bound groups of 100,000
       to 1 million stars. They are compact, spherical "balls" of stars with very high
       stellar densities. These clusters are typically 30 to 100 light years in diameter.

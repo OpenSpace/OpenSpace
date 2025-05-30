@@ -35,7 +35,8 @@ local C2019Y4AtlasTrail = {
   },
   GUI = {
     Name = "C2019 Y4 Atlas Trail",
-    Path = "/Solar System/Small Bodies"
+    Path = "/Solar System/Small Bodies",
+    Focusable = false
   }
 }
 

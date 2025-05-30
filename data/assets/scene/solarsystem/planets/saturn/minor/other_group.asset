@@ -58,7 +58,8 @@ local AegaeonTrail = {
   },
   GUI = {
     Name = "Aegaeon Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Aegaeon"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Aegaeon",
+    Focusable = false
   }
 }
 
@@ -88,7 +89,8 @@ local AegaeonLabel = {
   },
   GUI = {
     Name = "Aegaeon Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Aegaeon"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Aegaeon",
+    Focusable = false
   }
 }
 
@@ -144,7 +146,8 @@ local MethoneTrail = {
   },
   GUI = {
     Name = "Methone Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Methone"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Methone",
+    Focusable = false
   }
 }
 
@@ -174,7 +177,8 @@ local MethoneLabel = {
   },
   GUI = {
     Name = "Methone Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Methone"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Methone",
+    Focusable = false
   }
 }
 
@@ -230,7 +234,8 @@ local AntheTrail = {
   },
   GUI = {
     Name = "Anthe Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Anthe"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Anthe",
+    Focusable = false
   }
 }
 
@@ -260,7 +265,8 @@ local AntheLabel = {
   },
   GUI = {
     Name = "Anthe Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Anthe"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Anthe",
+    Focusable = false
   }
 }
 
@@ -316,7 +322,8 @@ local PalleneTrail = {
   },
   GUI = {
     Name = "Pallene Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Pallene"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Pallene",
+    Focusable = false
   }
 }
 
@@ -346,7 +353,8 @@ local PalleneLabel = {
   },
   GUI = {
     Name = "Pallene Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Pallene"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Pallene",
+    Focusable = false
   }
 }
 
@@ -402,7 +410,8 @@ local TelestoTrail = {
   },
   GUI = {
     Name = "Telesto Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Telesto"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Telesto",
+    Focusable = false
   }
 }
 
@@ -432,7 +441,8 @@ local TelestoLabel = {
   },
   GUI = {
     Name = "Telesto Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Telesto"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Telesto",
+    Focusable = false
   }
 }
 
@@ -488,7 +498,8 @@ local CalypsoTrail = {
   },
   GUI = {
     Name = "Calypso Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Calypso"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Calypso",
+    Focusable = false
   }
 }
 
@@ -518,7 +529,8 @@ local CalypsoLabel = {
   },
   GUI = {
     Name = "Calypso Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Calypso"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Calypso",
+    Focusable = false
   }
 }
 
@@ -574,7 +586,8 @@ local HeleneTrail = {
   },
   GUI = {
     Name = "Helene Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Helene"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Helene",
+    Focusable = false
   }
 }
 
@@ -604,7 +617,8 @@ local HeleneLabel = {
   },
   GUI = {
     Name = "Helene Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Helene"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Helene",
+    Focusable = false
   }
 }
 
@@ -660,7 +674,8 @@ local PolydeucesTrail = {
   },
   GUI = {
     Name = "Polydeuces Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Polydeuces"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Polydeuces",
+    Focusable = false
   }
 }
 
@@ -690,7 +705,8 @@ local PolydeucesLabel = {
   },
   GUI = {
     Name = "Polydeuces Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Polydeuces"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Polydeuces",
+    Focusable = false
   }
 }
 
@@ -746,7 +762,8 @@ local S2004S24Trail = {
   },
   GUI = {
     Name = "S/2004 S 24 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/S2004S24"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/S2004S24",
+    Focusable = false
   }
 }
 
@@ -776,7 +793,8 @@ local S2004S24Label = {
   },
   GUI = {
     Name = "S/2004 S 24 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/S2004S24"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/S2004S24",
+    Focusable = false
   }
 }
 

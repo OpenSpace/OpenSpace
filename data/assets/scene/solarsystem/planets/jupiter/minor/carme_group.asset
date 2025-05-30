@@ -57,7 +57,8 @@ local HerseTrail = {
   },
   GUI = {
     Name = "Herse Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Herse"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Herse",
+    Focusable = false
   }
 }
 
@@ -88,6 +89,7 @@ local HerseLabel = {
   GUI = {
     Name = "Herse Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Herse",
+    Focusable = false,
     Description = "Label for Jupiter's moon Herse (Carme group)"
   }
 }
@@ -144,7 +146,8 @@ local AitneTrail = {
   },
   GUI = {
     Name = "Aitne Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Aitne"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Aitne",
+    Focusable = false
   }
 }
 
@@ -175,6 +178,7 @@ local AitneLabel = {
   GUI = {
     Name = "Aitne Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Aitne",
+    Focusable = false,
     Description = "Label for Jupiter's moon Aitne (Carme group)"
   }
 }
@@ -231,7 +235,8 @@ local KaleTrail = {
   },
   GUI = {
     Name = "Kale Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kale"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kale",
+    Focusable = false
   }
 }
 
@@ -262,6 +267,7 @@ local KaleLabel = {
   GUI = {
     Name = "Kale Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kale",
+    Focusable = false,
     Description = "Label for Jupiter's moon Kale (Carme group)"
   }
 }
@@ -318,7 +324,8 @@ local TaygeteTrail = {
   },
   GUI = {
     Name = "Taygete Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Taygete"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Taygete",
+    Focusable = false
   }
 }
 
@@ -349,6 +356,7 @@ local TaygeteLabel = {
   GUI = {
     Name = "Taygete Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Taygete",
+    Focusable = false,
     Description = "Label for Jupiter's moon Taygete (Carme group)"
   }
 }
@@ -405,7 +413,8 @@ local ChaldeneTrail = {
   },
   GUI = {
     Name = "Chaldene Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Chaldene"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Chaldene",
+    Focusable = false
   }
 }
 
@@ -436,6 +445,7 @@ local ChaldeneLabel = {
   GUI = {
     Name = "Chaldene Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Chaldene",
+    Focusable = false,
     Description = "Label for Jupiter's moon Chaldene (Carme group)"
   }
 }
@@ -492,7 +502,8 @@ local ErinomeTrail = {
   },
   GUI = {
     Name = "Erinome Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Erinome"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Erinome",
+    Focusable = false
   }
 }
 
@@ -523,6 +534,7 @@ local ErinomeLabel = {
   GUI = {
     Name = "Erinome Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Erinome",
+    Focusable = false,
     Description = "Label for Jupiter's moon Erinome (Carme group)"
   }
 }
@@ -579,7 +591,8 @@ local KallichoreTrail = {
   },
   GUI = {
     Name = "Kallichore Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kallichore"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kallichore",
+    Focusable = false
   }
 }
 
@@ -610,6 +623,7 @@ local KallichoreLabel = {
   GUI = {
     Name = "Kallichore Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kallichore",
+    Focusable = false,
     Description = "Label for Jupiter's moon Kallichore (Carme group)"
   }
 }
@@ -666,7 +680,8 @@ local KalykeTrail = {
   },
   GUI = {
     Name = "Kalyke Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kalyke"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kalyke",
+    Focusable = false
   }
 }
 
@@ -697,6 +712,7 @@ local KalykeLabel = {
   GUI = {
     Name = "Kalyke Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kalyke",
+    Focusable = false,
     Description = "Label for Jupiter's moon Kalyke (Carme group)"
   }
 }
@@ -753,7 +769,8 @@ local PasitheeTrail = {
   },
   GUI = {
     Name = "Pasithee Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Pasithee"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Pasithee",
+    Focusable = false
   }
 }
 
@@ -784,6 +801,7 @@ local PasitheeLabel = {
   GUI = {
     Name = "Pasithee Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Pasithee",
+    Focusable = false,
     Description = "Label for Jupiter's moon Pasithee (Carme group)"
   }
 }
@@ -840,7 +858,8 @@ local S2010J1Trail = {
   },
   GUI = {
     Name = "S/2010 J 1 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2010J1"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2010J1",
+    Focusable = false
   }
 }
 
@@ -871,6 +890,7 @@ local S2010J1Label = {
   GUI = {
     Name = "S/2010 J 1 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2010J1",
+    Focusable = false,
     Description = "Label for Jupiter's moon S2010J1 (Carme group)"
   }
 }
@@ -927,7 +947,8 @@ local EukeladeTrail = {
   },
   GUI = {
     Name = "Eukelade Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Eukelade"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Eukelade",
+    Focusable = false
   }
 }
 
@@ -958,6 +979,7 @@ local EukeladeLabel = {
   GUI = {
     Name = "Eukelade Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Eukelade",
+    Focusable = false,
     Description = "Label for Jupiter's moon Eukelade (Carme group)"
   }
 }
@@ -1014,7 +1036,8 @@ local ArcheTrail = {
   },
   GUI = {
     Name = "Arche Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Arche"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Arche",
+    Focusable = false
   }
 }
 
@@ -1045,6 +1068,7 @@ local ArcheLabel = {
   GUI = {
     Name = "Arche Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Arche",
+    Focusable = false,
     Description = "Label for Jupiter's moon Arche (Carme group)"
   }
 }
@@ -1101,7 +1125,8 @@ local IsonoeTrail = {
   },
   GUI = {
     Name = "Isonoe Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Isonoe"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Isonoe,
+    Focusable = false"
   }
 }
 
@@ -1132,6 +1157,7 @@ local IsonoeLabel = {
   GUI = {
     Name = "Isonoe Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Isonoe",
+    Focusable = false,
     Description = "Label for Jupiter's moon Isonoe (Carme group)"
   }
 }
@@ -1188,7 +1214,8 @@ local CarmeTrail = {
   },
   GUI = {
     Name = "Carme Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Carme"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Carme",
+    Focusable = false
   }
 }
 
@@ -1219,6 +1246,7 @@ local CarmeLabel = {
   GUI = {
     Name = "Carme Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Carme",
+    Focusable = false,
     Description = "Label for Jupiter's moon Carme (Carme group)"
   }
 }
@@ -1275,7 +1303,8 @@ local S2003J5Trail = {
   },
   GUI = {
     Name = "S/2003 J 5 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J5"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J5",
+    Focusable = false
   }
 }
 
@@ -1306,6 +1335,7 @@ local S2003J5Label = {
   GUI = {
     Name = "S/2003 J 5 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J5",
+    Focusable = false,
     Description = "Label for Jupiter's moon S2003J5 (Carme group)"
   }
 }
@@ -1362,7 +1392,8 @@ local S2018J3Trail = {
   },
   GUI = {
     Name = "S/2018 J 3 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2018J3"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2018J3",
+    Focusable = false
   }
 }
 
@@ -1393,6 +1424,7 @@ local S2018J3Label = {
   GUI = {
     Name = "S/2018 J 3 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2018J3",
+    Focusable = false,
     Description = "Label for Jupiter's moon S2018J3 (Carme group)"
   }
 }
@@ -1449,7 +1481,8 @@ local S2021J4Trail = {
   },
   GUI = {
     Name = "S/2021 J 4 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J4"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J4",
+    Focusable = false
   }
 }
 
@@ -1480,6 +1513,7 @@ local S2021J4Label = {
   GUI = {
     Name = "S/2021 J 4 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J4",
+    Focusable = false,
     Description = "Label for Jupiter's moon S2021J4 (Carme group)"
   }
 }
@@ -1536,7 +1570,8 @@ local S2021J5Trail = {
   },
   GUI = {
     Name = "S/2021 J 5 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J5"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J5",
+    Focusable = false
   }
 }
 
@@ -1567,6 +1602,7 @@ local S2021J5Label = {
   GUI = {
     Name = "S/2021 J 5 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J5",
+    Focusable = false,
     Description = "Label for Jupiter's moon S2021J5 (Carme group)"
   }
 }
@@ -1623,7 +1659,8 @@ local S2021J6Trail = {
   },
   GUI = {
     Name = "S/2021 J 6 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J6"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J6",
+    Focusable = false
   }
 }
 
@@ -1654,6 +1691,7 @@ local S2021J6Label = {
   GUI = {
     Name = "S/2021 J 6 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J6",
+    Focusable = false,
     Description = "Label for Jupiter's moon S2021J6 (Carme group)"
   }
 }
@@ -1710,7 +1748,8 @@ local S2016J3Trail = {
   },
   GUI = {
     Name = "S/2016 J 3 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2016J3"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2016J3",
+    Focusable = false
   }
 }
 
@@ -1741,6 +1780,7 @@ local S2016J3Label = {
   GUI = {
     Name = "S/2016 J 3 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2016J3",
+    Focusable = false,
     Description = "Label for Jupiter's moon S2016J3 (Carme group)"
   }
 }
@@ -1797,7 +1837,8 @@ local S2022J1Trail = {
   },
   GUI = {
     Name = "S/2022 J 1 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J1"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J1",
+    Focusable = false
   }
 }
 
@@ -1828,6 +1869,7 @@ local S2022J1Label = {
   GUI = {
     Name = "S/2022 J 1 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J1",
+    Focusable = false,
     Description = "Label for Jupiter's moon S2022J1 (Carme group)"
   }
 }
@@ -1884,7 +1926,8 @@ local S2022J2Trail = {
   },
   GUI = {
     Name = "S/2022 J 2 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J2"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J2",
+    Focusable = false
   }
 }
 
@@ -1915,6 +1958,7 @@ local S2022J2Label = {
   GUI = {
     Name = "S/2022 J 2 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J2",
+    Focusable = false,
     Description = "Label for Jupiter's moon S2022J2 (Carme group)"
   }
 }
@@ -1971,7 +2015,8 @@ local S2017J2Trail = {
   },
   GUI = {
     Name = "S/2017 J 2 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J2"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J2",
+    Focusable = false
   }
 }
 
@@ -2002,6 +2047,7 @@ local S2017J2Label = {
   GUI = {
     Name = "S/2017 J 2 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J2",
+    Focusable = false,
     Description = "Label for Jupiter's moon S2017J2 (Carme group)"
   }
 }
@@ -2058,7 +2104,8 @@ local S2017J5Trail = {
   },
   GUI = {
     Name = "S/2017 J 5 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J5"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J5",
+    Focusable = false
   }
 }
 
@@ -2089,6 +2136,7 @@ local S2017J5Label = {
   GUI = {
     Name = "S/2017 J 5 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J5",
+    Focusable = false,
     Description = "Label for Jupiter's moon S2017J5 (Carme group)"
   }
 }
@@ -2145,7 +2193,8 @@ local S2017J8Trail = {
   },
   GUI = {
     Name = "S/2017 J 8 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J8"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J8",
+    Focusable = false
   }
 }
 
@@ -2176,6 +2225,7 @@ local S2017J8Label = {
   GUI = {
     Name = "S/2017 J 8 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J8",
+    Focusable = false,
     Description = "Label for Jupiter's moon S2017J8 (Carme group)"
   }
 }
@@ -2232,7 +2282,8 @@ local S2011J1Trail = {
   },
   GUI = {
     Name = "S/2011 J 1 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2011J1"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2011J1",
+    Focusable = false
   }
 }
 
@@ -2263,6 +2314,7 @@ local S2011J1Label = {
   GUI = {
     Name = "S/2011 J 1 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2011J1",
+    Focusable = false,
     Description = "Label for Jupiter's moon S2011J1 (Carme group)"
   }
 }
@@ -2319,7 +2371,8 @@ local S2003J9Trail = {
   },
   GUI = {
     Name = "S/2003 J 9 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J9"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J9",
+    Focusable = false
   }
 }
 
@@ -2350,6 +2403,7 @@ local S2003J9Label = {
   GUI = {
     Name = "S/2003 J 9 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J9",
+    Focusable = false,
     Description = "Label for Jupiter's moon S2003J9 (Carme group)"
   }
 }
@@ -2406,7 +2460,8 @@ local S2003J10Trail = {
   },
   GUI = {
     Name = "S/2003 J 10 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J10"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J10",
+    Focusable = false
   }
 }
 
@@ -2437,6 +2492,7 @@ local S2003J10Label = {
   GUI = {
     Name = "S/2003 J 10 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J10",
+    Focusable = false,
     Description = "Label for Jupiter's moon S2003J10 (Carme group)"
   }
 }

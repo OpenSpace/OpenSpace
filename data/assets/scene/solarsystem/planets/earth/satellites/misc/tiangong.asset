@@ -41,6 +41,7 @@ local TiangongPosition = {
   GUI = {
     Name = "Tiangong Position",
     Path = "/Solar System/Planets/Earth/Satellites/Tiangong",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -91,7 +92,8 @@ local TiangongTrail = {
   Tag = { "earth_satellites" },
   GUI = {
     Name = "Tiangong Trail",
-    Path = "/Solar System/Planets/Earth/Satellites/Tiangong"
+    Path = "/Solar System/Planets/Earth/Satellites/Tiangong",
+    Focusable = false
   }
 }
 
@@ -115,7 +117,8 @@ local TiangongLabel = {
   Tag = { "solarsystem_labels" },
   GUI = {
     Name = "Tiangong Label",
-    Path = "/Solar System/Planets/Earth/Satellites"
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
   }
 }
 

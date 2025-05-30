@@ -127,7 +127,8 @@ local VestaTrail = {
   },
   GUI = {
     Name = "Vesta Trail",
-    Path = "/Solar System/Asteroid Belt/Vesta"
+    Path = "/Solar System/Asteroid Belt/Vesta",
+    Focusable = false
   }
 }
 

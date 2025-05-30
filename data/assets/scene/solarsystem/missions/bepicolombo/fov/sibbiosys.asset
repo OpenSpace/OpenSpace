@@ -22,6 +22,7 @@ local SimbioSys_HRIC_FPA = {
   GUI = {
     Name = "MPO Simbio-Sys HRIC FPA",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -44,6 +45,7 @@ local SimbioSys_HRIC_F550 = {
   GUI = {
     Name = "MPO Simbio-Sys HRIC F550",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -66,6 +68,7 @@ local SimbioSys_HRIC_FPAN = {
   GUI = {
     Name = "MPO Simbio-Sys HRIC FPAN",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -88,6 +91,7 @@ local SimbioSys_HRIC_F750 = {
   GUI = {
     Name = "MPO Simbio-Sys HRIC F750",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -110,6 +114,7 @@ local SimbioSys_HRIC_F880 = {
   GUI = {
     Name = "MPO Simbio-Sys HRIC F880",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -132,6 +137,7 @@ local SimbioSys_STC_L = {
   GUI = {
     Name = "MPO Simbio-Sys STC L",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -154,6 +160,7 @@ local SimbioSys_STC_H = {
   GUI = {
     Name = "MPO Simbio-Sys STC H",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -176,6 +183,7 @@ local SimbioSys_STC_L_F920 = {
   GUI = {
     Name = "MPO Simbio-Sys STC L F920",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -198,6 +206,7 @@ local SimbioSys_STC_L_F550 = {
   GUI = {
     Name = "MPO Simbio-Sys STC L F550",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -220,6 +229,7 @@ local SimbioSys_STC_L_P700 = {
   GUI = {
     Name = "MPO Simbio-Sys STC L P700",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -242,6 +252,7 @@ local SimbioSys_STC_H_P700 = {
   GUI = {
     Name = "MPO Simbio-Sys STC H P700",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -264,6 +275,7 @@ local SimbioSys_STC_H_F420 = {
   GUI = {
     Name = "MPO Simbio-Sys STC H F420",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -286,6 +298,7 @@ local SimbioSys_STC_H_F750 = {
   GUI = {
     Name = "MPO Simbio-Sys STC H F750",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -308,6 +321,7 @@ local SimbioSys_VIHI = {
   GUI = {
     Name = "MPO Simbio-Sys VIHI",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 

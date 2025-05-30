@@ -26,6 +26,7 @@ local Object = {
   GUI = {
     Name = "Minor Planet Center Bodies",
     Path = "/Solar System/Small Bodies",
+    Focusable = false,
     Description = [[The full catalog of objects from the IAU's Minor Planets Center.
       Specifically from the publications of the Minor Planets Circulars, the Minor Planets
       Orbit Supplement, and the Minor Planet Electronic Circulars. For more information

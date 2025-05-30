@@ -28,7 +28,8 @@ local SatelliteBasedAugmentationSatellites = {
   Tag = { "earth_satellites" },
   GUI = {
     Name = "Satellite Based Augmentation System",
-    Path = "/Solar System/Planets/Earth/Satellites"
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
   }
 }
 

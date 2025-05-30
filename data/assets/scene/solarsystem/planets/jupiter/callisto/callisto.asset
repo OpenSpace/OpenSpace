@@ -72,6 +72,7 @@ local CallistoLabel = {
   GUI = {
     Name = "Callisto Label",
     Path = "/Solar System/Planets/Jupiter/Major Moons/Callisto",
+    Focusable = false,
     Description = "Label for Jupiter's moon Callisto"
   }
 }

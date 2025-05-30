@@ -32,6 +32,7 @@ local C2019Q4BorisovTrail = {
   GUI = {
     Name = "C/2019 Q4 Borisov Trail",
     Path = "/Solar System/Interstellar",
+    Focusable = false,
     Description = [[Trail of C-2019 Q4 Borisov from 2015 JAN 01 00:00:00
     to 2050 JAN 01 00:00:00. Data from JPL Horizons]]
   }

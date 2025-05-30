@@ -23,6 +23,8 @@ local HeliocentricEarthEquatorial180  = {
   GUI = {
     Name = "Heliocentric Earth Equatorial 180",
     Path = "/Solar System/Sun",
+    Focusable = false,
+    Hidden = true,
     Description = [[      -  X-Y plane is the solar equator of date, therefore, the +Z axis
           is the primary vector and it is aligned to the Sun's north pole
           of date.
@@ -35,8 +37,7 @@ local HeliocentricEarthEquatorial180  = {
 
       -  +Y axis completes the right-handed system.
 
-      -  the origin of this frame is the Sun's center of mass.]],
-    Hidden = true
+      -  the origin of this frame is the Sun's center of mass.]]
   }
 }
 
@@ -53,6 +54,8 @@ local HeliocentricEarthEquatorial = {
   GUI = {
     Name = "Heliocentric Earth Equatorial",
     Path = "/Solar System/Sun",
+    Focusable = false,
+    Hidden = true,
     Description = [[      -  X-Y plane is the solar equator of date, therefore, the +Z axis
          is the primary vector and it is aligned to the Sun's north pole
          of date.
@@ -65,8 +68,7 @@ local HeliocentricEarthEquatorial = {
 
       -  +Y axis completes the right-handed system.
 
-      -  the origin of this frame is the Sun's center of mass.]],
-    Hidden = true
+      -  the origin of this frame is the Sun's center of mass.]]
   }
 }
 
@@ -83,6 +85,8 @@ local HeliocentricEarthEcliptic = {
   GUI = {
     Name = "Heliocentric Earth Ecliptic",
     Path = "/Solar System/Sun",
+    Focusable = false,
+    Hidden = true,
     Description = [[      -  X-Y plane is defined by the Earth Mean Ecliptic plane of date,
          therefore, the +Z axis is the primary vector,and it defined as
          the normal vector to the Ecliptic plane that points toward the
@@ -93,8 +97,7 @@ local HeliocentricEarthEcliptic = {
 
       -  +Y axis completes the right-handed system.
 
-      -  the origin of this frame is the Sun's center of mass.]],
-    Hidden = true
+      -  the origin of this frame is the Sun's center of mass.]]
   }
 }
 

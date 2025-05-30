@@ -23,6 +23,7 @@ local Label = {
   GUI = {
     Name = "Sedna Label",
     Path = "/Solar System/Dwarf Planets/Sedna",
+    Focusable = false,
     Description = "Label for Sedna, visible at the solarsystem overview zoom level"
   }
 }

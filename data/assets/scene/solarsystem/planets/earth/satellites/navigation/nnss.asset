@@ -29,6 +29,7 @@ local NavyNavigationSatellites = {
   GUI = {
     Name = "Navy Navigation Satellite System",
     Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false,
     Description = [[The first satellite navigation system to be used operationally.]]
   }
 }

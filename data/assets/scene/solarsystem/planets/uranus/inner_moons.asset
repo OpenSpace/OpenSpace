@@ -55,7 +55,8 @@ local CordeliaTrail = {
   },
   GUI = {
     Name = "Cordelia Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cordelia"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cordelia",
+    Focusable = false
   }
 }
 
@@ -79,7 +80,8 @@ local CordeliaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Cordelia Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cordelia"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cordelia",
+    Focusable = false
   }
 }
 
@@ -134,7 +136,8 @@ local OpheliaTrail = {
   },
   GUI = {
     Name = "Ophelia Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Ophelia"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Ophelia",
+    Focusable = false
   }
 }
 
@@ -158,7 +161,8 @@ local OpheliaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Ophelia Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Ophelia"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Ophelia",
+    Focusable = false
   }
 }
 
@@ -213,7 +217,8 @@ local BiancaTrail = {
   },
   GUI = {
     Name = "Bianca Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Bianca"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Bianca",
+    Focusable = false
   }
 }
 
@@ -237,7 +242,8 @@ local BiancaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Bianca Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Bianca"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Bianca",
+    Focusable = false
   }
 }
 
@@ -292,7 +298,8 @@ local CressidaTrail = {
   },
   GUI = {
     Name = "Cressida Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cressida"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cressida",
+    Focusable = false
   }
 }
 
@@ -316,7 +323,8 @@ local CressidaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Cressida Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cressida"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cressida",
+    Focusable = false
   }
 }
 
@@ -371,7 +379,8 @@ local DesdemonaTrail = {
   },
   GUI = {
     Name = "Desdemona Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Desdemona"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Desdemona",
+    Focusable = false
   }
 }
 
@@ -395,7 +404,8 @@ local DesdemonaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Desdemona Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Desdemona"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Desdemona",
+    Focusable = false
   }
 }
 
@@ -450,7 +460,8 @@ local JulietTrail = {
   },
   GUI = {
     Name = "Juliet Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Juliet"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Juliet",
+    Focusable = false
   }
 }
 
@@ -474,7 +485,8 @@ local JulietLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Juliet Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Juliet"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Juliet",
+    Focusable = false
   }
 }
 
@@ -529,7 +541,8 @@ local PortiaTrail = {
   },
   GUI = {
     Name = "Portia Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Portia"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Portia",
+    Focusable = false
   }
 }
 
@@ -553,7 +566,8 @@ local PortiaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Portia Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Portia"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Portia",
+    Focusable = false
   }
 }
 
@@ -608,7 +622,8 @@ local RosalindTrail = {
   },
   GUI = {
     Name = "Rosalind Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Rosalind"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Rosalind",
+    Focusable = false
   }
 }
 
@@ -632,7 +647,8 @@ local RosalindLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Rosalind Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Rosalind"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Rosalind",
+    Focusable = false
   }
 }
 
@@ -687,7 +703,8 @@ local CupidTrail = {
   },
   GUI = {
     Name = "Cupid Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cupid"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cupid",
+    Focusable = false
   }
 }
 
@@ -711,7 +728,8 @@ local CupidLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Cupid Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cupid"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cupid",
+    Focusable = false
   }
 }
 
@@ -766,7 +784,8 @@ local BelindaTrail = {
   },
   GUI = {
     Name = "Belinda Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Belinda"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Belinda",
+    Focusable = false
   }
 }
 
@@ -790,7 +809,8 @@ local BelindaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Belinda Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Belinda"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Belinda",
+    Focusable = false
   }
 }
 
@@ -845,7 +865,8 @@ local PerditaTrail = {
   },
   GUI = {
     Name = "Perdita Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Perdita"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Perdita",
+    Focusable = false
   }
 }
 
@@ -869,7 +890,8 @@ local PerditaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Perdita Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Perdita"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Perdita",
+    Focusable = false
   }
 }
 
@@ -924,7 +946,8 @@ local PuckTrail = {
   },
   GUI = {
     Name = "Puck Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Puck"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Puck",
+    Focusable = false
   }
 }
 
@@ -948,7 +971,8 @@ local PuckLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Puck Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Puck"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Puck",
+    Focusable = false
   }
 }
 
@@ -1003,7 +1027,8 @@ local MabTrail = {
   },
   GUI = {
     Name = "Mab Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Mab"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Mab",
+    Focusable = false
   }
 }
 
@@ -1027,7 +1052,8 @@ local MabLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Mab Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Mab"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Mab",
+    Focusable = false
   }
 }
 

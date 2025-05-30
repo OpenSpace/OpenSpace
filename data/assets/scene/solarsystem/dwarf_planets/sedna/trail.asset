@@ -19,6 +19,7 @@ local Trail = {
   GUI = {
     Name = "Sedna Trail",
     Path = "/Solar System/Dwarf Planets/Sedna",
+    Focusable = false,
     Description = "Trail of Sedna"
   }
 }

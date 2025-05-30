@@ -22,6 +22,7 @@ local MarsBarycenterTrail = {
   GUI = {
     Name = "Mars Barycenter Trail",
     Path = "/Solar System/Planets/Mars",
+    Focusable = false,
     Description = "Trail of Mars' Barycenter as observed by the Sun"
   }
 }

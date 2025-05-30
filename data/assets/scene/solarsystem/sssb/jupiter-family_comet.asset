@@ -26,6 +26,7 @@ local Object = {
   GUI = {
     Name = "Jupiter-family Comets",
     Path = "/Solar System/Small Bodies",
+    Focusable = false,
     Description = [[Comets with a Tisserand's parameter with respect to Jupiter of between
       2 and 3.]]
   }

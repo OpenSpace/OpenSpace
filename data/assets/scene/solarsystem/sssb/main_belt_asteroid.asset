@@ -27,6 +27,7 @@ local Object = {
   GUI = {
     Name = "Main Asteroid Belt",
     Path = "/Solar System/Small Bodies",
+    Focusable = false,
     Description = [[Asteroids with a semi-major axis of between 2.0 and 3.2 AU,
       and a perihelion distance greater than 1.666 AU.]]
   }

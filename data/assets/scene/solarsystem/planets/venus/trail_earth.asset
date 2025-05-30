@@ -23,6 +23,7 @@ local VenusTrailEarth = {
   GUI = {
     Name = "Venus trail from Earth",
     Path = "/Solar System/Planets/Venus",
+    Focusable = false,
     Description = "Alternate trail for Venus, showing Venus as observed from Earth"
   }
 }

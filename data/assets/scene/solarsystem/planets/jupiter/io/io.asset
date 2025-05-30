@@ -71,6 +71,7 @@ local IoLabel = {
   GUI = {
     Name = "Io Label",
     Path = "/Solar System/Planets/Jupiter/Major Moons/Io",
+    Focusable = false,
     Description = "Label for Jupiter's moon Io"
   }
 }

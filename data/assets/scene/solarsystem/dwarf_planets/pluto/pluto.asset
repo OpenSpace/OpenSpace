@@ -70,6 +70,7 @@ local PlutoLabel = {
   GUI = {
     Name = "Pluto Label",
     Path = "/Solar System/Dwarf Planets/Pluto",
+    Focusable = false,
     Description = "Label for Pluto, visible at the solarsystem overview zoom level"
   }
 }

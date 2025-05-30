@@ -23,6 +23,7 @@ local Label = {
   GUI = {
     Name = "Haumea Label",
     Path = "/Solar System/Dwarf Planets/Haumea",
+    Focusable = false,
     Description = "Label for Haumea, visible at the solarsystem overview zoom level"
   }
 }

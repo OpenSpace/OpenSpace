@@ -25,6 +25,7 @@ local Position = {
   GUI = {
     Name = "Haumea Position",
     Path = "/Solar System/Dwarf Planets/Haumea",
+    Focusable = false,
     Hidden = true
   }
 }

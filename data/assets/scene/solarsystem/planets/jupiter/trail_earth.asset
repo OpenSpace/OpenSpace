@@ -22,7 +22,8 @@ local JupiterTrailEarth = {
   Tag = { "planetTrail_solarSystem_alt", "planetTrail_terrestrial_alt" },
   GUI = {
     Name = "Jupiter trail from Earth",
-    Path = "/Solar System/Planets/Jupiter"
+    Path = "/Solar System/Planets/Jupiter",
+    Focusable = false
   }
 }
 

@@ -41,6 +41,7 @@ local Object = {
   GUI = {
     Name = "Supernova Remnants",
     Path = "/Milky Way/Nebulae",
+    Focusable = false,
     Description = [[A supernova remnant is the nebulous gas left over from a supernova
       explosion. This gas expands at great speeds and rams into the surrounding
       interstellar gas. This excites the surrounding gas and causes it to glow, producing

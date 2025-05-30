@@ -23,6 +23,7 @@ local Label = {
   GUI = {
     Name = "Makemake Label",
     Path = "/Solar System/Dwarf Planets/Makemake",
+    Focusable = false,
     Description = "Label for Makemake, visible at the solarsystem overview zoom level"
   }
 }

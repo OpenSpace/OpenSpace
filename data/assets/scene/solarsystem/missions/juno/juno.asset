@@ -76,7 +76,8 @@ local JunoTrail = {
   },
   GUI = {
     Name = "Juno Trail",
-    Path = "/Solar System/Missions/Juno"
+    Path = "/Solar System/Missions/Juno",
+    Focusable = false
   }
 }
 

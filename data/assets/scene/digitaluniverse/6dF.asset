@@ -43,6 +43,7 @@ local Object = {
   GUI = {
     Name = "6dF Galaxies",
     Path = "/Universe/Nearby Surveys",
+    Focusable = false,
     Description = [[The Six-degree Field (6dF) Galaxy Survey mapped nearly half the sky
       from the Anglo-Australian Observatory. Because it's a southern hemisphere survey,
       there is no coverage in these data for the northern hemisphere's sky. As with all

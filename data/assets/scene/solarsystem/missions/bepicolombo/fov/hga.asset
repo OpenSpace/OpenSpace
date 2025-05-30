@@ -22,6 +22,7 @@ local HGA = {
   GUI = {
     Name = "MPO HGA",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 

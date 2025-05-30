@@ -41,6 +41,7 @@ local Object = {
   GUI = {
     Name = "Planetary Nebulae",
     Path = "/Milky Way/Nebulae",
+    Focusable = false,
     Description = [[A planetary nebula is an expanding shell of gas ejected from an
       average-sized star late in its life cycle. Appearing like greenish disks to a
       telescopic observer, planetary nebulae received their name from their resemblance to

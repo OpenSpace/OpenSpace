@@ -29,6 +29,7 @@ local BrightestSatellites = {
   GUI = {
     Name = "100 Brightest",
     Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false,
     Description = [[The 100 (or so) satellites that will appear brightest when viewed
       from Earth.]]
   }

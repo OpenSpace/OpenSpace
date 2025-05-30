@@ -74,6 +74,7 @@ local PerseveranceNode = {
   GUI = {
     Name = "Perseverance Node",
     Path = "/Solar System/Missions/Perseverance",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -101,6 +102,7 @@ local PerseveranceModel = {
   GUI = {
     Name = "Perseverance Model",
     Path = "/Solar System/Missions/Perseverance",
+    Focusable = false,
     Hidden = true
   }
 }

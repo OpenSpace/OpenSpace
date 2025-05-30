@@ -71,7 +71,8 @@ local IapetusLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Iapetus Label",
-    Path = "/Solar System/Planets/Saturn/Major Moons/Iapetus"
+    Path = "/Solar System/Planets/Saturn/Major Moons/Iapetus",
+    Focusable = false
   }
 }
 

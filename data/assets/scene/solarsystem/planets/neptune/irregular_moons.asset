@@ -55,7 +55,8 @@ local HalimedeTrail = {
   },
   GUI = {
     Name = "Halimede Trail",
-    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Halimede"
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Halimede",
+    Focusable = false
   }
 }
 
@@ -80,6 +81,7 @@ local HalimedeLabel = {
   GUI = {
     Name = "Halimede Label",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Halimede",
+    Focusable = false,
     Description = "Label for Neptune's moon Halimede (Irregular Prograde Moons)"
   }
 }
@@ -135,7 +137,8 @@ local PsamatheTrail = {
   },
   GUI = {
     Name = "Psamathe Trail",
-    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Psamathe"
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Psamathe",
+    Focusable = false
   }
 }
 
@@ -160,6 +163,7 @@ local PsamatheLabel = {
   GUI = {
     Name = "Psamathe Label",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Psamathe",
+    Focusable = false,
     Description = "Label for Neptune's moon Psamathe (Irregular Prograde Moons)"
   }
 }
@@ -215,7 +219,8 @@ local SaoTrail = {
   },
   GUI = {
     Name = "Sao Trail",
-    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Sao"
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Sao",
+    Focusable = false
   }
 }
 
@@ -240,6 +245,7 @@ local SaoLabel = {
   GUI = {
     Name = "Sao Label",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Sao",
+    Focusable = false,
     Description = "Label for Neptune's moon Sao (Irregular Prograde Moons)"
   }
 }
@@ -295,7 +301,8 @@ local LaomedeiaTrail = {
   },
   GUI = {
     Name = "Laomedeia Trail",
-    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Laomedeia"
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Laomedeia",
+    Focusable = false
   }
 }
 
@@ -320,6 +327,7 @@ local LaomedeiaLabel = {
   GUI = {
     Name = "Laomedeia Label",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Laomedeia",
+    Focusable = false,
     Description = "Label for Neptune's moon Laomedeia (Irregular Prograde Moons)"
   }
 }
@@ -375,7 +383,8 @@ local NesoTrail = {
   },
   GUI = {
     Name = "Neso Trail",
-    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Neso"
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Neso",
+    Focusable = false
   }
 }
 
@@ -400,6 +409,7 @@ local NesoLabel = {
   GUI = {
     Name = "Neso Label",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Neso",
+    Focusable = false,
     Description = "Label for Neptune's moon Neso (Irregular Prograde Moons)"
   }
 }

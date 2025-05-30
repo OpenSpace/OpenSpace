@@ -24,7 +24,8 @@ local LaunchTrail = {
   },
   GUI = {
     Name = "Apollo 8 Launch Trail",
-    Path = "/Solar System/Missions/Apollo/8"
+    Path = "/Solar System/Missions/Apollo/8",
+    Focusable = false
   }
 }
 
@@ -47,7 +48,8 @@ local MoonTrail = {
   },
   GUI = {
     Name = "Apollo 8 Moon Trail",
-    Path = "/Solar System/Missions/Apollo/8"
+    Path = "/Solar System/Missions/Apollo/8",
+    Focusable = false
   }
 }
 
@@ -70,7 +72,8 @@ local EarthBarycenterTrail = {
   },
   GUI = {
     Name = "Apollo 8 Earth Barycenter Trail",
-    Path = "/Solar System/Missions/Apollo/8"
+    Path = "/Solar System/Missions/Apollo/8",
+    Focusable = false
   }
 }
 
