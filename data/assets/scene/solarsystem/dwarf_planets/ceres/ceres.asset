@@ -9,7 +9,7 @@ local Ceres = {
     Type = "RenderableGlobe",
     Radii = { 487300, 487300, 454700 }
   },
-  Tag = { "planet_solarSystem", "planet_terrestrial", "dwarf_planet" },
+  Tag = { "planet_terrestrial", "dwarf_planet" },
   GUI = {
     Path = "/Solar System/Dwarf Planets/Ceres"
   }

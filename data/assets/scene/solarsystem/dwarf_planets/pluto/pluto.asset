@@ -43,7 +43,7 @@ local Pluto = {
       Color = { 1.0, 1.0, 0.0 }
     }
   },
-  Tag = { "planet_solarSystem", "planet_terrestrial", "dwarf_planet" },
+  Tag = { "planet_terrestrial", "dwarf_planet" },
   GUI = {
     Path = "/Solar System/Dwarf Planets/Pluto"
   }
