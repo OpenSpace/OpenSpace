@@ -271,7 +271,7 @@ if(OS_MACOSX)
     -fno-threadsafe-statics         # Don't generate thread-safe statics
     -fobjc-call-cxx-cdtors          # Call the constructor/destructor of C++ instance variables in ObjC objects
     -fvisibility-inlines-hidden     # Give hidden visibility to inlined class member functions
-    -std=gnu++2a                    # Use the C++14 language standard including GNU extensions
+    -std=gnu++20                    # Use the C++20 language standard including GNU extensions
     -Wno-narrowing                  # Don't warn about type narrowing
     -Wsign-compare                  # Warn about mixed signed/unsigned type comparisons
     )
