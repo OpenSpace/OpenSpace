@@ -42,7 +42,6 @@ class RenderableTimeVaryingSphere : public RenderableSphere {
 public:
     explicit RenderableTimeVaryingSphere(const ghoul::Dictionary& dictionary);
 
-    void initializeGL() override;
     void deinitializeGL() override;
 
     bool isReady() const override;

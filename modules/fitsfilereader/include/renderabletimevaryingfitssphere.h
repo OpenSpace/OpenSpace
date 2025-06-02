@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_BASE___RENDERABLETIMEVARYINGFITSSPHERE___H__
 #define __OPENSPACE_MODULE_BASE___RENDERABLETIMEVARYINGFITSSPHERE___H__
 
-#include <modules/base/rendering/renderabletimevaryingsphere.h>
+#include <modules/base/rendering/renderablesphere.h>
 
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/util/dynamicfilesequencedownloader.h>
@@ -36,7 +36,7 @@ struct RenderData;
 struct UpdateData;
 namespace documentation { struct Documentation; }
 
-class RenderableTimeVaryingFitsSphere : public RenderableTimeVaryingSphere {
+class RenderableTimeVaryingFitsSphere : public RenderableSphere {
 public:
     enum class LoadingType {
         StaticLoading,
@@ -68,6 +68,7 @@ private:
             return time < other.time;
         }
     };
+    ghoul::Dictionary ensureTextureSource(ghoul::Dictionary dictionary);
     void loadTexture();
     void trackOldest(File& file);
     void showCorrectFileName();
@@ -117,7 +118,6 @@ private:
     bool _firstUpdate = true;
     bool _layerOptionsAdded = false;
     ghoul::opengl::Texture* _texture = nullptr;
-    bool _textureIsDirty = true;
 };
 
 } // namespace openspace

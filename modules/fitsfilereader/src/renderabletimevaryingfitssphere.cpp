@@ -180,13 +180,14 @@ namespace openspace {
 
 documentation::Documentation RenderableTimeVaryingFitsSphere::Documentation() {
     return codegen::doc<Parameters>(
-        "fitsfilereader_renderable_time_varying_fits_sphere"
+        "fitsfilereader_renderable_time_varying_fits_sphere",
+        RenderableSphere::Documentation()
     );
 }
 
 RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
                                                       const ghoul::Dictionary& dictionary)
-    : RenderableTimeVaryingSphere(dictionary)
+    : RenderableSphere(dictionary)
     , _fitsLayerName(FitsLayerNameInfo)
     , _saveDownloadsOnShutdown(SaveDownloadsOnShutdown, false)
     , _textureFilterProperty(TextureFilterInfo)
@@ -194,9 +195,10 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (p.textureSource.has_value()){
+    if (p.textureSource.has_value()) {
         _textureSource = p.textureSource->string();
     }
+
     _textureSource.setReadOnly(true);
     addProperty(_textureSource); // Added only to show in GUI which file is active
 
@@ -293,7 +295,7 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
                     pair.value<double>("1"),
                     pair.value<double>("2")
                 };
-                std::pair<int, std::pair<float, float>> mapPair{
+                std::pair<int, std::pair<float, float>> mapPair {
                     std::stoi(std::string(intKey)),
                     minMax
                 };
@@ -324,12 +326,11 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
 }
 
 void RenderableTimeVaryingFitsSphere::deinitializeGL() {
-    _texture = nullptr;
-    _files.clear();
-
     if (_loadingType == LoadingType::DynamicDownloading && _dynamicFileDownloader) {
         _dynamicFileDownloader->deinitialize(_saveDownloadsOnShutdown);
     }
+    _texture = nullptr;
+    _files.clear();
     RenderableSphere::deinitializeGL();
 }
 
@@ -504,10 +505,10 @@ void RenderableTimeVaryingFitsSphere::update(const UpdateData& data) {
         _dataMinMaxValues = _files[_activeTriggerTimeIndex].dataMinMax;
     }
 
-    if (_textureIsDirty) [[unlikely]] {
-        loadTexture();
-        _textureIsDirty = false;
-    }
+    //if (_textureIsDirty) [[unlikely]] {
+    //    loadTexture();
+    //    _textureIsDirty = false;
+    //}
 }
 
 void RenderableTimeVaryingFitsSphere::render(const RenderData& data, RendererTasks& task)
