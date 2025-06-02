@@ -28,6 +28,7 @@ local PlutoKeplerianTrail = {
   GUI = {
     Name = "Pluto Keplerian Trail",
     Path = "/Solar System/Dwarf Planets/Pluto",
+    Focusable = false,
     Description = "Keplerian trail of Pluto. Contains full orbit"
   }
 }

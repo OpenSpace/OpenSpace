@@ -26,6 +26,7 @@ local Object = {
   GUI = {
     Name = "Mars-crossing Asteroids",
     Path = "/Solar System/Small Bodies",
+    Focusable = false,
     Description = [[Asteroids that cross the orbit of Mars, with a semi-major axis
       of less than 3.2 AU, and a perihelion distance of between 1.3 and 1.666 AU.]]
   }

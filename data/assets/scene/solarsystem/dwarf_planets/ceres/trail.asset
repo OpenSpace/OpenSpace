@@ -21,7 +21,8 @@ local CeresTrail = {
   Tag = { "planetTrail_solarSystem", "planetTrail_dwarf" },
   GUI = {
     Name = "Ceres Trail",
-    Path = "/Solar System/Dwarf Planets/Ceres"
+    Path = "/Solar System/Dwarf Planets/Ceres",
+    Focusable = false
   }
 }
 

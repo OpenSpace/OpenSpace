@@ -26,6 +26,7 @@ local Object = {
   GUI = {
     Name = "Amor Asteroids",
     Path = "/Solar System/Small Bodies",
+    Focusable = false,
     Description = [[Earth-approaching Near-Earth-Asteroids with orbits exterior to
       Earth's but interior to Mars'.]]
   }

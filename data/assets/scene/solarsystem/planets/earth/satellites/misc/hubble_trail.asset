@@ -33,6 +33,7 @@ local HubblePosition = {
   GUI = {
     Name = "Hubble Position",
     Path = "/Solar System/Planets/Earth/Satellites/Hubble",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -56,7 +57,8 @@ local HubbleTrail = {
   Tag = { "earth_satellites", "hubble" },
   GUI = {
     Name = "Hubble Trail",
-    Path = "/Solar System/Planets/Earth/Satellites/Hubble"
+    Path = "/Solar System/Planets/Earth/Satellites/Hubble",
+    Focusable = false
   }
 }
 

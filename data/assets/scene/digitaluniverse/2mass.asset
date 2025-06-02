@@ -43,6 +43,7 @@ local Object = {
   GUI = {
     Name = "2MASS Galaxies",
     Path = "/Universe/Nearby Surveys",
+    Focusable = false,
     Description = [[The Two Micron All-Sky Survey (2MASS) is an infrared survey of the
       sky published in 2003. Taken from two telescopes in Arizona and Chile, it offers an
       all-sky view of galaxies beyond the Milky Way. Because it is infrared, the light

@@ -68,7 +68,8 @@ local Apollo15Trail = {
   },
   GUI = {
     Name = "Apollo 15 Trail",
-    Path = "/Solar System/Missions/Apollo/15"
+    Path = "/Solar System/Missions/Apollo/15",
+    Focusable = false
   }
 }
 

@@ -26,6 +26,7 @@ local Object = {
   GUI = {
     Name = "Voids",
     Path = "/Universe/Nearby Surveys",
+    Focusable = false,
     Description = [[Cosmic voids are vast, empty spaces where there are either no
       galaxies, or very few galaxies. They are associated with cold spots in the cosmic
       microwave background (CMB) light, the earliest picture we have of the universe.

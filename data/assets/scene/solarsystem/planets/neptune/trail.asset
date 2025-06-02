@@ -21,6 +21,7 @@ local NeptuneTrail = {
   GUI = {
     Name = "Neptune Trail",
     Path = "/Solar System/Planets/Neptune",
+    Focusable = false,
     Description = "Trail of Neptune as observed by the Sun"
   }
 }

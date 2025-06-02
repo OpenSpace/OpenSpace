@@ -192,7 +192,8 @@ local PlutoBarycenterLabel = {
   },
   GUI = {
     Name = "Pluto Barycenter Label",
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto",
+    Focusable = false
   }
 }
 
@@ -215,7 +216,8 @@ local PlutoText = {
   },
   GUI = {
     Name = "Pluto Text",
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto",
+    Focusable = false
   }
 }
 
@@ -234,7 +236,8 @@ local PlutoShadow = {
   },
   GUI = {
     Name = "Pluto Shadow",
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto",
+    Focusable = false
   }
 }
 

@@ -29,6 +29,7 @@ local SpaceStations = {
   GUI = {
     Name = "Space Stations",
     Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false,
     Description = [[A collection of space stations (including the ISS and China's
       Tiangong), along with certain cubesats and satellite constellations from space
       agencies.]]

@@ -25,6 +25,7 @@ local Position = {
   GUI = {
     Name = "Quaoar Position",
     Path = "/Solar System/Dwarf Planets/Quaoar",
+    Focusable = false,
     Hidden = true
   }
 }

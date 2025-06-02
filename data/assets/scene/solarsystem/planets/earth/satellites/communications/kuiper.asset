@@ -29,6 +29,7 @@ local KuiperSatellites = {
   GUI = {
     Name = "Kuiper",
     Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false,
     Description = [[LEO satellite constellation launched by Amazon to provide broadband
       internet access.]]
   }

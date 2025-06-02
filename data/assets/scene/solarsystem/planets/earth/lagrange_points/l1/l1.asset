@@ -46,6 +46,7 @@ local L1Label = {
   GUI = {
     Name = "L1 Label",
     Path = "/Solar System/Planets/Earth/Lagrange Points",
+    Focusable = false,
     Description = "Main label for L1"
   }
 }

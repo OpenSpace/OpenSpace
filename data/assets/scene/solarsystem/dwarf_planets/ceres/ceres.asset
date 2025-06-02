@@ -32,6 +32,7 @@ local CeresLabel = {
   GUI = {
     Name = "Ceres Label",
     Path = "/Solar System/Dwarf Planets/Ceres",
+    Focusable = false,
     Description = "Label for Ceres, visible at the solarsystem overview zoom level"
   }
 }

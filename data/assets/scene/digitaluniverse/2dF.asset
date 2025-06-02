@@ -42,6 +42,7 @@ local Object = {
   GUI = {
     Name = "2dF Galaxies",
     Path = "/Universe/Deep Sky Surveys",
+    Focusable = false,
     Description = [[The Two-degree Field (2dF) Survey was a project designed to map
       portions of the extragalactic universe. The 2dF survey has three main components:
       the North Galactic Pole strip, the South Galactic Pole strip, and the random fields

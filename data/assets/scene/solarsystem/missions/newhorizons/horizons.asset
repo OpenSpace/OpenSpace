@@ -32,6 +32,7 @@ local NewHorizons = {
   GUI = {
     Name = "New Horizons Trail (Horizons)",
     Path = "/Solar System/Missions/New Horizons",
+    Focusable = false,
     Description = [[New Horizons Trail, spanning from January 19th, 2006 to January 1st,
       2030. Data from JPL Horizons]]
   }

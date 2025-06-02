@@ -28,6 +28,7 @@ local xy_n = {
   GUI = {
     Name = "Ganymede XY Plane N",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = "A cut plane in Ganymede's XY plane showing the number of particles"
   }
 }
@@ -44,6 +45,7 @@ local xy_t = {
   GUI = {
     Name = "Ganymede XY Plane T",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = "A cut plane in Ganymede's XY plane showing the temperature"
   }
 }
@@ -60,6 +62,7 @@ local xy_u = {
   GUI = {
     Name = "Ganymede XY Plane U",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = [[A cut plane in Ganymede's XY plane showing the strength of the
       magnetic field]]
   }
@@ -77,6 +80,7 @@ local xy_utot = {
   GUI = {
     Name = "Ganymede XY Plane U_tot",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = [[A cut plane in Ganymede's XY plane showing the X, Y, and Z components
       of the magnetic field mapped to the RGB components]]
   }
@@ -94,6 +98,7 @@ local xy_ux = {
   GUI = {
     Name = "Ganymede XY Plane Ux",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = [[A cut plane in Ganymede's XY plane showing the X component of
       Ganymede's magnetic field]]
   }
@@ -111,6 +116,7 @@ local xy_uy = {
   GUI = {
     Name = "Ganymede XY Plane Uy",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = [[A cut plane in Ganymede's XY plane showing the Y component of
       Ganymede's magnetic field]]
   }
@@ -128,6 +134,7 @@ local xy_uz = {
   GUI = {
     Name = "Ganymede XY Plane Uz",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = [[A cut plane in Ganymede's XY plane showing the Z component of
       Ganymede's magnetic field]]
   }
@@ -151,6 +158,7 @@ local xz_n = {
   GUI = {
     Name = "Ganymede XZ Plane N",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = "A cut plane in Ganymede's XZ plane showing the number of particles"
   }
 }
@@ -173,6 +181,7 @@ local xz_t = {
   GUI = {
     Name = "Ganymede XZ Plane T",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = "A cut plane in Ganymede's XZ plane showing the temperature"
   }
 }
@@ -195,6 +204,7 @@ local xz_u = {
   GUI = {
     Name = "Ganymede XZ Plane U",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = [[A cut plane in Ganymede's XZ plane showing the strength of the
       magnetic field]]
   }
@@ -218,6 +228,7 @@ local xz_utot = {
   GUI = {
     Name = "Ganymede XZ Plane U_tot",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = [[A cut plane in Ganymede's XZ plane showing the X, Y, and Z components
       of the magnetic field mapped to the RGB components]]
   }
@@ -241,6 +252,7 @@ local xz_ux = {
   GUI = {
     Name = "Ganymede XZ Plane Ux",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = [[A cut plane in Ganymede's XZ plane showing the X component of
       Ganymede's magnetic field]]
   }
@@ -264,6 +276,7 @@ local xz_uy = {
   GUI = {
     Name = "Ganymede XZ Plane Uy",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = [[A cut plane in Ganymede's XZ plane showing the Y component of
       Ganymede's magnetic field]]
   }
@@ -287,6 +300,7 @@ local xz_uz = {
   GUI = {
     Name = "Ganymede XZ Plane Uz",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = [[A cut plane in Ganymede's XZ plane showing the Z component of
       Ganymede's magnetic field]]
   }

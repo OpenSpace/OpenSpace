@@ -28,7 +28,8 @@ local SesSatellites = {
   Tag = { "earth_satellites" },
   GUI = {
     Name = "SES",
-    Path = "/Solar System/Planets/Earth/Satellites"
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
   }
 }
 

@@ -101,7 +101,8 @@ local Apollo11MoonTrail = {
   },
   GUI = {
     Name = "Apollo 11 Moon Orbits",
-    Path = "/Solar System/Missions/Apollo/11"
+    Path = "/Solar System/Missions/Apollo/11",
+    Focusable = false
   }
 }
 
@@ -144,7 +145,8 @@ local Apollo11LemTrail = {
   },
   GUI = {
     Name = "Apollo 11 Lunar Lander Trail",
-    Path = "/Solar System/Missions/Apollo/11"
+    Path = "/Solar System/Missions/Apollo/11",
+    Focusable = false
   }
 }
 
