@@ -33,7 +33,14 @@
 
 function(set_current_cef_build_platform)
   if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
-    if ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm64")
+    # Use CMAKE_OSX_ARCHITECTURES if set, otherwise fallback to CMAKE_SYSTEM_PROCESSOR
+    if (DEFINED CMAKE_OSX_ARCHITECTURES AND NOT "${CMAKE_OSX_ARCHITECTURES}" STREQUAL "")
+      # CMAKE_OSX_ARCHITECTURES can be a list; just use the first architecture
+      list(GET CMAKE_OSX_ARCHITECTURES 0 CEF_ARCH)
+    else()
+      set(CEF_ARCH "${CMAKE_SYSTEM_PROCESSOR}")
+    endif()
+    if ("${CEF_ARCH}" STREQUAL "arm64")
       set(CEF_PLATFORM "macosarm64" PARENT_SCOPE)
     else()
       set(CEF_PLATFORM "macosx64" PARENT_SCOPE)
