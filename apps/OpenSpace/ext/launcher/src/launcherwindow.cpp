@@ -503,7 +503,7 @@ void LauncherWindow::editConfiguration() {
 
     assert(cluster.generator);
     std::string err = sgct::validateConfigAgainstSchema(
-        path,
+        std::filesystem::path(path),
         _configPath / "schema/sgct.schema.json"
     );
     if (!err.empty()) {
