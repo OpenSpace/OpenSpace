@@ -371,7 +371,7 @@ void RenderableTimeVaryingFitsSphere::readFileFromFits(std::filesystem::path pat
         .dataMinMax = minMaxDataValues
     };
 
-    const std::vector<File>::const_iterator iter = std::upper_bound(
+    const std::deque<File>::const_iterator iter = std::upper_bound(
         _files.begin(),
         _files.end(),
         newFile.time,
@@ -615,17 +615,27 @@ void RenderableTimeVaryingFitsSphere::loadTexture() {
 
 void RenderableTimeVaryingFitsSphere::trackOldest(File& file) {
     if (file.status == File::FileStatus::Loaded) {
-        _loadedFiles.push(&file);
-    }
-    // Repopulate the queue if new File makes the queue full
-    if (!_loadedFiles.empty() &&
-        _loadingType != LoadingType::StaticLoading &&
-        _loadedFiles.size() >= _maxLoadedFiles)
-    {
-        File* oldest = _loadedFiles.front();
-        oldest->status = File::FileStatus::Downloaded;
-        oldest->texture = nullptr;
-        _loadedFiles.pop();
+        std::deque<File*>::iterator it =
+            std::find(_loadedFiles.begin(), _loadedFiles.end(), &file);
+        if (it == _loadedFiles.end()) {
+            _loadedFiles.push_back(&file);
+        }
+        // Repopulate the queue if new File makes the queue full
+        if (!_loadedFiles.empty() &&
+            _loadingType == LoadingType::DynamicDownloading &&
+            _loadedFiles.size() >= _maxLoadedFiles)
+        {
+            File* oldest = _loadedFiles.front();
+            // The edge case of when queue just got full and user jumped back to where
+            // they started which would make the oldes file in queue to be the active
+            // file. In that case we need to make sure we do not unload it
+            if (oldest == &file) {
+                return;
+            }
+            oldest->status = File::FileStatus::Downloaded;
+            oldest->texture = nullptr;
+            _loadedFiles.pop_front();
+        }
     }
 }
 

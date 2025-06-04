@@ -436,7 +436,6 @@ std::vector<float> FieldlinesState::extraQuantity(size_t index, bool& isSuccessf
 
 // Moves the points in @param line over to _vertexPositions and updates
 // _lineStart & _lineCount accordingly.
-
 void FieldlinesState::addLine(std::vector<glm::vec3>& line) {
     const size_t nNewPoints = line.size();
     const size_t nOldPoints = _vertexPositions.size();

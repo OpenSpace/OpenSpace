@@ -106,7 +106,6 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         std::filesystem::remove(path);
         return nullptr;
     }
-
 }
 
 void readFitsHeader(const std::filesystem::path& path) {

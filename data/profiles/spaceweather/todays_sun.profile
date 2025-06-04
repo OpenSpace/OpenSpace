@@ -142,6 +142,16 @@
       "name": "Scene.WSA_54_Fieldlines_Earth.Renderable.Enabled",
       "type": "setPropertyValue",
       "value": "false"
+    },
+    {
+      "name": "Scene.WSA_54_Fieldlines_PFSS_IO.Renderable.ABlendingEnabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.WSA_54_Fieldlines_PFSS_IO.Renderable.LineWidth",
+      "type": "setPropertyValueSingle",
+      "value": "1.8"
     }
   ],
   "time": {

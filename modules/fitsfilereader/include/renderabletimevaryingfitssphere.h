@@ -95,7 +95,7 @@ private:
     // Number of files to queue up at a time
     int _nFilesToQueue = 10;
     // To keep track of oldest file
-    std::queue<File*> _loadedFiles;
+    std::deque<File*> _loadedFiles;
     // Max number of files loaded at once
     size_t _maxLoadedFiles = 100;
     std::string _infoURL;
@@ -112,7 +112,7 @@ private:
     // DynamicFileSequenceDownloader downloads and updates the renderable with
     // data downloaded from the web
     std::unique_ptr<DynamicFileSequenceDownloader> _dynamicFileDownloader;
-    std::vector<File> _files;
+    std::deque<File> _files;
     int _activeTriggerTimeIndex = 0;
 
     bool _firstUpdate = true;

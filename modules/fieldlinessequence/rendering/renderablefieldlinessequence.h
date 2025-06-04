@@ -103,7 +103,7 @@ private:
     void staticallyLoadFiles(const std::optional<std::filesystem::path>& seed,
         const std::optional<std::string>& traceVariable);
 
-    std::vector<File> _files;
+    std::deque<File> _files;
     // The function loads the file in the sense that it creates the FieldlineState object in
     // the File object. The function also deletes the oldest file if the loadedFiles queue
     // is full. The currentTime is given a default value because the function is also called
@@ -134,7 +134,7 @@ private:
     // number of files to queue up at a time
     size_t _nFilesToQueue = 10;
     // to keep track of oldest file
-    std::queue<File*> _loadedFiles;
+    std::deque<File*> _loadedFiles;
     // max number of files loaded at onse
     size_t _maxLoadedFiles = 100;
     std::string _infoURL;

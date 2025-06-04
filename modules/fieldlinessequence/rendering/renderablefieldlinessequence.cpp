@@ -891,17 +891,27 @@ void RenderableFieldlinesSequence::loadFile(File& file) {
 
 void RenderableFieldlinesSequence::trackOldest(File& file) {
     if (file.status == File::FileStatus::Loaded) {
-        _loadedFiles.push(&file);
-    }
-    // Repopulate the queue if new File makes the queue full
-    if (!_loadedFiles.empty() &&
-        _loadingType != LoadingType::StaticLoading &&
-        _loadedFiles.size() >= _maxLoadedFiles)
-    {
-        File* oldest = _loadedFiles.front();
-        oldest->status = File::FileStatus::Downloaded;
-        oldest->state.clear();
-        _loadedFiles.pop();
+        std::deque<File*>::iterator it =
+            std::find(_loadedFiles.begin(), _loadedFiles.end(), &file);
+        if (it == _loadedFiles.end()) {
+            _loadedFiles.push_back(&file);
+        }
+        // Repopulate the queue if new File makes the queue full
+        if (!_loadedFiles.empty() &&
+            _loadingType == LoadingType::DynamicDownloading &&
+            _loadedFiles.size() >= _maxLoadedFiles)
+        {
+            File* oldest = _loadedFiles.front();
+            // The edge case of when queue just got full and user jumped back to where
+            // they started which would make the oldes file in queue to be the active
+            // file. In that case we need to make sure we do not unload it
+            if (oldest == &file) {
+                return;
+            }
+            oldest->status = File::FileStatus::Downloaded;
+            oldest->state.clear();
+            _loadedFiles.pop_front();
+        }
     }
 }
 
@@ -917,7 +927,7 @@ int RenderableFieldlinesSequence::updateActiveIndex(double currentTime) {
     }
 
     int index = 0;
-    const std::vector<File>::const_iterator iter = std::upper_bound(
+    const std::deque<File>::const_iterator iter = std::upper_bound(
         _files.begin(),
         _files.end(),
         currentTime,
@@ -954,7 +964,7 @@ void RenderableFieldlinesSequence::updateDynamicDownloading(double currentTime,
             .path = filePath,
             .timestamp = extractTriggerTimeFromFilename(filePath.filename())
         };
-        const std::vector<File>::const_iterator iter = std::upper_bound(
+        const std::deque<File>::const_iterator iter = std::upper_bound(
             _files.begin(),
             _files.end(),
             newFile.timestamp,
@@ -971,7 +981,7 @@ void RenderableFieldlinesSequence::updateDynamicDownloading(double currentTime,
 }
 
 void RenderableFieldlinesSequence::firstUpdate() {
-    std::vector<File>::iterator file = std::find_if(
+    std::deque<File>::iterator file = std::find_if(
         _files.begin(),
         _files.end(),
         [](File& f) { return f.status == File::FileStatus::Loaded; }
