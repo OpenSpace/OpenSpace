@@ -37,6 +37,8 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
+    constexpr std::string_view _loggerCat = "GlobeTranslation";
+
     constexpr openspace::properties::Property::PropertyInfo GlobeInfo = {
         "Globe",
         "Attached Globe",
@@ -189,13 +191,9 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
 void GlobeTranslation::fillAttachedNode() {
     SceneGraphNode* n = sceneGraphNode(_sceneGraphNode);
     if (!n || !n->renderable()) {
-        LERRORC(
-            "GlobeTranslation",
-            "Could not set attached node as it does not have a renderable"
-        );
+        LERROR("Could not set attached node as it does not have a renderable");
         return;
     }
-
     _attachedNode = n;
 }
 
@@ -224,10 +222,7 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
     }
 
     if (!_attachedNode) {
-        LERRORC(
-            "GlobeRotation",
-            std::format("Could not find attached node '{}'", _sceneGraphNode.value())
-        );
+        LERROR(std::format("Could not find attached node '{}'", _sceneGraphNode.value()));
         return _position;
     }
 

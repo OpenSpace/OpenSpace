@@ -37,6 +37,8 @@
 #include <glm/gtx/quaternion.hpp>
 
 namespace {
+    constexpr std::string_view _loggerCat = "GlobeRotation";
+
     constexpr openspace::properties::Property::PropertyInfo GlobeInfo = {
         "Globe",
         "Attached Globe",
@@ -136,7 +138,7 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
 
     _sceneGraphNode = p.globe;
     _sceneGraphNode.onChange([this]() {
-        findNode();
+        fillAttachedNode();
         setUpdateVariables();
     });
     addProperty(_sceneGraphNode);
@@ -162,13 +164,10 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
     addProperty(_useCamera);
 }
 
-void GlobeRotation::findNode() {
+void GlobeRotation::fillAttachedNode() {
     SceneGraphNode* n = sceneGraphNode(_sceneGraphNode);
     if (!n || !n->renderable()) {
-        LERRORC(
-            "GlobeRotation",
-            "Could not set attached node as it does not have a Renderable"
-        );
+        LERROR("Could not set attached node as it does not have a renderable");
         return;
     }
     _attachedNode = n;
@@ -208,7 +207,7 @@ glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitud
 
 void GlobeRotation::update(const UpdateData& data) {
     if (!_attachedNode) [[unlikely]] {
-        findNode();
+        fillAttachedNode();
         _matrixIsDirty = true;
     }
 
@@ -226,10 +225,7 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
     }
 
     if (!_attachedNode) {
-        LERRORC(
-            "GlobeRotation",
-            std::format("Could not find globe '{}'", _sceneGraphNode.value())
-        );
+        LERROR(std::format("Could not find attached node '{}'", _sceneGraphNode.value()));
         return _matrix;
     }
 
