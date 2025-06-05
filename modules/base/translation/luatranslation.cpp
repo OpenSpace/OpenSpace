@@ -78,10 +78,7 @@ LuaTranslation::LuaTranslation(const ghoul::Dictionary& dictionary)
     _luaScriptFile.onChange([this]() {
         requireUpdate();
         _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile.value());
-        _fileHandle->setCallback([this]() {
-            requireUpdate();
-            notifyObservers();
-        });
+        _fileHandle->setCallback([this]() { requireUpdate(); });
     });
     addProperty(_luaScriptFile);
     global::scriptEngine->initializeLuaState(_state);

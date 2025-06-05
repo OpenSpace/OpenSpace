@@ -64,7 +64,7 @@ public:
     explicit Rotation(const ghoul::Dictionary& dictionary);
     virtual ~Rotation() override = default;
 
-    virtual bool initialize();
+    virtual void initialize();
 
     virtual void update(const UpdateData& data);
     const glm::dmat3& matrix() const;

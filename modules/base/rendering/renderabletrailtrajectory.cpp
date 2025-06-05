@@ -304,6 +304,11 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
         // Calculate all vertex positions
         for (unsigned int i = startIndex; i < stopIndex; i++) {
+            _translation->update({
+                {},
+                Time(_start + i * _totalSampleInterval),
+                Time(0.0)
+            });
             const glm::dvec3 dp = _translation->position({
                 {},
                 Time(_start + i * _totalSampleInterval),
@@ -324,11 +329,12 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         // Adds the last point in time to the _vertexArray so that we
         // ensure that points for _start and _end always exists
         if (stopIndex == _numberOfVertices) {
+            _translation->update({ {}, Time(_end), Time(0.0) });
             const glm::dvec3 dp = _translation->position({
                 {},
                 Time(_end),
                 Time(0.0)
-                });
+            });
             const glm::vec3 p(dp.x, dp.y, dp.z);
             _vertexArray[stopIndex] = { p.x, p.y, p.z };
             _timeVector[stopIndex] = Time(_end).j2000Seconds();

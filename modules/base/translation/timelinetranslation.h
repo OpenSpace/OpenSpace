@@ -41,6 +41,8 @@ class TimelineTranslation : public Translation {
 public:
     explicit TimelineTranslation(const ghoul::Dictionary& dictionary);
 
+    void initialize() override;
+
     void update(const UpdateData& data) override;
     glm::dvec3 position(const UpdateData& data) const override;
     static documentation::Documentation Documentation();

@@ -185,11 +185,9 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
 
     // 2
     // Write the current location into the floating position
-    const glm::vec3 p = _translation->position({
-        {},
-        data.time,
-        Time(0.0)
-    });
+    _translation->update({ {}, data.time, Time(0.0) });
+
+    const glm::vec3 p = _translation->position({ {}, data.time, Time(0.0) });
     _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
 
     glBindVertexArray(_primaryRenderInformation._vaoID);
@@ -365,6 +363,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
 
             // Get the new permanent point and write it into the (previously) floating
             // location
+            _translation->update({ {}, Time(_lastPointTime), Time(0.0) });
             const glm::vec3 p = _translation->position({
                 {},
                 Time(_lastPointTime),
@@ -405,6 +404,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
 
             // Get the new permanent point and write it into the (previously) floating
             // location
+            _translation->update({ {}, Time(_firstPointTime), Time(0.0) });
             const glm::vec3 p = _translation->position({
                 {},
                 Time(_firstPointTime),
@@ -452,6 +452,7 @@ void RenderableTrailOrbit::fullSweep(double time) {
     const double secondsPerPoint = periodSeconds / (_resolution - 1);
     // starting at 1 because the first position is a floating current one
     for (int i = 1; i < _resolution; i++) {
+        _translation->update({ {}, Time(time), Time(0.0) });
         const glm::vec3 p = _translation->position({ {}, Time(time), Time(0.0) });
         _vertexArray[i] = { p.x, p.y, p.z };
 

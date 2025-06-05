@@ -81,9 +81,7 @@ Translation::Translation(const ghoul::Dictionary& dictionary)
     }
 }
 
-bool Translation::initialize() {
-    return true;
-}
+void Translation::initialize() {}
 
 void Translation::update(const UpdateData& data) {
     ZoneScoped;
@@ -105,24 +103,19 @@ void Translation::update(const UpdateData& data) {
         _cachedTime = data.time.j2000Seconds();
         _needsUpdate = false;
     }
-
-    if (oldPosition != _cachedPosition) {
-        notifyObservers();
-    }
 }
 
 glm::dvec3 Translation::position() const {
     return _cachedPosition;
 }
 
-void Translation::notifyObservers() const {
+void Translation::requireUpdate() {
+    _needsUpdate = true;
+
+    // Notify any potential observers
     if (_onParameterChangeCallback) {
         _onParameterChangeCallback();
     }
-}
-
-void Translation::requireUpdate() {
-    _needsUpdate = true;
 }
 
 void Translation::onParameterChange(std::function<void()> callback) {

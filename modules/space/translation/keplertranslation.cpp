@@ -260,12 +260,15 @@ double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
     }
 }
 
-glm::dvec3 KeplerTranslation::position(const UpdateData& data) const {
+void KeplerTranslation::update(const UpdateData&) {
     if (_orbitPlaneDirty) {
         computeOrbitPlane();
+        requireUpdate();
         _orbitPlaneDirty = false;
     }
+}
 
+glm::dvec3 KeplerTranslation::position(const UpdateData& data) const {
     const double t = data.time.j2000Seconds() - _epoch;
     const double meanMotion = glm::two_pi<double>() / _period;
     const double meanAnomaly = glm::radians(_meanAnomalyAtEpoch.value()) + t * meanMotion;
@@ -304,7 +307,6 @@ void KeplerTranslation::computeOrbitPlane() const {
                           glm::rotate(inc, inclinationAxisRot) *
                           glm::rotate(per, argPeriapsisAxisRot);
 
-    notifyObservers();
     _orbitPlaneDirty = false;
 }
 
@@ -375,6 +377,7 @@ void KeplerTranslation::setKeplerElements(double eccentricity, double semiMajorA
     _epoch = epoch;
 
     computeOrbitPlane();
+    requireUpdate();
 }
 
 } // namespace openspace

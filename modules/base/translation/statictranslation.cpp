@@ -58,10 +58,7 @@ StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _position = p.position;
-    _position.onChange([this]() {
-        requireUpdate();
-        notifyObservers();
-    });
+    _position.onChange([this]() { requireUpdate(); });
     // @TODO (2021-06-24, emmbr) The exponential sliders do not handle ranges with
     // negative values very well. When they do, this line can be uncommented
     //_position.setExponent(20.f);

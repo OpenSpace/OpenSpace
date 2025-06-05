@@ -74,9 +74,8 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
 
     _horizonsFiles.onChange([this]() {
         requireUpdate();
-        notifyObservers();
         loadData();
-        });
+    });
     addProperty(_horizonsFiles);
 
     if (std::holds_alternative<std::filesystem::path>(p.horizonsTextFile)) {

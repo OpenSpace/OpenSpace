@@ -63,6 +63,8 @@ public:
     /// Default destructor
     ~KeplerTranslation() override = default;
 
+    void update(const UpdateData& date) override;
+
     /**
     * Method returning the translation vector at a given time.
     *

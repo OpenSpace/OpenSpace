@@ -134,21 +134,18 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     _target.onChange([this]() {
         _cachedTarget = _target;
         requireUpdate();
-        notifyObservers();
     });
     addProperty(_target);
 
     _observer.onChange([this]() {
         _cachedObserver = _observer;
         requireUpdate();
-        notifyObservers();
     });
     addProperty(_observer);
 
     _frame.onChange([this]() {
         _cachedFrame = _frame;
         requireUpdate();
-        notifyObservers();
     });
     addProperty(_frame);
 
