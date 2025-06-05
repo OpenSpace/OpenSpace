@@ -266,7 +266,7 @@ struct EventMissionAdded : public Event {
 
     /**
      * Creates an instance of an EventMissionAdded event.
-     * 
+     *
      * \param identifier The identifier of the mission added
      */
     EventMissionAdded(std::string_view identifier);
@@ -310,7 +310,7 @@ struct EventPlanetEclipsed : public Event {
 
     /**
      * Creates an instance of an EventPlanetEclipsed event.
-     
+
      * \param eclipsee_ The scene graph node that is eclipsed by another object
      * \param eclipser_ The scene graph node that is eclipsing the other object
      *

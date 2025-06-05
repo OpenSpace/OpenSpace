@@ -167,7 +167,9 @@ void RenderableDistanceLabel::update(const UpdateData&) {
         // Get distance as string
         const double convertedDistance = convertMeters(nodeline->distance(), unit);
 
-        std::string distanceText = std::format("{:.{}f}", convertedDistance, _precision.value());
+        std::string distanceText = std::format(
+            "{:.{}f}", convertedDistance, _precision.value()
+        );
 
         // Create final label text and set it
         const std::string finalText = std::format("{} {}", distanceText, unitDescriptor);

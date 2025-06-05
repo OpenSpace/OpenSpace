@@ -1480,7 +1480,10 @@ int main(int argc, char* argv[]) {
             config = launcher.selectedWindowConfig();
             if (config.find(labelFromCfgFile) != std::string::npos) {
                 if (config.find("sgct.config") == std::string::npos) {
-                    config = config.substr(0, config.length() - labelFromCfgFile.length());
+                    config = config.substr(
+                        0,
+                        config.length() - labelFromCfgFile.length()
+                    );
                 }
                 else {
                     config = windowConfiguration;

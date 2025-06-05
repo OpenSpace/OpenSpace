@@ -63,7 +63,7 @@ namespace {
             ghoul_assert(std::holds_alternative<int>(object), "Additional variant type");
             id = std::get<int>(object);
         }
-    
+
 
         // Set up variables
         constexpr unsigned int MaxObj = 1024;
@@ -351,7 +351,7 @@ namespace {
     // kernel must be provided as the latter is required to be able to interpret the time
     // codes of the former. For this reason it is not possible to provide only a single
     // kernel to the CK struct in this class.
-    // 
+    //
     // The resulting validity of the time frame is based on the following conditions:
     //
     //   1. If either SPK or CK (but not both) are specified, the time frame depends on

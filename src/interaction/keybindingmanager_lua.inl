@@ -83,7 +83,7 @@ namespace {
         }
 
         // Actions might be bound to different actions
-        std::unique(res.begin(), res.end());
+        res.erase(std::unique(res.begin(), res.end()), res.end());
     }
     return res;
 }

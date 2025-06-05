@@ -203,4 +203,4 @@ double calculateElevationAngleFromAToB(const Camera* camera,
 
 } // namespace openspace
 
-#endif __OPENSPACE_MODULE_TELEMETRY___UTIL___H__
+#endif // __OPENSPACE_MODULE_TELEMETRY___UTIL___H__

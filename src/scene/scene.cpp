@@ -158,14 +158,26 @@ namespace {
             case openspace::PropertyValueType::Float:
             {
                 std::vector<float> vals;
-                processPropertyValueTableEntries(L, value, vals, isTableValue, propertyName);
+                processPropertyValueTableEntries(
+                    L,
+                    value,
+                    vals,
+                    isTableValue,
+                    propertyName
+                );
                 ghoul::lua::push(L, vals);
             }
             break;
             case openspace::PropertyValueType::String:
             {
                 std::vector<std::string> vals;
-                processPropertyValueTableEntries(L, value, vals, isTableValue, propertyName);
+                processPropertyValueTableEntries(
+                    L,
+                    value,
+                    vals,
+                    isTableValue,
+                    propertyName
+                );
                 ghoul::lua::push(L, vals);
             }
             break;

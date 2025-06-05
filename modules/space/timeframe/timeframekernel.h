@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___TIMEFRAMEKERNEL___H__
-#define __OPENSPACE_MODULE_BASE___TIMEFRAMEKERNEL___H__
+#ifndef __OPENSPACE_MODULE_SPACE___TIMEFRAMEKERNEL___H__
+#define __OPENSPACE_MODULE_SPACE___TIMEFRAMEKERNEL___H__
 
 #include <openspace/scene/timeframe.h>
 
@@ -49,4 +49,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___TIMEFRAMEKERNEL___H__
+#endif // __OPENSPACE_MODULE_SPACE___TIMEFRAMEKERNEL___H__
