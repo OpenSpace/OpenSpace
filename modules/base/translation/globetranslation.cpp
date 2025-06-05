@@ -202,6 +202,11 @@ void GlobeTranslation::setUpdateVariables() {
     requireUpdate();
 }
 
+void GlobeTranslation::initialize() {
+    Translation::initialize();
+    fillAttachedNode();
+}
+
 void GlobeTranslation::update(const UpdateData& data) {
     if (!_attachedNode) [[unlikely]] {
         fillAttachedNode();
