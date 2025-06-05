@@ -486,7 +486,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             _primaryRenderInformation.count,
             _primaryRenderInformation.first,
             _useSplitRenderMode,
-            _numberOfUniqueVertices
+            _nUniqueVertices
         );
 
         const int floatingOffset = std::max(0, _primaryRenderInformation.count - 1);
@@ -499,7 +499,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             _floatingRenderInformation.count,
             _floatingRenderInformation.first,
             _useSplitRenderMode,
-            _numberOfUniqueVertices,
+            _nUniqueVertices,
             floatingOffset
         );
 
@@ -513,7 +513,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             _secondaryRenderInformation.count,
             _secondaryRenderInformation.first,
             _useSplitRenderMode,
-            _numberOfUniqueVertices,
+            _nUniqueVertices,
             offset
         );
 
