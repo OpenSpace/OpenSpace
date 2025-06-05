@@ -90,9 +90,7 @@ void Rotation::requireUpdate() {
     _needsUpdate = true;
 }
 
-bool Rotation::initialize() {
-    return true;
-}
+void Rotation::initialize() {}
 
 const glm::dmat3& Rotation::matrix() const {
     return _cachedMatrix;
