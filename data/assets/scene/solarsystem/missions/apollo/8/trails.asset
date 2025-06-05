@@ -1,5 +1,5 @@
 local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -31,7 +31,7 @@ local LaunchTrail = {
 
 local MoonTrail = {
   Identifier = "Apollo8MoonTrail",
-  Parent = moon_transforms.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = false,

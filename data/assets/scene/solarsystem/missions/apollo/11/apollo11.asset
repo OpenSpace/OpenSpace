@@ -1,7 +1,7 @@
 asset.require("../actions")
 asset.require("./actions")
 local sun = asset.require("scene/solarsystem/sun/transforms")
-local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 local descentKeyframes = asset.require("./lem_descent")
 local descentRotationKeyframes = asset.require("./lem_descent_rotation")
 local kernels = asset.require("./kernels")
@@ -28,7 +28,7 @@ local lemModel = asset.resource({
 
 local Apollo11Position = {
   Identifier = "Apollo11Position",
-  Parent = moonTransforms.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "1969 JUL 19 19:38:29.183",
@@ -83,7 +83,7 @@ local Apollo11Model = {
 
 local Apollo11MoonTrail = {
   Identifier = "Apollo11MoonTrail",
-  Parent = moonTransforms.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = false,
@@ -132,7 +132,7 @@ local lemRotation = {
 
 local Apollo11LemTrail = {
   Identifier = "Apollo11LemTrail",
-  Parent = moonTransforms.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = false,
@@ -152,7 +152,7 @@ local Apollo11LemTrail = {
 
 local Apollo11LemPosition = {
   Identifier = "Apollo11LemPosition",
-  Parent = moonTransforms.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "1969 JUL 20 19:10:25.183"

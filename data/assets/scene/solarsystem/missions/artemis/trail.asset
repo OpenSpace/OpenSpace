@@ -1,5 +1,5 @@
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -32,7 +32,7 @@ local ArtemisEarthTrail = {
 
 local ArtemisMoonTrail = {
   Identifier = "ArtemisMoonTrail",
-  Parent = moonTransforms.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {

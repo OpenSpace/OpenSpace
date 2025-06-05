@@ -1,3 +1,4 @@
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 -- The following keyframe data was converted from the_last_four_minutes_2019-06-09.kml,
 -- which is available at http://apollo.mem-tek.com/GoogleMoonKMZ.html
 
@@ -15,7 +16,7 @@ In the conversion, some assumptions and simplifications were made:
 local keyframes = {
   ["1969-07-20T20:13:40"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.64480784327766,
     Latitude = 0.6899960896998255,
     Altitude = -1546.3568594681615,
@@ -23,7 +24,7 @@ local keyframes = {
   },
   ["1969-07-20T20:13:41"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.64371058653857,
     Latitude = 0.6878218095380976,
     Altitude = -1565.4215164947534,
@@ -31,7 +32,7 @@ local keyframes = {
   },
   ["1969-07-20T20:13:42"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.64182673932963,
     Latitude = 0.6868724573827948,
     Altitude = -1565.4215164947534,
@@ -39,7 +40,7 @@ local keyframes = {
   },
   ["1969-07-20T20:13:43"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.64054706630478,
     Latitude = 0.6858670898943581,
     Altitude = -1579.0391286566048,
@@ -47,7 +48,7 @@ local keyframes = {
   },
   ["1969-07-20T20:13:44"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.63636509003987,
     Latitude = 0.6869318608730292,
     Altitude = -1579.0391286566048,
@@ -55,7 +56,7 @@ local keyframes = {
   },
   ["1969-07-20T20:13:45"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.63333610553231,
     Latitude = 0.6875049989808152,
     Altitude = -1584.4861735213453,
@@ -63,7 +64,7 @@ local keyframes = {
   },
   ["1969-07-20T20:13:46"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.630258198415152,
     Latitude = 0.6879251024075629,
     Altitude = -1587.2096959537155,
@@ -71,7 +72,7 @@ local keyframes = {
   },
   ["1969-07-20T20:13:47"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.62944534804935,
     Latitude = 0.6868614912680597,
     Altitude = -1592.656740818456,
@@ -79,7 +80,7 @@ local keyframes = {
   },
   ["1969-07-20T20:13:48"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.62679291745059,
     Latitude = 0.6859161360075229,
     Altitude = -1604.9125917641222,
@@ -87,7 +88,7 @@ local keyframes = {
   },
   ["1969-07-20T20:13:49"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.624085315638872,
     Latitude = 0.685126212476227,
     Altitude = -1619.8919651421588,
@@ -95,7 +96,7 @@ local keyframes = {
   },
   ["1969-07-20T20:13:50"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.62142772795633,
     Latitude = 0.6848656185526153,
     Altitude = -1630.7860548716399,
@@ -103,7 +104,7 @@ local keyframes = {
   },
   ["1969-07-20T20:13:51"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.617193313827283,
     Latitude = 0.6849603490017026,
     Altitude = -1630.7860548716399,
@@ -111,7 +112,7 @@ local keyframes = {
   },
   ["1969-07-20T20:13:52"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.61543137875974,
     Latitude = 0.68523470439912,
     Altitude = -1629.4242936554547,
@@ -119,7 +120,7 @@ local keyframes = {
   },
   ["1969-07-20T20:13:53"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.61158202958536,
     Latitude = 0.6853852597026965,
     Altitude = -1633.5095773040102,
@@ -127,7 +128,7 @@ local keyframes = {
   },
   ["1969-07-20T20:13:54"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.60991413189263,
     Latitude = 0.6852537398149626,
     Altitude = -1643.041905817306,
@@ -135,7 +136,7 @@ local keyframes = {
   },
   ["1969-07-20T20:13:55"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.607915527643012,
     Latitude = 0.6853963551830907,
     Altitude = -1662.106562843898,
@@ -143,7 +144,7 @@ local keyframes = {
   },
   ["1969-07-20T20:13:56"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.605996916437142,
     Latitude = 0.6830167672762936,
     Altitude = -1663.4683240600832,
@@ -151,7 +152,7 @@ local keyframes = {
   },
   ["1969-07-20T20:13:57"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.6027345854584,
     Latitude = 0.6824580715414034,
     Altitude = -1671.09418687072,
@@ -159,7 +160,7 @@ local keyframes = {
   },
   ["1969-07-20T20:13:58"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.60047452065999,
     Latitude = 0.6837230890353062,
     Altitude = -1671.638891357194,
@@ -167,7 +168,7 @@ local keyframes = {
   },
   ["1969-07-20T20:13:59"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.598006245556462,
     Latitude = 0.6851039272779041,
     Altitude = -1670.277130141009,
@@ -175,7 +176,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:00"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.594980604909782,
     Latitude = 0.6859011120513393,
     Altitude = -1683.8947423028603,
@@ -183,7 +184,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:01"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.595085912567033,
     Latitude = 0.685405665002322,
     Altitude = -1698.874115680897,
@@ -191,7 +192,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:02"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.5930664955042,
     Latitude = 0.6852493785380211,
     Altitude = -1701.597638113267,
@@ -199,7 +200,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:03"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.591385100243283,
     Latitude = 0.6848676328581234,
     Altitude = -1709.768205410378,
@@ -207,7 +208,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:04"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.58888799865371,
     Latitude = 0.6847945134519827,
     Altitude = -1717.9387727074889,
@@ -215,7 +216,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:05"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.58707895840121,
     Latitude = 0.6847997274847563,
     Altitude = -1720.662295139859,
@@ -223,7 +224,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:06"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.585134523523262,
     Latitude = 0.6844679679748537,
     Altitude = -1726.1093400045995,
@@ -231,7 +232,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:07"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.58309233633901,
     Latitude = 0.6845115405154798,
     Altitude = -1730.194623653155,
@@ -239,7 +240,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:08"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.581800658763132,
     Latitude = 0.6837790677972603,
     Altitude = -1737.0034297340808,
@@ -247,7 +248,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:09"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.580055660445762,
     Latitude = 0.6831436064664251,
     Altitude = -1741.0887133826361,
@@ -255,7 +256,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:10"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.57863282556605,
     Latitude = 0.6828140286921376,
     Altitude = -1749.259280679747,
@@ -263,7 +264,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:11"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.57640031861404,
     Latitude = 0.6825176811105468,
     Altitude = -1751.9828031121174,
@@ -271,7 +272,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:12"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.57398679174075,
     Latitude = 0.6826876185178852,
     Altitude = -1750.6210418959322,
@@ -279,7 +280,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:13"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.57156483164977,
     Latitude = 0.6825035088375115,
     Altitude = -1758.7916091930429,
@@ -287,7 +288,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:14"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.568805614344672,
     Latitude = 0.6825830127392937,
     Altitude = -1764.2386540577836,
@@ -295,7 +296,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:15"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.56712274763365,
     Latitude = 0.6821390846562359,
     Altitude = -1764.2386540577836,
@@ -303,7 +304,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:16"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.56530723506546,
     Latitude = 0.6815597518028071,
     Altitude = -1772.4092213548943,
@@ -311,7 +312,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:17"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.56412162578659,
     Latitude = 0.6811736246098009,
     Altitude = -1773.7709825710795,
@@ -319,7 +320,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:18"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.56276962682385,
     Latitude = 0.6808738576281527,
     Altitude = -1779.2180274358202,
@@ -327,7 +328,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:19"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.560994966586822,
     Latitude = 0.6806433210749815,
     Altitude = -1781.9415498681901,
@@ -335,7 +336,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:20"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.55943927760013,
     Latitude = 0.680762500394614,
     Altitude = -1788.7503559491158,
@@ -343,7 +344,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:21"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.55808185917876,
     Latitude = 0.6806932677701746,
     Altitude = -1788.205651462642,
@@ -351,7 +352,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:22"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.556393791415733,
     Latitude = 0.6811207130416086,
     Altitude = -1791.4738783814862,
@@ -359,7 +360,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:23"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.55496480157647,
     Latitude = 0.6814204204715102,
     Altitude = -1792.8356395976714,
@@ -367,7 +368,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:24"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.55306742293409,
     Latitude = 0.6817752241315425,
     Altitude = -1795.5591620300418,
@@ -375,7 +376,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:25"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.55137129589691,
     Latitude = 0.6815869620825672,
     Altitude = -1802.3679681109675,
@@ -383,7 +384,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:26"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.54977453252549,
     Latitude = 0.681089420496018,
     Altitude = -1805.0914905433376,
@@ -391,7 +392,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:27"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.548083879890072,
     Latitude = 0.6807962459602379,
     Altitude = -1807.8150129757078,
@@ -399,7 +400,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:28"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.546540200146502,
     Latitude = 0.6805000865197504,
     Altitude = -1810.5385354080781,
@@ -407,7 +408,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:29"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.54516644867878,
     Latitude = 0.6804026508636472,
     Altitude = -1815.9855802728187,
@@ -415,7 +416,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:30"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.54408346592703,
     Latitude = 0.6805503084088244,
     Altitude = -1817.3473414890038,
@@ -423,7 +424,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:31"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.54339758182375,
     Latitude = 0.6804859303352504,
     Altitude = -1818.709102705189,
@@ -431,7 +432,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:32"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.54194570925206,
     Latitude = 0.6803064377127922,
     Altitude = -1821.4326251375592,
@@ -439,7 +440,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:33"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.54085221251783,
     Latitude = 0.6801546546560774,
     Altitude = -1824.9732042996407,
@@ -447,7 +448,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:34"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.53954140597472,
     Latitude = 0.6797325898259152,
     Altitude = -1827.696726732011,
@@ -455,7 +456,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:35"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.537934104316932,
     Latitude = 0.679569186740729,
     Altitude = -1831.7820103805664,
@@ -463,7 +464,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:36"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.53689199133522,
     Latitude = 0.6794114031790662,
     Altitude = -1833.6884760832256,
@@ -471,7 +472,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:37"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.53536814560564,
     Latitude = 0.6791732992510942,
     Altitude = -1836.9567030020698,
@@ -479,7 +480,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:38"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.53395331216349,
     Latitude = 0.6792039275673737,
     Altitude = -1839.4078731912032,
@@ -487,7 +488,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:39"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.53275788877434,
     Latitude = 0.6790059399149831,
     Altitude = -1840.497282164151,
@@ -495,7 +496,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:40"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.531279977460432,
     Latitude = 0.6788794363528592,
     Altitude = -1844.5825658127067,
@@ -503,7 +504,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:41"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.52959475512685,
     Latitude = 0.6788906739797406,
     Altitude = -1845.9443270288918,
@@ -511,7 +512,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:42"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.52769228385669,
     Latitude = 0.6787279693068425,
     Altitude = -1848.123144974788,
@@ -519,7 +520,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:43"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.52685377337869,
     Latitude = 0.6787634478561919,
     Altitude = -1850.8466674071583,
@@ -527,7 +528,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:44"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.526284004538702,
     Latitude = 0.6785694853441325,
     Altitude = -1853.0254853530546,
@@ -535,7 +536,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:45"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.5258419320743,
     Latitude = 0.6784720829848033,
     Altitude = -1852.2084286233435,
@@ -543,7 +544,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:46"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.524906401275462,
     Latitude = 0.6784174518581257,
     Altitude = -1855.7490077854247,
@@ -551,7 +552,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:47"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.52349915098792,
     Latitude = 0.6782893729810321,
     Altitude = -1857.383121244847,
@@ -559,7 +560,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:48"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.522315823805602,
     Latitude = 0.6780556991046269,
     Altitude = -1859.5619391907433,
@@ -567,7 +568,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:49"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.52101739233993,
     Latitude = 0.6779647310824661,
     Altitude = -1862.2854616231134,
@@ -575,7 +576,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:50"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.51994166433182,
     Latitude = 0.6778711676787862,
     Altitude = -1864.7366318122467,
@@ -583,7 +584,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:51"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.51898851685442,
     Latitude = 0.6778817565177891,
     Altitude = -1866.643097514906,
@@ -591,7 +592,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:52"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.51808183367586,
     Latitude = 0.6778718533214779,
     Altitude = -1868.821915460802,
@@ -599,7 +600,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:53"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.517315195124922,
     Latitude = 0.6777409244088132,
     Altitude = -1869.6389721905132,
@@ -607,7 +608,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:54"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.516423288093712,
     Latitude = 0.6776383502937863,
     Altitude = -1872.0901423796465,
@@ -615,7 +616,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:55"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.515618488386473,
     Latitude = 0.6775904175972421,
     Altitude = -1873.7242558390685,
@@ -623,7 +624,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:56"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.514931748492103,
     Latitude = 0.677451729714544,
     Altitude = -1875.0860170552537,
@@ -631,7 +632,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:57"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.5141592094038,
     Latitude = 0.6774090469390076,
     Altitude = -1876.1754260282019,
@@ -639,7 +640,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:58"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.513268517407862,
     Latitude = 0.677380792748438,
     Altitude = -1878.3542439740982,
@@ -647,7 +648,7 @@ local keyframes = {
   },
   ["1969-07-20T20:14:59"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.51249864236425,
     Latitude = 0.6773301671802587,
     Altitude = -1878.8989484605722,
@@ -655,7 +656,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:00"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.511670817073732,
     Latitude = 0.6773498341149018,
     Altitude = -1879.9883574335202,
@@ -663,7 +664,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:01"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.510927468201952,
     Latitude = 0.6773124695718212,
     Altitude = -1881.0777664064683,
@@ -671,7 +672,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:02"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.510140364179833,
     Latitude = 0.6772452153026853,
     Altitude = -1882.9842321091276,
@@ -679,7 +680,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:03"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.50940612514804,
     Latitude = 0.6772084204274821,
     Altitude = -1884.3459933253127,
@@ -687,7 +688,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:04"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.508556629045042,
     Latitude = 0.6771417022964165,
     Altitude = -1885.1630500550239,
@@ -695,7 +696,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:05"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.5078270022667,
     Latitude = 0.6770996409435569,
     Altitude = -1885.707754541498,
@@ -703,7 +704,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:06"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.50712374883535,
     Latitude = 0.6770942256987497,
     Altitude = -1886.7971635144459,
@@ -711,7 +712,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:07"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.50638631083077,
     Latitude = 0.6770208020089364,
     Altitude = -1888.158924730631,
@@ -719,7 +720,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:08"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.50572166907488,
     Latitude = 0.6769421116864789,
     Altitude = -1888.431276973868,
@@ -727,7 +728,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:09"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.505080467779102,
     Latitude = 0.6769068207439769,
     Altitude = -1889.5206859468162,
@@ -735,7 +736,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:10"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.504394828536693,
     Latitude = 0.6768437996516232,
     Altitude = -1890.6100949197644,
@@ -743,7 +744,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:11"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.50370057106609,
     Latitude = 0.6767452474349132,
     Altitude = -1891.9718561359496,
@@ -751,7 +752,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:12"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.503056349392182,
     Latitude = 0.6766723806693259,
     Altitude = -1893.3336173521345,
@@ -759,7 +760,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:13"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.50246925266341,
     Latitude = 0.6766252349202276,
     Altitude = -1893.8783218386086,
@@ -767,7 +768,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:14"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.50184956306549,
     Latitude = 0.6765535257068991,
     Altitude = -1894.9677308115567,
@@ -775,7 +776,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:15"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.501422630419572,
     Latitude = 0.6765112802947014,
     Altitude = -1894.1506740818456,
@@ -783,7 +784,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:16"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.50104221348722,
     Latitude = 0.676487362071662,
     Altitude = -1893.8783218386086,
@@ -791,7 +792,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:17"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.50076948252455,
     Latitude = 0.6764658967447386,
     Altitude = -1892.2442083791866,
@@ -799,7 +800,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:18"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.50013364513089,
     Latitude = 0.6764482060496164,
     Altitude = -1893.3336173521345,
@@ -807,7 +808,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:19"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.499460285339502,
     Latitude = 0.6764309028737,
     Altitude = -1894.9677308115567,
@@ -815,7 +816,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:20"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.498899330647752,
     Latitude = 0.6763755753041285,
     Altitude = -1896.057139784505,
@@ -823,7 +824,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:21"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.49826864115494,
     Latitude = 0.6763489810183512,
     Altitude = -1896.601844270979,
@@ -831,7 +832,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:22"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.49765193973772,
     Latitude = 0.6763177659437667,
     Altitude = -1897.41890100069,
@@ -839,7 +840,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:23"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.49706547748806,
     Latitude = 0.6762368192356724,
     Altitude = -1898.2359577304012,
@@ -847,7 +848,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:24"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.496489420526313,
     Latitude = 0.676209886695223,
     Altitude = -1899.053014460112,
@@ -855,7 +856,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:25"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.495878153012562,
     Latitude = 0.6761763249034947,
     Altitude = -1900.1424234330602,
@@ -863,7 +864,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:26"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.4953425244022,
     Latitude = 0.6761311089575274,
     Altitude = -1901.5041846492454,
@@ -871,7 +872,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:27"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.494725217962213,
     Latitude = 0.6761017566851846,
     Altitude = -1902.5935936221936,
@@ -879,7 +880,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:28"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.494112443564592,
     Latitude = 0.6760842983575135,
     Altitude = -1903.4106503519047,
@@ -887,7 +888,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:29"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.493537644480202,
     Latitude = 0.6760386448926926,
     Altitude = -1903.9553548383788,
@@ -895,7 +896,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:30"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.49299719757025,
     Latitude = 0.6760147528943234,
     Altitude = -1903.9553548383788,
@@ -903,7 +904,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:31"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.492415313069813,
     Latitude = 0.6759919962423392,
     Altitude = -1904.2277070816158,
@@ -911,7 +912,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:32"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.491877755110142,
     Latitude = 0.6759640721591937,
     Altitude = -1904.2277070816158,
@@ -919,7 +920,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:33"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.49128819308786,
     Latitude = 0.6759491077295323,
     Altitude = -1904.2277070816158,
@@ -927,7 +928,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:34"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.49073158429634,
     Latitude = 0.6759379383686839,
     Altitude = -1904.2277070816158,
@@ -935,7 +936,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:35"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.490174891596332,
     Latitude = 0.6759054634588104,
     Altitude = -1904.2277070816158,
@@ -943,7 +944,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:36"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.489635065407523,
     Latitude = 0.6758939648884956,
     Altitude = -1904.5000593248528,
@@ -951,7 +952,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:37"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.4891060535486,
     Latitude = 0.6759004097281942,
     Altitude = -1904.2277070816158,
@@ -959,7 +960,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:38"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.48855436619652,
     Latitude = 0.6758862600165565,
     Altitude = -1904.2277070816158,
@@ -967,7 +968,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:39"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.488052711552413,
     Latitude = 0.6758544116957282,
     Altitude = -1904.5000593248528,
@@ -975,7 +976,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:40"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.48754943516269,
     Latitude = 0.6758316193430558,
     Altitude = -1904.2277070816158,
@@ -983,7 +984,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:41"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.487094304824993,
     Latitude = 0.6758175052522961,
     Altitude = -1904.2277070816158,
@@ -991,7 +992,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:42"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.486618165034592,
     Latitude = 0.6757757367756437,
     Altitude = -1904.7724115680899,
@@ -999,7 +1000,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:43"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.48604740534131,
     Latitude = 0.675733428263931,
     Altitude = -1905.3171160545637,
@@ -1007,7 +1008,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:44"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.48548248435554,
     Latitude = 0.6756797157749009,
     Altitude = -1905.8618205410378,
@@ -1015,7 +1016,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:45"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.48494957486896,
     Latitude = 0.6756120527881188,
     Altitude = -1905.8618205410378,
@@ -1023,7 +1024,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:46"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.484598386683622,
     Latitude = 0.675584857481579,
     Altitude = -1907.49593400046,
@@ -1031,7 +1032,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:47"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.4841269963268,
     Latitude = 0.6755482784409179,
     Altitude = -1908.040638486934,
@@ -1039,7 +1040,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:48"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.48373390336955,
     Latitude = 0.6754890811171497,
     Altitude = -1908.8576952166452,
@@ -1047,7 +1048,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:49"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.48325134882829,
     Latitude = 0.6754258626149947,
     Altitude = -1908.4491668517896,
@@ -1055,7 +1056,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:50"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.48284574619883,
     Latitude = 0.6753753196460469,
     Altitude = -1909.1300474598822,
@@ -1063,7 +1064,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:51"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.48245362823393,
     Latitude = 0.6753264776464533,
     Altitude = -1909.4023997031193,
@@ -1071,7 +1072,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:52"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.482060114185842,
     Latitude = 0.6752749804130574,
     Altitude = -1909.6747519463563,
@@ -1079,7 +1080,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:53"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.481698202127482,
     Latitude = 0.675223605520775,
     Altitude = -1909.6747519463563,
@@ -1087,7 +1088,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:54"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.48129046365451,
     Latitude = 0.6751730022703166,
     Altitude = -1909.6747519463563,
@@ -1095,7 +1096,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:55"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.480893026154902,
     Latitude = 0.6751376710849429,
     Altitude = -1909.6747519463563,
@@ -1103,7 +1104,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:56"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.48059324160945,
     Latitude = 0.6750772226256051,
     Altitude = -1909.6747519463563,
@@ -1111,7 +1112,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:57"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.48034984354739,
     Latitude = 0.6750430267458865,
     Altitude = -1909.6747519463563,
@@ -1119,7 +1120,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:58"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.48005268645993,
     Latitude = 0.6750019848756621,
     Altitude = -1909.6747519463563,
@@ -1127,7 +1128,7 @@ local keyframes = {
   },
   ["1969-07-20T20:15:59"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47978070153665,
     Latitude = 0.6749655364121049,
     Altitude = -1909.9471041895933,
@@ -1135,7 +1136,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:00"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47951311851127,
     Latitude = 0.6749420304945992,
     Altitude = -1909.9471041895933,
@@ -1143,7 +1144,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:01"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47927978098579,
     Latitude = 0.6748989409040068,
     Altitude = -1909.9471041895933,
@@ -1151,7 +1152,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:02"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47904250519933,
     Latitude = 0.6748472712728636,
     Altitude = -1910.4918086760674,
@@ -1159,7 +1160,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:03"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47879202998348,
     Latitude = 0.674809514541568,
     Altitude = -1910.7641609193045,
@@ -1167,7 +1168,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:04"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.478567222437622,
     Latitude = 0.6747692774477394,
     Altitude = -1910.7641609193045,
@@ -1175,7 +1176,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:05"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47836548542964,
     Latitude = 0.6747160116119115,
     Altitude = -1910.7641609193045,
@@ -1183,7 +1184,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:06"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47818769774975,
     Latitude = 0.6746866473279819,
     Altitude = -1911.3088654057785,
@@ -1191,7 +1192,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:07"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.477896613823983,
     Latitude = 0.6746547793250971,
     Altitude = -1913.2153311084376,
@@ -1199,7 +1200,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:08"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47781195503974,
     Latitude = 0.6746276583132307,
     Altitude = -1913.2153311084376,
@@ -1207,7 +1208,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:09"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.477664452707373,
     Latitude = 0.6746112868414526,
     Altitude = -1914.0323878381487,
@@ -1215,7 +1216,7 @@ local keyframes = {
   },
   -- ["1969-07-20T20:16:10"] = {
   --   Type = "GlobeTranslation",
-  --   Globe = "Moon",
+  --   Globe = moon.Moon.Identifier,
   --   Longitude = 23.477750217762413,
   --   Latitude = 0.6745910947360472,
   --   Altitude = -1912.6706266219635,
@@ -1223,7 +1224,7 @@ local keyframes = {
   -- },
   -- ["1969-07-20T20:16:11"] = {
   --   Type = "GlobeTranslation",
-  --   Globe = "Moon",
+  --   Globe = moon.Moon.Identifier,
   --   Longitude = 23.477590925415402,
   --   Latitude = 0.6745598993839581,
   --   Altitude = -1912.6706266219635,
@@ -1231,7 +1232,7 @@ local keyframes = {
   -- },
   -- ["1969-07-20T20:16:12"] = {
   --   Type = "GlobeTranslation",
-  --   Globe = "Moon",
+  --   Globe = moon.Moon.Identifier,
   --   Longitude = 23.47745952757753,
   --   Latitude = 0.6745298610932787,
   --   Altitude = -1912.6706266219635,
@@ -1239,7 +1240,7 @@ local keyframes = {
   -- },
   -- ["1969-07-20T20:16:13"] = {
   --   Type = "GlobeTranslation",
-  --   Globe = "Moon",
+  --   Globe = moon.Moon.Identifier,
   --   Longitude = 23.477271343369093,
   --   Latitude = 0.6745166392893209,
   --   Altitude = -1913.2153311084376,
@@ -1247,7 +1248,7 @@ local keyframes = {
   -- },
   -- ["1969-07-20T20:16:14"] = {
   --   Type = "GlobeTranslation",
-  --   Globe = "Moon",
+  --   Globe = moon.Moon.Identifier,
   --   Longitude = 23.477100932665042,
   --   Latitude = 0.6744937499451563,
   --   Altitude = -1914.3047400813857,
@@ -1255,7 +1256,7 @@ local keyframes = {
   -- },
   ["1969-07-20T20:16:15"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47697690593997,
     Latitude = 0.6744644602883288,
     Altitude = -1914.8494445678598,
@@ -1263,7 +1264,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:16"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.476842953277412,
     Latitude = 0.6744457159538018,
     Altitude = -1915.1217968110968,
@@ -1271,7 +1272,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:17"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.476774052091812,
     Latitude = 0.6744243634139203,
     Altitude = -1914.8494445678598,
@@ -1279,7 +1280,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:18"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47665204889191,
     Latitude = 0.6743981221140924,
     Altitude = -1915.1217968110968,
@@ -1287,7 +1288,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:19"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47657652039885,
     Latitude = 0.6743808573601865,
     Altitude = -1915.1217968110968,
@@ -1295,7 +1296,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:20"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.476475036022492,
     Latitude = 0.6743552389834175,
     Altitude = -1914.8494445678598,
@@ -1303,7 +1304,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:21"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47638671770867,
     Latitude = 0.6743412077411113,
     Altitude = -1915.3941490543339,
@@ -1311,7 +1312,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:22"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.476286834646782,
     Latitude = 0.6743241644041175,
     Altitude = -1915.3941490543339,
@@ -1319,7 +1320,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:23"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47623840477727,
     Latitude = 0.6743121023448013,
     Altitude = -1915.3941490543339,
@@ -1327,7 +1328,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:24"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.476125794037742,
     Latitude = 0.6743019779643423,
     Altitude = -1915.938853540808,
@@ -1335,7 +1336,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:25"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47604582826371,
     Latitude = 0.6742984062330349,
     Altitude = -1916.211205784045,
@@ -1343,7 +1344,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:26"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47599605084473,
     Latitude = 0.6742864748966985,
     Altitude = -1916.211205784045,
@@ -1351,7 +1352,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:27"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47598166921822,
     Latitude = 0.6742856341308172,
     Altitude = -1916.755910270519,
@@ -1359,7 +1360,7 @@ local keyframes = {
   },
   -- ["1969-07-20T20:16:28"] = {
   --   Type = "GlobeTranslation",
-  --   Globe = "Moon",
+  --   Globe = moon.Moon.Identifier,
   --   Longitude = 23.47600003592791,
   --   Latitude = 0.6742816108377042,
   --   Altitude = -1916.211205784045,
@@ -1367,7 +1368,7 @@ local keyframes = {
   -- },
   -- ["1969-07-20T20:16:29"] = {
   --   Type = "GlobeTranslation",
-  --   Globe = "Moon",
+  --   Globe = moon.Moon.Identifier,
   --   Longitude = 23.47593990066764,
   --   Latitude = 0.6742699316275284,
   --   Altitude = -1916.483558027282,
@@ -1375,7 +1376,7 @@ local keyframes = {
   -- },
   ["1969-07-20T20:16:30"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47587957412098,
     Latitude = 0.6742661771136219,
     Altitude = -1916.755910270519,
@@ -1383,7 +1384,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:31"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47579282136856,
     Latitude = 0.6742214263433656,
     Altitude = -1917.028262513756,
@@ -1391,7 +1392,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:32"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47571834266516,
     Latitude = 0.6741885448706321,
     Altitude = -1917.5729670002302,
@@ -1399,7 +1400,7 @@ local keyframes = {
   },
   -- ["1969-07-20T20:16:33"] = {
   --   Type = "GlobeTranslation",
-  --   Globe = "Moon",
+  --   Globe = moon.Moon.Identifier,
   --   Longitude = 23.47569457676149,
   --   Latitude = 0.6741859152655852,
   --   Altitude = -1917.3006147569931,
@@ -1407,7 +1408,7 @@ local keyframes = {
   -- },
   ["1969-07-20T20:16:34"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47557041293751,
     Latitude = 0.6741798073326593,
     Altitude = -1918.117671486704,
@@ -1415,7 +1416,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:35"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.475475681892203,
     Latitude = 0.6741822414281841,
     Altitude = -1918.117671486704,
@@ -1423,7 +1424,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:36"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47541533097675,
     Latitude = 0.6742009046793005,
     Altitude = -1918.390023729941,
@@ -1431,7 +1432,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:37"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47532207549478,
     Latitude = 0.6742269926054295,
     Altitude = -1918.662375973178,
@@ -1439,7 +1440,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:38"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47522251798864,
     Latitude = 0.6742695236577596,
     Altitude = -1918.662375973178,
@@ -1447,7 +1448,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:39"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47513564425997,
     Latitude = 0.6742809051574165,
     Altitude = -1918.662375973178,
@@ -1455,7 +1456,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:40"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47498810518855,
     Latitude = 0.6743095342428154,
     Altitude = -1920.2964894326003,
@@ -1463,7 +1464,7 @@ local keyframes = {
   },
   -- ["1969-07-20T20:16:41"] = {
   --   Type = "GlobeTranslation",
-  --   Globe = "Moon",
+  --   Globe = moon.Moon.Identifier,
   --   Longitude = 23.47489523759891,
   --   Latitude = 0.6743154022599566,
   --   Altitude = -1920.0241371893633,
@@ -1471,7 +1472,7 @@ local keyframes = {
   -- },
   -- ["1969-07-20T20:16:42"] = {
   --   Type = "GlobeTranslation",
-  --   Globe = "Moon",
+  --   Globe = moon.Moon.Identifier,
   --   Longitude = 23.47479438729774,
   --   Latitude = 0.6743324078003049,
   --   Altitude = -1920.2964894326003,
@@ -1479,7 +1480,7 @@ local keyframes = {
   -- },
   -- ["1969-07-20T20:16:43"] = {
   --   Type = "GlobeTranslation",
-  --   Globe = "Moon",
+  --   Globe = moon.Moon.Identifier,
   --   Longitude = 23.47475788126512,
   --   Latitude = 0.674345583979325,
   --   Altitude = -1920.0241371893633,
@@ -1487,7 +1488,7 @@ local keyframes = {
   -- },
   ["1969-07-20T20:16:44"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.474678823712882,
     Latitude = 0.6743691203511213,
     Altitude = -1920.2964894326003,
@@ -1495,7 +1496,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:45"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47460302474115,
     Latitude = 0.6743890347121807,
     Altitude = -1920.2964894326003,
@@ -1503,7 +1504,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:46"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47450130965027,
     Latitude = 0.6744202280781089,
     Altitude = -1920.8411939190744,
@@ -1511,7 +1512,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:47"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.474379586340042,
     Latitude = 0.6744490653475903,
     Altitude = -1921.1135461623114,
@@ -1519,7 +1520,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:48"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47431921657337,
     Latitude = 0.6745028925523043,
     Altitude = -1921.1135461623114,
@@ -1527,7 +1528,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:49"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47424698504895,
     Latitude = 0.6745115395661241,
     Altitude = -1921.1135461623114,
@@ -1535,7 +1536,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:50"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.474158028620153,
     Latitude = 0.6745268900936557,
     Altitude = -1921.6582506487855,
@@ -1543,7 +1544,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:51"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47408003386958,
     Latitude = 0.674531434078838,
     Altitude = -1921.6582506487855,
@@ -1551,7 +1552,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:52"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.473993195514502,
     Latitude = 0.6745434127092755,
     Altitude = -1921.9306028920225,
@@ -1559,7 +1560,7 @@ local keyframes = {
   },
   -- ["1969-07-20T20:16:53"] = {
   --   Type = "GlobeTranslation",
-  --   Globe = "Moon",
+  --   Globe = moon.Moon.Identifier,
   --   Longitude = 23.47392353665608,
   --   Latitude = 0.6745464032805983,
   --   Altitude = -1922.2029551352596,
@@ -1567,7 +1568,7 @@ local keyframes = {
   -- },
   ["1969-07-20T20:16:54"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47388537487237,
     Latitude = 0.674552865152663,
     Altitude = -1921.9306028920225,
@@ -1575,7 +1576,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:55"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47382957912373,
     Latitude = 0.6745443566727537,
     Altitude = -1921.9306028920225,
@@ -1583,7 +1584,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:56"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47378652829031,
     Latitude = 0.6745361955127924,
     Altitude = -1921.6582506487855,
@@ -1591,7 +1592,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:57"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.473741159081282,
     Latitude = 0.6745139398577651,
     Altitude = -1921.6582506487855,
@@ -1599,7 +1600,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:58"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.473674434325403,
     Latitude = 0.6745046665169872,
     Altitude = -1922.2029551352596,
@@ -1607,7 +1608,7 @@ local keyframes = {
   },
   ["1969-07-20T20:16:59"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47366202033169,
     Latitude = 0.6744553774680945,
     Altitude = -1922.2029551352596,
@@ -1615,7 +1616,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:00"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47360771579434,
     Latitude = 0.6744345598586292,
     Altitude = -1922.7476596217336,
@@ -1623,7 +1624,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:01"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47357090816817,
     Latitude = 0.6744054827778567,
     Altitude = -1923.0200118649707,
@@ -1631,7 +1632,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:02"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47354290217646,
     Latitude = 0.6743765403194303,
     Altitude = -1923.2923641082077,
@@ -1639,7 +1640,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:03"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47354640286736,
     Latitude = 0.6743332580785223,
     Altitude = -1923.5647163514448,
@@ -1647,7 +1648,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:04"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.473541367503802,
     Latitude = 0.6742974556070759,
     Altitude = -1923.8370685946818,
@@ -1655,7 +1656,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:05"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47350854369485,
     Latitude = 0.6742858449512636,
     Altitude = -1924.1094208379188,
@@ -1663,7 +1664,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:06"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47347424911663,
     Latitude = 0.6742611487873781,
     Altitude = -1924.6541253243927,
@@ -1671,7 +1672,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:07"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.473503629496022,
     Latitude = 0.6742462694505276,
     Altitude = -1924.6541253243927,
@@ -1679,7 +1680,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:08"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.473512768546712,
     Latitude = 0.6742384048959066,
     Altitude = -1924.6541253243927,
@@ -1687,7 +1688,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:09"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47353343175876,
     Latitude = 0.6742241072273591,
     Altitude = -1924.3817730811559,
@@ -1695,7 +1696,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:10"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47353316391657,
     Latitude = 0.6742142580747189,
     Altitude = -1925.4711820541038,
@@ -1703,7 +1704,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:11"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47355774790429,
     Latitude = 0.6742015107317392,
     Altitude = -1924.9264775676297,
@@ -1711,7 +1712,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:12"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.4735540335665,
     Latitude = 0.6741800864866416,
     Altitude = -1924.9264775676297,
@@ -1719,7 +1720,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:13"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47353500681606,
     Latitude = 0.6741617950501063,
     Altitude = -1925.1988298108668,
@@ -1727,7 +1728,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:14"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47350664772458,
     Latitude = 0.6741447111551033,
     Altitude = -1925.4711820541038,
@@ -1735,7 +1736,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:15"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.473494757982273,
     Latitude = 0.6741430011390509,
     Altitude = -1925.4711820541038,
@@ -1743,7 +1744,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:16"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.473485349949943,
     Latitude = 0.6741431504511513,
     Altitude = -1925.4711820541038,
@@ -1751,7 +1752,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:17"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.473464448566723,
     Latitude = 0.674141681840806,
     Altitude = -1925.4711820541038,
@@ -1759,7 +1760,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:18"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47344203973089,
     Latitude = 0.6741518055278933,
     Altitude = -1925.4711820541038,
@@ -1767,7 +1768,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:19"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.473416197134252,
     Latitude = 0.6741705280217748,
     Altitude = -1925.7435342973408,
@@ -1775,7 +1776,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:20"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47339416150648,
     Latitude = 0.6741799656622618,
     Altitude = -1925.7435342973408,
@@ -1783,7 +1784,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:21"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.4733232813815,
     Latitude = 0.6741727841821631,
     Altitude = -1926.288238783815,
@@ -1791,7 +1792,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:24"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47324174890097,
     Latitude = 0.6742091863213222,
     Altitude = -1926.288238783815,
@@ -1799,7 +1800,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:27"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47317556908458,
     Latitude = 0.6742072669430229,
     Altitude = -1926.560591027052,
@@ -1807,7 +1808,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:30"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47310752310149,
     Latitude = 0.6742134078571678,
     Altitude = -1926.832943270289,
@@ -1815,7 +1816,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:32"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.473074792306253,
     Latitude = 0.6741925230045956,
     Altitude = -1927.105295513526,
@@ -1823,7 +1824,7 @@ local keyframes = {
   },
   ["1969-07-20T20:17:40"] = {
     Type = "GlobeTranslation",
-    Globe = "Moon",
+    Globe = moon.Moon.Identifier,
     Longitude = 23.47306,
     Latitude = 0.67402,
     Altitude = -1927.65,

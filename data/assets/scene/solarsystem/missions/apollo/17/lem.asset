@@ -1,5 +1,5 @@
 local sun = asset.require("scene/solarsystem/sun/transforms")
-local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 
 
@@ -13,18 +13,18 @@ local model = asset.resource({
 
 local Apollo17Lem = {
   Identifier = "Apollo17Lem",
-  Parent = moonAsset.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moonAsset.Moon.Identifier,
+      Globe = moon.Moon.Identifier,
       Longitude = 30.77167,
       Latitude = 20.19092,
       UseHeightmap = true
     },
     Rotation = {
       Type = "GlobeRotation",
-      Globe = moonAsset.Moon.Identifier,
+      Globe = moon.Moon.Identifier,
       Longitude = 30.77167,
       Latitude = 20.19092
     }
