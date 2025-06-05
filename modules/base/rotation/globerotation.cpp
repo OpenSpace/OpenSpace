@@ -205,6 +205,11 @@ glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitud
     );
 }
 
+void GlobeRotation::initialize() {
+    Rotation::initialize();
+    fillAttachedNode();
+}
+
 void GlobeRotation::update(const UpdateData& data) {
     if (!_attachedNode) [[unlikely]] {
         fillAttachedNode();
