@@ -25,7 +25,7 @@ local CarringtonPrimeMeridian = {
   Renderable = {
     Type = "RenderableSphericalGrid",
     Size = size,
-    Color = { 1.0, 1.0, 0.0 },
+    Color = { 1.0, 0.0, 0.0 },
     LineWidth = 2.0,
     LongSegments = 2,
     LatSegments = 64
@@ -62,7 +62,7 @@ local WSA_GridSlice = {
   GUI = {
     Name = "Solar Longitude Facing the Earth",
     Path =  "/Solar System/Heliosphere",
-    Description = [[An arc on the Sun surface that always faces Earth.]]
+    Description = [[An arc on the Sun surface from pole to pole that always faces Earth.]]
   }
 }
 

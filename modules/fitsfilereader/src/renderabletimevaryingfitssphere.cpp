@@ -227,12 +227,16 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
         switch (_textureFilterProperty) {
         case static_cast<int>(ghoul::opengl::Texture::FilterMode::Nearest):
             for (File& file : _files) {
-                file.texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
+                if (file.texture) {
+                    file.texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
+                }
             }
             break;
         case static_cast<int>(ghoul::opengl::Texture::FilterMode::Linear):
             for (File& file : _files) {
-                file.texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+                if (file.texture) {
+                    file.texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+                }
             }
             break;
         }
@@ -245,10 +249,20 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
         }
         else {
             for (File& file : _files) {
-                std::pair<float, float> minMax = _layerMinMaxCaps.at(_fitsLayerName);
-                file.texture = loadTextureFromFits(file.path, _fitsLayerName, minMax);
-                file.texture->uploadTexture();
-                file.texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
+                // This if-statement might seem redundant since we're loading a texture
+                // here, but the files without texture should not be loaded to save memory
+                if (file.status == File::FileStatus::Loaded) {
+                    std::pair<float, float> minMax = _layerMinMaxCaps.at(_fitsLayerName);
+                    file.texture = loadTextureFromFits(file.path, _fitsLayerName, minMax);
+                    file.texture->uploadTexture();
+                    _textureFilterProperty == 0 ?
+                        file.texture->setFilter(
+                            ghoul::opengl::Texture::FilterMode::Nearest
+                        ) :
+                        file.texture->setFilter(
+                            ghoul::opengl::Texture::FilterMode::Linear
+                        );
+                }
             }
             loadTexture();
         }
@@ -379,7 +393,8 @@ void RenderableTimeVaryingFitsSphere::readFileFromFits(std::filesystem::path pat
             return timeRef < fileRef.time;
         }
     );
-    _files.insert(iter, std::move(newFile));
+    std::deque<File>::iterator it = _files.insert(iter, std::move(newFile));
+    trackOldest(*it);
 }
 
 glm::vec2 RenderableTimeVaryingFitsSphere::minMaxTextureDataValues(
@@ -488,9 +503,10 @@ void RenderableTimeVaryingFitsSphere::update(const UpdateData& data) {
                 std::pair<float, float> minMax = _layerMinMaxCaps.at(_fitsLayerName);
                 file.texture =
                     loadTextureFromFits(file.path, _fitsLayerName, minMax);
+                _textureFilterProperty == 0 ?
+                    file.texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest) :
+                    file.texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
                 file.status = File::FileStatus::Loaded;
-            }
-            if (previousIndex != _activeTriggerTimeIndex) {
                 trackOldest(file);
                 loadTexture();
             }
@@ -505,10 +521,10 @@ void RenderableTimeVaryingFitsSphere::update(const UpdateData& data) {
         _dataMinMaxValues = _files[_activeTriggerTimeIndex].dataMinMax;
     }
 
-    //if (_textureIsDirty) [[unlikely]] {
-    //    loadTexture();
-    //    _textureIsDirty = false;
-    //}
+    if (_textureIsDirty) [[unlikely]] {
+        loadTexture();
+        _textureIsDirty = false;
+    }
 }
 
 void RenderableTimeVaryingFitsSphere::render(const RenderData& data, RendererTasks& task)
@@ -588,7 +604,7 @@ void RenderableTimeVaryingFitsSphere::computeSequenceEndTime() {
             //TODO: Alternativly check at construction and throw exeption.
             LWARNING(
                 "Only one file in data set, but ShowAtAllTimes set to false. "
-                "Using arbitrary duration to visualize data file instead"
+                "Using arbitrary 2 hours to visualize data file instead"
             );
         }
     }

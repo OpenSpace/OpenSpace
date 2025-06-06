@@ -658,7 +658,6 @@ void RenderableFieldlinesSequence::staticallyLoadFiles(
         switch (_inputFileType) {
             case SourceFileType::Cdf: {
                 _seedPointDirectory = seedPointDirectory.value_or(_seedPointDirectory);
-
                 _tracingVariable = tracingVariable.value_or(_tracingVariable);
                 if (!tracingVariable.has_value()) {
                     throw("No tracing variable specified");
@@ -712,7 +711,7 @@ void RenderableFieldlinesSequence::initialize() {
 
 void RenderableFieldlinesSequence::initializeGL() {
     _shaderProgram = global::renderEngine->buildRenderProgram(
-        "FieldlinesSequenceNew",
+        "FieldlinesSequence",
         absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_vs.glsl"),
         absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl")
     );
@@ -972,7 +971,8 @@ void RenderableFieldlinesSequence::updateDynamicDownloading(double currentTime,
                 return timeRef < fileRef.timestamp;
             }
         );
-        _files.insert(iter, std::move(newFile));
+        std::deque<File>::iterator it = _files.insert(iter, std::move(newFile));
+        trackOldest(*it);
     }
 
     // if all files are moved into _sourceFiles then we can
@@ -1085,12 +1085,12 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
             file.timestamp = extractTriggerTimeFromFilename(file.path);
             _atLeastOneFileLoaded = true;
             computeSequenceEndTime();
+            trackOldest(file);
         }
         // If we have a new index, buffers needs to update
         if (previousIndex != _activeIndex) {
             _shouldUpdateColorBuffer = true;
             _shouldUpdateMaskingBuffer = true;
-            trackOldest(file);
         }
 
         updateVertexPositionBuffer();

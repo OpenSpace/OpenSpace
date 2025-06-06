@@ -151,7 +151,7 @@
     {
       "name": "Scene.WSA_54_Fieldlines_PFSS_IO.Renderable.LineWidth",
       "type": "setPropertyValueSingle",
-      "value": "1.8"
+      "value": "2.0"
     }
   ],
   "time": {

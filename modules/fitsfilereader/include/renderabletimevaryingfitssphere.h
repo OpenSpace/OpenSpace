@@ -118,6 +118,7 @@ private:
     bool _firstUpdate = true;
     bool _layerOptionsAdded = false;
     ghoul::opengl::Texture* _texture = nullptr;
+    bool _textureIsDirty = true;
 };
 
 } // namespace openspace

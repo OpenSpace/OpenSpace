@@ -51,8 +51,9 @@ local fieldlinesSCS = {
   GUI = {
     Name = "Fieldlines: Corona SCS (Out-In Tracing)",
     Path = "/Solar System/Heliosphere/WSA Coronal Model",
-    Description = [[WSA 5.4 real-time output of the fieldline trace from the SCS outer boundary
-      to the source surface using GONGZ as input.]]
+    Description = [[WSA 5.4 real-time output of the fieldline trace from the SCS outer
+      boundary to the source surface using GONGZ as input. SCS is the Schatten Current
+      Sheet model, a part of WSA.]]
   }
 }
 
@@ -87,8 +88,9 @@ local fieldlinesOI = {
   GUI = {
     Name = "Fieldlines: Corona PFSS (Out-In Tracing)",
     Path = "/Solar System/Heliosphere/WSA Coronal Model",
-    Description = [[WSA 5.4 real-time output of the fieldline trace from the source surface to
-      the solar surface using GONGZ as input.]]
+    Description = [[WSA 5.4 real-time output of the fieldline trace from the source
+      surface to the solar surface using GONGZ as input. PFSS is the Potential Field
+      Source Surface model, a part of WSA.]]
   }
 }
 
@@ -122,7 +124,8 @@ local fieldlinesIO = {
     Name = "Fieldlines: Corona PFSS (In-Out Tracing)",
     Path = "/Solar System/Heliosphere/WSA Coronal Model",
     Description = [[WSA 5.4 real-time output of the fieldline trace from the solar surface
-      outwards using GONGZ as input.]]
+      outwards using GONGZ as input. PFSS is the Potential Field Source Surface model, a
+      part of WSA.]]
   }
 }
 
