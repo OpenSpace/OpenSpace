@@ -109,7 +109,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
 
     _url = p.url.value_or(_url);
 
-    _dimensions = p.dimensions.value_or(global::windowDelegate->currentSubwindowSize());
+    _dimensions = p.dimensions.value_or(glm::vec2( 1920, 1080 ));
 
     _browserInstance = std::make_unique<BrowserInstance>(
         _renderHandler.get(),

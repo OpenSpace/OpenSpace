@@ -58,26 +58,21 @@ public:
     // Browser
     void sendIdToBrowser() const;
     std::vector<std::pair<std::string, glm::dvec3>> displayCopies() const;
+    void addDisplayCopy(glm::vec3 position, int nCopies);
+    void removeDisplayCopy();
 
     // Target
     void centerTargetOnScreen();
     double targetRoll() const;
+    bool pointSpaceCraft() const;
+    void applyRoll();
+    void reloadBrowser();
 
+    // Getters
     bool isFacingCamera() const;
+    bool isInitialized() const;
     bool isUsingRadiusAzimuthElevation() const;
     bool isEnabled() const;
-
-    void setEnabled(bool enable);
-    void setVerticalFov(double vfov);
-    void setEquatorialAim(const glm::dvec2& aim);
-    void setBorderColor(const glm::ivec3& color);
-    void setBorderRadius(double radius);
-    void setBrowserRatio(float ratio);
-    void setVerticalFovWithScroll(float scroll);
-    void setImageCollectionIsLoaded(bool isLoaded);
-    void setPointSpaceCraft(bool shouldPoint);
-    void applyRoll();
-
     double verticalFov() const;
     glm::ivec3 borderColor() const;
     glm::dvec2 targetDirectionEquatorial() const;
@@ -86,10 +81,19 @@ public:
     std::string browserId() const;
     std::string targetRenderableId() const;
     std::string targetNodeId() const;
-    bool pointSpaceCraft() const;
-
-    ScreenSpaceSkyBrowser* browser() const;
     std::vector<std::string> selectedImages() const;
+
+    // Setters
+    void setEnabled(bool enable);
+    void setVerticalFov(double vfov);
+    void setEquatorialAim(const glm::dvec2& aim);
+    void setBorderColor(const glm::ivec3& color);
+    void setBorderRadius(double radius);
+    void setBrowserRatio(float ratio);
+    void setBrowserIsInitialized(bool initialized);
+    void setVerticalFovWithScroll(float scroll);
+    void setImageCollectionIsLoaded(bool isLoaded);
+    void setPointSpaceCraft(bool shouldPoint);
 
     ghoul::Dictionary dataAsDictionary() const;
 
@@ -101,7 +105,6 @@ public:
     void loadImageCollection(const std::string& collection);
     void setImageOpacity(const std::string& imageUrl, float opacity);
     void hideChromeInterface();
-
 private:
     // Target and browser
     RenderableSkyTarget* _targetRenderable = nullptr;
