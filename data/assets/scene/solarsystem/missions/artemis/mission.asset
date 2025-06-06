@@ -1,16 +1,14 @@
--- Source:  https://solarsystem.nasa.gov/missions/rosetta-philae/in-depth/
-
 local Mission = {
   Identifier = "Artemis",
   Name = "Artemis",
   TimeRange = { Start = "2022 NOV 16 06:47:00", End = "2022 DEC 11 17:40:30" },
-  Image = "https://www.nasa.gov/sites/default/files/thumbnails/image/em1_patch_final.png",
+  Image = "https://data.openspaceproject.com/missions/artemis/em1_patch_final.png",
   Description = "With Artemis missions, NASA will land the first woman and first person of color on the Moon, using innovative technologies to explore more of the lunar surface than ever before. We will collaborate with commercial and international partners and establish the first long-term presence on the Moon. Then, we will use what we learn on and around the Moon to take the next giant leap: sending the first astronauts to Mars.",
   Milestones = {
     {
       Name = "Mission launch",
       Date = "2022 NOV 16 06:47:44",
-      Image = "https://www.nasa.gov/sites/default/files/thumbnails/image/sls_rocket.jpg",
+      Image = "https://data.openspaceproject.com/missions/artemis/sls_rocket.png",
       Description = "Following a successful launch of NASA's Space Launch System (SLS), the most powerful rocket in the world, the agency's Orion spacecraft is on its way to the Moon as part of the Artemis program. Carrying an uncrewed Orion, SLS lifted off for its flight test debut at 1:47 a.m. EST Wednesday from Launch Pad 39B at NASA's Kennedy Space Center in Florida. The launch is the first leg of a mission in which Orion is planned to travel approximately 40,000 miles beyond the Moon and return to Earth over the course of 25.5 days. Known as Artemis I, the mission is a critical part of NASA's Moon to Mars exploration approach, in which the agency explores for the benefit of humanity. It's an important test for the agency before flying astronauts on the Artemis II mission.",
       Link = "https://www.nasa.gov/press-release/liftoff-nasa-s-artemis-i-mega-rocket-launches-orion-to-moon"
     },
@@ -18,19 +16,19 @@ local Mission = {
       Name = "Closest approach to the Moon",
       Date = "2022 NOV 21 12:57:00",
       Description = "A portion of the far side of the Moon looms large just beyond the Orion spacecraft in this image taken on the sixth day of the Artemis I mission by a camera on the tip of one of Orion's solar arrays. The spacecraft entered the lunar sphere of influence Sunday, Nov. 20, making the Moon, instead of Earth, the main gravitational force acting on the spacecraft. On Monday, Nov. 21, it came within 80 miles of the lunar surface, the closest approach of the uncrewed Artemis I mission, before moving into a distant retrograde orbit around the Moon. The darkest spot visible near the middle of the image is Mare Orientale.",
-      Image = "https://blogs.nasa.gov/artemis/wp-content/uploads/sites/303/2022/11/art001e000269-1200x900.jpg",
+      Image = "https://data.openspaceproject.com/missions/artemis/art001e000269-1200x900.jpg",
       Link = "https://blogs.nasa.gov/artemis/2022/11/21/artemis-i-flight-day-six-orion-performs-lunar-flyby-closest-outbound-approach/"
     },
     {
       Name = "Maximum distance from Earth",
       Date = "2022 NOV 28 00:00:00",
       Description = "NASA's uncrewed Orion spacecraft reached a maximum distance of nearly 270,000 miles from Earth during the Artemis I flight test before beginning its journey back toward Earth. Orion captured imagery of the Earth and Moon together from its distant lunar orbit, including this image taken from camera on one of the spacecraft's solar array wings.",
-      Image = "https://www.nasa.gov/sites/default/files/thumbnails/image/orion_day_13_advisory.jpg"
+      Image = "https://data.openspaceproject.com/missions/artemis/orion_day_13_advisory.jpg"
     },
     {
       Name = "Orion landing",
       Description = "NASA's Orion spacecraft for the Artemis I mission splashed down in the Pacific Ocean after a 25.5 day mission to the Moon.",
-      Image = "https://www.nasa.gov/sites/default/files/thumbnails/image/orion_splashdown_image.jpg",
+      Image = "https://data.openspaceproject.com/missions/artemis/Orion_splashdown_image.jpg",
       Date = "2022 DEC 11 17:40:30"
     }
   },

@@ -4,7 +4,7 @@ local Mission = {
   Identifier = "Rosetta",
   Name = "Rosetta",
   TimeRange = { Start = "2004 MAR 02 00:00:00", End = "2016 SEP 30 00:00:00" },
-  Image = "https://www.cosmos.esa.int/documents/522118/522182/Rosetta_logo.png/cd85878d-2fac-e086-e32a-df0eaee5e505?t=1614026031720",
+  Image = "https://data.openspaceproject.com/missions/rosetta/Rosetta_logo.png",
   Description = "ESAs Rosetta mission was the first to rendezvous with a comet, the first to follow a comet on its orbit around the Sun, and the first to deploy a lander to a comets surface. Comets are time capsules containing primitive material left over from the epoch when the Sun and its planets formed. By studying the gas, dust and structure of the nucleus and organic materials associated with the comet, via both remote and in situ observations, the Rosetta mission is unlocking the history and evolution of our Solar System.",
   Milestones = {
     {
@@ -14,15 +14,14 @@ local Mission = {
     {
       Name = "First Earth gravity assist",
       Date = "2005 MAR 04 00:00:00",
-      Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2005/03/moonrise_above_the_pacific_22_06_utc_4_march_2005/9520996-4-eng-GB/Moonrise_above_the_Pacific_22_06_UTC_4_March_2005_pillars.jpg",
-      Description = "The Moon rising above the Pacific, three minutes before the point of closest approach during Rosettas first Earth fly-by.",
-      Link = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2015/08/approaching_perihelion_animation/15556093-1-eng-GB/Approaching_perihelion_Animation_pillars.gif"
+      Image = "https://data.openspaceproject.com/missions/rosetta/Moonrise_above_the_Pacific_22_06_UTC_4_March_2005_pillars.jpg",
+      Description = "The Moon rising above the Pacific, three minutes before the point of closest approach during Rosettas first Earth fly-by."
     },
     {
       Name = "Mars gravity assist",
       Date = "2007 FEB 25 00:00:00",
       Description = "The Rosetta swing-by of Mars is the second of four gravity assists needed to place Rosetta on course for its final destination: comet 67P/Churyumov-Gerasimenko. The closest approach of the swing-by will take place at 01:54 UT, when the spacecraft will pass 250 km above the surface of Mars.",
-      Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2007/02/image_of_mars_seen_by_osiris/10287257-2-eng-GB/Image_of_Mars_seen_by_OSIRIS_pillars.jpg",
+      Image = "https://data.openspaceproject.com/missions/rosetta/Image_of_Mars_seen_by_OSIRIS_pillars.jpg",
       Link = "https://sci.esa.int/web/rosetta/-/40697-rosetta-mars-swing-by"
     },
     {
@@ -33,7 +32,7 @@ local Mission = {
     {
       Name = "Asteroid Steins flyby",
       Date = "2008 SEP 05 00:00:00",
-      Image = "https://cdn.sci.esa.int/documents/34878/35534/1567217294466-Steins-FlyBy-Mosaic_625.jpg",
+      Image = "https://data.openspaceproject.com/missions/rosetta/1567217294466-Steins-FlyBy-Mosaic_625.jpg",
       Description = "Images of asteroid 2867-Steins taken by the OSIRIS Wide Angle Camera during the fly-by of 5 September 2008. The effective diameter of the asteroid is 5 km, approximately as predicted. At the top of the asteroid, a large crater, approximately 2 km in size, can be seen."
     },
     {
@@ -43,7 +42,7 @@ local Mission = {
     {
       Name = "Asteroid Lutetia flyby",
       Date = "2010 NOV 10 00:00:00",
-      Image = "https://cdn.sci.esa.int/documents/34878/35534/1567216468815-4_closest_approach-0_625.jpg",
+      Image = "https://data.openspaceproject.com/missions/rosetta/1567216468815-4_closest_approach-0_625.jpg",
       Description = "Together with 2867-Steins, 21-Lutetia is one of the two target asteroids that Rosetta will study during its long trek to comet 67P-Churyumov-Gersimenko."
     },
     {
@@ -53,7 +52,7 @@ local Mission = {
     {
       Name = "Arrive at comet",
       Date = "2014 AUG 06 00:00:00",
-      Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2014/08/navcam_animation_6_august/14705553-1-eng-GB/NavCam_animation_6_August_pillars.gif",
+      Image = "https://data.openspaceproject.com/missions/rosetta/NavCam_animation_6_August_pillars.gif",
       Description = "After ten years, five months and four days travelling towards our destination, looping around the Sun five times and clocking up 6.4 billion kilometres, we are delighted to announce finally we are here, exclaimed Jean-Jacques Dordain, ESA's Director General."
     },
     {
@@ -64,14 +63,14 @@ local Mission = {
     {
       Name = "Philae lander delivery",
       Date = "2014 NOV 12 00:00:00",
-      Image = "https://cdn.sci.esa.int/documents/34878/35534/1567216603810-ESA_Rosetta_OSIRIS_NAC_Farewell_Philae_625.jpg",
+      Image = "https://data.openspaceproject.com/missions/rosetta/1567216603810-ESA_Rosetta_OSIRIS_NAC_Farewell_Philae_625.jpg",
       Description = "Rosetta's OSIRIS narrow-angle camera captured this parting shot of the Philae lander after separation."
     },
     {
       Name = "Closest approach to Sun (Perihelion)",
       Date = "2015 AUG 13 00:00:00",
       Description = "Perihelion is the closest point a Solar System object gets to the Sun along its orbit (aphelion is the term given to the most distant point).",
-      Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2015/03/comet_s_orbit/15317969-1-eng-GB/Comet_s_orbit_pillars.jpg"
+      Image = "https://data.openspaceproject.com/missions/rosetta/Comet_s_orbit_pillars.jpg"
     },
     {
       Name = "Mission end",
@@ -100,8 +99,7 @@ local Mission = {
     },
     {
       Name = "Mission",
-      Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2015/08/approaching_perihelion_animation/15556093-1-eng-GB/Approaching_perihelion_Animation_pillars.gif",
-      Link = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2015/08/approaching_perihelion_animation/15556093-1-eng-GB/Approaching_perihelion_Animation_pillars.gif",
+      Image = "https://data.openspaceproject.com/missions/rosetta/Approaching_perihelion_Animation_pillars.gif",
       Description = "At 10:00 CET the spacecraft woke up and started post-hibernation procedures, including communications with ESA and NASA.",
       TimeRange = { Start = "2014 JAN 20 10:00:00", End = "2016 SEP 30 00:00:00" }
     }
