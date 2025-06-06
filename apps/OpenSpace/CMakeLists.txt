@@ -178,7 +178,7 @@ set(SGCT_DEP_INCLUDE_SCN OFF CACHE BOOL "" FORCE)
 set(SGCT_DEP_INCLUDE_CATCH2 OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct)
-target_link_libraries(OpenSpace PRIVATE sgct)
+target_link_libraries(OpenSpace PUBLIC sgct)
 
 set_target_properties(sgct PROPERTIES FOLDER "External")
 set_target_properties(glfw PROPERTIES FOLDER "External")
@@ -201,25 +201,31 @@ end_header("Dependency: SGCT")
 
 # Handles pkg-config for the GStreamer dependencies
 if(SGCT_GSTREAMER_SUPPORT)
+
+  # For Windows, install pkgconf
   find_package(PkgConfig REQUIRED)
   find_package(GStreamer REQUIRED)
+  pkg_search_module(glib REQUIRED IMPORTED_TARGET glib-2.0)
   pkg_search_module(gstreamer REQUIRED IMPORTED_TARGET gstreamer-1.0)
   pkg_search_module(gstreamer-base REQUIRED IMPORTED_TARGET gstreamer-base-1.0)
   pkg_search_module(gstreamer-webrtc REQUIRED IMPORTED_TARGET gstreamer-webrtc-1.0)
   pkg_search_module(gstreamer-video REQUIRED IMPORTED_TARGET gstreamer-video-1.0)
   pkg_search_module(gstreamer-gl REQUIRED IMPORTED_TARGET gstreamer-gl-1.0)
   pkg_search_module(gstreamer-app REQUIRED IMPORTED_TARGET gstreamer-app-1.0)
+  find_package(libsoup-3.0 REQUIRED)
+  target_include_directories(OpenSpace PRIVATE ${LIBSOUP_INCLUDE_DIRS})
   target_link_libraries(OpenSpace PUBLIC
+    PkgConfig::glib
     PkgConfig::gstreamer
     PkgConfig::gstreamer-base
     PkgConfig::gstreamer-webrtc
     PkgConfig::gstreamer-video
     PkgConfig::gstreamer-gl
     PkgConfig::gstreamer-app
+    soup-3.0
   )
-  target_compile_definitions(OpenSpace PUBLIC SGCT_HAS_GSTREAMER)
-  target_include_directories(OpenSpace PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct/ext/gstreamer" "${GStreamer_INCLUDE_DIR}/../libsoup-3.0")
-  target_compile_definitions(OpenSpace PUBLIC OPENSPACE_ROOT="${CMAKE_SOURCE_DIR}")
-
-  message(STATUS "${GStreamer_INCLUDE_DIR}/libsoup-3.0")
+  target_compile_definitions(OpenSpace PRIVATE SGCT_HAS_GSTREAMER)
+  # Include gstreamerWebRTC.h
+  target_include_directories(OpenSpace PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct/ext/gstreamer")
+  target_compile_definitions(OpenSpace PRIVATE OPENSPACE_ROOT="${CMAKE_SOURCE_DIR}")
 endif()

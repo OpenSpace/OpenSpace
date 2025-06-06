@@ -1,0 +1,30 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "debug-custom-windows",
+            "displayName": "Debug Custom Configuration (Windows)",
+            "description": "Debug build with custom options for Windows using MSVC",
+            "generator": "Visual Studio 17 2022",
+            "architecture": "x64",
+            "cacheVariables": {
+                "OPENSPACE_HAVE_TESTS": "OFF",
+                "OPENSPACE_VIDEO_MODULE": "OFF",
+                "CMAKE_PREFIX_PATH": "C:/Program Files (x86)/zlib;C:/Program Files/gstreamer/1.0/msvc_x86_64",
+                "CMAKE_MODULE_PATH": "C:/Program Files/gstreamer/1.0/msvc_x86_64/share/cmake",
+                "ASSIMP_BUILD_ZLIB": "OFF",
+                "SGCT_BUILD_TESTS": "OFF",
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "build-debug-custom-windows",
+            "displayName": "Build Debug Custom Configuration (Windows)",
+            "description": "Build using the debug-custom-windows configure preset",
+            "configurePreset": "debug-custom-windows",
+            "configuration": "Debug"
+        }
+    ]
+}
