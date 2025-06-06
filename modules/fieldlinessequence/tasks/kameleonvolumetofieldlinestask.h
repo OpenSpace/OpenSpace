@@ -22,29 +22,44 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/fitsfilereader/fitsfilereadermodule.h>
+#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___KAMELEONVOLUMETOFIELDLINESTASK___H__
+#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___KAMELEONVOLUMETOFIELDLINESTASK___H__
 
-#include <modules/fitsfilereader/include/renderabletimevaryingfitssphere.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/templatefactory.h>
+#include <openspace/util/task.h>
+
+#include <ghoul/glm.h>
+#include <string>
 
 namespace openspace {
 
-FitsFileReaderModule::FitsFileReaderModule() : OpenSpaceModule(Name) {}
-
-void FitsFileReaderModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Renderable>* fRenderable =
-        FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderableTimeVaryingFitsSphere>("RenderableTimeVaryingFitsSphere");
-}
-
-std::vector<documentation::Documentation> FitsFileReaderModule::documentations() const {
-    return {
-        FitsFileReaderModule::Documentation(),
-        RenderableTimeVaryingFitsSphere::Documentation()
+class KameleonVolumeToFieldlinesTask : public Task {
+public:
+    enum class OutputType {
+        Json,
+        Osfls
     };
-}
+
+    explicit KameleonVolumeToFieldlinesTask(const ghoul::Dictionary& dictionary);
+
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation Documentation();
+
+private:
+    std::string _tracingVar;
+    std::vector<std::string> _scalarVars;
+    std::vector<std::string> _magnitudeVars;
+    std::filesystem::path _inputPath;
+    size_t _nthTimeStep = 1;
+    std::vector<std::string> _sourceFiles;
+    std::filesystem::path _seedpointsPath;
+    size_t _nthSeedPoint = 1;
+    OutputType _outputType;
+    std::filesystem::path _outputFolder;
+    // Manual time offset
+    float _manualTimeOffset = 0.f;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___KAMELEONVOLUMETOFIELDLINESTASK___H__

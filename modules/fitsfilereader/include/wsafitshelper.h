@@ -22,29 +22,42 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/fitsfilereader/fitsfilereadermodule.h>
+#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___WSAFITSHELPER___H__
+#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___WSAFITSHELPER___H__
 
-#include <modules/fitsfilereader/include/renderabletimevaryingfitssphere.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/templatefactory.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/opengl/texture.h>
+#include <valarray>
+
+namespace CCfits {
+    class FITS;
+    class PHDU;
+    class ExtHDU;
+} // namespace CCfits
 
 namespace openspace {
 
-FitsFileReaderModule::FitsFileReaderModule() : OpenSpaceModule(Name) {}
+template<typename T>
+struct ImageData {
+    std::valarray<T> contents;
+    int width;
+    int height;
+};
 
-void FitsFileReaderModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Renderable>* fRenderable =
-        FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderableTimeVaryingFitsSphere>("RenderableTimeVaryingFitsSphere");
-}
+// path of file to load, layerIndex is which layer in the fits file to make into a texture
+// and minMax is the value, positive and negative, in which to cap the data between
+// to cause overexposure of higher and lower values.;
+std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
+    const std::filesystem::path path, size_t layerIndex, std::pair<float, float> minMax);
 
-std::vector<documentation::Documentation> FitsFileReaderModule::documentations() const {
-    return {
-        FitsFileReaderModule::Documentation(),
-        RenderableTimeVaryingFitsSphere::Documentation()
-    };
-}
+void readFitsHeader(const std::filesystem::path& path);
+
+// return number of data layers in fits file.
+int nLayers(const std::filesystem::path& path);
+
+template<typename T, typename U>
+std::shared_ptr<ImageData<T>> readImageInternal(U& image);
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___WSAFITSHELPER___H__

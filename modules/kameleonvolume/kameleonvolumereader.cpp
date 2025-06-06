@@ -24,6 +24,7 @@
 
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 
+#include <modules/kameleon/include/kameleonhelper.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/volume/rawvolume.h>
 #include <ghoul/filesystem/file.h>
@@ -80,7 +81,7 @@ KameleonVolumeReader::KameleonVolumeReader(std::filesystem::path path)
     if (!std::filesystem::is_regular_file(_path)) {
         throw ghoul::FileNotFoundError(_path);
     }
-
+    _kameleon = kameleonHelper::createKameleonObject(_path.string());
     const long status = _kameleon->open(_path.string());
     if (status != ccmc::FileReader::OK) {
         throw ghoul::RuntimeError(std::format(

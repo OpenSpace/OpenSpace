@@ -13,7 +13,6 @@
     "scene/solarsystem/heliosphere/bastille_day/magnetogram",
     "scene/solarsystem/heliosphere/bastille_day/magnetogram_textures",
     "scene/solarsystem/planets/earth/magnetosphere/magnetosphere",
-    "scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere",
     "scene/solarsystem/planets/earth/satellites/satellites",
     "scene/solarsystem/sun/euv_layer"
   ],
@@ -80,7 +79,7 @@
       "key": "I"
     },
     {
-      "action": "os.solarsystem.ToggleEuv",
+      "action": "os.solarsystem.sun.ToggleEuv",
       "key": "E"
     },
     {
