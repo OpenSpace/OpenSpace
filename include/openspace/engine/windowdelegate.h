@@ -43,6 +43,7 @@ struct WindowDelegate {
     void (*setSynchronization)(bool enabled) = [](bool) {};
 
     bool (*windowHasResized)() = []() { return false; };
+    bool (*anyWindowHasResized)() = []() { return false; };
 
     double (*averageDeltaTime)() = []() { return 0.0; };
 

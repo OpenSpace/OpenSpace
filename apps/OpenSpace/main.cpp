@@ -747,6 +747,16 @@ void setSgctDelegateFunctions() {
 
         return currentWindow->isWindowResized();
     };
+    sgctDelegate.anyWindowHasResized = []() {
+        ZoneScoped;
+
+        for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
+            if (window->isWindowResized()) {
+                return true;
+            }
+        }
+        return false;
+    };
     sgctDelegate.averageDeltaTime = []() {
         ZoneScoped;
 
