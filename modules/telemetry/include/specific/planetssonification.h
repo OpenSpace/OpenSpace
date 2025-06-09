@@ -90,8 +90,8 @@ private:
     /**
      * Create an osc::Blob object with the current sonification settings for the indicated
      * planet.
-     * Order of settings: Size/day, gravity, temperature, and optionally atmosphere, moons,
-     *                    and rings.
+     * Order of settings: Size/day, gravity, temperature, and optionally atmosphere,
+     *                    moons, and rings.
      *
      * \param planetIndex The index of the planet to create the settings blob for
      * \return An osc::Blob object with current sonification settings for the indicated
@@ -208,4 +208,4 @@ private:
 
 } // namespace openspace
 
-#endif __OPENSPACE_MODULE_TELEMETRY___PLANETSSONIFICATION___H__
+#endif // __OPENSPACE_MODULE_TELEMETRY___PLANETSSONIFICATION___H__

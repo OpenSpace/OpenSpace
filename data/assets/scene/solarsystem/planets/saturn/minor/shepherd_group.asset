@@ -69,7 +69,8 @@ local PrometheusTrail = {
   },
   GUI = {
     Name = "Prometheus Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Prometheus"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Prometheus",
+    Focusable = false
   }
 }
 
@@ -99,7 +100,8 @@ local PrometheusLabel = {
   },
   GUI = {
     Name = "Prometheus Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Prometheus"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Prometheus",
+    Focusable = false
   }
 }
 
@@ -155,7 +157,8 @@ local PandoraTrail = {
   },
   GUI = {
     Name = "Pandora Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pandora"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pandora",
+    Focusable = false
   }
 }
 
@@ -185,7 +188,8 @@ local PandoraLabel = {
   },
   GUI = {
     Name = "Pandora Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pandora"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pandora",
+    Focusable = false
   }
 }
 
@@ -241,7 +245,8 @@ local AtlasTrail = {
   },
   GUI = {
     Name = "Atlas Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Atlas"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Atlas",
+    Focusable = false
   }
 }
 
@@ -271,7 +276,8 @@ local AtlasLabel = {
   },
   GUI = {
     Name = "Atlas Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Atlas"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Atlas",
+    Focusable = false
   }
 }
 
@@ -327,7 +333,8 @@ local JanusTrail = {
   },
   GUI = {
     Name = "Janus Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Janus"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Janus",
+    Focusable = false
   }
 }
 
@@ -357,7 +364,8 @@ local JanusLabel = {
   },
   GUI = {
     Name = "Janus Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Janus"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Janus",
+    Focusable = false
   }
 }
 
@@ -413,7 +421,8 @@ local EpimetheusTrail = {
   },
   GUI = {
     Name = "Epimetheus Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Epimetheus"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Epimetheus",
+    Focusable = false
   }
 }
 
@@ -443,7 +452,8 @@ local EpimetheusLabel = {
   },
   GUI = {
     Name = "Epimetheus Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Epimetheus"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Epimetheus",
+    Focusable = false
   }
 }
 
@@ -499,7 +509,8 @@ local DaphnisTrail = {
   },
   GUI = {
     Name = "Daphnis Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Daphnis"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Daphnis",
+    Focusable = false
   }
 }
 
@@ -529,7 +540,8 @@ local DaphnisLabel = {
   },
   GUI = {
     Name = "Daphnis Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Daphnis"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Daphnis",
+    Focusable = false
   }
 }
 
@@ -585,7 +597,8 @@ local PanTrail = {
   },
   GUI = {
     Name = "Pan Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pan"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pan",
+    Focusable = false
   }
 }
 
@@ -615,7 +628,8 @@ local PanLabel = {
   },
   GUI = {
     Name = "Pan Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pan"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pan",
+    Focusable = false
   }
 }
 

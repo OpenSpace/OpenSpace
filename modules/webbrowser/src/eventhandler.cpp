@@ -457,7 +457,7 @@ bool EventHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction act
         return charCallback(static_cast<unsigned int>(Key::Enter), modifier);
     }
 
-    return KeyEventFlag;    
+    return KeyEventFlag;
 }
 
 bool EventHandler::specialKeyEvent(Key key, KeyModifier mod, KeyAction action) {

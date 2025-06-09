@@ -22,9 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/iswa/rendering/texturecygnet.h>
+#include <modules/iswa/rendering/renderabletexturecygnet.h>
 
 #include <modules/iswa/util/iswamanager.h>
+#include <openspace/documentation/documentation.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
@@ -35,13 +36,20 @@ namespace {
 
 namespace openspace {
 
-TextureCygnet::TextureCygnet(const ghoul::Dictionary& dictionary)
-    : IswaCygnet(dictionary)
+documentation::Documentation RenderableTextureCygnet::Documentation() {
+    documentation::Documentation doc = RenderableIswaCygnet::Documentation();
+    doc.name = "RenderableTextureCygnet";
+    doc.id = "iswa_renderable_texturecygnet";
+    return doc;
+}
+
+RenderableTextureCygnet::RenderableTextureCygnet(const ghoul::Dictionary& dictionary)
+    : RenderableIswaCygnet(dictionary)
 {
     registerProperties();
 }
 
-bool TextureCygnet::updateTexture() {
+bool RenderableTextureCygnet::updateTexture() {
     using namespace ghoul;
 
     std::unique_ptr<opengl::Texture> texture = io::TextureReader::ref().loadTexture(
@@ -64,7 +72,7 @@ bool TextureCygnet::updateTexture() {
     return false;
 }
 
-bool TextureCygnet::downloadTextureResource(double timestamp) {
+bool RenderableTextureCygnet::downloadTextureResource(double timestamp) {
     if (_futureObject.valid()) {
         return false;
     }
@@ -86,7 +94,7 @@ bool TextureCygnet::downloadTextureResource(double timestamp) {
     return false;
 }
 
-bool TextureCygnet::updateTextureResource() {
+bool RenderableTextureCygnet::updateTextureResource() {
     // if The future is done then get the new imageFile
     DownloadManager::MemoryFile imageFile;
     if (_futureObject.valid() && DownloadManager::futureReady(_futureObject)) {
@@ -107,7 +115,7 @@ bool TextureCygnet::updateTextureResource() {
     return true;
 }
 
-bool TextureCygnet::readyToRender() const {
+bool RenderableTextureCygnet::readyToRender() const {
     return isReady() && ((!_textures.empty()) && _textures[0]);
 }
 

@@ -1,5 +1,5 @@
 local sun = asset.require("scene/solarsystem/sun/transforms")
-local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 
 
@@ -13,11 +13,11 @@ local models = asset.resource({
 
 local Station6Frag1Holder = {
   Identifier = "Station_6_Fragment1",
-  Parent = moonAsset.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moonAsset.Moon.Identifier,
+      Globe = moon.Moon.Identifier,
       Longitude = -360 + 30.80068,
       Latitude = 20.2903,
       Altitude = -2562.6,
@@ -36,7 +36,7 @@ local Station6Frag1Model = {
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moonAsset.Moon.Identifier,
+      Globe = moon.Moon.Identifier,
       Longitude = -360 + 30.8007,
       Latitude = 20.2903,
       Altitude = -2562.6,
@@ -70,7 +70,7 @@ local Station6Frag1Model = {
 
 local Station6Frag23Holder = {
   Identifier = "Station_6_Fragments_2_3",
-  Parent = moonAsset.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
   GUI = {
     Name = "Station 6 Fragments 2 & 3 Holder",
     Path = "/Solar System/Missions/Apollo/17/Station 6"
@@ -87,7 +87,7 @@ local Station6Frag2Model = {
     },
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moonAsset.Moon.Identifier,
+      Globe = moon.Moon.Identifier,
       Longitude = -360 + 30.80055,
       Latitude = 20.289808,
       Altitude = -2566.5,
@@ -125,7 +125,7 @@ local Station6Frag3Model = {
     },
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moonAsset.Moon.Identifier,
+      Globe = moon.Moon.Identifier,
       Longitude = -360 + 30.80053,
       Latitude = 20.29030,
       Altitude = -2563.0,

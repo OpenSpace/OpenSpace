@@ -33,10 +33,10 @@ namespace {
     // proprietary format that can be loaded more efficiently, but more important can be
     // distributed without violating terms of service for various 3D model hosting
     // websites.
-    // 
+    //
     // The resulting output file can be used everywhere in OpenSpace in place of the
     // source material.
-    // 
+    //
     // The list of supported files can be found here:
     // https://github.com/assimp/assimp/blob/master/doc/Fileformats.md
     struct [[codegen::Dictionary(ConvertModelTask)]] Parameters {

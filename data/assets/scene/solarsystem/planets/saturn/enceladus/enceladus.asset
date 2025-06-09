@@ -72,6 +72,7 @@ local EnceladusLabel = {
   GUI = {
     Name = "Enceladus Label",
     Path = "/Solar System/Planets/Saturn/Major Moons/Enceladus",
+    Focusable = false,
     Description = "Label for Saturn's moon Enceladus"
   }
 }

@@ -52,4 +52,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__
+#endif // __OPENSPACE_MODULE_BASE___TIMELINESCALE___H__

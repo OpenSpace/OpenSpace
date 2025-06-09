@@ -39,7 +39,8 @@ namespace {
  * true, any existing session recording file will be overwritten, false by default.
  */
 [[codegen::luawrap]] void stopRecording(std::filesystem::path recordFilePath,
-                                        std::string dataMode, std::optional<bool> overwrite)
+                                        std::string dataMode,
+                                        std::optional<bool> overwrite)
 {
     if (recordFilePath.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");

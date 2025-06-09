@@ -5,22 +5,22 @@ local Mission = {
     {
       Name = "First Color Photo",
       TimeRange = { Start = "2021 FEB 18" },
-      Image = "http://data.openspaceproject.com/missions/perseverance/Perseverance's_First_Full-Color_Look_at_Mars.png"
+      Image = "https://data.openspaceproject.com/missions/perseverance/Perseverance's_First_Full-Color_Look_at_Mars.png"
     },
     {
       Name = "First Study Target",
       TimeRange = { Start = "2021 FEB 22" },
-      Image = "http://data.openspaceproject.com/missions/perseverance/PIA24484-MarsPerseveranceRover-FirstStudyTarget-20210222.jpg"
+      Image = "https://data.openspaceproject.com/missions/perseverance/PIA24484-MarsPerseveranceRover-FirstStudyTarget-20210222.jpg"
     },
     {
       Name = "Drive Test",
       TimeRange = { Start = "2021 MAR 07" },
-      Image = "http://data.openspaceproject.com/missions/perseverance/PIA23729-MarsPerseveranceRover-DriveTest-20210307.jpg"
+      Image = "https://data.openspaceproject.com/missions/perseverance/PIA23729-MarsPerseveranceRover-DriveTest-20210307.jpg"
     },
     {
       Name = "Ingenuity Helicopter launch",
       TimeRange = { Start = "2021 APR 04" },
-      Image = "http://data.openspaceproject.com/missions/perseverance/Ingenuity_helicopter_first_colour_image.jpg"
+      Image = "https://data.openspaceproject.com/missions/perseverance/Ingenuity_helicopter_first_colour_image.jpg"
     },
     {
       Name = "Ingenuity Helicopter First Flight",

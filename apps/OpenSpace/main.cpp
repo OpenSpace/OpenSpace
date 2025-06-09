@@ -747,6 +747,16 @@ void setSgctDelegateFunctions() {
 
         return currentWindow->isWindowResized();
     };
+    sgctDelegate.anyWindowHasResized = []() {
+        ZoneScoped;
+
+        for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
+            if (window->isWindowResized()) {
+                return true;
+            }
+        }
+        return false;
+    };
     sgctDelegate.averageDeltaTime = []() {
         ZoneScoped;
 
@@ -1480,7 +1490,10 @@ int main(int argc, char* argv[]) {
             config = launcher.selectedWindowConfig();
             if (config.find(labelFromCfgFile) != std::string::npos) {
                 if (config.find("sgct.config") == std::string::npos) {
-                    config = config.substr(0, config.length() - labelFromCfgFile.length());
+                    config = config.substr(
+                        0,
+                        config.length() - labelFromCfgFile.length()
+                    );
                 }
                 else {
                     config = windowConfiguration;

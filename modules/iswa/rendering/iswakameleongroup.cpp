@@ -51,7 +51,8 @@ namespace {
     };
 } // namespace
 
-namespace openspace{
+namespace openspace {
+
 IswaKameleonGroup::IswaKameleonGroup(std::string name, std::string type)
     : IswaDataGroup(name, type)
     , _resolution(ResolutionInfo, 100.f, 10.f, 200.f)

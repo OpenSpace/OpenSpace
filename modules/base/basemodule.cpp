@@ -123,7 +123,9 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fSsRenderable->registerClass<ScreenSpaceRenderableRenderable>(
         "ScreenSpaceRenderableRenderable"
     );
-    fSsRenderable->registerClass<ScreenSpaceTimeVaryingImageOnline>("ScreenSpaceTimeVaryingImageOnline");
+    fSsRenderable->registerClass<ScreenSpaceTimeVaryingImageOnline>(
+        "ScreenSpaceTimeVaryingImageOnline"
+    );
 
 
     ghoul::TemplateFactory<DashboardItem>* fDashboard =

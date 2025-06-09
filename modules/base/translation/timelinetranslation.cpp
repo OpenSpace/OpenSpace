@@ -93,6 +93,8 @@ void TimelineTranslation::update(const UpdateData& data) {
     if (KeyframePointer next = _timeline.firstKeyframeAfter(now, true);  next) {
         next->data->update(data);
     }
+
+    Translation::update(data);
 }
 
 glm::dvec3 TimelineTranslation::position(const UpdateData& data) const {

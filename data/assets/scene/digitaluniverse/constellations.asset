@@ -56,6 +56,7 @@ local Constellations = {
   GUI = {
     Name = "Constellation Lines",
     Path = "/Milky Way/Constellations",
+    Focusable = false,
     Description = [[Lines connecting the stars that make up the constellation figures.
       We represent the constellations by connecting the main stars that make up the
       constellation "stick figures," as seen from Earth. Colors: most constellations

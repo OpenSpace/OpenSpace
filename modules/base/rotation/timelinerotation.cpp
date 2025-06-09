@@ -93,6 +93,8 @@ void TimelineRotation::update(const UpdateData& data) {
     if (KeyframePointer next = _timeline.firstKeyframeAfter(now, true);  next) {
         next->data->update(data);
     }
+
+    Rotation::update(data);
 }
 
 glm::dmat3 TimelineRotation::matrix(const UpdateData& data) const {

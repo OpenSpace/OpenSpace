@@ -105,7 +105,8 @@ local BennuTrail = {
   },
   GUI = {
     Name = "Bennu Trail",
-    Path = "/Solar System/Asteroid"
+    Path = "/Solar System/Asteroid",
+    Focusable = false
   }
 }
 

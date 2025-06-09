@@ -17,10 +17,11 @@ local PlutoBarycenterTrail = {
     Period = 365.25,
     Resolution = 1000
   },
-  Tag = { "planetTrail_solarSystem", "planetTrail_dwarf" },
+  Tag = { "planetTrail_dwarf" },
   GUI = {
     Name = "Pluto Barycenter Trail",
     Path = "/Solar System/Dwarf Planets/Pluto",
+    Focusable = false,
     Description = [[Precise trail of Pluto from NASA SPICE data. Not containing full
       orbit]]
   }

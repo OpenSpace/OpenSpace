@@ -14,6 +14,7 @@ local SolarSystemBarycenter = {
   GUI = {
     Name = "Solar System Barycenter",
     Path = "/Solar System",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -32,6 +33,7 @@ local SunCenter = {
     Name = "Sun Center",
     Path = "/Solar System/Sun",
     Description = "Spice frame for the Sun",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -55,6 +57,7 @@ local SunIAU = {
   GUI = {
     Name = "Sun IAU",
     Path = "/Solar System/Sun",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -77,6 +80,7 @@ local SunEclipJ2000 = {
   GUI = {
     Name = "Sun J2000",
     Path = "/Solar System/Sun",
+    Focusable = false,
     Hidden = true
   }
 }

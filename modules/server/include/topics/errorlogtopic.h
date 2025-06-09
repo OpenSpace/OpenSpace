@@ -52,4 +52,4 @@ private:
 
 } // namespace openspace
 
-#endif // !__OPENSPACE_MODULE_SERVER___ERRORLOGTOPIC____H__
+#endif // __OPENSPACE_MODULE_SERVER___ERRORLOGTOPIC____H__

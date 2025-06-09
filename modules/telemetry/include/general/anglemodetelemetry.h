@@ -61,4 +61,4 @@ private:
 
 } // namespace openspace
 
-#endif __OPENSPACE_MODULE_TELEMETRY___ANGLEMODETELEMETRY___H__
+#endif // __OPENSPACE_MODULE_TELEMETRY___ANGLEMODETELEMETRY___H__

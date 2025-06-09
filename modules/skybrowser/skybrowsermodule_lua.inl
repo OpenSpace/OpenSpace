@@ -79,17 +79,17 @@ std::string prunedIdentifier(std::string identifier) {
     if (id != "all") {
         TargetBrowserPair* pair = module->pair(id);
         if (pair) {
-            pair->browser()->setIsInitialized(false);
-            pair->browser()->setImageCollectionIsLoaded(false);
-            pair->browser()->reload();
+            pair->setBrowserIsInitialized(false);
+            pair->setImageCollectionIsLoaded(false);
+            pair->reloadBrowser();
         }
     }
     else {
         const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->pairs();
         for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
-            pair->browser()->setIsInitialized(false);
-            pair->browser()->setImageCollectionIsLoaded(false);
-            pair->browser()->reload();
+            pair->setBrowserIsInitialized(false);
+            pair->setImageCollectionIsLoaded(false);
+            pair->reloadBrowser();
         }
     }
 }
@@ -224,7 +224,7 @@ std::string prunedIdentifier(std::string identifier) {
     TargetBrowserPair* pair = module->pair(prunedId);
     if (pair) {
         pair->hideChromeInterface();
-        pair->browser()->loadImageCollection(module->wwtImageCollectionUrl());
+        pair->loadImageCollection(module->wwtImageCollectionUrl());
     }
 }
 
@@ -649,7 +649,7 @@ std::string prunedIdentifier(std::string identifier) {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
-        pair->browser()->removeSelectedImage(imageUrl);
+        pair->removeSelectedImage(imageUrl);
     }
 }
 
@@ -726,7 +726,7 @@ std::string prunedIdentifier(std::string identifier) {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(identifier);
     // Make sure the webpage has loaded properly before executing javascript on it
-    if (pair && pair->browser()->isInitialized()) {
+    if (pair && pair->isInitialized()) {
         pair->setBorderRadius(std::clamp(radius, 0.0, 1.0));
     }
 }
@@ -760,7 +760,7 @@ std::string prunedIdentifier(std::string identifier) {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
-        pair->browser()->addDisplayCopy(position, numberOfCopies);
+        pair->addDisplayCopy(position, numberOfCopies);
     }
 }
 
@@ -773,7 +773,7 @@ std::string prunedIdentifier(std::string identifier) {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
-        pair->browser()->removeDisplayCopy();
+        pair->removeDisplayCopy();
     }
 }
 
@@ -832,7 +832,7 @@ std::string prunedIdentifier(std::string identifier) {
                 std::optional<ImageData> img = module->wwtDataHandler().image(imageUrl);
                 ghoul_assert(img.has_value(), "No image found");
                 // Index of image is used as layer ID as it's unique in the image data set
-                pair->browser()->addImageLayerToWwt(img->imageUrl);
+                pair->addImageLayerToWwt(img->imageUrl);
             }
         );
     }

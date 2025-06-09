@@ -22,22 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ISWA___TEXTURECYGNET___H__
-#define __OPENSPACE_MODULE_ISWA___TEXTURECYGNET___H__
+#ifndef __OPENSPACE_MODULE_ISWA___RENDERABLETEXTURECYGNET___H__
+#define __OPENSPACE_MODULE_ISWA___RENDERABLETEXTURECYGNET___H__
 
-#include <modules/iswa/rendering/iswacygnet.h>
+#include <modules/iswa/rendering/renderableiswacygnet.h>
 
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 /**
  * This class exist to abstract away the loading of images from iSWA and updating of the
  * textures for child geometries. The class specifies the minimum interface that child
  * classes needs to implement.
  */
-class TextureCygnet : public IswaCygnet {
+class RenderableTextureCygnet : public RenderableIswaCygnet {
 public:
-    explicit TextureCygnet(const ghoul::Dictionary& dictionary);
-    ~TextureCygnet() = default;
+    explicit RenderableTextureCygnet(const ghoul::Dictionary& dictionary);
+    ~RenderableTextureCygnet() = default;
+
+    static documentation::Documentation Documentation();
 
 protected:
     bool updateTexture() override;
@@ -50,4 +54,4 @@ private:
 };
 } //namespace openspace
 
-#endif // __OPENSPACE_MODULE_ISWA___TEXTURECYGNET___H__
+#endif // __OPENSPACE_MODULE_ISWA___RENDERABLETEXTURECYGNET___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___CONVERTMODELTASK___H__
-#define __OPENSPACE_CORE___CONVERTMODELTASK___H__
+#ifndef __OPENSPACE_MODULE_BASE___CONVERTMODELTASK___H__
+#define __OPENSPACE_MODULE_BASE___CONVERTMODELTASK___H__
 
 #include <openspace/util/task.h>
 
@@ -49,4 +49,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___CONVERTMODELTASK___H__
+#endif // __OPENSPACE_MODULE_BASE___CONVERTMODELTASK___H__

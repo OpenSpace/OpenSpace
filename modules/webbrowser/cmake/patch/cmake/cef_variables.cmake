@@ -24,7 +24,9 @@ endif()
 
 # Determine the project architecture.
 if(NOT DEFINED PROJECT_ARCH)
-  if(CMAKE_SIZEOF_VOID_P MATCHES 8)
+  if(OS_MACOSX AND CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+    set(PROJECT_ARCH "arm64")
+  elseif(CMAKE_SIZEOF_VOID_P MATCHES 8)
     set(PROJECT_ARCH "x86_64")
   else()
     set(PROJECT_ARCH "x86")
@@ -183,6 +185,14 @@ if(OS_LINUX)
     list(APPEND CEF_LINKER_FLAGS
       -m32
       )
+  elseif(PROJECT_ARCH STREQUAL "arm64")
+    # Apple Silicon (ARM64) architecture.
+    list(APPEND CEF_COMPILER_FLAGS
+      -arch arm64
+      )
+    list(APPEND CEF_LINKER_FLAGS
+      -arch arm64
+     )
   endif()
 
   # Standard libraries.
@@ -253,7 +263,7 @@ if(OS_MACOSX)
     -Wno-unused-parameter           # Don't warn about unused parameters
     )
   list(APPEND CEF_C_COMPILER_FLAGS
-    -std=c99                        # Use the C99 language standard
+    -std=c17                        # Use the C99 language standard
     )
   list(APPEND CEF_CXX_COMPILER_FLAGS
     #-fno-exceptions                 # Disable exceptions
@@ -261,7 +271,7 @@ if(OS_MACOSX)
     -fno-threadsafe-statics         # Don't generate thread-safe statics
     -fobjc-call-cxx-cdtors          # Call the constructor/destructor of C++ instance variables in ObjC objects
     -fvisibility-inlines-hidden     # Give hidden visibility to inlined class member functions
-    -std=gnu++14                    # Use the C++14 language standard including GNU extensions
+    -std=gnu++20                    # Use the C++20 language standard including GNU extensions
     -Wno-narrowing                  # Don't warn about type narrowing
     -Wsign-compare                  # Warn about mixed signed/unsigned type comparisons
     )
@@ -299,7 +309,7 @@ if(OS_MACOSX)
 
   # Find the newest available base SDK.
   execute_process(COMMAND xcode-select --print-path OUTPUT_VARIABLE XCODE_PATH OUTPUT_STRIP_TRAILING_WHITESPACE)
-  foreach(OS_VERSION 10.11 10.10 10.9)
+  foreach(OS_VERSION 13.3 14.7)
     set(SDK "${XCODE_PATH}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${OS_VERSION}.sdk")
     if(NOT "${CMAKE_OSX_SYSROOT}" AND EXISTS "${SDK}" AND IS_DIRECTORY "${SDK}")
       set(CMAKE_OSX_SYSROOT ${SDK})
@@ -307,7 +317,7 @@ if(OS_MACOSX)
   endforeach()
 
   # Target SDK.
-  set(CEF_TARGET_SDK               "10.15")
+  set(CEF_TARGET_SDK               "13.3")
   list(APPEND CEF_COMPILER_FLAGS
     -mmacosx-version-min=${CEF_TARGET_SDK}
   )
@@ -317,7 +327,7 @@ if(OS_MACOSX)
   if(PROJECT_ARCH STREQUAL "x86_64")
     set(CMAKE_OSX_ARCHITECTURES "x86_64")
   else()
-    set(CMAKE_OSX_ARCHITECTURES "i386")
+    set(CMAKE_OSX_ARCHITECTURES "arm64")
   endif()
 
   # CEF directory paths.
@@ -328,6 +338,8 @@ if(OS_MACOSX)
   else()
       set(CEF_BINARY_DIR "${_CEF_ROOT}/$<CONFIG>")
   endif()
+
+  message("CMAKE_OSX_DEPLOYMENT_TARGET is set to ${CMAKE_OSX_DEPLOYMENT_TARGET}")
 
   set(CEF_BINARY_DIR_DEBUG    "${_CEF_ROOT}/Debug")
   set(CEF_BINARY_DIR_RELEASE  "${_CEF_ROOT}/Release")

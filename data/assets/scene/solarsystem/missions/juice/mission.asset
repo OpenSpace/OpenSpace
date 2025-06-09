@@ -1,7 +1,7 @@
 local Mission = {
   Identifier = "Juice",
   Name = "Juice",
-  Image = "https://www.esa.int/var/esa/storage/images/science_exploration/space_science/juice/23388092-2-eng-GB/Juice_pillars.jpg",
+  Image = "https://data.openspaceproject.com/missions/juice/Juice_pillars.jpg",
   Description = "ESA's Jupiter Icy Moons Explorer, Juice, will make detailed observations of the giant gas planet and its three large ocean-bearing moons - Ganymede, Callisto and Europa - with a suite of remote sensing, geophysical, and in situ instruments. The mission will characterize these moons as both planetary objects and possible habitats, explore Jupiter's complex environment in depth, and study the wider Jupiter system as an archetype for gas giants across the Universe.",
   Milestones = {
     {

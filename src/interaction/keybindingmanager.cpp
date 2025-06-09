@@ -119,6 +119,7 @@ scripting::LuaLibrary KeybindingManager::luaLibrary() {
         {
             codegen::lua::BindKey,
             codegen::lua::KeyBindings,
+            codegen::lua::KeyBindingsForAction,
             codegen::lua::ClearKey,
             codegen::lua::ClearKeys
         }

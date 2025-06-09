@@ -224,9 +224,12 @@ RenderablePlane::DistanceScalingSettings::DistanceScalingSettings(
         const Parameters::DistanceScalingSettings settings = *p.distanceScalingSettings;
 
         scaleByDistance = settings.scaleByDistance.value_or(scaleByDistance);
-        apparentSizeMultiplier = settings.apparentSizeMultiplier.value_or(apparentSizeMultiplier);
-        scaleByDistanceMaxHeight = settings.scaleByDistanceMaxHeight.value_or(scaleByDistanceMaxHeight);
-        scaleByDistanceMinHeight = settings.scaleByDistanceMinHeight.value_or(scaleByDistanceMinHeight);
+        apparentSizeMultiplier =
+            settings.apparentSizeMultiplier.value_or(apparentSizeMultiplier);
+        scaleByDistanceMaxHeight =
+            settings.scaleByDistanceMaxHeight.value_or(scaleByDistanceMaxHeight);
+        scaleByDistanceMinHeight =
+            settings.scaleByDistanceMinHeight.value_or(scaleByDistanceMinHeight);
     }
 
     addProperty(scaleByDistance);

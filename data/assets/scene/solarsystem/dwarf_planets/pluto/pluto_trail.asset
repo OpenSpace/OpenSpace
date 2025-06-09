@@ -17,10 +17,11 @@ local PlutoTrailBarycentric = {
     Period = 6.38723,
     Resolution = 1000
   },
-  Tag = { "planetTrail_solarSystem", "planetTrail_dwarf" },
+  Tag = { "planetTrail_dwarf" },
   GUI = {
     Name = "Pluto Barycentric Trail",
     Path = "/Solar System/Dwarf Planets/Pluto",
+    Focusable = false,
     Description = "Orbit of Pluto around its Barycenter"
   }
 }

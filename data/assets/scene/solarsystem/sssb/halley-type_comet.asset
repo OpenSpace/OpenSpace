@@ -26,6 +26,7 @@ local Object = {
   GUI = {
     Name = "Halley-type Comets",
     Path = "/Solar System/Small Bodies",
+    Focusable = false,
     Description = "Periodic comets with an orbital period between 20 and 200 years."
   }
 }

@@ -91,6 +91,8 @@ void TimelineScale::update(const UpdateData& data) {
     if (KeyframePointer next = _timeline.firstKeyframeAfter(now, true);  next) {
         next->data->update(data);
     }
+
+    Scale::update(data);
 }
 
 glm::dvec3 TimelineScale::scaleValue(const UpdateData& data) const {
