@@ -295,6 +295,14 @@ bool RenderableTrail::isReady() const {
     return _programObject != nullptr;
 }
 
+glm::dvec3 RenderableTrail::translationPosition(Time time) const {
+    // Use an empty modelTransform to get the position in local coordinates. Also, the
+    // previous frame time does not matter so we just use time 0
+    const UpdateData data = { {}, time, Time(0.0) };
+    _translation->update(data);
+    return _translation->position(data);
+}
+
 void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
                                      const RenderData& data,
                                      const glm::dmat4& modelTransform,

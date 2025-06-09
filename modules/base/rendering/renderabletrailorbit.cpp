@@ -185,9 +185,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
 
     // 2
     // Write the current location into the floating position
-    const UpdateData updateData = { {}, data.time, Time(0.0) };
-    _translation->update(updateData);
-    const glm::vec3 p = _translation->position(updateData);
+    const glm::vec3 p = translationPosition(data.time);
+
     _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
 
     glBindVertexArray(_primaryRenderInformation._vaoID);
@@ -363,11 +362,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
 
             // Get the new permanent point and write it into the (previously) floating
             // location
-            const glm::vec3 p = _translation->position({
-                {},
-                Time(_lastPointTime),
-                Time(0.0)
-            });
+            const glm::vec3 p = translationPosition(Time(_lastPointTime));
             _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
 
             // Move the current pointer back one step to be used as the new floating
@@ -403,9 +398,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
 
             // Get the new permanent point and write it into the (previously) floating
             // location
-            const UpdateData updateData = { {}, Time(_firstPointTime), Time(0.0) };
-            _translation->update(updateData);
-            const glm::vec3 p = _translation->position(updateData);
+            const glm::vec3 p = translationPosition(Time(_firstPointTime));
             _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
 
             // if we are on the upper bounds of the array, we start at 0
@@ -448,9 +441,7 @@ void RenderableTrailOrbit::fullSweep(double time) {
     const double secondsPerPoint = periodSeconds / (_resolution - 1);
     // starting at 1 because the first position is a floating current one
     for (int i = 1; i < _resolution; i++) {
-        const UpdateData updateData = { {}, Time(time), Time(0.0) };
-        _translation->update(updateData);
-        const glm::vec3 p = _translation->position(updateData);
+        const glm::vec3 p = translationPosition(Time(time));
         _vertexArray[i] = { p.x, p.y, p.z };
 
         time -= secondsPerPoint;
