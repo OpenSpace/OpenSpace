@@ -85,7 +85,6 @@ TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary)
 
 void TimelineTranslation::initialize() {
     Translation::initialize();
-
     for (const Keyframe<ghoul::mm_unique_ptr<Translation>>& kf : _timeline.keyframes()) {
         kf.data->initialize();
     }

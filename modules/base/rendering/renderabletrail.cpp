@@ -247,6 +247,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableTrail::initialize() {
+    Renderable::initialize();
     _translation->initialize();
 }
 

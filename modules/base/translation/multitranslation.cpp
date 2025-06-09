@@ -64,6 +64,13 @@ MultiTranslation::MultiTranslation(const ghoul::Dictionary& dictionary)
     }
 }
 
+void MultiTranslation::initialize() {
+    Translation::initialize();
+    for (const ghoul::mm_unique_ptr<Translation>& translation : _translations) {
+        translation->initialize();
+    }
+}
+
 void MultiTranslation::update(const UpdateData& data) {
     for (const ghoul::mm_unique_ptr<Translation>& translation : _translations) {
         translation->update(data);
