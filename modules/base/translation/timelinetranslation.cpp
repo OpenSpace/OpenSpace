@@ -83,7 +83,7 @@ TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary)
     addProperty(_shouldInterpolate);
 }
 
-bool TimelineTranslation::initialize() {
+void TimelineTranslation::initialize() {
     Translation::initialize();
 
     for (const Keyframe<ghoul::mm_unique_ptr<Translation>>& kf : _timeline.keyframes()) {
