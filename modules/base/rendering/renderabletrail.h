@@ -117,7 +117,7 @@ protected:
     explicit RenderableTrail(const ghoul::Dictionary& dictionary);
 
     /**
-     * Get the trail position for a given time from the translation object. The position
+     * Get the trail position for a given time from the Translation object. The position
      * will be in the local coordinate system of the renderable.
      *
      * \param time The time for which to get the position
