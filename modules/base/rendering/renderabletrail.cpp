@@ -244,7 +244,6 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     }
 
     addPropertySubOwner(_appearance);
-
 }
 
 void RenderableTrail::initialize() {
@@ -299,7 +298,10 @@ glm::dvec3 RenderableTrail::translationPosition(Time time) const {
     // Use an empty modelTransform to get the position in local coordinates. Also, the
     // previous frame time does not matter so we just use time 0
     const UpdateData data = { {}, time, Time(0.0) };
-    _translation->update(data);
+    // @TODO (2025-06-09, emmbr) Do we need to also call the update for the translation?
+    // As of now, this borks up the performance of the trail completely, and I'm not sure
+    // the update is needed since we are not using the cached version of the position.
+    //_translation->update(data);
     return _translation->position(data);
 }
 
