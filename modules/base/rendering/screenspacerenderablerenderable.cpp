@@ -187,7 +187,6 @@ ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
     addProperty(_cameraFov);
 
     _renderable = Renderable::createFromDictionary(p.renderable);
-    _renderable->initialize();
     addPropertySubOwner(_renderable.get());
 
     _transform = ghoul::mm_unique_ptr<properties::PropertyOwner>(
@@ -204,7 +203,6 @@ ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
         translation.setValue("Position", glm::dvec3(0.0));
         _translation = Translation::createFromDictionary(translation);
     }
-    _translation->initialize();
     _transform->addPropertySubOwner(_translation.get());
 
     if (p.transform.has_value() && p.transform->rotation.has_value()) {
@@ -216,7 +214,6 @@ ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
         rotation.setValue("Rotation", glm::dvec3(0.0));
         _rotation = Rotation::createFromDictionary(rotation);
     }
-    _rotation->initialize();
     _transform->addPropertySubOwner(_rotation.get());
 
     if (p.transform.has_value() && p.transform->scale.has_value()) {
@@ -228,11 +225,18 @@ ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
         scale.setValue("Scale", 1.0);
         _scale = Scale::createFromDictionary(scale);
     }
-    _scale->initialize();
     _transform->addPropertySubOwner(_scale.get());
 }
 
 ScreenSpaceRenderableRenderable::~ScreenSpaceRenderableRenderable() {}
+
+void ScreenSpaceRenderableRenderable::initialize() {
+    ScreenSpaceFramebuffer::initialize();
+    _translation->initialize();
+    _rotation->initialize();
+    _scale->initialize();
+    _renderable->initialize();
+}
 
 void ScreenSpaceRenderableRenderable::initializeGL() {
     ScreenSpaceFramebuffer::initializeGL();
