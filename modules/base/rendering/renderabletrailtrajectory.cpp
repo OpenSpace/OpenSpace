@@ -203,9 +203,7 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     _timeStampSubsamplingFactor.onChange([this] { _subsamplingIsDirty = true; });
     addProperty(_timeStampSubsamplingFactor);
 
-    _nReplacementPoints = p.accurateTrailPositions.value_or(
-        _nReplacementPoints
-    );
+    _nReplacementPoints = p.accurateTrailPositions.value_or(_nReplacementPoints);
     addProperty(_nReplacementPoints);
 
     _enableSweepChunking = p.enableSweepChunking.value_or(_enableSweepChunking);

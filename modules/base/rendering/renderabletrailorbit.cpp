@@ -186,7 +186,6 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     // 2
     // Write the current location into the floating position
     const glm::vec3 p = translationPosition(data.time);
-
     _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
 
     glBindVertexArray(_primaryRenderInformation._vaoID);
