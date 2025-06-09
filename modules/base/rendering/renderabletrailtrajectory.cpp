@@ -257,7 +257,7 @@ void RenderableTrailTrajectory::reset() {
 void RenderableTrailTrajectory::update(const UpdateData& data) {
     if (_needsFullSweep) {
         if (_sweepIteration == 0) {
-            constexpr unsigned int maxVertices = 1000000;
+            constexpr unsigned int MaxVertices = 1000000;
 
             // Convert the start and end time from string representations to J2000 seconds
             _start = SpiceManager::ref().ephemerisTimeFromDate(_startTime);
@@ -270,13 +270,13 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             // degredation/RAM usage
             _nVertices = std::min(
                 static_cast<unsigned int>(std::ceil(timespan / _totalSampleInterval)),
-                maxVertices
+                MaxVertices
             );
 
             // We need to recalcuate the _totalSampleInterval if _nVertices equals
-            // maxVertices. If we don't do this the position for each vertex
+            // MaxVertices. If we don't do this the position for each vertex
             // will not be correct for the number of vertices we are doing along the trail
-            _totalSampleInterval = (_nVertices == maxVertices) ?
+            _totalSampleInterval = (_nVertices == MaxVertices) ?
                 (timespan / _nVertices) : _totalSampleInterval;
 
             // Make space for the vertices
