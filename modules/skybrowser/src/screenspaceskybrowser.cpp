@@ -324,16 +324,15 @@ ScreenSpaceSkyBrowser::showDisplayCopies() const
 }
 
 ghoul::Dictionary ScreenSpaceSkyBrowser::data() const {
-
     ghoul::Dictionary res;
     std::vector<int> color = { _wwtBorderColor.r, _wwtBorderColor.g, _wwtBorderColor.b };
 
-    res.setValue("fov", static_cast<double>(verticalFov()));
+    res.setValue("fov", verticalFov());
     res.setValue("roll", _targetRoll);
     res.setValue("isFacingCamera", isFacingCamera());
     res.setValue("isUsingRae", isUsingRaeCoords());
     res.setValue("scale", static_cast<double>(scale()));
-    res.setValue("ratio", static_cast<double>(browserRatio()));
+    res.setValue("ratio", browserRatio());
     res.setValue("borderRadius", borderRadius());
     res.setValue("opacities", _wwtCommunicator.opacities());
     res.setValue("color", color);
@@ -358,7 +357,6 @@ WwtCommunicator* ScreenSpaceSkyBrowser::worldWideTelescope() {
 }
 
 void ScreenSpaceSkyBrowser::render(const RenderData& renderData) {
-
     if (!_isHidden) {
         ScreenSpaceBrowser::render(renderData);
     }
@@ -402,7 +400,6 @@ void ScreenSpaceSkyBrowser::setTargetRoll(double roll) {
     _targetRoll = roll;
 }
 
-
 glm::dvec2 ScreenSpaceSkyBrowser::fieldsOfView() const {
     const double vFov = verticalFov();
     const double hFov = vFov * browserRatio();
@@ -429,8 +426,13 @@ void ScreenSpaceSkyBrowser::setBorderColor(glm::ivec3 color) {
 }
 
 double ScreenSpaceSkyBrowser::browserRatio() const {
-    return static_cast<double>(_dimensions.value().x) /
-        static_cast<double>(_dimensions.value().y);
+    if (_dimensions.value().y > 0) {
+        return static_cast<double>(_dimensions.value().x) /
+            static_cast<double>(_dimensions.value().y);
+    }
+    else {
+        return std::numeric_limits<double>::max();
+    }
 }
 
 void ScreenSpaceSkyBrowser::reload() {
@@ -489,7 +491,10 @@ void ScreenSpaceSkyBrowser::setBorderRadius(double radius) {
 void ScreenSpaceSkyBrowser::setRatio(double ratio) {
     _radiusIsDirty = true;
     _isDimensionsDirty = true;
-    _dimensions = { _dimensions.value().y * ratio, _dimensions.value().y };
+    _dimensions = glm::uvec2(
+        static_cast<unsigned int>(_dimensions.value().y * ratio),
+        _dimensions.value().y
+    );
 }
 
 } // namespace openspace

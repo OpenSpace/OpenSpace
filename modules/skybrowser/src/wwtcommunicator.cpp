@@ -23,10 +23,11 @@
  ****************************************************************************************/
 
 #include <modules/skybrowser/include/wwtcommunicator.h>
-#include <modules/skybrowser/include/utility.h>
-#include <modules/webbrowser/include/webkeyboardhandler.h>
+
 #include <modules/cefwebgui/include/guirenderhandler.h>
 #include <modules/cefwebgui/include/guikeyboardhandler.h>
+#include <modules/skybrowser/include/utility.h>
+#include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <modules/webbrowser/webbrowsermodule.h>
 #include <ghoul/misc/dictionaryjsonformatter.h>
 #include <deque>
@@ -188,11 +189,7 @@ void WwtCommunicator::setBorderColor(glm::ivec3 color) {
 
 void WwtCommunicator::setAim(glm::dvec2 equatorialAim, double vFov, double roll) {
     // Message WorldWide Telescope current view
-    const ghoul::Dictionary msg = moveCameraMessage(
-        equatorialAim,
-        vFov,
-        roll
-    );
+    const ghoul::Dictionary msg = moveCameraMessage(equatorialAim, vFov, roll);
     sendMessageToWwt(msg);
 }
 

@@ -51,8 +51,9 @@ namespace openspace {
 
 class WebRenderHandler : public CefRenderHandler {
 public:
-    explicit WebRenderHandler();
     using Pixel = glm::tvec4<char>;
+
+    WebRenderHandler();
 
     virtual void draw(void) = 0;
     virtual void render() = 0;

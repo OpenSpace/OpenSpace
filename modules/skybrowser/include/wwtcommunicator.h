@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___WWTCOMMUNICATOR___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___WWTCOMMUNICATOR___H__
 
-#include <openspace/properties/scalar/doubleproperty.h>
 #include <modules/webbrowser/include/browserinstance.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 
 #include <deque>
 
@@ -35,7 +35,7 @@ using SelectedImageDeque = std::deque<std::pair<std::string, double>>;
 
 class WwtCommunicator {
 public:
-    WwtCommunicator(BrowserInstance* browserInstance);
+    explicit WwtCommunicator(BrowserInstance* browserInstance);
     ~WwtCommunicator() = default;
 
     // WorldWide Telescope communication
@@ -68,7 +68,7 @@ private:
     SelectedImageDeque _selectedImages;
 
 
-    BrowserInstance* _browserInstance;
+    BrowserInstance* _browserInstance = nullptr;
 };
 } // namespace openspace
 
