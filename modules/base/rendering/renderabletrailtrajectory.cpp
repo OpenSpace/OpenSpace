@@ -302,11 +302,13 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
         // Calculate all vertex positions
         for (unsigned int i = startIndex; i < stopIndex; i++) {
-            const glm::dvec3 dp = _translation->position({
+            const UpdateData updateData = {
                 {},
                 Time(_start + i * _totalSampleInterval),
                 Time(0.0)
-            });
+            };
+            _translation->update(updateData);
+            const glm::dvec3 dp = _translation->position(updateData);
             const glm::vec3 p(dp.x, dp.y, dp.z);
             _vertexArray[i] = { p.x, p.y, p.z };
             _timeVector[i] = Time(_start + i * _totalSampleInterval).j2000Seconds();
@@ -322,11 +324,9 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         // Adds the last point in time to the _vertexArray so that we
         // ensure that points for _start and _end always exists
         if (stopIndex == _nVertices) {
-            const glm::dvec3 dp = _translation->position({
-                {},
-                Time(_end),
-                Time(0.0)
-            });
+            const UpdateData updateData = { {}, Time(_end), Time(0.0) };
+            _translation->update(updateData);
+            const glm::dvec3 dp = _translation->position(updateData);
             const glm::vec3 p(dp.x, dp.y, dp.z);
             _vertexArray[stopIndex] = { p.x, p.y, p.z };
             _timeVector[stopIndex] = Time(_end).j2000Seconds();
@@ -416,6 +416,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         );
 
         // Get current position of the object
+        _translation->update(data);
         const glm::dvec3 p = _translation->position(data);
 
         // Calculates all replacement points before the object

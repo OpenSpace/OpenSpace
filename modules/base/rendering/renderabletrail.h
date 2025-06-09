@@ -97,6 +97,7 @@ public:
 
     virtual ~RenderableTrail() override = default;
 
+    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
 

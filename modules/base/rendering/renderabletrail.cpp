@@ -247,6 +247,10 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 
 }
 
+void RenderableTrail::initialize() {
+    _translation->initialize();
+}
+
 void RenderableTrail::initializeGL() {
     ZoneScoped;
 
@@ -545,8 +549,6 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             );
         }
     }
-
-
 
 
     if (renderPoints) {
