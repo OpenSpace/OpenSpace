@@ -88,7 +88,11 @@ void Scale::requireUpdate() {
     _needsUpdate = true;
 }
 
-void Scale::initialize() {}
+void Scale::initialize() {
+    if (_timeFrame) {
+        _timeFrame->initialize();
+    }
+}
 
 glm::dvec3 Scale::scaleValue() const {
     return _cachedScale;

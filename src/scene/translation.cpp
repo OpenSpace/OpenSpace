@@ -81,7 +81,11 @@ Translation::Translation(const ghoul::Dictionary& dictionary)
     }
 }
 
-void Translation::initialize() {}
+void Translation::initialize() {
+    if (_timeFrame) {
+        _timeFrame->initialize();
+    }
+}
 
 void Translation::update(const UpdateData& data) {
     ZoneScoped;
