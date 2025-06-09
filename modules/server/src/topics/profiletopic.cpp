@@ -28,6 +28,7 @@
 #include <modules/server/include/jsonconverters.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/settings.h>
 #include <openspace/scene/profile.h>
 
 namespace openspace {
@@ -37,14 +38,19 @@ bool ProfileTopic::isDone() const {
 }
 
 void ProfileTopic::handleJson(const nlohmann::json&) {
+
+    Settings settings = loadSettings();
+    
     // @TODO (2025-04-30, emmbr) If we expose the json converters from profile.cpp, we
     // could use those here instead and minimize the risk of getting the serialization of
     // the data out of sync
     nlohmann::json data = {
         { "uiPanelVisibility", global::profile->uiPanelVisibility },
         { "markNodes", global::profile->markNodes },
-        { "filePath", global::configuration->profile }
+        { "filePath", global::configuration->profile },
+        { "hasStartedBefore", settings.hasStartedBefore.value_or(false) }
     };
+    
 
     if (global::profile->meta.has_value()) {
         data["name"] = global::profile->meta->name.value_or("");
