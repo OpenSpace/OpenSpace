@@ -498,6 +498,7 @@ QWidget* WindowControl::createFisheyeWidget() {
     //  | { Informational text } |  Row 0
     //  | Quality    * [DDDDD>]  |  Row 1
     //  | Tilt       * [oooooo]  |  Row 2
+    //  | FOV        * [oooooo]  |  Row 3
     //  *------------*-----------*
     
     QWidget* widget = new QWidget;
@@ -539,6 +540,18 @@ QWidget* WindowControl::createFisheyeWidget() {
     _fisheye.tilt->setMinimum(-180.0);
     _fisheye.tilt->setMaximum(180.0);
     layout->addWidget(_fisheye.tilt, 2, 1);
+
+    QLabel* labelFov = new QLabel("FOV");
+    const QString fovTip = "Set the fisheye/dome field-of-view angle used in the fisheye "
+        "renderer.";
+    labelFov->setToolTip(fovTip);
+    layout->addWidget(labelFov, 3, 0);
+
+    _fisheye.fov = new QDoubleSpinBox;
+    _fisheye.fov->setToolTip(fovTip);
+    _fisheye.fov->setMinimum(0.0);
+    _fisheye.fov->setMaximum(360.0);
+    layout->addWidget(_fisheye.fov, 3, 1);
 
     return widget;
 }
@@ -743,6 +756,7 @@ void WindowControl::resetToDefaults() {
     _cylindrical.heightOffset->setValue(DefaultHeightOffset);
     _fisheye.quality->setCurrentIndex(2);
     _fisheye.tilt->setValue(0.0);
+    _fisheye.fov->setValue(180.0);
     _sphericalMirror.quality->setCurrentIndex(2);
     _cylindrical.quality->setCurrentIndex(2);
     _equirectangular.quality->setCurrentIndex(2);
@@ -823,9 +837,9 @@ void WindowControl::generateWindowInformation(sgct::config::Window& window) cons
     switch (static_cast<ProjectionIndices>(_projectionType->currentIndex())) {
         case ProjectionIndices::Fisheye:
             vp.projection = sgct::config::FisheyeProjection {
-                .fov = 180.f,
+                .fov = static_cast<float>(_fisheye.fov->value()),
                 .quality = Quality[_fisheye.quality->currentIndex()].first,
-                .tilt = static_cast<float>(_fisheye.tilt->value())
+                .tilt = static_cast<float>(_fisheye.tilt->value()),
             };
             break;
         case ProjectionIndices::SphericalMirror:
@@ -881,9 +895,10 @@ void WindowControl::setProjectionPlanar(float hfov, float vfov) {
     _projectionType->setCurrentIndex(static_cast<int>(ProjectionIndices::Planar));
 }
 
-void WindowControl::setProjectionFisheye(int quality, float tilt) {
+void WindowControl::setProjectionFisheye(int quality, float tilt, float fov) {
     _fisheye.quality->setCurrentIndex(indexForQuality(quality));
     _fisheye.tilt->setValue(tilt);
+    _fisheye.fov->setValue(fov);
     _projectionType->setCurrentIndex(static_cast<int>(ProjectionIndices::Fisheye));
 }
 
