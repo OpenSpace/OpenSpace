@@ -93,8 +93,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureSourceInfo = {
         "TextureSource",
         "Texture Source",
-        "This value specifies a directory from where files are loaded from "
-        "disk and are used as a texture that is applied to this sphere.",
+        "A directory on disk from which to load the texture files for the sphere.",
         openspace::properties::Property::Visibility::User
     };
 

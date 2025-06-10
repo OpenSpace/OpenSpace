@@ -593,14 +593,14 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         if (_colorTableRanges.size() > _colorQuantity) {
             _selectedColorRange = _colorTableRanges[_colorQuantity];
         }
-        // If fewer data ranges to be colored per parameter is given than
-        // there are parameters in the data.
-        // This would be the case where a better structure would be needed, because
-        // it creates descrepancy which range belongs to which parameter
+        // If fewer data ranges are given than there are parameters in the data, use the
+        // first range.
+        // @TODO (2025-06-10, elon) We should use a better structure for providing the
+        // data, since this creates discrepancy for which range belongs to which parameter
         else {
             _selectedColorRange = _colorTableRanges[0];
         }
-        
+
         if (_colorTablePaths.size() > _colorQuantity) {
             _colorTablePath = _colorTablePaths[_colorQuantity].string();
         }
@@ -622,13 +622,12 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
                 std::make_unique<TransferFunction>(_colorTablePath.value());
         }
         else {
-            LWARNING("Invalid path to transferfunction, please enter new path");
+            LWARNING("Invalid path to transfer function. Please enter new path");
         }
     });
 
     _maskingQuantity.onChange([this]() {
         _shouldUpdateMaskingBuffer = true;
-        _havePrintedQuantityRange = false;
         if (_maskingRanges.size() > _maskingQuantity) {
             _selectedMaskingRange = _maskingRanges[_maskingQuantity];
         }
@@ -666,14 +665,14 @@ void RenderableFieldlinesSequence::staticallyLoadFiles(
                 _seedPointDirectory = seedPointDirectory.value_or(_seedPointDirectory);
                 _tracingVariable = tracingVariable.value_or(_tracingVariable);
                 if (!tracingVariable.has_value()) {
-                    throw("No tracing variable specified");
+                    throw ghoul::RuntimeError("No tracing variable specified");
                 }
                 std::vector<std::string> extraMagVars =
                     fls::extractMagnitudeVarsFromStrings(_extraVars);
                 std::unordered_map<std::string, std::vector<glm::vec3>> seedsPerFiles =
                     fls::extractSeedPointsFromFiles(_seedPointDirectory);
                 if (seedsPerFiles.empty()) {
-                    throw("No seed files found");
+                    throw ghoul::RuntimeError("No seed files found");
                 }
                 loadSuccess = fls::convertCdfToFieldlinesState(
                     file.state,
@@ -857,7 +856,8 @@ void RenderableFieldlinesSequence::computeSequenceEndTime() {
     else if (_files.size() == 1) {
         _sequenceEndTime = _files[0].timestamp + 7200.f;
         if (_loadingType == LoadingType::StaticLoading && !_renderForever) {
-            //TODO: Alternativly check at construction and throw exeption.
+            // TODO(2025-06-10, Elon) Alternativly check at construction and throw
+            // exeption.
             LWARNING(
                 "Only one file in data set, but ShowAtAllTimes set to false. Using a 2h "
                 "window after the files time stamp to visualize the data"
@@ -924,9 +924,9 @@ int RenderableFieldlinesSequence::updateActiveIndex(double currentTime) {
     if (_files.empty()) {
         return -1;
     }
-    // if == currentTime, sets correct index if exactly the same
-    // if size == 1 at this point, we can expect to not have a sequence and wants to show
-    // the one files fieldlines at any point in time
+    // Sets index to 0 if time is at the first file time stamp and also,
+    // if size == 1 then we can expect to not have a sequence and wants to show
+    // the one file of fieldlines at all points in time
     if (_files.begin()->timestamp == currentTime || _files.size() == 1) {
         return 0;
     }
@@ -981,8 +981,8 @@ void RenderableFieldlinesSequence::updateDynamicDownloading(double currentTime,
         trackOldest(*it);
     }
 
-    // if all files are moved into _sourceFiles then we can
-    // empty the DynamicFileSequenceDownloader _downloadedFiles;
+    // If all files are moved into _sourceFiles then we can
+    // empty the DynamicFileSequenceDownloader's downloaded files list
     _dynamicFileDownloader->clearDownloaded();
 }
 
@@ -1051,6 +1051,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         updateDynamicDownloading(currentTime, deltaTime);
         computeSequenceEndTime();
     }
+    // At least one file in data set needs to be loaded to read extra variables
     if (_isFirstLoad && _atLeastOneFileLoaded) {
         firstUpdate();
     }

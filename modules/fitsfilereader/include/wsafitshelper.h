@@ -44,16 +44,26 @@ struct ImageData {
     int height;
 };
 
-// path of file to load, layerIndex is which layer in the fits file to make into a texture
-// and minMax is the value, positive and negative, in which to cap the data between
-// to cause overexposure of higher and lower values.;
+/**
+ * Load image from a FITS file into a texture.
+ *
+ * \param path The path to the FITS file.
+ * \param layerIndex The index of the layer to load from the FITS file.
+ * \param minMax The minimum and maximum value range in which to cap the data between.
+          Values outside of range will be overexposed.
+   \return The texture created from the layer in the file with the set min-max range.
+ */
 std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
     const std::filesystem::path path, size_t layerIndex, std::pair<float, float> minMax);
 
 void readFitsHeader(const std::filesystem::path& path);
 
-// return number of data layers in fits file.
-int nLayers(const std::filesystem::path& path);
+/**
+ * Get the number of data layers in a FITS file.
+ *
+ * \param path The path to the FITS file.
+ * \return The number of layers in the FITS file.
+ */int nLayers(const std::filesystem::path& path);
 
 template<typename T, typename U>
 std::shared_ptr<ImageData<T>> readImageInternal(U& image);

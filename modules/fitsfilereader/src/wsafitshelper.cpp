@@ -68,10 +68,10 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         float* imageData = new float[layerValues.size()];
         std::vector<glm::vec3> rgbLayers;
         for (size_t i = 0; i < layerValues.size(); i++) {
-            // normalization
+            // Normalization
             float normalizedValue =
                 (layerValues[i] - minMax.first) / (minMax.second - minMax.first);
-            // clamping causes overexposure above and below max and min values
+            // Clamping causes overexposure above and below max and min values
             // intentionally as desired by Nick Arge from WSA
             normalizedValue = std::clamp(normalizedValue, 0.f, 1.f);
 

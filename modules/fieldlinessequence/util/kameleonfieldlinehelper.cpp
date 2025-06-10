@@ -129,19 +129,19 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
 }
 
 std::unordered_map<std::string, std::vector<glm::vec3>>
-extractSeedPointsFromFiles(std::filesystem::path filePath, size_t nth)
+extractSeedPointsFromFiles(std::filesystem::path path, size_t nth)
 {
     std::unordered_map<std::string, std::vector<glm::vec3>> outMap;
 
-    if (!std::filesystem::is_directory(filePath)) {
+    if (!std::filesystem::is_directory(path)) {
         LERROR(std::format(
-            "The specified seed point directory: '{}' does not exist", filePath
+            "The specified seed point directory: '{}' does not exist", path
         ));
         return outMap;
     }
 
     namespace fs = std::filesystem;
-    for (const fs::directory_entry& spFile : fs::directory_iterator(filePath)) {
+    for (const fs::directory_entry& spFile : fs::directory_iterator(path)) {
         std::filesystem::path seedFilePath = spFile.path();
         if (!spFile.is_regular_file() || seedFilePath.extension() != "txt") {
             continue;
@@ -161,7 +161,7 @@ extractSeedPointsFromFiles(std::filesystem::path filePath, size_t nth)
         while (ghoul::getline(seedFile, line)) {
             if (linenumber % nth == 0) {
                 if (!line.empty() && line[0] == '#') {
-                    // ignore line, assume it's a comment
+                    // Ignore line, assume it's a comment
                     continue;
                 }
                 std::stringstream ss(line);
@@ -191,17 +191,17 @@ extractSeedPointsFromFiles(std::filesystem::path filePath, size_t nth)
         std::string date = name.substr(dateAndTimeSeperator - 8, 8);    // 8 for yyyymmdd
         std::string dateAndTime = date + time;
 
-        // add outVec as value and time stamp as int as key
+        // Add outVec as value, with time stamp as key
         outMap[dateAndTime] = outVec;
     }
     return outMap;
 }
 std::vector<std::string>
-extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars)
+extractMagnitudeVarsFromStrings(std::vector<std::string> vars)
 {
     std::vector<std::string> extraMagVars;
-    for (int i = 0; i < static_cast<int>(extrVars.size()); i++) {
-        const std::string& str = extrVars[i];
+    for (int i = 0; i < static_cast<int>(vars.size()); i++) {
+        const std::string& str = vars[i];
 
         std::istringstream ss(str);
         std::string magVar;
@@ -217,7 +217,7 @@ extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars)
         if (counter != 3 && counter > 0) {
             extraMagVars.erase(extraMagVars.end() - counter, extraMagVars.end());
         }
-        extrVars.erase(extrVars.begin() + i);
+        vars.erase(vars.begin() + i);
         i--;
     }
     return extraMagVars;
@@ -237,10 +237,10 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
 
     switch (state.model()) {
         case fls::Model::Batsrus:
-            innerBoundaryLimit = 0.f;  // TODO specify in Lua?
+            innerBoundaryLimit = 0.f;  // TODO (2025-06-10 Elon) specify in Lua?
             break;
         case fls::Model::Enlil:
-            innerBoundaryLimit = 0.11f; // TODO specify in Lua?
+            innerBoundaryLimit = 0.11f;
             break;
         default:
             LERROR(
@@ -266,7 +266,7 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
         //--------------------------------------------------------------------------//
         auto interpolator = std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
         ccmc::Tracer tracer(kameleon, interpolator.get());
-        tracer.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
+        tracer.setInnerBoundary(innerBoundaryLimit);
         ccmc::Fieldline ccmcFieldline = tracer.bidirectionalTrace(
             tracingVar,
             seed.x,
@@ -275,9 +275,10 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
         );
         const std::vector<ccmc::Point3f>& positions = ccmcFieldline.getPositions();
 
-        if ((positions[0].component3 < 0.5f && positions[0].component3 > -0.5f) &&
-            (positions[positions.size() - 1].component3 < 0.5f &&
-                positions[positions.size() - 1].component3 > -0.5f))
+        const ccmc::Point3f& firstPos = positions[0];
+        const ccmc::Point3f& lastPos = positions[positions.size() - 1];
+        if ((firstPos.component3 < 0.5f && firstPos.component3 > -0.5f) &&
+            (lastPos.component3 < 0.5f && lastPos.component3 > -0.5f))
         {
             const size_t nLinePoints = positions.size();
 
@@ -321,10 +322,10 @@ void addExtraQuantities(ccmc::Kameleon* kameleon,
     for (int i = 0; i < nVariableAttributes; ++i) {
         std::string varname = kameleon->getVariableAttributeName(i);
         std::string varunit = kameleon->getNativeUnit(varname);
-        std::string varVizUnit = kameleon->getVisUnit(varname);
+        std::string varVisualizationUnit = kameleon->getVisUnit(varname);
         LINFO(std::format(
-            "Variable '{}' is : '{}'. Variable Unit: '{}'. Viz unit: '{}'.",
-            i, varname, varunit, varVizUnit
+            "Variable '{}' is : '{}'. Variable Unit: '{}'. Visualization unit: '{}'.",
+            i, varname, varunit, varVisualizationUnit
         ));
         variablesAttributeNames.push_back(varname);
     }

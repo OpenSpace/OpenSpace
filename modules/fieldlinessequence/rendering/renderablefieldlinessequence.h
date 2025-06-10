@@ -54,7 +54,7 @@ public:
         Osfls
     };
 
-    // Used to determine if lines should be colored uniformly or by a some data variable
+    // Used to determine if lines should be colored uniformly or by some data variable
     enum class ColorMethod {
         Uniform,
         ByQuantity
@@ -82,7 +82,7 @@ public:
         };
         FileStatus status;
         std::filesystem::path path;
-        // assume timestamp is -1 until status is = Loaded
+        // Assume timestamp is -1 until FileStatus is = Loaded
         double timestamp = -1.0;
         FieldlinesState state;
 
@@ -104,38 +104,36 @@ private:
         const std::optional<std::string>& traceVariable);
 
     std::deque<File> _files;
-    // The function loads the file in the sense that it creates the FieldlineState object in
-    // the File object. The function also deletes the oldest file if the loadedFiles queue
-    // is full. The currentTime is given a default value because the function is also called
-    // if loadingType = StaticLoading where things initializes in the constructor where
-    // current time is not set yet. In that case, the current time is also irrelevant here.
+    // The function loads the file in the sense that it creates the FieldlineState object
+    // in the File object. The function also deletes the oldest file if the loadedFiles
+    // queue is full.
     void loadFile(File& file);
     void trackOldest(File& file);
 
-    SourceFileType _inputFileType;
-    // Static Loading on default / if not specified
-    LoadingType _loadingType;
+    // Not optional, but initialized with osfls because that is what we expect to be used
+    SourceFileType _inputFileType = SourceFileType::Osfls;
+    // Static Loading on default if not specified
+    LoadingType _loadingType = LoadingType::StaticLoading;
     // path to directory with seed point files
     std::filesystem::path _seedPointDirectory;
-    // Which tracing vaiable to trace. Often 'b' is for magnetic field
+    // Which tracing variable to trace. Often 'b' is for magnetic field
     std::string _tracingVariable;
-    // Extra variables such as rho, p or t
+    // Extra variables such as rho, p or t for density, pressure or temperature
     std::vector<std::string> _extraVars;
-    // Manual time offset
     float _manualTimeOffset = 0.0;
-    // Estimated / calculated end of sequence.
+    // Estimated / calculated end of sequence
     double _sequenceEndTime = 0.0;
     // If there's just one state it should never disappear
     bool _renderForever = false;
     bool _inInterval = false;
 
-    // dataID that corresponds to what dataset to use if using DynamicDownloading
+    // Data ID that corresponds to what dataset to use if using DynamicDownloading
     int _dataID;
-    // number of files to queue up at a time
+    // Number of files to queue up at a time
     size_t _nFilesToQueue = 10;
-    // to keep track of oldest file
+    // To keep track of oldest file
     std::deque<File*> _loadedFiles;
-    // max number of files loaded at onse
+    // The max number of files loaded at once
     size_t _maxLoadedFiles = 100;
     std::string _infoURL;
     std::string _dataURL;
@@ -147,9 +145,8 @@ private:
     // domain limits.
     float _scalingFactor = 1.f;
     fls::Model _model = fls::Model::Invalid;
-    bool _shouldUpdateMaskingBuffer;
-    bool _shouldUpdateColorBuffer;
-    bool _shouldUpdatePositionBuffer;
+    bool _shouldUpdateMaskingBuffer = false;
+    bool _shouldUpdateColorBuffer = false;
     int _activeIndex = -1;
     bool _atLeastOneFileLoaded = false;
 
@@ -195,13 +192,9 @@ private:
     properties::BoolProperty _domainEnabled;
     // Group to hold the Domain properties
     properties::PropertyOwner _domainGroup;
-    // Domain Limits along x-axis
     properties::Vec2Property _domainX;
-    // Domain Limits along y-axis
     properties::Vec2Property _domainY;
-    // Domain Limits along z-axis
     properties::Vec2Property _domainZ;
-    // Domain Limits radially
     properties::Vec2Property _domainR;
 
     // Toggle flow [ON/OFF]
@@ -230,8 +223,6 @@ private:
     properties::OptionProperty _maskingQuantity;
     // used to save property for later initialization
     int _maskingQuantityTemp = 0;
-    // printing min and max of property
-    bool _havePrintedQuantityRange = false;
 
     // Line width for the line rendering part
     properties::FloatProperty _lineWidth;
@@ -239,7 +230,6 @@ private:
     properties::TriggerProperty _jumpToStartBtn;
     properties::BoolProperty _saveDownloadsOnShutdown;
 
-    // At least one file in data set needs to be loaded to read extra variables
     bool _isFirstLoad = true;
 };
 

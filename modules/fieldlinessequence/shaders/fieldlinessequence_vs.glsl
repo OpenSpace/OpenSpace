@@ -92,7 +92,7 @@ void main() {
 
   if (usingDomain && hasColor) {
     float radius = length(in_position);
-    // if position is outside of domain
+    // If position is outside of domain
     if (in_position.x < domainLimX.x || in_position.x > domainLimX.y ||
         in_position.y < domainLimY.x || in_position.y > domainLimY.y ||
         in_position.z < domainLimZ.x || in_position.z > domainLimZ.y ||

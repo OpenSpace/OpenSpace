@@ -39,12 +39,16 @@ std::vector<std::string>
     extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars);
 
 /**
-* Extract seedpoints from a text file. Function is used both in
-* renderablefieldlinesequence and cdf to osfls converter task.
-* \param path is the part to the seedpoint file
-*/
- std::unordered_map<std::string, std::vector<glm::vec3>> extractSeedPointsFromFiles(
-     std::filesystem::path path, size_t nth = 1);
+ * Extract seedpoints from a text file. This function is used both in
+ * renderablefieldlinesequence and the .cdf to .osfls converter task.
+ *
+ * \param path The path to a directory with files containing list of seedpoints
+ * \param nth Is 1 on default to incluse every seedpoint. nth can be used to reduce the
+          amount of data produced be only including every nth seed point
+ * \return A list of seedpoints, mapped by their corresponding time step
+ */
+std::unordered_map<std::string, std::vector<glm::vec3>> extractSeedPointsFromFiles(
+    std::filesystem::path path, size_t nth = 1);
 /**
  * Traces field lines from the provided cdf file using kameleon and stores the data in the
  * provided FieldlinesState. Returns `false` if it fails to create a valid state. Requires

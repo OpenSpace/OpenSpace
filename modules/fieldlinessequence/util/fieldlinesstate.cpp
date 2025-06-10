@@ -105,7 +105,6 @@ bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
     // Read single value variables
     ifs.read(reinterpret_cast<char*>(&_triggerTime), sizeof(double));
     ifs.read(reinterpret_cast<char*>(&_model), sizeof(int32_t));
-    // size of bool flagged to change to be more exact size.
     ifs.read(reinterpret_cast<char*>(&_isMorphable), sizeof(uint8_t));
     ifs.read(reinterpret_cast<char*>(&nLines), sizeof(uint64_t));
     ifs.read(reinterpret_cast<char*>(&nPoints), sizeof(uint64_t));

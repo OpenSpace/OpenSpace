@@ -51,7 +51,7 @@ namespace {
         // The folder to the cdf files to extract data from
         std::filesystem::path input [[codegen::directory()]];
 
-        // Choose to decrease cadence and only use every nth time step/ input file
+        // Choose to decrease cadence and only use every nth time step / input file
         std::optional<int> nthTimeStep;
 
         // A path to folder with text files with seedpoints.
@@ -188,6 +188,7 @@ void KameleonVolumeToFieldlinesTask::perform(
                 newState.saveStateToJson(_outputFolder.string() + fileName);
                 break;
             }
+
         }
         ++fileNumber;
     }
