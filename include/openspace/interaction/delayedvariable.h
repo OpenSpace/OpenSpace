@@ -46,7 +46,6 @@ public:
 private:
     ScaleType _scaleFactor;
     ScaleType _friction;
-    T _targetValue = T(0);
     T _currentValue = T(0);
 };
 
