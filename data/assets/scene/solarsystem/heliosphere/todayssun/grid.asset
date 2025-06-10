@@ -34,7 +34,8 @@ local CarringtonPrimeMeridian = {
     Name = "Carrington Prime Meridian",
     Path =  "/Solar System/Heliosphere",
     Description = [[An arc showing the Carrington prime meridian of the Sun.
-      The line from pole to pole at 0 degree longitude.]]
+      The line from pole to pole at 0 degree longitude.]],
+    Focusable = false
   }
 }
 
@@ -62,7 +63,8 @@ local WSA_GridSlice = {
   GUI = {
     Name = "Solar Longitude Facing the Earth",
     Path =  "/Solar System/Heliosphere",
-    Description = [[An arc on the Sun surface from pole to pole that always faces Earth.]]
+    Description = [[An arc on the Sun surface from pole to pole that always faces Earth.]],
+    Focusable = false
   }
 }
 
@@ -86,7 +88,8 @@ local WSA_Grid10Degrees = {
     Name = "Grid on Sun",
     Path =  "/Solar System/Heliosphere",
     Description = [[A grid aligned with the Sun-Earth line, with a 10-degree
-      separation between line segments by default.]]
+      separation between line segments by default.]],
+    Focusable = false
   }
 }
 
