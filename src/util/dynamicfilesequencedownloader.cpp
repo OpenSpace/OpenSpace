@@ -536,8 +536,7 @@ void DynamicFileSequenceDownloader::update(double time, double deltaTime) {
         // Too fast, do nothing
         if (!_hasNotifiedTooFast) {
             LWARNING(
-                "Dynamic File Sequence Downloader: Setting time speed faster than 2h "
-                "per second will pause the downloader."
+                "Setting time speed faster than 2h per second will pause the downloader."
             );
             _hasNotifiedTooFast = true;
         }
