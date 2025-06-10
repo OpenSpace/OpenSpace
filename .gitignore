@@ -15,6 +15,9 @@ cmake-build-*
 cmake_install.cmake
 install_manifest.txt
 Makefile
+compile_commands.json
+.cache/
+GPUCache/
 
 # OS specific things
 .DS_Store
