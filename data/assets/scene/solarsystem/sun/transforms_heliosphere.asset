@@ -114,7 +114,7 @@ local WSAOffset60 = {
     Name = "WSA Data Offset 60 Degrees",
     Path = "/Solar System/Sun",
     Description = [[WSA outputs (FITS files) have the Sun-Earth line 60 degrees shifted
-      from the edge.]],
+      from the edge. This scene graph node handles that transformation.]],
     Hidden = true
   }
 }

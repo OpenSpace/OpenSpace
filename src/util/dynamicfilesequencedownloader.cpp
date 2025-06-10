@@ -278,7 +278,7 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
             //TODO what value is actually to large to handle?
             if (data.size() > std::numeric_limits<std::size_t>::max()) {
                 throw ghoul::RuntimeError(
-                    "Http responds with list of available files being too large"
+                    "Http response with list of available files is too large, i.e. too many files"
                 );
             }
 
@@ -507,7 +507,7 @@ void DynamicFileSequenceDownloader::putInQueue() {
             it->state = File::State::OnQueue;
         }
         ++nFileLimit;
-        // exit out early if enough files are queued / already downloaded
+        // Exit out early if enough files are queued / already downloaded
         if (nFileLimit == _nFilesToQueue) {
             break;
         }
@@ -531,7 +531,7 @@ void DynamicFileSequenceDownloader::update(double time, double deltaTime) {
     }
     // More than 2hrs a second would generally be unfeasable
     // for a regular internet connection to operate at
-    constexpr int SpeedThreshold = 7200;
+    constexpr int SpeedThreshold = 7200; // 2 hours in seconds
     if (abs(deltaTime) > SpeedThreshold) {
         // Too fast, do nothing
         if (!_hasNotifiedTooFast) {
@@ -581,7 +581,7 @@ void DynamicFileSequenceDownloader::update(double time, double deltaTime) {
         }
     }
     else if (!_isForwardDirection && _currentFile != _availableData.begin()) {
-        // if file is there and time is between prev and this file
+        // If file is there and time is between prev and this file
         // then change this to be prev. Same goes here as if time is moving forward
         // we will use forward 'usage', meaning file is active from now till next
         if (_currentFile - 1 != _availableData.begin() &&
@@ -590,7 +590,7 @@ void DynamicFileSequenceDownloader::update(double time, double deltaTime) {
         {
             _currentFile--;
         }
-        // if we are beyond the prev file, again delta time might be to fast, but we
+        // If we are beyond the prev file, again delta time might be to fast, but we
         // no longer know where we are so we reinitialize
         else if (_currentFile - 1 != _availableData.begin() &&
                  (_currentFile - 1)->time > time)
