@@ -296,12 +296,13 @@ bool RenderableTrail::isReady() const {
 }
 
 glm::dvec3 RenderableTrail::translationPosition(Time time) const {
-    // Use an empty modelTransform to get the position in local coordinates. Also, the
-    // previous frame time does not matter so we just use time 0
+    // Use empty modelTransform (local coordinates) and time 0; previous frame time
+    // doesn't matter
     const UpdateData data = { {}, time, Time(0.0) };
-    // @TODO (2025-06-09, emmbr) Do we need to also call the update for the translation?
-    // As of now, this borks up the performance of the trail completely, and I'm not sure
-    // the update is needed since we are not using the cached version of the position.
+    // (2025-06-09, emmbr) No need to call update here, since it's only for caching
+    // the position and kills the trail performance. If behavior changes or we add
+    // a translation type that needs pre-update, we need add the update and address
+    // performance
     //_translation->update(data);
     return _translation->position(data);
 }
