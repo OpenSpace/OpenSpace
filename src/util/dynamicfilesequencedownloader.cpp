@@ -581,7 +581,7 @@ void DynamicFileSequenceDownloader::update(double time, double deltaTime) {
         }
     }
     else if (!_isForwardDirection && _currentFile != _availableData.begin()) {
-        // if file is there and time is between prev and this file
+        // If file is there and time is between prev and this file
         // then change this to be prev. Same goes here as if time is moving forward
         // we will use forward 'usage', meaning file is active from now till next
         if (_currentFile - 1 != _availableData.begin() &&
