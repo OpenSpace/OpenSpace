@@ -590,7 +590,7 @@ void DynamicFileSequenceDownloader::update(double time, double deltaTime) {
         {
             _currentFile--;
         }
-        // if we are beyond the prev file, again delta time might be to fast, but we
+        // If we are beyond the prev file, again delta time might be to fast, but we
         // no longer know where we are so we reinitialize
         else if (_currentFile - 1 != _availableData.begin() &&
                  (_currentFile - 1)->time > time)
