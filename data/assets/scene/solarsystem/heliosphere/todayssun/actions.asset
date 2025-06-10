@@ -29,7 +29,7 @@ end)
 
 asset.meta = {
   Name = "Todays Sun's Actions",
-  Description = "Actions related to the real-time visualizations of the Sun",
+  Description = "Actions related to the real-time visualizations of the Sun.",
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license"

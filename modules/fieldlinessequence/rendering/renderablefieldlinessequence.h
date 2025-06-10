@@ -152,7 +152,6 @@ private:
     bool _shouldUpdatePositionBuffer;
     int _activeIndex = -1;
     bool _atLeastOneFileLoaded = false;
-    properties::BoolProperty _saveDownloadsOnShutdown;
 
     bool _isLoadingStateFromDisk = false;
 
@@ -192,6 +191,19 @@ private:
     // Whether or not to use additive blending
     properties::BoolProperty _colorABlendEnabled;
 
+    // Whether or not to use Domain limits
+    properties::BoolProperty _domainEnabled;
+    // Group to hold the Domain properties
+    properties::PropertyOwner _domainGroup;
+    // Domain Limits along x-axis
+    properties::Vec2Property _domainX;
+    // Domain Limits along y-axis
+    properties::Vec2Property _domainY;
+    // Domain Limits along z-axis
+    properties::Vec2Property _domainZ;
+    // Domain Limits radially
+    properties::Vec2Property _domainR;
+
     // Toggle flow [ON/OFF]
     properties::BoolProperty _flowEnabled;
     // Group to hold the flow/particle properties
@@ -221,23 +233,11 @@ private:
     // printing min and max of property
     bool _havePrintedQuantityRange = false;
 
-    // Whether or not to use Domain limits
-    properties::BoolProperty _domainEnabled;
-    // Group to hold the Domain properties
-    properties::PropertyOwner _domainGroup;
-    // Domain Limits along x-axis
-    properties::Vec2Property _domainX;
-    // Domain Limits along y-axis
-    properties::Vec2Property _domainY;
-    // Domain Limits along z-axis
-    properties::Vec2Property _domainZ;
-    // Domain Limits radially
-    properties::Vec2Property _domainR;
-
     // Line width for the line rendering part
     properties::FloatProperty _lineWidth;
     // Button which executes a time jump to start of sequence
     properties::TriggerProperty _jumpToStartBtn;
+    properties::BoolProperty _saveDownloadsOnShutdown;
 
     // At least one file in data set needs to be loaded to read extra variables
     bool _isFirstLoad = true;

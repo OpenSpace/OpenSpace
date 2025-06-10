@@ -3,7 +3,7 @@ local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local size = 700000000
+local size = 7.0E8
 
 local CarringtonPrimeMeridian = {
   Identifier = "CarringtonPrimeMeridian",
@@ -11,7 +11,7 @@ local CarringtonPrimeMeridian = {
   Transform = {
     Translation = {
       Type = "StaticTranslation",
-      Position = { 3500000, 0, 0 }
+      Position = { 3500000.0, 0.0, 0.0 }
     },
     Rotation = {
       Type = "StaticRotation",
@@ -19,7 +19,7 @@ local CarringtonPrimeMeridian = {
     },
     Scale = {
       Type = "StaticScale",
-      Scale = 698000000
+      Scale = 6.98E8
     }
   },
   Renderable = {

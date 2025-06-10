@@ -233,7 +233,7 @@ namespace {
         // colorized by. Should be entered as min value, max value
         std::optional<std::vector<glm::vec2>> colorTableRanges;
 
-        // Specifies the total range
+        // Specifies the total data range to where color map will be applied
         std::optional<glm::vec2> colorMinMaxRange;
 
         // [[codegen::verbatim(FlowEnabledInfo.description)]]
@@ -308,21 +308,23 @@ namespace {
         };
 
         // Choose type of loading:
-        // StaticLoading: Download and load files on startup.
-        // DynamicDownloading: Download and load files during run time.
+        // `StaticLoading`: Download and load files on startup.
+        // `DynamicDownloading`: Download and load files during run time.
         std::optional<LoadingType> loadingType;
 
-        // A data ID that corresponds to what dataset to use if using dynamicWebContent
+        // A data ID that corresponds to what dataset to use if using dynamic data
+        // downloading.
         std::optional<int> dataID;
 
-        // This is a max value of the amount of files to queue up
-        // so that not too big of a data set is downloaded.
+        // A maximum number to limit the amount of files being downloaded simultaneously.
         std::optional<int> numberOfFilesToQueue;
 
-        // A URL that returns a JSON formated page with metadata needed for the dataURL.
+        // A URL to a JSON-formatted page with metadata for the `DataURL`.
+        // Required if using dynamic downloading.
         std::optional<std::string> infoURL;
 
-        // A URL that returns a JSON formated page with a list of each available file.
+        // A URL to a JSONformatted page with a list of each available data file.
+        // Required if using dynamic downloading.
         std::optional<std::string> dataURL;
 
         enum class [[codegen::map(openspace::RenderableFieldlinesSequence::SourceFileType)]]
@@ -338,8 +340,9 @@ namespace {
         // Path to folder containing the input files.
         std::optional<std::filesystem::path> sourceFolder [[codegen::directory()]];
 
-        // Path to a .txt file containing seed points. It is mandatory if CDF is used as
-        // input. Files need time stamp in file name like so: yyyymmdd_hhmmss.txt
+        // Path to a directory including .txt files that contain seed points. The files
+        // need a file name with a timestamp in the format: yyyymmdd_hhmmss.txt.
+        // Required if CDF is used as input.
         std::optional<std::filesystem::path> seedPointDirectory [[codegen::directory()]];
 
         // Extra variables that can be used to color the field lines by.
@@ -348,8 +351,9 @@ namespace {
         // Which variable in CDF file to trace.
         std::optional<std::string> tracingVariable;
 
-        // This is set to false by default and will delete all the downloaded content when
-        // OpenSpace is shut down. Set to true to save all the downloaded files.
+        // Decides whether or not to cache the downloaded data between runs. By default,
+        // caching is disabled and all downloaded content will be deleted when OpenSpace
+        // is shut down. Set to true to save all the downloaded files.
         std::optional<bool> cacheData;
     };
 #include "renderablefieldlinessequence_codegen.cpp"
@@ -429,7 +433,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         _inputFileType == SourceFileType::Cdf)
     {
         throw ghoul::RuntimeError(
-            "Dynamic loading (or downloading) is only supported for osfls and json files"
+            "Dynamic loading (or downloading) is only supported for .osfls and .json files"
         );
     }
     if (_loadingType == LoadingType::StaticLoading && !p.sourceFolder.has_value()) {
@@ -447,14 +451,14 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 
     setModelDependentConstants();
 
-    // setting scaling factor after model to support unknown model (model = invalid, but
-    // scaling factor specified.
+    // Setting the scaling factor after model to support the case with unknown models
+    // (model = invalid), but scaling factor being specified.
     _scalingFactor = p.scaleToMeters.value_or(_scalingFactor);
 
     if (_loadingType == LoadingType::DynamicDownloading) {
         if (!p.dataID.has_value()) {
             throw ghoul::RuntimeError(
-                "If running with dynamic downloading, dataID needs to be specified"
+                "If running with dynamic downloading, DataID needs to be specified"
             );
         }
         _dataID = *p.dataID;
@@ -583,8 +587,9 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             return;
         }
         _shouldUpdateColorBuffer = true;
-        //_selectedColorRange not needed to be set in constructor, due to this onChnage is
-        // declared before firstupdate() function that sets _colorQuantity.
+        // Note that we do not need to set _selectedColorRange in the constructor, due to
+        // this onChange being declared before firstupdate() function that sets
+        // _colorQuantity.
         if (_colorTableRanges.size() > _colorQuantity) {
             _selectedColorRange = _colorTableRanges[_colorQuantity];
         }

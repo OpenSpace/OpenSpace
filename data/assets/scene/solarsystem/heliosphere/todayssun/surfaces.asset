@@ -104,10 +104,7 @@ local WSA_54_Magnetograms_GONGZ = {
     DataID = 2148,
     FitsLayer = 4,
     LayerNames = {
-      -- ['0'] = "Coronal Magnetic Field at 5 Solar Radii (nT)",
       ['1'] = "Flux tube expansion factor evaluated at the source surface",
-      -- ['2'] = "Colatitude of open field footpoints at photosphere (rad)",
-      -- ['3'] = "Longitude of open field footpoints (rad)",
       ['4'] = "Observed Photospheric Field (Gauss)",
       ['5'] = "Distance from open field footpoint to nearest coronal boundary (deg)",
       ['6'] = "Open (1,2,3) and closed (0) regions on the photosphere [1=in-to-out tracing; 2=out-to-in tracing; 3=both] (no units)",
@@ -147,10 +144,7 @@ local WSA_54_Magnetograms_ADAPT = {
     DataID = 2149,
     FitsLayer = 4,
     LayerNames = {
-      -- ['0'] = "Coronal Magnetic Field at 5 Solar Radii (nT)",
       ['1'] = "Flux tube expansion factor evaluated at the source surface",
-      -- ['2'] = "Colatitude of open field footpoints at photosphere (rad)",
-      -- ['3'] = "Longitude of open field footpoints (rad)",
       ['4'] = "Observed Photospheric Field (Gauss)",
       ['5'] = "Distance from open field footpoint to nearest coronal boundary (deg)",
       ['6'] = "Open (1,2,3) and closed (0) regions on the photosphere [1=in-to-out tracing; 2=out-to-in tracing; 3=both] (no units)",
@@ -279,7 +273,10 @@ asset.meta = {
   Name = "WSA 5.4. Streaming Surface Data Dynamically",
   Version = "1.0",
   Description = [[Downloading data from the WSA 5.4 simulation model, showing the dynamic
-    Sun at any point. It includes .fits files for solar surface data.]],
+    Sun at any point. It includes .fits files for solar surface data. GONG-Z is the
+    zero-corrected synoptic surface magnetic maps from the Global Oscillation Network
+    Group, while GONG-ADAPT is a model based on GONG, where ADAPT stands for Air Force
+    Data Assimilative Photospheric Flux Transport.]],
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license"

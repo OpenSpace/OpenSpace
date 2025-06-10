@@ -18,7 +18,7 @@ local opennessColorTable = transferFunctions .."/openness_spec.txt"
 local infoURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id="
 local dataURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID="
 
-local sunRadius = 695700000
+local sunRadius = 695700000.0
 
 local fieldlinesSCS = {
   Identifier = "WSA_54_Fieldlines_SCS_OI",

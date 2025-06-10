@@ -41,7 +41,7 @@ asset.export(WhiteBackground)
 asset.meta = {
   Name = "White Background",
   Description = [[A big sphere that works as a white background when inside the solar
-    system]],
+    system.]],
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license"

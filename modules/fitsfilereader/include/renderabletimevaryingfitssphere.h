@@ -68,7 +68,6 @@ private:
             return time < other.time;
         }
     };
-    ghoul::Dictionary ensureTextureSource(ghoul::Dictionary dictionary);
     void loadTexture();
     void trackOldest(File& file);
     void showCorrectFileName();

@@ -11,7 +11,7 @@ local SunEarthLine = {
     EndNode = earth.Earth.Identifier
   },
   GUI = {
-    Name = "Sun Earth Line",
+    Name = "Sun-Earth Line",
     Path = "/Solar System/Heliosphere",
     Description = [[A line between the Sun and the Earth to help with spatial
       orientation.]],
@@ -33,7 +33,7 @@ asset.export("NodeLine", SunEarthLine)
 
 
 asset.meta = {
-  Name = "Sun Earth Line",
+  Name = "Sun-Earth Line",
   Version = "1.0",
   Description = [[A line between the Sun and the Earth to help with spatial
     orientation.]],

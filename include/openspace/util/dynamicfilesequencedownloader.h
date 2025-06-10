@@ -43,7 +43,6 @@ struct File {
     double time = 0.0;
     std::string URL;
     std::filesystem::path path;
-    //TODO: need Cadence?
     double cadence = 0.0;
     int availableIndex = -1;
     enum class State {
@@ -58,15 +57,13 @@ struct File {
 
 class DynamicFileSequenceDownloader {
 public:
-    // Constructor of dynamic downloader. Add one last parameter to change number of files
-    // that it will keep around during run time instead of the default of 100 files.
     DynamicFileSequenceDownloader(int dataID, std::string identifier, std::string infoURL,
-        std::string dataURL, size_t nOfFilesToQ);
+        std::string dataURL, size_t nFilesToQueue);
 
     void deinitialize(bool cacheFiles);
     void requestDataInfo(std::string httpInfoRequest);
     void requestAvailableFiles(std::string httpDataRequest,
-        std::filesystem::path syncdir);
+        std::filesystem::path syncDir);
     std::vector<File>::iterator closestFileToNow(double time);
     void update(double time, double deltaTime);
     const std::vector<std::filesystem::path>& downloadedFiles();
@@ -79,7 +76,8 @@ public:
 private:
     void downloadFile();
     double calculateCadence() const;
-    void putOnQueue();
+    void putInQueue();
+
     bool _isForwardDirection = true;
     bool _isFirstFrame = true;
     bool _isSecondFrame = true;

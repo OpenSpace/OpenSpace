@@ -320,10 +320,10 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
         if (!p.layerNames.has_value()) {
             throw ghoul::RuntimeError("At least one name for one layer is required.");
         }
-        const ghoul::Dictionary dictionary = *p.layerNames;
-        for (std::string_view key : dictionary.keys()) {
+        const ghoul::Dictionary names = *p.layerNames;
+        for (std::string_view key : names.keys()) {
             const int k = std::stoi(std::string(key));
-            std::string v = dictionary.value<std::string>(key);
+            std::string v = names.value<std::string>(key);
             _layerNames.emplace(k, std::move(v));
         }
         if (!p.fitsLayer.has_value()) {
@@ -496,7 +496,6 @@ void RenderableTimeVaryingFitsSphere::update(const UpdateData& data) {
             // true => We stepped forward to a time represented by another state
             (nextIdx < _files.size() && currentTime >= _files[nextIdx].time))
         {
-            int previousIndex = _activeTriggerTimeIndex;
             updateActiveTriggerTimeIndex(currentTime);
             File& file = _files[_activeTriggerTimeIndex];
             if (file.status == File::FileStatus::Downloaded) {

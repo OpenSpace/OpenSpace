@@ -479,7 +479,7 @@ std::vector<File>::iterator DynamicFileSequenceDownloader::closestFileToNow(doub
     return _isForwardDirection ? prev : it;
 }
 
-void DynamicFileSequenceDownloader::putOnQueue() {
+void DynamicFileSequenceDownloader::putInQueue() {
     ZoneScoped;
 
     std::vector<File>::iterator end;
@@ -612,7 +612,7 @@ void DynamicFileSequenceDownloader::update(double time, double deltaTime) {
         checkForFinishedDownloads();
     }
 
-    putOnQueue();
+    putInQueue();
     downloadFile();
 }
 
