@@ -531,7 +531,7 @@ void DynamicFileSequenceDownloader::update(double time, double deltaTime) {
     }
     // More than 2hrs a second would generally be unfeasable
     // for a regular internet connection to operate at
-    constexpr int SpeedThreshold = 7200;
+    constexpr int SpeedThreshold = 7200; // 2 hours in seconds
     if (abs(deltaTime) > SpeedThreshold) {
         // Too fast, do nothing
         if (!_hasNotifiedTooFast) {
