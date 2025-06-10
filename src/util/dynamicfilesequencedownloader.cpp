@@ -507,7 +507,7 @@ void DynamicFileSequenceDownloader::putOnQueue() {
             it->state = File::State::OnQueue;
         }
         ++nFileLimit;
-        // exit out early if enough files are queued / already downloaded
+        // Exit out early if enough files are queued / already downloaded
         if (nFileLimit == _nFilesToQueue) {
             break;
         }
