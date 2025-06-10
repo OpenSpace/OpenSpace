@@ -88,8 +88,10 @@ void Scale::requireUpdate() {
     _needsUpdate = true;
 }
 
-bool Scale::initialize() {
-    return true;
+void Scale::initialize() {
+    if (_timeFrame) {
+        _timeFrame->initialize();
+    }
 }
 
 glm::dvec3 Scale::scaleValue() const {

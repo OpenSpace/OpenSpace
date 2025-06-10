@@ -97,6 +97,7 @@ public:
 
     virtual ~RenderableTrail() override = default;
 
+    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
 
@@ -114,6 +115,15 @@ public:
 
 protected:
     explicit RenderableTrail(const ghoul::Dictionary& dictionary);
+
+    /**
+     * Get the trail position for a given time from the Translation object. The position
+     * will be in the local coordinate system of the renderable.
+     *
+     * \param time The time for which to get the position
+     * \return The position of the trail at the given time, in the local coordinate system
+     */
+    glm::dvec3 translationPosition(Time time) const;
 
     static documentation::Documentation Documentation();
 
@@ -179,7 +189,7 @@ protected:
     /// Flag used to determine if we use a split trail or not during rendering
     bool _useSplitRenderMode = false;
     /// Number of unique vertices used when rendering segmented trails
-    int _numberOfUniqueVertices = 0;
+    int _nUniqueVertices = 0;
 
 private:
     void internalRender(bool renderLines, bool renderPoints,

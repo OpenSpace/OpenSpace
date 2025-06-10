@@ -81,6 +81,13 @@ TimelineScale::TimelineScale(const ghoul::Dictionary& dictionary)
     addProperty(_shouldInterpolate);
 }
 
+void TimelineScale::initialize() {
+    Scale::initialize();
+    for (const Keyframe<ghoul::mm_unique_ptr<Scale>>& kf : _timeline.keyframes()) {
+        kf.data->initialize();
+    }
+}
+
 void TimelineScale::update(const UpdateData& data) {
     const double now = data.time.j2000Seconds();
     using KeyframePointer = const Keyframe<ghoul::mm_unique_ptr<Scale>>*;

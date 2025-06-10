@@ -37,6 +37,8 @@
 #include <glm/gtx/quaternion.hpp>
 
 namespace {
+    constexpr std::string_view _loggerCat = "GlobeRotation";
+
     constexpr openspace::properties::Property::PropertyInfo GlobeInfo = {
         "Globe",
         "Attached Globe",
@@ -136,7 +138,7 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
 
     _sceneGraphNode = p.globe;
     _sceneGraphNode.onChange([this]() {
-        findNode();
+        fillAttachedNode();
         setUpdateVariables();
     });
     addProperty(_sceneGraphNode);
@@ -162,13 +164,10 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
     addProperty(_useCamera);
 }
 
-void GlobeRotation::findNode() {
+void GlobeRotation::fillAttachedNode() {
     SceneGraphNode* n = sceneGraphNode(_sceneGraphNode);
-    if (!n || !n->renderable()) {
-        LERRORC(
-            "GlobeRotation",
-            "Could not set attached node as it does not have a Renderable"
-        );
+    if (!n) {
+        LERROR(std::format("Could not find attached node '{}'", _sceneGraphNode.value()));
         return;
     }
     _attachedNode = n;
@@ -180,7 +179,7 @@ void GlobeRotation::setUpdateVariables() {
 }
 
 glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitude) const {
-    ghoul_assert(_attachedNode, "Renderable cannot be nullptr");
+    ghoul_assert(_attachedNode, "Attached node cannot be nullptr");
 
     const Geodetic3 pos = {
         { .lat = glm::radians(latitude), .lon = glm::radians(longitude) },
@@ -206,12 +205,12 @@ glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitud
     );
 }
 
-void GlobeRotation::update(const UpdateData& data) {
-    if (!_attachedNode) [[unlikely]] {
-        findNode();
-        _matrixIsDirty = true;
-    }
+void GlobeRotation::initialize() {
+    Rotation::initialize();
+    fillAttachedNode();
+}
 
+void GlobeRotation::update(const UpdateData& data) {
     if (_useHeightmap || _useCamera) {
         // If we use the heightmap, we have to compute the height every frame
         setUpdateVariables();
@@ -225,11 +224,7 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
         return _matrix;
     }
 
-    if (!_attachedNode) {
-        LERRORC(
-            "GlobeRotation",
-            std::format("Could not find globe '{}'", _sceneGraphNode.value())
-        );
+    if (!_attachedNode) [[unlikely]] {
         return _matrix;
     }
 

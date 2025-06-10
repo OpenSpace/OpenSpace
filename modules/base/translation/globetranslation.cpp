@@ -37,6 +37,8 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
+    constexpr std::string_view _loggerCat = "GlobeTranslation";
+
     constexpr openspace::properties::Property::PropertyInfo GlobeInfo = {
         "Globe",
         "Attached Globe",
@@ -188,14 +190,10 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
 
 void GlobeTranslation::fillAttachedNode() {
     SceneGraphNode* n = sceneGraphNode(_sceneGraphNode);
-    if (!n || !n->renderable()) {
-        LERRORC(
-            "GlobeTranslation",
-            "Could not set attached node as it does not have a renderable"
-        );
+    if (!n) {
+        LERROR(std::format("Could not find attached node '{}'", _sceneGraphNode.value()));
         return;
     }
-
     _attachedNode = n;
 }
 
@@ -204,12 +202,12 @@ void GlobeTranslation::setUpdateVariables() {
     requireUpdate();
 }
 
-void GlobeTranslation::update(const UpdateData& data) {
-    if (!_attachedNode) [[unlikely]] {
-        fillAttachedNode();
-        _positionIsDirty = true;
-    }
+void GlobeTranslation::initialize() {
+    Translation::initialize();
+    fillAttachedNode();
+}
 
+void GlobeTranslation::update(const UpdateData& data) {
     if (_useHeightmap || _useCamera) {
         // If we use the heightmap, we have to compute the height every frame
         setUpdateVariables();
@@ -223,11 +221,7 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
         return _position;
     }
 
-    if (!_attachedNode) {
-        LERRORC(
-            "GlobeRotation",
-            std::format("Could not find attached node '{}'", _sceneGraphNode.value())
-        );
+    if (!_attachedNode) [[unlikely]] {
         return _position;
     }
 

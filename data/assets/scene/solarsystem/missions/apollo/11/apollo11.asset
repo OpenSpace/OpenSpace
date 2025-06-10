@@ -93,7 +93,7 @@ local Apollo11MoonTrail = {
       Observer = coreKernels.ID.Moon,
       Frame = coreKernels.Frame.Moon
     },
-    Color = { 0.180000,0.510000,0.750000 },
+    Color = { 0.18, 0.51, 0.75 },
     StartTime = "1969 JUL 19 19:38:29.183",
     EndTime = "1969 JUL 22 04:55:35.183",
     SampleInterval = 60,
@@ -137,7 +137,7 @@ local Apollo11LemTrail = {
     Type = "RenderableTrailTrajectory",
     Enabled = false,
     Translation = lemTranslation,
-    Color = { 0.780000,0.940000,0.340000 },
+    Color = { 0.78, 0.94, 0.34 },
     StartTime = "1969 JUL 20 19:10:25.183",
     EndTime = "1969 JUL 20 20:17:46.183",
     SampleInterval = 2,
