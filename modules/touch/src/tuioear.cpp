@@ -29,8 +29,21 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <ghoul/logging/logmanager.h>
+#include <mutex>
 
 using namespace TUIO;
+
+namespace {
+    openspace::TouchInput touchInput(TuioCursor* tcur) {
+        return openspace::TouchInput(
+            static_cast<size_t>(tcur->getTuioSourceID()),
+            static_cast<size_t>(tcur->getCursorID()),
+            tcur->getX(),
+            tcur->getY(),
+            static_cast<double>(tcur->getTuioTime().getTotalMilliseconds()) / 1000.0
+        );
+    }
+}
 
 namespace openspace {
 
@@ -41,37 +54,19 @@ void TuioEar::updateTuioObject(TuioObject*) {}
 void TuioEar::removeTuioObject(TuioObject*) {}
 
 void TuioEar::addTuioCursor(TuioCursor* tcur) {
-    std::unique_lock lock(_mx);
-    _inputList.emplace_back(
-        static_cast<size_t>(tcur->getTuioSourceID()),
-        static_cast<size_t>(tcur->getCursorID()),
-        tcur->getX(),
-        tcur->getY(),
-        static_cast<double>(tcur->getTuioTime().getTotalMilliseconds()) / 1000.0
-    );
+    std::lock_guard lock(_mx);
+    _inputList.push_back(touchInput(tcur));
 }
 
 void TuioEar::updateTuioCursor(TuioCursor* tcur) {
-    std::unique_lock lock(_mx);
-    _inputList.emplace_back(
-        static_cast<size_t>(tcur->getTuioSourceID()),
-        static_cast<size_t>(tcur->getCursorID()),
-        tcur->getX(),
-        tcur->getY(),
-        static_cast<double>(tcur->getTuioTime().getTotalMilliseconds()) / 1000.0
-    );
+    std::lock_guard lock(_mx);
+    _inputList.push_back(touchInput(tcur));
 }
 
 // save id to be removed and remove it in clearInput
 void TuioEar::removeTuioCursor(TuioCursor* tcur) {
-    std::unique_lock lock(_mx);
-    _removalList.emplace_back(
-        static_cast<size_t>(tcur->getTuioSourceID()),
-        static_cast<size_t>(tcur->getCursorID()),
-        tcur->getX(),
-        tcur->getY(),
-        static_cast<double>(tcur->getTuioTime().getTotalMilliseconds()) / 1000.0
-    );
+    std::lock_guard lock(_mx);
+    _removalList.push_back(touchInput(tcur));
 }
 
 void TuioEar::addTuioBlob(TuioBlob*) {}
@@ -82,7 +77,7 @@ void TuioEar::removeTuioBlob(TuioBlob*) {}
 
 void TuioEar::refresh(TuioTime) {} // about every 15ms
 
-std::vector<TouchInput> TuioEar::takeInput() {
+std::vector<TouchInput> TuioEar::takeInputs() {
     std::vector<TouchInput> outputList;
     {
         std::lock_guard lock(_mx);
