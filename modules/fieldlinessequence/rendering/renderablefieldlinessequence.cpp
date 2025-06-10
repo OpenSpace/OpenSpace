@@ -595,6 +595,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         else {
             _selectedColorRange = _colorTableRanges[0];
         }
+        
         if (_colorTablePaths.size() > _colorQuantity) {
             _colorTablePath = _colorTablePaths[_colorQuantity].string();
         }
