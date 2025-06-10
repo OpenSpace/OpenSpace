@@ -278,7 +278,7 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
             //TODO what value is actually to large to handle?
             if (data.size() > std::numeric_limits<std::size_t>::max()) {
                 throw ghoul::RuntimeError(
-                    "Http responds with list of available files being too large"
+                    "Http response with list of available files is too large, i.e. too many files"
                 );
             }
 
