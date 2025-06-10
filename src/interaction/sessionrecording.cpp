@@ -177,10 +177,7 @@ namespace {
     };
 
     template <DataMode mode>
-    std::optional<FrameType> readFrameType(std::istream&, int) {
-        static_assert(sizeof(int) == 0, "Unimplemented overload");
-        return std::nullopt;
-    }
+    std::optional<FrameType> readFrameType(std::istream&, int);
 
     template <>
     std::optional<FrameType> readFrameType<DataMode::Ascii>(std::istream& stream, int) {
@@ -228,9 +225,7 @@ namespace {
     }
 
     template <DataMode mode>
-    void writeFrameType(std::ostream&, const FrameType&) {
-        static_assert(sizeof(int) == 0, "Unimplemented overload");
-    }
+    void writeFrameType(std::ostream&, const FrameType&);
 
     template <>
     void writeFrameType<DataMode::Ascii>(std::ostream& stream, const FrameType& type) {
