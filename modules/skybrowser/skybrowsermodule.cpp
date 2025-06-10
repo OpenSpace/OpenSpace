@@ -363,7 +363,8 @@ void SkyBrowserModule::disableHoverCircle(bool useScript) {
         }
         else {
             properties::Property* prop = _hoverCircle->renderable()->property("Fade");
-            properties::FloatProperty* floatProp = dynamic_cast<properties::FloatProperty*>(prop);
+            properties::FloatProperty* floatProp =
+                dynamic_cast<properties::FloatProperty*>(prop);
             ghoul_assert(floatProp, "Fade property is not a float property");
             *floatProp = 0.f;
         }
@@ -499,7 +500,6 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::InitializeBrowser,
             codegen::lua::SendOutIdsToBrowsers,
             codegen::lua::ListOfImages,
-            codegen::lua::ListOfImagesDeprecated,
             codegen::lua::SetHoverCircle,
             codegen::lua::MoveCircleToHoverImage,
             codegen::lua::DisableHoverCircle,
@@ -509,7 +509,6 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::AdjustCamera,
             codegen::lua::SetSelectedBrowser,
             codegen::lua::TargetData,
-            codegen::lua::TargetDataDeprecated,
             codegen::lua::CreateTargetBrowserPair,
             codegen::lua::RemoveTargetBrowserPair,
             codegen::lua::SetOpacityOfImageLayer,
@@ -529,7 +528,6 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::LoadingImageCollectionComplete,
             codegen::lua::ShowAllTargetsAndBrowsers,
             codegen::lua::WwtImageCollectionUrl,
-            codegen::lua::WwtImageCollectionUrlDeprecated,
             codegen::lua::StopAnimations,
             codegen::lua::SetBorderRadius,
             codegen::lua::ReloadDisplayCopyOnNode

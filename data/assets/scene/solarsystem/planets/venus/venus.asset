@@ -65,13 +65,14 @@ local VenusLabel = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "au",
-    FadeDistances = { 1.5, 25.0 },
+    FadeDistances = { 0.75, 25.0 },
     FadeWidths = { 1.0, 35.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {
-      Name = "Venus Label",
-      Path = "/Solar System/Planets/Venus"
+    Name = "Venus Label",
+    Path = "/Solar System/Planets/Venus",
+    Focusable = false
   }
 }
 

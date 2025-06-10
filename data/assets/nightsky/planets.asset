@@ -13,17 +13,33 @@ local textures = asset.resource({
   Version = 1
 })
 
+local csv = asset.resource({
+  Name = "Zero Point Data",
+  Type = "HttpSynchronization",
+  Identifier = "zeropoint_data",
+  Version = 1
+})
+
 
 local Mercury = {
   Identifier = "NightSkyMercury",
   Parent = mercury.MercuryBarycenter.Identifier,
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
-    Billboard = true,
+    Type = "RenderablePointCloud",
+    File = csv .. "zeropointdata.csv",
+    Coloring = {
+      FixedColor = { 0.608, 0.604, 0.455 }
+    },
+    Texture = {
+      File = textures .. "glare.png"
+    },
+    SizeSettings = {
+      ScaleFactor = 10,
+      ScaleExponent = 15,
+      MaxSize = 0.209,
+      EnableMaxSizeControl = true
+    },
     Enabled = asset.enabled,
-    Size = 2439700 * 500,
-    Texture = textures .. "glare.png",
-    MultiplyColor = { 0.608, 0.604, 0.455 },
     DimInAtmosphere = true,
     RenderBinMode = "PostDeferredTransparent"
   },
@@ -41,12 +57,21 @@ local Venus = {
   Identifier = "NightSkyVenus",
   Parent = venus.VenusBarycenter.Identifier,
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePointCloud",
+    File = csv .. "zeropointdata.csv",
+    Coloring = {
+      FixedColor = { 1.0 , 0.992, 0.757 }
+    },
+    Texture = {
+      File = textures .. "glare.png"
+    },
+    SizeSettings = {
+      ScaleFactor = 10,
+      ScaleExponent = 15,
+      MaxSize = 1.14,
+      EnableMaxSizeControl = true
+    },
     Enabled = asset.enabled,
-    Billboard = true,
-    Size = 6051900 * 700,
-    Texture = textures .. "glare.png",
-    MultiplyColor = { 1.0 , 0.992, 0.757 },
     DimInAtmosphere = true,
     RenderBinMode = "PostDeferredTransparent"
   },
@@ -64,12 +89,21 @@ local Mars = {
   Identifier = "NightSkyMars",
   Parent = mars.MarsBarycenter.Identifier,
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePointCloud",
+    File = csv .. "zeropointdata.csv",
+    Coloring = {
+      FixedColor = { 0.756, 0.267, 0.054 }
+    },
+    Texture = {
+      File = textures .. "glare.png"
+    },
+    SizeSettings = {
+      ScaleFactor = 10,
+      ScaleExponent = 15,
+      MaxSize = 0.404, --mars max angular size / 62
+      EnableMaxSizeControl = true
+    },
     Enabled = asset.enabled,
-    Billboard = true,
-    Size = 3396190 * 1000,
-    Texture = textures .. "glare.png",
-    MultiplyColor = { 0.756, 0.267, 0.054 },
     DimInAtmosphere = true,
     RenderBinMode = "PostDeferredTransparent"
   },
@@ -85,12 +119,21 @@ local Jupiter = {
   Identifier = "NightSkyJupiter",
   Parent = jupiter.JupiterBarycenter.Identifier,
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePointCloud",
+    File = csv .. "zeropointdata.csv",
+    Coloring = {
+      FixedColor = { 0.608, 0.604, 0.455 },
+    },
+    Texture = {
+      File = textures .. "glare.png"
+    },
+    SizeSettings = {
+      ScaleFactor = 10,
+      ScaleExponent = 15,
+      MaxSize = 0.82,
+      EnableMaxSizeControl = true
+    },
     Enabled = asset.enabled,
-    Billboard = true,
-    Size = 71492000 * 400,
-    Texture = textures .. "glare.png",
-    MultiplyColor = { 0.608, 0.604, 0.455 },
     DimInAtmosphere = true,
     RenderBinMode = "PostDeferredTransparent"
   },
@@ -108,12 +151,19 @@ local Saturn = {
   Identifier = "NightSkySaturn",
   Parent = saturn.SaturnBarycenter.Identifier,
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePointCloud",
+    File = csv .. "zeropointdata.csv",
+    Coloring = {
+      FixedColor =  { 0.85098, 0.843137, 0.619608 },
+    },
+    Texture = {
+      File = textures .. "glare.png"
+    },
+    SizeSettings = {
+      MaxSize = 0.332,
+      EnableMaxSizeControl = true
+    },
     Enabled = asset.enabled,
-    Billboard = true,
-    Size = 60268000 * 500,
-    Texture = textures .. "glare.png",
-    MultiplyColor = { 0.608, 0.604, 0.455 },
     DimInAtmosphere = true,
     RenderBinMode = "PostDeferredTransparent"
   },

@@ -83,6 +83,13 @@ TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary)
     addProperty(_shouldInterpolate);
 }
 
+void TimelineTranslation::initialize() {
+    Translation::initialize();
+    for (const Keyframe<ghoul::mm_unique_ptr<Translation>>& kf : _timeline.keyframes()) {
+        kf.data->initialize();
+    }
+}
+
 void TimelineTranslation::update(const UpdateData& data) {
     const double now = data.time.j2000Seconds();
     using KeyframePointer = const Keyframe<ghoul::mm_unique_ptr<Translation>>*;
@@ -93,6 +100,8 @@ void TimelineTranslation::update(const UpdateData& data) {
     if (KeyframePointer next = _timeline.firstKeyframeAfter(now, true);  next) {
         next->data->update(data);
     }
+
+    Translation::update(data);
 }
 
 glm::dvec3 TimelineTranslation::position(const UpdateData& data) const {

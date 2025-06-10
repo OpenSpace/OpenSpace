@@ -9,7 +9,7 @@ local speck = asset.resource({
   Name = "Exoplanets Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_exoplanets_speck",
-  Version = 4
+  Version = 5
 })
 
 
@@ -40,6 +40,7 @@ local Object = {
   GUI = {
     Name = "Exoplanet Systems",
     Path = "/Milky Way/Exoplanets",
+    Focusable = false,
     Description = [[Extrasolar planets, or exoplanets, are a relatively new phenomenon in
       astronomy - no observational evidence was available until 1995. To the eye,
       exoplanets are lost in the glare of their host star. Unconventional techniques are
@@ -67,7 +68,7 @@ asset.export(Object)
 asset.meta = {
   Name = "Exoplanets",
   Description = Object.GUI.Description,
-  Author = "Brian Abbott, Zack Reeves (AMNH)",
+  Author = "Brian Abbott, Zack Reeves, Ally Baldelli (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }

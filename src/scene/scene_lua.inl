@@ -602,16 +602,6 @@ int propertyGetValue(lua_State* L) {
     return 1;
 }
 
-int propertyGetValueDeprecated(lua_State* L) {
-    LWARNINGC(
-        "Deprecation",
-        "'getPropertyValue' function is deprecated and should be replaced with "
-        "'propertyValue'"
-    );
-
-    return propertyGetValue(L);
-}
-
 }  // namespace openspace::luascriptfunctions
 
 namespace {
@@ -668,19 +658,6 @@ namespace {
         matches.emplace_back(prop->uri());
     }
     return matches;
-}
-
-/**
- * Returns a list of property identifiers that match the passed regular expression
- */
-[[codegen::luawrap("getProperty")]] std::vector<std::string> propertyDeprecated(
-                                                                        std::string regex)
-{
-    LWARNINGC(
-        "Deprecation",
-        "'getProperty' function is deprecated and should be replaced with 'property'"
-    );
-    return property(std::move(regex));
 }
 
 /**

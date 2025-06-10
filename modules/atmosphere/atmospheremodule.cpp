@@ -48,4 +48,5 @@ std::vector<documentation::Documentation> AtmosphereModule::documentations() con
         RenderableAtmosphere::Documentation()
     };
 }
+
 } // namespace openspace

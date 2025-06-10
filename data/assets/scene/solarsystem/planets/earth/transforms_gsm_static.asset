@@ -27,26 +27,27 @@ local GeocentricSolarMagnetosphericStatic  = {
   GUI = {
     Name = "Geocentric Solar Magnetospheric Static",
     Path = "/Solar System/Planets/Earth",
-    Description =[[The Kernel for this is the same as
-      GSM (Geocentric Solar Magnetospheric), except it is using
-      ECLIPJ2000 instead of IAU_EARTH for the secondary axis. GSM is defind as:
-      +X is parallel to the geometric earth-sun position vector.
-      +Z axis is normalized component of north centered geomagnetic dipole
-      vector orthogonal to GSM +X axis.
-      +Y completes the right-handed frame.
-      - the origin of this frame is the center of mass of the Earth.]],
-    Hidden = true
+    Focusable = false,
+    Hidden = true,
+    Description =[[The Kernel for this is the same as GSM (Geocentric Solar
+      Magnetospheric), except it is using ECLIPJ2000 instead of IAU_EARTH for the
+      secondary axis. GSM is defind as: +X is parallel to the geometric earth-sun position
+      vector. +Z axis is normalized component of north centered geomagnetic dipole vector
+      orthogonal to GSM +X axis. +Y completes the right-handed frame. The origin of this
+      frame is the center of mass of the Earth.]]
   }
 }
 
 
 asset.onInitialize(function()
   openspace.spice.loadKernel(earthcentricKernels .. "GSM_static.tf")
+
   openspace.addSceneGraphNode(GeocentricSolarMagnetosphericStatic )
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(GeocentricSolarMagnetosphericStatic )
+
   openspace.spice.unloadKernel(earthcentricKernels .. "GSM_static.tf")
 end)
 

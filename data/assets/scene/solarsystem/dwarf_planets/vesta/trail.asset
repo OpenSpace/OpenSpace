@@ -19,6 +19,7 @@ local Trail = {
   GUI = {
     Name = "Vesta Trail",
     Path = "/Solar System/Dwarf Planets/Vesta",
+    Focusable = false,
     Description = "Trail of Vesta"
   }
 }

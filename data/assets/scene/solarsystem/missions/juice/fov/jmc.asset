@@ -27,6 +27,7 @@ local JMC1 = {
   GUI = {
     Name = "JUICE_JMC-1 FOV",
     Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false,
     Description = "The field-of-views for the Juice Monitoring cameras"
   }
 }
@@ -55,6 +56,7 @@ local JMC2 = {
   GUI = {
     Name = "JUICE_JMC-2 FOV",
     Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false,
     Description = "The field-of-views for the Juice Monitoring cameras"
   }
 }

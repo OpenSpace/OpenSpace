@@ -22,6 +22,7 @@ local MeridianPosition = {
       UseCamera = true
     }
   },
+  Tag = { "nightsky_marking" },
   GUI = {
     Name = "Local Meridian Position",
     Path = "/Night Sky/Coordinate Systems/Altitude-Azimuth",
@@ -44,9 +45,9 @@ local MeridianPlane = {
     Color = { 0.4, 0.8, 0.4 },
     LineWidth = 6.0,
     GridSegments = { 1, 1 },
-    Enabled = asset.enabled,
-    RenderBinMode = "PostDeferredTransparent"
+    Enabled = asset.enabled
   },
+  Tag = { "nightsky_marking" },
   GUI = {
     Name = "Local Meridian",
     Description = [[A line representation of the Local Meridian]],

@@ -4,24 +4,40 @@ local guiCustomization = asset.require("customization/gui")
 
 
 -- Select which commit hashes to use for the UI frontend
-local frontendHash = "97ec347ae4384a799bc5babf2022c8d771d26be8"
+local frontendHash = "6842c17cba43318852cd05d2bcae132bf7f88c39"
 
 -- The name of the file to download from the server
-local file = "frontend.zip"
+local frontendFile = "frontend.zip"
 
 local frontend = asset.resource({
   Identifier = "WebGuiFrontend",
   Name = "Web Gui Frontend",
   Type = "UrlSynchronization",
-  Url = "http://data.openspaceproject.com/files/webgui/frontend/" ..  frontendHash .. "/" .. file
+  Url = "http://data.openspaceproject.com/files/webgui/frontend/" ..  frontendHash .. "/" .. frontendFile
+})
+
+
+local showcomposerHash = "9071d8bc80d16dc1e081017e02297915563f0a64"
+local showcomposerFile = "showcomposer.zip"
+
+local showcomposer = asset.resource({
+  Identifier = "WebGuiShowComposer",
+  Name = "Web Gui ShowComposer",
+  Type = "UrlSynchronization",
+  Url = "http://data.openspaceproject.com/files/webgui/showcomposer/" ..  showcomposerHash .. "/" .. showcomposerFile
 })
 
 
 asset.onInitialize(function()
   -- Unzip the frontend bundle
-  local dest = frontend .. "frontend"
-  if not openspace.directoryExists(dest) then
-    openspace.unzipFile(frontend .. file, dest, true)
+  local destFrontend = frontend .. "frontend"
+  if not openspace.directoryExists(destFrontend) then
+    openspace.unzipFile(frontend .. frontendFile, destFrontend, true)
+  end
+
+  local destShowcomposer = showcomposer .. "showcomposer"
+  if not openspace.directoryExists(destShowcomposer) then
+    openspace.unzipFile(showcomposer .. showcomposerFile, destShowcomposer, true)
   end
 
   -- Disable the server, add production gui endpoint, and restart server.
@@ -39,6 +55,16 @@ asset.onInitialize(function()
   -- Add user directory for webpanels
   directories[#directories + 1] = "webpanels"
   directories[#directories + 1] = openspace.absPath("${USER_WEBPANELS}")
+
+  -- Add user directories for showcompower
+  directories[#directories + 1] = "showcomposer"
+  directories[#directories + 1] = showcomposer .. "showcomposer"
+  directories[#directories + 1] = "showcomposer/hub"
+  directories[#directories + 1] = showcomposer .. "showcomposer"
+  directories[#directories + 1] = "showcomposer/uploads"
+  directories[#directories + 1] = openspace.absPath("${USER_SHOWCOMPOSER_UPLOADS}")
+  directories[#directories + 1] = "showcomposer/projects"
+  directories[#directories + 1] = openspace.absPath("${USER_SHOWCOMPOSER_PROJECTS}")
 
   openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
   openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "frontend")

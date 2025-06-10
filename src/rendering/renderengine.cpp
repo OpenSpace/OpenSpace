@@ -884,8 +884,10 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
         std::format(FirstLine, timer, fullTime),
         ghoul::fontrendering::CrDirection::Down
     );
-    // Important: Length of this string is the same as the first line to make them align
-    RenderFont(*_fontShutdown, penPosition, "Press ESC again to abort");
+    // Important: Length of this string is the same as the first line after value
+    // expansion to make them visually align
+    constexpr std::string_view SecondLine = " Press any key to abort ";
+    RenderFont(*_fontShutdown, penPosition, SecondLine);
 }
 
 void RenderEngine::renderDashboard() const {

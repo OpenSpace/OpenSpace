@@ -32,6 +32,8 @@
 namespace {
     constexpr std::string_view _loggerCat = "OptionProperty";
 
+    constexpr std::string_view OptionsKey = "options";
+
     using Option = openspace::properties::OptionProperty::Option;
 
     bool addOptionInternal(int value, std::string desc, std::vector<Option>& options) {
@@ -55,7 +57,6 @@ namespace {
 
 namespace openspace::properties {
 
-const std::string OptionProperty::OptionsKey = "options";
 
 OptionProperty::OptionProperty(PropertyInfo info)
     : NumericalProperty<int>(

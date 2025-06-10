@@ -30,7 +30,7 @@ local Aqua = {
       DestinationFrame = coreKernels.Frame.J2000
     }
   },
-  Tag = { "earth_satellite", "Aqua" },
+  Tag = { "earth_satellites", "Aqua" },
   GUI = {
     Name = "Aqua",
     Path = "/Solar System/Planets/Earth/Satellites/Aqua"
@@ -53,10 +53,11 @@ local AquaTrail = {
     Fade = 1.5,
     Resolution = 320
   },
-  Tag = { "earth_satellite", "Aqua" },
+  Tag = { "earth_satellites", "Aqua" },
   GUI = {
     Name = "Aqua Trail",
-    Path = "/Solar System/Planets/Earth/Satellites/Aqua"
+    Path = "/Solar System/Planets/Earth/Satellites/Aqua",
+    Focusable = false
   }
 }
 

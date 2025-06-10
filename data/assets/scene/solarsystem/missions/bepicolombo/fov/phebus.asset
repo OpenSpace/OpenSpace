@@ -22,6 +22,7 @@ local PhebusSlit75 = {
   GUI = {
     Name = "MPO Phebus Slit 75",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -44,6 +45,7 @@ local PhebusSlit100 = {
   GUI = {
     Name = "MPO Phebus Slit 100",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -66,6 +68,7 @@ local Phebus75 = {
   GUI = {
     Name = "MPO Phebus 75",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -88,6 +91,7 @@ local Phebus100 = {
   GUI = {
     Name = "MPO Phebus 100",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 

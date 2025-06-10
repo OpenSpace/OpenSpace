@@ -79,17 +79,17 @@ std::string prunedIdentifier(std::string identifier) {
     if (id != "all") {
         TargetBrowserPair* pair = module->pair(id);
         if (pair) {
-            pair->browser()->setIsInitialized(false);
-            pair->browser()->setImageCollectionIsLoaded(false);
-            pair->browser()->reload();
+            pair->setBrowserIsInitialized(false);
+            pair->setImageCollectionIsLoaded(false);
+            pair->reloadBrowser();
         }
     }
     else {
         const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->pairs();
         for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
-            pair->browser()->setIsInitialized(false);
-            pair->browser()->setImageCollectionIsLoaded(false);
-            pair->browser()->reload();
+            pair->setBrowserIsInitialized(false);
+            pair->setImageCollectionIsLoaded(false);
+            pair->reloadBrowser();
         }
     }
 }
@@ -224,7 +224,7 @@ std::string prunedIdentifier(std::string identifier) {
     TargetBrowserPair* pair = module->pair(prunedId);
     if (pair) {
         pair->hideChromeInterface();
-        pair->browser()->loadImageCollection(module->wwtImageCollectionUrl());
+        pair->loadImageCollection(module->wwtImageCollectionUrl());
     }
 }
 
@@ -333,20 +333,6 @@ std::string prunedIdentifier(std::string identifier) {
 }
 
 /**
- * Deprecated in favor of 'wwtImageCollectionUrl'
- */
-[[codegen::luawrap("getWwtImageCollectionUrl")]]
-ghoul::Dictionary wwtImageCollectionUrlDeprecated()
-{
-    LWARNINGC(
-        "Deprecation",
-        "'getWwtImageCollectionUrl' function is deprecated and should be replaced with "
-        "'wwtImageCollectionUrl'"
-    );
-    return wwtImageCollectionUrl();
-}
-
-/**
  * Returns a list of all the loaded AAS WorldWide Telescope images that have been loaded.
  * Each image has a name, thumbnail url, equatorial spherical coordinates RA and Dec,
  * equatorial Cartesian coordinates, if the image has celestial coordinates, credits text,
@@ -386,19 +372,6 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
     }
 
     return list;
-}
-
-/**
- * Deprecated in favor of 'listOfExoplanets'
- */
-[[codegen::luawrap("getListOfImages")]] ghoul::Dictionary listOfImagesDeprecated()
-{
-    LWARNINGC(
-        "Deprecation",
-        "'getListOfImages' function is deprecated and should be replaced with "
-        "'listOfImages'"
-    );
-    return listOfImages();
 }
 
 /**
@@ -469,17 +442,6 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
     }
 
     return data;
-}
-
-/**
- * Deprecated in favor of 'targetData'
- */
-[[codegen::luawrap("getTargetData")]] ghoul::Dictionary targetDataDeprecated() {
-    LWARNINGC(
-        "Deprecation",
-        "'getTargetData' function is deprecated and should be replaced with 'targetData'"
-    );
-    return targetData();
 }
 
 /**
@@ -687,7 +649,7 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
-        pair->browser()->removeSelectedImage(imageUrl);
+        pair->removeSelectedImage(imageUrl);
     }
 }
 
@@ -764,7 +726,7 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(identifier);
     // Make sure the webpage has loaded properly before executing javascript on it
-    if (pair && pair->browser()->isInitialized()) {
+    if (pair && pair->isInitialized()) {
         pair->setBorderRadius(std::clamp(radius, 0.0, 1.0));
     }
 }
@@ -798,7 +760,7 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
-        pair->browser()->addDisplayCopy(position, numberOfCopies);
+        pair->addDisplayCopy(position, numberOfCopies);
     }
 }
 
@@ -811,7 +773,7 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
-        pair->browser()->removeDisplayCopy();
+        pair->removeDisplayCopy();
     }
 }
 
@@ -870,7 +832,7 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
                 std::optional<ImageData> img = module->wwtDataHandler().image(imageUrl);
                 ghoul_assert(img.has_value(), "No image found");
                 // Index of image is used as layer ID as it's unique in the image data set
-                pair->browser()->addImageLayerToWwt(img->imageUrl);
+                pair->addImageLayerToWwt(img->imageUrl);
             }
         );
     }

@@ -47,7 +47,20 @@ local ToggleRollFriction = {
 local ToggleMainGui = {
   Identifier = "os.ToggleMainGui",
   Name = "Toggle main GUI",
-  Command = [[openspace.invertBooleanProperty("Modules.CefWebGui.Visible")]],
+  Command = [[
+    openspace.invertBooleanProperty("Modules.CefWebGui.Visible")
+
+    if not openspace.propertyValue("Modules.CefWebGui.Visible") then
+      local action_id = "os.ToggleMainGui"
+      local keys = openspace.keyBindingsForAction(action_id)
+      if #keys > 0 then
+        local key = keys[1]
+        openspace.printInfo(
+          "Hiding the user interface. You can restore it with the '" .. key .. "' key"
+        )
+      end
+    end
+  ]],
   Documentation = "Toggles the main GUI",
   GuiPath = "/System/GUI",
   IsLocal = true

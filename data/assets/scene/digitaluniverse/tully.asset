@@ -59,6 +59,7 @@ local TullyGalaxies = {
   GUI = {
     Name = "Tully Galaxies",
     Path = "/Universe/Nearby Surveys",
+    Focusable = false,
     Description = [[The Tully Catalog is the most polished, accurate catalog of nearby
       galaxies. It includes over 30,000 galaxies in the local universe that surround the
       Milky Way. This catalog demonstrates the large-scale structure of the universe
@@ -104,6 +105,7 @@ local TullyGalaxiesImages = {
   GUI = {
     Name = "Tully Galaxy Images",
     Path = "/Universe/Nearby Surveys",
+    Focusable = false,
     Description = [[Each Tully galaxy is represented by an image that represents its
       morphological type (spiral, elliptical, etc.). Most of these come from The Galaxy
       Catalog. A handful of nearby galaxies are represented by their actual images, which

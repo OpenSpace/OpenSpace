@@ -163,26 +163,6 @@ namespace {
     return res;
 }
 
- /**
-  * Returns the list of layers for the specified globe for a specific layer group.
-  *
-  * Deprecated in favor of `layers`.
-  *
-  * \param globeIdentifier The identifier of the scene graph node for the globe
-  * \param layerGroup The identifier of the layer group for which to list the layers
-  */
-[[codegen::luawrap("getLayers")]] std::vector<std::string> layersDeprecated(
-                                                              std::string globeIdentifier,
-                                                                   std::string layerGroup)
-{
-    LWARNINGC(
-        "Deprecation",
-        "'getLayers' function is deprecated and should be replaced with 'layers'"
-    );
-
-    return layers(std::move(globeIdentifier), std::move(layerGroup));
-}
-
 /**
  * Rearranges the order of a single layer on a globe. The first position in the list
  * has index 0, and the last position is given by the number of layers minus one.
@@ -362,28 +342,6 @@ namespace {
     );
 
     return { glm::degrees(geo2.lat), glm::degrees(geo2.lon), altitude };
-}
-
-/**
- * Get geographic coordinates of the camera position in latitude, longitude, and altitude
- * (degrees and meters).
- *
- * Deprecated in favor of `geoPositionForCamera`.
- *
- * \param useEyePosition If true, use the view direction of the camera instead of the
- *                       camera position
- */
-[[codegen::luawrap("getGeoPositionForCamera")]]
-std::tuple<double, double, double>
-geoPositionForCameraDeprecated(bool useEyePosition = false)
-{
-    LWARNINGC(
-        "Deprecation",
-        "'getGeoPositionForCamera' function is deprecated and should be replaced with "
-        "'geoPositionForCamera'"
-    );
-
-    return geoPositionForCamera(useEyePosition);
 }
 
 /**

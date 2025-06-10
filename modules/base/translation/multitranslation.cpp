@@ -64,16 +64,23 @@ MultiTranslation::MultiTranslation(const ghoul::Dictionary& dictionary)
     }
 }
 
+void MultiTranslation::initialize() {
+    Translation::initialize();
+    for (const ghoul::mm_unique_ptr<Translation>& translation : _translations) {
+        translation->initialize();
+    }
+}
+
 void MultiTranslation::update(const UpdateData& data) {
-    for (const ghoul::mm_unique_ptr<Translation>& rot : _translations) {
-        rot->update(data);
+    for (const ghoul::mm_unique_ptr<Translation>& translation : _translations) {
+        translation->update(data);
     }
 }
 
 glm::dvec3 MultiTranslation::position(const UpdateData& data) const {
     glm::dvec3 res = glm::dvec3(1.0);
-    for (const ghoul::mm_unique_ptr<Translation>& rot : _translations) {
-        res += rot->position(data);
+    for (const ghoul::mm_unique_ptr<Translation>& translation : _translations) {
+        res += translation->position(data);
     }
     return res;
 }

@@ -34,7 +34,8 @@ local Lorri = {
   },
   GUI = {
     Name = "LORRI",
-    Path = "/Solar System/Missions/New Horizons/Instruments"
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
   }
 }
 
@@ -63,7 +64,8 @@ local RalphLeisa = {
   },
   GUI = {
     Name = "RALPH LEISA",
-    Path = "/Solar System/Missions/New Horizons/Instruments"
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
   }
 }
 
@@ -92,7 +94,8 @@ local RalphMvicPan1 = {
   },
   GUI = {
     Name = "RALPH MVIC PAN 1",
-    Path = "/Solar System/Missions/New Horizons/Instruments"
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
   }
 }
 
@@ -121,7 +124,8 @@ local RalphMvicPan2 = {
   },
   GUI = {
     Name = "RALPH MVIC PAN 2",
-    Path = "/Solar System/Missions/New Horizons/Instruments"
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
   }
 }
 
@@ -150,7 +154,8 @@ local RalphMvicRed = {
   },
   GUI = {
     Name = "RALPH MVIC RED",
-    Path = "/Solar System/Missions/New Horizons/Instruments"
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
   }
 }
 
@@ -179,7 +184,8 @@ local RalphMvicBlue = {
   },
   GUI = {
     Name = "RALPH MVIC BLUE",
-    Path = "/Solar System/Missions/New Horizons/Instruments"
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
   }
 }
 
@@ -208,7 +214,8 @@ local RalphMvicFt = {
   },
   GUI = {
     Name = "RALPH MVIC FT",
-    Path = "/Solar System/Missions/New Horizons/Instruments"
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
   }
 }
 
@@ -237,7 +244,8 @@ local RalphMvicMethane = {
   },
   GUI = {
     Name = "RALPH MVIC METHANE",
-    Path = "/Solar System/Missions/New Horizons/Instruments"
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
   }
 }
 
@@ -266,7 +274,8 @@ local RalphMvicNir = {
   },
   GUI = {
     Name = "RALPH MVIC NIR",
-    Path = "/Solar System/Missions/New Horizons/Instruments"
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
   }
 }
 
@@ -296,7 +305,8 @@ local AliceAirglow = {
   },
   GUI = {
     Name = "ALICE AIRGLOW",
-    Path = "/Solar System/Missions/New Horizons/Instruments"
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
   }
 }
 
@@ -325,7 +335,8 @@ local AliceSoc = {
   },
   GUI = {
     Name = "ALICE SOC",
-    Path = "/Solar System/Missions/New Horizons/Instruments"
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
   }
 }
 
@@ -354,7 +365,8 @@ local Rex = {
   },
   GUI = {
     Name = "REX",
-    Path = "/Solar System/Missions/New Horizons/Instruments"
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
   }
 }
 

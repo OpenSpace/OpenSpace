@@ -144,7 +144,7 @@ void ScreenSpaceImageOnline::update() {
             _textureIsDirty = false;
             LERRORC(e.component, e.message);
         }
-    }   
+    }
 }
 
 std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageToMemory(

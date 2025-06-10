@@ -59,6 +59,10 @@ void SubscriptionTopic::resetCallbacks() {
         _prop->removeOnChange(_onChangeHandle);
         _onChangeHandle = UnsetCallbackHandle;
     }
+    if (_onMetaDataChangeHandle != UnsetCallbackHandle) {
+        _prop->removeOnMetaDataChange(_onMetaDataChangeHandle);
+        _onMetaDataChangeHandle = UnsetCallbackHandle;
+    }
     if (_onDeleteHandle != UnsetCallbackHandle) {
         _prop->removeOnDelete(_onDeleteHandle);
         _onDeleteHandle = UnsetCallbackHandle;
@@ -94,13 +98,14 @@ void SubscriptionTopic::handleJson(const nlohmann::json& json) {
             _onMetaDataChangeHandle = _prop->onMetaDataChange(onMetaDataChange);
             _onDeleteHandle = _prop->onDelete([this]() {
                 _onChangeHandle = UnsetCallbackHandle;
+                _onMetaDataChangeHandle = UnsetCallbackHandle;
                 _onDeleteHandle = UnsetCallbackHandle;
                 _isSubscribedTo = false;
             });
 
             // Immediately send the value and meta data
             onChange();
-			onMetaDataChange();
+            onMetaDataChange();
         }
         else {
             LWARNING(std::format("Could not subscribe. Property '{}' not found", uri));
@@ -108,14 +113,7 @@ void SubscriptionTopic::handleJson(const nlohmann::json& json) {
     }
     if (event == StopSubscription) {
         _isSubscribedTo = false;
-        if (_prop && _onChangeHandle != UnsetCallbackHandle) {
-            _prop->removeOnChange(_onChangeHandle);
-            _onChangeHandle = UnsetCallbackHandle;
-        }
-        if (_prop && !_onDeleteHandle) {
-            _prop->removeOnDelete(_onDeleteHandle);
-            _onDeleteHandle = UnsetCallbackHandle;
-        }
+        resetCallbacks();
     }
 }
 

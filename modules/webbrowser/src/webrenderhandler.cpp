@@ -29,8 +29,8 @@
 
 namespace openspace {
 
-WebRenderHandler::WebRenderHandler(bool accelerate)
-    : _acceleratedRendering(WebBrowserModule::canUseAcceleratedRendering() && accelerate)
+WebRenderHandler::WebRenderHandler()
+    : _acceleratedRendering(WebBrowserModule::canUseAcceleratedRendering())
 {
     if (_acceleratedRendering) {
         glCreateTextures(GL_TEXTURE_2D, 1, &_texture);
@@ -112,7 +112,7 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser>, CefRenderHandler::PaintEle
 }
 
 #ifdef WIN32
-void WebRenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
+void WebRenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser>,
                                           PaintElementType,
                                           const RectList& dirtyRects,
                                           const CefAcceleratedPaintInfo& info)

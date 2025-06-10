@@ -45,6 +45,7 @@ local SunLabel = {
   GUI = {
     Name = "Sun Label",
     Path = "/Solar System/Sun",
+    Focusable = false,
     Description = "Label for the sun in our solar system"
   }
 }

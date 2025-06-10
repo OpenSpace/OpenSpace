@@ -63,6 +63,13 @@ MultiScale::MultiScale(const ghoul::Dictionary& dictionary)
     }
 }
 
+void MultiScale::initialize() {
+    Scale::initialize();
+    for (const ghoul::mm_unique_ptr<Scale>& scale : _scales) {
+        scale->initialize();
+    }
+}
+
 void MultiScale::update(const UpdateData& data) {
     for (const ghoul::mm_unique_ptr<Scale>& scale : _scales) {
         scale->update(data);

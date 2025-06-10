@@ -224,9 +224,12 @@ RenderablePlane::DistanceScalingSettings::DistanceScalingSettings(
         const Parameters::DistanceScalingSettings settings = *p.distanceScalingSettings;
 
         scaleByDistance = settings.scaleByDistance.value_or(scaleByDistance);
-        apparentSizeMultiplier = settings.apparentSizeMultiplier.value_or(apparentSizeMultiplier);
-        scaleByDistanceMaxHeight = settings.scaleByDistanceMaxHeight.value_or(scaleByDistanceMaxHeight);
-        scaleByDistanceMinHeight = settings.scaleByDistanceMinHeight.value_or(scaleByDistanceMinHeight);
+        apparentSizeMultiplier =
+            settings.apparentSizeMultiplier.value_or(apparentSizeMultiplier);
+        scaleByDistanceMaxHeight =
+            settings.scaleByDistanceMaxHeight.value_or(scaleByDistanceMaxHeight);
+        scaleByDistanceMinHeight =
+            settings.scaleByDistanceMinHeight.value_or(scaleByDistanceMinHeight);
     }
 
     addProperty(scaleByDistance);
@@ -238,12 +241,12 @@ RenderablePlane::DistanceScalingSettings::DistanceScalingSettings(
 RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary, { .automaticallyUpdateRenderBin = false })
     , _blendMode(BlendModeInfo)
-    , _distanceScalingSettings(dictionary)
     , _renderOption(OrientationRenderOptionInfo)
     , _mirrorBackside(MirrorBacksideInfo, false)
     , _size(SizeInfo, glm::vec2(10.f), glm::vec2(0.f), glm::vec2(1e25f))
     , _autoScale(AutoScaleInfo, false)
     , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _distanceScalingSettings(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

@@ -43,6 +43,7 @@ local Object = {
   GUI = {
     Name = "Hubble Deep Field",
     Path = "/Universe/Galaxies",
+    Focusable = false,
     Description = [[
       Hubble Ultra Deep Field galaxy survey <br><br>
       Data Reference: Hubble Ultra Deep Field 2012 program (Ellis+, Koekemoer+, 2013)

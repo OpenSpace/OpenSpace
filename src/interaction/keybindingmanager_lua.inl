@@ -49,22 +49,60 @@ namespace {
 }
 
 /**
- * Returns the strings of the script that are bound to the passed key and whether they
- * were local or remote key binds.
+ * Returns the identifiers of the action that are bound to the passed key and whether they
+ * were local or remote key binds. If no key is provided, all bound keybindings are
+ * returned instead.
+ *
+ * \param key The key for which to return the keybindings. If no key is provided, all
+ *        keybindings are returned
  */
-[[codegen::luawrap]] std::vector<std::string> keyBindings(std::string key) {
+[[codegen::luawrap]] std::vector<std::string> keyBindings(std::optional<std::string> key)
+{
     using namespace openspace;
 
-    using K = KeyWithModifier;
-    using V = std::string;
-    const std::vector<std::pair<K, V>>& info = global::keybindingManager->keyBinding(
-        stringToKey(key)
-    );
+    std::vector<std::string> res;
+    if (key.has_value()) {
+        using K = KeyWithModifier;
+        using V = std::string;
+        const std::vector<std::pair<K, V>>& info = global::keybindingManager->keyBinding(
+            stringToKey(*key)
+        );
+
+        res.reserve(info.size());
+        for (const std::pair<K, V>& it : info) {
+            res.push_back(it.second);
+        }
+    }
+    else {
+        const std::multimap<KeyWithModifier, std::string>& keybinds =
+            global::keybindingManager->keyBindings();
+
+        res.reserve(keybinds.size());
+        for (const std::pair<const KeyWithModifier, std::string>& it : keybinds) {
+            res.push_back(it.second);
+        }
+
+        // Actions might be bound to different actions
+        res.erase(std::unique(res.begin(), res.end()), res.end());
+    }
+    return res;
+}
+
+/**
+ * Returns the keybinds to which the provided action is bound. As actions can be bound to
+ * multiple keys, this function returns a list of all keys
+ */
+[[codegen::luawrap]] std::vector<std::string> keyBindingsForAction(std::string action) {
+    using namespace openspace;
+
+    const std::multimap<KeyWithModifier, std::string>& keybinds =
+        global::keybindingManager->keyBindings();
 
     std::vector<std::string> res;
-    res.reserve(info.size());
-    for (const std::pair<K, V>& it : info) {
-        res.push_back(it.second);
+    for (const std::pair<const KeyWithModifier, std::string>& it : keybinds) {
+        if (it.second == action) {
+            res.push_back(keyToString(it.first));
+        }
     }
     return res;
 }

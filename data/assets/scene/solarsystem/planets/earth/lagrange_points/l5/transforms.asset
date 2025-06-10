@@ -18,6 +18,7 @@ local L5Position = {
   GUI = {
     Name = "L5 Position",
     Path = "/Solar System/Planets/Earth/Lagrange Points",
+    Focusable = false,
     Hidden = true
   }
 }

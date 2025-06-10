@@ -17,7 +17,13 @@ local Nix = {
     Type = "RenderableGlobe",
     Radii = { 45000, 45000, 45000 }
   },
-  Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_minor", "moon_minor_pluto" },
+  Tag = {
+    "moon_solarSystem",
+    "moon_dwarf",
+    "moon_pluto",
+    "moon_minor",
+    "moon_minor_pluto"
+  },
   GUI = {
     Path = "/Solar System/Dwarf Planets/Pluto/Moons/Nix"
   }
@@ -46,7 +52,8 @@ local NixTrail = {
   },
   GUI = {
     Name = "Nix Trail",
-    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Nix"
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Nix",
+    Focusable = false
   }
 }
 
@@ -71,6 +78,7 @@ local NixLabel = {
   GUI = {
     Name = "Nix Label",
     Path = "/Solar System/Dwarf Planets/Pluto/Moons/Nix",
+    Focusable = false,
     Description = "Label for Pluto's moon Nix"
   }
 }

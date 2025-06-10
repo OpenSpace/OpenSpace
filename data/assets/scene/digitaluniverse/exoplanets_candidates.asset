@@ -9,7 +9,7 @@ local speck = asset.resource({
   Name = "Exoplanets Candidates Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_exoplanets_candidates_speck",
-  Version = 2
+  Version = 3
 })
 
 
@@ -42,6 +42,7 @@ local Object = {
   GUI = {
     Name = "Exoplanet Candidates",
     Path = "/Milky Way/Exoplanets",
+    Focusable = false,
     Description = [[The exoplanet candidate stars are likely hosts for exoplanets. These
       are stars plucked from NASA's Kepler and TESS space telescopes. Further observations
       are needed to confirm a planet's existence. Rather than represent them
@@ -69,7 +70,7 @@ asset.export(Object)
 asset.meta = {
   Name = "Exoplanetary Candidates",
   Description = Object.GUI.Description,
-  Author = "Brian Abbott, Zack Reeves, Emily Rice, and Jason No (AMNH)",
+  Author = "Brian Abbott, Ally Baldelli, Zack Reeves, Emily Rice, and Jason No (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }

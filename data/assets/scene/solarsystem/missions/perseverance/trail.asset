@@ -27,7 +27,8 @@ local PerseveranceTrailSun = {
   },
   GUI = {
     Name = "Perseverance Trail (Sun)",
-    Path = "/Solar System/Missions/Perseverance"
+    Path = "/Solar System/Missions/Perseverance",
+    Focusable = false
   }
 }
 
@@ -49,7 +50,8 @@ local PerseveranceTrailMars = {
   },
   GUI = {
     Name = "Perseverance Trail (Mars)",
-    Path = "/Solar System/Missions/Perseverance"
+    Path = "/Solar System/Missions/Perseverance",
+    Focusable = false
   }
 }
 

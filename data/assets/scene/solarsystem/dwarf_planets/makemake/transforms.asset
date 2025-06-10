@@ -25,6 +25,7 @@ local Position = {
   GUI = {
     Name = "Makemake Position",
     Path = "/Solar System/Dwarf Planets/Makemake",
+    Focusable = false,
     Hidden = true
   }
 }

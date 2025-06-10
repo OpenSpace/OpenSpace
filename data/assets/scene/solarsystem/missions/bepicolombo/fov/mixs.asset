@@ -22,6 +22,7 @@ local MIXS_C = {
   GUI = {
     Name = "MPO MIXS-C",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -44,6 +45,7 @@ local MIXS_T = {
   GUI = {
     Name = "MPO MIXS-T",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 

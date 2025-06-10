@@ -24,12 +24,13 @@
 
 #include <modules/iswa/iswamodule.h>
 
-#include <modules/iswa/rendering/dataplane.h>
-#include <modules/iswa/rendering/datasphere.h>
-#include <modules/iswa/rendering/kameleonplane.h>
 #include <modules/iswa/rendering/screenspacecygnet.h>
-#include <modules/iswa/rendering/textureplane.h>
+#include <modules/iswa/rendering/renderabledataplane.h>
+#include <modules/iswa/rendering/renderabledatasphere.h>
+#include <modules/iswa/rendering/renderablekameleonplane.h>
+#include <modules/iswa/rendering/renderabletextureplane.h>
 #include <modules/iswa/util/iswamanager.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderable.h>
@@ -54,16 +55,25 @@ void IswaModule::internalInitialize(const ghoul::Dictionary&) {
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 
-    fRenderable->registerClass<TexturePlane>("TexturePlane");
-    fRenderable->registerClass<DataPlane>("DataPlane");
-    fRenderable->registerClass<KameleonPlane>("KameleonPlane");
-    fRenderable->registerClass<DataSphere>("DataSphere");
+    fRenderable->registerClass<RenderableTexturePlane>("RenderableTexturePlane");
+    fRenderable->registerClass<RenderableDataPlane>("RenderableDataPlane");
+    fRenderable->registerClass<RenderableKameleonPlane>("RenderableKameleonPlane");
+    fRenderable->registerClass<RenderableDataSphere>("RenderableDataSphere");
 
     ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "No fScreenSpaceRenderable factory existed");
 
     fScreenSpaceRenderable->registerClass<ScreenSpaceCygnet>("ScreenSpaceCygnet");
+}
+
+std::vector<documentation::Documentation> IswaModule::documentations() const {
+    return {
+        RenderableTexturePlane::Documentation(),
+        RenderableDataPlane::Documentation(),
+        RenderableKameleonPlane::Documentation(),
+        ScreenSpaceCygnet::Documentation()
+    };
 }
 
 scripting::LuaLibrary IswaModule::luaLibrary() const {

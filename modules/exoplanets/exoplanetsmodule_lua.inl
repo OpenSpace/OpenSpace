@@ -220,20 +220,6 @@ std::vector<std::string> hostStarsWithSufficientData() {
 }
 
 /**
- * Deprecated in favor of 'listOfExoplanets'
- */
-[[codegen::luawrap("getListOfExoplanets")]] std::vector<std::string>
-listOfExoplanetsDeprecated()
-{
-    LWARNINGC(
-        "Deprecation",
-        "'getListOfExoplanets' function is deprecated and should be replaced with "
-        "'listOfExoplanets'"
-    );
-    return listOfExoplanets();
-}
-
-/**
  * Lists the names of the host stars of all exoplanet systems that have sufficient
  * data for generating a visualization, and prints the list to the console.
  */

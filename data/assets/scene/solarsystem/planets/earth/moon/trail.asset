@@ -15,12 +15,17 @@ local MoonTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 27,
-    Resolution = 1000,
-    Tag = { "moonTrail_solarSystem", "moonTrail_terrestrial", "moonTrail_earth" }
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_terrestrial",
+    "moonTrail_earth"
   },
   GUI = {
     Name = "Moon Trail",
-    Path = "/Solar System/Planets/Earth/Moon"
+    Path = "/Solar System/Planets/Earth/Moon",
+    Focusable = false
   }
 }
 

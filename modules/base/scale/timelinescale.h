@@ -41,6 +41,8 @@ class TimelineScale : public Scale {
 public:
     explicit TimelineScale(const ghoul::Dictionary& dictionary);
 
+    void initialize() override;
+
     void update(const UpdateData& data) override;
     glm::dvec3 scaleValue(const UpdateData& data) const override;
     static documentation::Documentation Documentation();
@@ -52,4 +54,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__
+#endif // __OPENSPACE_MODULE_BASE___TIMELINESCALE___H__

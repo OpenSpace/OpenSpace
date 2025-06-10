@@ -27,6 +27,7 @@ local NavCam = {
   GUI = {
     Name = "NavCam FOV",
     Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false,
     Description = "The camera onboard Juice used to navigate by the stars"
   }
 }

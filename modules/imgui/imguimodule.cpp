@@ -130,7 +130,7 @@ ImGUIModule::ImGUIModule()
     global::callback::draw2D->emplace_back([this]() {
         ZoneScopedN("ImGUI");
 
-        if (!_isEnabled) {
+        if (!_isEnabled || !_hasContext) {
             return;
         }
 
@@ -160,7 +160,7 @@ ImGUIModule::ImGUIModule()
         {
             ZoneScopedN("ImGUI");
 
-            if (!isGuiWindow || !_isEnabled) {
+            if (!isGuiWindow || !_isEnabled || !_hasContext) {
                 return false;
             }
             return keyCallback(key, mod, action);
@@ -173,7 +173,7 @@ ImGUIModule::ImGUIModule()
         {
             ZoneScopedN("ImGUI");
 
-            if (!isGuiWindow || !_isEnabled) {
+            if (!isGuiWindow || !_isEnabled || !_hasContext) {
                 return false;
             }
             return charCallback(codepoint, modifier);
@@ -182,7 +182,7 @@ ImGUIModule::ImGUIModule()
 
     global::callback::mousePosition->emplace_back(
         [this](double x, double y, IsGuiWindow isGuiWindow) {
-            if (!isGuiWindow) {
+            if (!isGuiWindow || !_isEnabled || !_hasContext) {
                 return; // do nothing
             }
             _mousePosition = glm::vec2(static_cast<float>(x), static_cast<float>(y));
@@ -195,7 +195,7 @@ ImGUIModule::ImGUIModule()
         {
             ZoneScopedN("ImGUI");
 
-            if (!isGuiWindow) {
+            if (!isGuiWindow || !_isEnabled || !_hasContext) {
                 return false;
             }
 
@@ -214,7 +214,7 @@ ImGUIModule::ImGUIModule()
         [this](double, double posY, IsGuiWindow isGuiWindow) -> bool {
             ZoneScopedN("ImGUI");
 
-            if (!isGuiWindow || !_isEnabled) {
+            if (!isGuiWindow || !_isEnabled || !_hasContext) {
                 return false;
             }
             return mouseWheelCallback(posY);
@@ -223,18 +223,27 @@ ImGUIModule::ImGUIModule()
 
     global::callback::touchDetected->emplace_back(
         [this](TouchInput input) -> bool {
+            if (!_isEnabled || !_hasContext) {
+                return false;
+            }
             return touchDetectedCallback(input);
         }
     );
 
     global::callback::touchUpdated->emplace_back(
         [this](TouchInput input) -> bool {
+            if (!_isEnabled || !_hasContext) {
+                return false;
+            }
             return touchUpdatedCallback(input);
         }
     );
 
     global::callback::touchExit->emplace_back(
         [this](TouchInput input) {
+            if (!_isEnabled || !_hasContext) {
+                return;
+            }
             touchExitCallback(input);
         }
     );
@@ -275,6 +284,8 @@ void ImGUIModule::internalDeinitialize() {
     for (gui::GuiComponent* comp : _components) {
         comp->deinitialize();
     }
+
+    _hasContext = false;
 }
 
 void ImGUIModule::internalInitializeGL() {
@@ -377,6 +388,8 @@ void ImGUIModule::internalInitializeGL() {
         style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.44f, 0.63f, 1.00f, 0.35f);
         style.Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
     }
+
+    _hasContext = true;
 
     for (gui::GuiComponent* comp : _components) {
         comp->initialize();

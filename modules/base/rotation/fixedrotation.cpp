@@ -444,7 +444,7 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
     setPropertyVisibility(_zAxis);
 }
 
-bool FixedRotation::initialize() {
+void FixedRotation::initialize() {
     ZoneScoped;
 
     // We have already checked this before, but still
@@ -454,7 +454,7 @@ bool FixedRotation::initialize() {
     // nodes referenced in the dictionary might not exist yet at construction time. At
     // initialization time, however, we know that they already have been created
 
-    const bool res = Rotation::initialize();
+    Rotation::initialize();
 
     _attachedObject = p.attached.value_or(_attachedObject);
 
@@ -525,7 +525,6 @@ bool FixedRotation::initialize() {
 
     // No need to hold on to the data
     _constructorDictionary = ghoul::Dictionary();
-    return res;
 }
 
 void FixedRotation::update(const UpdateData& data) {

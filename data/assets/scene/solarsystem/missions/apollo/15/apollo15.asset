@@ -1,5 +1,5 @@
 asset.require("../actions")
-local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 local sun = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
@@ -16,7 +16,7 @@ local models = asset.resource({
 
 local Apollo15 = {
   Identifier = "Apollo15",
-  Parent = moonTransforms.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "1971-07-30T02:22:00.00",
@@ -52,7 +52,7 @@ local Apollo15 = {
 
 local Apollo15Trail = {
   Identifier = "Apollo15Trail",
-  Parent = moonTransforms.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
@@ -68,7 +68,8 @@ local Apollo15Trail = {
   },
   GUI = {
     Name = "Apollo 15 Trail",
-    Path = "/Solar System/Missions/Apollo/15"
+    Path = "/Solar System/Missions/Apollo/15",
+    Focusable = false
   }
 }
 

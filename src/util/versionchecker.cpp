@@ -25,6 +25,9 @@
 #include <openspace/util/versionchecker.h>
 
 #include <openspace/openspace.h>
+#include <openspace/engine/configuration.h>
+#include <openspace/engine/globals.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/stringhelper.h>
@@ -47,9 +50,22 @@ void VersionChecker::requestLatestVersion(const std::string& url) {
     std::string operatingSystem = SysCap.component<GCC>().operatingSystemString();
     operatingSystem = ghoul::encodeUrl(operatingSystem);
 
+    std::string builtInProfiles = absPath("${PROFILES}").string();
+
+    std::string profile;
+    // Remove the .profile extension
+    if (global::configuration->profile.starts_with(builtInProfiles)) {
+        std::filesystem::path path = global::configuration->profile;
+        path.replace_extension("");
+        profile = path.string().substr(builtInProfiles.size() + 1);
+    }
+    else {
+        profile = "user-profile";
+    }
+
     std::string fullUrl = std::format(
-        "{}?client_version={}&commit_hash={}&operating_system={}",
-        url, OPENSPACE_VERSION_NUMBER, OPENSPACE_GIT_COMMIT, operatingSystem
+        "{}?client_version={}&commit_hash={}&operating_system={}&profile={}",
+        url, OPENSPACE_VERSION_NUMBER, OPENSPACE_GIT_COMMIT, operatingSystem, profile
     );
 
     if (_request) {

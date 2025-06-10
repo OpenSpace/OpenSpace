@@ -78,8 +78,9 @@ public:
     void remove(const std::string& path);
 
     /**
-     * Reloads the asset at the provided \p path as a new root asset of the AssetManager. If the
-     * asset at that path was not previously loaded, acts the same as the add function.
+     * Reloads the asset at the provided \p path as a new root asset of the AssetManager.
+     * If the asset at that path was not previously loaded, acts the same as the add
+     * function.
      *
      * \param path The path from which the Asset is loaded. This path can be either
      *        relative to the base directory (the path starting with . or ..), an absolute

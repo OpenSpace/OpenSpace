@@ -24,9 +24,9 @@
 
 #include <modules/iswa/rendering/iswadatagroup.h>
 
-#include <modules/iswa/rendering/dataplane.h>
-#include <modules/iswa/rendering/datasphere.h>
-#include <modules/iswa/rendering/kameleonplane.h>
+#include <modules/iswa/rendering/renderabledataplane.h>
+#include <modules/iswa/rendering/renderabledatasphere.h>
+#include <modules/iswa/rendering/renderablekameleonplane.h>
 #include <modules/iswa/util/dataprocessor.h>
 #include <modules/iswa/util/dataprocessortext.h>
 #include <modules/iswa/util/dataprocessorjson.h>
@@ -193,13 +193,13 @@ void IswaDataGroup::registerOptions(const std::vector<std::string>& options) {
 }
 
 void IswaDataGroup::createDataProcessor() {
-    if (_type == typeid(DataPlane).name()) {
+    if (_type == typeid(RenderableDataPlane).name()) {
         _dataProcessor = std::make_shared<DataProcessorText>();
     }
-    else if (_type == typeid(DataSphere).name()) {
+    else if (_type == typeid(RenderableDataSphere).name()) {
         _dataProcessor = std::make_shared<DataProcessorJson>();
     }
-    else if (_type == typeid(KameleonPlane).name()) {
+    else if (_type == typeid(RenderableKameleonPlane).name()) {
         _dataProcessor = std::make_shared<DataProcessorKameleon>();
     }
 }

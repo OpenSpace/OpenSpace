@@ -73,6 +73,7 @@ local MimasLabel = {
   GUI = {
     Name = "Mimas Label",
     Path = "/Solar System/Planets/Saturn/Major Moons/Mimas",
+    Focusable = false,
     Description = "Label for Saturn's moon Mimas"
   }
 }
