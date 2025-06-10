@@ -124,8 +124,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorMapInfo = {
         "ColorMap",
         "Transfer Function (Color Map) Path",
-        "Color map / Transfer Function to use if `IsUsingColorMap` is enabled."
-        "magnetograms on the sun.",
+        "Color map / Transfer function to use if `UseColorMap` is enabled ",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -424,15 +423,15 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     }
 
     // TextureUnit cannot be declared in if statement below
-    ghoul::opengl::TextureUnit transferfunctionUnit;
+    ghoul::opengl::TextureUnit transferFunctionUnit;
     _shader->setUniform("usingTransferFunction", _useColorMap);
-    _shader->setUniform("transferFunction", transferfunctionUnit);
+    _shader->setUniform("transferFunction", transferFunctionUnit);
     _shader->setUniform("dataMinMaxValues", _dataMinMaxValues);
     if (_useColorMap) {
         if (_transferFunction == nullptr) {
-            _transferFunction = std::make_unique<TransferFunction>(_colorMap);
+            _transferFunction = std::make_unique<TransferFunction>(_colorMap.value());
         }
-        transferfunctionUnit.activate();
+        transferFunctionUnit.activate();
         _transferFunction->bind();
     }
 

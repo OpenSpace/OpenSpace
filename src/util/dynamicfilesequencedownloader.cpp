@@ -85,12 +85,12 @@ std::string buildDataHttpRequest(double minTime, double maxTime, int dataID,
 
 DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
                                                              const std::string identifier,
-                                                             std::string infoURL,
-                                                             std::string dataURL,
+                                                             std::string infoUrl,
+                                                             std::string dataUrl,
                                                              size_t nOfFilesToQueue)
     : _dataID(dataID)
-    , _infoURL(std::move(infoURL))
-    , _dataURL(std::move(dataURL))
+    , _infoUrl(std::move(infoUrl))
+    , _dataUrl(std::move(dataUrl))
     , _nFilesToQueue(nOfFilesToQueue)
 {
     _syncDir = absPath(
@@ -127,13 +127,13 @@ DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
         }
     }
 
-    std::string httpInfoRequest = _infoURL + std::to_string(_dataID);
+    std::string httpInfoRequest = _infoUrl + std::to_string(_dataID);
     requestDataInfo(httpInfoRequest);
     std::string httpDataRequest = buildDataHttpRequest(
         _dataMinTime,
         _dataMaxTime,
         _dataID,
-        _dataURL
+        _dataUrl
     );
     requestAvailableFiles(httpDataRequest, _syncDir);
 }
@@ -633,7 +633,7 @@ std::vector<File*>& DynamicFileSequenceDownloader::filesCurrentlyDownloading() {
 }
 
 const std::vector<std::filesystem::path>&
-DynamicFileSequenceDownloader::downloadedFiles()
+DynamicFileSequenceDownloader::downloadedFiles() const
 {
     return _downloadedFiles;
 }

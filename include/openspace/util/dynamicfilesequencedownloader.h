@@ -57,8 +57,8 @@ struct File {
 
 class DynamicFileSequenceDownloader {
 public:
-    DynamicFileSequenceDownloader(int dataID, std::string identifier, std::string infoURL,
-        std::string dataURL, size_t nFilesToQueue);
+    DynamicFileSequenceDownloader(int dataID, std::string identifier, std::string infoUrl,
+        std::string dataUrl, size_t nFilesToQueue);
 
     void deinitialize(bool cacheFiles);
     void requestDataInfo(std::string httpInfoRequest);
@@ -66,7 +66,7 @@ public:
         std::filesystem::path syncDir);
     std::vector<File>::iterator closestFileToNow(double time);
     void update(double time, double deltaTime);
-    const std::vector<std::filesystem::path>& downloadedFiles();
+    const std::vector<std::filesystem::path>& downloadedFiles() const;
     void checkForFinishedDownloads();
     void clearDownloaded();
     const std::filesystem::path& destinationDirectory() const;
@@ -86,8 +86,8 @@ private:
     std::filesystem::path _syncDir;
     std::filesystem::path _trackSynced;
     const int _dataID;
-    const std::string _infoURL;
-    const std::string _dataURL;
+    const std::string _infoUrl;
+    const std::string _dataUrl;
 
     double _dataMinTime;
     double _dataMaxTime;

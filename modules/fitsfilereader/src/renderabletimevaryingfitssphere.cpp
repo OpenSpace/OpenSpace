@@ -516,7 +516,7 @@ void RenderableTimeVaryingFitsSphere::update(const UpdateData& data) {
         }
     }
 
-    if (!_firstUpdate && _isUsingColorMap && !_files.empty()) {
+    if (!_firstUpdate && _useColorMap && !_files.empty()) {
         _dataMinMaxValues = _files[_activeTriggerTimeIndex].dataMinMax;
     }
 
