@@ -294,9 +294,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     // but using it on start-up is set to false.
     if (p.useColorMap.has_value()) {
         if (!p.colorMap.has_value()) {
-            throw ghoul::RuntimeError(
-                "When using a color map, a color map path has to be provided."
-            );
+            throw ghoul::RuntimeError("No color map path was provided");
         }
         _isUsingColorMap = *p.useColorMap;
     }
