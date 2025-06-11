@@ -2,13 +2,11 @@
   "assets": [
     "base",
     "base_keybindings",
-    "scene/solarsystem/heliosphere/todayssun/actions",
     "scene/solarsystem/heliosphere/todayssun/fieldlines",
     "scene/solarsystem/heliosphere/todayssun/grid",
     "scene/solarsystem/heliosphere/todayssun/mission",
     "scene/solarsystem/heliosphere/todayssun/sun_earth_line",
     "scene/solarsystem/heliosphere/todayssun/surfaces",
-    "scene/solarsystem/heliosphere/todayssun/white_background",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites"
   ],

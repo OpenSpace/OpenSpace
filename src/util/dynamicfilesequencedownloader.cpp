@@ -23,8 +23,8 @@
  ****************************************************************************************/
 
 #include <openspace/util/dynamicfilesequencedownloader.h>
-#include <openspace/util/httprequest.h>
 
+#include <openspace/util/httprequest.h>
 #include <openspace/json.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -32,11 +32,10 @@
 #include <unordered_set>
 
 namespace {
-    constexpr const char* _loggerCat = "DynamicFileSequenceDownloader";
+    constexpr const std::string_view _loggerCat = "DynamicFileSequenceDownloader";
 } // namepace
 
 namespace openspace {
-
 void trackFinishedDownloads(const std::filesystem::path& syncFilePath,
                             const std::filesystem::path& newFilePath)
 {
@@ -55,7 +54,7 @@ void trackFinishedDownloads(const std::filesystem::path& syncFilePath,
     const std::string fileName = newFilePath.filename().string();
     const std::string filePath = newFilePath.string();
 
-    if (existingEntries.find(fileName) == existingEntries.end()) {
+    if (!existingEntries.contains(fileName)) {
         std::ofstream outFile = std::ofstream(syncFilePath, std::ios::app);
         if (outFile.is_open()) {
             outFile << filePath << std::endl;
@@ -83,10 +82,10 @@ std::string buildDataHttpRequest(double minTime, double maxTime, int dataID,
 }
 
 DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
-                                                             const std::string identifier,
-                                                             std::string infoUrl,
-                                                             std::string dataUrl,
-                                                             size_t nOfFilesToQueue)
+                                                            const std::string& identifier,
+                                                            std::string infoUrl,
+                                                            std::string dataUrl,
+                                                            size_t nOfFilesToQueue)
     : _dataID(dataID)
     , _infoUrl(std::move(infoUrl))
     , _dataUrl(std::move(dataUrl))
@@ -120,7 +119,7 @@ DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
         }
         std::string name = entry.path().filename().string();
         if (name != _trackSynced.filename().string() &&
-            keepFiles.find(name) == keepFiles.end())
+            !keepFiles.contains(name))
         {
             std::filesystem::remove(entry.path());
         }
@@ -138,14 +137,16 @@ DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
 }
 
 void DynamicFileSequenceDownloader::deinitialize(bool cacheFiles) {
-    std::vector<File*>& currentlyDownloadingFiles = filesCurrentlyDownloading();
+    const std::vector<File*>& currentlyDownloadingFiles = filesCurrentlyDownloading();
     for (File* file : currentlyDownloadingFiles) {
         file->download->cancel();
         file->download->wait();
         std::error_code ec;
         std::filesystem::remove(file->path, ec);
         if (ec) {
-            LERROR(std::format("Failed to delete unfinished file: {}", file->path));
+            LERROR(std::format(
+                "Failed to delete unfinished file '{}'. {}", file->path, ec.message()
+            ));
         }
         else {
             LINFO(std::format("Removing unfinished download:: {}", file->path));
@@ -159,7 +160,9 @@ void DynamicFileSequenceDownloader::deinitialize(bool cacheFiles) {
             std::error_code ec;
             std::filesystem::remove(file.path(), ec);
             if (ec) {
-                LERROR(std::format("Failed to delete file: {}", file.path()));
+                LERROR(std::format(
+                    "Failed to delete file '{}'. {}", file.path(), ec.message()
+                ));
             }
         }
     }
@@ -178,9 +181,9 @@ void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest)
     constexpr int MaxRetries = 1;
 
     /********************
-    *   Example response
+    * Example response
     *********************
-    *{
+    * {
     *    "availability": {
     *        "startDate": "2017-07-01T00:42:02.0Z",
     *        "stopDate" : "2017-09-30T22:43:18.0Z"
@@ -188,13 +191,13 @@ void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest)
     *        "description" : "WSA 4.4 field line trace from the SCS outer boundary to the
     *                         source surface",
     *        "id" : 1177
-    *}
-    ********************/
+    * }
+    */
     while (attempt <= MaxRetries && !success) {
         try {
             std::vector<char> responseText = response.downloadedData();
             if (responseText.empty()) {
-                throw std::runtime_error("Empty HTTP response");
+                throw ghoul::RuntimeError("Empty HTTP response");
             }
             nlohmann::json jsonResult = nlohmann::json::parse(responseText);
             success = true;
@@ -208,9 +211,7 @@ void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest)
         catch (const nlohmann::json::parse_error& e) {
             LWARNING(std::format("JSON parse error: {}", e.what()));
         }
-        catch (const ghoul::RuntimeError& e) {
-            LWARNING(std::format("HTTP or other error: {}", e.what()));
-        }
+
         if (!success) {
             if (attempt < MaxRetries) {
                 LINFO(std::format("Retry number {}.", attempt + 1));
@@ -243,7 +244,7 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
     nlohmann::json jsonResult;
 
     /********************
-    *   Example response
+    * Example response
     *********************
     * {
     *  "dataID": 1234,
@@ -260,8 +261,8 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
     *  "time.max": "2017-10-01 00:00:00.0",
     *  "time.min": "2017-06-01 00:00:00.0"
     * }
-    ********************
-    * note that requested time can be month 10 but last entry in list is month 07,
+    *
+    * Note that requested time can be month 10 but last entry in list is month 07,
     * meaning there are no more available files between month 7-10.
     * *****************/
     while (attempt <= MaxRetries && !success) {
@@ -273,7 +274,8 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
             // @TODO (2025-06-10, Elon) What value is actually too large to handle?
             if (data.size() > std::numeric_limits<std::size_t>::max()) {
                 throw ghoul::RuntimeError(
-                    "Http response with list of available files is too large, i.e. too many files"
+                    "Http response with list of available files is too large, i.e. too "
+                    "many files"
                 );
             }
 
@@ -282,9 +284,6 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
         }
         catch (const nlohmann::json::parse_error& ex) {
             LERROR(std::format("JSON parsing error: '{}'", ex.what()));
-        }
-        catch (const ghoul::RuntimeError& ex) {
-            LERROR(std::format("An error occurred: '{}'", ex.what()));
         }
 
         if (!success) {
@@ -356,12 +355,13 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
 
 double DynamicFileSequenceDownloader::calculateCadence() const {
     double averageTime = 0.0;
+
     if (_availableData.size() < 2) {
         // If 0 or 1 files there is no cadence
         return averageTime;
     }
-    double time1 = Time::convertTime(_availableData.begin()->timestep);
-    double timeN = Time::convertTime(_availableData.rbegin()->timestep);
+    const double time1 = Time::convertTime(_availableData.begin()->timestep);
+    const double timeN = Time::convertTime(_availableData.rbegin()->timestep);
     averageTime = (timeN - time1) / _availableData.size();
 
     return averageTime;
@@ -370,7 +370,15 @@ double DynamicFileSequenceDownloader::calculateCadence() const {
 void DynamicFileSequenceDownloader::downloadFile() {
     ZoneScoped;
 
-    if (_filesCurrentlyDownloading.size() < 4 && !_queuedFilesToDownload.empty()) {
+    // The MaxDownloads number is a educated guess. Ideally this would vary depending on
+    // each users computer and internet specifications. It allows at least a few files to
+    // download in parallel, but not too many to take up more bandwidth than it would
+    // allow the current files to download as fast as possible
+    constexpr int MaxDownloads = 4;
+
+    if (_filesCurrentlyDownloading.size() < MaxDownloads &&
+        !_queuedFilesToDownload.empty())
+    {
         File* dl = _queuedFilesToDownload.front();
         if (dl->state != File::State::OnQueue) {
             throw ghoul::RuntimeError(
@@ -427,7 +435,9 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
                 std::error_code ec;
                 std::filesystem::remove(filepath, ec);
                 if (ec) {
-                    LERROR(std::format("Failed to delete file: {}", filepath));
+                    LERROR(std::format(
+                        "Failed to delete file '{}'. {}", filepath, ec.message()
+                    ));
                 }
                 else {
                     LINFO(std::format(
@@ -624,7 +634,8 @@ bool DynamicFileSequenceDownloader::areFilesCurrentlyDownloading() const {
     return !_filesCurrentlyDownloading.empty();
 }
 
-std::vector<File*>& DynamicFileSequenceDownloader::filesCurrentlyDownloading() {
+const std::vector<File*>& DynamicFileSequenceDownloader::filesCurrentlyDownloading() const
+{
     return _filesCurrentlyDownloading;
 }
 

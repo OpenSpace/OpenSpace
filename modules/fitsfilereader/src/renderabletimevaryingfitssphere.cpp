@@ -93,28 +93,28 @@ namespace {
         "TextureSource",
         "Texture Source",
         "A directory on disk from which to load the texture files for the sphere.",
-        openspace::properties::Property::Visibility::User
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FitsLayerInfo = {
         "FitsLayer",
         "Texture Layer",
         "The index of the layer in the FITS file to use as texture.",
-        openspace::properties::Property::Visibility::User
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FitsLayerNameInfo = {
         "LayerNames",
         "Texture Layer Options",
         "This value specifies which name of the fits layer to use as texture.",
-        openspace::properties::Property::Visibility::User
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureFilterInfo = {
         "TextureFilter",
         "Texture Filter",
         "Option to choose nearest neighbor or linear filtering for the texture.",
-        openspace::properties::Property::Visibility::User
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SaveDownloadsOnShutdown = {
@@ -122,7 +122,7 @@ namespace {
         "Save Downloads On Shutdown",
         "This is an option for if dynamically downloaded files should be saved for the"
         "next run or not.",
-        openspace::properties::Property::Visibility::User
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTimeVaryingFitsSphere)]] Parameters {
@@ -312,8 +312,8 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
                 const ghoul::Dictionary& pair = d.value<ghoul::Dictionary>(intKey);
                 if (pair.hasValue<double>("1") && pair.hasValue<double>("2")) {
                     std::pair<float, float> minMax = {
-                        pair.value<double>("1"),
-                        pair.value<double>("2")
+                        static_cast<float>(pair.value<double>("1")),
+                        static_cast<float>(pair.value<double>("2"))
                     };
                     std::pair<int, std::pair<float, float>> mapPair {
                         std::stoi(std::string(intKey)),
@@ -324,7 +324,7 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
                 else {
                     throw ghoul::RuntimeError(std::format(
                         "The two values at {} needs to be of type double, a number with "
-                        "at least one decimal.",
+                        "at least one decimal",
                         intKey
                     ));
                 }
@@ -332,7 +332,7 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
         }
 
         if (!p.layerNames.has_value()) {
-            throw ghoul::RuntimeError("At least one name for one layer is required.");
+            throw ghoul::RuntimeError("At least one name for one layer is required");
         }
         const ghoul::Dictionary names = *p.layerNames;
         for (std::string_view key : names.keys()) {
@@ -378,6 +378,7 @@ void RenderableTimeVaryingFitsSphere::readFileFromFits(std::filesystem::path pat
     if (!t) {
         return;
     }
+
     using FilterMode = ghoul::opengl::Texture::FilterMode;
     if (_textureFilterProperty == static_cast<int>(FilterMode::Nearest)) {
         t->setFilter(FilterMode::Nearest);
@@ -441,11 +442,13 @@ void RenderableTimeVaryingFitsSphere::extractMandatoryInfoFromSourceFolder() {
     // Ensure that the source folder exists and then extract
     // the files with the same extension as <inputFileTypeString>
     namespace fs = std::filesystem;
-    const fs::path sourceFolder = absPath(_textureSource);
+    const fs::path sourceFolder = _textureSource.stringValue();
     if (!std::filesystem::is_directory(sourceFolder)) {
-        throw ghoul::RuntimeError(
-            "Source folder for RenderableTimeVaryingFitsSphere is not a valid directory"
-        );
+        throw ghoul::RuntimeError(std::format(
+            "Source folder '{}' for RenderableTimeVaryingFitsSphere is not a valid "
+            "directory",
+            sourceFolder
+        ));
     }
     // Extract all file paths from the provided folder
     _files.clear();
@@ -454,14 +457,13 @@ void RenderableTimeVaryingFitsSphere::extractMandatoryInfoFromSourceFolder() {
         if (!e.is_regular_file()) {
             continue;
         }
-        if (e.path().extension() == ".fits") {
-            readFileFromFits(e.path());
-        }
-        else {
-            throw ghoul::RuntimeError(
-                std::format("{} File extension required to be .fits", e.path())
+        if (e.path().extension() != ".fits") {
+            throw ghoul::RuntimeError(std::format(
+                "File extension for '{}' required to be .fits", e.path())
             );
         }
+
+        readFileFromFits(e.path());
     }
     // Ensure that there are available and valid source files left
     if (_files.empty()) {
@@ -469,9 +471,8 @@ void RenderableTimeVaryingFitsSphere::extractMandatoryInfoFromSourceFolder() {
             "Source folder for RenderableTimeVaryingFitsSphere contains no files"
         );
     }
-    else {
-        computeSequenceEndTime();
-    }
+
+    computeSequenceEndTime();
 }
 
 void RenderableTimeVaryingFitsSphere::update(const UpdateData& data) {

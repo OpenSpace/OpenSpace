@@ -34,7 +34,7 @@ using namespace CCfits;
 namespace openspace {
 
 std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
-                                                         const std::filesystem::path path,
+                                                        const std::filesystem::path& path,
                                                                         size_t layerIndex,
                                                            std::pair<float, float> minMax)
 {
@@ -99,13 +99,6 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         std::filesystem::remove(path);
         return nullptr;
     }
-    catch (const ghoul::MissingCaseException& e) {
-        LERROR(std::format(
-            "Error when reading file '{}'. '{}'", path, e.what()
-        ));
-        std::filesystem::remove(path);
-        return nullptr;
-    }
 }
 
 void readFitsHeader(const std::filesystem::path& path) {
@@ -159,4 +152,5 @@ std::shared_ptr<ImageData<T>> readImageInternal(U& image) {
     }
     return nullptr;
 }
+
 } // namespace openspace

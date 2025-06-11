@@ -57,8 +57,8 @@ struct File {
 
 class DynamicFileSequenceDownloader {
 public:
-    DynamicFileSequenceDownloader(int dataID, std::string identifier, std::string infoUrl,
-        std::string dataUrl, size_t nFilesToQueue);
+    DynamicFileSequenceDownloader(int dataID, const std::string& identifier,
+        std::string infoUrl, std::string dataUrl, size_t nFilesToQueue);
 
     void deinitialize(bool cacheFiles);
     void requestDataInfo(std::string httpInfoRequest);
@@ -71,7 +71,7 @@ public:
     void clearDownloaded();
     const std::filesystem::path& destinationDirectory() const;
     bool areFilesCurrentlyDownloading() const;
-    std::vector<File*>& filesCurrentlyDownloading();
+    const std::vector<File*>& filesCurrentlyDownloading() const;
 
 private:
     void downloadFile();

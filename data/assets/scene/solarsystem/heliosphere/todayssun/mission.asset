@@ -29,13 +29,11 @@ local Mission = {
     GUI. In the visualization, the white line shooting out from the Sun, along with the
     white arc, always points in the direction of Earth. The red arc is the Carrington
     prime meridian which is longitude 0 of the Sun, and the green grid shows lines with a
-    10-degree separation. You can also toggle a white background from the Actions panel.
-    If no data is showing, most likely the selected time is outside of the data range
-    (e.g., too far in the future or the past for the dynamic data to be available).
-    Alternatively, the files failed to download. For more information on the simulation
-    model, see https://ccmc.gsfc.nasa.gov/models/WSA~5.4.
+    10-degree separation. If no data is showing, most likely the selected time is outside
+    of the data range (e.g., too far in the future or the past for the dynamic data to be
+    available). Alternatively, the files failed to download. For more information on the
+    simulation model, see https://ccmc.gsfc.nasa.gov/models/WSA~5.4.
   ]],
-  Actions = { "os.todayssun.ToggleWhiteBackground" },
   Milestones = {
     {
       Name = "Version 5.4",
