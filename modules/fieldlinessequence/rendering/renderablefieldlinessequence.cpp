@@ -566,9 +566,6 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         _selectedColorRange.setMinValue(glm::vec2(p.colorMinMaxRange->x));
         _selectedColorRange.setMaxValue(glm::vec2(p.colorMinMaxRange->y));
     }
-    // To not change peoples masking settings i kept the parameter for the assets
-    // to be "MaskingRanges", but a single vec2-value instead of a vector.
-    // What is given from the asset, is stored as the selected range.
     if (p.maskingRanges.has_value()) {
         _maskingRanges = p.maskingRanges.value_or(_maskingRanges);
     }
