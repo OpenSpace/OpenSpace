@@ -100,7 +100,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FitsLayerInfo = {
         "FitsLayer",
         "Texture Layer",
-        "This value specifies which index in the fits file to use as texture.",
+        "The index of the layer in the FITS file to use as texture.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -121,8 +121,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SaveDownloadsOnShutdown = {
         "SaveDownloadsOnShutdown",
         "Save Downloads On Shutdown",
-        "This is an option for if dynamically downloaded should be saved between runs "
-        "or not.",
+        "This is an option for if dynamically downloaded files should be saved for the"
+        "next run or not.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -162,7 +162,8 @@ namespace {
         std::optional<ghoul::Dictionary> layerNames;
 
         // A range per layer to be used to cap where the color range will lie.
-        // Values outside of range will be overexposed.
+        // Values outside of range will be overexposed, i.e. data values below the min
+        // or above the max, will all be set to the min and max color value in range.
         std::optional<ghoul::Dictionary> layerMinMaxCapValues;
 
         // This is set to false by default and will delete all the downloaded content when
@@ -254,13 +255,13 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
                     std::pair<float, float> minMax = _layerMinMaxCaps.at(_fitsLayerName);
                     file.texture = loadTextureFromFits(file.path, _fitsLayerName, minMax);
                     file.texture->uploadTexture();
-                    _textureFilterProperty == 0 ?
-                        file.texture->setFilter(
-                            ghoul::opengl::Texture::FilterMode::Nearest
-                        ) :
-                        file.texture->setFilter(
-                            ghoul::opengl::Texture::FilterMode::Linear
-                        );
+                    using FM = ghoul::opengl::Texture::FilterMode;
+                    if (_textureFilterProperty == static_cast<int>(FM::Nearest)) {
+                        file.texture->setFilter(FM::Nearest);
+                    }
+                    else if (_textureFilterProperty == static_cast<int>(FM::Linear)) {
+                        file.texture->setFilter(FM::Linear);
+                    }
                 }
             }
             loadTexture();
@@ -290,7 +291,7 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
             );
         }
 
-        _infoURL = *p.infoURL;
+        _infoUrl = *p.infoURL;
 
         if (!p.dataURL.has_value()) {
             throw ghoul::RuntimeError(
@@ -298,7 +299,7 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
             );
         }
 
-        _dataURL = *p.dataURL;
+        _dataUrl = *p.dataURL;
 
         if (p.layerMinMaxCapValues.has_value()) {
             const ghoul::Dictionary d = *p.layerMinMaxCapValues;
@@ -363,15 +364,12 @@ void RenderableTimeVaryingFitsSphere::readFileFromFits(std::filesystem::path pat
     if (!t) {
         return;
     }
-    if (_textureFilterProperty == static_cast<int>(
-        ghoul::opengl::Texture::FilterMode::Nearest))
-    {
-        t->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
+    using FilterMode = ghoul::opengl::Texture::FilterMode;
+    if (_textureFilterProperty == static_cast<int>(FilterMode::Nearest)) {
+        t->setFilter(FilterMode::Nearest);
     }
-    else if (_textureFilterProperty == static_cast<int>(
-        ghoul::opengl::Texture::FilterMode::Linear))
-    {
-        t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+    else if (_textureFilterProperty == static_cast<int>(FilterMode::Linear)) {
+        t->setFilter(FilterMode::Linear);
     }
 
     glm::vec2 minMaxDataValues = minMaxTextureDataValues(t);
@@ -473,8 +471,8 @@ void RenderableTimeVaryingFitsSphere::update(const UpdateData& data) {
         _dynamicFileDownloader = std::make_unique<DynamicFileSequenceDownloader>(
             _dataID,
             identifier,
-            _infoURL,
-            _dataURL,
+            _infoUrl,
+            _dataUrl,
             _nFilesToQueue
         );
     }
@@ -501,9 +499,13 @@ void RenderableTimeVaryingFitsSphere::update(const UpdateData& data) {
                 std::pair<float, float> minMax = _layerMinMaxCaps.at(_fitsLayerName);
                 file.texture =
                     loadTextureFromFits(file.path, _fitsLayerName, minMax);
-                _textureFilterProperty == 0 ?
-                    file.texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest) :
-                    file.texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+                using FilterMode = ghoul::opengl::Texture::FilterMode;
+                if (_textureFilterProperty == static_cast<int>(FilterMode::Nearest)) {
+                    file.texture->setFilter(FilterMode::Nearest);
+                }
+                else if (_textureFilterProperty == static_cast<int>(FilterMode::Linear)) {
+                    file.texture->setFilter(FilterMode::Linear);
+                }
                 file.status = File::FileStatus::Loaded;
                 trackOldest(file);
                 loadTexture();
@@ -579,6 +581,7 @@ void RenderableTimeVaryingFitsSphere::updateDynamicDownloading(double currentTim
         const bool isInInterval = !_files.empty() &&
             currentTime >= _files[0].time &&
             currentTime < _sequenceEndTime;
+
         if (isInInterval &&
             _activeTriggerTimeIndex != -1 &&
             _activeTriggerTimeIndex < _files.size())
@@ -587,8 +590,8 @@ void RenderableTimeVaryingFitsSphere::updateDynamicDownloading(double currentTim
             loadTexture();
         }
     }
-    // if all files are moved into _sourceFiles then we can
-    // empty the DynamicFileSequenceDownloader _downloadedFiles;
+    // If all files are moved into _sourceFiles then we can
+    // empty the DynamicFileSequenceDownloader's downloaded files list
     _dynamicFileDownloader->clearDownloaded();
 }
 
@@ -599,7 +602,8 @@ void RenderableTimeVaryingFitsSphere::computeSequenceEndTime() {
     else if (_files.size() == 1) {
         _sequenceEndTime = _files[0].time + 7200.f;
         if (_loadingType == LoadingType::StaticLoading && !_renderForever) {
-            //TODO: Alternativly check at construction and throw exeption.
+            // TODO (2025-06-10, Elon) Alternativly check at construction and throw
+            // exeption.
             LWARNING(
                 "Only one file in data set, but ShowAtAllTimes set to false. "
                 "Using arbitrary 2 hours to visualize data file instead"

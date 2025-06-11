@@ -50,6 +50,7 @@ Fragment getFragment() {
     vec4 dataValue = texture(colorTexture, texCoord);
     float minVal = dataMinMaxValues.x;
     float maxVal = dataMinMaxValues.y;
+    // dataValue and minVal comes from the same texture so dataValue cannot be < minVal
     float lookUpVal = (dataValue.x - minVal) / (maxVal - minVal);
     frag.color = vec4(
         texture(transferFunction, lookUpVal).rgb,

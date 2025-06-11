@@ -856,7 +856,7 @@ void RenderableFieldlinesSequence::computeSequenceEndTime() {
     else if (_files.size() == 1) {
         _sequenceEndTime = _files[0].timestamp + 7200.f;
         if (_loadingType == LoadingType::StaticLoading && !_renderForever) {
-            // TODO(2025-06-10, Elon) Alternativly check at construction and throw
+            // TODO (2025-06-10, Elon) Alternativly check at construction and throw
             // exeption.
             LWARNING(
                 "Only one file in data set, but ShowAtAllTimes set to false. Using a 2h "

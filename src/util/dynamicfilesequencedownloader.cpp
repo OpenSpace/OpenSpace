@@ -74,7 +74,6 @@ std::string buildDataHttpRequest(double minTime, double maxTime, int dataID,
     // days in seconds      : 86400
     // 30 days in seconds   : 2592000
     // 1 year in seconds    : 31556926
-    // TODO: adapt min and max time dependent on the cadence
     std::string_view min = Time(minTime).ISO8601();
     std::string_view max = Time(maxTime).ISO8601();
 
@@ -233,11 +232,7 @@ void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest)
 void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRequest,
                                                           std::filesystem::path syncDir)
 {
-    // Declaring big window. pair.first is timestep, pair.second is url to be downloaded
-
-    // Get big window/ list of available files for the specified data set.
     // If it expands to more of a API call rather than a http-request, that code goes here
-    // TODO: make_unique?
     HttpMemoryDownload response = HttpMemoryDownload(httpDataRequest);
     response.start();
     response.wait();
@@ -275,7 +270,7 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
             if (data.empty()) {
                 throw ghoul::RuntimeError("Empty HTTP response");
             }
-            //TODO what value is actually to large to handle?
+            // @TODO (2025-06-10, Elon) What value is actually too large to handle?
             if (data.size() > std::numeric_limits<std::size_t>::max()) {
                 throw ghoul::RuntimeError(
                     "Http response with list of available files is too large, i.e. too many files"

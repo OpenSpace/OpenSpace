@@ -38,11 +38,11 @@ namespace {
     constexpr std::string_view _loggerCat = "KameleonVolumeToFieldlinesTask";
 
     // This task class traces field lines from volume data. It takes a task file which
-    // specify a folder with .cdf files, as well as a file that lists seed points in which
-    // the tracing starts from. For the outputs, specify an `outputFolder` for where the
-    // field lines data will be saved and the `OutputType` parameter to be either `Osfls`
-    // which is an OpenSpace specific binary format for field lines, or `Json` for a
-    // readable version of the same data. Some knowledge of the data might be needed,
+    // specifies a folder with .cdf files, as well as a file that lists seed points in
+    // which the tracing starts from. For the outputs, specify an `outputFolder` for where
+    // the field lines data will be saved and the `OutputType` parameter to be either
+    // `Osfls` which is an OpenSpace specific binary format for field lines, or `Json` for
+    // a readable version of the same data. Some knowledge of the data might be needed,
     // especially if coloring the field lines according to some data parameter like
     // temperature or density. These parameters needs to be specified in the `ScalarVars`
     // and match the name in the input data. For the magnitude of a vector parameter, such

@@ -97,8 +97,8 @@ private:
     std::deque<File*> _loadedFiles;
     // Max number of files loaded at once
     size_t _maxLoadedFiles = 100;
-    std::string _infoURL;
-    std::string _dataURL;
+    std::string _infoUrl;
+    std::string _dataUrl;
     std::map<int, std::string> _layerNames;
     std::map<int, std::pair<float, float>> _layerMinMaxCaps;
 
