@@ -277,7 +277,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
 
     _colorMap.onChange([this]() {
         if (!std::filesystem::exists(_colorMap.value())) {
-            LWARNING(std::format(
+            LERROR(std::format(
                 "Path {} to color map is invalid.",
                 _colorMap.value()
             ));
@@ -426,9 +426,6 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform("transferFunction", transferFunctionUnit);
     _shader->setUniform("dataMinMaxValues", _dataMinMaxValues);
     if (_useColorMap) {
-        if (_transferFunction == nullptr) {
-            _transferFunction = std::make_unique<TransferFunction>(_colorMap.value());
-        }
         transferFunctionUnit.activate();
         _transferFunction->bind();
     }
@@ -499,7 +496,9 @@ void RenderableSphere::update(const UpdateData&) {
         _shader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
-
+    if (_transferFunction == nullptr && std::filesystem::exists(_colorMap.value())) {
+        _transferFunction = std::make_unique<TransferFunction>(_colorMap.value());
+    }
     if (_sphereIsDirty) [[unlikely]] {
         _sphere = std::make_unique<Sphere>(_size, _segments);
         _sphere->initialize();

@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
+local transforms = asset.require("scene/solarsystem/heliosphere/transforms_heliosphere")
 
 
 
@@ -10,7 +10,7 @@ local transferFunctions = asset.resource({
 })
 
 
-local blueBlackRed = transferFunctions .. "/blue-black-red.txt"
+local blueBlackRed = transferFunctions .. "blue-black-red.txt"
 
 local infoURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id="
 local dataURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID="

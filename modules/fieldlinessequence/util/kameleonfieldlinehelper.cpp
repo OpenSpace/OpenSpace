@@ -134,7 +134,7 @@ extractSeedPointsFromFiles(std::filesystem::path path, size_t nth)
     std::unordered_map<std::string, std::vector<glm::vec3>> outMap;
 
     if (!std::filesystem::is_directory(path)) {
-        LERROR(std::format(
+        throw ghoul::RuntimeError(std::format(
             "The specified seed point directory: '{}' does not exist", path
         ));
         return outMap;
@@ -142,7 +142,7 @@ extractSeedPointsFromFiles(std::filesystem::path path, size_t nth)
 
     namespace fs = std::filesystem;
     for (const fs::directory_entry& spFile : fs::directory_iterator(path)) {
-        std::filesystem::path seedFilePath = spFile.path();
+        fs::path seedFilePath = spFile.path();
         if (!spFile.is_regular_file() || seedFilePath.extension() != "txt") {
             continue;
         }
@@ -200,7 +200,7 @@ std::vector<std::string>
 extractMagnitudeVarsFromStrings(std::vector<std::string> vars)
 {
     std::vector<std::string> extraMagVars;
-    for (int i = 0; i < static_cast<int>(vars.size()); i++) {
+    for (size_t i = 0; i < vars.size(); i++) {
         const std::string& str = vars[i];
 
         std::istringstream ss(str);

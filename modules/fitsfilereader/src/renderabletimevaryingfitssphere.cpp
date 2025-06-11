@@ -37,7 +37,6 @@
 #include <ghoul/misc/crc32.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-
 #include <string>
 
 namespace {
@@ -215,7 +214,10 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
 
     _textureFilterProperty.addOptions({
         { static_cast<int>(ghoul::opengl::Texture::FilterMode::Nearest), "No Filter" },
-        { static_cast<int>(ghoul::opengl::Texture::FilterMode::Linear), "Linear smoothing" }
+        {
+            static_cast<int>(ghoul::opengl::Texture::FilterMode::Linear),
+            "Linear smoothing"
+        }
     });
     _textureFilterProperty = static_cast<int>(
         ghoul::opengl::Texture::FilterMode::Nearest
@@ -225,20 +227,24 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
 
     _textureFilterProperty.onChange([this]() {
         switch (_textureFilterProperty) {
-        case static_cast<int>(ghoul::opengl::Texture::FilterMode::Nearest):
-            for (File& file : _files) {
-                if (file.texture) {
-                    file.texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
+            case static_cast<int>(ghoul::opengl::Texture::FilterMode::Nearest):
+                for (File& file : _files) {
+                    if (file.texture) {
+                        file.texture->setFilter(
+                            ghoul::opengl::Texture::FilterMode::Nearest
+                        );
+                    }
                 }
-            }
-            break;
-        case static_cast<int>(ghoul::opengl::Texture::FilterMode::Linear):
-            for (File& file : _files) {
-                if (file.texture) {
-                    file.texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+                break;
+            case static_cast<int>(ghoul::opengl::Texture::FilterMode::Linear):
+                for (File& file : _files) {
+                    if (file.texture) {
+                        file.texture->setFilter(
+                            ghoul::opengl::Texture::FilterMode::Linear
+                        );
+                    }
                 }
-            }
-            break;
+                break;
         }
     });
     addProperty(_textureFilterProperty);
@@ -283,6 +289,7 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
         }
 
         _dataID = *p.dataID;
+
         _nFilesToQueue = p.numberOfFilesToQueue.value_or(_nFilesToQueue);
 
         if (!p.infoURL.has_value()) {
@@ -290,7 +297,6 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
                 "If running with dynamic downloading, infoURL needs to be specified"
             );
         }
-
         _infoUrl = *p.infoURL;
 
         if (!p.dataURL.has_value()) {
@@ -298,22 +304,30 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
                 "If running with dynamic downloading, dataURL needs to be specified"
             );
         }
-
         _dataUrl = *p.dataURL;
 
         if (p.layerMinMaxCapValues.has_value()) {
             const ghoul::Dictionary d = *p.layerMinMaxCapValues;
             for (std::string_view intKey : d.keys()) {
                 const ghoul::Dictionary& pair = d.value<ghoul::Dictionary>(intKey);
-                std::pair<float, float> minMax = {
-                    pair.value<double>("1"),
-                    pair.value<double>("2")
-                };
-                std::pair<int, std::pair<float, float>> mapPair {
-                    std::stoi(std::string(intKey)),
-                    minMax
-                };
-                _layerMinMaxCaps.emplace(mapPair);
+                if (pair.hasValue<double>("1") && pair.hasValue<double>("2")) {
+                    std::pair<float, float> minMax = {
+                        pair.value<double>("1"),
+                        pair.value<double>("2")
+                    };
+                    std::pair<int, std::pair<float, float>> mapPair {
+                        std::stoi(std::string(intKey)),
+                        minMax
+                    };
+                    _layerMinMaxCaps.emplace(mapPair);
+                }
+                else {
+                    throw ghoul::RuntimeError(std::format(
+                        "The two values at {} needs to be of type double, a number with "
+                        "at least one decimal.",
+                        intKey
+                    ));
+                }
             }
         }
 

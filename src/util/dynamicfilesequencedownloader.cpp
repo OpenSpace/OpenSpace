@@ -314,11 +314,12 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
         std::string timestamp = element["timestamp"].get<std::string>();
         std::string url = element["url"].get<std::string>();
 
-        //timestamp = "2022-11-13T16:14:00.000";
-        //url =
-        //https://iswaA-webservice1.ccmc.gsfc.nasa.gov/
-        //...iswa_data_tree/model/solar/WSA5.X/fieldlines/
-        //...GONG_Z/trace_pfss_intoout/2022/11/2022-11-13T16-14-00.000.osfls";
+        // An example of how one element in the list from the JSON-result look like:
+        // timestamp = "2022-11-13T16:14:00.000";
+        // url =
+        // https://iswaA-webservice1.ccmc.gsfc.nasa.gov/
+        // ...iswa_data_tree/model/solar/WSA5.X/fieldlines/
+        // ...GONG_Z/trace_pfss_intoout/2022/11/2022-11-13T16-14-00.000.osfls";
 
         std::string fileName = url.substr(url.find_last_of("//"));
         std::filesystem::path destination = _syncDir;
@@ -400,7 +401,7 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
             std::ifstream tempFile = std::ifstream(file->URL);
             std::streampos size = tempFile.tellg();
             if (size == 0) {
-                LERROR(std::format("File '{}' is size 0, removing", dl->destination()));
+                LERROR(std::format("File '{}' is empty, removing", dl->destination()));
                 currentIt = _filesCurrentlyDownloading.erase(currentIt);
                 --i;
             }
@@ -439,7 +440,7 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
             // If one is removed, i is reduced, else we'd skip one in the list
             --i;
         }
-        // The file is not finnished downloading, move on to next
+        // The file is not finished downloading, move on to next
         else {
             ++currentIt;
         }
@@ -483,7 +484,7 @@ void DynamicFileSequenceDownloader::putInQueue() {
     }
     else {
         end = _availableData.begin();
-        // To catch first file (since begin points to a file but end() does not
+        // To catch first file (since begin points to a file but end() does not)
         if (_currentFile == end && _currentFile->state == File::State::Available) {
             _queuedFilesToDownload.push_back(&*_currentFile);
             _currentFile->state = File::State::OnQueue;
@@ -527,7 +528,7 @@ void DynamicFileSequenceDownloader::update(double time, double deltaTime) {
     // More than 2hrs a second would generally be unfeasable
     // for a regular internet connection to operate at
     constexpr int SpeedThreshold = 7200; // 2 hours in seconds
-    if (abs(deltaTime) > SpeedThreshold) {
+    if (std::abs(deltaTime) > SpeedThreshold) {
         // Too fast, do nothing
         if (!_hasNotifiedTooFast) {
             LWARNING(

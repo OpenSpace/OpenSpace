@@ -27,16 +27,16 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 set(HEADER_FILES
   fitsfilereadermodule.h
   include/fitsfilereader.h
-  include/wsafitshelper.h
   include/renderabletimevaryingfitssphere.h
+  include/wsafitshelper.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   fitsfilereadermodule.cpp
   src/fitsfilereader.cpp
-  src/wsafitshelper.cpp
   src/renderabletimevaryingfitssphere.cpp
+  src/wsafitshelper.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

@@ -1,7 +1,8 @@
+local timeNow = openspace.time.currentWallTime()
 local Mission = {
   Identifier = "WSA",
   Name = "The WSA Simulation Model",
-  TimeRange = { Start = "2022 DEC 09 16:14:00", End = "2025 MAY 31 00:00:01" },
+  TimeRange = { Start = "2022 DEC 09 16:14:00", End = timeNow },
   Description = [[
     This profile shows the Sun and its magnetic polarities, using data from the WSA
     (Wang-Sheeley-Arge) simulation model version 5.4. The solar coronal portion of WSA is

@@ -31,7 +31,7 @@ in float vs_screenSpaceDepth;
 
 uniform sampler2D colorTexture;
 
-uniform bool usingTransferFunction;
+uniform bool usingTransferFunction = false;
 uniform sampler1D transferFunction;
 uniform vec2 dataMinMaxValues;
 

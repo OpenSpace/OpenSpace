@@ -51,8 +51,10 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
     static documentation::Documentation Documentation();
+
 protected:
     void bindTexture() override;
+
 private:
     struct File {
         enum class FileStatus {
@@ -63,7 +65,7 @@ private:
         std::filesystem::path path;
         double time = 0.0;
         std::unique_ptr<ghoul::opengl::Texture> texture;
-        glm::vec2 dataMinMax = { 0.0, 1.0 };
+        glm::vec2 dataMinMax = { 0.f, 1.f };
         bool operator<(const File& other) const noexcept {
             return time < other.time;
         }

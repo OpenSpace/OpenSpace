@@ -44,7 +44,6 @@ class RenderableFieldlinesSequence : public Renderable {
 public:
     enum class LoadingType {
         StaticLoading,
-        DynamicLoading,
         DynamicDownloading
     };
 
@@ -227,7 +226,7 @@ private:
     // Line width for the line rendering part
     properties::FloatProperty _lineWidth;
     // Button which executes a time jump to start of sequence
-    properties::TriggerProperty _jumpToStartBtn;
+    properties::TriggerProperty _jumpToStart;
     properties::BoolProperty _saveDownloadsOnShutdown;
 
     bool _isFirstLoad = true;

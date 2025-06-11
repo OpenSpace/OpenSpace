@@ -89,8 +89,8 @@ private:
     const std::string _infoUrl;
     const std::string _dataUrl;
 
-    double _dataMinTime;
-    double _dataMaxTime;
+    double _dataMinTime = 0.0;
+    double _dataMaxTime = 0.0;
 
     const size_t _nFilesToQueue = 0;
 

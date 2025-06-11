@@ -37,7 +37,9 @@ void FitsFileReaderModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul::TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderableTimeVaryingFitsSphere>("RenderableTimeVaryingFitsSphere");
+    fRenderable->registerClass<RenderableTimeVaryingFitsSphere>(
+        "RenderableTimeVaryingFitsSphere"
+    );
 }
 
 std::vector<documentation::Documentation> FitsFileReaderModule::documentations() const {

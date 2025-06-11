@@ -1,9 +1,11 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
+local transforms = asset.require("scene/solarsystem/heliosphere/transforms_heliosphere")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local size = 7.0E8
+-- Slightly bigger size than the sphere radius to allow grid lines to not clip into sphere
+-- since the lines themselfs are not curved
+local gridSizeRadius = 7.0E8
 
 local CarringtonPrimeMeridian = {
   Identifier = "CarringtonPrimeMeridian",
@@ -11,20 +13,23 @@ local CarringtonPrimeMeridian = {
   Transform = {
     Translation = {
       Type = "StaticTranslation",
+       -- A shift to only show an arc on one side of the sun
       Position = { 3500000.0, 0.0, 0.0 }
     },
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { 0.0, 0.0, -math.pi / 2.0 } -- -90 degrees
+      Rotation = { 0.0, 0.0, -math.rad(90) }
     },
     Scale = {
       Type = "StaticScale",
+       -- Slightly smaller than grid size, to make the arc look better together with the
+       -- translation in x
       Scale = 6.98E8
     }
   },
   Renderable = {
     Type = "RenderableSphericalGrid",
-    Size = size,
+    Size = gridSizeRadius,
     Color = { 1.0, 0.0, 0.0 },
     LineWidth = 2.0,
     LongSegments = 2,
@@ -45,16 +50,16 @@ local WSA_GridSlice = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { 0.0, 0.0, -math.pi / 2.0 } -- -90 degrees
+      Rotation = { 0.0, 0.0, -math.rad(90) }
     },
     Scale = {
       Type = "StaticScale",
-      Scale = size
+      Scale = gridSizeRadius
     }
   },
   Renderable = {
     Type = "RenderableSphericalGrid",
-    Size = size,
+    Size = gridSizeRadius,
     Color = { 0.8, 0.8, 0.8 },
     LineWidth = 2.0,
     LongSegments = 2,
@@ -74,12 +79,12 @@ local WSA_Grid10Degrees = {
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = size
+      Scale = gridSizeRadius
     }
   },
   Renderable = {
     Type = "RenderableSphericalGrid",
-    Size = size,
+    Size = gridSizeRadius,
     Color = { 0.035, 0.675, 0.255 },
     LineWidth = 1.0,
     Segments = 36

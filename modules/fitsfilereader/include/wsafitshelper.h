@@ -63,7 +63,8 @@ void readFitsHeader(const std::filesystem::path& path);
  *
  * \param path The path to the FITS file.
  * \return The number of layers in the FITS file.
- */int nLayers(const std::filesystem::path& path);
+ */
+int nLayers(const std::filesystem::path& path);
 
 template<typename T, typename U>
 std::shared_ptr<ImageData<T>> readImageInternal(U& image);

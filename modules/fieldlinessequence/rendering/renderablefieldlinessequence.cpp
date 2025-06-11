@@ -42,6 +42,20 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableFieldlinesSequence";
 
+    double extractTriggerTimeFromFilename(const std::filesystem::path& filePath) {
+        // number of characters in filename (excluding '.osfls')
+        std::string fileName = filePath.stem().string(); // excludes extention
+
+        // Ensure the separators are correct
+        fileName.replace(4, 1, "-");
+        fileName.replace(7, 1, "-");
+        fileName.replace(10, 1, "T");
+        fileName.replace(13, 1, ":");
+        fileName.replace(16, 1, ":");
+        fileName.replace(19, 1, ".");
+        return openspace::Time::convertTime(fileName);
+    }
+
     constexpr openspace::properties::Property::PropertyInfo ColorMethodInfo = {
         "ColorMethod",
         "Color Method",
@@ -296,9 +310,10 @@ namespace {
         std::optional<Model> simulationModel;
 
         // Convert the models distance unit, ex. AU to meters for Enlil.
-        // 1.f is default, assuming meters as input.
+        // 1.0 is default, assuming meters as input.
         // Does not need to be specified if simulationModel is specified.
-        // Using a different model? Set this to scale your vertex positions to meters.
+        // When using a different model, use this value to scale your vertex positions to
+        // meters.
         std::optional<float> scaleToMeters;
 
         enum class [[codegen::map(openspace::RenderableFieldlinesSequence::LoadingType)]]
@@ -327,7 +342,8 @@ namespace {
         // Required if using dynamic downloading.
         std::optional<std::string> dataURL;
 
-        enum class [[codegen::map(openspace::RenderableFieldlinesSequence::SourceFileType)]]
+        enum class
+        [[codegen::map(openspace::RenderableFieldlinesSequence::SourceFileType)]]
         SourceFileType {
             Cdf,
             Json,
@@ -345,7 +361,7 @@ namespace {
         // Required if CDF is used as input.
         std::optional<std::filesystem::path> seedPointDirectory [[codegen::directory()]];
 
-        // Extra variables that can be used to color the field lines by.
+        // Extra variables that can be used to color the field lines.
         std::optional<std::vector<std::string>> extraVariables;
 
         // Which variable in CDF file to trace.
@@ -360,8 +376,6 @@ namespace {
 } // namespace
 
 namespace openspace {
-double extractTriggerTimeFromFilename(const std::filesystem::path& filePath);
-
 documentation::Documentation RenderableFieldlinesSequence::Documentation() {
     return codegen::doc<Parameters>("fieldlinessequence_renderablefieldlinessequence");
 }
@@ -414,7 +428,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     )
     , _maskingQuantity(MaskingQuantityInfo)
     , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
-    , _jumpToStartBtn(TimeJumpButtonInfo)
+    , _jumpToStart(TimeJumpButtonInfo)
     , _saveDownloadsOnShutdown(SaveDownloadsOnShutdown, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -433,7 +447,8 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         _inputFileType == SourceFileType::Cdf)
     {
         throw ghoul::RuntimeError(
-            "Dynamic loading (or downloading) is only supported for .osfls and .json files"
+            "Dynamic loading (or downloading) is only supported for .osfls and .json "
+            "files"
         );
     }
     if (_loadingType == LoadingType::StaticLoading && !p.sourceFolder.has_value()) {
@@ -469,6 +484,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             throw ghoul::RuntimeError("InfoURL has to be provided");
         }
         _infoURL = *p.infoURL;
+
         if (!p.dataURL.has_value()) {
             throw ghoul::RuntimeError("DataURL has to be provided");
         }
@@ -570,7 +586,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     // to be "MaskingRanges", but a single vec2-value instead of a vector.
     // What is given from the asset, is stored as the selected range.
     if (p.maskingRanges.has_value()) {
-        _maskingRanges = p.maskingRanges.value_or(_maskingRanges);
+        _maskingRanges = *p.maskingRanges;
     }
     else {
         _maskingRanges.push_back(glm::vec2(0.f, 1.f));
@@ -622,7 +638,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
                 std::make_unique<TransferFunction>(_colorTablePath.value());
         }
         else {
-            LWARNING("Invalid path to transfer function. Please enter new path");
+            LERROR("Invalid path to transfer function. Please enter new path");
         }
     });
 
@@ -645,7 +661,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         }
     });
 
-    _jumpToStartBtn.onChange([this]() {
+    _jumpToStart.onChange([this]() {
         if (_atLeastOneFileLoaded) {
             global::timeManager->setTimeNextFrame(Time(_files[0].timestamp));
         }
@@ -657,13 +673,12 @@ void RenderableFieldlinesSequence::staticallyLoadFiles(
                            const std::optional<std::filesystem::path>& seedPointDirectory,
                                         const std::optional<std::string>& tracingVariable)
 {
-    std::vector<std::thread> openThreads;
-    for (File& file : _files) {
-        bool loadSuccess = false;
-        switch (_inputFileType) {
-            case SourceFileType::Cdf: {
-                _seedPointDirectory = seedPointDirectory.value_or(_seedPointDirectory);
-                _tracingVariable = tracingVariable.value_or(_tracingVariable);
+    bool loadSuccess = false;
+    switch (_inputFileType) {
+        case SourceFileType::Cdf:
+            _seedPointDirectory = seedPointDirectory.value_or(_seedPointDirectory);
+            _tracingVariable = tracingVariable.value_or(_tracingVariable);
+            for (File& file : _files) {
                 if (!tracingVariable.has_value()) {
                     throw ghoul::RuntimeError("No tracing variable specified");
                 }
@@ -683,20 +698,24 @@ void RenderableFieldlinesSequence::staticallyLoadFiles(
                     _extraVars,
                     extraMagVars
                 );
-                break;
             }
-            case SourceFileType::Json:
+            break;
+        case SourceFileType::Json:
+            for (File& file : _files) {
                 loadSuccess = file.state.loadStateFromJson(
                     file.path.string(),
                     _model,
                     _scalingFactor
                 );
-                break;
-            case SourceFileType::Osfls: {
-                loadFile(file);
-                break;
             }
-        }
+            break;
+        case SourceFileType::Osfls:
+            for (File& file : _files) {
+                loadFile(file);
+            }
+            break;
+        default:
+            throw ghoul::MissingCaseException();
     }
 
     _isLoadingStateFromDisk = false;
@@ -733,7 +752,7 @@ void RenderableFieldlinesSequence::initializeGL() {
 void RenderableFieldlinesSequence::setupProperties() {
     addProperty(_colorABlendEnabled);
     addProperty(_lineWidth);
-    addProperty(_jumpToStartBtn);
+    addProperty(_jumpToStart);
 
     // Add Property Groups
     addPropertySubOwner(_colorGroup);
@@ -810,20 +829,6 @@ void RenderableFieldlinesSequence::setModelDependentConstants() {
     _domainR = glm::vec2(0.f, limit * 1.5f);
 }
 
-double extractTriggerTimeFromFilename(const std::filesystem::path& filePath) {
-    // number of characters in filename (excluding '.osfls')
-    std::string fileName = filePath.stem().string(); // excludes extention
-
-    // Ensure the separators are correct
-    fileName.replace(4, 1, "-");
-    fileName.replace(7, 1, "-");
-    fileName.replace(10, 1, "T");
-    fileName.replace(13, 1, ":");
-    fileName.replace(16, 1, ":");
-    fileName.replace(19, 1, ".");
-    return Time::convertTime(fileName);
-}
-
 void RenderableFieldlinesSequence::deinitializeGL() {
     glDeleteVertexArrays(1, &_vertexArrayObject);
     _vertexArrayObject = 0;
@@ -889,8 +894,8 @@ void RenderableFieldlinesSequence::loadFile(File& file) {
             );
         }
     }
-    catch (const std::runtime_error& e) {
-        LERROR(e.what());
+    catch (const ghoul::RuntimeError& e) {
+        LERRORC(e.component, e.message);
     }
 }
 
@@ -931,7 +936,6 @@ int RenderableFieldlinesSequence::updateActiveIndex(double currentTime) {
         return 0;
     }
 
-    int index = 0;
     const std::deque<File>::const_iterator iter = std::upper_bound(
         _files.begin(),
         _files.end(),
@@ -942,15 +946,14 @@ int RenderableFieldlinesSequence::updateActiveIndex(double currentTime) {
     );
 
     if (iter == _files.begin()) {
-        index = 0;
+        return 0;
     }
     else if (iter != _files.end()) {
-        index = static_cast<int>(std::distance(_files.cbegin(), iter));
+        return static_cast<int>(std::distance(_files.cbegin(), iter));
     }
     else {
-        index = static_cast<int>(_files.size()) - 1;
+        return static_cast<int>(_files.size()) - 1;
     }
-    return index;
 }
 
 bool RenderableFieldlinesSequence::isReady() const {
@@ -1245,13 +1248,10 @@ void RenderableFieldlinesSequence::updateVertexColorBuffer() {
     glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
 
     const FieldlinesState& state = _files[_activeIndex].state;
-    bool isSuccessful;
-    const std::vector<float>& quantities = state.extraQuantity(
-        _colorQuantity,
-        isSuccessful
-    );
+    bool success;
+    const std::vector<float>& quantities = state.extraQuantity(_colorQuantity, success);
 
-    if (isSuccessful) {
+    if (success) {
         glBufferData(
             GL_ARRAY_BUFFER,
             quantities.size() * sizeof(float),
@@ -1273,10 +1273,7 @@ void RenderableFieldlinesSequence::updateVertexMaskingBuffer() {
 
     const FieldlinesState& state = _files[_activeIndex].state;
     bool success;
-    const std::vector<float>& quantities = state.extraQuantity(
-        _maskingQuantity,
-        success
-    );
+    const std::vector<float>& quantities = state.extraQuantity(_maskingQuantity, success);
 
     if (success) {
         glBufferData(

@@ -40,7 +40,7 @@ std::vector<std::string>
 
 /**
  * Extract seedpoints from a text file. This function is used both in
- * renderablefieldlinesequence and the .cdf to .osfls converter task.
+ * RenderableFieldlinesSequence and the .cdf to .osfls converter task.
  *
  * \param path The path to a directory with files containing list of seedpoints
  * \param nth Is 1 on default to incluse every seedpoint. nth can be used to reduce the

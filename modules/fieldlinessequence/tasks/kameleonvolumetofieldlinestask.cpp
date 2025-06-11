@@ -38,8 +38,8 @@ namespace {
     constexpr std::string_view _loggerCat = "KameleonVolumeToFieldlinesTask";
 
     // This task class traces field lines from volume data. It takes a task file which
-    // specifies a folder with .cdf files, as well as a file that lists seed points in
-    // which the tracing starts from. For the outputs, specify an `outputFolder` for where
+    // specifies a folder with .cdf files, as well as a file that lists seed points from
+    // which the tracing starts. For the outputs, specify an `outputFolder` for where
     // the field lines data will be saved and the `OutputType` parameter to be either
     // `Osfls` which is an OpenSpace specific binary format for field lines, or `Json` for
     // a readable version of the same data. Some knowledge of the data might be needed,
@@ -48,16 +48,16 @@ namespace {
     // and match the name in the input data. For the magnitude of a vector parameter, such
     // as magnetic stength or velocity, there are specified in `MagntitudeVars`.
     struct [[codegen::Dictionary(KameleonVolumeToFieldlinesTask)]] Parameters {
-        // The folder to the cdf files to extract data from
+        // The folder to the cdf files to extract data from.
         std::filesystem::path input [[codegen::directory()]];
 
-        // Choose to decrease cadence and only use every nth time step / input file
+        // Choose to decrease cadence and only use every nth time step / input file.
         std::optional<int> nthTimeStep;
 
         // A path to folder with text files with seedpoints.
         // The format of points: x1 y1 z1 x2 y2 z2 ...
         // Seedpoints are expressed in the native coordinate system of the model.
-        // Filename must mutch date and time for CDF file
+        // Filename must match date and time for CDF file.
         std::filesystem::path seedpoints [[codegen::directory()]];
 
         // Choose to only include every nth seedpoint from each file.
@@ -65,7 +65,7 @@ namespace {
 
         // If data sets parameter start_time differ from start of run,
         // elapsed_time_in_seconds might be in relation to start of run.
-        // ManuelTimeOffset will be added to trigger time.
+        // ManualTimeOffset will be added to trigger time.
         std::optional<float> manualTimeOffset;
 
         // The name of the kameleon variable to use for tracing, like b, or u.
@@ -179,16 +179,19 @@ void KameleonVolumeToFieldlinesTask::perform(
                 newState.saveStateToOsfls(_outputFolder.string());
                 break;
             case OutputType::Json:
-                std::string timeStr =
-                    std::string(Time(newState.triggerTime()).ISO8601());
-                timeStr.replace(13, 1, "-");
-                timeStr.replace(16, 1, "-");
-                timeStr.replace(19, 1, "-");
-                std::string fileName = timeStr;
-                newState.saveStateToJson(_outputFolder.string() + fileName);
-                break;
+                {
+                    std::string timeStr =
+                        std::string(Time(newState.triggerTime()).ISO8601());
+                    timeStr.replace(13, 1, "-");
+                    timeStr.replace(16, 1, "-");
+                    timeStr.replace(19, 1, "-");
+                    std::string fileName = timeStr;
+                    newState.saveStateToJson(_outputFolder.string() + fileName);
+                    break;
+                }
+            default :
+                throw ghoul::MissingCaseException();
             }
-
         }
         ++fileNumber;
     }

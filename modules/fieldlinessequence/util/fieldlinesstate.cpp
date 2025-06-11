@@ -78,7 +78,7 @@ bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
 
     if (!ifs.is_open()) {
         LERROR(std::format(
-            "Could not open file: {}. Error code : {}",
+            "Could not open file: {}. Error code: {}",
             pathToOsflsFile, std::strerror(errno)
         ));
         return false;
