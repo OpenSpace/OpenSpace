@@ -331,14 +331,14 @@ namespace {
         // downloading.
         std::optional<int> dataID;
 
-        // A maximum number to limit the amount of files being downloaded simultaneously.
+        // A maximum number to limit the number of files being downloaded simultaneously.
         std::optional<int> numberOfFilesToQueue;
 
         // A URL to a JSON-formatted page with metadata for the `DataURL`.
         // Required if using dynamic downloading.
         std::optional<std::string> infoURL;
 
-        // A URL to a JSONformatted page with a list of each available data file.
+        // A URL to a JSON-formatted page with a list of each available data file.
         // Required if using dynamic downloading.
         std::optional<std::string> dataURL;
 
@@ -582,9 +582,6 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         _selectedColorRange.setMinValue(glm::vec2(p.colorMinMaxRange->x));
         _selectedColorRange.setMaxValue(glm::vec2(p.colorMinMaxRange->y));
     }
-    // To not change peoples masking settings i kept the parameter for the assets
-    // to be "MaskingRanges", but a single vec2-value instead of a vector.
-    // What is given from the asset, is stored as the selected range.
     if (p.maskingRanges.has_value()) {
         _maskingRanges = *p.maskingRanges;
     }
