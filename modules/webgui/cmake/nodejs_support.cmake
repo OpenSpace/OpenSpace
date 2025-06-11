@@ -42,14 +42,13 @@ function(DownloadNodeJs version download_dir)
   endif ()
 
   # Create the file if it doesn't exist
+  file(MAKE_DIRECTORY "${download_dir}")
   file(TOUCH "${download_dir}/version.txt")
 
   # Read the file
   file(STRINGS "${download_dir}/version.txt" existing_version)
 
   # Download and/or extract the binary distribution if necessary
-  message("ex: ${existing_version}")
-  message("ver: ${version}")
   if ("${existing_version}" STREQUAL "${version}")
     return()
   endif ()
@@ -58,7 +57,7 @@ function(DownloadNodeJs version download_dir)
   set(NODEJS_DOWNLOAD_URL "https://nodejs.org/dist/${path}")
 
   # Download the binary distribution
-  message(STATUS "Downloading NodeJs: ${NODEJS_DOWNLOAD_PATH}...")
+  message(STATUS "Downloading Node.js: ${NODEJS_DOWNLOAD_PATH}")
   file(DOWNLOAD "${NODEJS_DOWNLOAD_URL}" "${NODEJS_DOWNLOAD_PATH}" SHOW_PROGRESS)
 
   message(STATUS "URL: ${NODEJS_DOWNLOAD_URL}")
@@ -66,7 +65,7 @@ function(DownloadNodeJs version download_dir)
   # Extract the binary distribution for unix
   if (APPLE)
     # Apple uses tar.gz
-    message(STATUS "Extracting NodeJs: ${NODEJS_DOWNLOAD_PATH} in ${download_dir}")
+    message(STATUS "Extracting Node.js: ${NODEJS_DOWNLOAD_PATH} in ${download_dir}")
     execute_process(
       COMMAND tar xzf ${NODEJS_DOWNLOAD_PATH}
       WORKING_DIRECTORY ${download_dir}
@@ -74,7 +73,7 @@ function(DownloadNodeJs version download_dir)
   endif ()
   if (UNIX AND NOT APPLE)
     # Linux uses tar.xz
-    message(STATUS "Extracting NodeJs: ${NODEJS_DOWNLOAD_PATH} in ${download_dir}")
+    message(STATUS "Extracting Node.js: ${NODEJS_DOWNLOAD_PATH} in ${download_dir}")
     execute_process(
       COMMAND tar xf ${NODEJS_DOWNLOAD_PATH}
       WORKING_DIRECTORY ${download_dir}
@@ -82,9 +81,9 @@ function(DownloadNodeJs version download_dir)
   endif ()
 
   if (UNIX)
-    FILE(COPY ${download_dir}/${basename}/bin/node DESTINATION ${download_dir})
-    FILE(REMOVE_RECURSE ${download_dir}/${basename})
-    FILE(REMOVE ${NODEJS_DOWNLOAD_PATH})
+    file(COPY ${download_dir}/${basename}/bin/node DESTINATION ${download_dir})
+    file(REMOVE_RECURSE ${download_dir}/${basename})
+    file(REMOVE ${NODEJS_DOWNLOAD_PATH})
   endif ()
 
   file(WRITE "${download_dir}/version.txt" "${version}")
