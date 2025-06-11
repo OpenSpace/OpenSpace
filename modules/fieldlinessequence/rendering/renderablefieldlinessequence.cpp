@@ -316,7 +316,7 @@ namespace {
         // downloading.
         std::optional<int> dataID;
 
-        // A maximum number to limit the amount of files being downloaded simultaneously.
+        // A maximum number to limit the number of files being downloaded simultaneously.
         std::optional<int> numberOfFilesToQueue;
 
         // A URL to a JSON-formatted page with metadata for the `DataURL`.
