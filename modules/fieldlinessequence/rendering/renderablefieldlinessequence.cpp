@@ -323,7 +323,7 @@ namespace {
         // Required if using dynamic downloading.
         std::optional<std::string> infoURL;
 
-        // A URL to a JSONformatted page with a list of each available data file.
+        // A URL to a JSON-formatted page with a list of each available data file.
         // Required if using dynamic downloading.
         std::optional<std::string> dataURL;
 
