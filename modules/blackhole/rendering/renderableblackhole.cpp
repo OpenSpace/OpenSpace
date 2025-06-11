@@ -19,7 +19,7 @@
 
 #include <filesystem>
 #include <vector>
-#include <chrono>
+//#include <chrono>
 
 #include <modules/blackhole/cuda/kerr.h>
 #include <modules/blackhole/cuda/schwarzschild.h>
@@ -52,8 +52,20 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo RayCountInfo = {
-        "RayCountInfo",
-        "Number of rays per lookup dimension",
+        "RayCount",
+        "Number of rays in navigation",
+        "The number of rays used per dimention when rendering the blackhole",
+        openspace::properties::Property::Visibility::User
+    };
+    constexpr openspace::properties::Property::PropertyInfo RayCountHighResInfo = {
+        "RayCountHighRes",
+        "Number of rays in high resultion",
+        "The number of rays used per dimention when rendering the high resolution kerr blackhole",
+        openspace::properties::Property::Visibility::User
+    };
+    constexpr openspace::properties::Property::PropertyInfo RenderHighResInfo = {
+        "RenderHighRes",
+        "Render At High Resolution",
         "temp description",
         openspace::properties::Property::Visibility::User
     };
@@ -108,11 +120,14 @@ namespace openspace {
     RenderableBlackHole::RenderableBlackHole(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary),
         _solarMass(SolarMassInfo, 4.297e6f),
-        _kerrRotation(KerrRotationInfo, 0.5f, 0.0f, 0.999999f),
+        _kerrRotation(KerrRotationInfo, 0.5f, 0.0f, 0.999f),
         _colorBVMapTexturePath(ColorTextureInfo),
         _starMapRanges(StarMapRangesInfo, { 0.00035, 12.5002625, 12.5002625, 25.000175000000002, 25.000175000000002, 37.5000875, 37.5000875, 50.0 }),
         _blackholeType(BlackHoleTypeInfo),
-        _accretionDiskEnabled(KerrAccretionDiskEnabledInfo, true)
+        _accretionDiskEnabled(KerrAccretionDiskEnabledInfo, true),
+        _renderHighRes(RenderHighResInfo, false),
+        _rayCount(RayCountInfo, 250, 50, 3000),
+        _rayCountHighRes(RayCountHighResInfo, 1500, 300, 6000)
     {
         const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -140,6 +155,7 @@ namespace openspace {
             setInteractionSphere(_rs * 1.2);
             setBoundingSphere(_rs * 20);
             _layerLayout.calcPositions(distanceconstants::Parsec / _rs);
+            _isDirty = true;
             };
         _solarMass.onChange(calcRs);
         _solarMass = p.solarMass.value_or(_solarMass);
@@ -147,8 +163,6 @@ namespace openspace {
 
        
         _kerrRotation = p.kerrRotation.value_or(_kerrRotation);
-        
-        
         
 
         _blackholeType.addOptions({
@@ -166,10 +180,14 @@ namespace openspace {
                 case BlackHoleType::kerr:
                     _kerrRotation.setVisibility(properties::Property::Visibility::User);
                     _accretionDiskEnabled.setVisibility(properties::Property::Visibility::User);
+                    _renderHighRes.setVisibility(properties::Property::Visibility::User);
+                    _rayCountHighRes.setVisibility(properties::Property::Visibility::User);
                     break;
                 default:
                     _kerrRotation.setVisibility(properties::Property::Visibility::Hidden);
                     _accretionDiskEnabled.setVisibility(properties::Property::Visibility::Hidden);
+                    _renderHighRes.setVisibility(properties::Property::Visibility::Hidden);
+                    _rayCountHighRes.setVisibility(properties::Property::Visibility::Hidden);
                     break;
                 }
             };
@@ -178,10 +196,23 @@ namespace openspace {
         _blackholeType = p.blackHoleType.value_or(static_cast<int>(BlackHoleType::schwarzschild));
 
 
+        auto makeDirty = [this]() {
+            _isDirty = true;
+            };
+
+        _rayCount.onChange(makeDirty);
+        _rayCountHighRes.onChange(makeDirty);
+        _kerrRotation.onChange(makeDirty);
+        _accretionDiskEnabled.onChange(makeDirty);
+        _renderHighRes.onChange(makeDirty);
+
         addProperty(_blackholeType);
         addProperty(_kerrRotation);
         addProperty(_solarMass);
         addProperty(_accretionDiskEnabled);
+        addProperty(_rayCount);
+        addProperty(_renderHighRes);
+        addProperty(_rayCountHighRes);
         addProperty(_starMapRanges);
         changeBlackHoleType();
 
@@ -247,33 +278,34 @@ namespace openspace {
             // 3) Remove scaling (component-wise)
             glm::dvec3 cameraPosition = v_rot / data.modelTransform.scale;
 
-            if (glm::distance(cameraPosition, _chacedCameraPos) > 0.01f * _rs || _starKDTree.isDirty) {
-                traceKerr(cameraPosition, _rs, _kerrRotation, _layerLayout.positions, _rayCount, _stepsCount, _blackHoleWarpTable, _accretionDiskEnabled.value());
+
+            if (glm::distance(cameraPosition, _chacedCameraPos) > 0.01f * _rs || _starKDTree.isDirty || _isDirty) {
+                traceKerr(
+                    cameraPosition,
+                    _rs,
+                    _kerrRotation,
+                    _layerLayout.positions,
+                    !_renderHighRes ? _rayCount : _rayCountHighRes,
+                    _stepsCount,
+                    _blackHoleWarpTable,
+                    _accretionDiskEnabled
+                );
                 _chacedCameraPos = cameraPosition;
-                highres = false;
-                lastTime = std::chrono::high_resolution_clock::now();
+                _isDirty = false;
             }
-            else if (!highres) {
-                auto currentTime = std::chrono::high_resolution_clock::now();
-                std::chrono::duration<float> deltaTime = currentTime - lastTime;
-                float deltaTimeSeconds = deltaTime.count();
-                if (deltaTimeSeconds > 1.0f) {
-                    traceKerr(cameraPosition, _rs, _kerrRotation, _layerLayout.positions, _rayCountHighRes, _stepsCount, _blackHoleWarpTable, _accretionDiskEnabled.value());
-                    highres = true;
-                }
-            }
+
         }
 
         if (_blackholeType.value() == static_cast<int>(BlackHoleType::schwarzschild)) {
             glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
             float distanceToAnchor = static_cast<float>(glm::distance(cameraPosition, _chachedTranslation));
-            if (abs(_rCamera * _rs - distanceToAnchor) > _rs * 0.1 || _starKDTree.isDirty) {
+            if (abs(_rCamera * _rs - distanceToAnchor) > _rs * 0.1 || _starKDTree.isDirty || _isDirty) {
                 _rCamera = distanceToAnchor / _rs;
                 schwarzschild(_layerLayout.positions, _rayCount, _stepsCount, _rCamera, _stepLength, _blackHoleWarpTable);
+                _isDirty = false;
             }
         }
     }
-
     void RenderableBlackHole::render(const RenderData& renderData, RendererTasks&) {
         _program->activate();
         bindFramebuffer();

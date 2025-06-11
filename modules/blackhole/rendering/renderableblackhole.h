@@ -55,19 +55,19 @@ namespace openspace {
         glm::dvec3 _chachedTranslation{};
         glm::dvec3 _chacedCameraPos{};
 
-        static constexpr size_t _rayCount{ 300 };
-        static constexpr size_t _rayCountHighRes{ 750 };
-
         static constexpr size_t _stepsCount = 100000;
         static constexpr float _stepLength = 0.0001f;
         static constexpr size_t _mapCount = 5;
 
+        properties::IntProperty _rayCount;
+        properties::IntProperty _rayCountHighRes;
         properties::FloatProperty _solarMass;
         properties::FloatProperty _kerrRotation;
         properties::StringProperty _colorBVMapTexturePath;
         properties::DoubleListProperty _starMapRanges;
         properties::OptionProperty _blackholeType;
         properties::BoolProperty _accretionDiskEnabled;
+        properties::BoolProperty _renderHighRes;
 
         enum class BlackHoleType{
             schwarzschild,
@@ -101,6 +101,7 @@ namespace openspace {
         float _rs;
         float _rEnvmap;
         float _rCamera;
+        bool _isDirty{ false };
 
         ViewPort _viewport{};
 
