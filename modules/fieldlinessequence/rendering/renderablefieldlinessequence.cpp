@@ -900,7 +900,7 @@ void RenderableFieldlinesSequence::loadFile(File& file) {
     }
 }
 
-void RenderableFieldlinesSequence::trackOldest(const File& file) {
+void RenderableFieldlinesSequence::trackOldest(File& file) {
     if (file.status == File::FileStatus::Loaded) {
         std::deque<File*>::iterator it =
             std::find(_loadedFiles.begin(), _loadedFiles.end(), &file);
