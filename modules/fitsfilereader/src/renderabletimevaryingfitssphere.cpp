@@ -287,7 +287,6 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
                 "If running with dynamic downloading, dataID needs to be specified"
             );
         }
-
         _dataID = *p.dataID;
 
         _nFilesToQueue = p.numberOfFilesToQueue.value_or(_nFilesToQueue);
@@ -311,14 +310,14 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
             for (std::string_view intKey : d.keys()) {
                 const ghoul::Dictionary& pair = d.value<ghoul::Dictionary>(intKey);
                 if (pair.hasValue<double>("1") && pair.hasValue<double>("2")) {
-                    std::pair<float, float> minMax = {
+                    std::pair<float, float> minMax = std::pair(
                         static_cast<float>(pair.value<double>("1")),
                         static_cast<float>(pair.value<double>("2"))
-                    };
-                    std::pair<int, std::pair<float, float>> mapPair {
+                    );
+                    std::pair<int, std::pair<float, float>> mapPair = std::pair(
                         std::stoi(std::string(intKey)),
                         minMax
-                    };
+                    );
                     _layerMinMaxCaps.emplace(mapPair);
                 }
                 else {

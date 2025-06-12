@@ -62,12 +62,15 @@ void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul::TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
+    fRenderable->registerClass<RenderableFieldlinesSequence>(
+        "RenderableFieldlinesSequence"
+    );
 
     ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
     ghoul_assert(fTask, "No task factory existed");
-    fTask->registerClass<KameleonVolumeToFieldlinesTask>("KameleonVolumeToFieldlinesTask");
-
+    fTask->registerClass<KameleonVolumeToFieldlinesTask>(
+        "KameleonVolumeToFieldlinesTask"
+    );
 }
 
 std::vector<documentation::Documentation> FieldlinesSequenceModule::documentations() const

@@ -145,9 +145,11 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
 
 void RenderableTimeVaryingSphere::update(const UpdateData& data) {
     RenderableSphere::update(data);
+
     if (_files.empty()) {
         return;
     }
+
     const double currentTime = data.time.j2000Seconds();
     const bool isInInterval = (currentTime >= _files[0].time) &&
         (currentTime < _sequenceEndTime);

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___WSAFITSHELPER___H__
-#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___WSAFITSHELPER___H__
+#ifndef __OPENSPACE_MODULE_FITSFILEREADER___WSAFITSHELPER___H__
+#define __OPENSPACE_MODULE_FITSFILEREADER___WSAFITSHELPER___H__
 
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/texture.h>
@@ -47,22 +47,23 @@ struct ImageData {
 /**
  * Load image from a FITS file into a texture.
  *
- * \param path The path to the FITS file.
- * \param layerIndex The index of the layer to load from the FITS file.
- * \param minMax The minimum and maximum value range in which to cap the data between.
-          Values outside of range will be overexposed.
-   \return The texture created from the layer in the file with the set min-max range.
+ * \param path The path to the FITS file
+ * \param layerIndex The index of the layer to load from the FITS file
+ * \param minMax The minimum and maximum value range in which to cap the data between
+          Values outside of range will be overexposed
+   \return The texture created from the layer in the file with the set min-max range
  */
 std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
-    const std::filesystem::path& path, size_t layerIndex, std::pair<float, float> minMax);
+    const std::filesystem::path& path, size_t layerIndex,
+    const std::pair<float, float>& minMax);
 
 void readFitsHeader(const std::filesystem::path& path);
 
 /**
  * Get the number of data layers in a FITS file.
  *
- * \param path The path to the FITS file.
- * \return The number of layers in the FITS file.
+ * \param path The path to the FITS file
+ * \return The number of layers in the FITS file
  */
 int nLayers(const std::filesystem::path& path);
 
@@ -71,4 +72,4 @@ std::shared_ptr<ImageData<T>> readImageInternal(U& image);
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___WSAFITSHELPER___H__
+#endif // __OPENSPACE_MODULE_FITSFILEREADER___WSAFITSHELPER___H__

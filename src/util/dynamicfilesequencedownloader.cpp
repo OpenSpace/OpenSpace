@@ -32,54 +32,53 @@
 #include <unordered_set>
 
 namespace {
-    constexpr const std::string_view _loggerCat = "DynamicFileSequenceDownloader";
+    constexpr std::string_view _loggerCat = "DynamicFileSequenceDownloader";
+
+    void trackFinishedDownloads(const std::filesystem::path& syncFilePath,
+                                const std::filesystem::path& newFilePath)
+    {
+        std::unordered_set<std::string> existingEntries;
+        std::ifstream inFile = std::ifstream(syncFilePath);
+        std::string line;
+
+        // load existing entries
+        while (ghoul::getline(inFile, line)) {
+            if (!line.empty()) {
+                existingEntries.insert(std::filesystem::path(line).filename().string());
+            }
+        }
+        inFile.close();
+
+        const std::string fileName = newFilePath.filename().string();
+        const std::string filePath = newFilePath.string();
+
+        if (!existingEntries.contains(fileName)) {
+            std::ofstream outFile = std::ofstream(syncFilePath, std::ios::app);
+            if (outFile.is_open()) {
+                outFile << filePath << std::endl;
+            }
+        }
+    }
+
+    std::string buildDataHttpRequest(double minTime, double maxTime, int dataID,
+                                     const std::string& baseUrl)
+    {
+        // formulate a min and a max time from time
+        // The thing is time might be "now" and no items
+        // ISO8601 format: yyyy-mm-ddThh:mm:ssZ
+
+        // hour in seconds      : 3600
+        // days in seconds      : 86400
+        // 30 days in seconds   : 2592000
+        // 1 year in seconds    : 31556926
+        std::string_view min = openspace::Time(minTime).ISO8601();
+        std::string_view max = openspace::Time(maxTime).ISO8601();
+
+        return std::format("{}{}&time.min={}&time.max={}", baseUrl, dataID, min, max);
+    }
 } // namepace
 
 namespace openspace {
-void trackFinishedDownloads(const std::filesystem::path& syncFilePath,
-                            const std::filesystem::path& newFilePath)
-{
-    std::unordered_set<std::string> existingEntries;
-    std::ifstream inFile = std::ifstream(syncFilePath);
-    std::string line;
-
-    // load existing entries
-    while (ghoul::getline(inFile, line)) {
-        if (!line.empty()) {
-            existingEntries.insert(std::filesystem::path(line).filename().string());
-        }
-    }
-    inFile.close();
-
-    const std::string fileName = newFilePath.filename().string();
-    const std::string filePath = newFilePath.string();
-
-    if (!existingEntries.contains(fileName)) {
-        std::ofstream outFile = std::ofstream(syncFilePath, std::ios::app);
-        if (outFile.is_open()) {
-            outFile << filePath << std::endl;
-        }
-    }
-}
-
-std::string buildDataHttpRequest(double minTime, double maxTime, int dataID,
-                                 const std::string& baseUrl)
-{
-    // formulate a min and a max time from time
-    // The thing is time might be "now" and no items
-    // ISO8601 format: yyyy-mm-ddThh:mm:ssZ
-
-    // hour in seconds      : 3600
-    // days in seconds      : 86400
-    // 30 days in seconds   : 2592000
-    // 1 year in seconds    : 31556926
-    std::string_view min = Time(minTime).ISO8601();
-    std::string_view max = Time(maxTime).ISO8601();
-
-    return std::format(
-        "{}{}&time.min={}&time.max={}", baseUrl, dataID, min, max
-    );
-}
 
 DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
                                                             const std::string& identifier,
@@ -113,7 +112,8 @@ DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
             keepFiles.insert(std::filesystem::path(filename).filename().string());
         }
     }
-    for (const auto& entry : std::filesystem::directory_iterator(folder)) {
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& entry : fs::directory_iterator(folder)) {
         if (!entry.is_regular_file()) {
             continue;
         }
@@ -156,7 +156,8 @@ void DynamicFileSequenceDownloader::deinitialize(bool cacheFiles) {
         if (!std::filesystem::exists(_syncDir)) {
             return;
         }
-        for (auto& file : std::filesystem::directory_iterator(_syncDir)) {
+        namespace fs = std::filesystem;
+        for (const fs::directory_entry& file : fs::directory_iterator(_syncDir)) {
             std::error_code ec;
             std::filesystem::remove(file.path(), ec);
             if (ec) {
@@ -188,9 +189,9 @@ void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest)
     *        "startDate": "2017-07-01T00:42:02.0Z",
     *        "stopDate" : "2017-09-30T22:43:18.0Z"
     *    },
-    *        "description" : "WSA 4.4 field line trace from the SCS outer boundary to the
-    *                         source surface",
-    *        "id" : 1177
+    *    "description" : "WSA 4.4 field line trace from the SCS outer boundary to the
+    *                     source surface",
+    *    "id" : 1177
     * }
     */
     while (attempt <= MaxRetries && !success) {
@@ -505,8 +506,8 @@ void DynamicFileSequenceDownloader::putInQueue() {
     // If forward iterate from now to end. else reverse from now to begin
     size_t nFileLimit = 0;
     for (std::vector<File>::iterator it = _currentFile;
-        it != end;
-        _isForwardDirection ? ++it : --it)
+         it != end;
+         _isForwardDirection ? ++it : --it)
     {
         if (it->state == File::State::Available) {
             _queuedFilesToDownload.push_back(&*it);

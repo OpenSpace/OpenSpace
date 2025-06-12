@@ -27,9 +27,9 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/rendering/transferfunction.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/vector/vec2property.h>
+#include <openspace/rendering/transferfunction.h>
 #include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::opengl { class ProgramObject; }

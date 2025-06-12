@@ -168,8 +168,8 @@ extractSeedPointsFromFiles(std::filesystem::path path, size_t nth)
                 glm::vec3 point;
                 if (!(ss >> point.x) || !(ss >> point.y) || !(ss >> point.z)) {
                     LERROR(std::format(
-                        "Could not read line '{}' in file '{}'. ",
-                        "Line is not formatted with 3 values representing a point",
+                        "Could not read line '{}' in file '{}'. Line is not formatted "
+                        "with 3 values representing a point",
                         linenumber, seedFilePath
                     ));
                 }

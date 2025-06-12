@@ -36,7 +36,7 @@ namespace openspace {
 std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
                                                         const std::filesystem::path& path,
                                                                         size_t layerIndex,
-                                                           std::pair<float, float> minMax)
+                                                    const std::pair<float, float>& minMax)
 {
     try {
         readFitsHeader(path);

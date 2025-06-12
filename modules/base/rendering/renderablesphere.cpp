@@ -124,7 +124,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorMapInfo = {
         "ColorMap",
         "Transfer Function (Color Map) Path",
-        "Color map / Transfer function to use if `UseColorMap` is enabled ",
+        "Color map / Transfer function to use if `UseColorMap` is enabled.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -496,7 +496,7 @@ void RenderableSphere::update(const UpdateData&) {
         _shader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
-    if (_transferFunction == nullptr && std::filesystem::exists(_colorMap.value())) {
+    if (!_transferFunction && std::filesystem::exists(_colorMap.value())) {
         _transferFunction = std::make_unique<TransferFunction>(_colorMap.value());
     }
     if (_sphereIsDirty) [[unlikely]] {

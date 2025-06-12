@@ -306,7 +306,7 @@ namespace {
         };
 
         // If the simulation model is not specified, it means that the scaleFactor
-        // (scaleToMeters) will be 1.f assuming meter as input.
+        // (scaleToMeters) will be 1.0 assuming meter as input.
         std::optional<Model> simulationModel;
 
         // Convert the models distance unit, ex. AU to meters for Enlil.
@@ -477,9 +477,11 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             );
         }
         _dataID = *p.dataID;
+
         _nFilesToQueue = static_cast<size_t>(
             p.numberOfFilesToQueue.value_or(_nFilesToQueue)
         );
+
         if (!p.infoURL.has_value()) {
             throw ghoul::RuntimeError("InfoURL has to be provided");
         }
@@ -509,7 +511,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             _files.push_back(std::move(file));
             if (_files[0].path.empty()) {
                 throw ghoul::RuntimeError(std::format(
-                    "Error finding file {} in folder {}",
+                    "Error finding file '{}' in folder '{}'",
                     e.path().filename(), path
                 ));
             }
@@ -543,8 +545,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         for (const std::filesystem::path& path : *p.colorTablePaths) {
             if (!std::filesystem::exists(path)) {
                 throw ghoul::RuntimeError(std::format(
-                    "Color table path {} is not a valid file",
-                    path
+                    "Color table path '{}' is not a valid file", path
                 ));
             }
             _colorTablePaths.emplace_back(path);
@@ -635,7 +636,10 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
                 std::make_unique<TransferFunction>(_colorTablePath.value());
         }
         else {
-            LERROR("Invalid path to transfer function. Please enter new path");
+            LERROR(std::format(
+                "Invalid path '{}' to transfer function. Please enter new path",
+                _colorTablePath.value()
+            ));
         }
     });
 
@@ -896,7 +900,7 @@ void RenderableFieldlinesSequence::loadFile(File& file) {
     }
 }
 
-void RenderableFieldlinesSequence::trackOldest(File& file) {
+void RenderableFieldlinesSequence::trackOldest(const File& file) {
     if (file.status == File::FileStatus::Loaded) {
         std::deque<File*>::iterator it =
             std::find(_loadedFiles.begin(), _loadedFiles.end(), &file);
@@ -1245,7 +1249,7 @@ void RenderableFieldlinesSequence::updateVertexColorBuffer() {
     glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
 
     const FieldlinesState& state = _files[_activeIndex].state;
-    bool success;
+    bool success = false;
     const std::vector<float>& quantities = state.extraQuantity(_colorQuantity, success);
 
     if (success) {
@@ -1269,7 +1273,7 @@ void RenderableFieldlinesSequence::updateVertexMaskingBuffer() {
     glBindBuffer(GL_ARRAY_BUFFER, _vertexMaskingBuffer);
 
     const FieldlinesState& state = _files[_activeIndex].state;
-    bool success;
+    bool success = false;
     const std::vector<float>& quantities = state.extraQuantity(_maskingQuantity, success);
 
     if (success) {

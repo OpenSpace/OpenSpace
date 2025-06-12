@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLETIMEVARYINGFITSSPHERE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLETIMEVARYINGFITSSPHERE___H__
+#ifndef __OPENSPACE_MODULE_FITSFILEREADER___RENDERABLETIMEVARYINGFITSSPHERE___H__
+#define __OPENSPACE_MODULE_FITSFILEREADER___RENDERABLETIMEVARYINGFITSSPHERE___H__
 
 #include <modules/base/rendering/renderablesphere.h>
 
@@ -124,4 +124,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLETIMEVARYINGFITSSPHERE___H__
+#endif // __OPENSPACE_MODULE_FITSFILEREADER___RENDERABLETIMEVARYINGFITSSPHERE___H__
