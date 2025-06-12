@@ -22,55 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___NOTIFICATIONLOG___H__
-#define __OPENSPACE_MODULE_SERVER___NOTIFICATIONLOG___H__
+#ifndef __OPENSPACE_MODULE_FITSFILEREADER___WSAFITSHELPER___H__
+#define __OPENSPACE_MODULE_FITSFILEREADER___WSAFITSHELPER___H__
 
-#include <ghoul/logging/log.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/opengl/texture.h>
+#include <valarray>
 
-#include <ghoul/misc/profiling.h>
-#include <functional>
+namespace CCfits {
+    class FITS;
+    class PHDU;
+    class ExtHDU;
+} // namespace CCfits
 
 namespace openspace {
 
-/**
- * A concrete subclass of Log that passes logs to the provided callback function. The
- * callback is specified using `std::function`. Trying to log messages when the callback
- * object has been deleted results in undefined behavior.
- */
-class NotificationLog : public ghoul::logging::Log {
-public:
-    /// The type of function that is used as a callback in this log
-    using CallbackFunction = std::function<void(
-        std::string_view timeString,
-        std::string_view dateString,
-        std::string_view category,
-        ghoul::logging::LogLevel logLevel,
-        std::string_view message)>;
-
-    /**
-     * Constructor that calls Log constructor.
-     *
-     * \param callbackFunction The callback function that is called for each log message
-     * \param minimumLogLevel The minimum log level that this logger will accept
-     */
-    NotificationLog(CallbackFunction callbackFunction,
-        ghoul::logging::LogLevel minimumLogLevel = ghoul::logging::LogLevel::Warning);
-
-    /**
-     * Method that logs a message with a given level and category to the console.
-     *
-     * \param level The log level with which the message shall be logged
-     * \param category The category of this message
-     * \param message The message body of the log message
-     */
-    void log(ghoul::logging::LogLevel level, std::string_view category,
-        std::string_view message) override;
-
-private:
-    CallbackFunction _callbackFunction;
-    TracyLockable(std::mutex, _mutex);
+template<typename T>
+struct ImageData {
+    std::valarray<T> contents;
+    int width;
+    int height;
 };
 
-} // namespace ghoul::logging
+/**
+ * Load image from a FITS file into a texture.
+ *
+ * \param path The path to the FITS file
+ * \param layerIndex The index of the layer to load from the FITS file
+ * \param minMax The minimum and maximum value range in which to cap the data between
+          Values outside of range will be overexposed
+   \return The texture created from the layer in the file with the set min-max range
+ */
+std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
+    const std::filesystem::path& path, size_t layerIndex,
+    const std::pair<float, float>& minMax);
 
-#endif // __OPENSPACE_MODULE_SERVER___NOTIFICATIONLOG___H__
+void readFitsHeader(const std::filesystem::path& path);
+
+/**
+ * Get the number of data layers in a FITS file.
+ *
+ * \param path The path to the FITS file
+ * \return The number of layers in the FITS file
+ */
+int nLayers(const std::filesystem::path& path);
+
+template<typename T, typename U>
+std::shared_ptr<ImageData<T>> readImageInternal(U& image);
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_FITSFILEREADER___WSAFITSHELPER___H__

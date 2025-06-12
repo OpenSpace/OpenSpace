@@ -25,6 +25,7 @@
 #include <modules/fieldlinessequence/fieldlinessequencemodule.h>
 
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
+#include <modules/fieldlinessequence/tasks/kameleonvolumetofieldlinestask.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -58,17 +59,25 @@ FieldlinesSequenceModule::FieldlinesSequenceModule() : OpenSpaceModule(Name) {
 }
 
 void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Renderable>* factory =
+    ghoul::TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(factory, "No renderable factory existed");
+    ghoul_assert(fRenderable, "No renderable factory existed");
+    fRenderable->registerClass<RenderableFieldlinesSequence>(
+        "RenderableFieldlinesSequence"
+    );
 
-    factory->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
+    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
+    ghoul_assert(fTask, "No task factory existed");
+    fTask->registerClass<KameleonVolumeToFieldlinesTask>(
+        "KameleonVolumeToFieldlinesTask"
+    );
 }
 
 std::vector<documentation::Documentation> FieldlinesSequenceModule::documentations() const
 {
     return {
-        RenderableFieldlinesSequence::Documentation()
+        RenderableFieldlinesSequence::Documentation(),
+        KameleonVolumeToFieldlinesTask::Documentation()
     };
 }
 

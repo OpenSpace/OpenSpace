@@ -24,8 +24,29 @@
 
 #include <modules/fitsfilereader/fitsfilereadermodule.h>
 
+#include <modules/fitsfilereader/include/renderabletimevaryingfitssphere.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/util/factorymanager.h>
+#include <ghoul/misc/templatefactory.h>
+
 namespace openspace {
 
 FitsFileReaderModule::FitsFileReaderModule() : OpenSpaceModule(Name) {}
+
+void FitsFileReaderModule::internalInitialize(const ghoul::Dictionary&) {
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "No renderable factory existed");
+    fRenderable->registerClass<RenderableTimeVaryingFitsSphere>(
+        "RenderableTimeVaryingFitsSphere"
+    );
+}
+
+std::vector<documentation::Documentation> FitsFileReaderModule::documentations() const {
+    return {
+        FitsFileReaderModule::Documentation(),
+        RenderableTimeVaryingFitsSphere::Documentation()
+    };
+}
 
 } // namespace openspace

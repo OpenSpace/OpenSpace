@@ -1,5 +1,5 @@
 asset.require("scene/solarsystem/heliosphere/2012/reset_loop_action")
-local transforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
+local transforms = asset.require("scene/solarsystem/heliosphere/transforms_heliosphere")
 
 
 
@@ -61,8 +61,9 @@ local ENLILSliceEqPlane11AU1 = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.EqPlane011AU1,
     InputFileType = "Osfls",
+    ShowAtAllTimes = false,
     Color = { 0.4, 0.15, 0.4, 0.6 },
-    ColorMethod = "By Quantity", -- Color by Quantity
+    ColorMethod = "By Quantity",
     ColorQuantity = 1, -- Velocity
     ColorTablePaths = {
       enlilDensityColorTable,
@@ -84,8 +85,9 @@ local ENLILSliceEqPlane11AU2 = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.EqPlane011AU2,
     InputFileType = "Osfls",
+    ShowAtAllTimes = false,
     Color = { 0.4, 0.15, 0.4, 0.6 },
-    ColorMethod = "By Quantity", -- Color by Quantity
+    ColorMethod = "By Quantity",
     ColorQuantity = 1, -- Velocity
     ColorTablePaths = {
       enlilDensityColorTable,
@@ -107,9 +109,9 @@ local ENLILSliceLat411AU1 = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.Lat4011AU1,
     InputFileType = "Osfls",
-
+    ShowAtAllTimes = false,
     Color = { 0.4, 0.15, 0.4, 0.6 },
-    ColorMethod = "By Quantity", -- Color by Quantity
+    ColorMethod = "By Quantity",
     ColorQuantity = 1, -- Velocity
     ColorTablePaths = {
       enlilDensityColorTable,
@@ -131,9 +133,9 @@ local ENLILSliceLat411AU2 = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.Lat4011AU2,
     InputFileType = "Osfls",
-
+    ShowAtAllTimes = false,
     Color = { 0.4, 0.15, 0.4, 0.6 },
-    ColorMethod = "By Quantity", -- Color by Quantity
+    ColorMethod = "By Quantity",
     ColorQuantity = 1, -- Velocity
     ColorTablePaths = {
       enlilDensityColorTable,
@@ -155,6 +157,7 @@ local ENLILEarth = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.Earth,
     InputFileType = "Osfls",
+    ShowAtAllTimes = false,
     Color = { 1.0, 1.0, 1.0, 0.6 },
     ColorTablePaths = {
       enlilDensityColorTable,
@@ -176,6 +179,7 @@ local ENLILStereoA = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.StereoA,
     InputFileType = "Osfls",
+    ShowAtAllTimes = false,
     Color = { 1.0, 1.0, 1.0, 0.6 },
     ColorTablePaths = {
       enlilDensityColorTable,

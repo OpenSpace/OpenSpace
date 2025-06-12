@@ -79,7 +79,7 @@
       "key": "I"
     },
     {
-      "action": "os.solarsystem.ToggleEuv",
+      "action": "os.solarsystem.sun.ToggleEuv",
       "key": "E"
     },
     {

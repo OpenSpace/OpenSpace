@@ -28,6 +28,7 @@
 #include <openspace/util/time.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <cerrno>
 #include <fstream>
 #include <iomanip>
 
@@ -61,10 +62,25 @@ void FieldlinesState::scalePositions(float scale) {
     }
 }
 
+FieldlinesState FieldlinesState::createStateFromOsfls(const std::string& path) {
+    FieldlinesState s;
+    const bool success = s.loadStateFromOsfls(path);
+    if (!success) {
+        throw ghoul::RuntimeError(std::format(
+            "Failed to load state from osfls file {}", path
+        ));
+    }
+    return s;
+}
+
 bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
-    std::ifstream ifs(pathToOsflsFile, std::ifstream::binary);
+    std::ifstream ifs = std::ifstream(pathToOsflsFile, std::ifstream::binary);
+
     if (!ifs.is_open()) {
-        LERROR("Couldn't open file: " + pathToOsflsFile);
+        LERROR(std::format(
+            "Could not open file: {}. Error code: {}",
+            pathToOsflsFile, std::strerror(errno)
+        ));
         return false;
     }
 
@@ -89,7 +105,7 @@ bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
     // Read single value variables
     ifs.read(reinterpret_cast<char*>(&_triggerTime), sizeof(double));
     ifs.read(reinterpret_cast<char*>(&_model), sizeof(int32_t));
-    ifs.read(reinterpret_cast<char*>(&_isMorphable), sizeof(bool));
+    ifs.read(reinterpret_cast<char*>(&_isMorphable), sizeof(uint8_t));
     ifs.read(reinterpret_cast<char*>(&nLines), sizeof(uint64_t));
     ifs.read(reinterpret_cast<char*>(&nPoints), sizeof(uint64_t));
     ifs.read(reinterpret_cast<char*>(&nExtras), sizeof(uint64_t));
@@ -226,7 +242,8 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
  *                              CurrentVersion)
  *  1. double                 - _triggerTime
  *  2. int                    - _model
- *  3. bool                   - _isMorphable
+ *  3. uint8_t works like bool- _isMorphable
+ *     0 for false, 1 for true
  *  4. size_t                 - Number of lines in the state  == _lineStart.size()
  *                                                            == _lineCount.size()
  *  5. size_t                 - Total number of vertex points == _vertexPositions.size()
@@ -277,7 +294,7 @@ void FieldlinesState::saveStateToOsfls(const std::string& absPath) {
     //-------------------- WRITE META DATA FOR STATE --------------------------------
     ofs.write(reinterpret_cast<const char*>(&_triggerTime), sizeof(_triggerTime));
     ofs.write(reinterpret_cast<const char*>(&_model), sizeof(int32_t));
-    ofs.write(reinterpret_cast<const char*>(&_isMorphable), sizeof(bool));
+    ofs.write(reinterpret_cast<const char*>(&_isMorphable), sizeof(uint8_t));
 
     ofs.write(reinterpret_cast<const char*>(&nLines), sizeof(uint64_t));
     ofs.write(reinterpret_cast<const char*>(&nPoints), sizeof(uint64_t));
@@ -296,6 +313,8 @@ void FieldlinesState::saveStateToOsfls(const std::string& absPath) {
         ofs.write(reinterpret_cast<char*>(vec.data()), sizeof(float) * nPoints);
     }
     ofs.write(allExtraQuantityNamesInOne.c_str(), nStringBytes);
+
+    LINFO(std::format("Saving fieldline state to: {}", absPath));
 }
 
 // TODO: This should probably be rewritten, but this is the way the files were structured
@@ -375,6 +394,18 @@ void FieldlinesState::saveStateToJson(const std::string& absPath) {
     LINFO(std::format("Saved fieldline state to: {}{}", absPath, ext));
 }
 
+void FieldlinesState::clear() {
+    _isMorphable = 0;
+    _triggerTime = -1.0;
+    _model = fls::Model::Invalid;
+
+    _extraQuantities.clear();
+    _extraQuantityNames.clear();
+    _lineCount.clear();
+    _lineStart.clear();
+    _vertexPositions.clear();
+}
+
 void FieldlinesState::setModel(fls::Model m) {
     _model = m;
 }
@@ -387,6 +418,10 @@ void FieldlinesState::setTriggerTime(double t) {
 // If index is out of scope an empty vector is returned and the referenced bool is false.
 std::vector<float> FieldlinesState::extraQuantity(size_t index, bool& isSuccessful) const
 {
+    if (index == -1) {
+        isSuccessful = false;
+        return std::vector<float>();
+    }
     if (index < _extraQuantities.size()) {
         isSuccessful = true;
         return _extraQuantities[index];
@@ -394,13 +429,12 @@ std::vector<float> FieldlinesState::extraQuantity(size_t index, bool& isSuccessf
     else {
         isSuccessful = false;
         LERROR("Provided Index was out of scope");
-        return {};
+        return std::vector<float>();
     }
 }
 
 // Moves the points in @param line over to _vertexPositions and updates
 // _lineStart & _lineCount accordingly.
-
 void FieldlinesState::addLine(std::vector<glm::vec3>& line) {
     const size_t nNewPoints = line.size();
     const size_t nOldPoints = _vertexPositions.size();

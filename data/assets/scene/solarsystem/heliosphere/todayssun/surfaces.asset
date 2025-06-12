@@ -1,0 +1,283 @@
+local transforms = asset.require("scene/solarsystem/heliosphere/transforms_heliosphere")
+
+
+
+local transferFunctions = asset.resource({
+  Type = "HttpSynchronization",
+  Name = "Today's Sun Transfer Functions",
+  Identifier = "todayssun_transferfunctions",
+  Version = 1
+})
+
+
+local blueBlackRed = transferFunctions .. "blue-black-red.txt"
+
+local infoURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id="
+local dataURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID="
+
+local sunRadius = 695700000
+-- This small 0.2% increase is an arbitrary number but necessary to make sure it is not
+-- within the Sun sphere
+local extendedRadius = sunRadius * 1.002
+local fiveSunRadius = sunRadius * 5
+local outerBoundary = sunRadius * 21.5
+-- Slightly bigger radii to prevent z fighting rendering artifact compared to GONG-Z
+local extendedRadiusAdapt = extendedRadius * 1.00002
+local fiveSunRadiusAdapt = fiveSunRadius * 1.00002
+local outerBoundaryAdapt = outerBoundary * 1.00002
+
+local WSA_54_Magnetic_Field_GONGZ_5_Rs = {
+  Identifier = "WSA_54_Magnetic_Field_GONGZ_5_Rs",
+  Parent = transforms.WSAOffset60.Identifier,
+  Renderable = {
+    Type = "RenderableTimeVaryingFitsSphere",
+    Size = fiveSunRadius,
+    Orientation = "Both",
+    LoadingType = "DynamicDownloading",
+    InfoURL = infoURL,
+    DataURL = dataURL,
+    DataID = 2148,
+    FitsLayer = 0,
+    LayerNames = {
+      ['0'] = "Coronal Magnetic Field at 5 Solar Radii (nT)"
+    },
+    LayerMinMaxCapValues = {
+      ['0'] = { -5000.0, 5000.0 }
+    },
+    ColorMap = blueBlackRed,
+    UseColorMap = false,
+    ShowPastFirstAndLastFile = false,
+    Segments = 132
+  },
+  GUI = {
+    Name = "Magnetic Field at 5Rs (GONG-Z)",
+    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Description = [[Texture sequence of simulation model WSA 5.4, showing the coronal
+      magnetic field on a sphere at 5 solar radii. Output: FITS files using GONG-Z Maps
+      (RADOUT = 5.0).]],
+    Focusable = false
+  }
+}
+
+local WSA_54_Magnetic_Field_ADAPT_5_Rs = {
+  Identifier = "WSA_54_Magnetic_Field_ADAPT_5_Rs",
+  Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
+  Renderable = {
+    Type = "RenderableTimeVaryingFitsSphere",
+    Size = fiveSunRadiusAdapt,
+    Orientation = "Both",
+    LoadingType = "DynamicDownloading",
+    InfoURL = infoURL,
+    DataURL = dataURL,
+    DataID = 2149,
+    FitsLayer = 0,
+    LayerNames = {
+      ['0'] = "Coronal Magnetic Field at 5 Solar Radii (nT)"
+    },
+    LayerMinMaxCapValues = {
+      ['0'] = { -5000.0, 5000.0 }
+    },
+    ColorMap = blueBlackRed,
+    UseColorMap = false,
+    ShowPastFirstAndLastFile = false,
+    Segments = 132
+  },
+  GUI = {
+    Name = "Magnetic Field at 5Rs (GONG ADAPT)",
+    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Description = [[Texture sequence of simulation model WSA 5.4, showing the coronal
+      magnetic field on a sphere at 5 solar radii. Output: FITS file using
+      ADAPT GONG realization 000 to 011 Maps (RADOUT = 5.0).]],
+    Focusable = false
+  }
+}
+
+local WSA_54_Magnetograms_GONGZ = {
+  Identifier = "WSA_54_Magnetograms_GONGZ",
+  Parent = transforms.WSAOffset60.Identifier,
+  Renderable = {
+    Type = "RenderableTimeVaryingFitsSphere",
+    Size = extendedRadius,
+    LoadingType = "DynamicDownloading",
+    InfoURL = infoURL,
+    DataURL = dataURL,
+    DataID = 2148,
+    FitsLayer = 4,
+    LayerNames = {
+      ['1'] = "Flux tube expansion factor evaluated at the source surface",
+      ['4'] = "Observed Photospheric Field (Gauss)",
+      ['5'] = "Distance from open field footpoint to nearest coronal boundary (deg)",
+      ['6'] = "Open (1,2,3) and closed (0) regions on the photosphere [1=in-to-out tracing; 2=out-to-in tracing; 3=both] (no units)",
+      ['7'] = "Distance to current sheet at outer boundary (degrees)"
+    },
+    LayerMinMaxCapValues = {
+      ['1'] = { 0.0, 50.0 },
+      ['4'] = { -50.0, 50.0 },
+      ['5'] = { 0.0, 30.0 },
+      ['6'] = { 0.0, 4.0 },
+      ['7'] = { 0.0, 90.0 }
+    },
+    ColorMap = blueBlackRed,
+    UseColorMap = false,
+    ShowPastFirstAndLastFile = false,
+    Segments = 132
+  },
+  GUI = {
+    Name = "Solar Surface (GONG-Z)",
+    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Description = [[Texture sequence of simulation model WSA 5.4, showing data on the
+      solar surface with multiple options in the list under Texture Layer Options. Output:
+      FITS files using GONG-Z Maps (RADOUT = 5.0).]],
+    Focusable = false
+  }
+}
+
+local WSA_54_Magnetograms_ADAPT = {
+  Identifier = "WSA_54_Magnetograms_ADAPT",
+  Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
+  Renderable = {
+    Type = "RenderableTimeVaryingFitsSphere",
+    Size = extendedRadiusAdapt,
+    LoadingType = "DynamicDownloading",
+    InfoURL = infoURL,
+    DataURL = dataURL,
+    DataID = 2149,
+    FitsLayer = 4,
+    LayerNames = {
+      ['1'] = "Flux tube expansion factor evaluated at the source surface",
+      ['4'] = "Observed Photospheric Field (Gauss)",
+      ['5'] = "Distance from open field footpoint to nearest coronal boundary (deg)",
+      ['6'] = "Open (1,2,3) and closed (0) regions on the photosphere [1=in-to-out tracing; 2=out-to-in tracing; 3=both] (no units)",
+      ['7'] = "Distance to current sheet at outer boundary (degrees)"
+    },
+    LayerMinMaxCapValues = {
+      ['1'] = { 0.0, 50.0 },
+      ['4'] = { -50.0, 50.0 },
+      ['5'] = { 0.0, 30.0 },
+      ['6'] = { 0.0, 4.0 },
+      ['7'] = { 0.0, 90.0 }
+    },
+    ColorMap = blueBlackRed,
+    UseColorMap = false,
+    ShowPastFirstAndLastFile = false,
+    Segments = 132
+  },
+  GUI = {
+    Name = "Solar Surface (GONG ADAPT)",
+    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Description = [[Texture sequence of simulation model WSA 5.4, showing data on the
+      solar surface with multiple options in the list under Texture Layer Options. Output:
+      FITS file using ADAPT GONG realization 000 to 011 Maps (RADOUT = 5.0).]],
+    Focusable = false
+  }
+}
+
+local WSA_Velocity_Adapt_Outer_Boundary = {
+  Identifier = "WSA_54_velocity_ADAPT_Outer_Boundary",
+  Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
+  Renderable = {
+    Type = "RenderableTimeVaryingFitsSphere",
+    Size = outerBoundaryAdapt,
+    LoadingType = "DynamicDownloading",
+    Orientation = "Both",
+    InfoURL = infoURL,
+    DataURL = dataURL,
+    DataID = 2218,
+    FitsLayer = 1,
+    LayerNames = {
+      ['0'] = "Coronal Magnetic Field at 21.5 Solar Radii (nT)",
+      ['1'] = "Solar Wind Speed at 21.5 Solar Radii (km/s)"
+    },
+    LayerMinMaxCapValues = {
+      ['0'] = { -200.0, 200.0 },
+      ['1'] = { 200.0, 850.0 }
+    },
+    ColorMap = blueBlackRed,
+    ShowPastFirstAndLastFile = false,
+    Segments = 132
+  },
+  GUI = {
+    Name = "Velocity at Outer Boundary (GONG-ADAPT)",
+    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Description = [[Texture sequence of simulation model WSA 5.4, showing data on a sphere
+      at the outer boundary of the simulation model, either solar wind speed or coronal
+      magnetic field. Output: FITS file using ADAPT GONG realization 000-011 Maps
+      (RADOUT = 21.5).]],
+    Focusable = false
+  }
+}
+
+local WSA_Velocity_Gongz_Outer_Boundary = {
+  Identifier = "WSA_54_velocity_GONGZ_Outer_Boundary",
+  Parent = transforms.WSAOffset60.Identifier,
+  Renderable = {
+    Type = "RenderableTimeVaryingFitsSphere",
+    Size = outerBoundary,
+    Orientation = "Both",
+    LoadingType = "DynamicDownloading",
+    InfoURL = infoURL,
+    DataURL = dataURL,
+    DataID = 2217,
+    FitsLayer = 1,
+    LayerNames = {
+      ['0'] = "Coronal Magnetic Field at 21.5 Solar Radii (nT)",
+      ['1'] = "Solar Wind Speed at 21.5 Solar Radii (km/s)"
+    },
+    LayerMinMaxCapValues = {
+      ['0'] = { -200.0, 200.0 },
+      ['1'] = { 200.0, 850.0 }
+    },
+    ColorMap = blueBlackRed,
+    ShowPastFirstAndLastFile = false,
+    Segments = 132
+  },
+  GUI = {
+    Name = "Velocity at Outer Boundary (GONG-Z)",
+    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Description = [[Texture sequence of simulation model WSA 5.4, showing data on a sphere
+      at the outer boundary of the simulation model, either solar wind speed or coronal
+      magnetic field. Output: FITS file using GONG-Z Maps (RADOUT = 21.5).]],
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(WSA_54_Magnetic_Field_GONGZ_5_Rs)
+  openspace.addSceneGraphNode(WSA_54_Magnetic_Field_ADAPT_5_Rs)
+  openspace.addSceneGraphNode(WSA_54_Magnetograms_GONGZ)
+  openspace.addSceneGraphNode(WSA_54_Magnetograms_ADAPT)
+  openspace.addSceneGraphNode(WSA_Velocity_Adapt_Outer_Boundary)
+  openspace.addSceneGraphNode(WSA_Velocity_Gongz_Outer_Boundary)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(WSA_Velocity_Gongz_Outer_Boundary)
+  openspace.removeSceneGraphNode(WSA_Velocity_Adapt_Outer_Boundary)
+  openspace.removeSceneGraphNode(WSA_54_Magnetograms_ADAPT)
+  openspace.removeSceneGraphNode(WSA_54_Magnetograms_GONGZ)
+  openspace.removeSceneGraphNode(WSA_54_Magnetic_Field_ADAPT_5_Rs)
+  openspace.removeSceneGraphNode(WSA_54_Magnetic_Field_GONGZ_5_Rs)
+end)
+
+asset.export(WSA_54_Magnetic_Field_GONGZ_5_Rs)
+asset.export(WSA_54_Magnetic_Field_ADAPT_5_Rs)
+asset.export(WSA_54_Magnetograms_GONGZ)
+asset.export(WSA_54_Magnetograms_ADAPT)
+asset.export(WSA_Velocity_Adapt_Outer_Boundary)
+asset.export(WSA_Velocity_Gongz_Outer_Boundary)
+
+
+
+asset.meta = {
+  Name = "WSA 5.4. Streaming Surface Data Dynamically",
+  Version = "1.0",
+  Description = [[Downloading data from the WSA 5.4 simulation model, showing the dynamic
+    Sun at any point. It includes .fits files for solar surface data. GONG-Z is the
+    zero-corrected synoptic surface magnetic maps from the Global Oscillation Network
+    Group, while GONG-ADAPT is a model based on GONG, where ADAPT stands for Air Force
+    Data Assimilative Photospheric Flux Transport.]],
+  Author = "CCMC",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

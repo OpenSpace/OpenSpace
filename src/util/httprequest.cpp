@@ -231,7 +231,10 @@ void HttpDownload::cancel() {
 bool HttpDownload::wait() {
     std::mutex conditionMutex;
     std::unique_lock lock(conditionMutex);
-    _downloadFinishCondition.wait(lock, [this]() { return _isFinished; });
+    _downloadFinishCondition.wait(
+        lock,
+        [this]() { return _isFinished || _shouldCancel; }
+    );
     if (_downloadThread.joinable()) {
         _downloadThread.join();
     }

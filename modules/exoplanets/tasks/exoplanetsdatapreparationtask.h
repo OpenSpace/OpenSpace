@@ -65,7 +65,7 @@ public:
      *
      * \param row The row to parse, given as a string
      * \param columnNames The list of column names in the file, from the CSV header
-     * \param positionSourceFile A SPECK file to use for getting the position of the star.
+     * \param positionSourceFile A SPECK file to use for getting the position of the star
      *        This is used to make sure the position of the star matches those of other
      *        star datasets. If no file is provided, the position from the CSV data file
      *        is read and used instead

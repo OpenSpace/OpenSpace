@@ -22,55 +22,43 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___NOTIFICATIONLOG___H__
-#define __OPENSPACE_MODULE_SERVER___NOTIFICATIONLOG___H__
+#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___KAMELEONVOLUMETOFIELDLINESTASK___H__
+#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___KAMELEONVOLUMETOFIELDLINESTASK___H__
 
-#include <ghoul/logging/log.h>
+#include <openspace/util/task.h>
 
-#include <ghoul/misc/profiling.h>
-#include <functional>
+#include <string>
 
 namespace openspace {
 
-/**
- * A concrete subclass of Log that passes logs to the provided callback function. The
- * callback is specified using `std::function`. Trying to log messages when the callback
- * object has been deleted results in undefined behavior.
- */
-class NotificationLog : public ghoul::logging::Log {
+class KameleonVolumeToFieldlinesTask : public Task {
 public:
-    /// The type of function that is used as a callback in this log
-    using CallbackFunction = std::function<void(
-        std::string_view timeString,
-        std::string_view dateString,
-        std::string_view category,
-        ghoul::logging::LogLevel logLevel,
-        std::string_view message)>;
+    enum class OutputType {
+        Json,
+        Osfls
+    };
 
-    /**
-     * Constructor that calls Log constructor.
-     *
-     * \param callbackFunction The callback function that is called for each log message
-     * \param minimumLogLevel The minimum log level that this logger will accept
-     */
-    NotificationLog(CallbackFunction callbackFunction,
-        ghoul::logging::LogLevel minimumLogLevel = ghoul::logging::LogLevel::Warning);
+    explicit KameleonVolumeToFieldlinesTask(const ghoul::Dictionary& dictionary);
 
-    /**
-     * Method that logs a message with a given level and category to the console.
-     *
-     * \param level The log level with which the message shall be logged
-     * \param category The category of this message
-     * \param message The message body of the log message
-     */
-    void log(ghoul::logging::LogLevel level, std::string_view category,
-        std::string_view message) override;
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation Documentation();
 
 private:
-    CallbackFunction _callbackFunction;
-    TracyLockable(std::mutex, _mutex);
+    std::string _tracingVar;
+    std::vector<std::string> _scalarVars;
+    std::vector<std::string> _magnitudeVars;
+    std::filesystem::path _inputPath;
+    size_t _nthTimeStep = 1;
+    std::vector<std::string> _sourceFiles;
+    std::filesystem::path _seedpointsPath;
+    size_t _nthSeedPoint = 1;
+    OutputType _outputType;
+    std::filesystem::path _outputFolder;
+    // Manual time offset
+    float _manualTimeOffset = 0.f;
 };
 
-} // namespace ghoul::logging
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___NOTIFICATIONLOG___H__
+#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___KAMELEONVOLUMETOFIELDLINESTASK___H__
