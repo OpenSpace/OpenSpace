@@ -135,7 +135,9 @@ public:
     LoadingScreen* loadingScreen();
 
     void invalidatePropertyCache();
+    void invalidatePropertyOwnerCache();
     const std::vector<properties::Property*>& allProperties() const;
+    const std::vector<properties::PropertyOwner*>& allPropertyOwners() const;
 
     void createUserDirectoriesIfNecessary();
 
@@ -182,6 +184,9 @@ private:
 
     mutable bool _isAllPropertiesCacheDirty = true;
     mutable std::vector<properties::Property*> _allPropertiesCache;
+
+    mutable bool _isAllPropertyOwnersCacheDirty = true;
+    mutable std::vector<properties::PropertyOwner*> _allPropertyOwnersCache;
 };
 
 /**
