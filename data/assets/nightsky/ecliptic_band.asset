@@ -196,7 +196,7 @@ asset.meta = {
   Name = "Ecliptic Band/Line",
   Description = [[A line and band representation of the Ecliptic plane, including actions
     to toggle, hide and show each of them.]],
-  Author = "OpenSpace Team",
+  Author = "OpenSpace Team / Ken Murphy",
   URL = "http://openspaceproject.com",
   License = "MIT license"
 }
