@@ -70,7 +70,7 @@
   },
   "properties": [
     {
-      "name": "{earth_satellites}.Renderable.Enabled",
+      "name": "{earth_satellites~space_stations}.Renderable.Enabled",
       "type": "setPropertyValue",
       "value": "false"
     },

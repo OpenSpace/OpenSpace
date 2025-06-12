@@ -333,8 +333,10 @@ openspace.toggleFade = function(renderable, fadeTime, endScript)
   if (fadeTime == nil) then
     fadeTime = openspace.propertyValue("OpenSpaceEngine.FadeDuration")
   end
+
   local enabled = openspace.propertyValue(renderable .. ".Enabled")
   local fadeState = openspace.propertyValue(renderable .. ".Fade")
+
   if (enabled) then
     if (fadeState < 0.5) then
       openspace.fadeIn(renderable, fadeTime-(fadeTime*fadeState), endScript)
