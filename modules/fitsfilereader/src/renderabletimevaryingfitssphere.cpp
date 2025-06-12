@@ -99,7 +99,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FitsLayerInfo = {
         "FitsLayer",
         "Texture Layer",
-        "The index of the layer in the FITS file to use as texture.",
+        "The index, a whole positive number, of the layer in the FITS file to use as "
+        "texture. If not specified, the first layer in the data will be used regardless. "
+        "When specified, that data layer will be the option used.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -125,6 +127,30 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This `Renderable` reads a data sequence from specifically FITS files and makes
+    // textures from them and wraps them onto a sphere. A sequence, in the sense that the
+    // data source consists of multiple data files that each correspond to a specific
+    // time, and is therefor time varying like the name of the renderable suggests.
+    //
+    // `LoadingType` can be specified in two ways;
+    //
+    // `StaticLoading`: In this case, property `TextureSource` is expected to be provided
+    // to specify where the data is. Using this, all data will be loaded on start up.
+    // Other properties required to be provided is at least one entry in the list of
+    // `LayerNames` that assigns a name to the index corresponding to which layer in the
+    // FITS data that will be used. Additionally, a data range for each of these entries
+    // is required to be assigned in `LayerMinMaxCapValues` in a similar manner as
+    // `LayerNames`.
+    //
+    // `DynamicDownloading`: This case downloads the data during run time. In addition to
+    // `LayerNames` and `LayerMinMaxCapValues` more parameters are required to be
+    // specified. `InfoURL`: that will be a first step to give data to 'DataURL` which
+    // is expected to return the list with data files. The `DataID` accompanies the two
+    // URLs to specify which data source to use.
+    //
+    // In addition, but not required `FitsLayer` can be specified that correspond to one
+    // of the layers in `LayerNames` and `LayerMinMaxCapValues`. `CacheData` and
+    // `ShowPastFirstAndLastFile` are two additional options.
     struct [[codegen::Dictionary(RenderableTimeVaryingFitsSphere)]] Parameters {
         // [[codegen::verbatim(TextureSourceInfo.description)]]
         std::optional<std::filesystem::path> textureSource;
@@ -141,7 +167,7 @@ namespace {
         // DynamicDownloading: Download and load files during run time.
         std::optional<LoadingType> loadingType;
 
-        // A data ID that corresponds to what dataset to use if using dynamicWebContent.
+        // A data ID that corresponds to what dataset to use if using dynamic downloading.
         std::optional<int> dataID;
 
         // This is a max value of the amount of files to queue up
@@ -166,10 +192,12 @@ namespace {
         std::optional<ghoul::Dictionary> layerMinMaxCapValues;
 
         // This is set to false by default and will delete all the downloaded content when
-        // OpenSpace is shut down. Set to true to save all the downloaded files.
+        // OpenSpace is shut down, if using dynamic downloading. Set to true to save all
+        // the downloaded files.
         std::optional<bool> cacheData;
 
-        // Set if first/last file should render outside of the sequence interval.
+        // Set if first/last file should render when time is outside of the sequence
+        // interval. This can be used regardless of LoadingType.
         std::optional<bool> showPastFirstAndLastFile;
     };
 #include "renderabletimevaryingfitssphere_codegen.cpp"
