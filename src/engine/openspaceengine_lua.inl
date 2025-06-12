@@ -36,6 +36,7 @@
 #include <ghoul/glm.h>
 #include <ghoul/io/texture/texturewriter.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/base64.h>
 #include <ghoul/misc/csvreader.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
@@ -196,6 +197,23 @@ namespace {
     }
 
     return fileName;
+}
+
+/**
+ * This function takes a base64 encoded data string, decodes it and saves the resulting
+ * data to the provided filepath.
+ *
+ * \param filePath The location where the data will be saved. Any file that already exists
+ *        in that location will be overwritten
+ * \param base64Data The base64 encoded data that should be saved to the provided file
+ */
+[[codegen::luawrap]] void saveBase64File(std::filesystem::path filepath,
+                                         std::string base64Data)
+{
+    std::vector<uint8_t> data = ghoul::decodeBase64(base64Data);
+
+    std::ofstream file = std::ofstream(filepath, std::ofstream::binary);
+    file.write(reinterpret_cast<char*>(data.data()), data.size());
 }
 
 /**

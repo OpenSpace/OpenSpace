@@ -33,6 +33,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/engine/settings.h>
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/event.h>
@@ -84,6 +85,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+#include <date/date.h>
 #include <glbinding/glbinding.h>
 #include <glbinding-aux/types_to_string.h>
 #include <filesystem>
@@ -864,6 +866,27 @@ void OpenSpaceEngine::deinitialize() {
     ZoneScoped;
 
     LTRACE("OpenSpaceEngine::deinitialize(begin)");
+
+    {
+        // We are storing the `hasStartedBefore` setting here instead of in the
+        // intialization phase as otherwise we'd always think that OpenSpace had been
+        // started before
+        openspace::Settings settings = loadSettings();
+
+        settings.hasStartedBefore = true;
+        const date::year_month_day now = date::year_month_day(
+            floor<date::days>(std::chrono::system_clock::now())
+        );
+        settings.lastStartedDate = std::format(
+            "{}-{:0>2}-{:0>2}",
+            static_cast<int>(now.year()),
+            static_cast<unsigned>(now.month()),
+            static_cast<unsigned>(now.day())
+        );
+
+        saveSettings(settings, findSettings());
+    }
+
 
     for (const std::function<void()>& func : *global::callback::deinitialize) {
         func();
@@ -1704,6 +1727,7 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::RemoveTag,
             codegen::lua::DownloadFile,
             codegen::lua::CreateSingleColorImage,
+            codegen::lua::SaveBase64File,
             codegen::lua::IsMaster,
             codegen::lua::Version,
             codegen::lua::ReadCSVFile,
