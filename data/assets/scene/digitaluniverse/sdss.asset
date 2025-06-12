@@ -45,6 +45,7 @@ local Object = {
   GUI = {
     Name = "Sloan Galaxies",
     Path = "/Universe/Deep Sky Surveys",
+    Focusable = false,
     Description = [[The Sloan Digital Sky Survey (SDSS) is an ambitious project to image
       about 35% of the sky, deep into the universe. The SDSS galaxies form triangular
       wedges, revealing those parts of the sky observed by the telescope. If the entire

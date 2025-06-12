@@ -1,5 +1,5 @@
 local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -24,13 +24,14 @@ local LaunchTrail = {
   },
   GUI = {
     Name = "Apollo 8 Launch Trail",
-    Path = "/Solar System/Missions/Apollo/8"
+    Path = "/Solar System/Missions/Apollo/8",
+    Focusable = false
   }
 }
 
 local MoonTrail = {
   Identifier = "Apollo8MoonTrail",
-  Parent = moon_transforms.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = false,
@@ -47,7 +48,8 @@ local MoonTrail = {
   },
   GUI = {
     Name = "Apollo 8 Moon Trail",
-    Path = "/Solar System/Missions/Apollo/8"
+    Path = "/Solar System/Missions/Apollo/8",
+    Focusable = false
   }
 }
 
@@ -70,7 +72,8 @@ local EarthBarycenterTrail = {
   },
   GUI = {
     Name = "Apollo 8 Earth Barycenter Trail",
-    Path = "/Solar System/Missions/Apollo/8"
+    Path = "/Solar System/Missions/Apollo/8",
+    Focusable = false
   }
 }
 

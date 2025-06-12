@@ -22,10 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/iswa/rendering/iswacygnet.h>
+#include <modules/iswa/rendering/renderableiswacygnet.h>
 
 #include <modules/iswa/rendering/iswabasegroup.h>
 #include <modules/iswa/util/iswamanager.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
@@ -54,56 +55,51 @@ namespace {
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::User
     };
+
+    struct [[codegen::Dictionary(RenderableIswaCygnet)]] Parameters {
+        int id;
+        int updateTime;
+        std::optional<glm::vec4> spatialScale;
+        std::optional<glm::vec3> gridMin;
+        std::optional<glm::vec3> gridMax;
+        std::optional<std::string> frame;
+        std::optional<std::string> coordinateType;
+        std::optional<std::string> group;
+
+        std::optional<double> xOffset;
+    };
+#include "renderableiswacygnet_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
-IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
+documentation::Documentation RenderableIswaCygnet::Documentation() {
+    return codegen::doc<Parameters>("iswa_renderable_iswacygnet");
+}
+
+RenderableIswaCygnet::RenderableIswaCygnet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _alpha(AlphaInfo, 0.9f, 0.f, 1.f)
     , _delete(DeleteInfo)
 {
-    // This changed from setIdentifier to setGuiName, 2018-03-14 ---abock
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
     std::string name;
     if (dictionary.hasValue<std::string>("Name")) {
         name = dictionary.value<std::string>("Name");
     }
     setGuiName(name);
 
-    _data.id = static_cast<int>(dictionary.value<double>("Id"));
-    _data.updateTime = static_cast<int>(dictionary.value<double>("UpdateTime"));
+    _data.id = p.id;
+    _data.updateTime = p.updateTime;
+    _data.spatialScale = p.spatialScale.value_or(_data.spatialScale);
+    _data.gridMin = p.gridMin.value_or(_data.gridMin);
+    _data.gridMax = p.gridMax.value_or(_data.gridMax);
+    _data.frame = p.frame.value_or(_data.frame);
+    _data.coordinateType = p.frame.value_or(_data.coordinateType);
+    _data.groupName = p.group.value_or(_data.groupName);
 
-    _data.spatialScale = glm::dvec4(0.0);
-    if (dictionary.hasValue<glm::dvec4>("SpatialScale")) {
-        _data.spatialScale = dictionary.value<glm::dvec4>("SpatialScale");
-    }
-
-    _data.gridMin = glm::dvec3(0.0);
-    if (dictionary.hasValue<glm::dvec3>("GridMin")) {
-        _data.gridMin = dictionary.value<glm::dvec3>("GridMin");
-    }
-
-    _data.gridMax = glm::dvec3(0.0);
-    if (dictionary.hasValue<glm::dvec3>("GridMax")) {
-        _data.gridMax = dictionary.value<glm::dvec3>("GridMax");
-    }
-
-    if (dictionary.hasKey("Frame") && dictionary.hasValue<std::string>("Frame")) {
-        _data.frame = dictionary.value<std::string>("Frame");
-    }
-    if (dictionary.hasValue<std::string>("CoordinateType")) {
-        _data.coordinateType = dictionary.value<std::string>("CoordinateType");
-    }
-
-
-    double xOffset = 0.0;
-    if (dictionary.hasValue<double>("XOffset")) {
-        xOffset = dictionary.value<double>("XOffset");
-    }
-    if (dictionary.hasValue<std::string>("Group")) {
-        _data.groupName = dictionary.value<std::string>("Group");
-    }
-
+    double xOffset = p.xOffset.value_or(0.0);
 
     glm::vec3 scale = glm::vec3(
         _data.gridMax.x - _data.gridMin.x,
@@ -126,9 +122,9 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     addProperty(_delete);
 }
 
-IswaCygnet::~IswaCygnet() {}
+RenderableIswaCygnet::~RenderableIswaCygnet() {}
 
-void IswaCygnet::initializeGL() {
+void RenderableIswaCygnet::initializeGL() {
     _textures.push_back(nullptr);
 
     if (!_data.groupName.empty()) {
@@ -148,7 +144,7 @@ void IswaCygnet::initializeGL() {
     downloadTextureResource(global::timeManager->time().j2000Seconds());
 }
 
-void IswaCygnet::deinitializeGL() {
+void RenderableIswaCygnet::deinitializeGL() {
     if (!_data.groupName.empty()) {
         _group->groupEvent().unsubscribe(identifier());
     }
@@ -162,11 +158,11 @@ void IswaCygnet::deinitializeGL() {
     }
 }
 
-bool IswaCygnet::isReady() const {
+bool RenderableIswaCygnet::isReady() const {
     return !_shader;
 }
 
-void IswaCygnet::render(const RenderData& data, RendererTasks&) {
+void RenderableIswaCygnet::render(const RenderData& data, RendererTasks&) {
     if (!readyToRender()) {
         return;
     }
@@ -209,7 +205,7 @@ void IswaCygnet::render(const RenderData& data, RendererTasks&) {
     _shader->deactivate();
 }
 
-void IswaCygnet::update(const UpdateData&) {
+void RenderableIswaCygnet::update(const UpdateData&) {
     if (!_enabled) {
         return;
     }
@@ -254,15 +250,15 @@ void IswaCygnet::update(const UpdateData&) {
     }
 }
 
-void IswaCygnet::enabled(bool enabled) {
+void RenderableIswaCygnet::enabled(bool enabled) {
     _enabled = enabled;
 }
 
-void IswaCygnet::registerProperties() {}
+void RenderableIswaCygnet::registerProperties() {}
 
-void IswaCygnet::unregisterProperties() {}
+void RenderableIswaCygnet::unregisterProperties() {}
 
-void IswaCygnet::initializeTime() {
+void RenderableIswaCygnet::initializeTime() {
     _openSpaceTime = global::timeManager->time().j2000Seconds();
     _lastUpdateOpenSpaceTime = 0.0;
 
@@ -274,7 +270,7 @@ void IswaCygnet::initializeTime() {
     _minRealTimeUpdateInterval = 100;
 }
 
-void IswaCygnet::initializeGroup() {
+void RenderableIswaCygnet::initializeGroup() {
     _group = IswaManager::ref().iswaGroup(_data.groupName);
 
     //Subscribe to enable and delete property

@@ -27,6 +27,7 @@ local StarOh1 = {
   GUI = {
     Name = "Star Tracker OH1 FOV",
     Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false,
     Description = "The first head of the Hydra star tracking system"
   }
 }
@@ -55,6 +56,7 @@ local StarOh2 = {
   GUI = {
     Name = "Star Tracker OH2 FOV",
     Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false,
     Description = "The second head of the Hydra star tracking system"
   }
 }
@@ -83,6 +85,7 @@ local StarOh3 = {
   GUI = {
     Name = "Star Tracker OH3 FOV",
     Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false,
     Description = "The third head of the Hydra star tracking system"
   }
 }

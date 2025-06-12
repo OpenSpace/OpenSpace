@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ISWA___DATACYGNET___H__
-#define __OPENSPACE_MODULE_ISWA___DATACYGNET___H__
+#ifndef __OPENSPACE_MODULE_ISWA___RENDERABLEDATACYGNET___H__
+#define __OPENSPACE_MODULE_ISWA___RENDERABLEDATACYGNET___H__
 
-#include <modules/iswa/rendering/iswacygnet.h>
+#include <modules/iswa/rendering/renderableiswacygnet.h>
 
 #include <openspace/properties/misc/selectionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
@@ -35,16 +35,19 @@
 namespace openspace {
 
 class DataProcessor;
+namespace documentation { struct Documentation; }
 
 /**
  * This class abstracts away the the loading of data and creation of textures for all data
  * cygnets. It specifies the interface that needs to be implemented for all concrete
  * subclasses.
  */
-class DataCygnet : public IswaCygnet {
+class RenderableDataCygnet : public RenderableIswaCygnet {
 public:
-    explicit DataCygnet(const ghoul::Dictionary& dictionary);
-    ~DataCygnet();
+    explicit RenderableDataCygnet(const ghoul::Dictionary& dictionary);
+    ~RenderableDataCygnet();
+
+    static documentation::Documentation Documentation();
 
 protected:
     bool updateTexture() override;
@@ -100,4 +103,4 @@ private:
 
 } //namespace openspace
 
-#endif // __OPENSPACE_MODULE_ISWA___DATACYGNET___H__
+#endif // __OPENSPACE_MODULE_ISWA___RENDERABLEDATACYGNET___H__

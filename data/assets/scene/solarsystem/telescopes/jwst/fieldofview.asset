@@ -30,6 +30,7 @@ local JWSTFov = {
   GUI = {
     Name = "JWST Field of View",
     Path = "/Solar System/Telescopes/JWST",
+    Focusable = false,
     Description = [[
       The field of view for the James Webb Space Telescope at its current position.
     ]]

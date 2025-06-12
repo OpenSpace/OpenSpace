@@ -49,7 +49,7 @@ local IssPosition = {
       Format = "OMM"
     }
   },
-  Tag = { "earth_satellite", "ISS" },
+  Tag = { "earth_satellites", "ISS" },
   GUI = {
     Name = "ISS Position",
     Path = "/Solar System/Planets/Earth/Satellites/ISS",
@@ -76,7 +76,7 @@ local IssModel = {
     },
     PerformShading = true
   },
-  Tag = { "earth_satellite", "ISS" },
+  Tag = { "earth_satellites", "ISS" },
   GUI = {
     Name = "ISS",
     Path = "/Solar System/Planets/Earth/Satellites/ISS"
@@ -99,10 +99,11 @@ local IssTrail = {
     Fade = 1.5,
     Resolution = 320
   },
-  Tag = { "earth_satellite", "ISS" },
+  Tag = { "earth_satellites", "ISS" },
   GUI = {
     Name = "ISS Trail",
-    Path = "/Solar System/Planets/Earth/Satellites/ISS"
+    Path = "/Solar System/Planets/Earth/Satellites/ISS",
+    Focusable = false
   }
 }
 
@@ -126,7 +127,8 @@ local IssLabel = {
   Tag = { "solarsystem_labels" },
   GUI = {
     Name = "ISS Label",
-    Path = "/Solar System/Planets/Earth/Satellites"
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
   }
 }
 

@@ -250,7 +250,7 @@ public:
      * PropertyOwner. This method will also inform the Property about the change in
      * ownership by calling the Property::setPropertyOwner method.
      *
-     * \param prop The Property whose ownership is changed.
+     * \param prop The Property whose ownership is changed
      */
     void addProperty(Property* prop);
 

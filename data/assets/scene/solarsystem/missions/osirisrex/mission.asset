@@ -33,13 +33,13 @@ local Mission = {
   Identifier = "OsirisRex",
   Name = "OSIRIS-REx",
   Description = "Launched on Sept. 8, 2016, the Origins, Spectral Interpretation, Resource Identification, Security-Regolith Explorer (OSIRIS-REx) spacecraft traveled to a near-Earth asteroid called Bennu (formerly 1999 RQ36), and collected a sample of the of rocks and material from the surface that it will return to Earth in 2023. The mission will help scientists investigate how planets formed and how life began, as well as improve our understanding of asteroids that could impact Earth.",
-  Image = "https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/osiris-rex-mission-logo12_copy.png",
+  Image = "https://data.openspaceproject.com/missions/osirisrex/osiris-rex-mission-logo12-copy.png",
   Actions = { "os.osirisrex.AimAtBennu", "os.osirisrex.SetLaunchTime", "os.osirisrex.LookImageCapture" },
   Phases = {
     -- All 1-level phases based on [1]
     {
       Name = "Outbound Cruise",
-      Image = "https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/28929096574_85a647dc8e_o.jpg",
+      Image = "https://data.openspaceproject.com/missions/osirisrex/OSIRIS-REx_launch_28929096574_85a647dc8e_o.jpg",
       Phases = {
         -- Phases from [4]
         {
@@ -56,7 +56,7 @@ local Mission = {
         {
           Name = "Solar Orbit",
           TimeRange = { Start = "2016 SEP 08 23:45:00", End = "2018 SEP 01 00:00:00" },
-          Image = "https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/ega_1ms_mapcam_color_corrected_0.png",
+          Image = "https://data.openspaceproject.com/missions/osirisrex/ega_1ms_mapcam_color_corrected_0.png",
           Description = "A color composite image of Earth taken on Sept. 22 by the MapCam camera on NASA's OSIRIS-REx spacecraft. This image was taken just hours after the spacecraft completed its Earth Gravity Assist at a range of approximately 106,000 miles (170,000 kilometers). MapCam is part of the OSIRIS-REx Camera Suite (OCAMS) operated by the University of Arizona. Visible in this image are the Pacific Ocean and several familiar landmasses, including Australia in the lower left, and Baja California and the southwestern United States in the upper right. The dark vertical streaks at the top of the image are caused by short exposure times (less than three milliseconds). Short exposure times are required for imaging an object as bright as Earth, but are not anticipated for an object as dark as the asteroid Bennu, which the camera was designed to image. Date Taken: Sept. 22, 2017",
           Phases = {
             {
@@ -77,13 +77,13 @@ local Mission = {
           Name = "Approach",
           Description = "Approach Phase began on August 17, 2018, when the spacecraft was still about 1.2 million miles (two million km) away from Bennu, and it continued until the spacecraft arrived at the asteroid on December 3, 2018. The primary goals of Approach were to visually locate Bennu for the first time, survey the surrounding area for potential hazards, and collect enough imagery of Bennu for scientists to generate a detailed shape model of the asteroid, assign a coordinate system, and understand its spin state.",
           TimeRange = { Start = "2018-AUG-17 00:00:00.000", End = "2018-DEC-31 01:34:21.183" },
-          Image = "https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/lbt-orex-1049-loop-gif.gif",
+          Image = "https://data.openspaceproject.com/missions/osirisrex/LBT-OREx-1049-loop-gif-1.gif",
           Phases = {
             {
               Name = "Dust Plume Search Observation",
               Description = "Search for dust and gas plumes originating from the asteroid surface, and characterize their source regions and column densities. Information on the presence and location of dust and gas plumes is needed to assess safety, understand the geologic and dynamic history of the asteroid, and inform sample-site selection.",
               TimeRange = { Start = "2018-SEP-11 21:31:01.183", End = "2018-SEP-12 02:18:41.183" },
-              Image = "https://www.asteroidmission.org/wp-content/uploads/2018/09/MapCamDustSearch-1.jpg"
+              Image = "https://data.openspaceproject.com/missions/osirisrex/MapCamDustSearch-1.jpg"
             },
             {
               Name = "Light Curve",
@@ -114,7 +114,7 @@ local Mission = {
         {
           Name = "Preliminary Survey",
           Description = "Preliminary Survey Phase began with the spacecraft's arrival at Bennu on December 3, 2018, and marked the first time that the OSIRIS-REx spacecraft operated around the asteroid. The spacecraft made a total of five passes over the north pole, equator, and south pole at a range of 4.3 miles (7 km). The primary science goals of Preliminary Survey were to estimate Bennu's mass, refine the asteroid's spin state model, and generate a global shape model at a resolution of 75-cm.",
-          Image = "https://www.asteroidmission.org/wp-content/uploads/2018/05/Prelim-Survey-for-Web.jpg",
+          Image = "https://data.openspaceproject.com/missions/osirisrex/Prelim-Survey-for-Web.jpg",
           Phases = {
             {
               Name = "MapCamOLA Phase 1",
@@ -222,7 +222,7 @@ local Mission = {
         {
           Name = "Orbital B",
           Description = "At the end of Detailed Survey, the spacecraft entered a close orbit - with a radius of 0.6 miles (1 km) - around Bennu to begin Orbital B Phase. This phase broke the record OSIRIS-REx set in Orbital A for the closest that a spacecraft has ever orbited around a small body. The primary science activities for this phase were the global mapping of Bennu, the development of shape modeling based on OLA data, and the execution of a Radio Science experiment. These data were used to evaluate potential sample collection sites for three key elements: safety, sampleability and science value.  Orbital B concluded with the team narrowing in on a primary and a back-up sample site.",
-          Image = "https://www.asteroidmission.org/wp-content/uploads/2018/05/Orbital-B-for-Web.jpg",
+          Image = "https://data.openspaceproject.com/missions/osirisrex/Orbital-B-for-Web.jpg",
           Phases = {
             {
               Name = "Candidate Sample Site Phase 1",

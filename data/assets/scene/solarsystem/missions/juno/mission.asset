@@ -1,14 +1,12 @@
 local Mission = {
   Identifier = "Juno",
   Name = "Juno",
-  Image = "https://upload.wikimedia.org/wikipedia/commons/3/32/Juno_mission_insignia.svg",
+  Image = "https://data.openspaceproject.com/missions/juno/Juno_mission_insignia.svg",
   Description = "On August 5, 2011, NASA's Juno spacecraft embarked on a 5-year journey to our solar system's largest planet - the gas giant Jupiter. Its mission: to probe beneath the planet's dense clouds and answer questions about the origin and evolution of Jupiter, our solar system, and giant planets in general across the cosmos. Juno arrived at Jupiter on July 4, 2016, after a 5-year, 1.7-billion-mile journey, and settled into a 53-day polar orbit stretching from just above Jupiter's cloud tops to the outer reaches of the Jovian magnetosphere.",
   Milestones = {
     {
       Name = "Arrival at Jupiter",
-      Date = "2016 JUL 04 00:00:00",
-      Image = "https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/pj41_full.gif" ,
-      Description = "On Dec. 24, 1968, Apollo 8 astronauts Frank Borman, Jim Lovell, and Bill Anders became the first humans to orbit the Moon, and the first to witness the magnificent sight called 'Earthrise'. As the spacecraft was in the process of rotating, Anders took this iconic picture showing Earth rising over the Moon's horizon."
+      Date = "2016 JUL 04 00:00:00"
     }
   },
   Phases = {
@@ -16,7 +14,7 @@ local Mission = {
       Name = "Journey to Jupiter",
       TimeRange = { Start = "2011 AUG 05 16:25:00", End = "2016 JUL 04 00:00:00" },
       Description = "Juno arrived at Jupiter on July 4, 2016, after a five-year, 1,740-million-mile journey, and settled into a 53-day polar orbit stretching from just above Jupiter's cloud tops to the outer reaches of the Jovian magnetosphere.",
-      Image = "https://d2pn8kiwq2w21t.cloudfront.net/original_images/jpegPIA22946.jpg",
+      Image = "https://data.openspaceproject.com/missions/juno/PIA22946_modest.jpg",
       Phases = {
         {
           Name = "Deep space maneuevers",
@@ -28,12 +26,12 @@ local Mission = {
       Name = "Mission",
       TimeRange = { Start = "2016 JUL 04 00:00:00", End = "2021 AUG 01 00:00:00" },
       Description = "Juno's discoveries have revolutionized our understanding of Jupiter and solar system formation. During the prime mission's 35 orbits of Jupiter, Juno collected more than three terabits (375 gigabytes) of science data and provided dazzling views of Jupiter and its satellites, all processed by citizen scientists with NASA's first-ever camera dedicated to public outreach. Juno's many discoveries have changed our view of Jupiter's atmosphere and interior, revealing an atmospheric weather layer that extends far beyond its clouds and a deep interior with a diluted, or 'fuzzy,' heavy element core. Near the end of the prime mission, as the spacecraft's orbit evolved, flybys of the moon Ganymede initiated Juno's transition into a full Jovian system explorer.",
-      Image = "https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/pia22692_hires.jpg"
+      Image = "https://data.openspaceproject.com/missions/juno/PIA22692.jpg"
     },
     {
       Name = "Extended Mission",
       TimeRange = { Start = "2021 AUG 01 00:00:00", End = "2025 Sep 01 00:00:00" },
-      Image = "https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/pia25015.jpg"
+      Image = "https://data.openspaceproject.com/missions/juno/PIA25015.jpg"
     }
   }
 }

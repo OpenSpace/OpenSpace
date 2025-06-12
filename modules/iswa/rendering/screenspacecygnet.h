@@ -27,9 +27,12 @@
 
 #include <modules/base/rendering/screenspaceimageonline.h>
 
+#include <openspace/documentation/documentation.h>
 #include <chrono>
 
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 class ScreenSpaceCygnet : public ScreenSpaceImageOnline {
 public:
@@ -37,6 +40,8 @@ public:
     ~ScreenSpaceCygnet() = default;
 
     virtual void update() override;
+
+    static documentation::Documentation Documentation();
 
 private:
     int _cygnetId;

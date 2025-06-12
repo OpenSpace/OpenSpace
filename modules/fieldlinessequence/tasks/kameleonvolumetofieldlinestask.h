@@ -22,42 +22,43 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ISWA___DATAPLANE___H__
-#define __OPENSPACE_MODULE_ISWA___DATAPLANE___H__
+#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___KAMELEONVOLUMETOFIELDLINESTASK___H__
+#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___KAMELEONVOLUMETOFIELDLINESTASK___H__
 
-#include <modules/iswa/rendering/datacygnet.h>
+#include <openspace/util/task.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
+#include <string>
 
 namespace openspace {
 
-/**
- * DataPlane is a concrete IswaCygnet with data files as its input source. The class
- * handles creation, destruction and rendering of a plane geometry. It also specifies what
- * uniforms to use and what GUI properties it needs.
- */
-class DataPlane : public DataCygnet {
-friend class IswaBaseGroup;
+class KameleonVolumeToFieldlinesTask : public Task {
 public:
-    explicit DataPlane(const ghoul::Dictionary& dictionary);
-     ~DataPlane() = default;
+    enum class OutputType {
+        Json,
+        Osfls
+    };
 
-     void initializeGL() override;
+    explicit KameleonVolumeToFieldlinesTask(const ghoul::Dictionary& dictionary);
+
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation Documentation();
 
 private:
-    /**
-     * Creates a plane geometry.
-     */
-    bool createGeometry() override;
-    bool destroyGeometry() override;
-    void renderGeometry() const override;
-    void setUniforms() override;
-    std::vector<float*> textureData() override;
-
-    GLuint _quad;
-    GLuint _vertexPositionBuffer;
+    std::string _tracingVar;
+    std::vector<std::string> _scalarVars;
+    std::vector<std::string> _magnitudeVars;
+    std::filesystem::path _inputPath;
+    size_t _nthTimeStep = 1;
+    std::vector<std::string> _sourceFiles;
+    std::filesystem::path _seedpointsPath;
+    size_t _nthSeedPoint = 1;
+    OutputType _outputType;
+    std::filesystem::path _outputFolder;
+    // Manual time offset
+    float _manualTimeOffset = 0.f;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_ISWA___DATAPLANE___H__
+#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___KAMELEONVOLUMETOFIELDLINESTASK___H__

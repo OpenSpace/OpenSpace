@@ -68,6 +68,7 @@ local PhobosTrail = {
   GUI = {
     Name = "Phobos Trail",
     Path = "/Solar System/Planets/Mars/Moons/Phobos",
+    Focusable = false,
     Description = "Trail for Phobos"
   }
 }
@@ -93,6 +94,7 @@ local PhobosLabel = {
   GUI = {
     Name = "Phobos Label",
     Path = "/Solar System/Planets/Mars/Moons/Phobos",
+    Focusable = false,
     Description = "Label for Mars' moon Phobos"
   }
 }

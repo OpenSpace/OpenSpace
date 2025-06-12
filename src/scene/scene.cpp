@@ -158,14 +158,26 @@ namespace {
             case openspace::PropertyValueType::Float:
             {
                 std::vector<float> vals;
-                processPropertyValueTableEntries(L, value, vals, isTableValue, propertyName);
+                processPropertyValueTableEntries(
+                    L,
+                    value,
+                    vals,
+                    isTableValue,
+                    propertyName
+                );
                 ghoul::lua::push(L, vals);
             }
             break;
             case openspace::PropertyValueType::String:
             {
                 std::vector<std::string> vals;
-                processPropertyValueTableEntries(L, value, vals, isTableValue, propertyName);
+                processPropertyValueTableEntries(
+                    L,
+                    value,
+                    vals,
+                    isTableValue,
+                    propertyName
+                );
                 ghoul::lua::push(L, vals);
             }
             break;
@@ -849,7 +861,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 &luascriptfunctions::propertySetValue<false>,
                 {
                     { "uri", "String" },
-                    { "value", "String | Number | Boolean | Table" },
+                    { "value", "Nil | String | Number | Boolean | Table" },
                     { "duration", "Number?", "0.0" },
                     { "easing", "EasingFunction?", "Linear" },
                     { "postscript", "String?", "" }
@@ -906,7 +918,7 @@ interpolation. If 0 was provided, the script runs immediately.
                 &luascriptfunctions::propertySetValue<true>,
                 {
                     { "uri", "String" },
-                    { "value", "String | Number | Boolean | Table" },
+                    { "value", "Nil | String | Number | Boolean | Table" },
                     { "duration", "Number?", "0.0" },
                     { "easing", "EasingFunction?", "Linear" },
                     { "postscript", "String?", "" }

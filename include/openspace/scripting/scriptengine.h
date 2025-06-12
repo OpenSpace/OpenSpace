@@ -110,7 +110,7 @@ public:
     void queueScript(Script script);
     void queueScript(std::string script);
 
-    // Runs the `script` every `timeout` seconds wallclock time 
+    // Runs the `script` every `timeout` seconds wallclock time
     void registerRepeatedScript(std::string identifier, std::string script,
         double timeout, std::string preScript = "", std::string postScript = "");
     void removeRepeatedScript(std::string_view identifier);

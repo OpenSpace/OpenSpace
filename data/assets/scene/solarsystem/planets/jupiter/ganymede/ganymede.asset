@@ -71,6 +71,7 @@ local GanymedeLabel = {
   GUI = {
     Name = "Ganymede Label",
     Path = "/Solar System/Planets/Jupiter/Major Moons/Ganymede",
+    Focusable = false,
     Description = "Label for Jupiter's moon Ganymede"
   }
 }

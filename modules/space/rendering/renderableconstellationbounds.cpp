@@ -212,14 +212,26 @@ bool RenderableConstellationBounds::isReady() const {
 void RenderableConstellationBounds::render(const RenderData& data, RendererTasks& tasks) {
     _program->activate();
 
-    _program->setUniform(_uniformCache.campos, glm::vec4(data.camera.positionVec3(), 1.f));
-    _program->setUniform(_uniformCache.objpos, glm::vec4(data.modelTransform.translation, 0.f));
-    _program->setUniform(_uniformCache.camrot, glm::mat4(data.camera.viewRotationMatrix()));
+    _program->setUniform(
+        _uniformCache.campos,
+        glm::vec4(data.camera.positionVec3(), 1.f)
+    );
+    _program->setUniform(
+        _uniformCache.objpos,
+        glm::vec4(data.modelTransform.translation, 0.f)
+    );
+    _program->setUniform(
+        _uniformCache.camrot,
+        glm::mat4(data.camera.viewRotationMatrix())
+    );
     _program->setUniform(_uniformCache.scaling, glm::vec2(1.f, 0.f));
 
     const glm::dmat4 modelTransform = calcModelTransform(data);
 
-    _program->setUniform(_uniformCache.ViewProjection, data.camera.viewProjectionMatrix());
+    _program->setUniform(
+        _uniformCache.ViewProjection,
+        data.camera.viewProjectionMatrix()
+    );
     _program->setUniform(_uniformCache.ModelTransform, glm::mat4(modelTransform));
     _program->setUniform(_uniformCache.color, _color);
     _program->setUniform(_uniformCache.opacity, opacity());

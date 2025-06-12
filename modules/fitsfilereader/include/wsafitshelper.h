@@ -22,93 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/iswa/rendering/texturecygnet.h>
+#ifndef __OPENSPACE_MODULE_FITSFILEREADER___WSAFITSHELPER___H__
+#define __OPENSPACE_MODULE_FITSFILEREADER___WSAFITSHELPER___H__
 
-#include <modules/iswa/util/iswamanager.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
+#include <valarray>
 
-namespace {
-    constexpr std::string_view _loggerCat = "TextureCygnet";
-} // namespace
+namespace CCfits {
+    class FITS;
+    class PHDU;
+    class ExtHDU;
+} // namespace CCfits
 
 namespace openspace {
 
-TextureCygnet::TextureCygnet(const ghoul::Dictionary& dictionary)
-    : IswaCygnet(dictionary)
-{
-    registerProperties();
-}
+template<typename T>
+struct ImageData {
+    std::valarray<T> contents;
+    int width;
+    int height;
+};
 
-bool TextureCygnet::updateTexture() {
-    using namespace ghoul;
+/**
+ * Load image from a FITS file into a texture.
+ *
+ * \param path The path to the FITS file
+ * \param layerIndex The index of the layer to load from the FITS file
+ * \param minMax The minimum and maximum value range in which to cap the data between
+          Values outside of range will be overexposed
+   \return The texture created from the layer in the file with the set min-max range
+ */
+std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
+    const std::filesystem::path& path, size_t layerIndex,
+    const std::pair<float, float>& minMax);
 
-    std::unique_ptr<opengl::Texture> texture = io::TextureReader::ref().loadTexture(
-        reinterpret_cast<void*>(_imageFile.buffer),
-        _imageFile.size,
-        2,
-        _imageFile.format
-    );
+void readFitsHeader(const std::filesystem::path& path);
 
-    if (texture) {
-        LDEBUG(std::format(
-            "Loaded texture from image iswa cygnet with id '{}'", _data.id
-        ));
-        texture->uploadTexture();
-        // Textures of planets looks much smoother with AnisotropicMipMap
-        texture->setFilter(opengl::Texture::FilterMode::LinearMipMap);
-        _textures[0] = std::move(texture);
-    }
+/**
+ * Get the number of data layers in a FITS file.
+ *
+ * \param path The path to the FITS file
+ * \return The number of layers in the FITS file
+ */
+int nLayers(const std::filesystem::path& path);
 
-    return false;
-}
+template<typename T, typename U>
+std::shared_ptr<ImageData<T>> readImageInternal(U& image);
 
-bool TextureCygnet::downloadTextureResource(double timestamp) {
-    if (_futureObject.valid()) {
-        return false;
-    }
+} // namespace openspace
 
-    if (_textures.empty()) {
-        _textures.push_back(nullptr);
-    }
-
-    std::future<DownloadManager::MemoryFile> future = IswaManager::ref().fetchImageCygnet(
-        _data.id,
-        timestamp
-    );
-
-    if (future.valid()) {
-        _futureObject = std::move(future);
-        return true;
-    }
-
-    return false;
-}
-
-bool TextureCygnet::updateTextureResource() {
-    // if The future is done then get the new imageFile
-    DownloadManager::MemoryFile imageFile;
-    if (_futureObject.valid() && DownloadManager::futureReady(_futureObject)) {
-        imageFile = _futureObject.get();
-
-        if (imageFile.corrupted) {
-            delete[] imageFile.buffer;
-            return false;
-        }
-        else {
-            _imageFile = imageFile;
-        }
-    }
-    else {
-        return false;
-    }
-
-    return true;
-}
-
-bool TextureCygnet::readyToRender() const {
-    return isReady() && ((!_textures.empty()) && _textures[0]);
-}
-
-} //namespace openspace
+#endif // __OPENSPACE_MODULE_FITSFILEREADER___WSAFITSHELPER___H__

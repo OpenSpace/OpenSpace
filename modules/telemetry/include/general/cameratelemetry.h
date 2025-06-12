@@ -71,4 +71,4 @@ private:
 
 } // namespace openspace
 
-#endif __OPENSPACE_MODULE_TELEMETRY___CAMERATELEMETRY___H__
+#endif // __OPENSPACE_MODULE_TELEMETRY___CAMERATELEMETRY___H__

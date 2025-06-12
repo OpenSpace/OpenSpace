@@ -298,7 +298,9 @@ QVariant AssetTreeModel::data(const QModelIndex& index, int role) const {
     }
 
     if (role == Qt::ForegroundRole) {
-        return item->doesExistInFilesystem() ? QColor(Qt::black) : QColor(Qt::red);
+        // Returning an empty variant will cause Qt to use the theme-appropriate color for
+        // the item
+        return item->doesExistInFilesystem() ? QVariant() : QColor(Qt::red);
     }
     else if (role == Qt::DisplayRole) {
         return item->data(index.column());

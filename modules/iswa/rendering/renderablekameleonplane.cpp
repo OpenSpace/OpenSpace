@@ -22,13 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/iswa/rendering/kameleonplane.h>
+#include <modules/iswa/rendering/renderablekameleonplane.h>
 
 #include <modules/iswa/rendering/iswabasegroup.h>
 #include <modules/iswa/rendering/iswakameleongroup.h>
 #include <modules/iswa/util/dataprocessorkameleon.h>
 #include <modules/iswa/util/iswamanager.h>
 #include <openspace/json.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
@@ -63,38 +64,58 @@ namespace {
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::User
     };
+
+    struct [[codegen::Dictionary(RenderableKameleonPlane)]] Parameters {
+        std::optional<std::string> kwPath;
+        std::optional<std::string>
+            fieldlineSeedsIndexFile [[codegen::key("fieldlineSeedsIndexFile")]];
+
+        enum class AxisCut {
+            X,
+            Y,
+            Z
+        };
+        std::optional<AxisCut> axisCut [[codegen::key("axisCut")]];
+    };
+#include "renderablekameleonplane_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
-KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
-    : DataCygnet(dictionary)
+documentation::Documentation RenderableKameleonPlane::Documentation() {
+    return codegen::doc<Parameters>(
+        "iswa_renderable_kameleonplane",
+        RenderableDataCygnet::Documentation()
+    );
+}
+
+RenderableKameleonPlane::RenderableKameleonPlane(const ghoul::Dictionary& dictionary)
+    : RenderableDataCygnet(dictionary)
     , _fieldlines(FieldLineSeedsInfo)
     , _resolution(ResolutionInfo, 100.f, 10.f, 200.f)
     , _slice(SliceInfo, 0.f, 0.f, 1.f)
 {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _kwPath = p.kwPath.value_or(_kwPath);
+    _fieldlineIndexFile = p.fieldlineSeedsIndexFile.value_or(_fieldlineIndexFile);
+
     addProperty(_resolution);
     addProperty(_slice);
     addProperty(_fieldlines);
 
-    if (dictionary.hasValue<std::string>("kwPath")) {
-        _kwPath = dictionary.value<std::string>("kwPath");
-    }
-
-    if (dictionary.hasValue<std::string>("fieldlineSeedsIndexFile")) {
-        _fieldlineIndexFile = dictionary.value<std::string>("fieldlineSeedsIndexFile");
-    }
-
-    std::string axis;
-    if (dictionary.hasValue<std::string>("axisCut")) {
-        axis = dictionary.value<std::string>("axisCut");
-    }
-
-    if (axis == "x") {
-        _cut = Cut::X;
-    }
-    else if (axis == "y") {
-        _cut = Cut::Y;
+    if (p.axisCut.has_value()) {
+        switch (*p.axisCut) {
+            case Parameters::AxisCut::X:
+                _cut = Cut::X;
+                break;
+            case Parameters::AxisCut::Y:
+                _cut = Cut::Y;
+                break;
+            case Parameters::AxisCut::Z:
+                _cut = Cut::Z;
+                break;
+        }
     }
     else {
         _cut = Cut::Z;
@@ -111,14 +132,16 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     setDimensions();
 }
 
-KameleonPlane::~KameleonPlane() {}
+RenderableKameleonPlane::~RenderableKameleonPlane() {}
 
-void KameleonPlane::deinitializeGL() {
-    IswaCygnet::deinitialize();
+void RenderableKameleonPlane::deinitializeGL() {
     _fieldlines = std::set<std::string>();
+    RenderableDataCygnet::deinitializeGL();
 }
 
-void KameleonPlane::initializeGL() {
+void RenderableKameleonPlane::initializeGL() {
+    RenderableDataCygnet::initializeGL();
+
     if (!_shader) {
         _shader = global::renderEngine->buildRenderProgram(
             "DataPlaneProgram",
@@ -194,7 +217,7 @@ void KameleonPlane::initializeGL() {
     updateTextureResource();
 }
 
-bool KameleonPlane::createGeometry() {
+bool RenderableKameleonPlane::createGeometry() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
 
@@ -236,7 +259,7 @@ bool KameleonPlane::createGeometry() {
     return true;
 }
 
-bool KameleonPlane::destroyGeometry() {
+bool RenderableKameleonPlane::destroyGeometry() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 
@@ -246,31 +269,31 @@ bool KameleonPlane::destroyGeometry() {
     return true;
 }
 
-void KameleonPlane::renderGeometry() const {
+void RenderableKameleonPlane::renderGeometry() const {
     glBindVertexArray(_quad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-std::vector<float*> KameleonPlane::textureData() {
+std::vector<float*> RenderableKameleonPlane::textureData() {
     DataProcessorKameleon* p = dynamic_cast<DataProcessorKameleon*>(_dataProcessor.get());
     p->setSlice(_slice);
     return p->processData(_kwPath, _dataOptions, _dimensions);
 }
 
-bool KameleonPlane::updateTextureResource() {
+bool RenderableKameleonPlane::updateTextureResource() {
     _data.offset[_cut] = _slice * _scale + _data.gridMin[_cut];
     // _textureDirty = true;
     updateTexture();
     return true;
 }
 
-void KameleonPlane::setUniforms() {
+void RenderableKameleonPlane::setUniforms() {
     setTextureUniforms();
     _shader->setUniform("backgroundValues", _backgroundValues.value());
     _shader->setUniform("transparency", _alpha.value());
 }
 
-void KameleonPlane::updateFieldlineSeeds() {
+void RenderableKameleonPlane::updateFieldlineSeeds() {
     std::set<std::string> selectedOptions = _fieldlines;
     std::vector<std::string> opts = _fieldlines.options();
 
@@ -316,7 +339,7 @@ void KameleonPlane::updateFieldlineSeeds() {
     }
 }
 
-void KameleonPlane::readFieldlinePaths(const std::filesystem::path& indexFile) {
+void RenderableKameleonPlane::readFieldlinePaths(const std::filesystem::path& indexFile) {
     LINFO(std::format("Reading seed points paths from file '{}'", indexFile));
     if (_group) {
         dynamic_cast<IswaKameleonGroup*>(_group)->setFieldlineInfo(
@@ -356,9 +379,9 @@ void KameleonPlane::readFieldlinePaths(const std::filesystem::path& indexFile) {
    }
 }
 
-void KameleonPlane::subscribeToGroup() {
+void RenderableKameleonPlane::subscribeToGroup() {
     // Subscribe to DataCygnet events
-    DataCygnet::subscribeToGroup();
+    RenderableDataCygnet::subscribeToGroup();
 
     //Add additional Events specific to KameleonPlane
     ghoul::Event<ghoul::Dictionary>& groupEvent = _group->groupEvent();
@@ -387,7 +410,7 @@ void KameleonPlane::subscribeToGroup() {
     );
 }
 
-void KameleonPlane::setDimensions() {
+void RenderableKameleonPlane::setDimensions() {
     // the cdf files has an offset of 0.5 in normali resolution.
     // with lower resolution the offset increases.
     _data.offset = _origOffset - 0.5f * (100.f / _resolution);
@@ -405,7 +428,7 @@ void KameleonPlane::setDimensions() {
     }
 }
 
-void KameleonPlane::changeKwPath(std::string kwPath) {
+void RenderableKameleonPlane::changeKwPath(std::string kwPath) {
     _kwPath = std::move(kwPath);
 }
 

@@ -83,6 +83,13 @@ TimelineRotation::TimelineRotation(const ghoul::Dictionary& dictionary)
     addProperty(_shouldInterpolate);
 }
 
+void TimelineRotation::initialize() {
+    Rotation::initialize();
+    for (const Keyframe<ghoul::mm_unique_ptr<Rotation>>& kf : _timeline.keyframes()) {
+        kf.data->initialize();
+    }
+}
+
 void TimelineRotation::update(const UpdateData& data) {
     const double now = data.time.j2000Seconds();
     using KeyframePointer = const Keyframe<ghoul::mm_unique_ptr<Rotation>>*;
@@ -93,6 +100,8 @@ void TimelineRotation::update(const UpdateData& data) {
     if (KeyframePointer next = _timeline.firstKeyframeAfter(now, true);  next) {
         next->data->update(data);
     }
+
+    Rotation::update(data);
 }
 
 glm::dmat3 TimelineRotation::matrix(const UpdateData& data) const {

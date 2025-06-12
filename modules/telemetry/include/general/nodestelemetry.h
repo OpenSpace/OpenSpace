@@ -144,4 +144,4 @@ private:
 
 } // namespace openspace
 
-#endif __OPENSPACE_MODULE_TELEMETRY___NODESTELEMETRY___H__
+#endif // __OPENSPACE_MODULE_TELEMETRY___NODESTELEMETRY___H__

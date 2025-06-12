@@ -28,6 +28,7 @@
 #include <modules/server/include/jsonconverters.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/settings.h>
 #include <openspace/scene/profile.h>
 
 namespace openspace {
@@ -43,8 +44,13 @@ void ProfileTopic::handleJson(const nlohmann::json&) {
     nlohmann::json data = {
         { "uiPanelVisibility", global::profile->uiPanelVisibility },
         { "markNodes", global::profile->markNodes },
-        { "filePath", global::configuration->profile }
+        { "filePath", global::configuration->profile },
     };
+
+    Settings settings = loadSettings();
+    if (settings.hasStartedBefore.has_value()) {
+        data["hasStartedBefore"] = settings.hasStartedBefore.value();
+    }
 
     if (global::profile->meta.has_value()) {
         data["name"] = global::profile->meta->name.value_or("");

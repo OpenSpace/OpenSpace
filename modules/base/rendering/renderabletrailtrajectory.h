@@ -84,7 +84,7 @@ private:
     properties::BoolProperty _renderFullTrail;
     /// Determines how many vertices around the object that will be
     /// replaced during full trail rendering
-    properties::IntProperty _numberOfReplacementPoints;
+    properties::IntProperty _nReplacementPoints;
 
     /// Dirty flag that determines whether the full vertex buffer needs to be resampled
     bool _needsFullSweep = true;
@@ -102,7 +102,7 @@ private:
 
     /// How many points do we need to compute given the distance between the
     /// start and end date and the desired sample interval
-    unsigned int _numberOfVertices = 0;
+    unsigned int _nVertices = 0;
 
     double _totalSampleInterval = 0.0;
 

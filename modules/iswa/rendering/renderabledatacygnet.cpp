@@ -22,11 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/iswa/rendering/datacygnet.h>
+#include <modules/iswa/rendering/renderabledatacygnet.h>
 
 #include <modules/iswa/rendering/iswadatagroup.h>
 #include <modules/iswa/util/dataprocessor.h>
 #include <modules/iswa/util/iswamanager.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/rendering/transferfunction.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -92,8 +93,15 @@ namespace {
 
 namespace openspace {
 
-DataCygnet::DataCygnet(const ghoul::Dictionary& dictionary)
-    : IswaCygnet(dictionary)
+documentation::Documentation RenderableDataCygnet::Documentation() {
+    documentation::Documentation doc = RenderableIswaCygnet::Documentation();
+    doc.name = "RenderableDataCygnet";
+    doc.id = "iswa_renderable_datacygnet";
+    return doc;
+}
+
+RenderableDataCygnet::RenderableDataCygnet(const ghoul::Dictionary& dictionary)
+    : RenderableIswaCygnet(dictionary)
     , _dataOptions(DataOptionsInfo)
     , _transferFunctionsFile(TransferFunctionsFile, "${SCENE}/iswa/tfs/default.tf")
     , _backgroundValues(BackgroundInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(1.f))
@@ -112,9 +120,9 @@ DataCygnet::DataCygnet(const ghoul::Dictionary& dictionary)
     registerProperties();
 }
 
-DataCygnet::~DataCygnet() {}
+RenderableDataCygnet::~RenderableDataCygnet() {}
 
-bool DataCygnet::updateTexture() {
+bool RenderableDataCygnet::updateTexture() {
     const std::vector<float*>& data = textureData();
 
     if (data.empty()) {
@@ -163,7 +171,7 @@ bool DataCygnet::updateTexture() {
     return texturesReady;
 }
 
-bool DataCygnet::downloadTextureResource(double timestamp) {
+bool RenderableDataCygnet::downloadTextureResource(double timestamp) {
     if (_futureObject.valid()) {
         return false;
     }
@@ -181,7 +189,7 @@ bool DataCygnet::downloadTextureResource(double timestamp) {
     return false;
 }
 
-bool DataCygnet::updateTextureResource() {
+bool RenderableDataCygnet::updateTextureResource() {
     DownloadManager::MemoryFile dataFile = _futureObject.get();
 
     if (dataFile.corrupted) {
@@ -194,7 +202,7 @@ bool DataCygnet::updateTextureResource() {
     return true;
 }
 
-bool DataCygnet::readyToRender() const {
+bool RenderableDataCygnet::readyToRender() const {
     return (!_textures.empty() && !_transferFunctions.empty());
 }
 
@@ -203,7 +211,7 @@ bool DataCygnet::readyToRender() const {
  * bind to the right texture units. If separate in to two functions a list of
  * ghoul::TextureUnit needs to be passed as an argument to both.
  */
-void DataCygnet::setTextureUniforms() {
+void RenderableDataCygnet::setTextureUniforms() {
     const std::set<std::string>& selectedOptions = _dataOptions;
     const std::vector<std::string>& options = _dataOptions.options();
     std::vector<int> selectedOptionsIndices;
@@ -273,7 +281,7 @@ void DataCygnet::setTextureUniforms() {
     _shader->setUniform("numTextures", activeTextures);
 }
 
-void DataCygnet::readTransferFunctions(std::string tfPath) {
+void RenderableDataCygnet::readTransferFunctions(std::string tfPath) {
     std::ifstream tfFile(absPath(std::move(tfPath)));
 
     std::vector<TransferFunction> tfs;
@@ -292,7 +300,7 @@ void DataCygnet::readTransferFunctions(std::string tfPath) {
     }
 }
 
-void DataCygnet::fillOptions(const std::string& source) {
+void RenderableDataCygnet::fillOptions(const std::string& source) {
     std::vector<std::string> options = _dataProcessor->readMetadata(
         source,
         _textureDimensions
@@ -314,7 +322,7 @@ void DataCygnet::fillOptions(const std::string& source) {
     }
 }
 
-void DataCygnet::setPropertyCallbacks() {
+void RenderableDataCygnet::setPropertyCallbacks() {
     _normValues.onChange([this]() {
         _dataProcessor->normValues(_normValues);
         updateTexture();
@@ -345,7 +353,7 @@ void DataCygnet::setPropertyCallbacks() {
     });
 }
 
-void DataCygnet::subscribeToGroup() {
+void RenderableDataCygnet::subscribeToGroup() {
     ghoul::Event<ghoul::Dictionary>& groupEvent = _group->groupEvent();
 
     groupEvent.subscribe(

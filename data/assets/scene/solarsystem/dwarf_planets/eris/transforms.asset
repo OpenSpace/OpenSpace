@@ -24,6 +24,7 @@ local Position = {
   GUI = {
     Name = "Eris Position",
     Path = "/Solar System/Dwarf Planets/Eris",
+    Focusable = false,
     Hidden = true
   }
 }

@@ -57,7 +57,8 @@ local CarpoTrail = {
   },
   GUI = {
     Name = "Carpo Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/Carpo"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/Carpo",
+    Focusable = false
   }
 }
 
@@ -88,6 +89,7 @@ local CarpoLabel = {
   GUI = {
     Name = "Carpo Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/Carpo",
+    Focusable = false,
     Description = "Label for Jupiter's moon Carpo (Carpo group)"
   }
 }
@@ -119,6 +121,7 @@ local CarpoLabelNear = {
   GUI = {
     Name = "Carpo Label (Near)",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/Carpo",
+    Focusable = false,
     Description = "Transitional Label for close-range viewing of Carpo (Carpo group)"
   }
 }
@@ -175,7 +178,8 @@ local S2018J4Trail = {
   },
   GUI = {
     Name = "S/2018 J 4 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/S2018J4"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/S2018J4",
+    Focusable = false
   }
 }
 
@@ -206,6 +210,7 @@ local S2018J4Label = {
   GUI = {
     Name = "S/2018 J 4 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/S2018J4",
+    Focusable = false,
     Description = "Label for Jupiter's moon S2018J4 (Carpo group)"
   }
 }
@@ -237,6 +242,7 @@ local S2018J4LabelNear = {
   GUI = {
     Name = "S2018J4 Label (Near)",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/S2018J4",
+    Focusable = false,
     Description = "Transitional Label for close-range viewing of S2018J4 (Carpo group)"
   }
 }

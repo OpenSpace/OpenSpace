@@ -55,7 +55,6 @@ protected:
 
     ghoul::mm_unique_ptr<Renderable> _renderableNear;
     ghoul::mm_unique_ptr<Renderable> _renderableFar;
-    
 };
 } // namespace openspace
 

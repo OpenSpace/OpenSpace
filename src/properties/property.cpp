@@ -169,7 +169,9 @@ Property::OnChangeHandle Property::onDelete(std::function<void()> callback) {
     return handle;
 }
 
-Property::OnMetaDataChangeHandle Property::onMetaDataChange(std::function<void()> callback) {
+Property::OnMetaDataChangeHandle Property::onMetaDataChange(
+                                                           std::function<void()> callback)
+{
     ghoul_assert(callback, "The callback must not be empty");
 
     const OnMetaDataChangeHandle handle = _currentHandleValue++;

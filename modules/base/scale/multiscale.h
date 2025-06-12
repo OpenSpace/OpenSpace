@@ -35,6 +35,8 @@ class MultiScale : public Scale {
 public:
     explicit MultiScale(const ghoul::Dictionary& dictionary);
 
+    void initialize() override;
+
     void update(const UpdateData& data) override;
     glm::dvec3 scaleValue(const UpdateData& data) const override;
 

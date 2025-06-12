@@ -23,6 +23,8 @@ local HeliocentricEarthEquatorial180  = {
   GUI = {
     Name = "Heliocentric Earth Equatorial 180",
     Path = "/Solar System/Sun",
+    Focusable = false,
+    Hidden = true,
     Description = [[      -  X-Y plane is the solar equator of date, therefore, the +Z axis
           is the primary vector and it is aligned to the Sun's north pole
           of date.
@@ -35,8 +37,7 @@ local HeliocentricEarthEquatorial180  = {
 
       -  +Y axis completes the right-handed system.
 
-      -  the origin of this frame is the Sun's center of mass.]],
-    Hidden = true
+      -  the origin of this frame is the Sun's center of mass.]]
   }
 }
 
@@ -53,6 +54,8 @@ local HeliocentricEarthEquatorial = {
   GUI = {
     Name = "Heliocentric Earth Equatorial",
     Path = "/Solar System/Sun",
+    Focusable = false,
+    Hidden = true,
     Description = [[      -  X-Y plane is the solar equator of date, therefore, the +Z axis
          is the primary vector and it is aligned to the Sun's north pole
          of date.
@@ -65,8 +68,7 @@ local HeliocentricEarthEquatorial = {
 
       -  +Y axis completes the right-handed system.
 
-      -  the origin of this frame is the Sun's center of mass.]],
-    Hidden = true
+      -  the origin of this frame is the Sun's center of mass.]]
   }
 }
 
@@ -83,6 +85,8 @@ local HeliocentricEarthEcliptic = {
   GUI = {
     Name = "Heliocentric Earth Ecliptic",
     Path = "/Solar System/Sun",
+    Focusable = false,
+    Hidden = true,
     Description = [[      -  X-Y plane is defined by the Earth Mean Ecliptic plane of date,
          therefore, the +Z axis is the primary vector,and it defined as
          the normal vector to the Ecliptic plane that points toward the
@@ -93,7 +97,24 @@ local HeliocentricEarthEcliptic = {
 
       -  +Y axis completes the right-handed system.
 
-      -  the origin of this frame is the Sun's center of mass.]],
+      -  the origin of this frame is the Sun's center of mass.]]
+  }
+}
+
+local WSAOffset60 = {
+  Identifier = "WSAOffset60",
+  Parent = HeliocentricEarthEquatorial.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, 0, -math.rad(60) }
+    }
+  },
+  GUI = {
+    Name = "WSA Data Offset 60 Degrees",
+    Path = "/Solar System/Sun",
+    Description = [[WSA outputs (FITS files) have the Sun-Earth line 60 degrees shifted
+      from the edge. This scene graph node handles that transformation.]],
     Hidden = true
   }
 }
@@ -106,9 +127,11 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(HeliocentricEarthEquatorial180)
   openspace.addSceneGraphNode(HeliocentricEarthEquatorial)
   openspace.addSceneGraphNode(HeliocentricEarthEcliptic)
+  openspace.addSceneGraphNode(WSAOffset60)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(WSAOffset60)
   openspace.removeSceneGraphNode(HeliocentricEarthEcliptic)
   openspace.removeSceneGraphNode(HeliocentricEarthEquatorial)
   openspace.removeSceneGraphNode(HeliocentricEarthEquatorial180)
@@ -120,12 +143,14 @@ end)
 asset.export(HeliocentricEarthEquatorial180)
 asset.export(HeliocentricEarthEquatorial)
 asset.export(HeliocentricEarthEcliptic)
+asset.export(WSAOffset60)
 
 
 
 asset.meta = {
   Name = "Sun Transform, HEE, HEEQ and HEEQ180",
-  Description = "Sun transform: HEE, HEEQ and HEEQ180",
+  Description = [[Sun transform: HEE, HEEQ, HEEQ180 and a 60-degree fixed rotation that WSA
+   is using.]],
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license"

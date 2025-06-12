@@ -1,10 +1,10 @@
 local helper = asset.require("util/vrt_flipbook_helper")
-local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 
 
 local assetPrefix = "A11flip"
-local assetGlobe = moonAsset.Moon.Identifier
+local assetGlobe = moon.Moon.Identifier
 local flipbookCount = 19
 
 local flipbook = nil

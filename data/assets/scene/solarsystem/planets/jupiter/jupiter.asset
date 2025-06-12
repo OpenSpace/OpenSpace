@@ -60,7 +60,8 @@ local JupiterLabel = {
   Tag = { "solarsystem_labels" },
   GUI = {
     Name = "Jupiter Label",
-    Path = "/Solar System/Planets/Jupiter"
+    Path = "/Solar System/Planets/Jupiter",
+    Focusable = false
   }
 }
 

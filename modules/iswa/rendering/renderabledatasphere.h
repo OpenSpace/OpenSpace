@@ -22,92 +22,45 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SKYBROWSER___BROWSER___H__
-#define __OPENSPACE_MODULE_SKYBROWSER___BROWSER___H__
+#ifndef __OPENSPACE_MODULE_ISWA___RENDERABLEDATASPHERE___H__
+#define __OPENSPACE_MODULE_ISWA___RENDERABLEDATASPHERE___H__
 
-#include <modules/webbrowser/include/webrenderhandler.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/misc/triggerproperty.h>
-#include <openspace/properties/vector/ivec2property.h>
-
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable : 4100)
-#endif // _MSC_VER
-
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter"
-#endif // __clang__
-
-#include <include/cef_client.h>
-
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif // __clang__
-
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif // _MSC_VER
-
-namespace ghoul::opengl { class Texture; }
+#include <modules/iswa/rendering/renderabledatacygnet.h>
 
 namespace openspace {
 
-class BrowserInstance;
-class RenderHandler;
-class WebKeyboardHandler;
+class Sphere;
+namespace documentation { struct Documentation; }
 
-class Browser {
+/**
+ * DataSphere is a concrete IswaCygnet with data files as its input source. The class
+ * handles creation, destruction and rendering of a sphere geometry. It also specifies
+ * what uniforms to use and what GUI properties it needs.
+ */
+class RenderableDataSphere : public RenderableDataCygnet {
 public:
-    explicit Browser(const ghoul::Dictionary& dictionary);
-    virtual ~Browser();
+    explicit RenderableDataSphere(const ghoul::Dictionary& dictionary);
+    ~RenderableDataSphere();
 
-    void initializeGL();
-    void deinitializeGL();
-    bool isReady() const;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
-    void render();
-    void update();
-
-    void updateBrowserSize();
-    void reload();
-
-    void setRatio(float ratio);
-    float browserRatio() const;
+    static documentation::Documentation Documentation();
 
 protected:
-    properties::IVec2Property _browserDimensions;
-    properties::StringProperty _url;
-    properties::TriggerProperty _reload;
+    /**
+     * Creates a sphere geometry.
+     */
+    bool createGeometry() override;
+    bool destroyGeometry() override;
+    void renderGeometry() const override;
+    void setUniforms() override;
+    std::vector<float*> textureData() override;
 
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-
-    void updateBrowserDimensions();
-    void executeJavascript(const std::string& script) const;
-
-    bool _isUrlDirty = false;
-    bool _isDimensionsDirty = false;
-    bool _shouldReload = false;
-
-private:
-    class RenderHandler : public WebRenderHandler {
-    public:
-        RenderHandler()
-            : WebRenderHandler(false)
-        {}
-        void draw() override;
-        void render() override;
-
-        void setTexture(GLuint t);
-    };
-
-    CefRefPtr<RenderHandler> _renderHandler;
-    CefRefPtr<WebKeyboardHandler> _keyboardHandler;
-    std::unique_ptr<BrowserInstance> _browserInstance;
+    std::unique_ptr<Sphere> _sphere;
+    float _radius;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SKYBROWSER___BROWSER___H__
+#endif // __OPENSPACE_MODULE_ISWA___RENDERABLEDATASPHERE___H__

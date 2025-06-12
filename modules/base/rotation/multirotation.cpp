@@ -64,6 +64,13 @@ MultiRotation::MultiRotation(const ghoul::Dictionary& dictionary)
     }
 }
 
+void MultiRotation::initialize() {
+    Rotation::initialize();
+    for (const ghoul::mm_unique_ptr<Rotation>& rot : _rotations) {
+        rot->initialize();
+    }
+}
+
 void MultiRotation::update(const UpdateData& data) {
     for (const ghoul::mm_unique_ptr<Rotation>& rot : _rotations) {
         rot->update(data);

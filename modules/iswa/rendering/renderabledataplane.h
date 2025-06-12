@@ -22,37 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ISWA___TEXTUREPLANE___H__
-#define __OPENSPACE_MODULE_ISWA___TEXTUREPLANE___H__
+#ifndef __OPENSPACE_MODULE_ISWA___RENDERABLEDATAPLANE___H__
+#define __OPENSPACE_MODULE_ISWA___RENDERABLEDATAPLANE___H__
 
-#include <modules/iswa/rendering/texturecygnet.h>
+#include <modules/iswa/rendering/renderabledatacygnet.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
 
-/**
- * TexturePlane is a "concrete" IswaCygnet with texture as its input source. It handles
- * the creation, destruction and rendering of a plane geometry. It also specifies which
- * shaders to use and the uniforms that it needs.
- */
-class TexturePlane : public TextureCygnet {
-public:
-    explicit TexturePlane(const ghoul::Dictionary& dictionary);
-    virtual ~TexturePlane() = default;
+namespace documentation { struct Documentation; }
 
-    void initializeGL() override;
+/**
+ * DataPlane is a concrete IswaCygnet with data files as its input source. The class
+ * handles creation, destruction and rendering of a plane geometry. It also specifies what
+ * uniforms to use and what GUI properties it needs.
+ */
+class RenderableDataPlane : public RenderableDataCygnet {
+friend class IswaBaseGroup;
+public:
+    explicit RenderableDataPlane(const ghoul::Dictionary& dictionary);
+     ~RenderableDataPlane() = default;
+
+     void initializeGL() override;
+     void deinitializeGL() override;
+
+     static documentation::Documentation Documentation();
 
 private:
+    /**
+     * Creates a plane geometry.
+     */
     bool createGeometry() override;
-    void setUniforms() override;
     bool destroyGeometry() override;
     void renderGeometry() const override;
+    void setUniforms() override;
+    std::vector<float*> textureData() override;
 
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
+    GLuint _quad;
+    GLuint _vertexPositionBuffer;
 };
 
- } // namespace openspace
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_ISWA___TEXTUREPLANE___H__
+#endif // __OPENSPACE_MODULE_ISWA___RENDERABLEDATAPLANE___H__

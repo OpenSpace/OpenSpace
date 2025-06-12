@@ -120,6 +120,7 @@ private:
     GLuint vao = 0;
     GLuint vbo = 0;
     GLuint vboElements = 0;
+    bool _hasContext = false;
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(tex, ortho) _uniformCache;
     std::unique_ptr<ghoul::opengl::Texture> _fontTexture;

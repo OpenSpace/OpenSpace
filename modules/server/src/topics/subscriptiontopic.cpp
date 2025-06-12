@@ -105,7 +105,7 @@ void SubscriptionTopic::handleJson(const nlohmann::json& json) {
 
             // Immediately send the value and meta data
             onChange();
-			onMetaDataChange();
+            onMetaDataChange();
         }
         else {
             LWARNING(std::format("Could not subscribe. Property '{}' not found", uri));

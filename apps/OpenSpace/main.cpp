@@ -56,7 +56,6 @@
 #include <sgct/projection/nonlinearprojection.h>
 #include <sgct/user.h>
 #include <sgct/window.h>
-#include <date/date.h>
 #include <stb_image.h>
 #include <tracy/Tracy.hpp>
 #include <iostream>
@@ -746,6 +745,16 @@ void setSgctDelegateFunctions() {
         ZoneScoped;
 
         return currentWindow->isWindowResized();
+    };
+    sgctDelegate.anyWindowHasResized = []() {
+        ZoneScoped;
+
+        for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
+            if (window->isWindowResized()) {
+                return true;
+            }
+        }
+        return false;
     };
     sgctDelegate.averageDeltaTime = []() {
         ZoneScoped;
@@ -1480,7 +1489,10 @@ int main(int argc, char* argv[]) {
             config = launcher.selectedWindowConfig();
             if (config.find(labelFromCfgFile) != std::string::npos) {
                 if (config.find("sgct.config") == std::string::npos) {
-                    config = config.substr(0, config.length() - labelFromCfgFile.length());
+                    config = config.substr(
+                        0,
+                        config.length() - labelFromCfgFile.length()
+                    );
                 }
                 else {
                     config = windowConfiguration;
@@ -1501,7 +1513,6 @@ int main(int argc, char* argv[]) {
 
     {
         openspace::Settings settings = loadSettings();
-        settings.hasStartedBefore = true;
 
         const std::filesystem::path profile = global::configuration->profile;
 
@@ -1539,15 +1550,6 @@ int main(int argc, char* argv[]) {
 
         settings.configuration =
             isGeneratedWindowConfig ? "" : global::configuration->windowConfiguration;
-        const date::year_month_day now = date::year_month_day(
-            floor<date::days>(std::chrono::system_clock::now())
-        );
-        settings.lastStartedDate = std::format(
-            "{}-{:0>2}-{:0>2}",
-            static_cast<int>(now.year()),
-            static_cast<unsigned>(now.month()),
-            static_cast<unsigned>(now.day())
-        );
 
         saveSettings(settings, findSettings());
     }

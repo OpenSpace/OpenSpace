@@ -463,7 +463,7 @@ public:
 
     /**
      * Creates the information that is general to every Property and adds the
-     * `description`, `guiName`, `group`, `isReadOnly`, `needsConfirmation` `type`, 
+     * `description`, `guiName`, `group`, `isReadOnly`, `needsConfirmation` `type`,
      * and `visibility` keys and their values.
      *
      * \return The base description common to all Property classes
