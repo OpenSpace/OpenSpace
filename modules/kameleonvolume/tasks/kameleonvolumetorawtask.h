@@ -43,10 +43,11 @@ public:
     static documentation::Documentation documentation();
 
 private:
-    std::filesystem::path _inputPath;
-    std::filesystem::path _rawVolumeOutputPath;
-    std::filesystem::path _dictionaryOutputPath;
+    std::filesystem::path _inputDirectory;
+    std::filesystem::path _rawVolumeOutputBasePath;
+    std::filesystem::path _dictionaryOutputBasePath;
 
+    size_t _nthTimeStep = 1;
     std::string _variable;
     std::string _units;
     glm::uvec3 _dimensions = glm::uvec3(0);

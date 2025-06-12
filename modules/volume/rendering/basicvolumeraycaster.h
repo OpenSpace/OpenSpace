@@ -85,7 +85,11 @@ public:
     float rNormalization() const;
     void setRNormalization(float rNormalization);
     float rUpperBound() const;
+    float latUpperBound() const;
+    float latLowerBound() const;
     void setRUpperBound(float rUpperBound);
+    void setLatUpperBound(float latUpperBound);
+    void setLatLowerBound(float latLowerBound);
     VolumeGridType gridType() const;
     void setGridType(VolumeGridType gridType);
     void setModelTransform(glm::mat4 transform);
@@ -102,6 +106,8 @@ private:
     float _brightness = 1.f;
     float _rNormalization = 0.f;
     float _rUpperBound = 1.f;
+    float _latUpperBound = 1.f;
+    float _latLowerBound = 1.f;
 
     std::unique_ptr<ghoul::opengl::TextureUnit> _tfUnit;
     std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;

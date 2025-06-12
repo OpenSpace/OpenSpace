@@ -50,7 +50,7 @@ namespace openspace::kameleonHelper {
 
 std::unique_ptr<ccmc::Kameleon> createKameleonObject(const std::string& cdfFilePath) {
     auto kameleon = std::make_unique<ccmc::Kameleon>();
-    LDEBUG(std::format("Opening the CDF file '{}'", cdfFilePath));
+    //LDEBUG(std::format("Opening the CDF file '{}'", cdfFilePath));
     long kamStatus = kameleon->open(cdfFilePath);
 
     if (kamStatus != ccmc::FileReader::OK) {
@@ -60,7 +60,7 @@ std::unique_ptr<ccmc::Kameleon> createKameleonObject(const std::string& cdfFileP
         ));
        return nullptr;
     }
-    LDEBUG(std::format("Successfully opened '{}'", cdfFilePath));
+    //LDEBUG(std::format("Successfully opened '{}'", cdfFilePath));
     return kameleon;
 }
 

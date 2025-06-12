@@ -24,6 +24,7 @@
 
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 
+#include <modules/kameleon/include/kameleonhelper.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/volume/rawvolume.h>
 #include <ghoul/filesystem/file.h>
@@ -48,6 +49,7 @@
 #include <ccmc/CCMCTime.h>
 #include <ccmc/Attribute.h>
 #include <ccmc/Interpolator.h>
+#include "ccmc/StringConstants.h"
 
 #ifdef WIN32
 #pragma warning (pop)
@@ -81,6 +83,7 @@ KameleonVolumeReader::KameleonVolumeReader(std::filesystem::path path)
         throw ghoul::FileNotFoundError(_path);
     }
 
+    _kameleon = kameleonHelper::createKameleonObject(_path.string());
     const long status = _kameleon->open(_path.string());
     if (status != ccmc::FileReader::OK) {
         throw ghoul::RuntimeError(std::format(
@@ -133,16 +136,92 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
         return _interpolator->interpolate(var, coords[0], coords[1], coords[2]);
     };
 
+    // Determine if we're reading the status variable itself
+    bool isReadingStatus = (variable == ccmc::strings::variables::status_);
+
+    float missingValue = this->_kameleon->getMissingValue();
+
     float* data = volume->data();
     for (size_t index = 0; index < volume->nCells(); index++) {
         const glm::vec3 coords = volume->indexToCoords(index);
         const glm::vec3 coordsZeroToOne = coords / dims;
         const glm::vec3 volumeCoords = lowerBound + diff * coordsZeroToOne;
 
-        data[index] = interpolate(variable, volumeCoords);
+        // Interpolate status at this position
+        float status = interpolate(ccmc::strings::variables::status_, volumeCoords);
 
-        minValue = glm::min(minValue, data[index]);
-        maxValue = glm::max(maxValue, data[index]);
+        if (status > 0.1 || isReadingStatus) {
+            // Add special handling for temperature variable
+            if (variable == "t" || variable == "T") {
+                // Only retrieve and store data for non-IMF regions or if we're reading status
+                // Call interpolate recursively for pressure and density
+                float pressure = isReadingStatus ? status : interpolate("p", volumeCoords);
+                float density = isReadingStatus ? status : interpolate("rho", volumeCoords);
+
+                // Check for missing values or zero density to avoid division by zero
+                if (pressure == missingValue || density == missingValue || density == 0.0f) {
+                    data[index] = missingValue;
+                }
+
+                float value = pressure;
+                value *= 72429735.6984f;  //ToKelvin;
+                value /= density;
+
+                // Calculate temperature as p/rho
+                data[index] = value;
+
+                // Only update min/max for valid values
+                if (value != missingValue) {
+                    minValue = glm::min(minValue, value);
+                    maxValue = glm::max(maxValue, value);
+                }
+            }
+            else if (variable == "b" || variable == "JParallellB") {
+                const float x = isReadingStatus ? status : interpolate("jx",volumeCoords);
+                const float y = isReadingStatus ? status : interpolate("jy",volumeCoords);
+                const float z = isReadingStatus ? status : interpolate("jz",volumeCoords);
+                float value;
+                // When looking at the current's magnitude in Batsrus, CCMC staff are
+                // only interested in the magnitude parallel to the magnetic field
+                if (variable == "JParallellB") {
+
+                    const float bx = isReadingStatus ? status : interpolate("bx", volumeCoords);
+                    const float by = isReadingStatus ? status : interpolate("by", volumeCoords);
+                    const float bz = isReadingStatus ? status : interpolate("bz", volumeCoords);
+
+                    const glm::vec3 normMagnetic = glm::normalize(glm::vec3(bx,by,bz));
+                    // Magnitude of the part of the current vector that's parallel to
+                    // the magnetic field vector!
+                    value = glm::dot(glm::vec3(x, y, z), normMagnetic);
+
+                }
+                else {
+                    value = std::sqrt(x * x + y * y + z * z);
+                }
+                data[index] = value;
+
+                // Only update min/max for valid values
+                if (value != missingValue) {
+                    minValue = glm::min(minValue, value);
+                    maxValue = glm::max(maxValue, value);
+                }
+            }
+            else {
+                // Only retrieve and store data for non-IMF regions or if we're reading status
+                float value = isReadingStatus ? status : interpolate(variable, volumeCoords);
+                data[index] = value;
+
+                // Only update min/max for valid values
+                if (value != missingValue) {
+                    minValue = glm::min(minValue, value);
+                    maxValue = glm::max(maxValue, value);
+                }
+            }
+        }
+        else {
+            // For IMF regions, use missing value
+            data[index] = 0.0f;
+        }
     }
 
     return volume;

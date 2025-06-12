@@ -140,6 +140,8 @@ void BasicVolumeRaycaster::preRaycast(const RaycastData& data,
     program.setUniform("brightness_" + id, brightness());
     program.setUniform("rNormalization_" + id, _rNormalization);
     program.setUniform("rUpperBound_" + id, _rUpperBound);
+    program.setUniform("latUpperBound_" + id, _latUpperBound);
+    program.setUniform("latLowerBound_" + id, _latLowerBound);
 }
 
 void BasicVolumeRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObject&)
@@ -217,8 +219,24 @@ void BasicVolumeRaycaster::setRUpperBound(float rUpperBound) {
     _rUpperBound = rUpperBound;
 }
 
+void BasicVolumeRaycaster::setLatUpperBound(float latUpperBound) {
+    _latUpperBound = latUpperBound;
+}
+
+void BasicVolumeRaycaster::setLatLowerBound(float latLowerBound) {
+    _latLowerBound = latLowerBound;
+}
+
 float BasicVolumeRaycaster::rUpperBound() const {
     return _rUpperBound;
+}
+
+float BasicVolumeRaycaster::latUpperBound() const {
+    return _latUpperBound;
+}
+
+float BasicVolumeRaycaster::latLowerBound() const {
+    return _latLowerBound;
 }
 
 VolumeGridType BasicVolumeRaycaster::gridType() const {
