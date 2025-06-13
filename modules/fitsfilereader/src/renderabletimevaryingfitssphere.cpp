@@ -130,7 +130,7 @@ namespace {
     // This `Renderable` reads a data sequence from specifically FITS files and makes
     // textures from them and wraps them onto a sphere. A sequence is a data source
     // consisting of multiple data files that each correspond to a specific
-    // time, and is therefor time varying like the name of the renderable suggests.
+    // time and is therefore time varying like the name of the renderable suggests.
     //
     // `LoadingType` can be specified in two ways;
     //
@@ -142,7 +142,7 @@ namespace {
     // is required to be assigned in `LayerMinMaxCapValues` in a similar manner as
     // `LayerNames`.
     //
-    // `DynamicDownloading`: This case downloads the data during run time. In addition to
+    // `DynamicDownloading`: This case downloads the data during runtime. In addition to
     // `LayerNames` and `LayerMinMaxCapValues` more parameters are required to be
     // specified. `InfoURL`: that will be a first step to give data to 'DataURL` which
     // is expected to return the list with data files. The `DataID` accompanies the two
@@ -197,7 +197,8 @@ namespace {
         std::optional<bool> cacheData;
 
         // Set if first/last file should render when time is outside of the sequence
-        // interval. This can be used regardless of LoadingType.
+        // interval. This can be used regardless of LoadingType. If this value is not
+        // specified, the field lines are shown at all times.
         std::optional<bool> showAtAllTimes;
     };
 #include "renderabletimevaryingfitssphere_codegen.cpp"

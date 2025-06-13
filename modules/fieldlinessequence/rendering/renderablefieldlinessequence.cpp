@@ -224,9 +224,9 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    // This `Renderable` visualizes field lines, mainly a sequence of time steps but work
-    // with only one time step too. A sequence is a data source consisting of multiple
-    // data files that each correspond to a specific time, and is therefor time varying
+    // This `Renderable` visualizes field lines, mainly a sequence of time steps but works
+    // with only one time step, too. A sequence is a data source consisting of multiple
+    // data files that each correspond to a specific time and is therefore time varying
     // like the name of the renderable suggests.
     //
     // `LoadingType` can be specified in two ways;
@@ -235,15 +235,15 @@ namespace {
     // `SourceFolder` is then mandatory. The data format is also required to be set with
     // `InputFileType`.
     //
-    // `DynamicDownloading`: This case downloads the data during run time. For this a few
+    // `DynamicDownloading`: This case downloads the data during runtime. For this, a few
     // parameters are required: `InfoURL`, `DataURL` and `DataID` are used to specify the
     // data source to use.
     //
     // When using CDF data `SeedPointDirectory` is required. Some prior knowledge of the
     // data is needed to use it in this way. `TracingVariable` needs to be set and
     // `ExtraVariables` will have to match what parameters are in the CDF data. Using CDF
-    // directly in this `Renderable` is not recommended. Rather use
-    // `KameleonVolumeToFieldlinesTask` first, to save the data to .osfls or .json
+    // directly in this `Renderable` is not recommended. Rather use the
+    // `KameleonVolumeToFieldlinesTask` task first, to save the data to .osfls or .json
     struct [[codegen::Dictionary(RenderableFieldlinesSequence)]] Parameters {
         enum class [[codegen::map(openspace::RenderableFieldlinesSequence::ColorMethod)]]
         ColorMethod {
@@ -313,7 +313,8 @@ namespace {
         std::optional<bool> alphaBlendingEnabled;
 
         // Set if first/last file should render when time is outside of the sequence
-        // interval. This can be used regardless of LoadingType.
+        // interval. This can be used regardless of LoadingType. If this value is not
+        // specified, the field lines are shown at all times.
         std::optional<bool> showAtAllTimes;
 
         // If data sets parameter start_time differ from start of run,
@@ -596,7 +597,12 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 
     if (p.colorTableRanges.has_value()) {
         _colorTableRanges = *p.colorTableRanges;
-        _selectedColorRange = _colorTableRanges[_colorQuantityTemp];
+        if (_colorTableRanges.size() > _colorQuantityTemp && _colorQuantityTemp >= 0) {
+            _selectedColorRange = _colorTableRanges[_colorQuantityTemp];
+        }
+        else {
+            _selectedColorRange = _colorTableRanges[0];
+        }
     }
     else {
         _colorTableRanges.push_back(glm::vec2(0.f, 1.f));
