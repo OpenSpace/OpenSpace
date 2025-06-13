@@ -11,7 +11,7 @@ local colormaps = asset.resource({
 
 
 local Node = {
-    Identifier = "black_hole",
+    Identifier = "blackhole",
     Transform = {
     Translation = {
       Type = "StaticTranslation",
@@ -24,8 +24,8 @@ local Node = {
         ColorMap = colormaps .. "colorbv.cmap",
       },
       GUI = {
-          Name = "black_hole",
-          Path = "/black_holes"
+          Name = "Black Hole",
+          Path = "/blackhole"
         }
   }
 

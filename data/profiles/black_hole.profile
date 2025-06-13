@@ -1,11 +1,11 @@
 {
   "assets": [
     "base_blank",
-    "blackholes/black_holes"
+    "blackholes/blackhole"
   ],
   "camera": {
     "aim": "",
-    "anchor": "black_hole",
+    "anchor": "blackhole",
     "frame": "",
     "position": {
       "x": 0,
