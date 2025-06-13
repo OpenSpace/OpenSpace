@@ -4,35 +4,15 @@ local Mission = {
   Name = "The WSA Simulation Model",
   TimeRange = { Start = "2022 DEC 09 16:14:00", End = timeNow },
   Description = [[
-    This profile shows the Sun and its magnetic polarities, using data from the WSA
-    (Wang-Sheeley-Arge) simulation model version 5.4. The solar coronal portion of WSA is
-    comprised of two potential field type models. The inner model is Potential Field
-    Source Surface (PFSS) which specifies the coronal field from the inner, photospheric
-    boundary at 1 solar radii (Rs) to its outer boundary or source surface at 2.5Rs. The
-    outer model is the Schatten Current Sheet (SCS) model. The radial magnetic field
-    components of the PFSS magnetic field solution at 2.5Rs are used as the inner boundary
-    condition to the SCS model. All data is downloaded dynamically, bringing you the
-    latest data from the model. You can find these assets in the Scene menu under
-    "Solar System/Heliosphere". Under the "WSA Coronal Model" submenu, you will find extra
-    options for the solar field lines and surface features. The four different sets of
-    field lines are all following the magnetic fields but traced from different locations.
-    They can be colored by their different parameters in the data, for example polarity or
-    open or closed field lines. The two elements named "Solar Surface" show the magnetic
-    polarities, but have other options in the settings under "Texture Layer Options". The
-    same goes for the two named "Velocity at Outer Boundary". However, the two named
-    "Magnetic Field at 5Rs" do not have other options. Each asset includes settings for
-    appearance. If field lines are looking too bright against a bright background, try
-    changing the setting for additive blending. Additionally there is an option to save
-    the downloaded data for future use (by default, the data is not cached). Each data
-    file remains active until the next one in the sequence becomes available. To see which
-    file is currently being used, check the "Texture Source" field for each asset in the
-    GUI. In the visualization, the white line shooting out from the Sun, along with the
-    white arc, always points in the direction of Earth. The red arc is the Carrington
-    prime meridian which is longitude 0 of the Sun, and the green grid shows lines with a
-    10-degree separation. If no data is showing, most likely the selected time is outside
-    of the data range (e.g., too far in the future or the past for the dynamic data to be
-    available). Alternatively, the files failed to download. For more information on the
-    simulation model, see https://ccmc.gsfc.nasa.gov/models/WSA~5.4.
+  This visualization shows the Sun's magnetic field using data from the WSA
+  (Wang-Sheeley-Arge) simulation model. The field lines trace the Sun's magnetic field.
+  Some loop back into the Sun (closed, shown in yellow), while others stream into space
+  (open), colored by their position relative to the heliospheric current sheet. On the
+  Sun's surface, white and black indicate areas of positive and negative magnetic
+  polarity, respectively. Understanding these fields is critical: solar activity like
+  Coronal Mass Ejections (CMEs) can disrupt satellites, power grids, and pose risks to
+  astronauts and spacecraft throughout the solar system. All data is fetched live, giving
+  you the latest view of our dynamic Sun.
   ]],
   Milestones = {
     {

@@ -128,13 +128,13 @@ namespace {
     };
 
     // This `Renderable` reads a data sequence from specifically FITS files and makes
-    // textures from them and wraps them onto a sphere. A sequence, in the sense that the
-    // data source consists of multiple data files that each correspond to a specific
+    // textures from them and wraps them onto a sphere. A sequence is a data source
+    // consisting of multiple data files that each correspond to a specific
     // time, and is therefor time varying like the name of the renderable suggests.
     //
     // `LoadingType` can be specified in two ways;
     //
-    // `StaticLoading`: In this case, property `TextureSource` is expected to be provided
+    // `StaticLoading`: In this case, parameter `TextureSource` is expected to be provided
     // to specify where the data is. Using this, all data will be loaded on start up.
     // Other properties required to be provided is at least one entry in the list of
     // `LayerNames` that assigns a name to the index corresponding to which layer in the
@@ -167,12 +167,12 @@ namespace {
         // DynamicDownloading: Download and load files during run time.
         std::optional<LoadingType> loadingType;
 
-        // A data ID that corresponds to what dataset to use if using dynamic downloading.
-        std::optional<int> dataID;
-
         // This is a max value of the amount of files to queue up
         // so that not to big of a data set is downloaded.
         std::optional<int> numberOfFilesToQueue;
+
+        // A data ID that corresponds to what dataset to use if using dynamic downloading.
+        std::optional<int> dataID;
 
         // A URL that returns a JSON formated page with metadata needed for the dataURL.
         std::optional<std::string> infoURL;
