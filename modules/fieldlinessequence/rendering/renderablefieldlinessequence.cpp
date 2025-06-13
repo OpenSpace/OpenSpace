@@ -387,7 +387,7 @@ namespace {
         std::optional<std::vector<std::string>> extraVariables;
 
         // Which variable in CDF file that represents which vector field in the data to
-        // trace fieldlines in.
+        // trace field lines in.
         std::optional<std::string> tracingVariable;
 
         // Decides whether or not to cache the downloaded data between runs. By default,
