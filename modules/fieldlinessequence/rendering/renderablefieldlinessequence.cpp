@@ -72,9 +72,10 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorMinMaxInfo = {
-        "ColorQuantityMinMax",
-        "ColorTable Min Value",
-        "Value to map to the lowest and highest end of the color table.",
+        "ColorMinMaxRange",
+        "Color Min Max Range",
+        "A min-max range for what the lowest and highest values of the color table can "
+        "be set to.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -150,7 +151,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo FlowReversedInfo = {
-        "Reversed",
+        "ReversedFlow",
         "Reversed Flow",
         "Toggle to make the flow move in the opposite direction.",
         openspace::properties::Property::Visibility::User
@@ -171,7 +172,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo FlowSpeedInfo = {
-        "Speed",
+        "FlowSpeed",
         "Speed",
         "Speed of the flow.",
         openspace::properties::Property::Visibility::User
@@ -223,6 +224,26 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // This `Renderable` visualizes field lines, mainly a sequence of time steps but work
+    // with only one time step too. A sequence is a data source consisting of multiple
+    // data files that each correspond to a specific time, and is therefor time varying
+    // like the name of the renderable suggests.
+    //
+    // `LoadingType` can be specified in two ways;
+    //
+    // `StaticLoading`: In this case all data is loaded when starting OpenSpace. A
+    // `SourceFolder` is then mandatory. The data format is also required to be set with
+    // `InputFileType`.
+    //
+    // `DynamicDownloading`: This case downloads the data during run time. For this a few
+    // parameters are required: `InfoURL`, `DataURL` and `DataID` are used to specify the
+    // data source to use.
+    //
+    // When using CDF data `SeedPointDirectory` is required. Some prior knowledge of the
+    // data is needed to use it in this way. `TracingVariable` needs to be set and
+    // `ExtraVariables` will have to match what parameters are in the CDF data. Using CDF
+    // directly in this `Renderable` is not recommended. Rather use
+    // `KameleonVolumeToFieldlinesTask` first, to save the data to .osfls or .json
     struct [[codegen::Dictionary(RenderableFieldlinesSequence)]] Parameters {
         enum class [[codegen::map(openspace::RenderableFieldlinesSequence::ColorMethod)]]
         ColorMethod {
@@ -247,7 +268,7 @@ namespace {
         // colorized by. Should be entered as min value, max value
         std::optional<std::vector<glm::vec2>> colorTableRanges;
 
-        // Specifies the total data range to where color map will be applied
+        // [[codegen::verbatim(ColorMinMaxInfo.description)]]
         std::optional<glm::vec2> colorMinMaxRange;
 
         // [[codegen::verbatim(FlowEnabledInfo.description)]]
@@ -275,7 +296,7 @@ namespace {
         std::optional<int> maskingQuantity;
 
         // Ranges for which their corresponding quantity parameter value will be
-        // masked by. Should be entered as a min value, max value pair.
+        // masked by. Should be entered as a list of min value, max value pairs.
         std::optional<std::vector<glm::vec2>> maskingRanges;
 
         // Ranges for which their corresponding parameters values will be
@@ -291,8 +312,9 @@ namespace {
         // [[codegen::verbatim(ColorUseABlendingInfo.description)]]
         std::optional<bool> alphaBlendingEnabled;
 
-        // Set if first/last file should render forever.
-        bool showAtAllTimes;
+        // Set if first/last file should render when time is outside of the sequence
+        // interval. This can be used regardless of LoadingType.
+        std::optional<bool> showAtAllTimes;
 
         // If data sets parameter start_time differ from start of run,
         // elapsed_time_in_seconds might be in relation to start of run.
@@ -327,12 +349,12 @@ namespace {
         // `DynamicDownloading`: Download and load files during run time.
         std::optional<LoadingType> loadingType;
 
+        // A maximum number to limit the number of files being downloaded simultaneously.
+        std::optional<int> numberOfFilesToQueue;
+
         // A data ID that corresponds to what dataset to use if using dynamic data
         // downloading.
         std::optional<int> dataID;
-
-        // A maximum number to limit the number of files being downloaded simultaneously.
-        std::optional<int> numberOfFilesToQueue;
 
         // A URL to a JSON-formatted page with metadata for the `DataURL`.
         // Required if using dynamic downloading.
@@ -364,7 +386,8 @@ namespace {
         // Extra variables that can be used to color the field lines.
         std::optional<std::vector<std::string>> extraVariables;
 
-        // Which variable in CDF file to trace.
+        // Which variable in CDF file that represents which vector field in the data to
+        // trace fieldlines in.
         std::optional<std::string> tracingVariable;
 
         // Decides whether or not to cache the downloaded data between runs. By default,
@@ -531,7 +554,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     _domainEnabled = p.domainEnabled.value_or(_domainEnabled);
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     _colorABlendEnabled = p.alphaBlendingEnabled.value_or(_colorABlendEnabled);
-    _renderForever = p.showAtAllTimes;
+    _renderForever = p.showAtAllTimes.value_or(_renderForever);
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
     _saveDownloadsOnShutdown = p.cacheData.value_or(_saveDownloadsOnShutdown);
 
@@ -539,7 +562,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         staticallyLoadFiles(p.seedPointDirectory, p.tracingVariable);
         computeSequenceEndTime();
     }
-    // Color group
+
     _colorTablePath = FieldlinesSequenceModule::DefaultTransferFunctionFile.string();
     if (p.colorTablePaths.has_value()) {
         for (const std::filesystem::path& path : *p.colorTablePaths) {
@@ -573,6 +596,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 
     if (p.colorTableRanges.has_value()) {
         _colorTableRanges = *p.colorTableRanges;
+        _selectedColorRange = _colorTableRanges[_colorQuantityTemp];
     }
     else {
         _colorTableRanges.push_back(glm::vec2(0.f, 1.f));
@@ -583,6 +607,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         _selectedColorRange.setMinValue(glm::vec2(p.colorMinMaxRange->x));
         _selectedColorRange.setMaxValue(glm::vec2(p.colorMinMaxRange->y));
     }
+
     if (p.maskingRanges.has_value()) {
         _maskingRanges = *p.maskingRanges;
     }

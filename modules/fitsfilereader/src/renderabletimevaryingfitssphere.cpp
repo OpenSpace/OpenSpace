@@ -198,7 +198,7 @@ namespace {
 
         // Set if first/last file should render when time is outside of the sequence
         // interval. This can be used regardless of LoadingType.
-        std::optional<bool> showPastFirstAndLastFile;
+        std::optional<bool> showAtAllTimes;
     };
 #include "renderabletimevaryingfitssphere_codegen.cpp"
 } // namespace
@@ -251,7 +251,7 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
         ghoul::opengl::Texture::FilterMode::Nearest
     );
 
-    _renderForever = p.showPastFirstAndLastFile.value_or(_renderForever);
+    _renderForever = p.showAtAllTimes.value_or(_renderForever);
 
     _textureFilterProperty.onChange([this]() {
         switch (_textureFilterProperty) {
