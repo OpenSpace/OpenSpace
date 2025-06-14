@@ -272,13 +272,6 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
             if (data.empty()) {
                 throw ghoul::RuntimeError("Empty HTTP response");
             }
-            // @TODO (2025-06-10, Elon) What value is actually too large to handle?
-            if (data.size() > std::numeric_limits<std::size_t>::max()) {
-                throw ghoul::RuntimeError(
-                    "Http response with list of available files is too large, i.e. too "
-                    "many files"
-                );
-            }
 
             jsonResult = nlohmann::json::parse(data);
             success = true;
@@ -466,8 +459,6 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
 
 std::vector<File>::iterator DynamicFileSequenceDownloader::closestFileToNow(double time) {
     ZoneScoped;
-    std::vector<File>::iterator closestIt = _availableData.begin();
-
     std::vector<File>::iterator it = std::lower_bound(
         _availableData.begin(),
         _availableData.end(),
@@ -551,7 +542,8 @@ void DynamicFileSequenceDownloader::update(double time, double deltaTime) {
     }
 
     // if delta time direction got changed
-    if (_isForwardDirection && deltaTime < 0 || !_isForwardDirection && deltaTime > 0) {
+    if ((_isForwardDirection && deltaTime < 0) || (!_isForwardDirection && deltaTime > 0))
+    {
         _isForwardDirection = !_isForwardDirection;
         // Remove from queue when time changed, to start downloading most relevant files
         for (File* file : _queuedFilesToDownload) {

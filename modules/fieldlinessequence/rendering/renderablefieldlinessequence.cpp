@@ -674,7 +674,6 @@ void RenderableFieldlinesSequence::staticallyLoadFiles(
                            const std::optional<std::filesystem::path>& seedPointDirectory,
                                         const std::optional<std::string>& tracingVariable)
 {
-    bool loadSuccess = false;
     switch (_inputFileType) {
         case SourceFileType::Cdf:
             _seedPointDirectory = seedPointDirectory.value_or(_seedPointDirectory);
@@ -690,7 +689,7 @@ void RenderableFieldlinesSequence::staticallyLoadFiles(
                 if (seedsPerFiles.empty()) {
                     throw ghoul::RuntimeError("No seed files found");
                 }
-                loadSuccess = fls::convertCdfToFieldlinesState(
+                fls::convertCdfToFieldlinesState(
                     file.state,
                     file.path.string(),
                     seedsPerFiles,
@@ -703,11 +702,7 @@ void RenderableFieldlinesSequence::staticallyLoadFiles(
             break;
         case SourceFileType::Json:
             for (File& file : _files) {
-                loadSuccess = file.state.loadStateFromJson(
-                    file.path.string(),
-                    _model,
-                    _scalingFactor
-                );
+                file.state.loadStateFromJson(file.path.string(), _model, _scalingFactor);
             }
             break;
         case SourceFileType::Osfls:
