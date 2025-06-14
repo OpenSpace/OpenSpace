@@ -19,6 +19,7 @@ layout (std430) buffer ssbo_warp_table {
 #define INF 1.0 / 0.0
 #endif
 
+const float shadow_delta = 0.01f;
 const float PI = 3.1415926535897932384626433832795f;
 const float VIEWGRIDZ = -1.0f;
 
@@ -30,6 +31,8 @@ const mat4 alignToWorldAxisRotation = mat4(
 );
 
 int layerCount, tableSize, num_rays;
+
+float _shadow_angle;
 
 /**********************************************************
                         Math
@@ -88,18 +91,13 @@ float ShadowAngle() {
     // Clamp to [0,1] to avoid domain errors
     ratio = clamp(ratio, 0.0, 1.0);
 
-    return asin(ratio);
+    return asin(ratio) - shadow_delta;
 }
 
 ivec2 getClosestWarpIndices(float phi) {
     //Delta needs to be the same as the Cuda implemtation that calculates the Schwarszchild table
-    float r_0;
-    float theta_shadow = ShadowAngle();
-    float delta = 0.01f;
-    float lower_bound = theta_shadow - delta;
-
-    float denom = delta - (PI - lower_bound);
-    float s = (phi - (PI - lower_bound)) / denom;
+    float denom = shadow_delta - (PI - _shadow_angle);
+    float s = (phi - (PI - _shadow_angle)) / denom;
     s = clamp(s, 0.0, 1.0);
 
     float idx_f = s * float(num_rays - 1);
@@ -140,6 +138,7 @@ vec2 applyBlackHoleWarp(vec2 cameraOutSphereCoords, int layer){
 
 Fragment getFragment() {
     Fragment frag;
+    _shadow_angle = ShadowAngle();
     layerCount = starMapKDTreesIndices.length();
     tableSize = schwarzschildWarpTable.length() / 2;
     num_rays = schwarzschildWarpTable.length() / (layerCount + 1);
@@ -149,7 +148,14 @@ Fragment getFragment() {
     // User local input rotation of the black hole
     vec4 rotatedViewCoords = cameraRotationMatrix * viewCoords;
     
-    vec2 sphericalCoords;
+
+
+    vec2 sphericalCoords = cartesianToSpherical(rotatedViewCoords.xyz);
+    if(sphericalCoords.x < _shadow_angle){
+            frag.color = vec4(0.0f);
+            return frag;
+    }
+
     vec2 envMapSphericalCoords;
     
     vec4 accumulatedColor = vec4(0.0f);
@@ -159,12 +165,6 @@ Fragment getFragment() {
     for (int l = 0; l < layerCount; ++l) {
         sphericalCoords = cartesianToSpherical(rotatedViewCoords.xyz);
         envMapSphericalCoords = applyBlackHoleWarp(sphericalCoords, l);
-
-        if (isnan(envMapSphericalCoords.x)) {
-            // If inside the event horizon
-            frag.color = vec4(0.0f);
-            return frag;
-        }
 
         vec4 envMapCoords = vec4(sphericalToCartesian(envMapSphericalCoords.x, envMapSphericalCoords.y), 0.0f);
 
