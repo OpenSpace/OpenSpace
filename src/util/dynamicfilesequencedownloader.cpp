@@ -322,7 +322,7 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
         // ...GONG_Z/trace_pfss_intoout/2022/11/2022-11-13T16-14-00.000.osfls";
 
         std::string fileName = url.substr(url.find_last_of("//"));
-        std::filesystem::path destination = _syncDir;
+        std::filesystem::path destination = syncDir;
         destination += fileName;
 
         double time = Time::convertTime(timestamp);
