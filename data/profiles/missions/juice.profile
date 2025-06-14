@@ -81,7 +81,7 @@
       "value": "false"
     },
     {
-      "name": "Scene.GanymedeMagnetosphere.Renderable.DomainEnabled",
+      "name": "Scene.GanymedeMagnetosphere.Renderable.Domain.DomainEnabled",
       "type": "setPropertyValueSingle",
       "value": "false"
     },
@@ -106,12 +106,12 @@
       "value": "40"
     },
     {
-      "name": "Scene.GanymedeMagnetosphere.Renderable.Flow.Speed",
+      "name": "Scene.GanymedeMagnetosphere.Renderable.Flow.FlowSpeed",
       "type": "setPropertyValueSingle",
       "value": "150.000000"
     },
     {
-      "name": "Scene.GanymedeMagnetosphere.Renderable.FlowEnabled",
+      "name": "Scene.GanymedeMagnetosphere.Renderable.Flow.FlowEnabled",
       "type": "setPropertyValueSingle",
       "value": "true"
     },

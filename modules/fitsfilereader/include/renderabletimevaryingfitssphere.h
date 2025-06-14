@@ -106,7 +106,7 @@ private:
 
     int _fitsLayerTemp = -1;
     // If there's just one state it should never disappear
-    bool _renderForever = false;
+    bool _renderForever = true;
     bool _inInterval = false;
 
     bool _isLoadingStateFromDisk = false;

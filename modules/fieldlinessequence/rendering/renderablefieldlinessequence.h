@@ -123,7 +123,7 @@ private:
     // Estimated / calculated end of sequence
     double _sequenceEndTime = 0.0;
     // If there's just one state it should never disappear
-    bool _renderForever = false;
+    bool _renderForever = true;
     bool _inInterval = false;
 
     // Data ID that corresponds to what dataset to use if using DynamicDownloading
