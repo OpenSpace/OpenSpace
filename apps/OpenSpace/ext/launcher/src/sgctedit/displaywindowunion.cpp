@@ -194,7 +194,11 @@ void DisplayWindowUnion::initialize(const std::vector<QRect>& monitorSizeList,
             },
             [&](const sgct::config::FisheyeProjection& p) {
                 if (p.quality.has_value()) {
-                    wCtrl->setProjectionFisheye(*p.quality, p.tilt.value_or(0.f), p.fov.value_or(180.0));
+                    wCtrl->setProjectionFisheye(
+                        *p.quality,
+                        p.tilt.value_or(0.f),
+                        p.fov.value_or(180.0)
+                    );
                 }
             },
             [&](const sgct::config::PlanarProjection& p) {

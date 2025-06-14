@@ -43,7 +43,7 @@ namespace {
             static_cast<double>(tcur->getTuioTime().getTotalMilliseconds()) / 1000.0
         );
     }
-}
+} // namespace
 
 namespace openspace {
 

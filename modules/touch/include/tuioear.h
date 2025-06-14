@@ -58,17 +58,17 @@ public:
     /**
      * Callback functions, listens to the TUIO server.
      */
-    void addTuioObject(TUIO::TuioObject *tobj) override;
-    void updateTuioObject(TUIO::TuioObject *tobj) override;
-    void removeTuioObject(TUIO::TuioObject *tobj) override;
+    void addTuioObject(TUIO::TuioObject* tobj) override;
+    void updateTuioObject(TUIO::TuioObject* tobj) override;
+    void removeTuioObject(TUIO::TuioObject* tobj) override;
 
-    void addTuioCursor(TUIO::TuioCursor *tcur) override;
-    void updateTuioCursor(TUIO::TuioCursor *tcur) override;
-    void removeTuioCursor(TUIO::TuioCursor *tcur) override;
+    void addTuioCursor(TUIO::TuioCursor* tcur) override;
+    void updateTuioCursor(TUIO::TuioCursor* tcur) override;
+    void removeTuioCursor(TUIO::TuioCursor* tcur) override;
 
-    void addTuioBlob(TUIO::TuioBlob *tblb) override;
-    void updateTuioBlob(TUIO::TuioBlob *tblb) override;
-    void removeTuioBlob(TUIO::TuioBlob *tblb) override;
+    void addTuioBlob(TUIO::TuioBlob* tblb) override;
+    void updateTuioBlob(TUIO::TuioBlob* tblb) override;
+    void removeTuioBlob(TUIO::TuioBlob* tblb) override;
 
     void refresh(TUIO::TuioTime frameTime) override;
 
