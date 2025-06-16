@@ -1,6 +1,7 @@
 local ToggleTrailsInstant = {
   Identifier = "os.ToggleTrailsInstant",
   Name = "Toggle planet and moon trails (instant)",
+  -- @TODO (2025-06-16, emmbr) This action will not work if the renderables are faded out
   Command = [[
     local list = openspace.property("{planetTrail_solarSystem}.Renderable.Enabled")
     for _,v in pairs(list) do
