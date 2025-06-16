@@ -1083,46 +1083,60 @@ void setSgctDelegateFunctions() {
         sgct::Engine::instance().setStatsGraphScale(scale);
     };
     sgctDelegate.setMouseCursor = [](WindowDelegate::Cursor mouse) {
+        auto glfwCreateStandardCursorChecked = [](int shape) {
+            auto prev_error_callback = glfwSetErrorCallback(NULL);
+            auto cursor = glfwCreateStandardCursor(shape);
+            glfwSetErrorCallback(prev_error_callback);
+            if (cursor == NULL) {
+                LINFO(std::format(
+                    "Replacing unavailable cursor shape {} with {}",
+                    shape, GLFW_ARROW_CURSOR
+                ));
+                return glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+            } else {
+                return cursor;
+            }
+        };
         static std::unordered_map<WindowDelegate::Cursor, GLFWcursor*> Cursors = {
             {
                 WindowDelegate::Cursor::Arrow,
-                glfwCreateStandardCursor(GLFW_ARROW_CURSOR)
+                glfwCreateStandardCursorChecked(GLFW_ARROW_CURSOR)
             },
             {
                 WindowDelegate::Cursor::IBeam,
-                glfwCreateStandardCursor(GLFW_IBEAM_CURSOR)
+                glfwCreateStandardCursorChecked(GLFW_IBEAM_CURSOR)
             },
             {
                 WindowDelegate::Cursor::CrossHair,
-                glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR)
+                glfwCreateStandardCursorChecked(GLFW_CROSSHAIR_CURSOR)
             },
             {
                 WindowDelegate::Cursor::PointingHand,
-                glfwCreateStandardCursor(GLFW_POINTING_HAND_CURSOR)
+                glfwCreateStandardCursorChecked(GLFW_POINTING_HAND_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeEW,
-                glfwCreateStandardCursor(GLFW_RESIZE_EW_CURSOR)
+                glfwCreateStandardCursorChecked(GLFW_RESIZE_EW_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeNS,
-                glfwCreateStandardCursor(GLFW_RESIZE_NS_CURSOR)
+                glfwCreateStandardCursorChecked(GLFW_RESIZE_NS_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeNWSE,
-                glfwCreateStandardCursor(GLFW_RESIZE_NWSE_CURSOR)
+                glfwCreateStandardCursorChecked(GLFW_RESIZE_NWSE_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeNESW,
-                glfwCreateStandardCursor(GLFW_RESIZE_NESW_CURSOR)
+                glfwCreateStandardCursorChecked(GLFW_RESIZE_NESW_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeAll,
-                glfwCreateStandardCursor(GLFW_RESIZE_ALL_CURSOR)
+                glfwCreateStandardCursorChecked(GLFW_RESIZE_ALL_CURSOR)
             },
             {
                 WindowDelegate::Cursor::NotAllowed,
-                glfwCreateStandardCursor(GLFW_NOT_ALLOWED_CURSOR)
+                glfwCreateStandardCursorChecked(GLFW_NOT_ALLOWED_CURSOR)
             },
         };
         ghoul_assert(
