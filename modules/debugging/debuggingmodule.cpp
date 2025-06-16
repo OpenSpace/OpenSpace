@@ -62,9 +62,18 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo StatisticsScaleInfo = {
         "StatisticsScale",
         "Statistics Scale",
-        "This value is scaling the statatistics window by the provided amount. For flat "
+        "This value is scaling the statistics window by the provided amount. For flat "
         "projections this is rarely necessary, but it is important when using a setup "
-        "where the cornders of the image are masked out.",
+        "where the corners of the image are masked out.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo StatisticsOffsetInfo = {
+        "StatisticsOffset",
+        "Statistics Offset",
+        "This value is offsetting the center of the statistics window by the provided "
+        "amount. For flat projections this is rarely necessary, but it is important when "
+        "using a setup the center of the image is distorted in some form.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -83,6 +92,12 @@ DebuggingModule::DebuggingModule()
     : OpenSpaceModule(Name)
     , _showStatistics(ShowStatisticsInfo, false)
     , _statisticsScale(StatisticsScaleInfo, 1.f, 0.f, 1.f)
+    , _statisticsOffset(
+        StatisticsOffsetInfo,
+        glm::vec2(0.f),
+        glm::vec2(-2.f),
+        glm::vec2(2.f)
+    )
     , _showFrameInformation(ShowFrameNumberInfo, false)
 {
     _showStatistics.onChange([this]() {
@@ -97,6 +112,11 @@ DebuggingModule::DebuggingModule()
         global::windowDelegate->setStatisticsGraphScale(_statisticsScale);
     });
     addProperty(_statisticsScale);
+
+    _statisticsOffset.onChange([this]() {
+        global::windowDelegate->setStatisticsGraphOffset(_statisticsOffset);
+    });
+    addProperty(_statisticsOffset);
 
     addProperty(_showFrameInformation);
 

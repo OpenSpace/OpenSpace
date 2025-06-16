@@ -150,10 +150,13 @@ protected:
     properties::TriggerProperty _delete;
 
     glm::ivec2 _objectSize = glm::ivec2(0);
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+
+private:
     UniformCache(color, opacity, blackoutFactor, hue, value, saturation, mvpMatrix, tex,
         backgroundColor, gamma, borderColor, borderWidth, borderFeather,
         useAcceleratedRendering) _uniformCache;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 };
 
 } // namespace openspace

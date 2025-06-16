@@ -189,52 +189,53 @@ ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
     _renderable = Renderable::createFromDictionary(p.renderable);
     addPropertySubOwner(_renderable.get());
 
-    _transform = ghoul::mm_unique_ptr<properties::PropertyOwner>(
+    _transform.parent = ghoul::mm_unique_ptr<properties::PropertyOwner>(
         new properties::PropertyOwner(TransformInfo)
     );
-    addPropertySubOwner(_transform.get());
+    addPropertySubOwner(_transform.parent.get());
 
     if (p.transform.has_value() && p.transform->translation.has_value()) {
-        _translation = Translation::createFromDictionary(*p.transform->translation);
+        _transform.translation =
+            Translation::createFromDictionary(*p.transform->translation);
     }
     else {
         ghoul::Dictionary translation;
         translation.setValue("Type", std::string("StaticTranslation"));
         translation.setValue("Position", glm::dvec3(0.0));
-        _translation = Translation::createFromDictionary(translation);
+        _transform.translation = Translation::createFromDictionary(translation);
     }
-    _transform->addPropertySubOwner(_translation.get());
+    _transform.parent->addPropertySubOwner(_transform.translation.get());
 
     if (p.transform.has_value() && p.transform->rotation.has_value()) {
-        _rotation = Rotation::createFromDictionary(*p.transform->rotation);
+        _transform.rotation = Rotation::createFromDictionary(*p.transform->rotation);
     }
     else {
         ghoul::Dictionary rotation;
         rotation.setValue("Type", std::string("StaticRotation"));
         rotation.setValue("Rotation", glm::dvec3(0.0));
-        _rotation = Rotation::createFromDictionary(rotation);
+        _transform.rotation = Rotation::createFromDictionary(rotation);
     }
-    _transform->addPropertySubOwner(_rotation.get());
+    _transform.parent->addPropertySubOwner(_transform.rotation.get());
 
     if (p.transform.has_value() && p.transform->scale.has_value()) {
-        _scale = Scale::createFromDictionary(*p.transform->scale);
+        _transform.scale = Scale::createFromDictionary(*p.transform->scale);
     }
     else {
         ghoul::Dictionary scale;
         scale.setValue("Type", std::string("StaticScale"));
         scale.setValue("Scale", 1.0);
-        _scale = Scale::createFromDictionary(scale);
+        _transform.scale = Scale::createFromDictionary(scale);
     }
-    _transform->addPropertySubOwner(_scale.get());
+    _transform.parent->addPropertySubOwner(_transform.scale.get());
 }
 
 ScreenSpaceRenderableRenderable::~ScreenSpaceRenderableRenderable() {}
 
 void ScreenSpaceRenderableRenderable::initialize() {
     ScreenSpaceFramebuffer::initialize();
-    _translation->initialize();
-    _rotation->initialize();
-    _scale->initialize();
+    _transform.translation->initialize();
+    _transform.rotation->initialize();
+    _transform.scale->initialize();
     _renderable->initialize();
 }
 
@@ -273,9 +274,9 @@ void ScreenSpaceRenderableRenderable::initializeGL() {
             .camera = camera,
             .time = Time(_time),
             .modelTransform = {
-                .translation = _translation->position(),
-                .rotation = _rotation->matrix(),
-                .scale = _scale->scaleValue()
+                .translation = _transform.translation->position(),
+                .rotation = _transform.rotation->matrix(),
+                .scale = _transform.scale->scaleValue()
             }
         };
         RendererTasks tasks;
@@ -296,14 +297,14 @@ void ScreenSpaceRenderableRenderable::update() {
         .previousFrameTime = Time(_previousTime)
     };
 
-    _translation->update(updateData);
-    updateData.modelTransform.translation = _translation->position();
+    _transform.translation->update(updateData);
+    updateData.modelTransform.translation = _transform.translation->position();
 
-    _rotation->update(updateData);
-    updateData.modelTransform.rotation = _rotation->matrix();
+    _transform.rotation->update(updateData);
+    updateData.modelTransform.rotation = _transform.rotation->matrix();
 
-    _scale->update(updateData);
-    updateData.modelTransform.scale = _scale->scaleValue();
+    _transform.scale->update(updateData);
+    updateData.modelTransform.scale = _transform.scale->scaleValue();
 
     _renderable->update(updateData);
 }

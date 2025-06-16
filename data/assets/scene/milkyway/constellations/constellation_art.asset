@@ -89,7 +89,7 @@ local function createConstellations(baseIdentifier, guiPath, constellationfile)
         Opacity = 0.1,
         DimInAtmosphere = true
       },
-      Tag = { "image_constellation", "zodiac_" .. group, "daytime_hidden" },
+      Tag = { "image_constellation", "constellation_art_" .. group, "daytime_hidden" },
       GUI = {
         Name = name .. " Image",
         Path = "/Milky Way/Constellations/" .. guiPath,
@@ -138,7 +138,7 @@ local ShowZodiacArt = {
   Identifier = "os.constellation_art.ShowZodiacArt",
   Name = "Show zodiac",
   Command = [[
-    openspace.fadeIn("{zodiac}")
+    openspace.fadeIn("{constellation_art_zodiac}")
   ]],
   Documentation = "Enables and fades up zodiac art work",
   GuiPath = "/Constellations/Art",
@@ -149,7 +149,7 @@ local HideZodiacArt = {
   Identifier = "os.constellation_art.HideZodiacArt",
   Name = "Hide zodiac",
   Command = [[
-    openspace.fadeOut("{zodiac}")
+    openspace.fadeOut("{constellation_art_zodiac}")
   ]],
   Documentation = "Fades down zodiac art work",
   GuiPath = "/Constellations/Art",

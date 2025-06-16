@@ -29,16 +29,6 @@ namespace {
     constexpr std::string_view MaximumValueKey = "max";
     constexpr std::string_view SteppingValueKey = "step";
     constexpr std::string_view ExponentValueKey = "exponent";
-
-    std::string luaToJson(std::string luaValue) {
-        if (luaValue[0] == '{') {
-            luaValue.replace(0, 1, "[");
-        }
-        if (luaValue[luaValue.size() - 1] == '}') {
-            luaValue.replace(luaValue.size() - 1, 1, "]");
-        }
-        return luaValue;
-    }
 } // namespace
 
 namespace openspace::properties {
@@ -126,6 +116,16 @@ void NumericalProperty<T>::setExponent(float exponent) {
 
 template <typename T>
 nlohmann::json NumericalProperty<T>::generateAdditionalJsonDescription() const {
+    constexpr auto luaToJson = [](std::string luaValue) {
+        if (luaValue[0] == '{') {
+            luaValue.replace(0, 1, "[");
+        }
+        if (luaValue[luaValue.size() - 1] == '}') {
+            luaValue.replace(luaValue.size() - 1, 1, "]");
+        }
+        return luaValue;
+    };
+
     nlohmann::json result = {
         {
             MinimumValueKey,

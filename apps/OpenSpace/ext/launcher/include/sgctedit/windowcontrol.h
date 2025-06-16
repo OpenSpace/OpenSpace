@@ -130,7 +130,7 @@ public:
      *        combobox index
      * \tilt  The tilt of the fisheye in degrees
      */
-    void setProjectionFisheye(int quality, float tilt);
+    void setProjectionFisheye(int quality, float tilt, float fov);
 
     /**
      * Sets the window's projection type to spherical mirror, with the accompanying
@@ -235,6 +235,7 @@ private:
         QWidget* widget = nullptr;
         QComboBox* quality = nullptr;
         QDoubleSpinBox* tilt = nullptr;
+        QDoubleSpinBox* fov = nullptr;
     } _fisheye;
 
     struct {

@@ -1082,6 +1082,9 @@ void setSgctDelegateFunctions() {
     sgctDelegate.setStatisticsGraphScale = [](float scale) {
         sgct::Engine::instance().setStatsGraphScale(scale);
     };
+    sgctDelegate.setStatisticsGraphOffset = [](glm::vec2 offset) {
+        sgct::Engine::instance().setStatsGraphOffset(sgct::vec2{ offset.x, offset.y });
+    };
     sgctDelegate.setMouseCursor = [](WindowDelegate::Cursor mouse) {
         static std::unordered_map<WindowDelegate::Cursor, GLFWcursor*> Cursors = {
             {
