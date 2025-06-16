@@ -4,15 +4,19 @@ local Mission = {
   Name = "The WSA Simulation Model",
   TimeRange = { Start = "2022 DEC 09 16:14:00", End = timeNow },
   Description = [[
-  This visualization shows the Sun's magnetic field using data from the WSA
-  (Wang-Sheeley-Arge) simulation model. The field lines trace the Sun's magnetic field.
-  Some loop back into the Sun (closed, shown in yellow), while others stream into space
-  (open), colored by their position relative to the heliospheric current sheet. On the
-  Sun's surface, white and black indicate areas of positive and negative magnetic
-  polarity, respectively. Understanding these fields is critical: solar activity like
-  Coronal Mass Ejections (CMEs) can disrupt satellites, power grids, and pose risks to
-  astronauts and spacecraft throughout the solar system. All data is fetched live, giving
-  you the latest view of our dynamic Sun.
+    This visualization shows the Sun's magnetic field using data from the WSA
+    (Wang-Sheeley-Arge) simulation model. The field lines trace the Sun's magnetic field.
+    Some loop back into the Sun (closed, shown in yellow), while others stream into space
+    (open). The simulation data throughout this visualization is colored red for positive
+    values and blue for negative. Red field lines indicate that the direction of the field
+    is pointing away from the sun and blue that it is pointing inward toward the Sun. The
+    direction of the field is opposite on either side of whats called the heliospheric
+    current sheet. On the Sun's surface, white and black indicate areas of positive and
+    negative magnetic polarity, respectively. Understanding these fields is critical:
+    solar activity like Coronal Mass Ejections (CMEs) can disrupt satellites, power grids,
+    and pose risks to astronauts and spacecraft throughout the solar system. All
+    simulation data in this profile is fetched live, giving you the latest view of our
+    dynamic Sun.
   ]],
   Milestones = {
     {

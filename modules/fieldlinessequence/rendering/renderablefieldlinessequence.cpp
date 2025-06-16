@@ -230,20 +230,22 @@ namespace {
     // like the name of the renderable suggests.
     //
     // `LoadingType` can be specified in two ways;
-    //
-    // `StaticLoading`: In this case all data is loaded when starting OpenSpace. A
-    // `SourceFolder` is then mandatory. The data format is also required to be set with
+    // 1. `StaticLoading`: In this case all data is loaded when starting OpenSpace. A
+    // `SourceFolder` is then required. The data format is also required to be set with
     // `InputFileType`.
     //
-    // `DynamicDownloading`: This case downloads the data during runtime. For this, a few
-    // parameters are required: `InfoURL`, `DataURL` and `DataID` are used to specify the
-    // data source to use.
+    // 2. `DynamicDownloading`: This case downloads the data during runtime. For this, a
+    // few parameters are required: `InfoURL` together with `DataID` will construct a URL
+    // that is used for a HTTP request that returns meta data. `DataURL` and `DataID`,
+    // together with this meta data, will be used in constructing another HTTP request
+    // that returns the list with data files. The `DataID` specify which data source to
+    // use.
     //
     // When using CDF data `SeedPointDirectory` is required. Some prior knowledge of the
     // data is needed to use it in this way. `TracingVariable` needs to be set and
     // `ExtraVariables` will have to match what parameters are in the CDF data. Using CDF
     // directly in this `Renderable` is not recommended. Rather use the
-    // `KameleonVolumeToFieldlinesTask` task first, to save the data to .osfls or .json
+    // `KameleonVolumeToFieldlinesTask` task first, to save the data to .osfls or .json.
     struct [[codegen::Dictionary(RenderableFieldlinesSequence)]] Parameters {
         enum class [[codegen::map(openspace::RenderableFieldlinesSequence::ColorMethod)]]
         ColorMethod {

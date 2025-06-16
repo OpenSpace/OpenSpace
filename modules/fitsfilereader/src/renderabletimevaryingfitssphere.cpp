@@ -133,24 +133,24 @@ namespace {
     // time and is therefore time varying like the name of the renderable suggests.
     //
     // `LoadingType` can be specified in two ways;
+    // 1. `StaticLoading`: In this case, all data will be loaded on startup, from the
+    // location specified in the `TextureSource` parameter. Other required parameters are
+    // `LayerNames` and `LayerMinMaxCapValues` that require at least one entry each.
+    // `LayerNames` assigns a name to an index that corresponds to a layer in the FITS
+    // data to use. For each entry in `LayerNames`, there should also be a matching entry
+    // in the `LayerMinMaxCapValues` that specifies the min and max range for the data.
     //
-    // `StaticLoading`: In this case, parameter `TextureSource` is expected to be provided
-    // to specify where the data is. Using this, all data will be loaded on start up.
-    // Other properties required to be provided is at least one entry in the list of
-    // `LayerNames` that assigns a name to the index corresponding to which layer in the
-    // FITS data that will be used. Additionally, a data range for each of these entries
-    // is required to be assigned in `LayerMinMaxCapValues` in a similar manner as
-    // `LayerNames`.
+    // 2. `DynamicDownloading`: This case downloads the data during runtime. In addition
+    // to `LayerNames` and `LayerMinMaxCapValues`, a few more parameters are required in
+    // this case: `InfoURL` together with `DataID` will construct a URL that is used for a
+    // HTTP request that returns meta data. `DataURL` and `DataID`, together with this
+    // meta data, will be used in constructing another HTTP request that returns the list
+    // with data files. The `DataID` specify which data source to use.
     //
-    // `DynamicDownloading`: This case downloads the data during runtime. In addition to
-    // `LayerNames` and `LayerMinMaxCapValues` more parameters are required to be
-    // specified. `InfoURL`: that will be a first step to give data to 'DataURL` which
-    // is expected to return the list with data files. The `DataID` accompanies the two
-    // URLs to specify which data source to use.
-    //
-    // In addition, but not required `FitsLayer` can be specified that correspond to one
-    // of the layers in `LayerNames` and `LayerMinMaxCapValues`. `CacheData` and
-    // `ShowPastFirstAndLastFile` are two additional options.
+    // In addition, but not required, the `FitsLayer` parameter can be specified to use a
+    // specific data layer for the sphere texture. The index should match one of the
+    // layers in `LayerNames` and `LayerMinMaxCapValues`. `CacheData` and `showAtAllTimes`
+    // are two other optional parameters.
     struct [[codegen::Dictionary(RenderableTimeVaryingFitsSphere)]] Parameters {
         // [[codegen::verbatim(TextureSourceInfo.description)]]
         std::optional<std::filesystem::path> textureSource;
