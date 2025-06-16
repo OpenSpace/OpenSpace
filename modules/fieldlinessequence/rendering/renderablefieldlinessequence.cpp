@@ -263,11 +263,11 @@ namespace {
         std::optional<glm::vec4> color [[codegen::color()]];
 
         // A list of paths to transferfunction .txt files containing color tables
-        // used for colorizing the fieldlines according to different parameters
+        // used for colorizing the fieldlines according to different parameters.
         std::optional<std::vector<std::filesystem::path>> colorTablePaths;
 
         // Ranges for which their corresponding parameters values will be
-        // colorized by. Should be entered as min value, max value
+        // colorized by. Should be entered as min value, max value.
         std::optional<std::vector<glm::vec2>> colorTableRanges;
 
         // [[codegen::verbatim(ColorMinMaxInfo.description)]]
