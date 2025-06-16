@@ -212,7 +212,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     _endpointCallback = webGuiModule->addEndpointChangeCallback(
         [this](const std::string& endpoint, bool exists) {
             ZoneScopedN("CefWebGuiModule::endpointCallback");
-            if (exists && endpoint == "frontend" && _instance) {
+            if (exists && endpoint == "gui" && _instance) {
                 _instance->reloadBrowser();
             }
         }
