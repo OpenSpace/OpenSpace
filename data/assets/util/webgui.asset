@@ -50,7 +50,7 @@ asset.onInitialize(function()
   openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", false)
 
   local directories = openspace.propertyValue("Modules.WebGui.Directories")
-  directories[#directories + 1] = "frontend"
+  directories[#directories + 1] = "gui"
   directories[#directories + 1] = frontend .. "frontend"
   -- Add user directory for webpanels
   directories[#directories + 1] = "webpanels"
@@ -67,7 +67,7 @@ asset.onInitialize(function()
   directories[#directories + 1] = openspace.absPath("${USER_SHOWCOMPOSER_PROJECTS}")
 
   openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
-  openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "frontend")
+  openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "gui")
   openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", enabled)
 
   -- The GUI contains date and simulation increment,
@@ -90,7 +90,7 @@ asset.onInitialize(function()
   end
   openspace.setPropertyValueSingle(
     "Modules.CefWebGui.GuiUrl",
-    "http://127.0.0.1:" .. port .. "/frontend/"
+    "http://127.0.0.1:" .. port .. "/gui"
   )
 end)
 
