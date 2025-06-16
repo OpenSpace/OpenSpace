@@ -42,6 +42,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
+#include <ghoul/misc/defer.h>
 #include <ghoul/misc/stacktrace.h>
 #ifdef WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -1086,46 +1087,62 @@ void setSgctDelegateFunctions() {
         sgct::Engine::instance().setStatsGraphOffset(sgct::vec2{ offset.x, offset.y });
     };
     sgctDelegate.setMouseCursor = [](WindowDelegate::Cursor mouse) {
+        auto createGLFWCursor = [](int shape) {
+            GLFWerrorfun prevErrorCallback = glfwSetErrorCallback(nullptr);
+            defer { glfwSetErrorCallback(prevErrorCallback); };
+
+            GLFWcursor* cursor = glfwCreateStandardCursor(shape);
+            if (!cursor) {
+                LINFO(std::format(
+                    "Replacing unavailable cursor shape {} with arrow cursor ({})",
+                    shape, GLFW_ARROW_CURSOR
+                ));
+                return glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+            }
+
+            return cursor;
+        };
+
         static std::unordered_map<WindowDelegate::Cursor, GLFWcursor*> Cursors = {
             {
                 WindowDelegate::Cursor::Arrow,
-                glfwCreateStandardCursor(GLFW_ARROW_CURSOR)
+                createGLFWCursor(GLFW_ARROW_CURSOR)
             },
             {
                 WindowDelegate::Cursor::IBeam,
-                glfwCreateStandardCursor(GLFW_IBEAM_CURSOR)
+                createGLFWCursor(GLFW_IBEAM_CURSOR)
             },
             {
                 WindowDelegate::Cursor::CrossHair,
-                glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR)
+                createGLFWCursor(GLFW_CROSSHAIR_CURSOR)
             },
             {
                 WindowDelegate::Cursor::PointingHand,
-                glfwCreateStandardCursor(GLFW_POINTING_HAND_CURSOR)
+                createGLFWCursor(GLFW_POINTING_HAND_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeEW,
-                glfwCreateStandardCursor(GLFW_RESIZE_EW_CURSOR)
+                createGLFWCursor(GLFW_RESIZE_EW_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeNS,
-                glfwCreateStandardCursor(GLFW_RESIZE_NS_CURSOR)
+                createGLFWCursor(GLFW_RESIZE_NS_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeNWSE,
-                glfwCreateStandardCursor(GLFW_RESIZE_NWSE_CURSOR)
+                createGLFWCursor(GLFW_RESIZE_NWSE_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeNESW,
-                glfwCreateStandardCursor(GLFW_RESIZE_NESW_CURSOR)
+                createGLFWCursor(GLFW_RESIZE_NESW_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeAll,
-                glfwCreateStandardCursor(GLFW_RESIZE_ALL_CURSOR)
+                createGLFWCursor(GLFW_RESIZE_ALL_CURSOR)
             },
             {
                 WindowDelegate::Cursor::NotAllowed,
-                glfwCreateStandardCursor(GLFW_NOT_ALLOWED_CURSOR)
+                createGLFWCursor(GLFW_NOT_ALLOWED_CURSOR)
             },
         };
         ghoul_assert(
