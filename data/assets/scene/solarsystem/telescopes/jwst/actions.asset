@@ -10,11 +10,11 @@ local ToggleLagrangianPoints = {
 local ToggleHudf = {
   Identifier = "os.jwst.ToggleHudf",
   Name = "Toggle Hubble Ultra Deep Field",
+  -- The tag used here matches both a screenspace renderable and a scene graph node,
+  -- hence the need for the double toggleFade
   Command = [[
-    local list = openspace.property("{mission_jwst_hudf}.*.Enabled")
-    for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
-    end
+    openspace.toggleFade("{mission_jwst_hudf}")
+    openspace.toggleFade("{mission_jwst_hudf}.Renderable")
   ]],
   Documentation = "Toggle Hubble Ultra Deep Field image and line towards its coordinate",
   GuiPath = "/JWST",

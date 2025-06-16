@@ -68,7 +68,7 @@ namespace {
  * and if that does not contain the requested tag, its own owners are checked recursively.
  */
 bool ownerMatchesGroupTag(const openspace::properties::PropertyOwner* owner,
-                          std::string_view tagToMatch)
+                          std::string_view tagToMatch, bool recursive = true)
 {
     using namespace openspace;
 
@@ -171,9 +171,11 @@ bool ownerMatchesGroupTag(const openspace::properties::PropertyOwner* owner,
     }
 
     // If we got this far, we have an owner and we haven't found a match, so we have to
-    // try one level higher
-    ghoul_assert(owner, "Owner does not exist");
-    return ownerMatchesGroupTag(owner->owner(), tagToMatch);
+    // try one level higher if we are checking recursively
+    if (recursive) {
+        return ownerMatchesGroupTag(owner->owner(), tagToMatch);
+    }
+    return false;
 }
 
 // Checks to see if URI contains a group tag (with { } around the first term)
@@ -315,70 +317,99 @@ std::vector<openspace::properties::PropertyOwner*> findMatchesInAllPropertyOwner
     auto [parentUri, ownerIdentifier, isLiteral] = parseRegex(regex);
 
     const bool isGroupMode = !groupTag.empty();
-    if (parentUri.empty() && isGroupMode) {
+    if (isGroupMode) {
         isLiteral = false;
     }
+
+    // If we are in group mode, no parent URI is found, and there is no punctuation
+    // in the returned owner identifier, we only got the group - no identifier.
+    const bool inputIsOnlyTag = isGroupMode && parentUri.empty() &&
+        ownerIdentifier.find(".") == std::string::npos;
 
     const std::vector<PropertyOwner*>& propertyOwners = allPropertyOwners();
 
     std::vector<PropertyOwner*> matches;
 
-    // @TODO: Need to update this to make it work if there is no identifier.
-    // i.e. if there is only a regex or group tag
-
     std::mutex mutex;
-    std::for_each(
-        std::execution::par_unseq,
-        propertyOwners.cbegin(),
-        propertyOwners.cend(),
-        [&](PropertyOwner* propOwner) {
-            const std::string uri = propOwner->uri();
-
-            if (isLiteral && uri != ownerIdentifier) {
-                return;
+    if (inputIsOnlyTag) {
+        // If we only got a tag as input, the result is all owners that directly
+        // match the group tag (without looking recusively in parent owners)
+        std::for_each(
+            std::execution::par_unseq,
+            propertyOwners.cbegin(),
+            propertyOwners.cend(),
+            [&](PropertyOwner* propOwner) {
+                if (!ownerMatchesGroupTag(propOwner, groupTag, false)) {
+                    return;
+                }
+                std::lock_guard g(mutex);
+                matches.push_back(propOwner);
             }
+        );
+    }
+    else {
+        std::for_each(
+            std::execution::par_unseq,
+            propertyOwners.cbegin(),
+            propertyOwners.cend(),
+            [&](PropertyOwner* propOwner) {
+                const std::string uri = propOwner->uri();
 
-            if (!ownerIdentifier.empty()) {
-                const size_t posInUri = uri.find(ownerIdentifier);
-                if (
-                    // Check if the ownerIdentifier appears in the URI at all
-                    (posInUri == std::string::npos) ||
-                    // Check that the ownerIdentifier fully matches the property in URI
-                    ((posInUri + ownerIdentifier.length() + 1) < uri.length()) ||
-                    // Match parent URI
-                    (!parentUri.empty() && uri.find(parentUri) == std::string::npos))
-                {
-                    return;
-                }
-
-                // At this point we know that the identifier matches, so another way this
-                // check to fail is if we provided a tag and the owner doesn't match it
-                if (isGroupMode && !ownerMatchesGroupTag(propOwner->owner(), groupTag)) {
-                    return;
-                }
-            }
-            else if (!parentUri.empty()) {
-                const size_t parentPos = uri.find(parentUri);
-                if (parentPos == std::string::npos) {
-                    return;
-                }
-
-                // Check tag
-                if (isGroupMode) {
-                    if (!ownerMatchesGroupTag(propOwner->owner(), groupTag)) {
+                if (inputIsOnlyTag) {
+                    // If we only got a tag as input, the result is all owners that directly
+                    // match the group tag (without looking recusively in parent owners)
+                    if (!ownerMatchesGroupTag(propOwner, groupTag, false)) {
                         return;
                     }
                 }
-                else if (parentPos != 0) {
-                    // Check that the node identifier fully matches the node in URI
-                    return;
-                }
-            }
+                else {
+                    if (isLiteral && uri != ownerIdentifier) {
+                        return;
+                    }
 
-            std::lock_guard g(mutex);
-            matches.push_back(propOwner);
-        }
-    );
+                    if (!ownerIdentifier.empty()) {
+                        const size_t posInUri = uri.find(ownerIdentifier);
+                        if (
+                            // Check if the ownerIdentifier appears in the URI at all
+                            (posInUri == std::string::npos) ||
+                            // Check that the ownerIdentifier fully matches the property in URI
+                            ((posInUri + ownerIdentifier.length() + 1) < uri.length()) ||
+                            // Match parent URI
+                            (!parentUri.empty() && uri.find(parentUri) == std::string::npos))
+                        {
+                            return;
+                        }
+
+                        // At this point we know that the identifier matches, so another way this
+                        // check to fail is if we provided a tag and the owner doesn't match it
+                        if (isGroupMode && !ownerMatchesGroupTag(propOwner->owner(), groupTag)) {
+                            return;
+                        }
+                    }
+                    else if (!parentUri.empty()) {
+                        const size_t parentPos = uri.find(parentUri);
+                        if (parentPos == std::string::npos) {
+                            return;
+                        }
+
+                        // Check tag
+                        if (isGroupMode) {
+                            if (!ownerMatchesGroupTag(propOwner->owner(), groupTag)) {
+                                return;
+                            }
+                        }
+                        else if (parentPos != 0) {
+                            // Check that the node identifier fully matches the node in URI
+                            return;
+                        }
+                    }
+                }
+
+                std::lock_guard g(mutex);
+                matches.push_back(propOwner);
+            }
+        );
+    }
 
     return matches;
 }

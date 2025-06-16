@@ -340,17 +340,22 @@ openspace.toggleFade = function(renderable, fadeTime, endScript)
   for i = 1, #renderablesList do
     local renderable = renderablesList[i]
 
-    local enabled = openspace.propertyValue(renderable .. ".Enabled")
-    local fadeState = openspace.propertyValue(renderable .. ".Fade")
+    -- Skip any matches that do not have the properties we need
+    if openspace.hasProperty(renderable .. ".Enabled") and
+       openspace.hasProperty(renderable .. ".Fade")
+    then
+      local enabled = openspace.propertyValue(renderable .. ".Enabled")
+      local fadeState = openspace.propertyValue(renderable .. ".Fade")
 
-    if (enabled) then
-      if (fadeState < 0.5) then
-        openspace.fadeIn(renderable, fadeTime-(fadeTime*fadeState), endScript)
+      if (enabled) then
+        if (fadeState < 0.5) then
+          openspace.fadeIn(renderable, fadeTime-(fadeTime*fadeState), endScript)
+        else
+          openspace.fadeOut(renderable, fadeTime*fadeState, endScript)
+        end
       else
-        openspace.fadeOut(renderable, fadeTime*fadeState, endScript)
+        openspace.fadeIn(renderable, fadeTime, endScript)
       end
-    else
-      openspace.fadeIn(renderable, fadeTime, endScript)
     end
   end
 end
