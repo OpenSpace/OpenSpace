@@ -13,21 +13,8 @@ local JupiterMinorMoonsOn = {
   Identifier = "os.solarsystem.JupiterMinorMoonsOn",
   Name = "Turn ON minor moons and trails",
   Command = [[
-    local trails = openspace.property("{moonTrail_minor_jupiter}.Renderable.Enabled")
-    local trails_fade = openspace.property("{moonTrail_minor_jupiter}.Renderable.Fade")
-
-    local moons = openspace.property("{moon_minor_jupiter}.Renderable.Enabled")
-    local moons_fade = openspace.property("{moon_minor_jupiter}.Renderable.Fade")
-
-    for i, v in pairs(trails_fade) do
-      openspace.setPropertyValueSingle(trails[i], true)
-      openspace.setPropertyValueSingle(v, 1, 2, "Linear")
-    end
-
-    for i, v in pairs(moons_fade) do
-      openspace.setPropertyValueSingle(moons[i], true)
-      openspace.setPropertyValueSingle(v, 1, 2, "Linear")
-    end
+    openspace.fadeIn("{moonTrail_minor_jupiter}.Renderable")
+    openspace.fadeIn("{moon_minor_jupiter}.Renderable")
   ]],
   Documentation = "Turn ON Jupiter's minor moons and their trails",
   GuiPath = "/Solar System/Jupiter",
@@ -38,31 +25,8 @@ local JupiterMinorMoonsOff = {
   Identifier = "os.solarsystem.JupiterMinorMoonsOff",
   Name = "Turn OFF minors moon and trails",
   Command = [[
-    local trails = openspace.property("{moonTrail_minor_jupiter}.Renderable.Enabled")
-    local trails_fade = openspace.property("{moonTrail_minor_jupiter}.Renderable.Fade")
-
-    local moons = openspace.property("{moon_minor_jupiter}.Renderable.Enabled")
-    local moons_fade = openspace.property("{moon_minor_jupiter}.Renderable.Fade")
-
-    for i, v in pairs(trails_fade) do
-      openspace.setPropertyValueSingle(
-        v,
-        0,
-        2,
-        "Linear",
-        "openspace.setPropertyValueSingle('" .. trails[i] .. "', false)"
-      )
-    end
-
-    for i, v in pairs(moons_fade) do
-      openspace.setPropertyValueSingle(
-        v,
-        0,
-        2,
-        "Linear",
-        "openspace.setPropertyValueSingle('" .. moons[i] .. "', false)"
-      )
-    end
+    openspace.fadeOut("{moonTrail_minor_jupiter}.Renderable")
+    openspace.fadeOut("{moon_minor_jupiter}.Renderable")
   ]],
   Documentation = "Turn OFF Jupiter's minor moons and their trails",
   GuiPath = "/Solar System/Jupiter",
