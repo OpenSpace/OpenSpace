@@ -39,10 +39,7 @@ local ToggleKaguyaLayer = {
   Identifier = "os.apollo.moon.ToggleKaguyaLayer",
   Name = "Toggle Kaguya layer",
   Command = [[
-    openspace.setPropertyValueSingle(
-      "Scene.Moon.Renderable.Layers.ColorLayers.Kaguya_Utah.Enabled",
-      not openspace.propertyValue("Scene.Moon.Renderable.Layers.ColorLayers.Kaguya_Utah.Enabled")
-    )
+    openspace.toggleFade("Scene.Moon.Renderable.Layers.ColorLayers.Kaguya_Utah")
   ]],
   Documentation = "Toggles Moon Kaguya color layer",
   GuiPath = "/Missions/Apollo",
