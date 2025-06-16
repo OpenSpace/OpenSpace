@@ -1125,8 +1125,8 @@ local IsonoeTrail = {
   },
   GUI = {
     Name = "Isonoe Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Isonoe,
-    Focusable = false"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Isonoe",
+    Focusable = false
   }
 }
 
