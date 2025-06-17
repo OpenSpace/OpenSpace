@@ -369,7 +369,7 @@ std::vector<openspace::properties::PropertyOwner*> findMatchesInAllPropertyOwner
                 const std::string uri = propOwner->uri();
 
                 bool isMatch = checkUriMatchFromRegexResults(
-                    uri, // TODO: Does this work? takes string_view
+                    uri,
                     { parentUri, ownerIdentifier, isLiteral },
                     groupTag,
                     propOwner->owner()
