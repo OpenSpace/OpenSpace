@@ -56,17 +56,17 @@ namespace {
         );
         std::filesystem::path path = global::configuration->profile;
         path.replace_extension();
-        std::string newFile = std::format("{}_{}", path, time);
+        std::string newFile = std::format("{}_{}", path.string(), time);
         std::string sourcePath = std::format(
-            "{}/{}.profile", absPath("${USER_PROFILES}"), global::configuration->profile
+            "{}/{}.profile", absPath("${USER_PROFILES}").string(), global::configuration->profile
         );
         std::string destPath = std::format(
-            "{}/{}.profile", absPath("${PROFILES}"), global::configuration->profile
+            "{}/{}.profile", absPath("${PROFILES}").string(), global::configuration->profile
         );
         if (!std::filesystem::is_regular_file(sourcePath)) {
             sourcePath = std::format(
                 "{}/{}.profile",
-                absPath("${USER_PROFILES}"), global::configuration->profile
+                absPath("${USER_PROFILES}").string(), global::configuration->profile
             );
         }
         LINFOC(
@@ -99,7 +99,7 @@ namespace {
     }
 
     std::string absFilename = std::format(
-        "{}/{}.profile", absPath("${PROFILES}"), *saveFilePath
+        "{}/{}.profile", absPath("${PROFILES}").string(), *saveFilePath
     );
     if (!std::filesystem::is_regular_file(absFilename)) {
         absFilename = absPath("${USER_PROFILES}/" + *saveFilePath + ".profile").string();

@@ -279,10 +279,10 @@ void Asset::initialize() {
         return;
     }
     if (!isSynchronized()) {
-        LERROR(std::format("Cannot initialize unsynchronized asset '{}'", _assetPath));
+        LERROR(std::format("Cannot initialize unsynchronized asset '{}'", _assetPath.string()));
         return;
     }
-    LDEBUG(std::format("Initializing asset '{}'", _assetPath));
+    LDEBUG(std::format("Initializing asset '{}'", _assetPath.string()));
 
     // 1. Initialize requirements
     for (Asset* child : _requiredAssets) {
@@ -294,13 +294,13 @@ void Asset::initialize() {
         _manager.callOnInitialize(this);
     }
     catch (const documentation::SpecificationError& e) {
-        LERROR(std::format("Failed to initialize asset '{}'", path()));
+        LERROR(std::format("Failed to initialize asset '{}'", path().string()));
         documentation::logError(e);
         setState(State::InitializationFailed);
         return;
     }
     catch (const ghoul::RuntimeError& e) {
-        LERROR(std::format("Failed to initialize asset '{}'", path()));
+        LERROR(std::format("Failed to initialize asset '{}'", path().string()));
         LERROR(std::format("{}: {}", e.component, e.message));
         setState(State::InitializationFailed);
         return;
@@ -314,7 +314,7 @@ void Asset::deinitialize() {
     if (!isInitialized()) {
         return;
     }
-    LDEBUG(std::format("Deinitializing asset '{}'", _assetPath));
+    LDEBUG(std::format("Deinitializing asset '{}'", _assetPath.string()));
 
     // Perform inverse actions as in initialize, in reverse order (3 - 1)
 
@@ -326,7 +326,7 @@ void Asset::deinitialize() {
         _manager.callOnDeinitialize(this);
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
-        LERROR(std::format("Failed to deinitialize asset '{}'", _assetPath));
+        LERROR(std::format("Failed to deinitialize asset '{}'", _assetPath.string()));
         LERROR(std::format("{}: {}", e.component, e.message));
         return;
     }

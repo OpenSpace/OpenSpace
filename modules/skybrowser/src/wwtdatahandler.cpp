@@ -132,11 +132,11 @@ namespace {
     {
         using namespace openspace;
         // Download file from url
-        const std::filesystem::path file = std::format("{}{}.aspx", directory, fileName);
+        const std::filesystem::path file = std::format("{}{}.aspx", directory.string(), fileName);
         const bool success = downloadFile(url, file);
         if (!success) {
             LINFO(std::format(
-                "Could not download file '{}' to directory '{}'", url, directory
+                "Could not download file '{}' to directory '{}'", url, directory.string()
             ));
             return false;
         }
@@ -264,7 +264,7 @@ void WwtDataHandler::loadImages(const std::string& root,
 
     // 1.
     if (!directoryExists(directory)) {
-        LINFO(std::format("Creating directory '{}'", directory));
+        LINFO(std::format("Creating directory '{}'", directory.string()));
         std::filesystem::create_directory(directory);
     }
 
