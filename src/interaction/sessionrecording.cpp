@@ -42,7 +42,7 @@ namespace {
             : ghoul::RuntimeError(
                 std::format(
                     "Error loading session recording '{}' (entry #{}): {}",
-                    file_, entry_, error_
+                    file_.string(), entry_, error_
                 ),
                 "SessionRecording"
             )
@@ -53,7 +53,7 @@ namespace {
 
         LoadingError(std::string error_, std::filesystem::path file_)
             : ghoul::RuntimeError(
-                std::format("Error loading session recording '{}': {}", file_, error_),
+                std::format("Error loading session recording '{}': {}", file_.string(), error_),
                 "SessionRecording"
             )
             , error(std::move(error_))

@@ -145,11 +145,11 @@ void DynamicFileSequenceDownloader::deinitialize(bool cacheFiles) {
         std::filesystem::remove(file->path, ec);
         if (ec) {
             LERROR(std::format(
-                "Failed to delete unfinished file '{}'. {}", file->path, ec.message()
+                "Failed to delete unfinished file '{}'. {}", file->path.string(), ec.message()
             ));
         }
         else {
-            LINFO(std::format("Removing unfinished download:: {}", file->path));
+            LINFO(std::format("Removing unfinished download:: {}", file->path.string()));
         }
     }
     if (!cacheFiles) {
@@ -430,12 +430,12 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
                 std::filesystem::remove(filepath, ec);
                 if (ec) {
                     LERROR(std::format(
-                        "Failed to delete file '{}'. {}", filepath, ec.message()
+                        "Failed to delete file '{}'. {}", filepath.string(), ec.message()
                     ));
                 }
                 else {
                     LINFO(std::format(
-                        "Deleted file after failed download: {}", filepath
+                        "Deleted file after failed download: {}", filepath.string()
                     ));
                 }
             }

@@ -220,13 +220,13 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::filesystem::path filePa
     ghoul_assert(!filePath.empty(), "Empty file path");
     ghoul_assert(
         std::filesystem::is_regular_file(filePath),
-        std::format("File '{}' ({}) does not exist", filePath, absPath(filePath))
+        std::format("File '{}' ({}) does not exist", filePath.string(), absPath(filePath).string())
     );
     ghoul_assert(
         std::filesystem::is_directory(std::filesystem::path(filePath).parent_path()),
         std::format(
             "File '{}' exists, but directory '{}' does not",
-            absPath(filePath), std::filesystem::path(filePath).parent_path()
+            absPath(filePath).string(), std::filesystem::path(filePath).parent_path().string()
         )
     );
 
@@ -249,7 +249,7 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::filesystem::path filePa
     const std::filesystem::path p = filePath.parent_path();
     std::filesystem::current_path(p);
 
-    LINFO(std::format("Loading SPICE kernel '{}'", filePath));
+    LINFO(std::format("Loading SPICE kernel '{}'", filePath.string()));
     // Load the kernel
     const std::string k = filePath.string();
     furnsh_c(k.c_str());
@@ -297,7 +297,7 @@ void SpiceManager::unloadKernel(KernelHandle kernelId) {
         // If there was only one part interested in the kernel, we can unload it
         if (it->refCount == 1) {
             // No need to check for errors as we do not allow empty path names
-            LINFO(std::format("Unloading SPICE kernel '{}'", it->path));
+            LINFO(std::format("Unloading SPICE kernel '{}'", it->path.string()));
             const std::string p = it->path.string();
             unload_c(p.c_str());
             _loadedKernels.erase(it);
@@ -332,7 +332,7 @@ void SpiceManager::unloadKernel(std::filesystem::path filePath) {
     else {
         // If there was only one part interested in the kernel, we can unload it
         if (it->refCount == 1) {
-            LINFO(std::format("Unloading SPICE kernel '{}'", filePath));
+            LINFO(std::format("Unloading SPICE kernel '{}'", filePath.string()));
             const std::string p = filePath.string();
             unload_c(p.c_str());
             _loadedKernels.erase(it);
@@ -1062,7 +1062,7 @@ void SpiceManager::findCkCoverage(const std::filesystem::path& path) {
     ghoul_assert(!path.empty(), "Empty file path");
     ghoul_assert(
         std::filesystem::is_regular_file(path),
-        std::format("File '{}' does not exist", path)
+        std::format("File '{}' does not exist", path.string())
     );
 
     constexpr unsigned int MaxObj = 1024;
@@ -1123,7 +1123,7 @@ void SpiceManager::findSpkCoverage(const std::filesystem::path &path) {
     ghoul_assert(!path.empty(), "Empty file path");
     ghoul_assert(
         std::filesystem::is_regular_file(path),
-        std::format("File '{}' does not exist", path)
+        std::format("File '{}' does not exist", path.string())
     );
 
     constexpr unsigned int MaxObj = 1024;

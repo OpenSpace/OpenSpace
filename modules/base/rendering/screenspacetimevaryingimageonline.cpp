@@ -100,7 +100,7 @@ void ScreenSpaceTimeVaryingImageOnline::deinitializeGL() {
 void ScreenSpaceTimeVaryingImageOnline::loadJsonData(const std::filesystem::path& path) {
     std::ifstream file = std::ifstream(path);
     if (!file.is_open()) {
-        throw ghoul::RuntimeError(std::format("Could not open JSON file at '{}'", path));
+        throw ghoul::RuntimeError(std::format("Could not open JSON file at '{}'", path.string()));
     }
 
     nlohmann::json json;
@@ -108,7 +108,7 @@ void ScreenSpaceTimeVaryingImageOnline::loadJsonData(const std::filesystem::path
 
     if (json.find("files") == json.end()) {
         throw ghoul::RuntimeError(std::format(
-            "Error loading JSON file. No 'files' was found in '{}'", path
+            "Error loading JSON file. No 'files' was found in '{}'", path.string()
         ));
     }
 

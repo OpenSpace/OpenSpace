@@ -390,7 +390,7 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
         std::error_code ec;
         std::filesystem::rename(tempName, originalName, ec);
         if (ec) {
-            LERROR(std::format("Error renaming '{}' to '{}'", tempName, originalName));
+            LERROR(std::format("Error renaming '{}' to '{}'", tempName.string(), originalName.string()));
             failed = true;
         }
 
