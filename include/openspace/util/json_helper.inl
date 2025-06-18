@@ -24,6 +24,11 @@
 
 #include <ghoul/format.h>
 #include <ghoul/glm.h>
+
+#ifdef __APPLE__
+#include <ghoul/glm_ostream.h>
+#endif // MacOS complains that glm::vec<4, float> is not formattable etc
+
 #include <ghoul/misc/dictionaryjsonformatter.h>
 #include <type_traits>
 
@@ -71,13 +76,25 @@ std::string formatJson(T value) {
         return ghoul::formatJson(value);
     }
     else if constexpr (internal::isGlmVector<T>()) {
+#ifndef __APPLE__
         std::string v = std::format("{}", value);
+#else
+        std::ostringstream oss;
+        oss << value;
+        std::string v = oss.str();
+#endif // __APPLE__
         v.front() = '[';
         v.back() = ']';
         return v;
     }
     else if constexpr (internal::isGlmMatrix<T>()) {
+#ifndef __APPLE__
         std::string v = std::format("{}", value);
+#else
+        std::ostringstream oss;
+        oss << value;
+        std::string v = oss.str();
+#endif // __APPLE__
         v.front() = '[';
         v.back() = ']';
         return v;

@@ -376,8 +376,7 @@ TestResult Color3Verifier::operator()(const ghoul::Dictionary& dictionary,
         res.success = false;
         TestResult::Offense o = {
             .offender = key + ".x",
-            .reason = TestResult::Offense::Reason::Verification,
-            .explanation = "X value outside allowed range [0,1]"
+            .reason = TestResult::Offense::Reason::Verification
         };
         res.offenses.push_back(std::move(o));
     }
@@ -670,11 +669,19 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dictionary,
         if (count.has_value()) {
             if (d.size() != *count) {
                 res.success = false;
+#ifndef __APPLE__
                 res.offenses.emplace_back(
                     "Count",
                     TestResult::Offense::Reason::Verification,
                     std::format("Expected {} entries, but only got {}", *count, d.size())
                 );
+#else
+                //res.offenses.emplace_back(
+                //    "Count",
+                //    TestResult::Offense::Reason::Verification,
+                //    std::format("Expected {} entries, but only got {}", *count, d.size())
+                //);
+#endif // MacOS perhaps doesn't seem to have appropriate emplace_back support for XCode 15, perhaps related https://stackoverflow.com/questions/4303513/push-back-vs-emplace-back
             }
         }
 

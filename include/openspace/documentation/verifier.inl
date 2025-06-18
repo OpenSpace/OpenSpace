@@ -373,6 +373,9 @@ TestResult InListVerifier<T>::operator()(const ghoul::Dictionary& dict,
             o.offender = key;
             o.reason = TestResult::Offense::Reason::Verification;
 
+#ifdef __APPLE__
+            std::string list = "std::accumulate has limitations on Mac with vectors - verifier.inl";
+#else
             std::string list = std::accumulate(
                 values.begin() + 1,
                 values.end(),
@@ -381,6 +384,7 @@ TestResult InListVerifier<T>::operator()(const ghoul::Dictionary& dict,
                     return std::format("{}, {}", lhs, rhs);
                 }
             );
+#endif // APPLE
             o.explanation = std::format(
                 "'{}' not in list of accepted values '{}'",
                 key, list
