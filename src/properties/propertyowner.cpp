@@ -95,6 +95,17 @@ std::vector<Property*> PropertyOwner::propertiesRecursive() const {
     return props;
 }
 
+std::vector<PropertyOwner*> PropertyOwner::subownersRecursive() const {
+    std::vector<PropertyOwner*> subowners = _subOwners;
+
+    for (const PropertyOwner* owner : _subOwners) {
+        std::vector<PropertyOwner*> p = owner->subownersRecursive();
+        subowners.insert(subowners.end(), p.begin(), p.end());
+    }
+
+    return subowners;
+}
+
 Property* PropertyOwner::property(const std::string& uri) const {
     auto it = std::find_if(
         _properties.begin(),
@@ -323,6 +334,7 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
             updateUriCaches();
             if (global::openSpaceEngine) {
                 global::openSpaceEngine->invalidatePropertyCache();
+                global::openSpaceEngine->invalidatePropertyOwnerCache();
             }
 
             // Notify change so UI gets updated
@@ -392,6 +404,10 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner*
             global::openSpaceEngine->invalidatePropertyCache();
         }
         _subOwners.erase(it);
+
+        if (global::openSpaceEngine) {
+            global::openSpaceEngine->invalidatePropertyOwnerCache();
+        }
     }
     else {
         LERROR(std::format(

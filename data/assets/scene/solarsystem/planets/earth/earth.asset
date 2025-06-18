@@ -91,14 +91,7 @@ local FocusEarth = {
 local ToggleSatelliteTrails = {
   Identifier = "os.solarsystem.ToggleSatelliteTrails",
   Name = "Toggle satellite trails",
-  Command = [[
-    local list = openspace.property(
-      "{earth_satellites~space_stations}.Renderable.Enabled"
-    )
-    for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
-    end
-  ]],
+  Command = [[openspace.toggleFade("{earth_satellites~space_stations}.Renderable")]],
   Documentation = [[
     Toggle trails on or off for the satellites around Earth (excluding space stations)
   ]],
@@ -109,12 +102,7 @@ local ToggleSatelliteTrails = {
 local ToggleSpaceStations = {
   Identifier = "os.solarsystem.ToggleSpaceStations",
   Name = "Toggle space stations",
-  Command = [[
-    local list = openspace.property("{space_stations}.Renderable.Enabled")
-    for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
-    end
-  ]],
+  Command = [[openspace.toggleFade("{space_stations}.Renderable")]],
   Documentation = [[
     Toggle visiblity of the space stations around Earth (including their trail).
   ]],
@@ -125,12 +113,7 @@ local ToggleSpaceStations = {
 local ToggleSpaceStationTrails = {
   Identifier = "os.solarsystem.ToggleSpaceStationTrails",
   Name = "Toggle space station trails",
-  Command = [[
-    local list = openspace.property("{space_stations&trails}.Renderable.Enabled")
-    for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
-    end
-  ]],
+  Command = [[openspace.toggleFade("{space_stations&trails}.Renderable")]],
   Documentation = [[
     Toggle visiblity of the trails for the space stations around Earth.
   ]],

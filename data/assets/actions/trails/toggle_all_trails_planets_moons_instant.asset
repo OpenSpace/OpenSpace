@@ -2,15 +2,8 @@ local ToggleTrailsInstant = {
   Identifier = "os.ToggleTrailsInstant",
   Name = "Toggle planet and moon trails (instant)",
   Command = [[
-    local list = openspace.property("{planetTrail_solarSystem}.Renderable.Enabled")
-    for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
-    end
-
-    local moonlist = openspace.property("{moonTrail_solarSystem}.Renderable.Enabled")
-    for _,v in pairs(moonlist) do
-      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
-    end
+    openspace.toggleFade("{planetTrail_solarSystem}.Renderable", 0.0)
+    openspace.toggleFade("{moonTrail_solarSystem}.Renderable", 0.0)
   ]],
   Documentation = "Toggles the visibility of planet and moon trails",
   GuiPath = "/Solar System",

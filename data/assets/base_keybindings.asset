@@ -7,12 +7,7 @@ local allTrailsInstantAction = asset.require("actions/trails/toggle_all_trails")
 local TogglePlanetLabels = {
   Identifier = "os_default.TogglePlanetLabels",
   Name = "Toggle planet labels",
-  Command = [[
-    local list = openspace.property("{solarsystem_labels}.Renderable.Enabled")
-    for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
-    end
-  ]],
+  Command = [[openspace.toggleFade("{solarsystem_labels}.Renderable")]],
   Documentation = "Turns on visibility for all solar system labels",
   GuiPath = "/Solar System",
   IsLocal = false
