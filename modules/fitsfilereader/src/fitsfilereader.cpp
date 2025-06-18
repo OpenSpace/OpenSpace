@@ -532,7 +532,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
     std::ifstream fileStream(filePath);
 
     if (!fileStream.good()) {
-        LERROR(std::format("Failed to open Speck file '{}'", filePath));
+        LERROR(std::format("Failed to open Speck file '{}'", filePath.string()));
         return fullData;
     }
 

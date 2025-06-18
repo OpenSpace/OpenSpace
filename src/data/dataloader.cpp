@@ -89,7 +89,7 @@ namespace {
         if (std::filesystem::exists(cached)) {
             LINFOC(
                 "DataLoader",
-                std::format("Cached file {} used for file {}", cached, filePath)
+                std::format("Cached file {} used for file {}", cached.string(), filePath.string())
             );
 
             std::optional<T> dataset = loadCacheFunction(cached);
@@ -102,7 +102,7 @@ namespace {
             }
         }
 
-        LINFOC("DataLoader", std::format("Loading file '{}'", filePath));
+        LINFOC("DataLoader", std::format("Loading file '{}'", filePath.string()));
         T dataset = loadFunction(filePath, specs);
 
         if (!dataset.entries.empty()) {
@@ -125,7 +125,7 @@ Dataset loadFile(std::filesystem::path path, std::optional<DataMapping> specs) {
 
     const std::ifstream file = std::ifstream(path);
     if (!file.good()) {
-        throw ghoul::RuntimeError(std::format("Failed to open data file '{}'", path));
+        throw ghoul::RuntimeError(std::format("Failed to open data file '{}'", path.string()));
     }
 
     const std::string extension = ghoul::toLowerCase(path.extension().string());
@@ -140,7 +140,7 @@ Dataset loadFile(std::filesystem::path path, std::optional<DataMapping> specs) {
     else {
         LERRORC("DataLoader", std::format(
             "Could not read data file '{}'. File format '{}' is not supported",
-            path, path.extension()
+            path.string(), path.extension()
         ));
     }
 
@@ -427,7 +427,7 @@ Labelset loadFile(std::filesystem::path path, std::optional<DataMapping>) {
 
     const std::ifstream file = std::ifstream(path);
     if (!file.good()) {
-        throw ghoul::RuntimeError(std::format("Failed to open dataset file '{}'", path));
+        throw ghoul::RuntimeError(std::format("Failed to open dataset file '{}'", path.string()));
     }
 
     const std::string extension = ghoul::toLowerCase(path.extension().string());
@@ -439,7 +439,7 @@ Labelset loadFile(std::filesystem::path path, std::optional<DataMapping>) {
     else {
         LERRORC("DataLoader", std::format(
             "Could not read label data file '{}'. File format '{}' is not supported",
-            path, path.extension()
+            path.string(), path.extension()
         ));
     }
 
@@ -563,7 +563,7 @@ ColorMap loadFile(std::filesystem::path path, std::optional<DataMapping>) {
 
     const std::ifstream file = std::ifstream(path);
     if (!file.good()) {
-        throw ghoul::RuntimeError(std::format("Failed to open colormap file '{}'", path));
+        throw ghoul::RuntimeError(std::format("Failed to open colormap file '{}'", path.string()));
     }
 
     const std::string extension = ghoul::toLowerCase(path.extension().string());
@@ -575,7 +575,7 @@ ColorMap loadFile(std::filesystem::path path, std::optional<DataMapping>) {
     else {
         LERRORC("DataLoader", std::format(
             "Could not read color map file '{}'. File format '{}' is not supported",
-            path, path.extension()
+            path.string(), path.extension()
         ));
     }
 
