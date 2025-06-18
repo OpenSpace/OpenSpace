@@ -322,7 +322,7 @@ void SpiceManager::unloadKernel(std::filesystem::path filePath) {
     if (it == _loadedKernels.end()) {
         if (_useExceptions) {
             throw SpiceException(
-                std::format("'{}' did not correspond to a loaded kernel", filePath)
+                std::format("'{}' did not correspond to a loaded kernel", filePath.string())
             );
         }
         else {
