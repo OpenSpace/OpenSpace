@@ -38,8 +38,8 @@ local ToggleTrailsInstant = {
   Identifier = "os.ToggleTrailsInstant",
   Name = "Toggle all trails instantly",
   Command = [[
-    openspace.toggleFade("Scene.*Trail.Renderable", 0)
-    openspace.toggleFade("Scene.*trail.Renderable", 0)
+    openspace.toggleFade("Scene.*Trail.Renderable", 0.0)
+    openspace.toggleFade("Scene.*trail.Renderable", 0.0)
   ]],
   Documentation = "Toggle fade instantly for all trails in the Scene",
   GuiPath = "/Trails",
