@@ -1753,6 +1753,10 @@ void OpenSpaceEngine::invalidatePropertyCache() {
     _isAllPropertiesCacheDirty = true;
 }
 
+void OpenSpaceEngine::invalidatePropertyOwnerCache() {
+    _isAllPropertyOwnersCacheDirty = true;
+}
+
 const std::vector<properties::Property*>& OpenSpaceEngine::allProperties() const {
     if (_isAllPropertiesCacheDirty) {
         _allPropertiesCache = global::rootPropertyOwner->propertiesRecursive();
@@ -1760,6 +1764,16 @@ const std::vector<properties::Property*>& OpenSpaceEngine::allProperties() const
     }
 
     return _allPropertiesCache;
+}
+
+const std::vector<properties::PropertyOwner*>& OpenSpaceEngine::allPropertyOwners() const
+{
+    if (_isAllPropertyOwnersCacheDirty) {
+        _allPropertyOwnersCache = global::rootPropertyOwner->subownersRecursive();
+        _isAllPropertyOwnersCacheDirty = false;
+    }
+
+    return _allPropertyOwnersCache;
 }
 
 AssetManager& OpenSpaceEngine::assetManager() {

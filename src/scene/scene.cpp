@@ -978,6 +978,7 @@ at the end of the interpolation. If 0 was provided, the script runs immediately.
             },
             codegen::lua::HasProperty,
             codegen::lua::Property,
+            codegen::lua::PropertyOwner,
             codegen::lua::AddCustomProperty,
             codegen::lua::RemoveCustomProperty,
             codegen::lua::AddSceneGraphNode,

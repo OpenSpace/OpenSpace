@@ -3,7 +3,8 @@ local ToggleSun = {
   Name = "Toggle Sun",
   Command = [[
     if not is_declared("args") then
-      openspace.printError("Cannot execute 'os.ToggleSun' manually")
+      openspace.toggleFade("Scene.Sun.Renderable")
+      openspace.toggleFade("Scene.SunGlare.Renderable")
       return
     end
 

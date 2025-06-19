@@ -2,14 +2,8 @@ local FadeUpTrails = {
   Identifier = "os.FadeUpTrails",
   Name = "Show all trails",
   Command = [[
-    local capList = openspace.property("Scene.*Trail.Renderable.Fade")
-    for _,v in ipairs(capList) do
-      openspace.setPropertyValueSingle(v, 1, 2)
-    end
-    local list = openspace.property("Scene.*trail.Renderable.Fade")
-    for _,v in ipairs(list) do
-      openspace.setPropertyValueSingle(v, 1, 2)
-    end
+    openspace.fadeIn("Scene.*Trail.Renderable")
+    openspace.fadeIn("Scene.*trail.Renderable")
   ]],
   Documentation = "Fade up all enabled trails in the Scene",
   GuiPath = "/Trails",
@@ -20,14 +14,8 @@ local FadeDownTrails = {
   Identifier = "os.FadeDownTrails",
   Name = "Hide all trails",
   Command = [[
-    local capList = openspace.property("Scene.*Trail.Renderable.Fade")
-    for _,v in ipairs(capList) do
-      openspace.setPropertyValueSingle(v, 0, 2)
-    end
-    local list = openspace.property("Scene.*trail.Renderable.Fade")
-    for _,v in ipairs(list) do
-      openspace.setPropertyValueSingle(v, 0, 2)
-    end
+    openspace.fadeOut("Scene.*Trail.Renderable")
+    openspace.fadeOut("Scene.*trail.Renderable")
   ]],
   Documentation = "Fade down all enabled trails in the Scene",
   GuiPath = "/Trails",
@@ -38,30 +26,8 @@ local ToggleTrails = {
   Identifier = "os.ToggleTrails",
   Name = "Toggle all trails",
   Command = [[
-    local capList = openspace.property("*Trail.Renderable.Fade")
-    local list = openspace.property("*trail.Renderable.Fade")
-    if (#capList == 0) and (#list == 0) then
-      openspace.printWarning("No trails to toggle")
-    else
-      local prop
-      if #capList > 0 then
-        prop = capList[1]
-      else
-        prop = list[1]
-      end
-      local currentFade = openspace.propertyValue(prop)
-      local newFade = 0
-      if currentFade < 1 then
-        newFade = 1
-      end
-      if (#capList > 0) then
-        openspace.setPropertyValue("Scene.*Trail.Renderable.Fade", newFade, 2)
-      end
-      if (#list > 0) then
-        openspace.setPropertyValue("Scene.*trail.Renderable.Fade", newFade, 2)
-      end
-      openspace.setPropertyValue("Scene.*TrailEarth.Renderable.Fade", newFade, 2)
-    end
+    openspace.toggleFade("Scene.*Trail.Renderable")
+    openspace.toggleFade("Scene.*trail.Renderable")
   ]],
   Documentation = "Toggle fade for all trails in the Scene",
   GuiPath = "/Trails",
@@ -72,29 +38,8 @@ local ToggleTrailsInstant = {
   Identifier = "os.ToggleTrailsInstant",
   Name = "Toggle all trails instantly",
   Command = [[
-    local capList = openspace.property("*Trail.Renderable.Fade")
-    local list = openspace.property("*trail.Renderable.Fade")
-    if (#capList == 0) and (#list == 0) then
-      openspace.printWarning("No trails to toggle")
-    else
-      local prop
-      if #capList > 0 then
-        prop = capList[1]
-      else
-        prop = list[1]
-      end
-      local currentFade = openspace.propertyValue(prop)
-      local newFade = 0
-      if currentFade < 1 then
-        newFade = 1
-      end
-      if (#capList > 0) then
-        openspace.setPropertyValue("Scene.*Trail.Renderable.Fade", newFade)
-      end
-      if (#list > 0) then
-        openspace.setPropertyValue("Scene.*trail.Renderable.Fade", newFade)
-      end
-    end
+    openspace.toggleFade("Scene.*Trail.Renderable", 0.0)
+    openspace.toggleFade("Scene.*trail.Renderable", 0.0)
   ]],
   Documentation = "Toggle fade instantly for all trails in the Scene",
   GuiPath = "/Trails",

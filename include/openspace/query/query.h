@@ -44,6 +44,7 @@ const Renderable* renderable(const std::string& name);
 properties::Property* property(const std::string& uri);
 properties::PropertyOwner* propertyOwner(const std::string& uri);
 const std::vector<properties::Property*>& allProperties();
+const std::vector<properties::PropertyOwner*>& allPropertyOwners();
 
 } // namespace openspace
 
