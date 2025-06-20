@@ -21,7 +21,9 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-
+#ifdef __APPLE__
+include <sstream> // for accumulate -> ostringstream workaround
+#endif
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 #include <functional>
@@ -374,7 +376,15 @@ TestResult InListVerifier<T>::operator()(const ghoul::Dictionary& dict,
             o.reason = TestResult::Offense::Reason::Verification;
 
 #ifdef __APPLE__
-            std::string list = "std::accumulate has limitations on Mac with vectors - verifier.inl";
+            // std::string list = "std::accumulate has limitations on Mac with vectors - verifier.inl";
+            std::ostringstream oss;
+            if (!values.empty()) {
+                oss << values.front();
+                for (auto it = values.begin() + 1; it != values.end(); ++it) {
+                    oss << ", " << *it;
+                }
+            }
+            std::string list = oss.str();
 #else
             std::string list = std::accumulate(
                 values.begin() + 1,
