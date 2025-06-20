@@ -256,12 +256,11 @@ void SessionRecordingHandler::tickRecording(double dt) {
         KeyframeNavigator::CameraPose(std::move(kf))
     );
 #else
-    _timeline.entries.push_back(
-        SessionRecording::Entry(
-            _recording.elapsedTime,
-            global::timeManager->time().j2000Seconds(),
-            KeyframeNavigator::CameraPose(std::move(kf))
-        )
+    SessionRecording::Entry entry;
+    entry.timestamp = _recording.elapsedTime;
+    entry.simulationTime = global::timeManager->time().j2000Seconds();
+    entry.value = KeyframeNavigator::CameraPose(std::move(kf));
+    _timeline.entries.push_back(std::move(entry));
     );
 #endif
 // MacOS seems to have some issue with emplace_back here
@@ -575,13 +574,11 @@ void SessionRecordingHandler::saveScriptKeyframeToTimeline(std::string script) {
         std::move(script)
     );
 #else
-    _timeline.entries.push_back(
-        SessionRecording::Entry(
-            _recording.elapsedTime,
-            global::timeManager->time().j2000Seconds(),
-            std::move(script)
-        )
-    );
+    SessionRecording::Entry entrysc;
+    entrysc.timestamp = _recording.elapsedTime;
+    entrysc.simulationTime = global::timeManager->time().j2000Seconds();
+    entrysc.value = std::move(script);
+    _timeline.entries.push_back(std::move(entrysc));
 #endif
 // Since MacOS seems to refuse to compile with emplace_back()
 }
