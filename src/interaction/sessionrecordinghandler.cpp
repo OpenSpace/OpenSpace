@@ -256,8 +256,15 @@ void SessionRecordingHandler::tickRecording(double dt) {
         KeyframeNavigator::CameraPose(std::move(kf))
     );
 #else
-
+    _timeline.entries.push_back(
+        SessionRecording::Entry(
+            _recording.elapsedTime,
+            global::timeManager->time().j2000Seconds(),
+            KeyframeNavigator::CameraPose(std::move(kf))
+        )
+    );
 #endif
+// MacOS seems to have some issue with emplace_back here
 }
 
 void SessionRecordingHandler::render() const {
@@ -561,11 +568,22 @@ void SessionRecordingHandler::saveScriptKeyframeToTimeline(std::string script) {
         }
     }
 
+#ifndef __APPLE__
     _timeline.entries.emplace_back(
         _recording.elapsedTime,
         global::timeManager->time().j2000Seconds(),
         std::move(script)
     );
+#else
+    _timeline.entries.push_back(
+        SessionRecording::Entry(
+            _recording.elapsedTime,
+            global::timeManager->time().j2000Seconds(),
+            std::move(script)
+        )
+    );
+#endif
+// Since MacOS seems to refuse to compile with emplace_back()
 }
 
 void SessionRecordingHandler::savePropertyBaseline(properties::Property& prop) {
@@ -729,7 +747,12 @@ SessionRecordingHandler::CallbackHandle SessionRecordingHandler::addStateChangeC
                                                                    StateChangeCallback cb)
 {
     const CallbackHandle handle = _nextCallbackHandle++;
+#ifndef __APPLE__
     _stateChangeCallbacks.emplace_back(handle, std::move(cb));
+#else
+    _stateChangeCallbacks.push_back(std::make_pair(handle, std::move(cb)));
+// Since MacOS refuses to compile with emplace_back
+#endif
     return handle;
 }
 
