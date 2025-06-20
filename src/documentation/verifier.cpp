@@ -681,6 +681,11 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dictionary,
                 //    TestResult::Offense::Reason::Verification,
                 //    std::format("Expected {} entries, but only got {}", *count, d.size())
                 //);
+                TestResult::Offense o;
+                o.offender = "Count";
+                o.reason = TestResult::Offense::Reason::Verification;
+                o.explanation = std::format("Expected {} entries, but only got {}", *count, d.size());
+                res.offenses.push_back(o);
 #endif // MacOS perhaps doesn't seem to have appropriate emplace_back support for XCode 15, perhaps related https://stackoverflow.com/questions/4303513/push-back-vs-emplace-back
             }
         }
