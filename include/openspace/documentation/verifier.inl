@@ -22,7 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 #ifdef __APPLE__
-include <sstream> // for accumulate -> ostringstream workaround
+#include <sstream> 
+// for accumulate -> ostringstream workaround
 #endif
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
