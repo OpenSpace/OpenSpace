@@ -249,11 +249,15 @@ void SessionRecordingHandler::tickRecording(double dt) {
 
     using namespace datamessagestructures;
     CameraKeyframe kf = generateCameraKeyframe();
+#ifndef __APPLE__
     _timeline.entries.emplace_back(
         _recording.elapsedTime,
         global::timeManager->time().j2000Seconds(),
         KeyframeNavigator::CameraPose(std::move(kf))
     );
+#else
+
+#endif
 }
 
 void SessionRecordingHandler::render() const {
