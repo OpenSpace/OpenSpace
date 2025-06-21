@@ -36,7 +36,6 @@ namespace openspace {
 SpoutModule::SpoutModule() : OpenSpaceModule(Name) {}
 
 void SpoutModule::internalInitialize(const ghoul::Dictionary&) {
-
 #ifdef WIN32
     ghoul::TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
@@ -49,6 +48,14 @@ void SpoutModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderablePlaneSpout>("RenderablePlaneSpout");
     fRenderable->registerClass<RenderableSphereSpout>("RenderableSphereSpout");
 #endif // WIN32
+}
+
+std::vector<documentation::Documentation> SpoutModule::documentations() const {
+    return {
+        ScreenSpaceSpout::Documentation(),
+        RenderablePlaneSpout::Documentation(),
+        RenderableSphereSpout::Documentation()
+    };
 }
 
 } // namespace openspace

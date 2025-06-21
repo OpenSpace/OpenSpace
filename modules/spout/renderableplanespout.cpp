@@ -32,17 +32,10 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo NameInfo = {
-        "SpoutName",
-        "Spout Sender Name",
-        "A value to explicitly set the Spout receiver to use a specific name. If this "
-        "is not a valid name, an empty image is used.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
+    // This `Renderable` type can be used to render a plane with a texture that is
+    // provided by another application on the same computer using the SPOUT library.
+    // Note: The Spout library is only available on Windows.
     struct [[codegen::Dictionary(RenderablePlaneSpout)]] Parameters {
-        // [[codegen::verbatim(NameInfo.description)]]
-        std::optional<std::string> spoutName;
     };
 #include "renderableplanespout_codegen.cpp"
 
@@ -51,7 +44,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePlaneSpout::Documentation() {
-    return codegen::doc<Parameters>("spout_screenspace_spout");
+    return codegen::doc<Parameters>(
+        "spout_screenspace_spout",
+        spout::SpoutReceiverPropertyProxy::Documentation()
+    );
 }
 
 RenderablePlaneSpout::RenderablePlaneSpout(const ghoul::Dictionary& dictionary)
@@ -69,14 +65,14 @@ RenderablePlaneSpout::RenderablePlaneSpout(const ghoul::Dictionary& dictionary)
             setIdentifier("RenderablePlaneSpout");
         }
         else {
-            setIdentifier("RenderablePlaneSpout" + std::to_string(iIdentifier));
+            setIdentifier(std::format("RenderablePlaneSpout{}", iIdentifier));
         }
         id++;
     }
 
     if (_guiName.empty()) {
         // Adding an extra space to the user-facing name as it looks nicer
-        setGuiName("RenderablePlaneSpout " + std::to_string(iIdentifier));
+        setGuiName(std::format("RenderablePlaneSpout {}", iIdentifier));
     }
 }
 
