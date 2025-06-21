@@ -93,7 +93,7 @@ namespace {
 [[codegen::luawrap]] std::string readFile(std::filesystem::path file) {
     std::filesystem::path p = absPath(file);
     if (!std::filesystem::is_regular_file(p)) {
-        throw ghoul::lua::LuaError(std::format("Could not open file '{}'", file));
+        throw ghoul::lua::LuaError(std::format("Could not open file '{}'", file.string()));
     }
 
     std::ifstream f(p);
@@ -107,7 +107,7 @@ namespace {
 [[codegen::luawrap]] std::vector<std::string> readFileLines(std::filesystem::path file) {
     std::filesystem::path p = absPath(file);
     if (!std::filesystem::is_regular_file(p)) {
-        throw ghoul::lua::LuaError(std::format("Could not open file '{}'", file));
+        throw ghoul::lua::LuaError(std::format("Could not open file '{}'", file.string()));
     }
 
     std::ifstream f = std::ifstream(p);
