@@ -176,13 +176,11 @@ namespace {
         Script
     };
 
-#ifndef __APPLE__
     template <DataMode mode>
     std::optional<FrameType> readFrameType(std::istream&, int) {
         static_assert(sizeof(int) == 0, "Unimplemented overload");
         return std::nullopt;
     }
-#endif // XCode 15.4 has a problem compiling this - probably due to limited support for std::optional
 
     template <>
     std::optional<FrameType> readFrameType<DataMode::Ascii>(std::istream& stream, int) {
@@ -228,12 +226,12 @@ namespace {
                 throw LoadingError(std::format("Unrecognized frame '{}'", frameType));
         }
     }
-#ifndef __APPLE__
+
     template <DataMode mode>
     void writeFrameType(std::ostream&, const FrameType&) {
         static_assert(sizeof(int) == 0, "Unimplemented overload");
     }
-#endif // XCode 15.4 possibly has issues with this
+
 
     template <>
     void writeFrameType<DataMode::Ascii>(std::ostream& stream, const FrameType& type) {
