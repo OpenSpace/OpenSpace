@@ -618,12 +618,22 @@ void ScriptEngine::registerRepeatedScript(std::string identifier, std::string sc
     if (!preScript.empty()) {
         runScript({ std::move(preScript) });
     }
+#ifndef __APPLE__
     _repeatedScripts.emplace_back(
         std::move(script),
         std::move(postScript),
         std::move(identifier),
         timeout
     );
+#else
+    // XCode complains of no matching constructor with emplace_back, hence this workaround
+        RepeatedScriptInfo info;
+        info.script = std::move(script);
+        info.postScript = std::move(postScript);
+        info.identifier = std::move(identifier);
+        info.timeout = timeout;
+        _repeatedScripts.push_back(std::move(info));
+#endif // APPLE
 }
 
 void ScriptEngine::removeRepeatedScript(std::string_view identifier) {
@@ -651,7 +661,14 @@ void ScriptEngine::scheduleScript(std::string script, double delay) {
         global::sessionRecordingHandler->isSavingFramesDuringPlayback() ?
         global::sessionRecordingHandler->currentApplicationInterpolationTime() :
         global::windowDelegate->applicationTime();
+#ifndef __APPLE__
     _scheduledScripts.emplace_back(std::move(script), now + delay);
+#else
+    ScheduledScriptInfo info;
+    info.script = std::move(script);
+    info.timestamp = now + delay;
+    _scheduledScripts.push_back(std::move(info));
+#endif // __APPLE__ , since XCode complains of no suitable constructor
 }
 
 void ScriptEngine::addBaseLibrary() {
