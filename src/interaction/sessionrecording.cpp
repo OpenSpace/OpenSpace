@@ -175,12 +175,17 @@ namespace {
         Camera,
         Script
     };
-
+#ifndef __APPLE__
     template <DataMode mode>
     std::optional<FrameType> readFrameType(std::istream&, int) {
         static_assert(sizeof(int) == 0, "Unimplemented overload");
         return std::nullopt;
     }
+#else
+    template <DataMode mode>
+    std::optional<FrameType> readFrameType(std::istream&, int) = delete;
+#endif
+// XCode tries to instantiate all template overloads, even if they're not used, hence this workaround, which actually should work with all compilers       
 
     template <>
     std::optional<FrameType> readFrameType<DataMode::Ascii>(std::istream& stream, int) {
@@ -227,10 +232,16 @@ namespace {
         }
     }
 
+#ifndef __APPLE__
     template <DataMode mode>
     void writeFrameType(std::ostream&, const FrameType&) {
         static_assert(sizeof(int) == 0, "Unimplemented overload");
     }
+#else
+    template <DataMode mode>
+    void writeFrameType(std::ostream&, const FrameType&) = delete;
+#endif
+        // XCode tries to instantiate all templates, hence fails to compile the static_assert()
 
 
     template <>
