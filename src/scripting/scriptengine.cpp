@@ -465,7 +465,7 @@ void ScriptEngine::writeLog(const std::string& script) {
     // Simple text output to logfile
     std::ofstream file(_logFilename, std::ofstream::app);
     if (!file.good()) {
-        LERROR(std::format("Could not open file '{}' for logging scripts", _logFilename));
+        LERROR(std::format("Could not open file '{}' for logging scripts", _logFilename.string()));
         return;
     }
 
