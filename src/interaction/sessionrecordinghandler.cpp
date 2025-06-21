@@ -261,9 +261,8 @@ void SessionRecordingHandler::tickRecording(double dt) {
     entry.simulationTime = global::timeManager->time().j2000Seconds();
     entry.value = KeyframeNavigator::CameraPose(std::move(kf));
     _timeline.entries.push_back(std::move(entry));
-    );
 #endif
-// MacOS seems to have some issue with emplace_back here
+// XCode 15.4 seems to have some issue with emplace_back here, hence using push_back instead.
 }
 
 void SessionRecordingHandler::render() const {
