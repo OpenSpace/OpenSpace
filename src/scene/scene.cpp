@@ -737,7 +737,7 @@ void Scene::updateInterpolations() {
                 // therefore it has already been synced and sent to the connected nodes
                 // and peers
                 using Script = scripting::ScriptEngine::Script;
-                global::scriptEngine->queueScript({
+                global::scriptEngine->queueScript(scripting::ScriptEngine::Script{
                     .code = std::move(i.postScript),
                     .synchronized = Script::ShouldBeSynchronized::No,
                     .sendToRemote = Script::ShouldSendToRemote::No

@@ -472,7 +472,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         const std::string cmd = _commands.at(_activeCommand);
         if (!cmd.empty()) {
             using Script = scripting::ScriptEngine::Script;
-            global::scriptEngine->queueScript({
+            global::scriptEngine->queueScript(scripting::ScriptEngine::Script{
                 .code = cmd,
                 .synchronized = Script::ShouldBeSynchronized(_shouldBeSynchronized),
                 .sendToRemote = Script::ShouldSendToRemote(_shouldSendToRemote)

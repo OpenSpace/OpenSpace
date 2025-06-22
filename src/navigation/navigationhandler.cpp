@@ -218,7 +218,7 @@ void NavigationHandler::triggerFadeToTransition(std::string transitionScript,
     }
 
     // No syncing, as this was called from a script that should have been synced already
-    global::scriptEngine->queueScript({
+    global::scriptEngine->queueScript(scripting::ScriptEngine::Script{
         .code = std::move(script),
         .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
         .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No

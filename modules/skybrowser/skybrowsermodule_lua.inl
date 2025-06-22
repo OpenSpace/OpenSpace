@@ -250,7 +250,7 @@ std::string prunedIdentifier(std::string identifier) {
 
             // No sync or send because this is already inside a Lua script, therefor it
             // has already been synced and sent to the connected nodes and peers
-            global::scriptEngine->queueScript({
+            global::scriptEngine->queueScript(scripting::ScriptEngine::Script{
                 .code = script,
                 .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
                 .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
@@ -260,7 +260,7 @@ std::string prunedIdentifier(std::string identifier) {
     // To ensure each node in a cluster calls its own instance of the wwt application
     // Do not send this script to the other nodes. (Note malej 2023-AUG-23: Due to this
     // already being inside a Lua function that have already been synced out)
-    global::scriptEngine->queueScript({
+    global::scriptEngine->queueScript(scripting::ScriptEngine::Script{
         .code = "openspace.skybrowser.sendOutIdsToBrowsers()",
         .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
         .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
@@ -577,7 +577,7 @@ std::string prunedIdentifier(std::string identifier) {
         "openspace.skybrowser.setSelectedBrowser('{3}')",
         browser, target, idTarget, idBrowser
     );
-    global::scriptEngine->queueScript({
+    global::scriptEngine->queueScript(scripting::ScriptEngine::Script{
         .code = script,
         .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
         .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
@@ -601,13 +601,13 @@ std::string prunedIdentifier(std::string identifier) {
         // Remove from engine.
         // No sync or send because this is already inside a Lua script, therefor it has
         // already been synced and sent to the connected nodes and peers
-        global::scriptEngine->queueScript({
+        global::scriptEngine->queueScript(scripting::ScriptEngine::Script{
             .code = "openspace.removeScreenSpaceRenderable('" + browser + "');",
             .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
             .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
         });
 
-        global::scriptEngine->queueScript({
+        global::scriptEngine->queueScript(scripting::ScriptEngine::Script{
             .code = "openspace.removeSceneGraphNode('" + target + "');",
             .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
             .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No

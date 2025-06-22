@@ -49,7 +49,7 @@ namespace {
         );
         // No syncing, as this was triggered from a property change (which happened
         // based on an already synced script)
-        global::scriptEngine->queueScript({
+        global::scriptEngine->queueScript(scripting::ScriptEngine::Script{
             .code = script,
             .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
             .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No

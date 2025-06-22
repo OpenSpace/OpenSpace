@@ -200,7 +200,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
 
     // No sync or send because this is already inside a Lua script, therefor it has
     // already been synced and sent to the connected nodes and peers
-    global::scriptEngine->queueScript({
+    global::scriptEngine->queueScript(scripting::ScriptEngine::Script{
         .code = "openspace.removeSceneGraphNode('" + starIdentifier + "');",
         .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
         .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
