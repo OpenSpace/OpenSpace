@@ -618,7 +618,7 @@ void NavigationHandler::saveNavigationState(const std::filesystem::path& filepat
 
     if (!ofs.good()) {
         throw ghoul::RuntimeError(std::format(
-            "Error saving navigation state to '{}'", filepath
+            "Error saving navigation state to '{}'", filepath.string()
         ));
     }
 
@@ -648,7 +648,7 @@ void NavigationHandler::loadNavigationState(const std::string& filepath,
 
     if (contents.empty()) {
         throw::ghoul::RuntimeError(std::format(
-            "Failed reading camera state from file: {}. File is empty", absolutePath
+            "Failed reading camera state from file: {}. File is empty", absolutePath.string()
         ));
     }
 
