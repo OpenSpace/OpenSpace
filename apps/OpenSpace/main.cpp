@@ -1312,7 +1312,7 @@ int main(int argc, char* argv[]) {
             );
             exit(EXIT_FAILURE);
         }
-        LINFO(std::format("Configuration Path '{}'", configurationFilePath));
+        LINFO(std::format("Configuration Path '{}'", configurationFilePath.string()));
 
         // Register the base path as the directory where the configuration file lives
         std::filesystem::path base = configurationFilePath.parent_path();

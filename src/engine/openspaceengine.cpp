@@ -1539,7 +1539,7 @@ void OpenSpaceEngine::touchExitCallback(TouchInput input) {
 void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
 #ifdef WIN32
     if (file.extension() == ".lnk") {
-        LDEBUG(std::format("Replacing shell link path '{}'", file));
+        LDEBUG(std::format("Replacing shell link path '{}'", file.string()));
         file = FileSys.resolveShellLink(file);
     }
 #endif // WIN32

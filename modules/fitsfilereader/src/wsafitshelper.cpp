@@ -114,7 +114,7 @@ int nLayers(const std::filesystem::path& path) {
     try {
         std::unique_ptr<FITS> file = std::make_unique<FITS>(path.string(), Read, true);
         if (!file.get()) {
-            LERROR(std::format("Failed to open fits file '{}'", path));
+            LERROR(std::format("Failed to open fits file '{}'", path.string()));
             return -1;
         }
         // Convert fits path with fits-file-reader functions

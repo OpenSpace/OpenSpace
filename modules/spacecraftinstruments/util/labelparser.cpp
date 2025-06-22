@@ -161,7 +161,7 @@ bool LabelParser::create() {
         std::ifstream file = std::ifstream(path);
 
         if (!file.good()) {
-            LERROR(std::format("Failed to open label file '{}'", path));
+            LERROR(std::format("Failed to open label file '{}'", path.string()));
             return false;
         }
 
@@ -191,21 +191,21 @@ bool LabelParser::create() {
             if (read == "TARGET_NAME") {
                 _target = decode(line);
                 if (_target.empty()) {
-                    LWARNING(std::format(ErrorMsg, "TARGET_NAME", line, path));
+                    LWARNING(std::format(ErrorMsg, "TARGET_NAME", line, path.string()));
                 }
                 count++;
             }
             if (read == "INSTRUMENT_HOST_NAME") {
                 _instrumentHostID = decode(line);
                 if (_instrumentHostID.empty()) {
-                    LWARNING(std::format(ErrorMsg, "INSTRUMENT_HOST_NAME", line, path));
+                    LWARNING(std::format(ErrorMsg, "INSTRUMENT_HOST_NAME", line, path.string()));
                 }
                 count++;
             }
             if (read == "INSTRUMENT_ID") {
                 _instrumentID = decode(line);
                 if (_instrumentID.empty()) {
-                    LWARNING(std::format(ErrorMsg, "INSTRUMENT_ID", line, path));
+                    LWARNING(std::format(ErrorMsg, "INSTRUMENT_ID", line, path.string()));
                 }
                 lblName = encode(line);
                 count++;
@@ -213,7 +213,7 @@ bool LabelParser::create() {
             if (read == "DETECTOR_TYPE") {
                 _detectorType = decode(line);
                 if (_detectorType.empty()) {
-                    LWARNING(std::format(ErrorMsg, "DETECTOR_TYPE", line, path));
+                    LWARNING(std::format(ErrorMsg, "DETECTOR_TYPE", line, path.string()));
                 }
                 count++;
             }

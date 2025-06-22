@@ -1011,7 +1011,7 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
     bool useAlpha = (t->numberOfChannels() > 3) && _texture.useAlphaChannel;
 
     if (t) {
-        LINFOC("RenderablePlanesCloud", std::format("Loaded texture {}", path));
+        LINFOC("RenderablePlanesCloud", std::format("Loaded texture {}", path.string()));
         // Do not upload the loaded texture to the GPU, we just want it to hold the data.
         // However, convert textures make sure they all use the same format
         ghoul::opengl::Texture::Format targetFormat = glFormat(useAlpha);
