@@ -325,7 +325,7 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
 
     _octreeManager->initOctree(0, _maxDist, _maxStarsPerNode);
 
-    LINFO(std::format("Reading data file '{}'", _inFileOrFolderPath));
+    LINFO(std::format("Reading data file '{}'", _inFileOrFolderPath.string()));
 
     LINFO(std::format(
         "MAX DIST: {} - MAX STARS PER NODE: {}",
@@ -414,7 +414,7 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
     // Slice LOD data before writing to files.
     _octreeManager->sliceLodData();
 
-    LINFO(std::format("Writing octree to '{}'", _outFileOrFolderPath));
+    LINFO(std::format("Writing octree to '{}'", _outFileOrFolderPath.string()));
     std::ofstream outFileStream(_outFileOrFolderPath, std::ofstream::binary);
     if (outFileStream.good()) {
         if (nValues == 0) {
@@ -479,7 +479,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
         std::filesystem::path inFilePath = allInputFiles[idx];
         int nStarsInfile = 0;
 
-        LINFO(std::format("Reading data file '{}'", inFilePath));
+        LINFO(std::format("Reading data file '{}'", inFilePath.string()));
 
         std::ifstream inFileStream(inFilePath, std::ifstream::binary);
         if (inFileStream.good()) {

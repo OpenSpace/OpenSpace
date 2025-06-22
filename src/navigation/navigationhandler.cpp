@@ -612,7 +612,7 @@ void NavigationHandler::saveNavigationState(const std::filesystem::path& filepat
         // Adding the .navstate extension to the filepath if it came without one
         absolutePath.replace_extension(".navstate");
     }
-    LINFO(std::format("Saving camera position: {}", absolutePath));
+    LINFO(std::format("Saving camera position: {}", absolutePath.string()));
 
     std::ofstream ofs(absolutePath);
 
@@ -629,7 +629,7 @@ void NavigationHandler::loadNavigationState(const std::string& filepath,
                                             bool useTimeStamp)
 {
     std::filesystem::path absolutePath = absPath(filepath);
-    LINFO(std::format("Reading camera state from file: {}", absolutePath));
+    LINFO(std::format("Reading camera state from file: {}", absolutePath.string()));
 
     if (!absolutePath.has_extension()) {
         // Adding the .navstate extension to the filepath if it came without one

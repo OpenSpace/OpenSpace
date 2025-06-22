@@ -372,7 +372,7 @@ int main(int argc, char** argv) {
             LFATALC("main", "Could not find configuration: " + configurationFilePath);
             exit(EXIT_FAILURE);
         }
-        LINFO(std::format("Configuration Path: '{}'", configurationFilePath));
+        LINFO(std::format("Configuration Path: '{}'", configurationFilePath.string()));
 
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");

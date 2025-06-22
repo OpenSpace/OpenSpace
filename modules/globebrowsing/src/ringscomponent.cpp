@@ -625,7 +625,7 @@ void RingsComponent::loadTexture() {
         );
 
         if (texture) {
-            LDEBUG(std::format("Loaded texture from '{}'", absPath(_texturePath)));
+            LDEBUG(std::format("Loaded texture from '{}'", absPath(_texturePath).string()));
             _texture = std::move(texture);
 
             _texture->uploadTexture();
@@ -698,7 +698,7 @@ void RingsComponent::loadTexture() {
 
         if (textureUnlit) {
             LDEBUG(
-                std::format("Loaded unlit texture from '{}'", absPath(_textureUnlitPath))
+                std::format("Loaded unlit texture from '{}'", absPath(_textureUnlitPath).string())
             );
             _textureUnlit = std::move(textureUnlit);
 
@@ -720,7 +720,7 @@ void RingsComponent::loadTexture() {
 
         if (textureColor) {
             LDEBUG(
-                std::format("Loaded color texture from '{}'", absPath(_textureColorPath))
+                std::format("Loaded color texture from '{}'", absPath(_textureColorPath).string())
             );
             _textureColor = std::move(textureColor);
 
@@ -742,7 +742,7 @@ void RingsComponent::loadTexture() {
 
         if (textureTransparency) {
             LDEBUG(
-                std::format("Loaded unlit texture from '{}'", absPath(_textureUnlitPath))
+                std::format("Loaded unlit texture from '{}'", absPath(_textureUnlitPath).string())
             );
             _textureTransparency = std::move(textureTransparency);
 

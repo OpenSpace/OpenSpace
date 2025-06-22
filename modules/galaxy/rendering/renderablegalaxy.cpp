@@ -346,7 +346,7 @@ void RenderableGalaxy::initialize() {
     const bool hasCachedFile = std::filesystem::is_regular_file(cachedPointsFile);
     if (hasCachedFile) {
         LINFO(std::format("Cached file '{}' used for galaxy point file '{}'",
-            cachedPointsFile, _pointsFilename
+            cachedPointsFile.string(), _pointsFilename.string()
         ));
 
         Result res = loadCachedFile(cachedPointsFile);
@@ -768,7 +768,7 @@ RenderableGalaxy::Result RenderableGalaxy::loadCachedFile(
     int8_t cacheVersion = 0;
     fileStream.read(reinterpret_cast<char*>(&cacheVersion), sizeof(int8_t));
     if (cacheVersion != CurrentCacheVersion) {
-        LINFO(std::format("Removing cache file '{}' as the version changed", file));
+        LINFO(std::format("Removing cache file '{}' as the version changed", file.string()));
         return { false, {}, {} };
     }
 

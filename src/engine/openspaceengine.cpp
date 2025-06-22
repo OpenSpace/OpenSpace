@@ -303,8 +303,8 @@ void OpenSpaceEngine::initialize() {
     if (global::configuration->usePerProfileCache) {
         cacheFolder = std::format("{}-{}", cacheFolder, global::configuration->profile);
 
-        LINFO(std::format("Old cache: {}", absPath("${CACHE}")));
-        LINFO(std::format("New cache: {}", cacheFolder));
+        LINFO(std::format("Old cache: {}", absPath("${CACHE}").string()));
+        LINFO(std::format("New cache: {}", cacheFolder.string()));
         FileSys.registerPathToken(
             "${CACHE}",
             cacheFolder,
@@ -469,7 +469,7 @@ void OpenSpaceEngine::initialize() {
     }
 
     // Load the profile
-    LINFO(std::format("Loading profile '{}'", profile));
+    LINFO(std::format("Loading profile '{}'", profile.string()));
     *global::profile = Profile(profile);
 
     // Set up asset loader

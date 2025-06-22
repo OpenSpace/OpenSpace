@@ -220,7 +220,7 @@ void StateMachine::saveToDotFile(const std::filesystem::path& filename) const {
     }
     file << "}\n";
 
-    LINFO(std::format("Saved state machine to file: {}", outputFile));
+    LINFO(std::format("Saved state machine to file: {}", outputFile.string()));
 }
 
 } // namespace openspace

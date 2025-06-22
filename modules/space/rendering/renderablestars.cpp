@@ -751,7 +751,7 @@ void RenderableStars::loadPSFTexture() {
             return;
         }
 
-        LDEBUG(std::format("Loaded texture from '{}'", absPath(component.texturePath)));
+        LDEBUG(std::format("Loaded texture from '{}'", absPath(component.texturePath).string()));
         component.texture->uploadTexture();
         component.texture->setWrapping(Texture::WrappingMode::ClampToBorder);
 

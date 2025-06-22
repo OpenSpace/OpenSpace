@@ -268,7 +268,7 @@ void LabelsComponent::loadLabels() {
         return;
     }
 
-    LINFO(std::format("Loading label file '{}'", _labelFile));
+    LINFO(std::format("Loading label file '{}'", _labelFile.string()));
 
     if (_useCache) {
         _labelset = dataloader::label::loadFileWithCache(_labelFile);

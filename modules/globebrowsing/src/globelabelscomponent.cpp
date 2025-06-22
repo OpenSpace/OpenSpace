@@ -370,7 +370,7 @@ bool GlobeLabelsComponent::loadLabelsData(const std::filesystem::path& file) {
     const bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
         LINFO(std::format(
-            "Cached file '{}' used for labels file '{}'", cachedFile, file
+            "Cached file '{}' used for labels file '{}'", cachedFile.string(), file.string()
         ));
 
         const bool hasCache = loadCachedFile(cachedFile);
@@ -384,9 +384,9 @@ bool GlobeLabelsComponent::loadLabelsData(const std::filesystem::path& file) {
         }
     }
     else {
-        LINFO(std::format("Cache for labels file '{}' not found", file));
+        LINFO(std::format("Cache for labels file '{}' not found", file.string()));
     }
-    LINFO(std::format("Loading labels file '{}'", file));
+    LINFO(std::format("Loading labels file '{}'", file.string()));
 
     const bool success = readLabelsFile(file);
     if (success) {

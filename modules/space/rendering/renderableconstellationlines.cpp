@@ -333,7 +333,7 @@ void RenderableConstellationLines::loadData() {
     }
     std::filesystem::path fileName = absPath(_speckFile);
 
-    LINFO(std::format("Loading Speck file '{}'", fileName));
+    LINFO(std::format("Loading Speck file '{}'", fileName.string()));
     std::ifstream file(fileName);
     if (!file.good()) {
         throw ghoul::RuntimeError(std::format(

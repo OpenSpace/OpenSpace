@@ -1200,7 +1200,7 @@ int main(int argc, char* argv[]) {
         std::filesystem::current_path() / std::filesystem::path(argv[0]).parent_path(),
         ghoul::filesystem::FileSystem::Override::Yes
     );
-    LDEBUG(std::format("Registering ${{BIN}} to '{}'", absPath("${BIN}")));
+    LDEBUG(std::format("Registering ${{BIN}} to '{}'", absPath("${BIN}").string()));
 
     //
     // Parse commandline arguments
@@ -1591,7 +1591,7 @@ int main(int argc, char* argv[]) {
 
     // Determining SGCT configuration file
     LINFO(std::format(
-        "SGCT Configuration file: {}", absPath(winConf)
+        "SGCT Configuration file: {}", absPath(winConf).string()
     ));
 
 

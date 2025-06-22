@@ -142,7 +142,7 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
     if (outFileStream.good()) {
         int32_t nValues = static_cast<int32_t>(fullData.size());
         LINFO(std::format(
-            "Writing {} values to file '{}'", nValues, _outFileOrFolderPath
+            "Writing {} values to file '{}'", nValues, _outFileOrFolderPath.string()
         ));
         LINFO("Number of values per star: " + std::to_string(nValuesPerStar));
 

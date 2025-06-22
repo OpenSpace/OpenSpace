@@ -524,13 +524,13 @@ void RenderableModel::initializeGL() {
     if (!_modelHasAnimation) {
         if (!_animationStart.empty()) {
             LWARNING(std::format(
-                "Animation start time given to model '{}' without animation", _file
+                "Animation start time given to model '{}' without animation", _file.string()
             ));
         }
 
         if (_enableAnimation) {
             LWARNING(std::format(
-                "Cannot enable animation for model '{}': it does not have any", _file
+                "Cannot enable animation for model '{}': it does not have any", _file.string()
             ));
             _enableAnimation = false;
         }
@@ -547,7 +547,7 @@ void RenderableModel::initializeGL() {
         else if (!_enableAnimation) {
             LINFO(std::format(
                 "Model '{}' with deactivated animation was found. The animation can be "
-                "activated by entering a start time in the asset file", _file
+                "activated by entering a start time in the asset file", _file.string()
             ));
         }
 

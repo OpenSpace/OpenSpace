@@ -2178,7 +2178,7 @@ bool RenderableGaiaStars::readDataFile() {
     _octreeManager.initOctree(_cpuRamBudgetInBytes);
 
     std::filesystem::path file = absPath(_filePath.value());
-    LINFO(std::format("Loading data file '{}'", file));
+    LINFO(std::format("Loading data file '{}'", file.string()));
 
     switch (fileReaderOption) {
         case gaia::FileReaderOption::Fits:

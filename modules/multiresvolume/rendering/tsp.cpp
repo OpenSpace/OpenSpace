@@ -552,10 +552,10 @@ bool TSP::writeCache() {
 
     std::ofstream file(cacheFilename, std::ios::out | std::ios::binary);
     if (!file.is_open()) {
-        LWARNING(std::format("Failed to open {}", cacheFilename));
+        LWARNING(std::format("Failed to open {}", cacheFilename.string()));
         return false;
     }
-    LINFO(std::format("Writing cache to {}", cacheFilename));
+    LINFO(std::format("Writing cache to {}", cacheFilename.string()));
 
     file.write(reinterpret_cast<char*>(&_minSpatialError), sizeof(float));
     file.write(reinterpret_cast<char*>(&_maxSpatialError), sizeof(float));
