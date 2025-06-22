@@ -301,7 +301,7 @@ void OpenSpaceEngine::initialize() {
 
     std::filesystem::path cacheFolder = absPath("${CACHE}");
     if (global::configuration->usePerProfileCache) {
-        cacheFolder = std::format("{}-{}", cacheFolder, global::configuration->profile);
+        cacheFolder = std::format("{}-{}", cacheFolder.string(), global::configuration->profile);
 
         LINFO(std::format("Old cache: {}", absPath("${CACHE}").string()));
         LINFO(std::format("New cache: {}", cacheFolder.string()));
@@ -382,13 +382,13 @@ void OpenSpaceEngine::initialize() {
             const std::filesystem::path ext = file.extension();
 
             std::filesystem::path newCandidate = file;
-            newCandidate.replace_filename(std::format("{}-{}{}", fname, rot, ext));
+            newCandidate.replace_filename(std::format("{}-{}{}", fname.string(), rot, ext.string()));
 
             std::filesystem::path oldCandidate = file;
             if (rot > 1) {
                 // We don't actually have a -0 version, it is just the base name
                 oldCandidate.replace_filename(
-                    std::format("{}-{}{}", fname, rot - 1, ext)
+                    std::format("{}-{}{}", fname.string(), rot - 1, ext.string())
                 );
             }
 
@@ -1601,7 +1601,7 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
         // If we have a single file, we can just execute it directly
         const bool success = handleFile(file);
         if (!success) {
-            LWARNING(std::format("Unhandled file dropped: {}", file));
+            LWARNING(std::format("Unhandled file dropped: {}", file.string()));
         }
     }
     else if (std::filesystem::is_directory(file)) {

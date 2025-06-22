@@ -546,7 +546,7 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
         ghoul::getline(f, firstLine);
         if (f.bad() || firstLine[0] != '1') {
             throw ghoul::RuntimeError(std::format(
-                "Malformed TLE file '{}' at line {}", file, lineNum + 1
+                "Malformed TLE file '{}' at line {}", file.string(), lineNum + 1
             ));
         }
         // The id only contains the last two digits of the launch year, so we have to
@@ -578,7 +578,7 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
         ghoul::getline(f, secondLine);
         if (f.bad() || secondLine[0] != '2') {
             throw ghoul::RuntimeError(std::format(
-                "Malformed TLE file '{}' at line {}", file, lineNum + 1
+                "Malformed TLE file '{}' at line {}", file.string(), lineNum + 1
             ));
         }
 
@@ -823,7 +823,7 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
         if (!initial) {
             throw ghoul::RuntimeError(std::format(
                 "Unable to parse initial block of line {} in data file '{}'. {}",
-                i, file, line
+                i, file.string(), line
             ));
         }
 
