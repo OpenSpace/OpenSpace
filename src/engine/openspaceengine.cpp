@@ -1031,7 +1031,7 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
         std::filesystem::path s = absPath(script);
         if (std::filesystem::is_regular_file(s)) {
             try {
-                LINFO(std::format("Running global customization script: {}", s));
+                LINFO(std::format("Running global customization script: {}", s.string()));
                 ghoul::lua::runScriptFile(state, s);
             }
             catch (const ghoul::RuntimeError& e) {
@@ -1039,7 +1039,7 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
             }
         }
         else {
-            LDEBUG(std::format("Ignoring non-existing script file: {}", s));
+            LDEBUG(std::format("Ignoring non-existing script file: {}", s.string()));
         }
     }
 }
@@ -1053,11 +1053,11 @@ void OpenSpaceEngine::loadFonts() {
         std::filesystem::path fontName = absPath(font.second);
 
         if (!std::filesystem::is_regular_file(fontName)) {
-            LERROR(std::format("Could not find font '{}' for key '{}'", fontName, key));
+            LERROR(std::format("Could not find font '{}' for key '{}'", fontName.string(), key));
             continue;
         }
 
-        LDEBUG(std::format("Registering font '{}' with key '{}'", fontName, key));
+        LDEBUG(std::format("Registering font '{}' with key '{}'", fontName.string(), key));
         global::fontManager->registerFontPath(key, fontName);
     }
 
