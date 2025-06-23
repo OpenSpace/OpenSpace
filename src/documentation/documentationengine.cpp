@@ -48,7 +48,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringhelper.h>
-ifdef __APPLE__
+#ifdef __APPLE__
 #include <ghoul/misc/stringconversion.h>
 #endif // __APPLE__
 #include <fstream>
