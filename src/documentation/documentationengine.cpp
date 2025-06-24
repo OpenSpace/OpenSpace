@@ -50,6 +50,7 @@
 #include <ghoul/misc/stringhelper.h>
 #ifdef __APPLE__
 #include <ghoul/misc/stringconversion.h>
+#include <ghoul/glm_ostream.h>
 #endif // __APPLE__
 #include <fstream>
 #include <future>
