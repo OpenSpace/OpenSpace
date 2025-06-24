@@ -235,10 +235,18 @@ TestResult testSpecification(const Documentation& documentation,
             }
             if (!p.optional && !dictionary.hasKey(p.key)) {
                 result.success = false;
-                result.offenses.emplace_back(openspace::documentation::TestResult::Offense(
+#ifndef __APPLE__
+                result.offenses.emplace_back(
                     p.key,
-                    TestResult::Offense::Reason::MissingKey)
+                    TestResult::Offense::Reason::MissingKey
                 );
+#else                
+                TestResult::Offense toffense;
+                toffense.offender = p.key;
+                toffense.reason = TestResult::Offense::Reason::MissingKey;
+                toffense.explanation = "";
+                result.offenses.push_back(toffense);
+#endif // __APPLE__ XCode complains no matching constructor, hence manually instantiating                
                 continue;
             }
             applyVerifier(*(p.verifier), p.key);
