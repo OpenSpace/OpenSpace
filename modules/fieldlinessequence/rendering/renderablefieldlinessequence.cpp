@@ -230,6 +230,7 @@ namespace {
     // like the name of the renderable suggests.
     //
     // `LoadingType` can be specified in two ways;
+    //
     // 1. `StaticLoading`: In this case all data is loaded when starting OpenSpace. A
     // `SourceFolder` is then required. The data format is also required to be set with
     // `InputFileType`.
@@ -402,6 +403,7 @@ namespace {
 } // namespace
 
 namespace openspace {
+
 documentation::Documentation RenderableFieldlinesSequence::Documentation() {
     return codegen::doc<Parameters>("fieldlinessequence_renderablefieldlinessequence");
 }
