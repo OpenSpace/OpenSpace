@@ -53,7 +53,7 @@ local fieldlinesSCS = {
     Path = "/Solar System/Heliosphere/WSA Coronal Model",
     Description = [[WSA 5.4 real-time output of the fieldline trace from the Schatten
       Current Sheet model (SCS) outer boundary at 21.5 Rs to the source surface at 2.5 Rs
-      using GONGZ as input. SCS is the , a part of WSA.]],
+      using GONGZ as input.]],
     Focusable = false
   }
 }
