@@ -191,7 +191,7 @@ function (set_openspace_compile_settings target)
     "-Wno-attributes"
     "-Wno-deprecated-enum-enum-conversion"
     "-Wno-missing-braces"
-    "-Wno-missing-designated-field-initializers"
+    "-Wno-missing-field-initializers"
     "-Wno-sign-compare"
     "-Wno-suggest-destructor-override"
     "-Wno-unknown-attributes"
