@@ -235,9 +235,9 @@ TestResult testSpecification(const Documentation& documentation,
             }
             if (!p.optional && !dictionary.hasKey(p.key)) {
                 result.success = false;
-                result.offenses.emplace_back(
+                result.offenses.emplace_back(openspace::documentation::TestResult::Offense(
                     p.key,
-                    TestResult::Offense::Reason::MissingKey
+                    TestResult::Offense::Reason::MissingKey)
                 );
                 continue;
             }
