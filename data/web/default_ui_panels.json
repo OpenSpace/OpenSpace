@@ -91,7 +91,7 @@
   },
   "15": {
     "id": "gettingStartedTour",
-    "visible": true,
+    "visible": false,
     "name": "Getting Started Tour",
     "isOpen": false
   },
