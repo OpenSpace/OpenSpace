@@ -188,7 +188,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
     const std::vector<glm::dvec3> points = currentPath->controlPoints();
 
     const std::string guiPath =
-        std::format("{}/Camera Path Control Points", DebuggingGuiPath.string());
+        std::format("{}/Camera Path Control Points", DebuggingGuiPath);
 
     const char* colorTexturePath = "openspace.absPath("
         "openspace.createSingleColorImage('point_color', { 0.0, 1.0, 0.0 })"
