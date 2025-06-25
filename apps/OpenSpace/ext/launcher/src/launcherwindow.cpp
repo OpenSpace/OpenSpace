@@ -510,7 +510,7 @@ void LauncherWindow::editConfiguration() {
         editRefusalDialog(
             this,
             "Format Validation Error",
-            std::format("Parsing error found in file '{}'", path.string()),
+            std::format("Parsing error found in file '{}'", path),
             std::format(
                 "{}\n\nThis configuration file is unable to generate a proper "
                 "display", err
