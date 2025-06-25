@@ -69,10 +69,18 @@ public:
     );
     void update(const UpdateData& data);
 
-    static documentation::Documentation Documentation();
-
-    bool isEnabled() const;
+    static documentation::Documentation Documentation();    bool isEnabled() const;
     double size() const;
+
+    // Texture access methods for globe rendering
+    ghoul::opengl::Texture* ringTextureFwrd() const;
+    ghoul::opengl::Texture* ringTextureBckwrd() const;
+    ghoul::opengl::Texture* ringTextureUnlit() const;
+    ghoul::opengl::Texture* ringTextureColor() const;
+    ghoul::opengl::Texture* ringTextureTransparency() const;
+    glm::vec2 textureOffset() const;
+    glm::vec3 sunPositionObj() const;
+    glm::vec3 camPositionObj() const;
 
 private:
     void loadTexture();

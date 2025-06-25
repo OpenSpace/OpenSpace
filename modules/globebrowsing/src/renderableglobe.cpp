@@ -1441,9 +1441,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 
     if (_eclipseShadowsEnabled && !_ellipsoid.shadowConfigurationArray().empty()) {
         calculateEclipseShadows(program, data, ShadowCompType::GLOBAL_SHADOW);
-    }
-
-    // Shadow Mapping
+    }    // Shadow Mapping
     ghoul::opengl::TextureUnit shadowMapUnit;
     if (_shadowMappingProperties.shadowMapping && shadowData.shadowDepthTexture != 0) {
         // Adding the model transformation to the final shadow matrix so we have a
@@ -1462,6 +1460,49 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
             "zFightingPercentage",
             _shadowMappingProperties.zFightingPercentage
         );
+
+        // Bind ring textures for direct projection when rings component is available
+        if (_ringsComponent && _ringsComponent->isEnabled() && _ringsComponent->isReady()) {
+            ghoul::opengl::TextureUnit ringTextureFwrdUnit;
+            ghoul::opengl::TextureUnit ringTextureBckwrdUnit;
+            ghoul::opengl::TextureUnit ringTextureUnlitUnit;
+            ghoul::opengl::TextureUnit ringTextureColorUnit;
+            ghoul::opengl::TextureUnit ringTextureTransparencyUnit;
+
+            if (_ringsComponent->ringTextureFwrd()) {
+                ringTextureFwrdUnit.activate();
+                _ringsComponent->ringTextureFwrd()->bind();
+                program.setUniform("ringTextureFwrd", ringTextureFwrdUnit);
+            }
+
+            if (_ringsComponent->ringTextureBckwrd()) {
+                ringTextureBckwrdUnit.activate();
+                _ringsComponent->ringTextureBckwrd()->bind();
+                program.setUniform("ringTextureBckwrd", ringTextureBckwrdUnit);
+            }
+
+            if (_ringsComponent->ringTextureUnlit()) {
+                ringTextureUnlitUnit.activate();
+                _ringsComponent->ringTextureUnlit()->bind();
+                program.setUniform("ringTextureUnlit", ringTextureUnlitUnit);
+            }
+
+            if (_ringsComponent->ringTextureColor()) {
+                ringTextureColorUnit.activate();
+                _ringsComponent->ringTextureColor()->bind();
+                program.setUniform("ringTextureColor", ringTextureColorUnit);
+            }
+
+            if (_ringsComponent->ringTextureTransparency()) {
+                ringTextureTransparencyUnit.activate();
+                _ringsComponent->ringTextureTransparency()->bind();
+                program.setUniform("ringTextureTransparency", ringTextureTransparencyUnit);
+            }
+
+            program.setUniform("textureOffset", _ringsComponent->textureOffset());
+            program.setUniform("sunPositionObj", _ringsComponent->sunPositionObj());
+            program.setUniform("camPositionObj", _ringsComponent->camPositionObj());
+        }
     }
     else if (_shadowMappingProperties.shadowMapping && _shadowComponent) {
         shadowMapUnit.activate();
@@ -1581,9 +1622,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
     if (_eclipseShadowsEnabled && !_ellipsoid.shadowConfigurationArray().empty()) {
         calculateEclipseShadows(program, data, ShadowCompType::LOCAL_SHADOW);
-    }
-
-    // Shadow Mapping
+    }    // Shadow Mapping
     ghoul::opengl::TextureUnit shadowMapUnit;
     if (_shadowMappingProperties.shadowMapping && shadowData.shadowDepthTexture != 0) {
         // Adding the model transformation to the final shadow matrix so we have a
@@ -1602,6 +1641,49 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
             "zFightingPercentage",
             _shadowMappingProperties.zFightingPercentage
         );
+
+        // Bind ring textures for direct projection when rings component is available
+        if (_ringsComponent && _ringsComponent->isEnabled() && _ringsComponent->isReady()) {
+            ghoul::opengl::TextureUnit ringTextureFwrdUnit;
+            ghoul::opengl::TextureUnit ringTextureBckwrdUnit;
+            ghoul::opengl::TextureUnit ringTextureUnlitUnit;
+            ghoul::opengl::TextureUnit ringTextureColorUnit;
+            ghoul::opengl::TextureUnit ringTextureTransparencyUnit;
+
+            if (_ringsComponent->ringTextureFwrd()) {
+                ringTextureFwrdUnit.activate();
+                _ringsComponent->ringTextureFwrd()->bind();
+                program.setUniform("ringTextureFwrd", ringTextureFwrdUnit);
+            }
+
+            if (_ringsComponent->ringTextureBckwrd()) {
+                ringTextureBckwrdUnit.activate();
+                _ringsComponent->ringTextureBckwrd()->bind();
+                program.setUniform("ringTextureBckwrd", ringTextureBckwrdUnit);
+            }
+
+            if (_ringsComponent->ringTextureUnlit()) {
+                ringTextureUnlitUnit.activate();
+                _ringsComponent->ringTextureUnlit()->bind();
+                program.setUniform("ringTextureUnlit", ringTextureUnlitUnit);
+            }
+
+            if (_ringsComponent->ringTextureColor()) {
+                ringTextureColorUnit.activate();
+                _ringsComponent->ringTextureColor()->bind();
+                program.setUniform("ringTextureColor", ringTextureColorUnit);
+            }
+
+            if (_ringsComponent->ringTextureTransparency()) {
+                ringTextureTransparencyUnit.activate();
+                _ringsComponent->ringTextureTransparency()->bind();
+                program.setUniform("ringTextureTransparency", ringTextureTransparencyUnit);
+            }
+
+            program.setUniform("textureOffset", _ringsComponent->textureOffset());
+            program.setUniform("sunPositionObj", _ringsComponent->sunPositionObj());
+            program.setUniform("camPositionObj", _ringsComponent->camPositionObj());
+        }
     }
     else if (_shadowMappingProperties.shadowMapping) {
         shadowMapUnit.activate();

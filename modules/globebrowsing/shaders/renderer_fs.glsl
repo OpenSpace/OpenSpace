@@ -60,12 +60,16 @@ uniform float ambientIntensity;
 
 #if SHADOW_MAPPING_ENABLED
 
-#define NSSamplesMinusOne #{nShadowSamples}
-#define NSSamples (NSSamplesMinusOne + 1)
+// Ring texture projection uniforms
+uniform sampler1D ringTextureFwrd;
+uniform sampler1D ringTextureBckwrd;
+uniform sampler1D ringTextureUnlit;
+uniform sampler1D ringTextureColor;
+uniform sampler1D ringTextureTransparency;
+uniform vec2 textureOffset;
+uniform vec3 sunPositionObj;
+uniform vec3 camPositionObj;
 
-in vec4 shadowCoords;
-uniform sampler2DShadow shadowMapTexture;
-uniform float zFightingPercentage;
 #endif // SHADOW_MAPPING_ENABLED
 
 #if USE_ECLIPSE_SHADOWS
@@ -269,27 +273,45 @@ Fragment getFragment() {
 
 #if SHADOW_MAPPING_ENABLED
   float shadow = 1.0;
-  if (shadowCoords.w > 1) {
-    vec4 normalizedShadowCoords = shadowCoords;
-    normalizedShadowCoords.z    = normalizeFloat(zFightingPercentage * normalizedShadowCoords.w);
-    normalizedShadowCoords.xy   = normalizedShadowCoords.xy / normalizedShadowCoords.w;
-    normalizedShadowCoords.w    = 1.0;
-
-    float sum = 0;
-    #for i in 0..#{nShadowSamples}
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i}, -NSSamples + #{i}));
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i},  0));
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i},  NSSamples - #{i}));
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(                0, -NSSamples + #{i}));
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(                0,  NSSamples - #{i}));
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i}, -NSSamples + #{i}));
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i},  0));
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i},  NSSamples - #{i}));
-    #endfor
-    sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(0, 0));
-    shadow = sum / (8.0 * NSSamples + 1.f);
+  
+  // Calculate ring shadow by projecting ring texture directly onto surface
+  // Assume ring lies in the XZ plane (Y=0) in object space
+  vec3 surfaceToSun = normalize(sunPositionObj - positionCameraSpace);
+  
+  // Find intersection of light ray with ring plane (Y=0)
+  // Ray equation: P = positionCameraSpace + t * surfaceToSun
+  // For ring plane: P.y = 0, so t = -positionCameraSpace.y / surfaceToSun.y
+  if (abs(surfaceToSun.y) > 0.001) { // Avoid division by zero
+    float t = -positionCameraSpace.y / surfaceToSun.y;
+    
+    if (t > 0.0) { // Ray intersects ring plane in front of surface
+      vec3 ringIntersection = positionCameraSpace + t * surfaceToSun;
+      
+      // Calculate distance from ring center
+      float ringRadius = length(ringIntersection.xz);
+      
+      // Convert radius to texture coordinate based on ring texture mapping
+      // Radius \in [textureOffset.x, textureOffset.y] maps to texCoord \in [0,1]
+      float texCoord = (ringRadius - textureOffset.x) / (textureOffset.y - textureOffset.x);
+      
+      if (texCoord >= 0.0 && texCoord <= 1.0) {
+        // Sample ring transparency texture
+        vec4 transparency = texture(ringTextureTransparency, texCoord);
+          // Determine which side of ring we're viewing from (matches ring shader logic)
+        float lerpFactor = dot(camPositionObj, sunPositionObj);
+        
+        // Sample appropriate ring texture based on viewing direction
+        vec4 ringColor = mix(texture(ringTextureFwrd, texCoord), texture(ringTextureBckwrd, texCoord), lerpFactor);
+        
+        // Calculate shadow factor based on ring opacity
+        float ringOpacity = transparency.a;
+        shadow = 1.0 - ringOpacity;
+        shadow = clamp(shadow + 0.3, 0.0, 1.0); // Add ambient light similar to original
+      }
+    }
   }
-  frag.color.xyz *= shadow < 0.99 ? clamp(shadow + 0.3, 0.0, 1.0) : shadow;
+  
+  frag.color.xyz *= shadow;
 #endif
 
   frag.color.a *= opacity;

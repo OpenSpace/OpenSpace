@@ -867,4 +867,36 @@ double RingsComponent::size() const {
     return _size;
 }
 
+ghoul::opengl::Texture* RingsComponent::ringTextureFwrd() const {
+    return _textureForwards.get();
+}
+
+ghoul::opengl::Texture* RingsComponent::ringTextureBckwrd() const {
+    return _textureBackwards.get();
+}
+
+ghoul::opengl::Texture* RingsComponent::ringTextureUnlit() const {
+    return _textureUnlit.get();
+}
+
+ghoul::opengl::Texture* RingsComponent::ringTextureColor() const {
+    return _textureColor.get();
+}
+
+ghoul::opengl::Texture* RingsComponent::ringTextureTransparency() const {
+    return _textureTransparency.get();
+}
+
+glm::vec2 RingsComponent::textureOffset() const {
+    return _offset;
+}
+
+glm::vec3 RingsComponent::sunPositionObj() const {
+    return _sunPosition;
+}
+
+glm::vec3 RingsComponent::camPositionObj() const {
+    return _camPositionObjectSpace;
+}
+
 } // namespace openspace
