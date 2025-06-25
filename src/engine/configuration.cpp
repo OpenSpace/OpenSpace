@@ -76,6 +76,19 @@ namespace {
         // OpenSpace. If it is not provided, it defaults to 'User'
         std::optional<Visibility> propertyVisibility;
 
+        enum class [[codegen::map(openspace::OpenSpaceEngine::PropertyConfirmation)]]
+        PropertyConfirmation
+        {
+            Never,
+            Default,
+            Always
+        };
+        // Determines when the property confirmation modal should be shown when starting
+        // up OpenSpace. If it is not provided, it defaults to 'Default', i.e., each
+        // individual property determines whether it requires a confirmation or not
+        std::optional<PropertyConfirmation> propertyConfirmation;
+        
+
         // A list of paths that are automatically registered with the file system. If a
         // key X is used in the table, it is then useable by referencing ${X} in all other
         // configuration files or scripts
@@ -343,6 +356,7 @@ ghoul::Dictionary Configuration::createDictionary() {
     res.setValue("Asset", asset);
     res.setValue("Profile", profile);
     res.setValue("PropertyVisibility", static_cast<int>(propertyVisibility));
+    res.setValue("PropertyConfirmation", static_cast<int>(propertyConfirmation));
 
     ghoul::Dictionary globalCustomizationScriptsDict;
     for (size_t i = 0; i < globalCustomizationScripts.size(); i++) {
@@ -544,6 +558,11 @@ void parseLuaState(Configuration& configuration) {
     if (p.propertyVisibility.has_value()) {
         c.propertyVisibility = codegen::map<properties::Property::Visibility>(
             *p.propertyVisibility
+        );
+    }
+    if (p.propertyConfirmation.has_value()) {
+        c.propertyConfirmation = codegen::map<OpenSpaceEngine::PropertyConfirmation>(
+            *p.propertyConfirmation
         );
     }
     c.pathTokens = p.paths;

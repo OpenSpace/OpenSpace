@@ -159,7 +159,22 @@ namespace {
         "Disable All Mouse Inputs",
         "Disables all mouse inputs. Useful when using touch interaction, to prevent "
         "double inputs on touch (from both touch input and inserted mouse inputs).",
-        openspace::properties::Property::Visibility::User
+        openspace::properties::Property::Visibility::User,
+        openspace::properties::Property::Confirmation::Always
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo
+        ShowPropertyConfirmationModalInfo =
+    {
+        "ShowPropertyConfirmationModals",
+        "Show Property Confirmation Modals",
+        "Controls when confirmation modals are shown when making changes to properties. "
+        "'Never': Disables confirmation prompts for all properties, unless a specific "
+        "property explicitly requires confirmation. 'Default': Follows the individual "
+        "settings for each property. Properties marked as 'Yes' or 'Always' will require "
+        "confirmation, while others will not. 'Always': Enables confirmation prompts for "
+        "all changes, regardelss of specific property settings.",
+        openspace::properties::Property::Visibility::AdvancedUser,
     };
 
     void viewportChanged() {
@@ -214,6 +229,7 @@ OpenSpaceEngine::OpenSpaceEngine()
     , _visibility(VisibilityInfo)
     , _fadeOnEnableDuration(FadeDurationInfo, 1.f, 0.f, 5.f)
     , _disableAllMouseInputs(DisableMouseInputInfo, false)
+    , _showPropertyConfirmationModal(ShowPropertyConfirmationModalInfo)
 {
     FactoryManager::initialize();
     SpiceManager::initialize();
@@ -230,6 +246,13 @@ OpenSpaceEngine::OpenSpaceEngine()
         { static_cast<int>(Visibility::Hidden), "Everything" },
     });
     addProperty(_visibility);
+
+    _showPropertyConfirmationModal.addOptions({
+        { static_cast<int>(PropertyConfirmation::Never), "Never" },
+        { static_cast<int>(PropertyConfirmation::Default), "Default" },
+        { static_cast<int>(PropertyConfirmation::Always), "Always" }
+    });
+    addProperty(_showPropertyConfirmationModal);
 
     addProperty(_fadeOnEnableDuration);
     addProperty(_disableAllMouseInputs);
@@ -298,6 +321,7 @@ void OpenSpaceEngine::initialize() {
 
     _printEvents = global::configuration->isPrintingEvents;
     _visibility = static_cast<int>(global::configuration->propertyVisibility);
+    _showPropertyConfirmationModal = static_cast<int>(global::configuration->propertyConfirmation);
 
     std::filesystem::path cacheFolder = absPath("${CACHE}");
     if (global::configuration->usePerProfileCache) {

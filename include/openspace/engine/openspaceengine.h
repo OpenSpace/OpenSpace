@@ -88,6 +88,12 @@ public:
         CameraPath
     };
 
+    enum class PropertyConfirmation {
+        Never = 0,
+        Default = 1,
+        Always = 2,
+    };
+
     OpenSpaceEngine();
     ~OpenSpaceEngine() override;
 
@@ -158,6 +164,7 @@ private:
 
     properties::BoolProperty _printEvents;
     properties::OptionProperty _visibility;
+    properties::OptionProperty _showPropertyConfirmationModal;
     properties::FloatProperty _fadeOnEnableDuration;
     properties::BoolProperty _disableAllMouseInputs;
 

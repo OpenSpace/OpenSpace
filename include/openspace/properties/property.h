@@ -85,6 +85,21 @@ public:
     };
 
     /**
+     * The Confirmation classes for Property%s. Always ignore GUI settings, Yes and No
+     * should adhere to GUI settings 
+     */
+    enum class Confirmation {
+        /// Do not confirm with respect to GUI settings
+        No = 0,
+        /// Confirm with respect to GUI settings
+        Yes = 1,
+        /// Always confirm
+        Always = 2,
+        /// The default confirmation for properties
+        Default = No
+    };
+
+    /**
      * This structure is passed to the constructor of a Property and contains the unique
      * identifier, a GUI name and descriptive text that are both user facing.
      */
@@ -93,18 +108,22 @@ public:
          * GCC requires an explicit constructor here, as it does not handle the default
          * argument for the struct initialization.
          */
-        constexpr PropertyInfo(const char* ident, const char* gui, const char* desc)
+        constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
+                               Confirmation needsConfirmation = Confirmation::Default)
             : identifier(ident)
             , guiName(gui)
             , description(desc)
+            , needsConfirmation(needsConfirmation)
         {}
 
         constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
-                               Visibility vis)
+                               Visibility vis,
+                               Confirmation needsConfirmation = Confirmation::Default)
             : identifier(ident)
             , guiName(gui)
             , description(desc)
             , visibility(vis)
+            , needsConfirmation(needsConfirmation)
         {}
 
         /// The unique identifier that is part of the fully qualified URI of this Property
@@ -115,6 +134,9 @@ public:
         const char* description;
         /// Determines the visibility of this Property in the user interface
         Visibility visibility = Visibility::Default;
+        /// Determines if the Property require confirmation upon value change, this flag
+        /// only acts as a hint
+        Confirmation needsConfirmation = Confirmation::Default;
     };
 
     /// An OnChangeHandle is returned by the onChange method to uniquely identify an
@@ -406,11 +428,11 @@ public:
      * This method determines if this Property requires confirmation upon every change of
      * the value. This setting is only a hint and does not need to be followed by GUI
      * applications and does not have any effect on the Property::set or
-     * Property::setLuaValue methods. The default value is `false`.
+     * Property::setLuaValue methods.
      *
-     * \param state `true` if the Property needs confirmation, `false` otherwise
+     * \param confirmation The new confirmation level of the Property
      */
-    void setNeedsConfirmation(bool state);
+    void setNeedsConfirmation(Confirmation confirmation);
 
     /**
      * Default view options that can be used in the Property::setViewOption method. The
@@ -529,7 +551,7 @@ protected:
         std::optional<std::string> group;
         Visibility visibility = Visibility::Default;
         std::optional<bool> readOnly;
-        std::optional<bool> needsConfirmation;
+        Confirmation needsConfirmation;
         std::unordered_map<std::string, bool> viewOptions;
     } _metaData;
 
