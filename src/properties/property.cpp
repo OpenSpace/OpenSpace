@@ -287,6 +287,7 @@ nlohmann::json Property::generateJsonDescription() const {
     };
     static const std::unordered_map<Confirmation, std::string> ConfirmationConverter = {
        { Confirmation::No, "No" },
+       { Confirmation::Never, "Never" },
        { Confirmation::Yes, "Yes" },
        { Confirmation::Always, "Always" }
     };
