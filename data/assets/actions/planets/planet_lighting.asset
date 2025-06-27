@@ -90,8 +90,10 @@ local AllGlobesGlobalIllumination = {
   Identifier = "os.AllGlobesGlobalIllumination",
   Name = "All globes global illumination",
   Command = [[
-    openspace.setPropertyValue("{planet_solarSystem}.Renderable.PerformShading", false)
-    openspace.setPropertyValue("{moon_solarSystem}.Renderable.PerformShading", false)
+    local allGlobes = openspace.nodeByRenderableType("RenderableGlobe")
+    for _, globe in ipairs(allGlobes) do
+      openspace.setPropertyValue("Scene." .. globe .. ".Renderable.PerformShading", false)
+    end
     openspace.setPropertyValue("Scene.*Atmosphere.Renderable.SunFollowingCamera", true)
     openspace.setPropertyValue("Scene.*.Renderable.ShadowsComponent.DistanceFraction", 3000)
     openspace.setPropertyValue("Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Enabled", false)
@@ -105,8 +107,10 @@ local AllGlobesStandardIllumination = {
   Identifier = "os.AllGlobesStandardIllumination",
   Name = "All globes standard illumination",
   Command = [[
-    openspace.setPropertyValue("{planet_solarSystem}.Renderable.PerformShading", true)
-    openspace.setPropertyValue("{moon_solarSystem}.Renderable.PerformShading", true)
+    local allGlobes = openspace.nodeByRenderableType("RenderableGlobe")
+    for _, globe in ipairs(allGlobes) do
+      openspace.setPropertyValue("Scene." .. globe .. ".Renderable.PerformShading", true)
+    end
     openspace.setPropertyValue("Scene.*Atmosphere.Renderable.SunFollowingCamera", false)
     openspace.setPropertyValue("Scene.*.Renderable.ShadowsComponent.DistanceFraction", 40)
     openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Enabled", true)
