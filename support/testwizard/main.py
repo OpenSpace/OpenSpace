@@ -25,9 +25,10 @@
 from openspace import Api
 import asyncio
 import json
+from tabulate import tabulate
 
 async def createCommandNavigationState(openspace):
-  include = input("Include timestamp (y/n). Default 'y'.")
+  include = input("Include timestamp? (y/n, default 'y'): ")
   include = include or "y"
 
   navstate = await openspace.navigation.getNavigationState()
@@ -57,9 +58,9 @@ async def createCommandNavigationState(openspace):
 
 
 async def createCommandAsset(openspace):
-  asset = input("Enter the name of the asset to load (path relative to data/asset). The '.asset' extension is added automatically.")
+  asset = input("Name of the asset to load (path relative to data/asset). The '.asset' extension is added automatically: ")
   if asset == "":
-    return {}
+    return None
 
   return {
     "type": "asset",
@@ -68,11 +69,11 @@ async def createCommandAsset(openspace):
 
 
 async def createCommandProperty(openspace):
-  uri = input("Enter the URI of the property.")
+  uri = input("URI of the property: ")
   if uri == "":
-    return {}
+    return None
 
-  value = openspace.propertyValue(uri)
+  value = await openspace.propertyValue(uri)
 
   return {
     "type": "property",
@@ -84,9 +85,9 @@ async def createCommandProperty(openspace):
 
 
 async def createCommandWait(openspace):
-  wait = input("Enter the number of seconds to wait.")
+  wait = input("Number of seconds to wait: ")
   if wait == "":
-    return {}
+    return None
 
   return {
     "type": "wait",
@@ -94,24 +95,8 @@ async def createCommandWait(openspace):
   }
 
 
-async def createCommandPause(openspace):
-  pause = input("New pause state: (y/n). Default 'y'.")
-  pause = pause or "y"
-
-  p = ""
-  if pause == "y":
-    p = "true"
-  else:
-    p = "false"
-
-  return {
-    "type": "pause",
-    "value": p
-  }
-
-
 async def createCommandScript(openspace):
-  script = input("Enter the script that should be executed.")
+  script = input("Script that should be executed: ")
 
   return {
     "type": "script",
@@ -128,6 +113,22 @@ async def createCommandTime(openspace):
   }
 
 
+async def createCommandPause(openspace):
+  pause = input("New pause state: (y/n). Default 'y': ")
+  pause = pause or "y"
+
+  p = ""
+  if pause == "y":
+    p = "true"
+  else:
+    p = "false"
+
+  return {
+    "type": "pause",
+    "value": p
+  }
+
+
 async def createCommandDeltatime(openspace):
   dt = await openspace.time.deltaTime()
 
@@ -139,16 +140,18 @@ async def createCommandDeltatime(openspace):
 
 async def createCommandAction(openspace):
   actions = await openspace.action.actions()
-  print("List of actions.")
+  print("List of actions:")
   for index,action in enumerate(actions):
     print(  f"  ({index+1}): {action}")
-  action = input("Select which action to to execute or enter the URI of the action.")
 
-  if action == "":
-    return {}
+  action = ""
+  while not action.isnumeric():
+    action = input("Select which action to execute: ")
 
-  if action.isnumeric():
-    action = actions[action]
+    if action == "":
+      return None
+
+  action = actions[action]
 
   return {
     "type": "action",
@@ -156,55 +159,87 @@ async def createCommandAction(openspace):
   }
 
 
+AllCommands = [
+  [
+    "Navigation state",
+    createCommandNavigationState,
+    "Stores the current position of the camera (and optionally the time). When the regression test is run, the saved camera position is restored."
+  ],
+  [
+    "Asset",
+    createCommandAsset,
+    "Causes the regression test to load a specific asset file that needs to be provided manually."
+  ],
+  [
+    "Property",
+    createCommandProperty,
+    "Requests the current value of a specified property. When the regression test is run, the specified property will be set to the stored value."
+  ],
+  [
+    "Wait",
+    createCommandWait,
+    "Causes the test to wait for a specified number of seconds before progressing to the next command in the test."
+  ],
+  [
+    "Script",
+    createCommandScript,
+    "Requests a Lua script that will be executed by the regression test."
+  ],
+  [
+    "Time",
+    createCommandTime,
+    "Stores the current in-game time and restore it when the regression test is run."
+  ],
+  [
+    "Pause",
+    createCommandPause,
+    "Will either pause or resume the simulation time while running the test. This command should generally not be used as a changing clock can generally easily trigger small deviations that will cause image tests to fail."
+  ],
+  [
+    "Deltatime",
+    createCommandDeltatime,
+    "Requests a value for the delta time, which will the be set when the regression test is run. This command should not be used as it requires the in-game time to be unpaused, which can easily trigger small deviations that cause image tests to fail."
+  ],
+  [
+    "Action",
+    createCommandAction,
+    "Provides a selection of registered actions that can be triggered in the regression test."
+  ]
+]
+
+
 async def internalRun(openspace):
   test = {}
+  test["profile"] = await openspace.profile()
 
-  print("OpenSpace Visual Test Creation Wizard")
-  print("=====================================")
-  print()
-  text = input("Enter the name of the test: ")
-  test["profile"] = input("Name of the profile to use: ")
+  name = input("Enter the name of the test: ")
+  if name == "":
+    raise "Must provide a name for the test"
 
-
-  print()
   test["commands"] = []
+
+
   while True:
-    print("Commands to add to the test")
-    print("  ( 1): Navigation state")
-    print("  ( 2): Asset")
-    print("  ( 3): Property")
-    print("  ( 4): Wait")
-    print("  ( 5): Pause")
-    print("  ( 6): Script")
-    print("  ( 7): Time")
-    print("  ( 8): Deltatime")
-    print("  ( 9): Action")
-    print("Finalize the test by entering an empty value")
+    print()
+    print("Select command to add to the test:")
+    for index,cmd in enumerate(AllCommands):
+      print(f"  ({index+1}): {cmd}")
+    print("Finalize the test by selecting the empty value.")
     selection = input()
     if selection == "":
       break
 
-    match int(selection):
-      case 1:
-        test["commands"].append(await createCommandNavigationState(openspace))
-      case 2:
-        test["commands"].append(await createCommandAsset(openspace))
-      case 3:
-        test["commands"].append(await createCommandProperty(openspace))
-      case 4:
-        test["commands"].append(await createCommandWait(openspace))
-      case 5:
-        test["commands"].append(await createCommandPause(openspace))
-      case 6:
-        test["commands"].append(await createCommandScript(openspace))
-      case 7:
-        test["commands"].append(await createCommandTime(openspace))
-      case 8:
-        test["commands"].append(await createCommandDeltatime(openspace))
-      case 9:
-        test["commands"].append(await createCommandAction(openspace))
+    cmd = AllCommands[int(selection) - 1]
+    func = cmd[1]
+    command = func(openspace)
+    if command:
+      test["commands"].append(command)
 
-  with open(f"{text}.ostest", "w") as fp:
+  # Add screenshot command at the end
+  test["commands"].append({ "type": "screenshot" })
+
+  # Save the test to disk
+  with open(f"{name}.ostest", "w") as fp:
     json.dump(test, fp)
 
 async def mainLoop():
@@ -214,5 +249,14 @@ async def mainLoop():
 
   await asyncio.create_task(internalRun(openspace))
   api.disconnect()
+
+print("OpenSpace Visual Test Creation Wizard")
+print("=====================================")
+print("This wizard helps creating image regression test files. To use it, first start ")
+print("OpenSpace with the profile for which to create a test. Then, execute this script ")
+print("and select the commands in the order in which the test should execute them. ")
+print("After picking all commands, leaving the prompt empty finalizes the test.")
+print()
+print(tabulate([[x[0], x[2]] for x in AllCommands], tablefmt="plain", maxcolwidths=[20, 60]))
 
 asyncio.new_event_loop().run_until_complete(mainLoop())
