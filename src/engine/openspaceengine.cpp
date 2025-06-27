@@ -166,14 +166,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo
         ShowPropertyConfirmationModalInfo =
     {
-        "ShowPropertyConfirmationModals",
-        "Show Property Confirmation Modals",
-        "Controls when confirmation modals are shown when making changes to properties. "
+        "ShowPropertyConfirmation",
+        "Show Property Confirmation",
+        "Controls when confirmation dialogs are shown when making changes to properties. "
         "'Never': Disables confirmation prompts for all properties, unless a specific "
         "property explicitly requires confirmation. 'Default': Follows the individual "
         "settings for each property. Properties marked as 'Yes' or 'Always' will require "
         "confirmation, while others will not. 'Always': Enables confirmation prompts for "
-        "all changes, regardelss of specific property settings.",
+        "all changes, regardless of specific property settings.",
         openspace::properties::Property::Visibility::AdvancedUser,
     };
 

@@ -85,18 +85,18 @@ public:
     };
 
     /**
-     * The Confirmation classes for Property%s. Always ignore GUI settings, Yes and No
-     * should adhere to GUI settings 
+     * The Confirmation classes for Property%s. Always and Never ignore GUI settings, Yes
+     * and No should adhere to GUI settings 
      */
     enum class Confirmation {
         /// Do not confirm with respect to GUI settings
         No = 0,
+        // Never confirm
+        Never,
         /// Confirm with respect to GUI settings
-        Yes = 1,
+        Yes,
         /// Always confirm
-        Always = 2,
-        /// The default confirmation for properties
-        Default = No
+        Always,
     };
 
     /**
@@ -109,7 +109,7 @@ public:
          * argument for the struct initialization.
          */
         constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
-                               Confirmation needsConfirmation = Confirmation::Default)
+                               Confirmation needsConfirmation = Confirmation::No)
             : identifier(ident)
             , guiName(gui)
             , description(desc)
@@ -118,7 +118,7 @@ public:
 
         constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
                                Visibility vis,
-                               Confirmation needsConfirmation = Confirmation::Default)
+                               Confirmation needsConfirmation = Confirmation::No)
             : identifier(ident)
             , guiName(gui)
             , description(desc)
@@ -136,7 +136,7 @@ public:
         Visibility visibility = Visibility::Default;
         /// Determines if the Property require confirmation upon value change, this flag
         /// only acts as a hint
-        Confirmation needsConfirmation = Confirmation::Default;
+        Confirmation needsConfirmation = Confirmation::No;
     };
 
     /// An OnChangeHandle is returned by the onChange method to uniquely identify an

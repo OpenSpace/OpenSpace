@@ -90,8 +90,8 @@ public:
 
     enum class PropertyConfirmation {
         Never = 0,
-        Default = 1,
-        Always = 2,
+        Default,
+        Always,
     };
 
     OpenSpaceEngine();
