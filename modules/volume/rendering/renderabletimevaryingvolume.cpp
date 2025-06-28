@@ -242,7 +242,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
     for (std::pair<const double, Timestep>& p : _volumeTimesteps) {
         Timestep& t = p.second;
         const std::string path = std::format(
-            "{}/{}.rawvolume", _sourceDirectory.value().string(), t.baseName
+            "{}/{}.rawvolume", _sourceDirectory.value(), t.baseName
         );
         RawVolumeReader<float> reader(path, t.metadata.dimensions);
         t.rawVolume = reader.read(_invertDataAtZ);
