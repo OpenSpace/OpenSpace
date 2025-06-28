@@ -141,7 +141,7 @@ std::string LabelParser::encode(const std::string& line) const {
 bool LabelParser::create() {
     std::filesystem::path sequenceDir = absPath(_fileName);
     if (!std::filesystem::is_directory(sequenceDir)) {
-        LERROR(std::format("Could not load label directory '{}'", sequenceDir));
+        LERROR(std::format("Could not load label directory '{}'", sequenceDir.string()));
         return false;
     }
 
@@ -245,7 +245,7 @@ bool LabelParser::create() {
                 }
                 else{
                     LERROR(std::format(
-                        "Label file '{}' deviates from generic standard", path
+                        "Label file '{}' deviates from generic standard", path.string()
                     ));
                     LINFO(
                         "Please make sure input data adheres to format from \
