@@ -96,7 +96,7 @@ std::string GenerateRawVolumeTask::description() {
         _dimensions.x, _dimensions.y, _dimensions.z, _valueFunctionLua,
         _lowerDomainBound.x, _lowerDomainBound.y, _lowerDomainBound.z,
         _upperDomainBound.x, _upperDomainBound.y, _upperDomainBound.z,
-        _rawVolumeOutputPath, _dictionaryOutputPath
+        _rawVolumeOutputPath.string(), _dictionaryOutputPath.string()
     );
 }
 
