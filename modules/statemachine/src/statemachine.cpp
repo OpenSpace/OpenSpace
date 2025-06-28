@@ -206,7 +206,7 @@ void StateMachine::saveToDotFile(const std::filesystem::path& filename) const {
     std::ofstream file = std::ofstream(outputFile);
     if (!file.good()) {
         LERROR(std::format(
-            "Error opening file '{}' for saving state machine dot file", outputFile
+            "Error opening file '{}' for saving state machine dot file", outputFile.string()
         ));
         return;
     }
