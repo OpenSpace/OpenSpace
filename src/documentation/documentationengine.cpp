@@ -715,7 +715,7 @@ nlohmann::json DocumentationEngine::generateActionJson() const {
 #else
             // On macOS, std::formatter overloads for std::format are not available
             std::ostringstream oss;
-            oss << value;
+            oss << action.color;
             d[ColorKey] = oss.str();
 #endif // __APPLE__
 
@@ -726,7 +726,7 @@ nlohmann::json DocumentationEngine::generateActionJson() const {
 #else   
             // On macOS, std::formatter overloads for std::format are not available
             std::ostringstream oss;
-            oss << value;
+            oss << action.textColor;
             d[TextColorKey] = oss.str();
 #endif // __APPLE__
         }
