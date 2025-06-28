@@ -73,7 +73,7 @@ ConvertRecFormatTask::ConvertRecFormatTask(const ghoul::Dictionary& dictionary) 
     }
 
     if (!std::filesystem::is_regular_file(_inFilePath)) {
-        LERROR(std::format("Failed to load session recording file: {}", _inFilePath));
+        LERROR(std::format("Failed to load session recording file: {}", _inFilePath.string()));
     }
 }
 
