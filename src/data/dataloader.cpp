@@ -140,7 +140,7 @@ Dataset loadFile(std::filesystem::path path, std::optional<DataMapping> specs) {
     else {
         LERRORC("DataLoader", std::format(
             "Could not read data file '{}'. File format '{}' is not supported",
-            path.string(), path.extension()
+            path.string(), extension
         ));
     }
 
@@ -439,7 +439,7 @@ Labelset loadFile(std::filesystem::path path, std::optional<DataMapping>) {
     else {
         LERRORC("DataLoader", std::format(
             "Could not read label data file '{}'. File format '{}' is not supported",
-            path.string(), path.extension()
+            path.string(), extension
         ));
     }
 
@@ -575,7 +575,7 @@ ColorMap loadFile(std::filesystem::path path, std::optional<DataMapping>) {
     else {
         LERRORC("DataLoader", std::format(
             "Could not read color map file '{}'. File format '{}' is not supported",
-            path.string(), path.extension()
+            path.string(), extension
         ));
     }
 
