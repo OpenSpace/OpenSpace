@@ -224,10 +224,10 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
 RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
 
 void RenderableTimeVaryingVolume::initializeGL() {
-    std::filesystem::path sequenceDir = absPath(_sourceDirectory);
+    std::filesystem::path sequenceDir = absPath();
 
     if (!std::filesystem::is_directory(sequenceDir)) {
-        LERROR(std::format("Could not load sequence directory '{}'", sequenceDir));
+        LERROR(std::format("Could not load sequence directory '{}'", sequenceDir.string()));
         return;
     }
 
