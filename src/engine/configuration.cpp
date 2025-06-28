@@ -793,7 +793,7 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
     ghoul::lua::runScriptFile(result.state, configurationFile);
 
     // If an override file exist, we want to run it straight after
-    const std::filesystem::path override = std::format("{}.override", configurationFile);
+    const std::filesystem::path override = std::format("{}.override", configurationFile.string());
     if (std::filesystem::exists(override)) {
         ghoul::lua::runScriptFile(result.state, override);
     }
