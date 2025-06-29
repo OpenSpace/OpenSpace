@@ -57,7 +57,7 @@ async def createCommandNavigationState(openspace):
   return res
 
 
-async def createCommandAsset(openspace):
+async def createCommandAsset():
   asset = input("Name of the asset to load (path relative to data/asset). The '.asset' extension is added automatically: ")
   if asset == "":
     return None
@@ -84,7 +84,7 @@ async def createCommandProperty(openspace):
   }
 
 
-async def createCommandWait(openspace):
+async def createCommandWait():
   wait = input("Number of seconds to wait: ")
   if wait == "":
     return None
@@ -95,7 +95,7 @@ async def createCommandWait(openspace):
   }
 
 
-async def createCommandScript(openspace):
+async def createCommandScript():
   script = input("Script that should be executed: ")
 
   return {
@@ -113,7 +113,7 @@ async def createCommandTime(openspace):
   }
 
 
-async def createCommandPause(openspace):
+async def createCommandPause():
   pause = input("New pause state: (y/n). Default 'y': ")
   pause = pause or "y"
 
