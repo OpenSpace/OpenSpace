@@ -2090,7 +2090,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
             if (_pointSpreadFunctionTexture) {
                 LDEBUG(std::format(
-                    "Loaded texture from '{}'", absPath(_pointSpreadFunctionTexturePath)
+                    "Loaded texture from '{}'", absPath(_pointSpreadFunctionTexturePath).string()
                ));
                 _pointSpreadFunctionTexture->uploadTexture();
             }
@@ -2118,7 +2118,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             );
             if (_colorTexture) {
                 LDEBUG(std::format(
-                    "Loaded texture from '{}'", absPath(_colorTexturePath)
+                    "Loaded texture from '{}'", absPath(_colorTexturePath).string()
                 ));
                 _colorTexture->uploadTexture();
             }
@@ -2287,7 +2287,7 @@ int RenderableGaiaStars::readBinaryRawFile(const std::filesystem::path& filePath
     }
     else {
         LERROR(std::format(
-            "Error opening file '{}' for loading raw binary file", filePath
+            "Error opening file '{}' for loading raw binary file", filePath.string()
         ));
         return nReadStars;
     }
@@ -2305,7 +2305,7 @@ int RenderableGaiaStars::readBinaryOctreeFile(const std::filesystem::path& fileP
     }
     else {
         LERROR(std::format(
-            "Error opening file '{}' for loading binary Octree file", filePath
+            "Error opening file '{}' for loading binary Octree file", filePath.string()
         ));
         return nReadStars;
     }
@@ -2320,7 +2320,7 @@ int RenderableGaiaStars::readBinaryOctreeStructureFile(
     std::ifstream fileStream = std::ifstream(indexFile, std::ifstream::binary);
     if (!fileStream.good()) {
         LERROR(std::format(
-            "Error opening file '{}' for loading binary Octree file", indexFile
+            "Error opening file '{}' for loading binary Octree file", indexFile.string()
         ));
         return 0;
     }

@@ -299,7 +299,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
             // If this evaluates to true, the stream was not completely filled, which
             // means that the line was incomplete, so there was an error
             LERROR(std::format(
-                "Error reading file '{}' at line #{}", fileName, currentLineNumber
+                "Error reading file '{}' at line #{}", fileName.string(), currentLineNumber
             ));
             break;
         }

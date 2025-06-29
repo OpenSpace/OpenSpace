@@ -728,7 +728,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
                 LWARNING(std::format(
                     "Both a single texture File and multi-texture Folder was provided. "
                     "The folder '{}' has priority and the single texture with the "
-                    "following path will be ignored: '{}'", *t.folder, *t.file
+                    "following path will be ignored: '{}'", *t.folder.string(), *t.file.string()
                 ));
             }
 
@@ -955,7 +955,7 @@ void RenderablePointCloud::initializeSingleTexture() {
 
     if (!std::filesystem::is_regular_file(p)) {
         throw ghoul::RuntimeError(std::format(
-            "Could not find image file '{}'", p
+            "Could not find image file '{}'", p.string()
         ));
     }
 
@@ -969,7 +969,7 @@ void RenderablePointCloud::initializeMultiTextures() {
 
         if (!std::filesystem::is_regular_file(path)) {
             throw ghoul::RuntimeError(std::format(
-                "Could not find image file '{}'", path
+                "Could not find image file '{}'", path.string()
             ));
         }
         loadTexture(path, tex.index);
@@ -1019,7 +1019,7 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
     }
     else {
         throw ghoul::RuntimeError(std::format(
-            "Could not find image file {}", path
+            "Could not find image file {}", path.string()
         ));
     }
 

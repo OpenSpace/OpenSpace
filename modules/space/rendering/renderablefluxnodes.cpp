@@ -358,12 +358,12 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
 
         // Ensure that there are available and valid source files left
         if (_binarySourceFiles.empty()) {
-            LERROR(std::format("'{}' contains no files", _binarySourceFolderPath));
+            LERROR(std::format("'{}' contains no files", _binarySourceFolderPath.string()));
         }
     }
     else {
         LERROR(std::format(
-            "Source folder '{}' is not a valid directory", _binarySourceFolderPath
+            "Source folder '{}' is not a valid directory", _binarySourceFolderPath.string()
         ));
     }
 
@@ -447,13 +447,13 @@ void RenderableFluxNodes::loadNodeData(int energybinOption) {
     }
 
     const std::string file = std::format(
-        "{}/positions{}", _binarySourceFolderPath, energybin
+        "{}/positions{}", _binarySourceFolderPath.string(), energybin
     );
     const std::string file2 = std::format(
-        "{}/fluxes{}", _binarySourceFolderPath, energybin
+        "{}/fluxes{}", _binarySourceFolderPath.string(), energybin
     );
     const std::string file3 = std::format(
-        "{}/radiuses{}", _binarySourceFolderPath, energybin
+        "{}/radiuses{}", _binarySourceFolderPath.string(), energybin
     );
 
     std::ifstream fileStream = std::ifstream(file, std::ifstream::binary);
@@ -647,7 +647,7 @@ void RenderableFluxNodes::populateStartTimes() {
             else {
                 LERROR(std::format(
                     "Error in file formating. Last column in file '{}' is not on UTC "
-                    "ISO8601 format", timeFile
+                    "ISO8601 format", timeFile.string()
                 ));
             }
         }

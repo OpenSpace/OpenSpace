@@ -476,7 +476,7 @@ void RenderableTimeVaryingFitsSphere::extractMandatoryInfoFromSourceFolder() {
         throw ghoul::RuntimeError(std::format(
             "Source folder '{}' for RenderableTimeVaryingFitsSphere is not a valid "
             "directory",
-            sourceFolder
+            sourceFolder.string()
         ));
     }
     // Extract all file paths from the provided folder
@@ -488,7 +488,7 @@ void RenderableTimeVaryingFitsSphere::extractMandatoryInfoFromSourceFolder() {
         }
         if (e.path().extension() != ".fits") {
             throw ghoul::RuntimeError(std::format(
-                "File extension for '{}' required to be .fits", e.path())
+                "File extension for '{}' required to be .fits", e.path().string())
             );
         }
 

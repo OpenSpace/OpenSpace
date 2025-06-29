@@ -155,7 +155,7 @@ namespace {
         std::ofstream fileStream(file, std::ofstream::binary);
 
         if (!fileStream.good()) {
-            LERROR(std::format("Error opening file '{}' for save cache file", file));
+            LERROR(std::format("Error opening file '{}' for save cache file", file.string()));
             return;
         }
 
@@ -444,7 +444,7 @@ void RenderableGalaxy::initializeGL() {
 
         if (_pointSpreadFunctionTexture) {
             LDEBUG(std::format(
-                "Loaded texture from '{}'", absPath(_pointSpreadFunctionTexturePath)
+                "Loaded texture from '{}'", absPath(_pointSpreadFunctionTexturePath).string()
             ));
             _pointSpreadFunctionTexture->uploadTexture();
         }
@@ -761,7 +761,7 @@ RenderableGalaxy::Result RenderableGalaxy::loadCachedFile(
 
     std::ifstream fileStream = std::ifstream(file, std::ifstream::binary);
     if (!fileStream.good()) {
-        LERROR(std::format("Error opening file '{}' for loading cache file", file));
+        LERROR(std::format("Error opening file '{}' for loading cache file", file.string()));
         return { false, {}, {} };
     }
 

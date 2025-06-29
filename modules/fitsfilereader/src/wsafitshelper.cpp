@@ -126,7 +126,7 @@ int nLayers(const std::filesystem::path& path) {
     }
     catch (const CCfits::FitsException& e) {
         LERROR(std::format(
-            "Failed to open fits file '{}'. '{}'", path, e.message()
+            "Failed to open fits file '{}'. '{}'", path.string(), e.message()
         ));
         return 0;
     }

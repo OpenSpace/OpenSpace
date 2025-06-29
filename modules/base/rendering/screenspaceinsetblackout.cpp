@@ -524,7 +524,7 @@ ScreenSpaceInsetBlackout::ScreenSpaceInsetBlackout(const ghoul::Dictionary& dict
                 "ScreenSpaceInsetBlackout",
                 std::format(
                     "Could not find calibration texture '{}'.",
-                    *optTexturePath
+                    *optTexturePath->string()
                 )
             );
         }

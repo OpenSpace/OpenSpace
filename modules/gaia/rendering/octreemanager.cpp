@@ -703,7 +703,7 @@ void OctreeManager::writeToMultipleFiles(const std::filesystem::path& outFolderP
                                          size_t branchIndex)
 {
     // Write entire branch to disc, with one file per node
-    const std::string outFilePrefix = std::format("{}{}", outFolderPath, branchIndex);
+    const std::string outFilePrefix = std::format("{}{}", outFolderPath.string(), branchIndex);
     // More threads doesn't make it much faster, disk speed still the limiter
     writeNodeToMultipleFiles(outFilePrefix, *_root->children[branchIndex], false);
 
@@ -798,7 +798,7 @@ void OctreeManager::fetchNodeDataFromFile(OctreeNode& node) {
     posId.erase(posId.begin());
 
     const std::string inFilePath = std::format(
-        "{}{}{}", _streamFolderPath, posId, BINARY_SUFFIX
+        "{}{}{}", _streamFolderPath.string(), posId, BINARY_SUFFIX
     );
     std::ifstream inFileStream(inFilePath, std::ifstream::binary);
     // LINFO("Fetch node data file: " + inFilePath);

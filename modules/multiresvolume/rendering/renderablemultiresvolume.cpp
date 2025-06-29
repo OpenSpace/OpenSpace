@@ -420,7 +420,7 @@ bool RenderableMultiresVolume::initializeSelector() {
         case Selector::TF:
             if (_errorHistogramManager) {
                  std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
-                     std::format("{}_{}_errorHistograms", _filename.stem(), nHistograms),
+                     std::format("{}_{}_errorHistograms", _filename.stem().string(), nHistograms),
                      ""
                 );
                 std::ifstream cacheFile(cached, std::ios::in | std::ios::binary);
@@ -455,7 +455,7 @@ bool RenderableMultiresVolume::initializeSelector() {
         case Selector::SIMPLE:
             if (_histogramManager) {
                 std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
-                    std::format("{}_{}_histogram", _filename.stem(), nHistograms),
+                    std::format("{}_{}_histogram", _filename.stem().string(), nHistograms),
                     ""
                 );
                 std::ifstream cacheFile(cached, std::ios::in | std::ios::binary);
@@ -485,7 +485,7 @@ bool RenderableMultiresVolume::initializeSelector() {
             if (_localErrorHistogramManager) {
                  std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
                     std::format(
-                        "{}_{}_localErrorHistograms", _filename.stem(), nHistograms
+                        "{}_{}_localErrorHistograms", _filename.stem().string(), nHistograms
                     ),
                     ""
                 );

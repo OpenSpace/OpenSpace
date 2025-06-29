@@ -152,7 +152,7 @@ void GlobeGeometryFeature::updateTexture(bool isInitializeStep) {
     }
     else {
         LERROR(std::format(
-            "Trying to use texture file that does not exist: {}", texturePath
+            "Trying to use texture file that does not exist: {}", texturePath.string()
         ));
     }
 }

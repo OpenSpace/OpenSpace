@@ -296,7 +296,7 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
     const std::string path = std::format("{}/{}/{}/",
         mod.mrfCacheLocation(), _cacheProperties.path, datasetIdentifier);
     const std::filesystem::path root = absPath(path);
-    const std::string mrf = std::format("{}{}.mrf", root, datasetIdentifier);
+    const std::string mrf = std::format("{}{}.mrf", root.string(), datasetIdentifier);
 
     if (!std::filesystem::exists(mrf)) {
         std::error_code ec;
@@ -306,7 +306,7 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
                 LWARNING(std::format(
                     "Failed to create directories for cache at: '{}'. "
                     "Error Code: '{}', message: {}",
-                    root, std::to_string(ec.value()), ec.message()
+                    root.string(), std::to_string(ec.value()), ec.message()
                 ));
                 return std::nullopt;
             }

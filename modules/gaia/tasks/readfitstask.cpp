@@ -107,7 +107,7 @@ std::string ReadFitsTask::description() {
         "Read the specified fits file (or all fits files in specified folder): '{}'\n "
         "and write raw star data into: '{}'\nAll columns required for default rendering "
         "and filtering parameters will always be read but user can define additional "
-        "filter columns to read", _inFileOrFolderPath, _outFileOrFolderPath
+        "filter columns to read", _inFileOrFolderPath.string(), _outFileOrFolderPath.string()
     );
 }
 
@@ -165,7 +165,7 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
     }
     else {
         LERROR(std::format(
-            "Error opening file '{}' as output data file", _outFileOrFolderPath
+            "Error opening file '{}' as output data file", _outFileOrFolderPath.string()
         ));
     }
 }
@@ -303,7 +303,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
 int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int index,
                                     std::vector<bool>& isFirstWrite, int nValuesPerStar)
 {
-    std::string outPath = std::format("{}octant_{}.bin", _outFileOrFolderPath, index);
+    std::string outPath = std::format("{}octant_{}.bin", _outFileOrFolderPath.string(), index);
     std::ofstream fileStream(outPath, std::ofstream::binary | std::ofstream::app);
     if (fileStream.good()) {
         int32_t nValues = static_cast<int32_t>(octantData.size());

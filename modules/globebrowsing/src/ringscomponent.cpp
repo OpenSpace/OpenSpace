@@ -648,7 +648,7 @@ void RingsComponent::loadTexture() {
             LDEBUG(
                 std::format(
                     "Loaded forwards scattering texture from '{}'",
-                    absPath(_textureFwrdPath)
+                    absPath(_textureFwrdPath).string()
                 )
             );
             _textureForwards = std::move(textureForwards);
@@ -674,7 +674,7 @@ void RingsComponent::loadTexture() {
             LDEBUG(
                 std::format(
                     "Loaded backwards scattering texture from '{}'",
-                    absPath(_textureBckwrdPath)
+                    absPath(_textureBckwrdPath).string()
                 )
             );
             _textureBackwards = std::move(textureBackwards);

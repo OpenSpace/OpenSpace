@@ -100,7 +100,7 @@ std::string KameleonVolumeToRawTask::description() {
     return std::format(
         "Extract volumetric data from CDF file '{}'. Write raw volume data into '{}' "
         "and dictionary with metadata to '{}'",
-        _inputPath, _rawVolumeOutputPath, _dictionaryOutputPath
+        _inputPath.string(), _rawVolumeOutputPath.string(), _dictionaryOutputPath.string()
     );
 }
 

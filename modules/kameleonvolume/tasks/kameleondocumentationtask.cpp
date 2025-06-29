@@ -66,7 +66,7 @@ KameleonDocumentationTask::KameleonDocumentationTask(const ghoul::Dictionary& di
 std::string KameleonDocumentationTask::description() {
     return std::format(
         "Extract metadata from CDF file '{}' and output HTML documentation to '{}'",
-        _inputPath, _outputPath
+        _inputPath.string(), _outputPath.string()
     );
 }
 

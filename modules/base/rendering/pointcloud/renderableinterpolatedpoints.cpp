@@ -300,7 +300,7 @@ void RenderableInterpolatedPoints::initialize() {
         LERROR(std::format(
             "Mismatch between provided number of data entries and the specified number "
             "of points. Expected the number of entries in the data file '{}' to be "
-            "evenly divisible by the number of objects", _dataFile
+            "evenly divisible by the number of objects", _dataFile.string()
         ));
     }
 

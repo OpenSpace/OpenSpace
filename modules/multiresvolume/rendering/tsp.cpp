@@ -514,7 +514,7 @@ bool TSP::readCache() {
 
     std::ifstream file(cacheFilename, std::ios::in | std::ios::binary);
     if (!file.is_open()) {
-        LWARNING(std::format("Failed to open {}", cacheFilename));
+        LWARNING(std::format("Failed to open {}", cacheFilename.string()));
         return false;
     }
 

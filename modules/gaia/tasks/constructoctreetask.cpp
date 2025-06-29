@@ -297,7 +297,7 @@ ConstructOctreeTask::ConstructOctreeTask(const ghoul::Dictionary& dictionary) {
 std::string ConstructOctreeTask::description() {
     return std::format(
         "Read bin file (or files in folder) '{}' and write octree data file (or files) "
-        "into '{}'", _inFileOrFolderPath, _outFileOrFolderPath
+        "into '{}'", _inFileOrFolderPath.string(), _outFileOrFolderPath.string()
     );
 }
 
@@ -406,7 +406,7 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
     }
     else {
         LERROR(std::format(
-            "Error opening file '{}' for loading preprocessed file", _inFileOrFolderPath
+            "Error opening file '{}' for loading preprocessed file", _inFileOrFolderPath.string()
         ));
     }
     LINFO(std::format("{} of {} read stars were filtered", nFilteredStars, nTotalStars));
@@ -426,7 +426,7 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
     }
     else {
         LERROR(std::format(
-            "Error opening file '{}' as output data file", _outFileOrFolderPath
+            "Error opening file '{}' as output data file", _outFileOrFolderPath.string()
         ));
     }
 }
@@ -537,7 +537,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
         }
         else {
             LERROR(std::format(
-                "Error opening file '{}' for loading preprocessed file", inFilePath
+                "Error opening file '{}' for loading preprocessed file", inFilePath.string()
             ));
         }
 
@@ -601,7 +601,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
     }
     else {
         LERROR(std::format(
-            "Error opening file '{}' as index output file", indexFileOutPath
+            "Error opening file '{}' as index output file", indexFileOutPath.string()
         ));
     }
 

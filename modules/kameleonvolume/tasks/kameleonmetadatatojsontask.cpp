@@ -60,7 +60,7 @@ KameleonMetadataToJsonTask::KameleonMetadataToJsonTask(
 std::string KameleonMetadataToJsonTask::description() {
     return std::format(
         "Extract metadata from CDF file '{}' and write as JSON to '{}'",
-        _inputPath, _outputPath
+        _inputPath.string(), _outputPath.string()
     );
 }
 

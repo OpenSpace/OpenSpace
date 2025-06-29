@@ -399,7 +399,7 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
     try {
         std::fstream csvLabelFile(file);
         if (!csvLabelFile.good()) {
-            LERROR(std::format("Failed to open labels file '{}'", file));
+            LERROR(std::format("Failed to open labels file '{}'", file.string()));
             return false;
         }
         if (!csvLabelFile.is_open()) {
@@ -482,7 +482,7 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
         return true;
     }
     catch (const std::fstream::failure& e) {
-        LERROR(std::format("Failed reading labels file '{}'", file));
+        LERROR(std::format("Failed reading labels file '{}'", file.string()));
         LERROR(e.what());
         return false;
     }
@@ -491,7 +491,7 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
 bool GlobeLabelsComponent::loadCachedFile(const std::filesystem::path& file) {
     std::ifstream fileStream(file, std::ifstream::binary);
     if (!fileStream.good()) {
-        LERROR(std::format("Error opening file '{}' for loading cache file", file));
+        LERROR(std::format("Error opening file '{}' for loading cache file", file.string()));
         return false;
     }
 
@@ -521,7 +521,7 @@ bool GlobeLabelsComponent::loadCachedFile(const std::filesystem::path& file) {
 bool GlobeLabelsComponent::saveCachedFile(const std::filesystem::path& file) const {
     std::ofstream fileStream = std::ofstream(file, std::ofstream::binary);
     if (!fileStream.good()) {
-        LERROR(std::format("Error opening file '{}' for save cache file", file));
+        LERROR(std::format("Error opening file '{}' for save cache file", file.string()));
         return false;
     }
     fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion), sizeof(int8_t));
