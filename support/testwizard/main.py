@@ -28,8 +28,10 @@ import json
 from tabulate import tabulate
 
 async def createCommandNavigationState(openspace):
-  include = input("Include timestamp? (y/n, default 'y'): ")
-  include = include or "y"
+  include = ""
+  while include != "y" and include != "n":
+    include = input("Include timestamp? (y/n, default 'y'): ")
+    include = include or "y"
 
   navstate = await openspace.navigation.getNavigationState()
   res = {
@@ -57,7 +59,7 @@ async def createCommandNavigationState(openspace):
   return res
 
 
-async def createCommandAsset():
+async def createCommandAsset(openspace):
   asset = input("Name of the asset to load (path relative to data/asset). The '.asset' extension is added automatically: ")
   if asset == "":
     return None
@@ -73,7 +75,12 @@ async def createCommandProperty(openspace):
   if uri == "":
     return None
 
-  value = await openspace.propertyValue(uri)
+  if uri.find("*") != -1 or uri.find("{") != -1:
+    # The URI refers to multiple property values, so we need to as for the specific value
+    value = input("Enter value of the property: ")
+  else:
+    # This is a property identifier that we can use to request a value for
+    value = await openspace.propertyValue(uri)
 
   return {
     "type": "property",
@@ -84,7 +91,7 @@ async def createCommandProperty(openspace):
   }
 
 
-async def createCommandWait():
+async def createCommandWait(openspace):
   wait = input("Number of seconds to wait: ")
   if wait == "":
     return None
@@ -95,7 +102,7 @@ async def createCommandWait():
   }
 
 
-async def createCommandScript():
+async def createCommandScript(openspace):
   script = input("Script that should be executed: ")
 
   return {
@@ -113,7 +120,7 @@ async def createCommandTime(openspace):
   }
 
 
-async def createCommandPause():
+async def createCommandPause(openspace):
   pause = input("New pause state: (y/n). Default 'y': ")
   pause = pause or "y"
 
@@ -210,7 +217,9 @@ AllCommands = [
 
 async def internalRun(openspace):
   test = {}
-  test["profile"] = await openspace.profile()
+  profile = await openspace.profile()
+  profile = profile[:profile.find('.')]
+  test["profile"] = profile
 
   name = input("Enter the name of the test: ")
   if name == "":
@@ -223,7 +232,7 @@ async def internalRun(openspace):
     print()
     print("Select command to add to the test:")
     for index,cmd in enumerate(AllCommands):
-      print(f"  ({index+1}): {cmd}")
+      print(f"  ({index+1}): {cmd[0]}")
     print("Finalize the test by selecting the empty value.")
     selection = input()
     if selection == "":
@@ -231,8 +240,9 @@ async def internalRun(openspace):
 
     cmd = AllCommands[int(selection) - 1]
     func = cmd[1]
-    command = func(openspace)
+    command = await func(openspace)
     if command:
+      print(f"Adding command {cmd[0]}")
       test["commands"].append(command)
 
   # Add screenshot command at the end
@@ -240,7 +250,8 @@ async def internalRun(openspace):
 
   # Save the test to disk
   with open(f"{name}.ostest", "w") as fp:
-    json.dump(test, fp)
+    json.dump(test, fp, indent=2)
+    fp.write("\n")
 
 async def mainLoop():
   api = Api("localhost", 4681)
@@ -258,5 +269,6 @@ print("and select the commands in the order in which the test should execute the
 print("After picking all commands, leaving the prompt empty finalizes the test.")
 print()
 print(tabulate([[x[0], x[2]] for x in AllCommands], tablefmt="plain", maxcolwidths=[20, 60]))
+print()
 
 asyncio.new_event_loop().run_until_complete(mainLoop())
