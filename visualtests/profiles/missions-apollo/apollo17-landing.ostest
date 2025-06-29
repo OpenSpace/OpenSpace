@@ -1,0 +1,81 @@
+{
+  "profile": "missions\\apollo",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Apollo17LemModel",
+        "position": [
+          30.02923583984375,
+          -29.72040557861328,
+          -31.129328727722168
+        ],
+        "pitch": 0.009218857321953586,
+        "referenceFrame": "Root",
+        "up": [
+          0.7131304202232668,
+          0.7007774057501406,
+          0.018868792814849766
+        ],
+        "yaw": -0.0021792706316779713,
+        "timestamp": "1972 DEC 19 17:40:50"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Moon.Renderable.Layers.ColorLayers.A17_travmap.BlendMode",
+        "value": 0.0
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Moon.Renderable.Layers.ColorLayers.A17_travmap.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_17.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Moon.Renderable.Layers.ColorLayers.A17_LEM.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Moon.Renderable.Layers.ColorLayers.A17_LEM.BlendMode",
+        "value": 0.0
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Moon.Renderable.Layers.ColorLayers.A17_NAC_Alt_p.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Moon.Renderable.Layers.ColorLayers.A17_NAC_Alt_p.BlendMode",
+        "value": 0.0
+      }
+    },
+    {
+      "type": "wait",
+      "value": "120"
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

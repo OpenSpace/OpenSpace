@@ -1,0 +1,39 @@
+{
+  "profile": "missions\\apollo",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Apollo8",
+        "position": [
+          5.223876953125,
+          6.3313751220703125,
+          -17.32757568359375
+        ],
+        "pitch": 1.6970685907245127e-05,
+        "referenceFrame": "Root",
+        "up": [
+          0.9532206601710425,
+          -0.2204364309745952,
+          0.20682880099798806
+        ],
+        "yaw": 6.349364881632187e-06,
+        "timestamp": "1968 DEC 24 16:39:06"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "*Trail.Renderable.Enabled",
+        "value": "false"
+      }
+    },
+    {
+      "type": "wait",
+      "value": "30"
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}
