@@ -79,6 +79,11 @@ struct TileDepthTransform {
     float offset = 0.f;
 };
 
+#ifdef __APPLE__
+// XCode wants an explicit constructor
+TileDepthTransform(float s, float o) : scale(s), offset(o) {}
+#endif // __APPLE__
+
 
 
 struct TileMetaData {
