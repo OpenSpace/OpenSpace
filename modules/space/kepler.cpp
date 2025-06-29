@@ -837,6 +837,7 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
         }
 
         std::string epochDate = unpackDate(epoch);
+#ifndef __APPLE__
         result.emplace_back(
             std::move(name),
             std::move(designation),
@@ -850,6 +851,25 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
             epochFromYMDdSubstring(epochDate),
             std::chrono::seconds(std::chrono::hours(24)).count() / meanMotion
         );
+#else
+        // XCode complains about the constructor not being defined
+        Parameters p;
+        p.name = std::move(name);
+        p.id = std::move(designation);
+        p.inclination = inclination;
+        // AU -> km
+        p.semiMajorAxis =
+            semiMajorAxis * distanceconstants::AstronomicalUnit / 1000.0;
+        p.ascendingNode = ascNode;
+        p.eccentricity = eccentricity;
+        p.argumentOfPeriapsis = argPeriapsis;
+        p.meanAnomaly = meanAnomaly;
+        p.epoch = epochFromYMDdSubstring(epochDate);
+        p.period = std::chrono::seconds(std::chrono::hours(24)).count() / meanMotion;
+
+        result.push_back(std::move(p));
+#endif // __APPLE__ XCode complains of lack of constructor
+        
 
     }
 
