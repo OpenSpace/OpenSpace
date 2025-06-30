@@ -82,6 +82,7 @@ async def createCommandAsset(openspace):
       continue
 
   asset = assets[idx]
+  asset = asset.replace("\\", "/")
 
   return {
     "type": "asset",
