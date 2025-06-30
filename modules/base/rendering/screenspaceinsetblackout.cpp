@@ -522,7 +522,7 @@ ScreenSpaceInsetBlackout::ScreenSpaceInsetBlackout(const ghoul::Dictionary& dict
         else {
             // XCode needs special treatment for std::optional types
             std::filesystem::path TexPath;
-            TexPath = optTexturePath;
+            TexPath = *optTexturePath;
             LWARNINGC(
                 "ScreenSpaceInsetBlackout",
                 std::format(
