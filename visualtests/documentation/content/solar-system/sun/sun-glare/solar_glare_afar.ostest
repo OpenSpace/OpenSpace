@@ -1,0 +1,26 @@
+{
+  "profile": "default",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Sun",
+        "position": [
+          84155789111.37135,
+          297871387493.2634,
+          715073492528.5961
+        ],
+        "referenceFrame": "Root",
+        "up": [
+          -0.19298058083955272,
+          0.9136146283740696,
+          -0.3578642287792111
+        ],
+        "timestamp": "2025 JUN 29 20:59:38"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

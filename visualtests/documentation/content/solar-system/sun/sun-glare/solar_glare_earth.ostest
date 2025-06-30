@@ -1,0 +1,52 @@
+{
+  "profile": "default",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Earth",
+        "position": [
+          -745174.9945405964,
+          24541685.91159403,
+          -6341294.803191382
+        ],
+        "pitch": 0.05837219833812837,
+        "up": [
+          0.12447616526348906,
+          0.25176792618858523,
+          0.9597492358027673
+        ],
+        "yaw": 0.2726540070673632,
+        "timestamp": "2025 JUN 29 20:56:47"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.*Trail.Renderable",
+        "value": "false"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Multiplier",
+        "value": 13.84000015258789
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma",
+        "value": 2.109999895095825
+      }
+    },
+    {
+      "type": "wait",
+      "value": "60"
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

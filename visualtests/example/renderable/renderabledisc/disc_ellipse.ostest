@@ -1,0 +1,31 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderableradialgrid/radialgrid_styled.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderableDisc_Example_Ellipse",
+        "position": [
+          -8.912373577600023,
+          240.7060758193548,
+          -143.98449319167156
+        ],
+        "pitch": 0.005038942674584544,
+        "up": [
+          0.223651402188523,
+          -0.4942286228867445,
+          -0.8400703057593334
+        ],
+        "yaw": 0.004635536562576999,
+        "timestamp": "2025 JUN 29 21:57:48"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}
