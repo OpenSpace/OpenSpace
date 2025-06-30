@@ -1,0 +1,38 @@
+{
+  "profile": "missions\\gaia",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Gaia",
+        "position": [
+          -0.06383593832149649,
+          2.2522640717251896,
+          1.1888500079539364
+        ],
+        "pitch": 0.008992242848879232,
+        "up": [
+          -0.08252213166753651,
+          -0.028177232341000936,
+          0.04895040151623098
+        ],
+        "yaw": 0.0011831256009964823,
+        "timestamp": "2019 JUN 10 00:05:03"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.*Trail.Renderable.Enabled",
+        "value": "false"
+      }
+    },
+    {
+      "type": "wait",
+      "value": "15"
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

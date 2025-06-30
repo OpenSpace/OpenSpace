@@ -1,0 +1,36 @@
+{
+  "profile": "missions/mars",
+  "commands": [
+    {
+      "type": "action",
+      "value": "os.insight.Setup"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Insight",
+        "position": [
+          1.3401336669921875,
+          -10.440658569335938,
+          5.037750244140625
+        ],
+        "pitch": 5.7141499404609864e-05,
+        "referenceFrame": "Root",
+        "up": [
+          0.5588702531874072,
+          0.41746135644661153,
+          0.7165124255558993
+        ],
+        "yaw": -7.390185793759023e-05,
+        "timestamp": "2018 NOV 26 19:40:36"
+      }
+    },
+    {
+      "type": "wait",
+      "value": "15"
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

@@ -146,10 +146,12 @@ async def createCommandDeltatime(openspace):
 
 
 async def createCommandAction(openspace):
-  actions = await openspace.action.actions()
+  acts = await openspace.action.actions()
+  actions = [action for index,action in acts.items()]
+
   print("List of actions:")
   for index,action in enumerate(actions):
-    print(  f"  ({index+1}): {action}")
+    print(  f"  ({index+1}): {action["Name"]} ({action["Identifier"]})")
 
   action = ""
   while not action.isnumeric():
@@ -158,11 +160,17 @@ async def createCommandAction(openspace):
     if action == "":
       return None
 
-  action = actions[action]
+    idx = int(action) - 1
+
+    if idx < 0 or idx >= len(actions):
+      print("Invalid index")
+      continue
+
+  action = actions[idx]
 
   return {
     "type": "action",
-    "value": action
+    "value": action["Identifier"]
   }
 
 
@@ -219,6 +227,7 @@ async def internalRun(openspace):
   test = {}
   profile = await openspace.profile()
   profile = profile[:profile.find('.')]
+  profile = profile.replace("\\", "/")
   test["profile"] = profile
 
   name = input("Enter the name of the test: ")
@@ -238,7 +247,17 @@ async def internalRun(openspace):
     if selection == "":
       break
 
-    cmd = AllCommands[int(selection) - 1]
+    if not selection.isnumeric():
+      print("Invalid index")
+      continue
+
+    idx = int(selection) - 1
+
+    if idx < 0 or idx >= len(AllCommands):
+      print("Invalid index")
+      continue
+
+    cmd = AllCommands[idx]
     func = cmd[1]
     command = await func(openspace)
     if command:

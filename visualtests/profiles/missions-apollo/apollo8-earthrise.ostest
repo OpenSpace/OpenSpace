@@ -1,5 +1,5 @@
 {
-  "profile": "missions\\apollo",
+  "profile": "missions/apollo",
   "commands": [
     {
       "type": "navigationstate",
