@@ -1,0 +1,38 @@
+{
+  "profile": "nightsky",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Earth",
+        "position": [
+          3192846.2155912574,
+          925439.4983945834,
+          5443383.943057189
+        ],
+        "pitch": 1.6903369285437138,
+        "up": [
+          -0.1852744417236591,
+          0.9809676336458727,
+          -0.058102349205549686
+        ],
+        "yaw": -0.03168668865273167,
+        "timestamp": "2023 APR 13 19:42:09"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.StereoscopicDepthOfFocusSurface",
+        "value": 5.0
+      }
+    },
+    {
+      "type": "wait",
+      "value": "30"
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "profile": "missions/osirisrex",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "OsirisRex",
+        "position": [
+          2338.341178894043,
+          -17054.8603515625,
+          57953.93472290039
+        ],
+        "referenceFrame": "Root",
+        "up": [
+          -0.2706365371700218,
+          0.920510106928882,
+          0.2818102336509402
+        ],
+        "timestamp": "2018 NOV 02 04:14:41"
+      }
+    },
+    {
+      "type": "pause",
+      "value": "false"
+    },
+    {
+      "type": "deltatime",
+      "value": 0.0
+    },
+    {
+      "type": "wait",
+      "value": "10"
+    },
+    {
+      "type": "pause",
+      "value": "false"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "BennuBarycenter",
+        "position": [
+          -495.29418182373047,
+          -852.7742004394531,
+          1506.3917388916016
+        ],
+        "pitch": -0.002293478788789291,
+        "referenceFrame": "Root",
+        "up": [
+          -0.285919555052317,
+          0.8711613969022869,
+          0.3991589014239081
+        ],
+        "yaw": -0.004905840484298409,
+        "timestamp": "2018 NOV 02 04:14:45"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

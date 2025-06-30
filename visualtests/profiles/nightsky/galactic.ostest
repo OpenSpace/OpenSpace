@@ -1,0 +1,59 @@
+{
+  "profile": "nightsky",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Earth",
+        "position": [
+          3192846.215388023,
+          925439.4979643398,
+          5443383.942485468
+        ],
+        "pitch": 2.0775542657828026,
+        "up": [
+          0.21943529281343616,
+          -0.9749237760736399,
+          0.03703759055604833
+        ],
+        "yaw": 0.1883188867274486,
+        "timestamp": "2023 APR 13 19:46:47"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.StereoscopicDepthOfFocusSurface",
+        "value": 5.0
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.GalacticSphere.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.GalacticSphereLabels.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.GalacticLine.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "wait",
+      "value": "20"
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}
