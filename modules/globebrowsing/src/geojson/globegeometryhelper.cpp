@@ -34,7 +34,7 @@
 
 namespace openspace::globebrowsing::geometryhelper {
 
-Geodetic3 toGeodetic(const geos::geom::& c) {
+Geodetic3 toGeodetic(const geos::geom::Coordinate& c) {
     Geodetic3 gd;
     gd.geodetic2.lon = glm::radians(c.x);
     gd.geodetic2.lat = glm::radians(c.y);
@@ -42,8 +42,8 @@ Geodetic3 toGeodetic(const geos::geom::& c) {
     return gd;
 }
 
-geos::geom:: toGeosCoord(const Geodetic3& gd) {
-    geos::geom:: c;
+geos::geom::Coordinate toGeosCoord(const Geodetic3& gd) {
+    geos::geom::Coordinate c;
     c.x = glm::degrees(gd.geodetic2.lon);
     c.y = glm::degrees(gd.geodetic2.lat);
     c.z = gd.height;
@@ -51,18 +51,18 @@ geos::geom:: toGeosCoord(const Geodetic3& gd) {
 }
 
 std::vector<Geodetic3>
-coordsToGeodetic(const std::vector<geos::geom::>& coords)
+coordsToGeodetic(const std::vector<geos::geom::Coordinate>& coords)
 {
     std::vector<Geodetic3> res;
     res.reserve(coords.size());
-    for (const geos::geom::& c : coords) {
+    for (const geos::geom::Coordinate& c : coords) {
         res.push_back(toGeodetic(c));
     }
     return res;
 }
 
 std::vector<Geodetic3> geometryCoordsAsGeoVector(const geos::geom::Geometry* geometry) {
-    std::vector<geos::geom::> coords;
+    std::vector<geos::geom::Coordinate> coords;
     geometry->gets()->toVector(coords);
     return geometryhelper::coordsToGeodetic(coords);
 }
