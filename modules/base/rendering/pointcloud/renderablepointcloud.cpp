@@ -725,10 +725,14 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
             _texturesDirectory = absPath(*t.folder);
 
             if (t.file.has_value()) {
+                // XCode needs help with std::optional types
+                std::filesystem::path tfolder = *t.folder;
+                std::filesystem::path tfile = *t.file;
+                
                 LWARNING(std::format(
                     "Both a single texture File and multi-texture Folder was provided. "
                     "The folder '{}' has priority and the single texture with the "
-                    "following path will be ignored: '{}'", *t.folder.string(), *t.file.string()
+                    "following path will be ignored: '{}'", tfolder.string(), tfile.string()
                 ));
             }
 
