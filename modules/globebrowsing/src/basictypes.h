@@ -75,15 +75,12 @@ enum Quad {
 
 
 struct TileDepthTransform {
+    TileDepthTransform(float s, float o);
     float scale = 1.f;
     float offset = 0.f;
 };
-
-#ifdef __APPLE__
 // XCode wants an explicit constructor
 TileDepthTransform::TileDepthTransform(float s, float o) : scale(s), offset(o) {}
-#endif // __APPLE__
-
 
 
 struct TileMetaData {
