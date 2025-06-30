@@ -520,11 +520,14 @@ ScreenSpaceInsetBlackout::ScreenSpaceInsetBlackout(const ghoul::Dictionary& dict
             }
         }
         else {
+            // XCode needs special treatment for std::optional types
+            std::filesystem::path TexPath;
+            TexPath = optTexturePath;
             LWARNINGC(
                 "ScreenSpaceInsetBlackout",
                 std::format(
                     "Could not find calibration texture '{}'.",
-                    optTexturePath.string()
+                    TexPath.string()
                 )
             );
         }
