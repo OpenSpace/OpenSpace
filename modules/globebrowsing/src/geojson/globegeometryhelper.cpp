@@ -63,7 +63,7 @@ coordsToGeodetic(const std::vector<geos::geom::Coordinate>& coords)
 
 std::vector<Geodetic3> geometryCoordsAsGeoVector(const geos::geom::Geometry* geometry) {
     std::vector<geos::geom::Coordinate> coords;
-    geometry->gets()->toVector(coords);
+    geometry->getCoordinates()->toVector(coords);
     return geometryhelper::coordsToGeodetic(coords);
 }
 
@@ -145,7 +145,7 @@ createExtrudedGeometryVertices(const std::vector<std::vector<glm::vec3>>& edgeVe
 }
 
 double getHeightToReferenceSurface(const Geodetic2& geo, const RenderableGlobe& globe) {
-    // Compute model space , and potentially account for height map
+    // Compute model space coordinate, and potentially account for height map
     const glm::dvec3 posModelSpaceZeroHeight =
         globe.ellipsoid().cartesianSurfacePosition(geo);
 
@@ -155,7 +155,7 @@ double getHeightToReferenceSurface(const Geodetic2& geo, const RenderableGlobe& 
     return posHandle.heightToSurface;
 }
 
-glm::dvec3 computeOffsetedModel(const Geodetic3& geo,
+glm::dvec3 computeOffsetedModelCoordinate(const Geodetic3& geo,
                                           const RenderableGlobe& globe,
                                           float latOffset, float lonOffset)
 {
