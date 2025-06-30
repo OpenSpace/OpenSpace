@@ -60,9 +60,28 @@ async def createCommandNavigationState(openspace):
 
 
 async def createCommandAsset(openspace):
-  asset = input("Name of the asset to load (path relative to data/asset). The '.asset' extension is added automatically: ")
-  if asset == "":
-    return None
+  assets = await openspace.asset.rootAssets()
+  folder = await openspace.absPath("${ASSETS}")
+  assets = [asset[len(folder)+1:asset.find(".")] for index,asset in assets.items()]
+
+  print("List of assets:")
+  for index,asset in enumerate(assets):
+    print(  f"  ({index+1}): {asset}")
+
+  asset = ""
+  while not asset.isnumeric():
+    asset = input("Select which asset to load: ")
+
+    if asset == "":
+      return None
+
+    idx = int(asset) - 1
+
+    if idx < 0 or idx >= len(assets):
+      print("Invalid index")
+      continue
+
+  asset = assets[idx]
 
   return {
     "type": "asset",
@@ -151,8 +170,8 @@ async def createCommandDeltatime(openspace):
 
 
 async def createCommandAction(openspace):
-  acts = await openspace.action.actions()
-  actions = [action for index,action in acts.items()]
+  actions = await openspace.action.actions()
+  actions = [action for index,action in actions.items()]
 
   print("List of actions:")
   for index,action in enumerate(actions):
