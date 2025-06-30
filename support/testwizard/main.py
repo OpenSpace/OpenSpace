@@ -79,6 +79,11 @@ async def createCommandProperty(openspace):
     # The URI refers to multiple property values, so we need to as for the specific value
     value = input("Enter value of the property: ")
   else:
+    has_property = await openspace.hasProperty(uri)
+    if not has_property:
+      print(f"Property '{uri}' not found")
+      return None
+
     # This is a property identifier that we can use to request a value for
     value = await openspace.propertyValue(uri)
 
