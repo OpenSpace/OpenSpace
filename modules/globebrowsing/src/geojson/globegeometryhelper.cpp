@@ -34,7 +34,7 @@
 
 namespace openspace::globebrowsing::geometryhelper {
 
-Geodetic3 toGeodetic(const geos::geom::Coordinate& c) {
+Geodetic3 toGeodetic(const geos::geom::& c) {
     Geodetic3 gd;
     gd.geodetic2.lon = glm::radians(c.x);
     gd.geodetic2.lat = glm::radians(c.y);
@@ -42,8 +42,8 @@ Geodetic3 toGeodetic(const geos::geom::Coordinate& c) {
     return gd;
 }
 
-geos::geom::Coordinate toGeosCoord(const Geodetic3& gd) {
-    geos::geom::Coordinate c;
+geos::geom:: toGeosCoord(const Geodetic3& gd) {
+    geos::geom:: c;
     c.x = glm::degrees(gd.geodetic2.lon);
     c.y = glm::degrees(gd.geodetic2.lat);
     c.z = gd.height;
@@ -51,19 +51,19 @@ geos::geom::Coordinate toGeosCoord(const Geodetic3& gd) {
 }
 
 std::vector<Geodetic3>
-coordsToGeodetic(const std::vector<geos::geom::Coordinate>& coords)
+coordsToGeodetic(const std::vector<geos::geom::>& coords)
 {
     std::vector<Geodetic3> res;
     res.reserve(coords.size());
-    for (const geos::geom::Coordinate& c : coords) {
+    for (const geos::geom::& c : coords) {
         res.push_back(toGeodetic(c));
     }
     return res;
 }
 
 std::vector<Geodetic3> geometryCoordsAsGeoVector(const geos::geom::Geometry* geometry) {
-    std::vector<geos::geom::Coordinate> coords;
-    geometry->getCoordinates()->toVector(coords);
+    std::vector<geos::geom::> coords;
+    geometry->gets()->toVector(coords);
     return geometryhelper::coordsToGeodetic(coords);
 }
 
@@ -145,7 +145,7 @@ createExtrudedGeometryVertices(const std::vector<std::vector<glm::vec3>>& edgeVe
 }
 
 double getHeightToReferenceSurface(const Geodetic2& geo, const RenderableGlobe& globe) {
-    // Compute model space coordinate, and potentially account for height map
+    // Compute model space , and potentially account for height map
     const glm::dvec3 posModelSpaceZeroHeight =
         globe.ellipsoid().cartesianSurfacePosition(geo);
 
@@ -155,7 +155,7 @@ double getHeightToReferenceSurface(const Geodetic2& geo, const RenderableGlobe& 
     return posHandle.heightToSurface;
 }
 
-glm::dvec3 computeOffsetedModelCoordinate(const Geodetic3& geo,
+glm::dvec3 computeOffsetedModel(const Geodetic3& geo,
                                           const RenderableGlobe& globe,
                                           float latOffset, float lonOffset)
 {
@@ -239,7 +239,7 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
     vertices.reserve(maxSteps * maxSteps);
 
     // Add points inside the triangle
-    std::vector<Coordinate> pointCoords;
+    std::vector<geos::geom::Coordinate> pointCoords;
     pointCoords.reserve(3 * maxSteps + 1);
 
     const Ellipsoid& ellipsoid = globe.ellipsoid();
@@ -308,7 +308,7 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
     // time
     std::vector<std::unique_ptr<Point>> geosPoints;
     geosPoints.reserve(pointCoords.size());
-    for (const Coordinate& c : pointCoords) {
+    for (const geos::geom::Coordinate& c : pointCoords) {
         geosPoints.emplace_back(geometryFactory->createPoint(c));
     }
     std::unique_ptr<MultiPoint> points = geometryFactory->createMultiPoint(
@@ -320,13 +320,13 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
 
     // Returns a list of triangles, as geos polygons
     GeometryCollection* triangleGeoms = builder.getTriangles(*geometryFactory).release();
-    std::vector<Coordinate> triCoords;
+    std::vector<geos::geom::Coordinate> triCoords;
     triangleGeoms->getCoordinates()->toVector(triCoords);
 
     vertices.reserve(vertices.size() + triCoords.size() + 1);
 
     int count = 0;
-    for (const Coordinate& coord : triCoords) {
+    for (const geos::geom::Coordinate& coord : triCoords) {
         count++;
         if (count == 4) {
             // Skip every 4th coord, as polygons have one extra coord per triangle.
