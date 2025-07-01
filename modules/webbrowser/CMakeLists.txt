@@ -202,7 +202,7 @@ if (OS_MACOSX)
     target_link_libraries(${target} libcef_dll_wrapper ${CEF_STANDARD_LIBS})
     set_target_properties(${target} PROPERTIES
       MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/mac/helper-Info.plist
-      OUTPUT_NAME "${target}_OUTPUT_NAME"
+      OUTPUT_NAME "${target}"
     )
 
     target_compile_options(${target} PRIVATE -Wno-deprecated-declarations)
