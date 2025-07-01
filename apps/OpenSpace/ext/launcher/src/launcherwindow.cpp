@@ -510,7 +510,7 @@ void LauncherWindow::editConfiguration() {
         editRefusalDialog(
             this,
             "Format Validation Error",
-            std::format("Parsing error found in file '{}'", path),
+            std::format("Parsing error found in file '{}'", path.string()),
             std::format(
                 "{}\n\nThis configuration file is unable to generate a proper "
                 "display", err
@@ -593,7 +593,7 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
     }
     else {
         // Otherwise, we want to load that profile
-        std::string fullProfilePath = std::format("{}{}.profile", savePath, profile);
+        std::string fullProfilePath = std::format("{}{}.profile", savePath.string(), profile);
         // Verify that the file actually exists
         if (!std::filesystem::exists(fullProfilePath)) {
             QMessageBox::critical(
@@ -647,7 +647,7 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
         &editor,
         &ProfileEdit::raiseExitWindow,
         [&editor, &savePath, &p, &profile]() {
-            const std::string origPath = std::format("{}{}.profile", savePath, profile);
+            const std::string origPath = std::format("{}{}.profile", savePath.string(), profile);
             // If this is a new profile we want to prompt the user, but only if the user
             // actually changed something. If it is still an empty profile, there is no
             // need to save it

@@ -745,12 +745,12 @@ bool HorizonsDialog::handleRequest() {
 
         const std::filesystem::path& oldFile = _horizonsFile.file();
         std::filesystem::path newFile = oldFile;
-        newFile.replace_filename(std::format("{}_error.txt", newName));
+        newFile.replace_filename(std::format("{}_error.txt", newName.string()));
 
         std::filesystem::rename(oldFile, newFile);
 
         const std::string msg = std::format(
-            "For more information, see the saved error file '{}'", newFile
+            "For more information, see the saved error file '{}'", newFile.string()
         );
         appendLog(msg, LogLevel::Info);
     }
