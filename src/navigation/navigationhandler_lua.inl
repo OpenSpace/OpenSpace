@@ -1083,8 +1083,8 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
 /**
  * Fly linearly to a specific distance in relation to the focus node.
  *
- * \param distance The distance to fly to, in meters above the bounding sphere.
- * \param duration An optional duration for the motion to take, in seconds.
+ * \param distance The distance to fly to, in meters above the bounding sphere
+ * \param duration An optional duration for the motion to take, in seconds
  */
 [[codegen::luawrap]] void zoomToDistance(double distance, std::optional<double> duration)
 {
@@ -1126,8 +1126,8 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
  * \param distance The distance to fly to, given as a multiple of the bounding sphere of
  *                 the current focus node bounding sphere. A value of 1 will result in a
  *                 position at a distance of one times the size of the bounding
- *                 sphere away from the object.
- * \param duration An optional duration for the motion, in seconds.
+ *                 sphere away from the object
+ * \param duration An optional duration for the motion, in seconds
  */
 [[codegen::luawrap]] void zoomToDistanceRelative(double distance,
                                                  std::optional<double> duration)
@@ -1169,11 +1169,11 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
  * Fade rendering to black, jump to the specified node, and then fade in. This is done by
  * triggering another script that handles the logic.
  *
- * \param navigationState A [NavigationState](#core_navigation_state) to jump to.
+ * \param navigationState A [NavigationState](#core_navigation_state) to jump to
  * \param useTimeStamp if true, and the provided NavigationState includes a timestamp,
- *                     the time will be set as well.
+ *                     the time will be set as well
  * \param fadeDuration An optional duration for the fading. If not included, the
- *                     property in Navigation Handler will be used.
+ *                     property in Navigation Handler will be used
  */
 [[codegen::luawrap]] void jumpToNavigationState(ghoul::Dictionary navigationState,
                                                 std::optional<bool> useTimeStamp,

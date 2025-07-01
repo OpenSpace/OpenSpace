@@ -96,9 +96,9 @@ documentation::Documentation ScreenSpaceBrowser::Documentation() {
 ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _dimensions(DimensionsInfo, glm::uvec2(0), glm::uvec2(0), glm::uvec2(3000))
+    , _reload(ReloadInfo)
     , _renderHandler(new ScreenSpaceRenderHandler)
     , _url(UrlInfo)
-    , _reload(ReloadInfo)
     , _keyboardHandler(new WebKeyboardHandler)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

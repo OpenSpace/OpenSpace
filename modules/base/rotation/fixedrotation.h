@@ -43,7 +43,7 @@ class FixedRotation : public Rotation {
 public:
     explicit FixedRotation(const ghoul::Dictionary& dictionary);
 
-    bool initialize() override;
+    void initialize() override;
 
     void update(const UpdateData& data) override;
     glm::dmat3 matrix(const UpdateData& data) const override;

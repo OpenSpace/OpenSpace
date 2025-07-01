@@ -68,7 +68,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableTimeVaryingSphere::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_time_varying_sphere");
+    return codegen::doc<Parameters>(
+        "base_renderable_time_varying_sphere",
+        RenderableSphere::Documentation()
+    );
 }
 
 RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
@@ -79,18 +82,13 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _textureSourcePath = p.textureSource.string();
+    extractMandatoryInfoFromSourceFolder();
+    computeSequenceEndTime();
+    loadTexture();
 }
 
 bool RenderableTimeVaryingSphere::isReady() const {
     return RenderableSphere::isReady() && _texture;
-}
-
-void RenderableTimeVaryingSphere::initializeGL() {
-    RenderableSphere::initializeGL();
-
-    extractMandatoryInfoFromSourceFolder();
-    computeSequenceEndTime();
-    loadTexture();
 }
 
 void RenderableTimeVaryingSphere::deinitializeGL() {
@@ -148,9 +146,14 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
 void RenderableTimeVaryingSphere::update(const UpdateData& data) {
     RenderableSphere::update(data);
 
+    if (_files.empty()) {
+        return;
+    }
+
     const double currentTime = data.time.j2000Seconds();
     const bool isInInterval = (currentTime >= _files[0].time) &&
         (currentTime < _sequenceEndTime);
+
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
         if (

@@ -40,7 +40,7 @@ namespace documentation { struct Documentation; }
 
 /**
  * Creates a texture by rendering to a framebuffer, this is then used on a screen space
- * plane. This class lets you ass renderfunctions that should render to a framebuffer with
+ * plane. This class lets you add renderfunctions that should render to a framebuffer with
  * an attached texture. The texture is then used on a screen space plane that works both
  * in fisheye and flat screens.
  */

@@ -256,10 +256,7 @@ local ToggleImagePlane = {
   Identifier = "os.rosetta.ToggleImagePlane",
   Name = "Toggle image plane",
   Command = [[
-    openspace.setPropertyValueSingle(
-      "Scene.ImagePlaneRosetta.Renderable.Enabled",
-      not openspace.propertyValue("Scene.ImagePlaneRosetta.Renderable.Enabled")
-    )
+    openspace.toggleFade("Scene.ImagePlaneRosetta.Renderable")
   ]],
   Documentation = "Toggles the visibility of the free floating image plane",
   GuiPath = "/Missions/Rosetta",
@@ -270,10 +267,7 @@ local TogglePhilaeTrail = {
   Identifier = "os.rosetta.TogglePhilaeTrail",
   Name = "Toggle Philae trail",
   Command = [[
-    openspace.setPropertyValueSingle(
-      "Scene.PhilaeTrail.Renderable.Enabled",
-      not openspace.propertyValue("Scene.PhilaeTrail.Renderable.Enabled")
-    )
+    openspace.toggleFade("Scene.PhilaeTrail.Renderable")
   ]],
   Documentation = "Toggles the visibility of Philae's trail",
   GuiPath = "/Missions/Rosetta",

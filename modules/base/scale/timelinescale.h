@@ -41,6 +41,8 @@ class TimelineScale : public Scale {
 public:
     explicit TimelineScale(const ghoul::Dictionary& dictionary);
 
+    void initialize() override;
+
     void update(const UpdateData& data) override;
     glm::dvec3 scaleValue(const UpdateData& data) const override;
     static documentation::Documentation Documentation();

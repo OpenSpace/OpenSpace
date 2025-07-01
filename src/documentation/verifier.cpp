@@ -376,7 +376,8 @@ TestResult Color3Verifier::operator()(const ghoul::Dictionary& dictionary,
         res.success = false;
         TestResult::Offense o = {
             .offender = key + ".x",
-            .reason = TestResult::Offense::Reason::Verification
+            .reason = TestResult::Offense::Reason::Verification,
+            .explanation = "X value outside allowed range [0,1]"
         };
         res.offenses.push_back(std::move(o));
     }
@@ -385,7 +386,8 @@ TestResult Color3Verifier::operator()(const ghoul::Dictionary& dictionary,
         res.success = false;
         TestResult::Offense o = {
             .offender = key + ".y",
-            .reason = TestResult::Offense::Reason::Verification
+            .reason = TestResult::Offense::Reason::Verification,
+            .explanation = "Y value outside allowed range [0,1]"
         };
         res.offenses.push_back(std::move(o));
     }
@@ -394,7 +396,8 @@ TestResult Color3Verifier::operator()(const ghoul::Dictionary& dictionary,
         res.success = false;
         TestResult::Offense o = {
             .offender = key + ".z",
-            .reason = TestResult::Offense::Reason::Verification
+            .reason = TestResult::Offense::Reason::Verification,
+            .explanation = "Z value outside allowed range [0,1]"
         };
         res.offenses.push_back(std::move(o));
     }
@@ -419,7 +422,8 @@ TestResult Color4Verifier::operator()(const ghoul::Dictionary& dictionary,
         res.success = false;
         TestResult::Offense o = {
             .offender = key + ".x",
-            .reason = TestResult::Offense::Reason::Verification
+            .reason = TestResult::Offense::Reason::Verification,
+            .explanation = "X value outside allowed range [0,1]"
         };
         res.offenses.push_back(std::move(o));
     }
@@ -428,7 +432,8 @@ TestResult Color4Verifier::operator()(const ghoul::Dictionary& dictionary,
         res.success = false;
         TestResult::Offense o = {
             .offender = key + ".y",
-            .reason = TestResult::Offense::Reason::Verification
+            .reason = TestResult::Offense::Reason::Verification,
+            .explanation = "Y value outside allowed range [0,1]"
         };
         res.offenses.push_back(std::move(o));
     }
@@ -437,7 +442,8 @@ TestResult Color4Verifier::operator()(const ghoul::Dictionary& dictionary,
         res.success = false;
         TestResult::Offense o = {
             .offender = key + ".z",
-            .reason = TestResult::Offense::Reason::Verification
+            .reason = TestResult::Offense::Reason::Verification,
+            .explanation = "Z value outside allowed range [0,1]"
         };
         res.offenses.push_back(std::move(o));
     }
@@ -446,7 +452,8 @@ TestResult Color4Verifier::operator()(const ghoul::Dictionary& dictionary,
         res.success = false;
         TestResult::Offense o = {
             .offender = key + ".a",
-            .reason = TestResult::Offense::Reason::Verification
+            .reason = TestResult::Offense::Reason::Verification,
+            .explanation = "W value outside allowed range [0,1]"
         };
         res.offenses.push_back(std::move(o));
     }

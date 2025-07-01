@@ -4,6 +4,7 @@
 *.dir
 *.idea/
 .build-vs/
+.cache/
 .cproject
 .project
 .vs/
@@ -13,6 +14,7 @@ CMakeFiles
 CMakeLists.txt.user
 cmake-build-*
 cmake_install.cmake
+compile_commands.json
 install_manifest.txt
 Makefile
 
@@ -33,11 +35,15 @@ Thumbs.db
 /user/
 /sync/
 /temp/
+GPUCache/
+
 # Customization is not supposed to be committed
 customization.lua
+
 # The COMMIT info is generated everytime CMake is run
 COMMIT.md
 *_codegen.cpp
+
 # SkyBrowser Module downloaded data
 /modules/skybrowser/wwtimagedata
 doc

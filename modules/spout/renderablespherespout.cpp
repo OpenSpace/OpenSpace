@@ -32,12 +32,10 @@
 #include <ghoul/opengl/texture.h>
 
 namespace {
-    // The RenderableSphereSpout can be used to render a sphere with a texture that is
+    // This `Renderable` type can be used to render a sphere with a texture that is
     // provided by another application on the same computer using the SPOUT library.
-    // Note: The Spout library is only available on Windows
+    // Note: The Spout library is only available on Windows.
     struct [[codegen::Dictionary(RenderableSphereSpout)]] Parameters {
-        // Specifies the GUI name of the RenderableSphereSpout
-        std::optional<std::string> name;
     };
 #include "renderablespherespout_codegen.cpp"
 } // namespace
@@ -66,14 +64,14 @@ RenderableSphereSpout::RenderableSphereSpout(const ghoul::Dictionary& dictionary
             setIdentifier("RenderableSphereSpout");
         }
         else {
-            setIdentifier("RenderableSphereSpout" + std::to_string(iIdentifier));
+            setIdentifier(std::format("RenderableSphereSpout{}", iIdentifier));
         }
         id++;
     }
 
     if (_guiName.empty()) {
         // Adding an extra space to the user-facing name as it looks nicer
-        setGuiName("RenderableSphereSpout " + std::to_string(iIdentifier));
+        setGuiName(std::format("RenderableSphereSpout {}", iIdentifier));
     }
 }
 

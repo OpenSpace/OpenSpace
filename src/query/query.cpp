@@ -65,4 +65,8 @@ const std::vector<properties::Property*>& allProperties() {
     return global::openSpaceEngine->allProperties();
 }
 
+const std::vector<properties::PropertyOwner*>& allPropertyOwners() {
+    return global::openSpaceEngine->allPropertyOwners();
+}
+
 }  // namespace openspace

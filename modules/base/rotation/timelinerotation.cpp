@@ -83,6 +83,13 @@ TimelineRotation::TimelineRotation(const ghoul::Dictionary& dictionary)
     addProperty(_shouldInterpolate);
 }
 
+void TimelineRotation::initialize() {
+    Rotation::initialize();
+    for (const Keyframe<ghoul::mm_unique_ptr<Rotation>>& kf : _timeline.keyframes()) {
+        kf.data->initialize();
+    }
+}
+
 void TimelineRotation::update(const UpdateData& data) {
     const double now = data.time.j2000Seconds();
     using KeyframePointer = const Keyframe<ghoul::mm_unique_ptr<Rotation>>*;

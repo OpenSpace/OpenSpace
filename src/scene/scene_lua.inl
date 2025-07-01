@@ -68,7 +68,7 @@ namespace {
  * and if that does not contain the requested tag, its own owners are checked recursively.
  */
 bool ownerMatchesGroupTag(const openspace::properties::PropertyOwner* owner,
-                          std::string_view tagToMatch)
+                          std::string_view tagToMatch, bool recursive = true)
 {
     using namespace openspace;
 
@@ -171,9 +171,11 @@ bool ownerMatchesGroupTag(const openspace::properties::PropertyOwner* owner,
     }
 
     // If we got this far, we have an owner and we haven't found a match, so we have to
-    // try one level higher
-    ghoul_assert(owner, "Owner does not exist");
-    return ownerMatchesGroupTag(owner->owner(), tagToMatch);
+    // try one level higher if we are checking recursively
+    if (recursive) {
+        return ownerMatchesGroupTag(owner->owner(), tagToMatch);
+    }
+    return false;
 }
 
 // Checks to see if URI contains a group tag (with { } around the first term)
@@ -229,6 +231,61 @@ std::tuple<std::string_view, std::string_view, bool> parseRegex(std::string_view
     }
 }
 
+bool checkUriMatchFromRegexResults(std::string_view uri,
+                        std::tuple<std::string_view, std::string_view, bool> regexResults,
+                                   std::string_view groupTag,
+                                   const openspace::properties::PropertyOwner* parentOwner
+    )
+{
+    const bool isGroupMode = !groupTag.empty();
+    auto [parentUri, identifier, isLiteral] = regexResults;
+
+    // Literal check
+    if (isLiteral && uri != identifier) {
+        return false;
+    }
+
+    if (!identifier.empty()) {
+        const size_t propertyPos = uri.find(identifier);
+        if (
+            // Check if the identifier appears in the URI at all
+            (propertyPos == std::string::npos) ||
+            // Check that the identifier fully matches the identifier in URI
+            ((propertyPos + identifier.length() + 1) < uri.length()) ||
+            // Match parent URI
+            (!parentUri.empty() && uri.find(parentUri) == std::string::npos))
+        {
+            return false;
+        }
+
+        // At this point we know that the identifier matches, so another way this
+        // property or property owner to fail is if we provided a tag and the owner
+        // doesn't match it
+        if (isGroupMode && !ownerMatchesGroupTag(parentOwner, groupTag)) {
+            return false;
+        }
+    }
+    else if (!parentUri.empty()) {
+        const size_t parentPos = uri.find(parentUri);
+        if (parentPos == std::string::npos) {
+            return false;
+        }
+
+        // Check tag
+        if (isGroupMode) {
+            if (!ownerMatchesGroupTag(parentOwner, groupTag)) {
+                return false;
+            }
+        }
+        else if (parentPos != 0) {
+            // Check that the node identifier fully matches the node in URI
+            return false;
+        }
+    }
+
+    return true;
+}
+
 std::vector<openspace::properties::Property*> findMatchesInAllProperties(
                                                                    std::string_view regex,
                                                                 std::string_view groupTag)
@@ -236,10 +293,10 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
     using namespace openspace;
     using namespace properties;
 
-    auto [nodeName, propertyIdentifier, isLiteral] = parseRegex(regex);
+    auto [parentUri, propertyIdentifier, isLiteral] = parseRegex(regex);
 
     const bool isGroupMode = !groupTag.empty();
-    if (nodeName.empty() && isGroupMode) {
+    if (parentUri.empty() && isGroupMode) {
         isLiteral = false;
     }
 
@@ -255,50 +312,76 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
         [&](Property* prop) {
             const std::string_view uri = prop->uri();
 
-            if (isLiteral && uri != propertyIdentifier) {
-                return;
+            bool isMatch = checkUriMatchFromRegexResults(
+                uri,
+                { parentUri, propertyIdentifier, isLiteral },
+                groupTag,
+                prop->owner()
+            );
+
+            if (isMatch) {
+                std::lock_guard g(mutex);
+                matches.push_back(prop);
             }
+        }
+    );
 
-            if (!propertyIdentifier.empty()) {
-                const size_t propertyPos = uri.find(propertyIdentifier);
-                if (
-                    // Check if the propertyIdentifier appears in the URI at all
-                    (propertyPos == std::string::npos) ||
-                    // Check that the propertyIdentifier fully matches the property in URI
-                    ((propertyPos + propertyIdentifier.length() + 1) < uri.length()) ||
-                    // Match node name
-                    (!nodeName.empty() && uri.find(nodeName) == std::string::npos))
-                {
-                    return;
-                }
+    return matches;
+}
 
-                // At this point we know that the property name matches, so another way
-                // this property to fail is if we provided a tag and the owner doesn't
-                // match it
-                if (isGroupMode && !ownerMatchesGroupTag(prop->owner(), groupTag)) {
+std::vector<openspace::properties::PropertyOwner*> findMatchesInAllPropertyOwners(
+                                                                   std::string_view regex,
+                                                                std::string_view groupTag)
+{
+    using namespace openspace;
+    using namespace properties;
+
+    auto [parentUri, ownerIdentifier, isLiteral] = parseRegex(regex);
+
+    const bool isGroupMode = !groupTag.empty();
+    if (isGroupMode) {
+        isLiteral = false;
+    }
+
+    // If we are in group mode, no parent URI is found, and there is no punctuation
+    // in the returned owner identifier, we only got the group - no identifier
+    const bool inputIsOnlyTag = isGroupMode && parentUri.empty() &&
+        ownerIdentifier.find(".") == std::string::npos;
+
+    const std::vector<PropertyOwner*>& propertyOwners = allPropertyOwners();
+
+    std::vector<PropertyOwner*> matches;
+
+    std::mutex mutex;
+    std::for_each(
+        std::execution::par_unseq,
+        propertyOwners.cbegin(),
+        propertyOwners.cend(),
+        [&](PropertyOwner* propOwner) {
+            if (inputIsOnlyTag) {
+                // If we only got a tag as input, the result is all owners that directly
+                // match the group tag (without looking recusively in parent owners)
+                if (!ownerMatchesGroupTag(propOwner, groupTag, false)) {
                     return;
                 }
             }
-            else if (!nodeName.empty()) {
-                const size_t nodePos = uri.find(nodeName);
-                if (nodePos == std::string::npos) {
-                    return;
-                }
+            else {
+                const std::string uri = propOwner->uri();
 
-                // Check tag
-                if (isGroupMode) {
-                    if (!ownerMatchesGroupTag(prop->owner(), groupTag)) {
-                        return;
-                    }
-                }
-                else if (nodePos != 0) {
-                    // Check that the node identifier  fully matches the node in URI
+                bool isMatch = checkUriMatchFromRegexResults(
+                    uri,
+                    { parentUri, ownerIdentifier, isLiteral },
+                    groupTag,
+                    propOwner->owner()
+                );
+
+                if (!isMatch) {
                     return;
                 }
             }
 
             std::lock_guard g(mutex);
-            matches.push_back(prop);
+            matches.push_back(propOwner);
         }
     );
 
@@ -631,15 +714,17 @@ namespace {
  * `uri` identifies the property or properties that are returned by this function and can
  * include both wildcards `*` which match anything, as well as tags (`{tag}`) which match
  * scene graph nodes that have this tag. There is also the ability to combine two tags
- * through the `&`, `|`, and `~` operators. `{tag1&tag2}` will match anything that has the
- * tag1 and the tag2. `{tag1|tag2}` will match anything that has the tag1 or the tag 2,
- * and `{tag1~tag2}` will match anything that has tag1 but not tag2. If no wildcards or
- * tags are provided at most one property value will be changed. With wildcards or tags
- * all properties that match the URI are changed instead.
+ * through the `&`, `|`, and `~` operators. `{tag1&tag2}` will match anything that has
+ * both tags `tag1` and `tag2`. `{tag1|tag2}` will match anything that has `tag1` or
+ * `tag2`, and `{tag1~tag2}` will match anything that has `tag1` but not `tag2`. If no
+ * wildcards or tags are provided at most one property identifier will be returned. With
+ * wildcards or tags, the identifiers of all properties that match the URI are returned
+ * instead.
  *
- * \param uri The URI that identifies the property or properties whose values should be
- *            changed. The URI can contain 0 or 1 wildcard `*` characters or a tag
- *            expression (`{tag}`) that identifies a property owner.
+ * \param uri The URI that identifies the property or properties to get. The URI can
+ *            contain 0 or 1 wildcard `*` characters or a tag expression (`{tag}`) that
+ *            identifies a property owner.
+ * \ return A list of property URIs
  */
 [[codegen::luawrap]] std::vector<std::string> property(std::string uri) {
     using namespace openspace;
@@ -656,6 +741,43 @@ namespace {
     matches.reserve(props.size());
     for (properties::Property* prop : props) {
         matches.emplace_back(prop->uri());
+    }
+    return matches;
+}
+
+/**
+ * Returns a list of property owner identifiers that match the passed regular expression.
+ * The `uri` identifies the property owner or owner that are returned by this function and
+ * can include both wildcards `*` which match anything, as well as tags (`{tag}`) which
+ * match scene graph nodes that have this tag. There is also the ability to combine two
+ * tags through the `&`, `|`, and `~` operators. `{tag1&tag2}` will match anything that
+ * has both tags `tag1` and `tag2`. `{tag1|tag2}` will match anything that has the tag
+ * `tag1` or `tag2`, * and `{tag1~tag2}` will match anything that has `tag1` but not
+ * `tag2`. If no wildcards or tags are provided at most one property owner identifier
+ * will be returned. With wildcards or tags, the identifiers of all property owners that
+ * match the URI are returned instead.
+ *
+ * \param uri The URI that identifies the property owner or owners to get. The URI can
+ *            contain 0 or 1 wildcard `*` characters or a tag expression (`{tag}`) that
+ *            identifies a property owner.
+ * \ return A list of property owner URIs
+ */
+[[codegen::luawrap]] std::vector<std::string> propertyOwner(std::string uri) {
+    using namespace openspace;
+
+    std::string tag = groupTag(uri);
+    if (!tag.empty()) {
+        // Remove group name from start of regex and replace with '*'
+        uri = removeGroupTagFromUri(uri);
+    }
+
+    std::vector<properties::PropertyOwner*> owners =
+        findMatchesInAllPropertyOwners(uri, tag);
+
+    std::vector<std::string> matches;
+    matches.reserve(owners.size());
+    for (properties::PropertyOwner* owner : owners) {
+        matches.emplace_back(owner->uri());
     }
     return matches;
 }

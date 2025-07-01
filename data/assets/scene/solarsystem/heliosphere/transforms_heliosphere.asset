@@ -101,6 +101,24 @@ local HeliocentricEarthEcliptic = {
   }
 }
 
+local WSAOffset60 = {
+  Identifier = "WSAOffset60",
+  Parent = HeliocentricEarthEquatorial.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, 0, -math.rad(60) }
+    }
+  },
+  GUI = {
+    Name = "WSA Data Offset 60 Degrees",
+    Path = "/Solar System/Sun",
+    Description = [[WSA outputs (FITS files) have the Sun-Earth line 60 degrees shifted
+      from the edge. This scene graph node handles that transformation.]],
+    Hidden = true
+  }
+}
+
 
 asset.onInitialize(function()
   openspace.spice.loadKernel(SunCentricFrameKernels .. "HEEQ180.tf")
@@ -109,9 +127,11 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(HeliocentricEarthEquatorial180)
   openspace.addSceneGraphNode(HeliocentricEarthEquatorial)
   openspace.addSceneGraphNode(HeliocentricEarthEcliptic)
+  openspace.addSceneGraphNode(WSAOffset60)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(WSAOffset60)
   openspace.removeSceneGraphNode(HeliocentricEarthEcliptic)
   openspace.removeSceneGraphNode(HeliocentricEarthEquatorial)
   openspace.removeSceneGraphNode(HeliocentricEarthEquatorial180)
@@ -123,12 +143,14 @@ end)
 asset.export(HeliocentricEarthEquatorial180)
 asset.export(HeliocentricEarthEquatorial)
 asset.export(HeliocentricEarthEcliptic)
+asset.export(WSAOffset60)
 
 
 
 asset.meta = {
   Name = "Sun Transform, HEE, HEEQ and HEEQ180",
-  Description = "Sun transform: HEE, HEEQ and HEEQ180",
+  Description = [[Sun transform: HEE, HEEQ, HEEQ180 and a 60-degree fixed rotation that WSA
+   is using.]],
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license"

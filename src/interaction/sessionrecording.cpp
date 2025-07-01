@@ -456,13 +456,18 @@ namespace {
 
     template <>
     SessionRecording::Entry::Script readScript<DataMode::Binary>(std::istream& stream,
-                                                                 int)
+                                                                 int version)
     {
         SessionRecording::Entry::Script script;
 
         uint32_t scriptLength = 0;
         stream.read(reinterpret_cast<char*>(&scriptLength), sizeof(uint32_t));
         script.resize(scriptLength);
+
+        if (version == 0) {
+            uint32_t dummy;
+            stream.read(reinterpret_cast<char*>(&dummy), sizeof(uint32_t));
+        }
         stream.read(script.data(), scriptLength);
 
         return script;

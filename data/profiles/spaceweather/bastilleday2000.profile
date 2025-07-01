@@ -79,7 +79,7 @@
       "key": "I"
     },
     {
-      "action": "os.solarsystem.ToggleEuv",
+      "action": "os.solarsystem.sun.ToggleEuv",
       "key": "E"
     },
     {
@@ -117,7 +117,7 @@
   },
   "properties": [
     {
-      "name": "{earth_satellites}.Renderable.Enabled",
+      "name": "{earth_satellites~space_stations}.Renderable.Enabled",
       "type": "setPropertyValue",
       "value": "false"
     },
