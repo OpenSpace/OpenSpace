@@ -329,11 +329,6 @@ openspace.toggleFade = function(renderable, fadeTime, endScript)
   local renderablesList = openspace.propertyOwner(renderable)
 
   if next(renderablesList) == nil then
-    -- List is empty, no matches found
-    openspace.printError(
-      "Error when calling script 'openspace.toggleFade': " ..
-      "Could not find any property owner matching '" .. renderable .. "'"
-    )
     return
   end
 
