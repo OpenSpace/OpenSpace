@@ -260,6 +260,7 @@ AllCommands = [
 
 async def internalRun(openspace):
   test = {}
+
   profile = await openspace.profile()
   profile = profile[:profile.find('.')]
   profile = profile.replace("\\", "/")
@@ -307,6 +308,7 @@ async def internalRun(openspace):
     json.dump(test, fp, indent=2)
     fp.write("\n")
 
+
 async def mainLoop():
   api = Api("localhost", 4681)
   api.connect()
@@ -314,6 +316,7 @@ async def mainLoop():
 
   await asyncio.create_task(internalRun(openspace))
   api.disconnect()
+
 
 print("OpenSpace Visual Test Creation Wizard")
 print("=====================================")
