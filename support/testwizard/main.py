@@ -98,6 +98,16 @@ async def createCommandProperty(openspace):
   if uri.find("*") != -1 or uri.find("{") != -1:
     # The URI refers to multiple property values, so we need to as for the specific value
     value = input("Enter value of the property: ")
+
+    # Perform some type conversions if necessary
+    if value.lower() == "true":
+      value = True
+    elif value.lower() == "false":
+      value = False
+
+    if value.isnumeric():
+      value = int(value)
+
   else:
     has_property = await openspace.hasProperty(uri)
     if not has_property:

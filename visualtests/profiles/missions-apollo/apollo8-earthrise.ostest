@@ -25,7 +25,7 @@
       "type": "property",
       "value": {
         "property": "*Trail.Renderable.Enabled",
-        "value": "false"
+        "value": false
       }
     },
     {

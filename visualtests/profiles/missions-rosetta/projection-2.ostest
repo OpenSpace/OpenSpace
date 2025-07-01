@@ -26,7 +26,7 @@
     },
     {
       "type": "pause",
-      "value": "false"
+      "value": false
     },
     {
       "type": "wait",

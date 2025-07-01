@@ -24,7 +24,7 @@
       "type": "property",
       "value": {
         "property": "Scene.*Trail.Renderable",
-        "value": "false"
+        "value": false
       }
     },
     {

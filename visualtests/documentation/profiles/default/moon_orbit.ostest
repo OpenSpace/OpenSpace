@@ -23,7 +23,7 @@
       "type": "property",
       "value": {
         "property": "Scene.*Trail.Renderable.Enabled",
-        "value": "false"
+        "value": false
       }
     },
     {
