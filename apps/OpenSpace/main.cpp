@@ -1308,7 +1308,7 @@ int main(int argc, char* argv[]) {
         if (!std::filesystem::is_regular_file(configurationFilePath)) {
             LFATALC(
                 "main",
-                std::format("Could not find configuration '{}'", configurationFilePath)
+                std::format("Could not find configuration '{}'", configurationFilePath.string())
             );
             exit(EXIT_FAILURE);
         }
