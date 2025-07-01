@@ -60,6 +60,7 @@ uniform float ambientIntensity;
 
 #if SHADOW_MAPPING_ENABLED
 
+#if USE_RING_SHADOWS
 // Ring texture projection uniforms
 uniform sampler1D ringTextureFwrd;
 uniform sampler1D ringTextureBckwrd;
@@ -69,6 +70,7 @@ uniform sampler1D ringTextureTransparency;
 uniform vec2 textureOffset;
 uniform vec3 sunPositionObj;
 uniform vec3 camPositionObj;
+#endif // USE_RING_SHADOWS
 
 #endif // SHADOW_MAPPING_ENABLED
 
@@ -274,6 +276,7 @@ Fragment getFragment() {
 #if SHADOW_MAPPING_ENABLED
   float shadow = 1.0;
   
+#if USE_RING_SHADOWS
   // Calculate ring shadow by projecting ring texture directly onto surface
   // Assume ring lies in the XZ plane (Y=0) in object space
   vec3 surfaceToSun = normalize(sunPositionObj - positionCameraSpace);
@@ -310,6 +313,7 @@ Fragment getFragment() {
       }
     }
   }
+#endif // USE_RING_SHADOWS
   
   frag.color.xyz *= shadow;
 #endif

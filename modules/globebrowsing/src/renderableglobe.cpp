@@ -774,6 +774,21 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         _ringsComponent->setParentFadeable(this);
         _ringsComponent->initialize();
         addPropertySubOwner(_ringsComponent.get());
+        
+        // Set up notification for shader recompilation when rings state changes
+        auto* enabledProperty = static_cast<properties::BoolProperty*>(
+            _ringsComponent->property("Enabled")
+        );
+        if (enabledProperty) {
+            enabledProperty->onChange([this]() {
+                _shadersNeedRecompilation = true;
+            });
+        }
+        
+        // Set up notification for shader recompilation when rings readiness changes
+        _ringsComponent->onReadinessChange([this]() {
+            _shadersNeedRecompilation = true;
+        });
     }
 
     if (p.shadows.has_value()) {
@@ -1861,10 +1876,17 @@ void RenderableGlobe::recompileShaders() {
         "enableShadowMapping",
         std::to_string(_shadowMappingProperties.shadowMapping && _shadowComponent)
     );
+    pairs.emplace_back(
+        "useRingShadows", 
+        std::to_string(_shadowMappingProperties.shadowMapping && _ringsComponent)
+    );
     pairs.emplace_back("showChunkEdges", std::to_string(_debugProperties.showChunkEdges));
     pairs.emplace_back("showHeightResolution", "0");
     pairs.emplace_back("showHeightIntensities", "0");
     pairs.emplace_back("defaultHeight", std::to_string(DefaultHeight));
+
+    // log if ring shadows are enabled
+    LINFO(std::format("Ring shadows enabled: {}", _shadowMappingProperties.shadowMapping && _ringsComponent));
 
     //
     // Create dictionary from layerpreprocessing data
