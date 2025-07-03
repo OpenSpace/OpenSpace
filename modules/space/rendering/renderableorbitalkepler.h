@@ -79,14 +79,21 @@ private:
     };
 
     void updateBuffers();
+    void calculateSegmentsForPoints(const RenderData& data);
+    void calculateSegmentsForTrails(const RenderData& data);
 
     bool _updateDataBuffersAtNextRender = false;
     long long _numObjects = 0;
-    std::vector<GLint> _segmentSize;
-    std::vector<GLint> _startIndex;
+    GLsizei _lineDrawCount = 0;
     properties::UIntProperty _segmentQuality;
     properties::UIntProperty _startRenderIdx;
     properties::UIntProperty _sizeRender;
+    std::vector<GLint> _segmentSizeRaw;
+    std::vector<GLint> _startIndexPoints;
+    std::vector<GLint> _segmentSizePoints;
+    std::vector<GLint> _startIndexTrails;
+    std::vector<GLint> _segmentSizeTrails;
+    std::vector<kepler::Parameters> parameters;
 
     /// The layout of the VBOs
     struct TrailVBOLayout {
