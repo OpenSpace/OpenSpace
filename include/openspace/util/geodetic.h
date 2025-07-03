@@ -72,6 +72,13 @@ glm::vec3 cartesianCoordinatesFromGeo(const SceneGraphNode& sgn, double latitude
 glm::dvec3 geoPositionFromCamera();
 
 /**
+ * Returns the camera view direction relative to the current anchor node as geodetic
+ * coordinates. The returned value contains the latitude and longitude in degrees in the
+ * x, and y-coordinate respectively. 
+ */
+glm::dvec2 geoViewFromCamera();
+
+/**
  * Returns the height of the camera relative to the provided SceneGraphNode \p sgn in
  * meters. If \p useHeightMap is provided as `true` and \p sgn is a globe with an existing
  * height map, that height map is used to calculate the altitude.

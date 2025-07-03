@@ -103,6 +103,59 @@ glm::dvec3 geoPositionFromCamera() {
     return glm::dvec3(lat, lon, altitude);
 }
 
+glm::dvec2 geoViewFromCamera() {
+    const SceneGraphNode* n = global::navigationHandler->orbitalNavigator().anchorNode();
+    if (!n) {
+        return glm::dvec3(0.0);
+    }
+    const Renderable* renderable = n->renderable();
+    if (!renderable) {
+        return glm::dvec3(0.0);
+    }
+
+    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
+    const glm::dvec3 cameraViewDirection =
+        global::navigationHandler->camera()->viewDirectionWorldSpace();
+    const glm::dmat4 inverseModelTransform = glm::inverse(n->modelTransform());
+
+    const glm::dvec3 cameraPositionModelSpace = glm::dvec3(inverseModelTransform *
+        glm::dvec4(cameraPosition, 1.0)
+    );
+
+    // Scaling the cameraViewDirection to move the precision up a few decimals
+    glm::dvec3 cameraViewDirectionModelSpace =
+        glm::dvec3(inverseModelTransform * glm::dvec4(
+            cameraPosition + 10000.0 * cameraViewDirection, 1.0)
+    );
+
+    double d = glm::dot(
+        glm::normalize(cameraPositionModelSpace),
+        glm::normalize(cameraViewDirectionModelSpace)
+    );
+    if ((1.0 - std::abs(d)) < 1e-8) {
+        // We are looking straight up or down the object, use Camera Up vector instead of
+        // forward view direction
+        const glm::dvec3 cameraUp =
+            global::navigationHandler->camera()->lookUpVectorWorldSpace();
+        cameraViewDirectionModelSpace = glm::dvec3(inverseModelTransform * glm::dvec4(
+            cameraPosition + cameraUp, 1.0)
+        );
+    }
+
+    const SurfacePositionHandle posHandle = renderable->calculateSurfacePositionHandle(
+        cameraViewDirectionModelSpace
+    );
+
+    const Geodetic2 geo2 = renderable->ellipsoid().cartesianToGeodetic2(
+        posHandle.centerToReferenceSurface
+    );
+
+    const double lat = glm::degrees(geo2.lat);
+    const double lon = glm::degrees(geo2.lon);
+
+    return glm::dvec2(lat, lon);
+}
+
 double altitudeFromCamera(const SceneGraphNode& sgn, bool useHeightMap) {
     const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
 
