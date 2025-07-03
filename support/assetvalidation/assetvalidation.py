@@ -1,6 +1,6 @@
 ##########################################################################################
 #                                                                                        #
-# OpenSpace Visual Testing                                                               #
+# OpenSpace Asset Validation                                                             #
 #                                                                                        #
 # Copyright (c) 2024-2025                                                                #
 #                                                                                        #
