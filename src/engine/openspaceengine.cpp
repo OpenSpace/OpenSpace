@@ -1373,15 +1373,15 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
         return;
     }
 
-    for (const global::callback::KeyboardCallback& func : *global::callback::keyboard) {
-        const bool isConsumed = func(key, mod, action, isGuiWindow);
+    if (!global::configuration->isConsoleDisabled) {
+        const bool isConsumed = global::luaConsole->keyboardCallback(key, mod, action);
         if (isConsumed) {
             return;
         }
     }
 
-    if (!global::configuration->isConsoleDisabled) {
-        const bool isConsumed = global::luaConsole->keyboardCallback(key, mod, action);
+    for (const global::callback::KeyboardCallback& func : *global::callback::keyboard) {
+        const bool isConsumed = func(key, mod, action, isGuiWindow);
         if (isConsumed) {
             return;
         }
