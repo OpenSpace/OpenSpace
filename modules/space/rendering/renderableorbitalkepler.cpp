@@ -376,8 +376,8 @@ void RenderableOrbitalKepler::initializeGL() {
        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
            return global::renderEngine->buildRenderProgram(
                "OrbitalKeplerTrails",
-               absPath("${MODULE_SPACE}/shaders/debrisVizTrails_vs.glsl"),
-               absPath("${MODULE_SPACE}/shaders/debrisVizTrails_fs.glsl")
+               absPath("${MODULE_SPACE}/shaders/keplertrails_vs.glsl"),
+               absPath("${MODULE_SPACE}/shaders/keplertrails_vs.glsl")
            );
        }
    );
@@ -388,9 +388,9 @@ void RenderableOrbitalKepler::initializeGL() {
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "OrbitalKeplerPoints",
-                absPath("${MODULE_SPACE}/shaders/debrisVizPoints_vs.glsl"),
-                absPath("${MODULE_SPACE}/shaders/debrisVizPoints_fs.glsl"),
-                absPath("${MODULE_SPACE}/shaders/debrisVizPoints_gs.glsl")
+                absPath("${MODULE_SPACE}/shaders/keplerpoints_vs.glsl"),
+                absPath("${MODULE_SPACE}/shaders/keplerpoints_fs.glsl"),
+                absPath("${MODULE_SPACE}/shaders/keplerpoints_gs.glsl")
             );
         }
     );
