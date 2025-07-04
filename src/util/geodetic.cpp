@@ -118,15 +118,13 @@ glm::dvec2 geoViewFromCamera() {
         global::navigationHandler->camera()->viewDirectionWorldSpace();
     const glm::dmat4 inverseModelTransform = glm::inverse(n->modelTransform());
 
-    const glm::dvec3 cameraPositionModelSpace = glm::dvec3(inverseModelTransform *
-        glm::dvec4(cameraPosition, 1.0)
-    );
+    const glm::dvec3 cameraPositionModelSpace =
+        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
 
     // Scaling the cameraViewDirection to move the precision up a few decimals
-    glm::dvec3 cameraViewDirectionModelSpace =
-        glm::dvec3(inverseModelTransform * glm::dvec4(
-            cameraPosition + 10000.0 * cameraViewDirection, 1.0)
-    );
+    const glm::dvec3 cameraViewPoint = cameraPosition + 10000.0 * cameraViewDirection;
+    glm::dvec3 cameraViewDirectionModelSpace = 
+        glm::dvec3(inverseModelTransform * glm::dvec4(cameraViewPoint, 1.0));
 
     double d = glm::dot(
         glm::normalize(cameraPositionModelSpace),
@@ -137,8 +135,8 @@ glm::dvec2 geoViewFromCamera() {
         // forward view direction
         const glm::dvec3 cameraUp =
             global::navigationHandler->camera()->lookUpVectorWorldSpace();
-        cameraViewDirectionModelSpace = glm::dvec3(inverseModelTransform * glm::dvec4(
-            cameraPosition + cameraUp, 1.0)
+        cameraViewDirectionModelSpace = glm::dvec3(
+            inverseModelTransform * glm::dvec4(cameraPosition + cameraUp, 1.0)
         );
     }
 
