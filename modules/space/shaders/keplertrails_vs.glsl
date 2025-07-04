@@ -29,9 +29,10 @@
 layout (location = 0) in vec4 vertexData; // 1: x, 2: y, 3: z, 4: timeOffset,
 layout (location = 1) in vec2 orbitData; // 1: epoch, 2: period
 
-flat out float currentRevolutionFraction;
-flat out float vertexRevolutionFraction;
-flat out vec4 viewSpacePositions;
+out vec4 viewSpacePosition;
+out float viewSpaceDepth;
+out float periodFraction;
+out float offsetPeriods;
 
 uniform dmat4 modelViewTransform;
 uniform mat4 projectionTransform;
@@ -50,18 +51,21 @@ void main() {
   float epoch = orbitData.x;
   float period = orbitData.y;
 
-  // calculate nr of periods, get fractional part to know where the vertex closest to the
+  // Calculate nr of periods, get fractional part to know where the vertex closest to the
   // debris part is right now
   double nrOfRevolutions = (inGameTime - epoch) / period;
-  currentRevolutionFraction = float(nrOfRevolutions - double(int(nrOfRevolutions)));
-  if (currentRevolutionFraction < 0.0) {
-    currentRevolutionFraction += 1.0;
-  } 
+  double frac = double(int(nrOfRevolutions));
+  double periodFractiond = nrOfRevolutions - frac;
+  if (periodFractiond < 0.0) {
+    periodFractiond += 1.0;
+  }
+  periodFraction = float(periodFractiond);
 
   // Same procedure for the current vertex
-  vertexRevolutionFraction = vertexData.w / period;
-  
-  viewSpacePositions = vec4(modelViewTransform * dvec4(vertexData.xyz, 1));
-  vec4 vs_position = z_normalization(projectionTransform * viewSpacePositions);
+  offsetPeriods = vertexData.w / float(period);
+
+  viewSpacePosition = vec4(modelViewTransform * dvec4(vertexData.xyz, 1));
+  vec4 vs_position = z_normalization(projectionTransform * viewSpacePosition);
   gl_Position = vs_position;
+  viewSpaceDepth = vs_position.w;
 }
