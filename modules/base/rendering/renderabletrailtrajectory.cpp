@@ -380,10 +380,8 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             glm::dvec3 newPoint = dp - v;
 
             // Scales offset for smooth transition from original to accurate points
-            double mult = (prePaddingDelta - i) / static_cast<double>(prePaddingDelta);
-            if ( i > 0 && i == prePaddingDelta - 1) {
-                mult = 0.0;
-            }
+            double mult = (i > 0 && i == prePaddingDelta - 1) ? 0.0
+                : (prePaddingDelta - i) / static_cast<double>(prePaddingDelta);
 
             newPoint = newPoint + dv * mult;
             _replacementPoints.push_back({
