@@ -28,33 +28,33 @@ local GalacticLine = {
 }
 
 
-local ShowGalacticBand = {
-  Identifier = "os.nightsky.ShowGalacticBand",
-  Name = "Show galactic band",
+local ShowGalacticEquator = {
+  Identifier = "os.nightsky.ShowGalacticEquator",
+  Name = "Show galactic equator",
   Command = [[
-    openspace.fadeIn("Scene.GalacticBand.Renderable")
+    openspace.fadeIn("Scene.GalacticLine.Renderable")
   ]],
-  Documentation = "Shows the galactic band",
+  Documentation = "Shows the galactic equator",
   GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
   IsLocal = false
 }
 
-local HideGalacticBand = {
-  Identifier = "os.nightsky.HideGalacticBand",
-  Name = "Hide galactic band",
+local HideGalacticEquator = {
+  Identifier = "os.nightsky.HideGalacticEquator",
+  Name = "Hide galactic equator",
   Command = [[
-    openspace.fadeOut("Scene.GalacticBand.Renderable")
+    openspace.fadeOut("Scene.GalacticLine.Renderable")
   ]],
-  Documentation = "Hides the galactic band",
+  Documentation = "Hides the galactic equator",
   GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
   IsLocal = false
 }
 
-local ToggleGalacticBand = {
-  Identifier = "os.nightsky.ToggleGalacticBand",
-  Name = "Toggle galactic equator line",
-  Command = "openspace.toggleFade('Scene.GalacticBand.Renderable')",
-  Documentation = "Toggles the galactic equator line visibilty",
+local ToggleGalacticEquator = {
+  Identifier = "os.nightsky.ToggleGalacticEquator",
+  Name = "Toggle galactic equator",
+  Command = "openspace.toggleFade('Scene.GalacticLine.Renderable')",
+  Documentation = "Toggles the galactic equator visibilty",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
@@ -62,19 +62,22 @@ local ToggleGalacticBand = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(GalacticLine)
-  openspace.action.registerAction(ShowGalacticBand)
-  openspace.action.registerAction(HideGalacticBand)
+  openspace.action.registerAction(ShowGalacticEquator)
+  openspace.action.registerAction(HideGalacticEquator)
+  openspace.action.registerAction(ToggleGalacticEquator)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(HideGalacticBand)
-  openspace.action.removeAction(ShowGalacticBand)
+  openspace.action.removeAction(ToggleGalacticEquator)
+  openspace.action.removeAction(HideGalacticEquator)
+  openspace.action.removeAction(ShowGalacticEquator)
   openspace.removeSceneGraphNode(GalacticLine)
 end)
 
 asset.export(GalacticLine)
-asset.export("ShowGalacticBand", ShowGalacticBand.Identifier)
-asset.export("HideGalacticBand", HideGalacticBand.Identifier)
+asset.export("ShowGalacticEquator", ShowGalacticEquator.Identifier)
+asset.export("HideGalacticEquator", HideGalacticEquator.Identifier)
+asset.export("ToggleGalacticEquator", ToggleGalacticEquator.Identifier)
 
 
 
