@@ -1,0 +1,28 @@
+{
+  "profile": "spaceweather/solarstorm2012",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Sun",
+        "position": [
+          95321958733.18857,
+          396449775493.03986,
+          69044045375.83075
+        ],
+        "pitch": -0.003512191123942801,
+        "referenceFrame": "Root",
+        "up": [
+          -0.7298699214114914,
+          0.05685105888152164,
+          0.6812179202889727
+        ],
+        "yaw": -0.005592391511972479,
+        "timestamp": "2012 JUL 23 22:11:20"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

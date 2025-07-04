@@ -1,0 +1,42 @@
+{
+  "profile": "default",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "MilkyWayVolume",
+        "position": [
+          1.5630347170439507e+23,
+          -1.2421456206847388e+24,
+          8.765616614016136e+23
+        ],
+        "pitch": -0.0017689853036046068,
+        "referenceFrame": "Root",
+        "up": [
+          -0.6436783299132758,
+          0.3855276032950561,
+          0.6610950572327903
+        ],
+        "yaw": 0.005182201298062896,
+        "timestamp": "2025 JUN 29 15:50:02"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.HomeLabel.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.GalaxyClusterLabels.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

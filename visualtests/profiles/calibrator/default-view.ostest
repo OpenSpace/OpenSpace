@@ -1,0 +1,27 @@
+{
+  "profile": "calibrator",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Calibration",
+        "position": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "aim": "Calibration_Front",
+        "referenceFrame": "Root",
+        "up": [
+          -0.4082482904638631,
+          0.816496580927726,
+          -0.40824829046386296
+        ],
+        "timestamp": "2025 JUN 29 13:33:28"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

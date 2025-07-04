@@ -1,0 +1,54 @@
+{
+  "profile": "spaceweather/bastilleday2000",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Sun",
+        "position": [
+          269243285583.13907,
+          77833013568.03874,
+          102574266259.46323
+        ],
+        "referenceFrame": "Root",
+        "up": [
+          -0.3746974815056475,
+          0.8685000512303358,
+          0.32451418823562866
+        ],
+        "timestamp": "2000 JUL 14 10:43:36"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.MAS-MHD-Fieldlines-bastille-day-2000.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.MAS-MHD-Fieldlines-bastille-day-2000.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

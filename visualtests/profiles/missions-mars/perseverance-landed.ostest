@@ -1,0 +1,40 @@
+{
+  "profile": "missions/mars",
+  "commands": [
+    {
+      "type": "action",
+      "value": "os.perseverance.Setup"
+    },
+    {
+      "type": "wait",
+      "value": "10"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Perseverance",
+        "position": [
+          -9.4132080078125,
+          14.045448303222656,
+          -7.8332977294921875
+        ],
+        "pitch": 5.6162860356716035e-05,
+        "referenceFrame": "Root",
+        "up": [
+          0.7598977792997276,
+          0.157554938097496,
+          -0.6306598183620369
+        ],
+        "yaw": -4.402291846304851e-05,
+        "timestamp": "2021 FEB 18 20:46:51"
+      }
+    },
+    {
+      "type": "wait",
+      "value": "60"
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

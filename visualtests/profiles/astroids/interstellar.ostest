@@ -1,0 +1,40 @@
+{
+  "profile": "asteroids",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Earth",
+        "position": [
+          -12561206745176.639,
+          -2554982359165.7495,
+          6748228682097.809
+        ],
+        "referenceFrame": "Root",
+        "up": [
+          0.014909869068494841,
+          0.9256034489525743,
+          0.37820094009859295
+        ],
+        "timestamp": "2025 JUN 28 13:31:55"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.OumuamuaTrail.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.C2019Q4BorisovTrail.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

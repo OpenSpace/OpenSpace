@@ -1,0 +1,28 @@
+{
+  "profile": "missions/artemis",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "ArtemisModel",
+        "position": [
+          55.5958251953125,
+          4.590118408203125,
+          -0.9208297729492188
+        ],
+        "pitch": 0.00922219552025625,
+        "referenceFrame": "Root",
+        "up": [
+          -0.062279131336298366,
+          0.8569622856509104,
+          0.5116023365583504
+        ],
+        "yaw": -0.0015441471794646702,
+        "timestamp": "2022 NOV 21 12:01:58"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

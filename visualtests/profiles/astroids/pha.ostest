@@ -1,0 +1,33 @@
+{
+  "profile": "asteroids",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Earth",
+        "position": [
+          -1944461572755.4436,
+          792437739484.9446,
+          1697393949905.4695
+        ],
+        "referenceFrame": "Root",
+        "up": [
+          0.44776034898559697,
+          0.8887658610657894,
+          0.09800976522919777
+        ],
+        "timestamp": "2025 JUN 28 13:28:53"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.sssb_amor_asteroid.Renderable.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

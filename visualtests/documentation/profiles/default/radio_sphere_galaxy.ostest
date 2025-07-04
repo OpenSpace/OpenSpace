@@ -1,0 +1,35 @@
+{
+  "profile": "default",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Sun",
+        "position": [
+          -9.78376019040495e+19,
+          5.145290634859777e+18,
+          8.186629291137984e+19
+        ],
+        "pitch": 0.17668281057137317,
+        "referenceFrame": "Root",
+        "up": [
+          0.6413402377107581,
+          -0.011348596507855468,
+          0.7671726721217398
+        ],
+        "yaw": -0.009381310363914803,
+        "timestamp": "2025 JUN 29 15:28:38"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.RadioSphere.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

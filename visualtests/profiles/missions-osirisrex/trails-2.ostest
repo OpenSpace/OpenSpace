@@ -1,0 +1,28 @@
+{
+  "profile": "missions/osirisrex",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "BennuBarycenter",
+        "position": [
+          6884.10400390625,
+          14246.232284545898,
+          -25248.27604675293
+        ],
+        "pitch": -0.002293517134348197,
+        "referenceFrame": "Root",
+        "up": [
+          -0.00879634320132111,
+          0.8719159790745686,
+          0.48957650043759326
+        ],
+        "yaw": -0.004905834225861587,
+        "timestamp": "2019 JUL 28 23:07:07"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

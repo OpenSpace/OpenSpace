@@ -1,0 +1,32 @@
+{
+  "profile": "missions\\gaia",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Sun",
+        "position": [
+          1.9420809164003492e+18,
+          1.9328339607276824e+16,
+          3.4052733042343226e+17
+        ],
+        "pitch": -0.0035008561763981002,
+        "referenceFrame": "Root",
+        "up": [
+          -0.09286368407501094,
+          0.8722815320407087,
+          0.4801054728293884
+        ],
+        "yaw": 0.004927436466581795,
+        "timestamp": "123763 JUL 31 11:36:27.195"
+      }
+    },
+    {
+      "type": "wait",
+      "value": "15"
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

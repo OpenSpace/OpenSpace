@@ -1,0 +1,32 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderableradialgrid/radialgrid_styled.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderableCartesianAxes_Example_Parent",
+        "position": [
+          -2702172.8251342773,
+          76997053.80488586,
+          24395795.36685562
+        ],
+        "pitch": 0.0014819549212940508,
+        "referenceFrame": "Root",
+        "up": [
+          0.2547153819399344,
+          0.3001921369283056,
+          -0.9192414019884061
+        ],
+        "yaw": -0.006066943131778283,
+        "timestamp": "2025 JUN 29 21:55:55"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

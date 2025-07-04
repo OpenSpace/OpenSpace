@@ -1,0 +1,29 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderableradialgrid/radialgrid_styled.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Root",
+        "position": [
+          44692689.955625996,
+          57192191.96103361,
+          32594760.36539277
+        ],
+        "up": [
+          -0.6023197179846878,
+          0.694734783111249,
+          -0.39313424992260837
+        ],
+        "timestamp": "2025 JUN 29 21:55:27"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

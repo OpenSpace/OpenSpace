@@ -1,0 +1,42 @@
+{
+  "profile": "default",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "MilkyWayVolume",
+        "position": [
+          2.5487640283246867e+26,
+          -4.897830134382208e+26,
+          -1.4102439144608203e+25
+        ],
+        "pitch": -0.0017689853037882563,
+        "referenceFrame": "Root",
+        "up": [
+          -0.8867308769183201,
+          -0.46017079635132774,
+          -0.044172277562420315
+        ],
+        "yaw": 0.0051822012980758825,
+        "timestamp": "2025 JUN 29 15:54:27"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.SloanDigitalSkySurvey.Renderable.Sizing.ScaleExponent",
+        "value": 23.170000076293945
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Planck.Renderable.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

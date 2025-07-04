@@ -1,0 +1,29 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderableboxgrid/boxgrid_styled.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Root",
+        "position": [
+          8.007752866439407,
+          3.20767983742267,
+          5.058328191272642
+        ],
+        "up": [
+          -0.34240036184625194,
+          0.9380684184549688,
+          -0.05281699068433604
+        ],
+        "timestamp": "2025 JUN 29 21:48:56"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

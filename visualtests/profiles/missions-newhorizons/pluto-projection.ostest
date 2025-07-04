@@ -1,0 +1,26 @@
+{
+  "profile": "missions/newhorizons",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "PlutoProjection",
+        "position": [
+          -2728871.9707255624,
+          864461.3172204683,
+          1979745.112307979
+        ],
+        "up": [
+          0.6197909310677564,
+          0.2641537871593401,
+          0.7389735979691983
+        ],
+        "yaw": 1.5803330510877723e-07,
+        "timestamp": "2015 JUL 14 08:19:43"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "profile": "default",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Sun",
+        "position": [
+          -117317056137.0424,
+          47266443039.47096,
+          -2477871279.581847
+        ],
+        "pitch": -0.0014117096237509252,
+        "referenceFrame": "Root",
+        "up": [
+          0.3208071111338054,
+          0.8210121739793537,
+          0.4722518476657109
+        ],
+        "yaw": -0.009006398935123096,
+        "timestamp": "2025 JUN 29 20:48:54"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.SunGlare.Renderable.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Sun.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

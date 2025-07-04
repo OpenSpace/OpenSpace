@@ -1,0 +1,41 @@
+{
+  "profile": "default",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Sun",
+        "position": [
+          -3402674260728.038,
+          5638157271054.785,
+          -1064326153434.1298
+        ],
+        "pitch": 1.0888076107383742e-07,
+        "referenceFrame": "Root",
+        "up": [
+          0.37492384485495245,
+          0.3854298178616984,
+          0.8431346073209647
+        ],
+        "timestamp": "2025 JUN 29 21:06:46"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.SunHabitableZone.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Stars.Renderable.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

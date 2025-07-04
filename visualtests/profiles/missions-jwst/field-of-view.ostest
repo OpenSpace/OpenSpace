@@ -1,0 +1,34 @@
+{
+  "profile": "missions/jwst",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "JWSTModel",
+        "position": [
+          -10.483385190589575,
+          1.2827086605092095,
+          -24.05208934786692
+        ],
+        "pitch": -0.002569660686293142,
+        "up": [
+          0.18203890983397314,
+          0.9829226539391345,
+          -0.02692408692478901
+        ],
+        "yaw": 0.005388241718268684,
+        "timestamp": "2022 FEB 18 15:09:53"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.JWSTFov.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

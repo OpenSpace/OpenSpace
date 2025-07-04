@@ -1,0 +1,35 @@
+{
+  "profile": "default",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Sun",
+        "position": [
+          -1.5262319407550011e+19,
+          1.5871394391847586e+19,
+          1.8265688726442092e+20
+        ],
+        "pitch": -0.0011556405152207054,
+        "referenceFrame": "Root",
+        "up": [
+          0.18316442400068542,
+          0.9805940332507974,
+          -0.06990089937498095
+        ],
+        "yaw": 0.0058346752371309695,
+        "timestamp": "2025 JUN 29 15:27:27"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.PlanetaryCandidates.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

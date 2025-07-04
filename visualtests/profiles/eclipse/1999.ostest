@@ -1,0 +1,41 @@
+{
+  "profile": "eclipse",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Earth",
+        "position": [
+          19391638.592964437,
+          -299519.3292286098,
+          15573679.254210634
+        ],
+        "pitch": 0.0560735233019611,
+        "up": [
+          -0.6118775815551405,
+          0.19828263177510813,
+          0.765695646537558
+        ],
+        "yaw": 0.09318846627312329,
+        "timestamp": "1999 AUG 11 11:04:28"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Earth.Renderable.Layers.ColorLayers.Blue_Marble.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}
