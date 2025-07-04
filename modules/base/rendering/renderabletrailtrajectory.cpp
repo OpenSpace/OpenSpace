@@ -89,26 +89,6 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SweepChunkSizeInfo = {
-        "SweepChunkSize",
-        "Sweep Chunk Size",
-        "The number of vertices that will be calculated each frame whenever the trail "
-        "needs to be recalculated. A greater value will result in more calculations per "
-        "frame.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo EnableSweepChunkingInfo = {
-        "EnableSweepChunking",
-        "Use Sweep Chunking",
-        "Enable or Disable the use of iterative calculations (chunking) during full "
-        "sweep vertex calculations. When enabled, small part of the trail will be "
-        "calculated each frame instead of calculating the entire trail in one go. "
-        "The size of each 'chunk' can be altered by changing the sweep chunk size "
-        "property.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     constexpr openspace::properties::Property::PropertyInfo AccurateTrailPositionsInfo = {
         "AccurateTrailPositions",
         "Number of Accurate Trail Points",
@@ -139,12 +119,6 @@ namespace {
         // [[codegen::verbatim(RenderFullPathInfo.description)]]
         std::optional<bool> showFullTrail;
 
-        // [[codegen::verbatim(SweepChunkSizeInfo.description)]]
-        std::optional<int> sweepChunkSize;
-
-        // [[codegen::verbatim(SweepChunkSizeInfo.description)]]
-        std::optional<bool> enableSweepChunking;
-
         // [[codegen::verbatim(AccurateTrailPositionsInfo.description)]]
         std::optional<int> accurateTrailPositions;
     };
@@ -162,8 +136,6 @@ documentation::Documentation RenderableTrailTrajectory::Documentation() {
 
 RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& dictionary)
     : RenderableTrail(dictionary)
-    , _sweepChunkSize(SweepChunkSizeInfo, 200, 50, 5000)
-    , _enableSweepChunking(EnableSweepChunkingInfo, false)
     , _startTime(StartTimeInfo)
     , _endTime(EndTimeInfo)
     , _sampleInterval(SampleIntervalInfo, 2.0, 2.0, 1e6)
@@ -206,12 +178,6 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     _nReplacementPoints = p.accurateTrailPositions.value_or(_nReplacementPoints);
     addProperty(_nReplacementPoints);
 
-    _enableSweepChunking = p.enableSweepChunking.value_or(_enableSweepChunking);
-    addProperty(_enableSweepChunking);
-
-    _sweepChunkSize = p.sweepChunkSize.value_or(_sweepChunkSize);
-    addProperty(_sweepChunkSize);
-
     // We store the vertices with ascending temporal order
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
     _secondaryRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
@@ -249,109 +215,91 @@ void RenderableTrailTrajectory::deinitializeGL() {
 
 void RenderableTrailTrajectory::reset() {
     _needsFullSweep = true;
-    _sweepIteration = 0;
     _maxVertex = glm::vec3(-std::numeric_limits<float>::max());
     _minVertex = glm::vec3(std::numeric_limits<float>::max());
 }
 
+void RenderableTrailTrajectory::updateBuffer() {
+    constexpr unsigned int MaxVertices = 1000000;
+
+    // Convert the start and end time from string representations to J2000 seconds
+    _start = SpiceManager::ref().ephemerisTimeFromDate(_startTime);
+    _end = SpiceManager::ref().ephemerisTimeFromDate(_endTime);
+    const double timespan = _end - _start;
+
+    _totalSampleInterval = _sampleInterval / _timeStampSubsamplingFactor;
+
+    // Cap _nVertices in order to prevent overflow and extreme performance
+    // degredation/RAM usage
+    _nVertices = std::min(
+        static_cast<unsigned int>(std::ceil(timespan / _totalSampleInterval)),
+        MaxVertices
+    );
+
+    // We need to recalcuate the _totalSampleInterval if _nVertices equals
+    // MaxVertices. If we don't do this the position for each vertex
+    // will not be correct for the number of vertices we are doing along the trail
+    _totalSampleInterval = (_nVertices == MaxVertices) ?
+        timespan / _nVertices : _totalSampleInterval;
+
+    // Make space for the vertices
+    _vertexArray.clear();
+    _dVertexArray.clear();
+    _timeVector.clear();
+    _vertexArray.resize(_nVertices + 1);
+    _dVertexArray.resize(_nVertices + 1);
+    _timeVector.resize(_nVertices + 1);
+
+    // Calculate all vertex positions
+    for (unsigned int i = 0; i < _nVertices; i++) {
+        const glm::dvec3 dp = translationPosition(
+            Time(_start + i * _totalSampleInterval)
+        );
+        const glm::vec3 p(dp.x, dp.y, dp.z);
+        _vertexArray[i] = { p.x, p.y, p.z };
+        _timeVector[i] = Time(_start + i * _totalSampleInterval).j2000Seconds();
+        _dVertexArray[i] = { dp.x, dp.y, dp.z };
+
+        // Set max and min vertex for bounding sphere calculations
+        _maxVertex = glm::max(_maxVertex, dp);
+        _minVertex = glm::min(_minVertex, dp);
+    }
+
+    // Full sweep is complete here.
+    // Adds the last point in time to the _vertexArray so that we
+    // ensure that points for _start and _end always exists
+    const glm::dvec3 dp = translationPosition(Time(_end));
+    const glm::vec3 p(dp.x, dp.y, dp.z);
+    _vertexArray[_nVertices] = { p.x, p.y, p.z };
+    _timeVector[_nVertices] = Time(_end).j2000Seconds();
+    _dVertexArray[_nVertices] = { dp.x, dp.y, dp.z };
+
+    setBoundingSphere(glm::distance(_maxVertex, _minVertex) / 2.0);
+
+    // Upload vertices to the GPU
+    glBindVertexArray(_primaryRenderInformation._vaoID);
+    glBindBuffer(GL_ARRAY_BUFFER, _primaryRenderInformation._vBufferID);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        _vertexArray.size() * sizeof(TrailVBOLayout<float>),
+        _vertexArray.data(),
+        GL_STATIC_DRAW
+    );
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+    // We clear the indexArray just in case. The base class will take care not to use
+    // it if it is empty
+    _indexArray.clear();
+
+    _subsamplingIsDirty = true;
+    _needsFullSweep = false;
+}
+
 void RenderableTrailTrajectory::update(const UpdateData& data) {
     if (_needsFullSweep) {
-        if (_sweepIteration == 0) {
-            constexpr unsigned int MaxVertices = 1000000;
-
-            // Convert the start and end time from string representations to J2000 seconds
-            _start = SpiceManager::ref().ephemerisTimeFromDate(_startTime);
-            _end = SpiceManager::ref().ephemerisTimeFromDate(_endTime);
-            const double timespan = _end - _start;
-
-            _totalSampleInterval = _sampleInterval / _timeStampSubsamplingFactor;
-
-            // Cap _nVertices in order to prevent overflow and extreme performance
-            // degredation/RAM usage
-            _nVertices = std::min(
-                static_cast<unsigned int>(std::ceil(timespan / _totalSampleInterval)),
-                MaxVertices
-            );
-
-            // We need to recalcuate the _totalSampleInterval if _nVertices equals
-            // MaxVertices. If we don't do this the position for each vertex
-            // will not be correct for the number of vertices we are doing along the trail
-            _totalSampleInterval = (_nVertices == MaxVertices) ?
-                (timespan / _nVertices) : _totalSampleInterval;
-
-            // Make space for the vertices
-            _vertexArray.clear();
-            _dVertexArray.clear();
-            _timeVector.clear();
-            _vertexArray.resize(_nVertices + 1);
-            _dVertexArray.resize(_nVertices + 1);
-            _timeVector.resize(_nVertices + 1);
-        }
-
-        // Calculate sweeping range for this iteration
-        const unsigned int startIndex = _sweepIteration * _sweepChunkSize;
-        const unsigned int nextIndex = (_sweepIteration + 1) * _sweepChunkSize;
-        unsigned int stopIndex = std::min(nextIndex, _nVertices);
-
-        // If iterative calculations are disabled
-        if (!_enableSweepChunking) {
-            stopIndex = _nVertices;
-        }
-
-        // Calculate all vertex positions
-        for (unsigned int i = startIndex; i < stopIndex; i++) {
-            const glm::dvec3 dp = translationPosition(
-                Time(_start + i * _totalSampleInterval)
-            );
-            const glm::vec3 p(dp.x, dp.y, dp.z);
-            _vertexArray[i] = { p.x, p.y, p.z };
-            _timeVector[i] = Time(_start + i * _totalSampleInterval).j2000Seconds();
-            _dVertexArray[i] = {dp.x, dp.y, dp.z};
-
-            // Set max and min vertex for bounding sphere calculations
-            _maxVertex = glm::max(_maxVertex, dp);
-            _minVertex = glm::min(_minVertex, dp);
-        }
-        ++_sweepIteration;
-
-        // Full sweep is complete here.
-        // Adds the last point in time to the _vertexArray so that we
-        // ensure that points for _start and _end always exists
-        if (stopIndex == _nVertices) {
-            const glm::dvec3 dp = translationPosition(Time(_end));
-            const glm::vec3 p(dp.x, dp.y, dp.z);
-            _vertexArray[stopIndex] = { p.x, p.y, p.z };
-            _timeVector[stopIndex] = Time(_end).j2000Seconds();
-            _dVertexArray[stopIndex] = { dp.x, dp.y, dp.z };
-
-            _sweepIteration = 0;
-            setBoundingSphere(glm::distance(_maxVertex, _minVertex) / 2.0);
-        }
-        else {
-            // Early return as we don't need to render if we are still
-            // doing full sweep calculations
-            return;
-        }
-
-        // Upload vertices to the GPU
-        glBindVertexArray(_primaryRenderInformation._vaoID);
-        glBindBuffer(GL_ARRAY_BUFFER, _primaryRenderInformation._vBufferID);
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            _vertexArray.size() * sizeof(TrailVBOLayout<float>),
-            _vertexArray.data(),
-            GL_STATIC_DRAW
-        );
-
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-        // We clear the indexArray just in case. The base class will take care not to use
-        // it if it is empty
-        _indexArray.clear();
-
-        _subsamplingIsDirty = true;
-        _needsFullSweep = false;
+        updateBuffer();
     }
 
     // This has to be done every update step;
@@ -372,7 +320,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             // Calculates number of vertices for the second segment (object to end point)
             _secondaryRenderInformation.first = _primaryRenderInformation.count;
             _secondaryRenderInformation.count = static_cast<GLsizei>(
-                _vertexArray.size() - (_primaryRenderInformation.count)
+                _vertexArray.size() - _primaryRenderInformation.count
             );
 
             // Calculate number of vertices in the trail
@@ -431,14 +379,10 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             glm::dvec3 dv = fp - dp;
             glm::dvec3 newPoint = dp - v;
 
-            // Scales position offset for smooth transition from '
-            // original points to accurate points
-            double mult = 0.0;
-            if (i == prePaddingDelta - 1) {
-                mult = (i == 0) ? 1.0 : 0.0;
-            }
-            else {
-                mult = (prePaddingDelta - i) / static_cast<double>(prePaddingDelta);
+            // Scales offset for smooth transition from original to accurate points
+            double mult = (prePaddingDelta - i) / static_cast<double>(prePaddingDelta);
+            if ( i > 0 && i == prePaddingDelta - 1) {
+                mult = 0.0;
             }
 
             newPoint = newPoint + dv * mult;
@@ -474,11 +418,11 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             glm::dvec3 dv = fp - dp;
             glm::dvec3 newPoint = dp - v;
 
-            // Scales position offset for smooth transition from '
-            // original points to accurate points
-            double mult = (i == postPaddingDelta - 1) ?
-                1.0 :
-                1.0 - (postPaddingDelta - i) / static_cast<double>(postPaddingDelta);
+            // Scales offset for smooth transition from original to accurate points
+            double mult = 1.0;
+            if (i != postPaddingDelta - 1) {
+                mult -= (postPaddingDelta - i) / static_cast<double>(postPaddingDelta);
+            }
 
             newPoint = newPoint + dv * mult;
             _replacementPoints.push_back({
@@ -522,16 +466,6 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     }
-    else if (j2k >= _end || (j2k < _start && _renderFullTrail)) {
-        // Renders the whole trail if time has passed the end time
-        _primaryRenderInformation.first = 0;
-        _primaryRenderInformation.count = static_cast<GLsizei>(_vertexArray.size());
-        _nUniqueVertices = _primaryRenderInformation.count;
-        _secondaryRenderInformation.first = 0;
-        _secondaryRenderInformation.count = 0;
-        _floatingRenderInformation.first = 0;
-        _floatingRenderInformation.count = 0;
-    }
     else {
         _primaryRenderInformation.first = 0;
         _primaryRenderInformation.count = 0;
@@ -539,16 +473,19 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         _secondaryRenderInformation.count = 0;
         _floatingRenderInformation.first = 0;
         _floatingRenderInformation.count = 0;
+        if (_renderFullTrail || j2k >= _end) {
+            // Renders the whole trail if time has passed the end time
+            _primaryRenderInformation.count = static_cast<GLsizei>(_vertexArray.size());
+            _nUniqueVertices = _primaryRenderInformation.count;
+        }
     }
 
     if (_subsamplingIsDirty) {
         // If the subsampling information has changed (either by a property change or by
         // a request of a full sweep) we update it here
-
         _primaryRenderInformation.stride = _timeStampSubsamplingFactor;
         _secondaryRenderInformation.stride = _timeStampSubsamplingFactor;
         _floatingRenderInformation.stride = _timeStampSubsamplingFactor;
-
         _subsamplingIsDirty = false;
     }
 

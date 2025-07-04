@@ -62,14 +62,14 @@ public:
 private:
 
     /**
+     * Update vertex buffer when a full sweep is needed
+     */
+    void updateBuffer();
+
+    /**
      * Reset some variables to default state.
      */
     void reset();
-
-    /// The number of vertices that we calculate during each frame of the full sweep pass
-    properties::IntProperty _sweepChunkSize;
-    /// Enables or disables iterative vertex calculations during a full sweep
-    properties::BoolProperty _enableSweepChunking;
 
     /// The start time of the trail
     properties::StringProperty _startTime;
@@ -96,9 +96,6 @@ private:
     double _start = 0.0;
     /// The conversion of the _endTime into the internal time format
     double _end = 0.0;
-
-    /// Tracks sweep iteration, is used to calculate which vertices to work on per frame
-    int _sweepIteration = 0;
 
     /// How many points do we need to compute given the distance between the
     /// start and end date and the desired sample interval
