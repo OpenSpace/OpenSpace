@@ -43,9 +43,9 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "Default OpenSpace Profile. Adds Earth satellites not contained in other profiles.",
+    "description": "A profile showing the model and trajectory of ESA's BepiColombo mission to Mercury.",
     "license": "MIT License",
-    "name": "Default",
+    "name": "BepiColombo",
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
