@@ -1477,7 +1477,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
         );
 
         // Bind ring textures for direct projection when rings component is available
-        if (_ringsComponent && _ringsComponent->isEnabled() && _ringsComponent->isReady()) {
+        if (_ringsComponent && _ringsComponent->isEnabled()) {
             ghoul::opengl::TextureUnit ringTextureFwrdUnit;
             ghoul::opengl::TextureUnit ringTextureBckwrdUnit;
             ghoul::opengl::TextureUnit ringTextureUnlitUnit;
