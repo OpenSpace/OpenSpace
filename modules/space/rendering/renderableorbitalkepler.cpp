@@ -377,7 +377,7 @@ void RenderableOrbitalKepler::initializeGL() {
            return global::renderEngine->buildRenderProgram(
                "OrbitalKeplerTrails",
                absPath("${MODULE_SPACE}/shaders/keplertrails_vs.glsl"),
-               absPath("${MODULE_SPACE}/shaders/keplertrails_vs.glsl")
+               absPath("${MODULE_SPACE}/shaders/keplertrails_fs.glsl")
            );
        }
    );
