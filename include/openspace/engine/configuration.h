@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___CONFIGURATION___H__
 #define __OPENSPACE_CORE___CONFIGURATION___H__
 
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/properties/property.h>
 #include <openspace/util/keys.h>
 #include <ghoul/lua/luastate.h>
@@ -53,6 +54,9 @@ struct Configuration {
 
     properties::Property::Visibility propertyVisibility =
         properties::Property::Visibility::User;
+
+    OpenSpaceEngine::PropertyConfirmation propertyConfirmation =
+        OpenSpaceEngine::PropertyConfirmation::Default;
 
     std::vector<std::string> globalCustomizationScripts;
     std::map<std::string, std::string> pathTokens = {
