@@ -93,7 +93,7 @@ private:
     std::vector<GLint> _segmentSizePoints;
     std::vector<GLint> _startIndexTrails;
     std::vector<GLint> _segmentSizeTrails;
-    std::vector<kepler::Parameters> parameters;
+    std::vector<kepler::Parameters> _parameters;
 
     /// The layout of the VBOs
     struct TrailVBOLayout {

@@ -548,14 +548,12 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
         glLineWidth(_appearance.trailWidth);
 
         glBindVertexArray(_vertexArray);
-
         glMultiDrawArrays(
             GL_LINE_STRIP,
             _startIndexTrails.data(),
             _segmentSizeTrails.data(),
             _lineDrawCount
         );
-
         glBindVertexArray(0);
 
         _trailProgram->deactivate();
@@ -563,9 +561,9 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableOrbitalKepler::updateBuffers() {
-    parameters = kepler::readFile(_path.value(), _format);
+    _parameters = kepler::readFile(_path.value(), _format);
 
-    _numObjects = parameters.size();
+    _numObjects = _parameters.size();
 
     if (_startRenderIdx >= _numObjects) {
         throw ghoul::RuntimeError(std::format(
@@ -588,30 +586,30 @@ void RenderableOrbitalKepler::updateBuffers() {
     }
 
     if (_contiguousMode) {
-        if (_startRenderIdx >= parameters.size() ||
-            (_startRenderIdx + _sizeRender) >= parameters.size())
+        if (_startRenderIdx >= _parameters.size() ||
+            (_startRenderIdx + _sizeRender) >= _parameters.size())
         {
             throw ghoul::RuntimeError(std::format(
                 "Tried to load {} objects but only {} are available",
-                _startRenderIdx + _sizeRender, parameters.size()
+                _startRenderIdx + _sizeRender, _parameters.size()
             ));
         }
 
         // Extract subset that starts at _startRenderIdx and contains _sizeRender obejcts
-        parameters = std::vector<kepler::Parameters>(
-            parameters.begin() + _startRenderIdx,
-            parameters.begin() + _startRenderIdx + _sizeRender
+        _parameters = std::vector<kepler::Parameters>(
+            _parameters.begin() + _startRenderIdx,
+            _parameters.begin() + _startRenderIdx + _sizeRender
         );
     }
     else {
         // First shuffle the whole array
         std::default_random_engine rng;
-        std::shuffle(parameters.begin(), parameters.end(), rng);
+        std::shuffle(_parameters.begin(), _parameters.end(), rng);
 
         // Then take the first _sizeRender values
-        parameters = std::vector<kepler::Parameters>(
-            parameters.begin(),
-            parameters.begin() + _sizeRender
+        _parameters = std::vector<kepler::Parameters>(
+            _parameters.begin(),
+            _parameters.begin() + _sizeRender
         );
     }
 
@@ -621,13 +619,13 @@ void RenderableOrbitalKepler::updateBuffers() {
     _segmentSizeTrails.clear();
     _segmentSizeRaw.clear();
     size_t nVerticesTotal = 0;
-    const int numOrbits = static_cast<int>(parameters.size());
+    const int numOrbits = static_cast<int>(_parameters.size());
     for (int i = 0; i < numOrbits; i++) {
         // For points rendering as they are always two vertices long
         _segmentSizePoints.push_back(2);
 
         const double scale = static_cast<double>(_segmentQuality) * 10.0;
-        const kepler::Parameters& p = parameters[i];
+        const kepler::Parameters& p = _parameters[i];
         _segmentSizeRaw.push_back(
             static_cast<int>(scale + (scale / std::pow(1.0 - p.eccentricity, 1.2)))
         );
@@ -640,7 +638,7 @@ void RenderableOrbitalKepler::updateBuffers() {
 
     size_t vertexBufIdx = 0;
     for (int orbitIdx = 0; orbitIdx < numOrbits; ++orbitIdx) {
-        const kepler::Parameters& orbit = parameters[orbitIdx];
+        const kepler::Parameters& orbit = _parameters[orbitIdx];
 
         ghoul::Dictionary d;
         d.setValue("Type", std::string("KeplerTranslation"));
@@ -701,7 +699,7 @@ void RenderableOrbitalKepler::updateBuffers() {
     glBindVertexArray(0);
 
     double maxSemiMajorAxis = 0.0;
-    for (const kepler::Parameters& kp : parameters) {
+    for (const kepler::Parameters& kp : _parameters) {
         if (kp.semiMajorAxis > maxSemiMajorAxis) {
             maxSemiMajorAxis = kp.semiMajorAxis;
         }
@@ -713,7 +711,7 @@ void RenderableOrbitalKepler::calculateSegmentsForPoints(const RenderData& data)
     int startVertexIndex = 0;
     for (int i = 0; i < _segmentSizeRaw.size(); i++) {
         // Check how far along the trail we are
-        const kepler::Parameters& orbit = parameters[i];
+        const kepler::Parameters& orbit = _parameters[i];
         const double nRevs = (data.time.j2000Seconds() - orbit.epoch) / orbit.period;
         double frac = nRevs - std::trunc(nRevs);
         frac += (frac < 0.0) ? 1.0: 0.0;
@@ -730,13 +728,13 @@ void RenderableOrbitalKepler::calculateSegmentsForPoints(const RenderData& data)
 
 void RenderableOrbitalKepler::calculateSegmentsForTrails(const RenderData& data) {
     const float fade = pow(_appearance.trailFade.maxValue() - _appearance.trailFade, 2.f);
-    const double threshold = 1.0 - pow(0.05f, 1.f / fade);
+    const float threshold = 1.f - pow(0.05f, 1.f / fade);
 
     int nTotalTrailParts = 0;
     int startVertexIndex = 0;
     for (int i = 0; i < _segmentSizeRaw.size(); i++) {
         // Check how far along the trail we are
-        const kepler::Parameters& orbit = parameters[i];
+        const kepler::Parameters& orbit = _parameters[i];
         const double nRevs = (data.time.j2000Seconds() - orbit.epoch) / orbit.period;
         double frac = nRevs - std::trunc(nRevs);
         frac += (frac < 0.0) ? 1.0 : 0.0;
