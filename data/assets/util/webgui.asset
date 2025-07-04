@@ -28,6 +28,14 @@ local showcomposer = asset.resource({
 })
 
 
+local maps = asset.resource({
+  Identifier = "userinterface_maps",
+  Name = "Userinterface Maps",
+  Type = "HttpSynchronization",
+  Version = 1
+})
+
+
 asset.onInitialize(function()
   -- Unzip the frontend bundle
   local destFrontend = frontend .. "frontend"
@@ -65,6 +73,10 @@ asset.onInitialize(function()
   directories[#directories + 1] = openspace.absPath("${USER_SHOWCOMPOSER_UPLOADS}")
   directories[#directories + 1] = "showcomposer/projects"
   directories[#directories + 1] = openspace.absPath("${USER_SHOWCOMPOSER_PROJECTS}")
+
+  -- Add asset folders
+  directories[#directories + 1] = "assets/maps"
+  directories[#directories + 1] = maps
 
   openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
   openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "gui")
