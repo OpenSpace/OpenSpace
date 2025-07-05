@@ -105,7 +105,7 @@ std::string ExoplanetsDataPreparationTask::description() {
         "Extract data about exoplanets from file '{}' and write as bin to '{}'. The data "
         "file should be a csv version of the Planetary Systems Composite Data from the "
         "NASA exoplanets archive (https://exoplanetarchive.ipac.caltech.edu/)",
-        _inputDataPath, _outputBinPath
+        _inputDataPath.string(), _outputBinPath.string()
     );
 }
 
@@ -114,7 +114,7 @@ void ExoplanetsDataPreparationTask::perform(
 {
     std::ifstream inputDataFile(_inputDataPath);
     if (!inputDataFile.good()) {
-        LERROR(std::format("Failed to open input file '{}'", _inputDataPath));
+        LERROR(std::format("Failed to open input file '{}'", _inputDataPath.string()));
         return;
     }
 
@@ -122,7 +122,7 @@ void ExoplanetsDataPreparationTask::perform(
     std::ofstream lutFile(_outputLutPath);
 
     if (!binFile.good()) {
-        LERROR(std::format("Error when writing to '{}'",_outputBinPath));
+        LERROR(std::format("Error when writing to '{}'",_outputBinPath.string()));
         if (!std::filesystem::is_directory(_outputBinPath.parent_path())) {
             LERROR("Output directory does not exist");
         }
@@ -130,7 +130,7 @@ void ExoplanetsDataPreparationTask::perform(
     }
 
     if (!lutFile.good()) {
-        LERROR(std::format("Error when writing to '{}'", _outputLutPath));
+        LERROR(std::format("Error when writing to '{}'", _outputLutPath.string()));
         if (!std::filesystem::is_directory(_outputLutPath.parent_path())) {
             LERROR("Output directory does not exist");
         }
@@ -454,7 +454,7 @@ glm::vec3 ExoplanetsDataPreparationTask::starPosition(const std::string& starNam
 
     std::ifstream exoplanetsFile(sourceFile);
     if (!exoplanetsFile) {
-        LERROR(std::format("Error opening file '{}'", sourceFile));
+        LERROR(std::format("Error opening file '{}'", sourceFile.string()));
     }
 
     std::string line;
@@ -500,7 +500,7 @@ float ExoplanetsDataPreparationTask::bvFromTeff(float teff,
 
     std::ifstream teffToBvFile(conversionFile);
     if (!teffToBvFile.good()) {
-        LERROR(std::format("Failed to open file '{}'", conversionFile));
+        LERROR(std::format("Failed to open file '{}'", conversionFile.string()));
         return std::numeric_limits<float>::quiet_NaN();
     }
 

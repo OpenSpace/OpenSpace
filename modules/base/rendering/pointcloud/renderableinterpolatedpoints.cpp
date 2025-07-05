@@ -49,7 +49,7 @@ namespace {
         );
         // No syncing, as this was triggered from a property change (which happened
         // based on an already synced script)
-        global::scriptEngine->queueScript({
+        global::scriptEngine->queueScript(scripting::ScriptEngine::Script{
             .code = script,
             .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
             .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
@@ -300,7 +300,7 @@ void RenderableInterpolatedPoints::initialize() {
         LERROR(std::format(
             "Mismatch between provided number of data entries and the specified number "
             "of points. Expected the number of entries in the data file '{}' to be "
-            "evenly divisible by the number of objects", _dataFile
+            "evenly divisible by the number of objects", _dataFile.string()
         ));
     }
 

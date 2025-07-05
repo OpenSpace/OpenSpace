@@ -101,12 +101,12 @@ void IswaKameleonGroup::registerProperties() {
 }
 
 void IswaKameleonGroup::readFieldlinePaths(const std::filesystem::path& indexFile) {
-    LINFO(std::format("Reading seed points paths from file '{}'", indexFile));
+    LINFO(std::format("Reading seed points paths from file '{}'", indexFile.string()));
 
     // Read the index file from disk
     std::ifstream seedFile(indexFile);
     if (!seedFile.good()) {
-        LERROR(std::format("Could not open seed points file '{}'", indexFile));
+        LERROR(std::format("Could not open seed points file '{}'", indexFile.string()));
     }
     else {
         std::string line;

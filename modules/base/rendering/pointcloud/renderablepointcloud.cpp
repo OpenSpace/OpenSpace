@@ -725,10 +725,14 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
             _texturesDirectory = absPath(*t.folder);
 
             if (t.file.has_value()) {
+                // XCode needs help with std::optional types
+                std::filesystem::path tfolder = *t.folder;
+                std::filesystem::path tfile = *t.file;
+                
                 LWARNING(std::format(
                     "Both a single texture File and multi-texture Folder was provided. "
                     "The folder '{}' has priority and the single texture with the "
-                    "following path will be ignored: '{}'", *t.folder, *t.file
+                    "following path will be ignored: '{}'", tfolder.string(), tfile.string()
                 ));
             }
 
@@ -955,7 +959,7 @@ void RenderablePointCloud::initializeSingleTexture() {
 
     if (!std::filesystem::is_regular_file(p)) {
         throw ghoul::RuntimeError(std::format(
-            "Could not find image file '{}'", p
+            "Could not find image file '{}'", p.string()
         ));
     }
 
@@ -969,7 +973,7 @@ void RenderablePointCloud::initializeMultiTextures() {
 
         if (!std::filesystem::is_regular_file(path)) {
             throw ghoul::RuntimeError(std::format(
-                "Could not find image file '{}'", path
+                "Could not find image file '{}'", path.string()
             ));
         }
         loadTexture(path, tex.index);
@@ -1011,7 +1015,7 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
     bool useAlpha = (t->numberOfChannels() > 3) && _texture.useAlphaChannel;
 
     if (t) {
-        LINFOC("RenderablePlanesCloud", std::format("Loaded texture {}", path));
+        LINFOC("RenderablePlanesCloud", std::format("Loaded texture {}", path.string()));
         // Do not upload the loaded texture to the GPU, we just want it to hold the data.
         // However, convert textures make sure they all use the same format
         ghoul::opengl::Texture::Format targetFormat = glFormat(useAlpha);
@@ -1019,7 +1023,7 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
     }
     else {
         throw ghoul::RuntimeError(std::format(
-            "Could not find image file {}", path
+            "Could not find image file {}", path.string()
         ));
     }
 

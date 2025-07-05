@@ -105,7 +105,7 @@ namespace {
                 getmsg_c("LONG", SpiceErrorBufferSize, buffer.data());
                 reset_c();
                 throw ghoul::RuntimeError(std::format(
-                    "Error loading kernel {}. {}", kernel, buffer
+                    "Error loading kernel {}. {}", kernel.string(), buffer
                 ));
             }
             for (SpiceInt i = 0; i < card_c(&ids); i++) {
@@ -124,7 +124,7 @@ namespace {
                     getmsg_c("LONG", SpiceErrorBufferSize, buffer.data());
                     reset_c();
                     throw ghoul::RuntimeError(std::format(
-                        "Error finding SPK coverage '{}'. {}", kernel, buffer
+                        "Error finding SPK coverage '{}'. {}", kernel.string(), buffer
                     ));
                 }
 
@@ -141,7 +141,7 @@ namespace {
                         getmsg_c("LONG", SpiceErrorBufferSize, buffer.data());
                         reset_c();
                         throw ghoul::RuntimeError(std::format(
-                            "Error finding window {} in SPK '{}'. {}", j, kernel, buffer
+                            "Error finding window {} in SPK '{}'. {}", j, kernel.string(), buffer
                         ));
                     }
 
@@ -242,7 +242,7 @@ namespace {
                 getmsg_c("LONG", SpiceErrorBufferSize, buffer.data());
                 reset_c();
                 throw ghoul::RuntimeError(std::format(
-                    "Error loading kernel {}. {}", kernel, buffer
+                    "Error loading kernel {}. {}", kernel.string(), buffer
                 ));
             }
             for (SpiceInt i = 0; i < card_c(&ids); i++) {
@@ -261,7 +261,7 @@ namespace {
                     getmsg_c("LONG", SpiceErrorBufferSize, buffer.data());
                     reset_c();
                     throw ghoul::RuntimeError(std::format(
-                        "Error finding CK coverage '{}'. {}", kernel, buffer
+                        "Error finding CK coverage '{}'. {}", kernel.string(), buffer
                     ));
                 }
 
@@ -278,7 +278,7 @@ namespace {
                         getmsg_c("LONG", SpiceErrorBufferSize, buffer.data());
                         reset_c();
                         throw ghoul::RuntimeError(std::format(
-                            "Error finding window {} in SPK '{}'. {}", j, kernel, buffer
+                            "Error finding window {} in SPK '{}'. {}", j, kernel.string(), buffer
                         ));
                     }
 

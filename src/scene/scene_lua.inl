@@ -305,6 +305,7 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
     std::vector<Property*> matches;
 
     std::mutex mutex;
+#ifndef __APPLE__
     std::for_each(
         std::execution::par_unseq,
         properties.cbegin(),
@@ -325,6 +326,27 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
             }
         }
     );
+#else
+    std::for_each(
+        properties.cbegin(),
+        properties.cend(),
+        [&](Property* prop) {
+            const std::string_view uri = prop->uri();
+
+            bool isMatch = checkUriMatchFromRegexResults(
+                uri,
+                { parentUri, propertyIdentifier, isLiteral },
+                groupTag,
+                prop->owner()
+            );
+
+            if (isMatch) {
+                std::lock_guard g(mutex);
+                matches.push_back(prop);
+            }
+        }
+    );
+#endif // XCode does not support par_unseq or par yet
 
     return matches;
 }
@@ -353,6 +375,7 @@ std::vector<openspace::properties::PropertyOwner*> findMatchesInAllPropertyOwner
     std::vector<PropertyOwner*> matches;
 
     std::mutex mutex;
+#ifndef __APPLE__
     std::for_each(
         std::execution::par_unseq,
         propertyOwners.cbegin(),
@@ -384,6 +407,38 @@ std::vector<openspace::properties::PropertyOwner*> findMatchesInAllPropertyOwner
             matches.push_back(propOwner);
         }
     );
+#else
+    std::for_each(
+        propertyOwners.cbegin(),
+        propertyOwners.cend(),
+        [&](PropertyOwner* propOwner) {
+            if (inputIsOnlyTag) {
+                // If we only got a tag as input, the result is all owners that directly
+                // match the group tag (without looking recusively in parent owners)
+                if (!ownerMatchesGroupTag(propOwner, groupTag, false)) {
+                    return;
+                }
+            }
+            else {
+                const std::string uri = propOwner->uri();
+
+                bool isMatch = checkUriMatchFromRegexResults(
+                    uri,
+                    { parentUri, ownerIdentifier, isLiteral },
+                    groupTag,
+                    propOwner->owner()
+                );
+
+                if (!isMatch) {
+                    return;
+                }
+            }
+
+            std::lock_guard g(mutex);
+            matches.push_back(propOwner);
+        }
+    );
+#endif // XCode does not support par_unseq
 
     return matches;
 }

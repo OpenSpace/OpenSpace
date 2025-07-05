@@ -145,11 +145,11 @@ void DynamicFileSequenceDownloader::deinitialize(bool cacheFiles) {
         std::filesystem::remove(file->path, ec);
         if (ec) {
             LERROR(std::format(
-                "Failed to delete unfinished file '{}'. {}", file->path, ec.message()
+                "Failed to delete unfinished file '{}'. {}", file->path.string(), ec.message()
             ));
         }
         else {
-            LINFO(std::format("Removing unfinished download:: {}", file->path));
+            LINFO(std::format("Removing unfinished download:: {}", file->path.string()));
         }
     }
     if (!cacheFiles) {
@@ -162,7 +162,7 @@ void DynamicFileSequenceDownloader::deinitialize(bool cacheFiles) {
             std::filesystem::remove(file.path(), ec);
             if (ec) {
                 LERROR(std::format(
-                    "Failed to delete file '{}'. {}", file.path(), ec.message()
+                    "Failed to delete file '{}'. {}", file.path().string(), ec.message()
                 ));
             }
         }
@@ -403,7 +403,7 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
             std::ifstream tempFile = std::ifstream(file->URL);
             std::streampos size = tempFile.tellg();
             if (size == 0) {
-                LERROR(std::format("File '{}' is empty, removing", dl->destination()));
+                LERROR(std::format("File '{}' is empty, removing", dl->destination().string()));
                 currentIt = _filesCurrentlyDownloading.erase(currentIt);
                 --i;
             }
@@ -430,12 +430,12 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
                 std::filesystem::remove(filepath, ec);
                 if (ec) {
                     LERROR(std::format(
-                        "Failed to delete file '{}'. {}", filepath, ec.message()
+                        "Failed to delete file '{}'. {}", filepath.string(), ec.message()
                     ));
                 }
                 else {
                     LINFO(std::format(
-                        "Deleted file after failed download: {}", filepath
+                        "Deleted file after failed download: {}", filepath.string()
                     ));
                 }
             }

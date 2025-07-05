@@ -83,7 +83,7 @@ namespace {
         ));
         if (!std::filesystem::is_regular_file(execLocation)) {
             LERROR(std::format(
-                "Could not find web helper executable at location: {}", execLocation
+                "Could not find web helper executable at location: {}", execLocation.string()
             ));
         }
         return execLocation;
@@ -161,7 +161,7 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 
     std::filesystem::path webHelperLocation =
         p.webHelperLocation.value_or(findHelperExecutable());
-    LDEBUG(std::format("CEF using web helper executable: {}", webHelperLocation));
+    LDEBUG(std::format("CEF using web helper executable: {}", webHelperLocation.string()));
     _cefHost = std::make_unique<CefHost>(webHelperLocation.string());
     LDEBUG("Starting CEF... done");
 

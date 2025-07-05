@@ -202,7 +202,7 @@ namespace {
     if (elementToExtract > nElements) {
         throw ghoul::RuntimeError(std::format(
             "Error loading {}. Element number {} requested, but only {} found",
-            tle, nElements, elementToExtract
+            tle.string(), nElements, elementToExtract
         ));
     }
 
@@ -212,14 +212,14 @@ namespace {
     if (line1.size() != TLEColumnWidth) {
         throw ghoul::RuntimeError(std::format(
             "Illformed TLE file {}, expected {} characters per line, got {}",
-            tle, TLEColumnWidth, line1.size()
+            tle.string(), TLEColumnWidth, line1.size()
         ));
     }
     std::string line2 = lines[3 * elementToExtract + 2];
     if (line2.size() != TLEColumnWidth) {
         throw ghoul::RuntimeError(std::format(
             "Illformed TLE file {}, expected {} characters per line, got {}",
-            tle, TLEColumnWidth, line2.size()
+            tle.string(), TLEColumnWidth, line2.size()
         ));
     }
 
@@ -244,7 +244,7 @@ namespace {
     if (tokens.size() < 2) {
         throw ghoul::RuntimeError(std::format(
             "Error parsing TLE file {}. Expected 8-9 elements in the second row, got {}",
-            tle, tokens.size()
+            tle.string(), tokens.size()
         ));
     }
     // Earth-orbiting spacecraft usually lack a DSN identification code, so the NAIF ID
@@ -255,7 +255,7 @@ namespace {
 
     // Write the elements to a new SPK file
     const SpiceInt nCommentCharacters = 0;
-    std::string internalFileName = std::format("Type 10 SPK for {}", tle);
+    std::string internalFileName = std::format("Type 10 SPK for {}", tle.string());
     std::string segmentId = "Segment";
 
     if (std::filesystem::exists(spk)) {

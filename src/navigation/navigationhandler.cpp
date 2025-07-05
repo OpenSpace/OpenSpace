@@ -218,7 +218,7 @@ void NavigationHandler::triggerFadeToTransition(std::string transitionScript,
     }
 
     // No syncing, as this was called from a script that should have been synced already
-    global::scriptEngine->queueScript({
+    global::scriptEngine->queueScript(scripting::ScriptEngine::Script{
         .code = std::move(script),
         .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
         .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
@@ -612,13 +612,13 @@ void NavigationHandler::saveNavigationState(const std::filesystem::path& filepat
         // Adding the .navstate extension to the filepath if it came without one
         absolutePath.replace_extension(".navstate");
     }
-    LINFO(std::format("Saving camera position: {}", absolutePath));
+    LINFO(std::format("Saving camera position: {}", absolutePath.string()));
 
     std::ofstream ofs(absolutePath);
 
     if (!ofs.good()) {
         throw ghoul::RuntimeError(std::format(
-            "Error saving navigation state to '{}'", filepath
+            "Error saving navigation state to '{}'", filepath.string()
         ));
     }
 
@@ -629,7 +629,7 @@ void NavigationHandler::loadNavigationState(const std::string& filepath,
                                             bool useTimeStamp)
 {
     std::filesystem::path absolutePath = absPath(filepath);
-    LINFO(std::format("Reading camera state from file: {}", absolutePath));
+    LINFO(std::format("Reading camera state from file: {}", absolutePath.string()));
 
     if (!absolutePath.has_extension()) {
         // Adding the .navstate extension to the filepath if it came without one
@@ -648,7 +648,7 @@ void NavigationHandler::loadNavigationState(const std::string& filepath,
 
     if (contents.empty()) {
         throw::ghoul::RuntimeError(std::format(
-            "Failed reading camera state from file: {}. File is empty", absolutePath
+            "Failed reading camera state from file: {}. File is empty", absolutePath.string()
         ));
     }
 

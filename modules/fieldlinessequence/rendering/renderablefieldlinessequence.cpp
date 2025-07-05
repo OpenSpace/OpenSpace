@@ -540,7 +540,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             if (_files[0].path.empty()) {
                 throw ghoul::RuntimeError(std::format(
                     "Error finding file '{}' in folder '{}'",
-                    e.path().filename(), path
+                    e.path().filename().string(), path.string()
                 ));
             }
         }
@@ -573,7 +573,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         for (const std::filesystem::path& path : *p.colorTablePaths) {
             if (!std::filesystem::exists(path)) {
                 throw ghoul::RuntimeError(std::format(
-                    "Color table path '{}' is not a valid file", path
+                    "Color table path '{}' is not a valid file", path.string()
                 ));
             }
             _colorTablePaths.emplace_back(path);
