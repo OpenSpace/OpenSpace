@@ -517,6 +517,12 @@ void applyRegularExpression(lua_State* L, std::string_view regex,
             }
         }
     }
+
+    // We need to do this check outside the for loop since the results of the postscript
+    // script might otherwise be overwritten by the following property values
+    if (interpolationDuration == 0.0 && !postScript.empty()) {
+        global::scriptEngine->runScript({ std::move(postScript) });
+    }
 }
 
 int setPropertyCallSingle(openspace::properties::Property& prop, const std::string& uri,
@@ -543,6 +549,10 @@ int setPropertyCallSingle(openspace::properties::Property& prop, const std::stri
             scene->removePropertyInterpolation(&prop);
         }
         prop.setLuaValue(L);
+
+        if (!postScript.empty()) {
+            global::scriptEngine->runScript({ std::move(postScript) });
+        }
     }
     else {
         prop.setLuaInterpolationTarget(L);

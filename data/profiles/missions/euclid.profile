@@ -39,7 +39,7 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "A profile showing the trajectory of ESA's Euclid mission",
+    "description": "A profile showing the trajectory of ESA's Euclid mission.",
     "license": "MIT License",
     "name": "Euclid",
     "url": "https://www.openspaceproject.com",

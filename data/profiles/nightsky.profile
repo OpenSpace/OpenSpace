@@ -61,7 +61,7 @@
     "author": "OpenSpace Team",
     "description": "A profile starting at night on the surface of earth looking out at the horizon. The city lights map has been disabled.",
     "license": "MIT License",
-    "name": "Default",
+    "name": "Nights Sky",
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
