@@ -138,7 +138,12 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     : RenderableTrail(dictionary)
     , _startTime(StartTimeInfo)
     , _endTime(EndTimeInfo)
-    , _sampleInterval(SampleIntervalInfo, 2.0, 2.0, 1e6)
+    , _sampleInterval(
+        SampleIntervalInfo,
+        openspace::timeconstants::SecondsPerDay / 2.0,
+        2.0,
+        1e6
+    )
     , _timeStampSubsamplingFactor(TimeSubSampleInfo, 1, 1, 1000000000)
     , _renderFullTrail(RenderFullPathInfo, false)
     , _nReplacementPoints(AccurateTrailPositionsInfo, 100, 0, 1000)
@@ -162,10 +167,6 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
 
     if (p.sampleInterval.has_value()) {
         _sampleInterval = *p.sampleInterval;
-    }
-    else {
-        const double delta = Time::convertTime(_endTime) - Time::convertTime(_startTime);
-        _sampleInterval = delta / (openspace::timeconstants::SecondsPerYear * 2);
     }
     _sampleInterval.onChange([this] { reset(); });
     addProperty(_sampleInterval);
@@ -220,27 +221,13 @@ void RenderableTrailTrajectory::reset() {
 }
 
 void RenderableTrailTrajectory::updateBuffer() {
-    constexpr unsigned int MaxVertices = 1000000;
-
     // Convert the start and end time from string representations to J2000 seconds
     _start = SpiceManager::ref().ephemerisTimeFromDate(_startTime);
     _end = SpiceManager::ref().ephemerisTimeFromDate(_endTime);
     const double timespan = _end - _start;
 
     _totalSampleInterval = _sampleInterval / _timeStampSubsamplingFactor;
-
-    // Cap _nVertices in order to prevent overflow and extreme performance
-    // degredation/RAM usage
-    _nVertices = std::min(
-        static_cast<unsigned int>(std::ceil(timespan / _totalSampleInterval)),
-        MaxVertices
-    );
-
-    // We need to recalcuate the _totalSampleInterval if _nVertices equals
-    // MaxVertices. If we don't do this the position for each vertex
-    // will not be correct for the number of vertices we are doing along the trail
-    _totalSampleInterval = (_nVertices == MaxVertices) ?
-        timespan / _nVertices : _totalSampleInterval;
+    _nVertices = static_cast<unsigned int>(std::ceil(timespan / _totalSampleInterval));
 
     // Make space for the vertices
     _vertexArray.clear();
