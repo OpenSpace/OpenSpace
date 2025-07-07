@@ -333,7 +333,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         }
         else {
             prePaddingDelta = std::min(
-                static_cast<int>(_primaryRenderInformation.count),
+                static_cast<int>(std::max(1, _primaryRenderInformation.count)),
                 static_cast<int>(_nReplacementPoints)
             );
         }
@@ -348,8 +348,10 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         // Calculates all replacement points before the object
         glm::dvec3 v = p;
         for (int i = 0; i < prePaddingDelta; ++i) {
-            const int floatPointIndex =
-                _primaryRenderInformation.count - prePaddingDelta + i;
+            const int floatPointIndex = std::max(
+                0,
+                _primaryRenderInformation.count - prePaddingDelta + i
+            );
 
             glm::dvec3 fp = glm::dvec3(
                 _vertexArray[floatPointIndex].x,
