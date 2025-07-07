@@ -55,8 +55,7 @@ struct Configuration {
     properties::Property::Visibility propertyVisibility =
         properties::Property::Visibility::User;
 
-    OpenSpaceEngine::PropertyConfirmation propertyConfirmation =
-        OpenSpaceEngine::PropertyConfirmation::Default;
+    bool propertyConfirmation = true;
 
     std::vector<std::string> globalCustomizationScripts;
     std::map<std::string, std::string> pathTokens = {

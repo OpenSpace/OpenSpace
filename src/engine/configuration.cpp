@@ -76,17 +76,10 @@ namespace {
         // OpenSpace. If it is not provided, it defaults to 'User'
         std::optional<Visibility> propertyVisibility;
 
-        enum class [[codegen::map(openspace::OpenSpaceEngine::PropertyConfirmation)]]
-        PropertyConfirmation
-        {
-            Never,
-            Default,
-            Always
-        };
         // Determines when the property confirmation modal should be shown when starting
-        // up OpenSpace. If it is not provided, it defaults to 'Default', i.e., each
-        // individual property determines whether it requires a confirmation or not
-        std::optional<PropertyConfirmation> propertyConfirmation;
+        // up OpenSpace. If it is not provided, it defaults to 'true', i.e., each
+        // individual property determines whether it requires a confirmation or not.
+        std::optional<bool> propertyConfirmation;
         
 
         // A list of paths that are automatically registered with the file system. If a
@@ -560,11 +553,8 @@ void parseLuaState(Configuration& configuration) {
             *p.propertyVisibility
         );
     }
-    if (p.propertyConfirmation.has_value()) {
-        c.propertyConfirmation = codegen::map<OpenSpaceEngine::PropertyConfirmation>(
-            *p.propertyConfirmation
-        );
-    }
+
+    c.propertyConfirmation = p.propertyConfirmation.value_or(true);
     c.pathTokens = p.paths;
     c.fonts = p.fonts.value_or(c.fonts);
     c.fontSize.frameInfo = p.fontSize.frameInfo;
