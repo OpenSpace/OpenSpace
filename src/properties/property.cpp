@@ -128,7 +128,7 @@ bool Property::isReadOnly() const {
     return _metaData.readOnly.value_or(false);
 }
 
-void Property::setNeedsConfirmation(Confirmation confirmation) {
+void Property::setNeedsConfirmation(bool confirmation) {
     _metaData.needsConfirmation = confirmation;
     notifyMetaDataChangeListeners();
 }
@@ -285,15 +285,9 @@ nlohmann::json Property::generateJsonDescription() const {
        { Visibility::Developer, "Developer" },
        { Visibility::Hidden, "Hidden" }
     };
-    static const std::unordered_map<Confirmation, std::string> ConfirmationConverter = {
-       { Confirmation::No, "No" },
-       { Confirmation::Never, "Never" },
-       { Confirmation::Yes, "Yes" },
-       { Confirmation::Always, "Always" }
-    };
+
     const std::string& vis = VisibilityConverter.at(_metaData.visibility);
     const bool isReadOnly = _metaData.readOnly.value_or(false);
-    const std::string& needsConfirmation = ConfirmationConverter.at(_metaData.needsConfirmation);
     const std::string groupId = groupIdentifier();
 
     nlohmann::json json = {
@@ -302,7 +296,7 @@ nlohmann::json Property::generateJsonDescription() const {
         { "guiName", _guiName },
         { "group", groupId },
         { "isReadOnly", isReadOnly },
-        { "needsConfirmation", needsConfirmation },
+        { "needsConfirmation", _metaData.needsConfirmation },
         { "type", className() },
         { "visibility", vis }
     };
