@@ -666,6 +666,11 @@ bool PlanetsSonification::updateData(const Camera* camera, int planetIndex,
 }
 
 void PlanetsSonification::sendData(int planetIndex) {
+    if (_planets.empty()) {
+        LWARNING("No planets have been added to the sonification");
+        return;
+    }
+
     if (planetIndex < 0 || planetIndex > _planets.size() - 1) {
         LWARNING(std::format("Planet list does not include index {}", planetIndex));
         return;
