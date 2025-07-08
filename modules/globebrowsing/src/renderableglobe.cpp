@@ -1696,8 +1696,8 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
             }
 
             program.setUniform("textureOffset", _ringsComponent->textureOffset());
-            program.setUniform("sunPositionObj", _ringsComponent->sunPositionObj());
-            program.setUniform("camPositionObj", _ringsComponent->camPositionObj());
+            program.setUniform("sunPositionObj", glm::vec3(0.0f));
+            program.setUniform("camPositionWorld", data.camera.positionVec3()); // pass camera world position
         }
     }
     else if (_shadowMappingProperties.shadowMapping) {
@@ -1807,6 +1807,19 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
         programObject.setUniform("deltaPhi1", glm::length(deltaPhi1));
         programObject.setUniform("tileDelta", TileDelta);
     }
+
+    // Set sunPositionWorld and camPositionWorld uniforms for ring shadow calculations
+    // Get Sun node position in world coordinates
+    glm::dvec3 sunPositionWorld = glm::dvec3(0.0);
+    SceneGraphNode* sunNode = sceneGraph()->sceneGraphNode("Sun");
+    if (sunNode) {
+        sunPositionWorld = sunNode->worldPosition();
+    }
+    // Camera position in world coordinates
+    glm::dvec3 camPositionWorld = data.camera.positionVec3();
+    programObject.setUniform("sunPositionWorld", glm::vec3(sunPositionWorld));
+    programObject.setUniform("camPositionWorld", glm::vec3(camPositionWorld));
+    programObject.setUniform("modelTransform", _cachedModelTransform);
 }
 
 void RenderableGlobe::recompileShaders() {
@@ -1860,7 +1873,7 @@ void RenderableGlobe::recompileShaders() {
     }
 
     std::vector<std::pair<std::string, std::string>>& pairs =
-        preprocessingData.keyValuePairs;
+                preprocessingData.keyValuePairs;
 
     const bool hasHeightLayer =
         !_layerManager.layerGroup(layers::Group::ID::HeightLayers).activeLayers().empty();
@@ -2588,7 +2601,6 @@ bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk,
     );
 
     const glm::dvec3& globeToCamera = cameraPos;
-
     const Geodetic2 camPosOnGlobe = _ellipsoid.cartesianToGeodetic2(globeToCamera);
     const Geodetic2 closestPatchPoint = patch.closestPoint(camPosOnGlobe);
     glm::dvec3 objectPos = _ellipsoid.cartesianSurfacePosition(closestPatchPoint);

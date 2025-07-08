@@ -37,16 +37,14 @@ out vec2 fs_uv;
 out vec3 ellipsoidNormalCameraSpace;
 out vec3 levelWeights;
 out vec3 positionCameraSpace;
+out vec3 positionWorldSpace;
 
 #if USE_ACCURATE_NORMALS
   out vec3 ellipsoidTangentThetaCameraSpace;
   out vec3 ellipsoidTangentPhiCameraSpace;
 #endif // USE_ACCURATE_NORMALS
 
-#if USE_ECLIPSE_SHADOWS
-  out vec3 positionWorldSpace;
-  uniform dmat4 modelTransform;
-#endif // USE_ECLIPSE_SHADOWS
+uniform dmat4 modelTransform;
 
 #if SHADOW_MAPPING_ENABLED
   // ShadowMatrix is the matrix defined by:
@@ -134,10 +132,7 @@ void main() {
   gl_Position = fs_position;
   ellipsoidNormalCameraSpace = mat3(modelViewTransform) * pair.normal;
   positionCameraSpace = vec3(modelViewTransform * vec4(pair.position, 1.0));
-
-#if USE_ECLIPSE_SHADOWS
   positionWorldSpace = vec3(modelTransform * dvec4(pair.position, 1.0));
-#endif // USE_ECLIPSE_SHADOWS
 
 #if SHADOW_MAPPING_ENABLED
   shadowCoords = vec4(shadowMatrix * dvec4(pair.position, 1.0));

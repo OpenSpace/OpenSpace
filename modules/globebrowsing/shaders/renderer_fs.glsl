@@ -68,8 +68,8 @@ uniform sampler1D ringTextureUnlit;
 uniform sampler1D ringTextureColor;
 uniform sampler1D ringTextureTransparency;
 uniform vec2 textureOffset;
-uniform vec3 sunPositionObj;
-uniform vec3 camPositionObj;
+uniform vec3 sunPositionWorld; // NEW: world coordinates
+uniform vec3 camPositionWorld; // NEW: world coordinates
 #endif // USE_RING_SHADOWS
 
 #endif // SHADOW_MAPPING_ENABLED
@@ -154,9 +154,7 @@ in vec3 positionCameraSpace;
   in vec3 ellipsoidTangentPhiCameraSpace;
 #endif // USE_ACCURATE_NORMALS
 
-#if USE_ECLIPSE_SHADOWS
 in vec3 positionWorldSpace;
-#endif // USE_ECLIPSE_SHADOWS
 
 uniform float opacity;
 
@@ -279,16 +277,16 @@ Fragment getFragment() {
 #if USE_RING_SHADOWS
   // Calculate ring shadow by projecting ring texture directly onto surface
   // Assume ring lies in the XZ plane (Y=0) in object space
-  vec3 surfaceToSun = normalize(sunPositionObj - positionCameraSpace);
+  vec3 surfaceToSun = -normalize(sunPositionWorld - positionWorldSpace); // Use world coordinates
   
   // Find intersection of light ray with ring plane (Y=0)
-  // Ray equation: P = positionCameraSpace + t * surfaceToSun
-  // For ring plane: P.y = 0, so t = -positionCameraSpace.y / surfaceToSun.y
+  // Ray equation: P = positionWorldSpace + t * surfaceToSun
+  // For ring plane: P.y = 0, so t = -positionWorldSpace.y / surfaceToSun.y
   if (abs(surfaceToSun.y) > 0.001) { // Avoid division by zero
-    float t = -positionCameraSpace.y / surfaceToSun.y;
+    float t = -positionWorldSpace.y / surfaceToSun.y;
     
     if (t > 0.0) { // Ray intersects ring plane in front of surface
-      vec3 ringIntersection = positionCameraSpace + t * surfaceToSun;
+      vec3 ringIntersection = positionWorldSpace + t * surfaceToSun;
       
       // Calculate distance from ring center
       float ringRadius = length(ringIntersection.xz);
@@ -301,7 +299,7 @@ Fragment getFragment() {
         // Sample ring transparency texture
         vec4 transparency = texture(ringTextureTransparency, texCoord);
           // Determine which side of ring we're viewing from (matches ring shader logic)
-        float lerpFactor = dot(camPositionObj, sunPositionObj);
+        float lerpFactor = dot(camPositionWorld, sunPositionWorld);
         
         // Sample appropriate ring texture based on viewing direction
         vec4 ringColor = mix(texture(ringTextureFwrd, texCoord), texture(ringTextureBckwrd, texCoord), lerpFactor);
@@ -311,11 +309,17 @@ Fragment getFragment() {
         shadow = 1.0 - ringOpacity;
         shadow = clamp(shadow + 0.3, 0.0, 1.0); // Add ambient light similar to original
       }
+
+      if (t < 1000.0) {
+        shadow = 0.0;
+      }
     }
   }
 #endif // USE_RING_SHADOWS
   
-  frag.color.xyz *= shadow;
+  if (shadow < 1.0) {
+    frag.color.rgb = vec3(0.0, 1.0, 0.0);
+  }
 #endif
 
   frag.color.a *= opacity;
