@@ -79,7 +79,7 @@ namespace {
         // Determines when the property confirmation modal should be shown when starting
         // up OpenSpace. If it is not provided, it defaults to 'true', i.e., each
         // individual property determines whether it requires a confirmation or not.
-        std::optional<bool> propertyConfirmation;
+        std::optional<bool> showPropertyConfirmation;
         
 
         // A list of paths that are automatically registered with the file system. If a
@@ -349,7 +349,7 @@ ghoul::Dictionary Configuration::createDictionary() {
     res.setValue("Asset", asset);
     res.setValue("Profile", profile);
     res.setValue("PropertyVisibility", static_cast<int>(propertyVisibility));
-    res.setValue("PropertyConfirmation", static_cast<int>(propertyConfirmation));
+    res.setValue("ShowPropertyConfirmation", static_cast<int>(showPropertyConfirmation));
 
     ghoul::Dictionary globalCustomizationScriptsDict;
     for (size_t i = 0; i < globalCustomizationScripts.size(); i++) {
@@ -554,7 +554,7 @@ void parseLuaState(Configuration& configuration) {
         );
     }
 
-    c.propertyConfirmation = p.propertyConfirmation.value_or(true);
+    c.showPropertyConfirmation = p.showPropertyConfirmation.value_or(true);
     c.pathTokens = p.paths;
     c.fonts = p.fonts.value_or(c.fonts);
     c.fontSize.frameInfo = p.fontSize.frameInfo;

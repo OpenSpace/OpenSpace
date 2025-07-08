@@ -55,7 +55,7 @@ struct Configuration {
     properties::Property::Visibility propertyVisibility =
         properties::Property::Visibility::User;
 
-    bool propertyConfirmation = true;
+    bool showPropertyConfirmation = true;
 
     std::vector<std::string> globalCustomizationScripts;
     std::map<std::string, std::string> pathTokens = {

@@ -128,8 +128,8 @@ bool Property::isReadOnly() const {
     return _metaData.readOnly.value_or(false);
 }
 
-void Property::setNeedsConfirmation(bool confirmation) {
-    _metaData.needsConfirmation = confirmation;
+void Property::setNeedsConfirmation(bool needsConfirmation) {
+    _metaData.needsConfirmation = needsConfirmation;
     notifyMetaDataChangeListeners();
 }
 

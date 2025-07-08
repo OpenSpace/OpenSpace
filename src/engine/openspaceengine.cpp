@@ -160,7 +160,7 @@ namespace {
         "Disables all mouse inputs. Useful when using touch interaction, to prevent "
         "double inputs on touch (from both touch input and inserted mouse inputs).",
         openspace::properties::Property::Visibility::User,
-        true
+        openspace::properties::Property::NeedsConfirmation::Yes
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -168,10 +168,10 @@ namespace {
     {
         "ShowPropertyConfirmation",
         "Show Property Confirmation",
-        "Controls when confirmation dialogs are shown when making changes to certain "
+        "Controls whether confirmation dialogs are shown when making changes to certain "
         "properties. If checked, the dialogs will be shown for properties that require "
         "it. If unchecked, no dialogs will be shown.",
-        openspace::properties::Property::Visibility::AdvancedUser,
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     void viewportChanged() {
@@ -224,8 +224,8 @@ OpenSpaceEngine::OpenSpaceEngine()
     : properties::PropertyOwner({ "OpenSpaceEngine", "OpenSpace Engine" })
     , _printEvents(PrintEventsInfo, false)
     , _visibility(VisibilityInfo)
-    , _fadeOnEnableDuration(FadeDurationInfo, 1.f, 0.f, 5.f)
     , _showPropertyConfirmationDialog(ShowPropertyConfirmationDialogInfo, true)
+    , _fadeOnEnableDuration(FadeDurationInfo, 1.f, 0.f, 5.f)
     , _disableAllMouseInputs(DisableMouseInputInfo, false)
 {
     FactoryManager::initialize();
@@ -313,7 +313,7 @@ void OpenSpaceEngine::initialize() {
 
     _printEvents = global::configuration->isPrintingEvents;
     _visibility = static_cast<int>(global::configuration->propertyVisibility);
-    _showPropertyConfirmationDialog = static_cast<int>(global::configuration->propertyConfirmation);
+    _showPropertyConfirmationDialog = global::configuration->showPropertyConfirmation;
 
     std::filesystem::path cacheFolder = absPath("${CACHE}");
     if (global::configuration->usePerProfileCache) {

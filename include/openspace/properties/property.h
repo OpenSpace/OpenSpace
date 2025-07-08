@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___PROPERTY___H__
 
 #include <openspace/util/json_helper.h>
+#include <ghoul/misc/boolean.h>
 #include <ghoul/misc/easing.h>
 #include <ghoul/lua/lua_types.h>
 #include <functional>
@@ -62,6 +63,8 @@ class PropertyOwner;
  */
 class Property {
 public:
+    BooleanType(NeedsConfirmation);
+
     /**
      * The visibility classes for Property%s. The classes are strictly ordered as
      * Hidden > Developer > AdvancedUser > User > NoviceUser > Always
@@ -94,7 +97,7 @@ public:
          * argument for the struct initialization.
          */
         constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
-                               bool needsConfirmation = false)
+                              NeedsConfirmation needsConfirmation = NeedsConfirmation::No)
             : identifier(ident)
             , guiName(gui)
             , description(desc)
@@ -103,7 +106,7 @@ public:
 
         constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
                                Visibility vis,
-                               bool needsConfirmation = false)
+                              NeedsConfirmation needsConfirmation = NeedsConfirmation::No)
             : identifier(ident)
             , guiName(gui)
             , description(desc)
@@ -120,7 +123,7 @@ public:
         /// Determines the visibility of this Property in the user interface
         Visibility visibility = Visibility::Default;
         /// Determines if the Property require confirmation upon value change
-        bool needsConfirmation = false;
+        NeedsConfirmation needsConfirmation = NeedsConfirmation::No;
     };
 
     /// An OnChangeHandle is returned by the onChange method to uniquely identify an
@@ -414,10 +417,10 @@ public:
      * applications and does not have any effect on the Property::set or
      * Property::setLuaValue methods.
      *
-     * \param confirmation `true` if confirmation dialogs should be shown, `false`
-     * otherwise.
+     * \param needsConfirmation `true` if confirmation dialogs should be shown, `false`
+     *        otherwise.
      */
-    void setNeedsConfirmation(bool confirmation);
+    void setNeedsConfirmation(bool needsConfirmation);
 
     /**
      * Default view options that can be used in the Property::setViewOption method. The
