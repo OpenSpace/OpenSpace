@@ -43,8 +43,9 @@ local GanymedePosition = {
     }
   },
   GUI = {
-    Path = "/Solar System/Planets/Jupiter/Moons",
-    Description = "Ganymede's position relative to Jupiter as an inertial reference frame"
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Ganymede",
+    Description = "Ganymede's position relative to Jupiter as an inertial reference frame",
+    Hidden = true
   }
 }
 

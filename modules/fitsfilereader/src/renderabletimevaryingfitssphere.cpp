@@ -133,6 +133,7 @@ namespace {
     // time and is therefore time varying like the name of the renderable suggests.
     //
     // `LoadingType` can be specified in two ways;
+    //
     // 1. `StaticLoading`: In this case, all data will be loaded on startup, from the
     // location specified in the `TextureSource` parameter. Other required parameters are
     // `LayerNames` and `LayerMinMaxCapValues` that require at least one entry each.
