@@ -158,6 +158,7 @@ private:
 
     properties::BoolProperty _printEvents;
     properties::OptionProperty _visibility;
+    properties::BoolProperty _showPropertyConfirmationDialog;
     properties::FloatProperty _fadeOnEnableDuration;
     properties::BoolProperty _disableAllMouseInputs;
 
