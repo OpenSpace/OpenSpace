@@ -79,6 +79,12 @@ glm::dvec3 geoPositionFromCamera();
 glm::dvec2 geoViewFromCamera();
 
 /**
+ * Return the coordinates where the sun is at its zenith at the current anchor at the
+ * current time. The returned value contains the latitude and longitude in degrees.
+ */ 
+glm::dvec2 subSolarCoordinates();
+
+/**
  * Returns the height of the camera relative to the provided SceneGraphNode \p sgn in
  * meters. If \p useHeightMap is provided as `true` and \p sgn is a globe with an existing
  * height map, that height map is used to calculate the altitude.

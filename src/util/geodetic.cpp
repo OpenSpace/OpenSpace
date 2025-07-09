@@ -113,6 +113,8 @@ glm::dvec2 geoViewFromCamera() {
         return glm::dvec3(0.0);
     }
 
+    
+
     const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
     const glm::dvec3 cameraViewDirection =
         global::navigationHandler->camera()->viewDirectionWorldSpace();
@@ -139,6 +141,8 @@ glm::dvec2 geoViewFromCamera() {
             inverseModelTransform * glm::dvec4(cameraPosition + cameraUp, 1.0)
         );
     }
+    const glm::dvec3 sunPositionModelSpace =
+        glm::dvec3(inverseModelTransform * glm::dvec4(-n->worldPosition(), 1.0));
 
     const SurfacePositionHandle posHandle = renderable->calculateSurfacePositionHandle(
         cameraViewDirectionModelSpace
@@ -150,6 +154,32 @@ glm::dvec2 geoViewFromCamera() {
 
     const double lat = glm::degrees(geo2.lat);
     const double lon = glm::degrees(geo2.lon);
+
+    
+
+    return glm::dvec2(lat, lon);
+}
+
+glm::dvec2 subSolarCoordinates() {
+    const SceneGraphNode* n = global::navigationHandler->orbitalNavigator().anchorNode();
+    if (!n) {
+        return glm::dvec3(0.0);
+    }
+    const Renderable* renderable = n->renderable();
+    if (!renderable) {
+        return glm::dvec3(0.0);
+    }
+
+    const glm::dmat4 inverseModelTransform = glm::inverse(n->modelTransform());
+    const glm::dvec3 sunPositionModelSpace =
+        glm::dvec3(inverseModelTransform * glm::dvec4(-n->worldPosition(), 1.0));
+
+    const SurfacePositionHandle sunPosition = n->calculateSurfacePositionHandle(sunPositionModelSpace);
+    const Geodetic2 subsolarCoordinates = renderable->ellipsoid().cartesianToGeodetic2(
+        sunPosition.centerToReferenceSurface
+    );
+    const double lat = glm::degrees(subsolarCoordinates.lat);
+    const double lon = glm::degrees(subsolarCoordinates.lon);
 
     return glm::dvec2(lat, lon);
 }

@@ -86,6 +86,7 @@ void CameraTopic::sendCameraData() {
     glm::dvec3 position = geoPositionFromCamera();
     glm::dvec2 direction = geoViewFromCamera();
     std::pair<double, std::string_view> altSimplified = simplifyDistance(position.z);
+    glm::dvec2 subSolar = subSolarCoordinates();
 
     glm::dvec2 dir = direction - glm::dvec2(position);
     if (glm::length(dir) > 1e-6) {
@@ -99,7 +100,9 @@ void CameraTopic::sendCameraData() {
         { "altitude", altSimplified.first },
         { "altitudeUnit", altSimplified.second },
         { "viewLatitude", dir.x },
-        { "viewLongitude", dir.y }
+        { "viewLongitude", dir.y },
+        { "subSolarLatitude", subSolar.x },
+        { "subSolarLongitude", subSolar.y },
     };
 
     _connection->sendJson(wrappedPayload(jsonData));
