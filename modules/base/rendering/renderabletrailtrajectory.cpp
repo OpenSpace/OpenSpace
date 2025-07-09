@@ -89,6 +89,14 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo AccurateTrailInfo = {
+        "AccurateTrail",
+        "Use Accurate Trail",
+        "If true, the trail around the spacecraft will be recalculated to present a "
+        "smoother trail. If false, the original trail will be used.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo AccurateTrailPositionsInfo = {
         "AccurateTrailPositions",
         "Number of Accurate Trail Points",
@@ -119,6 +127,9 @@ namespace {
         // [[codegen::verbatim(RenderFullPathInfo.description)]]
         std::optional<bool> showFullTrail;
 
+        // [[codegen::verbatim(AccurateTrailInfo.description)]]
+        std::optional<bool> useAccurateTrail;
+
         // [[codegen::verbatim(AccurateTrailPositionsInfo.description)]]
         std::optional<int> accurateTrailPositions;
     };
@@ -146,7 +157,8 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     )
     , _timeStampSubsamplingFactor(TimeSubSampleInfo, 1, 1, 1000000000)
     , _renderFullTrail(RenderFullPathInfo, false)
-    , _nReplacementPoints(AccurateTrailPositionsInfo, 100, 0, 1000)
+    , _useAccurateTrail(AccurateTrailInfo, true)
+    , _nReplacementPoints(AccurateTrailPositionsInfo, 100, 2, 1000)
     , _maxVertex(glm::vec3(-std::numeric_limits<float>::max()))
     , _minVertex(glm::vec3(std::numeric_limits<float>::max()))
 {
@@ -156,6 +168,17 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
 
     _renderFullTrail = p.showFullTrail.value_or(_renderFullTrail);
     addProperty(_renderFullTrail);
+
+    _useAccurateTrail = p.useAccurateTrail.value_or(_useAccurateTrail);
+    addProperty(_useAccurateTrail);
+
+    _nReplacementPoints = p.accurateTrailPositions.value_or(_nReplacementPoints);
+    _nReplacementPoints.onChange([this] {
+        if (_nReplacementPoints < 2) {
+            _nReplacementPoints = 2;
+        }
+    });
+    addProperty(_nReplacementPoints);
 
     _startTime = p.startTime;
     _startTime.onChange([this] { reset(); });
@@ -175,9 +198,6 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
         p.timeStampSubsampleFactor.value_or(_timeStampSubsamplingFactor);
     _timeStampSubsamplingFactor.onChange([this] { _subsamplingIsDirty = true; });
     addProperty(_timeStampSubsamplingFactor);
-
-    _nReplacementPoints = p.accurateTrailPositions.value_or(_nReplacementPoints);
-    addProperty(_nReplacementPoints);
 
     // We store the vertices with ascending temporal order
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
@@ -324,34 +344,30 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             _nUniqueVertices = _primaryRenderInformation.count;
         }
 
-        // Determine the number of points to be recalculated
-        int prePaddingDelta = 0;
-        if (!_renderFullTrail && _nReplacementPoints == 0) {
-            // Enables trail from last point to current position
-            // if we don't do any replacement points
-            prePaddingDelta = 1;
-        }
-        else {
-            prePaddingDelta = std::min(
-                static_cast<int>(std::max(1, _primaryRenderInformation.count)),
-                static_cast<int>(_nReplacementPoints)
-            );
-        }
-        int postPaddingDelta = std::min(
-            static_cast<int>(_secondaryRenderInformation.count),
-            static_cast<int>(_nReplacementPoints)
-        );
-
         // Get current position of the object
         const glm::dvec3 p = translationPosition(data.time);
 
-        // Calculates all replacement points before the object
+        // Determine the number of points before the object to be recalculated
+        int prePaddingDelta = 0;
+        if (_useAccurateTrail) {
+            prePaddingDelta = std::min(
+                _primaryRenderInformation.count,
+                static_cast<int>(_nReplacementPoints)
+            );
+        }
+        else {
+            if (_renderFullTrail) {
+                _primaryRenderInformation.count += 1;
+            }
+            else {
+                prePaddingDelta = std::min(2, _primaryRenderInformation.count);
+            }
+        }
+
         glm::dvec3 v = p;
         for (int i = 0; i < prePaddingDelta; ++i) {
-            const int floatPointIndex = std::max(
-                0,
-                _primaryRenderInformation.count - prePaddingDelta + i
-            );
+            const int floatPointIndex =
+                (_primaryRenderInformation.count - prePaddingDelta) + i;
 
             glm::dvec3 fp = glm::dvec3(
                 _vertexArray[floatPointIndex].x,
@@ -369,10 +385,10 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             glm::dvec3 newPoint = dp - v;
 
             // Scales offset for smooth transition from original to accurate points
-            double mult = (i > 0 && i == prePaddingDelta - 1) ? 0.0
-                : (prePaddingDelta - i) / static_cast<double>(prePaddingDelta);
+            double mult = (i == prePaddingDelta - 1 && i > 0) ?
+                0.0 : (prePaddingDelta - i) / static_cast<double>(prePaddingDelta);
 
-            newPoint = newPoint + dv * mult;
+            newPoint += dv * pow(mult, 2.0);
             _replacementPoints.push_back({
                 static_cast<float>(newPoint.x),
                 static_cast<float>(newPoint.y),
@@ -381,12 +397,20 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         }
 
         // Mid-point (model-space position for the object)
-        if (_nReplacementPoints > 0 || !_renderFullTrail) {
+        if (_useAccurateTrail || !_renderFullTrail) {
             _replacementPoints.push_back({ 0.f, 0.f, 0.f });
         }
 
         // Calculates all replacement points after the object
-        v = glm::dvec3(p.x, p.y, p.z);
+        int postPaddingDelta = _secondaryRenderInformation.count;;
+        if (_useAccurateTrail) {
+            postPaddingDelta = std::min(
+                static_cast<int>(_secondaryRenderInformation.count),
+                static_cast<int>(_nReplacementPoints)
+            );
+        }
+
+        v = p;
         for (int i = 0; i < postPaddingDelta; ++i) {
             const int floatPointIndex = _secondaryRenderInformation.first + i;
 
@@ -407,11 +431,11 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
             // Scales offset for smooth transition from original to accurate points
             double mult = 1.0;
-            if (i != postPaddingDelta - 1) {
+            if (_useAccurateTrail && i != postPaddingDelta - 1) {
                 mult -= (postPaddingDelta - i) / static_cast<double>(postPaddingDelta);
             }
 
-            newPoint = newPoint + dv * mult;
+            newPoint += dv * pow(mult, 2.0);
             _replacementPoints.push_back({
                 static_cast<float>(newPoint.x),
                 static_cast<float>(newPoint.y),
@@ -428,7 +452,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
         // Adjusts number of unique vertices if we have inserted a new mid point
         if (_floatingRenderInformation.count > 0 && _renderFullTrail) {
-            _nUniqueVertices++;
+            _nUniqueVertices += 1;
         }
 
         // Recalculate .count and .first based on the recalculated (floating) vertices

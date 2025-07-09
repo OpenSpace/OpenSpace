@@ -82,6 +82,8 @@ private:
     properties::IntProperty _timeStampSubsamplingFactor;
     /// Determines whether the full trail should be rendered or the future trail removed
     properties::BoolProperty _renderFullTrail;
+    /// Determines whether accurate trail points are being calculated or not
+    properties::BoolProperty _useAccurateTrail;
     /// Determines how many vertices around the object that will be
     /// replaced during full trail rendering
     properties::IntProperty _nReplacementPoints;
