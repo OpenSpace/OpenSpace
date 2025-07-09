@@ -53,83 +53,79 @@ void main() {
   float v0Frac = vertexRevolutionFraction[0];
   float v1Frac = vertexRevolutionFraction[1];
 
-  // Only create/emit vertices for segments where the head of the trail falls within
-  if (cFrac >= v0Frac && cFrac <= v1Frac) {
+  // Interpolate position of current position of the trail head
+  float dFrac = abs(cFrac - v0Frac);
+  float vFrac = abs(v1Frac - v0Frac);
+  float percentage = dFrac / vFrac;
 
-    // Interpolate position of current position of the trail head
-    float dFrac = abs(cFrac - v0Frac);
-    float vFrac = abs(v1Frac - v0Frac);
-    float percentage = dFrac / vFrac;
-    
-    vec4 v0Weighted = (1.0 - percentage) * gl_in[0].gl_Position;
-    vec4 v1Weighted = (percentage) * gl_in[1].gl_Position;
-    vec4 pos = v0Weighted + v1Weighted;
-    // ==========================
+  vec4 v0Weighted = (1.0 - percentage) * gl_in[0].gl_Position;
+  vec4 v1Weighted = percentage * gl_in[1].gl_Position;
+  vec4 pos = v0Weighted + v1Weighted;
+  // ==========================
 
-    // Calculate current vertex position to world space
-    dvec4 vertPosWorldSpace = modelTransform * pos;
+  // Calculate current vertex position to world space
+  dvec4 vertPosWorldSpace = modelTransform * pos;
 
-    // Calculate new axis for plane
-    vec3 camPosToVertPos = vec3(cameraPositionWorld - vertPosWorldSpace.xyz);
-    vec3 normal = normalize(camPosToVertPos);
-    vec3 right = normalize(cross(cameraUpWorld, normal));
-    vec3 up = normalize(cross(normal, right));
+  // Calculate new axis for plane
+  vec3 camPosToVertPos = vec3(cameraPositionWorld - vertPosWorldSpace.xyz);
+  vec3 normal = normalize(camPosToVertPos);
+  vec3 right = normalize(cross(cameraUpWorld, normal));
+  vec3 up = normalize(cross(normal, right));
 
-    // Calculate size of points
-    float initialSize = pow(10.0, pointSizeExponent);
-    right *= initialSize;
-    up *= initialSize;
+  // Calculate size of points
+  float initialSize = pow(10.0, pointSizeExponent);
+  right *= initialSize;
+  up *= initialSize;
 
-    float opp = length(right);
-    float adj = length(camPosToVertPos);
-    float angle = atan(opp/adj);
-    float maxAngle = radians(maxSize * 0.5);
+  float opp = length(right);
+  float adj = length(camPosToVertPos);
+  float angle = atan(opp/adj);
+  float maxAngle = radians(maxSize * 0.5);
 
-    // Controls the point size
-    if (enableMaxSize && (angle > maxAngle) && (adj > 0.0)) {
-      float correction = (adj * tan(maxAngle)) / opp;
-      right *= correction;
-      up *= correction;
-    }
+  // Controls the point size
+  if (enableMaxSize && (angle > maxAngle) && (adj > 0.0)) {
+    float correction = (adj * tan(maxAngle)) / opp;
+    right *= correction;
+    up *= correction;
+  }
 
-    // Calculate and set corners of the new quad
-    dvec4 p0World = vertPosWorldSpace + vec4(up-right, 0.0);
-    dvec4 p1World = vertPosWorldSpace + vec4(-right-up,0.0);
-    dvec4 p2World = vertPosWorldSpace + vec4(right+up, 0.0);
-    dvec4 p3World = vertPosWorldSpace + vec4(right-up, 0.0);
+  // Calculate and set corners of the new quad
+  dvec4 p0World = vertPosWorldSpace + vec4(up-right, 0.0);
+  dvec4 p1World = vertPosWorldSpace + vec4(-right-up,0.0);
+  dvec4 p2World = vertPosWorldSpace + vec4(right+up, 0.0);
+  dvec4 p3World = vertPosWorldSpace + vec4(right-up, 0.0);
 
-    // Set some additional out parameters
-    viewSpace = z_normalization(
-      vec4(projectionTransform * viewTransform * modelTransform * pos)
-    );
-    projectionViewDepth = viewSpace.w;
-    
-    dmat4 ViewProjectionTransform = projectionTransform * viewTransform;
-    
-    // left-top
-    vec4 p0Screen = z_normalization(vec4(ViewProjectionTransform * p0World));
-    gl_Position = p0Screen;
-    texCoord = vec2(0.0, 0.0);
-    EmitVertex();
+  // Set some additional out parameters
+  viewSpace = z_normalization(
+    vec4(projectionTransform * viewTransform * modelTransform * pos)
+  );
+  projectionViewDepth = viewSpace.w;
 
-    // left-bot
-    vec4 p1Screen = z_normalization(vec4(ViewProjectionTransform * p1World));
-    gl_Position = p1Screen;
-    texCoord = vec2(1.0, 0.0);
-    EmitVertex();
+  dmat4 ViewProjectionTransform = projectionTransform * viewTransform;
 
-    // right-top
-    vec4 p2Screen = z_normalization(vec4(ViewProjectionTransform * p2World));
-    gl_Position = p2Screen;
-    texCoord = vec2(0.0, 1.0);
-    EmitVertex();
+  // left-top
+  vec4 p0Screen = z_normalization(vec4(ViewProjectionTransform * p0World));
+  gl_Position = p0Screen;
+  texCoord = vec2(0.0, 0.0);
+  EmitVertex();
 
-    // right-bot
-    vec4 p3Screen = z_normalization(vec4(ViewProjectionTransform * p3World));
-    gl_Position = p3Screen;
-    texCoord = vec2(1.0, 1.0);
-    EmitVertex();
-  } 
+  // left-bot
+  vec4 p1Screen = z_normalization(vec4(ViewProjectionTransform * p1World));
+  gl_Position = p1Screen;
+  texCoord = vec2(1.0, 0.0);
+  EmitVertex();
+
+  // right-top
+  vec4 p2Screen = z_normalization(vec4(ViewProjectionTransform * p2World));
+  gl_Position = p2Screen;
+  texCoord = vec2(0.0, 1.0);
+  EmitVertex();
+
+  // right-bot
+  vec4 p3Screen = z_normalization(vec4(ViewProjectionTransform * p3World));
+  gl_Position = p3Screen;
+  texCoord = vec2(1.0, 1.0);
+  EmitVertex();
 
   EndPrimitive();
 }
