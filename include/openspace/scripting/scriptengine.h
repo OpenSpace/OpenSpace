@@ -110,6 +110,11 @@ public:
     void queueScript(Script script);
     void queueScript(std::string script);
 
+    // This function should only be used by external classes if you are sure that the
+    // passed script should really be executed at this point. Otherwise the #queueScript
+    // should be used
+    bool runScript(const Script& script);
+
     // Runs the `script` every `timeout` seconds wallclock time
     void registerRepeatedScript(std::string identifier, std::string script,
         double timeout, std::string preScript = "", std::string postScript = "");
@@ -132,7 +137,6 @@ private:
 
     void addBaseLibrary();
 
-    bool runScript(const Script& script);
 
     ghoul::lua::LuaState _state;
     std::vector<LuaLibrary> _registeredLibraries;

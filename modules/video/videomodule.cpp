@@ -33,39 +33,13 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/scripting/lualibrary.h>
 
-namespace {
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "Decides if this module should be enabled."
-    };
-
-    struct [[codegen::Dictionary(VideoModule)]] Parameters {
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
-    };
-
-#include "videomodule_codegen.cpp"
-} // namespace
-
 namespace openspace {
-
-documentation::Documentation VideoModule::Documentation() {
-    return codegen::doc<Parameters>("module_video");
-}
 
 VideoModule::VideoModule()
     : OpenSpaceModule(VideoModule::Name)
-    , _enabled(EnabledInfo)
-{
-    addProperty(_enabled);
-}
+{}
 
-void VideoModule::internalInitialize(const ghoul::Dictionary& dict) {
-    const Parameters p = codegen::bake<Parameters>(dict);
-
-    _enabled = p.enabled.value_or(_enabled);
-
+void VideoModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul::TemplateFactory<globebrowsing::TileProvider>* fTileProvider =
         FactoryManager::ref().factory<globebrowsing::TileProvider>();
     ghoul_assert(fTileProvider, "TileProvider factory was not created");
