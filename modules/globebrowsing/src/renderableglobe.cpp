@@ -1232,8 +1232,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::No);
     }
 
-    const glm::mat4 modelViewTransform = glm::mat4(viewTransform * _cachedModelTransform);
-    const glm::mat4 modelViewProjectionTransform =
+    glm::mat4 modelViewTransform = glm::mat4(viewTransform * _cachedModelTransform);
+    glm::mat4 modelViewProjectionTransform =
         data.camera.sgctInternal.projectionMatrix() * modelViewTransform;
 
     // Upload the uniform variables
@@ -1257,9 +1257,9 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     }
 
     using namespace layers;
-    const bool nightLayersActive =
+    bool nightLayersActive =
         !_layerManager.layerGroup(Group::ID::NightLayers).activeLayers().empty();
-    const bool waterLayersActive =
+    bool waterLayersActive =
         !_layerManager.layerGroup(Group::ID::WaterMasks).activeLayers().empty();
 
     if (nightLayersActive || waterLayersActive || _performShading) {
@@ -1268,25 +1268,55 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
         const glm::vec3 directionToSunCameraSpace = glm::vec3(viewTransform *
             glm::dvec4(directionToSunWorldSpace, 0));
-        // @TODO (abock, 2020-04-14); This is just a bandaid for issue #1136.  The better
-        // way is to figure out with the uniform is optimized away. I assume that it is
-        // because the shader doesn't get recompiled when the last layer of the night
-        // or water is disabled;  so the shader thinks it has to do the calculation, but
-        // there are actually no layers left
+        const glm::vec3 directionToSunObjSpace = glm::vec3(_cachedInverseModelTransform *
+            glm::dvec4(directionToSunWorldSpace, 0));
+
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-        _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
-        _localRenderer.program->setUniform(
+        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
+        _globalRenderer.program->setUniform(
             "lightDirectionCameraSpace",
             -glm::normalize(directionToSunCameraSpace)
         );
-        _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
+        _globalRenderer.program->setUniform(
+            "lightDirectionObjSpace",
+            -glm::normalize(directionToSunObjSpace)
+        );
+        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
     }
 
-    // Local shader
-    _localRenderer.program->setUniform(
-        "projectionTransform",
-        data.camera.sgctInternal.projectionMatrix()
+    modelViewTransform = glm::mat4(viewTransform * _cachedModelTransform);
+    modelViewProjectionTransform =
+        data.camera.sgctInternal.projectionMatrix() * modelViewTransform;
+
+    
+    _globalRenderer.program->setUniform(
+        "lightDirectionWorldSpace",
+        glm::vec3(glm::normalize(directionToLightSource(data.modelTransform.translation, _lightSourceNode)))
     );
+
+    // Upload the uniform variables
+    _localRenderer.program->setUniform(
+        "modelViewProjectionTransform",
+        modelViewProjectionTransform
+    );
+
+    _localRenderer.program->setUniform("modelViewTransform", modelViewTransform);
+
+    if (_useAccurateNormals && hasHeightLayer) {
+        // Apply an extra scaling to the height if the object is scaled
+        _localRenderer.program->setUniform(
+            "heightScale",
+            static_cast<float>(
+                glm::compMax(data.modelTransform.scale) * data.camera.scaling()
+            )
+        );
+    }
+
+    using namespace layers;
+    nightLayersActive =
+        !_layerManager.layerGroup(Group::ID::NightLayers).activeLayers().empty();
+    waterLayersActive =
+        !_layerManager.layerGroup(Group::ID::WaterMasks).activeLayers().empty();
 
     if (nightLayersActive || waterLayersActive || _performShading) {
         const glm::dvec3 directionToSunWorldSpace =
@@ -1294,18 +1324,20 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
         const glm::vec3 directionToSunCameraSpace = glm::vec3(viewTransform *
             glm::dvec4(directionToSunWorldSpace, 0));
-        // @TODO (abock, 2020-04-14); This is just a bandaid for issue #1136.  The better
-        // way is to figure out with the uniform is optimized away. I assume that it is
-        // because the shader doesn't get recompiled when the last layer of the night
-        // or water is disabled;  so the shader thinks it has to do the calculation, but
-        // there are actually no layers left
+        const glm::vec3 directionToSunObjSpace = glm::vec3(_cachedInverseModelTransform *
+            glm::dvec4(directionToSunWorldSpace, 0));
+
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
-        _globalRenderer.program->setUniform(
+        _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
+        _localRenderer.program->setUniform(
             "lightDirectionCameraSpace",
             -glm::normalize(directionToSunCameraSpace)
         );
-        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
+        _localRenderer.program->setUniform(
+            "lightDirectionObjSpace",
+            -glm::normalize(directionToSunObjSpace)
+        );
+        _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
     }
 
     int globalCount = 0;
@@ -1517,6 +1549,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
             program.setUniform("textureOffset", _ringsComponent->textureOffset());
             program.setUniform("sunPositionObj", _ringsComponent->sunPositionObj());
             program.setUniform("camPositionObj", _ringsComponent->camPositionObj());
+            program.setUniform("ringSize", (float)_ringsComponent->size());
         }
     }
     else if (_shadowMappingProperties.shadowMapping && _shadowComponent) {
@@ -1696,8 +1729,8 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
             }
 
             program.setUniform("textureOffset", _ringsComponent->textureOffset());
-            program.setUniform("sunPositionObj", glm::vec3(0.0f));
-            program.setUniform("camPositionWorld", data.camera.positionVec3()); // pass camera world position
+            program.setUniform("sunPositionObj", _ringsComponent->sunPositionObj());
+            program.setUniform("camPositionObj", _ringsComponent->camPositionObj());
         }
     }
     else if (_shadowMappingProperties.shadowMapping) {

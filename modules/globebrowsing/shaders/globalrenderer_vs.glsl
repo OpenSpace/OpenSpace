@@ -38,6 +38,7 @@ out vec3 ellipsoidNormalCameraSpace;
 out vec3 levelWeights;
 out vec3 positionCameraSpace;
 out vec3 positionWorldSpace;
+out vec3 posObjSpace;
 
 #if USE_ACCURATE_NORMALS
   out vec3 ellipsoidTangentThetaCameraSpace;
@@ -133,6 +134,7 @@ void main() {
   ellipsoidNormalCameraSpace = mat3(modelViewTransform) * pair.normal;
   positionCameraSpace = vec3(modelViewTransform * vec4(pair.position, 1.0));
   positionWorldSpace = vec3(modelTransform * dvec4(pair.position, 1.0));
+  posObjSpace = pair.position;
 
 #if SHADOW_MAPPING_ENABLED
   shadowCoords = vec4(shadowMatrix * dvec4(pair.position, 1.0));
