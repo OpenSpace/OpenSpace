@@ -170,10 +170,8 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     addProperty(_useAccurateTrail);
 
     _nReplacementPoints = p.accurateTrailPositions.value_or(_nReplacementPoints);
-    _nReplacementPoints.onChange([this] {
-        if (_nReplacementPoints < 2) {
-            _nReplacementPoints = 2;
-        }
+    _nReplacementPoints.onChange([this]() {
+        _nReplacementPoints = std::max(2, static_cast<int>(_nReplacementPoints));
     });
     addProperty(_nReplacementPoints);
 
@@ -185,15 +183,14 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     _endTime.onChange([this] { reset(); });
     addProperty(_endTime);
 
-    if (p.sampleInterval.has_value()) {
-        _sampleInterval = *p.sampleInterval;
-    }
-    _sampleInterval.onChange([this] { reset(); });
+    _sampleInterval = p.sampleInterval.value_or(_sampleInterval);
+
+    _sampleInterval.onChange([this]() { reset(); });
     addProperty(_sampleInterval);
 
     _timeStampSubsamplingFactor =
         p.timeStampSubsampleFactor.value_or(_timeStampSubsamplingFactor);
-    _timeStampSubsamplingFactor.onChange([this] { _subsamplingIsDirty = true; });
+    _timeStampSubsamplingFactor.onChange([this]() { _subsamplingIsDirty = true; });
     addProperty(_timeStampSubsamplingFactor);
 
     // We store the vertices with ascending temporal order
@@ -259,7 +256,7 @@ void RenderableTrailTrajectory::updateBuffer() {
         const glm::dvec3 dp = translationPosition(
             Time(_start + i * _totalSampleInterval)
         );
-        const glm::vec3 p(dp.x, dp.y, dp.z);
+        const glm::vec3 p = dp;
         _vertexArray[i] = { p.x, p.y, p.z };
         _timeVector[i] = Time(_start + i * _totalSampleInterval).j2000Seconds();
         _dVertexArray[i] = { dp.x, dp.y, dp.z };
@@ -273,7 +270,7 @@ void RenderableTrailTrajectory::updateBuffer() {
     // Adds the last point in time to the _vertexArray so that we
     // ensure that points for _start and _end always exists
     const glm::dvec3 dp = translationPosition(Time(_end));
-    const glm::vec3 p(dp.x, dp.y, dp.z);
+    const glm::vec3 p = dp;
     _vertexArray[_nVertices] = { p.x, p.y, p.z };
     _timeVector[_nVertices] = Time(_end).j2000Seconds();
     _dVertexArray[_nVertices] = { dp.x, dp.y, dp.z };
@@ -357,12 +354,12 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
                 _primaryRenderInformation.count += 1;
             }
             else {
-                prePaddingDelta = std::min(2, _primaryRenderInformation.count);
+                prePaddingDelta = std::min(_primaryRenderInformation.count, 2);
             }
         }
 
         glm::dvec3 v = p;
-        for (int i = 0; i < prePaddingDelta; ++i) {
+        for (int i = 0; i < prePaddingDelta; i++) {
             const int floatPointIndex =
                 (_primaryRenderInformation.count - prePaddingDelta) + i;
 
@@ -382,7 +379,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             glm::dvec3 newPoint = dp - v;
 
             // Scales offset for smooth transition from original to accurate points
-            double mult = (i == prePaddingDelta - 1 && i > 0) ?
+            const double mult = (i == prePaddingDelta - 1 && i > 0) ?
                 0.0 : (prePaddingDelta - i) / static_cast<double>(prePaddingDelta);
 
             newPoint += dv * pow(mult, 2.0);
@@ -399,7 +396,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         }
 
         // Calculates all replacement points after the object
-        int postPaddingDelta = _secondaryRenderInformation.count;;
+        int postPaddingDelta = _secondaryRenderInformation.count;
         if (_useAccurateTrail) {
             postPaddingDelta = std::min(
                 static_cast<int>(_secondaryRenderInformation.count),
@@ -408,7 +405,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         }
 
         v = p;
-        for (int i = 0; i < postPaddingDelta; ++i) {
+        for (int i = 0; i < postPaddingDelta; i++) {
             const int floatPointIndex = _secondaryRenderInformation.first + i;
 
             glm::dvec3 fp = glm::dvec3(

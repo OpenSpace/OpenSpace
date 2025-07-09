@@ -62,7 +62,7 @@ public:
 private:
 
     /**
-     * Update vertex buffer when a full sweep is needed
+     * Update vertex buffer when a full sweep is needed.
      */
     void updateBuffer();
 
