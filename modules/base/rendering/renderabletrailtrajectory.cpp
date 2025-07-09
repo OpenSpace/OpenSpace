@@ -65,9 +65,8 @@ namespace {
         "SampleInterval",
         "Sample Interval",
         "The interval between samples of the trajectory. This value (together with "
-        "'TimeStampSubsampleFactor') determines how far apart (in time) the samples are "
-        "spaced along the trajectory. The time interval between 'StartTime' and "
-        "'EndTime' is split into 'SampleInterval' * 'TimeStampSubsampleFactor' segments.",
+        "'TimeStampSubsampleFactor') determines how far apart (in seconds) the samples "
+        "are spaced along the trajectory.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -75,9 +74,8 @@ namespace {
         "TimeStampSubsampleFactor",
         "Time Stamp Subsampling Factor",
         "The factor that is used to create subsamples along the trajectory. This value "
-        "(together with 'SampleInterval') determines how far apart (in time) the samples "
-        "are spaced along the trajectory. The time interval between 'StartTime' and "
-        "'EndTime' is split into 'SampleInterval' * 'TimeStampSubsampleFactor' segments.",
+        "(together with 'SampleInterval') determines how far apart (in seconds) the "
+        "samples are spaced along the trajectory.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -113,15 +111,14 @@ namespace {
         // [[codegen::verbatim(EndTimeInfo.description)]]
         std::string endTime [[codegen::annotation("A valid date in ISO 8601 format")]];
 
-        // The interval between samples of the trajectory. This value (together with
-        // 'TimeStampSubsampleFactor') determines how far apart (in time) the samples are
-        // spaced along the trajectory. The time interval between 'StartTime' and
-        // 'EndTime' is split into 'SampleInterval' * 'TimeStampSubsampleFactor' segments.
-        // If this value is not specified, it will be automatically calculated to produce
+        // [[codegen::verbatim(SampleIntervalInfo.description)]]
+        // The final interval is calculated as SampleInterval/TimeStampSubsampleFactor.
+        // If SampleInterval is not specified, it will be automatically calculated to produce
         // one sample every two day between the 'StartTime' and 'EndTime'.
         std::optional<double> sampleInterval;
 
         // [[codegen::verbatim(TimeSubSampleInfo.description)]]
+        // The final interval is calculated as SampleInterval/TimeStampSubsampleFactor.
         std::optional<int> timeStampSubsampleFactor;
 
         // [[codegen::verbatim(RenderFullPathInfo.description)]]
