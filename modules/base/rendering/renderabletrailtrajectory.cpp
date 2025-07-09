@@ -171,7 +171,7 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
 
     _nReplacementPoints = p.accurateTrailPositions.value_or(_nReplacementPoints);
     _nReplacementPoints.onChange([this]() {
-        _nReplacementPoints = std::max(2, static_cast<int>(_nReplacementPoints));
+        _nReplacementPoints = std::max<int>(2, _nReplacementPoints);
     });
     addProperty(_nReplacementPoints);
 
@@ -344,9 +344,9 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         // Determine the number of points before the object to be recalculated
         int prePaddingDelta = 0;
         if (_useAccurateTrail) {
-            prePaddingDelta = std::min(
+            prePaddingDelta = std::min<int>(
                 _primaryRenderInformation.count,
-                static_cast<int>(_nReplacementPoints)
+                _nReplacementPoints
             );
         }
         else {
@@ -398,9 +398,9 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         // Calculates all replacement points after the object
         int postPaddingDelta = _secondaryRenderInformation.count;
         if (_useAccurateTrail) {
-            postPaddingDelta = std::min(
-                static_cast<int>(_secondaryRenderInformation.count),
-                static_cast<int>(_nReplacementPoints)
+            postPaddingDelta = std::min<int>(
+                _secondaryRenderInformation.count,
+                _nReplacementPoints
             );
         }
 
