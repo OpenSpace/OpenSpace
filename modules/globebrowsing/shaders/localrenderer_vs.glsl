@@ -39,6 +39,7 @@ out vec3 levelWeights;
 out vec3 positionCameraSpace;
 out vec3 positionWorldSpace;
 out vec3 posObjSpace;
+out vec3 normalObjSpace;
 
 #if USE_ACCURATE_NORMALS
   out vec3 ellipsoidTangentThetaCameraSpace;
