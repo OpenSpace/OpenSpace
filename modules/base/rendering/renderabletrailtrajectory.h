@@ -91,9 +91,6 @@ private:
     /// Dirty flag that determines whether the full vertex buffer needs to be resampled
     bool _needsFullSweep = true;
 
-    /// Dirty flag to determine whether the stride information needs to be changed
-    bool _subsamplingIsDirty = true;
-
     /// The conversion of the _startTime into the internal time format
     double _start = 0.0;
     /// The conversion of the _endTime into the internal time format

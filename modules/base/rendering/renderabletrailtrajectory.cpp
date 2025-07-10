@@ -75,7 +75,9 @@ namespace {
         "Time Stamp Subsampling Factor",
         "The factor that is used to create subsamples along the trajectory. This value "
         "(together with 'SampleInterval') determines how far apart (in seconds) the "
-        "samples are spaced along the trajectory.",
+        "samples are spaced along the trajectory. Subsamples are rendered as smaller "
+		"points compared to normal samples (from 'SampleInterval') when rendering the "
+		"trail as points.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -152,7 +154,7 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
         2.0,
         1e6
     )
-    , _timeStampSubsamplingFactor(TimeSubSampleInfo, 1, 1, 1000000000)
+    , _timeStampSubsamplingFactor(TimeSubSampleInfo, 1, 1, 100)
     , _renderFullTrail(RenderFullPathInfo, false)
     , _useAccurateTrail(AccurateTrailInfo, true)
     , _nReplacementPoints(AccurateTrailPositionsInfo, 100, 2, 1000)
@@ -190,7 +192,7 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
 
     _timeStampSubsamplingFactor =
         p.timeStampSubsampleFactor.value_or(_timeStampSubsamplingFactor);
-    _timeStampSubsamplingFactor.onChange([this]() { _subsamplingIsDirty = true; });
+	_timeStampSubsamplingFactor.onChange([this]() { reset(); });
     addProperty(_timeStampSubsamplingFactor);
 
     // We store the vertices with ascending temporal order
@@ -294,7 +296,9 @@ void RenderableTrailTrajectory::updateBuffer() {
     // it if it is empty
     _indexArray.clear();
 
-    _subsamplingIsDirty = true;
+	_primaryRenderInformation.stride = _timeStampSubsamplingFactor;
+	_secondaryRenderInformation.stride = _timeStampSubsamplingFactor;
+	_floatingRenderInformation.stride = _timeStampSubsamplingFactor;
     _needsFullSweep = false;
 }
 
@@ -483,15 +487,6 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             _primaryRenderInformation.count = static_cast<GLsizei>(_vertexArray.size());
             _nUniqueVertices = _primaryRenderInformation.count;
         }
-    }
-
-    if (_subsamplingIsDirty) {
-        // If the subsampling information has changed (either by a property change or by
-        // a request of a full sweep) we update it here
-        _primaryRenderInformation.stride = _timeStampSubsamplingFactor;
-        _secondaryRenderInformation.stride = _timeStampSubsamplingFactor;
-        _floatingRenderInformation.stride = _timeStampSubsamplingFactor;
-        _subsamplingIsDirty = false;
     }
 
     glBindVertexArray(0);
