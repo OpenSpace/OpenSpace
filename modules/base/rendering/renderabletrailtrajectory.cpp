@@ -114,7 +114,7 @@ namespace {
         // [[codegen::verbatim(SampleIntervalInfo.description)]]
         // The final interval is calculated as SampleInterval/TimeStampSubsampleFactor.
         // If SampleInterval is not specified, it will be automatically calculated to produce
-        // one sample every two day between the 'StartTime' and 'EndTime'.
+        // two samples per day between the 'StartTime' and 'EndTime'.
         std::optional<double> sampleInterval;
 
         // [[codegen::verbatim(TimeSubSampleInfo.description)]]
