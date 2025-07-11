@@ -73,14 +73,14 @@ Fragment getFragment() {
   vec4 colorBckwrd = texture(ringTextureBckwrd, texCoord);
   vec4 colorFwrd = texture(ringTextureFwrd, texCoord);
   vec4 colorMult = texture(ringTextureColor, texCoord);
-  vec4 transparency = texture(ringTextureTransparency, texCoord);
+  float transparency = 1.0 - texture(ringTextureTransparency, texCoord).r;
 
   float lerpFactor = dot(camPositionObj, sunPositionObj);
 
   // Jon Colors:
   //vec4 diffuse = mix(colorFwrd * vec4(1, 0.88, 0.82, 1.0), colorBckwrd * vec4(1, 0.88, 0.82, 1.0), lerpFactor);
   vec4 diffuse = mix(colorFwrd, colorBckwrd, lerpFactor) * colorMult;
-  diffuse.a = colorFilterValue * transparency.a;
+  diffuse.a = colorFilterValue * transparency;
   float colorValue = length(diffuse.rgb) / 0.57735026919;
   if (colorValue < 0.001) {
     discard;
@@ -106,7 +106,7 @@ Fragment getFragment() {
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i},  NSSamples - #{i}));
     #endfor
     sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(0, 0));
-    shadow = clamp(sum / (8.0 * NSSamples + 1.f), 0.35, 1.0);
+    shadow = clamp(sum / (8.0 * NSSamples + 1.f), 0.05, 1.0);
   }
 
   // The normal for the one plane depends on whether we are dealing
@@ -126,6 +126,7 @@ Fragment getFragment() {
 
   frag.color = diffuse * shadow;
   frag.color.a *= opacity;
+  frag.color.a += (1.0 - shadow) * 0.5;
   frag.depth = vs_screenSpaceDepth;
   frag.gPosition = vec4(1e30, 1e30, 1e30, 1.0);
   frag.gNormal = vec4(normal, 1.0);

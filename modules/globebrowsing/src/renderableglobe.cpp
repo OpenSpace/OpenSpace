@@ -1232,8 +1232,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::No);
     }
 
-    glm::mat4 modelViewTransform = glm::mat4(viewTransform * _cachedModelTransform);
-    glm::mat4 modelViewProjectionTransform =
+    const glm::mat4 modelViewTransform = glm::mat4(viewTransform * _cachedModelTransform);
+    const glm::mat4 modelViewProjectionTransform =
         data.camera.sgctInternal.projectionMatrix() * modelViewTransform;
 
     // Upload the uniform variables
@@ -1282,18 +1282,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
             -glm::normalize(directionToSunObjSpace)
         );
     }
-
-    modelViewTransform = glm::mat4(viewTransform * _cachedModelTransform);
-    modelViewProjectionTransform =
-        data.camera.sgctInternal.projectionMatrix() * modelViewTransform;
-
-    // Upload the uniform variables
-    _localRenderer.program->setUniform(
-        "modelViewProjectionTransform",
-        modelViewProjectionTransform
-    );
-
-    _localRenderer.program->setUniform("modelViewTransform", modelViewTransform);
 
     if (_useAccurateNormals && hasHeightLayer) {
         // Apply an extra scaling to the height if the object is scaled

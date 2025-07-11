@@ -329,6 +329,8 @@ Fragment getFragment() {
     }
 
   #endif // USE_RING_SHADOWS
+
+  // Blend the light color passing thru the rings with the pre-shaded color
   frag.color.rgb = mix(preShadedColor * lightColor * ambientIntensity, frag.color.rgb, shadow);
 
 #endif // SHADOW_MAPPING_ENABLED
