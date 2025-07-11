@@ -56,6 +56,9 @@ public:
         GeometryAndShading
     };
 
+    // Callback for when readiness state changes
+    using ReadinessChangeCallback = std::function<void()>;
+
     explicit RingsComponent(const ghoul::Dictionary& dictionary);
 
     void initialize();
@@ -69,15 +72,27 @@ public:
     );
     void update(const UpdateData& data);
 
-    static documentation::Documentation Documentation();
-
-    bool isEnabled() const;
+    static documentation::Documentation Documentation();    bool isEnabled() const;
     double size() const;
+
+    // Readiness change callback
+    void onReadinessChange(ReadinessChangeCallback callback);
+
+    // Texture access methods for globe rendering
+    ghoul::opengl::Texture* ringTextureFwrd() const;
+    ghoul::opengl::Texture* ringTextureBckwrd() const;
+    ghoul::opengl::Texture* ringTextureUnlit() const;
+    ghoul::opengl::Texture* ringTextureColor() const;
+    ghoul::opengl::Texture* ringTextureTransparency() const;
+    glm::vec2 textureOffset() const;
+    glm::vec3 sunPositionObj() const;
+    glm::vec3 camPositionObj() const;
 
 private:
     void loadTexture();
     void createPlane();
     void compileShadowShader();
+    void checkAndNotifyReadinessChange();
 
     properties::StringProperty _texturePath;
     properties::StringProperty _textureFwrdPath;
@@ -128,6 +143,10 @@ private:
 
     glm::vec3 _sunPosition = glm::vec3(0.f);
     glm::vec3 _camPositionObjectSpace = glm::vec3(0.f);
+
+    // Callback for readiness state changes
+    ReadinessChangeCallback _readinessChangeCallback;
+    bool _wasReady = false;
 };
 
 } // namespace openspace

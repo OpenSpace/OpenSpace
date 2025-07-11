@@ -351,6 +351,9 @@ void RingsComponent::initializeGL() {
     glGenBuffers(1, &_vertexPositionBuffer);
 
     createPlane();
+    
+    // Check if readiness state has changed after shader compilation
+    checkAndNotifyReadinessChange();
 }
 
 void RingsComponent::deinitializeGL() {
@@ -759,6 +762,9 @@ void RingsComponent::loadTexture() {
     }
 
     _isAdvancedTextureEnabled = _textureForwards && _textureBackwards && _textureUnlit;
+    
+    // Check if readiness state has changed after loading textures
+    checkAndNotifyReadinessChange();
 }
 
 void RingsComponent::createPlane() {
@@ -857,6 +863,9 @@ void RingsComponent::compileShadowShader() {
     catch (const ghoul::RuntimeError& e) {
         LERROR(e.message);
     }
+    
+    // Check if readiness state has changed after shader compilation
+    checkAndNotifyReadinessChange();
 }
 
 bool RingsComponent::isEnabled() const {
@@ -865,6 +874,52 @@ bool RingsComponent::isEnabled() const {
 
 double RingsComponent::size() const {
     return _size;
+}
+
+ghoul::opengl::Texture* RingsComponent::ringTextureFwrd() const {
+    return _textureForwards.get();
+}
+
+ghoul::opengl::Texture* RingsComponent::ringTextureBckwrd() const {
+    return _textureBackwards.get();
+}
+
+ghoul::opengl::Texture* RingsComponent::ringTextureUnlit() const {
+    return _textureUnlit.get();
+}
+
+ghoul::opengl::Texture* RingsComponent::ringTextureColor() const {
+    return _textureColor.get();
+}
+
+ghoul::opengl::Texture* RingsComponent::ringTextureTransparency() const {
+    return _textureTransparency.get();
+}
+
+glm::vec2 RingsComponent::textureOffset() const {
+    return _offset;
+}
+
+glm::vec3 RingsComponent::sunPositionObj() const {
+    return _sunPosition;
+}
+
+glm::vec3 RingsComponent::camPositionObj() const {
+    return _camPositionObjectSpace;
+}
+
+void RingsComponent::onReadinessChange(ReadinessChangeCallback callback) {
+    _readinessChangeCallback = std::move(callback);
+}
+
+void RingsComponent::checkAndNotifyReadinessChange() {
+    const bool currentlyReady = isReady();
+    if (currentlyReady != _wasReady) {
+        _wasReady = currentlyReady;
+        if (_readinessChangeCallback) {
+            _readinessChangeCallback();
+        }
+    }
 }
 
 } // namespace openspace

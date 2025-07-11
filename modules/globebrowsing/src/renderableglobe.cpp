@@ -774,6 +774,21 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         _ringsComponent->setParentFadeable(this);
         _ringsComponent->initialize();
         addPropertySubOwner(_ringsComponent.get());
+        
+        // Set up notification for shader recompilation when rings state changes
+        auto* enabledProperty = static_cast<properties::BoolProperty*>(
+            _ringsComponent->property("Enabled")
+        );
+        if (enabledProperty) {
+            enabledProperty->onChange([this]() {
+                _shadersNeedRecompilation = true;
+            });
+        }
+        
+        // Set up notification for shader recompilation when rings readiness changes
+        _ringsComponent->onReadinessChange([this]() {
+            _shadersNeedRecompilation = true;
+        });
     }
 
     if (p.shadows.has_value()) {
@@ -1242,9 +1257,9 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     }
 
     using namespace layers;
-    const bool nightLayersActive =
+    bool nightLayersActive =
         !_layerManager.layerGroup(Group::ID::NightLayers).activeLayers().empty();
-    const bool waterLayersActive =
+    bool waterLayersActive =
         !_layerManager.layerGroup(Group::ID::WaterMasks).activeLayers().empty();
 
     if (nightLayersActive || waterLayersActive || _performShading) {
@@ -1253,25 +1268,36 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
         const glm::vec3 directionToSunCameraSpace = glm::vec3(viewTransform *
             glm::dvec4(directionToSunWorldSpace, 0));
-        // @TODO (abock, 2020-04-14); This is just a bandaid for issue #1136.  The better
-        // way is to figure out with the uniform is optimized away. I assume that it is
-        // because the shader doesn't get recompiled when the last layer of the night
-        // or water is disabled;  so the shader thinks it has to do the calculation, but
-        // there are actually no layers left
+        const glm::vec3 directionToSunObjSpace = glm::vec3(_cachedInverseModelTransform *
+            glm::dvec4(directionToSunWorldSpace, 0));
+
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-        _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
-        _localRenderer.program->setUniform(
+        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
+        _globalRenderer.program->setUniform(
             "lightDirectionCameraSpace",
             -glm::normalize(directionToSunCameraSpace)
         );
-        _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
+        _globalRenderer.program->setUniform(
+            "lightDirectionObjSpace",
+            -glm::normalize(directionToSunObjSpace)
+        );
     }
 
-    // Local shader
-    _localRenderer.program->setUniform(
-        "projectionTransform",
-        data.camera.sgctInternal.projectionMatrix()
-    );
+    if (_useAccurateNormals && hasHeightLayer) {
+        // Apply an extra scaling to the height if the object is scaled
+        _localRenderer.program->setUniform(
+            "heightScale",
+            static_cast<float>(
+                glm::compMax(data.modelTransform.scale) * data.camera.scaling()
+            )
+        );
+    }
+
+    using namespace layers;
+    nightLayersActive =
+        !_layerManager.layerGroup(Group::ID::NightLayers).activeLayers().empty();
+    waterLayersActive =
+        !_layerManager.layerGroup(Group::ID::WaterMasks).activeLayers().empty();
 
     if (nightLayersActive || waterLayersActive || _performShading) {
         const glm::dvec3 directionToSunWorldSpace =
@@ -1279,18 +1305,20 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
         const glm::vec3 directionToSunCameraSpace = glm::vec3(viewTransform *
             glm::dvec4(directionToSunWorldSpace, 0));
-        // @TODO (abock, 2020-04-14); This is just a bandaid for issue #1136.  The better
-        // way is to figure out with the uniform is optimized away. I assume that it is
-        // because the shader doesn't get recompiled when the last layer of the night
-        // or water is disabled;  so the shader thinks it has to do the calculation, but
-        // there are actually no layers left
+        const glm::vec3 directionToSunObjSpace = glm::vec3(_cachedInverseModelTransform *
+            glm::dvec4(directionToSunWorldSpace, 0));
+
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
-        _globalRenderer.program->setUniform(
+        _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
+        _localRenderer.program->setUniform(
             "lightDirectionCameraSpace",
             -glm::normalize(directionToSunCameraSpace)
         );
-        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
+        _localRenderer.program->setUniform(
+            "lightDirectionObjSpace",
+            -glm::normalize(directionToSunObjSpace)
+        );
+        _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
     }
 
     int globalCount = 0;
@@ -1449,9 +1477,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 
     if (_eclipseShadowsEnabled && !_ellipsoid.shadowConfigurationArray().empty()) {
         calculateEclipseShadows(program, data, ShadowCompType::GLOBAL_SHADOW);
-    }
-
-    // Shadow Mapping
+    }    // Shadow Mapping
     ghoul::opengl::TextureUnit shadowMapUnit;
     if (_shadowMappingProperties.shadowMapping && shadowData.shadowDepthTexture != 0) {
         // Adding the model transformation to the final shadow matrix so we have a
@@ -1470,6 +1496,50 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
             "zFightingPercentage",
             _shadowMappingProperties.zFightingPercentage
         );
+
+        // Bind ring textures for direct projection when rings component is available
+        if (_ringsComponent && _ringsComponent->isEnabled()) {
+            ghoul::opengl::TextureUnit ringTextureFwrdUnit;
+            ghoul::opengl::TextureUnit ringTextureBckwrdUnit;
+            ghoul::opengl::TextureUnit ringTextureUnlitUnit;
+            ghoul::opengl::TextureUnit ringTextureColorUnit;
+            ghoul::opengl::TextureUnit ringTextureTransparencyUnit;
+
+            if (_ringsComponent->ringTextureFwrd()) {
+                ringTextureFwrdUnit.activate();
+                _ringsComponent->ringTextureFwrd()->bind();
+                program.setUniform("ringTextureFwrd", ringTextureFwrdUnit);
+            }
+
+            if (_ringsComponent->ringTextureBckwrd()) {
+                ringTextureBckwrdUnit.activate();
+                _ringsComponent->ringTextureBckwrd()->bind();
+                program.setUniform("ringTextureBckwrd", ringTextureBckwrdUnit);
+            }
+
+            if (_ringsComponent->ringTextureUnlit()) {
+                ringTextureUnlitUnit.activate();
+                _ringsComponent->ringTextureUnlit()->bind();
+                program.setUniform("ringTextureUnlit", ringTextureUnlitUnit);
+            }
+
+            if (_ringsComponent->ringTextureColor()) {
+                ringTextureColorUnit.activate();
+                _ringsComponent->ringTextureColor()->bind();
+                program.setUniform("ringTextureColor", ringTextureColorUnit);
+            }
+
+            if (_ringsComponent->ringTextureTransparency()) {
+                ringTextureTransparencyUnit.activate();
+                _ringsComponent->ringTextureTransparency()->bind();
+                program.setUniform("ringTextureTransparency", ringTextureTransparencyUnit);
+            }
+
+            program.setUniform("textureOffset", _ringsComponent->textureOffset());
+            program.setUniform("sunPositionObj", _ringsComponent->sunPositionObj());
+            program.setUniform("camPositionObj", _ringsComponent->camPositionObj());
+            program.setUniform("ringSize", (float)_ringsComponent->size());
+        }
     }
     else if (_shadowMappingProperties.shadowMapping && _shadowComponent) {
         shadowMapUnit.activate();
@@ -1589,9 +1659,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
     if (_eclipseShadowsEnabled && !_ellipsoid.shadowConfigurationArray().empty()) {
         calculateEclipseShadows(program, data, ShadowCompType::LOCAL_SHADOW);
-    }
-
-    // Shadow Mapping
+    }    // Shadow Mapping
     ghoul::opengl::TextureUnit shadowMapUnit;
     if (_shadowMappingProperties.shadowMapping && shadowData.shadowDepthTexture != 0) {
         // Adding the model transformation to the final shadow matrix so we have a
@@ -1610,6 +1678,49 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
             "zFightingPercentage",
             _shadowMappingProperties.zFightingPercentage
         );
+
+        // Bind ring textures for direct projection when rings component is available
+        if (_ringsComponent && _ringsComponent->isEnabled() && _ringsComponent->isReady()) {
+            ghoul::opengl::TextureUnit ringTextureFwrdUnit;
+            ghoul::opengl::TextureUnit ringTextureBckwrdUnit;
+            ghoul::opengl::TextureUnit ringTextureUnlitUnit;
+            ghoul::opengl::TextureUnit ringTextureColorUnit;
+            ghoul::opengl::TextureUnit ringTextureTransparencyUnit;
+
+            if (_ringsComponent->ringTextureFwrd()) {
+                ringTextureFwrdUnit.activate();
+                _ringsComponent->ringTextureFwrd()->bind();
+                program.setUniform("ringTextureFwrd", ringTextureFwrdUnit);
+            }
+
+            if (_ringsComponent->ringTextureBckwrd()) {
+                ringTextureBckwrdUnit.activate();
+                _ringsComponent->ringTextureBckwrd()->bind();
+                program.setUniform("ringTextureBckwrd", ringTextureBckwrdUnit);
+            }
+
+            if (_ringsComponent->ringTextureUnlit()) {
+                ringTextureUnlitUnit.activate();
+                _ringsComponent->ringTextureUnlit()->bind();
+                program.setUniform("ringTextureUnlit", ringTextureUnlitUnit);
+            }
+
+            if (_ringsComponent->ringTextureColor()) {
+                ringTextureColorUnit.activate();
+                _ringsComponent->ringTextureColor()->bind();
+                program.setUniform("ringTextureColor", ringTextureColorUnit);
+            }
+
+            if (_ringsComponent->ringTextureTransparency()) {
+                ringTextureTransparencyUnit.activate();
+                _ringsComponent->ringTextureTransparency()->bind();
+                program.setUniform("ringTextureTransparency", ringTextureTransparencyUnit);
+            }
+
+            program.setUniform("textureOffset", _ringsComponent->textureOffset());
+            program.setUniform("sunPositionObj", _ringsComponent->sunPositionObj());
+            program.setUniform("camPositionObj", _ringsComponent->camPositionObj());
+        }
     }
     else if (_shadowMappingProperties.shadowMapping) {
         shadowMapUnit.activate();
@@ -1718,6 +1829,19 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
         programObject.setUniform("deltaPhi1", glm::length(deltaPhi1));
         programObject.setUniform("tileDelta", TileDelta);
     }
+
+    // Set sunPositionWorld and camPositionWorld uniforms for ring shadow calculations
+    // Get Sun node position in world coordinates
+    glm::dvec3 sunPositionWorld = glm::dvec3(0.0);
+    SceneGraphNode* sunNode = sceneGraph()->sceneGraphNode("Sun");
+    if (sunNode) {
+        sunPositionWorld = sunNode->worldPosition();
+    }
+    // Camera position in world coordinates
+    glm::dvec3 camPositionWorld = data.camera.positionVec3();
+    programObject.setUniform("sunPositionWorld", glm::vec3(sunPositionWorld));
+    programObject.setUniform("camPositionWorld", glm::vec3(camPositionWorld));
+    programObject.setUniform("modelTransform", _cachedModelTransform);
 }
 
 void RenderableGlobe::recompileShaders() {
@@ -1771,7 +1895,7 @@ void RenderableGlobe::recompileShaders() {
     }
 
     std::vector<std::pair<std::string, std::string>>& pairs =
-        preprocessingData.keyValuePairs;
+                preprocessingData.keyValuePairs;
 
     const bool hasHeightLayer =
         !_layerManager.layerGroup(layers::Group::ID::HeightLayers).activeLayers().empty();
@@ -1787,10 +1911,17 @@ void RenderableGlobe::recompileShaders() {
         "enableShadowMapping",
         std::to_string(_shadowMappingProperties.shadowMapping && _shadowComponent)
     );
+    pairs.emplace_back(
+        "useRingShadows", 
+        std::to_string(_shadowMappingProperties.shadowMapping && _ringsComponent)
+    );
     pairs.emplace_back("showChunkEdges", std::to_string(_debugProperties.showChunkEdges));
     pairs.emplace_back("showHeightResolution", "0");
     pairs.emplace_back("showHeightIntensities", "0");
     pairs.emplace_back("defaultHeight", std::to_string(DefaultHeight));
+
+    // log if ring shadows are enabled
+    LINFO(std::format("Ring shadows enabled: {}", _shadowMappingProperties.shadowMapping && _ringsComponent));
 
     //
     // Create dictionary from layerpreprocessing data
@@ -2492,7 +2623,6 @@ bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk,
     );
 
     const glm::dvec3& globeToCamera = cameraPos;
-
     const Geodetic2 camPosOnGlobe = _ellipsoid.cartesianToGeodetic2(globeToCamera);
     const Geodetic2 closestPatchPoint = patch.closestPoint(camPosOnGlobe);
     glm::dvec3 objectPos = _ellipsoid.cartesianSurfacePosition(closestPatchPoint);
