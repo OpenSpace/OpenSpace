@@ -1,0 +1,59 @@
+{
+  "profile": "default",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "MilkyWayVolume",
+        "position": [
+          -8.008694537764452e+20,
+          -2.9859694850796107e+21,
+          3.989579210506219e+21
+        ],
+        "pitch": -0.0017689853035976106,
+        "referenceFrame": "Root",
+        "up": [
+          0.3668326238201004,
+          0.7079633964748088,
+          0.6035077922886444
+        ],
+        "yaw": 0.005182201298061193,
+        "timestamp": "2025 JUN 29 15:37:07"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.LocalDwarfGalaxies.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.LocalDwarfGalaxies.Renderable.Labels.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.LocalDwarfGalaxies.Renderable.Labels.MinMaxSize",
+        "value": [
+          6.0,
+          20.0
+        ]
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.TullyGalaxies.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

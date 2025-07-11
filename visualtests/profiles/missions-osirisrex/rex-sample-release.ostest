@@ -1,0 +1,52 @@
+{
+  "profile": "missions/osirisrex",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "OsirisRex",
+        "position": [
+          -0.2794404979364814,
+          -1.979025992611732,
+          2.7587025038108224
+        ],
+        "pitch": -0.008087529311772526,
+        "up": [
+          0.878584932708278,
+          -0.42573687147545425,
+          -0.21641772636335532
+        ],
+        "yaw": -0.003463063467685347,
+        "timestamp": "2023 SEP 24 14:51:01"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.StereoscopicDepthOfFocusSurface",
+        "value": 5.0
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_World_Imagery.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "wait",
+      "value": 30
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}
