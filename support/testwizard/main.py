@@ -25,6 +25,7 @@
 from openspace import Api
 import asyncio
 import json
+import os
 from tabulate import tabulate
 
 async def createCommandNavigationState(openspace):
@@ -275,12 +276,13 @@ async def internalRun(openspace):
 
   while True:
     print()
+    print()
     print("Select command to add to the test:")
     for index,cmd in enumerate(AllCommands):
       print(f"  ({index+1}): {cmd[0]}")
-    print("Finalize the test by selecting the empty value.")
-    selection = input()
-    if selection == "":
+    print("Finalize the test by typing 's' or 'save'.")
+    selection = input("> ")
+    if selection == "s" or selection == "save":
       break
 
     if not selection.isnumeric():
@@ -304,6 +306,8 @@ async def internalRun(openspace):
   test["commands"].append({ "type": "screenshot" })
 
   # Save the test to disk
+  print()
+  print(f"Saving test: {os.path.abspath(name)}.ostest")
   with open(f"{name}.ostest", "w") as fp:
     json.dump(test, fp, indent=2)
     fp.write("\n")
@@ -323,9 +327,9 @@ print("=====================================")
 print("This wizard helps creating image regression test files. To use it, first start ")
 print("OpenSpace with the profile for which to create a test. Then, execute this script ")
 print("and select the commands in the order in which the test should execute them. ")
-print("After picking all commands, leaving the prompt empty finalizes the test.")
+print("To finish the test, enter 's' or 'save' at the prompt.")
 print()
 print(tabulate([[x[0], x[2]] for x in AllCommands], tablefmt="plain", maxcolwidths=[20, 60]))
 print()
 
-asyncio.new_event_loop().run_until_complete(mainLoop())
+asyncio.run(mainLoop())
