@@ -100,6 +100,7 @@ void CameraTopic::sendCameraData() {
         { "longitude", position.y },
         { "altitude", altSimplified.first },
         { "altitudeUnit", altSimplified.second },
+        { "altitudeMeters", position.z },
         { "viewLatitude", dir.x },
         { "viewLongitude", dir.y },
         { "viewLength", viewLength },
