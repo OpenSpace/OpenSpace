@@ -151,7 +151,7 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     , _sampleInterval(
         SampleIntervalInfo,
         openspace::timeconstants::SecondsPerDay / 2.0,
-        2.0,
+        1.0,
         1e6
     )
     , _timeStampSubsamplingFactor(TimeSubSampleInfo, 1, 1, 100)
