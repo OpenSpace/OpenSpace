@@ -76,7 +76,7 @@ glm::dvec3 geoPositionFromCamera();
  * coordinates. The returned value contains the latitude and longitude in degrees in the
  * x, and y-coordinate respectively. 
  */
-glm::dvec2 geoViewFromCamera();
+glm::dvec3 geoViewFromCamera();
 
 /**
  * Return the coordinates where the sun is at its zenith at the current anchor at the

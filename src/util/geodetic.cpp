@@ -103,15 +103,11 @@ glm::dvec3 geoPositionFromCamera() {
     return glm::dvec3(lat, lon, altitude);
 }
 
-glm::dvec2 geoViewFromCamera() {
+glm::dvec3 geoViewFromCamera() {
     const SceneGraphNode* n = global::navigationHandler->orbitalNavigator().anchorNode();
     if (!n) {
         return glm::dvec3(0.0);
     }
-
-    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
-    const glm::dvec3 cameraViewDirection =
-        global::navigationHandler->camera()->viewDirectionWorldSpace();
 
     const glm::dmat4 inverseModelTransform = glm::inverse(n->modelTransform());
 
@@ -125,29 +121,19 @@ glm::dvec2 geoViewFromCamera() {
         global::navigationHandler->camera()->viewDirectionWorldSpace();
     // Scaling the cameraViewDirection to move the precision up a few decimals
     const glm::dvec3 cameraViewPoint = cameraPosition + 10000.0 * cameraViewDirection;
-    glm::dvec3 cameraViewDirectionModelSpace = 
+    glm::dvec3 cameraViewDirectionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraViewPoint, 1.0));
+
 
     // `d` represents how much we are looking towards the center of the scene graph node
     // The closer `d` is to -1 or 1, the more we are looking either towards the center or
     // away from it
+    const glm::dmat3 rotationOnly = glm::mat3_cast(glm::quat_cast(n->modelTransform()));
     const double d = glm::dot(
         glm::normalize(cameraPositionModelSpace),
-        glm::normalize(cameraViewDirectionModelSpace)
+        glm::normalize(glm::transpose(rotationOnly) * cameraViewDirection)
     );
-    constexpr double Epsilon = 1.0 - 1e-8;
-    if (std::abs(d) > Epsilon) {
-        // We are looking straight up or down the object, use Camera Up vector instead of
-        // forward view direction
-        const glm::dvec3 cameraUp =
-            global::navigationHandler->camera()->lookUpVectorWorldSpace();
-        cameraViewDirectionModelSpace = glm::dvec3(
-            inverseModelTransform * glm::dvec4(cameraPosition + cameraUp, 1.0)
-        );
-    }
-    const glm::dvec3 sunPositionModelSpace =
-        glm::dvec3(inverseModelTransform * glm::dvec4(-n->worldPosition(), 1.0));
-
+   
     const SurfacePositionHandle posHandle = n->calculateSurfacePositionHandle(
         cameraViewDirectionModelSpace
     );
@@ -159,7 +145,7 @@ glm::dvec2 geoViewFromCamera() {
     const double lat = glm::degrees(geo.lat);
     const double lon = glm::degrees(geo.lon);
 
-    return glm::dvec2(lat, lon);
+    return glm::dvec3(lat, lon, d);
 }
 
 glm::dvec2 subSolarCoordinates() {
