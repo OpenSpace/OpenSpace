@@ -79,10 +79,10 @@ Fragment getFragment() {
 
   // Jon Colors:
   //vec4 diffuse = mix(colorFwrd * vec4(1, 0.88, 0.82, 1.0), colorBckwrd * vec4(1, 0.88, 0.82, 1.0), lerpFactor);
-  vec4 diffuse = mix(colorFwrd * colorMult, colorBckwrd * colorMult, lerpFactor);
+  vec4 diffuse = mix(colorFwrd, colorBckwrd, lerpFactor) * colorMult;
   diffuse.a = colorFilterValue * transparency.a;
   float colorValue = length(diffuse.rgb) / 0.57735026919;
-  if (colorValue < 0.1) {
+  if (colorValue < 0.001) {
     discard;
   }
 

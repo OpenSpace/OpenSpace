@@ -296,7 +296,10 @@ Fragment getFragment() {
 #endif // SHOW_CHUNK_EDGES
 
 #if SHADOW_MAPPING_ENABLED
+  // 0.0 is full shadow, 1.0 is no shadow
   float shadow = 1.0;
+  // Light thru rings is colored, default full white
+  vec3 lightColor = vec3(1.0, 1.0, 1.0);
   
 #if USE_RING_SHADOWS
   // Calculate ring shadow by projecting ring texture directly onto surface
@@ -305,33 +308,32 @@ Fragment getFragment() {
   vec3 p = posObjSpace;
   vec3 ringPlaneNormal = vec3(0.0, 0.0, 1.0);
   
-  if (abs(surfaceToSun.y) > 1e-8 && dot(normalObjSpace, lightDirectionObjSpace) < 0.0) { // Avoid division by zero
+  if (abs(surfaceToSun.y) > 1e-8 && dot(normalObjSpace, lightDirectionObjSpace) < 0.0) {
     float t = rayPlaneIntersection(p, surfaceToSun, vec3(0.0, 0.0, 0.0), ringPlaneNormal);
     
     vec3 ringIntersection = p + t * surfaceToSun;
       
     // Calculate distance from ring center
     float tx = length(ringIntersection.xy) / ringSize;
+    // See advanced_rings_fs.glsl for explanation of textureOffset
     float texCoord = (tx - textureOffset.x) / (textureOffset.y - textureOffset.x);
-
 
     if (texCoord >= 0.0 && texCoord <= 1.0) {
       // Sample ring transparency texture
       float ringOpacity = texture(ringTextureTransparency, texCoord).r;
-      // Determine which side of ring we're viewing from (matches ring shader logic)
-      // float lerpFactor = dot(camPositionWorld, sunPositionWorld);
       
-      // Sample appropriate ring texture based on viewing direction
-      // vec4 ringColor = mix(texture(ringTextureFwrd, texCoord), texture(ringTextureBckwrd, texCoord), lerpFactor);
+      // Increase the shadow darkness factor with low angle to simulate the light having to pass thru more material
+      float angleFactor = clamp(abs(-dot(ringPlaneNormal, surfaceToSun)) / 2.0, 0.0, 0.3);
       
       // Calculate shadow factor based on ring opacity
-      shadow = 1.0 - ringOpacity;
-      shadow = clamp(shadow + 0.3, 0.0, 1.0); // Add ambient light similar to original
+      shadow = ringOpacity;
+      shadow = clamp(shadow + angleFactor, 0.05, 1.0);
+      lightColor = texture(ringTextureColor, texCoord).rgb;
     }
   }
 
 #endif // USE_RING_SHADOWS;
-  frag.color.rgb = mix(frag.color.rgb, preShadedColor * ambientIntensity, 1.0 - shadow);
+  frag.color.rgb = mix(preShadedColor * lightColor * ambientIntensity, frag.color.rgb, shadow);
 #endif
 
   frag.color.a *= opacity;
