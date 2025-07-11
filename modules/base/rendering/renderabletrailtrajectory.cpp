@@ -353,13 +353,11 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
                 _nReplacementPoints
             );
         }
+        else if (_renderFullTrail) {
+            _primaryRenderInformation.count += 1;
+        }
         else {
-            if (_renderFullTrail) {
-                _primaryRenderInformation.count += 1;
-            }
-            else {
-                prePaddingDelta = std::min(_primaryRenderInformation.count, 2);
-            }
+            prePaddingDelta = std::min(_primaryRenderInformation.count, 2);
         }
 
         glm::dvec3 v = p;
