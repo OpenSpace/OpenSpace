@@ -1281,18 +1281,11 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
             "lightDirectionObjSpace",
             -glm::normalize(directionToSunObjSpace)
         );
-        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
     }
 
     modelViewTransform = glm::mat4(viewTransform * _cachedModelTransform);
     modelViewProjectionTransform =
         data.camera.sgctInternal.projectionMatrix() * modelViewTransform;
-
-    
-    _globalRenderer.program->setUniform(
-        "lightDirectionWorldSpace",
-        glm::vec3(glm::normalize(directionToLightSource(data.modelTransform.translation, _lightSourceNode)))
-    );
 
     // Upload the uniform variables
     _localRenderer.program->setUniform(

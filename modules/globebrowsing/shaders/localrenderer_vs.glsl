@@ -118,8 +118,11 @@ void main() {
   gl_Position = fs_position;
   ellipsoidNormalCameraSpace = patchNormalCameraSpace;
   positionCameraSpace = p;
-  positionWorldSpace = vec3(inverseViewTransform * dvec4(p, 1.0));
   posObjSpace = vec3(inverseViewTransform * dvec4(p, 1.0));
+
+#if USE_ECLIPSE_SHADOWS
+  positionWorldSpace = vec3(modelTransform * dvec4(p, 1.0));
+#endif // USE_ECLIPSE_SHADOWS
 
 #if SHADOW_MAPPING_ENABLED
   shadowCoords = vec4(shadowMatrix * dvec4(p, 1.0));

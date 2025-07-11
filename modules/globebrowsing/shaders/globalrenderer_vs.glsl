@@ -37,7 +37,6 @@ out vec2 fs_uv;
 out vec3 ellipsoidNormalCameraSpace;
 out vec3 levelWeights;
 out vec3 positionCameraSpace;
-out vec3 positionWorldSpace;
 out vec3 posObjSpace;
 out vec3 normalObjSpace;
 
@@ -55,6 +54,10 @@ uniform dmat4 modelTransform;
   uniform dmat4 shadowMatrix;
   out vec4 shadowCoords;
 #endif // SHADOW_MAPPING_ENABLED
+
+#if USE_ECLIPSE_SHADOWS
+  out vec3 positionWorldSpace;
+#endif // USE_ECLIPSE_SHADOWS
 
 uniform mat4 modelViewProjectionTransform;
 uniform mat4 modelViewTransform;
@@ -134,9 +137,12 @@ void main() {
   gl_Position = fs_position;
   ellipsoidNormalCameraSpace = mat3(modelViewTransform) * pair.normal;
   positionCameraSpace = vec3(modelViewTransform * vec4(pair.position, 1.0));
-  positionWorldSpace = vec3(modelTransform * dvec4(pair.position, 1.0));
   posObjSpace = pair.position;
   normalObjSpace = pair.normal;
+
+#if USE_ECLIPSE_SHADOWS
+  positionWorldSpace = vec3(modelTransform * dvec4(pair.position, 1.0));
+#endif // USE_ECLIPSE_SHADOWS
 
 #if SHADOW_MAPPING_ENABLED
   shadowCoords = vec4(shadowMatrix * dvec4(pair.position, 1.0));
