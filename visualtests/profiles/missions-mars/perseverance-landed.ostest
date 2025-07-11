@@ -7,7 +7,7 @@
     },
     {
       "type": "wait",
-      "value": "10"
+      "value": 10
     },
     {
       "type": "navigationstate",
@@ -31,7 +31,7 @@
     },
     {
       "type": "wait",
-      "value": "60"
+      "value": 60
     },
     {
       "type": "screenshot"

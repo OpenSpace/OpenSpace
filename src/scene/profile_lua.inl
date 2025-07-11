@@ -29,7 +29,7 @@ namespace {
 /**
  * Returns the name of the profile with which OpenSpace was started.
  */
-[[codegen::luawrap]] std::string profile() {
+[[codegen::luawrap]] std::string profileName() {
     std::string p = openspace::global::configuration->profile;
     const std::string builtInPath = absPath("${PROFILES}").string();
     const std::string userPath = absPath("${USER_PROFILES}").string();

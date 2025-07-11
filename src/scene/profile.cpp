@@ -858,7 +858,7 @@ scripting::LuaLibrary Profile::luaLibrary() {
     return {
         "",
         {
-            codegen::lua::Profile,
+            codegen::lua::ProfileName,
             codegen::lua::ProfilePath,
             codegen::lua::SaveSettingsToProfile
         }

@@ -57,7 +57,7 @@
     },
     {
       "type": "wait",
-      "value": "20"
+      "value": 20
     },
     {
       "type": "screenshot"

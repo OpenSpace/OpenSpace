@@ -1,8 +1,8 @@
 ##########################################################################################
 #                                                                                        #
-# OpenSpace Visual Test Wizard                                                           #
+# OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2025                                                                     #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -106,7 +106,7 @@ async def createCommandProperty(openspace):
       value = False
 
     if value.isnumeric():
-      value = int(value)
+      value = float(value)
 
   else:
     has_property = await openspace.hasProperty(uri)
@@ -127,13 +127,13 @@ async def createCommandProperty(openspace):
 
 
 async def createCommandWait(openspace):
-  wait = input("Number of seconds to wait: ")
-  if wait == "":
+  seconds = input("Number of seconds to wait: ")
+  if seconds == "":
     return None
 
   return {
     "type": "wait",
-    "value": wait
+    "value": float(seconds)
   }
 
 
@@ -161,9 +161,9 @@ async def createCommandPause(openspace):
 
   p = ""
   if pause == "y":
-    p = "true"
+    p = True
   else:
-    p = "false"
+    p = False
 
   return {
     "type": "pause",
@@ -261,7 +261,7 @@ AllCommands = [
 async def internalRun(openspace):
   test = {}
 
-  profile = await openspace.profile()
+  profile = await openspace.profileName()
   profile = profile[:profile.find('.')]
   profile = profile.replace("\\", "/")
   test["profile"] = profile
