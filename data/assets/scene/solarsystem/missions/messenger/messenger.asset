@@ -136,7 +136,7 @@ local MessengerProbePanels = {
   GUI = {
     Name = "MessengerProbe Panels",
     Path = "/Solar System/Missions/Messenger",
-    Focusable = false
+    Focusable = false,
     Hidden = true
   }
 }

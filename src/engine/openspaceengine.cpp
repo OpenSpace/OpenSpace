@@ -159,7 +159,19 @@ namespace {
         "Disable All Mouse Inputs",
         "Disables all mouse inputs. Useful when using touch interaction, to prevent "
         "double inputs on touch (from both touch input and inserted mouse inputs).",
-        openspace::properties::Property::Visibility::User
+        openspace::properties::Property::Visibility::User,
+        openspace::properties::Property::NeedsConfirmation::Yes
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo
+        ShowPropertyConfirmationDialogInfo =
+    {
+        "ShowPropertyConfirmation",
+        "Show Property Confirmation",
+        "Controls whether confirmation dialogs are shown when making changes to certain "
+        "properties. If checked, the dialogs will be shown for properties that require "
+        "it. If unchecked, no dialogs will be shown.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     void viewportChanged() {
@@ -212,6 +224,7 @@ OpenSpaceEngine::OpenSpaceEngine()
     : properties::PropertyOwner({ "OpenSpaceEngine", "OpenSpace Engine" })
     , _printEvents(PrintEventsInfo, false)
     , _visibility(VisibilityInfo)
+    , _showPropertyConfirmationDialog(ShowPropertyConfirmationDialogInfo, true)
     , _fadeOnEnableDuration(FadeDurationInfo, 1.f, 0.f, 5.f)
     , _disableAllMouseInputs(DisableMouseInputInfo, false)
 {
@@ -230,6 +243,8 @@ OpenSpaceEngine::OpenSpaceEngine()
         { static_cast<int>(Visibility::Hidden), "Everything" },
     });
     addProperty(_visibility);
+
+    addProperty(_showPropertyConfirmationDialog);
 
     addProperty(_fadeOnEnableDuration);
     addProperty(_disableAllMouseInputs);
@@ -298,6 +313,7 @@ void OpenSpaceEngine::initialize() {
 
     _printEvents = global::configuration->isPrintingEvents;
     _visibility = static_cast<int>(global::configuration->propertyVisibility);
+    _showPropertyConfirmationDialog = global::configuration->showPropertyConfirmation;
 
     std::filesystem::path cacheFolder = absPath("${CACHE}");
     if (global::configuration->usePerProfileCache) {
@@ -1373,15 +1389,15 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
         return;
     }
 
-    for (const global::callback::KeyboardCallback& func : *global::callback::keyboard) {
-        const bool isConsumed = func(key, mod, action, isGuiWindow);
+    if (!global::configuration->isConsoleDisabled) {
+        const bool isConsumed = global::luaConsole->keyboardCallback(key, mod, action);
         if (isConsumed) {
             return;
         }
     }
 
-    if (!global::configuration->isConsoleDisabled) {
-        const bool isConsumed = global::luaConsole->keyboardCallback(key, mod, action);
+    for (const global::callback::KeyboardCallback& func : *global::callback::keyboard) {
+        const bool isConsumed = func(key, mod, action, isGuiWindow);
         if (isConsumed) {
             return;
         }

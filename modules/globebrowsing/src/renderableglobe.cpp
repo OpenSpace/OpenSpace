@@ -1449,7 +1449,15 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     );
 
     if (_layerManager.hasAnyBlendingLayersEnabled()) {
+        // We are ignoring the uniform error here as it is cheaper to just set the uniform
+        // when we don't need it than to check whether we need it. The uniform is not
+        // needed if a globe only has `SolidColor` layers, which is pretty rare, but a
+        // check to see if we need it would need to iterate over all layers, which would
+        // be relatively expensive
+        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        program.setIgnoreUniformLocationError(IgnoreError::Yes);
         program.setUniform("chunkLevel", chunk.tileIndex.level);
+        program.setIgnoreUniformLocationError(IgnoreError::No);
     }
 
     // Calculate other uniform variables needed for rendering

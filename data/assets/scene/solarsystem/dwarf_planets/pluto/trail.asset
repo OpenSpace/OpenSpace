@@ -14,8 +14,9 @@ local PlutoBarycenterTrail = {
       Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.3, 0.7, 0.3 },
-    Period = 365.25,
-    Resolution = 1000
+    Period = 90560,
+    Resolution = 368,
+    LineLength = 0.03
   },
   Tag = { "planetTrail_dwarf" },
   GUI = {

@@ -720,12 +720,10 @@ void Scene::updateInterpolations() {
             1.f
         );
 
-        // @FRAGILE(abock): This method might crash if someone deleted the property
-        //                  underneath us. We take care of removing entire PropertyOwners,
-        //                  but we assume that Propertys live as long as their
-        //                  SceneGraphNodes. This is true in general, but if Propertys are
-        //                  created and destroyed often by the SceneGraphNode, this might
-        //                  become a problem.
+        // This method might crash if someone deleted the property underneath us. We take
+        // care of removing entire PropertyOwners, but we assume that Propertys live as
+        // long as their SceneGraphNodes. This is true in general, but if Propertys are
+        // created and destroyed often by the SceneGraphNode, this might become a problem.
         i.prop->interpolateValue(t, i.easingFunction);
 
         i.isExpired = (t == 1.f);
