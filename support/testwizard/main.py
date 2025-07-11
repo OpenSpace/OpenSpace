@@ -98,6 +98,11 @@ async def createCommandProperty(openspace):
 
   if uri.find("*") != -1 or uri.find("{") != -1:
     # The URI refers to multiple property values, so we need to as for the specific value
+    print("As multiple properties are specified, it is not possible to query their")
+    print("current state from OpenSpace. Requesting the value manually. For boolean")
+    print("values enter 'true' or 'false', numerical and string values can be entered ")
+    print("directly. Vectors can currently not be entered manually.")
+    print()
     value = input("Enter value of the property: ")
 
     # Perform some type conversions if necessary
@@ -108,7 +113,6 @@ async def createCommandProperty(openspace):
 
     if value.isnumeric():
       value = float(value)
-
   else:
     has_property = await openspace.hasProperty(uri)
     if not has_property:
