@@ -101,7 +101,7 @@ namespace {
         "Line Fade Amount",
         "The amount of the trail that should be faded. If the value is 0 then the "
         "trail will have no fading applied. A value of 0.6 will result in a trail "
-        "where 60% of the extent of the trail will have fading applied to it. In other"
+        "where 60% of the extent of the trail will have fading applied to it. In other "
         "words, the 40% closest to the head of the trail will be solid and the rest "
         "will fade until completely transparent at the end of the trail. A value of 1 "
         "will result in a trail that starts fading immediately, becoming fully "
