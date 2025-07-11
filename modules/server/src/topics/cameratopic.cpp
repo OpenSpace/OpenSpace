@@ -84,13 +84,28 @@ void CameraTopic::handleJson(const nlohmann::json& json) {
 void CameraTopic::sendCameraData() {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
     glm::dvec3 position = geoPositionFromCamera();
+    glm::dvec3 direction = geoViewFromCamera();
+    const double viewLength = direction.z;
     std::pair<double, std::string_view> altSimplified = simplifyDistance(position.z);
+    glm::dvec2 subSolar = subSolarCoordinates();
 
-    const nlohmann::json jsonData = {
+    glm::dvec2 dir = glm::dvec2(direction) - glm::dvec2(position);
+    if (glm::length(dir) > 1e-6) {
+        // Avoid sending NaNs/null from bad normalization
+        dir = glm::normalize(dir);
+    }
+
+    nlohmann::json jsonData = {
         { "latitude", position.x },
         { "longitude", position.y },
         { "altitude", altSimplified.first },
-        { "altitudeUnit", altSimplified.second }
+        { "altitudeUnit", altSimplified.second },
+        { "altitudeMeters", position.z },
+        { "viewLatitude", dir.x },
+        { "viewLongitude", dir.y },
+        { "viewLength", viewLength },
+        { "subSolarLatitude", subSolar.x },
+        { "subSolarLongitude", subSolar.y },
     };
 
     _connection->sendJson(wrappedPayload(jsonData));
