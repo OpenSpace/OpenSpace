@@ -1,0 +1,102 @@
+{
+  "profile": "spaceweather/solarstorm2012",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Earth",
+        "position": [
+          -158669050.69439697,
+          -9667240.017425537,
+          69482758.33553314
+        ],
+        "pitch": 0.008618922782347153,
+        "referenceFrame": "Root",
+        "up": [
+          0.09332543194691514,
+          0.9346319364648231,
+          0.34315230888329534
+        ],
+        "yaw": 0.0010868230681453435,
+        "timestamp": "2012 JUL 14 19:29:10"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.FL_BATSRUS_J12_FlowLines.Renderable.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.FL_ENLIL_earth.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.FL_ENLIL_slice_eqPlane_011AU_1.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.FL_ENLIL_slice_eqPlane_011AU_2.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.FL_ENLIL_slice_lat4_011AU_1.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.FL_ENLIL_slice_lat4_011AU_2.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.FL_ENLIL_stereoa.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.FL_PFSS.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Earth.Renderable.Layers.ColorLayers.Blue_Marble.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "wait",
+      "value": 10
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

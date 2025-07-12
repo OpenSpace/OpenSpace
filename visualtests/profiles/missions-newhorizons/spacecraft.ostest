@@ -1,0 +1,27 @@
+{
+  "profile": "missions/newhorizons",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "NewHorizons",
+        "position": [
+          49.888210710526536,
+          -1.5376306944695592,
+          17.17774740093506
+        ],
+        "pitch": 0.05368816101338993,
+        "up": [
+          0.021478551725442663,
+          0.9994024752592575,
+          0.02708069905756927
+        ],
+        "yaw": -0.039890546194123265,
+        "timestamp": "2015 JUL 14 08:00:28"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

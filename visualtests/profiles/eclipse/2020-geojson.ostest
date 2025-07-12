@@ -1,0 +1,48 @@
+{
+  "profile": "eclipse",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Earth",
+        "position": [
+          11126299.109931003,
+          19567379.396164607,
+          10582437.163533993
+        ],
+        "pitch": 0.05607352326255417,
+        "up": [
+          -0.2940618490131303,
+          -0.31989021691487335,
+          0.9006652419612597
+        ],
+        "yaw": 0.0931884662734699,
+        "timestamp": "2020 JUN 21 06:41:57"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Earth.Renderable.Layers.ColorLayers.Blue_Marble.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Earth.Renderable.GeographicOverlays.Annular-2020-06-21.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}
