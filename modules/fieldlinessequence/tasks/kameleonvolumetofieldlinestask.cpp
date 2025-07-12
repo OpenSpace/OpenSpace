@@ -141,7 +141,7 @@ std::string KameleonVolumeToFieldlinesTask::description() {
     return std::format(
         "Extract fieldline data from cdf file {} and seedpoint file {}. "
         "Write osfls file into the folder {}.",
-        _inputPath, _seedpointsPath, _outputFolder
+        _inputPath.string(), _seedpointsPath.string(), _outputFolder.string()
     );
 }
 

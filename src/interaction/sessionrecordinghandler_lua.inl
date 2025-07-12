@@ -78,7 +78,7 @@ namespace {
 
     if (!std::filesystem::is_regular_file(file)) {
         throw ghoul::RuntimeError(std::format(
-            "Cannot find the specified playback file '{}'", file
+            "Cannot find the specified playback file '{}'", file.string()
         ));
     }
 

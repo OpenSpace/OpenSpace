@@ -61,7 +61,7 @@ ReadSpeckTask::ReadSpeckTask(const ghoul::Dictionary& dictionary) {
 std::string ReadSpeckTask::description() {
     return std::format(
         "Read speck file '{}' and write raw star data into '{}'",
-        _inFilePath, _outFilePath
+        _inFilePath.string(), _outFilePath.string()
     );
 }
 
@@ -95,7 +95,7 @@ void ReadSpeckTask::perform(const Task::ProgressCallback& onProgress) {
         fileStream.close();
     }
     else {
-        LERROR(std::format("Error opening file '{}' as output data file", _outFilePath));
+        LERROR(std::format("Error opening file '{}' as output data file", _outFilePath.string()));
     }
 
     onProgress(1.f);

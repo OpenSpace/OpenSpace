@@ -155,7 +155,7 @@ namespace {
         std::ofstream fileStream(file, std::ofstream::binary);
 
         if (!fileStream.good()) {
-            LERROR(std::format("Error opening file '{}' for save cache file", file));
+            LERROR(std::format("Error opening file '{}' for save cache file", file.string()));
             return;
         }
 
@@ -346,7 +346,7 @@ void RenderableGalaxy::initialize() {
     const bool hasCachedFile = std::filesystem::is_regular_file(cachedPointsFile);
     if (hasCachedFile) {
         LINFO(std::format("Cached file '{}' used for galaxy point file '{}'",
-            cachedPointsFile, _pointsFilename
+            cachedPointsFile.string(), _pointsFilename.string()
         ));
 
         Result res = loadCachedFile(cachedPointsFile);
@@ -444,7 +444,7 @@ void RenderableGalaxy::initializeGL() {
 
         if (_pointSpreadFunctionTexture) {
             LDEBUG(std::format(
-                "Loaded texture from '{}'", absPath(_pointSpreadFunctionTexturePath)
+                "Loaded texture from '{}'", absPath(_pointSpreadFunctionTexturePath).string()
             ));
             _pointSpreadFunctionTexture->uploadTexture();
         }
@@ -761,14 +761,14 @@ RenderableGalaxy::Result RenderableGalaxy::loadCachedFile(
 
     std::ifstream fileStream = std::ifstream(file, std::ifstream::binary);
     if (!fileStream.good()) {
-        LERROR(std::format("Error opening file '{}' for loading cache file", file));
+        LERROR(std::format("Error opening file '{}' for loading cache file", file.string()));
         return { false, {}, {} };
     }
 
     int8_t cacheVersion = 0;
     fileStream.read(reinterpret_cast<char*>(&cacheVersion), sizeof(int8_t));
     if (cacheVersion != CurrentCacheVersion) {
-        LINFO(std::format("Removing cache file '{}' as the version changed", file));
+        LINFO(std::format("Removing cache file '{}' as the version changed", file.string()));
         return { false, {}, {} };
     }
 

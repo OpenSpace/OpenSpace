@@ -75,7 +75,13 @@ TileProviderByDate::TileProviderByDate(const ghoul::Dictionary& dictionary) {
         addPropertySubOwner(tp.get());
 
         const double time = SpiceManager::ref().ephemerisTimeFromDate(prov.first);
+#ifndef __APPLE__
         _tileProviders.emplace_back(time, std::move(tp));
+#else
+        // Apple complains about the constructor not being explicit, so we use a
+        // constructor that takes the time and the tile provider as parameters
+        _tileProviders.emplace_back(Provider{ time, std::move(tp) });
+#endif // _APPLE__ 
     }
 
     // After we added all tile providers, we need to sort them as they might have been

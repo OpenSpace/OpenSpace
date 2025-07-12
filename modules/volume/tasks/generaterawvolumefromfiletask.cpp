@@ -91,7 +91,7 @@ std::string GenerateRawVolumeFromFileTask::description() {
         "Generate a raw volume with dimensions: ({}, {}, {}). "
         "Write raw volume data into '{}' and dictionary with metadata to '{}'",
         _dimensions.x, _dimensions.y, _dimensions.z,
-        _rawVolumeOutputPath, _dictionaryOutputPath
+        _rawVolumeOutputPath.string(), _dictionaryOutputPath.string()
     );
 }
 

@@ -298,7 +298,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
             throw ghoul::RuntimeError(std::format(
                 "Error loading layer '{}'. Folder '{}' does not contain any files that "
                 "matched the time format",
-                _identifier, _folder.folder
+                _identifier, _folder.folder.string()
             ));
         }
     }

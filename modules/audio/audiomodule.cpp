@@ -100,7 +100,7 @@ std::unique_ptr<SoLoud::Wav> AudioModule::loadSound(const std::filesystem::path&
     if (res != 0) {
         throw ghoul::RuntimeError(std::format(
             "Error loading sound from {}. {}: {}",
-            path, static_cast<int>(res), _engine->getErrorString(res)
+            p, static_cast<int>(res), _engine->getErrorString(res)
         ));
     }
 

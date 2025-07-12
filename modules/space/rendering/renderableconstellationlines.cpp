@@ -333,11 +333,11 @@ void RenderableConstellationLines::loadData() {
     }
     std::filesystem::path fileName = absPath(_speckFile);
 
-    LINFO(std::format("Loading Speck file '{}'", fileName));
+    LINFO(std::format("Loading Speck file '{}'", fileName.string()));
     std::ifstream file(fileName);
     if (!file.good()) {
         throw ghoul::RuntimeError(std::format(
-            "Failed to open Speck file '{}'", fileName
+            "Failed to open Speck file '{}'", fileName.string()
         ));
     }
 
@@ -390,7 +390,7 @@ void RenderableConstellationLines::loadData() {
             else {
                 LWARNING(std::format(
                     "Unknown command '{}' found in constellation file '{}'",
-                    dummy, fileName
+                    dummy, fileName.string()
                 ));
             }
             dummy.clear();
@@ -435,7 +435,7 @@ void RenderableConstellationLines::loadData() {
             else {
                 LERROR(std::format(
                     "Failed reading position on line {} of mesh {} in file '{}'. "
-                    "Stopped reading constellation data", l, lineIndex, fileName
+                    "Stopped reading constellation data", l, lineIndex, fileName.string()
                 ));
             }
 

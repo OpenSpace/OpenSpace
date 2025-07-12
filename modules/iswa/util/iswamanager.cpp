@@ -621,7 +621,7 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
     }
     else {
         LWARNING(
-            std::format("'{}' is not a CDF file or cannot be found", absPath(info.path))
+            std::format("'{}' is not a CDF file or cannot be found", absPath(info.path).string())
         );
     }
 }
@@ -658,7 +658,7 @@ void IswaManager::createFieldline(std::string name, std::filesystem::path cdfPat
         }
     }
     else {
-        LWARNING(std::format("{} is not a CDF file or cannot be found", cdfPath));
+        LWARNING(std::format("{} is not a CDF file or cannot be found", cdfPath.string()));
     }
 }
 
@@ -739,7 +739,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
         }
     }
     else {
-        LWARNING(std::format("'{}' is not a CDF file or cannot be found", cdfFile));
+        LWARNING(std::format("'{}' is not a CDF file or cannot be found", cdfFile.string()));
     }
 }
 

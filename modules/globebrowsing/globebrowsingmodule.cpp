@@ -235,7 +235,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
                 "GlobeBrowsingModule",
                 std::format(
                     "The provided texture file '{}' for the default geo point texture "
-                    "does not exist", path
+                    "does not exist", path.string()
                 )
             );
         }
