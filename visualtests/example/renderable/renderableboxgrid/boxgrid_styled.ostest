@@ -6,6 +6,13 @@
       "value": "examples/renderable/renderableboxgrid/boxgrid_styled.asset"
     },
     {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
       "type": "navigationstate",
       "value": {
         "anchor": "Root",
@@ -19,7 +26,7 @@
           0.9380684184549688,
           -0.05281699068433604
         ],
-        "timestamp": "2025 JUN 29 21:48:56"
+        "timestamp": "2000 JAN 01 12:00:00"
       }
     },
     {

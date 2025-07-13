@@ -3,7 +3,7 @@
   "commands": [
     {
       "type": "asset",
-      "value": "examples/renderable/renderableradialgrid/radialgrid_styled.asset"
+      "value": "examples/screenspacerenderable/screenspacerenderablerenderable/renderablerenderable_model-distance.asset"
     },
     {
       "type": "screenshot"

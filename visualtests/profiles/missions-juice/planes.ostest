@@ -57,6 +57,13 @@
       }
     },
     {
+      "type": "property",
+      "value": {
+        "property": "Scene.GanymedeMagnetosphere.Renderable.Flow.FlowEnabled",
+        "value": false
+      }
+    },
+    {
       "type": "wait",
       "value": 15
     },

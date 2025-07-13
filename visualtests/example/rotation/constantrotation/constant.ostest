@@ -3,16 +3,23 @@
   "commands": [
     {
       "type": "asset",
-      "value": "examples/renderable/renderableradialgrid/radialgrid_styled.asset"
+      "value": "examples/rotation/constantrotation/constant.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
     },
     {
       "type": "navigationstate",
       "value": {
         "anchor": "ConstantRotation_Example",
         "position": [
-          -0.38629884248260915,
-          8.642690818782182,
-          -5.015443012858863
+          0.265863249593815,
+          -1.006726689094225,
+          1.8204064909399365
         ],
         "pitch": 0.005038942674599358,
         "up": [
@@ -21,7 +28,7 @@
           -0.8474033545153344
         ],
         "yaw": 0.004635536562583947,
-        "timestamp": "2025 JUN 29 21:59:39"
+        "timestamp": "2000 JAN 01 12:00:00"
       }
     },
     {
