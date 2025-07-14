@@ -3,7 +3,7 @@
   "commands": [
     {
       "type": "asset",
-      "value": "examples/renderable/renderableboxgrid/boxgrid_styled.asset"
+      "value": "examples/scale/luascale/lua.asset"
     },
     {
       "type": "property",
@@ -15,17 +15,21 @@
     {
       "type": "navigationstate",
       "value": {
+        "anchor": "LuaScale_Example",
         "position": [
-          151.59398920879985,
-          99.95798264068029,
-          96.90007979489782
+          3.4316828325932547,
+          2.938354025288038,
+          -0.5443736043235018
         ],
+        "pitch": 1.0995394475463923e-07,
+        "referenceFrame": "Root",
         "up": [
-          -0.48072616672974144,
-          0.8655011206100662,
-          -0.1407485802558886
+          -0.16481956358156002,
+          0.009769482746134983,
+          -0.9862753513434557
         ],
-        "timestamp": "2000 JAN 01 12:00:00"
+        "yaw": 1.1433575514143556e-07,
+        "timestamp": "2000 JAN 01 10:00:00"
       }
     },
     {

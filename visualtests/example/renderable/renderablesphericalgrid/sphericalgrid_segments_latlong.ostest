@@ -1,0 +1,29 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderablesphericalgrid/sphericalgrid_segments_latlong.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderableSphericalGrid_Example_SegmentsLatLong",
+        "position": [
+          -2.670862345531653,
+          0.38945474988794027,
+          -0.0034232637362729824
+        ],
+        "up": [
+          8.061203098975068e-05,
+          0.0006405490241453515,
+          0.009979138171612124
+        ],
+        "timestamp": "2025 JUL 13 12:40:59"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

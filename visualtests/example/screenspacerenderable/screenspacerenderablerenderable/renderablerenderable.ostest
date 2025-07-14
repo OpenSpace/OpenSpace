@@ -6,6 +6,13 @@
       "value": "examples/screenspacerenderable/screenspacerenderablerenderable/renderablerenderable.asset"
     },
     {
+      "type": "property",
+      "value": {
+        "property": "ScreenSpace.ScreenSpaceRenderableRenderable_Example.Scale",
+        "value": 1.5
+      }
+    },
+    {
       "type": "screenshot"
     }
   ]

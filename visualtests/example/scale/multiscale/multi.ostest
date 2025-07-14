@@ -3,7 +3,7 @@
   "commands": [
     {
       "type": "asset",
-      "value": "examples/renderable/renderableboxgrid/boxgrid_styled.asset"
+      "value": "examples/scale/multiscale/multi.asset"
     },
     {
       "type": "property",
@@ -15,17 +15,21 @@
     {
       "type": "navigationstate",
       "value": {
+        "anchor": "MultiScale_Example",
         "position": [
-          151.59398920879985,
-          99.95798264068029,
-          96.90007979489782
+          2.228003414075766,
+          1.9077120816430038,
+          -0.35343191901244525
         ],
+        "pitch": 1.0411423631560367e-07,
+        "referenceFrame": "Root",
         "up": [
-          -0.48072616672974144,
-          0.8655011206100662,
-          -0.1407485802558886
+          -0.16481956358155797,
+          0.009769482746131208,
+          -0.9862753513434562
         ],
-        "timestamp": "2000 JAN 01 12:00:00"
+        "yaw": 1.082633208637964e-07,
+        "timestamp": "2000 JAN 01 10:00:00"
       }
     },
     {

@@ -22,6 +22,20 @@
       }
     },
     {
+      "type": "property",
+      "value": {
+        "property": "Scene.*Trail.Renderable.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.MoonTrail.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
       "type": "screenshot"
     }
   ]

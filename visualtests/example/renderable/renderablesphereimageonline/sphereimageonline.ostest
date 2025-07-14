@@ -3,7 +3,7 @@
   "commands": [
     {
       "type": "asset",
-      "value": "examples/renderable/renderableboxgrid/boxgrid_styled.asset"
+      "value": "examples/renderable/renderablesphereimageonline/sphereimageonline.asset"
     },
     {
       "type": "property",
@@ -15,17 +15,18 @@
     {
       "type": "navigationstate",
       "value": {
+        "anchor": "RenderableSphereImageOnline_Example",
         "position": [
-          151.59398920879985,
-          99.95798264068029,
-          96.90007979489782
+          -2.734910066530501,
+          0.3987939409402511,
+          -0.003505354126132989
         ],
         "up": [
-          -0.48072616672974144,
-          0.8655011206100662,
-          -0.1407485802558886
+          0.00806120315276282,
+          0.06405490240679734,
+          0.9979138171612746
         ],
-        "timestamp": "2000 JAN 01 12:00:00"
+        "timestamp": "2025 JUL 13 12:35:51"
       }
     },
     {

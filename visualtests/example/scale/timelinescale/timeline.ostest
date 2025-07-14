@@ -3,7 +3,7 @@
   "commands": [
     {
       "type": "asset",
-      "value": "examples/renderable/renderableboxgrid/boxgrid_styled.asset"
+      "value": "examples/scale/timelinescale/timeline_no-interpolate.asset"
     },
     {
       "type": "property",
@@ -15,17 +15,19 @@
     {
       "type": "navigationstate",
       "value": {
+        "anchor": "TimelineScale_Example",
         "position": [
-          151.59398920879985,
-          99.95798264068029,
-          96.90007979489782
+          -2.2844822677113674,
+          -1.7458797903641945,
+          -1.8546121097507622
         ],
+        "referenceFrame": "Root",
         "up": [
-          -0.48072616672974144,
-          0.8655011206100662,
-          -0.1407485802558886
+          0.25073349699360403,
+          0.531443534856866,
+          -0.8091356392745271
         ],
-        "timestamp": "2000 JAN 01 12:00:00"
+        "timestamp": "2000 JAN 01 10:00:00"
       }
     },
     {
