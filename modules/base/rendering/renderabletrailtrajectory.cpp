@@ -296,9 +296,9 @@ void RenderableTrailTrajectory::updateBuffer() {
     // it if it is empty
     _indexArray.clear();
 
-	_primaryRenderInformation.stride = _timeStampSubsamplingFactor;
-	_secondaryRenderInformation.stride = _timeStampSubsamplingFactor;
-	_floatingRenderInformation.stride = _timeStampSubsamplingFactor;
+    _primaryRenderInformation.stride = _timeStampSubsamplingFactor;
+    _secondaryRenderInformation.stride = _timeStampSubsamplingFactor;
+    _floatingRenderInformation.stride = _timeStampSubsamplingFactor;
     _needsFullSweep = false;
 }
 
