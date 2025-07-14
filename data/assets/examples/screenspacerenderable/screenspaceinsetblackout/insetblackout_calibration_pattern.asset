@@ -14,11 +14,11 @@ local inset = {
   Type = "ScreenSpaceInsetBlackout",
   Name = "ScreenSpaceInsetBlackout Example - Calibration Pattern",
   Blackoutshape = {
-    -- Must always contain four corners in the following order: 
+    -- Must always contain four corners in the following order:
     -- top-left, top-right, bottom-right, bottom-left
-    Corners = { {0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}, {0.0, 0.0} },
-
-    CalibrationTexturePath = texturePath .. "calibration-pattern.png";
+    Corners = { { 0.0, 1.0 }, { 1.0, 1.0 }, { 1.0, 0.0 }, { 0.0, 0.0 } },
+    CalibrationTexturePath = texturePath .. "calibration-pattern.png",
+    EnableCalibrationPattern = true
   },
   Scale = 1.0
 }
