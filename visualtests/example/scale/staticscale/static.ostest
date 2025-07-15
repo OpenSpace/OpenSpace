@@ -3,7 +3,14 @@
   "commands": [
     {
       "type": "asset",
-      "value": "examples/renderable/renderableradialgrid/radialgrid_styled.asset"
+      "value": "examples/scale/staticscale/static.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
     },
     {
       "type": "navigationstate",
@@ -22,7 +29,7 @@
           -0.5825670687013211
         ],
         "yaw": 0.004635536562591554,
-        "timestamp": "2025 JUN 29 22:00:56"
+        "timestamp": "2000 JAN 01 12:00:00"
       }
     },
     {

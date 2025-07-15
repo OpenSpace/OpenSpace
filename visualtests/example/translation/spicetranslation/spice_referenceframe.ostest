@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/translation/spicetranslation/spice_referenceframe.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "SpiceTranslation_Example_ReferenceFrame",
+        "position": [
+          1.2332304120063782,
+          1.4812999442219734,
+          1.9384842813014984
+        ],
+        "pitch": -0.0015403849795370388,
+        "referenceFrame": "Root",
+        "up": [
+          -0.7123832887930015,
+          0.6972607525263221,
+          -0.07960837163825238
+        ],
+        "yaw": -0.005829085199385845,
+        "timestamp": "2025 JUL 13 13:54:28"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

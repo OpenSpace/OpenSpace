@@ -1,0 +1,29 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderablepointcloud/advanced/pointcloud_multitextured.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderablePointCloud_Example_MultiTextured_Speck",
+        "position": [
+          7752496.220826305,
+          63045331.18050671,
+          78007770.94846387
+        ],
+        "up": [
+          -0.47876998555216527,
+          0.7054728949533864,
+          -0.522577549671307
+        ],
+        "timestamp": "2025 JUL 13 12:25:02"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

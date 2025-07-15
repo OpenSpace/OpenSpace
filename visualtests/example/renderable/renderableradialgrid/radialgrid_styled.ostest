@@ -6,20 +6,27 @@
       "value": "examples/renderable/renderableradialgrid/radialgrid_styled.asset"
     },
     {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
       "type": "navigationstate",
       "value": {
         "anchor": "Root",
         "position": [
-          1.7911782364431361,
-          -7.364203156090494,
-          6.523817318190268
+          1.265863249593815,
+          -1.406726689094225,
+          2.3204064909399365
         ],
         "up": [
           0.1260691167163834,
           0.6748194908618241,
           0.727134947972754
         ],
-        "timestamp": "2025 JUN 29 21:53:14"
+        "timestamp": "2000 JAN 01 12:00:00"
       }
     },
     {

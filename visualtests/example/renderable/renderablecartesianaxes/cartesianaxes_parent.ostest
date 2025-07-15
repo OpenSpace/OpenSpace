@@ -3,7 +3,14 @@
   "commands": [
     {
       "type": "asset",
-      "value": "examples/renderable/renderableradialgrid/radialgrid_styled.asset"
+      "value": "examples/renderable/renderablecartesianaxes/cartesianaxes_parent.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
     },
     {
       "type": "navigationstate",
@@ -22,7 +29,7 @@
           -0.9192414019884061
         ],
         "yaw": -0.006066943131778283,
-        "timestamp": "2025 JUN 29 21:55:55"
+        "timestamp": "2000 JAN 01 12:00:00"
       }
     },
     {

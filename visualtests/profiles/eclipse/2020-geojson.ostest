@@ -42,6 +42,10 @@
       }
     },
     {
+      "type": "wait",
+      "value": 60
+    },
+    {
       "type": "screenshot"
     }
   ]

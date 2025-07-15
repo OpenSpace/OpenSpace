@@ -6,20 +6,27 @@
       "value": "examples/renderable/renderableboxgrid/boxgrid_size.asset"
     },
     {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
       "type": "navigationstate",
       "value": {
         "anchor": "Root",
         "position": [
-          196.89113053945766,
-          126.72162461789465,
-          233.71127311578175
+          126.97790367243805,
+          159.49356154654507,
+          188.43556076297907
         ],
         "up": [
-          -0.2928242525991165,
-          0.9220208783566536,
-          -0.25324189417273346
+          -0.41996816889300326,
+          0.8123614362884659,
+          -0.4045931709112237
         ],
-        "timestamp": "2025 JUN 29 21:47:10"
+        "timestamp": "2000 JAN 01 12:00:00"
       }
     },
     {

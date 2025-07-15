@@ -3,7 +3,14 @@
   "commands": [
     {
       "type": "asset",
-      "value": "examples/renderable/renderableradialgrid/radialgrid_styled.asset"
+      "value": "examples/screenspacerenderable/screenspacerenderablerenderable/renderablerenderable.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "ScreenSpace.ScreenSpaceRenderableRenderable_Example.Scale",
+        "value": 1.5
+      }
     },
     {
       "type": "screenshot"

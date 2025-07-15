@@ -64,6 +64,7 @@ async def createCommandAsset(openspace):
   assets = await openspace.asset.rootAssets()
   folder = await openspace.absPath("${ASSETS}")
   assets = [asset[len(folder)+1:asset.find(".")] for index,asset in assets.items()]
+  assets.sort()
 
   print("List of assets:")
   for index,asset in enumerate(assets):
@@ -91,10 +92,11 @@ async def createCommandAsset(openspace):
   }
 
 
-async def createCommandProperty(openspace):
-  uri = input("URI of the property: ")
-  if uri == "":
-    return None
+async def createCommandProperty(openspace, uri=None):
+  if not uri:
+    uri = input("URI of the property: ")
+    if uri == "":
+      return None
 
   if uri.find("*") != -1 or uri.find("{") != -1:
     # The URI refers to multiple property values, so we need to as for the specific value
@@ -303,6 +305,25 @@ async def internalRun(openspace):
     func = cmd[1]
     command = await func(openspace)
     if command:
+      if cmd[0] == "Navigation state":
+        # If we have a navigation state, we make the users life easier if we check the
+        # limit zoom value here and if it is not the default, offer to add a property
+        # change to make it fit. Otherwise there is the danger of the camera being placed
+        # too far away as the camera limit is hit
+        limitZoom = await openspace.propertyValue(
+          "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance"
+        )
+        if not limitZoom:
+          print("The 'Limit Zoom' of the camera is disabled. Do you want to add a "
+                "command so that it is disabled in the test as well? (y/n). Default 'y'")
+          addCommand = input("> ")
+          if addCommand.lower() == "y" or addCommand.lower() == "":
+            c = await createCommandProperty(
+              openspace,
+              "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance"
+            )
+            test["commands"].append(c)
+
       print(f"Adding command {cmd[0]}")
       test["commands"].append(command)
 

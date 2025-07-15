@@ -9,7 +9,7 @@
 -- See Textured example for more details.
 
 local Node = {
-  Identifier = "RenderablePointCloud_Example_FaceCameraPosition",
+  Identifier = "RenderablePointCloud_Example_Textured_FaceCameraPosition",
   Renderable = {
     Type = "RenderablePointCloud",
     File = asset.resource("data/dummydata.csv"),
@@ -23,7 +23,7 @@ local Node = {
     UseAdditiveBlending = false
   },
   GUI = {
-    Name = "RenderablePointCloud - Face Camera Position",
+    Name = "RenderablePointCloud - Textured Face Camera Position",
     Path = "/Examples"
   }
 }

@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderableinterpolatedpoints/interpolatedpoints.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderableInterpolatedPoints_Example",
+        "position": [
+          105427.59159630619,
+          -121564.9439030838,
+          84108.76768350306
+        ],
+        "pitch": -0.00023949122188209358,
+        "referenceFrame": "Root",
+        "up": [
+          -0.10004682471559656,
+          0.5059847760306755,
+          0.8567205141056875
+        ],
+        "yaw": -0.005947437777873828,
+        "timestamp": "2025 JUL 13 11:04:54"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.RenderableInterpolatedPoints_Example.Renderable.Interpolation.Value",
+        "value": 5.0
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

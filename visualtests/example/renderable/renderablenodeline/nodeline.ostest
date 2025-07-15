@@ -1,0 +1,32 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderablenodeline/nodeline.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderableNodeLine_Example",
+        "position": [
+          258684118450.62708,
+          72863749431.2556,
+          51467781700.840675
+        ],
+        "pitch": -0.18187219669509616,
+        "referenceFrame": "Root",
+        "up": [
+          -0.2815968456459158,
+          0.957684022833635,
+          0.059535946548753715
+        ],
+        "yaw": -0.13503143342069474,
+        "timestamp": "2025 JUL 13 11:58:54"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}
