@@ -20,6 +20,13 @@
       }
     },
     {
+      "type": "property",
+      "value": {
+        "property": "Scene.*.Renderable.Flow.FlowEnabled",
+        "value": false
+      }
+    },
+    {
       "type": "screenshot"
     }
   ]
