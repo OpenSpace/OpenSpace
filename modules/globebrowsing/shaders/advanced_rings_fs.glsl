@@ -73,7 +73,7 @@ Fragment getFragment() {
   vec4 colorBckwrd = texture(ringTextureBckwrd, texCoord);
   vec4 colorFwrd = texture(ringTextureFwrd, texCoord);
   vec4 colorMult = texture(ringTextureColor, texCoord);
-  float transparency = 1.0 - texture(ringTextureTransparency, texCoord).r;
+  float transparency = 1.0 - texture(ringTextureTransparency, texCoord).a;
 
   float lerpFactor = dot(camPositionObj, sunPositionObj);
 
@@ -125,8 +125,7 @@ Fragment getFragment() {
   Fragment frag;
 
   frag.color = diffuse * shadow;
-  frag.color.a *= opacity;
-  frag.color.a += (1.0 - shadow) * 0.5;
+  frag.color.a = frag.color.a * opacity + (1.0 - shadow) * 0.5;
   frag.depth = vs_screenSpaceDepth;
   frag.gPosition = vec4(1e30, 1e30, 1e30, 1.0);
   frag.gNormal = vec4(normal, 1.0);

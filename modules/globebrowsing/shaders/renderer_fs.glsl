@@ -144,7 +144,9 @@ vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[NSEclipseShadows],
 }
 #endif
 
-float rayPlaneIntersection(vec3 rayOrigin, vec3 rayDirection, vec3 planePoint, vec3 planeNormal) {
+float rayPlaneIntersection(vec3 rayOrigin, vec3 rayDirection, vec3 planePoint,
+                           vec3 planeNormal)
+{
   float denom = dot(planeNormal, rayDirection);
   
   // Check if ray is parallel to plane (or nearly parallel)
@@ -294,8 +296,8 @@ Fragment getFragment() {
 #if SHADOW_MAPPING_ENABLED
   // 0.0 is full shadow, 1.0 is no shadow
   float shadow = 1.0;
-  // Light thru rings is colored, default full white
-  vec3 lightColor = vec3(1.0, 1.0, 1.0);
+  // Light through rings is colored, default full white
+  vec3 lightColor = vec3(1.0);
   
   #if USE_RING_SHADOWS
     // Calculate ring shadow by projecting ring texture directly onto surface
@@ -305,7 +307,7 @@ Fragment getFragment() {
     vec3 ringPlaneNormal = vec3(0.0, 0.0, 1.0);
     
     if (abs(surfaceToSun.y) > 1e-8 && dot(normalObjSpace, lightDirectionObjSpace) < 0.0) {
-      float t = rayPlaneIntersection(p, surfaceToSun, vec3(0.0, 0.0, 0.0), ringPlaneNormal);
+      float t = rayPlaneIntersection(p, surfaceToSun, vec3(0.0), ringPlaneNormal);
       
       vec3 ringIntersection = p + t * surfaceToSun;
         
@@ -316,9 +318,10 @@ Fragment getFragment() {
 
       if (texCoord >= 0.0 && texCoord <= 1.0) {
         // Sample ring transparency texture
-        float ringOpacity = texture(ringTextureTransparency, texCoord).r;
+        float ringOpacity = texture(ringTextureTransparency, texCoord).a;
         
-        // Increase the shadow darkness factor with low angle to simulate the light having to pass thru more material
+        // Increase the shadow darkness factor with low angle to simulate the light having
+        // to pass through more material
         float angleFactor = clamp(abs(-dot(ringPlaneNormal, surfaceToSun)) / 2.0, 0.0, 0.3);
         
         // Calculate shadow factor based on ring opacity
@@ -330,7 +333,7 @@ Fragment getFragment() {
 
   #endif // USE_RING_SHADOWS
 
-  // Blend the light color passing thru the rings with the pre-shaded color
+  // Blend the light color passing through the rings with the pre-shaded color
   frag.color.rgb = mix(preShadedColor * lightColor * ambientIntensity, frag.color.rgb, shadow);
 
 #endif // SHADOW_MAPPING_ENABLED
