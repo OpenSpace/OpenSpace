@@ -144,7 +144,6 @@ glm::dvec3 geoViewFromCamera() {
 
     const double lat = glm::degrees(geo.lat);
     const double lon = glm::degrees(geo.lon);
-
     return glm::dvec3(lat, lon, d);
 }
 
@@ -153,22 +152,24 @@ glm::dvec2 subSolarCoordinates() {
     if (!n) {
         return glm::dvec3(0.0);
     }
-    const Renderable* renderable = n->renderable();
-    if (!renderable) {
-        return glm::dvec3(0.0);
-    }
 
     const glm::dmat4 inverseModelTransform = glm::inverse(n->modelTransform());
-    const glm::dvec3 sunPositionModelSpace =
+    // @TODO (2025-07-16, abock): For now we use the position of the SolarSystemBarycenter
+    // to calculate the Sun position. While this is not completely correct and precludes
+    // the calculation of subsolar coordinates on exoplanets, that is a problem left for
+    // later
+    const glm::dvec3 ssbPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(-n->worldPosition(), 1.0));
 
-    const SurfacePositionHandle sunPosition = n->calculateSurfacePositionHandle(sunPositionModelSpace);
-    const Geodetic2 subsolarCoordinates = renderable->ellipsoid().cartesianToGeodetic2(
+    const SurfacePositionHandle sunPosition = n->calculateSurfacePositionHandle(
+        ssbPositionModelSpace
+    );
+    const Geodetic2 subsolarCoordinates = n->ellipsoid().cartesianToGeodetic2(
         sunPosition.centerToReferenceSurface
     );
+
     const double lat = glm::degrees(subsolarCoordinates.lat);
     const double lon = glm::degrees(subsolarCoordinates.lon);
-
     return glm::dvec2(lat, lon);
 }
 
