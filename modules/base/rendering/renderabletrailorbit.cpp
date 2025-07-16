@@ -101,16 +101,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo StartTimeInfo = {
         "StartTime",
         "Start Time",
-        "The start time for the range of this trajectory. The date must be in ISO 8601 "
-        "format: YYYY MM DD HH:mm:ss.xxx.",
+        "The start time for the range of this trajectory. The date must be in ISO 8601.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EndTimeInfo = {
         "EndTime",
         "End Time",
-        "The end time for the range of this trajectory. The date must be in ISO 8601 "
-        "format: YYYY MM DD HH:mm:ss.xxx.",
+        "The end time for the range of this trajectory. The date must be in ISO 8601.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
