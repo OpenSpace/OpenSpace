@@ -63,17 +63,16 @@ uniform float ambientIntensity;
 
 #if SHADOW_MAPPING_ENABLED
 #if USE_RING_SHADOWS
+// Fragment position in object space
+in vec3 posObjSpace;
+
 // Color of the rings
 uniform sampler1D ringTextureColor;
 // Transparency of the rings
 uniform sampler1D ringTextureTransparency;
 uniform vec2 textureOffset;
-uniform vec3 sunPositionWorld; // NEW: world coordinates
-uniform vec3 camPositionWorld; // NEW: world coordinates
 #endif // USE_RING_SHADOWS
 #endif // SHADOW_MAPPING_ENABLED
-
-in vec3 posObjSpace; // Fragment position in object space
 
 #if USE_ECLIPSE_SHADOWS
 
@@ -322,11 +321,9 @@ Fragment getFragment() {
         
         // Increase the shadow darkness factor with low angle to simulate the light having
         // to pass through more material
-        float angleFactor = clamp(abs(-dot(ringPlaneNormal, surfaceToSun)) / 2.0, 0.0, 0.3);
-        
+        float angleFactor = clamp(abs(dot(ringPlaneNormal, surfaceToSun)) / 2.0, 0.0, 0.3);
         // Calculate shadow factor based on ring opacity
-        shadow = ringOpacity;
-        shadow = clamp(shadow + angleFactor, 0.05, 1.0);
+        shadow = clamp(ringOpacity + angleFactor, 0.05, 1.0);
         lightColor = texture(ringTextureColor, texCoord).rgb;
       }
     }

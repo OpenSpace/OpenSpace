@@ -441,35 +441,35 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
             ringTextureFwrdUnit.activate();
             _textureForwards->bind();
             _shader->setUniform(
-                _uniformCacheAdvancedRings.ringTextureFwrd,
+                _uniformCacheAdvancedRings.textureForwards,
                 ringTextureFwrdUnit
             );
 
             ringTextureBckwrdUnit.activate();
             _textureBackwards->bind();
             _shader->setUniform(
-                _uniformCacheAdvancedRings.ringTextureBckwrd,
+                _uniformCacheAdvancedRings.textureBackwards,
                 ringTextureBckwrdUnit
             );
 
             ringTextureUnlitUnit.activate();
             _textureUnlit->bind();
             _shader->setUniform(
-                _uniformCacheAdvancedRings.ringTextureUnlit,
+                _uniformCacheAdvancedRings.textureUnlit,
                 ringTextureUnlitUnit
             );
 
             ringTextureColorUnit.activate();
             _textureColor->bind();
             _shader->setUniform(
-                _uniformCacheAdvancedRings.ringTextureColor,
+                _uniformCacheAdvancedRings.textureColor,
                 ringTextureColorUnit
             );
 
             ringTextureTransparencyUnit.activate();
             _textureTransparency->bind();
             _shader->setUniform(
-                _uniformCacheAdvancedRings.ringTextureTransparency,
+                _uniformCacheAdvancedRings.textureTransparency,
                 ringTextureTransparencyUnit
             );
             _shader->setUniform(_uniformCacheAdvancedRings.opacity, opacity());
@@ -876,23 +876,23 @@ double RingsComponent::size() const {
     return _size;
 }
 
-ghoul::opengl::Texture* RingsComponent::ringTextureFwrd() const {
+ghoul::opengl::Texture* RingsComponent::textureForwards() const {
     return _textureForwards.get();
 }
 
-ghoul::opengl::Texture* RingsComponent::ringTextureBckwrd() const {
+ghoul::opengl::Texture* RingsComponent::textureBackwards() const {
     return _textureBackwards.get();
 }
 
-ghoul::opengl::Texture* RingsComponent::ringTextureUnlit() const {
+ghoul::opengl::Texture* RingsComponent::textureUnlit() const {
     return _textureUnlit.get();
 }
 
-ghoul::opengl::Texture* RingsComponent::ringTextureColor() const {
+ghoul::opengl::Texture* RingsComponent::textureColor() const {
     return _textureColor.get();
 }
 
-ghoul::opengl::Texture* RingsComponent::ringTextureTransparency() const {
+ghoul::opengl::Texture* RingsComponent::textureTransparency() const {
     return _textureTransparency.get();
 }
 

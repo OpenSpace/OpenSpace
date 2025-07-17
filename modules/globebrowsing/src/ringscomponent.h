@@ -79,11 +79,11 @@ public:
     void onReadinessChange(ReadinessChangeCallback callback);
 
     // Texture access methods for globe rendering
-    ghoul::opengl::Texture* ringTextureFwrd() const;
-    ghoul::opengl::Texture* ringTextureBckwrd() const;
-    ghoul::opengl::Texture* ringTextureUnlit() const;
-    ghoul::opengl::Texture* ringTextureColor() const;
-    ghoul::opengl::Texture* ringTextureTransparency() const;
+    ghoul::opengl::Texture* textureForwards() const;
+    ghoul::opengl::Texture* textureBackwards() const;
+    ghoul::opengl::Texture* textureUnlit() const;
+    ghoul::opengl::Texture* textureColor() const;
+    ghoul::opengl::Texture* textureTransparency() const;
     glm::vec2 textureOffset() const;
     glm::vec3 sunPositionObj() const;
     glm::vec3 camPositionObj() const;
@@ -115,8 +115,8 @@ private:
         opacity
     ) _uniformCache;
     UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
-        sunPosition, sunPositionObj, camPositionObj, ringTextureFwrd, ringTextureBckwrd,
-        ringTextureUnlit, ringTextureColor, ringTextureTransparency, shadowMatrix,
+        sunPosition, sunPositionObj, camPositionObj, textureForwards, textureBackwards,
+        textureUnlit, textureColor, textureTransparency, shadowMatrix,
         shadowMapTexture, zFightingPercentage, opacity
     ) _uniformCacheAdvancedRings;
     UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture) _geomUniformCache;
