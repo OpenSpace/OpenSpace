@@ -71,8 +71,9 @@ public:
         const ShadowComponent::ShadowMapData& shadowData = {}
     );
     void update(const UpdateData& data);
+    bool isEnabled() const;
 
-    static documentation::Documentation Documentation();    bool isEnabled() const;
+    static documentation::Documentation Documentation();
     double size() const;
 
     // Readiness change callback
