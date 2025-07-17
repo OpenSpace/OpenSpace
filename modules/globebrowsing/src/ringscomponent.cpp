@@ -745,10 +745,10 @@ void RingsComponent::loadTexture() {
 
         if (textureTransparency) {
             LDEBUG(
-                std::format("Loaded unlit texture from '{}'", absPath(_textureUnlitPath))
+                std::format("Loaded transparency texture from '{}'", absPath(_textureTransparencyPath))
             );
             _textureTransparency = std::move(textureTransparency);
-
+            
             _textureTransparency->uploadTexture();
             _textureTransparency->setFilter(
                 ghoul::opengl::Texture::FilterMode::AnisotropicMipMap

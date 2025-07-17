@@ -882,15 +882,8 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
                 glDisable(GL_BLEND);
 
                 // Render from light source point of view
+                // (Rings are skipped because the shadow is drawn directly onto the globe)
                 renderChunks(lightRenderData, rendererTask, {}, true);
-                if (_ringsComponent && _ringsComponent->isEnabled() &&
-                    _ringsComponent->isVisible())
-                {
-                    _ringsComponent->draw(
-                        lightRenderData,
-                        RingsComponent::RenderPass::GeometryOnly
-                    );
-                }
 
                 glEnable(GL_BLEND);
 
@@ -1284,15 +1277,25 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
             glm::dvec4(directionToSunWorldSpace, 0.0));
 
         // Set the light direction uniforms for local renderer
-        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-        _localRenderer.program->setUniform(
+        _globalRenderer.program->setUniform(
             "lightDirectionCameraSpace",
             -glm::normalize(directionToSunCameraSpace)
         );
         _localRenderer.program->setUniform(
-            "lightDirectionObjSpace",
-            -glm::normalize(directionToSunObjSpace)
+            "lightDirectionCameraSpace",
+            -glm::normalize(directionToSunCameraSpace)
         );
+
+        if (_ringsComponent) {
+            _localRenderer.program->setUniform(
+                "lightDirectionObjSpace",
+                -glm::normalize(directionToSunObjSpace)
+            );
+            _globalRenderer.program->setUniform(
+                "lightDirectionObjSpace",
+                -glm::normalize(directionToSunObjSpace)
+            );
+        }
     }
 
     int globalCount = 0;
@@ -1454,50 +1457,11 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     }
 
     // Shadow Mapping
-    ghoul::opengl::TextureUnit shadowMapUnit;
     if (_shadowMappingProperties.shadowMapping && shadowData.shadowDepthTexture != 0) {
-        // Adding the model transformation to the final shadow matrix so we have a
-        // complete transformation from the model coordinates to the clip space of the
-        // light position.
-        program.setUniform(
-            "shadowMatrix",
-            shadowData.shadowMatrix * modelTransform()
-        );
-
-        shadowMapUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
-
-        program.setUniform("shadowMapTexture", shadowMapUnit);
-        program.setUniform(
-            "zFightingPercentage",
-            _shadowMappingProperties.zFightingPercentage
-        );
-
         // Bind ring textures for direct projection when rings component is available
         if (_ringsComponent && _ringsComponent->isEnabled()) {
-            ghoul::opengl::TextureUnit ringTextureFwrdUnit;
-            ghoul::opengl::TextureUnit ringTextureBckwrdUnit;
-            ghoul::opengl::TextureUnit ringTextureUnlitUnit;
             ghoul::opengl::TextureUnit ringTextureColorUnit;
             ghoul::opengl::TextureUnit ringTextureTransparencyUnit;
-
-            if (_ringsComponent->textureForwards()) {
-                ringTextureFwrdUnit.activate();
-                _ringsComponent->textureForwards()->bind();
-                program.setUniform("ringTextureFwrd", ringTextureFwrdUnit);
-            }
-
-            if (_ringsComponent->textureBackwards()) {
-                ringTextureBckwrdUnit.activate();
-                _ringsComponent->textureBackwards()->bind();
-                program.setUniform("ringTextureBckwrd", ringTextureBckwrdUnit);
-            }
-
-            if (_ringsComponent->textureUnlit()) {
-                ringTextureUnlitUnit.activate();
-                _ringsComponent->textureUnlit()->bind();
-                program.setUniform("ringTextureUnlit", ringTextureUnlitUnit);
-            }
 
             if (_ringsComponent->textureColor()) {
                 ringTextureColorUnit.activate();
@@ -1512,17 +1476,8 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
             }
 
             program.setUniform("textureOffset", _ringsComponent->textureOffset());
-            program.setUniform("sunPositionObj", _ringsComponent->sunPositionObj());
-            program.setUniform("camPositionObj", _ringsComponent->camPositionObj());
             program.setUniform("ringSize", (float)_ringsComponent->size());
         }
-    }
-    else if (_shadowMappingProperties.shadowMapping && _shadowComponent) {
-        shadowMapUnit.activate();
-        // JCC: Avoiding a to recompiling the shaders or having more than one
-        // set of shaders for this step.
-        glBindTexture(GL_TEXTURE_2D, _shadowComponent->dDepthTexture());
-        program.setUniform("shadowMapTexture", shadowMapUnit);
     }
 
     glEnable(GL_DEPTH_TEST);
@@ -1638,50 +1593,11 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     }
     
     // Shadow Mapping
-    ghoul::opengl::TextureUnit shadowMapUnit;
     if (_shadowMappingProperties.shadowMapping && shadowData.shadowDepthTexture != 0) {
-        // Adding the model transformation to the final shadow matrix so we have a
-        // complete transformation from the model coordinates to the clip space of the
-        // light position.
-        program.setUniform(
-            "shadowMatrix",
-            shadowData.shadowMatrix * modelTransform()
-        );
-
-        shadowMapUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
-
-        program.setUniform("shadowMapTexture", shadowMapUnit);
-        program.setUniform(
-            "zFightingPercentage",
-            _shadowMappingProperties.zFightingPercentage
-        );
-
         // Bind ring textures for direct projection when rings component is available
-        if (_ringsComponent && _ringsComponent->isEnabled() && _ringsComponent->isReady()) {
-            ghoul::opengl::TextureUnit ringTextureFwrdUnit;
-            ghoul::opengl::TextureUnit ringTextureBckwrdUnit;
-            ghoul::opengl::TextureUnit ringTextureUnlitUnit;
+        if (_ringsComponent && _ringsComponent->isEnabled()) {
             ghoul::opengl::TextureUnit ringTextureColorUnit;
             ghoul::opengl::TextureUnit ringTextureTransparencyUnit;
-
-            if (_ringsComponent->textureForwards()) {
-                ringTextureFwrdUnit.activate();
-                _ringsComponent->textureForwards()->bind();
-                program.setUniform("ringTextureFwrd", ringTextureFwrdUnit);
-            }
-
-            if (_ringsComponent->textureBackwards()) {
-                ringTextureBckwrdUnit.activate();
-                _ringsComponent->textureBackwards()->bind();
-                program.setUniform("ringTextureBckwrd", ringTextureBckwrdUnit);
-            }
-
-            if (_ringsComponent->textureUnlit()) {
-                ringTextureUnlitUnit.activate();
-                _ringsComponent->textureUnlit()->bind();
-                program.setUniform("ringTextureUnlit", ringTextureUnlitUnit);
-            }
 
             if (_ringsComponent->textureColor()) {
                 ringTextureColorUnit.activate();
@@ -1696,16 +1612,8 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
             }
 
             program.setUniform("textureOffset", _ringsComponent->textureOffset());
-            program.setUniform("sunPositionObj", _ringsComponent->sunPositionObj());
-            program.setUniform("camPositionObj", _ringsComponent->camPositionObj());
+            program.setUniform("ringSize", (float)_ringsComponent->size());
         }
-    }
-    else if (_shadowMappingProperties.shadowMapping) {
-        shadowMapUnit.activate();
-        // JCC: Avoiding a to recompiling the shaders or having more than one
-        // set of shaders for this step.
-        glBindTexture(GL_TEXTURE_2D, _shadowComponent->dDepthTexture());
-        program.setUniform("shadowMapTexture", shadowMapUnit);
     }
 
     glEnable(GL_DEPTH_TEST);
@@ -1808,7 +1716,11 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
         programObject.setUniform("tileDelta", TileDelta);
     }
 
+    // Used by local and global renderer, as well as geojson
+    using ghoul::opengl::ProgramObject;
+    programObject.setIgnoreUniformLocationError(ProgramObject::IgnoreError::Yes);
     programObject.setUniform("modelTransform", _cachedModelTransform);
+    programObject.setIgnoreUniformLocationError(ProgramObject::IgnoreError::No);
 }
 
 void RenderableGlobe::recompileShaders() {
@@ -1886,12 +1798,6 @@ void RenderableGlobe::recompileShaders() {
     pairs.emplace_back("showHeightResolution", "0");
     pairs.emplace_back("showHeightIntensities", "0");
     pairs.emplace_back("defaultHeight", std::to_string(DefaultHeight));
-
-    // log if ring shadows are enabled
-    LINFO(std::format(
-        "Ring shadows enabled: {}",
-        _shadowMappingProperties.shadowMapping && _ringsComponent
-    ));
 
     //
     // Create dictionary from layerpreprocessing data

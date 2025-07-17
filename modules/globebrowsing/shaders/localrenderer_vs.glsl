@@ -46,14 +46,7 @@ out vec3 normalObjSpace;
 #endif // USE_ACCURATE_NORMALS
 
 uniform dmat4 inverseViewTransform;
-
-#if SHADOW_MAPPING_ENABLED
-  // ShadowMatrix is the matrix defined by:
-  // textureCoordsMatrix * projectionMatrix * combinedViewMatrix * modelMatrix
-  // where textureCoordsMatrix is just a scale and bias computation: [-1,1] to [0,1]
-  uniform dmat4 shadowMatrix;
-  out vec4 shadowCoords;
-#endif // SHADOW_MAPPING_ENABLED
+uniform dmat4 modelTransform;
 
 #if USE_ECLIPSE_SHADOWS
   // Position in world space
@@ -127,8 +120,4 @@ void main() {
 #if USE_ECLIPSE_SHADOWS
   positionWorldSpace = vec3(modelTransform * dvec4(p, 1.0));
 #endif // USE_ECLIPSE_SHADOWS
-
-#if SHADOW_MAPPING_ENABLED
-  shadowCoords = vec4(shadowMatrix * dvec4(p, 1.0));
-#endif // SHADOW_MAPPING_ENABLED
 }

@@ -34,11 +34,11 @@ in vec4 shadowCoords;
 in vec3 vs_normal;
 
 uniform sampler2DShadow shadowMapTexture;
-uniform sampler1D ringTextureFwrd;
-uniform sampler1D ringTextureBckwrd;
-uniform sampler1D ringTextureUnlit;
-uniform sampler1D ringTextureColor;
-uniform sampler1D ringTextureTransparency;
+uniform sampler1D textureForwards;
+uniform sampler1D textureBackwards;
+uniform sampler1D textureUnlit;
+uniform sampler1D textureColor;
+uniform sampler1D textureTransparency;
 uniform vec2 textureOffset;
 uniform float colorFilterValue;
 uniform vec3 sunPosition;
@@ -70,10 +70,10 @@ Fragment getFragment() {
     discard;
   }
 
-  vec4 colorBckwrd = texture(ringTextureBckwrd, texCoord);
-  vec4 colorFwrd = texture(ringTextureFwrd, texCoord);
-  vec4 colorMult = texture(ringTextureColor, texCoord);
-  float transparency = 1.0 - texture(ringTextureTransparency, texCoord).a;
+  vec4 colorBckwrd = texture(textureBackwards, texCoord);
+  vec4 colorFwrd = texture(textureForwards, texCoord);
+  vec4 colorMult = texture(textureColor, texCoord);
+  float transparency = 1.0 - texture(textureTransparency, texCoord).r;
 
   float lerpFactor = dot(camPositionObj, sunPositionObj);
 
@@ -119,7 +119,7 @@ Fragment getFragment() {
   // if we are facing away from the Sun
   if (dot(sunPosition, normal) < 0.0) {
     diffuse.xyz =
-      vec3(1.0, 0.97075, 0.952) *  texture(ringTextureUnlit, texCoord).xyz * nightFactor;
+      vec3(1.0, 0.97075, 0.952) *  texture(textureUnlit, texCoord).xyz * nightFactor;
   }
 
   Fragment frag;

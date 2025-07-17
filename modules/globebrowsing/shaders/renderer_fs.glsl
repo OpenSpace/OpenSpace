@@ -317,11 +317,11 @@ Fragment getFragment() {
 
       if (texCoord >= 0.0 && texCoord <= 1.0) {
         // Sample ring transparency texture
-        float ringOpacity = texture(ringTextureTransparency, texCoord).a;
+        float ringOpacity = texture(ringTextureTransparency, texCoord).r;
         
         // Increase the shadow darkness factor with low angle to simulate the light having
         // to pass through more material
-        float angleFactor = clamp(abs(dot(ringPlaneNormal, surfaceToSun)) / 2.0, 0.0, 0.3);
+        float angleFactor = clamp(abs(-dot(ringPlaneNormal, surfaceToSun)) / 2.0, 0.0, 0.3);
         // Calculate shadow factor based on ring opacity
         shadow = clamp(ringOpacity + angleFactor, 0.05, 1.0);
         lightColor = texture(ringTextureColor, texCoord).rgb;
