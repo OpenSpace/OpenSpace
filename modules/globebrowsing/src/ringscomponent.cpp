@@ -351,6 +351,9 @@ void RingsComponent::initializeGL() {
     glGenBuffers(1, &_vertexPositionBuffer);
 
     createPlane();
+    
+    // Check if readiness state has changed after shader compilation
+    checkAndNotifyReadinessChange();
 }
 
 void RingsComponent::deinitializeGL() {
@@ -438,35 +441,35 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
             ringTextureFwrdUnit.activate();
             _textureForwards->bind();
             _shader->setUniform(
-                _uniformCacheAdvancedRings.ringTextureFwrd,
+                _uniformCacheAdvancedRings.textureForwards,
                 ringTextureFwrdUnit
             );
 
             ringTextureBckwrdUnit.activate();
             _textureBackwards->bind();
             _shader->setUniform(
-                _uniformCacheAdvancedRings.ringTextureBckwrd,
+                _uniformCacheAdvancedRings.textureBackwards,
                 ringTextureBckwrdUnit
             );
 
             ringTextureUnlitUnit.activate();
             _textureUnlit->bind();
             _shader->setUniform(
-                _uniformCacheAdvancedRings.ringTextureUnlit,
+                _uniformCacheAdvancedRings.textureUnlit,
                 ringTextureUnlitUnit
             );
 
             ringTextureColorUnit.activate();
             _textureColor->bind();
             _shader->setUniform(
-                _uniformCacheAdvancedRings.ringTextureColor,
+                _uniformCacheAdvancedRings.textureColor,
                 ringTextureColorUnit
             );
 
             ringTextureTransparencyUnit.activate();
             _textureTransparency->bind();
             _shader->setUniform(
-                _uniformCacheAdvancedRings.ringTextureTransparency,
+                _uniformCacheAdvancedRings.textureTransparency,
                 ringTextureTransparencyUnit
             );
             _shader->setUniform(_uniformCacheAdvancedRings.opacity, opacity());
@@ -742,10 +745,10 @@ void RingsComponent::loadTexture() {
 
         if (textureTransparency) {
             LDEBUG(
-                std::format("Loaded unlit texture from '{}'", absPath(_textureUnlitPath))
+                std::format("Loaded transparency texture from '{}'", absPath(_textureTransparencyPath))
             );
             _textureTransparency = std::move(textureTransparency);
-
+            
             _textureTransparency->uploadTexture();
             _textureTransparency->setFilter(
                 ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
@@ -759,6 +762,9 @@ void RingsComponent::loadTexture() {
     }
 
     _isAdvancedTextureEnabled = _textureForwards && _textureBackwards && _textureUnlit;
+    
+    // Check if readiness state has changed after loading textures
+    checkAndNotifyReadinessChange();
 }
 
 void RingsComponent::createPlane() {
@@ -857,6 +863,9 @@ void RingsComponent::compileShadowShader() {
     catch (const ghoul::RuntimeError& e) {
         LERROR(e.message);
     }
+    
+    // Check if readiness state has changed after shader compilation
+    checkAndNotifyReadinessChange();
 }
 
 bool RingsComponent::isEnabled() const {
@@ -865,6 +874,52 @@ bool RingsComponent::isEnabled() const {
 
 double RingsComponent::size() const {
     return _size;
+}
+
+ghoul::opengl::Texture* RingsComponent::textureForwards() const {
+    return _textureForwards.get();
+}
+
+ghoul::opengl::Texture* RingsComponent::textureBackwards() const {
+    return _textureBackwards.get();
+}
+
+ghoul::opengl::Texture* RingsComponent::textureUnlit() const {
+    return _textureUnlit.get();
+}
+
+ghoul::opengl::Texture* RingsComponent::textureColor() const {
+    return _textureColor.get();
+}
+
+ghoul::opengl::Texture* RingsComponent::textureTransparency() const {
+    return _textureTransparency.get();
+}
+
+glm::vec2 RingsComponent::textureOffset() const {
+    return _offset;
+}
+
+glm::vec3 RingsComponent::sunPositionObj() const {
+    return _sunPosition;
+}
+
+glm::vec3 RingsComponent::camPositionObj() const {
+    return _camPositionObjectSpace;
+}
+
+void RingsComponent::onReadinessChange(ReadinessChangeCallback callback) {
+    _readinessChangeCallback = std::move(callback);
+}
+
+void RingsComponent::checkAndNotifyReadinessChange() {
+    const bool currentlyReady = isReady();
+    if (currentlyReady != _wasReady) {
+        _wasReady = currentlyReady;
+        if (_readinessChangeCallback) {
+            _readinessChangeCallback();
+        }
+    }
 }
 
 } // namespace openspace

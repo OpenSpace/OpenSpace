@@ -56,6 +56,9 @@ public:
         GeometryAndShading
     };
 
+    // Callback for when readiness state changes
+    using ReadinessChangeCallback = std::function<void()>;
+
     explicit RingsComponent(const ghoul::Dictionary& dictionary);
 
     void initialize();
@@ -68,16 +71,29 @@ public:
         const ShadowComponent::ShadowMapData& shadowData = {}
     );
     void update(const UpdateData& data);
+    bool isEnabled() const;
 
     static documentation::Documentation Documentation();
-
-    bool isEnabled() const;
     double size() const;
+
+    // Readiness change callback
+    void onReadinessChange(ReadinessChangeCallback callback);
+
+    // Texture access methods for globe rendering
+    ghoul::opengl::Texture* textureForwards() const;
+    ghoul::opengl::Texture* textureBackwards() const;
+    ghoul::opengl::Texture* textureUnlit() const;
+    ghoul::opengl::Texture* textureColor() const;
+    ghoul::opengl::Texture* textureTransparency() const;
+    glm::vec2 textureOffset() const;
+    glm::vec3 sunPositionObj() const;
+    glm::vec3 camPositionObj() const;
 
 private:
     void loadTexture();
     void createPlane();
     void compileShadowShader();
+    void checkAndNotifyReadinessChange();
 
     properties::StringProperty _texturePath;
     properties::StringProperty _textureFwrdPath;
@@ -100,8 +116,8 @@ private:
         opacity
     ) _uniformCache;
     UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
-        sunPosition, sunPositionObj, camPositionObj, ringTextureFwrd, ringTextureBckwrd,
-        ringTextureUnlit, ringTextureColor, ringTextureTransparency, shadowMatrix,
+        sunPosition, sunPositionObj, camPositionObj, textureForwards, textureBackwards,
+        textureUnlit, textureColor, textureTransparency, shadowMatrix,
         shadowMapTexture, zFightingPercentage, opacity
     ) _uniformCacheAdvancedRings;
     UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture) _geomUniformCache;
@@ -128,6 +144,10 @@ private:
 
     glm::vec3 _sunPosition = glm::vec3(0.f);
     glm::vec3 _camPositionObjectSpace = glm::vec3(0.f);
+
+    // Callback for readiness state changes
+    ReadinessChangeCallback _readinessChangeCallback;
+    bool _wasReady = false;
 };
 
 } // namespace openspace
