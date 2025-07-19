@@ -1212,7 +1212,7 @@ int main(int argc, char* argv[]) {
         std::filesystem::current_path() / std::filesystem::path(argv[0]).parent_path(),
         ghoul::filesystem::FileSystem::Override::Yes
     );
-    LDEBUG(std::format("Registering ${{BIN}} to '{}'", absPath("${BIN}")));
+    LDEBUG(std::format("Registering ${{BIN}} to '{}'", absPath("${BIN}").string()));
 
     //
     // Parse commandline arguments
@@ -1320,11 +1320,11 @@ int main(int argc, char* argv[]) {
         if (!std::filesystem::is_regular_file(configurationFilePath)) {
             LFATALC(
                 "main",
-                std::format("Could not find configuration '{}'", configurationFilePath)
+                std::format("Could not find configuration '{}'", configurationFilePath.string())
             );
             exit(EXIT_FAILURE);
         }
-        LINFO(std::format("Configuration Path '{}'", configurationFilePath));
+        LINFO(std::format("Configuration Path '{}'", configurationFilePath.string()));
 
         // Register the base path as the directory where the configuration file lives
         std::filesystem::path base = configurationFilePath.parent_path();
@@ -1603,7 +1603,7 @@ int main(int argc, char* argv[]) {
 
     // Determining SGCT configuration file
     LINFO(std::format(
-        "SGCT Configuration file: {}", absPath(winConf)
+        "SGCT Configuration file: {}", absPath(winConf).string()
     ));
 
 

@@ -93,7 +93,7 @@ BackgroundImage::BackgroundImage(QRect size, const std::filesystem::path& syncFo
         QPainter painter = QPainter(&pixmap);
         painter.setOpacity(0.7);
         QPixmap overlay = QPixmap(QString::fromStdString(
-            std::format("{}/overlay.png", latest.path.path())
+            std::format("{}/overlay.png", latest.path.path().string())
         ));
         painter.drawPixmap(pixmap.rect(), overlay);
         setPixmap(pixmap);

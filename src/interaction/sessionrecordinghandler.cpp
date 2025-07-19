@@ -249,11 +249,20 @@ void SessionRecordingHandler::tickRecording(double dt) {
 
     using namespace datamessagestructures;
     CameraKeyframe kf = generateCameraKeyframe();
+#ifndef __APPLE__
     _timeline.entries.emplace_back(
         _recording.elapsedTime,
         global::timeManager->time().j2000Seconds(),
         KeyframeNavigator::CameraPose(std::move(kf))
     );
+#else
+    SessionRecording::Entry entry;
+    entry.timestamp = _recording.elapsedTime;
+    entry.simulationTime = global::timeManager->time().j2000Seconds();
+    entry.value = KeyframeNavigator::CameraPose(std::move(kf));
+    _timeline.entries.push_back(std::move(entry));
+#endif
+// XCode 15.4 seems to have some issue with emplace_back here, hence using push_back instead.
 }
 
 void SessionRecordingHandler::render() const {
@@ -330,7 +339,7 @@ void SessionRecordingHandler::stopRecording(const std::filesystem::path& filenam
 
     if (!overwrite && std::filesystem::is_regular_file(filename)) {
         throw ghoul::RuntimeError(std::format(
-            "Unable to start recording. File '{}' already exists", filename
+            "Unable to start recording. File '{}' already exists", filename.string()
         ), "SessionRecording");
     }
 
@@ -557,11 +566,20 @@ void SessionRecordingHandler::saveScriptKeyframeToTimeline(std::string script) {
         }
     }
 
+#ifndef __APPLE__
     _timeline.entries.emplace_back(
         _recording.elapsedTime,
         global::timeManager->time().j2000Seconds(),
         std::move(script)
     );
+#else
+    SessionRecording::Entry entrysc;
+    entrysc.timestamp = _recording.elapsedTime;
+    entrysc.simulationTime = global::timeManager->time().j2000Seconds();
+    entrysc.value = std::move(script);
+    _timeline.entries.push_back(std::move(entrysc));
+#endif
+// Since MacOS seems to refuse to compile with emplace_back()
 }
 
 void SessionRecordingHandler::savePropertyBaseline(properties::Property& prop) {
@@ -725,7 +743,12 @@ SessionRecordingHandler::CallbackHandle SessionRecordingHandler::addStateChangeC
                                                                    StateChangeCallback cb)
 {
     const CallbackHandle handle = _nextCallbackHandle++;
+#ifndef __APPLE__
     _stateChangeCallbacks.emplace_back(handle, std::move(cb));
+#else
+    _stateChangeCallbacks.push_back(std::make_pair(handle, std::move(cb)));
+// Since MacOS refuses to compile with emplace_back
+#endif
     return handle;
 }
 

@@ -59,7 +59,7 @@ TEST_CASE("Property: Basic", "[property]") {
         LogMgr.resetMessageCounters();
         defer { LogMgr.resetMessageCounters(); };
 
-        global::scriptEngine->queueScript({
+        global::scriptEngine->queueScript(scripting::ScriptEngine::Script{
             .code = "return openspace.property('base.p1')",
             .callback = [&p1](ghoul::Dictionary d) {
                 REQUIRE(d.size() == 1);
@@ -89,7 +89,7 @@ TEST_CASE("Property: Empty", "[property]") {
         LogMgr.resetMessageCounters();
         defer { LogMgr.resetMessageCounters(); };
 
-        global::scriptEngine->queueScript({
+        global::scriptEngine->queueScript(scripting::ScriptEngine::Script{
             .code = "return openspace.property('other-name')",
             .callback = [](ghoul::Dictionary d) {
                 REQUIRE(d.size() == 1);
@@ -107,7 +107,7 @@ TEST_CASE("Property: Empty", "[property]") {
         LogMgr.resetMessageCounters();
         defer { LogMgr.resetMessageCounters(); };
 
-        global::scriptEngine->queueScript({
+        global::scriptEngine->queueScript(scripting::ScriptEngine::Script{
             .code = "return openspace.property('base.other-name')",
             .callback = [](ghoul::Dictionary d) {
                 REQUIRE(d.size() == 1);
@@ -135,7 +135,7 @@ TEST_CASE("Property: Multiple", "[property]") {
         LogMgr.resetMessageCounters();
         defer { LogMgr.resetMessageCounters(); };
 
-        global::scriptEngine->queueScript({
+        global::scriptEngine->queueScript(scripting::ScriptEngine::Script{
             .code = "return openspace.property('base.*')",
             .callback = [&p1, &p2](ghoul::Dictionary d) {
                 REQUIRE(d.size() == 1);
@@ -190,7 +190,7 @@ TEST_CASE("Property: Multiple/2", "[property]") {
         LogMgr.resetMessageCounters();
         defer { LogMgr.resetMessageCounters(); };
 
-        global::scriptEngine->queueScript({
+        global::scriptEngine->queueScript(scripting::ScriptEngine::Script{
             .code = "return openspace.property('base1.*')",
             .callback = [&p1, &p2](ghoul::Dictionary d) {
                 REQUIRE(d.size() == 1);
@@ -226,7 +226,7 @@ TEST_CASE("Property: Multiple/2", "[property]") {
         LogMgr.resetMessageCounters();
         defer { LogMgr.resetMessageCounters(); };
 
-        global::scriptEngine->queueScript({
+        global::scriptEngine->queueScript(scripting::ScriptEngine::Script{
             .code = "return openspace.property('*.p1')",
             .callback = [&p1, &p21](ghoul::Dictionary d) {
                 REQUIRE(d.size() == 1);
@@ -262,7 +262,7 @@ TEST_CASE("Property: Multiple/2", "[property]") {
         LogMgr.resetMessageCounters();
         defer { LogMgr.resetMessageCounters(); };
 
-        global::scriptEngine->queueScript({
+        global::scriptEngine->queueScript(scripting::ScriptEngine::Script{
             .code = "return openspace.property('base*.p1')",
             .callback = [&p1, &p21](ghoul::Dictionary d) {
                 REQUIRE(d.size() == 1);

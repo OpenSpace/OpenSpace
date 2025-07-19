@@ -249,7 +249,7 @@ ExoplanetsModule::ExoplanetsModule()
        if (!std::filesystem::is_directory(f)) {
             LERROR(std::format(
                 "Could not find directory: '{}' for module setting '{}'",
-                f, _exoplanetsDataFolder.identifier()
+                f.string(), _exoplanetsDataFolder.identifier()
             ));
         }
     });
@@ -261,7 +261,7 @@ ExoplanetsModule::ExoplanetsModule()
             if (!std::filesystem::is_regular_file(f)) {
                 LERROR(std::format(
                     "Could not find file: '{}' for module setting '{}'",
-                    f, p.identifier()
+                    f.string(), p.identifier()
                 ));
             }
         };

@@ -546,7 +546,7 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
         ghoul::getline(f, firstLine);
         if (f.bad() || firstLine[0] != '1') {
             throw ghoul::RuntimeError(std::format(
-                "Malformed TLE file '{}' at line {}", file, lineNum + 1
+                "Malformed TLE file '{}' at line {}", file.string(), lineNum + 1
             ));
         }
         // The id only contains the last two digits of the launch year, so we have to
@@ -578,7 +578,7 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
         ghoul::getline(f, secondLine);
         if (f.bad() || secondLine[0] != '2') {
             throw ghoul::RuntimeError(std::format(
-                "Malformed TLE file '{}' at line {}", file, lineNum + 1
+                "Malformed TLE file '{}' at line {}", file.string(), lineNum + 1
             ));
         }
 
@@ -823,7 +823,7 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
         if (!initial) {
             throw ghoul::RuntimeError(std::format(
                 "Unable to parse initial block of line {} in data file '{}'. {}",
-                i, file, line
+                i, file.string(), line
             ));
         }
 
@@ -837,6 +837,7 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
         }
 
         std::string epochDate = unpackDate(epoch);
+#ifndef __APPLE__
         result.emplace_back(
             std::move(name),
             std::move(designation),
@@ -850,6 +851,25 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
             epochFromYMDdSubstring(epochDate),
             std::chrono::seconds(std::chrono::hours(24)).count() / meanMotion
         );
+#else
+        // XCode complains about the constructor not being defined
+        Parameters p;
+        p.name = std::move(name);
+        p.id = std::move(designation);
+        p.inclination = inclination;
+        // AU -> km
+        p.semiMajorAxis =
+            semiMajorAxis * distanceconstants::AstronomicalUnit / 1000.0;
+        p.ascendingNode = ascNode;
+        p.eccentricity = eccentricity;
+        p.argumentOfPeriapsis = argPeriapsis;
+        p.meanAnomaly = meanAnomaly;
+        p.epoch = epochFromYMDdSubstring(epochDate);
+        p.period = std::chrono::seconds(std::chrono::hours(24)).count() / meanMotion;
+
+        result.push_back(std::move(p));
+#endif // __APPLE__ XCode complains of lack of constructor
+        
 
     }
 
@@ -932,7 +952,7 @@ std::vector<Parameters> readFile(std::filesystem::path file, Format format) {
     std::filesystem::path cachedFile = FileSys.cacheManager()->cachedFilename(file);
     if (std::filesystem::is_regular_file(cachedFile)) {
         LINFO(std::format(
-            "Cached file '{}' used for Kepler file '{}'", cachedFile, file
+            "Cached file '{}' used for Kepler file '{}'", cachedFile.string(), file.string()
         ));
 
         std::optional<std::vector<Parameters>> res = loadCache(cachedFile);
@@ -959,7 +979,7 @@ std::vector<Parameters> readFile(std::filesystem::path file, Format format) {
             break;
     }
 
-    LINFO(std::format("Saving cache '{}' for Kepler file '{}'", cachedFile, file));
+    LINFO(std::format("Saving cache '{}' for Kepler file '{}'", cachedFile.string(), file.string()));
     saveCache(res, cachedFile);
     return res;
 }

@@ -59,7 +59,7 @@ TEST_CASE("PropertyValue: Basic", "[propertyvalue]") {
         LogMgr.resetMessageCounters();
         defer { LogMgr.resetMessageCounters(); };
 
-        global::scriptEngine->queueScript({
+        global::scriptEngine->queueScript(scripting::ScriptEngine::Script{
             .code = "return openspace.propertyValue('base.p1')",
             .callback = [&p1](ghoul::Dictionary d) {
                 REQUIRE(d.size() == 1);
@@ -85,7 +85,7 @@ TEST_CASE("PropertyValue: Empty", "[propertyvalue]") {
         LogMgr.resetMessageCounters();
         defer { LogMgr.resetMessageCounters(); };
 
-        global::scriptEngine->queueScript({
+        global::scriptEngine->queueScript(scripting::ScriptEngine::Script{
             .code = "return openspace.propertyValue('other-name')",
             .callback = [](ghoul::Dictionary d) {
                 CHECK(d.size() == 0);
@@ -99,7 +99,7 @@ TEST_CASE("PropertyValue: Empty", "[propertyvalue]") {
         LogMgr.resetMessageCounters();
         defer { LogMgr.resetMessageCounters(); };
 
-        global::scriptEngine->queueScript({
+        global::scriptEngine->queueScript(scripting::ScriptEngine::Script{
             .code = "return openspace.propertyValue('base.other-name')",
             .callback = [](ghoul::Dictionary d) {
                 CHECK(d.size() == 0);

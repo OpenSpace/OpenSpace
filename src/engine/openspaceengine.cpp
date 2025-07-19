@@ -317,10 +317,10 @@ void OpenSpaceEngine::initialize() {
 
     std::filesystem::path cacheFolder = absPath("${CACHE}");
     if (global::configuration->usePerProfileCache) {
-        cacheFolder = std::format("{}-{}", cacheFolder, global::configuration->profile);
+        cacheFolder = std::format("{}-{}", cacheFolder.string(), global::configuration->profile);
 
-        LINFO(std::format("Old cache: {}", absPath("${CACHE}")));
-        LINFO(std::format("New cache: {}", cacheFolder));
+        LINFO(std::format("Old cache: {}", absPath("${CACHE}").string()));
+        LINFO(std::format("New cache: {}", cacheFolder.string()));
         FileSys.registerPathToken(
             "${CACHE}",
             cacheFolder,
@@ -398,13 +398,13 @@ void OpenSpaceEngine::initialize() {
             const std::filesystem::path ext = file.extension();
 
             std::filesystem::path newCandidate = file;
-            newCandidate.replace_filename(std::format("{}-{}{}", fname, rot, ext));
+            newCandidate.replace_filename(std::format("{}-{}{}", fname.string(), rot, ext.string()));
 
             std::filesystem::path oldCandidate = file;
             if (rot > 1) {
                 // We don't actually have a -0 version, it is just the base name
                 oldCandidate.replace_filename(
-                    std::format("{}-{}{}", fname, rot - 1, ext)
+                    std::format("{}-{}{}", fname.string(), rot - 1, ext.string())
                 );
             }
 
@@ -485,7 +485,7 @@ void OpenSpaceEngine::initialize() {
     }
 
     // Load the profile
-    LINFO(std::format("Loading profile '{}'", profile));
+    LINFO(std::format("Loading profile '{}'", profile.string()));
     *global::profile = Profile(profile);
 
     // Set up asset loader
@@ -1047,7 +1047,7 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
         std::filesystem::path s = absPath(script);
         if (std::filesystem::is_regular_file(s)) {
             try {
-                LINFO(std::format("Running global customization script: {}", s));
+                LINFO(std::format("Running global customization script: {}", s.string()));
                 ghoul::lua::runScriptFile(state, s);
             }
             catch (const ghoul::RuntimeError& e) {
@@ -1055,7 +1055,7 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
             }
         }
         else {
-            LDEBUG(std::format("Ignoring non-existing script file: {}", s));
+            LDEBUG(std::format("Ignoring non-existing script file: {}", s.string()));
         }
     }
 }
@@ -1069,11 +1069,11 @@ void OpenSpaceEngine::loadFonts() {
         std::filesystem::path fontName = absPath(font.second);
 
         if (!std::filesystem::is_regular_file(fontName)) {
-            LERROR(std::format("Could not find font '{}' for key '{}'", fontName, key));
+            LERROR(std::format("Could not find font '{}' for key '{}'", fontName.string(), key));
             continue;
         }
 
-        LDEBUG(std::format("Registering font '{}' with key '{}'", fontName, key));
+        LDEBUG(std::format("Registering font '{}' with key '{}'", fontName.string(), key));
         global::fontManager->registerFontPath(key, fontName);
     }
 
@@ -1555,7 +1555,7 @@ void OpenSpaceEngine::touchExitCallback(TouchInput input) {
 void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
 #ifdef WIN32
     if (file.extension() == ".lnk") {
-        LDEBUG(std::format("Replacing shell link path '{}'", file));
+        LDEBUG(std::format("Replacing shell link path '{}'", file.string()));
         file = FileSys.resolveShellLink(file);
     }
 #endif // WIN32
@@ -1617,7 +1617,7 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
         // If we have a single file, we can just execute it directly
         const bool success = handleFile(file);
         if (!success) {
-            LWARNING(std::format("Unhandled file dropped: {}", file));
+            LWARNING(std::format("Unhandled file dropped: {}", file.string()));
         }
     }
     else if (std::filesystem::is_directory(file)) {

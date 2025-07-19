@@ -42,7 +42,7 @@ namespace {
             : ghoul::RuntimeError(
                 std::format(
                     "Error loading session recording '{}' (entry #{}): {}",
-                    file_, entry_, error_
+                    file_.string(), entry_, error_
                 ),
                 "SessionRecording"
             )
@@ -53,7 +53,7 @@ namespace {
 
         LoadingError(std::string error_, std::filesystem::path file_)
             : ghoul::RuntimeError(
-                std::format("Error loading session recording '{}': {}", file_, error_),
+                std::format("Error loading session recording '{}': {}", file_.string(), error_),
                 "SessionRecording"
             )
             , error(std::move(error_))
@@ -175,12 +175,17 @@ namespace {
         Camera,
         Script
     };
-
+#ifndef __APPLE__
     template <DataMode mode>
     std::optional<FrameType> readFrameType(std::istream&, int) {
         static_assert(sizeof(int) == 0, "Unimplemented overload");
         return std::nullopt;
     }
+#else
+    template <DataMode mode>
+    std::optional<FrameType> readFrameType(std::istream&, int) = delete;
+#endif
+// XCode tries to instantiate all template overloads, even if they're not used, hence this workaround, which actually should work with all compilers       
 
     template <>
     std::optional<FrameType> readFrameType<DataMode::Ascii>(std::istream& stream, int) {
@@ -227,10 +232,17 @@ namespace {
         }
     }
 
+#ifndef __APPLE__
     template <DataMode mode>
     void writeFrameType(std::ostream&, const FrameType&) {
         static_assert(sizeof(int) == 0, "Unimplemented overload");
     }
+#else
+    template <DataMode mode>
+    void writeFrameType(std::ostream&, const FrameType&) = delete;
+#endif
+        // XCode tries to instantiate all templates, hence fails to compile the static_assert()
+
 
     template <>
     void writeFrameType<DataMode::Ascii>(std::ostream& stream, const FrameType& type) {

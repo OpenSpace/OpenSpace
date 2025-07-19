@@ -48,6 +48,9 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringhelper.h>
+#ifdef __APPLE__
+#include <ghoul/glm_ostream.h>
+#endif // __APPLE__
 #include <fstream>
 #include <future>
 
@@ -707,10 +710,25 @@ nlohmann::json DocumentationEngine::generateActionJson() const {
         d[DocumentationKey] = action.documentation;
         d[CommandKey] = action.command;
         if (action.color.has_value()) {
+#ifndef __APPLE__
             d[ColorKey] = std::format("{}", action.color);
+#else
+            // On macOS, std::formatter overloads for std::format are not available
+            std::ostringstream oss;
+            oss << action.color;
+            d[ColorKey] = oss.str();
+#endif // __APPLE__
+
         }
         if (action.textColor.has_value()) {
+#ifndef __APPLE__
             d[TextColorKey] = std::format("{}", action.textColor);
+#else   
+            // On macOS, std::formatter overloads for std::format are not available
+            std::ostringstream oss;
+            oss << action.textColor;
+            d[TextColorKey] = oss.str();
+#endif // __APPLE__
         }
         res[DataKey].push_back(d);
     }

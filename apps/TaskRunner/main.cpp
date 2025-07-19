@@ -164,7 +164,7 @@ int main(int argc, char** argv) {
 
     // If no task file was specified in as argument, run in CLI mode.
 
-    LINFO(std::format("Task root: {}", absPath("${TASKS}")));
+    LINFO(std::format("Task root: {}", absPath("${TASKS}").string()));
     std::filesystem::current_path(absPath("${TASKS}"));
 
     std::cout << "TASK > ";

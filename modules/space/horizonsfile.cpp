@@ -499,7 +499,7 @@ HorizonsResult readHorizonsFile(std::filesystem::path file) {
     std::ifstream fileStream = std::ifstream(file);
 
     if (!fileStream.good()) {
-        LERROR(std::format("Failed to open Horizons file '{}'", file));
+        LERROR(std::format("Failed to open Horizons file '{}'", file.string()));
         return HorizonsResult();
     }
 
@@ -531,7 +531,7 @@ HorizonsResult readHorizonsVectorFile(std::filesystem::path file) {
 
     std::ifstream fileStream = std::ifstream(file);
     if (!fileStream.good()) {
-        LERROR(std::format("Failed to open Horizons text file {}", file));
+        LERROR(std::format("Failed to open Horizons text file {}", file.string()));
         return HorizonsResult();
     }
 
@@ -561,7 +561,7 @@ HorizonsResult readHorizonsVectorFile(std::filesystem::path file) {
         // Get next line of same data point
         ghoul::getline(fileStream, line);
         if (!fileStream.good()) {
-            LERROR(std::format("Malformed Horizons file '{}'", file));
+            LERROR(std::format("Malformed Horizons file '{}'", file.string()));
             return HorizonsResult();
         }
         std::stringstream str2(line);
@@ -600,7 +600,7 @@ HorizonsResult readHorizonsObserverFile(std::filesystem::path file) {
 
     std::ifstream fileStream = std::ifstream(file);
     if (!fileStream.good()) {
-        LERROR(std::format("Failed to open Horizons text file '{}'", file));
+        LERROR(std::format("Failed to open Horizons text file '{}'", file.string()));
         return HorizonsResult();
     }
 
