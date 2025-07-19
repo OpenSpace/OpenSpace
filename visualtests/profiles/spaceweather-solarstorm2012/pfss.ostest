@@ -21,7 +21,7 @@
     {
       "type": "property",
       "value": {
-        "property": "Scene.FL_PFSS.Renderable.Flow.FlowEnabled",
+        "property": "Scene.*.Renderable.Flow.FlowEnabled",
         "value": false
       }
     },
