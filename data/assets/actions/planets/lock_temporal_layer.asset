@@ -1,29 +1,12 @@
-function getDateTime()
-  local j2000 = openspace.time.currentTime()
-  return openspace.time.convertTime(j2000)
-end
-
-function getCurrentTemporalLayer()
-  local focusName = openspace.propertyValue("NavigationHandler.OrbitalNavigator.Anchor")
-  local allUri = openspace.property("Scene." .. focusName .. ".*.UseFixedTime")
-  local layers = {}
-  for i = 1, #(allUri) do
-    layers[i] = string.sub(allUri[i], 1, -14)
-  end
-  return layers
-end
-
-
 local LockCurrent = {
   Identifier = "os.temporalLayer.LockCurrent",
   Name = "Lock Focus Node Temporal Layers",
   Command = [[
-    local dateTime = getDateTime()
-    local layers = getCurrentTemporalLayer()
-    for i = 1, #(layers) do
-      openspace.setPropertyValueSingle(layers[i] .. ".FixedTime", dateTime)
-      openspace.setPropertyValueSingle(layers[i] .. ".UseFixedTime", true)
-    end
+    local j2000 = openspace.time.currentTime()
+    local dateTime = openspace.time.convertTime(j2000)
+    local focusName = openspace.propertyValue("NavigationHandler.OrbitalNavigator.Anchor")
+    openspace.setPropertyValue("Scene." .. focusName .. ".*.FixedTime", dateTime)
+    openspace.setPropertyValue("Scene." .. focusName .. ".*.UseFixedTime", true)
   ]],
   Documentation = [[Set fixed date for all temporal layers for the currently 
     focused node.]],
@@ -35,11 +18,11 @@ local UnlockCurrent = {
   Identifier = "os.temporalLayer.UnlockCurrent",
   Name = "Unlock Focus Node Temporal Layers",
   Command = [[
-    local layers = getCurrentTemporalLayer()
-    for i = 1, #(layers) do
-      openspace.setPropertyValueSingle(layers[i] .. ".UseFixedTime", false)
-      openspace.setPropertyValueSingle(layers[i] .. ".FixedTime", "")
-    end
+    local j2000 = openspace.time.currentTime()
+    local dateTime = openspace.time.convertTime(j2000)
+    local focusName = openspace.propertyValue("NavigationHandler.OrbitalNavigator.Anchor")
+    openspace.setPropertyValue("Scene." .. focusName .. ".*.UseFixedTime", false)
+    openspace.setPropertyValue("Scene." .. focusName .. ".*.FixedTime", "")
   ]],
   Documentation = [[Removes fixed date for all temporal layers for the currently
      focused node.]],
@@ -51,7 +34,8 @@ local LockAll = {
   Identifier = "os.temporalLayer.LockAll",
   Name = "Lock All Temporal Layers",
   Command = [[
-    local dateTime = getDateTime()
+    local j2000 = openspace.time.currentTime()
+    local dateTime = openspace.time.convertTime(j2000)
     openspace.setPropertyValue("Scene.*.FixedTime", dateTime)
     openspace.setPropertyValue("Scene.*.UseFixedTime", true)
   ]],
