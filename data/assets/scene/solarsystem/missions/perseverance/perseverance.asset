@@ -1,0 +1,6 @@
+asset.require("./mission")
+asset.require("./model")
+asset.require("./trail")
+asset.require("./actions")
+asset.require("scene/solarsystem/planets/mars/mars")
+asset.require("scene/solarsystem/planets/mars/default_layers")

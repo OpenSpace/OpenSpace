@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
+#include <openspace/util/touch.h>
 #include <ghoul/glm.h>
 #include <chrono>
 
@@ -35,7 +36,16 @@
 #pragma warning (disable : 4100)
 #endif // _MSC_VER
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#endif // __clang__
+
 #include <include/cef_browser.h>
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif // __clang__
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -48,12 +58,11 @@ class BrowserInstance;
 class EventHandler {
 public:
     void initialize();
-    void setBrowser(const CefRefPtr<CefBrowser>& browser);
     void setBrowserInstance(BrowserInstance* browserInstance);
-    void detachBrowser();
+    void resetBrowserInstance();
 
 private:
-    bool mouseButtonCallback(MouseButton button, MouseAction action);
+    bool mouseButtonCallback(MouseButton button, MouseAction action, KeyModifier mods);
     bool mousePositionCallback(double x, double y);
     bool mouseWheelCallback(glm::ivec2 delta);
     bool charCallback(unsigned int charCode, KeyModifier modifier);
@@ -64,16 +73,28 @@ private:
      * sent to CEF.
      *
      * \param key the pressed key
-     * \return true if event found, false otherwise
+     * \param mods the key modifier that was pressed
+     * \param action the action that was performed that triggered this event
+     * \return `true` if event found, `false` otherwise
      */
-    bool specialKeyEvent(Key key);
+    bool specialKeyEvent(Key key, KeyModifier mods, KeyAction action);
 
     /**
      * Create a mouse event on the current cursor position.
-     *
-     * \return
      */
-    CefMouseEvent mouseEvent();
+    CefMouseEvent mouseEvent(KeyModifier mods = KeyModifier::None) const;
+
+#ifdef WIN32
+    /**
+     * Build a CEF touch event based on our internal structure.
+     *
+     * Note: As of 2020-02-21 we are using an older version of CEF on OSX than WIN32. This
+     * version does not handle the CefTouchEvent type and does not have any internal
+     * touch handling
+     */
+    CefTouchEvent touchEvent(const TouchInput& input,
+        const cef_touch_event_type_t eventType) const;
+#endif
 
     /**
      * Find the CEF key event to use for a given action.
@@ -84,20 +105,22 @@ private:
     cef_key_event_type_t keyEventType(KeyAction action);
 
     BrowserInstance* _browserInstance = nullptr;
-    glm::vec2 _mousePosition = { 0.f, 0.f };
+    glm::vec2 _mousePosition = glm::vec2(0.f);
 
     struct MouseButtonState {
         bool down = false;
-        glm::vec2 lastClickPosition = { 0.f, 0.f };
+        glm::vec2 lastClickPosition = glm::vec2(0.f);
         std::chrono::high_resolution_clock::time_point lastClickTime;
     };
 
     MouseButtonState _leftButton;
     MouseButtonState _rightButton;
 
+    /// This vector assumes first element to be the active one
+    std::vector<TouchInput> _validTouchStates;
+
     /**
-     * determines if a click should be sent as a double click or not
-     * @return
+     * Determines if a click should be sent as a double click or not
      */
     bool isDoubleClick(const MouseButtonState& button) const;
 };

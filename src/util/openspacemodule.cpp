@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,18 +26,18 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
-
-#include <openspace/modulepath.h>
-
+#include <filesystem>
 
 namespace {
-    constexpr const char* _loggerCat = "OpenSpaceModule";
-    constexpr const char* ModuleBaseToken = "MODULE_";
+    constexpr std::string_view _loggerCat = "OpenSpaceModule";
+    constexpr std::string_view ModuleBaseToken = "MODULE_";
 } // namespace
 
 namespace openspace {
@@ -46,44 +46,50 @@ OpenSpaceModule::OpenSpaceModule(std::string name)
     : properties::PropertyOwner({ std::move(name) })
 {}
 
-void OpenSpaceModule::initialize(const ModuleEngine* moduleEngine,
-                                 const ghoul::Dictionary& configuration)
-{
-    std::string upperIdentifier = identifier();
-    std::transform(
-        upperIdentifier.begin(),
-        upperIdentifier.end(),
-        upperIdentifier.begin(),
-        [](char v) { return static_cast<char>(toupper(v)); }
-    );
+void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
-    std::string moduleToken =
-        ghoul::filesystem::FileSystem::TokenOpeningBraces +
-        std::string(ModuleBaseToken) +
-        upperIdentifier +
-        ghoul::filesystem::FileSystem::TokenClosingBraces;
+    const std::string upperIdentifier = ghoul::toUpperCase(identifier());
 
-    std::string path = modulePath();
-    LDEBUG(fmt::format("Registering module path {}: {}", moduleToken, path));
-    FileSys.registerPathToken(moduleToken, std::move(path));
+    std::string moduleToken = "${" + std::string(ModuleBaseToken) + upperIdentifier + "}";
 
-    _moduleEngine = moduleEngine;
+    std::filesystem::path path = modulePath();
+    if (!path.empty()) {
+        LDEBUG(std::format("Registering module path '{}' -> {}", moduleToken, path));
+        FileSys.registerPathToken(std::move(moduleToken), std::move(path));
+    }
+
     internalInitialize(configuration);
 }
 
 void OpenSpaceModule::initializeGL() {
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
+    TracyGpuZone("initializeGL")
+
     internalInitializeGL();
 }
 
 void OpenSpaceModule::deinitialize() {
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
+
     internalDeinitialize();
 }
 
 void OpenSpaceModule::deinitializeGL() {
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
+
     internalDeinitializeGL();
 }
 
 std::vector<documentation::Documentation> OpenSpaceModule::documentations() const {
+    return {};
+}
+
+documentation::Documentation OpenSpaceModule::Documentation() {
     return {};
 }
 
@@ -103,37 +109,12 @@ std::vector<std::string> OpenSpaceModule::requiredOpenGLExtensions() const {
     return {};
 }
 
-std::string OpenSpaceModule::modulePath() const {
-    std::string moduleIdentifier = identifier();
-    std::transform(
-        moduleIdentifier.begin(),
-        moduleIdentifier.end(),
-        moduleIdentifier.begin(),
-        [](char v) { return static_cast<char>(tolower(v)); }
-    );
+std::filesystem::path OpenSpaceModule::modulePath() const {
+    const std::string moduleIdentifier = ghoul::toLowerCase(identifier());
 
     // First try the internal module directory
-    if (FileSys.directoryExists(absPath("${MODULES}/" + moduleIdentifier))) {
-        return absPath("${MODULES}/" + moduleIdentifier);
-    }
-    else { // Otherwise, it might be one of the external directories
-        for (const char* dir : ModulePaths) {
-            const std::string& path = std::string(dir) + '/' + moduleIdentifier;
-            if (FileSys.directoryExists(absPath(path))) {
-                return absPath(path);
-            }
-        }
-    }
-
-    // If we got this far, neither the internal module nor any of the external modules fit
-    throw ghoul::RuntimeError(
-        "Could not resolve path for module '" + identifier() + "'",
-        "OpenSpaceModule"
-    );
-}
-
-const ModuleEngine* OpenSpaceModule::moduleEngine() const {
-    return _moduleEngine;
+    const std::filesystem::path path = absPath("${MODULES}/" + moduleIdentifier);
+    return std::filesystem::is_directory(path) ? path : "";
 }
 
 void OpenSpaceModule::internalInitialize(const ghoul::Dictionary&) {}

@@ -1,0 +1,85 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Ocean Temperature at Depth - Seasonal"
+local Identifier = "noaa-sos-oceans-ocean_depths_temp"
+local Description = [[Though satellites provide highly detailed analyses of the
+temperature of the ocean surface, they cannot measure temperatures below the first 1 mm
+of water. For that deeper understanding, NOAA relies on thousands of buoys, ships,
+undersea gliders and other devices to measure temperatures at depth. The measurements are
+consolidated every few years by the National Oceanographic Data Center into a product
+known as the World Ocean Atlas. The measurements shown here go as deep as 5,000 m — far
+deeper than many places in the ocean — which is why there is a lack of data (black areas)
+in some of the deeper imagery]]
+local URL = "https://sos.noaa.gov/catalog/datasets/ocean-temperature-at-depth-seasonal/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local imagesDestination = syncedDirectory .. "4096"
+local imagesByDepthDestination = syncedDirectory .. "4096_by_depth"
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "ImageSequenceTileProvider",
+  FolderPath = imagesDestination,
+  Description = Description
+}
+
+local LayerByDepth = {
+  Identifier = Identifier .. "-bydepth",
+  Name = Name .. " (by Depth)",
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "ImageSequenceTileProvider",
+  FolderPath = imagesByDepthDestination,
+  Description = Description
+}
+
+local Colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerByDepth)
+  openspace.addScreenSpaceRenderable(Colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerByDepth)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(LayerByDepth)
+asset.export(Colorbar)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

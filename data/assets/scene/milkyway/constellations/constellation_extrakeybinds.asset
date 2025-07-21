@@ -1,0 +1,23 @@
+local mainAsset = asset.require("./constellation_art")
+
+
+
+asset.onInitialize(function()
+  openspace.bindKey("V", mainAsset.ShowZodiacArt)
+  openspace.bindKey("Shift+V", mainAsset.HideZodiacArt)
+end)
+
+asset.onDeinitialize(function()
+  openspace.clearKey("V")
+  openspace.clearKey("Shift+V")
+end)
+
+
+
+asset.meta = {
+  Name = "Constellation Image Extra Keybinds",
+  Description = "Artistic images depicting the constellations",
+  Author = "James Hedberg",
+  URL = "http://jameshedberg.com",
+  License = "CC-BY"
+}

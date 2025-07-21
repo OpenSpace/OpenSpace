@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___LOADINGSCREEN___H__
 #define __OPENSPACE_CORE___LOADINGSCREEN___H__
 
+#include <openspace/util/screenlog.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -45,35 +46,31 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
+class AssetManager;
+class Scene;
+
 class LoadingScreen {
 public:
     BooleanType(ShowMessage);
     BooleanType(ShowNodeNames);
-    BooleanType(ShowProgressbar);
+    BooleanType(ShowLogMessages);
     BooleanType(CatastrophicError);
 
     LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeNames,
-        ShowProgressbar showProgressbar);
+        ShowLogMessages showLogMessages);
     ~LoadingScreen();
+
+    void abort();
+    void exec(AssetManager& manager, Scene& scene);
 
     void render();
 
-    void postMessage(std::string message);
-    void setCatastrophicError(CatastrophicError catastrophicError);
+    struct ProgressInfo {
+        float progress = 0.f;
 
-    void finalize();
-
-    void setItemNumber(int nItems);
-    int itemNumber();
-    void tickItem();
-
-    enum class Phase {
-        Construction,
-        Synchronization,
-        Initialization
+        int64_t currentSize = -1;
+        int64_t totalSize = -1;
     };
-    void setPhase(Phase phase);
-
 
     enum class ItemStatus {
         Started,
@@ -82,30 +79,37 @@ public:
         Failed
     };
 
-    struct ProgressInfo {
-        float progress = 0.f;
-
-        int currentSize = -1;
-        int totalSize = -1;
-    };
-
     void updateItem(const std::string& itemIdentifier, const std::string& itemName,
         ItemStatus newStatus, ProgressInfo progressInfo);
 
 private:
-    bool _showMessage;
-    bool _showNodeNames;
-    bool _showProgressbar;
+    enum class Phase {
+        PreStart,
+        Construction,
+        Synchronization,
+        Initialization
+    };
 
-    Phase _phase;
-    std::atomic_int _iProgress = 0;
-    std::atomic_int _nItems = 0;
+    void postMessage(std::string message);
+    void setCatastrophicError(CatastrophicError catastrophicError);
+
+    void finalize();
+    void setPhase(Phase phase);
+
+    void renderLogMessages() const;
+
+    bool _showMessage = true;
+    bool _showNodeNames = true;
+    bool _showLog = true;
+
+    Phase _phase = Phase::PreStart;
 
     std::unique_ptr<ghoul::opengl::Texture> _logoTexture;
 
     std::shared_ptr<ghoul::fontrendering::Font> _loadingFont;
     std::shared_ptr<ghoul::fontrendering::Font> _messageFont;
     std::shared_ptr<ghoul::fontrendering::Font> _itemFont;
+    std::shared_ptr<ghoul::fontrendering::Font> _logFont;
 
     bool _hasCatastrophicErrorOccurred = false;
     std::string _message;
@@ -119,16 +123,25 @@ private:
         ProgressInfo progress;
 
         bool hasLocation;
-        glm::vec2 ll;
-        glm::vec2 ur;
+        glm::vec2 ll = glm::vec2(0.f);
+        glm::vec2 ur = glm::vec2(0.f);
 
         std::chrono::system_clock::time_point finishedTime;
+
+#ifdef LOADINGSCREEN_DEBUGGING
+        bool exhaustedSearch = false;
+#endif // LOADINGSCREEN_DEBUGGING
     };
     std::vector<Item> _items;
     std::mutex _itemsMutex;
 
+    bool _shouldAbortLoading = false;
+
     std::random_device _randomDevice;
     std::default_random_engine _randomEngine;
+
+    // Non owning but we remove the log from LogManager on destruction
+    ScreenLog* _log = nullptr;
 };
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,37 +32,51 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr const char* KeyFontMono = "Mono";
-    constexpr const float DefaultFontSize = 10.f;
-
-    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
-        "FontName",
-        "Font Name",
-        "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font Size",
-        "This value determines the size of the font that is used to render the date."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo SimplificationInfo = {
         "Simplification",
-        "Time Simplification",
+        "Do Time Simplification",
         "If this value is enabled, the time is displayed in nuanced units, such as "
         "minutes, hours, days, years, etc. If this value is disabled, it is always "
-        "displayed in seconds."
+        "displayed in seconds.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
         "RequestedUnit",
         "Requested Unit",
         "If the simplification is disabled, this time unit is used as a destination to "
-        "convert the seconds into."
+        "convert the seconds into.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TransitionFormatInfo = {
+        "TransitionFormat",
+        "Transition Format",
+        "Format string used to format the text used while in a delta time transition, "
+        "that is if the current delta time is being interpolated to reach a target "
+        "delta time. This format gets five parameters in this order:  The target delta "
+        "time value, the target delta time unit, the string 'Paused' if the delta time "
+        "is paused or the empty string otherwise, the current delta time value, and the "
+        "current delta time unit. More information about how to make use of the format "
+        "string, see the documentation at "
+        "https://en.cppreference.com/w/cpp/utility/format/spec.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RegularFormatInfo = {
+        "RegularFormat",
+        "Regular Format",
+        "The format string used to format the text if the target delta time is the same "
+        "as the current delta time. This format gets three parameters in this order:  "
+        "The target delta value, the target delta unit, and the string 'Paused' if the "
+        "delta time is paused or the empty string otherwise. More information about how "
+        "to make use of the format string, see the documentation at "
+        "https://en.cppreference.com/w/cpp/utility/format/spec.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     std::vector<std::string> unitList() {
@@ -71,114 +85,93 @@ namespace {
             openspace::TimeUnits.begin(),
             openspace::TimeUnits.end(),
             res.begin(),
-            [](openspace::TimeUnit unit) -> std::string { return nameForTimeUnit(unit); }
+            [](openspace::TimeUnit unit) -> std::string {
+                return std::string(nameForTimeUnit(unit));
+            }
         );
         return res;
     }
+
+    // This `DashboardItem` shows how fast the in-game time progresses. The display string
+    // for the `RegularFormat` is used when the current simulation increment is not
+    // changing, the `TransitionFormat` is used if the simulation increment is currently
+    // interpolating to a new value.
+    struct [[codegen::Dictionary(DashboardItemSimulationIncrement)]] Parameters {
+        // [[codegen::verbatim(SimplificationInfo.description)]]
+        std::optional<bool> simplification;
+
+        // [[codegen::verbatim(RequestedUnitInfo.description)]]
+        std::optional<std::string> requestedUnit [[codegen::inlist(unitList())]];
+
+        // [[codegen::verbatim(TransitionFormatInfo.description)]]
+        std::optional<std::string> transitionFormat;
+
+        // [[codegen::verbatim(RegularFormatInfo.description)]]
+        std::optional<std::string> regularFormat;
+    };
+#include "dashboarditemsimulationincrement_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItemSimulationIncrement::Documentation() {
-    using namespace documentation;
-    return {
-        "DashboardItem Simulation Increment",
+    return codegen::doc<Parameters>(
         "base_dashboarditem_simulationincrement",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("DashboardItemSimulationIncrement"),
-                Optional::No
-            },
-            {
-                FontNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                FontNameInfo.description
-            },
-            {
-                FontSizeInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                FontSizeInfo.description
-            },
-            {
-                SimplificationInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                SimplificationInfo.description
-            },
-            {
-                RequestedUnitInfo.identifier,
-                new StringInListVerifier(unitList()),
-                Optional::Yes,
-                RequestedUnitInfo.description
-            }
-        }
-    };
+        DashboardTextItem::Documentation()
+    );
 }
 
 DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
                                                       const ghoul::Dictionary& dictionary)
-    : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, KeyFontMono)
-    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
+    : DashboardTextItem(dictionary)
     , _doSimplification(SimplificationInfo, true)
-    , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _requestedUnit(RequestedUnitInfo)
+    , _transitionFormat(
+        TransitionFormatInfo,
+        "Simulation increment: {:.1f} {:s} / second{:s} (current: {:.1f} {:s})"
+    )
+    , _regularFormat(RegularFormatInfo, "Simulation increment: {:.1f} {:s} / second{:s}")
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "DashboardItemSimulationIncrement"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasKey(FontNameInfo.identifier)) {
-        _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
-    }
-    _fontName.onChange([this](){
-        _font = global::fontManager.font(_fontName, _fontSize);
-    });
-    addProperty(_fontName);
-
-    if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
-    }
-    _fontSize.onChange([this](){
-        _font = global::fontManager.font(_fontName, _fontSize);
-    });
-    addProperty(_fontSize);
-
-    if (dictionary.hasKey(SimplificationInfo.identifier)) {
-        _doSimplification = dictionary.value<bool>(SimplificationInfo.identifier);
-    }
+    _doSimplification = p.simplification.value_or(_doSimplification);
     _doSimplification.onChange([this]() {
-        if (_doSimplification) {
-            _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
-        }
-        else {
-            _requestedUnit.setVisibility(properties::Property::Visibility::User);
-        }
+        _requestedUnit.setVisibility(
+            _doSimplification ?
+            properties::Property::Visibility::Hidden :
+            properties::Property::Visibility::User
+        );
     });
     addProperty(_doSimplification);
 
-    for (TimeUnit u : TimeUnits) {
-        _requestedUnit.addOption(static_cast<int>(u), nameForTimeUnit(u));
+    for (const TimeUnit u : TimeUnits) {
+        _requestedUnit.addOption(static_cast<int>(u), std::string(nameForTimeUnit(u)));
     }
     _requestedUnit = static_cast<int>(TimeUnit::Second);
-    if (dictionary.hasKey(RequestedUnitInfo.identifier)) {
-        std::string value = dictionary.value<std::string>(RequestedUnitInfo.identifier);
-        TimeUnit unit = timeUnitFromString(value.c_str());
+    if (p.requestedUnit.has_value()) {
+        const TimeUnit unit = timeUnitFromString(*p.requestedUnit);
         _requestedUnit = static_cast<int>(unit);
+        _doSimplification = false;
     }
-    _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
+    _requestedUnit.setVisibility(
+        _doSimplification ?
+        properties::Property::Visibility::Hidden :
+        properties::Property::Visibility::User
+    );
     addProperty(_requestedUnit);
 
-    _font = global::fontManager.font(_fontName, _fontSize);
+    _transitionFormat = p.transitionFormat.value_or(_transitionFormat);
+    addProperty(_transitionFormat);
+
+    _regularFormat = p.regularFormat.value_or(_regularFormat);
+    addProperty(_regularFormat);
 }
 
-void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
-    const double targetDt = global::timeManager.targetDeltaTime();
-    const double currentDt = global::timeManager.deltaTime();
+void DashboardItemSimulationIncrement::update() {
+    ZoneScoped;
+
+    const double targetDt = global::timeManager->targetDeltaTime();
+    const double currentDt = global::timeManager->deltaTime();
     std::pair<double, std::string> targetDeltaTime;
     std::pair<double, std::string> currentDeltaTime;
     if (_doSimplification) {
@@ -191,62 +184,50 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
         const TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
 
         const double convTarget = convertTime(targetDt, TimeUnit::Second, unit);
-        targetDeltaTime = { convTarget, nameForTimeUnit(unit, convTarget != 1.0) };
+        targetDeltaTime = std::pair(
+            convTarget,
+            std::string(nameForTimeUnit(unit, convTarget != 1.0))
+        );
 
         if (targetDt != currentDt) {
             const double convCurrent = convertTime(currentDt, TimeUnit::Second, unit);
-            currentDeltaTime = { convCurrent, nameForTimeUnit(unit, convCurrent != 1.0) };
+            currentDeltaTime = std::pair(
+                convCurrent,
+                std::string(nameForTimeUnit(unit, convCurrent != 1.0))
+            );
         }
     }
 
-    std::string pauseText = global::timeManager.isPaused() ? " (Paused)" : "";
+    std::string pauseText = global::timeManager->isPaused() ? " (Paused)" : "";
 
-    penPosition.y -= _font->height();
-    if (targetDt != currentDt && !global::timeManager.isPaused()) {
-        // We are in the middle of a transition
-        RenderFont(
-            *_font,
-            penPosition,
-            fmt::format(
-                "Simulation increment: {:.1f} {:s} / second{:s} (current: {:.1f} {:s})",
-                targetDeltaTime.first, targetDeltaTime.second,
-                pauseText,
-                currentDeltaTime.first, currentDeltaTime.second
-            )
-        );
+    try {
+        if (targetDt != currentDt && !global::timeManager->isPaused()) {
+            // We are in the middle of a transition
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            _buffer = std::vformat(
+                _transitionFormat.value(),
+                std::make_format_args(
+                    targetDeltaTime.first, targetDeltaTime.second,
+                    pauseText,
+                    currentDeltaTime.first, currentDeltaTime.second
+                )
+            );
+        }
+        else {
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            _buffer = std::vformat(
+                _regularFormat.value(),
+                std::make_format_args(
+                    targetDeltaTime.first,
+                    targetDeltaTime.second,
+                    pauseText
+                )
+            );
+        }
     }
-    else {
-        RenderFont(
-            *_font,
-            penPosition,
-            fmt::format(
-                "Simulation increment: {:.1f} {:s} / second{:s}",
-                targetDeltaTime.first, targetDeltaTime.second,
-                pauseText
-            )
-        );
+    catch (const std::format_error&) {
+        LERRORC("DashboardItemDate", "Illegal format string");
     }
-}
-
-glm::vec2 DashboardItemSimulationIncrement::size() const {
-    double t = global::timeManager.targetDeltaTime();
-    std::pair<double, std::string> deltaTime;
-    if (_doSimplification) {
-        deltaTime = simplifyTime(t);
-    }
-    else {
-        TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
-        double convertedT = convertTime(t, TimeUnit::Second, unit);
-        deltaTime = { convertedT, nameForTimeUnit(unit, convertedT != 1.0) };
-    }
-
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
-        fmt::format(
-            "Simulation increment: {:.1f} {:s} / second",
-            deltaTime.first, deltaTime.second
-        )
-    ).boundingBox;
 }
 
 } // namespace openspace

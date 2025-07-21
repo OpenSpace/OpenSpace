@@ -1,53 +1,103 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-local kernel = asset.require('../kernels').sat375
-asset.request('./trail')
+asset.require("./trail")
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
-local textures = asset.syncedResource({
-    Type = "HttpSynchronization",
-    Name = "Titan textures",
-    Identifier = "titan_textures",
-    Version = 1
+local labelsPath = asset.resource({
+  Name = "Saturn Labels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_labels",
+  Version = 1
 })
 
+
 local Titan = {
-    Identifier = "Titan",
-    Parent = transforms.SaturnBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "TITAN",
-            Observer = "SATURN BARYCENTER",
-            Kernels = kernel
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_TITAN",
-            DestinationFrame = "GALACTIC"
-        }
+  Identifier = "Titan",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Titan,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = 2576000,
-        SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/titan.jpg",
-                    Enabled = true
-                }
-            }
-        }
-    },
-    Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
-    GUI = {
-        Path = "/Solar System/Planets/Saturn/Moons"
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Titan,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = 2576000,
+    Labels = {
+      Enabled = false,
+      FileName = labelsPath .. "titan.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 9.6,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 5000000.0, 7500000.0 },
+      DistanceEPS = 1350000.0,
+      Color = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_major_saturn" },
+  GUI = {
+    Name = "Titan",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Titan",
+    Description = "Largest moon of Saturn"
+  }
+}
+
+local TitanLabel = {
+  Identifier = "TitanLabel",
+  Parent = Titan.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Titan",
+    FontSize = 70.0,
+    Size = 6.2,
+    MinMaxSize = { 1, 35 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.5, 20.0 },
+    FadeWidths = { 0.3, 20.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Titan Label",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Titan",
+    Focusable = false,
+    Description = "Label for Saturn's moon Titan"
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Titan)
+  openspace.addSceneGraphNode(TitanLabel)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Titan })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TitanLabel)
+  openspace.removeSceneGraphNode(Titan)
+end)
+
+asset.export(Titan)
+asset.export(TitanLabel)
+
+
+
+asset.meta = {
+  Name = "Titan",
+  Description = "Titan globe with labels",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

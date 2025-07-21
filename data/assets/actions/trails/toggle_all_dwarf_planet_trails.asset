@@ -1,0 +1,29 @@
+local ToggleDwarfPlanetTrails = {
+  Identifier = "os.ToggleDwarfPlanetTrails",
+  Name = "Toggle dwarf planet trails",
+  Command = [[openspace.toggleFade("{planetTrail_dwarf}.Renderable")]],
+  Documentation = "Toggle on/off trails for all dwarf planets in the solar system",
+  GuiPath = "/Trails",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.action.registerAction(ToggleDwarfPlanetTrails)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(ToggleDwarfPlanetTrails)
+end)
+
+asset.export("ToggleDwarfPlanetTrails", ToggleDwarfPlanetTrails.Identifier)
+
+
+
+asset.meta = {
+  Name = "Actions - Toggle Dwarf Planet Trails",
+  Description = "Asset providing actions to toggle all dwarf planet trails on and off",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

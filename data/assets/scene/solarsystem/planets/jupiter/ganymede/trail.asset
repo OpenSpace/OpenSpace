@@ -1,32 +1,53 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-asset.require("spice/base")
-local kernel = asset.require('../kernels').jup310
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
 local GanymedeTrail = {
-    Identifier = "GanymedeTrail",
-    Parent = transforms.JupiterBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "GANYMEDE",
-            Observer = "JUPITER BARYCENTER",
-            Kernels = kernel
-        },
-        Color = { 0.4, 0.3, 0.3 },
-        Period =  172.0 / 24.0,
-        Resolution = 1000
+  Identifier = "GanymedeTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Ganymede,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
-    Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter" },
-    GUI = {
-        Name = "Ganymede Trail",
-        Path = "/Solar System/Planets/Jupiter/Moons"
-    }
+    Color = { 0.4, 0.3, 0.3 },
+    Period = 172.0 / 24.0,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_major_jupiter"
+  },
+  GUI = {
+    Name = "Ganymede Trail",
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Ganymede",
+    Focusable = false
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(GanymedeTrail)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { GanymedeTrail })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(GanymedeTrail)
+end)
+
+asset.export(GanymedeTrail)
+
+
+
+asset.meta = {
+  Name = "Ganymede Trail",
+  Description = "Trail of Ganymede as observed by the Jupiter",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

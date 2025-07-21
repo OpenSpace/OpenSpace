@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
+#include <filesystem>
 #include <memory>
 
 namespace ghoul::filesystem { class File; }
@@ -45,8 +46,8 @@ struct UpdateData;
 
 class RenderablePlaneProjection : public Renderable {
 public:
-    RenderablePlaneProjection(const ghoul::Dictionary& dictionary);
-    ~RenderablePlaneProjection();
+    explicit RenderablePlaneProjection(const ghoul::Dictionary& dictionary);
+    ~RenderablePlaneProjection() override = default;
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -56,22 +57,23 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
+    static documentation::Documentation Documentation();
+
 private:
     void loadTexture();
     void updatePlane(const Image& img, double currentTime);
     void setTarget(std::string body);
 
-    std::string _texturePath;
+    std::filesystem::path _texturePath;
 
     bool _planeIsDirty = false;
 
-    glm::dmat3 _stateMatrix;
+    glm::dmat3 _stateMatrix = glm::dmat3(1.0);
     std::string _frame;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     bool _textureIsDirty = false;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
-//    ghoul::opengl::Texture* _texture;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
     GLuint _quad = 0;
     GLuint _vertexPositionBuffer = 0;
@@ -85,8 +87,6 @@ private:
         std::string frame;
         std::string node;
     } _target;
-    std::string _name = "ImagePlane";
-    bool _moving = false;
     bool _hasImage = false;
 };
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /******************************************************************************
- * $Id: ogrvrt.xsd 55ecd4e11ef1179beec5787d5be781a5b15d61cf 2017-10-20 21:35:00Z Even Rouault $
+ * $Id: ogrvrt.xsd 4721d91b3b6e8cbe7e3168e4f83c8bbc323eaf25 2018-09-26 11:21:21 +0200 Even Rouault $
  *
  * Project:  GDAL/OGR
  * Purpose:  XML Schema for OGR VRT files.
@@ -141,10 +141,10 @@
 
     <xs:complexType name="FIDType">
         <xs:simpleContent>
-            <xs:extension base="nonEmptyStringType">
+            <xs:extension base="xs:string">
                 <xs:attribute name="name" type="xs:string">
                     <xs:annotation>
-                        <xs:documentation>A user-facing name can be specified here so that a FID column name is reported even if it is not reported as a regular field.</xs:documentation>
+                        <xs:documentation>User-facing name of the FID column.</xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
             </xs:extension>

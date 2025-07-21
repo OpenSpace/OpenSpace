@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,32 +22,34 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefieldlinessequence.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/fieldlinesstate.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/commons.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/kameleonfieldlinehelper.h
+  rendering/renderablefieldlinessequence.h
+  tasks/kameleonvolumetofieldlinestask.h
+  util/fieldlinesstate.h
+  util/commons.h
+  util/kameleonfieldlinehelper.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefieldlinessequence.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/fieldlinesstate.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/commons.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/kameleonfieldlinehelper.cpp
+  rendering/renderablefieldlinessequence.cpp
+  tasks/kameleonvolumetofieldlinestask.cpp
+  util/fieldlinesstate.cpp
+  util/commons.cpp
+  util/kameleonfieldlinehelper.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldlinessequence_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldlinessequence_fs.glsl
+  shaders/fieldlinessequence_vs.glsl
+  shaders/fieldlinessequence_fs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
-    "FieldlinesSequence"
-    fieldlinessequence_module
-    ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+  "FieldlinesSequence"
+  fieldlinessequence_module
+  ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )

@@ -1,23 +1,55 @@
-local assetHelper = asset.require('util/asset_helper')
-local shared = asset.require('../satellites_shared')
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local group = {
-    Title = "Iridium 33 Debris",
-    Url = "http://www.celestrak.com/NORAD/elements/iridium-33-debris.txt",
-    TrailColor = { 0.25, 0.35, 0.45 }
+
+
+local omm = asset.resource({
+  Name = "Satellite OMM Data (Iridium 33 Debris)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_iridium-33-debris",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=iridium-33-debris&FORMAT=kvn",
+  Filename = "iridium-33-debris.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+
+local DebrisIridium = {
+  Identifier = "DebrisIridium-33",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "iridium-33-debris.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.8, 0.0, 0.3 },
+    TrailFade = 5,
+    PointSizeExponent = 5.0,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Iridium 33 Debris",
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
+  }
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
 
-
-local objectNames = {}
-
-asset.onInitialize(function ()
-    objectNames = shared.addSatelliteGroupObjects(group, tle, true)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(DebrisIridium)
 end)
 
-asset.onDeinitialize(function ()
-    for _, n in ipairs(objectNames) do
-        openspace.removeSceneGraphNode(n)
-    end
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(DebrisIridium)
 end)
+
+asset.export(DebrisIridium)
+
+
+
+asset.meta = {
+  Name = "Satellites Debris - Iridium 33 Debris",
+  Description = "Satellites asset for Debris - Iridium 33 Debris. Data from Celestrak",
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/NORAD/elements/",
+  License = "Celestrak"
+}

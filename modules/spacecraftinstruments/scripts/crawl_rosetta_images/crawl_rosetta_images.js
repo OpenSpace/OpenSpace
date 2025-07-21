@@ -80,14 +80,14 @@ getHttps(archiveUrl, (body) => {
     let imageUrl = '';
     if (thumbnailName) {
       let originalName = thumbnailName.replace('_tn', '');
-      imageUrl = rootUrl + originalName; 
+      imageUrl = rootUrl + originalName;
     }
 
 
     let detailsName = $(td).find('a').attr('href');
     if (detailsName) {
       let detailsUrl = rootUrl + detailsName;
-      
+
       getHttps(detailsUrl, (detailsBody) => {
         let $detailsRoot = $.load(detailsBody);
 
@@ -99,7 +99,7 @@ getHttps(archiveUrl, (body) => {
         $detailsRoot('tr').map((i, detailsTr) => {
           let header = $(detailsTr).children('th').html();
           let cell = $(detailsTr).children('td').html();
-          
+
           switch (header) {
             case 'ID': id = cell; break;
             case 'Date taken': startTime = cell; break;

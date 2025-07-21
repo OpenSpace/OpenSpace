@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,19 +30,15 @@
 
 namespace openspace::interaction {
 
-class InputState;
-
 class CameraInteractionStates {
 public:
     /**
-     * \param sensitivity
-     * \param velocityScaleFactor can be set to 60 to remove the inertia of the
-     * interaction. Lower value will make it harder to move the camera.
+     * \param sensitivity Interaction sensitivity
+     * \param velocityScaleFactor Can be set to 60 to remove the inertia of the
+     *        interaction. Lower value will make it harder to move the camera
      */
     CameraInteractionStates(double sensitivity, double velocityScaleFactor);
     virtual ~CameraInteractionStates() = default;
-
-    virtual void updateStateFromInput(const InputState& inputState, double deltaTime) = 0;
 
     void setRotationalFriction(double friction);
     void setHorizontalFriction(double friction);
@@ -56,18 +52,25 @@ public:
     glm::dvec2 localRollVelocity() const;
     glm::dvec2 globalRollVelocity() const;
 
+    void resetVelocities();
+
+    /**
+     * Returns true if any of the velocities are larger than zero, i.e. wether an
+     * interaction happened.
+     */
+    bool hasNonZeroVelocities(bool checkOnlyMovement = false) const;
+
 protected:
     struct InteractionState {
         InteractionState(double scaleFactor);
         void setFriction(double friction);
         void setVelocityScaleFactor(double scaleFactor);
 
-        glm::dvec2 previousPosition;
+        glm::dvec2 previousPosition = glm::dvec2(0.0);
         DelayedVariable<glm::dvec2, double> velocity;
     };
 
-
-    double _sensitivity;
+    double _sensitivity = 0.0;
 
     InteractionState _globalRotationState;
     InteractionState _localRotationState;

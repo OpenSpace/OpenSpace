@@ -1,0 +1,11 @@
+asset.require("./layers/colorlayers/cassini_iss_global_mosaic_4km_local", true)
+
+
+
+asset.meta = {
+  Name = "Default Titan Layers",
+  Description = "Default Titan layers are: Cassini ISS Global Mosaic",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

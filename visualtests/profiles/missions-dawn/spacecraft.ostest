@@ -1,0 +1,38 @@
+{
+  "profile": "missions/dawn",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Dawn",
+        "position": [
+          -7.01275419284917,
+          7.820280260364558,
+          -3.2352289315946328
+        ],
+        "pitch": 2.4178422698310285e-05,
+        "up": [
+          -0.437962117993405,
+          -0.020927490586799463,
+          0.8987500079445685
+        ],
+        "yaw": -1.3478329467692498e-05,
+        "timestamp": "2011 AUG 09 07:31:53"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.*Trail.Renderable.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "wait",
+      "value": 30
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,50 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace::luascriptfunctions {
+#include <ghoul/lua/lua_helper.h>
 
-int connect(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::connect");
+namespace {
 
-    if (global::windowDelegate.isMaster()) {
-        global::parallelPeer.connect();
+[[codegen::luawrap]] void joinServer(std::string port, std::string address,
+                                     std::string serverName, std::string password,
+                                     std::string hostpassword = "",
+                                     std::string name = "Anonymous") {
+    using namespace openspace;
+    if (global::windowDelegate->isMaster()) {
+        ParallelPeer* peer = global::parallelPeer;
+        peer->setPort(std::move(port));
+        peer->setAddress(std::move(address));
+        peer->setPassword(std::move(password));
+        peer->setHostPassword(std::move(hostpassword));
+        peer->setServerName(std::move(serverName));
+        peer->setName(std::move(name));
+        peer->connect();
     }
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
 }
 
-int disconnect(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::disconnect");
-
-    if (global::windowDelegate.isMaster()) {
-        global::parallelPeer.connect();
+// Connect to parallel.
+[[codegen::luawrap]] void connect() {
+    using namespace openspace;
+    if (global::windowDelegate->isMaster()) {
+        global::parallelPeer->connect();
     }
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
 }
 
-int requestHostship(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::requestHostship");
-
-    if (global::windowDelegate.isMaster()) {
-        global::parallelPeer.requestHostship();
+// Disconnect from parallel.
+[[codegen::luawrap]] void disconnect() {
+    using namespace openspace;
+    if (global::windowDelegate->isMaster()) {
+        global::parallelPeer->disconnect();
     }
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
 }
 
-int resignHostship(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::resignHostship");
-
-    if (global::windowDelegate.isMaster()) {
-        global::parallelPeer.resignHostship();
+// Request to be the host for this session.
+[[codegen::luawrap]] void requestHostship() {
+    using namespace openspace;
+    if (global::windowDelegate->isMaster()) {
+        global::parallelPeer->requestHostship();
     }
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
 }
 
-} // namespace openspace::luascriptfunctions
+// Resign hostship.
+[[codegen::luawrap]] void resignHostship() {
+    using namespace openspace;
+    if (global::windowDelegate->isMaster()) {
+        global::parallelPeer->resignHostship();
+    }
+}
+
+#include "parallelpeer_lua_codegen.cpp"
+
+} // namespace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,69 +31,59 @@
 #include <openspace/util/time.h>
 
 namespace {
-    constexpr const openspace::properties::Property::PropertyInfo TimeFramesInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TimeFramesInfo = {
         "TimeFrames",
         "Time Frames",
-        "A vector of time frames to combine into one. "
-        "The time frame is active when any of the contained time frames are, "
-        "but not in gaps between contained time frames."
+        "A vector of time frames to combine into one. The time frame is active when any "
+        "of the contained time frames are, but not in gaps between contained time "
+        "frames.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
+
+    // This `TimeFrame` class will accept the union of all passed-in TimeFrames. This
+    // means that this TimeFrame will be active if at least one of the child TimeFrames is
+    // active and it will be inactive if none of the child TimeFrames are active.
+    //
+    // This can be used to create more complex TimeFrames that are made up of several,
+    // simpler TimeFrames themselves.
+    struct [[codegen::Dictionary(TimeFrameUnion)]] Parameters {
+        // [[codegen::verbatim(TimeFramesInfo.description)]]
+        std::vector<ghoul::Dictionary> timeFrames
+            [[codegen::reference("core_time_frame")]];
+    };
+#include "timeframeunion_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation TimeFrameUnion::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Time Frame Union",
-        "base_time_frame_union",
-        {
-            {
-                TimeFramesInfo.identifier,
-                new TableVerifier({
-                    {
-                        "*",
-                        new ReferencingVerifier("core_time_frame"),
-                        Optional::Yes
-                    }
-                }),
-                Optional::No,
-                TimeFramesInfo.description
-            },
-        }
-    };
+    return codegen::doc<Parameters>("base_timeframe_union");
 }
 
-bool TimeFrameUnion::isActive(const Time& time) const {
-    for (const auto& tf : _timeFrames) {
-        if (tf->isActive(time)) {
-            return true;
-        }
-    }
-    return false;
-}
+TimeFrameUnion::TimeFrameUnion(const ghoul::Dictionary& dictionary) {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-TimeFrameUnion::TimeFrameUnion() {}
-
-TimeFrameUnion::TimeFrameUnion(const ghoul::Dictionary& dictionary)
-    : TimeFrame()
-{
-    documentation::testSpecificationAndThrow(Documentation(),
-                                             dictionary,
-                                             "TimeFrameUnion");
-
-    ghoul::Dictionary frames =
-        dictionary.value<ghoul::Dictionary>(TimeFramesInfo.identifier);
-
-    for (const std::string& k : frames.keys()) {
-        const ghoul::Dictionary& subDictionary = frames.value<ghoul::Dictionary>(k);
-        _timeFrames.push_back(TimeFrame::createFromDictionary(subDictionary));
+    for (size_t i = 0; i < p.timeFrames.size(); i++) {
+        const ghoul::Dictionary& frame = p.timeFrames[i];
+        _timeFrames.push_back(TimeFrame::createFromDictionary(frame));
         TimeFrame& subFrame = *_timeFrames.back();
-        subFrame.setIdentifier(k);
-        subFrame.setGuiName(k);
-        subFrame.setDescription(k);
+        subFrame.setIdentifier(std::format("{}", i));
+        subFrame.setGuiName(std::format("{}", i));
+        subFrame.setDescription(std::format("{}", i));
         addPropertySubOwner(*_timeFrames.back());
     }
+}
+
+void TimeFrameUnion::update(const Time& time) {
+    for (const ghoul::mm_unique_ptr<TimeFrame>& tf : _timeFrames) {
+        tf->update(time);
+    }
+
+    _isInTimeFrame = std::any_of(
+        _timeFrames.begin(),
+        _timeFrames.end(),
+        std::mem_fn(&TimeFrame::isActive)
+    );
 }
 
 } // namespace openspace

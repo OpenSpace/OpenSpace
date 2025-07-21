@@ -1,0 +1,38 @@
+local globe = asset.require("../../earth")
+
+
+
+local Layer = {
+  Identifier = "Terrain_tileset",
+  Name = "Terrain tileset",
+  Enabled = asset.enabled,
+  ZIndex = 10,
+  FilePath = asset.resource("terrain_tileset.wms"),
+  TilePixelSize = 129,
+  Description = [[This globe layer presents elevation data at approximately 90m or 1km
+    per pixel resolution for the world. The elevation data includes 90m Shuttle Radar
+    Topography Mission (SRTM) elevation data from NASA and National
+    Geospatial-Intelligence Agency (NGA) where it is available and 1km GTOPO30
+    data from the USGS elsewhere. Vertical units are measured in meters]]
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "HeightLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "HeightLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "World Elevation (3D)",
+  Description = "Main web loaded height layer for Earth. This layer is hosted by ESRI",
+  Author = "ESRI",
+  URL = "https://www.arcgis.com/home/item.html?id=1b48cd3b6276416784fe90a68c580a89",
+  License = "Esri Master License Agreement"
+}

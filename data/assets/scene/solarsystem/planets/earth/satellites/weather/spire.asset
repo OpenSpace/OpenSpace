@@ -1,23 +1,55 @@
-local assetHelper = asset.require('util/asset_helper')
-local shared = asset.require('../satellites_shared')
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local group = {
-    Title = "Spire",
-    Url = "http://www.celestrak.com/NORAD/elements/spire.txt",
-    TrailColor = { 0.75, 0.75, 0.35 }
+
+
+local omm = asset.resource({
+  Name = "Satellite OMM Data (Spire)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_spire",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=spire&FORMAT=kvn",
+  Filename = "spire.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+
+local SpireSatellites = {
+  Identifier = "SpireSatellites",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "spire.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.75, 0.75, 0.35 },
+    TrailFade = 15,
+    PointSizeExponent = 5.0,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Spire",
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
+  }
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
 
-
-local objectNames = {}
-
-asset.onInitialize(function ()
-    objectNames = shared.addSatelliteGroupObjects(group, tle, false)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SpireSatellites)
 end)
 
-asset.onDeinitialize(function ()
-    for _, n in ipairs(objectNames) do
-        openspace.removeSceneGraphNode(n)
-    end
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SpireSatellites)
 end)
+
+asset.export(SpireSatellites)
+
+
+
+asset.meta = {
+  Name = "Satellites Weather - Spire",
+  Description = [[Satellites asset for the Spire constellation. Data from Celestrak]],
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/NORAD/elements/",
+  License = "Celestrak"
+}

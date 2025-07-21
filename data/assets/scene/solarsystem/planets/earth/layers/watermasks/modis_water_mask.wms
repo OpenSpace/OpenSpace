@@ -1,0 +1,24 @@
+<GDAL_WMS>
+  <Service name="TMS">
+    <ServerUrl>https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/MODIS_Terra_L3_Land_Water_Mask/default/2015-08-21/250m/${z}/${y}/${x}.png</ServerUrl>
+  </Service>
+  <DataWindow>
+    <UpperLeftX>-180.0</UpperLeftX>
+    <UpperLeftY>90</UpperLeftY>
+    <LowerRightX>396.0</LowerRightX>
+    <LowerRightY>-198</LowerRightY>
+    <TileLevel>7</TileLevel>
+    <TileCountX>2</TileCountX>
+    <TileCountY>1</TileCountY>
+    <YOrigin>top</YOrigin>
+  </DataWindow>
+  <Projection>EPSG:4326</Projection>
+  <BlockSizeX>512</BlockSizeX>
+  <BlockSizeY>512</BlockSizeY>
+  <BandsCount>4</BandsCount>
+  <MaxConnections>5</MaxConnections>
+  <UnsafeSSL>true</UnsafeSSL>
+  <ZeroBlockHttpCodes>400,204,404</ZeroBlockHttpCodes>
+  <ZeroBlockOnServerException>true</ZeroBlockOnServerException>
+  <Timeout>5</Timeout>
+</GDAL_WMS>

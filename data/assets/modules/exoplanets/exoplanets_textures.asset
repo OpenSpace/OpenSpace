@@ -1,0 +1,70 @@
+local habitableZoneTextures = asset.require(
+  "scene/milkyway/habitable_zones/habitable_zone_textures"
+)
+
+
+
+local sunTextures = asset.resource({
+  Type = "HttpSynchronization",
+  Name = "Sun textures",
+  Identifier = "sun_textures",
+  Version = 4
+})
+
+local texturesPath = asset.resource({
+  Name = "Exoplanet Textures",
+  Type = "HttpSynchronization",
+  Identifier = "exoplanets_textures",
+  Version = 2
+})
+
+
+asset.onInitialize(function()
+  local starTexture = texturesPath .. "sun.jpg"
+  local noDataTexture = texturesPath .. "grid-32.png"
+  local discTexture = texturesPath .. "disc_bw_texture.png"
+
+  local starGlareTexture = sunTextures .. "halo.png"
+
+  local hzTexture = habitableZoneTextures.TexturesPath .. "hot_to_cold_faded.png"
+
+  -- Set the default textures used for the exoplanet system creation
+  -- (Check if already set, to not override value set in another file)
+  local p1 = "Modules.Exoplanets.StarTexture"
+  if (openspace.propertyValue(p1) == "") then
+    openspace.setPropertyValueSingle(p1, starTexture)
+  end
+
+  local p2 = "Modules.Exoplanets.StarGlareTexture"
+  if (openspace.propertyValue(p2) == "") then
+    openspace.setPropertyValueSingle(p2, starGlareTexture)
+  end
+
+  local p3 = "Modules.Exoplanets.NoDataTexture"
+  if (openspace.propertyValue(p3) == "") then
+    openspace.setPropertyValueSingle(p3, noDataTexture)
+  end
+
+  local p4 = "Modules.Exoplanets.OrbitDiscTexture"
+  if (openspace.propertyValue(p4) == "") then
+    openspace.setPropertyValueSingle(p4, discTexture)
+  end
+
+  local p5 = "Modules.Exoplanets.HabitableZoneTexture"
+  if (openspace.propertyValue(p5) == "") then
+    openspace.setPropertyValueSingle(p5, hzTexture)
+  end
+end)
+
+asset.export("TexturesPath", texturesPath)
+
+
+
+asset.meta = {
+  Name = "Exoplanet Textures",
+  Description = [[Adds all textures that are required for the exoplanet system
+    visualizations]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

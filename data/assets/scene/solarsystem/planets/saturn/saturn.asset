@@ -1,66 +1,111 @@
-local transforms = asset.require('./transforms')
-local assetHelper = asset.require('util/asset_helper')
-asset.require("spice/base")
-asset.request('./trail')
+asset.require("./trail")
+local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
-local textures = asset.syncedResource({
-    Type = "HttpSynchronization",
-    Name = "Saturn textures",
-    Identifier = "saturn_textures",
-    Version = 3
+local texturesPath = asset.resource({
+  Type = "HttpSynchronization",
+  Name = "Saturn textures",
+  Identifier = "saturn_textures",
+  Version = 4
 })
 
+
 local Saturn = {
-    Identifier = "Saturn",
-    Parent = transforms.SaturnBarycenter.Identifier,
-    Transform = {
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_SATURN",
-            DestinationFrame = "GALACTIC"
-        },
-        Scale = {
-            Type = "StaticScale",
-            Scale = 1.0
-        }
+  Identifier = "Saturn",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = coreKernels.ID.Saturn,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = { 60268000, 60268000, 54364000 },
-        SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/saturn.jpg",
-                    Enabled = true
-                }
-            }
-        }
-    },
-    Tag = { "planet_solarSystem", "planet_giants" },
-    GUI = {
-        Path = "/Solar System/Planets/Saturn"
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.Saturn,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 60268000, 60268000, 54364000 },
+    Rings = {
+      -- Single Texture Values:
+      --Texture = texturesPath .. "/saturn_rings.png",
+      --ColorFilter = 0.15,
+
+      -- MultiTexture Valeus:
+      TextureFwrd = texturesPath .. "forward_original_single.png",
+      TextureBckwrd = texturesPath .. "back_original_single.png",
+      TextureUnlit = texturesPath .. "unlit_original_single.png",
+      TextureColor = texturesPath .. "color_original_single.png",
+      TextureTransparency = texturesPath .. "trans_original_single.png",
+      ColorFilter = 0.8,
+
+      NightFactor = 1.0,
+      Size = 140445000,
+      Offset = { 74500 / 140445.100671159, 1.0 }, -- min / max extend
+    },
+    Shadows = {
+      Enabled = true,
+      DistanceFraction = 40.0
+    }
+  },
+  Tag = { "planet_solarSystem", "planet_giants" },
+  GUI = {
+    Name = "Saturn",
+    Path = "/Solar System/Planets/Saturn",
+    Description = "Saturn globe"
+  }
 }
 
-local SaturnRings = {
-    Identifier = "SaturnRings",
-    Parent = Saturn.Identifier,
-    Renderable = {
-        Type = "RenderableRings",
-        Texture = textures .. "/saturn_rings.png",
-        Size = 140445000,
-        Offset = { 74500 / 140445.100671159, 1.0 } -- min / max extend
-    },
-    GUI = {
-        Name = "Saturn Rings",
-        Path = "/Solar System/Planets/Saturn"
-    }
+local SaturnLabel = {
+  Identifier = "SaturnLabel",
+  Parent = Saturn.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Saturn",
+    FontSize = 70.0,
+    Size = 8.9,
+    MinMaxSize = { 1, 60 },
+    BlendMode = "Additive",
+    OrientationOption = "Camera View Direction",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 2.5, 80.0 },
+    FadeWidths = { 1.0, 100.0 }
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "Saturn Label",
+    Path = "/Solar System/Planets/Saturn",
+    Focusable = false,
+    Description = "Main planet label for Saturn"
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Saturn)
+  openspace.addSceneGraphNode(SaturnLabel)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Saturn, SaturnRings })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SaturnLabel)
+  openspace.removeSceneGraphNode(Saturn)
+end)
+
+asset.export(Saturn)
+asset.export(SaturnLabel)
+
+
+
+asset.meta = {
+  Name = "Saturn",
+  Description = "Saturn globe, and main planet label",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

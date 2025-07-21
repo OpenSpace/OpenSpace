@@ -1,0 +1,105 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Tsunami Locations - 2000 BCE - 2014"
+local Identifier = "noaa-sos-oceans-tsunami_locations"
+local Description = [[Earthquakes, landslides, volcanoes, explosions, and atmospheric
+processes - all of these disasters have caused tsunamis in the past. But by far, the most
+common generator of tsunamis is earthquakes, as has recently been seen in Sumatra, Chile,
+and Japan. The NOAA National Geophysical Data Center archives academic and historical
+reports from around the world of where tsunamis are estimated to have originated, and
+have compiled a database of over 2,500 events from 2,000 B.C. through 2014t. This image
+plots about half of those events - tsunamis that are classified as a "definite tsunami"
+or "probable tsunami." The icons are shaded according to the devastation of the event by
+the number of fatalities caused where white = none, yellow = 1-50, orange = 51-100, and
+red = >101. Since earthquakes are the most common tsunami generator, the highest density
+of event origins are located around the Pacific "Ring of Fire" known for its prevalence
+of volcanic and tectonic activity. The points are overlaid on top of a map of ocean
+bathymetry (Natural Earth 2 from the Natural Earth project), which indicates many of the
+pronounced ocean features, such as volcanic islands, rift zones, and plate boundaries
+ that are often associated with generating tsunamis]]
+local URL = "https://sos.noaa.gov/catalog/datasets/tsunami-locations-2000-bce-2014/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local LayerBase = {
+  Identifier = Identifier,
+  Name = Name,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "4096.jpg",
+  Description = Description
+}
+
+local LayerGray = {
+  Identifier = Identifier .. "-gray",
+  Name = Name .. " (Gray)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "gray_earth_with_countries_4096.png",
+  Description = Description
+}
+
+local LayerNeutral = {
+  Identifier = Identifier .. "-neutral",
+  Name = Name .. " (Neutral)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "natural_earth_with_countries_4096.png",
+  Description = Description
+}
+
+local LayerEvents = {
+  Identifier = Identifier .. "-events",
+  Name = Name .. " (Events)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "tsunami_events.png",
+  Description = Description
+}
+
+local Legend = {
+  Identifier = Identifier,
+  Name = Name,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "legend.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.85, 0.0, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerGray)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerNeutral)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerEvents)
+  openspace.addScreenSpaceRenderable(Legend)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerEvents)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerNeutral)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerGray)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
+  openspace.removeScreenSpaceRenderable(Legend)
+end)
+
+asset.export(LayerBase)
+asset.export(LayerGray)
+asset.export(LayerNeutral)
+asset.export(LayerEvents)
+asset.export(Legend)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

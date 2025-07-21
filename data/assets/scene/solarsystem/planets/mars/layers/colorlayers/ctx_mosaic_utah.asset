@@ -1,0 +1,34 @@
+local globe = asset.require("../../mars")
+
+
+
+local Layer = {
+  Identifier = "CTX_Mosaic_Utah",
+  Name = "CTX Mosaic [Utah]",
+  Enabled = asset.enabled,
+  ZIndex = 60,
+  FilePath = asset.resource("ctx_mosaic_utah.wms"),
+  BlendMode = "Color"
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Mars.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Mars.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "CTX Mosaic [Utah]",
+  Description = [[CTX Mosaic layer for Mars globe. This layer is served from the
+    OpenSpace servers in Utah]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,10 +24,12 @@
 
 #include <modules/spacecraftinstruments/rendering/renderableplaneprojection.h>
 
+#include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
@@ -40,35 +42,53 @@
 #include <glm/gtx/projection.hpp>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderablePlaneProjection";
-    constexpr const char* KeySpacecraft = "Spacecraft";
-    constexpr const char* KeyInstrument = "Instrument";
-    constexpr const char* KeyMoving = "Moving";
-    constexpr const char* KeyTexture = "Texture";
-    constexpr const char* KeyName = "Name";
-    constexpr const char* KeyTarget = "DefaultTarget";
-    constexpr const char* GalacticFrame = "GALACTIC";
+    constexpr std::string_view _loggerCat = "RenderablePlaneProjection";
+
+    // This specialized Renderable type is used as a target for projections from a
+    // spacecraft instrument. Similarly to the
+    // [RenderablePlanetProject](spacecraftinstruments_renderableplanetprojection) it
+    // uses the spacecraft's position and orientation and information about an instruments
+    // field-of-view and set of images to project a captured image. In the case of this
+    // renderable the target geometry is a two-dimensional plane that the image is
+    // projected on.
+    struct [[codegen::Dictionary(RenderablePlaneProjection)]] Parameters {
+        // The SPICE name of the spacecraft from which the projection is performed.
+        std::string spacecraft;
+
+        // The SPICE name of the instrument that is used to project the image onto this
+        // `RenderablePlaneProjection`.
+        std::string instrument;
+
+        // The SPICE name of the default target that is imaged by this instrument (used
+        // when no target is identified by the `ImageSequencer`).
+        std::optional<std::string> defaultTarget;
+
+        // The image that is used on this plane before any image is loaded from the
+        // `ImageSequencer`.
+        std::optional<std::string> texture;
+    };
+#include "renderableplaneprojection_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
+documentation::Documentation RenderablePlaneProjection::Documentation() {
+    return codegen::doc<Parameters>("spacecraftinstruments_renderableplaneprojection");
+}
+
 RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
 {
-    dictionary.getValue(KeySpacecraft, _spacecraft);
-    dictionary.getValue(KeyInstrument, _instrument);
-    dictionary.getValue(KeyMoving, _moving);
-    dictionary.getValue(KeyName, _name);
-    dictionary.getValue(KeyTarget, _defaultTarget);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _spacecraft = p.spacecraft;
+    _instrument = p.instrument;
+    _defaultTarget = p.defaultTarget.value_or(_defaultTarget);
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyTexture)) {
-        _texturePath = dictionary.value<std::string>(KeyTexture);
-        _texturePath = absPath(_texturePath);
+    if (p.texture.has_value()) {
+        _texturePath = absPath(*p.texture);
         _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
     }
 }
-
-RenderablePlaneProjection::~RenderablePlaneProjection() {} // NOLINT
 
 bool RenderablePlaneProjection::isReady() const {
     return _shader && _texture;
@@ -78,7 +98,7 @@ void RenderablePlaneProjection::initializeGL() {
     glGenVertexArrays(1, &_quad);
     glGenBuffers(1, &_vertexPositionBuffer);
 
-    _shader = global::renderEngine.buildRenderProgram(
+    _shader = global::renderEngine->buildRenderProgram(
         "Image Plane",
         absPath("${MODULE_BASE}/shaders/imageplane_vs.glsl"),
         absPath("${MODULE_BASE}/shaders/imageplane_fs.glsl")
@@ -90,7 +110,7 @@ void RenderablePlaneProjection::initializeGL() {
 
 void RenderablePlaneProjection::deinitializeGL() {
     if (_shader) {
-        global::renderEngine.removeRenderProgram(_shader.get());
+        global::renderEngine->removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
 
@@ -102,12 +122,7 @@ void RenderablePlaneProjection::deinitializeGL() {
 }
 
 void RenderablePlaneProjection::render(const RenderData& data, RendererTasks&) {
-    bool active = ImageSequencer::ref().isInstrumentActive(
-        data.time.j2000Seconds(),
-        _instrument
-    );
-
-    if (!_hasImage || (_moving && !active)) {
+    if (!_hasImage) {
         return;
     }
 
@@ -116,10 +131,14 @@ void RenderablePlaneProjection::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(_stateMatrix);
-    glm::mat4 modelViewProjectionTransform = data.camera.projectionMatrix() *
-                             glm::mat4(data.camera.combinedViewMatrix() * modelTransform);
 
-    _shader->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
+    const glm::dmat4 ModelViewProjectionTransform =
+        calcModelViewProjectionTransform(data, modelTransform);
+
+    _shader->setUniform(
+        "modelViewProjectionTransform",
+        glm::mat4(ModelViewProjectionTransform)
+    );
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
@@ -134,9 +153,7 @@ void RenderablePlaneProjection::render(const RenderData& data, RendererTasks&) {
 
 void RenderablePlaneProjection::update(const UpdateData& data) {
     const double time = data.time.j2000Seconds();
-    const Image& img = openspace::ImageSequencer::ref().latestImageForInstrument(
-        _instrument
-    );
+    const Image& img = ImageSequencer::ref().latestImageForInstrument(_instrument);
 
     if (img.path.empty()) {
         return;
@@ -146,17 +163,16 @@ void RenderablePlaneProjection::update(const UpdateData& data) {
 
     _stateMatrix = SpiceManager::ref().positionTransformMatrix(
         _target.frame,
-        GalacticFrame,
+        "GALACTIC",
         time
     );
 
     const double timePast = std::abs(img.timeRange.start - _previousTime);
 
-    if (_moving || _planeIsDirty) {
+    if (_planeIsDirty) {
         updatePlane(img, time);
     }
-
-    else if (timePast > DBL_EPSILON) {
+    else if (timePast > std::numeric_limits<double>::epsilon()) {
         _previousTime = img.timeRange.start;
         updatePlane(img, img.timeRange.start);
     }
@@ -172,27 +188,27 @@ void RenderablePlaneProjection::update(const UpdateData& data) {
 }
 
 void RenderablePlaneProjection::loadTexture() {
-    if (!_texturePath.empty()) {
-        using TR = ghoul::io::TextureReader;
-        std::unique_ptr<ghoul::opengl::Texture> texture = TR::ref().loadTexture(
-            absPath(_texturePath)
-        );
-        if (texture) {
-            if (texture->format() == ghoul::opengl::Texture::Format::Red) {
-                texture->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_ONE });
-            }
-            texture->uploadTexture();
-            // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-            //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-            _texture = std::move(texture);
-
-            _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
-            _textureFile->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
-            );
-        }
+    if (_texturePath.empty()) {
+        return;
     }
+
+    std::unique_ptr<ghoul::opengl::Texture> texture =
+        ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath), 2);
+    if (!texture) {
+        return;
+    }
+
+    if (texture->format() == ghoul::opengl::Texture::Format::Red) {
+        texture->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_ONE });
+    }
+    texture->uploadTexture();
+    // TODO: AnisotropicMipMap crashes on ATI cards ---abock
+    //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+    texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+    _texture = std::move(texture);
+
+    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
+    _textureFile->setCallback([this]() { _textureIsDirty = true; });
 }
 
 void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime) {
@@ -201,7 +217,7 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
 
     std::string frame;
     std::vector<glm::dvec3> bounds;
-    glm::dvec3 boresight;
+    glm::dvec3 boresight = glm::dvec3(0.0);
     try {
         SpiceManager::FieldOfViewResult r = SpiceManager::ref().fieldOfView(_instrument);
 
@@ -213,11 +229,11 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
         LERROR(e.what());
     }
 
-    double lt;
+    double lt = 0.0;
     const glm::dvec3 vecToTarget = SpiceManager::ref().targetPosition(
         _target.body,
         _spacecraft,
-        GalacticFrame,
+        "GALACTIC",
         {
             SpiceManager::AberrationCorrection::Type::ConvergedNewtonianStellar,
             SpiceManager::AberrationCorrection::Direction::Reception
@@ -227,63 +243,47 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
     );
     // The apparent position, CN+S, makes image align best with target
 
-    // @TODO:  Remove these powerscaled coordinates
-    psc projection[4];
-    for (size_t j = 0; j < bounds.size(); ++j) {
+    std::array<glm::vec3, 4> projection;
+    std::fill(projection.begin(), projection.end(), glm::vec3(0.f));
+    for (size_t j = 0; j < bounds.size(); j++) {
         bounds[j] = SpiceManager::ref().frameTransformationMatrix(
             frame,
-            GalacticFrame,
+            "GALACTIC",
             currentTime
         ) * bounds[j];
         glm::dvec3 cornerPosition = glm::proj(vecToTarget, bounds[j]);
 
-        if (!_moving) {
-            cornerPosition -= vecToTarget;
-        }
+        cornerPosition -= vecToTarget;
         cornerPosition = SpiceManager::ref().frameTransformationMatrix(
-            GalacticFrame,
+            "GALACTIC",
             _target.frame,
             currentTime
         ) * cornerPosition;
 
-        projection[j] = PowerScaledCoordinate::CreatePowerScaledCoordinate(
-            cornerPosition[0],
-            cornerPosition[1],
-            cornerPosition[2]
-        );
-        projection[j][3] += 3;
+        // km -> m
+        projection[j] = glm::vec3(cornerPosition * 1000.0);
     }
 
-    if (!_moving) {
-        SceneGraphNode* thisNode = global::renderEngine.scene()->sceneGraphNode(_name);
-        SceneGraphNode* newParent = global::renderEngine.scene()->sceneGraphNode(
-            _target.node
-        );
-        if (thisNode && newParent) {
-            thisNode->setParent(*newParent);
-        }
-    }
-
-    const GLfloat vertex_data[] = {
+    const std::array<GLfloat, 36> VertexData = {
         // square of two triangles drawn within fov in target coordinates
         //      x      y     z     w     s     t
         // Lower left 1
-        projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 0,
+        projection[1].x, projection[1].y, projection[1].z, 0.f, 0.f, 0.f,
         // Upper right 2
-        projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 1,
+        projection[3].x, projection[3].y, projection[3].z, 0.f, 1.f, 1.f,
         // Upper left 3
-        projection[2][0], projection[2][1], projection[2][2], projection[2][3], 0, 1,
+        projection[2].x, projection[2].y, projection[2].z, 0.f, 0.f, 1.f,
         // Lower left 4 = 1
-        projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 0,
+        projection[1].x, projection[1].y, projection[1].z, 0.f, 0.f, 0.f,
         // Lower right 5
-        projection[0][0], projection[0][1], projection[0][2], projection[0][3], 1, 0,
+        projection[0].x, projection[0].y, projection[0].z, 0.f, 1.f, 0.f,
         // Upper left 6 = 2
-        projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 1,
+        projection[3].x, projection[3].y, projection[3].z, 0.f, 1.f, 1.f,
     };
 
     glBindVertexArray(_quad);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
     glEnableVertexAttribArray(1);
@@ -292,11 +292,11 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
         2,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(GLfloat) * 6,
+        6 * sizeof(GLfloat),
         reinterpret_cast<void*>(sizeof(GLfloat) * 4)
     );
 
-    if (!_moving && !img.path.empty()) {
+    if (!img.path.empty()) {
         _texturePath = img.path;
         loadTexture();
     }
@@ -307,7 +307,8 @@ void RenderablePlaneProjection::setTarget(std::string body) {
         return;
     }
 
-    _target.frame = SpiceManager::ref().frameFromBody(body);
+    _target.frame =
+        global::moduleEngine->module<SpacecraftInstrumentsModule>()->frameFromBody(body);
     _target.body = std::move(body);
 }
 

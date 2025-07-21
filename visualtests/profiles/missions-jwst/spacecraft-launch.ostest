@@ -1,0 +1,74 @@
+{
+  "profile": "missions/jwst",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "JWSTModel",
+        "position": [
+          2.41448974609375,
+          7.239112854003906,
+          -32.05631637573242
+        ],
+        "pitch": -0.0016536150252324272,
+        "referenceFrame": "Root",
+        "up": [
+          0.29929673277246255,
+          0.9256322227351812,
+          0.23157386291647233
+        ],
+        "yaw": -0.005743923344297124,
+        "timestamp": "2021 DEC 25 12:56:39"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.StereoscopicDepthOfFocusSurface",
+        "value": 5.0
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Earth.Renderable.Layers.ColorLayers.Blue_Marble.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.ISS_trail.Renderable.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.ISS.Renderable.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Tiangong_trail.Renderable.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Tiangong.Renderable.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "wait",
+      "value": 15
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

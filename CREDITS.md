@@ -1,30 +1,22 @@
+# Core Team
 Alexander Bock
-Joakim Kilby
-Emil Axelsson
-Eric Myers
-Jonathas Costa
-Matthew Territo
+Emma Broman
+Malin Ejdbo
+Ylva Selling
 Gene Payne
-Kalle Bladin
-Erik Sundén
+Elon Olsson
 Micah Acinapura
+Joakim Kilby
+Adam Rohdin
+Andreas Engberg
+Megan Villa
 
+
+Jonathas Costa
+Emil Axelsson
+Kalle Bladin
 Jonas Strandstedt
-Hans-Christian Helltegen
 Michal Marcinkowski
-Anton Arbring
-Tomas Forsyth Rosin
-Erik Broberg
-Michael Nilsson
-Sebastian Piwell
-Niclas Hultberg
-Rickard Lindtstedt
-Michael Sjöström
-Michael Novén
-Oskar Carlbaum
-Jonathan Bosson
-Klas Eskilson
-Christoffer Särevall
-
-Anteige
-noahdasanaike
+Lovisa Hassler
+Corrie Roe
+Eric Myers

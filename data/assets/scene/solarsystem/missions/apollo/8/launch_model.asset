@@ -1,0 +1,93 @@
+local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sun = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local models = asset.resource({
+  Name = "Apollo Models",
+  Type = "HttpSynchronization",
+  Identifier = "apollo_models",
+  Version = 4
+})
+
+
+local ApolloSpiceId = -908
+
+local Apollo8Launch = {
+  Identifier = "Apollo8Launch",
+  Parent = earth_transforms.EarthIAU.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "1968 DEC 21",
+    End = "1968 DEC 28"
+  },
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Apollo8,
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.Frame.Earth
+    }
+  },
+  GUI = {
+    Name = "Apollo 8 Launch Capsule",
+    Path = "/Solar System/Missions/Apollo/8"
+  }
+}
+
+local Apollo8LaunchModel = {
+  Identifier = "Apollo8LaunchModel",
+  Parent = Apollo8Launch.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "1968 DEC 21",
+    End = "1968 DEC 22"
+  },
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0.0, 0.0, -math.pi / 2 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "ApolloCSM.osmodel",
+    ModelScale = 0.0001,
+    LightSources = {
+      sun.LightSource
+    },
+    PerformShading = true
+  },
+  GUI = {
+    Name = "Apollo 8 Launch Model",
+    Path = "/Solar System/Missions/Apollo/8",
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Apollo8Launch)
+  openspace.addSceneGraphNode(Apollo8LaunchModel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Apollo8LaunchModel)
+  openspace.removeSceneGraphNode(Apollo8Launch)
+end)
+
+asset.export(Apollo8Launch)
+asset.export(Apollo8LaunchModel)
+
+
+
+asset.meta = {
+  Name = "Apollo 8 Launch Model",
+  Description = [[Contains the 3D model of the Apollo 8 command module for use during the
+    launch of the spacecraft from Earth.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

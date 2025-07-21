@@ -1,0 +1,63 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Sea Surface Temperature Anomalies - 1980 - 1999"
+local Identifier = "noaa-sos-oceans-sst_1980_1999"
+local Description = [[Rather than plotting sea surface temperatures, sea surface
+temperature anomalies have been plotted here to show the dramatic departures from normal
+that are associated with El Nino and La Nina from 1980 - 1999. El Nino is the warming of
+the Pacific Ocean off of the western coast of South America near Ecuador and Peru. It is
+called El Nino, or little boy in Spanish, referring to the Christ child because the
+phenomena usually occurs near Christmas time. The opposite of El Nino is La Nina, or
+little girl in Spanish, which is a cooling of the Pacific Ocean. The red shading
+signifies a warming of the ocean by 5-10°F, the green shading is normal and the blue
+shading is a cooling of the ocean by 5-10°F]]
+local URL = "https://sos.noaa.gov/catalog/datasets/sea-surface-temperature-anomalies-1980-1999/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "TemporalTileProvider",
+  Mode = "Folder",
+  Folder = {
+    Folder = syncedDirectory .. "4096",
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "cyl_%Y_%m_%d.jpg"
+  },
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

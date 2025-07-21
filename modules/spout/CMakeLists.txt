@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,32 +22,41 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/renderableplanespout.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/screenspacespout.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/spoutlibrary.h
+  renderableplanespout.h
+  renderablespherespout.h
+  screenspacespout.h
+  spoutlibrary.h
+  spoutwrapper.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/renderableplanespout.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/screenspacespout.cpp
+  renderableplanespout.cpp
+  renderablespherespout.cpp
+  screenspacespout.cpp
+  spoutwrapper.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SGCT_SPOUT_SUPPORT ON CACHE BOOL "" FORCE)
 
 create_new_module(
-    "Spout"
-    spout_module
-    STATIC
-    ${HEADER_FILES} ${SOURCE_FILES}
+  "Spout"
+  spout_module
+  STATIC
+  ${HEADER_FILES} ${SOURCE_FILES}
 )
 
-target_include_directories(openspace-module-spout SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout)
-target_link_libraries(openspace-module-spout ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.lib)
-register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.dll")
+add_library(spout SHARED IMPORTED)
+target_include_directories(spout SYSTEM INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout)
+set_target_properties(
+  spout PROPERTIES
+  IMPORTED_IMPLIB ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.lib
+  IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.dll
+)
+target_link_libraries(openspace-module-spout PRIVATE spout)
 
 target_compile_definitions(openspace-module-spout PUBLIC "OPENSPACE_HAS_SPOUT")

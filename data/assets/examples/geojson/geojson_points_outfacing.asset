@@ -1,0 +1,44 @@
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+
+
+local data = asset.resource({
+  Name = "GeoJSON Example Outfacing",
+  Type = "UrlSynchronization",
+  Identifier = "geojson_example_points",
+  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/points.geojson"
+})
+
+
+local ExamplePoints = {
+  Identifier = "Points-Example-outfacing",
+  File = data .. "points.geojson",
+  HeightOffset = 20000.0,
+  DefaultProperties = {
+    PointSize = 10.0
+  },
+  PointRenderMode = "Globe Normal",
+  Name = "Example Points (align to globe normal)"
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, ExamplePoints)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, ExamplePoints)
+end)
+
+asset.export(ExamplePoints)
+
+
+
+asset.meta = {
+  Name = "GeoJson Example - Outfacing Points",
+  Description = [[GeoJson example asset with point that are aligned to "stick out" of
+    the globe, i.e. face out of the planet]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

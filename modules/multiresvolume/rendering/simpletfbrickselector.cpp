@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,16 +29,16 @@
 #include <openspace/rendering/transferfunction.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <algorithm>
 
 namespace {
-    constexpr const char* _loggerCat = "SimpleTfBrickSelector";
+    constexpr std::string_view _loggerCat = "SimpleTfBrickSelector";
 
     bool compareSplitPoints(const openspace::BrickSelection& a,
                             const openspace::BrickSelection& b)
     {
         return a.splitPoints < b.splitPoints;
     }
-
 } // namespace
 
 namespace openspace {
@@ -83,7 +83,8 @@ void SimpleTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks)
 
     if (splitType != BrickSelection::SplitType::None) {
         priorityQueue.push_back(brickSelection);
-    } else {
+    }
+    else {
         leafSelections.push_back(brickSelection);
     }
 
@@ -137,10 +138,12 @@ void SimpleTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks)
                     priorityQueue.end(),
                     compareSplitPoints
                 );
-            } else {
+            }
+            else {
                 leafSelections.push_back(childSelection);
             }
-        } else if (bs.splitType == BrickSelection::SplitType::Spatial) {
+        }
+        else if (bs.splitType == BrickSelection::SplitType::Spatial) {
             nBricksInMemory += 7; // Remove one and add eight.
             unsigned int firstChild = _tsp->firstOctreeChild(brickIndex);
 
@@ -158,7 +161,8 @@ void SimpleTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks)
                 }
                 if (bs.splitPoints > -1) {
                     temporalSplitQueue.push_back(bs);
-                } else {
+                }
+                else {
                     deadEnds.push_back(bs);
                 }
                 break;
@@ -171,9 +175,9 @@ void SimpleTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks)
                 BrickSelection::SplitType childSplitType;
                 float childSplitPoints = splitPoints(childBrickIndex, childSplitType);
                 BrickSelection childSelection = bs.splitSpatially(
-                    i % 2,
-                    (i / 2) % 2, // abock:  this is always 0?
-                    i / 4,
+                    i % 2 != 0,
+                    (i / 2) % 2 != 0, // abock:  this is always 0?
+                    i / 4 != 0,
                     childBrickIndex,
                     childSplitType,
                     childSplitPoints
@@ -186,7 +190,8 @@ void SimpleTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks)
                         priorityQueue.end(),
                         compareSplitPoints
                     );
-                } else {
+                }
+                else {
                     leafSelections.push_back(childSelection);
                 }
             }
@@ -208,7 +213,8 @@ void SimpleTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks)
                     temporalSplitQueue.end(),
                     compareSplitPoints
                 );
-            } else {
+            }
+            else {
                 deadEnds.push_back(bs);
             }
         }
@@ -256,7 +262,8 @@ void SimpleTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks)
                     temporalSplitQueue.end(),
                     compareSplitPoints
                 );
-            } else {
+            }
+            else {
                 BrickSelection childSelection = bs.splitTemporally(
                     pickRightTimeChild,
                     childBrickIndex,
@@ -265,7 +272,8 @@ void SimpleTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks)
                 deadEnds.push_back(childSelection);
             }
         }
-    } else {
+    }
+    else {
         // Write selected inner nodes to brickSelection vector
         for (const BrickSelection& bs : priorityQueue) {
             writeSelection(bs, bricks);
@@ -309,10 +317,12 @@ float SimpleTfBrickSelector::splitPoints(unsigned int brickIndex,
     if (spatialPoints > 0 && spatialPoints > temporalPoints) {
         splitPoints = spatialPoints;
         splitType = BrickSelection::SplitType::Spatial;
-    } else if (temporalPoints > 0) {
+    }
+    else if (temporalPoints > 0) {
         splitPoints = temporalPoints;
         splitType = BrickSelection::SplitType::Temporal;
-    } else {
+    }
+    else {
         splitPoints = -1;
         splitType = BrickSelection::SplitType::None;
     }

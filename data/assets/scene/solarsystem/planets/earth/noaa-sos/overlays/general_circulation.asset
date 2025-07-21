@@ -1,0 +1,50 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Atmospheric General Circulation"
+local Identifier = "noaa-sos-overlays-general_circulation"
+local Description = [[Overlays are datasets with transparent backgrounds that contain
+foreground data used to augment other SOS datasets.This particular dataset overlays
+arrows and names of the approximate prevailing wind onto any dataset that you are
+viewing. General circulation overlay would be particularly useful when pointing out the
+rain shadow effect as well as cloud movement or when describing the coriolis effect]]
+local URL = "https://sos.noaa.gov/catalog/datasets/atmospheric-general-circulation/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  FilePath = syncedDirectory .. "features_arrows.png",
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "Overlays", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "Overlays", Layer)
+end)
+
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

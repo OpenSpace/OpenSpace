@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,53 +27,55 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/helper.h>
-#include <ghoul/fmt.h>
+#include <openspace/scene/asset.h>
+#include <openspace/scene/assetmanager.h>
+#include <openspace/scene/scene.h>
+#include <openspace/util/resourcesynchronization.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringconversion.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <random>
+#include <sstream>
 #include <thread>
+#include <unordered_set>
 
 namespace {
-    constexpr const float LoadingFontSize = 25.f;
-    constexpr const float MessageFontSize = 22.f;
-    constexpr const float ItemFontSize = 10.f;
+    constexpr float LoadingFontSize = 25.f;
+    constexpr float MessageFontSize = 22.f;
+    constexpr float ItemFontSize = 10.f;
+    constexpr float LogFontSize = 10.f;
 
-    const glm::vec2 LogoCenter = { 0.f, 0.525f };  // in NDC
-    const glm::vec2 LogoSize = { 0.275f, 0.275 };  // in NDC
+    constexpr int PreventOverlapThreshold = 1280; // in horizontal pixel size
 
-    const glm::vec2 ProgressbarCenter = { 0.f, -0.75f };  // in NDC
-    const glm::vec2 ProgressbarSize = { 0.7f, 0.0075f };  // in NDC
-    constexpr const float ProgressbarLineWidth = 0.0025f;  // in NDC
+    constexpr glm::vec2 LogoCenter = glm::vec2(0.f, 0.65f);  // in NDC
+    constexpr glm::vec2 LogoSize = glm::vec2(0.2f, 0.2f);  // in NDC
 
-    const glm::vec4 ProgressbarOutlineColor = { 0.9f, 0.9f, 0.9f, 1.f };
+    constexpr glm::vec4 ItemStatusColorStarted = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
+    constexpr glm::vec4 ItemStatusColorInitializing = glm::vec4(0.7f, 0.7f, 0.f, 1.f);
+    constexpr glm::vec4 ItemStatusColorFinished = glm::vec4(0.1f, 0.75f, 0.1f, 1.f);
+    constexpr glm::vec4 ItemStatusColorFailed = glm::vec4(0.8f, 0.1f, 0.1f, 1.f);
 
-    const glm::vec4 PhaseColorConstruction = { 0.7f, 0.7f, 0.f, 1.f };
-    const glm::vec4 PhaseColorSynchronization = { 0.9f, 0.9f, 0.9f, 1.f };
-    const glm::vec4 PhaseColorInitialization = { 0.1f, 0.75f, 0.1f, 1.f };
+    constexpr float ItemStandoffDistance = 5.f; // in pixels
 
-    const glm::vec4 ItemStatusColorStarted = { 0.5f, 0.5f, 0.5f, 1.f };
-    const glm::vec4 ItemStatusColorInitializing = { 0.7f, 0.7f, 0.f, 1.f };
-    const glm::vec4 ItemStatusColorFinished = { 0.1f, 0.75f, 0.1f, 1.f };
-    const glm::vec4 ItemStatusColorFailed = { 0.8f, 0.1f, 0.1f, 1.f };
+    constexpr float LoadingTextPosition = 0.275f;  // in NDC
+    constexpr float StatusMessageOffset = 0.225f;  // in NDC
+    constexpr float LogBackgroundPosition = 0.125f; // in NDC
 
-    constexpr const float ItemStandoffDistance = 5.f; // in pixels
+    constexpr int MaxNumberLocationSamples = 1000;
 
-    constexpr const float LoadingTextPosition = 0.275f;  // in NDC
-    constexpr const float StatusMessageOffset = 0.225f;  // in NDC
+    constexpr std::chrono::milliseconds TTL(5000);
 
-    constexpr const int MaxNumberLocationSamples = 1000;
-
-    constexpr const std::chrono::milliseconds TTL(5000);
-
-    constexpr const std::chrono::milliseconds RefreshRate(16);
+    constexpr std::chrono::milliseconds RefreshRate(16);
 
     bool rectOverlaps(glm::vec2 lhsLl, glm::vec2 lhsUr, glm::vec2 rhsLl, glm::vec2 rhsUr)
     {
@@ -83,15 +85,11 @@ namespace {
         rhsLl -= glm::vec2(ItemStandoffDistance / 2.f);
         rhsUr += glm::vec2(ItemStandoffDistance / 2.f);
 
-        return !(
-            lhsUr.x < rhsLl.x ||
-            lhsLl.x > rhsUr.x ||
-            lhsUr.y < rhsLl.y ||
-            lhsLl.y > rhsUr.y
-        );
+        return lhsUr.x >= rhsLl.x && lhsLl.x <= rhsUr.x &&
+               lhsUr.y >= rhsLl.y && lhsLl.y <= rhsUr.y;
     }
 
-    glm::vec2 ndcToScreen(glm::vec2 ndc, glm::ivec2 res) {
+    glm::vec2 ndcToScreen(glm::vec2 ndc, const glm::ivec2& res) {
         ndc.x = (ndc.x + 1.f) / 2.f * res.x;
         ndc.y = (ndc.y + 1.f) / 2.f * res.y;
         return ndc;
@@ -101,32 +99,51 @@ namespace {
 namespace openspace {
 
 LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeNames,
-                             ShowProgressbar showProgressbar)
+                             ShowLogMessages showLogMessages)
     : _showMessage(showMessage)
     , _showNodeNames(showNodeNames)
-    , _showProgressbar(showProgressbar)
+    , _showLog(showLogMessages)
     , _randomEngine(_randomDevice())
 {
-    _loadingFont = global::fontManager.font(
+    constexpr std::chrono::seconds ScreenLogTimeToLive(20);
+    std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(
+        ScreenLogTimeToLive,
+        ScreenLog::LogLevel::Warning
+    );
+    _log = log.get();
+    ghoul::logging::LogManager::ref().addLog(std::move(log));
+
+    const float fontScaling = global::windowDelegate->osDpiScaling();
+
+    _loadingFont = global::fontManager->font(
         "Loading",
-        LoadingFontSize,
+        LoadingFontSize * fontScaling,
         ghoul::fontrendering::FontManager::Outline::No,
         ghoul::fontrendering::FontManager::LoadGlyphs::No
     );
 
     if (_showMessage) {
-        _messageFont = global::fontManager.font(
+        _messageFont = global::fontManager->font(
             "Loading",
-            MessageFontSize,
+            MessageFontSize * fontScaling,
             ghoul::fontrendering::FontManager::Outline::No,
             ghoul::fontrendering::FontManager::LoadGlyphs::No
         );
     }
 
     if (_showNodeNames) {
-        _itemFont = global::fontManager.font(
+        _itemFont = global::fontManager->font(
             "Loading",
-            ItemFontSize,
+            ItemFontSize * fontScaling,
+            ghoul::fontrendering::FontManager::Outline::No,
+            ghoul::fontrendering::FontManager::LoadGlyphs::No
+        );
+    }
+
+    if (_showLog) {
+        _logFont = global::fontManager->font(
+            "Loading",
+            LogFontSize * fontScaling,
             ghoul::fontrendering::FontManager::Outline::No,
             ghoul::fontrendering::FontManager::LoadGlyphs::No
         );
@@ -135,7 +152,8 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     {
         // Logo stuff
         _logoTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath("${DATA}/openspace-logo.png")
+            absPath("${DATA}/openspace-logo.png"),
+            2
         );
         _logoTexture->uploadTexture();
     }
@@ -147,34 +165,160 @@ LoadingScreen::~LoadingScreen() {
     _loadingFont = nullptr;
     _messageFont = nullptr;
     _itemFont = nullptr;
+    ghoul::logging::LogManager::ref().removeLog(_log);
+    _log = nullptr;
+}
+
+void LoadingScreen::abort() {
+    _shouldAbortLoading = true;
+}
+
+void LoadingScreen::exec(AssetManager& manager, Scene& scene) {
+    setPhase(LoadingScreen::Phase::Construction);
+    postMessage("Loading assets");
+
+    std::unordered_set<const ResourceSynchronization*> finishedSynchronizations;
+    while (true) {
+        render();
+        manager.update();
+
+        std::vector<const Asset*> allAssets = manager.allAssets();
+
+        std::vector<const ResourceSynchronization*> allSyncs =
+            manager.allSynchronizations();
+
+        // Filter already synchronized assets so we don't check them anymore
+        auto syncIt = std::remove_if(
+            allSyncs.begin(),
+            allSyncs.end(),
+            [&finishedSynchronizations](const ResourceSynchronization* sync) {
+                return finishedSynchronizations.contains(sync);
+            }
+        );
+        allSyncs.erase(syncIt, allSyncs.end());
+
+        auto it = allSyncs.begin();
+        while (it != allSyncs.end()) {
+            ZoneScopedN("Update resource synchronization");
+
+            if ((*it)->isSyncing()) {
+                LoadingScreen::ProgressInfo progressInfo;
+
+                progressInfo.progress = [](const ResourceSynchronization* sync) {
+                    if (!sync->nTotalBytesIsKnown()) {
+                        return 0.f;
+                    }
+                    if (sync->nTotalBytes() == 0) {
+                        return 1.f;
+                    }
+                    return
+                        static_cast<float>(sync->nSynchronizedBytes()) /
+                        static_cast<float>(sync->nTotalBytes());
+                    }(*it);
+
+                    progressInfo.currentSize = (*it)->nSynchronizedBytes();
+                    if ((*it)->nTotalBytesIsKnown()) {
+                        progressInfo.totalSize = (*it)->nTotalBytes();
+                    }
+
+                    updateItem(
+                        (*it)->identifier(),
+                        (*it)->name(),
+                        LoadingScreen::ItemStatus::Started,
+                        progressInfo
+                    );
+                    it++;
+            }
+            else if ((*it)->isRejected()) {
+                updateItem(
+                    (*it)->identifier(),
+                    (*it)->name(),
+                    LoadingScreen::ItemStatus::Failed,
+                    LoadingScreen::ProgressInfo()
+                );
+                it++;
+            }
+            else {
+                LoadingScreen::ProgressInfo progressInfo;
+                progressInfo.progress = 1.f;
+
+                updateItem(
+                    (*it)->identifier(),
+                    (*it)->name(),
+                    LoadingScreen::ItemStatus::Finished,
+                    progressInfo
+                );
+                finishedSynchronizations.insert(*it);
+                it = allSyncs.erase(it);
+            }
+        }
+
+        if (_shouldAbortLoading) {
+            global::windowDelegate->terminate();
+            return;
+        }
+
+        const bool finishedLoading = std::all_of(
+            allAssets.begin(),
+            allAssets.end(),
+            [](const Asset* asset) { return asset->isInitialized() || asset->isFailed(); }
+        );
+
+        if (finishedLoading) {
+            break;
+        }
+    } // while(true)
+
+    setPhase(LoadingScreen::Phase::Initialization);
+
+    postMessage("Initializing scene");
+    while (scene.isInitializing()) {
+        render();
+    }
+
+    postMessage("Initializing OpenGL");
+    finalize();
 }
 
 void LoadingScreen::render() {
+    ZoneScoped;
+    FrameMarkStart("Loading");
+
+    if (_phase == Phase::PreStart) {
+        return;
+    }
+
     // We have to recalculate the positions here because we will not be informed about a
     // window size change
 
-    const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
+    const glm::vec2 dpiScaling = global::windowDelegate->dpiScaling();
     const glm::ivec2 res =
-        glm::vec2(global::windowDelegate.currentDrawBufferResolution()) / dpiScaling;
+        glm::vec2(global::windowDelegate->firstWindowResolution()) * dpiScaling;
 
-    float screenAspectRatio = static_cast<float>(res.x) / static_cast<float>(res.y);
+    const float screenAspectRatio = static_cast<float>(res.x) / static_cast<float>(res.y);
 
-    float textureAspectRatio = static_cast<float>(_logoTexture->dimensions().x) /
+    // We need to have a fudge factor for smaller screens or we end up testing all loading
+    // texts successfully against the logo as it takes up such a large portion of the
+    // screen. We don't want to incrase the size though and cap it at a screen size of
+    // 1920 pixels horizontally
+    const float sizeAdjustment = std::min(static_cast<float>(res.x) / 1920.f, 1.f);
+
+    const float textureAspectRatio = static_cast<float>(_logoTexture->dimensions().x) /
         static_cast<float>(_logoTexture->dimensions().y);
 
     ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(res);
 
-    const glm::vec2 size = {
-        LogoSize.x,
-        LogoSize.y * textureAspectRatio * screenAspectRatio
-    };
+    const glm::vec2 size = glm::vec2(
+        LogoSize.x * sizeAdjustment,
+        LogoSize.y * textureAspectRatio * screenAspectRatio * sizeAdjustment
+    );
 
     //
     // Clear background
     //
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(ClearBufferMask::GL_COLOR_BUFFER_BIT);
-
+    glViewport(0, 0, res.x, res.y);
     glDisable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -192,57 +336,6 @@ void LoadingScreen::render() {
     );
 
     //
-    // Render progress bar
-    //
-    const glm::vec2 progressbarSize = {
-        ProgressbarSize.x,
-        ProgressbarSize.y * screenAspectRatio
-    };
-
-    if (_showProgressbar) {
-        const float progress = _nItems != 0 ?
-            static_cast<float>(_iProgress) / static_cast<float>(_nItems) :
-            0.f;
-
-        const float w = ProgressbarLineWidth / screenAspectRatio;
-        const float h = ProgressbarLineWidth;
-        rendering::helper::renderBox(
-            glm::vec2(1.f) - ((ProgressbarCenter + glm::vec2(1.f)) / 2.f),
-            progressbarSize + glm::vec2(2 * w, 2 * h),
-            ProgressbarOutlineColor,
-            rendering::helper::Anchor::Center
-        );
-
-        rendering::helper::renderBox(
-            glm::vec2(1.f) - ((ProgressbarCenter + glm::vec2(1.f)) / 2.f),
-            progressbarSize,
-            glm::vec4(0.f, 0.f, 0.f, 1.f),
-            rendering::helper::Anchor::Center
-        );
-
-        glm::vec4 color;
-        switch (_phase) {
-            case Phase::Construction:
-                color = PhaseColorConstruction;
-                break;
-            case Phase::Synchronization:
-                color = PhaseColorSynchronization;
-                break;
-            case Phase::Initialization:
-                color = PhaseColorInitialization;
-                break;
-        }
-
-        glm::vec2 p = glm::vec2(1.f) - ((ProgressbarCenter + glm::vec2(1.f)) / 2.f);
-        rendering::helper::renderBox(
-            p - progressbarSize / 2.f,
-            progressbarSize * glm::vec2(progress, 1.f),
-            color,
-            rendering::helper::Anchor::NW
-        );
-    }
-
-    //
     // "Loading" text
     //
     using FR = ghoul::fontrendering::FontRenderer;
@@ -254,117 +347,108 @@ void LoadingScreen::render() {
         "Loading...";
     // We use "Loading" to center the text, but render "Loading..." to make it look more
     // pleasing
-    const FR::BoundingBoxInformation bbox = renderer.boundingBox(
-        *_loadingFont,
+    const glm::vec2 bbox = _loadingFont->boundingBox(
         headline.substr(0, headline.size() - 2)
     );
 
-    const glm::vec2 loadingLl = glm::vec2(
-        res.x / 2.f - bbox.boundingBox.x / 2.f,
+    const glm::vec2 loadLl = glm::vec2(
+        res.x / 2.f - bbox.x / 2.f,
         res.y * LoadingTextPosition
     );
-    const glm::vec2 loadingUr = loadingLl + bbox.boundingBox;
+    const glm::vec2 loadUr = loadLl + bbox;
 
-    renderer.render(*_loadingFont, loadingLl, headline);
+    renderer.render(*_loadingFont, loadLl, headline);
 
-    glm::vec2 messageLl;
-    glm::vec2 messageUr;
+    glm::vec2 messageLl = glm::vec2(0.f);
+    glm::vec2 messageUr = glm::vec2(0.f);
     if (_showMessage) {
-        std::lock_guard<std::mutex> guard(_messageMutex);
+        const std::lock_guard guard(_messageMutex);
 
-        FR::BoundingBoxInformation bboxMessage = renderer.boundingBox(
-            *_messageFont,
-            _message
-        );
+        const glm::vec2 bboxMessage = _messageFont->boundingBox(_message);
 
         messageLl = glm::vec2(
-            res.x / 2.f - bboxMessage.boundingBox.x / 2.f,
+            res.x / 2.f - bboxMessage.x / 2.f,
             res.y * StatusMessageOffset
         );
-        messageUr = messageLl + bboxMessage.boundingBox;
+        messageUr = messageLl + bboxMessage;
 
 
         renderer.render(*_messageFont, messageLl, _message);
     }
 
+    const glm::vec2 logLl = glm::vec2(0.f, 0.f);
+    const glm::vec2 logUr = glm::vec2(res.x, res.y * (LogBackgroundPosition + 0.015));
+
+    // Font rendering enables depth testing so we disable again to render the log box
+    glDisable(GL_DEPTH_TEST);
+    if (_showLog) {
+        constexpr glm::vec4 DarkGray = glm::vec4(glm::vec3(0.04f), 1.f);
+        rendering::helper::renderBox(
+            glm::vec2(0.f, 1.f),
+            glm::vec2(1.f, LogBackgroundPosition),
+            DarkGray,
+            rendering::helper::Anchor::SW
+        );
+    }
+
     if (_showNodeNames) {
-        std::lock_guard<std::mutex> guard(_itemsMutex);
+        const std::lock_guard guard(_itemsMutex);
 
-        std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+        const auto now = std::chrono::system_clock::now();
 
-        const glm::vec2 logoLl = { LogoCenter.x - size.x,  LogoCenter.y - size.y };
-        const glm::vec2 logoUr = { LogoCenter.x + size.x,  LogoCenter.y + size.y };
-
-        const glm::vec2 progressbarLl = {
-            ProgressbarCenter.x - progressbarSize.x,
-            ProgressbarCenter.y - progressbarSize.y
-        };
-        const glm::vec2 progressbarUr = {
-            ProgressbarCenter.x + progressbarSize.x ,
-            ProgressbarCenter.y + progressbarSize.y
-        };
-
+        const glm::vec2 logoLl = ndcToScreen(
+            glm::vec2(LogoCenter.x - size.x,  LogoCenter.y - size.y),
+            res
+        );
+        const glm::vec2 logoUr = ndcToScreen(
+            glm::vec2(LogoCenter.x + size.x,  LogoCenter.y + size.y),
+            res
+        );
 
         for (Item& item : _items) {
             if (!item.hasLocation) {
                 // Compute a new location
 
-                const FR::BoundingBoxInformation b = renderer.boundingBox(
-                    *_itemFont,
+                const glm::vec2 b = _itemFont->boundingBox(
                     (item.name + " 100%\n99999999/99999999")
                 );
 
-                // The maximum count is in here since we can't control the amount of
-                // screen estate and the number of nodes.  Rather than looping forever
-                // we make use with an overlap in the worst case
-                bool foundSpace = false;
-
-                glm::vec2 ll;
-                glm::vec2 ur;
+                glm::vec2 ll = glm::vec2(0.f);
+                glm::vec2 ur = glm::vec2(0.f);
                 int i = 0;
-                for (; i < MaxNumberLocationSamples && !foundSpace; ++i) {
+                for (; i < MaxNumberLocationSamples; i++) {
                     std::uniform_int_distribution<int> distX(
                         15,
-                        static_cast<int>(res.x - b.boundingBox.x - 15)
+                        std::max(static_cast<int>(res.x - b.x - 15), 15)
                     );
                     std::uniform_int_distribution<int> distY(
                         15,
-                        static_cast<int>(res.y - b.boundingBox.y - 15)
+                        std::max(static_cast<int>(res.y - b.y - 15), 15)
                     );
 
-                    ll = { distX(_randomEngine), distY(_randomEngine) };
-                    ur = ll + b.boundingBox;
+                    ll = glm::vec2(distX(_randomEngine), distY(_randomEngine));
+                    ur = ll + b;
 
                     // Test against logo and text
-                    const bool logoOverlap = rectOverlaps(
-                        ndcToScreen(logoLl, res), ndcToScreen(logoUr, res),
-                        ll, ur
-                    );
-
-                    const bool loadingOverlap = rectOverlaps(
-                        loadingLl, loadingUr,
-                        ll, ur
-                    );
+                    const bool logoOverlap = rectOverlaps(logoLl, logoUr, ll, ur);
+                    const bool loadingOverlap = rectOverlaps(loadLl, loadUr, ll, ur);
 
                     const bool messageOverlap = _showMessage ?
                         rectOverlaps(messageLl, messageUr, ll, ur) :
                         false;
 
-                    const bool barOverlap = _showProgressbar ?
-                        rectOverlaps(
-                            ndcToScreen(progressbarLl, res),
-                            ndcToScreen(progressbarUr, res),
-                            ll,
-                            ur
-                        ) :
+                    const bool logOverlap = _showLog ?
+                        rectOverlaps(logLl, logUr,ll, ur) :
                         false;
 
-                    if (logoOverlap || loadingOverlap || messageOverlap || barOverlap) {
-                        // We never want to have an overlap with these, so this try didn't
-                        // count against the maximum, thus ensuring that (if there has to
-                        // be an overlap, it's over other text that might disappear before
-                        // this one)
-                        --i;
+                    if (logoOverlap || loadingOverlap || messageOverlap || logOverlap) {
+                        // We don't want to have an overlap with any of these if we have a
+                        // big enough window resolution. If we have a too small screen,
+                        // there might not be enough space left to fix everything and we
+                        // would get an infinite loop here
+                        if (res.x >= PreventOverlapThreshold) {
+                            --i;
+                        }
                         continue;
                     }
 
@@ -425,38 +509,37 @@ void LoadingScreen::render() {
 #endif // LOADINGSCREEN_DEBUGGING
 
             std::string text = item.name;
-            if (item.status == ItemStatus::Started && item.progress.progress > 0) {
+            if (item.status == ItemStatus::Started && item.progress.currentSize > 0) {
                 ProgressInfo& info = item.progress;
-                bool hasSecondLine = (info.totalSize != -1 && info.currentSize != -1);
+                const bool isTotalSizeKnown = info.totalSize != -1;
 
                 int p = static_cast<int>(std::round(info.progress * 100));
-                if (hasSecondLine) {
+                if (isTotalSizeKnown) {
                     if (info.totalSize < 1024 * 1024) { // 1MB
-                        text = fmt::format(
+                        text = std::format(
                             "{} ({}%)\n{}/{} {}",
-                            text,
-                            p,
-                            info.currentSize,
-                            info.totalSize,
-                            "bytes"
+                            text, p, info.currentSize, info.totalSize, "bytes"
                         );
                     }
                     else {
                         float curr = info.currentSize / (1024.f * 1024.f);
                         float total = info.totalSize / (1024.f * 1024.f);
 
-                        text = fmt::format(
+                        text = std::format(
                             "{} ({}%)\n{:.3f}/{:.3f} {}",
-                            text,
-                            p,
-                            curr,
-                            total,
-                            "MB"
+                            text, p, curr, total, "MB"
                         );
                     }
                 }
                 else {
-                    text = fmt::format("{} ({}%)", text, p);
+                    // We don't know the total size but we have started downloading data
+                    if (info.currentSize < 1024 * 1024) {
+                        text = std::format("{}\n{} {}", text, info.currentSize, "bytes");
+                    }
+                    else {
+                        float curr = info.currentSize / (1024.f * 1024.f);
+                        text = std::format("{}\n{:.3f} {}", text, curr, "MB");
+                    }
                 }
             }
 
@@ -469,7 +552,7 @@ void LoadingScreen::render() {
                 _items.end(),
                 [now](const Item& i) {
                     if (i.status == ItemStatus::Finished) {
-                        return i.finishedTime > now + TTL;
+                        return (i.finishedTime + TTL) < now;
                     }
                     else {
                         return false;
@@ -481,15 +564,98 @@ void LoadingScreen::render() {
 
     }
 
+    // Render log messages last to make them slightly more visible if a download item
+    // is slightly overlapping
+    if (_showLog) {
+        renderLogMessages();
+    }
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
 
     std::this_thread::sleep_for(RefreshRate);
-    global::windowDelegate.swapBuffer();
+    global::windowDelegate->swapBuffer();
+    FrameMarkEnd("Loading");
+}
+
+void LoadingScreen::renderLogMessages() const {
+    ZoneScoped;
+
+    constexpr size_t MaxNumberMessages = 6;
+    constexpr int MessageLength = 209;
+
+    using FR = ghoul::fontrendering::FontRenderer;
+    const FR& renderer = FR::defaultRenderer();
+
+    const std::vector<ScreenLog::LogEntry>& entries = _log->entries();
+
+    size_t nRows = 0;
+    const size_t j = std::min(MaxNumberMessages, entries.size());
+    for (size_t i = 1; i <= j; i++) {
+        ZoneScopedN("Entry");
+
+        // Show only the j:th first log entries
+        const ScreenLog::LogEntry& it = entries[j - i];
+
+        std::ostringstream result;
+        // Split really long messages into multiple lines for better readability
+        if (it.message.size() > MessageLength) {
+            std::istringstream is(it.message);
+
+            int charactersSinceNewLine = 0;
+            std::string word;
+            while (is >> word) {
+                charactersSinceNewLine += static_cast<int>(word.size());
+                // Insert a new line when we exceede messageLength
+                if (charactersSinceNewLine > MessageLength) {
+                    result << '\n';
+                    charactersSinceNewLine = static_cast<int>(word.size());
+                    ++nRows;
+                }
+                result << word << ' ';
+                ++charactersSinceNewLine;
+            }
+        }
+
+        renderer.render(
+            *_logFont,
+            glm::vec2(
+                10,
+                10 + _logFont->pointSize() * nRows * 2
+            ),
+            it.message.size() < MessageLength ? it.message : result.str(),
+            ghoul::toColor(it.level)
+        );
+        ++nRows;
+    }
+
+    const glm::vec2 dpiScaling = global::windowDelegate->dpiScaling();
+    const glm::ivec2 res =
+        glm::vec2(global::windowDelegate->firstWindowResolution()) * dpiScaling;
+
+    // Render # of warnings and error messages
+    std::map<ghoul::logging::LogLevel, size_t> numberOfErrorsPerLevel;
+    for (const auto& entry : _log->entries()) {
+        numberOfErrorsPerLevel[entry.level]++;
+    }
+    size_t row = 0;
+    for (auto& [level, amount] : numberOfErrorsPerLevel) {
+        const std::string text = std::format("{}: {}", ghoul::to_string(level), amount);
+        const glm::vec2 bbox = _logFont->boundingBox(text);
+        renderer.render(
+            *_logFont,
+            glm::vec2(
+                res.x - bbox.x - 10,
+                10 + _logFont->pointSize() * row * 2
+            ),
+            text,
+            ghoul::toColor(level)
+        );
+        ++row;
+    }
 }
 
 void LoadingScreen::postMessage(std::string message) {
-    std::lock_guard<std::mutex> guard(_messageMutex);
+    const std::lock_guard guard(_messageMutex);
     _message = std::move(message);
 }
 
@@ -508,26 +674,13 @@ void LoadingScreen::finalize() {
         ),
         _items.end()
     );
-
+    _log->removeExpiredEntries();
+    _showLog = _showLog && !_log->entries().empty();
     render();
-}
-
-
-void LoadingScreen::setItemNumber(int nItems) {
-    _nItems = nItems;
-}
-
-int LoadingScreen::itemNumber() {
-    return _nItems;
-}
-
-void LoadingScreen::tickItem() {
-    ++_iProgress;
 }
 
 void LoadingScreen::setPhase(Phase phase) {
     _phase = phase;
-    _iProgress = 0;
 }
 
 void LoadingScreen::updateItem(const std::string& itemIdentifier,
@@ -539,7 +692,7 @@ void LoadingScreen::updateItem(const std::string& itemIdentifier,
         // also would create any of the text information
         return;
     }
-    std::lock_guard<std::mutex> guard(_itemsMutex);
+    const std::lock_guard guard(_itemsMutex);
 
     auto it = std::find_if(
         _items.begin(),
@@ -556,28 +709,24 @@ void LoadingScreen::updateItem(const std::string& itemIdentifier,
         }
     }
     else {
-        ghoul_assert(
-            newStatus == ItemStatus::Started,
-            fmt::format(
-                "Item '{}' did not exist and first message was not 'Started'",
-                itemIdentifier
-            )
-        );
         // We are not computing the location in here since doing it this way might stall
         // the main thread while trying to find a position for the new item
-        _items.push_back({
-            itemIdentifier,
-            itemName,
-            ItemStatus::Started,
-            std::move(progressInfo),
-            false,
-#ifdef LOADINGSCREEN_DEBUGGING
-            false,
-#endif // LOADINGSCREEN_DEBUGGING
-            {},
-            {},
-            std::chrono::system_clock::from_time_t(0)
-        });
+        Item item = {
+            .identifier = itemIdentifier,
+            .name = itemName,
+            .status = newStatus,
+            .progress = std::move(progressInfo),
+            .hasLocation = false,
+            .finishedTime = std::chrono::system_clock::from_time_t(0)
+        };
+
+        if (newStatus == ItemStatus::Finished) {
+            // This is only going to be triggered if an item finishes so quickly that
+            // there was not even time to create the item between starting and finishing
+            item.finishedTime = std::chrono::system_clock::now();
+        }
+
+        _items.push_back(std::move(item));
     }
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #include <openspace/documentation/documentation.h>
 
 #include <openspace/documentation/verifier.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <algorithm>
 #include <set>
@@ -63,22 +64,26 @@ struct WarningCompare {
 namespace ghoul {
 
 template <>
-std::string to_string(const openspace::documentation::TestResult& testResult) {
+std::string to_string(const openspace::documentation::TestResult& value) {
     using namespace openspace::documentation;
 
-    if (testResult.success) {
+    if (value.success) {
         return "Success";
     }
     else {
         std::stringstream stream;
-        stream << "Failure." << '\n';
+        stream << "Specification Failure. ";
 
-        for (const TestResult::Offense& offense : testResult.offenses) {
-            stream << "  " << ghoul::to_string(offense) << '\n';
+        for (const TestResult::Offense& offense : value.offenses) {
+            stream << std::format(" {}", ghoul::to_string(offense));
+            if (!offense.explanation.empty()) {
+                stream << std::format(" ({})", offense.explanation);
+            }
+            stream << '\n';
         }
 
-        for (const TestResult::Warning& warning : testResult.warnings) {
-            stream << "  " << ghoul::to_string(warning) << '\n';
+        for (const TestResult::Warning& warning : value.warnings) {
+            stream << std::format(" {}\n", ghoul::to_string(warning));
         }
 
         return stream.str();
@@ -86,20 +91,27 @@ std::string to_string(const openspace::documentation::TestResult& testResult) {
 }
 
 template <>
-std::string to_string(const openspace::documentation::TestResult::Offense& offense) {
-    return offense.offender + ": " + ghoul::to_string(offense.reason);
+std::string to_string(const openspace::documentation::TestResult::Offense& value) {
+    std::stringstream stream;
+    stream << value.offender + ": " + ghoul::to_string(value.reason);
+
+    if (!value.explanation.empty()) {
+        stream << std::format(" ({})", value.explanation);
+    }
+
+    return stream.str();
 }
 
 template <>
-std::string to_string(const openspace::documentation::TestResult::Offense::Reason& reason)
+std::string to_string(const openspace::documentation::TestResult::Offense::Reason& value)
 {
-    switch (reason) {
-        case openspace::documentation::TestResult::Offense::Reason::ExtraKey:
-            return "Extra key";
+    switch (value) {
+        case openspace::documentation::TestResult::Offense::Reason::Unknown:
+            return "Unknown";
         case openspace::documentation::TestResult::Offense::Reason::MissingKey:
             return "Missing key";
         case openspace::documentation::TestResult::Offense::Reason::UnknownIdentifier:
-            return "Unknown identifier";
+            return "Unknown documentation identifier";
         case openspace::documentation::TestResult::Offense::Reason::Verification:
             return "Verification failed";
         case openspace::documentation::TestResult::Offense::Reason::WrongType:
@@ -110,15 +122,14 @@ std::string to_string(const openspace::documentation::TestResult::Offense::Reaso
 }
 
 template <>
-std::string to_string(const openspace::documentation::TestResult::Warning& warning) {
-    return warning.offender + ": " + ghoul::to_string(warning.reason);
+std::string to_string(const openspace::documentation::TestResult::Warning& value) {
+    return value.offender + ": " + ghoul::to_string(value.reason);
 }
 
 template <>
-std::string to_string(
-                      const openspace::documentation::TestResult::Warning::Reason& reason)
+std::string to_string(const openspace::documentation::TestResult::Warning::Reason& value)
 {
-    switch (reason) {
+    switch (value) {
         case openspace::documentation::TestResult::Warning::Reason::Deprecated:
             return "Deprecated";
         default:
@@ -137,19 +148,42 @@ SpecificationError::SpecificationError(TestResult res, std::string comp)
     , result(std::move(res))
 {
     ghoul_assert(!result.success, "Result's success must be false");
+}
 
-    message += " (";
-    for (const TestResult::Offense& o : result.offenses) {
-        message += o.offender + ',';
+void logError(const SpecificationError& error, std::string component) {
+    if (error.result.success) {
+        // Nothing to print if we succeeded
+        return;
     }
-    message.back() = ')';
+
+    if (component.empty()) {
+        LERRORC(error.component, error.message);
+    }
+    else {
+        LERRORC(std::format("{}: {}", component, error.component), error.message);
+    }
+    for (const documentation::TestResult::Offense& o : error.result.offenses) {
+        if (o.explanation.empty()) {
+            LERRORC(ghoul::to_string(o.reason), o.offender);
+        }
+        else {
+            LERRORC(
+                ghoul::to_string(o.reason),
+                std::format("{}: {}", o.offender, o.explanation)
+            );
+        }
+    }
+    for (const documentation::TestResult::Warning& w : error.result.warnings) {
+        LWARNINGC(ghoul::to_string(w.reason), w.offender);
+    }
 }
 
 DocumentationEntry::DocumentationEntry(std::string k, std::shared_ptr<Verifier> v,
-                                       Optional opt, std::string doc)
+                                       Optional opt, Private priv, std::string doc)
     : key(std::move(k))
     , verifier(std::move(v))
     , optional(opt)
+    , isPrivate(priv)
     , documentation(std::move(doc))
 {
     ghoul_assert(!key.empty(), "Key must not be empty");
@@ -157,23 +191,9 @@ DocumentationEntry::DocumentationEntry(std::string k, std::shared_ptr<Verifier> 
 }
 
 DocumentationEntry::DocumentationEntry(std::string k, Verifier* v, Optional opt,
-                                       std::string doc)
-    : DocumentationEntry(std::move(k), std::shared_ptr<Verifier>(v), opt,
+                                       Private priv, std::string doc)
+    : DocumentationEntry(std::move(k), std::shared_ptr<Verifier>(v), opt, priv,
                          std::move(doc))
-{}
-
-Documentation::Documentation(std::string n, std::string i, DocumentationEntries ents)
-    : name(std::move(n))
-    , id(std::move(i))
-    , entries(std::move(ents))
-{}
-
-Documentation::Documentation(std::string n, DocumentationEntries ents)
-    : Documentation(std::move(n), "", std::move(ents))
-{}
-
-Documentation::Documentation(DocumentationEntries ents)
-    : Documentation("", "", std::move(ents))
 {}
 
 TestResult testSpecification(const Documentation& documentation,
@@ -182,7 +202,8 @@ TestResult testSpecification(const Documentation& documentation,
     TestResult result;
     result.success = true;
 
-    auto applyVerifier = [dictionary, &result](Verifier& verifier, const std::string& key)
+    auto applyVerifier = [dictionary, &result](const Verifier& verifier,
+                                               const std::string& key)
     {
         TestResult res = verifier(dictionary, key);
         if (!res.success) {
@@ -202,8 +223,8 @@ TestResult testSpecification(const Documentation& documentation,
 
     for (const auto& p : documentation.entries) {
         if (p.key == DocumentationEntry::Wildcard) {
-            for (const std::string& key : dictionary.keys()) {
-                applyVerifier(*(p.verifier), key);
+            for (const std::string_view key : dictionary.keys()) {
+                applyVerifier(*(p.verifier), std::string(key));
             }
         }
         else {
@@ -212,20 +233,28 @@ TestResult testSpecification(const Documentation& documentation,
                 // if the key exists, it has to be correct, however
                 continue;
             }
+            if (!p.optional && !dictionary.hasKey(p.key)) {
+                result.success = false;
+                result.offenses.emplace_back(
+                    p.key,
+                    TestResult::Offense::Reason::MissingKey
+                );
+                continue;
+            }
             applyVerifier(*(p.verifier), p.key);
         }
     }
 
     // Remove duplicate offenders that might occur if multiple rules apply to a single
     // key and more than one of these rules are broken
-    std::set<TestResult::Offense, OffenseCompare> uniqueOffenders(
+    const std::set<TestResult::Offense, OffenseCompare> uniqueOffenders(
         result.offenses.begin(), result.offenses.end()
     );
     result.offenses = std::vector<TestResult::Offense>(
         uniqueOffenders.begin(), uniqueOffenders.end()
     );
     // Remove duplicate warnings. This should normally not happen, but we want to be sure
-    std::set<TestResult::Warning, WarningCompare> uniqueWarnings(
+    const std::set<TestResult::Warning, WarningCompare> uniqueWarnings(
         result.warnings.begin(), result.warnings.end()
     );
     result.warnings = std::vector<TestResult::Warning>(
@@ -239,9 +268,9 @@ void testSpecificationAndThrow(const Documentation& documentation,
                                const ghoul::Dictionary& dictionary, std::string component)
 {
     // Perform testing against the documentation/specification
-    TestResult testResult = testSpecification(documentation, dictionary);
+    const TestResult testResult = testSpecification(documentation, dictionary);
     if (!testResult.success) {
-        throw SpecificationError(std::move(testResult), std::move(component));
+        throw SpecificationError(testResult, std::move(component));
     }
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,96 +24,138 @@
 
 #include <openspace/engine/moduleengine.h>
 
+#include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
 #include <openspace/moduleregistration.h>
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/openspacemodule.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/profiling.h>
 
 #include "moduleengine_lua.inl"
 
 namespace {
-    constexpr const char* _loggerCat = "ModuleEngine";
+    constexpr std::string_view _loggerCat = "ModuleEngine";
+
+    constexpr openspace::properties::Property::PropertyInfo AllModulesInfo = {
+        "AllModules",
+        "All Modules",
+        "The list of all modules that were compiled for this version of OpenSpace in the "
+        "same order in which they were initialized.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
 } // namespace
 
 namespace openspace {
 
-ModuleEngine::ModuleEngine() : properties::PropertyOwner({ "Modules" }) {}
+ModuleEngine::ModuleEngine()
+    : properties::PropertyOwner({ "Modules" })
+    , _allModules(AllModulesInfo)
+{
+    _allModules.setReadOnly(true);
+    addProperty(_allModules);
+}
 
 void ModuleEngine::initialize(
                      const std::map<std::string, ghoul::Dictionary>& moduleConfigurations)
 {
-    for (OpenSpaceModule* m : AllModules()) {
+    ZoneScoped;
+
+    const std::vector<OpenSpaceModule*> modules = AllModules();
+
+    std::vector<std::string> moduleNames;
+    moduleNames.reserve(modules.size());
+    for (OpenSpaceModule* m : modules) {
+        registerModule(std::unique_ptr<OpenSpaceModule>(m));
+        moduleNames.push_back(m->guiName());
+    }
+    _allModules = moduleNames;
+
+    for (OpenSpaceModule* m : modules) {
         const std::string& identifier = m->identifier();
         auto it = moduleConfigurations.find(identifier);
         ghoul::Dictionary configuration;
         if (it != moduleConfigurations.end()) {
             configuration = it->second;
         }
-        registerModule(std::unique_ptr<OpenSpaceModule>(m), configuration);
+        try {
+            m->initialize(configuration);
+        }
+        catch (const documentation::SpecificationError& e) {
+            logError(e);
+            throw;
+        }
+
+        addPropertySubOwner(m);
     }
 }
 
 void ModuleEngine::initializeGL() {
+    ZoneScoped;
+
     LDEBUG("Initializing OpenGL of modules");
     for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
-        LDEBUG(fmt::format("Initializing OpenGL of module '{}'", m->identifier()));
+        LDEBUG(std::format("Initializing OpenGL of module '{}'", m->identifier()));
         m->initializeGL();
     }
     LDEBUG("Finished initializing OpenGL of modules");
 }
 
 void ModuleEngine::deinitialize() {
-    LDEBUG("Deinitializing modules");
-    for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
-        LDEBUG(fmt::format("Deinitializing module '{}'", m->identifier()));
-        m->deinitialize();
-    }
+    ZoneScoped;
 
+    LDEBUG("Deinitializing modules");
+
+    for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); ++mIt) {
+        LDEBUG(std::format("Deinitializing module '{}'", (*mIt)->identifier()));
+        (*mIt)->deinitialize();
+    }
     LDEBUG("Finished deinitializing modules");
 
-    for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
-        LDEBUG(fmt::format("Destroying module '{}'", m->identifier()));
-        m = nullptr;
+    for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); ++mIt) {
+        LDEBUG(std::format("Destroying module '{}'", (*mIt)->identifier()));
+        (*mIt) = nullptr;
     }
-
     LDEBUG("Finished destroying modules");
+
     _modules.clear();
 }
 
 void ModuleEngine::deinitializeGL() {
+    ZoneScoped;
+
     LDEBUG("Deinitializing OpenGL of modules");
-    for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
-        LDEBUG(fmt::format("Deinitializing OpenGL of module '{}'", m->identifier()));
-        m->deinitializeGL();
+    for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); ++mIt) {
+        LDEBUG(std::format("Deinitializing OpenGL of module '{}'", (*mIt)->identifier()));
+        (*mIt)->deinitializeGL();
 
     }
     LDEBUG("Finished deinitializing OpenGL of modules");
 }
 
-void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> mod,
-                                  const ghoul::Dictionary& configuration)
-{
-    ghoul_assert(mod, "Module must not be nullptr");
+void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> module) {
+    ZoneScoped;
+
+    ghoul_assert(module, "Module must not be nullptr");
 
     auto it = std::find_if(
         _modules.begin(),
         _modules.end(),
-        [&mod](std::unique_ptr<OpenSpaceModule>& rhs) {
-            return rhs->identifier() == mod->identifier();
+        [&module](std::unique_ptr<OpenSpaceModule>& rhs) {
+            return rhs->identifier() == module->identifier();
         }
     );
     if (it != _modules.end()) {
         throw ghoul::RuntimeError(
-            "Module name '" + mod->identifier() + "' was registered before",
+            std::format("Module name '{}' was registered before", module->identifier()),
             "ModuleEngine"
         );
     }
 
-    LDEBUG(fmt::format("Registering module '{}'", mod->identifier()));
-    mod->initialize(this, configuration);
-    addPropertySubOwner(mod.get());
-    LDEBUG(fmt::format("Registered module '{}'", mod->identifier()));
-    _modules.push_back(std::move(mod));
+    LDEBUG(std::format("Registered module '{}'", module->identifier()));
+    _modules.push_back(std::move(module));
 }
 
 std::vector<OpenSpaceModule*> ModuleEngine::modules() const {
@@ -126,7 +168,7 @@ std::vector<OpenSpaceModule*> ModuleEngine::modules() const {
 }
 
 ghoul::systemcapabilities::Version ModuleEngine::requiredOpenGLVersion() const {
-    ghoul::systemcapabilities::Version version = { 0, 0, 0 };
+    ghoul::systemcapabilities::Version version = { .major = 0, .minor = 0, .release = 0 };
 
     for (const std::unique_ptr<OpenSpaceModule>& m : _modules) {
         version = std::max(version, m->requiredOpenGLVersion());
@@ -139,15 +181,13 @@ scripting::LuaLibrary ModuleEngine::luaLibrary() {
     return {
         "modules",
         {
-            {
-                "isLoaded",
-                &luascriptfunctions::isLoaded,
-                {},
-                "string",
-                "Checks whether a specific module is loaded"
-            }
+            codegen::lua::IsLoaded
         }
     };
+}
+
+std::vector<documentation::Documentation> ModuleEngine::moduleDocumentations() const {
+    return AllModuleDocumentation();
 }
 
 } // namespace openspace

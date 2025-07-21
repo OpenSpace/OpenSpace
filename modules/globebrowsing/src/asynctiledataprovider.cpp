@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,19 +24,19 @@
 
 #include <modules/globebrowsing/src/asynctiledataprovider.h>
 
-#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <modules/globebrowsing/src/rawtiledatareader.h>
 #include <modules/globebrowsing/src/tileloadjob.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace::globebrowsing {
 
 namespace {
-    constexpr const char* _loggerCat = "AsyncTileDataProvider";
+    constexpr std::string_view _loggerCat = "AsyncTileDataProvider";
 } // namespace
 
 AsyncTileDataProvider::AsyncTileDataProvider(std::string name,
@@ -45,17 +45,18 @@ AsyncTileDataProvider::AsyncTileDataProvider(std::string name,
     , _rawTileDataReader(std::move(rawTileDataReader))
     , _concurrentJobManager(LRUThreadPool<TileIndex::TileHashKey>(1, 10))
 {
-    _globeBrowsingModule = global::moduleEngine.module<GlobeBrowsingModule>();
+    ZoneScoped;
+
     performReset(ResetRawTileDataReader::No);
 }
-
-AsyncTileDataProvider::~AsyncTileDataProvider() {} // NOLINT
 
 const RawTileDataReader& AsyncTileDataProvider::rawTileDataReader() const {
     return *_rawTileDataReader;
 }
 
 bool AsyncTileDataProvider::enqueueTileIO(const TileIndex& tileIndex) {
+    ZoneScoped;
+
     if (_resetMode == ResetMode::ShouldNotReset && satisfiesEnqueueCriteria(tileIndex)) {
         auto job = std::make_unique<TileLoadJob>(*_rawTileDataReader, tileIndex);
         _concurrentJobManager.enqueueJob(std::move(job), tileIndex.hashKey());
@@ -65,14 +66,11 @@ bool AsyncTileDataProvider::enqueueTileIO(const TileIndex& tileIndex) {
     return false;
 }
 
-std::vector<RawTile> AsyncTileDataProvider::rawTiles() {
-    std::vector<RawTile> readyResults;
+void AsyncTileDataProvider::clearTiles() {
     std::optional<RawTile> finishedJob = popFinishedRawTile();
     while (finishedJob) {
-        readyResults.push_back(std::move(finishedJob.value()));
         finishedJob = popFinishedRawTile();
     }
-    return readyResults;
 }
 
 std::optional<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
@@ -84,7 +82,6 @@ std::optional<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
         // No longer enqueued. Remove from set of enqueued tiles
         _enqueuedTileRequests.erase(key);
         // Pbo is still mapped. Set the id for the raw tile
-        product.pbo = 0;
         if (product.error != RawTile::ReadError::None) {
             product.imageData = nullptr;
             return std::nullopt;
@@ -98,8 +95,14 @@ std::optional<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
 }
 
 bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const TileIndex& tileIndex) {
+    ZoneScoped;
+
     // Only satisfies if it is not already enqueued. Also bumps the request to the top.
     const bool alreadyEnqueued = _concurrentJobManager.touch(tileIndex.hashKey());
+    // Early out so we don't need to check the already enqueued requests
+    if (alreadyEnqueued) {
+        return false;
+    }
 
     // Concurrent job manager can start jobs which will pop them from enqueued, however
     // they are still in _enqueuedTileRequests until finished
@@ -110,7 +113,7 @@ bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const TileIndex& tileIndex)
 }
 
 void AsyncTileDataProvider::endUnfinishedJobs() {
-    std::vector<TileIndex::TileHashKey> unfinishedJobs =
+    const std::vector<TileIndex::TileHashKey> unfinishedJobs =
         _concurrentJobManager.keysToUnfinishedJobs();
     for (const TileIndex::TileHashKey& unfinishedJob : unfinishedJobs) {
         // When erasing the job before
@@ -119,7 +122,7 @@ void AsyncTileDataProvider::endUnfinishedJobs() {
 }
 
 void AsyncTileDataProvider::endEnqueuedJobs() {
-    std::vector<TileIndex::TileHashKey> enqueuedJobs =
+    const std::vector<TileIndex::TileHashKey> enqueuedJobs =
         _concurrentJobManager.keysToEnqueuedJobs();
     for (const TileIndex::TileHashKey& enqueuedJob : enqueuedJobs) {
         // When erasing the job before
@@ -132,38 +135,33 @@ void AsyncTileDataProvider::update() {
 
     // May reset
     switch (_resetMode) {
-        case ResetMode::ShouldResetAll: {
+        case ResetMode::ShouldResetAll:
             // Clean all finished jobs
-            rawTiles();
+            clearTiles();
             // Only allow resetting if there are no jobs currently running
             if (_enqueuedTileRequests.empty()) {
                 performReset(ResetRawTileDataReader::Yes);
-                LINFO(fmt::format("Tile data reader '{}' reset successfully", _name));
+                LINFO(std::format("Tile data reader '{}' reset successfully", _name));
             }
             break;
-        }
-        case ResetMode::ShouldResetAllButRawTileDataReader: {
+        case ResetMode::ShouldResetAllButRawTileDataReader:
             // Clean all finished jobs
-            rawTiles();
+            clearTiles();
             // Only allow resetting if there are no jobs currently running
             if (_enqueuedTileRequests.empty()) {
                 performReset(ResetRawTileDataReader::No);
-                LINFO(fmt::format("Tile data reader '{}' reset successfully", _name));
+                LINFO(std::format("Tile data reader '{}' reset successfully", _name));
             }
             break;
-        }
-        case ResetMode::ShouldBeDeleted: {
+        case ResetMode::ShouldBeDeleted:
             // Clean all finished jobs
-            rawTiles();
+            clearTiles();
             // Only allow resetting if there are no jobs currently running
             if (_enqueuedTileRequests.empty()) {
                 _shouldBeDeleted = true;
             }
             break;
-        }
-        case ResetMode::ShouldNotReset: {
-            break;
-        }
+        case ResetMode::ShouldNotReset:
         default:
             break;
     }
@@ -174,7 +172,7 @@ void AsyncTileDataProvider::reset() {
     // we need to wait until _enqueuedTileRequests is empty before finishing up.
     _resetMode = ResetMode::ShouldResetAll;
     endEnqueuedJobs();
-    LINFO(fmt::format("Prepairing for resetting of tile reader '{}'", _name));
+    LINFO(std::format("Prepairing for resetting of tile reader '{}'", _name));
 }
 
 void AsyncTileDataProvider::prepareToBeDeleted() {
@@ -182,11 +180,13 @@ void AsyncTileDataProvider::prepareToBeDeleted() {
     endEnqueuedJobs();
 }
 
-bool AsyncTileDataProvider::shouldBeDeleted() {
+bool AsyncTileDataProvider::shouldBeDeleted() const {
     return _shouldBeDeleted;
 }
 
 void AsyncTileDataProvider::performReset(ResetRawTileDataReader resetRawTileDataReader) {
+    ZoneScoped;
+
     ghoul_assert(_enqueuedTileRequests.empty(), "No enqueued requests left");
 
     // Reset raw tile data reader

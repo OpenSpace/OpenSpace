@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,10 +28,10 @@
 #include <modules/globebrowsing/src/lrucache.h>
 #include <modules/globebrowsing/src/tileindex.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/triggerproperty.h>
 #include <memory>
 #include <unordered_map>
 #include <vector>
@@ -45,11 +45,10 @@ namespace openspace::globebrowsing::cache {
 
 struct ProviderTileKey {
     TileIndex tileIndex;
-    unsigned int providerID;
+    uint16_t providerID;
 
     bool operator==(const ProviderTileKey& r) const {
-        return (providerID == r.providerID) &&
-            (tileIndex == r.tileIndex);
+        return (providerID == r.providerID) && (tileIndex == r.tileIndex);
     }
 };
 
@@ -58,7 +57,7 @@ struct ProviderTileHasher {
      * Creates a hash which can be used as key in hash maps.
      * First set the bits to be unique for all tiles.
      * +-------+------------+-------+------------+
-     * | USAGE | BIT RANGE  | #BITS | MAX VALUE  |
+     * | USAGE | BIT RANGE  |  BITS | MAX VALUE  |
      * +-------+------------+-------+------------+
      * | level |   0 -  5   |   5   |         31 |
      * |     x |   5 - 35   |  30   | 1073741824 |
@@ -85,7 +84,7 @@ struct ProviderTileHasher {
 
 class MemoryAwareTileCache : public properties::PropertyOwner {
 public:
-    MemoryAwareTileCache();
+    explicit MemoryAwareTileCache(int tileCacheSize = 1024);
 
     void clear();
     void setSizeEstimated(size_t estimatedSize);
@@ -108,8 +107,8 @@ private:
     class TextureContainer {
     public:
         /**
-         * \param initData is the description of the texture type.
-         * \param numTextures is the number of textures to allocate.
+         * \param initData is the description of the texture type
+         * \param numTextures is the number of textures to allocate
          */
         TextureContainer(TileTextureInitData initData, size_t numTextures);
 
@@ -128,7 +127,7 @@ private:
         const TileTextureInitData& tileTextureInitData() const;
 
         /**
-         * \returns the number of textures in this TextureContainer
+         * \return the number of textures in this TextureContainer
          */
         size_t size() const;
 

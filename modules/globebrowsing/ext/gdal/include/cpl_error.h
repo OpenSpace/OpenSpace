@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_error.h f5361e0be8e2ae819dde996e6c6aa5985b8fefec 2018-04-02 15:11:21 +0200 Even Rouault $
+ * $Id: cpl_error.h 340ad0d703534a256ec3de94176c95b0cf20cbd4 2018-10-13 00:33:14 +0200 Even Rouault $
  *
  * Name:     cpl_error.h
  * Project:  CPL - Common Portability Library
@@ -130,7 +130,9 @@ typedef int CPLErrorNum;
 /** AWSInvalidCredentials */
 #define CPLE_AWSInvalidCredentials      15
 /** AWSSignatureDoesNotMatch */
-#define CPLE_AWSSignatureDoesNotMatch    16
+#define CPLE_AWSSignatureDoesNotMatch   16
+/** VSIE_AWSError */
+#define CPLE_AWSError                   17
 
 /* 100 - 299 reserved for GDAL */
 
@@ -177,9 +179,18 @@ void CPL_DLL CPL_STDCALL _CPLAssert( const char *, const char *, int ) CPL_NO_RE
 #ifdef DEBUG
 /** Assert on an expression. Only enabled in DEBUG mode */
 #  define CPLAssert(expr)  ((expr) ? (void)(0) : _CPLAssert(#expr,__FILE__,__LINE__))
+/** Assert on an expression in DEBUG mode. Evaluate it also in non-DEBUG mode (useful to 'consume' a error return variable) */
+#  define CPLAssertAlwaysEval(expr) CPLAssert(expr)
 #else
 /** Assert on an expression. Only enabled in DEBUG mode */
 #  define CPLAssert(expr)
+#ifdef __cplusplus
+/** Assert on an expression in DEBUG mode. Evaluate it also in non-DEBUG mode (useful to 'consume' a error return variable) */
+#  define CPLAssertAlwaysEval(expr) CPL_IGNORE_RET_VAL(expr)
+#else
+/** Assert on an expression in DEBUG mode. Evaluate it also in non-DEBUG mode (useful to 'consume' a error return variable) */
+#  define CPLAssertAlwaysEval(expr) (void)(expr)
+#endif
 #endif
 
 CPL_C_END

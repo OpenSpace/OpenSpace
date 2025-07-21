@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdalwarper.h 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $
+ * $Id: gdalwarper.h d16ecc80707f9c7097a11bfe47c8403bb9df310f 2018-07-27 20:14:48 -0700 piyush.agram@jpl.nasa.gov $
  *
  * Project:  GDAL High Performance Warper
  * Purpose:  Prototypes, and definitions for warping related work.
@@ -155,13 +155,15 @@ typedef struct {
     /*! The "nodata" value real component for each input band, if NULL there isn't one */
     double             *padfSrcNoDataReal;
     /*! The "nodata" value imaginary component - may be NULL even if real
-      component is provided. */
+      component is provided. This value is not used to flag invalid values.
+      Only the real component is used. */
     double             *padfSrcNoDataImag;
 
     /*! The "nodata" value real component for each output band, if NULL there isn't one */
     double             *padfDstNoDataReal;
     /*! The "nodata" value imaginary component - may be NULL even if real
-      component is provided. */
+      component is provided. Note that warp operations only use real component
+      for flagging invalid data.*/
     double             *padfDstNoDataImag;
 
     /*! GDALProgressFunc() compatible progress reporting function, or NULL
@@ -317,6 +319,8 @@ CPL_C_END
  */
 class CPL_DLL GDALWarpKernel
 {
+    CPL_DISALLOW_COPY_ASSIGN(GDALWarpKernel)
+
 public:
     /** Warp options */
     char              **papszWarpOptions;
@@ -436,6 +440,9 @@ typedef struct _GDALWarpChunk GDALWarpChunk;
 /*! @endcond */
 
 class CPL_DLL GDALWarpOperation {
+
+    CPL_DISALLOW_COPY_ASSIGN(GDALWarpOperation)
+
 private:
     GDALWarpOptions *psOptions;
 
@@ -448,6 +455,12 @@ private:
                                          int *pnSrcXSize, int *pnSrcYSize,
                                          double *pdfSrcXExtraSize, double *pdfSrcYExtraSize,
                                          double* pdfSrcFillRatio );
+
+    void            ComputeSourceWindowStartingFromSource(
+                                    int nDstXOff, int nDstYOff,
+                                    int nDstXSize, int nDstYSize,
+                                    double* padfSrcMinX, double* padfSrcMinY,
+                                    double* padfSrcMaxX, double* padfSrcMaxY);
 
     static CPLErr          CreateKernelMask( GDALWarpKernel *, int iBand,
                                       const char *pszType );

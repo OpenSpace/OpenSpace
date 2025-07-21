@@ -1,0 +1,60 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Earthquakes: Historical Top 10 - through 2011"
+local Identifier = "noaa-sos-land-top_quakes"
+local Description = [[It is estimated that there are 500,000 detectable earthquakes in
+the world each year. Of those, 100,000 can be felt and 100 of them cause damage. Anything
+that causes seismic waves to radiate throughout the Earth is an earthquake. The cause of
+earthquakes can be natural, such as one tectonic plate slipping below another, or
+anthropogenic (cause by humans), such as drilling for fossil fuels, extraction of
+minerals, huge explosions, and the collapse of large buildings. The surface of the Earth
+is composed of a mosaic of tectonic plates moving with respect to each other. When two
+plates glide past one another, a stress builds up at the boundary. When that stress
+reaches a critical level, the boundary slips and the result is an earthquake. Because
+most natural earthquakes occur due to slipping plates, the boundaries between tectonic
+plates are "hot spots" for earthquakes. The magnitude of earthquakes is measured by the
+Richter magnitude scale. It is a base-10 logarithm scale of the ground motion caused by
+the earthquake. Each increase of 1 in magnitude represents 10 times more ground
+motion]]
+local URL = "https://sos.noaa.gov/catalog/datasets/earthquakes-historical-top-10-through-2011/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "sos_saras_big_quakes_20110316.png",
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

@@ -1,4 +1,1 @@
-set (OPENSPACE_DEPENDENCIES
-#    kameleon
-    space
-)
+set(DEFAULT_MODULE ON)

@@ -1,0 +1,102 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Age of the Seafloor (vegetation)"
+local Identifier = "noaa-sos-land-sea_floor_age-shaded_veg"
+local Description = [[The surface of the Earth is composed of a mosaic tectonic plates
+moving with respect to each other. The Earth is made of seven major plates and several
+smaller plates. As the plates move, new sea floor can be created. The plates form three
+different kinds of boundaries: convergent, divergent, and transform. Convergent
+boundaries are also called collision boundaries because they are areas where two plates
+collide. At transform boundaries, the plates slide and grind past one another. The
+divergent boundaries are the areas where plates are moving apart from one another. Where
+plates move apart, new crustal material is formed from molten magma from below the
+Earth's surface. Because of this, the youngest sea floor can be found along divergent
+boundaries, such as the Mid-Atlantic Ocean Ridge. The spreading, however, is generally
+not uniform causing linear features perpendicular to the divergent boundaries]]
+local URL = "https://sos.noaa.gov/catalog/datasets/age-of-the-seafloor-vegetation/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local LayerBase = {
+  Identifier = Identifier,
+  Name = Name,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "4096.png",
+  Description = Description
+}
+
+local LayerAol = {
+  Identifier = Identifier .. "-aol",
+  Name = Name .. " (AOL)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "4096_aol.png",
+  Description = Description
+}
+
+local LayerNoLabels = {
+  Identifier = Identifier .. "-no_labels",
+  Name = Name .. " (No Labels)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "4096_nolabels.jpg",
+  Description = Description
+}
+
+local LayerTrans = {
+  Identifier = Identifier .. "-trans",
+  Name = Name .. " (Trans)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "4096_trans.png",
+  Description = Description
+}
+
+local Colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar.png",
+  FaceCamera = false,
+  BackgroundColor = { 1.0, 1.0, 1.0, 1.0 },
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerAol)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerNoLabels)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerTrans)
+  openspace.addScreenSpaceRenderable(Colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerTrans)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerNoLabels)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerAol)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
+end)
+
+asset.export(LayerBase)
+asset.export(LayerAol)
+asset.export(LayerNoLabels)
+asset.export(LayerTrans)
+asset.export(Colorbar)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

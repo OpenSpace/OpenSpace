@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,45 +23,35 @@
  ****************************************************************************************/
 
 #include <modules/volume/transferfunctionproperty.h>
-
 #include <ghoul/lua/ghoul_lua.h>
-
-namespace {
-
-openspace::volume::TransferFunction fromLuaConversion(lua_State* state, bool& success) {
-    openspace::volume::TransferFunction tf;
-    success = tf.setEnvelopesFromLua(state);
-    return tf;
-}
-
-bool toLuaConversion(lua_State* state, openspace::volume::TransferFunction value) {
-    return value.envelopesToLua(state);
-}
-
-openspace::volume::TransferFunction fromStringConversion(std::string val, bool& success) {
-    openspace::volume::TransferFunction tf;
-    success = tf.setEnvelopesFromString(val);
-    return tf;
-}
-
-bool toStringConversion(std::string& outValue,
-                        openspace::volume::TransferFunction inValue)
-{
-    outValue = inValue.serializedToString();
-    return true;
-}
-
-} // namespace
 
 namespace openspace::properties {
 
-REGISTER_TEMPLATEPROPERTY_SOURCE(TransferFunctionProperty, volume::TransferFunction,
-    volume::TransferFunction(),
-    fromLuaConversion,
-    toLuaConversion,
-    fromStringConversion,
-    toStringConversion,
-    LUA_TTABLE
-)
+TransferFunctionProperty::TransferFunctionProperty(Property::PropertyInfo info,
+                                                   volume::TransferFunction value)
+    : TemplateProperty<volume::TransferFunction>(std::move(info), std::move(value))
+{}
+
+std::string_view TransferFunctionProperty::className() const {
+    return "TransferFunctionProperty";
+}
+
+ghoul::lua::LuaTypes TransferFunctionProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Table;
+}
+
+void TransferFunctionProperty::getLuaValue(lua_State* state) const {
+    _value.envelopesToLua(state);
+}
+
+volume::TransferFunction TransferFunctionProperty::toValue(lua_State* state) const {
+    openspace::volume::TransferFunction tf;
+    tf.setEnvelopesFromLua(state);
+    return tf;
+}
+
+std::string TransferFunctionProperty::stringValue() const {
+    return _value.serializedToString();
+}
 
 } // namespace openspace::properties

@@ -1,0 +1,114 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Earthquakes and Nuclear Power Plants"
+local Identifier = "noaa-sos-land-nuclear_earthquake"
+local Description = [[Earthquakes have been occurring on Earth since its formation. They
+occur when tectonic plates that are sliding against or past each other build up enough
+tension to slip, causing the rock to settle into a new position and the ground to shake.
+The United States Geological Survey predicts that 500,000 earthquakes happen every year,
+although most go undetected because they are so small or so far away from populated
+areas. 10,000 of them can be felt by humans and 100 of them cause damage. Unfortunately,
+scientists have not yet discovered a reliably precise way to predict earthquakes, and
+there is debate over whether such a thing is even possible. Current prediction methods
+involve measuring the tension that has been bled off by past earthquakes and how often
+earthquakes have occurred at that location before. Due to the fact that the instruments
+that can measure tension and accurate seismographs are a recent invention, earthquake
+prediction continues to be inaccurate and imprecise]]
+local URL = "https://sos.noaa.gov/catalog/datasets/earthquakes-and-nuclear-power-plants/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local imagesDestination = syncedDirectory .. "images"
+
+local LayerBase = {
+  Identifier = Identifier .. "-base",
+  Name = Name .. " (Base)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "2048.jpg",
+  Description = Description
+}
+
+local LayerAll = {
+  Identifier = Identifier .. "-all",
+  Name = Name .. " (All)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "all_earthquakes.png",
+  Description = Description
+}
+
+local LayerNew = {
+  Identifier = Identifier .. "-new",
+  Name = Name .. " (New)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "new.jpg",
+  Description = Description
+}
+
+local LayerNuclear = {
+  Identifier = Identifier .. "-nuclear",
+  Name = Name .. " (Nuclear)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "nuclear_plants.png",
+  Description = Description
+}
+
+local LayerImages = {
+  Identifier = Identifier .. "-images",
+  Name = Name .. " (Images)",
+  Type = "ImageSequenceTileProvider",
+  ZIndex = 100,
+  FolderPath = imagesDestination,
+  Description = Description
+}
+
+local Legend = {
+  Identifier = Identifier,
+  Name = Name,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "legend.png",
+  FaceCamera = false,
+  Scale = 0.175,
+  CartesianPosition = { 1.0, 0.0, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerAll)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerNew)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerNuclear)
+  openspace.addScreenSpaceRenderable(Legend)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Legend)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerNuclear)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerNew)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerAll)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
+end)
+
+asset.export(LayerBase)
+asset.export(LayerAll)
+asset.export(LayerNew)
+asset.export(LayerNuclear)
+asset.export(Legend)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

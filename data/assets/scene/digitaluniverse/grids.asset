@@ -1,307 +1,787 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
-local earth_transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
-local speck = asset.syncedResource({
-    Name = "Grids Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_grids_speck",
-    Version = 1
+
+local speck = asset.resource({
+  Name = "Grids Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_grids_speck",
+  Version = 3
 })
 
-local radio = {
-    Identifier = "RadioSphere",
-    Parent = earth_transforms.EarthBarycenter.Identifier,
-    Transform = {
-        Scale = {
-            Type = "TimeDependentScale",
-            -- First TV signals strong enough to leave the ionosphere
-            ReferenceDate = "1936 AUG 01 12:00:00",
-            Speed = 299792458 -- c
-        }
-    },
-    Renderable = {
-        Type = "RenderableSphericalGrid",
-        Enabled = false,
-        GridColor = { 1.0, 1.0, 0.3, 0.75},
-        LineWidth = 2.0,
-        GridMatrix = { -0.05487554,  0.4941095, -0.8676661   , 0.0,
-                       -0.9938214 , -0.1109906, -0.0003515167, 0.0,
-                       -0.09647644,  0.8622859,  0.4971472   , 0.0,
-                        0.0       ,  0.0      ,  0.0         , 1.0 }
-    },
-    GUI = {
-        Name = "Radio Sphere",
-        Path = "/Other/Grids"
-    }
+
+local EquatorialRotationMatrix = {
+  -0.05487554,  0.4941095, -0.8676661,
+  -0.8734371 , -0.4448296, -0.1980764,
+  -0.483835  ,  0.7469823,  0.4559838
 }
 
-local ecliptic = {
-    Identifier = "EclipticSphere",
-    Parent = transforms.SolarSystemBarycenter.Name,
-    Transform = {
-        Scale = {
-            Type = "StaticScale",
-            Scale = 9.46377307652E17;
-        }
-    },
-    Renderable = {
-        Type = "RenderableSphericalGrid",
-        Enabled = false,
-        GridColor = { 0.7, 0.0, 0.0, 0.5},
-        LineWidth = 2.0,
-        GridMatrix = { -0.05487554,  0.4941095, -0.8676661   , 0.0,
-                       -0.9938214 , -0.1109906, -0.0003515167, 0.0,
-                       -0.09647644,  0.8622859,  0.4971472   , 0.0,
-                        0.0       ,  0.0      ,  0.0         , 1.0 }
-    },
-    GUI = {
-        Name = "Ecliptic Sphere",
-        Path = "/Other/Grids"
-    }
+local EquatorialTransformationMatrix = {
+  -0.05487554,  0.4941095, -0.8676661, 0.0,
+  -0.8734371 , -0.4448296, -0.1980764, 0.0,
+  -0.483835  ,  0.7469823,  0.4559838, 0.0,
+   0.0       ,  0.0      ,  0.0      , 1.0
 }
 
-local eclipticLabels = {
-    Identifier = "EclipticSphereLabels",
-    Parent = transforms.SolarSystemBarycenter.Name,
-    Renderable = {
-        Type = "RenderableBillboardsCloud",
-        Enabled = false,
-        Color = { 1.0, 1.0, 1.0 },
-        Transparency = 0.65,
-        LabelFile = speck .. "/eclip.label",
-        DrawLabels = true,
-        TextColor = { 0.5, 0.5, 0.5, 1.0 },
-        TextSize = 14.75,
-        TextMinSize = 1.3,
-        TextMaxSize = 50.0,
-        Unit = "pc",
-        TransformationMatrix = {
-            -0.05487554,  0.4941095, -0.8676661,    0.0,
-            -0.9938214 , -0.1109906, -0.0003515167, 0.0,
-            -0.09647644,  0.8622859,  0.4971472,    0.0,
-            0.0,          0.0,        0.0,          1.0
-        }
-    },
-    GUI = {
-        Name = "Ecliptic Sphere Labels",
-        Path = "/Other/Grids"
-    }
+local EclipticRotationMatrix = {
+  -0.05487554,  0.4941095, -0.8676661,
+  -0.9938214 , -0.1109906, -0.0003515167,
+  -0.09647644,  0.8622859,  0.4971472
 }
 
-local equatorial = {
-    Identifier = "EquatorialSphere",
-    Parent = transforms.SolarSystemBarycenter.Name,
-    Transform = {
-        Scale = {
-            Type = "StaticScale",
-            Scale = 6.2440846E17;
-        }
-    },
-    Renderable = {
-        Type = "RenderableSphericalGrid",
-        Enabled = false,
-        GridColor = { 0.0, 0.0, 1.0, 0.8},
-        LineWidth = 2.0,
-        GridMatrix = { -0.05487554,  0.4941095, -0.8676661, 0.0,
-                       -0.8734371 , -0.4448296, -0.1980764, 0.0,
-                       -0.483835  ,  0.7469823,  0.4559838, 0.0,
-                        0.0       ,  0.0      ,  0.0      , 1.0 },
-    },
-    GUI = {
-        Name = "Equatorial Sphere",
-        Path = "/Other/Grids"
-    }
+local EclipticTransformationMatrix = {
+  -0.05487554,  0.4941095, -0.8676661,    0.0,
+  -0.9938214 , -0.1109906, -0.0003515167, 0.0,
+  -0.09647644,  0.8622859,  0.4971472,    0.0,
+   0.0       ,  0.0      ,  0.0      ,    1.0
 }
 
-local equatorialLabels = {
-    Identifier = "EquatorialSphereLabels",
-    Parent = transforms.SolarSystemBarycenter.Name,
-    Renderable = {
-        Type = "RenderableBillboardsCloud",
-        Enabled = false,
-        Color = { 1.0, 1.0, 1.0 },
-        Transparency = 0.65,
-        LabelFile = speck .. "/radec.label",
-        DrawLabels = true,
-        TextColor = { 0.5, 0.5, 0.5, 1.0 },
-        TextSize = 14.5,
-        TextMinSize = 1.7,
-        TextMaxSize = 70.0,
-        Unit = "pc",
-        TransformationMatrix = {
-            -0.05487554,  0.4941095, -0.8676661, 0.0,
-            -0.8734371 , -0.4448296, -0.1980764, 0.0,
-            -0.483835  ,  0.7469823,  0.4559838, 0.0,
-            0.0       ,  0.0      ,  0.0      , 1.0 
-        }
+local LightHour = 1.0792528488E12
+local LightDay = 2.59020684E13
+local LightMonth = 7.771E14
+local LightYear = 9.4605284E15
+
+local RadioSphere = {
+  Identifier = "RadioSphere",
+  Parent = earthTransforms.EarthBarycenter.Identifier,
+  Transform = {
+    Scale = {
+      Type = "TimeDependentScale",
+      -- First TV signals strong enough to leave the ionosphere
+      ReferenceDate = "1936 AUG 01 12:00:00",
+      Speed = 299792458 -- c
     },
-    GUI = {
-        Name = "Equatorial Sphere Labels",
-        Path = "/Other/Grids"
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = EquatorialRotationMatrix
     }
+  },
+  Renderable = {
+    Type = "RenderableSphericalGrid",
+    Enabled = false,
+    Opacity = 1.0,
+    Color = { 0.3, 0.84, 1.0 },
+    LineWidth = 2.0
+  },
+  Tag = { "du_grid" },
+  GUI = {
+    Name = "Radio Sphere",
+    Path = "/Milky Way/Grids",
+    Focusable = false,
+    Description = [[The radio sphere describes the theoretical extent of Earth's radio
+      signals in space. Before television carrier waves, early-warning radar first used
+      in World War II, and the detonation of atomic weapons, Earth was radio-quiet to the
+      universe (AM and FM radio signals bounce off the atmosphere and do not escape it).
+      After the use of these and other radio emitters began, in the late 1930s and early
+      1940s, signals were able to escape the atmosphere and travel into space at the speed
+      of light. Since then, we have been broadcasting to the universe. We mention earlier
+      that this is the theoretical extent of these signals. In reality, these signals
+      will dissipate rapidly into the ambient cosmic noise of the universe. All light
+      falls off as the square of the distance, and radio waves are no different. The
+      signals that emanate from Earth are likely lost in the noise before they leave the
+      solar system, but the radio sphere remains a visually compelling astronomical
+      concept.]]
+  }
 }
 
-local galactic = {
-    Identifier = "GalacticSphere",
-    Parent = transforms.SolarSystemBarycenter.Name,
-    Transform = {
-        Scale = {
-            Type = "StaticScale",
-            Scale = 9.46377307652E18;
-        }
+local EquatorialSphere = {
+  Identifier = "EquatorialSphere",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 80 * LightYear
     },
-    Renderable = {
-        Type = "RenderableSphericalGrid",
-        Enabled = false,
-        LineWidth = 2.0,
-        GridColor = { 0.0, 0.6, 0.6, 0.6}
-    },
-    GUI = {
-        Name = "Galactic Sphere",
-        Path = "/Other/Grids"
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = EquatorialRotationMatrix
     }
+  },
+  Renderable = {
+    Type = "RenderableSphericalGrid",
+    Enabled = false,
+    Opacity = 1.0,
+    Color = { 0.3, 0.3, 0.15 },
+    LineWidth = 2.0,
+    LatSegments = 36,
+    LongSegments = 24,
+  },
+  Tag = { "du_grid" },
+  GUI = {
+    Name = "Equatorial Coordinates",
+    Path = "/Night Sky/Coordinate Systems/Equatorial",
+    Focusable = false,
+    Description = [[An 80-light-year sphere representing equatorial coordinates (right
+      ascension and declination).]]
+  }
 }
 
-local galacticLabels = {
-    Identifier = "GalacticSphereLabels",
-    Parent = transforms.SolarSystemBarycenter.Name,
-    Renderable = {
-        Type = "RenderableBillboardsCloud",
-        Enabled = false,
-        Color = { 1.0, 1.0, 1.0 },
-        Transparency = 0.65,
-        LabelFile = speck .. "/galac.label",
-        DrawLabels = true,
-        TextColor = { 0.5, 0.5, 0.5, 1.0 },
-        TextSize = 15.8,
-        TextMinSize = 0.5,
-        TextMaxSize = 100.0,
-        Unit = "pc"
+local EquatorialSphereLabels = {
+  Identifier = "EquatorialSphereLabels",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Renderable = {
+    Type = "RenderablePointCloud",
+    Enabled = false,
+    Labels = {
+      Enabled = true,
+      File = speck .. "radec.label",
+      Color = { 0.5, 0.5, 0.5 },
+      Size = 14.5,
+      MinMaxSize = { 2, 70 },
+      Unit = "pc",
+      TransformationMatrix = EquatorialTransformationMatrix
     },
-    GUI = {
-        Name = "Galactic Sphere Labels",
-        Path = "/Other/Grids"
-    }
+    Opacity = 0.65,
+    Unit = "pc",
+    TransformationMatrix = EquatorialTransformationMatrix
+  },
+  Tag = { "du_grid_labels" },
+  GUI = {
+    Name = "Equatorial Coordinates Labels",
+    Path = "/Night Sky/Coordinate Systems/Equatorial",
+    Focusable = false,
+    Description = [[Labels on a sphere representing right ascension in hours and
+      declination in degrees.]]
+  }
 }
 
-local plane100kly = {
-    Identifier = "100klyGrid",
-    Renderable = {
-        Type = "RenderableDUMeshes",
-        Enabled = false,
-        Color = { 1.0, 1.0, 1.0 },
-        Transparency = 0.4,
-        ScaleFactor = 1.0,
-        File = speck .. "/100kly.speck",
-        MeshColor = {{ 0.1, 0.5, 0.6 }},
-        LabelFile = speck .. "/100kly.label",
-        TextColor = { 0.0, 0.2, 0.5, 1.0 },
-        TextSize = 18.6,
-        TextMinSize = 0.5,
-        TextMaxSize = 30.0,
-        Unit = "Mpc"
+local EclipticSphere = {
+  Identifier = "EclipticSphere",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 100 * LightYear
     },
-    GUI = {
-        Name = "100kly Grid",
-        Path = "/Other/Grids"
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = EclipticRotationMatrix
     }
+  },
+  Renderable = {
+    Type = "RenderableSphericalGrid",
+    Enabled = false,
+    Opacity = 1.0,
+    Color = { 0.3, 0.15, 0.15 },
+    LineWidth = 2.0
+  },
+  Tag = { "du_grid" },
+  GUI = {
+    Name = "Ecliptic Coordinates",
+    Path = "/Night Sky/Coordinate Systems/Ecliptic",
+    Focusable = false,
+    Description = [[A 100-light-year sphere representing ecliptic coordinates (ecliptic
+      longitude and latitude).]]
+  }
 }
 
-local plane1Mly = {
-    Identifier = "1MlyGrid",
-    Renderable = {
-        Type = "RenderableDUMeshes",
-        Enabled = false,
-        Color = { 1.0, 1.0, 1.0 },
-        Transparency = 0.4,
-        ScaleFactor = 1.0,
-        File = speck .. "/1Mly.speck",
-        MeshColor = {{ 0.1, 0.5, 0.6 }},
-        LabelFile = speck .. "/1Mly.label",
-        TextColor = { 0.0, 0.2, 0.5, 1.0 },
-        TextSize = 19.6,
-        TextMinSize = 0.5,
-        TextMaxSize = 30.0,
-        Unit = "Mpc"
+local EclipticSphereLabels = {
+  Identifier = "EclipticSphereLabels",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Renderable = {
+    Type = "RenderablePointCloud",
+    Enabled = false,
+    Labels = {
+      Enabled = true,
+      File = speck .. "eclip.label",
+      Color = { 0.5, 0.5, 0.5 },
+      Size = 14.5,
+      MinMaxSize = { 1, 50 },
+      Unit = "pc",
+      TransformationMatrix = EclipticTransformationMatrix
     },
-    GUI = {
-        Name = "1Mly Grid",
-        Path = "/Other/Grids"
-    }
+    Opacity = 0.65,
+    Unit = "pc",
+    TransformationMatrix = EclipticTransformationMatrix
+  },
+  Tag = { "du_grid_labels" },
+  GUI = {
+    Name = "Ecliptic Coordinates Labels",
+    Path = "/Night Sky/Coordinate Systems/Ecliptic",
+    Focusable = false,
+    Description = [[Labels on a sphere representing ecliptic longitude and latitude in
+      degrees.]]
+  }
 }
 
-local plane10Mly = {
-    Identifier = "10MlyGrid",
-    Renderable = {
-        Type = "RenderableDUMeshes",
-        Enabled = false,
-        Color = { 1.0, 1.0, 1.0 },
-        Transparency = 0.4,
-        ScaleFactor = 1.0,
-        File = speck .. "/10Mly.speck",
-        MeshColor = {{ 0.1, 0.5, 0.6 }},
-        LabelFile = speck .. "/10Mly.label",
-        TextColor = { 0.0, 0.2, 0.5, 1.0 },
-        TextSize = 20.6,
-        TextMinSize = 0.5,
-        TextMaxSize = 30.0,
-        Unit = "Mpc"
-    },
-    GUI = {
-        Name = "10Mly Grid",
-        Path = "/Other/Grids"
+local GalacticSphere = {
+  Identifier = "GalacticSphere",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 1000 * LightYear
     }
+  },
+  Renderable = {
+    Type = "RenderableSphericalGrid",
+    Enabled = false,
+    LineWidth = 2.0,
+    Opacity = 1.0,
+    Color = { 0.05, 0.25, 0.25 }
+  },
+  Tag = { "du_grid" },
+  GUI = {
+    Name = "Galactic Coordinates",
+    Path = "/Night Sky/Coordinate Systems/Galactic",
+    Focusable = false,
+    Description = [[A 1000-light-year sphere representing galactic coordinates (galactic
+      longitude and latitude).]]
+  }
 }
 
-local plane100Mly = {
-    Identifier = "100MlyGrid",
-    Renderable = {
-        Type = "RenderableDUMeshes",
-        Enabled = false,
-        Color = { 1.0, 1.0, 1.0 },
-        Transparency = 0.4,
-        ScaleFactor = 1.0,
-        File = speck .. "/100Mly.speck",
-        MeshColor = {{ 0.1, 0.5, 0.6 }},
-        LabelFile = speck .. "/100Mly.label",
-        TextColor = { 0.0, 0.2, 0.5, 1.0 },
-        TextSize = 21.6,
-        TextMinSize = 0.5,
-        TextMaxSize = 30.0,
-        Unit = "Mpc"
+local GalacticSphereLabels = {
+  Identifier = "GalacticSphereLabels",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Renderable = {
+    Type = "RenderablePointCloud",
+    Enabled = false,
+    Labels = {
+      Enabled = true,
+      File = speck .. "galac.label",
+      Color = { 0.5, 0.5, 0.5 },
+      Size = 15.5,
+      MinMaxSize = { 1, 100 },
+      Unit = "pc"
     },
-    GUI = {
-        Name = "100Mly Grid",
-        Path = "/Other/Grids"
-    }
+    Opacity = 0.65,
+    Unit = "pc"
+  },
+  Tag = { "du_grid_labels" },
+  GUI = {
+    Name = "Galactic Coordinates Labels",
+    Path = "/Night Sky/Coordinate Systems/Galactic",
+    Focusable = false,
+    Description = [[Labels on a sphere representing galactic longitude and latitude in
+      degrees.]]
+  }
 }
 
-local plane20Gly = {
-    Identifier = "20GlyGrid",
-    Renderable = {
-        Type = "RenderableDUMeshes",
-        Enabled = false,
-        Color = { 1.0, 1.0, 1.0 },
-        Transparency = 0.4,
-        ScaleFactor = 1.0,
-        File = speck .. "/20Gly.speck",
-        MeshColor = {{ 0.1, 0.5, 0.6 }},
-        LabelFile = speck .. "/20Gly.label",
-        TextColor = { 0.0, 0.2, 0.5, 1.0 },
-        TextSize = 23.6,
-        TextMinSize = 0.5,
-        TextMaxSize = 30.0,
-        Unit = "Mpc"
-    },
-    GUI = {
-        Name = "20Gly Grid",
-        Path = "/Other/Grids"
+local Plane1lh = {
+  Identifier = "1lhGrid",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = EclipticRotationMatrix
     }
+  },
+  Renderable = {
+    Type = "RenderableGrid",
+    Enabled = false,
+    Labels = {
+      File = speck .. "1lh.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 8.9,
+      MinMaxSize = { 0, 30 },
+      Unit = "Km"
+    },
+    Opacity = 0.4,
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 2 * LightHour, 2 * LightHour }
+  },
+  Tag = { "du_grid" },
+  GUI = {
+    Name = "1-light-hour Grid",
+    Path = "/Solar System/Grids",
+    Focusable = false,
+    Description = [[A 1-light-hour Cartesian grid aligned on the plane of the Solar
+      System.]],
+    OrderingNumber = LightHour
+  }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-    radio, ecliptic, eclipticLabels, equatorial, equatorialLabels, galactic,
-    galacticLabels, plane100kly, plane1Mly, plane10Mly, plane100Mly, plane20Gly
-})
+local Plane1ld = {
+  Identifier = "1ldGrid",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = EclipticRotationMatrix
+    }
+  },
+  Renderable = {
+    Type = "RenderableGrid",
+    Enabled = false,
+    Labels = {
+      File = speck .. "1ld.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 10.3,
+      MinMaxSize = { 0, 30 },
+      Unit = "Km"
+    },
+    Opacity = 0.4,
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 2 * LightDay, 2 * LightDay }
+  },
+  Tag = { "du_grid" },
+  GUI = {
+    Name = "1-light-day Grid",
+    Path = "/Solar System/Grids",
+    Focusable = false,
+    Description = [[A 1-light-day Cartesian grid aligned on the plane of the Solar
+      System.]],
+    OrderingNumber = LightDay
+  }
+}
+
+local Plane1lm = {
+  Identifier = "1lmGrid",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = EclipticRotationMatrix
+    }
+  },
+  Renderable = {
+    Type = "RenderableGrid",
+    Enabled = false,
+    Labels = {
+      File = speck .. "1lm.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 11.8,
+      MinMaxSize = { 0, 30 },
+      Unit = "pc"
+    },
+    Opacity = 0.4,
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 2 * LightMonth, 2 * LightMonth }
+  },
+  Tag = { "du_grid" },
+  GUI = {
+    Name = "1-light-month Grid",
+    Path = "/Solar System/Grids",
+    Focusable = false,
+    Description = [[A 1-light-month Cartesian grid aligned on the plane of the Solar
+      System.]],
+    OrderingNumber = LightMonth
+  }
+}
+
+local Plane1ly = {
+  Identifier = "1lyGrid",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = EclipticRotationMatrix
+    }
+  },
+  Renderable = {
+    Type = "RenderableGrid",
+    Enabled = false,
+    Labels = {
+      File = speck .. "1ly.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 13.0,
+      MinMaxSize = { 0, 30 },
+      Unit = "pc"
+    },
+    Opacity = 0.4,
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 2 * LightYear, 2 * LightYear }
+  },
+  Tag = { "du_grid" },
+  GUI = {
+    Name = "1-light-year Grid",
+    Path = "/Solar System/Grids",
+    Focusable = false,
+    Description = [[A 1-light-year Cartesian grid aligned on the plane of the Solar
+      System.]],
+    OrderingNumber = LightYear
+  }
+}
+
+local Plane10ly = {
+  Identifier = "10lyGrid",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = EclipticRotationMatrix
+    }
+  },
+  Renderable = {
+    Type = "RenderableGrid",
+    Enabled = false,
+    Labels = {
+      File = speck .. "10ly.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 14.17,
+      MinMaxSize = { 0, 30 },
+      Unit = "pc"
+    },
+    Opacity = 0.4,
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 10 * 2 * LightYear, 10 * 2 * LightYear }
+  },
+  Tag = { "du_grid" },
+  GUI = {
+    Name = "10-light-year Grid",
+    Path = "/Milky Way/Grids",
+    Focusable = false,
+    Description = [[A 10-light-year Cartesian grid aligned on the plane of the Solar
+      System.]],
+    OrderingNumber = 10 * LightYear
+  }
+}
+
+local Plane100ly = {
+  Identifier = "100lyGrid",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = EclipticRotationMatrix
+    }
+  },
+  Renderable = {
+    Type = "RenderableGrid",
+    Enabled = false,
+    Labels = {
+      File = speck .. "100ly.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 15.0,
+      MinMaxSize = { 0, 30 },
+      Unit = "pc"
+    },
+    Opacity = 0.4,
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 100 * 2 * LightYear, 100 * 2 * LightYear }
+  },
+  Tag = { "du_grid" },
+  GUI = {
+    Name = "100-light-year Grid",
+    Path = "/Milky Way/Grids",
+    Focusable = false,
+    Description = [[A 100-light-year Cartesian grid aligned on the plane of the Solar
+      System.]],
+    OrderingNumber = 100 * LightYear
+  }
+}
+
+local Plane1kly = {
+  Identifier = "1klyGrid",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = EclipticRotationMatrix
+    }
+  },
+  Renderable = {
+    Type = "RenderableGrid",
+    Enabled = false,
+    Labels = {
+      File = speck .. "1kly.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 16.0,
+      MinMaxSize = { 0, 30 },
+      Unit = "pc"
+    },
+    Opacity = 0.4,
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 1000 * 2 * LightYear, 1000 * 2 * LightYear }
+  },
+  Tag = { "du_grid" },
+  GUI = {
+    Name = "1,000-light-year Grid",
+    Path = "/Milky Way/Grids",
+    Focusable = false,
+    Description = [[A 1,000-light-year Cartesian grid aligned on the plane of the Solar
+      System.]],
+    OrderingNumber = 1000 * LightYear
+  }
+}
+
+local Plane10kly = {
+  Identifier = "10klyGrid",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = EclipticRotationMatrix
+    }
+  },
+  Renderable = {
+    Type = "RenderableGrid",
+    Enabled = false,
+    Labels = {
+      File = speck .. "10kly.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 17.25,
+      MinMaxSize = { 0, 30 },
+      Unit = "pc"
+    },
+    Opacity = 0.4,
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 10000 * 2 * LightYear, 10000 * 2 * LightYear }
+  },
+  Tag = { "du_grid" },
+  GUI = {
+    Name = "10,000-light-year Grid",
+    Path = "/Milky Way/Grids",
+    Focusable = false,
+    Description = [[A 10,000-light-year Cartesian grid aligned on the plane of the Solar
+      System.]],
+    OrderingNumber = 10000 * LightYear
+  }
+}
+
+local Plane100kly = {
+  Identifier = "100klyGrid",
+  Renderable = {
+    Type = "RenderableGrid",
+    Enabled = false,
+    Labels = {
+      File = speck .. "100kly.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 18.0,
+      MinMaxSize = { 0, 30 },
+      Unit = "Mpc"
+    },
+    Opacity = 0.4,
+    Color = { 0.1, 0.5, 0.6 },
+    HighlightColor = { 0.3, 0.7, 0.8 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    HighlightRate = { 5, 5 },
+    Size = { 100000 * 2 * LightYear, 100000 * 2 * LightYear }
+  },
+  Tag = { "du_grid" },
+  GUI = {
+    Name = "100,000-light-year Grid",
+    Path = "/Universe/Grids",
+    Focusable = false,
+    Description = [[A 100,000-light-year Cartesian grid aligned on the plane of the Milky
+      Way.]],
+    OrderingNumber = 100000 * LightYear
+  }
+}
+
+local Plane1Mly = {
+  Identifier = "1MlyGrid",
+  Renderable = {
+    Type = "RenderableGrid",
+    Enabled = false,
+    Labels = {
+      File = speck .. "1Mly.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 19.0,
+      MinMaxSize = { 0, 30 },
+      Unit = "Mpc"
+    },
+    Opacity = 0.4,
+    Color = { 0.1, 0.5, 0.6 },
+    HighlightColor = { 0.3, 0.7, 0.8 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    HighlightRate = { 5, 5 },
+    Size = { 1E6 * 2 * LightYear, 1E6 * 2 * LightYear }
+  },
+  Tag = { "du_grid" },
+  GUI = {
+    Name = "1-million-light-year Grid",
+    Path = "/Universe/Grids",
+    Focusable = false,
+    Description = [[A 1-million-light-year Cartesian grid aligned on the plane of the
+      Milky Way.]],
+    OrderingNumber = 1E6 * LightYear
+  }
+}
+
+local Plane10Mly = {
+  Identifier = "10MlyGrid",
+  Renderable = {
+    Type = "RenderableGrid",
+    Enabled = false,
+    Labels = {
+      File = speck .. "10Mly.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 20.3,
+      MinMaxSize = { 0, 30 },
+      Unit = "Mpc"
+    },
+    Opacity = 0.4,
+    Color = { 0.1, 0.5, 0.6 },
+    HighlightColor = { 0.3, 0.7, 0.8 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    HighlightRate = { 5, 5 },
+    Size = { 10E6 * 2 * LightYear, 10E6 * 2 * LightYear }
+  },
+  Tag = { "du_grid" },
+  GUI = {
+    Name = "10-million-light-year Grid",
+    Path = "/Universe/Grids",
+    Focusable = false,
+    Description = [[A 10-million-light-year Cartesian grid aligned on the plane of the
+      Milky Way.]],
+    OrderingNumber = 10E6 * LightYear
+  }
+}
+
+local Plane100Mly = {
+  Identifier = "100MlyGrid",
+  Renderable = {
+    Type = "RenderableGrid",
+    Enabled = false,
+    Labels = {
+      File = speck .. "100Mly.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 20.9,
+      MinMaxSize = { 0, 30 },
+      Unit = "Mpc"
+    },
+    Opacity = 0.4,
+    Color = { 0.1, 0.5, 0.6 },
+    HighlightColor = { 0.3, 0.7, 0.8 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    HighlightRate = { 5, 5 },
+    Size = { 100E6 * 2 * LightYear, 100E6 * 2 * LightYear }
+  },
+  Tag = { "du_grid" },
+  GUI = {
+    Name = "100-million-light-year Grid",
+    Path = "/Universe/Grids",
+    Focusable = false,
+    Description = [[A 100-million-light-year Cartesian grid aligned on the plane of the
+      Milky Way.]],
+    OrderingNumber = 100E6 * LightYear
+  }
+}
+
+local Plane20Gly = {
+  Identifier = "20GlyGrid",
+  Renderable = {
+    Type = "RenderableGrid",
+    Enabled = false,
+    Labels = {
+      File = speck .. "20Gly.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 23.1,
+      MinMaxSize = { 0, 30 },
+      Unit = "Mpc"
+    },
+    Opacity = 0.4,
+    Color = { 0.1, 0.5, 0.6 },
+    HighlightColor = { 0.3, 0.7, 0.8 },
+    LineWidth = 2.0,
+    Segments = { 40, 40 },
+    HighlightRate = { 5, 5 },
+    Size = { 20E9 * 2 * LightYear, 20E9 * 2 * LightYear }
+  },
+  Tag = { "du_grid" },
+  GUI = {
+    Name = "20-billion-light-year Grid",
+    Path = "/Universe/Grids",
+    Focusable = false,
+    Description = [[A 20-billion-light-year Cartesian grid aligned on the plane of the
+      Milky Way.]],
+    OrderingNumber = 20E9 * LightYear
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(RadioSphere)
+  openspace.addSceneGraphNode(EclipticSphere)
+  openspace.addSceneGraphNode(EclipticSphereLabels)
+  openspace.addSceneGraphNode(EquatorialSphere)
+  openspace.addSceneGraphNode(EquatorialSphereLabels)
+  openspace.addSceneGraphNode(GalacticSphere)
+  openspace.addSceneGraphNode(GalacticSphereLabels)
+  openspace.addSceneGraphNode(Plane1lh)
+  openspace.addSceneGraphNode(Plane1ld)
+  openspace.addSceneGraphNode(Plane1lm)
+  openspace.addSceneGraphNode(Plane1ly)
+  openspace.addSceneGraphNode(Plane10ly)
+  openspace.addSceneGraphNode(Plane100ly)
+  openspace.addSceneGraphNode(Plane1kly)
+  openspace.addSceneGraphNode(Plane10kly)
+  openspace.addSceneGraphNode(Plane100kly)
+  openspace.addSceneGraphNode(Plane1Mly)
+  openspace.addSceneGraphNode(Plane10Mly)
+  openspace.addSceneGraphNode(Plane100Mly)
+  openspace.addSceneGraphNode(Plane20Gly)
+end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(Plane20Gly)
+    openspace.removeSceneGraphNode(Plane100Mly)
+    openspace.removeSceneGraphNode(Plane10Mly)
+    openspace.removeSceneGraphNode(Plane1Mly)
+    openspace.removeSceneGraphNode(Plane100kly)
+    openspace.removeSceneGraphNode(Plane10kly)
+    openspace.removeSceneGraphNode(Plane1kly)
+    openspace.removeSceneGraphNode(Plane100ly)
+    openspace.removeSceneGraphNode(Plane10ly)
+    openspace.removeSceneGraphNode(Plane1ly)
+    openspace.removeSceneGraphNode(Plane1lm)
+    openspace.removeSceneGraphNode(Plane1ld)
+    openspace.removeSceneGraphNode(Plane1lh)
+    openspace.removeSceneGraphNode(GalacticSphereLabels)
+    openspace.removeSceneGraphNode(GalacticSphere)
+    openspace.removeSceneGraphNode(EquatorialSphereLabels)
+    openspace.removeSceneGraphNode(EquatorialSphere)
+    openspace.removeSceneGraphNode(EclipticSphereLabels)
+    openspace.removeSceneGraphNode(EclipticSphere)
+    openspace.removeSceneGraphNode(RadioSphere)
+end)
+
+asset.export(RadioSphere)
+asset.export(EclipticSphere)
+asset.export(EclipticSphereLabels)
+asset.export(EquatorialSphere)
+asset.export(EquatorialSphereLabels)
+asset.export(GalacticSphere)
+asset.export(GalacticSphereLabels)
+asset.export(Plane1lh)
+asset.export(Plane1ld)
+asset.export(Plane1lm)
+asset.export(Plane1ly)
+asset.export(Plane10ly)
+asset.export(Plane100ly)
+asset.export(Plane1kly)
+asset.export(Plane10kly)
+asset.export(Plane100kly)
+asset.export(Plane1Mly)
+asset.export(Plane10Mly)
+asset.export(Plane100Mly)
+asset.export(Plane20Gly)
+
+
+
+asset.meta = {
+  Name = "Grids",
+  Description = [[Various grids and spheres for showing size reference. Included:
+    10,000 light year grid, 10 light year grid, 20 billion light year grid, 10 million
+    light year grid, 100 light year grid, 100 million light year grid, Ecliptic
+    Coordinate Sphere (500-light-year radius), Galactic Coordinate Sphere
+    (1000-light-year radius), Galaxy Coordinate Grid, Celestial Coordinates / Radio Sphere
+    (dynamic radius), 1 billion light year grid, Celestial Coordinate Sphere
+    (1000000-light-year radius), 1,000 light year grid, 1 million light year grid,
+    1 light year grid.]],
+  Author = "Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe"
+}

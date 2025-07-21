@@ -1,0 +1,18 @@
+asset.require("./layers/utah_layers", true)
+asset.require("./layers/sweden_layers", false)
+asset.require("./layers/newyork_layers", false)
+
+
+
+asset.meta = {
+  Name = "Default Moon layers",
+  Description = [[Default Moon layers are: WAC, Clem Uvvis, Uvvis Hybrid, Kaguya,
+    LRO LOLA Color Shaded Relief 388m v4, Lola Shade, and Lola DEM (3D).
+
+
+    Layers loaded from all servers
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

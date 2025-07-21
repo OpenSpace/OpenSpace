@@ -1,0 +1,62 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Sea Ice Extent (Arctic only) - 1850 - Present"
+local Identifier = "noaa-sos-oceans-seaice_monthly"
+local Description = [[Arctic sea ice extent is declining at a rapid rate; the extent in
+September, 2019 was about 30% lower than the average September extent over 1980-2010. Sea
+ice in both hemispheres can be easily monitored now, with data from a series of
+satellites that have been operating since the late 1970s. Every year, NOAA publishes the
+Arctic Report Card. In it, scientists summarize how sea ice, along with snow cover,
+tundra greenness, marine algae, caribou, and other indicators of change are responding to
+warming that is taking place about two times faster in the Arctic than elsewhere on the
+planet]]
+local URL = "https://sos.noaa.gov/catalog/datasets/sea-ice-extent-arctic-only-1850-present/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "TemporalTileProvider",
+  Mode = "Folder",
+  Folder = {
+    Folder = syncedDirectory .. "4096",
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "sibt1850_seaice_extent_%Y%M%H_sos.png"
+  },
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

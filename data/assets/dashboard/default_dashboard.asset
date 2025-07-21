@@ -1,0 +1,16 @@
+asset.require("./date")
+asset.require("./simulationincrement")
+asset.require("./distance")
+asset.require("./framerate")
+asset.require("./parallelconnection")
+asset.require("./globelocation")
+
+
+
+asset.meta = {
+  Name = "Dashboard - Default Items",
+  Description = "This asset provides the default items for the dashboard",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

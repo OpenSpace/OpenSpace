@@ -1,0 +1,31 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderablemodel/model_vertex_colors.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderableModel_Example_Shader",
+        "position": [
+          -1.4308015710550517,
+          1.5322656483545825,
+          1.446271943930593
+        ],
+        "pitch": -0.000239491221873302,
+        "up": [
+          0.08343251916771802,
+          0.7241074954380635,
+          -0.6846220488676531
+        ],
+        "yaw": -0.0059474377778890525,
+        "timestamp": "2024 JUL 09 12:00:10"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

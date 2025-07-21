@@ -1,0 +1,63 @@
+local spheres = {}
+
+local i = 1
+for z = 1,3 do
+  for y = 1,3 do
+    for x = 1,3 do
+      local Sphere = {
+        Identifier = "ExampleSphere" .. i,
+        Transform = {
+          Translation = {
+            Type = "StaticTranslation",
+            Position = { x, y, z }
+          }
+        },
+        Renderable = {
+          Type = "RenderableSphereImageLocal",
+          Size = 0.20 + i * 0.01,
+          Segments = 80,
+          Opacity = 1,
+          Texture = openspace.absPath("${DATA}/test2.jpg"),
+          Orientation = "Both",
+        },
+        GUI = {
+          Name = "Test Sphere "  .. i,
+          Path = "/Other/Spheres"
+        }
+      }
+
+      table.insert(spheres, Sphere)
+      i = i + 1
+    end
+  end
+end
+
+
+asset.onInitialize(function()
+  for _, n in ipairs(spheres) do
+    openspace.addSceneGraphNode(n)
+  end
+end)
+
+asset.onDeinitialize(function()
+  for _, n in ipairs(spheres) do
+    openspace.removeSceneGraphNode(n)
+  end
+end)
+
+
+for _, n in ipairs(spheres) do
+  asset.export(n)
+end
+
+
+
+asset.meta = {
+  Name = "Spheres Example",
+  Description = [[Example showing how to render textured spheres in 3D space. Some
+    coding logic is used to generate 9 spheres with different size and position.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
+

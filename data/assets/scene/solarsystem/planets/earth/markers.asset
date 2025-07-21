@@ -1,27 +1,50 @@
-local transforms = asset.require('./transforms')
-local assetHelper = asset.require('util/asset_helper')
-local texturesPath = asset.require('./earth_textures').TexturesPath
+local transforms = asset.require("./transforms")
 
+
+
+local texturesPath = asset.resource({
+  Name = "Earth Textures",
+  Type = "HttpSynchronization",
+  Identifier = "earth_textures",
+  Version = 2
+})
 
 
 local EarthMarker = {
-    Identifier = "EarthMarker",
-    Parent = transforms.EarthIAU.Identifier,
-    Renderable = {
-        Type = "RenderablePlaneImageLocal",
-        Enabled = false,
-        Size = 3.0E11,
-        Origin = "Center",
-        Billboard = true,
-        Texture = texturesPath .. "/marker.png",
-        BlendMode = "Additive"
-    },
-    GUI = {
-        Name = "Earth Marker",
-        Path = "/Solar System/Planets/Earth"
-    }
+  Identifier = "EarthMarker",
+  Parent = transforms.EarthIAU.Identifier,
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Enabled = false,
+    Size = 3.0E11,
+    Origin = "Center",
+    Billboard = true,
+    Texture = texturesPath .. "marker.png",
+    BlendMode = "Additive"
+  },
+  GUI = {
+    Name = "Earth Marker",
+    Path = "/Solar System/Planets/Earth"
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(EarthMarker)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { EarthMarker })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(EarthMarker)
+end)
+
+asset.export(EarthMarker)
+
+
+
+asset.meta = {
+  Name = "Earth marker",
+  Description = "Earth marker with name, sized for Solar System view",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

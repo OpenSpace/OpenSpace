@@ -5,7 +5,9 @@
 //
 
 #include <windows.h>
+#ifndef SPOUT_NO_GL_INCLUDE
 #include <GL/GL.h>
+#endif
 
 #define SPOUTLIBRARY_EXPORTS // defined for this DLL. The application imports rather than exports
 

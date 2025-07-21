@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,7 @@
 
 #include <modules/server/include/jsonconverters.h>
 
+#include <openspace/interaction/action.h>
 #include <openspace/properties/property.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -33,24 +34,17 @@ using json = nlohmann::json;
 
 namespace openspace::properties {
 
-namespace {
-
-
-
-} // namespace 
-
 void to_json(json& j, const Property& p) {
-    std::string description = p.generateBaseJsonDescription();
-    json desc = json::parse(description);
+    const json metaData = p.generateJsonDescription();
 
-    std::string value = p.jsonValue();
+    const std::string value = p.jsonValue();
     json val = json::parse(value);
 
     j = {
-        { "Description", desc },
-        { "Value", val }
+        { "metaData", metaData },
+        { "uri", p.uri() },
+        { "value", val }
     };
-    j["Description"]["description"] = p.description();
 }
 
 void to_json(json& j, const Property* pP) {
@@ -64,7 +58,8 @@ void to_json(json& j, const PropertyOwner& p) {
         { "description", p.description() },
         { "properties", p.properties() },
         { "subowners", p.propertySubOwners() },
-        { "tag", p.tags() }
+        { "tag", p.tags() },
+        { "uri", p.uri() }
     };
 }
 
@@ -73,6 +68,79 @@ void to_json(json& j, const PropertyOwner* p) {
 }
 
 } // namespace openspace::properties
+
+namespace openspace::interaction {
+
+    void to_json(json& j, const Action& action) {
+        j = {
+            { "identifier", action.identifier },
+            { "name", action.name },
+            { "isLocal", action.isLocal == Action::IsLocal::Yes },
+            { "documentation", action.documentation },
+            { "guiPath", action.guiPath }
+        };
+
+        // Add the color if we have it
+        if (action.color.has_value()) {
+            // Convert to std as nlohmann doesn't understand glm
+            glm::vec4 color = action.color.value();
+            j["color"] = { color.r, color.g, color.b, color.a };
+        }
+    }
+
+    void to_json(json& j, const Action* pA) {
+        // Use reference converter instead of pointer
+        j = *pA;
+    }
+} // namespace openspace::interaction
+
+namespace ghoul {
+
+void to_json(json& j, const Dictionary& d) {
+    json object = json::object();
+    for (const std::string_view k : d.keys()) {
+        const std::string key = std::string(k);
+        if (d.hasValue<glm::dvec4>(key)) {
+            const glm::dvec4 v = d.value<glm::dvec4>(key);
+            object[key] = json::array({ v[0], v[1], v[2], v[3] });
+        }
+        else if (d.hasValue<glm::dvec3>(key)) {
+            const glm::dvec3 v = d.value<glm::dvec3>(key);
+            object[key] = json::array({ v[0], v[1], v[2] });
+        }
+        else if (d.hasValue<glm::dvec2>(key)) {
+            const glm::dvec2 v = d.value<glm::dvec2>(key);
+            object[key] = json::array({ v[0], v[1] });
+        }
+        else if (d.hasValue<double>(key)) {
+            object[key] = d.value<double>(key);
+        }
+        else if (d.hasValue<int>(key)) {
+            object[key] = d.value<int>(key);
+        }
+        else if (d.hasValue<std::string>(key)) {
+            object[key] = d.value<std::string>(key);
+        }
+        else if (d.hasValue<bool>(key)) {
+            object[key] = d.value<bool>(key);
+        }
+        else if (d.hasValue<Dictionary>(key)) {
+            json child;
+            to_json(child, d.value<Dictionary>(key));
+            object[key] = child;
+        }
+        else {
+            object[key] = nullptr;
+        }
+    }
+    j = object;
+}
+
+void to_json(json& j, const Dictionary* d) {
+    j = *d;
+}
+
+} // namespace ghoul
 
 namespace openspace {
 
@@ -88,11 +156,6 @@ void to_json(json& j, const SceneGraphNode& n) {
 
         { "subowners", n.propertySubOwners() }
     };
-/*
-    auto renderable = n.renderable();
-    if (renderable != nullptr) {
-        j["renderable"] = renderable;
-    }*/
 
     SceneGraphNode* parent = n.parent();
     if (parent) {
@@ -130,4 +193,4 @@ void to_json(json& j, const dvec3& v) {
     };
 }
 
-} // namepsace glm
+} // namespace glm

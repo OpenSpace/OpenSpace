@@ -1,0 +1,101 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Vegetation: Seasonal Changes - Apr 2012 - Apr 2013"
+local Identifier = "noaa-sos-land-global_vegetation"
+local Description = [[Although 75% of the planet is a relatively unchanging ocean of
+blue, the remaining 25% of Earth's surface is a dynamic green. Data from the NASA/NOAA
+Suomi NPP satellite is able to show these subtle differences in greenness using the
+Visible-Infrared Imager/Radiometer Suite (VIIRS) instrument on board the satellite. This
+dataset highlights our ever-changing planet, using a highly detailed vegetation index
+data from the satellite, developed by scientists at NOAA]]
+local URL = "https://sos.noaa.gov/catalog/datasets/vegetation-seasonal-changes-apr-2012-apr-2013/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local imagesDestination = syncedDirectory .. "4096"
+local colorbarDestination = syncedDirectory .. "colorbar/"
+
+local Background1Layer = {
+  Identifier = Identifier .. "-background-14a",
+  Name = Name .. " (Background Week 14a)",
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "2012_week14a.png",
+  Description = Description
+}
+
+local Background2Layer = {
+  Identifier = Identifier .. "-background-14",
+  Name = Name .. " (Background Week 14)",
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "2012week14.png",
+  Description = Description
+}
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "TemporalTileProvider",
+  Mode = "Folder",
+  Folder = {
+    Folder = imagesDestination,
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "%Yweek%U.png"
+  },
+  Description = Description
+}
+
+local Colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  -- @TODO:  We need a temporal provider for ScreenSpaceImages to handle this
+  TexturePath = colorbarDestination .. "NDVIColor00001.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Background1Layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Background2Layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Background2Layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Background1Layer)
+  openspace.removeScreenSpaceRenderable(Colorbar)
+end)
+
+asset.export(Layer)
+asset.export(Background2Layer)
+asset.export(Background1Layer)
+asset.export(Colorbar)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

@@ -1,23 +1,55 @@
-local assetHelper = asset.require('util/asset_helper')
-local shared = asset.require('../satellites_shared')
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local group = {
-    Title = "Disaster Monitoring",
-    Url = "http://www.celestrak.com/NORAD/elements/dmc.txt",
-    TrailColor = { 0.75, 0.75, 0.35 }
+
+
+local omm = asset.resource({
+  Name = "Satellite OMM Data (Disaster Monitoring)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_dmc",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=dmc&FORMAT=kvn",
+  Filename = "dmc.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+
+local DisasterMonitoringConstellation = {
+  Identifier = "DisasterMonitoringConstellation",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "dmc.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.75, 0.75, 0.35 },
+    TrailFade = 17,
+    PointSizeExponent = 5.0,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Disaster Monitoring",
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
+  }
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
 
-
-local objectNames = {}
-
-asset.onInitialize(function ()
-    objectNames = shared.addSatelliteGroupObjects(group, tle, false)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(DisasterMonitoringConstellation)
 end)
 
-asset.onDeinitialize(function ()
-    for _, n in ipairs(objectNames) do
-        openspace.removeSceneGraphNode(n)
-    end
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(DisasterMonitoringConstellation)
 end)
+
+asset.export(DisasterMonitoringConstellation)
+
+
+
+asset.meta = {
+  Name = "Satellites Weather - Disaster Monitoring",
+  Description = "Satellites asset for Weather - Disaster Monitoring. Data from Celestrak",
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/NORAD/elements/",
+  License = "Celestrak"
+}

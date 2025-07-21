@@ -1,0 +1,66 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Marine Life Tracks: Pacific Ocean"
+local Identifier = "noaa-sos-oceans-marine_life_tracking"
+local Description = [[This dataset contains the locations of a leatherback turtle, a
+northern elephant seal, and two white sharks for each day over the course of several
+months. The data used was taken from topp.org (TOPP stands for Tagging of Pelagic
+Predators), a site that tracks marine animals in an attempt to learn more about them.
+TOPP's goal is to protect marine wildlife from overfishing, climate change, and various
+other threats. The purpose of this dataset is to serve as an example of a hand-made
+animal tracking dataset. For a more extensive dataset using data from TOPP, go here]]
+local URL = "https://sos.noaa.gov/catalog/datasets/marine-life-tracks-pacific-ocean/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "2048.png",
+  Description = Description
+}
+
+local Legend = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "legend.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Legend)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Legend)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(Legend)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

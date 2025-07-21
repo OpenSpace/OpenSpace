@@ -1,67 +1,126 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-local kernels = asset.require('../mar097').Kernels
+local transforms = asset.require("scene/solarsystem/planets/mars/transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
--- local textures = asset.syncedResource({
---     Name = "Mars Textures",
---     Type = "HttpSynchronization",
---     Identifier = "mars_textures",
---     Version = 1
--- })
+
+local model = asset.resource({
+  Name = "Deimos Model",
+  Type = "HttpSynchronization",
+  Identifier = "deimos_model",
+  Version = 1
+})
 
 
 local Deimos = {
-    Identifier = "Deimos",
-    Parent = transforms.MarsBarycenter.Identifier,
-    Transform = {
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_DEIMOS",
-            DestinationFrame = "GALACTIC",
-            Kernels = kernels
-        },
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "DEIMOS",
-            Observer = "MARS BARYCENTER",
-            Kernels = kernels
-        }
+  Identifier = "Deimos",
+  Parent = transforms.MarsBarycenter.Identifier,
+  InteractionSphere = 8000,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Deimos,
+      Observer = coreKernels.ID.MarsBarycenter
     },
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = { 15, 12.2, 11 },
-        SegmentsPerPatch = 90,
-        Layers = {
-        }
-    },
-    Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
-    GUI = {
-        Path = "/Solar System/Planets/Mars"
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Deimos,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = model .. "Deimos_1_1000.glb",
+    ModelScale = "Kilometer",
+    RotationVector = { 180, 0, 180 },
+    AmbientIntensity = 0.02,
+    SpecularIntensity = 0.0,
+    LightSources = {
+      sun.LightSource
+    },
+    PerformShading = true
+  },
+  Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
+  GUI = {
+    Name = "Deimos",
+    Path = "/Solar System/Planets/Mars/Moons/Deimos",
+    Description = "One of two moons of Mars"
+  }
 }
 
 local DeimosTrail = {
-    Identifier = "DeimosTrail",
-    Parent = transforms.MarsBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "DEIMOS",
-            Observer = "MARS BARYCENTER"
-        },
-        Color = { 1.0, 0.605, 0.420 },
-        Period = 1.263,
-        Resolution = 1000
+  Identifier = "DeimosTrail",
+  Parent = transforms.MarsBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Deimos,
+      Observer = coreKernels.ID.MarsBarycenter
     },
-    Tag = { "moonTrail_solarSystem", "moonTrail_terrestrial", "moonTrail_mars" },
-    GUI = {
-        Name = "Deimos Trail",
-        Path = "/Solar System/Planets/Mars"
-    }
+    Color = { 1.0, 0.605, 0.420 },
+    Period = 1.263,
+    Resolution = 1000
+  },
+  Tag = { "moonTrail_solarSystem", "moonTrail_terrestrial", "moonTrail_mars" },
+  GUI = {
+    Name = "Deimos Trail",
+    Path = "/Solar System/Planets/Mars/Moons/Deimos",
+    Focusable = false,
+    Description = "Trail for Deimos"
+  }
+}
+
+local DeimosLabel = {
+  Identifier = "DeimosLabel",
+  Parent = Deimos.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Deimos",
+    FontSize = 70.0,
+    Size = 5.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 50.0, 1000.0 },
+    FadeWidths = { 50.0, 2000.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Deimos Label",
+    Path = "/Solar System/Planets/Mars/Moons/Deimos",
+    Focusable = false,
+    Description = "Label for Mars' moon Deimos"
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Deimos)
+  openspace.addSceneGraphNode(DeimosTrail)
+  openspace.addSceneGraphNode(DeimosLabel)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Deimos, DeimosTrail })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(DeimosLabel)
+  openspace.removeSceneGraphNode(DeimosTrail)
+  openspace.removeSceneGraphNode(Deimos)
+end)
+
+asset.export(Deimos)
+asset.export(DeimosTrail)
+
+
+
+asset.meta = {
+  Name = "Deimos",
+  Description = "RenderableModel and Trail for Deimos",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

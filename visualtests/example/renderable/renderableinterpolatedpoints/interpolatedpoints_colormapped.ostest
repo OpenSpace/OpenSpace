@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderableinterpolatedpoints/interpolatedpoints_colormapped.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderableInterpolatedPoints_Example_ColorMapped",
+        "position": [
+          30190.264204628616,
+          -34811.35933094328,
+          24085.401931723853
+        ],
+        "pitch": -0.0002394912218747391,
+        "referenceFrame": "Root",
+        "up": [
+          -0.10004682471563434,
+          0.5059847760306468,
+          0.8567205141057
+        ],
+        "yaw": -0.005947437777881546,
+        "timestamp": "2025 JUL 13 11:05:41"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.RenderableInterpolatedPoints_Example_ColorMapped.Renderable.Interpolation.Value",
+        "value": 3.4
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

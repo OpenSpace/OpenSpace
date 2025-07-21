@@ -1,0 +1,61 @@
+local helper = asset.require("util/vrt_flipbook_helper")
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
+
+
+
+local assetPrefix = "A11flip"
+local assetGlobe = moon.Moon.Identifier
+local flipbookCount = 19
+
+local flipbook = nil
+
+local vrts = asset.resource({
+  Name = "Apollo 11 Flipbook",
+  Type = "HttpSynchronization",
+  Identifier = "apollo_11_flipbook",
+  Version = 1
+})
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addBlendingLayersFromDirectory(vrts, assetGlobe)
+  flipbook = helper.createFlipbook(assetPrefix, assetGlobe, 19)
+
+  rawset(_G, "nextFlip", function() helper.nextFlipbookPage(flipbook) end)
+  openspace.action.registerAction({
+    Identifier = "os.lemFlipbook.NextFlip",
+    Name = "Next Apollo 11 flip",
+    Command = "nextFlip()",
+    Documentation = "Show the next Apollo 11 flipbook image",
+    GuiPath = "/Missions/Apollo/11",
+    IsLocal = false
+  })
+
+  rawset(_G, "previousFlip", function() helper.previousFlipbookPage(flipbook) end)
+  openspace.action.registerAction({
+    Identifier = "os.lemFlipbook.PrevFlip",
+    Name = "Prev Apollo 11 flip",
+    Command = "previousFlip()",
+    Documentation = "Show the previous Apollo 11 flipbook image",
+    GuiPath = "/Missions/Apollo/11",
+    IsLocal = false
+  })
+end)
+
+asset.onDeinitialize(function()
+  flipbook = nil
+
+  openspace.action.removeAction("os.lemFlipbook.NextFlip")
+  openspace.action.removeAction("os.lemFlipbook.PrevFlip")
+end)
+
+
+
+asset.meta = {
+  Name = "Apollo 11 Landing Site Flipbook",
+  Description = [[This asset provides georeferenced images of the Apollo 11 landing site,
+    taken with different illumination angles.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

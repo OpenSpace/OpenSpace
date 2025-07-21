@@ -1,0 +1,26 @@
+<VRTDataset rasterXSize="213388" rasterYSize="106695">
+  <SRS>GEOGCS["GCS_Mars_2000_Sphere",DATUM["D_Mars_2000_Sphere",SPHEROID["Mars_2000_Sphere_IAU_IAG",3396190.0,0.0]],PRIMEM["Reference_Meridian",0.0],UNIT["Degree",0.0174532925199433]]</SRS>
+  <GeoTransform> -1.8000000000000000e+02,  1.6870676889047182e-03,  0.0000000000000000e+00,  9.0000000000000000e+01,  0.0000000000000000e+00, -1.6870518768452129e-03</GeoTransform>
+  <VRTRasterBand dataType="Byte" band="1">
+   <ColorInterp>Gray</ColorInterp>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">themis_ir_night_sweden.wms</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="213388" RasterYSize="71130" DataType="Byte" BlockXSize="256" BlockYSize="256" />
+      <SrcRect xOff="0" yOff="0" xSize="213388" ySize="71130" />
+      <DstRect xOff="0" yOff="17782.5" xSize="213388" ySize="71130" />
+    </SimpleSource>
+  </VRTRasterBand>
+  <VRTRasterBand dataType="Byte" band="2">
+    <ColorInterp>Alpha</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">themis_ir_night_sweden.wms</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="213388" RasterYSize="71130" DataType="Byte" BlockXSize="256" BlockYSize="256" />
+      <SrcRect xOff="0" yOff="0" xSize="213388" ySize="71130" />
+      <DstRect xOff="0" yOff="17782.5" xSize="213388" ySize="71130" />
+      <ScaleRatio>255</ScaleRatio>
+      <NODATA>0</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+</VRTDataset>

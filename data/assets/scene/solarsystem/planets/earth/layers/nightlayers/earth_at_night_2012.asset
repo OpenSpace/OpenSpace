@@ -1,0 +1,34 @@
+local globe = asset.require("../../earth")
+
+
+
+local Layer = {
+  Identifier = "Earth_at_Night_2012",
+  Name = "Earth at Night 2012",
+  Enabled = asset.enabled,
+  ZIndex = 10,
+  FilePath = asset.resource("earth_at_night_2012.wms"),
+  Description = [[The lights of cities and villages trace the outlines of civilization
+    in this global view]]
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "NightLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "NightLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "Earth at Night 2012",
+  Description = "Main web loaded night layer for Earth. This layer is hosted by GIBS",
+  Author = "OpenSpace Team",
+  URL = "https://visibleearth.nasa.gov/images/79765/night-lights-2012-map",
+  License = "NASA"
+}

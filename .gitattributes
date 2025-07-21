@@ -1,5 +1,18 @@
 * text=auto
 
+# Correct GitHub's language detection shenanigans
+
+# Asset files are not Unity, but Lua instead
+*.asset linguist-language=Lua
+# We have some SPICE frame kernels that get misclassified as code
+*.tf -linguist-detectable
+# We do not want to index the GDAL csv and xml files
+modules/globebrowsing/gdal_data/* linguist-vendored
+# No need to index any external files
+*/ext/* linguist-vendored
+# No C allowed
+*.h linguist-language=C++
+
 # GitHub files
 ATTRIBUTION text
 AUTHORS text

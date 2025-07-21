@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderableinterpolatedpoints/interpolatedpoints_spline.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderableInterpolatedPoints_Example_Spline",
+        "position": [
+          16875.734172308472,
+          -19458.830908662276,
+          13463.242245182335
+        ],
+        "pitch": -0.00023949122186329427,
+        "referenceFrame": "Root",
+        "up": [
+          -0.10004682471567433,
+          0.5059847760306164,
+          0.8567205141057135
+        ],
+        "yaw": -0.005947437777883472,
+        "timestamp": "2025 JUL 13 11:06:41"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.RenderableInterpolatedPoints_Example_Spline.Renderable.Interpolation.Value",
+        "value": 3.809999942779541
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

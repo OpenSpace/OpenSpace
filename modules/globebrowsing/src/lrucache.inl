@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/profiling.h>
 
 namespace openspace::globebrowsing::cache {
 
@@ -58,8 +59,16 @@ bool LRUCache<KeyType, ValueType, HasherType>::exist(const KeyType& key) const {
 
 template<typename KeyType, typename ValueType, typename HasherType>
 bool LRUCache<KeyType, ValueType, HasherType>::touch(const KeyType& key) {
+    ZoneScoped;
+
     const auto it = _itemMap.find(key);
-    if (it != _itemMap.end()) { // Found in cache
+    if (it != _itemMap.end()) {
+        // @TODO (abock, 2020-08-14) Instead of removing the iterator from the previous
+        // position and then readding it at the front, it might make more sense to move
+        // them around?  That would prevent the dynamic memoray allocation that is
+        // happening here
+
+        // Found in cache
         ValueType value = it->second->second;
         // Remove from current position
         _itemList.erase(it->second);
@@ -69,7 +78,8 @@ bool LRUCache<KeyType, ValueType, HasherType>::touch(const KeyType& key) {
         _itemMap.emplace(key, _itemList.begin());
 
         return true;
-    } else {
+    }
+    else {
         return false;
     }
 }
@@ -81,16 +91,16 @@ bool LRUCache<KeyType, ValueType, HasherType>::isEmpty() const {
 
 template<typename KeyType, typename ValueType, typename HasherType>
 ValueType LRUCache<KeyType, ValueType, HasherType>::get(const KeyType& key) {
-    //ghoul_assert(exist(key), "Key " << key << " must exist");
     const auto it = _itemMap.find(key);
     // Move list iterator pointing to value
     _itemList.splice(_itemList.begin(), _itemList, it->second);
-    return it->second->second;
+    ValueType res = it->second->second;
+    return res;
 }
 
 template<typename KeyType, typename ValueType, typename HasherType>
 std::pair<KeyType, ValueType> LRUCache<KeyType, ValueType, HasherType>::popMRU() {
-    ghoul_assert(!_itemList.empty(), "Cannot pop LRU cache. Ensure cache is not empty.");
+    ghoul_assert(!_itemList.empty(), "Cannot pop LRU cache. Ensure cache is not empty");
 
     auto first_it = _itemList.begin();
     _itemMap.erase(first_it->first);
@@ -101,7 +111,7 @@ std::pair<KeyType, ValueType> LRUCache<KeyType, ValueType, HasherType>::popMRU()
 
 template<typename KeyType, typename ValueType, typename HasherType>
 std::pair<KeyType, ValueType> LRUCache<KeyType, ValueType, HasherType>::popLRU() {
-    ghoul_assert(!_itemList.empty(), "Cannot pop LRU cache. Ensure cache is not empty.");
+    ghoul_assert(!_itemList.empty(), "Cannot pop LRU cache. Ensure cache is not empty");
 
     auto lastIt = _itemList.end();
     lastIt--;

@@ -1,0 +1,40 @@
+local globe = asset.require("../../dione")
+
+
+
+local texturesPath = asset.resource({
+  Name = "Dione textures",
+  Type = "HttpSynchronization",
+  Identifier = "dione_textures",
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = "Texture",
+  FilePath = texturesPath .. "dione.jpg",
+  Enabled = asset.enabled,
+  ZIndex = 5,
+  CacheSettings = { Enabled = false }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Dione.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Dione.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "Dione Texutre",
+  Description = "Default jpg texture for Dione",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,15 +24,15 @@
 
 #version __CONTEXT__
 
-#include "atmosphere_common.glsl"
-
 out vec4 renderTableColor;
 
+uniform ivec2 OTHER_TEXTURES;
 uniform sampler2D deltaETexture;
 
-void main(void) {   
-  vec2 uv = gl_FragCoord.xy / vec2(OTHER_TEXTURES_W, OTHER_TEXTURES_H);
+
+void main() {
+  vec2 uv = gl_FragCoord.xy / vec2(OTHER_TEXTURES);
 
   // Update texture E with E plus deltaE textures.
-  renderTableColor = texture(deltaETexture, uv);   
+  renderTableColor = texture(deltaETexture, uv);
 }

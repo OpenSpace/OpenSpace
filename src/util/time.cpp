@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,13 +24,28 @@
 
 #include <openspace/util/time.h>
 
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/profile.h>
+#include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
+#include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stringhelper.h>
+#include <cctype>
+#include <ctime>
 #include <mutex>
+#include <string_view>
 
 #include "time_lua.inl"
 
@@ -41,219 +56,176 @@ double Time::convertTime(const std::string& time) {
     return SpiceManager::ref().ephemerisTimeFromDate(time);
 }
 
+double Time::convertTime(const char* time) {
+    return SpiceManager::ref().ephemerisTimeFromDate(time);
+}
+
+std::string Time::currentWallTime() {
+    const std::time_t t = std::time(nullptr);
+    std::tm* utcTime = std::gmtime(&t);
+    const std::string time = std::format(
+        "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}",
+        utcTime->tm_year + 1900, utcTime->tm_mon + 1, utcTime->tm_mday,
+        utcTime->tm_hour, utcTime->tm_min, utcTime->tm_sec
+    );
+    return time;
+}
+
 Time::Time(double secondsJ2000) : _time(secondsJ2000) {}
 
+Time::Time(const std::string& time) :
+    _time(SpiceManager::ref().ephemerisTimeFromDate(time))
+{}
+
 Time Time::now() {
-    Time now;
-    time_t secondsSince1970;
-    secondsSince1970 = time(nullptr);
+    const time_t secondsSince1970 = time(nullptr);
 
     const time_t secondsInAYear = static_cast<time_t>(365.25 * 24 * 60 * 60);
     const double secondsSince2000 = static_cast<double>(
         secondsSince1970 - 30 * secondsInAYear
     );
+    Time now;
     now.setTime(secondsSince2000);
     return now;
 }
 
-void Time::setTime(double value) {
-    _time = value;
+void Time::setTime(double j2000Seconds) {
+    _time = j2000Seconds;
 }
 
 double Time::j2000Seconds() const {
     return _time;
 }
 
-double Time::advanceTime(double delta) {
-    _time += delta;
+double Time::advanceTime(double deltaTime) {
+    _time += deltaTime;
     return _time;
 }
 
-void Time::setTime(std::string time) {
-    _time = SpiceManager::ref().ephemerisTimeFromDate(std::move(time));
+void Time::setTime(const std::string& time) {
+    _time = SpiceManager::ref().ephemerisTimeFromDate(time);
 }
 
-std::string Time::UTC() const {
-    return SpiceManager::ref().dateFromEphemerisTime(_time);
+void Time::setTime(const char* time) {
+    _time = SpiceManager::ref().ephemerisTimeFromDate(time);
 }
 
-std::string Time::ISO8601() const {
-    std::string datetime = SpiceManager::ref().dateFromEphemerisTime(_time);
-    const std::string& month = datetime.substr(5, 3);
+std::string_view Time::UTC() const {
+    constexpr const char Format[] = "YYYY MON DDTHR:MN:SC.### ::RND";
+    char* b = reinterpret_cast<char*>(
+        global::memoryManager->TemporaryMemory.allocate(32)
+    );
+    std::memset(b, 0, 32);
 
-    std::string MM;
-    if (month == "JAN") {
-        MM = "01";
+    SpiceManager::ref().dateFromEphemerisTime(_time, b, 32, Format);
+    return std::string_view(b);
+}
+
+std::string_view Time::ISO8601() const {
+    ZoneScoped;
+
+    constexpr const char Format[] = "YYYY-MM-DDTHR:MN:SC.###";
+    constexpr int S = sizeof(Format);
+    char* b = reinterpret_cast<char*>(
+        global::memoryManager->TemporaryMemory.allocate(S)
+    );
+    std::memset(b, 0, S);
+
+    SpiceManager::ref().dateFromEphemerisTime(_time, b, S, Format);
+    return std::string_view(b, S - 1);
+}
+
+void Time::ISO8601(char* buffer) const {
+    constexpr const char Format[] = "YYYY-MM-DDTHR:MN:SC.###";
+    constexpr int S = sizeof(Format) + 1;
+    std::memset(buffer, 0, S);
+    SpiceManager::ref().dateFromEphemerisTime(_time, buffer, S, Format);
+}
+
+std::string Time::advancedTime(const std::string& base, std::string change) {
+    const double j2000Seconds = Time::convertTime(base);
+
+    double dt = 0.0;
+    if (change.empty()) {
+        throw ghoul::RuntimeError("Modifier string must not be empty");
     }
-    else if (month == "FEB") {
-        MM = "02";
-    }
-    else if (month == "MAR") {
-        MM = "03";
-    }
-    else if (month == "APR") {
-        MM = "04";
-    }
-    else if (month == "MAY") {
-        MM = "05";
-    }
-    else if (month == "JUN") {
-        MM = "06";
-    }
-    else if (month == "JUL") {
-        MM = "07";
-    }
-    else if (month == "AUG") {
-        MM = "08";
-    }
-    else if (month == "SEP") {
-        MM = "09";
-    }
-    else if (month == "OCT") {
-        MM = "10";
-    }
-    else if (month == "NOV") {
-        MM = "11";
-    }
-    else if (month == "DEC") {
-        MM = "12";
-    }
-    else {
-        ghoul_assert(false, "Bad month");
+    ghoul::trimWhitespace(change);
+    bool isNegative = false;
+    if (change[0] == '-') {
+        isNegative = true;
+        change = change.substr(1);
     }
 
-    datetime.replace(4, 5, "-" + MM + "-");
-    return datetime;
+    auto it = std::find_if(
+        change.begin(), change.end(),
+        [](unsigned char c) {
+            const bool digit = std::isdigit(c) != 0;
+            const bool isDot = c == '.';
+            return !digit && !isDot;
+        }
+    );
+
+    try {
+        const double value = std::stod(std::string(change.begin(), it));
+        const std::string_view uName = std::string_view(it, change.end());
+
+        TimeUnit unit = TimeUnit::Second;
+        if (uName == "s") { unit = TimeUnit::Second; }
+        else if (uName == "m") { unit = TimeUnit::Minute; }
+        else if (uName == "h") { unit = TimeUnit::Hour; }
+        else if (uName == "d") { unit = TimeUnit::Day; }
+        else if (uName == "M") { unit = TimeUnit::Month; }
+        else if (uName == "y") { unit = TimeUnit::Year; }
+        else {
+            throw ghoul::RuntimeError(std::format("Unknown unit '{}'", uName));
+        }
+
+        dt = openspace::convertTime(value, unit, TimeUnit::Second);
+        if (isNegative) {
+            dt *= -1.0;
+        }
+    }
+    catch (...) {
+        throw ghoul::RuntimeError(std::format(
+            "Error parsing relative time offset '{}'", change
+        ));
+    }
+
+    const std::string_view ret = Time(j2000Seconds + dt).ISO8601();
+    return std::string(ret);
 }
 
 scripting::LuaLibrary Time::luaLibrary() {
     return {
         "time",
         {
-            {
-                "setTime",
-                &luascriptfunctions::time_setTime,
-                {},
-                "{number, string}",
-                "Sets the current simulation time to the "
-                "specified value. If the parameter is a number, the value is the number "
-                "of seconds past the J2000 epoch. If it is a string, it has to be a "
-                "valid ISO 8601-like date string of the format YYYY-MM-DDTHH:MN:SS. "
-                "Note: providing time zone using the Z format is not supported. UTC is "
-                "assumed."
-            },
-            {
-                "setDeltaTime",
-                &luascriptfunctions::time_setDeltaTime,
-                {},
-                "number",
-                "Sets the amount of simulation time that happens "
-                "in one second of real time"
-            },
-            {
-                "deltaTime",
-                &luascriptfunctions::time_deltaTime,
-                {},
-                "",
-                "Returns the amount of simulated time that passes in one "
-                "second of real time"
-            },
-            {
-                "setPause",
-                &luascriptfunctions::time_setPause,
-                {},
-                "bool",
-                "Pauses the simulation time or restores the delta time"
-            },
-            {
-                "togglePause",
-                &luascriptfunctions::time_togglePause,
-                {},
-                "",
-                "Toggles the pause function, i.e. temporarily setting the delta time to 0"
-                " and restoring it afterwards"
-            },
-            {
-                "interpolateTime",
-                &luascriptfunctions::time_interpolateTime,
-                {},
-                "{number, string} [, number]",
-                "Sets the current simulation time to the "
-                "specified value. If the parameter is a number, the value is the number "
-                "of seconds past the J2000 epoch. If it is a string, it has to be a "
-                "valid ISO 8601-like date string of the format YYYY-MM-DDTHH:MN:SS. "
-                "Note: providing time zone using the Z format is not supported. UTC is "
-                "assumed."
-            },
-            {
-                "interpolateTimeRelative",
-                &luascriptfunctions::time_interpolateTimeRelative,
-                {},
-                "number [, number]",
-                "Increments the current simulation time "
-                "by the specified number of seconds."
-            },
-            {
-                "interpolateDeltaTime",
-                &luascriptfunctions::time_interpolateDeltaTime,
-                {},
-                "number",
-                "Sets the amount of simulation time that happens "
-                "in one second of real time"
-            },
-            {
-                "interpolatePause",
-                &luascriptfunctions::time_interpolatePause,
-                {},
-                "bool",
-                "Pauses the simulation time or restores the delta time"
-            },
-            {
-                "interpolateTogglePause",
-                &luascriptfunctions::time_interpolateTogglePause,
-                {},
-                "",
-                "Toggles the pause function, i.e. temporarily setting the delta time to 0"
-                " and restoring it afterwards"
-            },
-            {
-                "currentTime",
-                &luascriptfunctions::time_currentTime,
-                {},
-                "",
-                "Returns the current time as the number of seconds since "
-                "the J2000 epoch"
-            },
-            {
-                "UTC",
-                &luascriptfunctions::time_currentTimeUTC,
-                {},
-                "",
-                "Returns the current time as an ISO 8601 date string "
-                "(YYYY-MM-DDTHH:MN:SS)"
-            },
-            {
-                "currentWallTime",
-                &luascriptfunctions::time_currentWallTime,
-                {},
-                "",
-                "Returns the current wall time as an ISO 8601 date string "
-                "(YYYY-MM-DDTHH-MN-SS) in the UTC timezone"
-            },
-            {
-                "advancedTime",
-                &luascriptfunctions::time_advancedTime,
-                {},
-                "string or number, string or number",
-                "Modifies the passed time (first argument) by the delta time (second "
-                "argument). The first argument can either be an ISO 8601 date string or "
-                "the number of seconds past the J2000 epoch. The second argument can "
-                "either be a string of the form [-]XX(s,m,h,d,M,y] with (s)econds, "
-                "(m)inutes, (h)ours, (d)ays, (M)onths, and (y)ears as units and an "
-                "optional - sign to move backwards in time. If the second argument is a "
-                "number, it is interpreted as a number of seconds. The return value is "
-                "of the same type as the first argument."
-            }
+            codegen::lua::SetDeltaTime,
+            codegen::lua::SetDeltaTimeSteps,
+            codegen::lua::SetNextDeltaTimeStep,
+            codegen::lua::SetPreviousDeltaTimeStep,
+            codegen::lua::InterpolateNextDeltaTimeStep,
+            codegen::lua::InterpolatePreviousDeltaTimeStep,
+            codegen::lua::InterpolateDeltaTime,
+            codegen::lua::DeltaTime,
+            codegen::lua::TogglePause,
+            codegen::lua::InterpolateTogglePause,
+            codegen::lua::PauseToggleViaKeyboard,
+            codegen::lua::SetPause,
+            codegen::lua::InterpolatePause,
+            codegen::lua::IsPaused,
+            codegen::lua::SetTime,
+            codegen::lua::InterpolateTime,
+            codegen::lua::InterpolateTimeRelative,
+            codegen::lua::CurrentTime,
+            codegen::lua::CurrentTimeUTC,
+            codegen::lua::CurrentTimeSpice,
+            codegen::lua::CurrentWallTime,
+            codegen::lua::CurrentApplicationTime,
+            codegen::lua::AdvancedTime,
+            codegen::lua::ConvertTime,
+            codegen::lua::Duration,
+            codegen::lua::SecondsPerDay,
+            codegen::lua::SecondsPerYear
         }
     };
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,9 @@
 
 #include <openspace/scene/rotation.h>
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <optional>
 
 namespace openspace {
 
@@ -35,9 +37,8 @@ namespace documentation { struct Documentation; }
 
 class SpiceRotation : public Rotation {
 public:
-    SpiceRotation(const ghoul::Dictionary& dictionary);
+    explicit SpiceRotation(const ghoul::Dictionary& dictionary);
 
-    const glm::dmat3& matrix() const;
     glm::dmat3 matrix(const UpdateData& data) const override;
 
     static documentation::Documentation Documentation();
@@ -45,6 +46,10 @@ public:
 private:
     properties::StringProperty _sourceFrame;
     properties::StringProperty _destinationFrame;
+    properties::StringProperty _fixedDate;
+    properties::FloatProperty _timeOffset;
+
+    std::optional<double> _fixedEphemerisTime;
 };
 
 } // namespace openspace

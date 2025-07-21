@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,12 +27,11 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec4property.h>
-
+#include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 
@@ -47,7 +46,7 @@ struct UpdateData;
 
 class RenderableShadowCylinder : public Renderable {
 public:
-    RenderableShadowCylinder(const ghoul::Dictionary& dictionary);
+    explicit RenderableShadowCylinder(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -60,17 +59,17 @@ public:
 
 private:
     struct CylinderVBOLayout {
-        float x;
-        float y;
-        float z;
-        float e;
+        float x = 0.f;
+        float y = 0.f;
+        float z = 0.f;
+        float e = 0.f;
     };
 
     void createCylinder(double time);
 
     properties::IntProperty _numberOfPoints;
     properties::FloatProperty _shadowLength;
-    properties::Vec4Property _shadowColor;
+    properties::Vec3Property _shadowColor;
     properties::OptionProperty _terminatorType;
     properties::StringProperty _lightSource;
     properties::StringProperty _observer;
@@ -79,9 +78,9 @@ private:
     properties::OptionProperty _aberration;
 
     ghoul::opengl::ProgramObject* _shader = nullptr;
-    UniformCache(modelViewProjectionTransform, shadowColor) _uniformCache;
+    UniformCache(modelViewProjectionTransform, shadowColor, opacity) _uniformCache;
 
-    glm::dmat3 _stateMatrix;
+    glm::dmat3 _stateMatrix = glm::dmat3(1.0);
 
     GLuint _vao = 0;
     GLuint _vbo = 0;

@@ -1,45 +1,73 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
-local textures = asset.syncedResource({
-    Name = "Open Clusters Textures",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_openclusters_textures",
-    Version = 1
+local textures = asset.resource({
+  Name = "Open Clusters Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_openclusters_textures",
+  Version = 1
 })
 
-local speck = asset.syncedResource({
-    Name = "Open Clusters Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_openclusters_speck",
-    Version = 1
+local speck = asset.resource({
+  Name = "Open Clusters Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_openclusters_speck",
+  Version = 4
 })
 
-local object = {
-    Identifier = "OpenStarClusters",
-    Renderable = {
-        Type = "RenderableBillboardsCloud",
-        Enabled = false,
-        Color = { 0.1, 0.8, 0.4 },
-        Transparency = 0.5,
-        File = speck .. "/oc.speck",
-        Texture = textures .. "/point4.png",
-        PolygonSides = 12,
-        TextColor = { 0.05, 0.4, 0.2, 1.0 },
-        LabelFile = speck .. "/oc.label",
-        ScaleFactor = 418.33,
-        TextSize = 16.68,
-        TextMinSize = 4.5,
-        TextMaxSize = 30.0,
-        Unit = "pc"
+
+local Object = {
+  Identifier = "OpenStarClusters",
+  Renderable = {
+    Type = "RenderablePolygonCloud",
+    Enabled = false,
+    Labels = {
+      File = speck .. "oc.label",
+      Color = { 0.0, 0.36, 0.14 },
+      Size = 15.5,
+      MinMaxSize = { 4, 30 },
+      Unit = "pc"
     },
-    GUI = {
-        Name = "Open Star Clusters",
-        Path = "/Milky Way/Open Clusters"
+    Coloring = {
+      FixedColor = { 0.13, 0.99, 0.50 }
+    },
+    Opacity = 0.9,
+    File = speck .. "oc.speck",
+    Unit = "pc",
+    PolygonSides = 12,
+    SizeSettings = {
+      ScaleExponent = 17.8,
+      MaxSize = 23.0,
+      EnableMaxSizeControl = true
     }
+  },
+  GUI = {
+    Name = "Open Star Clusters",
+    Path = "/Milky Way/Star Clusters",
+    Focusable = false,
+    Description = [[An open star cluster is a loose assemblage of stars numbering from
+      hundreds to thousands that are bound by their mutual gravitation. Because these are
+      young stars, we expect to see them in the star-forming regions of our Galaxy, namely
+      in the spiral arms. For this reason, open clusters exist, for the most part, in the
+      plane of the Galaxy and indicate relatively recent star formation. Census: 1,867
+      star clusters.]]
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Object)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Object)
+end)
+
+asset.export(Object)
+
+
+
+asset.meta = {
+  Name = "Open Star Clusters",
+  Description = Object.GUI.Description,
+  Author = "Brian Abbott, Zack Reeves (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe"
+}

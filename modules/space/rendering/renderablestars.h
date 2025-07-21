@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,12 +27,16 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/optionproperty.h>
+#include <openspace/data/dataloader.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/floatproperty.h>
-
+#include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <optional>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
@@ -47,7 +51,7 @@ namespace documentation { struct Documentation; }
 class RenderableStars : public Renderable {
 public:
     explicit RenderableStars(const ghoul::Dictionary& dictionary);
-    ~RenderableStars();
+    ~RenderableStars() override = default;
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -63,45 +67,93 @@ private:
     enum ColorOption {
         Color = 0,
         Velocity = 1,
-        Speed = 2
+        Speed = 2,
+        OtherData = 3,
+        FixedColor = 4
     };
 
-    void createDataSlice(ColorOption option);
+    void loadPSFTexture();
+    void loadData();
+    std::vector<float> createDataSlice(ColorOption option);
 
-    bool loadData();
-    bool readSpeckFile();
-    bool loadCachedFile(const std::string& file);
-    bool saveCachedFile(const std::string& file) const;
-
-    properties::StringProperty _pointSpreadFunctionTexturePath;
-    std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
-    std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
-    bool _pointSpreadFunctionTextureIsDirty;
+    properties::StringProperty _speckFile;
 
     properties::StringProperty _colorTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
     std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
-    bool _colorTextureIsDirty;
+
+    struct {
+        properties::PropertyOwner container;
+
+        properties::StringProperty bvColor;
+        properties::StringProperty luminance;
+        properties::StringProperty absoluteMagnitude;
+        properties::StringProperty vx;
+        properties::StringProperty vy;
+        properties::StringProperty vz;
+        properties::StringProperty speed;
+    } _dataMapping;
 
     properties::OptionProperty _colorOption;
-    bool _dataIsDirty;
+    properties::OptionProperty _otherDataOption;
+    properties::StringProperty _otherDataColorMapPath;
+    properties::Vec2Property _otherDataRange;
+    std::unique_ptr<ghoul::opengl::Texture> _otherDataColorMapTexture;
+    properties::Vec3Property _fixedColor;
+    properties::BoolProperty _filterOutOfRange;
 
-    properties::FloatProperty _alphaValue;
-    properties::FloatProperty _scaleFactor;
-    properties::FloatProperty _minBillboardSize;
+    struct TextureComponent {
+        properties::PropertyOwner container;
+
+        properties::StringProperty texturePath;
+        properties::FloatProperty multiplier;
+        properties::FloatProperty gamma;
+        properties::FloatProperty scale;
+
+        std::unique_ptr<ghoul::opengl::Texture> texture;
+        std::unique_ptr<ghoul::filesystem::File> file;
+    };
+
+    TextureComponent _core;
+    TextureComponent _glare;
+
+    struct {
+        properties::PropertyOwner container;
+        properties::OptionProperty method;
+        properties::FloatProperty lumCent;
+        properties::FloatProperty radiusCent;
+    } _parameters;
+
+    properties::FloatProperty _magnitudeExponent;
+    properties::Vec2Property _fadeInDistances;
+    properties::BoolProperty _useProperMotion;
+    properties::DoubleProperty _properMotionEpoch;
+    properties::BoolProperty _enableFadeInDistance;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-    UniformCache(view, projection, colorOption, alphaValue, scaleFactor,
-        minBillboardSize, screenSize, scaling, psfTexture, colorTexture) _uniformCache;
+    UniformCache(
+        modelMatrix, cameraViewProjectionMatrix, cameraUp, eyePosition, colorOption,
+        useProperMotion, diffTime, magnitudeExponent, sizeComposition, lumCent,
+        radiusCent, colorTexture, opacity, otherDataTexture, otherDataRange,
+        filterOutOfRange, fixedColor, glareTexture, glareMultiplier, glareGamma,
+        glareScale, hasCore, coreTexture, coreMultiplier, coreGamma, coreScale
+    ) _uniformCache;
 
-    std::string _speckFile;
+    bool _speckFileIsDirty = true;
+    bool _pointSpreadFunctionTextureIsDirty = true;
+    bool _colorTextureIsDirty = true;
+    bool _dataIsDirty = true;
+    bool _otherDataColorMapIsDirty = true;
 
-    std::vector<float> _slicedData;
-    std::vector<float> _fullData;
-    int _nValuesPerStar;
+    dataloader::Dataset _dataset;
 
-    GLuint _vao;
-    GLuint _vbo;
+    std::string _queuedOtherData;
+
+    std::optional<float> _staticFilterValue;
+    float _staticFilterReplacementValue = 0.f;
+
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 };
 
 } // namespace openspace

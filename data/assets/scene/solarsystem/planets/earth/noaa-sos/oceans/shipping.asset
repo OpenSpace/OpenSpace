@@ -1,0 +1,56 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Shipping Routes (with labels) - One Year"
+local Identifier = "noaa-sos-oceans-shipping"
+local Description = [[There were more than 30,000 merchant ships greater than 1000 gross
+tonnage at sea in 2005. The World Meteorological Organization has a Voluntary Observing
+Ships Scheme that equips ships with weather instruments in order to provide observations
+for weather models and forecasters. In addition to observing the weather, the location of
+the ships is also recorded through GPS. From October 2004 through October of 2005
+1,189,127 mobile ship data points were collected from 3,374 commercial and research
+vessels, which is about 11% of all ships at sea in 2005. By connecting the data points
+for each vessel, shipping routes over the course of one year were plotted. The National
+Center for Ecological Analysis and Synthesis compiled this data to include in their
+Global Map of Human Impacts to Marine Ecosystems]]
+local URL = "https://sos.noaa.gov/catalog/datasets/shipping-routes-with-labels-one-year/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "4096.jpg",
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

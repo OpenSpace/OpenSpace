@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,13 +27,14 @@
 
 #include <openspace/util/task.h>
 
+#include <filesystem>
 #include <string>
 
 namespace openspace::kameleonvolume {
 
 class KameleonMetadataToJsonTask : public Task {
 public:
-    KameleonMetadataToJsonTask(const ghoul::Dictionary& dictionary);
+    explicit KameleonMetadataToJsonTask(const ghoul::Dictionary& dictionary);
 
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
@@ -41,8 +42,8 @@ public:
     static documentation::Documentation documentation();
 
 private:
-    std::string _inputPath;
-    std::string _outputPath;
+    std::filesystem::path _inputPath;
+    std::filesystem::path _outputPath;
 };
 
 } // namespace openspace::kameleonvolume

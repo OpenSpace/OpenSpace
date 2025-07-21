@@ -1,0 +1,52 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Nighttime Lights Comparison - 1992, 2000, and 2008"
+local Identifier = "noaa-sos-land-earth_night-1992_2008"
+local Description = [[The data was recorded by the Defense Meteorological Satellite
+Program (DMSP) in the National Geophysical Data Center (NGDC), now part of NOAA National
+Centers for Environmental Information (NCEI). The data was collected using polar orbiting
+satellites that provide full cover of the globe twice a day. The satellites have an
+Operation Linescan system which allows them to detect low levels of visible-near
+infrared radiance at night]]
+local URL = "https://sos.noaa.gov/catalog/datasets/nighttime-lights-comparison-1992-2000-and-2008/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "8000.png",
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

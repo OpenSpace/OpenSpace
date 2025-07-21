@@ -1,0 +1,40 @@
+asset.require("./model")
+asset.require("./pluto")
+
+
+
+local Spacing = {
+  Type = "DashboardItemSpacing",
+  Identifier = "NewHorizonsSpacing",
+  GuiName = "New Horizons Spacing",
+  Spacing = 25
+}
+
+local Distance = {
+  Type = "DashboardItemDistance",
+  Identifier = "NewHorizonsPlutoDistance",
+  GuiName = "New Horizons Pluto Distance",
+  SourceType = "Node",
+  SourceNodeIdentifier = "NewHorizons",
+  DestinationType = "Node Surface",
+  DestinationNodeIdentifier = "PlutoProjection"
+}
+
+local Instruments = {
+  Type = "DashboardItemInstruments",
+  Identifier = "NewHorizonsInstruments",
+  GuiName = "NewHorizons Instruments"
+}
+
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Spacing)
+  openspace.dashboard.addDashboardItem(Distance)
+  openspace.dashboard.addDashboardItem(Instruments)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Instruments)
+  openspace.dashboard.removeDashboardItem(Distance)
+  openspace.dashboard.removeDashboardItem(Spacing)
+end)

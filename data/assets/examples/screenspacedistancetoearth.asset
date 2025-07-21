@@ -1,0 +1,61 @@
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+local Dashboard = {
+  Identifier = "ScreenSpaceDistanceToEarth",
+  Name = "Distance to Earth",
+  Type = "ScreenSpaceDashboard",
+  FaceCamera = false,
+  Scale = 3.0,
+  UseRadiusAzimuthElevation = true,
+  RadiusAzimuthElevation = { 2.0, -0.2, -0.2 },
+  Items = {
+    {
+      Type = "DashboardItemDistance",
+      Identifier = "EarthToCameraDistance",
+      GuiName = "Distance to Earth",
+      FontSize = 40,
+      SourceType = "Camera",
+      DestinationType = "Node",
+      DestinationNodeIdentifier = earth.Earth.Identifier,
+      -- Specify to use a specific unit, by disabling the automatic simplification of
+      -- unit and instead use light-years
+      Simplification = false,
+      RequestedUnit = "lightyear",
+      -- If we don't want to use the default format of the text, we can specify our own
+      -- format. Here we've decided to not include the name of the source object (index 0),
+      -- which would be "Camera". We just include the name of the destination node (Earth,
+      -- index 1), the distance (index 2) as a floating point number (f), and then the
+      -- name for the unit (index 3)
+      FormatString = "Distance to {1}: {2:f} {3}"
+    }
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(Dashboard)
+  openspace.setPropertyValueSingle(
+    "ScreenSpace.ScreenSpaceDistanceToEarth.Size",
+    {0.0, 0.0, 640.0, 320.0}
+  )
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Dashboard)
+end)
+
+asset.export(Dashboard)
+
+
+
+asset.meta = {
+  Name = "ScreenSpace - Distance to Earth",
+  Description = [[
+    This asset provides a screenspace dashboard item that shows the distance from the
+    camera to Earth, in light-years. This can be placed on a dome surface to show the
+    current distance to the audience.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

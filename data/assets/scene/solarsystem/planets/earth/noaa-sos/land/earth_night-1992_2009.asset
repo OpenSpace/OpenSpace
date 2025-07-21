@@ -1,0 +1,65 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Nighttime Lights Comparison - 1992 and 2009"
+local Identifier = "noaa-sos-land-earth_night-1992_2009"
+local Description = [[The data was recorded by the Defense Meteorological Satellite
+Program (DMSP) in the National Geophysical Data Center (NGDC), now part of NOAA National
+Centers for Environmental Information (NCEI). The data was collected using polar orbiting
+satellites that provide full cover of the globe twice a day. The satellites have an
+Operation Linescan system which allows them to detect low levels of visible-near infrared
+radiance at night]]
+local URL = "https://sos.noaa.gov/catalog/datasets/nighttime-lights-comparison-1992-and-2009/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "5000.png",
+  Description = Description
+}
+
+local Colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(Colorbar)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

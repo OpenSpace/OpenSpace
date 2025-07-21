@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
 	<key>CFBundleIconFile</key>
-	<string>webgui.icns</string>
+	<string>openspace.icns</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.openspaceproject.openspace</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -28,5 +28,12 @@
 	<string>NSApplication</string>
 	<key>NSSupportsAutomaticGraphicsSwitching</key>
 	<true/>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>Send usage data to Apple</string>
+	<key>LSEnvironment</key>
+	<dict>
+		<key>MallocNanoZone</key>
+		<string>0</string>
+	</dict>
 </dict>
 </plist>

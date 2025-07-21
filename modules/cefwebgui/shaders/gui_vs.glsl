@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,13 +26,13 @@
 
 layout(location = 0) in vec2 position;
 
+out vec2 vs_st;
+
 uniform mat4 ortho;
 
-out vec2 Texcoord;
 
 void main() {
-  Texcoord = vec2(position.x + 1.0f, position.y - 1.0f) * 0.5;
-  Texcoord.y *= -1.0f;
+  vs_st = vec2(position.x + 1.0, position.y + 1.0) * 0.5;
   gl_Position = vec4(position, 0.0, 1.0);
 }
 

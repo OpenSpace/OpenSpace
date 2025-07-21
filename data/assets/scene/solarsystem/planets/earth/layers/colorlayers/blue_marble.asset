@@ -1,0 +1,43 @@
+local globe = asset.require("../../earth")
+
+
+
+local texturesPath = asset.resource({
+  Name = "Earth Textures",
+  Type = "HttpSynchronization",
+  Identifier = "earth_textures",
+  Version = 2
+})
+
+
+local Layer = {
+  Identifier = "Blue_Marble",
+  Name = "Blue Marble",
+  Enabled = asset.enabled,
+  ZIndex = 5,
+  FilePath = texturesPath .. "earth_bluemarble.jpg",
+  Description = "Earth image from Blue Marble Next Generation",
+  CacheSettings = { Enabled = false }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "Blue Marble",
+  Description = [[Fallback layer for earth image if no internet is available. Contains
+    Blue Marble Next Generation]],
+  Author = "OpenSpace Team",
+  URL = "https://visibleearth.nasa.gov/collection/1484/blue-marble",
+  License = "NASA"
+}

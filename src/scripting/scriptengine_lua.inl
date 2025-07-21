@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,359 +22,289 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/filesystem/directory.h>
-#include <ghoul/filesystem/file.h>
-
-#include <ext/ghoul/ext/assimp/contrib/zip/src/zip.h>
-
 namespace openspace::luascriptfunctions {
 
-namespace {
-
-// Defining a common walk function that works off a pointer-to-member function
-template <typename Func>
-int walkCommon(lua_State* L, Func func) {
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 1, 3 }, "lua::walkCommon");
-
-    std::string path = ghoul::lua::value<std::string>(L, 1);
-
-    std::vector<std::string> result;
-    if (nArguments == 1) {
-        // Only the path was passed
-        result = std::invoke(
-            func,
-            ghoul::filesystem::Directory(path),
-            ghoul::filesystem::Directory::Recursive::No,
-            ghoul::filesystem::Directory::Sort::No
-        );
-    }
-    else if (nArguments == 2) {
-        // The path and the recursive value were passed
-        const bool recursive = ghoul::lua::value<bool>(L, 2);
-        result = std::invoke(
-            func,
-            ghoul::filesystem::Directory(path),
-            ghoul::filesystem::Directory::Recursive(recursive),
-            ghoul::filesystem::Directory::Sort::No
-        );
-    }
-    else if (nArguments == 3) {
-        // All three arguments were passed
-        const bool recursive = ghoul::lua::value<bool>(L, 2);
-        const bool sorted = ghoul::lua::value<bool>(L, 3);
-        result = std::invoke(
-            func,
-            ghoul::filesystem::Directory(path),
-            ghoul::filesystem::Directory::Recursive(recursive),
-            ghoul::filesystem::Directory::Sort(sorted)
-        );
-    }
-
-    lua_settop(L, 0);
-
-    // Copy values into the lua_State
-    lua_newtable(L);
-
-    for (int i = 0; i < static_cast<int>(result.size()); ++i) {
-        lua_pushstring(L, result[i].c_str());
-        lua_rawseti(L, -2, i + 1);
-    }
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-    return 1;
-}
-} // namespace
-
 int printInternal(ghoul::logging::LogLevel level, lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::printInternal");
-
-    using ghoul::lua::luaTypeToString;
-
-    const int type = lua_type(L, 1);
-    switch (type) {
-        case LUA_TNONE:
-        case LUA_TLIGHTUSERDATA:
-        case LUA_TTABLE:
-        case LUA_TFUNCTION:
-        case LUA_TUSERDATA:
-        case LUA_TTHREAD:
-            log(
-                level,
-                "print",
-                fmt::format("Function parameter was of type '{}'", luaTypeToString(type))
-            );
-            break;
-        case LUA_TNIL:
-            break;
-        case LUA_TBOOLEAN:
-            log(level, "print", std::to_string(ghoul::lua::value<bool>(L, 1)));
-            break;
-        case LUA_TNUMBER:
-            log(level, "print", std::to_string(ghoul::lua::value<double>(L, 1)));
-            break;
-        case LUA_TSTRING:
-            log(level, "print", ghoul::lua::value<std::string>(L, 1));
-            break;
+    const int nArguments = lua_gettop(L);
+    for (int i = 1; i <= nArguments; i++) {
+        log(level, "print", ghoul::lua::luaValueToString(L, i));
     }
-    lua_pop(L, 1);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    lua_pop(L, nArguments);
     return 0;
 }
 
-/**
- * \ingroup LuaScripts
- * printTrace(*):
- * Logs the passed value to the installed LogManager with a LogLevel of 'Trace'.
- * For Boolean, numbers, and strings, the internal values are printed, for all other
- * types, the type is printed instead
- */
 int printTrace(lua_State* L) {
     return printInternal(ghoul::logging::LogLevel::Trace, L);
 }
 
-/**
- * \ingroup LuaScripts
- * printDebug(*):
- * Logs the passed value to the installed LogManager with a LogLevel of 'Debug'.
- * For Boolean, numbers, and strings, the internal values are printed, for all other
- * types, the type is printed instead
- */
 int printDebug(lua_State* L) {
     return printInternal(ghoul::logging::LogLevel::Debug, L);
 }
 
-/**
- * \ingroup LuaScripts
- * printInfo(*):
- * Logs the passed value to the installed LogManager with a LogLevel of 'Info'.
- * For Boolean, numbers, and strings, the internal values are printed, for all other
- * types, the type is printed instead
- */
 int printInfo(lua_State* L) {
     return printInternal(ghoul::logging::LogLevel::Info, L);
 }
 
-/**
- * \ingroup LuaScripts
- * printWarning(*):
- * Logs the passed value to the installed LogManager with a LogLevel of 'Warning'.
- * For Boolean, numbers, and strings, the internal values are printed, for all other
- * types, the type is printed instead
- */
 int printWarning(lua_State* L) {
     return printInternal(ghoul::logging::LogLevel::Warning, L);
 }
 
-/**
- * \ingroup LuaScripts
- * printError(*):
- * Logs the passed value to the installed LogManager with a LogLevel of 'Error'.
- * For Boolean, numbers, and strings, the internal values are printed, for all other
- * types, the type is printed instead
- */
 int printError(lua_State* L) {
     return printInternal(ghoul::logging::LogLevel::Error, L);
 }
 
-/**
- * \ingroup LuaScripts
- * printFatal(*):
- * Logs the passed value to the installed LogManager with a LogLevel of 'Fatal'.
- * For Boolean, numbers, and strings, the internal values are printed, for all other
- * types, the type is printed instead
- */
 int printFatal(lua_State* L) {
     return printInternal(ghoul::logging::LogLevel::Fatal, L);
 }
 
+} // namespace openspace::luascriptfunctions
+
+namespace {
+
 /**
- * \ingroup LuaScripts
- * absPath(string):
- * Passes the argument to FileSystem::absolutePath, which resolves occuring path
- * tokens and returns the absolute path.
+ * Passes the argument to FileSystem::absolutePath, which resolves occuring path tokens
+ * and returns the absolute path.
  */
-int absolutePath(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::absolutePath");
-
-    const std::string& path = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-
-    ghoul::lua::push(L, absPath(path));
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-    return 1;
+[[codegen::luawrap("absPath")]] std::filesystem::path absolutePath(std::string path) {
+    std::filesystem::path result = absPath(path);
+    return result;
 }
 
 /**
- * \ingroup LuaScripts
- * setPathToken(string, string):
  * Registers the path token provided by the first argument to the path in the second
  * argument. If the path token already exists, it will be silently overridden.
  */
-int setPathToken(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::setPathToken");
-
-    std::string pathToken = ghoul::lua::value<std::string>(L, 1);
-    std::string path = ghoul::lua::value<std::string>(L, 2);
-
+[[codegen::luawrap]] void setPathToken(std::string pathToken, std::filesystem::path path)
+{
     FileSys.registerPathToken(
         std::move(pathToken),
         std::move(path),
         ghoul::filesystem::FileSystem::Override::Yes
     );
+}
 
-    lua_pop(L, 2);
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
+// Checks whether the provided file exists.
+[[codegen::luawrap]] bool fileExists(std::string file) {
+    const bool e = std::filesystem::is_regular_file(absPath(std::move(file)));
+    return e;
+}
+
+// Reads a file from disk and return its contents.
+[[codegen::luawrap]] std::string readFile(std::filesystem::path file) {
+    std::filesystem::path p = absPath(file);
+    if (!std::filesystem::is_regular_file(p)) {
+        throw ghoul::lua::LuaError(std::format("Could not open file '{}'", file));
+    }
+
+    std::ifstream f(p);
+    std::stringstream buffer;
+    buffer << f.rdbuf();
+    std::string contents = buffer.str();
+    return contents;
+}
+
+// Reads a file from disk and return its as a list of lines.
+[[codegen::luawrap]] std::vector<std::string> readFileLines(std::filesystem::path file) {
+    std::filesystem::path p = absPath(file);
+    if (!std::filesystem::is_regular_file(p)) {
+        throw ghoul::lua::LuaError(std::format("Could not open file '{}'", file));
+    }
+
+    std::ifstream f = std::ifstream(p);
+    std::vector<std::string> contents;
+    while (f.good()) {
+        std::string line;
+        ghoul::getline(f, line);
+        contents.push_back(std::move(line));
+    }
+
+    return contents;
+}
+
+// Checks whether the provided directory exists.
+[[codegen::luawrap]] bool directoryExists(std::filesystem::path file) {
+    const bool e = std::filesystem::is_directory(absPath(std::move(file)));
+    return e;
 }
 
 /**
- * \ingroup LuaScripts
- * fileExists(string):
- * Checks whether the provided file exists
+ * Creates a directory at the provided path, returns true if directory was newly created
+ * and false otherwise. If `recursive` flag is set to true, it will automatically create
+ * any missing parent folder as well
  */
-int fileExists(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::fileExists");
-
-    const std::string& file = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-    const bool e = FileSys.fileExists(absPath(file));
-
-    ghoul::lua::push(L, e);
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-    return 1;
+[[codegen::luawrap]] bool createDirectory(std::filesystem::path path,
+    bool recursive = false)
+{
+    if (recursive) {
+        return std::filesystem::create_directories(std::move(path));
+    }
+    else {
+        return std::filesystem::create_directory(std::move(path));
+    }
 }
 
 /**
- * \ingroup LuaScripts
- * directoryExists(string):
- * Checks whether the provided file exists
- */
-int directoryExists(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::directoryExists");
-
-    const std::string& file = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-    const bool e = FileSys.directoryExists(absPath(file));
-
-    ghoul::lua::push(L, e);
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-    return 1;
-}
-
-/**
- * \ingroup LuaScripts
- * walkDirectory(string, bool, bool):
  * Walks a directory and returns the contents of the directory as absolute paths. The
  * first argument is the path of the directory that should be walked, the second argument
  * determines if the walk is recursive and will continue in contained directories. The
  * default value for this parameter is "false". The third argument determines whether the
  * table that is returned is sorted. The default value for this parameter is "false".
  */
-int walkDirectory(lua_State* L) {
-    return walkCommon(L, &ghoul::filesystem::Directory::read);
+[[codegen::luawrap]] std::vector<std::filesystem::path> walkDirectory(
+                                                               std::filesystem::path path,
+                                                                   bool recursive = false,
+                                                                      bool sorted = false)
+{
+    if (!std::filesystem::exists(path) && !std::filesystem::is_directory(path)) {
+        return std::vector<std::filesystem::path>();
+    }
+
+    namespace fs = std::filesystem;
+    return ghoul::filesystem::walkDirectory(
+        path,
+        ghoul::filesystem::Recursive(recursive),
+        ghoul::filesystem::Sorted(sorted),
+        [](const fs::path& p) { return fs::is_directory(p) || fs::is_regular_file(p); }
+    );
 }
 
 /**
- * \ingroup LuaScripts
- * walkDirectoryFiles(string, bool, bool):
  * Walks a directory and returns the files of the directory as absolute paths. The first
  * argument is the path of the directory that should be walked, the second argument
  * determines if the walk is recursive and will continue in contained directories. The
  * default value for this parameter is "false". The third argument determines whether the
  * table that is returned is sorted. The default value for this parameter is "false".
  */
-int walkDirectoryFiles(lua_State* L) {
-    return walkCommon(L, &ghoul::filesystem::Directory::readFiles);
+[[codegen::luawrap]] std::vector<std::filesystem::path> walkDirectoryFiles(
+                                                               std::filesystem::path path,
+                                                                   bool recursive = false,
+                                                                      bool sorted = false)
+{
+    if (!std::filesystem::exists(path) && !std::filesystem::is_directory(path)) {
+        return std::vector<std::filesystem::path>();
+    }
 
+    namespace fs = std::filesystem;
+    return ghoul::filesystem::walkDirectory(
+        path,
+        ghoul::filesystem::Recursive(recursive),
+        ghoul::filesystem::Sorted(sorted),
+        [](const fs::path& p) { return fs::is_regular_file(p); }
+    );
 }
 
 /**
-* \ingroup LuaScripts
-* walkDirectory(string, bool, bool):
-* Walks a directory and returns the subfolders of the directory as absolute paths. The
-* first argument is the path of the directory that should be walked, the second argument
-* determines if the walk is recursive and will continue in contained directories. The
-* default value for this parameter is "false". The third argument determines whether the
-* table that is returned is sorted. The default value for this parameter is "false".
-*/
-int walkDirectoryFolder(lua_State* L) {
-    return walkCommon(L, &ghoul::filesystem::Directory::readDirectories);
+ * Walks a directory and returns the subfolders of the directory as absolute paths. The
+ * first argument is the path of the directory that should be walked, the second argument
+ * determines if the walk is recursive and will continue in contained directories. The
+ * default value for this parameter is "false". The third argument determines whether the
+ * table that is returned is sorted. The default value for this parameter is "false".
+ */
+[[codegen::luawrap]] std::vector<std::filesystem::path> walkDirectoryFolders(
+                                                               std::filesystem::path path,
+                                                                   bool recursive = false,
+                                                                      bool sorted = false)
+{
+    if (!std::filesystem::exists(path) && !std::filesystem::is_directory(path)) {
+        return std::vector<std::filesystem::path>();
+    }
+
+    namespace fs = std::filesystem;
+    return ghoul::filesystem::walkDirectory(
+        path,
+        ghoul::filesystem::Recursive(recursive),
+        ghoul::filesystem::Sorted(sorted),
+        [](const fs::path& p) { return fs::is_directory(p); }
+    );
 }
 
-
 /**
- * \ingroup LuaScripts
- * directoryForPath(string):
  * This function extracts the directory part of the passed path. For example, if the
  * parameter is 'C:\\OpenSpace\\foobar\\foo.txt', this function returns
- * 'C:\\OpenSpace\\foobar'."
+ * 'C:\\OpenSpace\\foobar'.
  */
-int directoryForPath(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::directoryForPath");
-
-    std::string file = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-    std::string path = ghoul::filesystem::File(std::move(file)).directoryName();
-
-    ghoul::lua::push(L, path);
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-    return 1;
+[[codegen::luawrap]] std::filesystem::path directoryForPath(std::filesystem::path file) {
+    std::filesystem::path path = std::filesystem::path(std::move(file)).parent_path();
+    return path;
 }
 
 /**
- * \ingroup LuaScripts
- * This function extracts the contents of a zip file. The first
- * argument is the path to the zip file. The second argument is the
- * directory where to put the extracted files. If the third argument is
- * true, the compressed file will be deleted after the decompression
+ * This function extracts the contents of a zip file. The first argument is the path to
+ * the zip file. The second argument is the directory where to put the extracted files. If
+ * the third argument is true, the compressed file will be deleted after the decompression
  * is finished.
  */
-int unzipFile(lua_State* L) {
-    const int nArguments = ghoul::lua::checkArgumentsAndThrow(
-        L,
-        { 2, 3 },
-        "lua::unzipFile"
-    );
-
-    std::string source = absPath(
-        ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::No)
-    );
-    std::string dest = absPath(
-        ghoul::lua::value<std::string>(L, 2, ghoul::lua::PopValue::No)
-    );
-
-    bool deleteSource = false;
-    if (nArguments == 3) {
-        deleteSource = ghoul::lua::value<bool>(L, 3, ghoul::lua::PopValue::No);
+[[codegen::luawrap]] void unzipFile(std::string source, std::string destination,
+                                    bool deleteSource = false)
+{
+    if (!std::filesystem::exists(source)) {
+        throw ghoul::lua::LuaError("Source file was not found");
     }
 
-    auto onExtractEntry = [](const char*, void*) { return 0; };
-    int arg = 2;
-    zip_extract(source.c_str(), dest.c_str(), onExtractEntry, &arg);
+    struct zip_t* z = zip_open(source.c_str(), 0, 'r');
+    const bool is64 = zip_is64(z) == 1;
+    zip_close(z);
 
-    if (deleteSource) {
-        FileSys.deleteFile(source);
+    if (is64) {
+        throw ghoul::lua::LuaError(std::format(
+            "Error while unzipping '{}': Zip64 archives are not supported", source
+        ));
     }
 
-    lua_settop(L, 0);
-    return 0;
+    int ret = zip_extract(source.c_str(), destination.c_str(), nullptr, nullptr);
+    if (ret != 0) {
+        throw ghoul::lua::LuaError(std::format(
+            "Error while unzipping '{}': {}", source, ret
+        ));
+    }
+
+    if (deleteSource && std::filesystem::is_regular_file(source)) {
+        std::filesystem::remove(source);
+    }
 }
 
-} // namespace openspace::luascriptfunctions
+/**
+ * This function registers another Lua script that will be periodically executed as long
+ * as the application is running. The `identifier` is used to later remove the script. The
+ * `script` is being executed every `timeout` seconds. This timeout is only as accurate as
+ * the framerate at which the application is running. Optionally the `preScript` Lua
+ * script is run when registering the repeated script and the `postScript` is run when
+ * unregistering it or when the application closes.
+ * If the `timeout` is 0, the script will be executed every frame.
+ * The `identifier` has to be a unique name that cannot have been used to register a
+ * repeated script before. A registered script is removed with the #removeRepeatedScript
+ * function.
+ */
+[[codegen::luawrap]] void registerRepeatedScript(std::string identifier,
+                                                 std::string script, double timeout = 0.0,
+                                                 std::string preScript = "",
+                                                 std::string postScript = "")
+{
+    openspace::global::scriptEngine->registerRepeatedScript(
+        std::move(identifier),
+        std::move(script),
+        timeout,
+        std::move(preScript),
+        std::move(postScript)
+    );
+}
+
+/**
+ * Removes a previously registered repeated script (see #registerRepeatedScript)
+ */
+[[codegen::luawrap]] void removeRepeatedScript(std::string identifier) {
+    openspace::global::scriptEngine->removeRepeatedScript(identifier);
+}
+
+/**
+ * Schedules a `script` to be run in `delay` seconds. The delay is measured in wallclock
+ * time, which is seconds that occur in the real world, not in relation to the in-game
+ * time.
+ */
+[[codegen::luawrap]] void scheduleScript(std::string script, double delay) {
+    openspace::global::scriptEngine->scheduleScript(std::move(script), delay);
+}
+
+#include "scriptengine_lua_codegen.cpp"
+
+} // namespace

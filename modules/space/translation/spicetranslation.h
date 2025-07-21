@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,13 +27,15 @@
 
 #include <openspace/scene/translation.h>
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <optional>
 
 namespace openspace {
 
 class SpiceTranslation : public Translation {
 public:
-    SpiceTranslation(const ghoul::Dictionary& dictionary);
+    explicit SpiceTranslation(const ghoul::Dictionary& dictionary);
 
     glm::dvec3 position(const UpdateData& data) const override;
 
@@ -43,8 +45,19 @@ private:
     properties::StringProperty _target;
     properties::StringProperty _observer;
     properties::StringProperty _frame;
+    properties::StringProperty _fixedDate;
+    properties::FloatProperty _timeOffset;
 
-    glm::dvec3 _position;
+    // We are accessing these values every frame and when retrieving a string from the
+    // StringProperty, it allocates some new memory, which we want to prevent. Until the
+    // property can return a const ref of the string, we keep a local copy as the target,
+    // observer, and frame are not likely to change very often
+    std::string _cachedTarget;
+    std::string _cachedObserver;
+    std::string _cachedFrame;
+    std::optional<double> _fixedEphemerisTime;
+
+    glm::dvec3 _position = glm::dvec3(0.0);
 };
 
 } // namespace openspace

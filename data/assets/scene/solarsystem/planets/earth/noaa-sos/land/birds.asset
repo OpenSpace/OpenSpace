@@ -1,0 +1,68 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "NOAA Science on a Sphere. Bird Migration Patterns - Western Hemisphere"
+local Identifier = "noaa-sos-land-birds"
+local Description = [[This dataset shows the migration of 118 species of terrestrial
+bird populations in the Western Hemisphere. Each dot represents the estimated location of
+the center of each species' population for each day of the year. These estimations come
+from millions of observations from the eBird citizen-science database. eBird is a
+real-time, online checklist program, launched in 2002 by the Cornell Lab of Ornithology
+and National Audubon Society, that allows birdwatchers to enter their observations]]
+local URL = "https://sos.noaa.gov/catalog/datasets/bird-migration-patterns-western-hemisphere/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "ImageSequenceTileProvider",
+  FolderPath = syncedDirectory .. "birds",
+  Description = Description
+}
+
+local Colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(Colorbar)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

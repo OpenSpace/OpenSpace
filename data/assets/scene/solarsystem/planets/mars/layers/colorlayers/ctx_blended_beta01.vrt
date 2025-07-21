@@ -1,0 +1,28 @@
+<VRTDataset rasterXSize="11534336" rasterYSize="2097152">
+  <SRS>GEOGCS["GCS_Mars_2000_Sphere",DATUM["D_Mars_2000_Sphere",SPHEROID["Mars_2000_Sphere_IAU_IAG",3396190.0,0.0]],PRIMEM["Reference_Meridian",0.0],UNIT["Degree",0.0174532925199433]]</SRS>
+  <GeoTransform> -8.1000000000000000e+02,  8.5830688476562500e-05,  0.0000000000000000e+00,  9.0000000000000000e+01,  0.0000000000000000e+00, -8.5830688476562500e-05</GeoTransform>
+  <VRTRasterBand dataType="Byte" band="1">
+    <NoDataValue>0.00000000000000E+00</NoDataValue>
+    <ColorInterp>Gray</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">ctx_blended_beta01.wms</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="4194304" RasterYSize="2097152" DataType="Byte" BlockXSize="512" BlockYSize="512" />
+      <SrcRect xOff="0" yOff="0" xSize="4194304" ySize="2097152" />
+      <DstRect xOff="7340032" yOff="0" xSize="4194304" ySize="2097152" />
+      <NODATA>0</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+  <VRTRasterBand dataType="Byte" band="2">
+    <NoDataValue>0</NoDataValue>
+    <ColorInterp>Alpha</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">ctx_blended_beta01.wms</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="4194304" RasterYSize="2097152" DataType="Byte" BlockXSize="512" BlockYSize="512" />
+      <SrcRect xOff="0" yOff="0" xSize="4194304" ySize="2097152" />
+      <DstRect xOff="7340032" yOff="0" xSize="4194304" ySize="2097152" />
+ <LUT>0:0,1:255,255:255</LUT>
+    </ComplexSource>
+  </VRTRasterBand>
+</VRTDataset>

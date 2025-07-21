@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,8 +24,9 @@
 
 #include <modules/iswa/util/dataprocessortext.h>
 
-#include <openspace/properties/selectionproperty.h>
+#include <openspace/properties/misc/selectionproperty.h>
 #include <openspace/util/histogram.h>
+#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <sstream>
 
@@ -47,25 +48,25 @@ std::vector<std::string> DataProcessorText::readMetadata(const std::string& data
     //# x           y           z           N           V_x         B_x
 
     // The string where the interesting data begins
-    constexpr const char* info = "# Output data: field with ";
+    constexpr std::string_view info = "# Output data: field with ";
     std::vector<std::string> options;
     std::string line;
     std::stringstream memorystream(data);
-    while (getline(memorystream, line)) {
+    while (ghoul::getline(memorystream, line)) {
         if (line.find(info) == 0) {
-            line = line.substr(strlen(info));
+            line = line.substr(info.size());
             std::stringstream ss(line);
 
             std::string token;
-            getline(ss, token, 'x');
+            ghoul::getline(ss, token, 'x');
             const int x = std::stoi(token);
 
-            getline(ss, token, '=');
+            ghoul::getline(ss, token, '=');
             const int y = std::stoi(token);
 
             dimensions = glm::size3_t(x, y, 1);
 
-            getline(memorystream, line);
+            ghoul::getline(memorystream, line);
             line = line.substr(1); //because of the # char
 
             ss = std::stringstream(line);
@@ -98,8 +99,8 @@ void DataProcessorText::addDataValues(const std::string& data,
     std::vector<std::vector<float>> optionValues(numOptions);
 
     // for each data point
-    while (getline(memorystream, line)) {
-        if (line.find("#") == 0) {
+    while (ghoul::getline(memorystream, line)) {
+        if (!line.empty() && line[0] == '#') {
             continue;
         }
 
@@ -125,7 +126,7 @@ void DataProcessorText::addDataValues(const std::string& data,
             continue;
         }
 
-        for (int i = 0; i < numOptions; ++i) {
+        for (int i = 0; i < numOptions; i++) {
             const float value = values[i];
 
             optionValues[i].push_back(value);
@@ -142,6 +143,10 @@ std::vector<float*> DataProcessorText::processData(const std::string& data,
                                                    properties::SelectionProperty& options,
                                                                  glm::size3_t& dimensions)
 {
+    // The update of the selection properties broke this and we don't have the data to
+    // actually test whether this update works. So if you are getting a crash around here
+    // this is why
+
     if (data.empty()) {
         return std::vector<float*>();
     }
@@ -149,16 +154,25 @@ std::vector<float*> DataProcessorText::processData(const std::string& data,
     std::string line;
     std::stringstream memorystream(data);
 
-    const std::vector<int>& selectedOptions = options.value();
+    const std::set<std::string>& selectedOptions = options.value();
+    const std::vector<std::string>& allOptions = options.options();
+    std::vector<int> selectedOptionsIndices;
 
     std::vector<float*> dataOptions(options.options().size(), nullptr);
-    for (int o : selectedOptions) {
-        dataOptions[o] = new float[dimensions.x * dimensions.y] { 0.f };
+    for (const std::string& o : selectedOptions) {
+        auto it = std::find(allOptions.begin(), allOptions.end(), o);
+        ghoul_assert(
+            it != allOptions.end(),
+            "Selected option must be in list of all options"
+        );
+        int idx = static_cast<int>(std::distance(allOptions.begin(), it));
+        selectedOptionsIndices.push_back(idx);
+        dataOptions[idx] = new float[dimensions.x * dimensions.y] { 0.f };
     }
 
     int numValues = 0;
-    while (getline(memorystream, line)) {
-        if (line.find("#") == 0) {
+    while (ghoul::getline(memorystream, line)) {
+        if (!line.empty() && line[0] == '#') {
             continue;
         }
 
@@ -172,11 +186,11 @@ std::vector<float*> DataProcessorText::processData(const std::string& data,
             last = (last > 0)? last : lineSize;
 
             const auto it = std::find(
-                selectedOptions.begin(),
-                selectedOptions.end(),
+                selectedOptionsIndices.begin(),
+                selectedOptionsIndices.end(),
                 option
             );
-            if (option >= 0 && it != selectedOptions.end()) {
+            if (option >= 0 && it != selectedOptionsIndices.end()) {
                 const float value = std::stof(line.substr(first, last));
                 dataOptions[option][numValues] = processDataPoint(value, option);
             }
@@ -187,9 +201,10 @@ std::vector<float*> DataProcessorText::processData(const std::string& data,
         numValues++;
     }
 
-    calculateFilterValues(selectedOptions);
+    calculateFilterValues(selectedOptionsIndices);
 
     return dataOptions;
+//#endif
 }
 
 } //namespace openspace

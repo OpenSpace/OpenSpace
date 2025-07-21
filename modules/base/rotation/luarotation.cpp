@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,8 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -41,62 +43,52 @@ namespace {
         "This value is the path to the Lua script that will be executed to compute the "
         "rotation for this transformation. The script needs to define a function "
         "'rotation' that takes the current simulation time in seconds past the J2000 "
-        "epoch as the first argument, the current wall time as milliseconds past the "
-        "J2000 epoch as the second argument and computes the rotation returned as 9 "
-        "values."
+        "epoch as the first argument, the simulation time in seconds past the J2000 "
+        "epoch of the last frame as the second argument, and the current wall time as "
+        "milliseconds past the J2000 epoch as the third argument. It computes the "
+        "rotation value factors returned as a table containing the 9 values that make up "
+        "the resulting rotation matrix.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
+
+    // This `Rotation` type generates the rotation for the attached scene graph node by
+    // calling the provided Lua script to create the full matrix used to orient the scene
+    // graph node. The returned matrix must be a valid rotation matrix. The script
+    // parameter describes in greater detail how the Lua script file should be
+    // constructed.
+    struct [[codegen::Dictionary(LuaRotation)]] Parameters {
+        // [[codegen::verbatim(ScriptInfo.description)]]
+        std::filesystem::path script;
+    };
+#include "luarotation_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation LuaRotation::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Lua Rotation",
-        "base_transform_rotation_lua",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("LuaRotation"),
-                Optional::No
-            },
-            {
-                ScriptInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                ScriptInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("base_transform_rotation_lua");
 }
 
-LuaRotation::LuaRotation()
-    : _luaScriptFile(ScriptInfo)
-    , _state(ghoul::lua::LuaState::IncludeStandardLibrary::No)
+LuaRotation::LuaRotation(const ghoul::Dictionary& dictionary)
+    : Rotation(dictionary)
+    , _luaScriptFile(ScriptInfo)
 {
-    addProperty(_luaScriptFile);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _luaScriptFile.onChange([&]() {
+    _luaScriptFile.onChange([this]() {
         requireUpdate();
-        _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile);
-        _fileHandle->setCallback([&](const ghoul::filesystem::File&) {
-            requireUpdate();
-        });
+        _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile.value());
+        _fileHandle->setCallback([this]() { requireUpdate(); });
     });
-}
 
-LuaRotation::LuaRotation(const ghoul::Dictionary& dictionary) : LuaRotation() {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "LuaRotation"
-    );
+    addProperty(_luaScriptFile);
+    global::scriptEngine->initializeLuaState(_state);
 
-    _luaScriptFile = absPath(dictionary.value<std::string>(ScriptInfo.identifier));
+    _luaScriptFile = p.script.string();
 }
 
 glm::dmat3 LuaRotation::matrix(const UpdateData& data) const {
-    ghoul::lua::runScriptFile(_state, _luaScriptFile);
+    ghoul::lua::runScriptFile(_state, _luaScriptFile.value());
 
     // Get the scaling function
     lua_getglobal(_state, "rotation");
@@ -104,7 +96,9 @@ glm::dmat3 LuaRotation::matrix(const UpdateData& data) const {
     if (!isFunction) {
         LERRORC(
             "LuaRotation",
-            fmt::format("Script '{}' does nto have a function 'rotation'", _luaScriptFile)
+            std::format(
+                "Script '{}' does not have a function 'rotation'", _luaScriptFile.value()
+            )
         );
         return glm::dmat3(1.0);
     }
@@ -121,20 +115,15 @@ glm::dmat3 LuaRotation::matrix(const UpdateData& data) const {
     ghoul::lua::push(_state, duration_cast<milliseconds>(now.time_since_epoch()).count());
 
     // Execute the scaling function
-    int success = lua_pcall(_state, 2, 9, 0);
+    const int success = lua_pcall(_state, 3, 1, 0);
     if (success != 0) {
         LERRORC(
-            "LuaScale",
-            fmt::format("Error executing 'rotation': {}", lua_tostring(_state, -1))
+            "LuaRotation",
+            std::format("Error executing 'rotation': {}", lua_tostring(_state, -1))
         );
     }
-
-    double values[9];
-    for (int i = 0; i < 9; ++i) {
-        values[i] = luaL_checknumber(_state, -1 - i);
-    }
-
-    return glm::make_mat3(values);
+    const glm::dmat3 rotation = ghoul::lua::value<glm::dmat3>(_state);
+    return rotation;
 }
 
 } // namespace openspace

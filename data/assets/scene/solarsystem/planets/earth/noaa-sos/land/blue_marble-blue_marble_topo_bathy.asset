@@ -1,0 +1,60 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Blue Marble: with Topography and Bathymetry"
+local Identifier = "noaa-sos-land-blue_marble-next_gen-topo_bathy"
+local Description = [[The Blue Marble is an incredibly detailed, true-color depiction of
+  the Earth. The Blue Marble Next Generation is an update on the original that has greater
+  detail. "The original Blue Marble was a composite of four months of MODIS observations
+  with a spatial resolution (level of detail) of 1 square kilometer per pixel. Blue Marble:
+  Next Generation offers a years worth of monthly composites at a spatial resolution of
+  500 meters]]
+local URL = "https://sos.noaa.gov/catalog/datasets/blue-marble-with-topography-seasonal/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "TemporalTileProvider",
+  Mode = "Folder",
+  Folder = {
+    Folder = syncedDirectory .. "5400",
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "world.topo.bathy.%Y%m.3x5400x2700.jpg"
+  },
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

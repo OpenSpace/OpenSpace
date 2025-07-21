@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,80 +26,71 @@
 #define __OPENSPACE_CORE__WINDOWDELEGATE___H__
 
 #include <ghoul/glm.h>
-#include <glbinding/glbinding.h>
 #include <vector>
 
 namespace openspace {
 
 struct WindowDelegate {
+    enum class Frustum { Mono, LeftEye, RightEye };
+
+    enum class Cursor { Arrow, IBeam, CrossHair, PointingHand, ResizeEW, ResizeNS,
+        ResizeNWSE, ResizeNESW, ResizeAll, NotAllowed };
+
     void (*terminate)() = [](){};
 
     void (*setBarrier)(bool enabled) = [](bool) {};
 
     void (*setSynchronization)(bool enabled) = [](bool) {};
 
-    void (*clearAllWindows)(const glm::vec4& clearColor) = [](const glm::vec4&) {};
-
     bool (*windowHasResized)() = []() { return false; };
+    bool (*anyWindowHasResized)() = []() { return false; };
 
     double (*averageDeltaTime)() = []() { return 0.0; };
+
+    double (*minDeltaTime)() = []() { return 0.0; };
+
+    double (*maxDeltaTime)() = []() { return 0.0; };
+
+    double (*deltaTimeStandardDeviation)() = []() { return 0.0; };
 
     double (*deltaTime)() = []() { return 0.0; };
 
     double (*applicationTime)() = []() { return 0.0; };
 
-    glm::vec2 (*mousePosition)() = []() { return glm::vec2(0.f); };
-
-    uint32_t (*mouseButtons)(int maxNumber) = [](int) { return uint32_t(0); };
-
     glm::ivec2 (*currentWindowSize)() = []() { return glm::ivec2(0); };
 
     glm::ivec2 (*currentSubwindowSize)() = []() { return glm::ivec2(0); };
-
-    glm::ivec2 (*currentWindowResolution)() = []() { return glm::ivec2(0); };
 
     glm::ivec2 (*currentDrawBufferResolution)() = []() { return glm::ivec2(0); };
 
     glm::ivec2 (*currentViewportSize)() = []() { return glm::ivec2(0); };
 
+    glm::ivec2(*currentViewportResolution)() = []() { return glm::ivec2(0); };
+
     glm::vec2 (*dpiScaling)() = []() { return glm::vec2(1.f); };
 
-    int (*currentNumberOfAaSamples)() = []() { return 1; };
+    glm::ivec2(*firstWindowResolution)() = []() { return glm::ivec2(0); };
 
-    bool (*isRegularRendering)() = []() { return true; };
+    glm::ivec2(*guiWindowResolution)() = []() { return glm::ivec2(0); };
+
+    float (*osDpiScaling)() = []() { return 1.f; };
 
     bool (*hasGuiWindow)() = []() { return false; };
 
     bool (*isGuiWindow)() = []() { return false; };
 
-    bool (*isMaster)() = []() { return false; };
-
-    int (*clusterId)() = []() { return 0; };
-
-    bool (*isUsingSwapGroups)() = []() { return false; };
-
-    bool (*isSwapGroupMaster)() = []() { return false; };
-
-    glm::mat4 (*viewProjectionMatrix)() = []() { return glm::mat4(1.f); };
+    bool (*isMaster)() = []() { return true; };
 
     glm::mat4 (*modelMatrix)() = []() { return glm::mat4(1.f); };
 
     void (*setNearFarClippingPlane)(float near, float far) = [](float, float) {};
 
-    void (*setEyeSeparationDistance)(float distance) = [](float) {};
-
-    glm::ivec4 (*viewportPixelCoordinates)() = []() { return glm::ivec4(0, 0, 0, 0); };
-
-    bool (*isExternalControlConnected)() = []() { return false; };
-
-    void (*sendMessageToExternalControl)(const std::vector<char>& message) =
-        [](const std::vector<char>&) {};
-
-    bool (*isSimpleRendering)() = []() { return true; };
-
     bool (*isFisheyeRendering)() = []() { return false; };
 
-    void (*takeScreenshot)(bool applyWarping) = [](bool) { };
+    unsigned int (*takeScreenshot)(bool applyWarping, std::vector<int> windowIds) =
+        [](bool, std::vector<int>) { return 0u; };
+
+    void (*resetScreenshotNumber)() = []() {};
 
     void (*swapBuffer)() = []() {};
 
@@ -107,10 +98,42 @@ struct WindowDelegate {
 
     int (*currentWindowId)() = []() { return 0; };
 
+    int (*firstWindowId)() = []() { return 0; };
+
+    std::string (*nameForWindow)(int windowIdx) = [](int) { return std::string(); };
+
+    float (*horizFieldOfView)(int windowIdx) = [](int) { return 0.f; };
+
+    void (*setHorizFieldOfView)(int windowIdx, float hFovDeg) = [](int, float) {};
+
+    void* (*getNativeWindowHandle)(size_t windowIndex) = [](size_t) -> void* {
+        return nullptr;
+    };
+
     using GLProcAddress = void(*)(void);
 
     GLProcAddress (*openGLProcedureAddress)(const char*) =
         [](const char*) -> GLProcAddress { return []() {}; };
+
+    Frustum (*frustumMode)() = []() { return Frustum::Mono; };
+
+    uint64_t (*swapGroupFrameNumber)() = []() { return uint64_t(0); };
+
+    void (*setScreenshotFolder)(std::filesystem::path) = [](std::filesystem::path) {};
+
+    void (*showStatistics)(bool) = [](bool) {};
+
+    int (*numberOfNodes)() = []() { return 0; };
+
+    int (*currentNode)() = []() { return 0; };
+
+    glm::vec2 (*mousePositionViewportRelative)(const glm::vec2& mousePosition) =
+        [](const glm::vec2&) { return glm::vec2(0); };
+
+    void (*setStatisticsGraphScale)(float scale) = [](float) {};
+    void (*setStatisticsGraphOffset)(glm::vec2 offset) = [](glm::vec2) {};
+
+    void (*setMouseCursor)(Cursor cursor) = [](Cursor) {};
 };
 
 } // namespace openspace

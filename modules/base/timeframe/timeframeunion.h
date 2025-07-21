@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,14 +35,14 @@ namespace documentation { struct Documentation; }
 
 class TimeFrameUnion : public TimeFrame {
 public:
-    TimeFrameUnion();
-    TimeFrameUnion(const ghoul::Dictionary& dictionary);
-    bool isActive(const Time&) const override;
+    explicit TimeFrameUnion(const ghoul::Dictionary& dictionary);
+
+    void update(const Time&) override;
 
     static documentation::Documentation Documentation();
 
 private:
-    std::vector<std::unique_ptr<TimeFrame>> _timeFrames;
+    std::vector<ghoul::mm_unique_ptr<TimeFrame>> _timeFrames;
 };
 
 } // namespace openspace

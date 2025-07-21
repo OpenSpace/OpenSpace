@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,100 +31,59 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    constexpr const char* KeySource = "Source";
-    constexpr const char* KeyTarget = "Target";
-    constexpr const char* KeyInstrument = "Instrument";
-    constexpr const char* KeyColor = "Color";
-    constexpr const char* KeyColorStart = "Start";
-    constexpr const char* KeyColorEnd = "End";
-
     struct VBOData {
-        float position[3];
-        float color[4];
+        std::array<float, 3> position;
+        std::array<float, 4> color;
     };
+
+    struct [[codegen::Dictionary(RenderableCrawlingLine)]] Parameters {
+        // The SPICE name of the source of the crawling line. For example, the spacecraft.
+        std::string source;
+
+        // The SPICE name of the target of the crawling line.
+        std::string target;
+
+        // The SPICE name of the instrument that is used to render the crawling line.
+        std::string instrument;
+
+        struct Color {
+            // The color at the start of the line.
+            glm::vec4 start [[codegen::color()]];
+
+            // The color at the end of the line.
+            glm::vec4 end [[codegen::color()]];
+        };
+        // The colors used for the crawling line, given as one color at the start of
+        // the line and one at the end.
+        Color color;
+    };
+#include "renderablecrawlingline_codegen.cpp"
 } // namespace
 
-// @TODO:  This clas is not properly working anymore and needs to be substantially
-//         rewritten
+// @TODO:  This class is not properly working anymore and needs to be substantially
+//         rewritten. When doing so, make sure that any color property uses three
+//         values, not four. The opacity should be handled separately
 
 namespace openspace {
 
 documentation::Documentation RenderableCrawlingLine::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableCrawlingLine",
-        "newhorizons_renderable_crawlingline",
-        {
-            {
-                KeySource,
-                new StringVerifier,
-                Optional::No,
-                "Denotes the SPICE name of the source of the renderable crawling line, "
-                "for example, the space craft"
-            },
-            {
-                KeyTarget,
-                new StringVerifier,
-                Optional::Yes,
-                "Denotes the SPICE name of the target of the crawling line"
-            },
-            {
-                KeyInstrument,
-                new StringVerifier,
-                Optional::No,
-                "Denotes the SPICE name of the instrument that is used to render the "
-                "crawling line"
-            },
-            {
-                KeyColor,
-                new TableVerifier({
-                    {
-                        KeyColorStart,
-                        new DoubleVector4Verifier,
-                        Optional::No,
-                        "The color at the start of the line",
-                    },
-                    {
-                        KeyColorEnd,
-                        new DoubleVector4Verifier,
-                        Optional::No,
-                        "The color at the end of the line"
-                    }
-                }),
-                Optional::No,
-                "Specifies the colors that are used for the crawling line. One value "
-                "determines the starting color of the line, the second value is the "
-                "color at the end of the line."
-            }
-        }
-    };
+    return codegen::doc<Parameters>("spacecraftinstruments_renderablecrawlingline");
 }
 
 RenderableCrawlingLine::RenderableCrawlingLine(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableCrawlingLine"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _source = dictionary.value<std::string>(KeySource);
-    _target = dictionary.value<std::string>(KeyTarget);
-    _instrumentName = dictionary.value<std::string>(KeyInstrument);
-
-    _lineColorBegin = dictionary.value<glm::vec4>(
-        std::string(KeyColor) + "." + KeyColorStart
-    );
-
-    _lineColorEnd = dictionary.value<glm::vec4>(
-        std::string(KeyColor) + "." + KeyColorEnd
-    );
+    _source = p.source;
+    _target = p.target;
+    _instrumentName = p.instrument;
+    _lineColorBegin = p.color.start;
+    _lineColorEnd = p.color.end;
 }
 
 bool RenderableCrawlingLine::isReady() const {
@@ -132,7 +91,7 @@ bool RenderableCrawlingLine::isReady() const {
 }
 
 void RenderableCrawlingLine::initializeGL() {
-    _program = global::renderEngine.buildRenderProgram(
+    _program = global::renderEngine->buildRenderProgram(
         "RenderableCrawlingLine",
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/crawlingline_vs.glsl"),
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/crawlingline_fs.glsl")
@@ -155,7 +114,7 @@ void RenderableCrawlingLine::initializeGL() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(VBOData),
-        reinterpret_cast<void*>(offsetof(VBOData, color)) // NOLINT
+        reinterpret_cast<void*>(offsetof(VBOData, color))
     );
 
     glBindVertexArray(0);
@@ -168,7 +127,7 @@ void RenderableCrawlingLine::deinitializeGL() {
     _vbo = 0;
 
     if (_program) {
-        global::renderEngine.removeRenderProgram(_program.get());
+        global::renderEngine->removeRenderProgram(_program.get());
         _program = nullptr;
     }
 }
@@ -181,26 +140,18 @@ void RenderableCrawlingLine::render(const RenderData& data, RendererTasks&) {
     _program->activate();
     _frameCounter++;
 
-    glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+    const glm::dmat4 modelViewProjection = calcModelViewProjectionTransform(data);
+    _program->setUniform("modelViewProjection", modelViewProjection);
 
-    glm::dmat4 modelViewProjectionTransform = data.camera.projectionMatrix() *
-                             glm::mat4(data.camera.combinedViewMatrix() * modelTransform);
-
-    _program->setUniform("modelViewProjection", modelViewProjectionTransform);
-
-    int frame = _frameCounter % 60;
-    float fadingFactor = static_cast<float>(sin((frame * glm::pi<float>()) / 60));
-    float alpha = 0.6f + fadingFactor*0.4f;
+    const int frame = _frameCounter % 60;
+    const float fadingFactor = std::sin(frame * glm::pi<float>() / 60.f);
+    const float alpha = 0.6f + fadingFactor * 0.4f;
 
     glLineWidth(2.f);
 
-    _program->setUniform("_alpha", alpha);
+    _program->setUniform("alpha", alpha);
 
     glBindVertexArray(_vao);
-
     glDrawArrays(GL_LINES, 0, 2);
     glBindVertexArray(0);
 
@@ -222,12 +173,12 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
     const glm::dvec3 boresight = res.boresightVector;
     const glm::vec4 target = glm::dmat4(tm) * glm::vec4(boresight, 12);
 
-    VBOData vboData[2] = {
-        {
+    std::array<VBOData, 2> vboData = {
+        VBOData {
             { 0.f, 0.f, 0.f },
             { _lineColorBegin.r, _lineColorBegin.g, _lineColorBegin.b, _lineColorBegin.a }
         },
-        {
+        VBOData {
             {
                 target.x * powf(10, target.w),
                 target.y * powf(10, target.w),
@@ -239,20 +190,15 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
 
 
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferSubData(
-        GL_ARRAY_BUFFER,
-        0,
-        2 * sizeof(VBOData),
-        vboData
-    );
+    glBufferSubData(GL_ARRAY_BUFFER, 0, 2 * sizeof(VBOData), vboData.data());
 
     if (ImageSequencer::ref().isReady()) {
-        _imageSequenceTime = ImageSequencer::ref().instrumentActiveTime(
+        const float imageSequenceTime = ImageSequencer::ref().instrumentActiveTime(
             data.time.j2000Seconds(),
             _instrumentName
         );
 
-        _drawLine = _imageSequenceTime != -1.f;
+        _drawLine = (imageSequenceTime != -1.f);
     }
 }
 

@@ -1,0 +1,53 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "ETOPO2: Topography and Bathymetry (shaded colors)"
+local Identifier = "noaa-sos-land-etopo2-earth_shaded"
+local Description = [[Many datasets have been created by utilizing the ETOPO2 dataset.
+This dataset was generated from digital data bases of seafloor and land elevations on a
+2-minute latitude/longitude grid (1 minute of latitude = 1 nautical mile, or 1.15 statute
+mile). ETOPO2 is a combination of satellite altimetry observations, shipboard
+echo-sounding measurements, data from the Digital Bathymetric Data Base Variable
+Resolution and data from the GLOBE project which has a global digital elevation
+model]]
+local URL = "https://sos.noaa.gov/catalog/datasets/etopo2-topography-and-bathymetry-shaded-colors/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "5400.jpg",
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

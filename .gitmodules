@@ -9,14 +9,44 @@
 	url = https://github.com/OpenSpace/Spice.git
 [submodule "modules/touch/ext/libTUIO11"]
 	path = modules/touch/ext/libTUIO11
-	url = https://github.com/mkalten/TUIO11_CPP
-[submodule "modules/sync/ext/libtorrent"]
-	path = modules/sync/ext/libtorrent
-	url = https://github.com/OpenSpace/libtorrent.git
+	url = https://github.com/OpenSpace/TUIO11_CPP.git
 [submodule "apps/OpenSpace-MinVR/ext/minvr"]
 	path = apps/OpenSpace-MinVR/ext/minvr
 	url = https://github.com/OpenSpace/minvr
 	branch = OpenSpace
 [submodule "apps/OpenSpace/ext/sgct"]
 	path = apps/OpenSpace/ext/sgct
-	url = https://github.com/opensgct/sgct
+	url = https://github.com/sgct/sgct
+[submodule "modules/fitsfilereader/ext/CCfits"]
+	path = modules/fitsfilereader/ext/CCfits
+	url = https://github.com/OpenSpace/CCfits.git
+[submodule "modules/fitsfilereader/ext/cfitsio"]
+	path = modules/fitsfilereader/ext/cfitsio
+	url = https://github.com/OpenSpace/cfitsio.git
+[submodule "apps/OpenSpace-MinVR/ext/glfw"]
+	path = apps/OpenSpace-MinVR/ext/glfw
+	url = https://github.com/opensgct/glfw
+[submodule "ext/date"]
+	path = ext/date
+	url = https://github.com/HowardHinnant/date
+[submodule "support/coding/codegen"]
+	path = support/coding/codegen
+	url = https://github.com/OpenSpace/codegen
+[submodule "modules/globebrowsing/ext/geos"]
+	path = modules/globebrowsing/ext/geos
+	url = https://github.com/OpenSpace/geos.git
+[submodule "documentation"]
+	path = documentation
+	url = https://github.com/OpenSpace/OpenSpace-Documentation-Dist.git
+[submodule "support/doxygen/css"]
+	path = support/doxygen/css
+	url = https://github.com/jothepro/doxygen-awesome-css.git
+[submodule "modules/audio/ext/soloud"]
+	path = modules/audio/ext/soloud
+	url = https://github.com/jarikomppa/soloud
+[submodule "modules/opensoundcontrol/ext/oscpack"]
+	path = modules/opensoundcontrol/ext/oscpack
+	url = https://github.com/OpenSpace/oscpack.git
+[submodule "ext/json"]
+	path = ext/json
+	url = https://github.com/nlohmann/json

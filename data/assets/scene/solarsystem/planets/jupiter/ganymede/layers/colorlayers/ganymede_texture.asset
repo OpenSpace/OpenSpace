@@ -1,0 +1,40 @@
+local globe = asset.require("../../ganymede")
+
+
+
+local texturesPath = asset.resource({
+  Name = "Ganymede Textures",
+  Type = "HttpSynchronization",
+  Identifier = "ganymede_textures",
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = "Texture",
+  FilePath = texturesPath .. "ganymede.jpg",
+  Enabled = asset.enabled,
+  ZIndex = 5,
+  CacheSettings = { Enabled = false }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Ganymede.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Ganymede.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "Ganymede Texutre",
+  Description = "Default jpg texture for Ganymede",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

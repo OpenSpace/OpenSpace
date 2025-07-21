@@ -1,23 +1,56 @@
-local assetHelper = asset.require('util/asset_helper')
-local shared = asset.require('../satellites_shared')
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local group = {
-    Title = "Satellite Based Augmentation System",
-    Url = "http://www.celestrak.com/NORAD/elements/sbas.txt",
-    TrailColor = { 0.75, 0.75, 0.35 }
+
+
+local omm = asset.resource({
+  Name = "Satellite OMM Data (Satellite Based Augmentation System)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_sbas",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=sbas&FORMAT=kvn",
+  Filename = "sbas.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+
+local SatelliteBasedAugmentationSatellites = {
+  Identifier = "SatelliteBasedAugmentationSatellites",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "sbas.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.75, 0.75, 0.35 },
+    TrailFade = 15,
+    PointSizeExponent = 5.0,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Satellite Based Augmentation System",
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
+  }
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
 
-
-local objectNames = {}
-
-asset.onInitialize(function ()
-    objectNames = shared.addSatelliteGroupObjects(group, tle, false)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SatelliteBasedAugmentationSatellites)
 end)
 
-asset.onDeinitialize(function ()
-    for _, n in ipairs(objectNames) do
-        openspace.removeSceneGraphNode(n)
-    end
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SatelliteBasedAugmentationSatellites)
 end)
+
+asset.export(SatelliteBasedAugmentationSatellites)
+
+
+
+asset.meta = {
+  Name = "Satellites Navigation Satellite Based Augmentation System",
+  Description = [[Satellites asset for Navigation Satellite Based Augmentation System.
+    Data from Celestrak]],
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/NORAD/elements/",
+  License = "Celestrak"
+}

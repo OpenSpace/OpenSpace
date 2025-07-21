@@ -1,31 +1,57 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
-local textures = asset.syncedResource({
-    Name = "ESO Milky Way Textures",
-    Type = "HttpSynchronization",
-    Identifier = "milkyway-eso_textures",
-    Version = 1
+local textures = asset.resource({
+  Name = "ESO Milky Way Textures",
+  Type = "HttpSynchronization",
+  Identifier = "milkyway-eso_textures",
+  Version = 1
 })
 
-local object = {
-    Identifier = "MilkyWay-ESO",
-    Renderable = {
-        Type = "RenderableSphere",
-        Size = 9.2E20,
-        Segments = 40,
-        Opacity = 0.4,
-        Texture = textures .. "/eso0932a_blend.png",
-        Orientation = "Inside/Outside",
-        FadeOutThreshould = 0.01
-    },
-    GUI = {
-        Name = "Milky Way (ESO)",
-        Path = "/Milky Way/Milky Way"
+
+local Object = {
+  Identifier = "MilkyWay-ESO",
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, 0, math.pi }
     }
+  },
+  Renderable = {
+    Type = "RenderableSphereImageLocal",
+    Size = 9.2E20,
+    Segments = 40,
+    Opacity = 0.4,
+    Texture = textures .. "eso0932a_blend.png",
+    Orientation = "Inside",
+    MirrorTexture = true,
+    FadeOutThreshold = 0.01,
+    BlendingOption = "Additive",
+    DisableDepth = true
+  },
+  GUI = {
+    Name = "Milky Way (ESO)",
+    Path = "/Milky Way/Milky Way",
+    Focusable = false,
+    Description = "Milky Way Galaxy image (alternate)"
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Object)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Object)
+end)
+
+asset.export(Object)
+
+
+
+asset.meta = {
+  Name = "MilkyWay Galaxy (ESO)",
+  Description = [[This asset contains an alternate to the Digital Universe image for the
+    Milky Way from ESO]],
+  Author = "ESO/S. Brunier",
+  URL = "https://www.eso.org/public/usa/images/eso0932a/",
+  License = "Creative Commons Attribution 4.0 International License"
+}

@@ -1,0 +1,66 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Earth's Magnetic Lines"
+local Identifier = "noaa-sos-land-earths_magnetism_magnetic_lines"
+local Description = [[Earth is like a giant magnet with a North and South Pole. However,
+the magnetic North and South Pole are not aligned with the Geographic North and South
+Pole. The Geographic North Pole is defined by the latitude 90° N and is the axis of the
+Earth's rotation. The Magnetic North Pole is where the Earth's magnetic field points
+vertically downward. The Earth creates its own magnetic field from the electric currents
+created in the liquid iron-nickel core. In order to illustrate the earth's magnetic
+field, three datasets for Earth's Magnetism have been created. All of these datasets show
+the changes in the magnetic field from 1590 - 2010. The first dataset shows the magnetic
+field lines at the surface of the Earth. The magnetic poles are indicated by stars. The
+blue lines show where the magnetic field dips into the Earth and the red lines show where
+the magnetic field emerges from the Earth. Where the field lines are horizontal to the
+Earth, between the red and blue lines, is the magnetic equator shaded yellow]]
+local URL = "https://sos.noaa.gov/catalog/datasets/earths-magnetic-lines/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "TemporalTileProvider",
+  Mode = "Folder",
+  Folder = {
+    Folder = syncedDirectory .. "4096",
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "%Y.png"
+  },
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

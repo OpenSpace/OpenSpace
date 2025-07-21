@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,22 +28,35 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scenelicense.h>
 #include <ghoul/misc/easing.h>
-#include <ghoul/misc/exception.h>
+#include <ghoul/misc/memorypool.h>
 #include <mutex>
 #include <set>
 #include <unordered_map>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::opengl { class ProgramObject; }
+namespace ghoul {
+
+class Dictionary;
+namespace lua { class LuaState; }
+namespace opengl { class ProgramObject; }
+
+} // namespace ghoul
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
 namespace scripting { struct LuaLibrary; }
 
+enum class PropertyValueType {
+    Boolean = 0,
+    Float,
+    String,
+    Table,
+    Nil
+};
+
+class Profile;
 class SceneInitializer;
 
 // Notifications:
@@ -52,55 +65,35 @@ class Scene : public properties::PropertyOwner {
 public:
     BooleanType(UpdateDependencies);
 
-    struct InvalidSceneError : ghoul::RuntimeError {
-        /**
-         * \param message The reason that caused this exception to be thrown
-         * \param component The optional compoment that caused this exception to be thrown
-         * \pre message may not be empty
-        */
-        explicit InvalidSceneError(const std::string& msg,
-            const std::string& comp = "");
-    };
-
-    /// This struct describes a time that has some intrinsic interesting-ness to this
-    /// scene.
+    /**
+     * This struct describes a time that has some intrinsic interesting-ness to this
+     * scene.
+     */
     struct InterestingTime {
         std::string name;
         std::string time;
     };
 
-    // constructors & destructor
-    Scene(std::unique_ptr<SceneInitializer> initializer);
-    ~Scene();
+    explicit Scene(std::unique_ptr<SceneInitializer> initializer);
+    virtual ~Scene() override;
 
     /**
-     * Clear the scene graph,
-     * i.e. set the root node to nullptr and deallocate all scene graph nodes.
+     * Attach node to the root.
      */
-    void clear();
+    void attachNode(ghoul::mm_unique_ptr<SceneGraphNode> node);
 
     /**
-     * Attach node to the root
+     * Detach node from the root.
      */
-    void attachNode(std::unique_ptr<SceneGraphNode> node);
+    ghoul::mm_unique_ptr<SceneGraphNode> detachNode(SceneGraphNode& node);
 
     /**
-     * Detach node from the root
-     */
-    std::unique_ptr<SceneGraphNode> detachNode(SceneGraphNode& node);
-
-    /**
-     * Set the camera of the scene
-     */
-    void setCamera(std::unique_ptr<Camera> camera);
-
-    /**
-     * Return the camera
+     * Return the camera.
      */
     Camera* camera() const;
 
     /**
-     * Updates all SceneGraphNodes relative positions
+     * Updates all SceneGraphNodes relative positions.
      */
     void update(const UpdateData& data);
 
@@ -120,8 +113,8 @@ public:
     const SceneGraphNode* root() const;
 
     /**
-     * Return the scenegraph node with the specified name or <code>nullptr</code> if that
-     * name does not exist.
+     * Return the scenegraph node with the specified name or `nullptr` if that name does
+     * not exist.
      */
     SceneGraphNode* sceneGraphNode(const std::string& name) const;
 
@@ -135,25 +128,15 @@ public:
      */
     void unregisterNode(SceneGraphNode* node);
 
-    void addSceneLicense(SceneLicense license);
-
     /**
-    * Mark the node registry as dirty
-    */
+     * Mark the node registry as dirty.
+     */
     void markNodeRegistryDirty();
 
     /**
      * Return a vector of all scene graph nodes in the scene.
      */
     const std::vector<SceneGraphNode*>& allSceneGraphNodes() const;
-
-    /**
-     * Write information about the license information for the scenegraph nodes that are
-     * contained in this scene
-     * \param path The file path that will contain the documentation about the licenses
-     * used in this scene
-     */
-    void writeSceneLicenseDocumentation(const std::string& path) const;
 
     /**
      * Returns a map from identifier to scene graph node.
@@ -171,7 +154,7 @@ public:
     void initializeNode(SceneGraphNode* node);
 
     /**
-     * Return true if the scene is initializing
+     * Return true if the scene is initializing.
      */
     bool isInitializing() const;
 
@@ -186,70 +169,111 @@ public:
      * \param prop The property that should be called to update itself every frame until
      *        \p durationSeconds seconds have passed
      * \param durationSeconds The number of seconds that the interpolation will run for
+     * \param postScript A Lua script that will be executed when the interpolation
+     *        finishes
+     * \param easingFunction A function that determines who the interpolation occurs
      *
-     * \pre \p prop must not be \c nullptr
+     * \pre \p prop must not be `nullptr`
      * \pre \p durationSeconds must be positive and not 0
      * \post A new interpolation record exists for \p that is not expired
      */
     void addPropertyInterpolation(properties::Property* prop, float durationSeconds,
+        std::string postScript = "",
         ghoul::EasingFunction easingFunction = ghoul::EasingFunction::Linear);
 
     /**
      * Removes the passed \p prop from the list of Property%s that are update each time
-     * the #updateInterpolations method is called
+     * the #updateInterpolations method is called.
      *
      * \param prop The Property that should not longer be updated
      *
-     * \pre \prop must not be nullptr
+     * \pre \p prop must not be nullptr
      * \post No interpolation record exists for \p prop
      */
     void removePropertyInterpolation(properties::Property* prop);
 
     /**
      * Informs all Property%s with active interpolations about applying a new update tick
-     * using the Property::interpolateValue method, passing a parameter \c t which is \c 0
-     * if no time has passed between the #addInterpolation method and \c 1 if an amount of
-     * time equal to the requested interpolation time has passed. The parameter \c t is
-     * updated with a resolution of 1 microsecond, which means that if this function is
-     * called twice within 1 microsecond, the passed parameter \c t might be the same for
-     * both calls
+     * using the Property::interpolateValue method, passing a parameter `t` which is `0`
+     * if no time has passed between the #addPropertyInterpolation method and `1` if an
+     * amount of time equal to the requested interpolation time has passed. The parameter
+     * `t` is updated with a resolution of 1 microsecond, which means that if this
+     * function is called twice within 1 microsecond, the passed parameter `t` might be
+     * the same for both calls.
      */
     void updateInterpolations();
 
     /**
-     * Adds the provided \p time as an interesting time to this scene. The same time can
-     * be added multiple times.
-     *
-     * \param The time that should be added
-     *
-     * \pre \p time.time must not be empty
-     * \pre \p time.name must not be empty
-     */
-    void addInterestingTime(InterestingTime time);
-
-    /**
-     * Returns the list of all interesting times that are defined for this scene.
-     *
-     * \return The list of all interesting times that are defined for this scene
-     */
-    const std::vector<InterestingTime>& interestingTimes() const;
-
-    /**
      * Returns the Lua library that contains all Lua functions available to change the
-     * scene graph. The functions contained are
-     * - openspace::luascriptfunctions::property_setValue
-     * - openspace::luascriptfunctions::property_getValue
+     * scene graph.
+     *
      * \return The Lua library that contains all Lua functions available to change the
-     * scene graph
+     *         scene graph
      */
     static scripting::LuaLibrary luaLibrary();
 
+    /**
+     * Sets a property using the 'properties' contents of a profile. The function will
+     * loop through each setProperty command. A property may be set to a bool, float, or
+     * string value (which must be converted because a Profile stores all values as
+     * strings).
+     *
+     * \param p The Profile to be read.
+     */
+    void setPropertiesFromProfile(const Profile& p);
+
+    /**
+     * Searches for any properties that match the regex propertyString, and returns
+     * the results in a vector.
+     *
+     * \param propertyString The regex string that is intended to match one or more
+     *        properties in the currently-available properties
+     * \return Vector of Property objs containing property names that matched the regex
+     */
+    std::vector<properties::Property*> propertiesMatchingRegex(
+        std::string_view propertyString);
+
+    /**
+     * Returns a list of all unique tags that are used in the currently loaded scene.
+     *
+     * \return A list of all unique tags that are used in the currently loaded scene.
+     */
+    std::vector<std::string> allTags() const;
+
+    /**
+     * Set a custom order for items in a given branch in the Scene GUI tree.
+     *
+     * \param guiPath The GUI path for which to set the order
+     * \param list A list of names of scene graph nodes or subgroups in the GUI, in the
+     *             order of which they should appear in the tree.
+     */
+    void setGuiTreeOrder(const std::string& guiPath,
+        const std::vector<std::string>& list);
+
+    /**
+     * Returns a dictionary containing all the currently set custom orderings for the
+     * Scene GUI tree.
+     *
+     * \return A dictionary containing key value pairs with custom item orderings for
+     *         specific paths in the Scene GUI tree
+     */
+    ghoul::Dictionary guiTreeOrder() const;
+
 private:
+    /**
+     * Accepts string version of a property value from a profile, converts it to the
+     * appropriate type, and then pushes the value onto the Lua state.
+     *
+     * \param L The Lua state to push value to
+     * \param value String representation of the value with which to set property
+     */
+    void propertyPushProfileValueToLua(ghoul::lua::LuaState& L, const std::string& value);
+
+
     /**
      * Update dependencies.
      */
     void updateNodeRegistry();
-
     void sortTopologically();
 
     std::unique_ptr<Camera> _camera;
@@ -257,12 +281,10 @@ private:
     std::vector<SceneGraphNode*> _circularNodes;
     std::unordered_map<std::string, SceneGraphNode*> _nodesByIdentifier;
     bool _dirtyNodeRegistry = false;
-    SceneGraphNode _rootDummy;
+    SceneGraphNode _rootNode;
     std::unique_ptr<SceneInitializer> _initializer;
-
-    std::vector<InterestingTime> _interestingTimes;
-
-    std::vector<SceneLicense> _licenses;
+    std::string _profilePropertyName;
+    bool _valueIsTable = false;
 
     std::mutex _programUpdateLock;
     std::set<ghoul::opengl::ProgramObject*> _programsToUpdate;
@@ -272,11 +294,18 @@ private:
         properties::Property* prop;
         std::chrono::time_point<std::chrono::steady_clock> beginTime;
         float durationSeconds;
+        std::string postScript;
+
         ghoul::EasingFunc<float> easingFunction;
         bool isExpired = false;
     };
     std::vector<PropertyInterpolationInfo> _propertyInterpolationInfos;
+
+    std::unordered_map<std::string, std::vector<std::string>> _guiTreeOrderMap;
 };
+
+// Convert the input string to a format that is valid as an identifier
+std::string makeIdentifier(std::string str);
 
 } // namespace openspace
 

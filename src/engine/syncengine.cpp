@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 
 #include <openspace/util/syncdata.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/profiling.h>
 #include <algorithm>
 
 namespace openspace {
@@ -36,27 +37,19 @@ SyncEngine::SyncEngine(unsigned int syncBufferSize)
     ghoul_assert(syncBufferSize > 0, "syncBufferSize must be bigger than 0");
 }
 
-// should be called on sgct master
-std::vector<char> SyncEngine::encodeSyncables() {
+// Should be called on sgct master
+std::vector<std::byte> SyncEngine::encodeSyncables() {
     for (Syncable* syncable : _syncables) {
         syncable->encode(&_syncBuffer);
     }
 
-    std::vector<char> data = _syncBuffer.data();
+    std::vector<std::byte> data = _syncBuffer.data();
     _syncBuffer.reset();
     return data;
-
-    //_dataStream.resize(_encodeOffset);
-    //_synchronizationBuffer->setVal(_dataStream);
-    //sgct::SharedData::instance()->writeVector(_synchronizationBuffer.get());
-    //_dataStream.resize(_n);
-    //_encodeOffset = 0;
-    //_decodeOffset = 0;
-    //_syncBuffer.write();
 }
 
-//should be called on sgct slaves
-void SyncEngine::decodeSyncables(std::vector<char> data) {
+// Should be called on sgct clients
+void SyncEngine::decodeSyncables(std::vector<std::byte> data) {
     _syncBuffer.setData(std::move(data));
     for (Syncable* syncable : _syncables) {
         syncable->decode(&_syncBuffer);
@@ -66,26 +59,34 @@ void SyncEngine::decodeSyncables(std::vector<char> data) {
 }
 
 void SyncEngine::preSynchronization(IsMaster isMaster) {
-    for (Syncable* syncable : _syncables) {
-        syncable->preSync(isMaster);
+    ZoneScoped;
+
+    // We use a raw for-loop because a syncable can add to the `_syncables` list which
+    // can invalidate the pointers of a range-based for-loop
+    for (size_t i = 0; i < _syncables.size(); i++) {
+        _syncables[i]->preSync(isMaster);
     }
 }
 
 void SyncEngine::postSynchronization(IsMaster isMaster) {
-    for (Syncable* syncable : _syncables) {
-        syncable->postSync(isMaster);
+    ZoneScoped;
+
+    // We use a raw for-loop because a syncable can add to the `_syncables` list which
+    // can invalidate the pointers of a range-based for-loop
+    for (size_t i = 0; i < _syncables.size(); i++) {
+        _syncables[i]->postSync(isMaster);
     }
 }
 
 void SyncEngine::addSyncable(Syncable* syncable) {
-    ghoul_assert(syncable, "synable must not be nullptr");
+    ghoul_assert(syncable, "Syncable must not be nullptr");
 
     _syncables.push_back(syncable);
 }
 
 void SyncEngine::addSyncables(const std::vector<Syncable*>& syncables) {
     for (Syncable* syncable : syncables) {
-        ghoul_assert(syncable, "syncables must not contain any nullptr");
+        ghoul_assert(syncable, "Syncables must not contain any nullptr");
         addSyncable(syncable);
     }
 }

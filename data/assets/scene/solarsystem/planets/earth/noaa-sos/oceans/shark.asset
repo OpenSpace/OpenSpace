@@ -1,0 +1,63 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Great White Shark Track"
+local Identifier = "noaa-sos-oceans-shark"
+local Description = [[Before satellite tagging technology became feasible, it was
+thought that great white sharks (Carcharodon carcharias), spent most of their time close
+to the coasts feeding on seals and sea lions. With the advent of satellite tagging
+technology, many new behaviors of the great white shark have been discovered. By tagging
+a shark with a satellite transmitter, scientists are able to track the movement of the
+shark for extended periods. In 2001, a shark tagged off of the coast of California was
+tracked all the way to Hawaii, 3,800 km (2,280 miles) away. The shark spent the winter
+there before returning to waters closer to California. Several other sharks tagged off
+the coast of California also were tracked traveling great distances from California]]
+local URL = "https://sos.noaa.gov/catalog/datasets/great-white-shark-track/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "TemporalTileProvider",
+  Mode = "Folder",
+  Folder = {
+    Folder = syncedDirectory .. "2048",
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "shark-migration-%y%j-%H%M.jpg"
+  },
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

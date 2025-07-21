@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,18 +26,17 @@
 #define __OPENSPACE_MODULE_KAMELEONVOLUME___RENDERABLEKAMELEONVOLUME___H__
 
 #include <openspace/rendering/renderable.h>
-#include <openspace/rendering/transferfunction.h>
-#include <modules/kameleon/include/kameleonwrapper.h>
-#include <modules/volume/rawvolume.h>
-#include <modules/volume/rendering/basicvolumeraycaster.h>
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/vector/uvec3property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace openspace { struct RenderData; }
+namespace openspace {
+    struct RenderData;
+    class TransferFunction;
+} // namespace openspace
 
 namespace openspace::volume {
     class BasicVolumeRaycaster;
@@ -50,7 +49,7 @@ namespace openspace::kameleonvolume {
 
 class RenderableKameleonVolume : public Renderable {
 public:
-    RenderableKameleonVolume(const ghoul::Dictionary& dictionary);
+    explicit RenderableKameleonVolume(const ghoul::Dictionary& dictionary);
     ~RenderableKameleonVolume();
 
     void initializeGL() override;
@@ -63,9 +62,9 @@ public:
 private:
     void load();
     void loadFromPath(const std::string& path);
-    void loadRaw(const std::string& path);
+    void loadRaw(const std::filesystem::path& path);
     void loadCdf(const std::string& path);
-    void storeRaw(const std::string& path);
+    void storeRaw(const std::filesystem::path& path);
 
     std::string cacheSuffix() const;
     void updateTextureFromVolume();

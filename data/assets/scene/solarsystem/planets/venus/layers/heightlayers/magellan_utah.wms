@@ -1,0 +1,21 @@
+<GDAL_WMS>
+  <Service name="TMS">
+    <ServerUrl>http://openspace.sci.utah.edu/Venus/MagellanDEM/tile/${z}/${y}/${x}</ServerUrl>
+  </Service>
+  <DataWindow>
+    <UpperLeftX>-180.0</UpperLeftX>
+    <UpperLeftY>90.0</UpperLeftY>
+    <LowerRightX>180.0</LowerRightX>
+    <LowerRightY>-90.0</LowerRightY>
+    <SizeX>8192</SizeX>
+    <SizeY>4096</SizeY>
+    <TileLevel>4</TileLevel>
+    <YOrigin>top</YOrigin>
+  </DataWindow>
+  <Projection>GEOGCS["GCS_Venus",DATUM["D_Venus",SPHEROID["Venus",6051000,0]],PRIMEM["Reference_Meridian",0],UNIT["Degree",0.0174532925199433]]</Projection>
+  <BlockSizeX>256</BlockSizeX>
+  <BlockSizeY>256</BlockSizeY>
+  <BandsCount>1</BandsCount>
+  <MaxConnections>10</MaxConnections>
+  <Timeout>5</Timeout>
+</GDAL_WMS>

@@ -1,8 +1,59 @@
-asset.request('./minor/ananke_group')
-asset.request('./minor/carme_group')
-asset.request('./minor/carpo_group')
-asset.request('./minor/himalia_group')
-asset.request('./minor/inner_group')
-asset.request('./minor/other_groups')
-asset.request('./minor/pasiphae_group')
-asset.request('./minor/themisto_group')
+asset.require("./minor/ananke_group")
+asset.require("./minor/carme_group")
+asset.require("./minor/carpo_group")
+asset.require("./minor/himalia_group")
+asset.require("./minor/inner_group")
+asset.require("./minor/other_groups")
+asset.require("./minor/pasiphae_group")
+asset.require("./minor/themisto_group")
+
+
+
+local JupiterMinorMoonsOn = {
+  Identifier = "os.solarsystem.JupiterMinorMoonsOn",
+  Name = "Turn ON minor moons and trails",
+  Command = [[
+    openspace.fadeIn("{moonTrail_minor_jupiter}.Renderable")
+    openspace.fadeIn("{moon_minor_jupiter}.Renderable")
+  ]],
+  Documentation = "Turn ON Jupiter's minor moons and their trails",
+  GuiPath = "/Solar System/Jupiter",
+  IsLocal = false
+}
+
+local JupiterMinorMoonsOff = {
+  Identifier = "os.solarsystem.JupiterMinorMoonsOff",
+  Name = "Turn OFF minors moon and trails",
+  Command = [[
+    openspace.fadeOut("{moonTrail_minor_jupiter}.Renderable")
+    openspace.fadeOut("{moon_minor_jupiter}.Renderable")
+  ]],
+  Documentation = "Turn OFF Jupiter's minor moons and their trails",
+  GuiPath = "/Solar System/Jupiter",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.action.registerAction(JupiterMinorMoonsOn)
+  openspace.action.registerAction(JupiterMinorMoonsOff)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(JupiterMinorMoonsOff)
+  openspace.action.removeAction(JupiterMinorMoonsOn)
+end)
+
+asset.export("JupiterMinorMoonsOn", JupiterMinorMoonsOn.Identifier)
+asset.export("JupiterMinorMoonsOff", JupiterMinorMoonsOff.Identifier)
+
+
+
+asset.meta = {
+  Name = "Jupiter Minor Moons",
+  Description = [[Meta asset containing eight moon groups: Ananke, Carme, Carpo, Himalia,
+    Pasiphae, Themisto, Inner, and Other]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,70 +26,97 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-    constexpr const char* KeyType = "Type";
+    struct [[codegen::Dictionary(Scale)]] Parameters {
+        // The type of the scaling that is described in this element. The available types
+        // of scaling depend on the configuration of the application and can be written to
+        // disk on application startup into the FactoryDocumentation
+        std::string type [[codegen::annotation("Must name a valid Scale type")]];
+
+        // The time frame in which this `Scale` is applied. If the in-game time is outside
+        // this range, no scaling will be applied.
+        std::optional<ghoul::Dictionary> timeFrame
+            [[codegen::reference("core_time_frame")]];
+    };
+#include "scale_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation Scale::Documentation() {
-    using namespace openspace::documentation;
-
-    return {
-        "Transformation Scaling",
-        "core_transform_scaling",
-        {
-            {
-                KeyType,
-                new StringAnnotationVerifier("Must name a valid Scale type"),
-                Optional::No,
-                "The type of the scaling that is described in this element. "
-                "The available types of scaling depend on the configuration "
-                "of the application and can be written to disk on "
-                "application startup into the FactoryDocumentation."
-            }
-        }
-    };
+    return codegen::doc<Parameters>("core_transform_scale");
 }
 
-std::unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary& dictionary) {
-    documentation::testSpecificationAndThrow(Documentation(), dictionary, "Scale");
+ghoul::mm_unique_ptr<Scale> Scale::createFromDictionary(
+                                                      const ghoul::Dictionary& dictionary)
+{
+    ZoneScoped;
 
-    std::string scaleType = dictionary.value<std::string>(KeyType);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    auto factory = FactoryManager::ref().factory<Scale>();
-    std::unique_ptr<Scale> result = factory->create(scaleType, dictionary);
+    Scale* result = FactoryManager::ref().factory<Scale>()->create(
+        p.type,
+        dictionary,
+        &global::memoryManager->PersistentMemory
+    );
     result->setIdentifier("Scale");
-    return result;
+    result->_type = p.type;
+
+    return ghoul::mm_unique_ptr<Scale>(result);
 }
 
-Scale::Scale() : properties::PropertyOwner({ "Scale" }) {}
+Scale::Scale(const ghoul::Dictionary& dictionary)
+    : properties::PropertyOwner({ "Scale" })
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    if (p.timeFrame.has_value()) {
+        _timeFrame = TimeFrame::createFromDictionary(*p.timeFrame);
+        addPropertySubOwner(_timeFrame.get());
+    }
+}
 
 void Scale::requireUpdate() {
     _needsUpdate = true;
 }
 
-bool Scale::initialize() {
-    return true;
+void Scale::initialize() {
+    if (_timeFrame) {
+        _timeFrame->initialize();
+    }
 }
 
-double Scale::scaleValue() const {
+glm::dvec3 Scale::scaleValue() const {
     return _cachedScale;
 }
 
 void Scale::update(const UpdateData& data) {
+    ZoneScoped;
+
     if (!_needsUpdate && data.time.j2000Seconds() == _cachedTime) {
         return;
     }
-    _cachedScale = scaleValue(data);
-    _cachedTime = data.time.j2000Seconds();
-    _needsUpdate = false;
+
+    if (_timeFrame) {
+        _timeFrame->update(data.time);
+    }
+
+    if (_timeFrame && !_timeFrame->isActive()) {
+        _cachedScale = glm::dvec3(1.0);
+    }
+    else {
+        _cachedScale = scaleValue(data);
+        _cachedTime = data.time.j2000Seconds();
+        _needsUpdate = false;
+    }
 }
 
 } // namespace openspace

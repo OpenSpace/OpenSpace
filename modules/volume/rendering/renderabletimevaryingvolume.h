@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,25 +27,17 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/triggerproperty.h>
-// #include <modules/volume/rawvolume.h>
- #include <modules/volume/rawvolumemetadata.h>
-// #include <modules/volume/rendering/basicvolumeraycaster.h>
-// #include <modules/volume/rendering/volumeclipplanes.h>
-
-// #include <openspace/properties/vectorproperty.h>
-// #include <openspace/properties/optionproperty.h>
-// #include <openspace/properties/stringproperty.h>
-// #include <openspace/util/boxgeometry.h>
-// #include <openspace/util/histogram.h>
-// #include <openspace/rendering/transferfunction.h>
+#include <modules/volume/rawvolumemetadata.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/rendering/transferfunction.h>
 
 namespace openspace {
     class Histogram;
     struct RenderData;
-    class TransferFunction;
 } // namespace openspace
 
 namespace openspace::volume {
@@ -56,8 +48,8 @@ class VolumeClipPlanes;
 
 class RenderableTimeVaryingVolume : public Renderable {
 public:
-    RenderableTimeVaryingVolume(const ghoul::Dictionary& dictionary);
-    ~RenderableTimeVaryingVolume();
+    explicit RenderableTimeVaryingVolume(const ghoul::Dictionary& dictionary);
+    ~RenderableTimeVaryingVolume() override;
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -69,7 +61,7 @@ public:
 
 private:
     struct Timestep {
-        std::string baseName;
+        std::filesystem::path baseName;
         bool inRam;
         bool onGpu;
         RawVolumeMetadata metadata;
@@ -80,15 +72,16 @@ private:
 
     Timestep* currentTimestep();
     int timestepIndex(const Timestep* t) const;
-    Timestep* timestepFromIndex(int index);
-    void jumpToTimestep(int i);
+    Timestep* timestepFromIndex(int target);
+    void jumpToTimestep(int target);
 
-    void loadTimestepMetadata(const std::string& path);
+    void loadTimestepMetadata(const std::filesystem::path& path);
 
     properties::OptionProperty _gridType;
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
 
     properties::FloatProperty _stepSize;
+    properties::FloatProperty _brightness;
     properties::FloatProperty _rNormalization;
     properties::FloatProperty _rUpperBound;
     properties::FloatProperty _secondsBefore;
@@ -98,10 +91,10 @@ private:
 
     properties::TriggerProperty _triggerTimeJump;
     properties::IntProperty _jumpToTimestep;
-    properties::IntProperty _currentTimestep;
 
     std::map<double, Timestep> _volumeTimesteps;
     std::unique_ptr<BasicVolumeRaycaster> _raycaster;
+    bool _invertDataAtZ;
 
     std::shared_ptr<openspace::TransferFunction> _transferFunction;
 };

@@ -1,23 +1,55 @@
-local assetHelper = asset.require('util/asset_helper')
-local shared = asset.require('../satellites_shared')
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local group = {
-    Title = "Breeze-M Breakup",
-    Url = "http://www.celestrak.com/NORAD/elements/2012-044.txt",
-    TrailColor = { 0.25, 0.35, 0.45 }
+
+
+local omm = asset.resource({
+  Name = "Satellite OMM Data (Breeze-M Breakup)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_2012-044",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?INTDES=2012-044&FORMAT=kvn",
+  Filename = "2012-044.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+
+local DebrisBreezem = {
+  Identifier = "DebrisBreezem-2012-044",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "2012-044.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.25, 0.35, 0.45 },
+    TrailFade = 15,
+    PointSizeExponent = 5.0,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Breeze-M Breakup",
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
+  }
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
 
-
-local objectNames = {}
-
-asset.onInitialize(function ()
-    objectNames = shared.addSatelliteGroupObjects(group, tle, true)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(DebrisBreezem)
 end)
 
-asset.onDeinitialize(function ()
-    for _, n in ipairs(objectNames) do
-        openspace.removeSceneGraphNode(n)
-    end
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(DebrisBreezem)
 end)
+
+asset.export(DebrisBreezem)
+
+
+
+asset.meta = {
+  Name = "Satellites Debris - Breeze-M Breakup",
+  Description = "Satellites asset for Debris - Breeze-M Breakup. Data from Celestrak",
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/events/38746-Breakup/",
+  License = "Celestrak"
+}

@@ -1,0 +1,62 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Sea Ice: Fraction and Solar Radiation Absorption"
+local Identifier = "noaa-sos-oceans-seaice_radiation"
+local Description = [[While sea ice is mostly white and reflects the sun's rays, ocean
+water is dark and absorbs the sun's energy at a higher rate. A decline in the region's
+albedo - its reflectivity, in effect - has been a key concern among scientists since the
+summer Arctic sea ice cover began shrinking in recent decades. As more of the sun's
+energy is absorbed by the climate system, it enhances ongoing warming in the region,
+which is more pronounced than anywhere else on the planet]]
+local URL = "https://sos.noaa.gov/catalog/datasets/sea-ice-fraction-and-solar-radiation-absorption/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local LayerFraction = {
+  Identifier = Identifier,
+  Name = Name,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "sea_ice_fraction.png",
+  Description = Description
+}
+
+local LayerSolar = {
+  Identifier = Identifier .. "-solar",
+  Name = Name .. " (Solar)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "solar.png",
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerFraction)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerSolar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerSolar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerFraction)
+end)
+
+asset.export(LayerFraction)
+asset.export(LayerSolar)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

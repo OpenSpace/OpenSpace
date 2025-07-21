@@ -1,0 +1,75 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Ocean Acidification: Surface pH"
+local Identifier = "noaa-sos-oceans-ocean_acid-ph"
+local Description = [[Ranging from 0 to 14, pH is a scale that describes the acid and
+base properties of a solution. The ocean's surface has an average pH of around 8.1, which
+is slightly basic. The pH of the open ocean is relatively stable in both time and space;
+however, the uptake of CO2 by the ocean has caused measurable changes in seawater. The
+imagery here shows the output of a computer model that makes predictions of how the pH
+will change over time based on best estimates of likely CO2 emissions (RCP 8.5) used in
+the United Nations Intergovernmental Panel on Climate Change's AR5 assessment. The
+dataset starts in 1861 and runs through 2100]]
+local URL = "https://sos.noaa.gov/catalog/datasets/ocean-acidification-surface-ph/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "TemporalTileProvider",
+  Mode = "Folder",
+  Folder = {
+    Folder = syncedDirectory .. "images",
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "ACID.yearly.%Y.color.png"
+  },
+  Description = Description
+}
+
+local Colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(Colorbar)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

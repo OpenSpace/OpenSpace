@@ -1,0 +1,3 @@
+asset.require("./annular")
+asset.require("./hybrid")
+asset.require("./total")

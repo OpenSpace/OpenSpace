@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,130 +27,89 @@
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 #include <modules/volume/rawvolumewriter.h>
 #include <openspace/documentation/verifier.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
+#include <array>
+#include <filesystem>
+#include <optional>
 
 namespace {
-    constexpr const char* KeyInput = "Input";
-    constexpr const char* KeyRawVolumeOutput = "RawVolumeOutput";
-    constexpr const char* KeyDictionaryOutput = "DictionaryOutput";
-    constexpr const char* KeyDimensions = "Dimensions";
-    constexpr const char* KeyVariable = "Variable";
-    constexpr const char* KeyTime = "Time";
-    constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
-    constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
+    struct [[codegen::Dictionary(KameleonVolumeToRawTask)]] Parameters {
+        // The cdf file to extract data from
+        std::filesystem::path input;
 
-    constexpr const char* KeyMinValue = "MinValue";
-    constexpr const char* KeyMaxValue = "MaxValue";
+        // The raw volume file to export data to
+        std::string rawVolumeOutput [[codegen::annotation("A valid filepath")]];
 
-    constexpr const char* KeyVisUnit = "VisUnit";
+        // The Lua dictionary file to export metadata to
+        std::string dictionaryOutput [[codegen::annotation("A valid filepath")]];
+
+        // The variable name to read from the kameleon dataset
+        std::string variable [[codegen::annotation("A valid kameleon variable")]];
+
+        // A vector representing the number of cells in each dimension
+        glm::ivec3 dimensions;
+
+        // A vector representing the lower bound of the domain, in the native kameleon
+        // grid units
+        std::optional<glm::vec3> lowerDomainBound;
+
+        // A vector representing the lower bound of the domain, in the native kameleon
+        // grid units
+        std::optional<glm::vec3> upperDomainBound;
+
+        // The unit of the data
+        std::optional<std::string> visUnit
+            [[codegen::annotation("A valid kameleon unit")]];
+    };
+#include "kameleonvolumetorawtask_codegen.cpp"
 } // namespace
 
 namespace openspace::kameleonvolume {
 
 documentation::Documentation KameleonVolumeToRawTask::documentation() {
-    using namespace documentation;
-    return {
-        "KameleonVolumeToRawTask",
-        "kameleon_metadata_to_json_task",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("KameleonVolumeToRawTask"),
-                Optional::No,
-                "The type of this task",
-            },
-            {
-                KeyInput,
-                new StringAnnotationVerifier("A file path to a cdf file"),
-                Optional::No,
-                "The cdf file to extract data from",
-            },
-            {
-                KeyRawVolumeOutput,
-                new StringAnnotationVerifier("A valid filepath"),
-                Optional::No,
-                "The raw volume file to export data to",
-            },
-            {
-                KeyDictionaryOutput,
-                new StringAnnotationVerifier("A valid filepath"),
-                Optional::No,
-                "The lua dictionary file to export metadata to",
-            },
-            {
-                KeyVariable,
-                new StringAnnotationVerifier("A valid kameleon variable"),
-                Optional::No,
-                "The variable name to read from the kameleon dataset",
-            },
-            {
-                KeyDimensions,
-                new DoubleVector3Verifier,
-                Optional::No,
-                "A vector representing the number of cells in each dimension",
-            },
-            {
-                KeyLowerDomainBound,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                "A vector representing the lower bound of the domain, "
-                "in the native kameleon grid units",
-            },
-            {
-                KeyUpperDomainBound,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                "A vector representing the lower bound of the domain, "
-                "in the native kameleon grid units"
-            },
-            {
-                KeyVisUnit,
-                new StringAnnotationVerifier("A valid kameleon unit"),
-                Optional::Yes,
-                "The unit of the data",
-            }
-        }
-    };
+    return codegen::doc<Parameters>("kameleon_metadata_to_json_task");
 }
 
-
 KameleonVolumeToRawTask::KameleonVolumeToRawTask(const ghoul::Dictionary& dictionary) {
-    openspace::documentation::testSpecificationAndThrow(
-        documentation(),
-        dictionary,
-        "KameleonVolumeToRawTask"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _inputPath = absPath(dictionary.value<std::string>(KeyInput));
-    _rawVolumeOutputPath = absPath(dictionary.value<std::string>(KeyRawVolumeOutput));
-    _dictionaryOutputPath = absPath(dictionary.value<std::string>(KeyDictionaryOutput));
-    _variable = dictionary.value<std::string>(KeyVariable);
-    _dimensions = glm::uvec3(dictionary.value<glm::vec3>(KeyDimensions));
+    _inputPath = p.input;
+    _rawVolumeOutputPath = absPath(p.rawVolumeOutput);
+    _dictionaryOutputPath = absPath(p.dictionaryOutput);
+    _variable = p.variable;
+    _dimensions = p.dimensions;
 
-    if (!dictionary.getValue<glm::vec3>(KeyLowerDomainBound, _lowerDomainBound)) {
+    if (p.lowerDomainBound.has_value()) {
+        _lowerDomainBound = *p.lowerDomainBound;
+    }
+    else {
         _autoDomainBounds = true;
     }
-    if (!dictionary.getValue<glm::vec3>(KeyUpperDomainBound, _upperDomainBound)) {
+
+    if (p.upperDomainBound.has_value()) {
+        _upperDomainBound = *p.upperDomainBound;
+    }
+    else {
         _autoDomainBounds = true;
     }
 }
 
 std::string KameleonVolumeToRawTask::description() {
-    return fmt::format(
-        "Extract volumetric data from cdf file {}. Write raw volume data into {} "
-        "and dictionary with metadata to {}",
+    return std::format(
+        "Extract volumetric data from CDF file '{}'. Write raw volume data into '{}' "
+        "and dictionary with metadata to '{}'",
         _inputPath, _rawVolumeOutputPath, _dictionaryOutputPath
     );
 }
 
 void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCallback) {
-    KameleonVolumeReader reader(_inputPath);
+    KameleonVolumeReader reader = KameleonVolumeReader(_inputPath);
 
     std::array<std::string, 3> variables = reader.gridVariableNames();
 
-    if (variables.size() == 3 && _autoDomainBounds) {
+    if (_autoDomainBounds) {
         _lowerDomainBound = glm::vec3(
             reader.minValue(variables[0]),
             reader.minValue(variables[1]),
@@ -188,23 +147,21 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
         time.pop_back();
     }
 
-    outputMetadata.setValue(KeyTime, time);
-    outputMetadata.setValue(KeyDimensions, glm::vec3(_dimensions));
-    outputMetadata.setValue(KeyLowerDomainBound, _lowerDomainBound);
-    outputMetadata.setValue(KeyUpperDomainBound, _upperDomainBound);
+    outputMetadata.setValue("Time", time);
+    outputMetadata.setValue("Dimensions", glm::dvec3(_dimensions));
+    outputMetadata.setValue("LowerDomainBound", glm::dvec3(_lowerDomainBound));
+    outputMetadata.setValue("UpperDomainBound", glm::dvec3(_upperDomainBound));
 
-    outputMetadata.setValue(KeyMinValue, static_cast<float>(reader.minValue(_variable)));
-    outputMetadata.setValue(KeyMaxValue, static_cast<float>(reader.maxValue(_variable)));
-    outputMetadata.setValue<std::string>(KeyVisUnit, reader.getVisUnit(_variable));
+    outputMetadata.setValue("MinValue", reader.minValue(_variable));
+    outputMetadata.setValue("MaxValue", reader.maxValue(_variable));
+    outputMetadata.setValue("VisUnit", reader.getVisUnit(_variable));
 
-    ghoul::DictionaryLuaFormatter formatter;
-    std::string metadataString = formatter.format(outputMetadata);
+    std::string metadataString = ghoul::formatLua(outputMetadata);
 
-    std::fstream f(_dictionaryOutputPath, std::ios::out);
+    std::fstream f = std::fstream(_dictionaryOutputPath, std::ios::out);
     f << "return " << metadataString;
-    f.close();
 
-    progressCallback(1.0f);
+    progressCallback(1.f);
 }
 
 } // namespace openspace::kameleonvolume

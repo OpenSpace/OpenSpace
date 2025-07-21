@@ -1,0 +1,82 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Human Influences on Marine Ecosystems"
+local Identifier = "noaa-sos-oceans-marine_impacts"
+local Description = [[The ocean has an impact on the lives of everyone on Earth, even
+those who don't live on the coasts. It has been estimated that one in every six jobs in
+the United States is marine-related and that 50% of all species on Earth are supported by
+the ocean. Because of this, it is important to protect and preserve the oceans. Humans
+however have been shown to have a negative impact on the oceans. A report issued in
+February 2008 found that 40% of the world's oceans are heavily impacted by human
+activities, such as overfishing and pollution. In all 17 different human activities were
+examined in the report, including fertilizer run-off, commercial shipping, and indirect
+activities such as changes in sea surface temperature, UV radiation, and ocean
+acidification]]
+local URL = "https://sos.noaa.gov/catalog/datasets/human-influences-on-marine-ecosystems/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "5000.png",
+  Description = Description
+}
+
+local Colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+local ColorbarHumanImpact = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "HumanImpactColorbar.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Colorbar)
+  openspace.addScreenSpaceRenderable(ColorbarHumanImpact)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(ColorbarHumanImpact)
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(Colorbar)
+asset.export(ColorbarHumanImpact)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

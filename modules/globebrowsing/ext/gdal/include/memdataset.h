@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: memdataset.h a570977d47b4689910835836ea861f77906d06ae 2018-03-13 17:44:13Z Even Rouault $
+ * $Id: memdataset.h e37e476c4cf8f4b0df8995e0d95d5d672fca1a9b 2018-05-05 16:54:18 +0200 Even Rouault $
  *
  * Project:  Memory Array Translator
  * Purpose:  Declaration of MEMDataset, and MEMRasterBand.
@@ -54,6 +54,8 @@ class MEMRasterBand;
 
 class CPL_DLL MEMDataset : public GDALDataset
 {
+    CPL_DISALLOW_COPY_ASSIGN(MEMDataset)
+
     friend class MEMRasterBand;
 
     int         bGeoTransformSet;
@@ -126,6 +128,8 @@ class CPL_DLL MEMRasterBand : public GDALPamRasterBand
   private:
                 MEMRasterBand( GByte *pabyDataIn, GDALDataType eTypeIn,
                                int nXSizeIn, int nYSizeIn );
+
+    CPL_DISALLOW_COPY_ASSIGN(MEMRasterBand)
 
   protected:
     friend      class MEMDataset;

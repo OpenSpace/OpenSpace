@@ -1,0 +1,179 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "PALEOMAP PaleoAtlas 0 - 750 Million Years Ago"
+local Identifier = "noaa-sos-land-paleomap"
+local Description = [[The PALEOMAP PaleoAtlas for GPlates consists of 91 paleogeographic
+  maps spanning the Phanerozoic and late Neoproterozoic. The PaleoAtlas can be directly
+  loaded into GPlates as a Time Dependent Raster file. The paleogeographic maps in the
+  PaleoAtlas illustrate the ancient configuration of the ocean basins and continents, as
+  well as important topographic and bathymetric features such as mountains, lowlands,
+  shallow sea, continental shelves, and deep oceans. This tutorial also describes how the
+  maps in the PaleoAtlas were made, documents the sources of information used to make the
+  paleogeographic maps, and provides instructions how to plot user-defined paleodata on
+  the paleogeographic maps using the program PaleoDataPlotter.
+
+  For any questions about the resource, please email: Christopher Scotese]]
+local URL = "https://sos.noaa.gov/catalog/datasets/paleomap-paleoatlas-0-750-million-years-ago/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local imagesDestination = syncedDirectory .. "3600"
+
+local layers_names = {
+  "Map01a_PALEOMAP_PaleoAtlas_000",
+  "Map02a_Last_Glacial_Maximum_001",
+  "Map03a_Pliocene_004",
+  "Map04a_Messinian_Event_006",
+  "Map05a_Late_Miocene_010",
+  "Map06a_Middle_Miocene_015",
+  "Map07a_Early_Miocene_020",
+  "Map08a_Late_Oligocene_025",
+  "Map09a_Early_Oligocene_030",
+  "Map10a_Late_Eocene_035",
+  "Map11a_MIddle_Eocene_040",
+  "Map12a_early_Middle_Eocene_045",
+  "Map13a_Early_Eocene_050",
+  "Map14a_PETM_055",
+  "Map15a_Paleocene_060",
+  "Map16a_KT_Boundary_066",
+  "Map17a_LtK_Maastrichtian_070",
+  "Map18a_LtK_Late_Campanian_075",
+  "Map19a_LtK_Early_Campanian_080",
+  "Map21a_LtK_Turonian_090",
+  "Map22a_LtK_Cenomanian_095",
+  "Map23a_EK_Late_Albian_100",
+  "Map24a_EK_Middle_Albian_105",
+  "Map25a_EK_Early_Albian_110",
+  "Map26a_EK_Late_Aptian_115",
+  "Map27a_EK_Early_Albian_120",
+  "Map28a_EK_Barremian_125",
+  "Map29a_EK_Hauterivian_130",
+  "Map30a_EK_Valangian_135",
+  "Map31a_EK_Berriasian_140",
+  "Map32a_Jurassic-Cretaceous_Boundary_145",
+  "Map33a_LtJ_Tithonian_150",
+  "Map34a_LtJ_Kimmeridgian_155",
+  "Map35a_LtJ_Oxfordian_160",
+  "Map36a_MJ_Callovian_165",
+  "Map37a_MJ_Bajocian&Bathonian_170",
+  "Map38a_MJ_Aalenian_175",
+  "Map39a_EJ_Toarcian_180",
+  "Map40a_EJ_Pliensbachian_185",
+  "Map41a_EJ_Sinemurian_190",
+  "Map42a_EJ_Hettangian_195",
+  "Map43a_Triassic-Jurassic_Boundary_200",
+  "Map44a_LtTr_Norian_210",
+  "Map45a_LtTr_Carnian_220",
+  "Map46a_MTr_Ladinian_230",
+  "Map47a_MTr_Anisian_240",
+  "Map48a_ETr_Induan-Olenekian_245",
+  "Map49a_Permo-Triassic_Boundary_250",
+  "Map50a_LtP_Lopingian_255",
+  "Map51a_LtP_Capitanian_260",
+  "Map52a_MP_Roadian&Wordian_270",
+  "Map53a_EP_Kungurian_275",
+  "Map54a_EP_Artinskian_280",
+  "Map55a_EP_Sakmarian_290",
+  "Map56a_EP_Asselian_295",
+  "Map57a_LtCarb_Gzhelian_300",
+  "Map58a_LtCarb_Kasimovian_305",
+  "Map59a_LtCarb_Moscovian_310",
+  "Map60a_LtCarb_Bashkirian_315",
+  "Map61a_ECarb_Serpukhovian_320",
+  "Map62a_ECarb_Late_Visean_330",
+  "Map63a_ECarb_Early_Visean_340",
+  "Map64a_ECarb_Tournaisian_350",
+  "Map65a_Devono-Carboniferous_Boundary_360",
+  "Map66a_LtD_Famennian_370",
+  "Map67a_LtD_Frasnian_380",
+  "Map68a_MD_Givetian_390",
+  "Map69a_MD_Eifelian_395",
+  "Map70a_ED_Emsian_400",
+  "Map71a_ED_Pragian_410",
+  "Map72a_ED_Lochlovian_415",
+  "Map73a_LtS_Ludlow&Pridoli_420",
+  "Map74a_MS_Wenlock_425",
+  "Map75a_ES_late_Llandovery_430",
+  "Map76a_ES_early_Llandovery_440",
+  "Map77a_LtO_Hirnantian_445",
+  "Map78a_LtO_Sandbian-Katian_450",
+  "Map79a_LtO_Caradoc_460",
+  "Map80a_LtO_Darwillian_460",
+  "Map81a_EO_Floian-Dapingian_470",
+  "Map82a_EO_Tremadoc_480",
+  "Map83a_Cambro-Ordovician_Boundary_490",
+  "Map84a_LtC_Furongian_500",
+  "Map85a_early_Late_Cambrian_Series_3_510",
+  "Map86a_Middle_Cambrian_Series_2_520",
+  "Map87a_Early_Cambrian_Terreneuvian_530",
+  "Map88a_Precambrian-Cambrian_Boundary_540",
+  "Map90a_Middle_Ediacaran_600",
+  "Map92a_Late_Cryogenian_690",
+  "Map93a_MIddle_Cryogenian_750"
+}
+
+local layers = {}
+for i,v in ipairs(layers_names) do
+  local layer = {
+    Identifier = Identifier .. "-" .. v,
+    Name = Name .. " " .. v,
+    Enabled = asset.enabled,
+    ZIndex = 100,
+    FilePath = imagesDestination .. "/" .. v .. ".jpg",
+    Description = Description
+  }
+
+  table.insert(layers, layer)
+end
+
+local Legend = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "legend.jpg",
+  FaceCamera = false,
+  Scale = 0.2,
+  CartesianPosition = { 0.85, 0.0, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  for i,v in ipairs(layers) do
+    openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", v)
+  end
+
+  openspace.addScreenSpaceRenderable(Legend)
+end)
+
+asset.onDeinitialize(function()
+  for i,v in ipairs(layers) do
+    openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", v)
+  end
+
+  openspace.removeScreenSpaceRenderable(Legend)
+end)
+
+for _,v in ipairs(layers) do
+  asset.export(v)
+end
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

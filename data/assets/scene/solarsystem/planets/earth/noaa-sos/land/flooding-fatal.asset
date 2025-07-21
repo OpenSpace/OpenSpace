@@ -1,0 +1,68 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Flood Events: 50 or More Fatalities - 2000 - 2009"
+local Identifier = "noaa-sos-land-flooding-fatal"
+local Description = [[Flooding is the nation's most common, costly and deadly natural
+hazard. Heavy rain is the most frequent cause of floods, but there are many other natural
+triggers, including hurricanes, tidal surges, ice jams and snow melt. Floods and flash
+floods have happened in all 50 states in the USA. Flooding in river basins is a natural
+part of the river's processes, serving to improve water quality and provide essential
+habitat to species, among other benefits. Flooding is a matter of scientific interest,
+as well as cultural significance, and is critical to land-use planning and policy. It is
+also a vital concern to the safety and welfare of communities in flood prone areas
+including those who live along waterways and coasts. People from all walks of life are
+vulnerable to the effects of flooding]]
+local URL = "https://sos.noaa.gov/catalog/datasets/flood-events-50-or-more-fatalities-2000-2009/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "3600.png",
+  Description = Description
+}
+
+local LayerNight = {
+  Identifier = Identifier .. "-night",
+  Name = Name .. " (Night)",
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "4096_night.jpg",
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerNight)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerNight)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(LayerNight)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

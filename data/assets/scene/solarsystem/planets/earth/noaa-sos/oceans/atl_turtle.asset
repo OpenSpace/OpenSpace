@@ -1,0 +1,64 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Sea Turtle Track: Atlantic Ocean"
+local Identifier = "noaa-sos-oceans-atl_turtle"
+local Description = [[The Virginia Institute of Marine Science found a sub-adult
+juvenile loggerhead (Caretta caretta) sea turtle stranded off of Deltaville, Virginia
+along the western Chesapeake Bay in July 2004. The sea turtle, appropriately named Delta
+for the location where s/he was found stranded, had a broken left flipper and a severe
+head injury most likely from a collision with a boat propeller. Delta was transferred to
+the Virginia Aquarium Stranding Program for rehabilitation. After many months of recovery
+and head surgery, Delta was ready for release in November of 2004. Before release, Delta
+was outfitted with a satellite tag by Kate Mansfield, then a Ph.D. student at the
+  Virginia Institute of Marine Science (College of William and Mary). This was done in
+  order to track Delta's movements and determine the success of the recovery]]
+local URL = "https://sos.noaa.gov/catalog/datasets/sea-turtle-track-atlantic-ocean/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "TemporalTileProvider",
+  Mode = "Folder",
+  Folder = {
+    Folder = syncedDirectory .. "2048",
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "turtle-migration-%y%j-%H%M.jpg"
+  },
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

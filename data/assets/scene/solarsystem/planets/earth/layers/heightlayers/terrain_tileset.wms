@@ -1,0 +1,23 @@
+<GDAL_WMS>
+  <Service name="TMS">
+    <ServerUrl>http://earthlive.maptiles.arcgis.com/arcgis/rest/services/GCS_Elevation3D/ImageServer/tile/${z}/${y}/${x}</ServerUrl>
+  </Service>
+  <DataWindow>
+    <UpperLeftX>-180</UpperLeftX>
+    <UpperLeftY>90</UpperLeftY>
+    <LowerRightX>180</LowerRightX>
+    <LowerRightY>-90</LowerRightY>
+    <SizeX>16777216</SizeX>
+    <SizeY>8388608</SizeY>
+    <TileLevel>14</TileLevel>
+    <YOrigin>top</YOrigin>
+  </DataWindow>
+  <Projection>EPSG:4326</Projection>
+  <BlockSizeX>512</BlockSizeX>
+  <BlockSizeY>512</BlockSizeY>
+  <BandsCount>1</BandsCount>
+  <DataType>Float32</DataType>
+  <DataValues NoData="0" Min="-11000" Max="8500"/>
+  <MaxConnections>5</MaxConnections>
+  <ZeroBlockHttpCodes>404,400</ZeroBlockHttpCodes>
+</GDAL_WMS>

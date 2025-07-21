@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,23 +26,42 @@
 
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
-#include <openspace/util/timemanager.h>
-#include <openspace/interaction/keyframenavigator.h>
-#include <openspace/interaction/navigationhandler.h>
+#include <openspace/navigation/keyframenavigator.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/network/messagestructures.h>
-
-#include <ghoul/fmt.h>
-
+#include <openspace/util/timemanager.h>
+#include <ghoul/format.h>
 #include <algorithm>
 #include <numeric>
+
+namespace {
+    void renderHost() {
+        const size_t nConnections = openspace::global::parallelPeer->nConnections();
+
+        std::string connectionInfo;
+        const size_t nClients = nConnections - 1;
+        if (nClients == 1) {
+            connectionInfo = "Hosting session with 1 client";
+        }
+        else {
+            connectionInfo = std::format("Hosting session with {} clients", nClients);
+        }
+
+        ImGui::Text("%s", connectionInfo.c_str());
+
+        const bool resignHostship = ImGui::Button("Resign hostship");
+        if (resignHostship) {
+            openspace::global::parallelPeer->resignHostship();
+        }
+    }
+} // namespace
 
 namespace openspace::gui {
 
 GuiParallelComponent::GuiParallelComponent()
     : GuiPropertyComponent("Parallel", "Parallel Connection")
 {
-    setVisibility(properties::Property::Visibility::All);
 }
 
 void GuiParallelComponent::renderDisconnected() {
@@ -50,7 +69,7 @@ void GuiParallelComponent::renderDisconnected() {
 
     const bool connect = ImGui::Button("Connect");
     if (connect) {
-        global::parallelPeer.connect();
+        global::parallelPeer->connect();
     }
 }
 
@@ -59,24 +78,26 @@ void GuiParallelComponent::renderConnecting() {
 
     const bool cancel = ImGui::Button("Cancel connection");
     if (cancel) {
-        global::parallelPeer.disconnect();
+        global::parallelPeer->disconnect();
     }
 }
 
 void GuiParallelComponent::renderClientWithHost() {
-    ParallelPeer& parallel = global::parallelPeer;
+    ParallelPeer& parallel = *global::parallelPeer;
 
     std::string connectionInfo = "Session hosted by \"" + parallel.hostName() + "\"\n";
     const size_t nConnections = parallel.nConnections();
     const size_t nClients = nConnections - 1;
 
     if (nClients > 2) {
-        std::string c = std::to_string(nClients - 1);
-        connectionInfo += "You and " + c + " more clients are connected";
+        connectionInfo += std::format(
+            "You and {} more clients are connected", nClients - 1
+        );
     }
     else if (nClients == 2) {
-        std::string c = std::to_string(nClients - 1);
-        connectionInfo += "You and " + c + " more client are connected";
+        connectionInfo += std::format(
+            "You and {} more client are connected", nClients - 1
+        );
     }
     else if (nClients == 1) {
         connectionInfo += "You are the only client";
@@ -85,15 +106,19 @@ void GuiParallelComponent::renderClientWithHost() {
     ImGui::Text("%s", connectionInfo.c_str());
     renderClientCommon();
 
-    const size_t nTimeKeyframes = global::timeManager.nKeyframes();
+    const size_t nTimeKeyframes = global::timeManager->nKeyframes();
     const size_t nCameraKeyframes =
-        global::navigationHandler.keyframeNavigator().nKeyframes();
+        global::navigationHandler->keyframeNavigator().nKeyframes();
 
-    std::string timeKeyframeInfo = "TimeKeyframes : " + std::to_string(nTimeKeyframes);
-    std::string cameraKeyframeInfo = "CameraKeyframes : " +
-                                     std::to_string(nCameraKeyframes);
-    std::string latencyStandardDeviation = "Latency standard deviation: " +
-                               std::to_string(parallel.latencyStandardDeviation()) + " s";
+    const std::string timeKeyframeInfo = std::format(
+        "TimeKeyframes: {}", nTimeKeyframes
+    );
+    const std::string cameraKeyframeInfo = std::format(
+        "CameraKeyframes: {}", nCameraKeyframes
+    );
+    const std::string latencyStandardDeviation = std::format(
+        "Latency standard deviation: {} s", parallel.latencyStandardDeviation()
+    );
 
     const bool resetTimeOffset = ImGui::Button("Reset time offset");
 
@@ -108,15 +133,17 @@ void GuiParallelComponent::renderClientWithHost() {
 
 void GuiParallelComponent::renderClientWithoutHost() {
     std::string connectionInfo = "Connected to parallel session with no host\n";
-    const size_t nConnections = global::parallelPeer.nConnections();
+    const size_t nConnections = global::parallelPeer->nConnections();
 
     if (nConnections > 2) {
-        std::string c = std::to_string(nConnections - 1);
-        connectionInfo += "You and " + c + " more users are connected";
+        connectionInfo += std::format(
+            "You and {} more users are connected", nConnections - 1
+        );
     }
     else if (nConnections == 2) {
-        std::string c = std::to_string(nConnections - 1);
-        connectionInfo += "You and " + c + " more users are connected";
+        connectionInfo += std::format(
+            "You and {} more users are connected", nConnections - 1
+        );
     }
     else if (nConnections == 1) {
         connectionInfo += "You are the only one here";
@@ -130,34 +157,14 @@ void GuiParallelComponent::renderClientWithoutHost() {
 void GuiParallelComponent::renderClientCommon() {
     const bool requestHostship = ImGui::Button("Request hostship");
     if (requestHostship) {
-        global::parallelPeer.requestHostship();
+        global::parallelPeer->requestHostship();
     }
 
     const bool disconnect = ImGui::Button("Disconnect");
     if (disconnect) {
-        global::parallelPeer.disconnect();
+        global::parallelPeer->disconnect();
     }
 }
-
-void GuiParallelComponent::renderHost() {
-    const size_t nConnections = global::parallelPeer.nConnections();
-
-    std::string connectionInfo;
-    const size_t nClients = nConnections - 1;
-    if (nClients == 1) {
-        connectionInfo = "Hosting session with 1 client";
-    } else {
-        connectionInfo = "Hosting session with " + std::to_string(nClients) + " clients";
-    }
-
-    ImGui::Text("%s", connectionInfo.c_str());
-
-    const bool resignHostship = ImGui::Button("Resign hostship");
-    if (resignHostship) {
-        global::parallelPeer.resignHostship();
-    }
-}
-
 
 void GuiParallelComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
@@ -166,7 +173,7 @@ void GuiParallelComponent::render() {
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 
-    ParallelConnection::Status status = global::parallelPeer.status();
+    const ParallelConnection::Status status = global::parallelPeer->status();
 
     switch (status) {
         case ParallelConnection::Status::Disconnected:
@@ -186,7 +193,7 @@ void GuiParallelComponent::render() {
             break;
     }
 
-    GuiPropertyComponent::renderPropertyOwner(&global::parallelPeer);
+    GuiPropertyComponent::renderPropertyOwner(global::parallelPeer);
     ImGui::End();
 }
 

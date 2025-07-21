@@ -1,0 +1,52 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Deep-Sea Vent Locations"
+local Identifier = "noaa-sos-oceans-vent_locations"
+local Description = [[This dataset shows all known locations of deep-sea hydrothermal
+vents. Hydrothermal vents form in places where there is volcanic activity, such as along
+Earth's plate boundaries. They occur when seawater seeps down and is heated deep beneath
+the seafloor. The hot fluid rises and gushes out of vents at temperatures up to 400 deg C
+(more than 750 deg F!), carrying with it chemical energy that supports life in the
+otherwise cold, dark, deep sea]]
+local URL = "https://sos.noaa.gov/catalog/datasets/deep-sea-vent-locations/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "vents_2016.png",
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

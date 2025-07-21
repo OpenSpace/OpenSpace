@@ -1,0 +1,69 @@
+local ToggleSun = {
+  Identifier = "os.ToggleSun",
+  Name = "Toggle Sun",
+  Command = [[
+    if not is_declared("args") then
+      openspace.toggleFade("Scene.Sun.Renderable")
+      openspace.toggleFade("Scene.SunGlare.Renderable")
+      return
+    end
+
+    if not openspace.propertyValue("Scene.Sun.Renderable.Enabled") then
+      openspace.setPropertyValueSingle("Scene.Sun.Renderable.Enabled", true)
+    end
+
+    if args.Transition == "Approaching" then
+      openspace.setPropertyValueSingle("Scene.SunGlare.Renderable.Fade", 0.0, 1.0)
+      openspace.setPropertyValueSingle("Scene.Sun.Renderable.Fade", 1.0, 1.0)
+    else -- "Exiting"
+      openspace.setPropertyValueSingle("Scene.SunGlare.Renderable.Fade", 1.0, 1.0)
+      openspace.setPropertyValueSingle("Scene.Sun.Renderable.Fade", 0.0, 1.0)
+    end
+  ]],
+  Documentation = [[Toggles the visibility of the Sun glare and the Sun globe when the
+    camera is approaching either so that from far away the Sun Glare is rendered and when
+    close up, the globe is rendered instead]],
+  GuiPath = "/Solar System/Sun",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.action.registerAction(ToggleSun)
+  openspace.event.registerEventAction(
+    "CameraFocusTransition",
+    ToggleSun.Identifier,
+    { Node = "Sun", Transition = "Approaching" }
+  )
+  openspace.event.registerEventAction(
+    "CameraFocusTransition",
+    ToggleSun.Identifier,
+    { Node = "Sun", Transition = "Exiting" }
+  )
+end)
+
+asset.onDeinitialize(function()
+  openspace.event.unregisterEventAction(
+    "CameraFocusTransition",
+    ToggleSun.Identifier,
+    { Node = "Sun", Transition = "Exiting" }
+  )
+  openspace.event.unregisterEventAction(
+    "CameraFocusTransition",
+    ToggleSun.Identifier,
+    { Node = "Sun", Transition = "Approaching" }
+  )
+  openspace.action.removeAction(ToggleSun)
+end)
+
+asset.export("ToggleSun", ToggleSun.Identifier)
+
+
+
+asset.meta = {
+  Name = "Actions - Toggle current Trails",
+  Description = "Asset providing actions to toggle trails",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

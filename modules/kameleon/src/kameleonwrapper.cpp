@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,11 +26,12 @@
 
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
-#include <ghoul/misc/misc.h>
+#include <ghoul/misc/stringhelper.h>
+#include <filesystem>
 
 #ifdef WIN32
 #pragma warning (push)
@@ -38,6 +39,8 @@
 #endif // WIN32
 
 #include <ccmc/Kameleon.h>
+#include <ccmc/Constants.h>
+#include <ccmc/FileReader.h>
 #include <ccmc/Model.h>
 #include <ccmc/Interpolator.h>
 #include <ccmc/BATSRUS.h>
@@ -49,8 +52,8 @@
 #endif // WIN32
 
 namespace {
-    constexpr const char* _loggerCat = "KameleonWrapper";
-    constexpr const float RE_TO_METER = 6371000;
+    constexpr std::string_view _loggerCat = "KameleonWrapper";
+    constexpr float RE_TO_METER = 6371000;
 } // namespace
 
 namespace openspace {
@@ -80,29 +83,14 @@ std::array<std::string, 3> gridVariables(ccmc::Model* model) {
     std::string y = std::move(tokens.at(1));
     std::string z = std::move(tokens.at(2));
 
-    std::transform(
-        x.begin(),
-        x.end(),
-        x.begin(),
-        [](char c) { return static_cast<char>(tolower(c)); }
-    );
-    std::transform(
-        y.begin(),
-        y.end(),
-        y.begin(),
-        [](char c) { return static_cast<char>(tolower(c)); }
-    );
-    std::transform(
-        z.begin(),
-        z.end(),
-        z.begin(),
-        [](char c) { return static_cast<char>(tolower(c)); }
-    );
+    x = ghoul::toLowerCase(x);
+    y = ghoul::toLowerCase(y);
+    z = ghoul::toLowerCase(z);
 
     return { x, y, z };
 }
 
-KameleonWrapper::KameleonWrapper(const std::string& filename) {
+KameleonWrapper::KameleonWrapper(const std::filesystem::path& filename) {
     open(filename);
 }
 
@@ -110,15 +98,15 @@ KameleonWrapper::~KameleonWrapper() {
     close();
 }
 
-bool KameleonWrapper::open(const std::string& filename) {
+bool KameleonWrapper::open(const std::filesystem::path& filename) {
     close();
 
-    if (!FileSys.fileExists(filename)) {
+    if (!std::filesystem::is_regular_file(filename)) {
         return false;
     }
 
     _kameleon = new ccmc::Kameleon;
-    long status = _kameleon->open(filename);
+    long status = _kameleon->open(filename.string());
     if (status == ccmc::FileReader::OK) {
         _model = _kameleon->model;
         _interpolator = _model->createNewInterpolator();
@@ -129,33 +117,33 @@ bool KameleonWrapper::open(const std::string& filename) {
         _zCoordVar = v[2];
         _type = modelType();
 
-        LDEBUG(fmt::format("x: {}", _xCoordVar));
-        LDEBUG(fmt::format("y: {}", _yCoordVar));
-        LDEBUG(fmt::format("z: {}", _zCoordVar));
+        LDEBUG(std::format("x: {}", _xCoordVar));
+        LDEBUG(std::format("y: {}", _yCoordVar));
+        LDEBUG(std::format("z: {}", _zCoordVar));
 
-        _min = {
+        _min = glm::vec3(
             _model->getVariableAttribute(_xCoordVar, "actual_min").getAttributeFloat(),
             _model->getVariableAttribute(_yCoordVar, "actual_min").getAttributeFloat(),
             _model->getVariableAttribute(_zCoordVar, "actual_min").getAttributeFloat()
-        };
+        );
 
-        _max = {
+        _max = glm::vec3(
             _model->getVariableAttribute(_xCoordVar, "actual_max").getAttributeFloat(),
             _model->getVariableAttribute(_yCoordVar, "actual_max").getAttributeFloat(),
             _model->getVariableAttribute(_zCoordVar, "actual_max").getAttributeFloat()
-        };
+        );
 
-        _validMin = {
+        _validMin = glm::vec3(
             _model->getVariableAttribute(_xCoordVar, "valid_min").getAttributeFloat(),
             _model->getVariableAttribute(_yCoordVar, "valid_min").getAttributeFloat(),
             _model->getVariableAttribute(_zCoordVar, "valid_min").getAttributeFloat()
-        };
+        );
 
-        _validMax = {
+        _validMax = glm::vec3(
             _model->getVariableAttribute(_xCoordVar, "valid_max").getAttributeFloat(),
             _model->getVariableAttribute(_yCoordVar, "valid_max").getAttributeFloat(),
             _model->getVariableAttribute(_zCoordVar, "valid_max").getAttributeFloat()
-        };
+        );
 
         return true;
     }
@@ -184,7 +172,9 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
 
-    LINFO(fmt::format("Loading variable {} from CDF data with a uniform sampling", var));
+    LINFO(std::format(
+        "Loading variable '{}' from CDF data with a uniform sampling", var
+    ));
 
     const size_t size = outDimensions.x * outDimensions.y * outDimensions.z;
     float* data = new float[size];
@@ -193,13 +183,13 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
 
     const double varMin =
         _model->getVariableAttribute(var, "actual_min").getAttributeFloat();
-    LDEBUG(fmt::format("{} Min: {}", var, varMin));
+    LDEBUG(std::format("{} Min: {}", var, varMin));
     const double varMax =
         _model->getVariableAttribute(var, "actual_max").getAttributeFloat();
-    LDEBUG(fmt::format("{} Max: {}", var, varMax));
+    LDEBUG(std::format("{} Max: {}", var, varMax));
 
     // HISTOGRAM
-    constexpr const int NBins = 200;
+    constexpr int NBins = 200;
     std::vector<int> histogram(NBins, 0);
     // Explicitly mentioning the capture list provides either an error on MSVC (if NBins)
     // is not specified or a warning on Clang if it is specified. Sigh...
@@ -248,7 +238,8 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
                             LWARNING("Warning: There might be a gap in the data");
                         }
                         // Leave values at zero if outside domain
-                    } else { // if inside
+                    }
+                    else { // if inside
                         // ENLIL CDF specific hacks!
                         // Convert from meters to AU for interpolator
                         const double localRPh = rPh / ccmc::constants::AU_in_meters;
@@ -268,8 +259,8 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
 
                     doubleData[index] = value;
                     histogram[mapToHistogram(value)]++;
-
-                } else {
+                }
+                else {
                     // Assume cartesian for fallback purpose
                     const double stepX = (_max.x - _min.x) /
                                          (static_cast<double>(outDimensions.x));
@@ -299,9 +290,9 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
 
     int sum = 0;
     int stop = 0;
-    constexpr const float TruncationLimit = 0.9f;
+    constexpr float TruncationLimit = 0.9f;
     const int upperLimit = static_cast<int>(size * TruncationLimit);
-    for (int i = 0; i < NBins; ++i) {
+    for (int i = 0; i < NBins; i++) {
         sum += histogram[i];
         if (sum > upperLimit) {
             stop = i;
@@ -312,15 +303,15 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
     const double dist = ((varMax - varMin) / NBins) * stop;
 
     const double varMaxNew = varMin + dist;
-    for(size_t i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; i++) {
         const double normalizedVal = (doubleData[i] - varMin) / (varMaxNew - varMin);
 
         data[i] = static_cast<float>(glm::clamp(normalizedVal, 0.0, 1.0));
         if (data[i] < 0.f) {
-            LERROR(fmt::format("Datapoint {} less than 0", i));
+            LERROR(std::format("Datapoint {} less than 0", i));
         }
         if (data[i] > 1.f) {
-            LERROR(fmt::format("Datapoint {} more than 1", i));
+            LERROR(std::format("Datapoint {} more than 1", i));
         }
     }
 
@@ -330,11 +321,11 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
 // This method returns new'd memory,  turn into std::vector<float> instead?
 float* KameleonWrapper::uniformSliceValues(const std::string& var,
                                            const glm::size3_t& outDimensions,
-                                           const float& slice) const
+                                           float slice) const
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
-    LINFO(fmt::format(
-        "Loading variable {} from CDF data with a uniform sampling",
+    LINFO(std::format(
+        "Loading variable '{}' from CDF data with a uniform sampling",
         var
     ));
 
@@ -361,8 +352,8 @@ float* KameleonWrapper::uniformSliceValues(const std::string& var,
     const double yDim = hasYSlice ? 1.0 : outDimensions.y - 1;
     const double zDim = hasZSlice ? 1.0 : outDimensions.z - 1;
 
-    LDEBUG(fmt::format("{} min: {}", var, varMin));
-    LDEBUG(fmt::format("{} max: {}", var, varMax));
+    LDEBUG(std::format("{} min: {}", var, varMin));
+    LDEBUG(std::format("{} max: {}", var, varMax));
 
     //double maxValue = 0.0;
     //double minValue = std::numeric_limits<double>::max();
@@ -371,7 +362,7 @@ float* KameleonWrapper::uniformSliceValues(const std::string& var,
 
     for (size_t x = 0; x < outDimensions.x; ++x) {
         for (size_t y = 0; y < outDimensions.y; ++y) {
-            for(size_t z = 0; z < outDimensions.z; ++z){
+            for (size_t z = 0; z < outDimensions.z; ++z) {
 
                 const float xi = (hasXSlice) ? slice : x;
                 const float yi = (hasYSlice) ? slice : y;
@@ -408,7 +399,9 @@ float* KameleonWrapper::uniformSliceValues(const std::string& var,
                                 LWARNING("Warning: There might be a gap in the data");
                             }
                             // Leave values at zero if outside domain
-                        } else { // if inside
+                        }
+                        else {
+                            // if inside
                             // ENLIL CDF specific hacks!
                             // Convert from meters to AU for interpolator
                             const double localRPh = rPh / ccmc::constants::AU_in_meters;
@@ -426,7 +419,8 @@ float* KameleonWrapper::uniformSliceValues(const std::string& var,
                             );
                         }
 
-                } else {
+                }
+                else {
                     const double xPos = _min.x + stepX * xi;
                     const double yPos = _min.y + stepY * yi;
                     const double zPos = _min.z + stepZ * zi;
@@ -443,7 +437,8 @@ float* KameleonWrapper::uniformSliceValues(const std::string& var,
                 if (value != missingValue) {
                     doubleData[index] = value;
                     data[index] = static_cast<float>(value);
-                } else {
+                }
+                else {
                     doubleData[index] = 0;
                 }
             }
@@ -460,14 +455,14 @@ float* KameleonWrapper::uniformSampledVectorValues(const std::string& xVar,
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
 
-    LINFO(fmt::format(
-        "loading variables {} {} {} from CDF data with a uniform sampling",
+    LINFO(std::format(
+        "Loading variables {} {} {} from CDF data with a uniform sampling",
         xVar,
         yVar,
         zVar
     ));
 
-    constexpr const int NumChannels = 4;
+    constexpr int NumChannels = 4;
     const size_t size = NumChannels * outDimensions.x * outDimensions.y * outDimensions.z;
     float* data = new float[size];
 
@@ -513,7 +508,8 @@ float* KameleonWrapper::uniformSampledVectorValues(const std::string& xVar,
                     data[index + 2] = (zVal - varZMin) / (varZMax - varZMin); // B
                     // GL_RGB refuses to work. Workaround doing a GL_RGBA  hardcoded alpha
                     data[index + 3] = 1.f;
-                } else {
+                }
+                else {
                     LERROR(
                         "Only cartesian grid supported for "
                         "uniformSampledVectorValues (for now)"
@@ -534,7 +530,7 @@ KameleonWrapper::Fieldlines KameleonWrapper::classifiedFieldLines(const std::str
                                                                      float stepSize) const
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
-    LINFO(fmt::format(
+    LINFO(std::format(
         "Creating {} fieldlines from variables {} {} {}",
         seedPoints.size(), xVar, yVar, zVar
     ));
@@ -579,7 +575,8 @@ KameleonWrapper::Fieldlines KameleonWrapper::classifiedFieldLines(const std::str
 
             fieldLines.push_back(line);
         }
-    } else {
+    }
+    else {
         LERROR("Fieldlines are only supported for BATSRUS model");
     }
 
@@ -595,7 +592,7 @@ KameleonWrapper::Fieldlines KameleonWrapper::fieldLines(const std::string& xVar,
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
 
-    LINFO(fmt::format(
+    LINFO(std::format(
         "Creating {} fieldlines from variables {} {} {}",
         seedPoints.size(), xVar, yVar, zVar
     ));
@@ -637,7 +634,8 @@ KameleonWrapper::Fieldlines KameleonWrapper::fieldLines(const std::string& xVar,
 
             fieldLines.push_back(line);
         }
-    } else {
+    }
+    else {
         LERROR("Fieldlines are only supported for BATSRUS model");
     }
 
@@ -649,7 +647,7 @@ KameleonWrapper::Fieldlines KameleonWrapper::lorentzTrajectories(
                                                                const glm::vec4& /*color*/,
                                                                          float step) const
 {
-    LINFO(fmt::format("Creating {} Lorentz force trajectories", seedPoints.size()));
+    LINFO(std::format("Creating {} Lorentz force trajectories", seedPoints.size()));
 
     Fieldlines trajectories;
 
@@ -689,11 +687,11 @@ glm::vec3 KameleonWrapper::modelBarycenterOffset() const {
         return glm::vec3(0.f);
     }
 
-    glm::vec3 offset = {
+    glm::vec3 offset = glm::vec3(
         _min.x + (std::abs(_min.x) + std::abs(_max.x)) / 2.f,
         _min.y + (std::abs(_min.y) + std::abs(_max.y)) / 2.f,
         _min.z + (std::abs(_min.z) + std::abs(_max.z)) / 2.f
-    };
+    );
     return offset;
 }
 
@@ -714,11 +712,11 @@ glm::vec3 KameleonWrapper::modelScale() const {
         return glm::vec3(1.f);
     }
 
-    glm::vec3 scale = {
+    glm::vec3 scale = glm::vec3(
         _max.x - _min.x,
         _max.y - _min.y,
         _max.z - _min.z
-    };
+    );
     return scale;
 }
 
@@ -777,7 +775,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceCartesianFieldline(
                                                                  TraceDirection direction,
                                                                   FieldlineEnd& end) const
 {
-    constexpr const int MaxSteps = 5000;
+    constexpr int MaxSteps = 5000;
 
     _model->loadVariable(xVar);
     const long int xID = _model->getVariableID(xVar);
@@ -842,7 +840,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceCartesianFieldline(
 
         ++numSteps;
         if (numSteps > MaxSteps) {
-            LDEBUG(fmt::format("Max number of steps taken ({})", MaxSteps));
+            LDEBUG(std::format("Max number of steps taken ({})", MaxSteps));
             break;
         }
     }
@@ -867,7 +865,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceLorentzTrajectory(
                                                                            float stepsize,
                                                                       float eCharge) const
 {
-    constexpr const int MaxSteps = 5000;
+    constexpr int MaxSteps = 5000;
 
     glm::vec3 step = glm::vec3(stepsize);
 
@@ -896,57 +894,57 @@ KameleonWrapper::TraceLine KameleonWrapper::traceLorentzTrajectory(
         trajectory.push_back(pos);
 
         // Calculate new position with Lorentz force quation and Runge-Kutta 4th order
-        glm::vec3 B = {
+        glm::vec3 B = glm::vec3(
             _interpolator->interpolate(bxID, pos.x, pos.y, pos.z),
             _interpolator->interpolate(byID, pos.x, pos.y, pos.z),
             _interpolator->interpolate(bzID, pos.x, pos.y, pos.z)
-        };
+        );
 
-        glm::vec3 E = {
+        glm::vec3 E = glm::vec3(
             _interpolator->interpolate(jxID, pos.x, pos.y, pos.z),
             _interpolator->interpolate(jyID, pos.x, pos.y, pos.z),
             _interpolator->interpolate(jzID, pos.x, pos.y, pos.z)
-        };
+        );
         const glm::vec3 k1 = glm::normalize(eCharge * (E + glm::cross(v0, B)));
         const glm::vec3 k1Pos = pos + step / 2.f * v0 + step * step / 8.f * k1;
 
-        B = {
+        B = glm::vec3(
             _interpolator->interpolate(bxID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(byID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(bzID, k1Pos.x, k1Pos.y, k1Pos.z)
-        };
-        E = {
+        );
+        E = glm::vec3(
             _interpolator->interpolate(jxID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(jyID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(jzID, k1Pos.x, k1Pos.y, k1Pos.z)
-        };
+        );
         const glm::vec3 v1 = v0 + step / 2.f * k1;
         const glm::vec3 k2 = glm::normalize(eCharge * (E + glm::cross(v1, B)));
 
-        B = {
+        B = glm::vec3(
             _interpolator->interpolate(bxID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(byID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(bzID, k1Pos.x, k1Pos.y, k1Pos.z)
-        };
-        E = {
+        );
+        E = glm::vec3(
             _interpolator->interpolate(jxID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(jyID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(jzID, k1Pos.x, k1Pos.y, k1Pos.z)
-        };
+        );
         const glm::vec3 v2 = v0 + step / 2.f * k2;
         const glm::vec3 k3 = glm::normalize(eCharge * (E + glm::cross(v2, B)));
         const glm::vec3 k3Pos = pos + step * v0 + step * step / 2.f * k1;
 
-        B = {
+        B = glm::vec3(
             _interpolator->interpolate(bxID, k3Pos.x, k3Pos.y, k3Pos.z),
             _interpolator->interpolate(byID, k3Pos.x, k3Pos.y, k3Pos.z),
             _interpolator->interpolate(bzID, k3Pos.x, k3Pos.y, k3Pos.z)
-        };
-        E = {
+        );
+        E = glm::vec3(
             _interpolator->interpolate(jxID, k3Pos.x, k3Pos.y, k3Pos.z),
             _interpolator->interpolate(jyID, k3Pos.x, k3Pos.y, k3Pos.z),
             _interpolator->interpolate(jzID, k3Pos.x, k3Pos.y, k3Pos.z)
-        };
+        );
         const glm::vec3 v3 = v0 + step * k3;
         const glm::vec3 k4 = glm::normalize(eCharge * (E + glm::cross(v3, B)));
 
@@ -956,7 +954,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceLorentzTrajectory(
 
         ++numSteps;
         if (numSteps > MaxSteps) {
-            LDEBUG(fmt::format("Max number of steps taken ({})", MaxSteps));
+            LDEBUG(std::format("Max number of steps taken ({})", MaxSteps));
             break;
         }
     }
@@ -989,17 +987,23 @@ KameleonWrapper::Model KameleonWrapper::modelType() const {
             _kameleon->getGlobalAttribute("model_name").getAttributeString();
         if (modelName == "open_ggcm" || modelName == "ucla_ggcm") {
             return Model::OpenGGCM;
-        } else if (modelName == "batsrus") {
+        }
+        else if (modelName == "batsrus") {
             return Model::BATSRUS;
-        } else if (modelName == "enlil") {
+        }
+        else if (modelName == "enlil") {
             return Model::ENLIL;
-        } else if (modelName == "mas") {
+        }
+        else if (modelName == "mas") {
             return Model::MAS;
-        } else if (modelName == "ADAPT3D") {
+        }
+        else if (modelName == "ADAPT3D") {
             return Model::Adapt3D;
-        } else if (modelName == "swmf") {
+        }
+        else if (modelName == "swmf") {
             return Model::SWMF;
-        } else if (modelName == "LFM") {
+        }
+        else if (modelName == "LFM") {
             return Model::LFM;
         }
     }
@@ -1012,17 +1016,20 @@ glm::vec4 KameleonWrapper::classifyFieldline(FieldlineEnd fEnd, FieldlineEnd bEn
     {
         // closed
         return glm::vec4(1.f, 0.f, 0.f, 1.f);
-    } else if ((fEnd == FieldlineEnd::FAROUT && bEnd == FieldlineEnd::NORTH) ||
-               (bEnd == FieldlineEnd::FAROUT && fEnd == FieldlineEnd::NORTH))
+    }
+    else if ((fEnd == FieldlineEnd::FAROUT && bEnd == FieldlineEnd::NORTH) ||
+             (bEnd == FieldlineEnd::FAROUT && fEnd == FieldlineEnd::NORTH))
     {
         // north
         return glm::vec4(1.f, 1.f, 0.f, 1.f);
-    } else if ((fEnd == FieldlineEnd::FAROUT && bEnd == FieldlineEnd::SOUTH) ||
-               (bEnd == FieldlineEnd::FAROUT && fEnd == FieldlineEnd::SOUTH))
+    }
+    else if ((fEnd == FieldlineEnd::FAROUT && bEnd == FieldlineEnd::SOUTH) ||
+             (bEnd == FieldlineEnd::FAROUT && fEnd == FieldlineEnd::SOUTH))
     {
         // south
         return glm::vec4(0.f, 1.f, 0.f, 1.f);
-    } else if (fEnd == FieldlineEnd::FAROUT && bEnd == FieldlineEnd::FAROUT) {
+    }
+    else if (fEnd == FieldlineEnd::FAROUT && bEnd == FieldlineEnd::FAROUT) {
         // solar wind
         return glm::vec4(0.f, 0.f, 1.f, 1.f);
     }
@@ -1067,7 +1074,7 @@ std::vector<std::string> KameleonWrapper::variables() const {
 
     int numVariables = _model->getNumberOfVariables();
 
-    for (int i = 0; i < numVariables; ++i) {
+    for (int i = 0; i < numVariables; i++) {
         variableNames.push_back(_model->getVariableName(i));;
     }
     return variableNames;

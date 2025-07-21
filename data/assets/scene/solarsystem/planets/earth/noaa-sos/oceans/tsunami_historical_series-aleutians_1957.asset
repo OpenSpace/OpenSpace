@@ -1,0 +1,96 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Tsunami Historical Series: Aleutian Islands - 1957"
+local Identifier = "noaa-sos-oceans-tsunami_historical_series-aleutians_1957"
+local Description = [[At 4:22 am on Saturday, March 9, 1957 (9 March, 14:22 Z UTC) the
+second great earthquake in 11 years struck Alaska's Aleutian Islands. This earthquake had
+the same magnitude of the earlier earthquake--8.6 on the moment magnitude scale (Johnson
+et al. 1994)--but was to the west of the 1946 earthquake, near the Andreanof Islands. As
+with the earlier event it also caused a dangerous tsunami that caused significant damage
+in the Aleutian Islands and in Hawaii and was observed as far away as Chile. The greatest
+wave heights were in Alaska's Aleutian Islands, with waves nearly 23 m or 75 ft. high
+coming ashore on Unimak Island. The tsunami would reach Hawaii a little over four hours
+later, with the largest waves striking the island of Kauai at over 11 m or 38 ft. high
+and would cause $5.3 million in damage statewide ($46 million in 2017), including the
+destruction of more than 80 homes. Elsewhere around the Pacific Ocean the tsunami waves
+would reach heights of 6 m or 20 ft. in the Marquesas Islands (French Polynesia), 3 m or
+10 ft. in Japan, 1.5 m or 5 ft. in American Samoa, and over 1 m or 3 ft. in Mexico and
+Chile. Unlike the earlier event, however, it did not kill any people thanks to effective
+tsunami alerts from to the Honolulu Observatory and the Seismic Sea Wave Warning System.
+These efforts, established in 1948, would later become the Pacific Tsunami Warning Center
+(PTWC) and Pacific Tsunami Warning System]]
+local URL = "https://sos.noaa.gov/catalog/datasets/tsunami-historical-series-aleutian-islands-1957/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+-- OBS: This data seems to be incorrect
+local LayerCoastal = {
+  Identifier = Identifier .. "-coastal",
+  Name = Name .. " (Coastal)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "Tsunami_Coastal_Map_Aleutians_1957_2k.jpg",
+  Description = Description
+}
+
+local LayerEnergyCoastal = {
+  Identifier = Identifier .. "-energy_coastal",
+  Name = Name .. " (Energy Coastal)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "Tsunami_Energy+Coastal_Map_Aleutians_1957_2k.jpg",
+  Description = Description
+}
+
+local LayerEnergy = {
+  Identifier = Identifier .. "-energy",
+  Name = Name .. " (Energy)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "Tsunami_Energy_Map_Aleutians_1957_2k.jpg",
+  Description = Description
+}
+
+local LayerNull = {
+  Identifier = Identifier .. "-null",
+  Name = Name .. " (Null)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "Tsunami_Null_Coastal_Map_Aleutians_1957_2k.jpg",
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerCoastal)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerEnergyCoastal)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerEnergy)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerNull)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerNull)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerEnergy)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerEnergyCoastal)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerCoastal)
+end)
+
+asset.export(LayerCoastal)
+asset.export(LayerEnergyCoastal)
+asset.export(LayerEnergy)
+asset.export(LayerNull)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

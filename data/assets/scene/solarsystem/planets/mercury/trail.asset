@@ -1,30 +1,48 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
-asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
 local MercuryTrail = {
-    Identifier = "MercuryTrail",
-    Parent = transforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "MERCURY",
-            Observer = "SUN"
-        },
-        Color = { 0.6, 0.5, 0.5 },
-        Period = 87.968,
-        Resolution = 1000
+  Identifier = "MercuryTrail",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = coreKernels.ID.Mercury,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
-    Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
-    GUI = {
-        Name = "Mercury Trail",
-        Path = "/Solar System/Planets/Mercury"
-    }
+    Color = { 0.6, 0.5, 0.5 },
+    Period = 87.968,
+    Resolution = 1000
+  },
+  Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
+  GUI = {
+    Name = "Mercury Trail",
+    Path = "/Solar System/Planets/Mercury",
+    Focusable = false,
+    Description = "Trail of Mercury as observed by the Sun"
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MercuryTrail)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { MercuryTrail })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MercuryTrail)
+end)
+
+asset.export(MercuryTrail)
+
+
+
+asset.meta = {
+  Name = "Mercury Trail",
+  Description = "Main trail for Mercury",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,41 +1,139 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
-local textures = asset.syncedResource({
-    Name = "Stars Textures",
-    Type = "HttpSynchronization",
-    Identifier = "stars_textures",
-    Version = 1
+local speck = asset.resource({
+  Name = "Stars Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "stars_du",
+  Version = 6
 })
 
-local speck = asset.syncedResource({
-    Name = "Stars Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "stars_du",
-    Version = 1
+local sunspeck = asset.resource({
+  Name = "Stars Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_sunstar_speck",
+  Version = 1
 })
 
-local colorLUT = asset.syncedResource({
-    Name = "Stars Color Table",
-    Type = "HttpSynchronization",
-    Identifier = "stars_colormap",
-    Version = 1
+local colormaps = asset.resource({
+  Name = "Stars Color Table",
+  Type = "HttpSynchronization",
+  Identifier = "stars_colormap",
+  Version = 3
 })
 
-local object = {
-    Identifier = "Stars",
-    Renderable = {
-        Type = "RenderableStars",
-        File = speck .. "/stars.speck",
-        Texture = textures .. "/halo.png",
-        ColorMap = colorLUT .. "/colorbv.cmap"
+local textures = asset.resource({
+  Name = "Stars Textures",
+  Type = "HttpSynchronization",
+  Identifier = "stars_textures",
+  Version = 1
+})
+
+
+local Stars = {
+  Identifier = "Stars",
+  Renderable = {
+    Type = "RenderableStars",
+    File = speck .. "stars.speck",
+    Core = {
+      Texture = textures .. "glare.png",
+      Multiplier = 15.0,
+      Gamma = 1.66,
+      Scale = 0.18
     },
-    GUI = {
-        Path = "/Milky Way/Stars"
-    }
+    Glare = {
+      Texture = textures .. "halo.png",
+      Multiplier = 0.65
+    },
+    MagnitudeExponent = 6.325,
+    ColorMap = colormaps .. "colorbv.cmap",
+    OtherDataColorMap = colormaps .. "viridis.cmap",
+    SizeComposition = "Distance Modulus",
+    DataMapping = {
+      Bv = "colorb_v",
+      Luminance = "lum",
+      AbsoluteMagnitude = "absmag",
+      ApparentMagnitude = "appmag",
+      Vx = "vx",
+      Vy = "vy",
+      Vz = "vz",
+      Speed = "speed"
+    },
+    DimInAtmosphere = true
+  },
+  Tag = { "daytime_hidden" },
+  GUI = {
+    Name = "Stars",
+    Path = "/Milky Way/Stars",
+    Focusable = false,
+    Description = [[These are the nearby stars that surround the Sun and are close enough
+      to get accurate distances. These include all the stars we see with the unaided eye
+      and many stars dimmer than that. Over the entire night sky, all year round, and in
+      the northern and southern hemispheres, we can see roughly 9,000 stars total with
+      the unaided eye. Stars are the light factories of the universe, and come in a
+      variety of sizes, colors, and brightnesses. The base catalog is Hipparcos, with Gaia
+      DR3 data applied for distance and velocity when available. Census: 112,746 stars.]]
+  }
+}
+
+local SunStar = {
+  Identifier = "SunStar",
+  Renderable = {
+    Type = "RenderableStars",
+    File = sunspeck .. "sunstar.speck",
+    Core = {
+      Texture = textures .. "glare.png",
+      Multiplier = 1.0,
+      Scale = 0.1
+    },
+    Glare = {
+      Texture = textures .. "halo.png",
+      Multiplier = 0.55,
+      Gamma = 1.1,
+      Size = 0.95
+    },
+    MagnitudeExponent = 6.25,
+    ColorMap = colormaps .. "colorbv.cmap",
+    SizeComposition = "Distance Modulus",
+    FadeInDistances = { 0.0075, 0.1 },
+    DataMapping = {
+      Bv = "colorb_v",
+      Luminance = "lum",
+      AbsoluteMagnitude = "absmag",
+      ApparentMagnitude = "appmag",
+      Vx = "vx",
+      Vy = "vy",
+      Vz = "vz",
+      Speed = "speed"
+    },
+    DimInAtmosphere = true
+  },
+  GUI = {
+    Name = "Sun",
+    Path = "/Milky Way/Stars",
+    Focusable = false,
+    Description = [[Individual star to represent the Sun when outside of the Solar
+      System.]]
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Stars)
+  openspace.addSceneGraphNode(SunStar)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SunStar)
+  openspace.removeSceneGraphNode(Stars)
+end)
+
+asset.export(Stars)
+asset.export(SunStar)
+
+
+
+asset.meta = {
+  Name = "Stars",
+  Description = Stars.GUI.Description,
+  Author = "Brian Abbott, Zack Reeves, Andrew Ayala, Jackie Faherty (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe"
+}

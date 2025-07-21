@@ -1,0 +1,62 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Topography and Bathymetry with Nighttime Lights"
+local Identifier = "noaa-sos-land-hot_topo"
+local Description = [[This planet Earth visualization shows a rotating planet in order
+to display both a nighttime and daytime view. The daytime side of the visualization shows
+the bathymetry and topography of the globe. Color coding is used to distinguish between
+the elevations. Red and gray represent the highest terrain on the land, green and yellow
+represent the lowest. In the ocean, the darker colors are the deeper ocean floors while
+the lighter colors indicate shallower areas as well as mountain ranges on the sea floor.
+The very light blue shading in the ocean, near the land forms, is generally the shallow
+continental shelf. Some interesting features that can be seen are the mountain ranges in
+the oceans, such as the mid-Atlantic Ridge in the middle of the Atlantic Ocean, which is
+spreading. Also in the ocean is the Marianas Trench, which is south of Japan. This trench
+is the deepest location in the ocean with an amazing depth of 36,201 feet, almost 7
+miles. On land, the Himalayas are a noteworthy feature, as they are the home of Mount
+Everest, the tallest point on earth at a height of 29,035 feet, almost 5.5 miles]]
+local URL = "https://sos.noaa.gov/catalog/datasets/topography-and-bathymetry-with-nighttime-lights/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true,
+  UnzipFilesDestination = "images"
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "ImageSequenceTileProvider",
+  FolderPath = syncedDirectory .. "images",
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

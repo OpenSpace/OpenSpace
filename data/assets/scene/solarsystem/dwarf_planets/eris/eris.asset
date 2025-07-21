@@ -1,0 +1,13 @@
+asset.require("./planet")
+asset.require("./trail")
+asset.require("./label", false)
+
+
+
+asset.meta = {
+  Name = "Eris meta asset",
+  Description = [[Trail, Model and Label of Eris.]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

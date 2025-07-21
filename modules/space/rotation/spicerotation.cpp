@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,89 +29,101 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
+#include <optional>
 
 namespace {
-    constexpr const char* KeyKernels = "Kernels";
-
     constexpr openspace::properties::Property::PropertyInfo SourceInfo = {
         "SourceFrame",
         "Source",
         "This value specifies the source frame that is used as the basis for the "
-        "coordinate transformation. This has to be a valid SPICE name."
+        "coordinate transformation. This has to be a valid SPICE name.",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo DestinationInfo = {
         "DestinationFrame",
         "Destination",
         "This value specifies the destination frame that is used for the coordinate "
-        "transformation. This has to be a valid SPICE name."
+        "transformation. This has to be a valid SPICE name.",
+        openspace::properties::Property::Visibility::Developer
     };
+
+    constexpr openspace::properties::Property::PropertyInfo FixedDateInfo = {
+        "FixedDate",
+        "Fixed Date",
+        "A time to lock the rotation to. Setting this to an empty string will "
+        "unlock the time and return to rotation based on current simulation time.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TimeOffsetInfo = {
+        "TimeOffset",
+        "Time Offset",
+        "A time offset, in seconds, added to the simulation time (or Fixed Date if any), "
+        "at which to compute the rotation.",
+        openspace::properties::Property::Visibility::User
+    };
+
+
+    // This `Rotation` type uses [SPICE](https://naif.jpl.nasa.gov/naif/) kernels to
+    // provide rotation information for the attached scene graph node. SPICE is a library
+    // used by scientists and engineers to, among other tasks, plan space missions. If you
+    // are unfamiliar with SPICE, their webpage has both extensive
+    // [Tutorials](https://naif.jpl.nasa.gov/naif/tutorials.html) as well as
+    // [Lessions](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/Lessons/) that explain
+    // the system deeper. This class provides access to the
+    // [pxform_c](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/pxform_c.html)
+    // function of the Spice library.
+    struct [[codegen::Dictionary(SpiceRotation)]] Parameters {
+        // [[codegen::verbatim(SourceInfo.description)]]
+        std::string sourceFrame
+            [[codegen::annotation("A valid SPICE NAIF name or integer")]];
+
+        // This value specifies the destination frame that is used for the coordinate
+        // transformation. This has to be a valid SPICE name. If this value is not
+        // specified, a reference frame of 'GALACTIC' is used instead
+        std::optional<std::string> destinationFrame;
+
+        // [[codegen::verbatim(FixedDateInfo.description)]]
+        std::optional<std::string> fixedDate [[codegen::datetime()]];
+
+        // [[codegen::verbatim(TimeOffsetInfo.description)]]
+        std::optional<float> timeOffset;
+    };
+#include "spicerotation_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation SpiceRotation::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Spice Rotation",
-        "space_transform_rotation_spice",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("SpiceRotation"),
-                Optional::No
-            },
-            {
-                SourceInfo.identifier,
-                new StringAnnotationVerifier("A valid SPICE NAIF name or integer"),
-                Optional::No,
-                SourceInfo.description
-            },
-            {
-                DestinationInfo.identifier,
-                new StringAnnotationVerifier("A valid SPICE NAIF name or integer"),
-                Optional::No,
-                DestinationInfo.description
-            },
-            {
-                KeyKernels,
-                new OrVerifier({ new StringListVerifier, new StringVerifier }),
-                Optional::Yes,
-                "A single kernel or list of kernels that this SpiceTranslation depends "
-                "on. All provided kernels will be loaded before any other operation is "
-                "performed."
-            }
-        }
-    };
+    return codegen::doc<Parameters>("space_transform_rotation_spice");
 }
 
 SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
-    : _sourceFrame(SourceInfo)
+    : Rotation(dictionary)
+    , _sourceFrame(SourceInfo)
     , _destinationFrame(DestinationInfo)
+    , _fixedDate(FixedDateInfo)
+    , _timeOffset(TimeOffsetInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "SpiceRotation"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _sourceFrame = dictionary.value<std::string>(SourceInfo.identifier);
-    _destinationFrame = dictionary.value<std::string>(DestinationInfo.identifier);
+    _sourceFrame = p.sourceFrame;
+    _destinationFrame = p.destinationFrame.value_or("GALACTIC");
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyKernels)) {
-        SpiceManager::ref().loadKernel(dictionary.value<std::string>(KeyKernels));
-    }
-    else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyKernels)) {
-        ghoul::Dictionary kernels = dictionary.value<ghoul::Dictionary>(KeyKernels);
-        for (size_t i = 1; i <= kernels.size(); ++i) {
-            if (!kernels.hasKeyAndValue<std::string>(std::to_string(i))) {
-                throw ghoul::RuntimeError("Kernels has to be an array-style table");
-            }
-
-            std::string kernel = kernels.value<std::string>(std::to_string(i));
-            SpiceManager::ref().loadKernel(kernel);
+    _fixedDate.onChange([this]() {
+        if (_fixedDate.value().empty()) {
+            _fixedEphemerisTime = std::nullopt;
         }
-    }
+        else {
+            _fixedEphemerisTime = SpiceManager::ref().ephemerisTimeFromDate(_fixedDate);
+        }
+    });
+    _fixedDate = p.fixedDate.value_or(_fixedDate);
+    addProperty(_fixedDate);
+
+    _timeOffset = p.timeOffset.value_or(_timeOffset);
+    addProperty(_timeOffset);
 
     addProperty(_sourceFrame);
     addProperty(_destinationFrame);
@@ -124,7 +136,7 @@ glm::dmat3 SpiceRotation::matrix(const UpdateData& data) const {
     return SpiceManager::ref().positionTransformMatrix(
         _sourceFrame,
         _destinationFrame,
-        data.time.j2000Seconds()
+        _fixedEphemerisTime.value_or(data.time.j2000Seconds()) + _timeOffset
     );
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -57,6 +57,7 @@ bool AtlasManager::initialize() {
 
     _textureAtlas = new ghoul::opengl::Texture(
         glm::size3_t(_atlasDim, _atlasDim, _atlasDim),
+        GL_TEXTURE_3D,
         ghoul::opengl::Texture::Format::RGBA,
         GL_RGBA,
         GL_FLOAT
@@ -182,7 +183,7 @@ void AtlasManager::addToAtlas(int firstBrickIndex, int lastBrickIndex,
             unsigned int atlasCoords = _freeAtlasCoords.back();
             _freeAtlasCoords.pop_back();
             int level = _nOtLevels - static_cast<int>(
-                floor(log((7.0 * (float(brickIndex % _nOtNodes)) + 1.0))/log(8)) - 1
+                floor(log1p((7.0 * (float(brickIndex % _nOtNodes))))/log(8)) - 1
             );
             ghoul_assert(atlasCoords <= 0x0FFFFFFF, "@MISSING");
             unsigned int atlasData = (level << 28) + atlasCoords;

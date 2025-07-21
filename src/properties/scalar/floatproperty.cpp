@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,64 +24,34 @@
 
 #include <openspace/properties/scalar/floatproperty.h>
 
+#include <openspace/util/json_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
-
-#include <limits>
-#include <sstream>
-
-namespace {
-
-float fromLuaConversion(lua_State* state, bool& success) {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        float val = static_cast<float>(lua_tonumber(state, -1));
-        lua_pop(state, 1);
-        return val;
-    }
-    else {
-        return 0.f;
-    }
-}
-
-bool toLuaConversion(lua_State* state, float value) {
-    lua_pushnumber(state, static_cast<lua_Number>(value));
-    return true;
-}
-
-float fromStringConversion(const std::string& val, bool& success) {
-    std::stringstream s(val);
-    float v;
-    s >> v;
-    success = !s.fail();
-    if (success) {
-        return v;
-    }
-    else {
-        throw ghoul::RuntimeError("Conversion error for string: " + val);
-    }
-}
-
-bool toStringConversion(std::string& outValue, float inValue) {
-    outValue = std::to_string(inValue);
-    return true;
-}
-
-} // namespace
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    FloatProperty,
-    float,
-    0.f,
-    std::numeric_limits<float>::lowest(),
-    std::numeric_limits<float>::max(),
-    0.01f,
-    fromLuaConversion,
-    toLuaConversion,
-    fromStringConversion,
-    toStringConversion,
-    LUA_TNUMBER
-)
+FloatProperty::FloatProperty(Property::PropertyInfo info, float value,
+                             float minValue, float maxValue, float stepValue)
+    : NumericalProperty<float>(std::move(info), value, minValue, maxValue, stepValue)
+{}
+
+std::string_view FloatProperty::className() const {
+    return "FloatProperty";
+}
+
+ghoul::lua::LuaTypes FloatProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Number;
+}
+
+void FloatProperty::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
+float FloatProperty::toValue(lua_State* state) const {
+    return ghoul::lua::value<float>(state);
+}
+
+std::string FloatProperty::stringValue() const {
+    return formatJson(_value);
+}
 
 } // namespace openspace::properties

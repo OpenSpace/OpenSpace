@@ -1,3 +1,1 @@
-set (OPENSPACE_DEPENDENCIES
-    space
-)
+set(DEFAULT_MODULE ON)

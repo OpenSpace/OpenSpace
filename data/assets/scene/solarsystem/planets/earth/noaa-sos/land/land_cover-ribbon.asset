@@ -1,0 +1,72 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Land Cover (map with ribbon of labels)"
+local Identifier = "noaa-sos-land-land_cover-ribbon"
+local Description = [[The Moderate Resolution Imaging Spectroradiometer (MODIS)
+instrument on NASA's Terra satellite provides scientists with a new view of the Earth.
+Using data collected by MODIS, researchers at Boston University were able to create these
+land cover maps. Understanding the land cover of Earth aids policy makers involved in
+natural resource management. The maps are also critical for scientists as they study
+changes in the Earth system and as they model the Earth system. For example, in order to
+calculate the carbon budget for the Earth system, scientists can use these maps to
+determine the extent of vegetation covering the land surface that is absorbing carbon
+dioxide. Each of the varying land types have different impacts on the Earth system. Snow
+and ice cover cool the planet by reflecting sunlight back to space, forests absorb huge
+amounts of carbon dioxide, and croplands and urban areas reflect the human impact on the
+Earth]]
+local URL = "https://sos.noaa.gov/catalog/datasets/land-cover-map-with-ribbon-of-labels/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "2048.jpg",
+  Description = Description
+}
+
+local Label = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "lcc_ribbon_label.jpg",
+  FaceCamera = false,
+  Scale = 0.75,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Label)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Label)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(Label)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

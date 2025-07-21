@@ -1,0 +1,35 @@
+local globe = asset.require("../../moon")
+
+
+
+local Layer = {
+  Identifier = "LolaDem_Sweden",
+  Name = "Lola DEM [Sweden]",
+  Enabled = asset.enabled,
+  ZIndex = 10,
+  FilePath = asset.resource("loladem_sweden.wms"),
+  TilePixelSize = 360,
+  Settings = { Multiplier = 0.5 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Moon.Identifier, "HeightLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Moon.Identifier, "HeightLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "Lola DEM [Sweden]",
+  Description = [[Moon LRO LOLA DEM 118m v1 layer for Moon globe. This map is hosted on
+    the OpenSpace server in Sweden]],
+  Author = "USGS",
+  URL = "https://astrogeology.usgs.gov/search/map/Moon/LRO/LOLA/Lunar_LRO_LOLA_Global_LDEM_118m_Mar2014",
+  License = "NASA/PDS"
+}

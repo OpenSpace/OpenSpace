@@ -1,0 +1,42 @@
+local globe = asset.require("../../mercury")
+
+
+
+local texturesPath = asset.resource({
+  Name = "Mercury Textures",
+  Type = "HttpSynchronization",
+  Identifier = "mercury_abundance_textures",
+  Version = 1
+})
+
+
+local Layer = {
+  Name = "Silicon Abundance",
+  Identifier = "ssimap_02122015",
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = texturesPath .. "ssimap_02122015.png",
+  BlendMode = "Multiply",
+  CacheSettings = { Enabled = false }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "Mercury Silicon Abundance",
+  Description = "Silicon Abundance layer for Mercury globe",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

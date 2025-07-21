@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,64 +24,41 @@
 
 #include <openspace/properties/scalar/ulongproperty.h>
 
+#include <openspace/util/json_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
-
-#include <limits>
-#include <sstream>
-
-namespace {
-
-unsigned long fromLuaConversion(lua_State* state, bool& success) {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        unsigned long val = static_cast<unsigned long>(lua_tonumber(state, -1));
-        lua_pop(state, 1);
-        return val;
-    }
-    else {
-        return 0ul;
-    }
-}
-
-bool toLuaConversion(lua_State* state, unsigned long value) {
-    lua_pushnumber(state, static_cast<lua_Number>(value));
-    return true;
-}
-
-unsigned long fromStringConversion(const std::string& val, bool& success) {
-    std::stringstream s(val);
-    unsigned long v;
-    s >> v;
-    success = !s.fail();
-    if (success) {
-        return v;
-    }
-    else {
-        throw ghoul::RuntimeError("Conversion error for string: " + val);
-    }
-}
-
-bool toStringConversion(std::string& outValue, unsigned long inValue) {
-    outValue = std::to_string(inValue);
-    return true;
-}
-
-} // namespace
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    ULongProperty,
-    unsigned long,
-    0ul,
-    std::numeric_limits<unsigned long>::lowest(),
-    std::numeric_limits<unsigned long>::max(),
-    1ul,
-    fromLuaConversion,
-    toLuaConversion,
-    fromStringConversion,
-    toStringConversion,
-    LUA_TNUMBER
-)
+ULongProperty::ULongProperty(Property::PropertyInfo info, unsigned long value,
+                             unsigned long minValue, unsigned long maxValue,
+                             unsigned long stepValue)
+    : NumericalProperty<unsigned long>(
+        std::move(info),
+        value,
+        minValue,
+        maxValue,
+        stepValue
+    )
+{}
+
+std::string_view ULongProperty::className() const {
+    return "ULongProperty";
+}
+
+ghoul::lua::LuaTypes ULongProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Number;
+}
+
+void ULongProperty::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
+unsigned long ULongProperty::toValue(lua_State* state) const {
+    return ghoul::lua::value<unsigned long>(state);
+}
+
+std::string ULongProperty::stringValue() const {
+    return formatJson(_value);
+}
 
 } // namespace openspace::properties

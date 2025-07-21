@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,26 +25,33 @@
 #ifndef __OPENSPACE_CORE___ULONGPROPERTY___H__
 #define __OPENSPACE_CORE___ULONGPROPERTY___H__
 
- /**
- * \file ulongproperty.h
- *
- * \addtogroup openspace
- * @{
- * \addtogroup properties
- * @{
-
- * \class ULongProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>unsigned long</code>.
-
- * @} @}
- */
-
 #include <openspace/properties/numericalproperty.h>
+#include <limits>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(ULongProperty, unsigned long)
+/**
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type `unsigned long`.
+ */
+class ULongProperty : public NumericalProperty<unsigned long> {
+public:
+    ULongProperty(Property::PropertyInfo info, unsigned long value = 0ul,
+        unsigned long minValue = std::numeric_limits<unsigned long>::lowest(),
+        unsigned long maxValue = std::numeric_limits<unsigned long>::max(),
+        unsigned long stepValue = 1ul);
+
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
+
+    void getLuaValue(lua_State* state) const override final;
+
+    std::string stringValue() const override final;
+    using TemplateProperty<unsigned long>::operator=;
+
+private:
+    unsigned long toValue(lua_State* state) const override final;
+};
 
 } // namespace openspace::properties
 

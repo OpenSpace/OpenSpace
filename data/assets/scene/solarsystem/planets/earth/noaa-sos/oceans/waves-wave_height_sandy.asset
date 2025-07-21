@@ -1,0 +1,67 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Wave Heights - Hurricane Sandy 2012"
+local Identifier = "noaa-sos-oceans-waves-wave_height_sandy"
+local Description = [[Meteorological offices worldwide forecast ocean wave heights for
+the shipping and fisheries industry. In the United States, NOAA's National Weather
+Service provides the wave forecasts. Just like in weather forecasting, scientists run
+numerical models to make these predictions. This movie shows wave height calculations of
+a wave model called 'WAVEWATCH III'. The movie shows 3 hourly model output over October
+1st - October 31st, 2012]]
+local URL = "https://sos.noaa.gov/catalog/datasets/wave-heights-hurricane-sandy-2012/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "ImageSequenceTileProvider",
+  FolderPath = syncedDirectory .. "4096",
+  Description = Description
+}
+
+local Colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(Colorbar)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

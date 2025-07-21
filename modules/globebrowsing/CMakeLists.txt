@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,116 +22,164 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/globebrowsingmodule.h
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/asynctiledataprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/basictypes.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/dashboarditemglobelocation.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ellipsoid.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/gdalwrapper.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/geodeticpatch.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/gpulayergroup.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/layer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/layeradjustment.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/layergroup.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/layergroupid.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/layermanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/layerrendersettings.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/lrucache.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/lrucache.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/lruthreadpool.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/lruthreadpool.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/memoryawaretilecache.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/prioritizingconcurrentjobmanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/prioritizingconcurrentjobmanager.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/rawtile.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/rawtiledatareader.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderableglobe.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/skirtedgrid.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/tileindex.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/tileloadjob.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/tileprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/tiletextureinitdata.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/timequantizer.h
+  globebrowsingmodule.h
+  src/asynctiledataprovider.h
+  src/basictypes.h
+  src/dashboarditemglobelocation.h
+  src/gdalwrapper.h
+  src/geodeticpatch.h
+  src/globelabelscomponent.h
+  src/gpulayergroup.h
+  src/layer.h
+  src/layeradjustment.h
+  src/layergroup.h
+  src/layergroupid.h
+  src/layermanager.h
+  src/layerrendersettings.h
+  src/lrucache.h
+  src/lrucache.inl
+  src/lruthreadpool.h
+  src/lruthreadpool.inl
+  src/memoryawaretilecache.h
+  src/prioritizingconcurrentjobmanager.h
+  src/prioritizingconcurrentjobmanager.inl
+  src/rawtile.h
+  src/rawtiledatareader.h
+  src/renderableglobe.h
+  src/ringscomponent.h
+  src/shadowcomponent.h
+  src/skirtedgrid.h
+  src/tileindex.h
+  src/tileloadjob.h
+  src/tiletextureinitdata.h
+  src/tilecacheproperties.h
+  src/timequantizer.h
+  src/geojson/geojsoncomponent.h
+  src/geojson/geojsonmanager.h
+  src/geojson/geojsonproperties.h
+  src/geojson/globegeometryfeature.h
+  src/geojson/globegeometryhelper.h
+  src/tileprovider/defaulttileprovider.h
+  src/tileprovider/imagesequencetileprovider.h
+  src/tileprovider/singleimagetileprovider.h
+  src/tileprovider/sizereferencetileprovider.h
+  src/tileprovider/spoutimageprovider.h
+  src/tileprovider/temporaltileprovider.h
+  src/tileprovider/texttileprovider.h
+  src/tileprovider/tileindextileprovider.h
+  src/tileprovider/tileprovider.h
+  src/tileprovider/tileproviderbydate.h
+  src/tileprovider/tileproviderbyindex.h
+  src/tileprovider/tileproviderbylevel.h
 )
 
 set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/globebrowsingmodule.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/globebrowsingmodule_lua.inl
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/asynctiledataprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/dashboarditemglobelocation.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ellipsoid.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/gdalwrapper.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/geodeticpatch.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/gpulayergroup.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/layer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/layeradjustment.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/layergroup.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/layergroupid.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/layermanager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/layerrendersettings.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/memoryawaretilecache.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/rawtile.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/rawtiledatareader.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderableglobe.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/skirtedgrid.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/tileindex.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/tileloadjob.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/tileprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/tiletextureinitdata.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/timequantizer.cpp
+  globebrowsingmodule.cpp
+  globebrowsingmodule_lua.inl
+  src/asynctiledataprovider.cpp
+  src/dashboarditemglobelocation.cpp
+  src/gdalwrapper.cpp
+  src/geodeticpatch.cpp
+  src/globelabelscomponent.cpp
+  src/gpulayergroup.cpp
+  src/layer.cpp
+  src/layeradjustment.cpp
+  src/layergroup.cpp
+  src/layergroupid.cpp
+  src/layermanager.cpp
+  src/layerrendersettings.cpp
+  src/memoryawaretilecache.cpp
+  src/rawtiledatareader.cpp
+  src/renderableglobe.cpp
+  src/ringscomponent.cpp
+  src/shadowcomponent.cpp
+  src/skirtedgrid.cpp
+  src/tileindex.cpp
+  src/tileloadjob.cpp
+  src/tiletextureinitdata.cpp
+  src/timequantizer.cpp
+  src/geojson/geojsoncomponent.cpp
+  src/geojson/geojsonmanager.cpp
+  src/geojson/geojsonproperties.cpp
+  src/geojson/globegeometryfeature.cpp
+  src/geojson/globegeometryhelper.cpp
+  src/tileprovider/defaulttileprovider.cpp
+  src/tileprovider/imagesequencetileprovider.cpp
+  src/tileprovider/singleimagetileprovider.cpp
+  src/tileprovider/sizereferencetileprovider.cpp
+  src/tileprovider/spoutimageprovider.cpp
+  src/tileprovider/temporaltileprovider.cpp
+  src/tileprovider/texttileprovider.cpp
+  src/tileprovider/tileindextileprovider.cpp
+  src/tileprovider/tileprovider.cpp
+  src/tileprovider/tileproviderbydate.cpp
+  src/tileprovider/tileproviderbyindex.cpp
+  src/tileprovider/tileproviderbylevel.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/blending.hglsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globalrenderer_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/localrenderer_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderer_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/texturetilemapping.hglsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tile.hglsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tileheight.hglsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tilevertexskirt.hglsl
+  shaders/advanced_rings_vs.glsl
+  shaders/advanced_rings_fs.glsl
+  shaders/blending.glsl
+  shaders/geojson_fs.glsl
+  shaders/geojson_points_fs.glsl
+  shaders/geojson_points_gs.glsl
+  shaders/geojson_points_vs.glsl
+  shaders/geojson_vs.glsl
+  shaders/globalrenderer_vs.glsl
+  shaders/localrenderer_vs.glsl
+  shaders/renderer_fs.glsl
+  shaders/rings_vs.glsl
+  shaders/rings_fs.glsl
+  shaders/rings_geom_vs.glsl
+  shaders/rings_geom_fs.glsl
+  shaders/texturetilemapping.glsl
+  shaders/tile.glsl
+  shaders/tileheight.glsl
+  shaders/tilevertexskirt.glsl
 )
 
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
-    "GlobeBrowsing"
-    globebrowsing_module
-    STATIC
-    ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+  "GlobeBrowsing"
+  globebrowsing_module
+  STATIC
+  ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+)
+target_precompile_headers(${globebrowsing_module} PRIVATE
+  <modules/globebrowsing/src/tileprovider/tileprovider.h>
+  <modules/globebrowsing/globebrowsingmodule.h>
+  <future>
+  <map>
 )
 
+# Gdal
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/gdal_data DESTINATION modules/globebrowsing)
 
 if (WIN32)
-    target_include_directories(
-        openspace-module-globebrowsing
-        SYSTEM PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/include
-    )
-
-    target_link_libraries(
-        openspace-module-globebrowsing
-        ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib
-    )
-    register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal203.dll")
+  add_library(gdal SHARED IMPORTED)
+  target_include_directories(gdal SYSTEM INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/include)
+  set_target_properties(gdal PROPERTIES IMPORTED_IMPLIB ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib)
+  set_target_properties(gdal PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal241.dll)
+  target_link_libraries(openspace-module-globebrowsing PRIVATE gdal)
 else (WIN32)
-    find_package(GDAL REQUIRED)
+  find_package(GDAL REQUIRED)
 
-    target_include_directories(
-        openspace-module-globebrowsing
-        SYSTEM PUBLIC
-        ${GDAL_INCLUDE_DIR}
-    )
-
-    target_link_libraries(openspace-module-globebrowsing ${GDAL_LIBRARY})
-
-    mark_as_advanced(GDAL_CONFIG GDAL_INCLUDE_DIR GDAL_LIBRARY)
-
+  target_include_directories(openspace-module-globebrowsing SYSTEM PRIVATE ${GDAL_INCLUDE_DIR})
+  target_link_libraries(openspace-module-globebrowsing PRIVATE ${GDAL_LIBRARY})
+  mark_as_advanced(GDAL_CONFIG GDAL_INCLUDE_DIR GDAL_LIBRARY)
 endif () # WIN32
+
+begin_dependency("GEOS")
+add_subdirectory(ext/geos SYSTEM)
+target_link_libraries(openspace-module-globebrowsing PRIVATE geos)
+
+set_property(TARGET geos PROPERTY FOLDER "External")
+set_property(TARGET geos_c PROPERTY FOLDER "External")
+set_property(TARGET ryu PROPERTY FOLDER "External")
+end_dependency("GEOS")

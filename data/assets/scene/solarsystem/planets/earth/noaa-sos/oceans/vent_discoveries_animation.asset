@@ -1,0 +1,60 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Deep-Sea Vent Discoveries"
+local Identifier = "noaa-sos-oceans-vent_discoveries_animation"
+local Description = [[This dataset is an animation showing the discoveries of deep-sea
+hydrothermal vents from 1977-2016 (cumulative, annually). In 1977 scientists made a
+stunning discovery that changed our understanding of life on Earth. On the deep seafloor
+they had discovered hot springs, or hydrothermal vents, with animals that had never been
+seen before. These discoveries continue today. Over 240 vent fields have been discovered
+with human-occupied, remotely-operated, and autonomous vehicles]]
+local URL = "https://sos.noaa.gov/catalog/datasets/deep-sea-vent-discoveries/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "TemporalTileProvider",
+  Mode = "Folder",
+  Folder = {
+    Folder = syncedDirectory .. "new",
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "vents_%Y.png"
+  },
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

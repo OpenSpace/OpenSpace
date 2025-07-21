@@ -1,30 +1,47 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
-asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
 local JupiterTrail = {
-    Identifier = "JupiterTrail",
-    Parent = transforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "JUPITER BARYCENTER",
-            Observer = "SUN"
-        },
-        Color = { 0.8, 0.7, 0.7 },
-        Period = 4330.595,
-        Resolution = 1000
+  Identifier = "JupiterTrail",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = coreKernels.ID.Jupiter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
-    Tag = { "planetTrail_solarSystem", "planetTrail_giants" },
-    GUI = {
-        Name = "Jupiter Trail",
-        Path = "/Solar System/Planets/Jupiter"
-    }
+    Color = { 0.8, 0.7, 0.7 },
+    Period = 4330.595,
+    Resolution = 1000
+  },
+  Tag = { "planetTrail_solarSystem", "planetTrail_giants" },
+  GUI = {
+    Name = "Jupiter Trail",
+    Path = "/Solar System/Planets/Jupiter",
+    Focusable = false
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(JupiterTrail)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { JupiterTrail })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JupiterTrail)
+end)
+
+asset.export(JupiterTrail)
+
+
+
+asset.meta = {
+  Name = "Jupiter Trail",
+  Description = "Trail of Jupiter as observed by the Sun",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

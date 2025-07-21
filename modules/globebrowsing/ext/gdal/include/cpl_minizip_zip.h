@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_minizip_zip.h 44e0c0ecc2e12f7885d8572d0f18dd94e7fbda1c 2016-10-25 02:28:29Z Kurt Schwehr $
+ * $Id: cpl_minizip_zip.h 105d437a91a1a110bdeaba3bab046cd235701173 2018-07-02 12:01:26 +0200 Even Rouault $
  *
  * Project:  CPL - Common Portability Library
  * Author:   Frank Warmerdam, warmerdam@pobox.com
@@ -64,6 +64,7 @@
 
 #include "cpl_vsi.h"
 #define uLong64 vsi_l_offset
+typedef vsi_l_offset ZPOS64_T;
 
 #ifdef __cplusplus
 extern "C" {
@@ -234,7 +235,7 @@ extern int ZEXPORT cpl_zipCloseFileInZip (zipFile file);
 */
 
 extern int ZEXPORT cpl_zipCloseFileInZipRaw (zipFile file,
-                                             uLong uncompressed_size,
+                                             ZPOS64_T uncompressed_size,
                                              uLong crc32);
 /*
   Close the current file in the zipfile, for file opened with

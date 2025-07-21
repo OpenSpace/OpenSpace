@@ -1,0 +1,32 @@
+local UndoEventFade = {
+  Identifier = "os.UndoEventFade",
+  Name = "Undo all event fading",
+  Command = [[
+    openspace.setPropertyValue("Scene.*.Renderable.Fade", 1.0, 0.5)
+  ]],
+  Documentation = [[Sets the 'Fade' value of all renderables to 1. This internal values
+    is managed by events]],
+  GuiPath = "/System/Rendering",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.action.registerAction(UndoEventFade)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(UndoEventFade)
+end)
+
+asset.export("UndoEventFade", UndoEventFade.Identifier)
+
+
+
+asset.meta = {
+  Name = "Actions - Undo All Event Fading",
+  Description = "Asset providing debug ability to undo all event fading",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

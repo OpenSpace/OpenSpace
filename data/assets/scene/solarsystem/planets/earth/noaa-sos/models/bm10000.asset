@@ -1,0 +1,77 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Blue Marble: Sea Level, Ice and Vegetation Changes - 19,000BC - 10,000AD"
+local Identifier = "noaa-sos-models-bm10000"
+local Description = [[The Earth has been through many changes and continues to change
+today. To better understand these changes, the Zürich University of Applied Sciences
+created a simulation using past climate data, observations, and computer models. The
+simulation starts 21,000 years ago and ends 8,000 years in the future, showing the
+changes in ice concentration, sea level, and vegetation. 19,000BC was chosen as the start
+date because this was the last glacial maximum, when the Earth's ice sheets were at their
+maximum extension. As seen in the animation, much of northern Europe and North America
+were covered in ice in 19,000BC. The labels for the animation include information about
+carbon dioxide concentration, average temperature, sea level and population. The red line
+indicates the current levels. The yellow borders on the map represent the current
+coastlines. The data from 19,000BC to 2,000AD includes the most up-to-date paleoclimate
+data that is available. A list of sources can be found here. Some notable events in the
+past simulation include:
+
+The North Sea quickly forms around 8,000BC, creating the British Isles
+"Mega-Lake Chad" forms in the present-day Saraha Desert and is surrounded by lush
+landscapes around 7,000BC
+The ice pulls back and North America and Europe are largely ice free, starting in 6,500BC
+The lush vegetation across Northern Africa and the Arabian peninsula retreats in 2,000BC
+
+For the time frame from 2,000AD to 3,000AD, a computer model based on the IPCC A2
+scenario was used. This scenario assumes a complete cessation of carbon dioxide emissions
+in 2100. More details on the model used can be found here. In this part of the simulation
+the time steps change from a frame every 500 years as used in the first part of the
+animation, to a frame every 50 years to show the rapid changes that are modeled. The
+northern ice cap quickly disappears and the ice on Greenland and Antarctica begins to
+melt steadily. By the year 3,000AD, there is predicted 6m (19ft) sea level rise. The
+simulation continues from 3,000AD to 10,000 AD in 500 year time steps in a fictional
+scenario of worldwide glacier meltdown and shows the impacts this would have on the
+coasts]]
+local URL = "https://sos.noaa.gov/catalog/datasets/blue-marble-sea-level-ice-and-vegetation-changes-19000bc-10000ad/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "ImageSequenceTileProvider",
+  FolderPath = syncedDirectory .. "4096",
+  Description = Description
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

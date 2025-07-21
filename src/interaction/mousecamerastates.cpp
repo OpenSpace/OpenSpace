@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,13 @@
 
 #include <openspace/interaction/mousecamerastates.h>
 
-#include <openspace/interaction/inputstate.h>
+#include <openspace/interaction/mouseinputstate.h>
+#include <openspace/interaction/keyboardinputstate.h>
+
+namespace {
+    constexpr double SensitivityAdjustmentIncrease = 8.0;
+    constexpr double SensitivityAdjustmentDecrease = 0.5;
+} // namespace
 
 namespace openspace::interaction {
 
@@ -32,26 +38,62 @@ MouseCameraStates::MouseCameraStates(double sensitivity, double velocityScaleFac
     : CameraInteractionStates(sensitivity, velocityScaleFactor)
 {}
 
-void MouseCameraStates::updateStateFromInput(const InputState& inputState,
+void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseState,
+                                             const KeyboardInputState& keyboardState,
                                              double deltaTime)
 {
-    glm::dvec2 mousePosition = inputState.mousePosition();
+    const MouseButton primary =
+        _isMouseButtonInverted ? MouseButton::Button2 : MouseButton::Button1;
+    const MouseButton secondary =
+        _isMouseButtonInverted ? MouseButton::Button1 : MouseButton::Button2;
 
-    bool button1Pressed = inputState.isMouseButtonPressed(MouseButton::Button1);
-    bool button2Pressed = inputState.isMouseButtonPressed(MouseButton::Button2);
-    bool button3Pressed = inputState.isMouseButtonPressed(MouseButton::Button3);
-    bool keyCtrlPressed = inputState.isKeyPressed(Key::LeftControl) |
-                          inputState.isKeyPressed(Key::RightControl);
-    bool keyShiftPressed = inputState.isKeyPressed(Key::LeftShift) |
-                           inputState.isKeyPressed(Key::RightShift);
-    bool keyAltPressed = inputState.isKeyPressed(Key::LeftAlt) |
-                         inputState.isKeyPressed(Key::RightAlt);
+    const glm::dvec2 mousePosition = mouseState.mousePosition();
+
+    const bool primaryPressed = mouseState.isMouseButtonPressed(primary);
+    const bool secondaryPressed = mouseState.isMouseButtonPressed(secondary);
+    const bool button3Pressed = mouseState.isMouseButtonPressed(MouseButton::Button3);
+    const bool keyCtrlPressed =
+        keyboardState.isKeyPressed(Key::LeftControl) ||
+        keyboardState.isKeyPressed(Key::RightControl);
+    const bool keyShiftPressed =
+        keyboardState.isKeyPressed(Key::LeftShift) ||
+        keyboardState.isKeyPressed(Key::RightShift);
+    const bool keyAltPressed =
+        keyboardState.isKeyPressed(Key::LeftAlt) ||
+        keyboardState.isKeyPressed(Key::RightAlt);
+
+
+    if (keyboardState.isKeyPressed(Key::Z)) {
+        _currentSensitivityRamp += deltaTime;
+    }
+
+    // The reverse for the X key
+    if (keyboardState.isKeyPressed(Key::X)) {
+        _currentSensitivityRamp -= deltaTime;
+    }
+
+    if (!keyboardState.isKeyPressed(Key::Z) && !keyboardState.isKeyPressed(Key::X) &&
+        _currentSensitivityRamp != 0.0)
+    {
+        // If neither key is pressed, the sensitivity ramp falls off by 90% every frame
+        // when letting go of the key
+        _currentSensitivityRamp = _currentSensitivityRamp * 0.9;
+        if (std::abs(_currentSensitivityRamp) < 0.01) {
+            _currentSensitivityRamp = 0.0;
+        }
+    }
+
+    _currentSensitivityRamp = std::clamp(_currentSensitivityRamp, -1.0, 1.0);
+    const double totalSensitivity =
+        _currentSensitivityRamp < 0.0 ?
+        _currentSensitivityRamp * SensitivityAdjustmentDecrease :
+        _currentSensitivityRamp * SensitivityAdjustmentIncrease;
 
     // Update the mouse states
-    if (button1Pressed && !keyShiftPressed && !keyAltPressed) {
+    if (primaryPressed && !keyShiftPressed && !keyAltPressed) {
         if (keyCtrlPressed) {
-            glm::dvec2 mousePositionDelta = _localRotationState.previousPosition -
-                                             mousePosition;
+            const glm::dvec2 mousePositionDelta =
+                _localRotationState.previousPosition - mousePosition;
             _localRotationState.velocity.set(
                 mousePositionDelta * _sensitivity,
                 deltaTime
@@ -61,10 +103,10 @@ void MouseCameraStates::updateStateFromInput(const InputState& inputState,
             _globalRotationState.velocity.decelerate(deltaTime);
         }
         else {
-            glm::dvec2 mousePositionDelta = _globalRotationState.previousPosition -
-                                            mousePosition;
+            const glm::dvec2 mousePositionDelta =
+                _globalRotationState.previousPosition - mousePosition;
             _globalRotationState.velocity.set(
-                mousePositionDelta * _sensitivity,
+                mousePositionDelta * (_sensitivity + _sensitivity * totalSensitivity / 5),
                 deltaTime
             );
 
@@ -79,11 +121,12 @@ void MouseCameraStates::updateStateFromInput(const InputState& inputState,
         _globalRotationState.previousPosition = mousePosition;
         _globalRotationState.velocity.decelerate(deltaTime);
     }
-    if (button2Pressed || (keyAltPressed && button1Pressed)) {
-        glm::dvec2 mousePositionDelta = _truckMovementState.previousPosition -
-                                        mousePosition;
+    if (secondaryPressed || (keyAltPressed && primaryPressed)) {
+        const glm::dvec2 mousePosDelta =
+            _truckMovementState.previousPosition - mousePosition;
+
         _truckMovementState.velocity.set(
-            mousePositionDelta * _sensitivity,
+            mousePosDelta * (_sensitivity + _sensitivity * totalSensitivity),
             deltaTime
         );
     }
@@ -91,12 +134,12 @@ void MouseCameraStates::updateStateFromInput(const InputState& inputState,
         _truckMovementState.previousPosition = mousePosition;
         _truckMovementState.velocity.decelerate(deltaTime);
     }
-    if (button3Pressed || (keyShiftPressed && button1Pressed)) {
+    if (button3Pressed || (keyShiftPressed && primaryPressed)) {
         if (keyCtrlPressed) {
-            glm::dvec2 mousePositionDelta = _localRollState.previousPosition -
+            const glm::dvec2 mousePosDelta = _localRollState.previousPosition -
                                             mousePosition;
             _localRollState.velocity.set(
-                mousePositionDelta * _sensitivity,
+                mousePosDelta * _sensitivity,
                 deltaTime
             );
 
@@ -104,10 +147,10 @@ void MouseCameraStates::updateStateFromInput(const InputState& inputState,
             _globalRollState.velocity.decelerate(deltaTime);
         }
         else {
-            glm::dvec2 mousePositionDelta = _globalRollState.previousPosition -
+            const glm::dvec2 mousePosDelta = _globalRollState.previousPosition -
                                             mousePosition;
             _globalRollState.velocity.set(
-                mousePositionDelta * _sensitivity,
+                mousePosDelta * _sensitivity,
                 deltaTime
             );
 
@@ -122,6 +165,10 @@ void MouseCameraStates::updateStateFromInput(const InputState& inputState,
         _localRollState.previousPosition = mousePosition;
         _localRollState.velocity.decelerate(deltaTime);
     }
+}
+
+void MouseCameraStates::setInvertMouseButton(bool value) {
+    _isMouseButtonInverted = value;
 }
 
 } // namespace openspace::interaction

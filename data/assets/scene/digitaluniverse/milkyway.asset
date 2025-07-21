@@ -1,70 +1,73 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
-local sphereTextures = asset.syncedResource({
-    Name = "Milky Way Sphere Textures",
-    Type = "HttpSynchronization",
-    Identifier = "milkyway_textures",
-    Version = 2
+local textures = asset.resource({
+  Name = "Milky Way Plane Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_milkyway_textures",
+  Version = 2
 })
 
-local planeTextures = asset.syncedResource({
-    Name = "Milky Way Plane Textures",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_milkyway_textures",
-    Version = 2
+local speck = asset.resource({
+  Name = "Milky Way Plane Speck",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_milkyway_speck",
+  Version = 3
 })
 
-local planeSpeck = asset.syncedResource({
-    Name = "Milky Way Plane Speck",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_milkyway_speck",
-    Version = 1
-})
 
-local sphere = {
-    Identifier = "MilkyWay",
-    Renderable = {
-        Type = "RenderableSphere",
-        Size = 9.2E20,
-        Segments = 40,
-        Opacity = 0.4,
-        Texture = sphereTextures .. "/DarkUniverse_mellinger_4k.jpg",
-        Orientation = "Inside/Outside",
-        FadeOutThreshould = 0.25
+local Object = {
+  Identifier = "MilkyWayGalaxyImage",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    Opacity = 0.99,
+    File = speck .. "galaxy.speck",
+    Texture = {
+      Folder = textures
     },
-    GUI = {
-        Name = "Milky Way",
-        Path = "/Milky Way/Milky Way"
-    }
-}
-
-local plane = {
-    Identifier = "MilkyWayGalaxyImage",
-    Parent = "Root",
-    Renderable = {
-        Type = "RenderablePlanesCloud",
-        Enabled = true,
-        Color = { 1.0, 1.0, 1.0 },
-        Transparency = 0.90,
-        ScaleFactor = 2.8,
-        File = planeSpeck .. "/galaxy.speck",
-        TexturePath = planeTextures,
-        Luminosity = "size",
-        ScaleLuminosity = 1.0,
-        -- Fade in value in the same unit as "Unit"
-        FadeInThreshould = 119441,
-        FadeInDistances = { 1400.0, 119441.0 },
-        PlaneMinSize = 5.0,
-        Unit = "pc"
+    -- Use fixed orientation, and rotate planes based on orientation information in
+    -- the dataset
+    Billboard = "Fixed Rotation",
+    UseOrientationData = true,
+    Unit = "pc",
+    Fading = {
+      FadeInDistances = { 16000.0, 100000.0 } -- Fade in value in the same unit as "Unit"
     },
-    GUI = {
-        Name = "Milky Way Galaxy Image",
-        Path = "/Universe/Galaxies"
-    }
+    SizeSettings = {
+      SizeMapping = {
+        ParameterOptions = { "size" }
+      },
+      ScaleExponent = 16.936
+    },
+  },
+  GUI = {
+    Name = "Milky Way Image",
+    Path = "/Milky Way/Galaxy",
+    Focusable = false,
+    Description = [[The exterior view of the Milky Way is represented here by a
+      two-dimensional image. The image is that of NGC 1232, a galaxy thought to resemble
+      our Milky Way. The image has been properly sized and approximately oriented to
+      function as a placeholder, allowing one to see the context of the Galaxy relative
+      to other data in the atlas. The features you see in the image, of course, do not
+      represent our Galaxy, per se, but resemble similar features found in our Galaxy.
+      Census: 1 image.]]
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Object)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { sphere, plane })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Object)
+end)
+
+asset.export(Object)
+
+
+
+asset.meta = {
+  Name = "MilkyWay Galaxy",
+  Description = Object.GUI.Description,
+  Author = "Brian Abbott, Carter Emmart (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe"
+}

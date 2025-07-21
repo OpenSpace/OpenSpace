@@ -1,0 +1,21 @@
+<GDAL_WMS>
+  <Service name="TMS">
+    <ServerUrl>http://openspace.sci.utah.edu/Earth/Bmng/tile/${z}/${y}/${x}</ServerUrl>
+  </Service>
+  <DataWindow>
+    <UpperLeftX>-180.0</UpperLeftX>
+    <UpperLeftY>90.0</UpperLeftY>
+    <LowerRightX>180.0</LowerRightX>
+    <LowerRightY>-90.0</LowerRightY>
+    <SizeX>86400</SizeX>
+    <SizeY>43200</SizeY>
+    <TileLevel>8</TileLevel>
+    <YOrigin>top</YOrigin>
+  </DataWindow>
+  <Projection>EPSG:4326</Projection>
+  <BlockSizeX>240</BlockSizeX>
+  <BlockSizeY>240</BlockSizeY>
+  <BandsCount>3</BandsCount>
+  <MaxConnections>10</MaxConnections>
+  <Timeout>5</Timeout>
+</GDAL_WMS>

@@ -1,0 +1,161 @@
+local function highlightCommand(identifierString, value)
+  local easeFunction = "QuinticEaseOut"
+  if value > 1 then
+    easeFunction = "QuinticEaseIn"
+  end
+  local command = [[openspace.setPropertyValue("]]
+  command = command .. identifierString .. [[.Renderable.Appearance.Fade", ]]
+  command = command .. value .. [[, 2, "]] .. easeFunction .. [[")]]
+  return command
+end
+
+local function highlightAction(identifierString, value, nameString)
+  local actionString = "Dehighlight"
+  if value > 1 then
+    actionString = "Highlight"
+  end
+  return {
+    Identifier = "os." .. actionString .. identifierString .. "_trail",
+    Name = actionString .. " " .. nameString .. " trail",
+    Command = highlightCommand(identifierString, value),
+    Documentation = "Animates the trail fade of " .. nameString .. "'s Trail",
+    GuiPath = "/Trails/Appearance",
+    IsLocal = false
+  }
+end
+
+local function toggleHighlightAction(identifierString, value, nameString)
+  return {
+    Identifier = "os.toggle_" .. identifierString .. "_trail_highlight",
+    Name = "Toggle " .. nameString .. " trail highlight",
+    Command = [[
+local list = openspace.property("]] .. identifierString .. [[.Renderable.Appearance.Fade")
+if #list == 0 then
+  openspace.printWarning("No planets to resize")
+else
+  local prop = list[1]
+  local fadeValue = openspace.propertyValue(prop)
+  if fadeValue > 1 then
+    ]] .. highlightCommand(identifierString, 1, nameString) .. "\n" .. [[
+  else
+    ]] .. highlightCommand(identifierString, value, nameString) .. "\n" .. [[
+  end
+end]],
+    Documentation = "Animates the trail fade of " .. nameString .. "'s trail",
+    GuiPath = "/Trails/Appearance",
+    IsLocal = false
+  }
+end
+
+
+local EnableTrailFading = {
+  Identifier = "os.EnableTrailFading",
+  Name = "Enable trail fading",
+  Command = [[
+    openspace.setPropertyValue("Scene.*Trail.Renderable.Appearance.EnableFade", true)
+    openspace.setPropertyValue("Scene.*trail.Renderable.Appearance.EnableFade", true)
+  ]],
+  Documentation = "Set orbits to fade out towards the end",
+  GuiPath = "/Trails/Appearance",
+  IsLocal = false
+}
+
+local DisableTrailFading = {
+  Identifier = "os.DisableTrailFading",
+  Name = "Disable trail fading",
+  Command = [[
+    openspace.setPropertyValue("Scene.*Trail.Renderable.Appearance.EnableFade", false)
+    openspace.setPropertyValue("Scene.*trail.Renderable.Appearance.EnableFade", false)
+  ]],
+  Documentation = "Sets trails not to fade out torwards end",
+  GuiPath = "/Trails/Appearance",
+  IsLocal = false
+}
+
+local ToggleTrailFading = {
+  Identifier = "os.ToggleTrailFading",
+  Name = "Toggle trail fading",
+  Command = [[
+    local capList = openspace.property("*Trail.Renderable.Appearance.EnableFade")
+    local list = openspace.property("*trail.Renderable.Appearance.EnableFade")
+    if (#capList == 0) and (#list == 0) then
+      openspace.printWarning("No trails to toggle")
+    else
+      local prop
+      if #capList > 0 then
+        prop = capList[1]
+      else
+        prop = list[1]
+      end
+      local currentFade = openspace.propertyValue(prop)
+      local newFade = not currentFade
+      openspace.setPropertyValue("Scene.*Trail.Renderable.Appearance.EnableFade", newFade)
+      openspace.setPropertyValue("Scene.*trail.Renderable.Appearance.EnableFade", newFade)
+    end
+  ]],
+  Documentation = "Toggle trails to fade out towards the end for all trails in the Scene",
+  GuiPath = "/Trails/Appearance",
+  IsLocal = false
+}
+
+local HighlightEarthTrail = highlightAction("Scene.EarthTrail", 10, "Earth")
+local DehighlightEarthTrail = highlightAction("Scene.EarthTrail", 1, "Earth")
+local ToggleEarthTrailHighlight = toggleHighlightAction("Scene.EarthTrail", 10, "Earth")
+
+local HighlightInnerTrails = highlightAction("{planetTrail_terrestrial}", 50, "Inner Planet")
+local DehighlightInnerTrails = highlightAction("{planetTrail_terrestrial}", 1, "Inner Planet")
+local ToggleInnerTrailHighlight = toggleHighlightAction("{planetTrail_terrestrial}", 50, "Inner Planet")
+
+local HighlightOuterTrails = highlightAction("{planetTrail_giants}", 100, "Outer Planet")
+local DehighlightOuterTrails = highlightAction("{planetTrail_giants}", 1, "Outer Planet")
+local ToggleOuterTrailHighlight = toggleHighlightAction("{planetTrail_giants}", 100, "Outer Planet")
+
+
+asset.onInitialize(function()
+  openspace.action.registerAction(EnableTrailFading)
+  openspace.action.registerAction(DisableTrailFading)
+  openspace.action.registerAction(ToggleTrailFading)
+
+  openspace.action.registerAction(HighlightEarthTrail)
+  openspace.action.registerAction(DehighlightEarthTrail)
+  openspace.action.registerAction(ToggleEarthTrailHighlight)
+
+  openspace.action.registerAction(HighlightInnerTrails)
+  openspace.action.registerAction(DehighlightInnerTrails)
+  openspace.action.registerAction(ToggleInnerTrailHighlight)
+
+  openspace.action.registerAction(HighlightOuterTrails)
+  openspace.action.registerAction(DehighlightOuterTrails)
+  openspace.action.registerAction(ToggleOuterTrailHighlight)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(ToggleOuterTrailHighlight)
+  openspace.action.removeAction(DehighlightOuterTrails)
+  openspace.action.removeAction(HighlightOuterTrails)
+
+  openspace.action.removeAction(ToggleInnerTrailHighlight)
+  openspace.action.removeAction(DehighlightInnerTrails)
+  openspace.action.removeAction(HighlightInnerTrails)
+
+  openspace.action.removeAction(ToggleEarthTrailHighlight)
+  openspace.action.removeAction(DehighlightEarthTrail)
+  openspace.action.removeAction(HighlightEarthTrail)
+
+  openspace.action.removeAction(ToggleTrailFading)
+  openspace.action.removeAction(DisableTrailFading)
+  openspace.action.removeAction(EnableTrailFading)
+end)
+
+asset.export("EnableTrailFading", EnableTrailFading.Identifier)
+asset.export("DisableTrailFading", DisableTrailFading.Identifier)
+asset.export("ToggleTrailFading", ToggleTrailFading.Identifier)
+asset.export("HighlightEarthTrail", HighlightEarthTrail.Identifier)
+asset.export("DehighlightEarthTrail", DehighlightEarthTrail.Identifier)
+asset.export("ToggleEarthTrailHighlight", ToggleEarthTrailHighlight.Identifier)
+asset.export("HighlightInnerTrails", HighlightInnerTrails.Identifier)
+asset.export("DehighlightInnerTrails", DehighlightInnerTrails.Identifier)
+asset.export("ToggleInnerTrailHighlight", ToggleInnerTrailHighlight.Identifier)
+asset.export("HighlightOuterTrails", HighlightOuterTrails.Identifier)
+asset.export("DehighlightOuterTrails", DehighlightOuterTrails.Identifier)
+asset.export("ToggleOuterTrailHighlight", ToggleOuterTrailHighlight.Identifier)

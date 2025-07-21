@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,32 +28,32 @@
 #include <openspace/util/task.h>
 
 #include <ghoul/glm.h>
-
+#include <filesystem>
 #include <string>
 
-namespace openspace {
-namespace volume {
+namespace openspace::volume {
 
 class GenerateRawVolumeTask : public Task {
 public:
-    GenerateRawVolumeTask(const ghoul::Dictionary& dictionary);
+    explicit GenerateRawVolumeTask(const ghoul::Dictionary& dictionary);
+
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
-    static documentation::Documentation documentation();
+
+    static documentation::Documentation Documentation();
 
 private:
-    std::string _rawVolumeOutputPath;
-    std::string  _dictionaryOutputPath;
+    std::filesystem::path _rawVolumeOutputPath;
+    std::filesystem::path  _dictionaryOutputPath;
     std::string _time;
 
-    glm::uvec3 _dimensions;
-    glm::vec3 _lowerDomainBound;
-    glm::vec3 _upperDomainBound;
+    glm::uvec3 _dimensions = glm::uvec3(0);
+    glm::vec3 _lowerDomainBound = glm::vec3(0.f);
+    glm::vec3 _upperDomainBound = glm::vec3(0.f);
 
     std::string _valueFunctionLua;
 };
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume
 
 #endif // __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMETASK___H__

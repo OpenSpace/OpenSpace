@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,20 +26,20 @@
 #include <string>
 #include <ghoul/glm.h>
 
+#include <ghoul/ghoul.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/io/texture/texturereaderdevil.h>
-#include <ghoul/io/texture/texturereaderfreeimage.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/directory.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
-#include <ghoul/ghoul.h>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
 
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/settings.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/rendering/renderable.h>
@@ -54,23 +54,13 @@
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
 #include <openspace/engine/moduleengine.h>
+#ifdef WIN32
+#include <Windows.h>
+#endif // WIN32
 
 namespace {
     const std::string ConfigurationFile = "openspace.cfg";
     const std::string _loggerCat = "TaskRunner Main";
-}
-
-void initTextureReaders() {
-    #ifdef GHOUL_USE_DEVIL
-        ghoul::io::TextureReader::ref().addReader(
-            std::make_unique<ghoul::io::TextureReaderDevIL>()
-        );
-    #endif // GHOUL_USE_DEVIL
-    #ifdef GHOUL_USE_FREEIMAGE
-        ghoul::io::TextureReader::ref().addReader(
-            std::make_unique<ghoul::io::TextureReaderFreeImage>()
-        );
-    #endif // GHOUL_USE_FREEIMAGE
 }
 
 void performTasks(const std::string& path) {
@@ -84,12 +74,12 @@ void performTasks(const std::string& path) {
         LINFO("Task queue has 1 item");
     }
     else {
-        LINFO(fmt::format("Task queue has {} items", tasks.size()));
+        LINFO(std::format("Task queue has {} items", tasks.size()));
     }
 
     for (size_t i = 0; i < tasks.size(); i++) {
         Task& task = *tasks[i].get();
-        LINFO(fmt::format(
+        LINFO(std::format(
             "Performing task {} out of {}: {}", i + 1, tasks.size(), task.description()
         ));
         ProgressBar progressBar(100);
@@ -98,25 +88,61 @@ void performTasks(const std::string& path) {
         };
         task.perform(onProgress);
     }
-    std::cout << "Done performing tasks." << std::endl;
+    std::cout << "Done performing tasks" << std::endl;
 }
 
 int main(int argc, char** argv) {
     using namespace openspace;
 
+    ghoul::logging::LogManager::initialize(
+        ghoul::logging::LogLevel::Debug,
+        ghoul::logging::LogManager::ImmediateFlush::Yes
+    );
     ghoul::initialize();
+    global::create();
 
-    std::string configFile = configuration::findConfiguration();
-    global::configuration = configuration::loadConfigurationFromFile(configFile);
-    openspace::global::openSpaceEngine.registerPathTokens();
-    global::openSpaceEngine.initialize();
+    // Register the path of the executable,
+    // to make it possible to find other files in the same directory.
+    FileSys.registerPathToken(
+        "${BIN}",
+        std::filesystem::path(argv[0]).parent_path(),
+        ghoul::filesystem::FileSystem::Override::Yes
+    );
+
+    std::filesystem::path configFile = findConfiguration();
+
+    // Register the base path as the directory where the configuration file lives
+    std::filesystem::path base = configFile.parent_path();
+    constexpr std::string_view BasePathToken = "${BASE}";
+    FileSys.registerPathToken(BasePathToken.data(), base);
+
+    // Using same configuration for size as in apps/OpenSpace/main.cpp
+    glm::ivec2 size = glm::ivec2(1920, 1080);
+#ifdef WIN32
+    DEVMODEW dm = { 0 };
+    dm.dmSize = sizeof(DEVMODEW);
+    BOOL success = EnumDisplaySettingsW(nullptr, ENUM_CURRENT_SETTINGS, &dm);
+    if (success) {
+        size.x = dm.dmPelsWidth;
+        size.y = dm.dmPelsHeight;
+    }
+#endif // WIN32
+
+    std::filesystem::path settings = findSettings();
+    *global::configuration = loadConfigurationFromFile(
+        configFile.string(),
+        settings,
+        size
+    );
+    openspace::global::openSpaceEngine->registerPathTokens();
+    global::openSpaceEngine->initialize();
 
     ghoul::cmdparser::CommandlineParser commandlineParser(
         "OpenSpace TaskRunner",
         ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
     );
 
-    std::string tasksPath = "";
+    std::optional<std::string> tasksPath;
     commandlineParser.addCommand(
         std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
             tasksPath,
@@ -131,21 +157,24 @@ int main(int argc, char** argv) {
 
     //FileSys.setCurrentDirectory(launchDirectory);
 
-    if (tasksPath != "") {
-        performTasks(tasksPath);
+    if (tasksPath.has_value()) {
+        performTasks(*tasksPath);
         return 0;
     }
 
     // If no task file was specified in as argument, run in CLI mode.
 
-    LINFO(fmt::format("Task root: {}", absPath("${TASKS}")));
-    FileSys.setCurrentDirectory(ghoul::filesystem::Directory(absPath("${TASKS}")));
+    LINFO(std::format("Task root: {}", absPath("${TASKS}")));
+    std::filesystem::current_path(absPath("${TASKS}"));
 
     std::cout << "TASK > ";
-    while (std::cin >> tasksPath) {
-        performTasks(tasksPath);
+    std::string t;
+    while (std::cin >> t) {
+        performTasks(t);
         std::cout << "TASK > ";
     }
 
+    global::destroy();
+    ghoul::deinitialize();
     return 0;
 };

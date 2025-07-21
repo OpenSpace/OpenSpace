@@ -1,0 +1,31 @@
+local globe = asset.require("../../earth")
+
+
+
+local Layer = {
+  Identifier = "Reference_Labels",
+  Name = "Reference Labels",
+  Enabled = asset.enabled,
+  FilePath = asset.resource("reference_labels.wms")
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "Overlays", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "Overlays", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "Earth Reference Labels",
+  Description = "Reference Labels layer for Earth globe",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

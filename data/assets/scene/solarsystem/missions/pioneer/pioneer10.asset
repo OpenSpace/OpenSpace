@@ -1,0 +1,86 @@
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local model = asset.require("scene/solarsystem/missions/pioneer/pioneermodel")
+local coreKernels = asset.require("spice/core")
+
+
+
+local kernelsFolder = asset.resource({
+  Name = "Pioneer Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "pioneer_10_spice",
+  Version = 1
+})
+
+
+local Pioneer10ID = -23
+
+local Pioneer10 = {
+  Identifier = "Pioneer_10",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = Pioneer10ID,
+      Observer = coreKernels.ID.SolarSystemBarycenter
+    }
+  },
+  Renderable = model.PioneerModel,
+  GUI = {
+    Name = "Pioneer 10 Spacecraft",
+    Path = "/Solar System/Missions/Pioneer",
+    Description = "Pioneer 10 Spacecraft. Positioned by SPICE data"
+  }
+}
+
+local Pioneer10Trail = {
+  Identifier = "Pioneer_10Trail",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = Pioneer10ID,
+      Observer = coreKernels.ID.SolarSystemBarycenter
+    },
+    Color = { 0.70, 0.50, 0.20 },
+    StartTime = "1972 MAR 03 02:04:00",
+    EndTime = "1990 JAN 02 00:00:00",
+    EnableFade = false
+  },
+  GUI = {
+    Name = "Pioneer 10 Trail (SPICE)",
+    Path = "/Solar System/Missions/Pioneer",
+    Focusable = false,
+    Description = [[Pioneer 10 Trail, spanning March 3rd, 1972 to January 2nd, 1990.
+      Data from SPICE]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernelsFolder .. "p10-a.bsp")
+
+  openspace.addSceneGraphNode(Pioneer10)
+  openspace.addSceneGraphNode(Pioneer10Trail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Pioneer10Trail)
+  openspace.removeSceneGraphNode(Pioneer10)
+
+  openspace.spice.unloadKernel(kernelsFolder .. "p10-a.bsp")
+end)
+
+asset.export(Pioneer10)
+asset.export(Pioneer10Trail)
+
+
+
+asset.meta = {
+  Name = "Pioneer 10",
+  Description = [[Pioneer 10 Model and Trail. Driven by SPICE data for high accuracy from
+    March 3rd, 1972 to January 2nd, 1990]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

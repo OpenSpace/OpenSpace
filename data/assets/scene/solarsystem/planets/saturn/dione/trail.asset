@@ -1,31 +1,54 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-local kernel = asset.require('../kernels').sat375
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
 local DioneTrail = {
-    Identifier = "DioneTrail",
-    Parent = transforms.SaturnBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "DIONE",
-            Observer = "SATURN BARYCENTER",
-            Kernels = kernel
-        },
-        Color = { 0.5, 0.3, 0.3 },
-        Period = 66.0 / 24.0,
-        Resolution = 1000
+  Identifier = "DioneTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Dione,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
-    Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
-    GUI = {
-        Name = "Dione Trail",
-        Path = "/Solar System/Planets/Saturn/Moons"
-    }
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 66.0 / 24.0,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_major_saturn"
+  },
+  GUI = {
+    Name = "Dione Trail",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Dione",
+    Focusable = false,
+    Description = "Trail of Saturn's moon Dione as observed by Saturn"
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(DioneTrail)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { DioneTrail })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(DioneTrail)
+end)
+
+asset.export(DioneTrail)
+
+
+
+asset.meta = {
+  Name = "Dione Trail",
+  Description = "Trail for Dione",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

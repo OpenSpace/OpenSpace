@@ -1,27 +1,41 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
-local kernels = asset.require('./kernels').PlutoKernels
-asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
 local PlutoBarycenter = {
-    Identifier = "PlutoBarycenter",
-    Parent = transforms.SolarSystemBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "PLUTO BARYCENTER",
-            Observer = "SUN",
-            Kernels = kernels
-        }
-    },
-    GUI = {
-        Name = "Pluto Barycenter",
-        Path = "/Solar System/Dwarf Planets/Pluto"
+  Identifier = "PlutoBarycenter",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = coreKernels.ID.PlutoBarycenter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
+  },
+  GUI = {
+    Name = "Pluto Barycenter",
+    Path = "/Solar System/Dwarf Planets/Pluto"
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(PlutoBarycenter)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { PlutoBarycenter })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PlutoBarycenter)
+end)
+
+asset.export(PlutoBarycenter)
+
+
+
+asset.meta = {
+  Name = "Pluto Transforms",
+  Description = "Pluto Barycenter transform",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

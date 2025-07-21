@@ -1,0 +1,22 @@
+<GDAL_WMS>
+  <Service name="TMS">
+    <ServerUrl>http://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/${z}/${y}/${x}</ServerUrl>
+  </Service>
+  <DataWindow>
+    <UpperLeftX>-180.0</UpperLeftX>
+    <UpperLeftY>90.0</UpperLeftY>
+    <LowerRightX>180.0</LowerRightX>
+    <LowerRightY>-90.0</LowerRightY>
+    <SizeX>4194304</SizeX>
+    <SizeY>2097152</SizeY>
+    <TileLevel>12</TileLevel>
+    <YOrigin>top</YOrigin>
+  </DataWindow>
+  <Projection>GEOGCS["GCS_Mars_2000_Sphere",DATUM["D_Mars_2000_Sphere",SPHEROID["Mars_2000_Sphere_IAU_IAG",3396190.0,0.0]],PRIMEM["Reference_Meridian",0.0],UNIT["Degree",0.0174532925199433]]</Projection>
+  <BlockSizeX>512</BlockSizeX>
+  <BlockSizeY>512</BlockSizeY>
+  <BandsCount>1</BandsCount>
+  <MaxConnections>5</MaxConnections>
+  <DataValues NoData="0"></DataValues>
+  <ZeroBlockHttpCodes>404,400</ZeroBlockHttpCodes>
+</GDAL_WMS>

@@ -1,0 +1,31 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderableplaneimagelocal/planeimagelocal_billboard.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderablePlaneImageLocal_Example_Billboard",
+        "position": [
+          361843934707.85876,
+          23187521783.172447,
+          644256819181.3228
+        ],
+        "pitch": -0.005462881077927967,
+        "up": [
+          -0.02372523614955633,
+          0.999461978058476,
+          -0.022646579986526458
+        ],
+        "yaw": -0.004130253806732619,
+        "timestamp": "2025 JUL 13 12:01:05"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

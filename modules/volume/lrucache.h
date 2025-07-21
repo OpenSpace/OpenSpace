@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,15 +31,14 @@
 
 namespace openspace::volume {
 
-template <
+template<
     typename KeyType,
     typename ValueType,
-    template <typename...> class ContainerType
+    template<typename...> class ContainerType
 >
-class LruCache
-{
+class LruCache {
 public:
-    LruCache(size_t capacity);
+    explicit LruCache(size_t capacity);
 
     bool has(const KeyType& key);
     void set(const KeyType& key, ValueType value);

@@ -1,45 +1,69 @@
-local assetHelper = asset.require('util/asset_helper')
+local coreKernels = asset.require("spice/core")
 
 
 
-local data = asset.syncedResource({
-    Name = "Constellation Bounds Data",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_constellationbounds_data",
-    Version = 1
+local data = asset.resource({
+  Name = "Constellation Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_constellations_data",
+  Version = 1
 })
 
+
 local zodiacs = {
-    "Cancer", "Taurus", "Pisces", "Aries", "Libra", "Aquarius", "Capricornus", "Scorpius",
-    "Virgo", "Sagittarius", "Gemini", "Leo"
+  "CNC", "TAU", "PSC", "ARI", "LIB", "AQR", "CAP", "SCO", "VIR", "SGR", "GEM", "LEO"
 }
 
-local object = {
-    Identifier = "ConstellationBounds",
-    Renderable = {
-        Type = "RenderableConstellationBounds",
-        Enabled = false,
-        File = data .. "/bound_20.dat",
-        ConstellationFile = data .. "/constellations.dat"
-        -- ConstellationSelection = zodiacs
+local Object = {
+  Identifier = "ConstellationBounds",
+  Renderable = {
+    Type = "RenderableConstellationBounds",
+    Enabled = false,
+    File = data .. "bound_20.dat",
+    NamesFile = data .. "constellations.dat",
+    Color = { 0.45, 0.44, 0.30 }
+    -- Selection = zodiacs
+  },
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.J2000,
+      DestinationFrame = coreKernels.Frame.Galactic
     },
-    Transform = {
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "J2000",
-            DestinationFrame = "GALACTIC"
-        },
-        Scale = {
-            Type = "StaticScale",
-            Scale = 10e17
-        }
-    },
-    GUI = {
-        Name = "Constellation Bounds",
-        Path = "/Milky Way/Constellations"
+    Scale = {
+      Type = "StaticScale",
+      Scale = 10e17
     }
+  },
+  Tag = { "du_grid" },
+  GUI = {
+    Name = "Constellation Boundaries",
+    Path = "/Milky Way/Constellations",
+    Focusable = false,
+    Description = [[As a continent is divided into countries, astronomers divide the sky
+      into 88 regions called constellations. Every object falls into one of these 88
+      regions. The boundaries of these regions are shown in this asset. Use these in
+      concert with the constellation labels. Census: 88 constellations.]]
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Object)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Object)
+end)
+
+asset.export(Object)
+
+
+
+asset.meta = {
+  Name = "Constellation Bounds",
+  Description = Object.GUI.Description,
+  Author = "Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe"
+}

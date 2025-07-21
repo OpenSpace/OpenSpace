@@ -1,6 +1,5 @@
-set(DEFAULT_MODULE OFF)
+set(DEFAULT_MODULE ON)
+
 set(OPENSPACE_DEPENDENCIES
-    webbrowser
-    webgui
-    server
+  webbrowser
 )

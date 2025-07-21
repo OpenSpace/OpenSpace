@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,105 +32,81 @@
 #include <openspace/documentation/verifier.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <optional>
 
 namespace {
-    constexpr const char* ProgramName = "CartesianAxesProgram";
-    const int NVertexIndices = 6;
-
     constexpr openspace::properties::Property::PropertyInfo XColorInfo = {
         "XColor",
         "X Color",
-        "This value determines the color of the x axis."
+        "The color of the x-axis.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo YColorInfo = {
         "YColor",
         "Y Color",
-        "This value determines the color of the y axis."
+        "The color of the y-axis.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZColorInfo = {
         "ZColor",
         "Z Color",
-        "This value determines the color of the z axis."
+        "The color of the z-axis.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
+
+    // The RenderableCartesianAxes can be used to render the local Cartesian coordinate
+    // system, or reference frame, of another scene graph node. The colors of the axes
+    // can be customized but are per default set to Red, Green and Blue, for the X-, Y-
+    // and Z-axis, respectively.
+    //
+    // To add the axes, create a scene graph node with the RenderableCartesianAxes
+    // renderable and add it as a child to the other scene graph node, i.e. specify the
+    // other node as the `Parent` of the node with this renderable. Also, the axes have to
+    // be scaled to match the parent object for the axes to be visible in the scene, for
+    // example using a [StaticScale](#base_transform_scale_static).
+    struct [[codegen::Dictionary(RenderableCartesianAxes)]] Parameters {
+        // [[codegen::verbatim(XColorInfo.description)]]
+        std::optional<glm::vec3> xColor [[codegen::color()]];
+
+        // [[codegen::verbatim(YColorInfo.description)]]
+        std::optional<glm::vec3> yColor [[codegen::color()]];
+
+        // [[codegen::verbatim(ZColorInfo.description)]]
+        std::optional<glm::vec3> zColor [[codegen::color()]];
+    };
+#include "renderablecartesianaxes_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableCartesianAxes::Documentation() {
-    using namespace documentation;
-    return {
-        "CartesianAxesProgram",
-        "base_renderable_cartesianaxes",
-        {
-            {
-                XColorInfo.identifier,
-                new DoubleVector4Verifier,
-                Optional::Yes,
-                XColorInfo.description
-            },
-            {
-                YColorInfo.identifier,
-                new DoubleVector4Verifier,
-                Optional::Yes,
-                YColorInfo.description
-            },
-            {
-                ZColorInfo.identifier,
-                new DoubleVector4Verifier,
-                Optional::Yes,
-                ZColorInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("base_renderable_cartesianaxes");
 }
-
 
 RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _program(nullptr)
-    , _xColor(
-        XColorInfo,
-        glm::vec4(0.f, 0.f, 0.f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
-    , _yColor(
-        YColorInfo,
-        glm::vec4(0.f, 1.f, 0.f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
-    , _zColor(
-        ZColorInfo,
-        glm::vec4(0.f, 0.f, 1.f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
+    , _xColor(XColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _yColor(YColorInfo, glm::vec3(0.f, 1.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _zColor(ZColorInfo, glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableCartesianAxes"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasKey(XColorInfo.identifier)) {
-        _xColor = dictionary.value<glm::vec4>(XColorInfo.identifier);
-    }
+    addProperty(Fadeable::_opacity);
+
+    _xColor = p.xColor.value_or(_xColor);
     _xColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_xColor);
 
-    if (dictionary.hasKey(XColorInfo.identifier)) {
-        _yColor = dictionary.value<glm::vec4>(YColorInfo.identifier);
-    }
+    _yColor = p.yColor.value_or(_yColor);
     _yColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_yColor);
 
-    if (dictionary.hasKey(ZColorInfo.identifier)) {
-        _zColor = dictionary.value<glm::vec4>(ZColorInfo.identifier);
-    }
+    _zColor = p.zColor.value_or(_zColor);
     _zColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_zColor);
 }
@@ -143,10 +119,10 @@ bool RenderableCartesianAxes::isReady() const {
 
 void RenderableCartesianAxes::initializeGL() {
     _program = BaseModule::ProgramObjectManager.request(
-        ProgramName,
+        "CartesianAxesProgram",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine.buildRenderProgram(
-                ProgramName,
+            return global::renderEngine->buildRenderProgram(
+                "CartesianAxesProgram",
                 absPath("${MODULE_BASE}/shaders/axes_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/axes_fs.glsl")
             );
@@ -154,29 +130,22 @@ void RenderableCartesianAxes::initializeGL() {
     );
 
     glGenVertexArrays(1, &_vaoId);
-    glGenBuffers(1, &_vBufferId);
-    glGenBuffers(1, &_iBufferId);
-
     glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferId);
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
 
-    std::vector<Vertex> vertices({
+    constexpr std::array<Vertex, 4> vertices = {
         Vertex{0.f, 0.f, 0.f},
         Vertex{1.f, 0.f, 0.f},
         Vertex{0.f, 1.f, 0.f},
         Vertex{0.f, 0.f, 1.f}
-    });
+    };
 
-    std::vector<int> indices = {
+    constexpr std::array<int, 6> indices = {
         0, 1,
         0, 2,
         0, 3
     };
 
-    glBindVertexArray(_vaoId);
+    glGenBuffers(1, &_vBufferId);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
     glBufferData(
         GL_ARRAY_BUFFER,
@@ -185,8 +154,10 @@ void RenderableCartesianAxes::initializeGL() {
         GL_STATIC_DRAW
     );
 
+    glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
 
+    glGenBuffers(1, &_iBufferId);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferId);
     glBufferData(
         GL_ELEMENT_ARRAY_BUFFER,
@@ -194,6 +165,7 @@ void RenderableCartesianAxes::initializeGL() {
         indices.data(),
         GL_STATIC_DRAW
     );
+    glBindVertexArray(0);
 }
 
 void RenderableCartesianAxes::deinitializeGL() {
@@ -207,24 +179,18 @@ void RenderableCartesianAxes::deinitializeGL() {
     _iBufferId = 0;
 
     BaseModule::ProgramObjectManager.release(
-        ProgramName,
+        "CartesianAxesProgram",
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
     _program = nullptr;
 }
 
-void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&){
+void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&) {
     _program->activate();
 
-    const glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
-                                          modelTransform;
+    const glm::dmat4 modelViewTransform = calcModelViewTransform(data);
 
     _program->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _program->setUniform("projectionTransform", data.camera.projectionMatrix());
@@ -232,44 +198,27 @@ void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&){
     _program->setUniform("xColor", _xColor);
     _program->setUniform("yColor", _yColor);
     _program->setUniform("zColor", _zColor);
-
-    // Saves current state:
-    GLboolean isBlendEnabled = glIsEnabledi(GL_BLEND, 0);
-    GLboolean isLineSmoothEnabled = glIsEnabled(GL_LINE_SMOOTH);
-    GLfloat currentLineWidth;
-    glGetFloatv(GL_LINE_WIDTH, &currentLineWidth);
-
-    GLenum blendEquationRGB, blendEquationAlpha, blendDestAlpha,
-        blendDestRGB, blendSrcAlpha, blendSrcRGB;
-    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
-    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
-    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
-    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
-    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
-    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
+    _program->setUniform("opacity", opacity());
 
     // Changes GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
     glEnable(GL_LINE_SMOOTH);
+#ifndef __APPLE__
+    glLineWidth(3.f);
+#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
+    glLineWidth(1.f);
+#endif // __APPLE__
 
     glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferId);
-    glDrawElements(GL_LINES, NVertexIndices, GL_UNSIGNED_INT, nullptr);
+    glDrawElements(GL_LINES, 6, GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
 
     _program->deactivate();
 
     // Restores GL State
-    glLineWidth(currentLineWidth);
-    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
-    glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
-    if (!isBlendEnabled) {
-        glDisablei(GL_BLEND, 0);
-    }
-    if (!isLineSmoothEnabled) {
-        glDisable(GL_LINE_SMOOTH);
-    }
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetLineState();
 }
 
 } // namespace openspace

@@ -1,0 +1,128 @@
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local l2kernels = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/kernels")
+local l2transforms = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local LaunchTime = "2021 DEC 25 12:20:00"
+local DetachTime = "2021 DEC 25 12:50:00"
+local L2orbitInsertionTime = "2022 JAN 25 00:00:00"
+
+local JWSTPosition = {
+  Identifier = "JWSTPosition",
+  Parent = earthTransforms.EarthIAU.Identifier,
+  Transform = {
+    Translation = {
+      Type = "TimelineTranslation",
+      ShouldInterpolate = false,
+      Keyframes = {
+        [LaunchTime] = {
+          Type = "SpiceTranslation",
+          Target = kernels.ID.JWST,
+          Observer = coreKernels.ID.Earth,
+          Frame = coreKernels.Frame.Earth
+        },
+        [DetachTime] = {
+          Type = "SpiceTranslation",
+          Target = kernels.ID.JWST,
+          Observer = coreKernels.ID.Earth,
+          Frame = coreKernels.Frame.Galactic
+        },
+        [L2orbitInsertionTime] = {
+          Type = "SpiceTranslation",
+          Target = kernels.ID.JWST,
+          Observer = l2kernels.ID.L2,
+          Frame = coreKernels.Frame.Galactic
+        }
+      }
+    }
+  },
+  GUI = {
+    Name = "JWST Position",
+    Path = "/Solar System/Telescopes/JWST",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local JWSTRotation = {
+  Identifier = "JWSTRotation",
+  Parent = JWSTPosition.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "JWSTRotation",
+      XAxis = { 1, 0, 0 },
+      XAxisOrthogonal = true,
+      YAxisInvert = true,
+      YAxis = sunTransforms.SolarSystemBarycenter.Identifier
+    }
+  },
+  GUI = {
+    Name = "JWST Rotation",
+    Path = "/Solar System/Telescopes/JWST",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+-- Reparent the JWSTPosition node when the data changes
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(JWSTPosition)
+  openspace.addSceneGraphNode(JWSTRotation)
+
+  -- Set correct parent during run-time
+  openspace.scriptScheduler.loadScheduledScript(
+    DetachTime,
+    [[openspace.setParent("JWSTPosition", "]] .. earthTransforms.EarthCenter.Identifier .. [[")]],
+    [[openspace.setParent("JWSTPosition", "]] .. earthTransforms.EarthIAU.Identifier .. [[")]],
+    "",
+    1 -- Not default group, never clear this script
+  )
+  openspace.scriptScheduler.loadScheduledScript(
+    L2orbitInsertionTime,
+    [[openspace.setParent("JWSTPosition", "]] .. l2transforms.L2Position.Identifier .. [[")]],
+    [[openspace.setParent("JWSTPosition", "]] .. earthTransforms.EarthCenter.Identifier .. [[")]],
+    "",
+    1 -- Not default group, never clear this script
+  )
+
+  -- Set correct parent at the start
+  local now = openspace.time.currentTime()
+  if now < openspace.time.convertTime(DetachTime) then
+    openspace.setParent("JWSTPosition", earthTransforms.EarthIAU.Identifier)
+  elseif now > openspace.time.convertTime(L2orbitInsertionTime) then
+    openspace.setParent("JWSTPosition", l2transforms.L2Position.Identifier)
+  else
+    openspace.setParent("JWSTPosition", earthTransforms.EarthCenter.Identifier)
+  end
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JWSTRotation)
+  openspace.removeSceneGraphNode(JWSTPosition)
+  openspace.scriptScheduler.clear(1)
+end)
+
+asset.export("LaunchTime", LaunchTime)
+asset.export("DetachTime", DetachTime)
+asset.export("L2orbitInsertionTime", L2orbitInsertionTime)
+asset.export(JWSTPosition)
+asset.export(JWSTRotation)
+
+
+
+asset.meta = {
+  Name = "James Webb Space Telescope Transforms",
+  Description = [[
+    JWST transforms: JWST position relative to Earth and JWST rotation,
+    a fixed rotation so sunshield always points toward the Sun.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

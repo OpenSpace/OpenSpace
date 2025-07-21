@@ -1,0 +1,37 @@
+local sun = asset.require("scene/solarsystem/sun/transforms")
+
+
+
+local modelFolder = asset.resource({
+  Name = "Pioneer 10/11 Models",
+  Type = "HttpSynchronization",
+  Identifier = "pioneer_10_11_model",
+  Version = 3
+})
+
+
+local ModelRenderable = {
+  Type = "RenderableModel",
+  GeometryFile = modelFolder .. "pioneer.fbx",
+  LightSources = {
+    sun.LightSource,
+    {
+      Identifier = "Camera",
+      Type = "CameraLightSource",
+      Intensity = 0.5
+    }
+  }
+}
+
+asset.export("PioneerModel", ModelRenderable)
+
+
+
+asset.meta = {
+  Name = "Pioneer Model",
+  Description = [[Pioneer model asset. Used by both pioneer 10 and pioneer 11 asset.
+    Untextured version of model from NASA 3D resources]],
+  Author = "NASA",
+  URL = "https://nasa3d.arc.nasa.gov/detail/eoss-pioneer",
+  License = "NASA"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,26 +27,26 @@
 
 #include <modules/spacecraftinstruments/util/sequenceparser.h>
 
+#include <filesystem>
+
 namespace openspace {
 
 class HongKangParser : public SequenceParser {
 public:
-    HongKangParser();
-    HongKangParser(std::string name, std::string fileName, std::string spacecraft,
-        const ghoul::Dictionary& translationDictionary,
+    HongKangParser(std::string name, std::filesystem::path fileName,
+        std::string spacecraft, const ghoul::Dictionary& translationDictionary,
         std::vector<std::string> potentialTargets);
 
     bool create() override;
     std::string findPlaybookSpecifiedTarget(std::string line);
 
 private:
-    std::string _defaultCaptureImage;
+    std::filesystem::path _defaultCaptureImage;
     double _metRef = 299180517;
 
     std::string _name;
-    std::string _fileName;
+    std::filesystem::path _fileName;
     std::string _spacecraft;
-    std::map<std::string, std::unique_ptr<Decoder>> _fileTranslation;
     std::vector<std::string> _potentialTargets;
 };
 

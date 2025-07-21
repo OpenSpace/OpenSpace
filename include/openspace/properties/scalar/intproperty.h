@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,26 +25,32 @@
 #ifndef __OPENSPACE_CORE___INTPROPERTY___H__
 #define __OPENSPACE_CORE___INTPROPERTY___H__
 
- /**
- * \file intproperty.h
- *
- * \addtogroup openspace
- * @{
- * \addtogroup properties
- * @{
-
- * \class IntProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>int</code>.
-
- * @} @}
- */
-
 #include <openspace/properties/numericalproperty.h>
+#include <limits>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(IntProperty, int)
+/**
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type `int`.
+ */
+class IntProperty : public NumericalProperty<int> {
+public:
+    explicit IntProperty(Property::PropertyInfo info, int value = 0,
+        int minValue = std::numeric_limits<int>::lowest(),
+        int maxValue = std::numeric_limits<int>::max(), int stepValue = 1);
+
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
+
+    void getLuaValue(lua_State* state) const override final;
+
+    std::string stringValue() const override final;
+    using TemplateProperty<int>::operator=;
+
+private:
+    int toValue(lua_State* state) const override final;
+};
 
 } // namespace openspace::properties
 

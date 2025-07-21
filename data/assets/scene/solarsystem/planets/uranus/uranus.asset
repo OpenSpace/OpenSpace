@@ -1,51 +1,80 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
-asset.require("spice/base")
-asset.request('./trail')
+asset.require("./trail")
+local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
 
 
-
-local textures = asset.syncedResource({
-    Name = "Uranus Textures",
-    Type = "HttpSynchronization",
-    Identifier = "uranus_textures",
-    Version = 1
-})
 
 local Uranus = {
-    Identifier = "Uranus",
-    Parent = transforms.UranusBarycenter.Identifier,
-    Transform = {
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_URANUS",
-            DestinationFrame = "GALACTIC"
-        },
-        Scale = {
-            Type = "StaticScale",
-            Scale = 1.0
-        }
+  Identifier = "Uranus",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = coreKernels.ID.Uranus,
+      Observer = coreKernels.ID.UranusBarycenter
     },
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = { 25559000, 25559000, 24973000 },
-        SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/uranus.jpg",
-                    Enabled = true
-                }
-            }
-        }
-    },
-    Tag = { "planet_solarSystem", "planet_giants" },
-    GUI = {
-        Path = "/Solar System/Planets/Uranus"
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.Uranus,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 25559000, 25559000, 24973000 }
+  },
+  Tag = { "planet_solarSystem", "planet_giants" },
+  GUI = {
+    Name = "Uranus",
+    Path = "/Solar System/Planets/Uranus"
+  }
+}
+
+local UranusLabel = {
+  Identifier = "UranusLabel",
+  Parent = Uranus.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Uranus",
+    FontSize = 70.0,
+    Size = 9.0,
+    MinMaxSize = { 1, 80 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 2.5, 100.0 },
+    FadeWidths = { 1.0, 120.0 }
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "Uranus Label",
+    Path = "/Solar System/Planets/Uranus",
+    Focusable = false
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Uranus)
+  openspace.addSceneGraphNode(UranusLabel)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Uranus })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(UranusLabel)
+  openspace.removeSceneGraphNode(Uranus)
+end)
+
+asset.export(Uranus)
+asset.export(UranusLabel)
+
+
+
+asset.meta = {
+  Name = "Uranus",
+  Description = "Uranus globe, and main planet label",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

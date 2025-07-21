@@ -1,2 +1,13 @@
-asset.request('./sun/sun')
-asset.request('./sun/glare')
+asset.require("./sun/sun")
+asset.require("./sun/glare")
+
+
+
+asset.meta = {
+  Name = "Sun",
+  Description = [[Meta asset for the Sun in our solar system. Contains the Sun globe and
+  Sun glare texture]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

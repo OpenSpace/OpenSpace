@@ -1,0 +1,56 @@
+local transforms = asset.require("./transforms")
+
+
+
+local homespeck = asset.resource({
+  Name = "Home Speck File",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_home_speck",
+  Version = 1
+})
+
+
+local Object = {
+  Identifier = "HomeLabel",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    Enabled = false,
+    Labels = {
+      Enabled = true,
+      File = homespeck .. "home.label",
+      Color = { 0.8, 0.8, 0.8 },
+      Size = 20.50,
+      MinMaxSize = { 16, 20 },
+      Unit = "Mpc",
+      TransformationMatrix = transforms.Supergalactic
+    }
+  },
+  GUI = {
+    Name = "Home Label",
+    Path = "/Universe/Nearby Surveys",
+    Focusable = false,
+    Description = [[Label for the Milky Way titled 'Home', sized for viewing outside the
+      Milky Way Galaxy.]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Object)
+end)
+
+asset.export(Object)
+
+
+
+asset.meta = {
+  Name = "Home Label",
+  Description = Object.GUI.Description,
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

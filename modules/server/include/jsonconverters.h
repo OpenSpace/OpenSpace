@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 
 #include <openspace/json.h>
 #include <ghoul/glm.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace openspace::properties {
 
@@ -40,6 +41,13 @@ void to_json(nlohmann::json& j, const PropertyOwner* p);
 
 } // namespace openspace::properties
 
+namespace openspace::interaction {
+    struct Action;
+
+    void to_json(nlohmann::json& j, const Action& a);
+    void to_json(nlohmann::json& j, const Action* pA);
+} // namespace openspace::interaction
+
 namespace openspace {
 
 class Renderable;
@@ -52,6 +60,13 @@ void to_json(nlohmann::json& j, const Renderable& r);
 void to_json(nlohmann::json& j, const Renderable* pR);
 
 } // namespace openspace
+
+namespace ghoul {
+
+void to_json(nlohmann::json& j, const Dictionary& d);
+void to_json(nlohmann::json& j, const Dictionary* d);
+
+} // namespace ghoul
 
 namespace glm {
 

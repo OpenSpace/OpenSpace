@@ -1,0 +1,122 @@
+local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sun = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local models = asset.resource({
+  Name = "Apollo Models",
+  Type = "HttpSynchronization",
+  Identifier = "apollo_models",
+  Version = 4
+})
+
+
+local Apollo8 = {
+  Identifier = "Apollo8",
+  Parent = earth_transforms.EarthBarycenter.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "1968 DEC 21",
+    End = "1968 DEC 28"
+  },
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Apollo8,
+      Observer = coreKernels.ID.EarthBarycenter,
+      Frame = coreKernels.Frame.Galactic
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Apollo8Earthrise,
+      DestinationFrame = coreKernels.Frame.Galactic,
+      TimeFrame = {
+        -- The orientation of Apollo 8 is only available during the few minutes
+        -- when the Earthrise picture was taken.
+        Type = "TimeFrameInterval",
+        Start = "1968 DEC 24 16:37:19",
+        End = "1968 DEC 24 16:40:15"
+      }
+    }
+  },
+  GUI = {
+    Name = "Apollo 8",
+    Path = "/Solar System/Missions/Apollo/8"
+  }
+}
+
+local Apollo8Model = {
+  Identifier = "Apollo8Model",
+  Parent = Apollo8.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "1968 DEC 22",
+    End = "1968 DEC 28"
+  },
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0.0, 0.0, -math.pi / 2 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "ApolloCSM.osmodel",
+    ModelScale = 0.0001,
+    LightSources = {
+      sun.LightSource
+    },
+    PerformShading = true
+  },
+  GUI = {
+    Name = "Apollo 8 Model",
+    Path = "/Solar System/Missions/Apollo/8",
+    Hidden = true
+  }
+}
+
+-- The pivot node is used for navigation inside the spacecraft
+local Apollo8Pivot = {
+  Identifier = "Apollo8Pivot",
+  Parent = Apollo8.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0, 2.5, 0 }
+    }
+  },
+  GUI = {
+    Name = "Apollo 8 Pivot",
+    Path = "/Solar System/Missions/Apollo/8"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Apollo8)
+  openspace.addSceneGraphNode(Apollo8Model)
+  openspace.addSceneGraphNode(Apollo8Pivot)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Apollo8Pivot)
+  openspace.removeSceneGraphNode(Apollo8Model)
+  openspace.removeSceneGraphNode(Apollo8)
+end)
+
+asset.export(Apollo8)
+asset.export(Apollo8Model)
+asset.export(Apollo8Pivot)
+
+
+
+asset.meta = {
+  Name = "Apollo 8 Model",
+  Description = [[Contains the 3D model of the Apollo 8 command module for use during the
+    launch of the spacecraft from Earth and the Earthrise moment.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

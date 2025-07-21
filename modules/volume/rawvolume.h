@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,10 +33,10 @@ namespace openspace::volume {
 
 template <typename Type>
 class RawVolume {
+public:
     using VoxelType = Type;
 
-public:
-    RawVolume(const glm::uvec3& dimensions);
+    explicit RawVolume(const glm::uvec3& dimensions);
 
     glm::uvec3 dimensions() const;
     void setDimensions(const glm::uvec3& dimensions);
@@ -52,7 +52,7 @@ public:
     VoxelType* data();
 
 private:
-    glm::uvec3 _dimensions;
+    glm::uvec3 _dimensions = glm::uvec3(0);
     std::vector<VoxelType> _data;
 };
 

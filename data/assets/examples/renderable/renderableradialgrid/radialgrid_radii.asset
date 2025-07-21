@@ -1,0 +1,24 @@
+-- Custom Radii
+-- This example adds a circular grid with a radius of 100 meters with a hole of 10 meters
+-- in the center. This is achieved by specifying two radii, the first one being the radius
+-- of the inner circle and the second one being the radius of the outer circle.
+
+local Node = {
+  Identifier = "RenderableRadialGrid_Example_Radii",
+  Renderable = {
+    Type = "RenderableRadialGrid",
+    Radii = { 10.0, 100.0 }
+  },
+  GUI = {
+    Name = "RenderableRadialGrid - Custom Radii",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

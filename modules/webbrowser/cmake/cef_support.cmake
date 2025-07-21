@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -24,7 +24,6 @@
 
 # This file consists of snippets taken from various CEF projects.
 
-
 # Copyright (c) 2016 The Chromium Embedded Framework Authors. All rights
 # reserved. Use of this source code is governed by a BSD-style license that
 # can be found in the LICENSE file.
@@ -33,30 +32,43 @@
 # platform.
 
 function(set_current_cef_build_platform)
-  if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
-    set(CEF_PLATFORM "macosx64" PARENT_SCOPE)
-  elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-    if(CMAKE_SIZEOF_VOID_P MATCHES 8)
-      set(CEF_PLATFORM "linux64" PARENT_SCOPE)
+  if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+    # Use CMAKE_OSX_ARCHITECTURES if set, otherwise fallback to CMAKE_SYSTEM_PROCESSOR
+    if (DEFINED CMAKE_OSX_ARCHITECTURES AND NOT "${CMAKE_OSX_ARCHITECTURES}" STREQUAL "")
+      # CMAKE_OSX_ARCHITECTURES can be a list; just use the first architecture
+      list(GET CMAKE_OSX_ARCHITECTURES 0 CEF_ARCH)
     else()
-      set(CEF_PLATFORM "linux32" PARENT_SCOPE)
+      set(CEF_ARCH "${CMAKE_SYSTEM_PROCESSOR}")
     endif()
-  elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-    if(CMAKE_SIZEOF_VOID_P MATCHES 8)
+    if ("${CEF_ARCH}" STREQUAL "arm64")
+      set(CEF_PLATFORM "macosarm64" PARENT_SCOPE)
+    else()
+      set(CEF_PLATFORM "macosx64" PARENT_SCOPE)
+    endif()
+  elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+    if ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64")
+      set(CEF_PLATFORM "linuxarm64" PARENT_SCOPE)
+    elseif (CMAKE_SIZEOF_VOID_P MATCHES 8)
+      set(CEF_PLATFORM "linux64" PARENT_SCOPE)
+    else ()
+      set(CEF_PLATFORM "linux32" PARENT_SCOPE)
+    endif ()
+  elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+    if (CMAKE_SIZEOF_VOID_P MATCHES 8)
       set(CEF_PLATFORM "windows64" PARENT_SCOPE)
     else()
       set(CEF_PLATFORM "windows32" PARENT_SCOPE)
-    endif()
-  endif()
-endfunction()
+    endif ()
+  endif ()
+endfunction ()
 
 # Download the CEF binary distribution for |platform| and |version| to
 # |download_dir|. The |CEF_ROOT| variable will be set in global scope pointing
 # to the extracted location.
-# Visit http://opensource.spotify.com/cefbuilds/index.html for the list of
+# Visit https://cef-builds.spotifycdn.com/index.html for the list of
 # supported platforms and versions.
 
-function(DownloadCEF platform version download_dir)
+function(download_cef platform version download_dir)
   # Specify the binary distribution type and download directory.
   set(CEF_DISTRIBUTION "cef_binary_${version}_${platform}")
   set(CEF_DOWNLOAD_DIR "${download_dir}")
@@ -65,11 +77,11 @@ function(DownloadCEF platform version download_dir)
   set(CEF_ROOT "${CEF_DOWNLOAD_DIR}/${CEF_DISTRIBUTION}" CACHE INTERNAL "CEF_ROOT")
 
   # Download and/or extract the binary distribution if necessary.
-  if(NOT IS_DIRECTORY "${CEF_ROOT}")
+  if (NOT IS_DIRECTORY "${CEF_ROOT}")
     set(CEF_DOWNLOAD_FILENAME "${CEF_DISTRIBUTION}.tar.bz2")
     set(CEF_DOWNLOAD_PATH "${CEF_DOWNLOAD_DIR}/${CEF_DOWNLOAD_FILENAME}")
-    if(NOT EXISTS "${CEF_DOWNLOAD_PATH}")
-      set(CEF_DOWNLOAD_URL "http://opensource.spotify.com/cefbuilds/${CEF_DOWNLOAD_FILENAME}")
+    if (NOT EXISTS "${CEF_DOWNLOAD_PATH}")
+      string(REPLACE "+" "%2B" CEF_DOWNLOAD_URL "http://cef-builds.spotifycdn.com/${CEF_DOWNLOAD_FILENAME}")
 
       # Download the SHA1 hash for the binary distribution.
       message(STATUS "Downloading CEF: ${CEF_DOWNLOAD_PATH}.sha1...")
@@ -82,21 +94,21 @@ function(DownloadCEF platform version download_dir)
         DOWNLOAD "${CEF_DOWNLOAD_URL}" "${CEF_DOWNLOAD_PATH}"
         EXPECTED_HASH SHA1=${CEF_SHA1}
         SHOW_PROGRESS
-        )
-    endif()
+      )
+    endif ()
 
     # Extract the binary distribution.
     message(STATUS "Extracting CEF: ${CEF_DOWNLOAD_PATH}...")
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E tar xzf "${CEF_DOWNLOAD_DIR}/${CEF_DOWNLOAD_FILENAME}"
       WORKING_DIRECTORY ${CEF_DOWNLOAD_DIR}
-      )
-  endif()
-endfunction()
+    )
+  endif ()
+endfunction ()
 
-macro(SET_OPENSPACE_CEF_TARGET_OUT_DIR)
-  if(${CMAKE_GENERATOR} STREQUAL "Ninja" OR
-     ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles")
+macro(set_openspace_cef_target_out_dir)
+  if (${CMAKE_GENERATOR} STREQUAL "Ninja" OR
+      ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles")
     # By default Ninja and Make builds don't create a subdirectory named after
     # the configuration.
     # set(CEF_TARGET_OUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
@@ -105,31 +117,31 @@ macro(SET_OPENSPACE_CEF_TARGET_OUT_DIR)
     # Output binaries (executables, libraries) to the correct directory.
     # set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CEF_TARGET_OUT_DIR})
     # set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CEF_TARGET_OUT_DIR})
-  else()
+  else ()
     # set(CEF_TARGET_OUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIGURATION>")
-    set(CEF_TARGET_OUT_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>")
-  endif()
-endmacro()
+    set(CEF_TARGET_OUT_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>")
+  endif ()
+endmacro ()
 
-macro(ADD_WINDOWS_CEF_MANIFEST target_dir manifest_path target extension)
-    add_custom_command(
-        TARGET ${target}
-        POST_BUILD
-        COMMAND "mt.exe" -nologo
-        -manifest \"${manifest_path}/${target}.${extension}.manifest\" \"${manifest_path}/compatibility.manifest\"
-        -outputresource:"${target_dir}/${target}.${extension}"\;\#1
-        COMMENT "Adding manifest..."
-    )
-endmacro()
+macro(add_windows_cef_manifest target_dir manifest_path target extension)
+  add_custom_command(
+      TARGET ${target}
+      POST_BUILD
+      COMMAND "mt.exe" -nologo
+      -manifest \"${manifest_path}/${target}.${extension}.manifest\" \"${manifest_path}/compatibility.manifest\"
+      -outputresource:"${target_dir}/${target}.${extension}"\;\#1
+      COMMENT "Adding manifest..."
+  )
+endmacro ()
 
 
 # Add a logical target that can be used to link the specified libraries into an
 # executable target.
-macro(ADD_CEF_LOGICAL_TARGET target debug_lib release_lib)
+macro(add_cef_logical_target target debug_lib release_lib)
   add_library(${target} ${CEF_LIBTYPE} IMPORTED GLOBAL)
   set_target_properties(${target} PROPERTIES
     IMPORTED_LOCATION "${release_lib}"
     IMPORTED_LOCATION_DEBUG "${debug_lib}"
     IMPORTED_LOCATION_RELEASE "${release_lib}"
-    )
-endmacro()
+  )
+endmacro ()

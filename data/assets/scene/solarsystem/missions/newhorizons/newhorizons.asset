@@ -1,22 +1,13 @@
-asset.require('./model')
-asset.require('./label')
-asset.require('./fov')
-asset.require('./trail')
+asset.require("./model")
+asset.require("./label")
+asset.require("./fov")
+asset.require("./trail")
 
-asset.require('./pluto')
-asset.require('./charon')
-asset.require('./hydra')
-asset.require('./nix')
-asset.require('./styx')
+asset.require("./pluto")
+asset.require("./charon")
 
+asset.require("./othermoons")
 
-local mission = asset.localResource("newhorizons.mission")
-local missionName
+asset.require("./actions")
 
-asset.onInitialize(function()
-    missionName = openspace.loadMission(mission)
-end)
-
-asset.onDeinitialize(function()
-    openspace.unloadMission(missionName)
-end)
+asset.require("./mission")

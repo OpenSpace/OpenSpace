@@ -1,0 +1,69 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Carbon Dioxide Concentration: GEOS-5 Model"
+local Identifier = "noaa-sos-atmosphere-nccs_models-carbon"
+local Description = [[Models create a dynamic portrait of the Earth through numerical
+experiments that simulate our current knowledge of the dynamical and physical processes
+governing weather and climate variability. This new simulation of carbon dioxide in
+Earth's atmosphere provides an ultra-high-resolution look at how the key greenhouse gas
+moves around the globe and fluctuates in volume throughout the year. These three close-up
+views show how local geography affects the transport of carbon dioxide in the
+atmosphere]]
+local URL = "https://sos.noaa.gov/catalog/datasets/carbon-dioxide-concentration-geos-5-model/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "ImageSequenceTileProvider",
+  FolderPath = syncedDirectory .. "2048",
+  Description = Description
+}
+
+local Colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar.png",
+  FaceCamera = false,
+  Scale = 0.4,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(Colorbar)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

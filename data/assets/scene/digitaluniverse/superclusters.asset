@@ -1,43 +1,74 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
-local textures = asset.syncedResource({
-    Name = "Galaxy Superclusters Textures",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_superclusters_textures",
-    Version = 1
+local textures = asset.resource({
+  Name = "Point Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_point_textures",
+  Version = 1
 })
 
-local speck = asset.syncedResource({
-    Name = "Galaxy Superclusters Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_superclusters_speck",
-    Version = 1
+local speck = asset.resource({
+  Name = "Galaxy Superclusters Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_superclusters_speck",
+  Version = 2
 })
 
-local object = {
-    Identifier = "GalaxySuperclusters",
-    Renderable = {
-        Type = "RenderableBillboardsCloud",
-        Enabled = false,
-        Color = { 1.0, 1.0, 1.0 },
-        Transparency = 0.65,
-        File = speck .. "/superclust.speck",
-        Texture = textures .. "/point3.png",
-        LabelFile = speck .. "/superclust.label",
-        TextColor = { 0.6, 0.6, 0.6, 1.0 },
-        ScaleFactor = 531.0,
-        TextSize = 22.44,
-        TextMinSize = 8.0,
-        Unit = "Mpc"
+
+local Object = {
+  Identifier = "GalaxySuperclusters",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    Enabled = false,
+    File = speck .. "superclust.speck",
+    Labels = {
+      Enabled = true,
+      File = speck .. "superclust.label",
+      Color = { 0.9, 0.9, 0.9 },
+      Size = 22.44,
+      MinMaxSize = { 8, 20 },
+      Unit = "Mpc"
     },
-    GUI = {
-        Name = "Galaxy Superclusters",
-        Path = "/Universe/Galaxies"
+    DrawElements = false,
+    Opacity = 0.65,
+    Texture = {
+      File = textures .. "point3A.png",
+    },
+    Unit = "Mpc",
+    SizeSettings = {
+      ScaleExponent = 23.1,
+      MaxSize = 0.2,
+      EnableMaxSizeControl = true
     }
+  },
+  GUI = {
+    Name = "Supercluster Labels",
+    Path = "/Universe/Deep Sky Surveys",
+    Focusable = false,
+    Description = [[The superclusters dataset is a set of labels that mark the major
+      galaxy superclusters in the local universe. They correspond to, and should be viewed
+      with, the Abell clusters. Astronomers estimate there are 10 million superclusters in
+      the observable universe. Often, they carry constellation names because they are
+      viewed in those constellations from our night-sky perspective. Census: 33
+      supercluster labels.]]
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Object)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Object)
+end)
+
+asset.export(Object)
+
+
+
+asset.meta = {
+  Name = "Galaxy Superclusters",
+  Description = Object.GUI.Description,
+  Author = "Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe"
+}

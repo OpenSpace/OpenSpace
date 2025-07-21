@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,17 +27,31 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/list/stringlistproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <ghoul/misc/process.h>
 #include <memory>
+#include <unordered_map>
+#include <vector>
 
 namespace openspace {
 
 class WebGuiModule : public OpenSpaceModule {
 public:
+    using CallbackHandle = int;
+    using EndpointCallback = std::function<void(const std::string&, bool)>;
+
     static constexpr const char* Name = "WebGui";
+
     WebGuiModule();
+    int port() const;
+    std::string address() const;
+    CallbackHandle addEndpointChangeCallback(EndpointCallback cb);
+    void removeEndpointChangeCallback(CallbackHandle);
+
+    static documentation::Documentation Documentation();
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
@@ -45,11 +59,23 @@ protected:
 private:
     void startProcess();
     void stopProcess();
+    void notifyEndpointListeners(const std::string& endpoint, bool exists);
 
     std::unique_ptr<ghoul::Process> _process;
     properties::BoolProperty _enabled;
     properties::StringProperty _entryPoint;
-    properties::StringProperty _workingDirectory;
+    properties::StringListProperty _directories;
+    properties::StringListProperty _servedDirectories;
+    properties::StringProperty _defaultEndpoint;
+
+    std::unordered_map<std::string, std::string> _endpoints;
+
+    properties::IntProperty _port;
+    properties::StringProperty _address;
+    properties::StringProperty _webSocketInterface;
+
+    std::vector<std::pair<CallbackHandle, EndpointCallback>> _endpointChangeCallbacks;
+    int _nextCallbackHandle = 0;
 };
 
 } // namespace openspace

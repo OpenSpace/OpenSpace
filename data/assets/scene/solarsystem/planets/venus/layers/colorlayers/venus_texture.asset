@@ -1,0 +1,55 @@
+local globe = asset.require("../../venus")
+
+
+
+local texturesPath = asset.resource({
+  Name = "Venus Textures",
+  Type = "HttpSynchronization",
+  Identifier = "venus_textures",
+  Version = 2
+})
+
+
+local Clouds = {
+  Identifier = "Clouds",
+  FilePath = texturesPath .. "venus_clouds.jpg",
+  Enabled = asset.enabled,
+  ZIndex = 20,
+  CacheSettings = { Enabled = false }
+}
+
+local Layer = {
+  Identifier = "Texture",
+  FilePath = texturesPath .. "venus.jpg",
+  Enabled = asset.enabled,
+  ZIndex = 5,
+  Settings = {
+    Opacity = 0.48,
+    Gamma = 0.48
+  },
+  CacheSettings = { Enabled = false }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Venus.Identifier, "ColorLayers", Clouds)
+  openspace.globebrowsing.addLayer(globe.Venus.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Venus.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(globe.Venus.Identifier, "ColorLayers", Clouds)
+end)
+
+asset.export(Layer)
+asset.export(Clouds)
+
+
+
+asset.meta = {
+  Name = "Venus Texture",
+  Description = "This asset supplies a default texture for Venus",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

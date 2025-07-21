@@ -1,42 +1,72 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
-local textures = asset.syncedResource({
-    Name = "Stars Textures",
-    Type = "HttpSynchronization",
-    Identifier = "stars-denver_textures",
-    Version = 1
+local textures = asset.resource({
+  Name = "Stars Textures",
+  Type = "HttpSynchronization",
+  Identifier = "stars-denver_textures",
+  Version = 1
 })
 
-local speck = asset.syncedResource({
-    Name = "Stars Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "stars-denver_speck",
-    Version = 1
+local speck = asset.resource({
+  Name = "Stars Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "stars-denver_speck",
+  Version = 1
 })
 
-local colorLUT = asset.syncedResource({
-    Name = "Stars Color Table",
-    Type = "HttpSynchronization",
-    Identifier = "stars-denver_colormap",
-    Version = 1
+local colorLUT = asset.resource({
+  Name = "Stars Color Table",
+  Type = "HttpSynchronization",
+  Identifier = "stars-denver_colormap",
+  Version = 2
 })
 
-local object = {
-    Identifier = "Stars-Denver",
-    Renderable = {
-        Type = "RenderableStars",
-        File = speck .. "/denver_stars.speck",
-        Texture = textures .. "/halo.png",
-        ColorMap = colorLUT .. "/denver_colorbv.cmap"
+
+local Object = {
+  Identifier = "Stars-Denver",
+  Renderable = {
+    Type = "RenderableStars",
+    File = speck .. "denver_stars.speck",
+    Glare = {
+      Texture = textures .. "halo.png"
     },
-    GUI = {
-        Name = "Stars (Denver)",
-        Path = "/Milky Way/Stars"
+    ColorMap = colorLUT .. "denver_colorbv.cmap",
+    MagnitudeExponent = 6.2,
+    SizeComposition = "Distance Modulus",
+    DataMapping = {
+      Bv = "colorb_v",
+      Luminance = "lum",
+      AbsoluteMagnitude = "absmag",
+      ApparentMagnitude = "appmag",
+      Vx = "vx",
+      Vy = "vy",
+      Vz = "vz",
+      Speed = "speed"
     }
+  },
+  GUI = {
+    Name = "Stars (Denver)",
+    Path = "/Milky Way/Stars",
+    Focusable = false
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Object)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Object)
+end)
+
+asset.export(Object)
+
+
+
+asset.meta = {
+  Name = "Stars Denver",
+  Description = [[Alternative Milky Way Atlas: based on HIPPARCOS and Yale Bright
+    Star catalogs]],
+  Author = "Ka chun Yu",
+  URL = "http://openspaceproject.com",
+  License = "Creative Commons Attribution-Share Alike 3.0 Unported"
+}

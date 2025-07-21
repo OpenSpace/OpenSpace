@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,8 @@
 
 #include <openspace/util/openspacemodule.h>
 
+#include <filesystem>
+
 namespace openspace {
 
 class FieldlinesSequenceModule : public OpenSpaceModule {
@@ -35,7 +37,9 @@ public:
 
     FieldlinesSequenceModule();
 
-    static std::string DefaultTransferFunctionFile;
+    std::vector<documentation::Documentation> documentations() const override;
+
+    static std::filesystem::path DefaultTransferFunctionFile;
 
 private:
     void internalInitialize(const ghoul::Dictionary&) override;

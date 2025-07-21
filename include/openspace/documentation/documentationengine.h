@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_CORE___DOCUMENTATIONENGINE___H__
 #define __OPENSPACE_CORE___DOCUMENTATIONENGINE___H__
 
-#include <openspace/documentation/documentationgenerator.h>
-
 #include <openspace/documentation/documentation.h>
+#include <openspace/json.h>
+#include <openspace/properties/propertyowner.h>
 #include <ghoul/misc/exception.h>
 
 namespace openspace::documentation {
@@ -37,7 +37,7 @@ namespace openspace::documentation {
  * produced in the application an write them out as a documentation file for human
  * consumption.
  */
-class DocumentationEngine : public DocumentationGenerator {
+class DocumentationEngine {
 public:
     /**
      * This exception is thrown by the addDocumentation method if a provided Documentation
@@ -48,10 +48,9 @@ public:
          * Constructor of a DuplicateDocumentationException storing the offending
          * Documentation for later use.
          *
-         * \param doc The Documentation whose identifier was previously
-         *        registered
+         * \param doc The Documentation whose identifier was previously registered
          */
-        DuplicateDocumentationException(Documentation doc);
+        explicit DuplicateDocumentationException(Documentation doc);
 
         /// The offending Documentation whose identifier was previously registered
         Documentation documentation;
@@ -88,15 +87,24 @@ public:
      */
     static DocumentationEngine& ref();
 
-private:
-    std::string generateJson() const override;
+    void writeJavascriptDocumentation() const;
+    void writeJsonDocumentation() const;
 
+    nlohmann::json generateScriptEngineJson() const;
+    nlohmann::json generateFactoryManagerJson() const;
+    nlohmann::json generateKeybindingsJson() const;
+    nlohmann::json generatePropertyOwnerJson(properties::PropertyOwner* owner) const;
+    nlohmann::json generateLicenseGroupsJson() const;
+    nlohmann::json generateLicenseListJson() const;
+    nlohmann::json generateActionJson() const;
+    nlohmann::json generateEventJson() const;
+
+private:
     /// The list of all Documentation%s that are stored by the DocumentationEngine
     std::vector<Documentation> _documentations;
 
     static DocumentationEngine* _instance;
 };
-
 } // namespace openspace::documentation
 
 #define DocEng (openspace::documentation::DocumentationEngine::ref())

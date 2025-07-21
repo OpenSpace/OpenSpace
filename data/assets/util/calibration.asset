@@ -1,0 +1,221 @@
+local textures = asset.resource({
+  Name = "Calibration Images",
+  Type = "HttpSynchronization",
+  Identifier = "calibration_images",
+  Version = 1
+})
+
+local Distance = 1000
+local Size = 1000
+
+
+local Center = {
+  Identifier = "Calibration",
+  GUI = {
+    Name = "Calibration",
+    Description = "The centerpoint of the calibration cube",
+    Path = "/Calibration"
+  }
+}
+
+local Front = {
+  Identifier = "Calibration_Front",
+  Parent = Center.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0, Distance, 0 }
+    },
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { math.pi / 2.0, 0.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Enabled = asset.enabled,
+    Size = Size,
+    Origin = "Center",
+    Texture = textures .. "test-pattern-0.png"
+  },
+  GUI = {
+    Name = "Calibration (Front)",
+    Description = "The front face of the calibration cube",
+    Path = "/Calibration"
+  }
+}
+
+local Right = {
+  Identifier = "Calibration_Right",
+  Parent = Center.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { Distance, 0, 0 }
+    },
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { math.pi / 2.0, 0.0, -math.pi / 2.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Enabled = asset.enabled,
+    Size = Size,
+    Origin = "Center",
+    Texture = textures .. "test-pattern-1.png"
+  },
+  GUI = {
+    Name = "Calibration (Right)",
+    Description = "The right face of the calibration cube",
+    Path = "/Calibration"
+  }
+}
+
+local Back = {
+  Identifier = "Calibration_Back",
+  Parent = Center.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0, -Distance, 0 }
+    },
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { -math.pi / 2.0, math.pi, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Enabled = asset.enabled,
+    Size = Size,
+    Origin = "Center",
+    Texture = textures .. "test-pattern-2.png"
+  },
+  GUI = {
+    Name = "Calibration (Back)",
+    Description = "The back face of the calibration cube",
+    Path = "/Calibration"
+  }
+}
+
+local Left = {
+  Identifier = "Calibration_Left",
+  Parent = Center.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { -Distance, 0, 0 }
+    },
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { math.pi / 2.0, 0.0, math.pi / 2.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Enabled = asset.enabled,
+    Size = Size,
+    Origin = "Center",
+    Texture = textures .. "test-pattern-3.png"
+  },
+  GUI = {
+    Name = "Calibration (Left)",
+    Description = "The left face of the calibration cube",
+    Path = "/Calibration"
+  }
+}
+
+local Top = {
+  Identifier = "Calibration_Top",
+  Parent = Center.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0, 0, Distance }
+    },
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0.0, math.pi, -math.pi }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Enabled = asset.enabled,
+    Size = Size,
+    Origin = "Center",
+    Texture = textures .. "test-pattern-4.png"
+  },
+  GUI = {
+    Name = "Calibration (Top)",
+    Description = "The top face of the calibration cube",
+    Path = "/Calibration"
+  }
+}
+
+local Bottom = {
+  Identifier = "Calibration_Bottom",
+  Parent = Center.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0, 0, -Distance }
+    },
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0.0, 0.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Enabled = asset.enabled,
+    Size = Size,
+    Origin = "Center",
+    Texture = textures .. "test-pattern-5.png"
+  },
+  GUI = {
+    Name = "Calibration (Bottom)",
+    Description = "The bottom face of the calibration cube",
+    Path = "/Calibration"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Center)
+  openspace.addSceneGraphNode(Left)
+  openspace.addSceneGraphNode(Right)
+  openspace.addSceneGraphNode(Front)
+  openspace.addSceneGraphNode(Back)
+  openspace.addSceneGraphNode(Top)
+  openspace.addSceneGraphNode(Bottom)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Bottom)
+  openspace.removeSceneGraphNode(Top)
+  openspace.removeSceneGraphNode(Back)
+  openspace.removeSceneGraphNode(Front)
+  openspace.removeSceneGraphNode(Right)
+  openspace.removeSceneGraphNode(Left)
+  openspace.removeSceneGraphNode(Center)
+end)
+
+asset.export(Center)
+asset.export(Left)
+asset.export(Right)
+asset.export(Front)
+asset.export(Back)
+asset.export(Top)
+asset.export(Bottom)
+
+
+
+asset.meta = {
+  Name = "Calibrator",
+  Description = [[A cube that can be used to verify calibration in a complicated display
+    environment]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

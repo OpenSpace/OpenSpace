@@ -1,0 +1,49 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local coreKernels = asset.require("spice/core")
+
+
+
+local JupiterTrailEarth = {
+  Identifier = "JupiterTrailEarth",
+  Parent = earthTransforms.EarthBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Enabled = false,
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = coreKernels.ID.Jupiter,
+      Observer = coreKernels.ID.Earth
+    },
+    Color = { 0.8, 0.7, 0.7 },
+    Period = 4375.0,
+    Resolution = 1000
+  },
+  Tag = { "planetTrail_solarSystem_alt", "planetTrail_terrestrial_alt" },
+  GUI = {
+    Name = "Jupiter trail from Earth",
+    Path = "/Solar System/Planets/Jupiter",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(JupiterTrailEarth)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JupiterTrailEarth)
+end)
+
+asset.export(JupiterTrailEarth)
+
+
+
+asset.meta = {
+  Name = "Jupiter Trail from Earth",
+  Description = "Trail of Jupiter as observed by the Earth",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,24 +1,55 @@
-local assetHelper = asset.require('util/asset_helper')
-local shared = asset.require('../satellites_shared')
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local group = {
-    Title = "Intelsat",
-    Url = "http://www.celestrak.com/NORAD/elements/intelsat.txt",
-    TrailColor = { 0.75, 0.75, 0.35 }
+
+
+local omm = asset.resource({
+  Name = "Satellite OMM Data (Intelsat)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_intelsat",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=intelsat&FORMAT=kvn",
+  Filename = "intelsat.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+
+local IntelsatSatellites = {
+  Identifier = "IntelsatSatellites",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "intelsat.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.75, 0.75, 0.35 },
+    TrailFade = 5,
+    PointSizeExponent = 5.0,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Intelsat",
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
+  }
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
 
-
-local objectNames = {}
-
-asset.onInitialize(function ()
-    objectNames = shared.addSatelliteGroupObjects(group, tle, false)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(IntelsatSatellites)
 end)
 
-
-asset.onDeinitialize(function ()
-    for _, n in ipairs(objectNames) do
-        openspace.removeSceneGraphNode(n)
-    end
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(IntelsatSatellites)
 end)
+
+asset.export(IntelsatSatellites)
+
+
+
+asset.meta = {
+  Name = "Satellites Communications - Intelsat",
+  Description = "Satellites asset for Communications - Intelsat. Data from Celestrak",
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/NORAD/elements/",
+  License = "Celestrak"
+}

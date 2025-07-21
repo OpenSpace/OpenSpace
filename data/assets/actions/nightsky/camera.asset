@@ -1,0 +1,168 @@
+local LookUp = {
+  Identifier = "os.nightsky.LookUp",
+  Name = "Look up",
+  Command = [[
+    local currentNavState = openspace.navigation.getNavigationState()
+    local newNavState = {
+      Pitch = math.pi,
+      Anchor = currentNavState["Anchor"],
+      Yaw = currentNavState["Yaw"],
+      Position = currentNavState["Position"],
+      Up = currentNavState["Up"]
+    }
+    openspace.navigation.setNavigationState(newNavState)
+  ]],
+  Documentation = "Sets the view to be looking at the zenith",
+  GuiPath = "/Night Sky/View",
+  IsLocal = false
+}
+
+local LevelHorizonYaw = {
+  Identifier = "os.nightsky.LevelHorizonYaw",
+  Name = "Level Horizon Yaw",
+  Command = [[
+    local currentNavState = openspace.navigation.getNavigationState()
+    local newNavState = {
+      Pitch = currentNavState["Pitch"],
+      Anchor = currentNavState["Anchor"],
+      Yaw = 0.0,
+      Position = currentNavState["Position"],
+      Up = currentNavState["Up"]
+    }
+    openspace.navigation.setNavigationState(newNavState)
+  ]],
+  Documentation = "Levels the horizon horizontally.",
+  GuiPath = "/Night Sky/View",
+  IsLocal = false
+}
+
+local LevelHorizonPitch = {
+  Identifier = "os.nightsky.LevelHorizonPitch",
+  Name = "Level Horizon Pitch",
+  Command = [[
+    local currentNavState = openspace.navigation.getNavigationState()
+    local newNavState = {
+      Pitch = math.pi / 2.0,
+      Anchor = currentNavState["Anchor"],
+      Yaw = currentNavState["Yaw"],
+      Position = currentNavState["Position"],
+      Up = currentNavState["Up"]
+    }
+    openspace.navigation.setNavigationState(newNavState)
+  ]],
+  Documentation = "Levels the view to the horizon.",
+  GuiPath = "/Night Sky/View",
+  IsLocal = false
+}
+
+local LookingNorth = {
+  Identifier = "os.nightsky.LookingNorth",
+  Name = "Looking North",
+  Command = [[
+    local currentNavState = openspace.navigation.getNavigationState()
+    local newNavState = {
+      Pitch = math.pi,
+      Anchor = currentNavState["Anchor"],
+      Yaw = currentNavState["Yaw"],
+      Position = currentNavState["Position"],
+      Up = { 0.0, 0.0, 1.0 }
+    }
+    openspace.navigation.setNavigationState(newNavState)
+  ]],
+  Documentation = "Sets the view for a horizon looking North.",
+  GuiPath = "/Night Sky/View",
+  IsLocal = false
+}
+
+local LookingEast = {
+  Identifier = "os.nightsky.LookingEast",
+  Name = "Looking East",
+  Command = [[
+    local lat, lon, alt = openspace.globebrowsing.geoPositionForCamera()
+    local lon_rad = math.rad(lon)
+    local upx = -math.sin(lon_rad)
+    local upy = math.cos(lon_rad)
+    local currentNavState = openspace.navigation.getNavigationState()
+    local newNavState = {
+      Pitch = math.pi,
+      Anchor = currentNavState["Anchor"],
+      Yaw = currentNavState["Yaw"],
+      Position = currentNavState["Position"],
+      Up = { upx, upy, 0 }
+    }
+    openspace.navigation.setNavigationState(newNavState)
+  ]],
+  Documentation = "Sets the view looking up and East.",
+  GuiPath = "/Night Sky/View",
+  IsLocal = false
+}
+
+local LookingSouth = {
+  Identifier = "os.nightsky.LookingSouth",
+  Name = "Looking South",
+  Command = [[
+    local currentNavState = openspace.navigation.getNavigationState()
+    local newNavState = {
+      Pitch = math.pi,
+      Anchor = currentNavState["Anchor"],
+      Yaw = currentNavState["Yaw"],
+      Position = currentNavState["Position"],
+      Up = { 0.0, 0.0, -1.0 }
+    }
+    openspace.navigation.setNavigationState(newNavState)
+  ]],
+  Documentation = "Sets the view looking up and South.",
+  GuiPath = "/Night Sky/View",
+  IsLocal = false
+}
+
+local LookingWest = {
+  Identifier = "os.nightsky.LookingWest",
+  Name = "Looking West",
+  Command = [[
+    local lat, lon, alt = openspace.globebrowsing.geoPositionForCamera()
+    local lon_rad = math.rad(lon)
+    local upx = math.sin(lon_rad)
+    local upy = -math.cos(lon_rad)
+    local currentNavState = openspace.navigation.getNavigationState()
+    local newNavState = {
+      Pitch = math.pi,
+      Anchor = currentNavState["Anchor"],
+      Yaw = currentNavState["Yaw"],
+      Position = currentNavState["Position"],
+      Up = { upx, upy, 0 }
+    }
+    openspace.navigation.setNavigationState(newNavState)
+  ]],
+  Documentation = "Sets the view looking up and West.",
+  GuiPath = "/Night Sky/View",
+  IsLocal = false
+}
+
+asset.onInitialize(function()
+  openspace.action.registerAction(LookUp)
+  openspace.action.registerAction(LevelHorizonYaw)
+  openspace.action.registerAction(LevelHorizonPitch)
+  openspace.action.registerAction(LookingNorth)
+  openspace.action.registerAction(LookingEast)
+  openspace.action.registerAction(LookingSouth)
+  openspace.action.registerAction(LookingWest)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(LookingWest)
+  openspace.action.removeAction(LookingSouth)
+  openspace.action.removeAction(LookingEast)
+  openspace.action.removeAction(LookingNorth)
+  openspace.action.removeAction(LevelHorizonPitch)
+  openspace.action.removeAction(LevelHorizonYaw)
+  openspace.action.removeAction(LookUp)
+end)
+
+asset.export("LookUp", LookUp.Identifier)
+asset.export("LevelHorizonYaw", LevelHorizonYaw.Identifier)
+asset.export("LevelHorizonPitch", LevelHorizonPitch.Identifier)
+asset.export("LookingNorth", LookingNorth.Identifier)
+asset.export("LookingEast", LookingEast.Identifier)
+asset.export("LookingSouth", LookingSouth.Identifier)
+asset.export("LookingWest", LookingWest.Identifier)

@@ -1,0 +1,63 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Gray Earth"
+local Identifier = "noaa-sos-land-gray_earth"
+local Description = [[This dataset provides a view of the topography and bathymetry of
+Earth by shading the continents and sea floor. Gray Earth also shows major continental
+river systems and drainages.
+
+Longest Rivers in the world on each continent:
+    Africa - Nile - 4,132 miles (6,650 km)
+    South America - Amazon 4,000 miles (6,437 km)
+    Asia - Yangtze - 3,915 miles(6,300 km)
+    North America - Missouri - 2,540 miles (4,088 km)
+    Australia - Murray - 1,558 miles (2,508 km)
+    Europe - Volga - 2,266 miles (3,645)
+
+According to the dataset source, Natural Earth Data, the relief shading and hypsography
+(study of Earth's topography; measurement and mapping of land elevations) are derived
+from the modified SRTM - Shuttle Radar Topography Mission - Plus elevation data at 1km
+resolution. Daniel Huffman, University of Wisconsin, Madison created the regionally
+equalized hypsography that forms the foundation of the Gray Earth imagery]]
+local URL = "https://sos.noaa.gov/catalog/datasets/gray-earth/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "4096.png",
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

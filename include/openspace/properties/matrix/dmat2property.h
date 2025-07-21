@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,10 +28,30 @@
 #include <openspace/properties/numericalproperty.h>
 
 #include <ghoul/glm.h>
+#include <limits>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(DMat2Property, glm::dmat2x2)
+class DMat2Property : public NumericalProperty<glm::dmat2x2> {
+public:
+    DMat2Property(Property::PropertyInfo info, glm::dmat2x2 value = glm::dmat2x2(0.0),
+        glm::dmat2x2 minValue =
+            ghoul::createFillMat2x2<double>(std::numeric_limits<double>::lowest()),
+        glm::dmat2x2 maxValue =
+            ghoul::createFillMat2x2<double>(std::numeric_limits<double>::max()),
+        glm::dmat2x2 stepValue = ghoul::createFillMat2x2<double>(0.01));
+
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
+
+    void getLuaValue(lua_State* state) const override final;
+
+    std::string stringValue() const override final;
+    using TemplateProperty<glm::dmat2x2>::operator=;
+
+private:
+    glm::dmat2x2 toValue(lua_State* state) const override final;
+};
 
 } // namespace openspace::properties
 

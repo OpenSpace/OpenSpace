@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,25 +26,26 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___LAYER___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/fadeable.h>
 
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/layeradjustment.h>
 #include <modules/globebrowsing/src/layerrendersettings.h>
-#include <modules/globebrowsing/src/tileprovider.h>
-#include <openspace/properties/optionproperty.h>
+#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
+#include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+
+namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::globebrowsing {
 
 struct LayerGroup;
 struct TileIndex;
+struct TileProvider;
 
-namespace tileprovider { struct TileProvider; }
-
-class Layer : public properties::PropertyOwner {
+class Layer : public properties::PropertyOwner, public Fadeable {
 public:
-    Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
-        LayerGroup& parent);
+    Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGroup& parent);
 
     void initialize();
     void deinitialize();
@@ -52,26 +53,31 @@ public:
     ChunkTilePile chunkTilePile(const TileIndex& tileIndex, int pileSize) const;
     Tile::Status tileStatus(const TileIndex& index) const;
 
-    layergroupid::TypeID type() const;
-    layergroupid::BlendModeID blendMode() const;
+    layers::Layer::ID type() const;
+    layers::Blend::ID blendMode() const;
     TileDepthTransform depthTransform() const;
+    void setEnabled(bool enabled);
     bool enabled() const;
-    tileprovider::TileProvider* tileProvider() const;
+    bool isInitialized() const;
+    TileProvider* tileProvider() const;
     glm::vec3 solidColor() const;
     const LayerRenderSettings& renderSettings() const;
     const LayerAdjustment& layerAdjustment() const;
 
-    void onChange(std::function<void(void)> callback);
+    void setZIndex(unsigned int value);
+    unsigned int zIndex() const;
+
+    void onChange(std::function<void(Layer*)> callback);
 
     void update();
 
-    glm::ivec2 tilePixelStartOffset() const;
-    glm::ivec2 tilePixelSizeDifference() const;
     glm::vec2 tileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
-        const glm::vec2& tileUV, const glm::uvec2& resolution);
+        const glm::vec2& tileUV);
+
+    static documentation::Documentation Documentation();
 
 private:
-    void initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary initDict);
+    void initializeBasedOnType(layers::Layer::ID typeId, ghoul::Dictionary initDict);
     void addVisibleProperties();
 
     LayerGroup& _parent;
@@ -81,19 +87,21 @@ private:
     properties::BoolProperty _enabled;
     properties::TriggerProperty _reset;
     properties::TriggerProperty _remove;
+    properties::StringProperty _guiDescription;
 
-    layergroupid::TypeID _type;
-    std::unique_ptr<tileprovider::TileProvider> _tileProvider;
+    layers::Layer::ID _typeId;
+    std::unique_ptr<TileProvider> _tileProvider;
     properties::Vec3Property _solidColor;
     LayerRenderSettings _renderSettings;
     LayerAdjustment _layerAdjustment;
 
-    glm::ivec2 _padTilePixelStartOffset;
-    glm::ivec2 _padTilePixelSizeDifference;
+    const layers::Group::ID _layerGroupId;
 
-    const layergroupid::GroupID _layerGroupId;
+    std::function<void(Layer*)> _onChangeCallback;
+    bool _isInitialized = false;
 
-    std::function<void(void)> _onChangeCallback;
+    unsigned int _zIndex = 0;
+    bool _hasManualZIndex = false;
   };
 
 } // namespace openspace::globebrowsing

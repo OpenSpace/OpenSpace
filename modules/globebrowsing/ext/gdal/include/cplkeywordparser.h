@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cplkeywordparser.h 21e39584409342c2c70c6635a2b0329113de8975 2018-01-06 16:34:40Z Even Rouault $
+ * $Id: cplkeywordparser.h c39d156816d937c3139360b11786c769aeabd21e 2018-05-05 19:48:08 +0200 Even Rouault $
  *
  * Project:  Common Portability Library
  * Purpose:  Implementation of CPLKeywordParser - a class for parsing
@@ -45,15 +45,17 @@
 
 class CPLKeywordParser
 {
-    char     **papszKeywordList;
+    char     **papszKeywordList = nullptr;
 
-    CPLString osHeaderText;
-    const char *pszHeaderNext;
+    CPLString osHeaderText{};
+    const char *pszHeaderNext = nullptr;
 
     void    SkipWhite();
     bool    ReadWord( CPLString &osWord );
     bool    ReadPair( CPLString &osName, CPLString &osValue );
     bool    ReadGroup( const char *pszPathPrefix, int nRecLevel );
+
+    CPL_DISALLOW_COPY_ASSIGN(CPLKeywordParser)
 
 public:
     CPLKeywordParser();

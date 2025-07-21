@@ -1,47 +1,124 @@
-local assetHelper = asset.require("util/asset_helper")
-asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
 
 
 
 -- Barycenter of the solar system, expressed in the Galactic frame
 local SolarSystemBarycenter = {
-    Identifier = "SolarSystemBarycenter",
-    -- No parent; this node is attached to the scene graph root
-    TimeFrame = { -- Using Spice kernels for 1850-2150
-        Type = "TimeFrameInterval",
-        Start = "1850-JAN-01",
-        End = "2150-JAN-01"
-    },
-    GUI = {
-        Name = "Solar System Barycenter",
-        Path = "/Solar System",
-        Hidden = true
+  Identifier = "SolarSystemBarycenter",
+  -- No parent; this node is attached to the scene graph root
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "1550-JAN-01",
+    End = "2650-JAN-22"
+  },
+  GUI = {
+    Name = "Solar System Barycenter",
+    Path = "/Solar System",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local SunCenter = {
+  Identifier = "SunCenter",
+  Parent = SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = coreKernels.ID.Sun,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
+  },
+  GUI = {
+    Name = "Sun Center",
+    Path = "/Solar System/Sun",
+    Description = "Spice frame for the Sun",
+    Focusable = false,
+    Hidden = true
+  }
 }
 
 -- Spice frame for the Sun
 local SunIAU = {
-    Identifier = "SunIAU",
-    Parent = SolarSystemBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "SUN",
-            Observer = "SSB"
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_SUN",
-            DestinationFrame = "GALACTIC"
-        }
+  Identifier = "SunIAU",
+  Parent = SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = coreKernels.ID.Sun,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
-    GUI = {
-        Name = "SUN IAU",
-        Path = "/Solar System/Sun",
-        Hidden = true
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.Sun,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
+  },
+  GUI = {
+    Name = "Sun IAU",
+    Path = "/Solar System/Sun",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local SunEclipJ2000 = {
+  Identifier = "SunEclipJ2000",
+  Parent = SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = coreKernels.ID.Sun,
+      Observer = coreKernels.ID.SolarSystemBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.EclipJ2000,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "Sun J2000",
+    Path = "/Solar System/Sun",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local LightSource = {
+  Type = "SceneGraphLightSource",
+  Identifier = "Sun",
+  Node = SunIAU.Identifier,
+  Intensity = 1.0
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SolarSystemBarycenter)
+  openspace.addSceneGraphNode(SunCenter)
+  openspace.addSceneGraphNode(SunIAU)
+  openspace.addSceneGraphNode(SunEclipJ2000)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { SolarSystemBarycenter, SunIAU })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SunEclipJ2000)
+  openspace.removeSceneGraphNode(SunIAU)
+  openspace.removeSceneGraphNode(SunCenter)
+  openspace.removeSceneGraphNode(SolarSystemBarycenter)
+end)
+
+asset.export(SolarSystemBarycenter)
+asset.export(SunCenter)
+asset.export(SunIAU)
+asset.export(SunEclipJ2000)
+asset.export("LightSource", LightSource)
+
+
+
+asset.meta = {
+  Name = "Sun Transforms",
+  Description = "Sun transforms: Solar System Barycenter, SUN IAU and SUN J2000",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

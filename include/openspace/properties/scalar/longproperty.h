@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,26 +25,33 @@
 #ifndef __OPENSPACE_CORE___LONGPROPERTY___H__
 #define __OPENSPACE_CORE___LONGPROPERTY___H__
 
- /**
- * \file longproperty.h
- *
- * \addtogroup openspace
- * @{
- * \addtogroup properties
- * @{
-
- * \class LongProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>long</code>.
-
- * @} @}
- */
-
 #include <openspace/properties/numericalproperty.h>
+#include <limits>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(LongProperty, long)
+/**
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type `long`.
+ */
+class LongProperty : public NumericalProperty<long> {
+public:
+    LongProperty(Property::PropertyInfo info, long value = long(0),
+        long minValue = std::numeric_limits<long>::lowest(),
+        long maxValue = std::numeric_limits<long>::max(),
+        long stepValue = long(1));
+
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
+
+    void getLuaValue(lua_State* state) const override final;
+
+    std::string stringValue() const override final;
+    using TemplateProperty<long>::operator=;
+
+private:
+    long toValue(lua_State* state) const override final;
+};
 
 } // namespace openspace::properties
 

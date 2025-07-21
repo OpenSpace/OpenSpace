@@ -1,0 +1,235 @@
+-- Apollo mission insignias on their locations on the Lunar surface.
+
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
+
+
+
+local insigniasPath = asset.resource({
+  Name = "Apollo Insignias",
+  Type = "HttpSynchronization",
+  Identifier = "apollo_insignias",
+  Version = 1
+})
+
+
+local Apollo11 = {
+  Identifier = "Apollo11Insignia",
+  Parent = moon.Moon.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon.Moon.Identifier,
+      Latitude = 0.67409,
+      Longitude = 23.47298,
+      Altitude = 110000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 100000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = insigniasPath .. "apollo11.png",
+    Opacity = 0.0
+  },
+  GUI = {
+    Path = "/Other/Labels",
+    Name = "Apollo 11 Insignia"
+  }
+}
+
+local Apollo12 = {
+  Identifier = "Apollo12Insignia",
+  Parent = moon.Moon.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon.Moon.Identifier,
+      Latitude = -3.01381,
+      Longitude = -23.41930,
+      Altitude = 110000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 100000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = insigniasPath .. "apollo12.png",
+    Opacity = 0.0
+  },
+  GUI = {
+    Path = "/Other/Labels",
+    Name = "Apollo 12 Insignia"
+  }
+}
+
+local Apollo14 = {
+  Identifier = "Apollo14Insignia",
+  Parent = moon.Moon.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon.Moon.Identifier,
+      Latitude = -3.64544,
+      Longitude = -17.47139,
+      Altitude = 110000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 100000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = insigniasPath .. "apollo14.png",
+    Opacity = 0.0
+  },
+  GUI = {
+    Path = "/Other/Labels",
+    Name = "Apollo 14 Insignia"
+  }
+}
+
+local Apollo15 = {
+  Identifier = "Apollo15Insignia",
+  Parent = moon.Moon.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon.Moon.Identifier,
+      Latitude = 26.13224,
+      Longitude = 3.63400,
+      Altitude = 110000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 100000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = insigniasPath .. "apollo15.png",
+    Opacity = 0.0
+  },
+  GUI = {
+    Path = "/Other/Labels",
+    Name = "Apollo 15 Insignia"
+  }
+}
+
+local Apollo16 = {
+  Identifier = "Apollo16Insignia",
+  Parent = moon.Moon.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon.Moon.Identifier,
+      Latitude = -8.97341,
+      Longitude = 15.49859,
+      Altitude = 110000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 100000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = insigniasPath .. "apollo16.png",
+    Opacity = 0.0
+  },
+  GUI = {
+    Path = "/Other/Labels",
+    Name = "Apollo 16 Insignia"
+  }
+}
+
+local Apollo17 = {
+  Identifier = "Apollo17Insignia",
+  Parent = moon.Moon.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon.Moon.Identifier,
+      Latitude = 20.18809,
+      Longitude = 30.77475,
+      Altitude = 110000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 100000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = insigniasPath .. "apollo17.png",
+    Opacity = 0.0
+  },
+  GUI = {
+    Path = "/Other/Labels",
+    Name = "Apollo 17 Insignia"
+  }
+}
+
+local ShowInsignias = {
+  Identifier = "os.apollo.ShowInsignias",
+  Name = "Show Apollo landing labels",
+  Command = [[openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 1, 0.5)]],
+  Documentation = "Show patches of the Apollo missions on their respective landing sites",
+  GuiPath = "/Missions/Apollo",
+  IsLocal = false
+}
+
+local HideInsignias = {
+  Identifier = "os.apollo.HideInsignias",
+  Name = "Hide Apollo landing labels",
+  Command = [[openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 0, 0.5)]],
+  Documentation = "Hide patches of the Apollo missions on their respective landing sites",
+  GuiPath = "/Missions/Apollo",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Apollo11)
+  openspace.addSceneGraphNode(Apollo12)
+  openspace.addSceneGraphNode(Apollo14)
+  openspace.addSceneGraphNode(Apollo15)
+  openspace.addSceneGraphNode(Apollo16)
+  openspace.addSceneGraphNode(Apollo17)
+
+  openspace.action.registerAction(ShowInsignias)
+  openspace.action.registerAction(HideInsignias)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(HideInsignias)
+  openspace.action.removeAction(ShowInsignias)
+
+  openspace.removeSceneGraphNode(Apollo17)
+  openspace.removeSceneGraphNode(Apollo16)
+  openspace.removeSceneGraphNode(Apollo15)
+  openspace.removeSceneGraphNode(Apollo14)
+  openspace.removeSceneGraphNode(Apollo12)
+  openspace.removeSceneGraphNode(Apollo11)
+end)
+
+asset.export(Apollo11)
+asset.export(Apollo12)
+asset.export(Apollo14)
+asset.export(Apollo15)
+asset.export(Apollo16)
+
+
+
+asset.meta = {
+  Name = "Apollo - Insignias",
+  Description = [[This asset shows the location of the different landing sites of the
+    Apollo missions on the Moon by placing the missions' insignias.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

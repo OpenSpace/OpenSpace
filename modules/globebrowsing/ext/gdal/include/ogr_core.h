@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_core.h 971ad299681ca1ea2e1b800e88209f426b77e9aa 2018-04-17 12:14:43 +0200 Even Rouault $
+ * $Id: ogr_core.h 1e082b59d067cf2edf5713e15101c0b369d37e9a 2018-12-02 22:16:23 +0300 drons $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Define some core portability services for cross-platform OGR code.
@@ -628,7 +628,11 @@ typedef enum
                                                         OFSTInt16 = 2,
     /** Single precision (32 bit) floating point. Only valid for OFTReal and OFTRealList. */
                                                         OFSTFloat32 = 3,
-                                                        OFSTMaxSubType = 3
+    /** JSON content. Only valid for OFTString.
+     * @since GDAL 2.4
+     */
+                                                        OFSTJSON = 4,
+                                                        OFSTMaxSubType = 4
 } OGRFieldSubType;
 
 /**
@@ -869,7 +873,7 @@ typedef enum ogr_style_tool_param_symbol_id
     OGRSTSymbolPerp     = 7, /**< Perpendicular */
     OGRSTSymbolOffset   = 8, /**< Offset */
     OGRSTSymbolPriority = 9, /**< Priority */
-    OGRSTSymbolFontName = 10, /**< OBSOLETE; do not use */
+    OGRSTSymbolFontName = 10, /**< Font name */
     OGRSTSymbolOColor   = 11, /**< Outline color */
 #ifndef DOXYGEN_SKIP
     OGRSTSymbolLast     = 12

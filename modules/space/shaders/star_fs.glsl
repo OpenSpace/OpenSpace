@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,78 +23,113 @@
  ****************************************************************************************/
 
 #include "fragment.glsl"
-#include "PowerScaling/powerScaling_fs.hglsl"
+
+in vec3 vs_position;
+in vec2 texCoords;
+flat in float ge_bv;
+flat in vec3 ge_velocity;
+flat in float ge_speed;
+flat in float gs_screenSpaceDepth;
+
+uniform sampler1D colorTexture;
+uniform sampler2D glareTexture;
+uniform float opacity;
+uniform vec3 fixedColor;
+uniform int colorOption;
+uniform sampler1D otherDataTexture;
+uniform vec2 otherDataRange;
+uniform bool filterOutOfRange;
+
+uniform float glareMultiplier;
+uniform float glareGamma;
+uniform float glareScale;
+
+uniform bool hasCore;
+uniform sampler2D coreTexture;
+uniform float coreMultiplier;
+uniform float coreGamma;
+uniform float coreScale;
 
 // keep in sync with renderablestars.h:ColorOption enum
-const int COLOROPTION_COLOR = 0;
-const int COLOROPTION_VELOCITY = 1; 
-const int COLOROPTION_SPEED = 2;
- 
-uniform sampler2D psfTexture;
-uniform sampler1D colorTexture;
-uniform float minBillboardSize;
-
-uniform float alphaValue;
-uniform int colorOption;
-
-in vec4 vs_position;
-in vec4 ge_gPosition;
-in vec3 ge_brightness;
-in vec3 ge_velocity;
-in float ge_speed;
-in vec2 texCoord;
-in float billboardSize;
-
-#include "fragment.glsl"
-//#include "PowerScaling/powerScaling_fs.hglsl"
-
-uniform vec2 magnitudeClamp;
+const int ColorOptionColor = 0;
+const int ColorOptionVelocity = 1;
+const int ColorOptionSpeed = 2;
+const int ColorOptionOtherData = 3;
+const int ColorOptionFixedColor = 4;
 
 
 vec4 bv2rgb(float bv) {
-    // BV is [-0.4,2.0]
-    float t = (bv + 0.4) / (2.0 + 0.4);
-    return texture(colorTexture, t);
+  // BV is [-0.4,2.0]
+  float t = (bv + 0.4) / (2.0 + 0.4);
+  t = clamp(t, 0.0, 1.0);
+  return texture(colorTexture, t);
 }
 
+bool isOtherDataValueInRange() {
+  float t = (ge_bv - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
+  return t >= 0.0 && t <= 1.0;
+}
+
+vec4 otherDataValue() {
+  float t = (ge_bv - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
+  t = clamp(t, 0.0, 1.0);
+  return texture(otherDataTexture, t);
+}
+
+
 Fragment getFragment() {
-    // Something in the color calculations need to be changed because before it was dependent
-    // on the gl blend functions since the abuffer was not involved
-        
-    vec4 color = vec4(0.0);
-    switch (colorOption) {
-        case COLOROPTION_COLOR: 
-            color = bv2rgb(ge_brightness.x);
-            break;
-        case COLOROPTION_VELOCITY:
-            color = vec4(abs(ge_velocity), 0.5); 
-            break;
-        case COLOROPTION_SPEED:
-            // @TODO Include a transfer function here ---abock
-            color = vec4(vec3(ge_speed), 0.5);
-            break;
-    }
+  vec4 color = vec4(0.0);
 
-    vec4 textureColor = texture(psfTexture, texCoord);
-    vec4 fullColor = vec4(color.rgb, textureColor.a);
-    fullColor.a *= alphaValue;
-
-    vec4 position = vs_position;
-    // This has to be fixed when the scale graph is in place ---emiax
-    position.w = 15;
-
-    Fragment frag;
-    frag.color = fullColor;
-    frag.depth = pscDepth(position);
-
-    // G-Buffer
-    frag.gPosition  = ge_gPosition;
-    // There is no normal here
-    frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
-    
-    if (fullColor.a == 0) {
+  switch (colorOption) {
+    case ColorOptionColor:
+      color = bv2rgb(ge_bv);
+      break;
+    case ColorOptionVelocity:
+      color = vec4(abs(ge_velocity), 0.5);
+      break;
+    case ColorOptionSpeed:
+      // @TODO Include a transfer function here ---abock
+      color = vec4(vec3(ge_speed), 0.5);
+      break;
+    case ColorOptionOtherData:
+      if (filterOutOfRange && !isOtherDataValueInRange()) {
         discard;
-    }
+      }
+      else {
+        color = otherDataValue();
+      }
+      break;
+    case ColorOptionFixedColor:
+      color = vec4(fixedColor, 1.0);
+      break;
+  }
 
-    return frag;
+  vec2 shiftedCoords = (texCoords - 0.5) * 2;
+
+  vec2 scaledCoordsGlare = shiftedCoords / glareScale;
+  vec2 unshiftedCoordsGlare = (scaledCoordsGlare + 1.0) / 2.0;
+  float glareValue = texture(glareTexture, unshiftedCoordsGlare).a;
+  float alpha = pow(glareValue, glareGamma) * glareMultiplier;
+  if (hasCore) {
+    vec2 scaledCoordsCore = shiftedCoords / coreScale;
+    vec2 unshiftedCoordsCore = (scaledCoordsCore + 1.0) / 2.0;
+    float coreValue = texture(coreTexture, unshiftedCoordsCore).a;
+    float core = pow(coreValue, coreGamma) * coreMultiplier;
+    alpha += core;
+  }
+
+  vec4 fullColor = vec4(color.rgb, alpha * opacity);
+
+  if (fullColor.a < 0.001) {
+    discard;
+  }
+
+  Fragment frag;
+  frag.color = fullColor;
+  frag.depth = gs_screenSpaceDepth;
+  frag.gPosition = vec4(vs_position, 1.0);
+  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+  frag.disableLDR2HDR = true;
+
+  return frag;
 }

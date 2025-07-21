@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___FRAMEBUFFERRENDERER___H__
 #define __OPENSPACE_CORE___FRAMEBUFFERRENDERER___H__
 
-#include <openspace/rendering/renderer.h>
 #include <openspace/rendering/raycasterlistener.h>
 #include <openspace/rendering/deferredcasterlistener.h>
 
@@ -55,50 +54,124 @@ struct RaycasterTask;
 class Scene;
 struct UpdateStructures;
 
-class FramebufferRenderer : public Renderer, public RaycasterListener,
-                            public DeferredcasterListener
+class FramebufferRenderer final : public RaycasterListener, public DeferredcasterListener
 {
 public:
-    typedef std::map<
-        VolumeRaycaster*,
-        std::unique_ptr<ghoul::opengl::ProgramObject>
-    > RaycasterProgObjMap;
-    typedef std::map<
-        Deferredcaster*,
-        std::unique_ptr<ghoul::opengl::ProgramObject>
-    > DeferredcasterProgObjMap;
-public:
-    virtual ~FramebufferRenderer() = default;
+    virtual ~FramebufferRenderer() override = default;
 
-    void initialize() override;
-    void deinitialize() override;
+    //============================//
+    //=====  Reuse textures  =====//
+    //============================//
+    /**
+     * Gives access to the currently NOT used pingPongTexture. This texture is available
+     * for all RenderBins. However, it cannot be used at the same time as the Deferred
+     * Caster Tasks. The size of the texture is the resolution of the viewport.
+     *
+     * NOTE (malej 2023-02-21): The currently NOT used pingPongTexture might change
+     * depending on where in the render cycle you are. Especially after the Deferred
+     * Caster Tasks.
+     *
+     * \return The identifier of the currently NOT used pingPongTexture
+     */
+    GLuint additionalColorTexture1() const;
+
+    /**
+     * Gives access to the exitColorTexture. This texture is available for all RenderBins.
+     * However, it cannot be used at the same time as the Raycaster Tasks. The size of the
+     * texture is the resolution of the viewport.
+     *
+     * \return The identifier of the exitColorTexture
+     */
+    GLuint additionalColorTexture2() const;
+
+    /**
+     * Gives access to the fxaaTexture. This texture is available for all RenderBins.
+     * However, it cannot be used at the same time as the FXAA Task. The size of the
+     * texture is the resolution of the viewport.
+     *
+     * \return The identifier of the fxaaTexture
+     */
+    GLuint additionalColorTexture3() const;
+
+    /**
+     * Gives access to the exitDepthTexture. This texture is available for all RenderBins.
+     * However, it cannot be used at the same time as the Raycaster Tasks. The size of the
+     * texture is the resolution of the viewport.
+     *
+     * \return The identifier of the exitDepthTexture
+     */
+    GLuint additionalDepthTexture() const;
+
+    //=============================//
+    //=====  Access G-buffer  =====//
+    //=============================//
+    // Functions to access the G-buffer textures
+    /**
+     * Gives access to the color texture of the G-buffer. NOTE: This texture is used for
+     * the majority of rendering the scene and might be already in use. Use CAUTION when
+     * using this function. The size of the texture is the resolution of the viewport.
+     *
+     * \return The identifier of the color texture of the G-buffer
+     */
+    GLuint gBufferColorTexture() const;
+
+    /**
+     * Gives access to the position texture of the G-buffer. NOTE: This texture is used
+     * for the majority of rendering the scene and might be already in use. Use CAUTION
+     * when using this function. The size of the texture is the resolution of the
+     * viewport.
+     *
+     * \return The identifier of the position texture of the G-buffer
+     */
+    GLuint gBufferPositionTexture() const;
+
+    /**
+     * Gives access to the normal texture of the G-buffer. NOTE: This texture is used for
+     * the majority of rendering the scene and might be already in use. Use CAUTION when
+     * using this function. The size of the texture is the resolution of the viewport.
+     *
+     * \return The identifier of the normal texture of the G-buffer
+     */
+    GLuint gBufferNormalTexture() const;
+
+    /**
+     * Gives access to the depth texture of the G-buffer. NOTE: This texture is used for
+     * the majority of rendering the scene and might be already in use. Use CAUTION when
+     * using this function. The size of the texture is the resolution of the viewport.
+     *
+     * \return The identifier of the depth texture of the G-buffer
+     */
+    GLuint gBufferDepthTexture() const;
+
+    void initialize();
+    void deinitialize();
 
     void updateResolution();
     void updateRaycastData();
     void updateDeferredcastData();
-    void updateHDRData();
-    void updateMSAASamplingPattern();
+    void updateHDRAndFiltering();
+    void updateFXAA();
+    void updateDownscaledVolume();
 
-    void setResolution(glm::ivec2 res) override;
-    void setNAaSamples(int nAaSamples) override;
-    void setHDRExposure(float hdrExposure) override;
-    void setHDRBackground(float hdrBackground) override;
-    void setGamma(float gamma) override;
+    void setResolution(glm::ivec2 res);
+    void setHDRExposure(float hdrExposure);
+    void setGamma(float gamma);
+    void setHueValueSaturation(float hue, float value, float saturation);
 
-    float hdrBackground() const override;
-    int nAaSamples() const override;
-    const std::vector<double>& mSSAPattern() const override;
+    void enableFXAA(bool enable);
+    void setDisableHDR(bool disable);
 
-    void update() override;
-    void performRaycasterTasks(const std::vector<RaycasterTask>& tasks);
-    void performDeferredTasks(const std::vector<DeferredcasterTask>& tasks);
-    void render(Scene* scene, Camera* camera, float blackoutFactor) override;
+    void update();
+    void performRaycasterTasks(const std::vector<RaycasterTask>& tasks,
+        const glm::ivec4& viewport);
+    void performDeferredTasks(const std::vector<DeferredcasterTask>& tasks,
+        const glm::ivec4& viewport);
+    void render(Scene* scene, Camera* camera, float blackoutFactor);
 
     /**
-     * Update render data
-     * Responsible for calling renderEngine::setRenderData
+     * Update render data. Responsible for calling renderEngine::setRenderData
      */
-    virtual void updateRendererData() override;
+    virtual void updateRendererData();
 
     virtual void raycastersChanged(VolumeRaycaster& raycaster,
         RaycasterListener::IsAttached attached) override;
@@ -106,6 +179,22 @@ public:
         DeferredcasterListener::IsAttached isAttached) override;
 
 private:
+    using RaycasterProgObjMap = std::map<
+        VolumeRaycaster*,
+        std::unique_ptr<ghoul::opengl::ProgramObject>
+    >;
+    using DeferredcasterProgObjMap = std::map<
+        Deferredcaster*,
+        std::unique_ptr<ghoul::opengl::ProgramObject>
+    >;
+
+    void resolveMSAA(float blackoutFactor);
+    void applyTMO(float blackoutFactor, const glm::ivec4& viewport);
+    void applyFXAA(const glm::ivec4& viewport);
+    void updateDownscaleTextures() const;
+    void updateExitVolumeTextures();
+    void writeDownscaledVolume(const glm::ivec4& viewport);
+
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
     RaycasterProgObjMap _exitPrograms;
     RaycasterProgObjMap _raycastPrograms;
@@ -113,36 +202,67 @@ private:
 
     std::map<Deferredcaster*, DeferredcastData> _deferredcastData;
     DeferredcasterProgObjMap _deferredcastPrograms;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _hdrBackGroundProgram;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
-    UniformCache(mainColorTexture, blackoutFactor, nAaSamples) _uniformCache;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _hdrFilteringProgram;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _tmoProgram;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _fxaaProgram;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _downscaledVolumeProgram;
 
-    GLuint _screenQuad;
-    GLuint _vertexPositionBuffer;
-    GLuint _mainColorTexture;
-    GLuint _mainPositionTexture;
-    GLuint _mainNormalTexture;
-    GLuint _mainDepthTexture;
-    GLuint _exitColorTexture;
-    GLuint _mainFramebuffer;
-    GLuint _exitDepthTexture;
-    GLuint _exitFramebuffer;
-    GLuint _deferredFramebuffer;
-    GLuint _deferredColorTexture;
+    UniformCache(hdrFeedingTexture, blackoutFactor, hdrExposure, gamma,
+        Hue, Saturation, Value, Viewport, Resolution) _hdrUniformCache;
+    UniformCache(renderedTexture, inverseScreenSize, Viewport,
+        Resolution) _fxaaUniformCache;
+    UniformCache(downscaledRenderedVolume, downscaledRenderedVolumeDepth, viewport,
+        resolution) _writeDownscaledVolumeUniformCache;
+
+    GLint _defaultFBO = 0;
+    GLuint _screenQuad = 0;
+    GLuint _vertexPositionBuffer = 0;
+    GLuint _exitColorTexture = 0;
+    GLuint _exitDepthTexture = 0;
+    GLuint _exitFramebuffer = 0;
+
+    struct {
+        GLuint colorTexture;
+        GLuint positionTexture;
+        GLuint normalTexture;
+        GLuint depthTexture;
+        GLuint framebuffer;
+    } _gBuffers;
+
+    struct {
+        GLuint framebuffer;
+        GLuint colorTexture[2];
+    } _pingPongBuffers;
+
+    struct {
+        GLuint fxaaFramebuffer;
+        GLuint fxaaTexture;
+    } _fxaaBuffers;
+
+    struct {
+        GLuint framebuffer;
+        GLuint colorTexture;
+        GLuint depthbuffer;
+        float currentDownscaleFactor  = 1.f;
+    } _downscaleVolumeRendering;
+
+    unsigned int _pingPongIndex = 0u;
 
     bool _dirtyDeferredcastData;
     bool _dirtyRaycastData;
     bool _dirtyResolution;
-    bool _dirtyMsaaSamplingPattern;
 
     glm::ivec2 _resolution = glm::ivec2(0);
     int _nAaSamples;
-    float _hdrExposure = 0.4f;
-    float _hdrBackground = 2.8f;
-    float _gamma = 2.2f;
+    bool _enableFXAA = true;
+    bool _disableHDR = false;
 
-    std::vector<double> _mSAAPattern;
+    float _hdrExposure = 3.7f;
+    float _gamma = 0.95f;
+    float _hue = 1.f;
+    float _saturation = 1.f;
+    float _value = 1.f;
 
     ghoul::Dictionary _rendererData;
 };

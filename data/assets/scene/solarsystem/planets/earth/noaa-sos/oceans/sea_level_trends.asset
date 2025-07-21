@@ -1,0 +1,75 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Sea Level Trends - 1993 - 2012"
+local Identifier = "noaa-sos-oceans-sea_level_trends"
+local Description = [[There are many questions surrounding climate change. One big
+question is how the changing climate will affect the oceans. The sea level has been
+steadily rising since 1900 at a rate of 1 to 2.5 millimeters per year. In fact, since
+1992 new methods of satellite altimetry using the TOPEX/Poseidon satellite indicate a
+rate of rise of 3 millimeters per year. The Fourth Assessment Report from the IPCC states
+that "there is strong evidence that global sea level gradually rose in the 20th century
+and is currently rising at an increased rate, after a period of little change between AD
+0 and AD 1900. Sea level is projected to rise at an even greater rate in this century. "
+- Fourth Assessment Report on Sea Level Rise Sea level can rise by two different
+mechanisms with respect to climate change. The first is the expansion of the sea water as
+the oceans warm due to an increasing global temperature. The second mechanism is the
+melting of ice over land, which then adds water to the ocean. The IPCC Fourth Assessment
+Report predicts that total global-average sea level rise from 1990 - 2100 will be 7 - 15
+inches (177 - 381 mm) for low emission scenarios and 10 - 23 inches (254 - 584 mm) for
+high emission scenarios]]
+local URL = "https://sos.noaa.gov/catalog/datasets/sea-level-trends-1993-2012/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "4096.png",
+  Description = Description
+}
+
+local Colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar.png",
+  FaceCamera = false,
+  BackgroundColor = { 1.0, 1.0, 1.0, 1.0 },
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(Colorbar)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

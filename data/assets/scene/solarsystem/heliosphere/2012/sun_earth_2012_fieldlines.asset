@@ -1,0 +1,3 @@
+asset.require("./sun_earth_2012_fieldlines_enlil")
+asset.require("./sun_earth_2012_fieldlines_batsrus")
+asset.require("./sun_earth_2012_fieldlines_pfss")

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,10 +28,28 @@
 #include <openspace/properties/numericalproperty.h>
 
 #include <ghoul/glm.h>
+#include <limits>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(UVec4Property, glm::uvec4)
+class UVec4Property : public NumericalProperty<glm::uvec4> {
+public:
+    UVec4Property(Property::PropertyInfo info, glm::uvec4 value = glm::uvec4(0),
+        glm::uvec4 minValue = glm::uvec4(std::numeric_limits<unsigned int>::lowest()),
+        glm::uvec4 maxValue = glm::uvec4(std::numeric_limits<unsigned int>::max()),
+        glm::uvec4 stepValue = glm::uvec4(1));
+
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
+
+    void getLuaValue(lua_State* state) const override final;
+
+    std::string stringValue() const override final;
+    using TemplateProperty<glm::uvec4>::operator=;
+
+private:
+    glm::uvec4 toValue(lua_State* state) const override final;
+};
 
 } // namespace openspace::properties
 

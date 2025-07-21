@@ -1,0 +1,43 @@
+local transforms = asset.require("./transforms")
+local kernels = asset.require("./kernels")
+
+
+
+local textures = asset.resource({
+  Name = "Bennu Textures",
+  Type = "HttpSynchronization",
+  Identifier = "bennu_textures",
+  Version = 1
+})
+
+
+local BennuBodyId = "2101955"
+
+local ImagePlane = {
+  Identifier = "ImagePlaneBennu",
+  Parent = transforms.BennuBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderablePlaneProjection",
+    Frame = kernels.Frame.Bennu,
+    DefaultTarget = BennuBodyId,
+    Spacecraft = kernels.ID.OsirisRex,
+    Instrument = kernels.Frame.Polycam,
+    Moving = false,
+    Texture = textures .. "defaultProj.png"
+  },
+  GUI = {
+    Name = "OsirisREx Image Plane",
+    Path = "/Solar System/Missions/OSIRIS REx"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(ImagePlane)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(ImagePlane)
+end)
+
+asset.export(ImagePlane)

@@ -1,0 +1,57 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
+
+local sssb = asset.resource({
+  Name = "Small SolarSystem Body Data (Apollo Asteroid)",
+  Type = "HttpSynchronization",
+  Identifier = "sssb_data_apollo_asteroid",
+  Version = 4
+})
+
+
+local Object = {
+  Identifier = "sssb_apollo_asteroid",
+  Parent = transforms.SunEclipJ2000.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = sssb .. "sssb_data_apollo_asteroid.csv",
+    Format = "SBDB",
+    Segments = 200,
+    SegmentQuality = 6,
+    Color = { 0.7, 0.7, 1.0 },
+    TrailFade = 10,
+    PointSizeExponent = 9.2
+  },
+  GUI = {
+    Name = "Apollo Asteroids",
+    Path = "/Solar System/Small Bodies",
+    Focusable = false,
+    Description = [[Earth-crossing Near-Earth-Asteroids with semi-major axes larger than
+      Earth's.]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Object)
+end)
+
+asset.export(Object)
+
+
+
+asset.meta = {
+  Name = "Apollo Asteroids",
+  Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
+    the Apollo group]],
+  Author = "JPL Small-Body Database hosted by California Institute of Technology",
+  URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
+  License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010.
+    All documents available from this server may be protected under the U.S. and
+    Foreign Copyright Laws]]
+}

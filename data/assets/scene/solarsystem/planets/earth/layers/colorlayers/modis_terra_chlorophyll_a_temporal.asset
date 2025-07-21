@@ -1,0 +1,48 @@
+local globe = asset.require("../../earth")
+
+
+
+local Layer = {
+  Identifier = "MODIS_Terra_Chlorophyll_A_Temporal",
+  Name = "MODIS Terra Chlorophyll A (Temporal)",
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "TemporalTileProvider",
+  Mode = "Prototyped",
+  Prototyped = {
+    Time = {
+      Start = "2013-07-02",
+      End = "Yesterday"
+    },
+    TemporalResolution = "1d",
+    TimeFormat = "YYYY-MM-DD",
+    Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
+      "MODIS_Terra_L2_Chlorophyll_A",
+      "1km",
+      "png"
+    )
+  },
+  Description = [[Temporal coverage: 02 July 2013 - Present. The imagery resolution
+    is 1 km, and the temporal resolution is daily]]
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "MODIS Terra Chlorophyll A (Temporal)",
+  Description = "GIBS hosted layer",
+  Author = "NASA EOSDIS Global Imagery Browse Services",
+  URL = "https://earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/gibs",
+  License = "NASA"
+}

@@ -1,0 +1,97 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Coral Reef Risk Outlook"
+local Identifier = "noaa-sos-oceans-reefs_risk"
+local Description = [[From tourism to disease prevention, it's clear that reefs offer
+much more than recreation. According to the newly released Reefs at Risk Revisited
+report, coral reefs:
+
+Support more than 275 million people worldwide.
+Protect coastlines in more than 100 countries - helping defend against storms and erosion.
+Accounts for 15% of gross domestic product in more than 20 countries.
+Hold the potential to fight disease - including treatments for cancer, HIV, malaria, and
+other diseases.
+
+Yet coral reefs today face serious threats. The new report finds that approximately 75%
+of world's coral reefs are currently threatened by local and global pressures. Local
+pressures pose the most immediate threat - especially from overfishing and destructive
+fishing, which is particularly widespread in Southeast Asia. Global threats from climate
+change and alterations in ocean chemistry (i.e. ocean acidification) are compounding the
+pressures on reefs. Climate change is causing ocean temperatures to rise, which, in turn,
+is leading to wide-spread coral bleaching]]
+local URL = "https://sos.noaa.gov/catalog/datasets/coral-reef-risk-outlook/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer2012 = {
+  Identifier = Identifier .. "-2012",
+  Name = Name .. " (2012)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "2012_2048.jpg",
+  Description = Description
+}
+
+local Layer2030 = {
+  Identifier = Identifier .. "-2030",
+  Name = Name .. " (2030)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "2030_2048.jpg",
+  Description = Description
+}
+
+local Layer2050 = {
+  Identifier = Identifier .. "-2050",
+  Name = Name .. " (2050)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "2050_2048.jpg",
+  Description = Description
+}
+
+local Legend = {
+  Identifier = Identifier,
+  Name = Name,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "coral_legend.png",
+  FaceCamera = false,
+  Scale = 0.3,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer2012)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer2030)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer2050)
+  openspace.addScreenSpaceRenderable(Legend)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Legend)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer2050)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer2030)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer2012)
+end)
+
+asset.export(Layer2012)
+asset.export(Layer2030)
+asset.export(Layer2050)
+asset.export(Legend)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

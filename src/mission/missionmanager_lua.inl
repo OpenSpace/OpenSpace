@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,86 +23,61 @@
  ****************************************************************************************/
 
 #include <openspace/engine/globals.h>
+#include <ghoul/lua/lua_helper.h>
 
-namespace openspace::luascriptfunctions {
-
-int loadMission(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadMission");
-
-    const std::string& missionFileName = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-    if (missionFileName.empty()) {
-        return ghoul::lua::luaError(L, "Filepath is empty");
-    }
-
-    std::string name = global::missionManager.loadMission(absPath(missionFileName));
-    ghoul::lua::push(L, name);
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-    return 1;
+// Load mission phases from file.
+[[codegen::luawrap]] void loadMission(ghoul::Dictionary mission) {
+    // TODO: Check if mission table is valid
+    openspace::global::missionManager->loadMission(openspace::Mission(mission));
 }
 
-int unloadMission(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::unloadMission");
+// Unloads a previously loaded mission.
+[[codegen::luawrap]] void unloadMission(
+                         std::variant<std::string, ghoul::Dictionary> identifierOrMission)
+{
+    using namespace openspace;
 
-    const std::string& missionName = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-    if (missionName.empty()) {
-        return ghoul::lua::luaError(L, "Mission name is empty");
+    std::string identifier;
+    if (std::holds_alternative<std::string>(identifierOrMission)) {
+        identifier = std::move(std::get<std::string>(identifierOrMission));
+    }
+    else {
+        ghoul::Dictionary dict = std::get<ghoul::Dictionary>(identifierOrMission);
+        if (!dict.hasValue<std::string>("Identifier")) {
+            throw ghoul::lua::LuaError("Mission table needs 'Identifier'");
+        }
+
+        identifier = dict.value<std::string>("Identifier");
     }
 
-    if (!global::missionManager.hasMission(missionName)) {
-        return ghoul::lua::luaError(L, "Mission was not previously loaded");
+
+    if (identifier.empty()) {
+        throw ghoul::lua::LuaError("Mission identifier is empty");
     }
 
-    global::missionManager.unloadMission(missionName);
+    if (!global::missionManager->hasMission(identifier)) {
+        throw ghoul::lua::LuaError("Mission was not previously loaded");
+    }
 
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
+    global::missionManager->unloadMission(identifier);
 }
 
-int hasMission(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::hasMission");
-
-    const std::string& missionName = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-    if (missionName.empty()) {
-        return ghoul::lua::luaError(L, "Missing name is empty");
+// Returns whether a mission with the provided name has been loaded.
+[[codegen::luawrap]] bool hasMission(std::string identifier) {
+    if (identifier.empty()) {
+        throw ghoul::lua::LuaError("Mission identifier is empty");
     }
 
-    const bool hasMission = global::missionManager.hasMission(missionName);
-
-    ghoul::lua::push(L, hasMission);
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-    return 1;
+    bool hasMission = openspace::global::missionManager->hasMission(identifier);
+    return hasMission;
 }
 
-int setCurrentMission(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setCurrentMission");
-
-    const std::string& missionName = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-    if (missionName.empty()) {
-        return ghoul::lua::luaError(L, "Mission name is empty");
+// Set the currnet mission.
+[[codegen::luawrap]] void setCurrentMission(std::string identifier) {
+    if (identifier.empty()) {
+        throw ghoul::lua::LuaError("Mission identifier is empty");
     }
-
-    global::missionManager.setCurrentMission(missionName);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
+    openspace::global::missionManager->setCurrentMission(identifier);
 }
+#include "missionmanager_lua_codegen.cpp"
 
-} // namespace openspace::luascriptfunction

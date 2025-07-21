@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/timemanager.h>
+#include <ghoul/format.h>
 
 using namespace openspace;
 
@@ -44,8 +45,8 @@ using namespace openspace;
 #import <Foundation/Foundation.h>
 
 static NSString* pauseResultId = @"com.openspaceproject.pause_resume";
-static NSString* showFullGuiId = @"com.openspaceproject.show_full_gui";
-static NSString* showSimpleGuiId = @"com.openspaceproject.show_simple_gui";
+static NSString* hideGuiId = @"com.openspaceproject.hide_gui";
+static NSString* hideOnScreenTextId = @"com.openspaceproject.hide_onscreen";
 NSArray* focusIdentifiers;
 
 
@@ -55,8 +56,8 @@ NSArray* focusIdentifiers;
         makeItemForIdentifier:(NSTouchBarItemIdentifier)identifier;
     - (void)pauseResumeButtonAction:(id)sender;
     - (void)focusObjectAction:(id)sender;
-    - (void)fullGuiButtonAction:(id)sender;
-    - (void)simpleGuiButtonAction:(id)sender;
+    - (void)hideTextAction:(id)sender;
+    - (void)hideGuiAction:(id)sender;
 @end
 
 @implementation TouchBarDelegate
@@ -66,14 +67,14 @@ NSArray* focusIdentifiers;
 
         touchBar.customizationIdentifier = @"com.openspaceproject.main_touch_bar";
 
-        NSArray* objs = [@[showSimpleGuiId, showFullGuiId,
+        NSArray* objs = [@[hideGuiId, hideOnScreenTextId,
             NSTouchBarItemIdentifierFixedSpaceSmall, pauseResultId,
             NSTouchBarItemIdentifierFlexibleSpace]
             arrayByAddingObjectsFromArray: focusIdentifiers];
 
         // Set the default ordering of items.
         touchBar.defaultItemIdentifiers = objs;
-            
+
         touchBar.customizationAllowedItemIdentifiers = objs;
         if ([focusIdentifiers count] > 0) {
             touchBar.principalItemIdentifier = [focusIdentifiers firstObject];
@@ -85,15 +86,13 @@ NSArray* focusIdentifiers;
     - (NSTouchBarItem *)touchBar:(NSTouchBar *)touchBar
                         makeItemForIdentifier:(NSTouchBarItemIdentifier)identifier
     {
-        // @TODO(abock):  Potential memory leak here by returning an alloc?
-
         // Remove the unused variable warning
         (void)touchBar;
 
         if ([identifier isEqualToString:pauseResultId]) {
-            NSButton* button = [NSButton 
+            NSButton* button = [NSButton
                 buttonWithTitle:NSLocalizedString(
-                    (global::timeManager.isPaused() ? @"Resume" : @"Pause"),
+                    (global::timeManager->isPaused() ? @"Resume" : @"Pause"),
                     @""
                 )
                 target:self action:@selector(pauseResumeButtonAction:)
@@ -112,38 +111,38 @@ NSArray* focusIdentifiers;
             return [touchBarItem autorelease];
         }
 
-        if ([identifier isEqualToString:showFullGuiId]) {
-            NSButton* button = [NSButton 
-                buttonWithTitle:@"Full GUI"
-                target:self action:@selector(fullGuiButtonAction:)
+        if ([identifier isEqualToString:hideOnScreenTextId]) {
+            NSButton* button = [NSButton
+                buttonWithTitle:@"Toggle Text"
+                target:self action:@selector(hideTextAction:)
             ];
 
             NSCustomTouchBarItem* touchBarItem = [
                 [NSCustomTouchBarItem alloc]
-                initWithIdentifier:showFullGuiId
+                initWithIdentifier:hideOnScreenTextId
             ];
             touchBarItem.view = button;
             touchBarItem.customizationLabel = NSLocalizedString(
-                @"Toggles the full GUI",
+                @"Toogles on-screen text",
                 @""
             );
 
             return [touchBarItem autorelease];
         }
 
-        if ([identifier isEqualToString:showSimpleGuiId]) {
+        if ([identifier isEqualToString:hideGuiId]) {
             NSButton* button = [NSButton
-                buttonWithTitle:@"Simple GUI"
-                target:self action:@selector(simpleGuiButtonAction:)
+                buttonWithTitle:@"Toggle GUI"
+                target:self action:@selector(hideGuiAction:)
             ];
 
             NSCustomTouchBarItem* touchBarItem = [
                 [NSCustomTouchBarItem alloc]
-                initWithIdentifier:showSimpleGuiId
+                initWithIdentifier:hideGuiId
             ];
             touchBarItem.view = button;
             touchBarItem.customizationLabel = NSLocalizedString(
-                @"Toggles the simple GUI",
+                @"Toggles the main GUI",
                 @""
             );
 
@@ -173,14 +172,17 @@ NSArray* focusIdentifiers;
     }
 
     - (void)pauseResumeButtonAction:(id)sender {
-        global::scriptEngine.queueScript(
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
+        global::scriptEngine->queueScript(
             "openspace.time.togglePause();",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
 
         NSButton* button = static_cast<NSButton*>(sender);
         // This check is inverted since the togglePause script has not run yet
-        [button setTitle: global::timeManager.isPaused() ? @"Pause" : @"Resume"];
+        [button setTitle: global::timeManager->isPaused() ? @"Pause" : @"Resume"];
     }
 
     - (void)focusObjectAction:(id)sender {
@@ -188,64 +190,44 @@ NSArray* focusIdentifiers;
 
         NSString* title = [button title];
 
-        global::scriptEngine.queueScript(
-            "openspace.setPropertyValue('NavigationHandler.Origin', '" +
-            std::string([title UTF8String]) + "');",
-            scripting::ScriptEngine::RemoteScripting::Yes
+        std::string str = std::format(
+            "openspace.setPropertyValueSingle('{}', '{}');\
+             openspace.setPropertyValueSingle('{}', '');\
+             openspace.setPropertyValueSingle('{}', '');",
+             "NavigationHandler.OrbitalNavigator.Anchor", std::string([title UTF8String]),
+             "NavigationHandler.OrbitalNavigator.Aim",
+             "NavigationHandler.OrbitalNavigator.RetargetAnchor"
+        );
+        global::scriptEngine->queueScript(
+            str,
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 
-    - (void)fullGuiButtonAction:(id)sender {
+    - (void)hideTextAction:(id)sender {
         // Remove unused variable warning
         (void)sender;
-        global::scriptEngine.queueScript(
-            "local b = openspace.getPropertyValue(\
-                'Modules.ImGUI.Main.Enabled'\
-            );\
-            openspace.setPropertyValueSingle(\
-                'Modules.ImGUI.Main.Enabled',\
-                not b\
-            );\
-            openspace.setPropertyValueSingle(\
-                'Modules.ImGUI.Main.IsHidden',\
-                b\
-            );",
-            scripting::ScriptEngine::RemoteScripting::No
+
+        global::scriptEngine->queueScript(
+            "local isEnabled = openspace.propertyValue('Dashboard.IsEnabled');\
+             openspace.setPropertyValueSingle('Dashboard.IsEnabled', not isEnabled);\
+             openspace.setPropertyValueSingle('RenderEngine.ShowLog', not isEnabled);\
+             openspace.setPropertyValueSingle('RenderEngine.ShowVersion', not isEnabled);\
+             openspace.setPropertyValueSingle('RenderEngine.ShowCamera', not isEnabled)",
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
     }
 
-    - (void)simpleGuiButtonAction:(id)sender {
+    - (void)hideGuiAction:(id)sender {
         // Remove unused variable warning
         (void)sender;
-        global::scriptEngine.queueScript(
-"local b = openspace.getPropertyValue('Modules.ImGUI.Main.FeaturedProperties.Enabled');\n\
-local c = openspace.getPropertyValue('Modules.ImGUI.Main.IsHidden');\n\
-openspace.setPropertyValue('Modules.ImGUI.*.Enabled', false);\n\
-if b and c then\n\
-    -- This can happen if the main properties window is enabled, the main gui\n\
-    -- is enabled and then closed again. So the main properties window is\n\
-    -- enabled, but also all windows are hidden\n\
-    openspace.setPropertyValueSingle('Modules.ImGUI.Main.IsHidden', false);\n\
-    openspace.setPropertyValueSingle(\n\
-        'Modules.ImGUI.Main.FeaturedProperties.Enabled',\n\
-        true\n\
-    );\n\
-    openspace.setPropertyValueSingle(\n\
-        'Modules.ImGUI.Main.SpaceTime.Enabled',\n\
-        true\n\
-    );\n\
-else\n\
-    openspace.setPropertyValueSingle(\n\
-        'Modules.ImGUI.Main.FeaturedProperties.Enabled',\n\
-        not b\n\
-    );\n\
-    openspace.setPropertyValueSingle(\n\
-        'Modules.ImGUI.Main.SpaceTime.Enabled',\n\
-        not b\n\
-    );\n\
-    openspace.setPropertyValueSingle('Modules.ImGUI.Main.IsHidden', b);\n\
-end",
-            scripting::ScriptEngine::RemoteScripting::No
+        global::scriptEngine->queueScript(
+            "local isEnabled = openspace.propertyValue('Modules.CefWebGui.Visible');\
+             openspace.setPropertyValueSingle('Modules.CefWebGui.Visible', not isEnabled);",
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
     }
 @end
@@ -265,20 +247,19 @@ void showTouchbar() {
         g_TouchBarDelegate = [[TouchBarDelegate alloc] init];
         [NSApplication sharedApplication].automaticCustomizeTouchBarMenuItemEnabled = YES;
     }
-    
-    std::vector<SceneGraphNode*> nodes =
-        global::renderEngine.scene()->allSceneGraphNodes();
+
+    std::vector<SceneGraphNode*> ns = global::renderEngine->scene()->allSceneGraphNodes();
 
     std::sort(
-        nodes.begin(),
-        nodes.end(),
+        ns.begin(),
+        ns.end(),
         [](SceneGraphNode* lhs, SceneGraphNode* rhs) {
             return lhs->guiName() < rhs->guiName();
         }
     );
 
     NSMutableArray* ids = [[NSMutableArray alloc] init];
-    for (SceneGraphNode* n : nodes) {
+    for (SceneGraphNode* n : ns) {
         const std::vector<std::string>& tags = n->tags();
         auto it = std::find(tags.begin(), tags.end(), "GUI.Interesting");
         if (it != tags.end()) {

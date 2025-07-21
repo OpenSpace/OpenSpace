@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,37 +24,31 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
-
-in vec4 in_position;
-in vec3 in_brightness;
+in vec3 in_position;
+in vec3 in_bvLumAbsMag;
 in vec3 in_velocity;
 in float in_speed;
 
-out vec4 psc_position;
-out vec3 vs_brightness;
+out vec3 vs_bvLumAbsMag;
 out vec3 vs_velocity;
 out float vs_speed;
-out vec4 vs_gPosition;
 
-uniform mat4 view;
-uniform mat4 projection;
-
+uniform int useProperMotion;
+uniform float diffTime;
 
 void main() {
-    vec4 p = in_position;
-    psc_position  = p;
-    vs_brightness = in_brightness;
-    vs_velocity = in_velocity;
-    vs_speed = in_speed;
+  vs_bvLumAbsMag = in_bvLumAbsMag;
+  vs_velocity = in_velocity;
+  vs_speed = in_speed;
 
-    vec4 tmp = p;
-    vec4 position = pscTransform(tmp, mat4(1.0));
-    
-    // G-Buffer
-    vs_gPosition = view * (vec4(1E19, 1E19, 1E19, 1.0) * position);
-    
-    position = view * position;
-    
-    gl_Position = position;
+  if (useProperMotion == 1) {
+    // 1000 to get from km/s to m/s
+    dvec3 offsetInParsec = dvec3(in_velocity) * double(diffTime) * 1000.0;
+    vec3 pos = in_position + vec3(offsetInParsec);
+    gl_Position = vec4(pos, 1.0);
+  }
+  else {
+    gl_Position = vec4(in_position, 1.0);
+  }
+
 }

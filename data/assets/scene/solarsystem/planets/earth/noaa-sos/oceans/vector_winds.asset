@@ -1,0 +1,71 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Ocean Surface Winds"
+local Identifier = "noaa-sos-oceans-vector_winds"
+local Description = [[The SeaWinds scatterometer, carried aboard NASA's QuikSCAT
+satellite, is a microwave radar designed to measure the backscatter related to
+near-surface wind speed and direction over the oceans. A rougher ocean surface returns a
+stronger signal because the waves reflect more of the radar energy back toward the
+scatterometer antenna (backscatter), and a smoother ocean surface returns a weaker signal
+because less of the energy is reflected. Given the known relationship between the
+roughness of the surface and the strength of the wind, it is possible to compute the wind
+speed and direction - the wind vector - from multiple observations of the signal returned
+from a given area on the ocean surface]]
+local URL = "https://sos.noaa.gov/catalog/datasets/ocean-surface-winds/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true,
+  UnzipFilesDestination = "images"
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "ImageSequenceTileProvider",
+  FolderPath = syncedDirectory .. "images",
+  Description = Description
+}
+
+local Colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(Colorbar)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

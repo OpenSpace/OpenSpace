@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,98 +25,67 @@
 #ifndef __OPENSPACE_MODULE_TOUCH___TUIO_EAR___H__
 #define __OPENSPACE_MODULE_TOUCH___TUIO_EAR___H__
 
-// -Wold-style-cast
-#if (defined(__GNUC__) && !defined(__clang__))
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#endif // defined(__GNUC__) && !defined(__clang__)
-
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wold-style-cast"
-#endif // __clang__
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif
 
 #include <modules/touch/ext/libTUIO11/TUIO/TuioListener.h>
 #include <modules/touch/ext/libTUIO11/TUIO/TuioClient.h>
-#include <modules/touch/ext/libTUIO11/TUIO/UdpReceiver.h>
-#include <modules/touch/ext/libTUIO11/TUIO/TcpReceiver.h>
 
-#if (defined(__GNUC__) && !defined(__clang__))
-#pragma GCC diagnostic pop
-#endif // defined(__GNUC__) && !defined(__clang__)
 #ifdef __clang__
 #pragma clang diagnostic pop
-#endif // __clang__
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
+#include <openspace/util/touch.h>
 #include <ghoul/glm.h>
-
 #include <math.h>
-#include <vector>
 #include <mutex>
-#include <numeric>
-#include <algorithm>
+#include <vector>
 
+namespace openspace {
 
 class TuioEar : public TUIO::TuioListener {
-    public:
-        TuioEar();
-        ~TuioEar() {
-            _tuioClient->disconnect();
-            delete _tuioClient;
-            delete _oscReceiver;
-        }
+public:
+    TuioEar();
+    ~TuioEar();
 
-        /**
-        * Callback functions, listens to the TUIO server
-        */
-        void addTuioObject(TUIO::TuioObject *tobj);
-        void updateTuioObject(TUIO::TuioObject *tobj);
-        void removeTuioObject(TUIO::TuioObject *tobj);
+    /**
+     * Callback functions, listens to the TUIO server.
+     */
+    void addTuioObject(TUIO::TuioObject* tobj) override;
+    void updateTuioObject(TUIO::TuioObject* tobj) override;
+    void removeTuioObject(TUIO::TuioObject* tobj) override;
 
-        void addTuioCursor(TUIO::TuioCursor *tcur);
-        void updateTuioCursor(TUIO::TuioCursor *tcur);
-        void removeTuioCursor(TUIO::TuioCursor *tcur);
+    void addTuioCursor(TUIO::TuioCursor* tcur) override;
+    void updateTuioCursor(TUIO::TuioCursor* tcur) override;
+    void removeTuioCursor(TUIO::TuioCursor* tcur) override;
 
-        void addTuioBlob(TUIO::TuioBlob *tblb);
-        void updateTuioBlob(TUIO::TuioBlob *tblb);
-        void removeTuioBlob(TUIO::TuioBlob *tblb);
+    void addTuioBlob(TUIO::TuioBlob* tblb) override;
+    void updateTuioBlob(TUIO::TuioBlob* tblb) override;
+    void removeTuioBlob(TUIO::TuioBlob* tblb) override;
 
-        void refresh(TUIO::TuioTime frameTime);
+    void refresh(TUIO::TuioTime frameTime) override;
 
-        /**
-        * Returns a list of all touch history that happened since the last frame
-        */
-        std::vector<TUIO::TuioCursor> getInput();
+    /**
+     * Lock-swap the containers of this listener.
+     */
+    std::vector<TouchInput> takeInputs();
+    std::vector<TouchInput> takeRemovals();
 
-        /**
-        * Returns true if a tap occured since the last frame
-        */
-        bool tap();
+private:
+    TUIO::TuioClient _tuioClient;
 
-        /**
-        * Returns tap's cursor coordinates and time information
-        */
-        TUIO::TuioCursor getTap();
-
-        /**
-        * Clears the input list, function called after getInput() each frame
-        */
-        void clearInput();
-
-    private:
-        bool _tap = false;
-        TUIO::TuioCursor _tapCo = TUIO::TuioCursor(-1, -1, -1.0f, -1.0f);
-        std::mutex _mx;
-
-        TUIO::TuioClient *_tuioClient;
-        TUIO::OscReceiver *_oscReceiver;
-
-        std::vector<TUIO::TuioCursor> _list;
-
-        /**
-        * A list that tracks all of the cursor ID's that got removed since last frame
-        */
-        std::vector<long> _removeList;
+    std::vector<TouchInput> _inputList;
+    std::vector<TouchInput> _removalList;
+    std::mutex _mx;
 };
+
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_TOUCH___TUIO_EAR___H__

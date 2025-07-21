@@ -1,0 +1,29 @@
+local ToggleMinorMoonTrails = {
+  Identifier = "os.ToggleMinorMoonTrails",
+  Name = "Toggle minor moon trails",
+  Command = [[openspace.toggleFade("{moonTrail_minor}.Renderable")]],
+  Documentation = "Toggle on/off minor moon trails for all planets in the solar system",
+  GuiPath = "/Trails",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.action.registerAction(ToggleMinorMoonTrails)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(ToggleMinorMoonTrails)
+end)
+
+asset.export("ToggleMinorMoonTrails", ToggleMinorMoonTrails.Identifier)
+
+
+
+asset.meta = {
+  Name = "Actions - Toggle Minor Moon Trails",
+  Description = "Asset providing actions to toggle all minor moon trails on and off",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,0 +1,30 @@
+local globe = asset.require("../../mars")
+
+
+
+local Layer = {
+  Identifier = "Indices",
+  Type = "TileIndexTileProvider",
+  Enabled = asset.enabled
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Mars.Identifier, "Overlays", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Mars.Identifier, "Overlays", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "Mars Indices",
+  Description = "This asset supplies a tile index layer for the Mars globe",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,33 +25,26 @@
 #ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMDATE___H__
 #define __OPENSPACE_MODULE_BASE___DASHBOARDITEMDATE___H__
 
-#include <openspace/rendering/dashboarditem.h>
+#include <openspace/rendering/dashboardtextitem.h>
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-
-namespace ghoul::fontrendering { class Font; }
+#include <openspace/properties/misc/stringproperty.h>
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class DashboardItemDate : public DashboardItem {
+class DashboardItemDate : public DashboardTextItem {
 public:
-    DashboardItemDate(const ghoul::Dictionary& dictionary);
-    ~DashboardItemDate() = default;
+    explicit DashboardItemDate(const ghoul::Dictionary& dictionary);
+    ~DashboardItemDate() override = default;
 
-    void render(glm::vec2& penPosition) override;
-
-    glm::vec2 size() const override;
+    void update() override;
 
     static documentation::Documentation Documentation();
 
 private:
-    properties::StringProperty _fontName;
-    properties::FloatProperty _fontSize;
-
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
+    properties::StringProperty _formatString;
+    properties::StringProperty _timeFormat;
 };
 
 } // namespace openspace

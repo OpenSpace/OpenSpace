@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,17 +32,36 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
+#include <optional>
 
 namespace {
-    constexpr const char* KeyType = "Type";
-
-    constexpr const char* KeyIdentifier = "Identifier";
-
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "Whether the light source is enabled or not"
+        "Whether the light source is enabled or not.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
+
+    // This is the base class of all `LightSource` types, which are components that can be
+    // added to certain `Renderable` types to add lighting effects.
+    //
+    // A `LightSource`, in this case, is just a table that describes properties such as
+    // the location of the light. It _does not physically exist in the scene_, and the
+    // table of parameters have to be added to each `Renderable` that should be affected
+    // by the light source. This is commonly done by exporting a light source table from
+    // an Asset file that represents an illuminating object in the scene, such as the Sun
+    // in our solar system.
+    struct [[codegen::Dictionary(LightSource)]] Parameters {
+        // The type of light source that is described in this element.
+        std::string type [[codegen::annotation("Must name a valid `LightSource` type")]];
+
+        // The identifier of the light source.
+        std::string identifier [[codegen::identifier()]];
+
+        // [[codegen::verbatim(EnabledInfo.description)]]
+        std::optional<bool> enabled;
+    };
+#include "lightsource_codegen.cpp"
 } // namespace
 
 namespace openspace {
@@ -52,69 +71,30 @@ bool LightSource::isEnabled() const {
 }
 
 documentation::Documentation LightSource::Documentation() {
-    using namespace openspace::documentation;
-
-    return {
-        "Light Source",
-        "core_light_source",
-        {
-            {
-                KeyType,
-                new StringAnnotationVerifier("Must name a valid LightSource type"),
-                Optional::No,
-                "The type of the light source that is described in this element. "
-                "The available types of light sources depend on the configuration "
-                "of the application and can be written to disk on "
-                "application startup into the FactoryDocumentation."
-            },
-            {
-                KeyIdentifier,
-                new StringVerifier,
-                Optional::No,
-                "The identifier of the light source."
-            },
-            {
-                EnabledInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                EnabledInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("core_light_source");
 }
 
 std::unique_ptr<LightSource> LightSource::createFromDictionary(
-    const ghoul::Dictionary& dictionary)
+                                                      const ghoul::Dictionary& dictionary)
 {
-    documentation::testSpecificationAndThrow(Documentation(), dictionary, "LightSource");
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    const std::string timeFrameType = dictionary.value<std::string>(KeyType);
+    ghoul::TemplateFactory<LightSource>* factory =
+        FactoryManager::ref().factory<LightSource>();
+    LightSource* source = factory->create(p.type, dictionary);
+    source->setIdentifier(p.identifier);
 
-    auto factory = FactoryManager::ref().factory<LightSource>();
-    std::unique_ptr<LightSource> result = factory->create(timeFrameType, dictionary);
-
-    const std::string identifier = dictionary.value<std::string>(KeyIdentifier);
-    result->setIdentifier(identifier);
-
-    return result;
-}
-
-LightSource::LightSource()
-    : properties::PropertyOwner({ "LightSource" })
-    , _enabled(EnabledInfo, true)
-{
-    addProperty(_enabled);
+    source->_type = p.type;
+    return std::unique_ptr<LightSource>(source);
 }
 
 LightSource::LightSource(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "LightSource" })
+    : properties::PropertyOwner({ "LightSource", "Light Source" })
     , _enabled(EnabledInfo, true)
 {
-    if (dictionary.hasValue<std::string>(EnabledInfo.identifier)) {
-        _enabled = dictionary.value<bool>(EnabledInfo.identifier);
-    }
-
+    const Parameters p = codegen::bake<Parameters>(dictionary);
     addProperty(_enabled);
+    _enabled = p.enabled.value_or(_enabled);
 }
 
 bool LightSource::initialize() {

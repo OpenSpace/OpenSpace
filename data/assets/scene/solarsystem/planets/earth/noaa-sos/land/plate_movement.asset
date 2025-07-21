@@ -1,0 +1,76 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Plate Movement - 200 Million Years Ago to Today"
+local Identifier = "noaa-sos-land-plate_movement"
+local Description = [[Our planet's surface has been shaped and re-shaped by plate
+tectonics through cycles of supercontinent amalgamation and breakup. We can study the
+motion of the tectonic plates, and the continents that they carry, by measuring the
+magnetic signatures recorded in rocks that form the seafloor. As plates move apart at mid
+oceanic ridges (also known as seafloor spreading centers), lava from the Earth's mantle
+fills the void that is being created and solidifies as basalt, which can capture the
+magnetic polarity of the planet at the time. As the magnetic polarity reverses
+irregularly over time, we can use this barcode pattern to determine the age of the
+oceanic crust across all the world's oceans. Teams of geologists, geophysicists and
+marine scientists use ocean-going scientific vessels to criss-cross the oceans in order
+to reveal the entire "barcode" of seafloor spreading histories. This data enables the
+creation of "plate tectonic reconstructions" where the seafloor spreading history can be
+unwound to restore the past position of continents as they are pushed and pulled by the
+motion of the oceanic plates]]
+local URL = "https://sos.noaa.gov/catalog/datasets/plate-movement-200-million-years-ago-to-today/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "ImageSequenceTileProvider",
+  FolderPath = syncedDirectory .. "4096",
+  Description = Description
+}
+
+local AgeScale = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "age_scale.png",
+  FaceCamera = false,
+  Scale = 0.35,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(AgeScale)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(AgeScale)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(AgeScale)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

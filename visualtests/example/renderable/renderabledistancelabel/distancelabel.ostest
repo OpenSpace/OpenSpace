@@ -1,0 +1,32 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderabledistancelabel/distancelabel.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderableDistanceLabel_Example",
+        "position": [
+          339287137281.7024,
+          -128468197523.9453,
+          94339074942.26732
+        ],
+        "pitch": -0.008235380019932511,
+        "referenceFrame": "Root",
+        "up": [
+          0.3579383053992369,
+          0.9336089846207286,
+          -0.015950967474568978
+        ],
+        "yaw": -0.20072883963928767,
+        "timestamp": "2025 JUL 13 10:59:32"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

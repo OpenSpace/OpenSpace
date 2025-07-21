@@ -1,32 +1,53 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-asset.require("spice/base")
-local kernel = asset.require('../kernels').jup310
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
 local IoTrail = {
-    Identifier = "IoTrail",
-    Parent = transforms.JupiterBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "IO",
-            Observer = "JUPITER BARYCENTER",
-            Kernels = kernel
-        },
-        Color = { 0.4, 0.4, 0.2 },
-        Period =  42.0 / 24.0,
-        Resolution = 1000
+  Identifier = "IoTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Io,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
-    Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter" },
-    GUI = {
-        Name = "Io Trail",
-        Path = "/Solar System/Planets/Jupiter/Moons"
-    }
+    Color = { 0.4, 0.4, 0.2 },
+    Period = 42.0 / 24.0,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_major_jupiter"
+  },
+  GUI = {
+    Name = "Io Trail",
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Io",
+    Focusable = false
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(IoTrail)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { IoTrail })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(IoTrail)
+end)
+
+asset.export(IoTrail)
+
+
+
+asset.meta = {
+  Name = "Io Trail",
+  Description = "Trail of Io as observed by the Jupiter",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

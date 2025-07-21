@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,17 +25,20 @@
 #include <modules/space/rendering/renderableconstellationbounds.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/programobject.h>
 #include <fstream>
+#include <optional>
 #include "SpiceUsr.h"
 
 namespace {
+    constexpr std::string_view _loggerCat = "RenderableConstellationBounds";
+
     constexpr float convertHrsToRadians(float rightAscension) {
         // 360 degrees / 24h = 15 degrees/h
         return glm::radians(rightAscension * 15);
@@ -44,152 +47,126 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo VertexInfo = {
         "File",
         "Vertex File Path",
-        "The file pointed to with this value contains the vertex locations of the "
-        "constellations."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ConstellationInfo = {
-        "ConstellationFile",
-        "Constellation File Path",
-        "Specifies the file that contains the mapping between constellation "
-        "abbreviations and full name of the constellation. If this value is empty, the "
-        "abbreviations are used as the full names."
+        "A file that contains the vertex locations of the constellations bounds, as RA "
+        "Dec coordinates on the celestial sphere.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
-        "Color of constellation lines",
-        "Specifies the color of the constellation lines. The lines are always drawn at "
-        "full opacity."
+        "Color",
+        "The color of the lines.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
-        "ConstellationSelection",
-        "Constellation Selection",
-        "The constellations that are selected are displayed on the celestial sphere."
+    // This `Renderable` type can be used to draw bounding shapes on the night sky, where
+    // each shape encapsulates a group of night sky objects, such as the stars of a
+    // constellation.
+    //
+    // The shapes are defined in a file where each line specifies a vertex location in RA
+    // Dec coordinates on the celestial sphere. Each coordinate must also be marked with
+    // an abbreviation for the corresponding constellation that the shapes encapsulates.
+    // This gives each line the following order: `RA Dec Abbreviation`. The units for the
+    // coordinate values are hours for RA, and degrees for Dec. An example of a line
+    // corresponding to a vertex location may look like this:
+    // `23.5357132 +35.1897736 AND`, where `AND` is the identifier of the constellation.
+    // In this case it is short for Andromeda.
+    //
+    // The abbreviations act as identifiers of the individual constellations and can
+    // be mapped to full names in the optional `NamesFile`. The names in this file are
+    // then the ones that will show in the user interface, for example. A line in the
+    // file should first include the abbreviation and then the full name. For example,
+    // for the `AND` abbreviation in the example above, the line would look like this:
+    // `AND Andromeda`.
+    //
+    // If labels were added, the full names in the `NamesFile` may also be used for the
+    // text of the labels. Note that labels are added using a different file, where each
+    // line may or may not include an identifier for that specific label, marked by `id`
+    // in the file. If a row in the label file has an `id` that matches the abbreviation
+    // of the constellation, the text of that label is replaced with the full name from
+    // the `NamesFile`.
+    struct [[codegen::Dictionary(RenderableConstellationBounds)]] Parameters {
+        // [[codegen::verbatim(VertexInfo.description)]]
+        std::filesystem::path file;
+
+        // [[codegen::verbatim(ColorInfo.description)]]
+        std::optional<glm::vec3> color [[codegen::color()]];
     };
+#include "renderableconstellationbounds_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableConstellationBounds::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableConstellationBounds",
+    return codegen::doc<Parameters>(
         "space_renderable_constellationbounds",
-        {
-            {
-                VertexInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                VertexInfo.description
-            },
-            {
-                ConstellationInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                "Specifies the file that contains the mapping between constellation "
-                "abbreviations and full name of the constellation. If the file is "
-                "omitted, the abbreviations are used as the full names."
-            },
-            {
-                ColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                ColorInfo.description
-            },
-            {
-                SelectionInfo.identifier,
-                new StringListVerifier,
-                Optional::Yes,
-                SelectionInfo.description
-            }
-        }
-    };
+        RenderableConstellationsBase::Documentation()
+    );
 }
 
-
 RenderableConstellationBounds::RenderableConstellationBounds(
-    const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
+                                                      const ghoul::Dictionary& dictionary)
+    : RenderableConstellationsBase(dictionary)
     , _vertexFilename(VertexInfo)
-    , _constellationFilename(ConstellationInfo)
     , _color(ColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _constellationSelection(SelectionInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableConstellationBounds"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _vertexFilename.onChange([&](){ loadVertexFile(); });
+    // Avoid reading files here, instead do it in multithreaded initialize()
+    _vertexFilename = p.file.string();
+    _vertexFilename.onChange([this](){ loadData(); });
     addProperty(_vertexFilename);
-    _vertexFilename = dictionary.value<std::string>(VertexInfo.identifier);
-
-    _constellationFilename.onChange([&](){ loadConstellationFile(); });
-    addProperty(_constellationFilename);
-    if (dictionary.hasKey(ConstellationInfo.identifier)) {
-        _constellationFilename = dictionary.value<std::string>(
-            ConstellationInfo.identifier
-        );
-    }
 
     _color.setViewOption(properties::Property::ViewOptions::Color);
+    _color = p.color.value_or(_color);
     addProperty(_color);
-    if (dictionary.hasKey(ColorInfo.identifier)) {
-        _color = glm::vec3(dictionary.value<glm::dvec3>(ColorInfo.identifier));
-    }
+}
 
-    fillSelectionProperty();
-    _constellationSelection.onChange([this]() { selectionPropertyHasChanged(); });
-    addProperty(_constellationSelection);
+void RenderableConstellationBounds::initialize() {
+    RenderableConstellationsBase::initialize();
 
-    if (dictionary.hasKey(SelectionInfo.identifier)) {
-        const ghoul::Dictionary& selection = dictionary.value<ghoul::Dictionary>(
-            SelectionInfo.identifier
-        );
+    loadData();
 
-        std::vector<properties::SelectionProperty::Option> options =
-            _constellationSelection.options();
-        std::vector<int> selectedIndices;
+    if (!_assetSelection.empty()) {
+        const std::vector<std::string> options = _selection.options();
+        std::set<std::string> selectedConstellations;
 
-        for (size_t i = 1; i <= selection.size(); ++i) {
-            const std::string& s = selection.value<std::string>(std::to_string(i));
-
-            const auto it = std::find_if(
-                options.begin(),
-                options.end(),
-                [&s](const properties::SelectionProperty::Option& o) {
-                    return o.description == s;
-                }
-            );
-            if (it == options.end()) {
-                // The user has specified a constellation name that doesn't exist
-                LWARNINGC(
-                    "RenderableConstellationBounds",
-                    fmt::format("Option '{}' not found in list of constellations", s)
+        for (const std::string& s : _assetSelection) {
+            auto it = std::find(options.cbegin(), options.cend(), s);
+            if (it == options.cend()) {
+                // Test if the provided name was an identifier instead of the full name
+                it = std::find(
+                    options.cbegin(),
+                    options.cend(),
+                    constellationFullName(s)
                 );
+
+                if (it == options.cend()) {
+                    // The user has specified a constellation name that doesn't exist
+                    LWARNING(std::format(
+                        "Option '{}' not found in list of constellations", s
+                    ));
+                }
+                else {
+                    selectedConstellations.insert(constellationFullName(s));
+                }
             }
             else {
-                // If the found the option, we push the index of the found value into the
-                // array
-                selectedIndices.push_back(static_cast<int>(
-                    std::distance(options.begin(), it)
-                ));
+                selectedConstellations.insert(s);
             }
         }
-
-        _constellationSelection = selectedIndices;
+        _selection = selectedConstellations;
     }
 }
 
 void RenderableConstellationBounds::initializeGL() {
-    _program = global::renderEngine.buildRenderProgram(
+    _program = global::renderEngine->buildRenderProgram(
         "ConstellationBounds",
         absPath("${MODULE_SPACE}/shaders/constellationbounds_vs.glsl"),
         absPath("${MODULE_SPACE}/shaders/constellationbounds_fs.glsl")
     );
+
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
     glGenVertexArrays(1, &_vao);
     glBindVertexArray(_vao);
@@ -199,11 +176,11 @@ void RenderableConstellationBounds::initializeGL() {
     glBufferData(
         GL_ARRAY_BUFFER,
         _vertexValues.size() * 3 * sizeof(float),
-        &_vertexValues[0],
+        _vertexValues.data(),
         GL_STATIC_DRAW
     );
 
-    GLint positionAttrib = _program->attributeLocation("in_position");
+    const GLint positionAttrib = _program->attributeLocation("in_position");
     glEnableVertexAttribArray(positionAttrib);
     glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
@@ -217,29 +194,49 @@ void RenderableConstellationBounds::deinitializeGL() {
     _vao = 0;
 
     if (_program) {
-        global::renderEngine.removeRenderProgram(_program.get());
+        global::renderEngine->removeRenderProgram(_program.get());
         _program = nullptr;
     }
 }
 
 bool RenderableConstellationBounds::isReady() const {
-    return (_vao != 0) && (_vbo != 0) && _program;
+    bool isReady = _program && _vao != 0 && _vbo != 0;
+
+    // If we have labels, they also need to be loaded
+    if (_hasLabels) {
+        isReady = isReady && RenderableConstellationsBase::isReady();
+    }
+    return isReady;
 }
 
-void RenderableConstellationBounds::render(const RenderData& data, RendererTasks&) {
+void RenderableConstellationBounds::render(const RenderData& data, RendererTasks& tasks) {
     _program->activate();
 
-    setPscUniforms(*_program, data.camera, data.position);
+    _program->setUniform(
+        _uniformCache.campos,
+        glm::vec4(data.camera.positionVec3(), 1.f)
+    );
+    _program->setUniform(
+        _uniformCache.objpos,
+        glm::vec4(data.modelTransform.translation, 0.f)
+    );
+    _program->setUniform(
+        _uniformCache.camrot,
+        glm::mat4(data.camera.viewRotationMatrix())
+    );
+    _program->setUniform(_uniformCache.scaling, glm::vec2(1.f, 0.f));
 
-    glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+    const glm::dmat4 modelTransform = calcModelTransform(data);
 
+    _program->setUniform(
+        _uniformCache.ViewProjection,
+        data.camera.viewProjectionMatrix()
+    );
+    _program->setUniform(_uniformCache.ModelTransform, glm::mat4(modelTransform));
+    _program->setUniform(_uniformCache.color, _color);
+    _program->setUniform(_uniformCache.opacity, opacity());
 
-    _program->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _program->setUniform("ModelTransform", glm::mat4(modelTransform));
-    _program->setUniform("color", _color);
+    glLineWidth(_lineWidth);
 
     glBindVertexArray(_vao);
     for (const ConstellationBound& bound : _constellationBounds) {
@@ -249,6 +246,16 @@ void RenderableConstellationBounds::render(const RenderData& data, RendererTasks
     }
     glBindVertexArray(0);
     _program->deactivate();
+
+    RenderableConstellationsBase::render(data, tasks);
+}
+
+bool RenderableConstellationBounds::loadData() {
+    const bool success = loadVertexFile();
+    if (!success) {
+        throw ghoul::RuntimeError("Error loading data");
+    }
+    return success;
 }
 
 bool RenderableConstellationBounds::loadVertexFile() {
@@ -256,15 +263,13 @@ bool RenderableConstellationBounds::loadVertexFile() {
         return false;
     }
 
-    std::string fileName = absPath(_vertexFilename);
-    std::ifstream file;
-    file.open(fileName);
+    std::filesystem::path fileName = absPath(_vertexFilename);
+    std::ifstream file = std::ifstream(fileName);
     if (!file.good()) {
         return false;
     }
 
     ConstellationBound currentBound;
-    currentBound.constellationAbbreviation = "";
 
     std::string currentLine;
     int currentLineNumber = 1;
@@ -274,36 +279,33 @@ bool RenderableConstellationBounds::loadVertexFile() {
     // a new constellation name, at which point the currentBound is stored away, a new,
     // empty ConstellationBound is created and set at the currentBound
     while (file.good()) {
-        std::getline(file, currentLine);
+        ghoul::getline(file, currentLine);
         if (currentLine.empty()) {
             continue;
         }
 
         // @CHECK: Is this the best way of doing this? ---abock
         std::stringstream s(currentLine);
-        float ra;
+        float ra = 0.f;
         s >> ra;
 
-        float dec;
+        float dec = 0.f;
         s >> dec;
 
-        std::string constellationName;
-        s >> constellationName;
+        std::string abbreviation;
+        s >> abbreviation;
 
         if (!s.good()) {
             // If this evaluates to true, the stream was not completely filled, which
             // means that the line was incomplete, so there was an error
-            LERRORC(
-                "RenderableConstellationBounds",
-                fmt::format(
-                    "Error reading file '{}' at line #{}", fileName, currentLineNumber
-                )
-            );
+            LERROR(std::format(
+                "Error reading file '{}' at line #{}", fileName, currentLineNumber
+            ));
             break;
         }
 
         // Did we arrive at a new constellation?
-        if (constellationName != currentBound.constellationAbbreviation) {
+        if (abbreviation != currentBound.constellationAbbreviation) {
             // Store how many vertices we read during the active time of the constellation
             currentBound.nVertices = static_cast<GLsizei>(
                 _vertexValues.size() - currentBound.startIndex
@@ -312,8 +314,10 @@ bool RenderableConstellationBounds::loadVertexFile() {
             _constellationBounds.push_back(currentBound);
             currentBound = ConstellationBound();
             currentBound.isEnabled = true;
-            currentBound.constellationAbbreviation = constellationName;
-            currentBound.constellationFullName = constellationName;
+            currentBound.constellationAbbreviation = abbreviation;
+            std::string name = constellationFullName(abbreviation);
+            currentBound.constellationFullName =
+                name.empty() ? abbreviation : std::move(name);
             currentBound.startIndex = static_cast<GLsizei>(_vertexValues.size());
         }
 
@@ -324,11 +328,11 @@ bool RenderableConstellationBounds::loadVertexFile() {
         // Likewise, the declination is stored in degrees and needs to be converted
         dec = glm::radians(dec);
 
-        // Convert the (right ascension, declination) to rectangular coordinates)
+        // Convert the (right ascension, declination) to rectangular coordinates.
         // The 1.0 is the distance of the celestial sphere, we will scale that in the
         // render function
-        double rectangularValues[3];
-        radrec_c(1.0, ra, dec, rectangularValues);
+        std::array<double, 3> rectangularValues;
+        radrec_c(1.0, ra, dec, rectangularValues.data());
 
         // Add the new vertex to our list of vertices
         _vertexValues.push_back({
@@ -352,77 +356,17 @@ bool RenderableConstellationBounds::loadVertexFile() {
     return true;
 }
 
-bool RenderableConstellationBounds::loadConstellationFile() {
-    if (_constellationFilename.value().empty()) {
-        return true;
-    }
-
-    std::ifstream file;
-    file.exceptions(std::ifstream::goodbit);
-    file.open(absPath(_constellationFilename));
-
-    std::string line;
-    int index = 0;
-    while (file.good()) {
-        std::getline(file, line);
-        if (line.empty()) {
-            continue;
-        }
-
-        std::string abbreviation;
-        std::stringstream s(line);
-        s >> abbreviation;
-
-        const auto it = std::find_if(
-            _constellationBounds.begin(),
-            _constellationBounds.end(),
-            [abbreviation](const ConstellationBound& bound) {
-                return bound.constellationAbbreviation == abbreviation;
-            }
-        );
-        if (it == _constellationBounds.end()) {
-            LERRORC(
-                "RenderableConstellationBounds",
-                fmt::format("Could not find constellation '{}' in list", abbreviation)
-            );
-            return false;
-        }
-
-        // Update the constellations full name
-        s >> it->constellationFullName;
-        ++index;
-    }
-
-    return true;
-}
-
-void RenderableConstellationBounds::fillSelectionProperty() {
-    // Each constellation is associated with its position in the array as this is unique
-    // and will be constant during the runtime
-    for (int i = 0 ; i < static_cast<int>(_constellationBounds.size()); ++i) {
-        const ConstellationBound& bound = _constellationBounds[i];
-        _constellationSelection.addOption( { i, bound.constellationFullName } );
-    }
-}
-
 void RenderableConstellationBounds::selectionPropertyHasChanged() {
-    const std::vector<int>& values = _constellationSelection;
     // If no values are selected (the default), we want to show all constellations
-    if (values.empty()) {
+    if (!_selection.hasSelected()) {
         for (ConstellationBound& b : _constellationBounds) {
             b.isEnabled = true;
         }
     }
     else {
-        // In the worst case, this algorithm runs with 2 * nConstellations, which is
-        // acceptable as the number of constellations is < 100
-        // First disable all constellations
+        // Enable all constellations that are selected
         for (ConstellationBound& b : _constellationBounds) {
-            b.isEnabled = false;
-        }
-        // then re-enable the ones for which we have indices
-        for (int value : values) {
-            _constellationBounds[value].isEnabled = true;
+            b.isEnabled = _selection.isSelected(b.constellationFullName);
         }
     }
 }

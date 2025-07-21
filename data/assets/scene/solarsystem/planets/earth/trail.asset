@@ -1,30 +1,47 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
-asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
 local EarthTrail = {
-    Identifier = "EarthTrail",
-    Parent = transforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "EARTH",
-            Observer = "SUN"
-        },
-        Color = { 0.5, 0.8, 1.0 },
-        Period = 365.242,
-        Resolution = 1000,
-        Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" }
+  Identifier = "EarthTrail",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = coreKernels.ID.Earth,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
-    GUI = {
-        Name = "Earth Trail",
-        Path = "/Solar System/Planets/Earth"
-    }
+    Color = { 0.5, 0.8, 1.0 },
+    Period = 365.242,
+    Resolution = 1000
+  },
+  Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
+  GUI = {
+    Name = "Earth Trail",
+    Path = "/Solar System/Planets/Earth",
+    Focusable = false
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(EarthTrail)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { EarthTrail })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(EarthTrail)
+end)
+
+asset.export(EarthTrail)
+
+
+
+asset.meta = {
+  Name = "Earth Trail",
+  Description = "Trail of Earth as observed by the Sun",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

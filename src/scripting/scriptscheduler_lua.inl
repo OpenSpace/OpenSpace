@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,121 +22,99 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/globals.h>
+#include <ghoul/lua/lua_helper.h>
 
-namespace openspace::luascriptfunctions {
+namespace {
 
-int loadFile(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadFile");
+// Load timed scripts from a Lua script file that returns a list of scheduled scripts.
+[[codegen::luawrap]] void loadFile(std::string fileName) {
+    using namespace openspace;
 
-    const std::string& missionFileName = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-    if (missionFileName.empty()) {
-        return ghoul::lua::luaError(L, "filepath string is empty");
+    if (fileName.empty()) {
+        throw ghoul::lua::LuaError("Filepath string is empty");
     }
 
-    global::scriptScheduler.loadScripts(
-        ghoul::lua::loadDictionaryFromFile(missionFileName, L)
-    );
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-
-int loadScheduledScript(lua_State* L) {
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(
-        L,
-        { 2, 4 },
-        "lua::loadScheduledScript"
+    ghoul::Dictionary scriptsDict;
+    scriptsDict.setValue("Scripts", ghoul::lua::loadDictionaryFromFile(fileName));
+    documentation::testSpecificationAndThrow(
+        scripting::ScriptScheduler::Documentation(),
+        scriptsDict,
+        "ScriptScheduler"
     );
 
-    std::string time = ghoul::lua::value<std::string>(L, 1);
-    std::string forwardScript = ghoul::lua::value<std::string>(L, 2);
+    std::vector<scripting::ScriptScheduler::ScheduledScript> scripts;
+    for (size_t i = 1; i <= scriptsDict.size(); i++) {
+        ghoul::Dictionary d = scriptsDict.value<ghoul::Dictionary>(std::to_string(i));
 
-    if (nArguments == 2) {
-        global::scriptScheduler.loadScripts({
-            {
-                "1",
-                ghoul::Dictionary {
-                    { KeyTime, std::move(time) },
-                    { KeyForwardScript, std::move(forwardScript) }
-                }
-            }
-        });
-    }
-    else if (nArguments == 3) {
-        std::string backwardScript = ghoul::lua::value<std::string>(L, 3);
-        global::scriptScheduler.loadScripts({
-            {
-                "1",
-                ghoul::Dictionary {
-                    { KeyTime, std::move(time) },
-                    { KeyForwardScript, std::move(forwardScript) },
-                    { KeyBackwardScript, std::move(backwardScript) }
-                }
-            }
-        });
-    }
-    else if (nArguments == 4) {
-        std::string backwardScript = ghoul::lua::value<std::string>(L, 3);
-        std::string universalScript = ghoul::lua::value<std::string>(L, 4);
-
-        global::scriptScheduler.loadScripts({
-            {
-                "1",
-                ghoul::Dictionary {
-                    { KeyTime, std::move(time) },
-                    { KeyForwardScript, std::move(forwardScript) },
-                    { KeyBackwardScript, std::move(backwardScript) },
-                    { KeyUniversalScript, std::move(universalScript) }
-                }
-            }
-        });
+        scripting::ScriptScheduler::ScheduledScript script =
+            scripting::ScriptScheduler::ScheduledScript(d);
+        scripts.push_back(script);
     }
 
-    lua_settop(L, 0);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
+    global::scriptScheduler->loadScripts(scripts);
 }
 
-int setModeApplicationTime(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::setModeApplicationTime");
+/**
+ * Load a single scheduled script. The first argument is the time at which the scheduled
+ * script is triggered, the second argument is the script that is executed in the forward
+ * direction, the optional third argument is the script executed in the backwards
+ * direction, and the optional last argument is the universal script, executed in either
+ * direction.
+ */
+[[codegen::luawrap]] void loadScheduledScript(std::string time, std::string forwardScript,
+                                              std::optional<std::string> backwardScript,
+                                              std::optional<std::string> universalScript,
+                                              std::optional<int> group)
+{
+    using namespace openspace;
 
-    global::scriptScheduler.setModeApplicationTime();
+    scripting::ScriptScheduler::ScheduledScript script;
+    script.time = Time::convertTime(time);
+    script.forwardScript = std::move(forwardScript);
+    script.backwardScript = backwardScript.value_or(script.backwardScript);
+    script.universalScript = universalScript.value_or(script.universalScript);
+    script.group = group.value_or(script.group);
 
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
+    std::vector<scripting::ScriptScheduler::ScheduledScript> scripts;
+    scripts.push_back(std::move(script));
+    global::scriptScheduler->loadScripts(scripts);
 }
 
-int setModeRecordedTime(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::setModeRecordedTime");
-
-    global::scriptScheduler.setModeRecordedTime();
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
+// Clears all scheduled scripts.
+[[codegen::luawrap]] void clear(std::optional<int> group) {
+    openspace::global::scriptScheduler->clearSchedule(group);
 }
 
-int setModeSimulationTime(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::setModeSimulationTime");
+// Returns the list of all scheduled scripts
+[[codegen::luawrap]] std::vector<ghoul::Dictionary> scheduledScripts() {
+    using namespace openspace;
 
-    global::scriptScheduler.setModeSimulationTime();
+    std::vector<scripting::ScriptScheduler::ScheduledScript> scripts =
+        global::scriptScheduler->allScripts();
 
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
+    std::vector<ghoul::Dictionary> result;
+    result.reserve(scripts.size());
+
+    for (const scripting::ScriptScheduler::ScheduledScript& script : scripts) {
+        ghoul::Dictionary d;
+        d.setValue("Time", script.time);
+        if (!script.forwardScript.empty()) {
+            d.setValue("ForwardScript", script.forwardScript);
+        }
+        if (!script.backwardScript.empty()) {
+            d.setValue("BackwardScript", script.backwardScript);
+        }
+        if (!script.universalScript.empty()) {
+            d.setValue("UniversalScript", script.universalScript);
+        }
+        d.setValue("Group", script.group);
+
+        result.push_back(d);
+    }
+
+    return result;
 }
 
-int clear(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clear");
+#include "scriptscheduler_lua_codegen.cpp"
 
-    global::scriptScheduler.clearSchedule();
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-
-} // namespace openspace::luascriptfunction
+} // namespace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -72,7 +72,8 @@ float DataProcessor::processDataPoint(float value, int option) {
         return histogram.equalize(
             normalizeWithStandardScore(value, mean, sd, _histNormValues)
         ) / 512.f;
-    } else {
+    }
+    else {
         return normalizeWithStandardScore(value, mean, sd, _normValues);
     }
 }
@@ -82,11 +83,11 @@ float DataProcessor::normalizeWithStandardScore(float value, float mean, float s
 {
     float zScoreMin = normalizationValues.x;
     float zScoreMax = normalizationValues.y;
-    float standardScore = ( value - mean ) / sd;
+    float standardScore = (value - mean) / sd;
     // Clamp intresting values
     standardScore = glm::clamp(standardScore, -zScoreMin, zScoreMax);
     //return and normalize
-    return ( standardScore + zScoreMin ) / (zScoreMin + zScoreMax );
+    return (standardScore + zScoreMin) / (zScoreMin + zScoreMax);
 }
 
 float DataProcessor::unnormalizeWithStandardScore(float standardScore, float mean,
@@ -109,13 +110,13 @@ void DataProcessor::initializeVectors(int numOptions) {
         _max = std::vector<float>(numOptions, std::numeric_limits<float>::min());
     }
     if (_sum.empty()) {
-        _sum = std::vector<float>(numOptions, 0.0f);
+        _sum = std::vector<float>(numOptions, 0.f);
     }
     if (_standardDeviation.empty()) {
-        _standardDeviation = std::vector<float>(numOptions, 0.0f);
+        _standardDeviation = std::vector<float>(numOptions, 0.f);
     }
     if (_numValues.empty()) {
-        _numValues = std::vector<float>(numOptions, 0.0f);
+        _numValues = std::vector<float>(numOptions, 0.f);
     }
     if (_histograms.empty()) {
         _histograms.clear();
@@ -153,7 +154,8 @@ void DataProcessor::calculateFilterValues(const std::vector<int>& selectedOption
                     standardDeviation,
                     _normValues)
                 );
-            } else {
+            }
+            else {
                 Histogram hist = _histograms[option]->equalize();
                 filterMid = hist.highestBinValue(true);
                 filterWidth = 1.f / 512.f;
@@ -171,7 +173,7 @@ void DataProcessor::add(const std::vector<std::vector<float>>& optionValues,
 {
     const int numOptions = static_cast<int>(optionValues.size());
 
-    for (int i = 0; i < numOptions; ++i) {
+    for (int i = 0; i < numOptions; i++) {
         const std::vector<float>& values = optionValues[i];
         const int numValues = static_cast<int>(values.size());
 
@@ -180,7 +182,9 @@ void DataProcessor::add(const std::vector<std::vector<float>>& optionValues,
             values.begin(),
             values.end(),
             0.f,
-            [mean](float l, float r) { return l + pow(r - mean, 2); }
+            [mean](float l, float r) {
+                return l + static_cast<float>(std::pow(r - mean, 2));
+            }
         );
         const float standardDeviation = sqrt(variance / numValues);
 
@@ -188,8 +192,9 @@ void DataProcessor::add(const std::vector<std::vector<float>>& optionValues,
         const float oldMean = (1.f / _numValues[i]) * _sum[i];
 
         _sum[i] += sum[i];
-        _standardDeviation[i] = sqrt(pow(standardDeviation, 2) +
-                                pow(_standardDeviation[i], 2));
+        _standardDeviation[i] = static_cast<float>(
+            std::sqrt(std::pow(standardDeviation, 2) + std::pow(_standardDeviation[i], 2))
+        );
         _numValues[i] += numValues;
 
         const float min = normalizeWithStandardScore(
@@ -227,7 +232,7 @@ void DataProcessor::add(const std::vector<std::vector<float>>& optionValues,
                 _histNormValues
             );
             //unnormalize histMin, histMax
-            std::unique_ptr<Histogram> newHist = std::make_unique<Histogram>(
+            auto newHist = std::make_unique<Histogram>(
                 std::min(min, normalizeWithStandardScore(
                     unNormHistMin,
                     mean,
@@ -243,7 +248,7 @@ void DataProcessor::add(const std::vector<std::vector<float>>& optionValues,
                 numBins
             );
 
-            for (int j = 0; j < numBins; ++j) {
+            for (int j = 0; j < numBins; j++) {
                 float value = unnormalizeWithStandardScore(
                     j * (histMax - histMin) + histMin,
                     oldMean,
@@ -264,7 +269,7 @@ void DataProcessor::add(const std::vector<std::vector<float>>& optionValues,
             _histograms[i] = std::move(newHist);
         }
 
-        for (int j = 0; j < numValues; ++j) {
+        for (int j = 0; j < numValues; j++) {
             _histograms[i]->add(
                 normalizeWithStandardScore(
                     values[j],

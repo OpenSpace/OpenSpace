@@ -1,0 +1,48 @@
+local globe = asset.require("../../mars")
+
+
+
+local Layer = {
+  Identifier = "HiRISE-LS",
+  Name = "HiRISE Local Set",
+  Enabled = asset.enabled,
+  ZIndex = 70,
+  FilePath = asset.resource("hirisels.vrt"),
+  BlendMode = "Color",
+  Description = [[HiRISE (High Resolution Imaging Science Experiment) is the most
+    powerful camera ever sent to another planet, one of six instruments onboard the
+    Mars Reconnaissance Orbiter. We launched in 2005, arrived at Mars in 2006 and have
+    been imaging ever since. Our camera's high resolution capability (imaging up to 30
+    centimeters per pixel) remains unprecedented for any existing orbiter in the study
+    of the Red Planet, as well as being an indispensable instrument for helping to
+    select landing sites for robotic and future human exploration. In the past decade,
+    we've also imaged avalanches in progress, and discovered dark flows that may or
+    may not be briny seeps. Hundreds of science papers have been published with our
+    data. (Description from URL). This map contains a subet set of the HiRISE
+    imagaery, only containing locations where a corresponding HiRISE digital terrain
+    model (DTM) was available as of 2018]]
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Mars.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Mars.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "HiRISE Local Set",
+  Description = [[HiRISE layer for images with corresponding DEMs. This map is hosted by
+    ESRI]],
+  Author = "USGS",
+  URL = "https://www.uahirise.org",
+  License = "Esri Master License Agreement"
+}
+
+

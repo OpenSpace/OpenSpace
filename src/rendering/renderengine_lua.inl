@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,121 +22,67 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/globals.h>
+#include <ghoul/lua/lua_helper.h>
 
-namespace openspace::luascriptfunctions {
+namespace {
 
-/**
-* \ingroup LuaScripts
-* setRenderer(string):
-* Set renderer
-*/
-int setRenderer(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setRenderer");
-
-    const int type = lua_type(L, -1);
-    if (type != LUA_TSTRING) {
-        return ghoul::lua::luaError(L, "Expected argument of type 'string'");
-    }
-
-    const std::string& renderer = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-    global::renderEngine.setRendererFromString(renderer);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-
-/**
-* \ingroup LuaScripts
-* toggleFade(float):
-* Toggle a global fade over (float) seconds
-*/
-int toggleFade(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::toggleFade");
-
-    const float t = ghoul::lua::value<float>(L, 1, ghoul::lua::PopValue::Yes);
-
-    constexpr const float fadedIn = 1.f;
-    const int direction = global::renderEngine.globalBlackOutFactor() == fadedIn ? -1 : 1;
-
-    global::renderEngine.startFading(direction, static_cast<float>(t));
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-
-/**
-* \ingroup LuaScripts
-* fadeIn(float):
-* start a global fadein over (float) seconds
-*/
-int fadeIn(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::fadeIn");
-
-    const float t = ghoul::lua::value<float>(L, 1, ghoul::lua::PopValue::Yes);
-
-    global::renderEngine.startFading(1, t);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-/**
-* \ingroup LuaScripts
-* fadeIn(float):
-* start a global fadeout over (float) seconds
-*/
-int fadeOut(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::fadeOut");
-
-    float t = ghoul::lua::value<float>(L, 1, ghoul::lua::PopValue::Yes);
-
-    global::renderEngine.startFading(-1, t);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-
-int addScreenSpaceRenderable(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addScreenSpaceRenderable");
-
-    using ghoul::lua::errorLocation;
-
-    ghoul::Dictionary d;
-    try {
-        ghoul::lua::luaDictionaryFromState(L, d);
-        lua_settop(L, 0);
-    }
-    catch (const ghoul::lua::LuaFormatException& e) {
-        LERRORC("addScreenSpaceRenderable", e.what());
-        lua_settop(L, 0);
-        return 0;
-    }
-
+/// Will create a ScreenSpaceRenderable from a lua Table and add it in the RenderEngine
+[[codegen::luawrap]] void addScreenSpaceRenderable(ghoul::Dictionary screenSpace) {
+    using namespace openspace;
     std::unique_ptr<ScreenSpaceRenderable> s =
-        ScreenSpaceRenderable::createFromDictionary(d);
-
-    global::renderEngine.addScreenSpaceRenderable(std::move(s));
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
+        ScreenSpaceRenderable::createFromDictionary(screenSpace);
+    global::renderEngine->addScreenSpaceRenderable(std::move(s));
 }
 
-int removeScreenSpaceRenderable(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeScreenSpaceRenderable");
+/**
+ * Given a ScreenSpaceRenderable name this script will remove it from the RenderEngine.
+ * The parameter can also be a table in which case the 'Identifier' key is used to look up
+ * the name from the table.
+ */
+[[codegen::luawrap]] void removeScreenSpaceRenderable(
+                                  std::variant<std::string, ghoul::Dictionary> identifier)
+{
+    using namespace openspace;
+    std::string identifierStr;
+    if (std::holds_alternative<std::string>(identifier)) {
+        identifierStr = std::get<std::string>(identifier);
+    }
+    else {
+        ghoul::Dictionary d = std::get<ghoul::Dictionary>(identifier);
+        if (!d.hasValue<std::string>("Identifier")) {
+            throw ghoul::lua::LuaError("Passed table does not contain an Identifier");
+        }
+        identifierStr = d.value<std::string>("Identifier");
+    }
 
-    const std::string& name = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-    global::renderEngine.removeScreenSpaceRenderable(name);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
+    global::renderEngine->removeScreenSpaceRenderable(identifierStr);
 }
 
-}// namespace openspace::luascriptfunctions
+/**
+ * Take a screenshot and return the screenshot number. The screenshot will be stored in
+ * the ${SCREENSHOTS} folder.
+ */
+[[codegen::luawrap]] int takeScreenshot() {
+    using namespace openspace;
+    global::renderEngine->takeScreenshot();
+    unsigned int screenshotNumber = global::renderEngine->latestScreenshotNumber();
+    return static_cast<int>(screenshotNumber);
+}
+
+/**
+* Reset screenshot index to 0.
+*/
+[[codegen::luawrap]] void resetScreenshotNumber() {
+    using namespace openspace;
+    global::renderEngine->resetScreenshotNumber();
+}
+
+// Extracts the DPI scaling for either the GUI window or if there is no dedicated GUI
+// window, the first window.
+[[codegen::luawrap]] float dpiScaling() {
+    return openspace::global::windowDelegate->osDpiScaling();
+}
+
+#include "renderengine_lua_codegen.cpp"
+
+} // namespace

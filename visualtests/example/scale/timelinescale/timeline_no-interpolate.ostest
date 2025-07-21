@@ -1,0 +1,30 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/scale/timelinescale/timeline_no-interpolate.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "TimelineScale_Example_NoInterpolation",
+        "position": [
+          -21.610783714707534,
+          -16.51570295585548,
+          -17.544290776506497
+        ],
+        "referenceFrame": "Root",
+        "up": [
+          0.25073349699358005,
+          0.5314435348568856,
+          -0.8091356392745213
+        ],
+        "timestamp": "2000 JAN 01 10:00:00"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+local globe = asset.require("../../mercury")
+
+
+
+local Layer = {
+  Identifier = "Messenger_HIW_Sweden",
+  Name = "Messenger HIW [Sweden]",
+  Enabled = asset.enabled,
+  ZIndex = 10,
+  FilePath = asset.resource("messenger_hiw_sweden.wms")
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "Messenger HIW [Sweden]",
+  Description = [[Messenger HIW layer for Mercury globe. This map is hosted on the
+    OpenSpace server in Sweden]],
+  Author = "USGS",
+  URL = "",
+  License = "NASA/PDS"
+}
+
+

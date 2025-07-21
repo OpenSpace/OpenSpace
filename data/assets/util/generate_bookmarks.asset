@@ -1,0 +1,91 @@
+local function loadBookmarks(guiPath, bookmarkfile)
+  local genBookmarks = {}
+  local PARSEC_CONSTANT = 3.0856776E16
+
+  local extract_first_line = false
+  local contents = openspace.readCSVFile(openspace.absPath(bookmarkfile), extract_first_line)
+
+  for _,v in ipairs(contents) do
+    local group = v[1]
+    local name = v[2]
+    local globe = v[3]
+    local lat = v[4]
+    local lon = v[5]
+    local altitude = v[6]
+    local x = v[7]
+    local y = v[8]
+    local z = v[9]
+    local scale = v[10]
+    local linewidth = v[11]
+
+    local identifier = string.gsub(guiPath .. "-" .. name, " ", "_")
+
+    scale = (scale == "" and 75000 or scale)
+    linewidth = (linewidth == "" and 2.0 or tonumber(linewidth))
+
+    local parent = (globe == "" and "Root" or globe)
+
+    local sgn = {
+      Identifier = identifier,
+      Parent = parent,
+      Transform = {
+        Scale = {
+          Type = "StaticScale",
+          Scale = tonumber(scale)
+        },
+        Rotation = {
+          Type = "StaticRotation",
+          Rotation = {
+            -0.05487554,  0.4941095, -0.8676661,
+            -0.9938214 , -0.1109906, -0.0003515167,
+            -0.09647644,  0.8622859,  0.4971472
+          }
+        }
+      },
+      Renderable = {
+        Type = "RenderableSphericalGrid",
+        Enabled = false,
+        Opacity = 0.3,
+        Color = { 0.3, 0.84, 1.0 },
+        LineWidth = linewidth
+      },
+      GUI = {
+        Name = name,
+        Path = "/" .. guiPath
+      }
+    }
+
+    if (group ~= "") then
+      sgn.GUI.Path = sgn.GUI.Path .. "/" .. group
+    end
+
+    if (globe == "") then
+      sgn.Transform.Translation = {
+        Type = "StaticTranslation",
+        Position = {
+          tonumber(x) * PARSEC_CONSTANT,
+          tonumber(y) * PARSEC_CONSTANT,
+          tonumber(z) * PARSEC_CONSTANT
+        }
+      }
+    else
+      sgn.Transform.Translation = {
+        Type = "GlobeTranslation",
+        Globe = globe,
+        Latitude = tonumber(lat),
+        Longitude = tonumber(lon)
+      }
+      if (altitude == nil) then
+        sgn.Transform.Translation.UseHeightMap = true
+      else
+        sgn.Transform.Translation.UseHeightMap = false
+        sgn.Transform.Translation.Altitude = tonumber(altitude)
+      end
+    end
+
+    table.insert(genBookmarks, sgn)
+  end
+  return genBookmarks
+end
+
+asset.export("loadBookmarks", loadBookmarks)

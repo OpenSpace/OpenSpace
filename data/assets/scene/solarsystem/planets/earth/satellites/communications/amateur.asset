@@ -1,24 +1,56 @@
-local assetHelper = asset.require('util/asset_helper')
-local shared = asset.require('../satellites_shared')
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local group = {
-    Title = "Amateur Radio",
-    Url = "http://www.celestrak.com/NORAD/elements/amateur.txt",
-    TrailColor = { 0.75, 0.75, 0.35 }
+
+
+local omm = asset.resource({
+  Name = "Satellite OMM Data (Amateur Radio)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_amateur_radio",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=amateur&FORMAT=kvn",
+  Filename = "amateur.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+
+local AmateurSatellites = {
+  Identifier = "AmateurSatellites",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "amateur.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.75, 0.75, 0.35 },
+    TrailFade = 15.0,
+    PointSizeExponent = 5.0,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Amateur Radio",
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
+  }
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
 
-
-local objectNames = {}
-
-asset.onInitialize(function ()
-    objectNames = shared.addSatelliteGroupObjects(group, tle, false)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(AmateurSatellites)
 end)
 
-
-asset.onDeinitialize(function ()
-    for _, n in ipairs(objectNames) do
-        openspace.removeSceneGraphNode(n)
-    end
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(AmateurSatellites)
 end)
+
+asset.export(AmateurSatellites)
+
+
+
+asset.meta = {
+  Name = "Satellites Communications - Amateur Radio",
+  Description = [[Satellites asset for Communications - Amateur Radio. Data from
+    Celestrak]],
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/NORAD/elements/",
+  License = "Celestrak"
+}

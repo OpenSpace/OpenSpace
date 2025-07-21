@@ -1,0 +1,60 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
+
+local sssb = asset.resource({
+  Name = "Small SolarSystem Body Data (Potentially hazardous Asteroids)",
+  Type = "HttpSynchronization",
+  Identifier = "sssb_data_pha",
+  Version = 4
+})
+
+
+local Object = {
+  Identifier = "sssb_pha",
+  Parent = transforms.SunEclipJ2000.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = sssb .. "sssb_data_pha.csv",
+    Format = "SBDB",
+    Segments = 200,
+    SegmentQuality = 3,
+    Color = { 0.98, 0.09, 0.06 },
+    TrailFade = 17,
+    PointSizeExponent = 9.2
+  },
+  GUI = {
+    Name = "Potentially Hazardous Asteroids",
+    Path = "/Solar System/Small Bodies",
+    Focusable = false,
+    Description = [[Asteroids that are deemed potentially hazardous to Earth based on
+      their close approaches. All asteroids with an Earth Minimum Orbit Intersection
+      Distance (MOID) of 0.05 AU or less, and with an absolute magnitude (H) of 22.0 or
+      less.]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Object)
+end)
+
+asset.export(Object)
+
+
+
+asset.meta = {
+  Name = "Potentially-Hazardous Asteroids",
+  Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
+    Potentially Hazardous group. ]],
+  Author = [[JPL Small-Body Database hosted by California Institute of
+    Technology]],
+  URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
+  License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010. All
+    documents available from this server may be protected under the U.S. and Foreign
+    Copyright Laws]]
+}

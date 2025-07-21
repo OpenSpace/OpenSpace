@@ -1,0 +1,28 @@
+local Item = {
+  Type = "DashboardItemDistance",
+  Identifier = "Distance",
+  GuiName = "Distance",
+  SourceType = "Camera",
+  DestinationType = "Focus"
+}
+
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)
+
+asset.export(Item)
+
+
+
+asset.meta = {
+  Name = "Dashboard - Distance",
+  Description = "This asset provides a Distance dashboard item",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,0 +1,61 @@
+-- Contains the required functions to create a simple Lua state machine, that can step
+-- forwards and backwards through a list of states.
+--
+-- A state is given as a table with a Title string, and two functions: Play and Rewind
+-- (see example asset)
+
+local function goToNextStateFunction(machine)
+  if (machine.currentStateIndex >= #machine.states) then
+    machine.currentStateIndex = #machine.states
+    return
+  end
+
+  if (machine.currentStateIndex == 0) then
+    openspace.printInfo("Starting state machine with " ..
+      machine.states[machine.currentStateIndex + 1].Title)
+  elseif (machine.currentStateIndex == #machine.states) then
+    openspace.printInfo("Proceed from " ..
+      machine.states[machine.currentStateIndex].Title
+    )
+  else
+    openspace.printInfo("Proceed from " ..
+      machine.states[machine.currentStateIndex].Title .. " to " ..
+      machine.states[machine.currentStateIndex + 1].Title
+    )
+  end
+
+  machine.currentStateIndex = machine.currentStateIndex + 1
+
+  machine.states[machine.currentStateIndex].Play()
+end
+
+local function goToPreviousStateFunction(machine)
+  if (machine.currentStateIndex < 1) then
+    machine.currentStateIndex = 0
+    return
+  end
+
+  if (machine.currentStateIndex == 1) then
+    openspace.printInfo("Rewind from " .. machine.states[machine.currentStateIndex].Title)
+  else
+    openspace.printInfo("Rewind from " ..
+      machine.states[machine.currentStateIndex].Title .. " to " ..
+      machine.states[machine.currentStateIndex - 1].Title
+    )
+  end
+
+  machine.states[machine.currentStateIndex].Rewind()
+  machine.currentStateIndex = machine.currentStateIndex - 1
+end
+
+local function createStateMachine(states)
+  local machine = {
+    states = states,
+    currentStateIndex = 0
+  }
+  machine.goToNextState = function() goToNextStateFunction(machine) end
+  machine.goToPreviousState = function() goToPreviousStateFunction(machine) end
+  return machine
+end
+
+asset.export("createStateMachine", createStateMachine)

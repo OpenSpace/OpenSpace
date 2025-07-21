@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_alg.h ecc4064ad058e92440d85c2a83501cc45579c06c 2017-07-24 19:24:22Z Even Rouault $
+ * $Id: gdal_alg.h b9ddc19f9ccd776cac9388f260aebc24439f10aa 2018-10-09 11:45:33 +0200 Julien Cabieces $
  *
  * Project:  GDAL Image Processing Algorithms
  * Purpose:  Prototypes, and definitions for various GDAL based algorithms.
@@ -306,6 +306,8 @@ typedef struct
     double adfGeoTransform[6];
 
     int    nElevField;
+    int    nElevFieldMin;
+    int    nElevFieldMax;
     int    nIDField;
     int    nNextID;
 } OGRContourWriterInfo;
@@ -316,11 +318,16 @@ OGRContourWriter( double, int, double *, double *, void *pInfo );
 
 CPLErr CPL_DLL
 GDALContourGenerate( GDALRasterBandH hBand,
-                            double dfContourInterval, double dfContourBase,
-                            int nFixedLevelCount, double *padfFixedLevels,
-                            int bUseNoData, double dfNoDataValue,
-                            void *hLayer, int iIDField, int iElevField,
-                            GDALProgressFunc pfnProgress, void *pProgressArg );
+                     double dfContourInterval, double dfContourBase,
+                     int nFixedLevelCount, double *padfFixedLevels,
+                     int bUseNoData, double dfNoDataValue,
+                     void *hLayer, int iIDField, int iElevField,
+                     GDALProgressFunc pfnProgress, void *pProgressArg );
+
+CPLErr CPL_DLL
+GDALContourGenerateEx( GDALRasterBandH hBand, void *hLayer,
+                       CSLConstList options,
+                       GDALProgressFunc pfnProgress, void *pProgressArg );
 
 /************************************************************************/
 /*      Rasterizer API - geometries burned into GDAL raster.            */

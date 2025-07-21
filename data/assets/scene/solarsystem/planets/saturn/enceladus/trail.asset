@@ -1,31 +1,54 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-local kernel = asset.require('../kernels').sat375
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
 local EnceladusTrail = {
-    Identifier = "EnceladusTrail",
-    Parent = transforms.SaturnBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "ENCELADUS",
-            Observer = "SATURN BARYCENTER",
-            Kernels = kernel
-        },
-        Color = { 0.5, 0.3, 0.3 },
-        Period = 33.0 / 24.0,
-        Resolution = 1000
+  Identifier = "EnceladusTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Enceladus,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
-    Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
-    GUI = {
-        Name = "Enceladus Trail",
-        Path = "/Solar System/Planets/Saturn/Moons"
-    }
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 33.0 / 24.0,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_major_saturn"
+  },
+  GUI = {
+    Name = "Enceladus Trail",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Enceladus",
+    Focusable = false,
+    Description = "Trail of Saturn's moon Enceladus as observed by Saturn"
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(EnceladusTrail)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { EnceladusTrail })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(EnceladusTrail)
+end)
+
+asset.export(EnceladusTrail)
+
+
+
+asset.meta = {
+  Name = "Enceladus Trail",
+  Description = "Trail for Enceladus",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

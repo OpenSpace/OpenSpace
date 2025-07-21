@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,51 +27,70 @@
 #include <modules/webbrowser/include/webbrowserapp.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <ghoul/logging/logmanager.h>
-#include <fmt/format.h>
-#include <include/wrapper/cef_helpers.h>
+#include <ghoul/misc/profiling.h>
+#include <format>
+
+#ifdef __APPLE__
+#include <include/wrapper/cef_library_loader.h>
+#endif // __APPLE__
 
 namespace {
-    constexpr const char* _loggerCat = "CefHost";
+    constexpr std::string_view _loggerCat = "CefHost";
 } // namespace
 
 namespace openspace {
 
-CefHost::CefHost(std::string helperLocation) {
+CefHost::CefHost([[maybe_unused]] const std::string& helperLocation) {
     LDEBUG("Initializing CEF...");
 
     CefSettings settings;
+    const std::filesystem::path root =
+        std::filesystem::path(helperLocation).parent_path();
+    const std::filesystem::path cefcache = std::format("{}/cefcache", root);
+    CefString(&settings.root_cache_path).FromString(cefcache.string());
+
+#ifndef __APPLE__
+    // Apple will always look for helper in a fixed location
     CefString(&settings.browser_subprocess_path).FromString(helperLocation);
-    attachDebugSettings(settings);
+#endif // __APPLE__
 
-#ifdef WIN32
-    // Enable High-DPI support on Windows 7 or newer.
-    CefEnableHighDPISupport();
-#endif
-    CefRefPtr<WebBrowserApp> app(new WebBrowserApp);
+    settings.windowless_rendering_enabled = 1;
 
-    CefMainArgs args;
-    CefInitialize(args, settings, app.get(), NULL);
-    LDEBUG("Initializing CEF... done!");
+    settings.remote_debugging_port = 8088;
+    LDEBUG(std::format(
+        "Remote WebBrowser debugging available on http://localhost:{}",
+        settings.remote_debugging_port
+    ));
+
+    // cf. https://github.com/chromiumembedded/cef/issues/3685
+    settings.chrome_runtime = 1;
+
+#ifdef __APPLE__
+    // Load the CEF framework library at runtime instead of linking directly as required
+    // by the macOS sandbox implementation
+    CefScopedLibraryLoader library_loader;
+    if (!library_loader.LoadInMain()) {
+        return;
+    }
+#endif // __APPLE__
+
+    const CefRefPtr<WebBrowserApp> app = CefRefPtr<WebBrowserApp>(new WebBrowserApp);
+
+    const CefMainArgs args;
+    const bool success = CefInitialize(args, settings, app.get(), nullptr);
+    if (!success) {
+        throw ghoul::RuntimeError("Failed initializing CEF Browser");
+    }
+    LDEBUG("Initializing CEF... done");
 }
 
 CefHost::~CefHost() {
     CefShutdown();
 }
 
-void CefHost::attachDebugSettings(CefSettings &settings) {
-    settings.remote_debugging_port = 8088;
-
-    LDEBUG(fmt::format(
-        "Remote WebBrowser debugging available on http://localhost:{}",
-        settings.remote_debugging_port
-    ));
-
-#ifdef __APPLE__
-    settings.single_process = true;
-#endif
-}
-
 void CefHost::doMessageLoopWork() {
+    ZoneScoped;
+
     CefDoMessageLoopWork();
 }
 

@@ -1,0 +1,101 @@
+local jupiterTransforms = asset.require("scene/solarsystem/planets/jupiter/transforms")
+local kernelsJup = asset.require("scene/solarsystem/planets/jupiter/kernels")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local Juice = {
+  Identifier = "Juice",
+  Parent = jupiterTransforms.JupiterBarycenter.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 APR 14 12:43:25.842",
+    End = "2035 OCT 05 00:00:00.000"
+  },
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Juice,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Juice,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "Juice",
+    Path = "/Solar System/Missions/Juice",
+    Description = "The position of Juice in the reference frame of Jupiter"
+  }
+}
+
+local GanymedePosition = {
+  Identifier = "GanymedePosition",
+  Parent = jupiterTransforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernelsJup.ID.Ganymede,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Ganymede",
+    Description = "Ganymede's position relative to Jupiter as an inertial reference frame",
+    Hidden = true
+  }
+}
+
+local GPHIO = {
+  Identifier = "GPHIO",
+  Parent = GanymedePosition.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.GPHIO,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "GPHIO",
+    Path = "/Solar System/Missions/Juice",
+    Description = [[A rotating coordinate system called Ganymede Phi-Omega (G_PHI_O). The
+      X axis is pointing in the direction of corotational flow (System III flow), Z is
+      parallel to the Jovian spin axis (Omega), and Y completes the right handed set. The
+      basis vectors are fixed at the time of Ganymede closest approach (2000-12-28
+      08:25:28)]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Juice)
+  openspace.addSceneGraphNode(GanymedePosition)
+  openspace.addSceneGraphNode(GPHIO)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(GPHIO)
+  openspace.removeSceneGraphNode(GanymedePosition)
+  openspace.removeSceneGraphNode(Juice)
+end)
+
+asset.export(Juice)
+asset.export(GanymedePosition)
+asset.export(GPHIO)
+
+
+
+asset.meta = {
+  Name = "Transformations for the JUICE mission profile",
+  Description = [[
+    Contains all of the base transformations necessary for the JUICE mission in the Jovian
+    system
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

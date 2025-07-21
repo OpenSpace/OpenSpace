@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,75 +24,100 @@
 
 #include <openspace/network/parallelpeer.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/keyframenavigator.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
+#include <openspace/navigation/keyframenavigator.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/io/socket/tcpsocket.h>
+#include <ghoul/misc/profiling.h>
 
 #include "parallelpeer_lua.inl"
 
 namespace {
-    constexpr const size_t MaxLatencyDiffs = 64;
-    constexpr const char* _loggerCat = "ParallelPeer";
+    constexpr size_t MaxLatencyDiffs = 64;
+    constexpr std::string_view _loggerCat = "ParallelPeer";
 
     constexpr openspace::properties::Property::PropertyInfo PasswordInfo = {
         "Password",
         "Password",
         "The general password that allows this OpenSpace instance access to the Wormhole "
-        "server."
+        "server.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HostPasswordInfo = {
         "HostPassword",
         "Host Password",
         "The password that is required to take control of the joint session and thus "
-        "send all commands to connected clients."
+        "send all commands to connected clients.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo PortInfo = {
         "Port",
         "Port",
         "The port on which the Wormhole server is listening to connections from "
-        "OpenSpace."
+        "OpenSpace.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AddressInfo = {
         "Address",
         "Address",
-        "The address of the Wormhole server either as a DNS name or an IP address."
+        "The address of the Wormhole server either as a DNS name or an IP address.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo NameInfo = {
         "Name",
         "Connection Name",
         "The name of this OpenSpace instance that will be potentially broadcast to other "
-        "connected instances."
+        "connected instances.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ServerNameInfo = {
+        "ServerName",
+        "Server Name",
+        "The name of the server instance to join.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BufferTimeInfo = {
         "BufferTime",
         "Buffer Time",
-        "" // @TODO Missing documentation
+        "This is the number of seconds that received keyframes are buffered before they "
+        "get applied to the rendering. A higher value leads to smoother rendering, "
+        "particularly when the internet connection is unstable, but also leads to higher "
+        "delay.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TimeKeyFrameInfo = {
         "TimeKeyframeInterval",
         "Time keyframe interval",
-        "" // @TODO Missing documentation
+        "Determines how often the information about the simulation time is sent (in "
+        "seconds). Lower values mean more accurate representation of the time, but also "
+        "require higher internet bandwidth.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CameraKeyFrameInfo = {
         "CameraKeyframeInterval",
         "Camera Keyframe interval",
-        "" // @TODO Missing documentation
+        "Determines how often the information about the camera position and orientation "
+        "is sent (in seconds). Lower values mean more accurate representation of the "
+        "time, but also more internet traffic.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
 
@@ -102,6 +127,7 @@ ParallelPeer::ParallelPeer()
     : properties::PropertyOwner({ "ParallelPeer", "Parallel Peer" })
     , _password(PasswordInfo)
     , _hostPassword(HostPasswordInfo)
+    , _serverName(ServerNameInfo)
     , _port(PortInfo)
     , _address(AddressInfo)
     , _name(NameInfo)
@@ -112,6 +138,7 @@ ParallelPeer::ParallelPeer()
     , _connection(nullptr)
 {
     addProperty(_name);
+    addProperty(_serverName);
     addProperty(_port);
     addProperty(_address);
     addProperty(_bufferTime);
@@ -126,12 +153,8 @@ ParallelPeer::ParallelPeer()
 ParallelPeer::~ParallelPeer() {
     disconnect();
     if (_timeJumpCallback != -1) {
-        global::timeManager.removeTimeJumpCallback(_timeJumpCallback);
+        global::timeManager->removeTimeJumpCallback(_timeJumpCallback);
     }
-    if (_timeJumpCallback != -1) {
-        global::timeManager.removeTimeJumpCallback(_timeJumpCallback);
-    }
-
 }
 
 void ParallelPeer::connect() {
@@ -139,7 +162,7 @@ void ParallelPeer::connect() {
 
     setStatus(ParallelConnection::Status::Connecting);
 
-    std::unique_ptr<ghoul::io::TcpSocket> socket = std::make_unique<ghoul::io::TcpSocket>(
+    auto socket = std::make_unique<ghoul::io::TcpSocket>(
         _address,
         atoi(_port.value().c_str())
     );
@@ -164,31 +187,75 @@ void ParallelPeer::disconnect() {
 }
 
 void ParallelPeer::sendAuthentication() {
-    std::string name = _name;
-    // Length of this nodes name
-    const uint32_t nameLength = static_cast<uint32_t>(name.length());
+    std::string password = _password;
+    if (password.size() > std::numeric_limits<uint16_t>::max()) {
+        password.resize(std::numeric_limits<uint16_t>::max());
+    }
+    const uint16_t passwordSize = static_cast<uint16_t>(password.size());
 
-    // Total size of the buffer: (passcode + namelength + name)
-    const size_t size = sizeof(uint64_t) + sizeof(uint32_t) + nameLength;
+    std::string hostPassword = _hostPassword;
+    if (hostPassword.size() > std::numeric_limits<uint16_t>::max()) {
+        hostPassword.resize(std::numeric_limits<uint16_t>::max());
+    }
+    const uint16_t hostPasswordSize = static_cast<uint16_t>(hostPassword.size());
+
+    std::string serverName = _serverName;
+    if (serverName.size() > std::numeric_limits<uint8_t>::max()) {
+        serverName.resize(std::numeric_limits<uint8_t>::max());
+    }
+    const uint8_t serverNameSize = static_cast<uint8_t>(serverName.size());
+
+    std::string name = _name;
+    if (name.size() > std::numeric_limits<uint8_t>::max()) {
+        name.resize(std::numeric_limits<uint8_t>::max());
+    }
+    const uint8_t nameLength = static_cast<uint8_t>(name.length());
+
+
+    // Total size of the buffer
+    const size_t size =
+        sizeof(uint16_t) + // password length
+        passwordSize     + // password
+        sizeof(uint16_t) + // host password length
+        hostPasswordSize + // host password
+        sizeof(uint8_t) + // server name length
+        serverNameSize   + // server name
+        sizeof(uint8_t)  + // name length
+        nameLength;        // name
 
     // Create and reserve buffer
     std::vector<char> buffer;
     buffer.reserve(size);
 
-    const uint64_t passCode = std::hash<std::string>{}(_password.value());
-
-    // Write the hashed password to buffer
+    // Write the password to buffer
     buffer.insert(
         buffer.end(),
-        reinterpret_cast<const char*>(&passCode),
-        reinterpret_cast<const char*>(&passCode) + sizeof(uint64_t)
+        reinterpret_cast<const char*>(&passwordSize),
+        reinterpret_cast<const char*>(&passwordSize) + sizeof(uint16_t)
     );
+    buffer.insert(buffer.end(), password.begin(), password.end());
+
+    // Write the host password to buffer
+    buffer.insert(
+        buffer.end(),
+        reinterpret_cast<const char*>(&hostPasswordSize),
+        reinterpret_cast<const char*>(&hostPasswordSize) + sizeof(uint16_t)
+    );
+    buffer.insert(buffer.end(), hostPassword.begin(), hostPassword.end());
+
+    // Write the server name to the buffer
+    buffer.insert(
+        buffer.end(),
+        reinterpret_cast<const char*>(&serverNameSize),
+        reinterpret_cast<const char*>(&serverNameSize) + sizeof(uint8_t)
+    );
+    buffer.insert(buffer.end(), serverName.begin(), serverName.end());
 
     // Write the length of the nodes name to buffer
     buffer.insert(
         buffer.end(),
         reinterpret_cast<const char*>(&nameLength),
-        reinterpret_cast<const char*>(&nameLength) + sizeof(uint32_t)
+        reinterpret_cast<const char*>(&nameLength) + sizeof(uint8_t)
     );
 
     // Write this node's name to buffer
@@ -202,7 +269,7 @@ void ParallelPeer::sendAuthentication() {
 }
 
 void ParallelPeer::queueInMessage(const ParallelConnection::Message& message) {
-    std::lock_guard<std::mutex> unqlock(_receiveBufferMutex);
+    const std::lock_guard unqlock(_receiveBufferMutex);
     _receiveBuffer.push_back(message);
 }
 
@@ -218,15 +285,15 @@ void ParallelPeer::handleMessage(const ParallelConnection::Message& message) {
             nConnectionsMessageReceived(message.content);
             break;
         default:
-            //unknown message type
+            // unknown message type
             break;
     }
 }
 
 void ParallelPeer::analyzeTimeDifference(double messageTimestamp) {
-    std::lock_guard<std::mutex> latencyLock(_latencyMutex);
+    const std::lock_guard latencyLock(_latencyMutex);
 
-    const double timeDiff = global::windowDelegate.applicationTime() - messageTimestamp;
+    const double timeDiff = global::windowDelegate->applicationTime() - messageTimestamp;
     if (_latencyDiffs.empty()) {
         _initialTimeDiff = timeDiff;
     }
@@ -238,7 +305,7 @@ void ParallelPeer::analyzeTimeDifference(double messageTimestamp) {
 }
 
 double ParallelPeer::convertTimestamp(double messageTimestamp) {
-    std::lock_guard<std::mutex> latencyLock(_latencyMutex);
+    const std::lock_guard latencyLock(_latencyMutex);
     return messageTimestamp + _initialTimeDiff + _bufferTime;
 }
 
@@ -246,7 +313,7 @@ double ParallelPeer::convertTimestamp(double messageTimestamp) {
 double ParallelPeer::latencyStandardDeviation() const {
     double accumulatedLatencyDiffSquared = 0;
     double accumulatedLatencyDiff = 0;
-    for (double diff : _latencyDiffs) {
+    for (const double diff : _latencyDiffs) {
         accumulatedLatencyDiff += diff;
         accumulatedLatencyDiffSquared += diff*diff;
     }
@@ -262,27 +329,25 @@ double ParallelPeer::latencyStandardDeviation() const {
     return std::sqrt(latencyVariance);
 }
 
-void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
-{
+void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
     size_t offset = 0;
 
     // The type of data message received
-    const uint32_t type = *(reinterpret_cast<const uint32_t*>(message.data() + offset));
-    offset += sizeof(uint32_t);
+    const uint8_t type = *(reinterpret_cast<const uint8_t*>(message.data() + offset));
+    offset += sizeof(uint8_t);
 
     const double timestamp = *(reinterpret_cast<const double*>(message.data() + offset));
     offset += sizeof(double);
 
     analyzeTimeDifference(timestamp);
 
-    std::vector<char> buffer(message.begin() + offset, message.end());
-
+    const std::vector<char> buffer(message.begin() + offset, message.end());
     switch (static_cast<datamessagestructures::Type>(type)) {
         case datamessagestructures::Type::CameraData: {
-            datamessagestructures::CameraKeyframe kf(buffer);
+            const datamessagestructures::CameraKeyframe kf(buffer);
             const double convertedTimestamp = convertTimestamp(kf._timestamp);
 
-            global::navigationHandler.keyframeNavigator().removeKeyframesAfter(
+            global::navigationHandler->keyframeNavigator().removeKeyframesAfter(
                 convertedTimestamp
             );
 
@@ -293,16 +358,18 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
             pose.scale = kf._scale;
             pose.followFocusNodeRotation = kf._followNodeRotation;
 
-            global::navigationHandler.keyframeNavigator().addKeyframe(convertedTimestamp,
-                                                                      pose);
+            global::navigationHandler->keyframeNavigator().addKeyframe(
+                convertedTimestamp,
+                pose
+            );
             break;
         }
         case datamessagestructures::Type::TimelineData: {
-            const double now = global::windowDelegate.applicationTime();
-            datamessagestructures::TimeTimeline timelineMessage(buffer);
+            const double now = global::windowDelegate->applicationTime();
+            const datamessagestructures::TimeTimeline timelineMessage(buffer);
 
             if (timelineMessage._clear) {
-                global::timeManager.removeKeyframesAfter(
+                global::timeManager->removeKeyframesAfter(
                     convertTimestamp(timestamp),
                     true
                 );
@@ -313,19 +380,19 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
 
             // If there are new keyframes incoming, make sure to erase all keyframes
             // that already exist after the first new keyframe.
-            if (keyframesMessage.size() > 0) {
+            if (!keyframesMessage.empty()) {
                 const double convertedTimestamp =
                     convertTimestamp(keyframesMessage[0]._timestamp);
 
-                global::timeManager.removeKeyframesAfter(convertedTimestamp, true);
+                global::timeManager->removeKeyframesAfter(convertedTimestamp, true);
             }
 
             for (const datamessagestructures::TimeKeyframe& kfMessage : keyframesMessage)
             {
-                TimeKeyframeData timeKeyframeData;
+                TimeManager::TimeKeyframeData timeKeyframeData;
                 timeKeyframeData.delta = kfMessage._dt;
                 timeKeyframeData.pause = kfMessage._paused;
-                timeKeyframeData.time = kfMessage._time;
+                timeKeyframeData.time = Time(kfMessage._time);
                 timeKeyframeData.jump = kfMessage._requiresTimeJump;
 
                 const double kfTimestamp = convertTimestamp(kfMessage._timestamp);
@@ -333,9 +400,9 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
                 // We only need at least one keyframe before the current timestamp,
                 // so we can remove any other previous ones
                 if (kfTimestamp < now) {
-                    global::timeManager.removeKeyframesBefore(kfTimestamp, true);
+                    global::timeManager->removeKeyframesBefore(kfTimestamp, true);
                 }
-                global::timeManager.addKeyframe(
+                global::timeManager->addKeyframe(
                     kfTimestamp,
                     timeKeyframeData
                 );
@@ -346,40 +413,42 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
             datamessagestructures::ScriptMessage sm;
             sm.deserialize(buffer);
 
-            global::scriptEngine.queueScript(
-                sm._script,
-                scripting::ScriptEngine::RemoteScripting::No
-            );
+            // No sync or send because this has already been recived by a peer,
+            // don't send it back again
+            global::scriptEngine->queueScript({
+                .code = sm._script,
+                .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+                .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+            });
             break;
         }
-        default: {
-            LERROR(fmt::format(
-                "Unidentified message with identifier {} received in parallel connection",
+        default:
+            LERROR(std::format(
+                "Unidentified message with identifier '{}' received in parallel "
+                "connection",
                 type
             ));
             break;
-        }
     }
 }
 
-void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& message)
- {
-    if (message.size() < 2 * sizeof(uint32_t)) {
-        LERROR("Malformed connection status message.");
+void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& message) {
+    if (message.size() < 2 * sizeof(uint8_t)) {
+        LERROR("Malformed connection status message");
         return;
     }
     size_t pointer = 0;
-    uint32_t statusIn = *(reinterpret_cast<const uint32_t*>(&message[pointer]));
+    const uint8_t statusIn = *(reinterpret_cast<const uint8_t*>(&message[pointer]));
     const ParallelConnection::Status status = static_cast<ParallelConnection::Status>(
         statusIn
     );
-    pointer += sizeof(uint32_t);
+    pointer += sizeof(uint8_t);
 
-    const size_t hostNameSize = *(reinterpret_cast<const uint32_t*>(&message[pointer]));
-    pointer += sizeof(uint32_t);
+    const uint8_t hostNameSize = *(reinterpret_cast<const uint8_t*>(&message[pointer]));
+    pointer += sizeof(uint8_t);
 
     if (hostNameSize > message.size() - pointer) {
-        LERROR("Malformed connection status message.");
+        LERROR("Malformed connection status message");
         return;
     }
 
@@ -387,10 +456,9 @@ void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& mess
     if (hostNameSize > 0) {
         hostName = std::string(&message[pointer], hostNameSize);
     }
-    pointer += hostNameSize;
 
     if (status > ParallelConnection::Status::Host) {
-        LERROR("Invalid status.");
+        LERROR("Invalid status");
         return;
     }
 
@@ -406,27 +474,29 @@ void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& mess
 
     setStatus(status);
 
-    global::navigationHandler.keyframeNavigator().clearKeyframes();
-    global::timeManager.clearKeyframes();
+    global::navigationHandler->keyframeNavigator().clearKeyframes();
+    global::timeManager->clearKeyframes();
 }
 
-void ParallelPeer::nConnectionsMessageReceived(const std::vector<char>& message)
-{
+void ParallelPeer::nConnectionsMessageReceived(const std::vector<char>& message) {
     if (message.size() < sizeof(uint32_t)) {
-        LERROR("Malformed host info message.");
+        LERROR("Malformed host info message");
         return;
     }
-    const uint32_t nConnections = *(reinterpret_cast<const uint32_t*>(&message[0]));
+    const uint32_t nConnections = *(reinterpret_cast<const uint32_t*>(message.data()));
     setNConnections(nConnections);
 }
 
 void ParallelPeer::handleCommunication() {
     while (!_shouldDisconnect && _connection.isConnectedOrConnecting()) {
         try {
-            ParallelConnection::Message m = _connection.receiveMessage();
+            const ParallelConnection::Message m = _connection.receiveMessage();
             queueInMessage(m);
-        } catch (const ParallelConnection::ConnectionLostError&) {
-            LERROR("Parallel connection lost");
+        }
+        catch (const ParallelConnection::ConnectionLostError& e) {
+            if (e.shouldLogError) {
+                LERROR("Parallel connection lost");
+            }
         }
     }
     setStatus(ParallelConnection::Status::Disconnected);
@@ -440,31 +510,40 @@ void ParallelPeer::setAddress(std::string address) {
     _address = std::move(address);
 }
 
+void ParallelPeer::setServerName(std::string name) {
+    _serverName = std::move(name);
+}
+
 void ParallelPeer::setName(std::string name) {
     _name = std::move(name);
 }
 
 void ParallelPeer::requestHostship() {
     std::vector<char> buffer;
-    uint64_t passwordHash = std::hash<std::string>{}(_hostPassword);
+    std::string hostPw = _hostPassword;
+    uint16_t hostPwSize = static_cast<uint16_t>(hostPw.size());
     buffer.insert(
         buffer.end(),
-        reinterpret_cast<char*>(&passwordHash),
-        reinterpret_cast<char*>(&passwordHash) + sizeof(uint64_t)
+        reinterpret_cast<const char*>(&hostPwSize),
+        reinterpret_cast<const char*>(&hostPwSize) + sizeof(uint16_t)
     );
+    buffer.insert(buffer.end(), hostPw.begin(), hostPw.end());
 
-    _connection.sendMessage(ParallelConnection::Message(
-        ParallelConnection::MessageType::HostshipRequest,
-        buffer
-    ));
+    _connection.sendMessage(
+        ParallelConnection::Message(
+            ParallelConnection::MessageType::HostshipRequest,
+            buffer
+        )
+    );
 }
 
 void ParallelPeer::resignHostship() {
-    std::vector<char> buffer;
-    _connection.sendMessage(ParallelConnection::Message(
-        ParallelConnection::MessageType::HostshipResignation,
-        buffer
-    ));
+    _connection.sendMessage(
+        ParallelConnection::Message(
+            ParallelConnection::MessageType::HostshipResignation,
+            std::vector<char>()
+        )
+    );
 }
 
 void ParallelPeer::setPassword(std::string password) {
@@ -486,8 +565,8 @@ void ParallelPeer::sendScript(std::string script) {
     std::vector<char> buffer;
     sm.serialize(buffer);
 
-    double timestamp = global::windowDelegate.applicationTime();
-    ParallelConnection::DataMessage message(
+    const double timestamp = global::windowDelegate->applicationTime();
+    const ParallelConnection::DataMessage message = ParallelConnection::DataMessage(
         datamessagestructures::Type::ScriptData,
         timestamp,
         buffer
@@ -496,22 +575,24 @@ void ParallelPeer::sendScript(std::string script) {
 }
 
 void ParallelPeer::resetTimeOffset() {
-    global::navigationHandler.keyframeNavigator().clearKeyframes();
-    global::timeManager.clearKeyframes();
-    std::lock_guard<std::mutex> latencyLock(_latencyMutex);
+    global::navigationHandler->keyframeNavigator().clearKeyframes();
+    global::timeManager->clearKeyframes();
+    const std::lock_guard latencyLock(_latencyMutex);
     _latencyDiffs.clear();
 }
 
 void ParallelPeer::preSynchronization() {
-    std::unique_lock<std::mutex> unqlock(_receiveBufferMutex);
+    ZoneScoped;
+
+    const std::unique_lock unlock(_receiveBufferMutex);
     while (!_receiveBuffer.empty()) {
-        ParallelConnection::Message& message = _receiveBuffer.front();
+        const ParallelConnection::Message& message = _receiveBuffer.front();
         handleMessage(message);
         _receiveBuffer.pop_front();
     }
 
     if (isHost()) {
-        double now = global::windowDelegate.applicationTime();
+        const double now = global::windowDelegate->applicationTime();
 
         if (_lastCameraKeyframeTimestamp + _cameraKeyframeInterval < now) {
             sendCameraKeyframe();
@@ -533,23 +614,71 @@ void ParallelPeer::preSynchronization() {
 
 void ParallelPeer::setStatus(ParallelConnection::Status status) {
     if (_status != status) {
+        const ParallelConnection::Status prevStatus = _status;
         _status = status;
         _timeJumped = true;
         _connectionEvent->publish("statusChanged");
+
+
+        EventEngine* ee = global::eventEngine;
+        const bool isConnected =
+            status == ParallelConnection::Status::ClientWithoutHost ||
+            status == ParallelConnection::Status::ClientWithHost ||
+            status == ParallelConnection::Status::Host;
+        const bool wasConnected =
+            prevStatus == ParallelConnection::Status::ClientWithoutHost ||
+            prevStatus == ParallelConnection::Status::ClientWithHost ||
+            prevStatus == ParallelConnection::Status::Host;
+        const bool isDisconnected = status == ParallelConnection::Status::Disconnected;
+        const bool wasDisconnected =
+            prevStatus == ParallelConnection::Status::Disconnected;
+        const bool isHost = status == ParallelConnection::Status::Host;
+        const bool wasHost = prevStatus == ParallelConnection::Status::Host;
+        const bool isClient =
+            status == ParallelConnection::Status::ClientWithoutHost ||
+            status == ParallelConnection::Status::ClientWithHost;
+        const bool wasClient =
+            prevStatus == ParallelConnection::Status::ClientWithoutHost ||
+            prevStatus == ParallelConnection::Status::ClientWithHost;
+
+
+        if (isDisconnected && wasConnected) {
+            ee->publishEvent<events::EventParallelConnection>(
+                events::EventParallelConnection::State::Lost
+            );
+        }
+        if (isConnected && wasDisconnected) {
+            ee->publishEvent<events::EventParallelConnection>(
+                events::EventParallelConnection::State::Established
+            );
+        }
+        if (isHost && (wasClient || wasDisconnected)) {
+            ee->publishEvent<events::EventParallelConnection>(
+                events::EventParallelConnection::State::HostshipGained
+            );
+        }
+        if ((isClient || isDisconnected) && wasHost) {
+            ee->publishEvent<events::EventParallelConnection>(
+                events::EventParallelConnection::State::HostshipLost
+            );
+        }
     }
     if (isHost()) {
-        global::timeManager.addTimeJumpCallback([this]() {
+        global::timeManager->addTimeJumpCallback([this]() {
             _timeJumped = true;
         });
-        global::timeManager.addTimelineChangeCallback([this]() {
+        global::timeManager->addTimelineChangeCallback([this]() {
             _timeTimelineChanged = true;
         });
-    } else {
+    }
+    else {
         if (_timeJumpCallback != -1) {
-            global::timeManager.removeTimeJumpCallback(_timeJumpCallback);
+            global::timeManager->removeTimeJumpCallback(_timeJumpCallback);
         }
         if (_timeTimelineChangeCallback != -1) {
-            global::timeManager.removeTimelineChangeCallback(_timeTimelineChangeCallback);
+            global::timeManager->removeTimelineChangeCallback(
+                _timeTimelineChangeCallback
+            );
         }
     }
 }
@@ -585,30 +714,32 @@ const std::string& ParallelPeer::hostName() {
 }
 
 void ParallelPeer::sendCameraKeyframe() {
-    SceneGraphNode* focusNode = global::navigationHandler.focusNode();
+    interaction::NavigationHandler& navHandler = *global::navigationHandler;
+
+    const SceneGraphNode* focusNode =
+        navHandler.orbitalNavigator().anchorNode();
     if (!focusNode) {
         return;
     }
 
     // Create a keyframe with current position and orientation of camera
     datamessagestructures::CameraKeyframe kf;
-    kf._position = global::navigationHandler.focusNodeToCameraVector();
+    kf._position = navHandler.orbitalNavigator().anchorNodeToCameraVector();
 
-    kf._followNodeRotation =
-        global::navigationHandler.orbitalNavigator().followingNodeRotation();
+    kf._followNodeRotation = navHandler.orbitalNavigator().followingAnchorRotation();
     if (kf._followNodeRotation) {
         kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
-        kf._rotation = global::navigationHandler.focusNodeToCameraRotation();
+        kf._rotation = navHandler.orbitalNavigator().anchorNodeToCameraRotation();
     }
     else {
-        kf._rotation = global::navigationHandler.camera()->rotationQuaternion();
+        kf._rotation = navHandler.camera()->rotationQuaternion();
     }
 
     kf._focusNode = focusNode->identifier();
-    kf._scale = global::navigationHandler.camera()->scaling();
+    kf._scale = navHandler.camera()->scaling();
 
     // Timestamp as current runtime of OpenSpace instance
-    kf._timestamp = global::windowDelegate.applicationTime();
+    kf._timestamp = global::windowDelegate->applicationTime();
 
     // Create a buffer for the keyframe
     std::vector<char> buffer;
@@ -616,7 +747,7 @@ void ParallelPeer::sendCameraKeyframe() {
     // Fill the keyframe buffer
     kf.serialize(buffer);
 
-    const double timestamp = global::windowDelegate.applicationTime();
+    const double timestamp = global::windowDelegate->applicationTime();
     // Send message
     _connection.sendDataMessage(ParallelConnection::DataMessage(
         datamessagestructures::Type::CameraData,
@@ -627,16 +758,17 @@ void ParallelPeer::sendCameraKeyframe() {
 
 void ParallelPeer::sendTimeTimeline() {
     // Create a keyframe with current position and orientation of camera
-    const Timeline<TimeKeyframeData> timeline = global::timeManager.timeline();
-    std::deque<Keyframe<TimeKeyframeData>> keyframes = timeline.keyframes();
+    const Timeline<TimeManager::TimeKeyframeData>& timeline =
+        global::timeManager->timeline();
+    std::deque<Keyframe<TimeManager::TimeKeyframeData>> keyframes = timeline.keyframes();
 
     datamessagestructures::TimeTimeline timelineMessage;
     timelineMessage._clear = true;
     timelineMessage._keyframes.reserve(timeline.nKeyframes());
 
     // Case 1: Copy all keyframes from the native timeline
-    for (size_t i = 0; i < timeline.nKeyframes(); ++i) {
-        const Keyframe<TimeKeyframeData>& kf = keyframes.at(i);
+    for (size_t i = 0; i < timeline.nKeyframes(); i++) {
+        const Keyframe<TimeManager::TimeKeyframeData>& kf = keyframes.at(i);
 
         datamessagestructures::TimeKeyframe kfMessage;
         kfMessage._time = kf.data.time.j2000Seconds();
@@ -652,10 +784,10 @@ void ParallelPeer::sendTimeTimeline() {
     // If time jumped this frame, this is represented in the keyframe.
     if (timeline.nKeyframes() == 0) {
         datamessagestructures::TimeKeyframe kfMessage;
-        kfMessage._time = global::timeManager.time().j2000Seconds();
-        kfMessage._dt = global::timeManager.targetDeltaTime();
-        kfMessage._paused = global::timeManager.isPaused();
-        kfMessage._timestamp = global::windowDelegate.applicationTime();
+        kfMessage._time = global::timeManager->time().j2000Seconds();
+        kfMessage._dt = global::timeManager->targetDeltaTime();
+        kfMessage._paused = global::timeManager->isPaused();
+        kfMessage._timestamp = global::windowDelegate->applicationTime();
         kfMessage._requiresTimeJump = _timeJumped;
         timelineMessage._keyframes.push_back(kfMessage);
     }
@@ -665,7 +797,7 @@ void ParallelPeer::sendTimeTimeline() {
     // Fill the timeline buffer
     timelineMessage.serialize(buffer);
 
-    double timestamp = global::windowDelegate.applicationTime();
+    const double timestamp = global::windowDelegate->applicationTime();
     // Send message
     _connection.sendDataMessage(ParallelConnection::DataMessage(
         datamessagestructures::Type::TimelineData,
@@ -682,34 +814,11 @@ scripting::LuaLibrary ParallelPeer::luaLibrary() {
     return {
         "parallel",
         {
-            {
-                "connect",
-                &luascriptfunctions::connect,
-                {},
-                "",
-                "Connect to parallel"
-            },
-            {
-                "disconnect",
-                &luascriptfunctions::disconnect,
-                {},
-                "",
-                "Disconnect from parallel"
-            },
-            {
-                "requestHostship",
-                &luascriptfunctions::requestHostship,
-                {},
-                "",
-                "Request to be the host for this session"
-            },
-            {
-                "resignHostship",
-                &luascriptfunctions::resignHostship,
-                {},
-                "",
-                "Resign hostship"
-            },
+            codegen::lua::Connect,
+            codegen::lua::Disconnect,
+            codegen::lua::RequestHostship,
+            codegen::lua::ResignHostship,
+            codegen::lua::JoinServer
         }
     };
 }

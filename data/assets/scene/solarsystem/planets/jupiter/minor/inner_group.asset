@@ -1,85 +1,428 @@
-local assetHelper = asset.require('util/asset_helper')
-local proceduralGlobes = asset.require('util/procedural_globe')
-local transforms = asset.require('../transforms')
-local kernel = asset.require('../kernels').jup341
+local transforms = asset.require("../transforms")
+local kernels344 = asset.require("../kernels344")
+local coreKernels = asset.require("spice/core")
 
 
 
-local parentIdentifier = transforms.JupiterBarycenter.Identifier
-local parentSpice = "JUPITER BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_inner" }
-local trailColor = { 0.4, 0.3, 0.01 }
-
-local innerMoons = {
-    {
-        Identifier = "Metis",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "METIS",
-        Radii = { 60000, 40000, 34000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Inner Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 0.117912037,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Adrastea",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "ADRASTEA",
-        Radii = { 20000, 16000, 14000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Inner Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 0.2982638889,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Amalthea",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "AMALTHEA",
-        Radii = { 250000, 146000, 128000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Inner Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 0.4981828704,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Thebe",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "THEBE",
-        Radii = { 116000, 98000, 84000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Inner Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 0.6745023148,
-        Kernels = kernel
+local Metis = {
+  Identifier = "Metis",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels344.ID.Metis,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 60000, 40000, 34000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Metis",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Metis"
+  }
+}
+
+local MetisTrail = {
+  Identifier = "MetisTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels344.ID.Metis,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 0.117912037,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_inner",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Metis Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Metis",
+    Focusable = false
+  }
+}
+
+local MetisLabel = {
+  Identifier = "MetisLabel",
+  Parent = Metis.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Metis",
+    FontSize = 50.0,
+    Size = 5.6,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.1, 3.0 },
+    FadeWidths = { 0.1, 3.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_inner"
+  },
+  GUI = {
+    Name = "Metis Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Metis",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Metis (inner group)"
+  }
+}
+
+local Adrastea = {
+  Identifier = "Adrastea",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels344.ID.Adrastea,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 20000, 16000, 14000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Adrastea",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Adrastea"
+  }
+}
+
+local AdrasteaTrail = {
+  Identifier = "AdrasteaTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels344.ID.Adrastea,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 0.2982638889,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_inner",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Adrastea Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Adrastea",
+    Focusable = false
+  }
+}
+
+local AdrasteaLabel = {
+  Identifier = "AdrasteaLabel",
+  Parent = Adrastea.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Adrastea",
+    FontSize = 50.0,
+    Size = 5.6,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.1, 3.0 },
+    FadeWidths = { 0.1, 3.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_inner"
+  },
+  GUI = {
+    Name = "Adrastea Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Adrastea",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Adrastea (inner group)"
+  }
+}
+
+local Amalthea = {
+  Identifier = "Amalthea",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels344.ID.Amalthea,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 250000, 146000, 128000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Amalthea",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Amalthea"
+  }
+}
+
+local AmaltheaTrail = {
+  Identifier = "AmaltheaTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels344.ID.Amalthea,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 0.4981828704,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_inner",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Amalthea Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Amalthea",
+    Focusable = false
+  }
+}
+
+local AmaltheaLabel = {
+  Identifier = "AmaltheaLabel",
+  Parent = Amalthea.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Amalthea",
+    FontSize = 50.0,
+    Size = 5.6,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.1, 3.0 },
+    FadeWidths = { 0.1, 3.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_inner"
+  },
+  GUI = {
+    Name = "Amalthea Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Amalthea",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Amalthea (inner group)"
+  }
+}
+
+local Thebe = {
+  Identifier = "Thebe",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels344.ID.Thebe,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 116000, 98000, 84000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Thebe",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Thebe"
+  }
+}
+
+local ThebeTrail = {
+  Identifier = "ThebeTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels344.ID.Thebe,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 0.6745023148,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_inner",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Thebe Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Thebe",
+    Focusable = false
+  }
+}
+
+local ThebeLabel = {
+  Identifier = "ThebeLabel",
+  Parent = Thebe.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Thebe",
+    FontSize = 50.0,
+    Size = 5.6,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.1, 3.0 },
+    FadeWidths = { 0.1, 3.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_inner"
+  },
+  GUI = {
+    Name = "Thebe Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Thebe",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Thebe (inner group)"
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Metis)
+  openspace.addSceneGraphNode(MetisTrail)
+  openspace.addSceneGraphNode(MetisLabel)
 
-assetHelper.registerSceneGraphNodesAndExport(
-    asset,
-    proceduralGlobes.createGlobes(innerMoons)
-)
+  openspace.addSceneGraphNode(Adrastea)
+  openspace.addSceneGraphNode(AdrasteaTrail)
+  openspace.addSceneGraphNode(AdrasteaLabel)
+
+  openspace.addSceneGraphNode(Amalthea)
+  openspace.addSceneGraphNode(AmaltheaTrail)
+  openspace.addSceneGraphNode(AmaltheaLabel)
+
+  openspace.addSceneGraphNode(Thebe)
+  openspace.addSceneGraphNode(ThebeTrail)
+  openspace.addSceneGraphNode(ThebeLabel)
+end)
+
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MetisLabel)
+  openspace.removeSceneGraphNode(MetisTrail)
+  openspace.removeSceneGraphNode(Metis)
+
+  openspace.removeSceneGraphNode(AdrasteaLabel)
+  openspace.removeSceneGraphNode(AdrasteaTrail)
+  openspace.removeSceneGraphNode(Adrastea)
+
+  openspace.removeSceneGraphNode(AmaltheaLabel)
+  openspace.removeSceneGraphNode(AmaltheaTrail)
+  openspace.removeSceneGraphNode(Amalthea)
+
+  openspace.removeSceneGraphNode(ThebeLabel)
+  openspace.removeSceneGraphNode(ThebeTrail)
+  openspace.removeSceneGraphNode(Thebe)
+end)
+
+
+asset.export(Metis)
+asset.export(MetisTrail)
+asset.export(MetisLabel)
+
+asset.export(Adrastea)
+asset.export(AdrasteaTrail)
+asset.export(AdrasteaLabel)
+
+asset.export(Amalthea)
+asset.export(AmaltheaTrail)
+asset.export(AmaltheaLabel)
+
+asset.export(Thebe)
+asset.export(ThebeTrail)
+asset.export(ThebeLabel)
+
+
+
+asset.meta = {
+  Name = "Jupiter Inner Group Moons",
+  Description = [[Procedural Globe asset containing Jupiter's Inner Group moons: Metis,
+    Adrastea, Amalthea, and Thebe. Blank globes and SPICE trails are generated for each
+    moon]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

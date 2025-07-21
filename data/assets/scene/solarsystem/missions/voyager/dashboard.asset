@@ -1,0 +1,37 @@
+local voyager1 = asset.require("./voyager1")
+local voyager2 = asset.require("./voyager2")
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+
+local DistanceVoyager1 = {
+  Type = "DashboardItemDistance",
+  Identifier = "Voyager1Distance",
+  GuiName = "Voyager 1 - Earth Distance",
+  SourceType = "Node",
+  SourceNodeIdentifier = voyager1.Voyager_1.Identifier,
+  DestinationType = "Node",
+  DestinationNodeIdentifier = earth.Earth.Identifier,
+  Enabled = asset.enabled
+}
+
+local DistanceVoyager2 = {
+  Type = "DashboardItemDistance",
+  Identifier = "Voyager2Distance",
+  GuiName = "Voyager 2 - Earth Distance",
+  SourceType = "Node",
+  SourceNodeIdentifier = voyager2.Voyager_2.Identifier,
+  DestinationType = "Node",
+  DestinationNodeIdentifier = earth.Earth.Identifier,
+  Enabled = asset.enabled
+}
+
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(DistanceVoyager1)
+  openspace.dashboard.addDashboardItem(DistanceVoyager2)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(DistanceVoyager2)
+  openspace.dashboard.removeDashboardItem(DistanceVoyager1)
+end)

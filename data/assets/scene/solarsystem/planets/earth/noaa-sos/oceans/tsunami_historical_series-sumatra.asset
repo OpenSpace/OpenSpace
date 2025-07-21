@@ -1,0 +1,83 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Tsunami Historical Series: Sumatra - 2004"
+local Identifier = "noaa-sos-oceans-tsunami_historical_series-sumatra"
+local Description = [[The magnitude 9.1 Great Sumatra-Andaman Earthquake of December 26,
+2004, spawned the deadliest tsunami in history, killing more than 230,000 people in 14
+countries around the Indian Ocean. More than half of those killed had lived in Acheh
+Province, Sumatra, where the tsunami rose as high as 30 m (100 ft.) and traveled more than
+4 km (2.5 mi.) inland in this low-lying region]]
+local URL = "https://sos.noaa.gov/catalog/datasets/tsunami-historical-series-sumatra-2004//"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local LayerCoastal = {
+  Identifier = Identifier .. "-coastal",
+  Name = Name .. " (Coastal)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "Tsunami_Coastal_Map_Sumatra_2004_2k.jpg",
+  Description = Description
+}
+
+local LayerEnergyCoastal = {
+  Identifier = Identifier .. "-energy_coastal",
+  Name = Name .. " (Energy Coastal)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "Tsunami_Energy+Coastal_Map_Sumatra_2004_2k.jpg",
+  Description = Description
+}
+
+local LayerEnergy = {
+  Identifier = Identifier .. "-energy",
+  Name = Name .. " (Energy)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "Tsunami_Energy_Map_Sumatra_2004_2k.jpg",
+  Description = Description
+}
+
+local LayerNull = {
+  Identifier = Identifier .. "-null",
+  Name = Name .. " (Null)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "Tsunami_Null_Coastal_Map_Sumatra_2004_2k.jpg",
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerCoastal)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerEnergyCoastal)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerEnergy)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerNull)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerNull)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerEnergy)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerEnergyCoastal)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerCoastal)
+end)
+
+asset.export(LayerCoastal)
+asset.export(LayerEnergyCoastal)
+asset.export(LayerEnergy)
+asset.export(LayerNull)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

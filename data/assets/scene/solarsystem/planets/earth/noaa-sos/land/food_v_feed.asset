@@ -1,0 +1,76 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Agriculture: Food vs. Feed"
+local Identifier = "noaa-sos-land-food_v_feed"
+local Description = [[Not all cropland is used for producing food directly for people. A
+lot of the food crops grown are actually used as feed for animals. This map shows which
+regions produce crops that are mostly consumed directly by humans (in green), which
+regions produce about the same amount of human food and animal feed (in orange), and
+where most of the crops are used as animal feed (in red)]]
+local URL = "https://sos.noaa.gov/catalog/datasets/agriculture-food-vs-feed/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "4096.png",
+  Description = Description
+}
+
+local LayerCountries = {
+  Identifier = Identifier .. "-countries",
+  Name = Name .. " (w/ countries)",
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "4096_countries.png",
+  Description = Description
+}
+
+local Label = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "label.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerCountries)
+  openspace.addScreenSpaceRenderable(Label)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Label)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerCountries)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(LayerCountries)
+asset.export(Label)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

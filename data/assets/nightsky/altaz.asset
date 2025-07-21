@@ -1,0 +1,183 @@
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+
+
+
+local labels = asset.resource({
+  Name = "AltAz Label Files",
+  Type = "HttpSynchronization",
+  Identifier = "alt_az_labels",
+  Version = 1
+})
+
+
+local AltAzGridPosition = {
+  Identifier = "AltAzGridPosition",
+  Parent = earthAsset.Earth.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 0.0,
+      Longitude = 0.0,
+      Altitude = 0.0,
+      UseHeightmap = false,
+      UseCamera = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 0.0,
+      Longitude = 0.0,
+      UseHeightmap = false,
+      UseCamera = true
+    }
+  },
+  GUI = {
+    Name = "Altitude-Azimuth Grid Position",
+    Path = "/Night Sky/Coordinate Systems/Altitude-Azimuth",
+    Hidden = true
+  }
+}
+
+local AltAzGrid = {
+  Identifier = "AltAzGrid",
+  Parent = AltAzGridPosition.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 50000
+    },
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { -math.pi / 2.0, 0.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableSphericalGrid",
+    Enabled = asset.enabled,
+    Opacity = 0.8,
+    Color = { 0.2, 0.4, 0.2 },
+    LineWidth = 2.0,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "nightsky_marking" },
+  GUI = {
+    Name = "Altitude-Azimuth Grid",
+    Description = [[A local Altitude/Azimuth grid centered around your position on a
+    planetary surface. The grid can be toggled, hidden or shown using the accompanying
+    actions in the actions panel, under "Night Sky". Use these actions to move it to
+    another planet. The default is Earth.]],
+    Path = "/Night Sky/Coordinate Systems/Altitude-Azimuth"
+  }
+}
+
+local AltAzGridLabels = {
+  Identifier = "AltAzGridLabels",
+  Parent = AltAzGridPosition.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { -math.pi / 2.0, math.pi, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePointCloud",
+    Enabled = false,
+    Labels = {
+      Enabled = true,
+      File = labels .. "eclip.label",
+      Color = { 0.5, 0.5, 0.5 },
+      FaceCamera = false,
+      Size = 14.8,
+      MinMaxSize = { 2, 70 },
+      Unit = "pc",
+    },
+    Opacity = 0.65,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "nightsky_marking" },
+  GUI = {
+    Name = "Altitude-Azimuth Grid Labels",
+    Description = [[Labels for the Altitude-Azimuth Grid]],
+    Path = "/Night Sky/Coordinate Systems/Altitude-Azimuth"
+  }
+}
+
+
+local ShowAltaz = {
+  Identifier = "os.nightsky.ShowAltaz",
+  Name = "Show Alt/Az grid",
+  Command = [[
+    local camera = openspace.navigation.getNavigationState()
+    openspace.setParent("AltAzGridPosition", camera.Anchor)
+    openspace.setPropertyValueSingle("Scene.AltAzGridPosition.Translation.Globe", camera.Anchor)
+    openspace.setPropertyValueSingle("Scene.AltAzGridPosition.Rotation.Globe", camera.Anchor)
+    openspace.fadeIn("Scene.AltAzGrid.Renderable")
+  ]],
+  Documentation = "Shows a local Altitude/Azimuth grid centered around your position",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
+  IsLocal = false
+}
+
+local HideAltaz = {
+  Identifier = "os.nightsky.HideAltaz",
+  Name = "Hide Alt/Az grid",
+  Command = "openspace.fadeOut('Scene.AltAzGrid.Renderable')",
+  Documentation = "Hides the local Altitude/Azimuth grid centered around your position",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
+  IsLocal = false
+}
+
+local ToggleAltaz = {
+  Identifier = "os.nightsky.ToggleAltaz",
+  Name = "Toggle Alt/Az grid",
+  Command = [[
+    local camera = openspace.navigation.getNavigationState()
+    openspace.setParent("AltAzGridPosition", camera.Anchor)
+    openspace.setPropertyValueSingle("Scene.AltAzGridPosition.Translation.Globe", camera.Anchor)
+    openspace.setPropertyValueSingle("Scene.AltAzGridPosition.Rotation.Globe", camera.Anchor)
+    openspace.toggleFade("Scene.AltAzGrid.Renderable")
+  ]],
+  Documentation = "Toggles the local Altitude/Azimuth grid centered around your position",
+  GuiPath = "/Night Sky/Lines and Grids",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(AltAzGridPosition)
+  openspace.addSceneGraphNode(AltAzGrid)
+  openspace.addSceneGraphNode(AltAzGridLabels)
+  openspace.action.registerAction(ShowAltaz)
+  openspace.action.registerAction(HideAltaz)
+  openspace.action.registerAction(ToggleAltaz)
+
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(ToggleAltaz)
+  openspace.action.removeAction(HideAltaz)
+  openspace.action.removeAction(ShowAltaz)
+  openspace.removeSceneGraphNode(AltAzGridLabels)
+  openspace.removeSceneGraphNode(AltAzGrid)
+  openspace.removeSceneGraphNode(AltAzGridPosition)
+end)
+
+asset.export(AltAzGridPosition)
+asset.export(AltAzGrid)
+asset.export(AltAzGridLabels)
+asset.export("ShowAltaz", ShowAltaz.Identifier)
+asset.export("HideAltaz", HideAltaz.Identifier)
+asset.export("ToggleAltaz", ToggleAltaz.Identifier)
+
+
+
+asset.meta = {
+  Name = "Altitude/Azimuth Grid",
+  Description = [[A local Altitude/Azimuth grid centered around your position on a
+    planetary surface. The asset also includes some actions to toggle, hide or
+    show the grid.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

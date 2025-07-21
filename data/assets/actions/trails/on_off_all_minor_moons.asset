@@ -1,0 +1,47 @@
+local MinorMoonsOn = {
+  Identifier = "os.MinorMoonsOn",
+  Name = "Turn on minor moons and trails",
+  Command = [[
+    openspace.fadeIn("{moonTrail_minor}.Renderable")
+    openspace.fadeIn("{moon_minor}.Renderable")
+  ]],
+  Documentation = "Turn ON minor moons and their trails for all planets in the solar system",
+  GuiPath = "/Solar System/Minor Moons",
+  IsLocal = false
+}
+
+local MinorMoonsOff = {
+  Identifier = "os.MinorMoonsOff",
+  Name = "Turn off minor moons and trails",
+  Command = [[
+    openspace.fadeOut("{moonTrail_minor}.Renderable")
+    openspace.fadeOut("{moon_minor}.Renderable")
+  ]],
+  Documentation = "Turn OFF minor moons and their trails for all planets in the solar system",
+  GuiPath = "/Solar System/Minor Moons",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.action.registerAction(MinorMoonsOn)
+  openspace.action.registerAction(MinorMoonsOff)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(MinorMoonsOff)
+  openspace.action.removeAction(MinorMoonsOn)
+end)
+
+asset.export("MinorMoonsOn", MinorMoonsOn.Identifier)
+asset.export("MinorMoonsOff", MinorMoonsOff.Identifier)
+
+
+
+asset.meta = {
+  Name = "Actions - Turn ON/OFF all Minor Moons",
+  Description = "Asset providing actions to turn ON/OFF all minor moons and their trails",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

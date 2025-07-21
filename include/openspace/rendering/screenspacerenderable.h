@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,11 +26,13 @@
 #define __OPENSPACE_CORE___SCREENSPACERENDERABLE___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/fadeable.h>
 
-#include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
@@ -42,86 +44,119 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 
 /**
- * The base class for screen space images and screen space framebuffers.
- * This base class handles general functionality specific to planes that are rendered in
- * front of the camera. It implements protected methods and properties for converting
- * the planes from Spherical to Euclidean coordinates and back. It also specifies the
- * interface that its children need to implement.
+ * The base class for screen space images and screen space framebuffers. This base class
+ * handles general functionality specific to planes that are rendered in front of the
+ * camera. It implements protected methods and properties for converting the planes from
+ * Spherical to Cartesian coordinates and back. It also specifies the interface that its
+ * children need to implement.
  */
-class ScreenSpaceRenderable : public properties::PropertyOwner {
+class ScreenSpaceRenderable : public properties::PropertyOwner, public Fadeable {
 public:
     static std::unique_ptr<ScreenSpaceRenderable> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
-    static constexpr const char* KeyName = "Name";
-    static constexpr const char* KeyIdentifier = "Identifier";
+    static constexpr std::string_view KeyName = "Name";
+    static constexpr std::string_view KeyIdentifier = "Identifier";
 
-    ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceRenderable();
+    explicit ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
+    virtual ~ScreenSpaceRenderable() override;
 
-    virtual void render();
+    struct RenderData {
+        float blackoutFactor;
+        float hue;
+        float value;
+        float saturation;
+        float gamma;
+    };
+    virtual void render(const RenderData& renderData);
 
-    virtual bool initialize();
-    virtual bool initializeGL();
-    virtual bool deinitialize();
-    virtual bool deinitializeGL();
+    virtual void initialize();
+    virtual void initializeGL();
+    virtual void deinitialize();
+    virtual void deinitializeGL();
 
     virtual void update();
     virtual bool isReady() const;
     bool isEnabled() const;
+    bool isUsingRaeCoords() const;
+    bool isFacingCamera() const;
+    void setEnabled(bool isEnabled);
+    float depth();
+    float scale() const;
 
-    glm::vec3 euclideanPosition() const;
-    glm::vec3 sphericalPosition() const;
-    float depth() const;
+    // Screen space functionality in these coords: [-1,1][-ratio,ratio]
+    glm::vec2 screenSpacePosition();
+    glm::vec2 screenSpaceDimensions();
+    glm::vec2 upperRightCornerScreenSpace();
+    glm::vec2 lowerLeftCornerScreenSpace();
+    bool isIntersecting(const glm::vec2& coord);
+    void translate(glm::vec2 translation, glm::vec2 position);
+    void setCartesianPosition(const glm::vec3& position);
+    void setRaeFromCartesianPosition(const glm::vec3& position);
+    glm::vec3 raePosition() const;
 
     static documentation::Documentation Documentation();
 
 protected:
-    void useEuclideanCoordinates(bool b);
+    void createShaders(ghoul::Dictionary dict = ghoul::Dictionary());
+    std::string makeUniqueIdentifier(std::string name);
 
-    /**
-     * Converts Spherical coordinates to Euclidean.
-     * \param spherical The coordinates theta and phi
-     * \param radius The radius position value of the plane
-     * \return The x and y position value of the plane
-     */
-    //glm::vec2 toEuclidean(const glm::vec2& spherical, float radius);
-
-    /**
-     * Converts Euclidean coordinates to Spherical.
-     * \param euclidean The coordinates x and y
-     * \return The spherical coordinates theta and phi.
-     */
-    //glm::vec2 toSpherical(const glm::vec2& euclidean);
-
-
-    void createShaders();
-    glm::mat4 scaleMatrix();
-    glm::mat4 rotationMatrix();
+    virtual glm::mat4 scaleMatrix();
+    glm::mat4 globalRotationMatrix();
     glm::mat4 translationMatrix();
+    glm::mat4 localRotationMatrix();
 
-    void draw(glm::mat4 modelTransform);
+    glm::vec3 raeToCartesian(const glm::vec3& rae) const;
+    glm::vec3 cartesianToRae(const glm::vec3& cartesian) const;
 
-    virtual void bindTexture();
+    void draw(const glm::mat4& modelTransform, const RenderData& renderData,
+        bool useAcceleratedRendering = false);
+
+    virtual void bindTexture() = 0;
     virtual void unbindTexture();
 
+    glm::vec3 sphericalToRae(const glm::vec3& spherical) const;
+    glm::vec3 raeToSpherical(const glm::vec3& rae) const;
+    glm::vec3 cartesianToSpherical(const glm::vec3& cartesian) const;
+    glm::vec3 sphericalToCartesian(glm::vec3 spherical) const;
+    glm::vec3 sanitizeSphericalCoordinates(glm::vec3 spherical) const;
+
     properties::BoolProperty _enabled;
-    properties::BoolProperty _useFlatScreen;
-    properties::Vec2Property _euclideanPosition;
-    properties::Vec2Property _sphericalPosition;
-    properties::FloatProperty _depth;
+    properties::BoolProperty _renderDuringBlackout;
+    properties::BoolProperty _usePerspectiveProjection;
+    properties::BoolProperty _useRadiusAzimuthElevation;
+    properties::BoolProperty _faceCamera;
+
+    // x, y, z
+    properties::Vec3Property _cartesianPosition;
+
+    // Radius, azimuth, elevation,
+    // where azimuth is relative to negative y axis and
+    // elevation is angle from plane with normal z.
+    properties::Vec3Property _raePosition;
+
+    // Local rotation (roll, pitch, yaw)
+    properties::Vec3Property _localRotation;
+
+    // Border
+    properties::FloatProperty _borderWidth;
+    properties::Vec3Property _borderColor;
+    properties::BoolProperty _borderFeather;
+
     properties::FloatProperty _scale;
-    properties::FloatProperty _alpha;
+    properties::FloatProperty _gammaOffset;
+    properties::Vec3Property _multiplyColor;
+    properties::Vec4Property _backgroundColor;
     properties::TriggerProperty _delete;
 
-    glm::ivec2 _objectSize;
-    UniformCache(occlusionDepth, alpha, modelTransform, viewProj, texture) _uniformCache;
+    glm::ivec2 _objectSize = glm::ivec2(0);
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 
-    bool _useEuclideanCoordinates = true;
-    glm::vec2 _originalViewportSize;
-
-    float _radius;
+private:
+    UniformCache(color, opacity, blackoutFactor, hue, value, saturation, mvpMatrix, tex,
+        backgroundColor, gamma, borderColor, borderWidth, borderFeather,
+        useAcceleratedRendering) _uniformCache;
 };
 
 } // namespace openspace

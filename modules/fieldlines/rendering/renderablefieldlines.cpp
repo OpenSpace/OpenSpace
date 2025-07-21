@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,72 +33,75 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/programobject.h>
 #include <fstream>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableFieldlines";
+    constexpr std::string_view _loggerCat = "RenderableFieldlines";
 
-    constexpr const float DefaultFieldlineStepSize = 0.5f;
+    constexpr float DefaultFieldlineStepSize = 0.5f;
     const glm::vec4 DefaultFieldlineColor = glm::vec4(1.f, 0.f, 0.f, 1.f);
 
-    constexpr const char* KeyVectorField = "VectorField";
-    constexpr const char* KeyVectorFieldType = "Type";
-    constexpr const char* KeyVectorFieldFile = "File";
-    constexpr const char* KeyVectorFieldVolumeModel = "Model";
-    constexpr const char* KeyVectorFieldVolumeVariable = "Variables";
+    constexpr std::string_view KeyVectorField = "VectorField";
+    constexpr std::string_view KeyVectorFieldType = "Type";
+    constexpr std::string_view KeyVectorFieldFile = "File";
+    constexpr std::string_view KeyVectorFieldVolumeModel = "Model";
+    constexpr std::string_view KeyVectorFieldVolumeVariable = "Variables";
 
-    constexpr const char* KeyFieldlines = "Fieldlines";
-    constexpr const char* KeyFieldlinesStepSize = "Stepsize";
-    constexpr const char* KeyFieldlinesClassification = "Classification";
-    constexpr const char* KeyFieldlinesColor = "Color";
+    constexpr std::string_view KeyFieldlines = "Fieldlines";
+    constexpr std::string_view KeyFieldlinesColor = "Color";
 
-    constexpr const char* KeySeedPoints = "SeedPoints";
-    constexpr const char* KeySeedPointsType = "Type";
-    constexpr const char* KeySeedPointsFile = "File";
-    constexpr const char* KeySeedPointsTable = "SeedPoints";
+    constexpr std::string_view KeySeedPoints = "SeedPoints";
+    constexpr std::string_view KeySeedPointsType = "Type";
+    constexpr std::string_view KeySeedPointsFile = "File";
+    constexpr std::string_view KeySeedPointsTable = "SeedPoints";
 
-    constexpr const char* SeedPointsSourceFile = "File";
-    constexpr const char* SeedPointsSourceTable = "Table";
+    constexpr std::string_view SeedPointsSourceFile = "File";
+    constexpr std::string_view SeedPointsSourceTable = "Table";
 
-    constexpr const char* VectorFieldTypeVolumeKameleon = "VolumeKameleon";
+    constexpr std::string_view VectorFieldTypeVolumeKameleon = "VolumeKameleon";
 
-    constexpr const char* VectorFieldKameleonModelBATSRUS = "BATSRUS";
+    constexpr std::string_view VectorFieldKameleonModelBATSRUS = "BATSRUS";
 
-    constexpr const char* VectorFieldKameleonVariableLorentz = "Lorentz";
+    constexpr std::string_view VectorFieldKameleonVariableLorentz = "Lorentz";
 
-    constexpr const int SeedPointSourceFile = 0;
-    constexpr const int SeedPointSourceTable = 1;
+    constexpr int SeedPointSourceFile = 0;
+    constexpr int SeedPointSourceTable = 1;
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
-        KeyFieldlinesStepSize,
-        //"StepSize",
-        "Fieldline Step Size",
-        "" // @TODO Missing documentation
+        "Stepsize",
+        "Fieldline Step Size.",
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo Classification = {
-        KeyFieldlinesClassification,
+        "Classification",
         "Fieldline Classification",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FieldlineColorInfo = {
         "FieldlineColor",
         "Fieldline Color",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SeedPointSourceInfo = {
         "Source",
         "SeedPoint Source",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SeedPointFileInfo = {
         "SourceFile",
         "SeedPoint File",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
 
@@ -120,19 +123,25 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
     std::string identifier = dictionary.value<std::string>(SceneGraphNode::KeyIdentifier);
     setIdentifier(identifier);
 
-    bool success = dictionary.getValue(KeyVectorField, _vectorFieldInfo);
-    if (!success) {
-        LERROR(fmt::format("Renderable does not contain a key for '{}'", KeyVectorField));
+    if (!dictionary.hasValue<ghoul::Dictionary>(KeyVectorField)) {
+        LERROR(std::format("Renderable does not contain a key for '{}'", KeyVectorField));
+    }
+    else {
+        _vectorFieldInfo = dictionary.value<ghoul::Dictionary>(KeyVectorField);
     }
 
-    success = dictionary.getValue(KeyFieldlines, _fieldlineInfo);
-    if (!success) {
-        LERROR(fmt::format("Renderable does not contain a key for '{}'", KeyFieldlines));
+    if (!dictionary.hasValue<ghoul::Dictionary>(KeyFieldlines)) {
+        LERROR(std::format("Renderable does not contain a key for '{}'", KeyFieldlines));
+    }
+    else {
+        _fieldlineInfo = dictionary.value<ghoul::Dictionary>(KeyFieldlines);
     }
 
-    success = dictionary.getValue(KeySeedPoints, _seedPointsInfo);
-    if (!success) {
-        LERROR(fmt::format("Renderable does not contain a key for '{}", KeySeedPoints));
+    if (!dictionary.hasValue<ghoul::Dictionary>(KeySeedPoints)) {
+        LERROR(std::format("Renderable does not contain a key for '{}'", KeySeedPoints));
+    }
+    else {
+        _seedPointsInfo = dictionary.value<ghoul::Dictionary>(KeySeedPoints);
     }
 
     // @TODO a non-magic number perhaps ---abock
@@ -145,8 +154,8 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 
     // @TODO hook up visibility changes ---abock
 
-    auto dirtyFieldlines = [this]() { this->_fieldLinesAreDirty = true; };
-    auto dirtySeedpoints = [this]() { this->_seedPointsAreDirty = true; };
+    auto dirtyFieldlines = [this]() { _fieldLinesAreDirty = true; };
+    auto dirtySeedpoints = [this]() { _seedPointsAreDirty = true; };
 
     _stepSize.onChange(dirtyFieldlines);
     addProperty(_stepSize);
@@ -164,21 +173,29 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableFieldlines::initializeDefaultPropertyValues() {
-    _fieldlineInfo.getValue(KeyFieldlinesStepSize, _stepSize);
-    _fieldlineInfo.getValue(KeyFieldlinesClassification, _classification);
-    _fieldlineInfo.getValue(KeyFieldlinesColor, _fieldlineColor);
+    if (_fieldlineInfo.hasKey("Stepsize")) {
+        _stepSize = static_cast<float>(
+            _fieldlineInfo.value<double>("Stepsize")
+        );
+    }
+    if (_fieldlineInfo.hasKey("Classification")) {
+        _classification = _fieldlineInfo.value<bool>("Classification");
+    }
+    if (_fieldlineInfo.hasKey(KeyFieldlinesColor)) {
+        _fieldlineColor = _fieldlineInfo.value<glm::dvec4>(KeyFieldlinesColor);
+    }
 
-    if (_seedPointsInfo.hasKeyAndValue<std::string>(KeySeedPointsType)) {
+    if (_seedPointsInfo.hasValue<std::string>(KeySeedPointsType)) {
         std::string sourceType = _seedPointsInfo.value<std::string>(KeySeedPointsType);
 
         if (sourceType == SeedPointsSourceFile) {
             _seedPointSource = SeedPointSourceFile;
 
-            if (_seedPointsInfo.hasKeyAndValue<std::string>(KeySeedPointsFile)) {
+            if (_seedPointsInfo.hasValue<std::string>(KeySeedPointsFile)) {
                 std::string seedPointSourceFile = _seedPointsInfo.value<std::string>(
                     KeySeedPointsFile
                 );
-                _seedPointSourceFile = absPath(seedPointSourceFile);
+                _seedPointSourceFile = absPath(seedPointSourceFile).string();
             }
         }
         else if (sourceType == SeedPointsSourceTable) {
@@ -189,18 +206,20 @@ void RenderableFieldlines::initializeDefaultPropertyValues() {
 
 bool RenderableFieldlines::isReady() const {
     const bool programReady = _program != nullptr;
-    const bool vectorFieldReady = !_vectorFieldInfo.empty();
-    const bool fieldlineReady = !_fieldlineInfo.empty();
-    const bool seedPointsReady = !_seedPointsInfo.empty();
+    const bool vectorFieldReady = !_vectorFieldInfo.isEmpty();
+    const bool fieldlineReady = !_fieldlineInfo.isEmpty();
+    const bool seedPointsReady = !_seedPointsInfo.isEmpty();
     return programReady && vectorFieldReady && fieldlineReady && seedPointsReady;
 }
 
 void RenderableFieldlines::initializeGL() {
-    if (_vectorFieldInfo.empty() || _fieldlineInfo.empty() || _seedPointsInfo.empty()) {
+    if (_vectorFieldInfo.isEmpty() || _fieldlineInfo.isEmpty() ||
+        _seedPointsInfo.isEmpty())
+    {
         throw ghoul::RuntimeError("Error initializing");
     }
 
-    _program = global::renderEngine.buildRenderProgram(
+    _program = global::renderEngine->buildRenderProgram(
         "Fieldline",
         absPath("${MODULE_FIELDLINES}/shaders/fieldline_vs.glsl"),
         absPath("${MODULE_FIELDLINES}/shaders/fieldline_fs.glsl"),
@@ -215,7 +234,7 @@ void RenderableFieldlines::deinitializeGL() {
     _vertexPositionBuffer = 0;
 
     if (_program) {
-        global::renderEngine.removeRenderProgram(_program.get());
+        global::renderEngine->removeRenderProgram(_program.get());
         _program = nullptr;
     }
 }
@@ -229,7 +248,10 @@ void RenderableFieldlines::render(const RenderData& data, RendererTasks&) {
         glm::vec3(data.camera.viewDirectionWorldSpace())
     );
     glDisable(GL_CULL_FACE);
-    setPscUniforms(*_program, data.camera, data.position);
+    _program->setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
+    _program->setUniform("objpos", glm::vec4(data.modelTransform.translation, 0.f));
+    _program->setUniform("camrot", glm::mat4(data.camera.viewRotationMatrix()));
+    _program->setUniform("scaling", glm::vec2(1.f, 0.f));
 
     _program->setUniform("classification", _classification);
     if (!_classification) {
@@ -269,7 +291,7 @@ void RenderableFieldlines::update(const UpdateData&) {
         int prevEnd = 0;
         std::vector<LinePoint> vertexData;
         // Arrange data for glMultiDrawArrays
-        for (size_t j = 0; j < fieldlines.size(); ++j) {
+        for (size_t j = 0; j < fieldlines.size(); j++) {
             _lineStart.push_back(prevEnd);
             _lineCount.push_back(static_cast<int>(fieldlines[j].size()));
             prevEnd = prevEnd + static_cast<int>(fieldlines[j].size());
@@ -279,7 +301,7 @@ void RenderableFieldlines::update(const UpdateData&) {
                 fieldlines[j].end()
             );
         }
-        LDEBUG(fmt::format("Number of vertices: {}", vertexData.size()));
+        LDEBUG(std::format("Number of vertices: {}", vertexData.size()));
 
         if (_fieldlineVAO == 0) {
             glGenVertexArrays(1, &_fieldlineVAO);
@@ -336,22 +358,20 @@ void RenderableFieldlines::loadSeedPoints() {
         case SeedPointSourceTable:
             loadSeedPointsFromTable();
             break;
-        default:
-            throw ghoul::MissingCaseException();
     }
 }
 
 void RenderableFieldlines::loadSeedPointsFromFile() {
-    LINFO(fmt::format("Reading seed points from '{}'", _seedPointSourceFile.value()));
+    LINFO(std::format("Reading seed points from '{}'", _seedPointSourceFile.value()));
 
     std::ifstream seedFile(_seedPointSourceFile);
     if (!seedFile.good())
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Could not open seed points file '{}'", _seedPointSourceFile.value()
         ));
     else {
         std::string line;
-        while (std::getline(seedFile, line)) {
+        while (ghoul::getline(seedFile, line)) {
             std::stringstream s(line);
 
             glm::vec3 point;
@@ -365,31 +385,36 @@ void RenderableFieldlines::loadSeedPointsFromFile() {
 
 void RenderableFieldlines::loadSeedPointsFromTable() {
     // @TODO needs testing ---abock
+    if (!_seedPointsInfo.hasValue<ghoul::Dictionary>(KeySeedPointsTable)) {
+        return;
+    }
     LINFO("Loading provided list of seed points");
-    ghoul::Dictionary seedpointsDictionary;
-    _seedPointsInfo.getValue(KeySeedPointsTable, seedpointsDictionary);
-    glm::vec3 seedPos;
-    for (const std::string& index : seedpointsDictionary.keys()) {
-        _fieldlineInfo.getValue(std::string(KeySeedPointsTable) + "." + index, seedPos);
-        _seedPoints.push_back(seedPos);
+    ghoul::Dictionary seedpointsDictionary =
+        _seedPointsInfo.value<ghoul::Dictionary>(KeySeedPointsType);
+    for (std::string_view index : seedpointsDictionary.keys()) {
+        std::string key = std::format("{}.{}", KeySeedPointsTable, index);
+        // (2020-12-31, abock)  Looks to me as if this should be seedpointsDictionary
+        if (_fieldlineInfo.hasValue<glm::dvec3>(key)) {
+            glm::dvec3 seedPos = _fieldlineInfo.value<glm::dvec3>(key);
+            _seedPoints.push_back(seedPos);
+        }
     }
 }
 
 std::vector<RenderableFieldlines::Line> RenderableFieldlines::generateFieldlines() {
-    std::string type;
-    bool success = _vectorFieldInfo.getValue(KeyVectorFieldType, type);
-    if (!success) {
-        LERROR(fmt::format(
-            "{} does not contain a '{}' key", KeyVectorField, KeyVectorFieldType
+    if (!_vectorFieldInfo.hasValue<std::string>(KeyVectorFieldType)) {
+        LERROR(std::format(
+            "'{}' does not contain a '{}' key", KeyVectorField, KeyVectorFieldType
         ));
         return {};
     }
 
+    std::string type = _vectorFieldInfo.value<std::string>(KeyVectorFieldType);
     if (type == VectorFieldTypeVolumeKameleon) {
         return generateFieldlinesVolumeKameleon();
     }
     else {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "{}.{} does not name a valid type", KeyVectorField, KeyVectorFieldType
         ));
         return {};
@@ -399,26 +424,26 @@ std::vector<RenderableFieldlines::Line> RenderableFieldlines::generateFieldlines
 std::vector<RenderableFieldlines::Line>
 RenderableFieldlines::generateFieldlinesVolumeKameleon()
 {
-    std::string model;
-    bool success = _vectorFieldInfo.getValue(KeyVectorFieldVolumeModel, model);
-    if (!success) {
-        LERROR(fmt::format("{} does not name a model", KeyVectorField));
+    if (!_vectorFieldInfo.hasValue<std::string>(KeyVectorFieldVolumeModel)) {
+        LERROR(std::format("'{}' does not name a model", KeyVectorField));
         return {};
     }
 
-    std::string fileName;
-    success = _vectorFieldInfo.getValue(KeyVectorFieldFile, fileName);
-    if (!success) {
-        LERROR(fmt::format("{} does not name a file", KeyVectorField));
+    std::string model = _vectorFieldInfo.value<std::string>(KeyVectorFieldVolumeModel);
+
+    if (!_vectorFieldInfo.hasValue<std::string>(KeyVectorFieldFile)) {
+        LERROR(std::format("'{}' does not name a file", KeyVectorField));
         return {};
     }
-    fileName = absPath(fileName);
+    std::filesystem::path fileName = absPath(
+        _vectorFieldInfo.value<std::string>(KeyVectorFieldFile)
+    );
 
     //KameleonWrapper::Model modelType;
     if (model != VectorFieldKameleonModelBATSRUS) {
         //modelType = KameleonWrapper::Model::BATSRUS;
     //else {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "{}.{} model '{}' not supported",
             KeyVectorField, KeyVectorFieldVolumeModel, model
         ));
@@ -429,15 +454,16 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
     const std::string v2 = std::string(KeyVectorFieldVolumeVariable) + ".2";
     const std::string v3 = std::string(KeyVectorFieldVolumeVariable) + ".3";
 
-    const bool threeVariables = _vectorFieldInfo.hasKeyAndValue<std::string>(v1) &&
-                          _vectorFieldInfo.hasKeyAndValue<std::string>(v2) &&
-                          _vectorFieldInfo.hasKeyAndValue<std::string>(v3);
+    const bool threeVariables =
+        _vectorFieldInfo.hasValue<std::string>(v1) &&
+        _vectorFieldInfo.hasValue<std::string>(v2) &&
+        _vectorFieldInfo.hasValue<std::string>(v3);
 
-    const bool lorentzForce = _vectorFieldInfo.hasKeyAndValue<std::string>(v1) &&
-          (_vectorFieldInfo.value<std::string>(v1) == VectorFieldKameleonVariableLorentz);
+    const bool lorentzForce = _vectorFieldInfo.hasValue<std::string>(v1) &&
+        (_vectorFieldInfo.value<std::string>(v1) == VectorFieldKameleonVariableLorentz);
 
     if (!threeVariables && !lorentzForce) {
-        LERROR(fmt::format("'{}' does not name variables", KeyVectorField));
+        LERROR(std::format("'{}' does not name variables", KeyVectorField));
         return {};
     }
 
@@ -446,7 +472,7 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
         std::string yVariable = _vectorFieldInfo.value<std::string>(v2);
         std::string zVariable = _vectorFieldInfo.value<std::string>(v3);
 
-        KameleonWrapper kw(fileName);
+        KameleonWrapper kw = KameleonWrapper(fileName);
         return kw.classifiedFieldLines(
             xVariable,
             yVariable,
@@ -457,7 +483,7 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
     }
 
     if (lorentzForce) {
-        KameleonWrapper kw(fileName);
+        KameleonWrapper kw = KameleonWrapper(fileName);
         return kw.lorentzTrajectories(_seedPoints, _fieldlineColor, _stepSize);
     }
 

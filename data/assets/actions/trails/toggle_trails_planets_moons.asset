@@ -1,0 +1,52 @@
+local FadeUpTrails = {
+  Identifier = "os.planetsmoons.FadeUpTrails",
+  Name = "Show planet and moon trails",
+  Command = [[
+    openspace.fadeIn("{planetTrail_solarSystem}.Renderable")
+    openspace.fadeIn("{moonTrail_solarSystem}.Renderable")
+  ]],
+  Documentation = "Fade up all planet and moon trails in the Scene",
+  GuiPath = "/Trails",
+  IsLocal = false
+}
+
+local FadeDownTrails = {
+  Identifier = "os.planetsmoons.FadeDownTrails",
+  Name = "Hide planet and moon trails",
+  Command = [[
+    openspace.fadeOut("{planetTrail_solarSystem}.Renderable")
+    openspace.fadeOut("{moonTrail_solarSystem}.Renderable")
+  ]],
+  Documentation = "Fade down all planet and moon trails in the Scene",
+  GuiPath = "/Trails",
+  IsLocal = false
+}
+
+local ToggleTrails = {
+  Identifier = "os.planetsmoons.ToggleTrails",
+  Name = "Toggle planet and moon trails",
+  Command = [[
+    openspace.toggleFade("{planetTrail_solarSystem}.Renderable.Fade")
+    openspace.toggleFade("{moonTrail_solarSystem}.Renderable.Fade")
+  ]],
+  Documentation = "Toggle fade for planet and moon trails in the Scene",
+  GuiPath = "/Trails",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.action.registerAction(FadeUpTrails)
+  openspace.action.registerAction(FadeDownTrails)
+  openspace.action.registerAction(ToggleTrails)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(ToggleTrails)
+  openspace.action.removeAction(FadeDownTrails)
+  openspace.action.removeAction(FadeUpTrails)
+end)
+
+asset.export("FadeUpTrails", FadeUpTrails.Identifier)
+asset.export("FadeDownTrails", FadeDownTrails.Identifier)
+asset.export("ToggleTrails", ToggleTrails.Identifier)

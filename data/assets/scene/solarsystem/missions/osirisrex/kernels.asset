@@ -1,0 +1,142 @@
+local coreKernels = asset.require("spice/core")
+
+
+
+local data = asset.resource({
+  Name = "Osiris Rex Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "osirisrex_kernels",
+  Version = 4
+})
+
+
+local Kernels = {
+  data .. "orx_v14.tf",
+  data .. "orx_ocams_v07.ti",
+  data .. "orx_rexis_v01.ti",
+  data .. "ORX_SCLKSCET.00061.tsc",
+  data .. "bennu_v17.tpc",
+  data .. "orx_struct_v04.bsp",
+  data .. "orx_sa_red_200106_v02.bc",
+  data .. "orx_sa_red_200107_v02.bc",
+  data .. "orx_sa_red_200108_v02.bc",
+  data .. "orx_sa_red_200109_v02.bc",
+  data .. "orx_sa_red_200110_v02.bc",
+  data .. "orx_sa_rel_200106_200112_v01.bc",
+  data .. "orx_sc_rel_160909_160911_v01.bc",
+  data .. "orx_sc_rel_160912_160918_v01.bc",
+  data .. "orx_sc_rel_160919_160925_v01.bc",
+  data .. "orx_sc_rel_160926_161002_v01.bc",
+  data .. "orx_sc_rel_181029_181104_v02.bc",
+  data .. "orx_sc_rel_190218_190224_v02.bc",
+  data .. "orx_sc_rel_200106_200112_v01.bc",
+  data .. "orx_sc_rel_201019_201025_v01.bc",
+  data .. "orx_sc_rel_201012_201018_v01.bc",
+  data .. "orx_sc_red_200106_v02.bc",
+  data .. "orx_sc_red_200107_v02.bc",
+  data .. "orx_sc_red_200108_v02.bc",
+  data .. "orx_sc_red_200109_v02.bc",
+  data .. "orx_sc_red_201020_v02.bc",
+  data .. "orx_sc_red_201017_v03.bc",
+  data .. "orx_sc_red_201018_v02.bc",
+  data .. "orx_sc_red_201019_v02.bc",
+  data .. "orx_r_160909_160910_v01.bc",
+  data .. "orx_r_160910_160913_v01.bc",
+  data .. "orx_r_160913_160915_v01.bc",
+  data .. "orx_r_160915_160919_v01.bc",
+  data .. "orx_r_160918_160922_v01.bc",
+  data .. "orx_r_160919_160922_v01.bc",
+  data .. "orx_r_200105_200107_v02.bc",
+  data .. "orx_r_200106_200108_v02.bc",
+  data .. "orx_r_200107_200109_v02.bc",
+  data .. "orx_r_200107_200112_v01.bc",
+  data .. "orx_r_200108_200110_v02.bc",
+  data .. "orx_r_200109_200111_v02.bc",
+  data .. "orx_r_201019_201021_v06.bc",
+  data .. "orx_r_201018_201021_v02.bc",
+  data .. "orx_r_201018_201020_v03.bc",
+  data .. "orx_r_201017_201019_v03.bc",
+  data .. "orx_p_160910_161005_xc001b_v01.bc",
+  data .. "orx_p_200106_200113_2002_od205_v01.bc",
+  data .. "orx_p_200106_200113_2002_od209_v01.bc",
+  data .. "orx_p_200106_200113_2002_od210_v01.bc",
+  data .. "orx_p_201019_201026_2043tag_od293_v03.bc",
+  data .. "orx_p_201012_201019_2042_od291_v04.bc",
+  data .. "orx_p_210411_210510_xq006_od297_v05.bc",
+  data .. "orx_p_210509_210513_xr001_adm_final_mod_od311_v01.bc",
+  data .. "orx_p_210509_210607_xr001_od298_v00.bc",
+  data .. "orx_p_230824_231008_src_release_od298_v00.bc",
+  data .. "OREX_20160904_M45_complete.bsp",
+  data .. "OREX_20160908_M60_complete.bsp",
+  data .. "orx_struct_polycam_v01.bc",
+  data .. "de424.bsp",
+  data .. "bennu_refdrmc_v1.bsp",
+  data .. "orx_160908_231024_pgaa2_day06m60.bsp",
+  data .. "orx_160908_231024_pgaa3_day06m60_v1.bsp",
+  data .. "orx_160909_161228_160919_od005_tcm1_v2.bsp",
+  data .. "orx_160909_161228_160930_od006_tcm1_v1.bsp",
+  data .. "orx_160909_170101_160912_od004_v1.bsp",
+  data .. "orx_160909_170101_161010_od008_v1.bsp",
+  data .. "spk_orx_160908_231024_pgaa2_day06m60_v3.bsp",
+  data .. "orx_160909_231024_refod009_v2.bsp",
+  data .. "orx_171006_231024_171005_refod027_v1.bsp",
+  data .. "orx_180301_181201_180921_od044_v1.bsp",
+  data .. "orx_180801_190302_181218_od077_v1.bsp",
+  data .. "orx_181203_190302_190104_od085_v1.bsp",
+  data .. "orx_181231_190305_190215_od099_v1.bsp",
+  data .. "orx_190201_190327_190315_od110_v1.bsp",
+  data .. "orx_190301_190424_190412_od125_v1.bsp",
+  data .. "orx_190401_190522_190508_od137_v1.bsp",
+  data .. "orx_190426_190605_190522_od143_v1.bsp",
+  data .. "orx_190511_190619_190603_od148_v1.bsp",
+  data .. "orx_190601_190625_190614_od154_v1.bsp",
+  data .. "orx_190612_190917_190730_od170_v1.bsp",
+  data .. "orx_190712_190917_190814_od175_v1.bsp",
+  data .. "orx_190809_191008_190923_od182_v1.bsp",
+  data .. "orx_190809_191015_191004_od187_v1.bsp",
+  data .. "orx_190915_191029_191014_od191_v1.bsp",
+  data .. "orx_191001_191105_191021_od194_v1.bsp",
+  data .. "orx_191015_191112_191030_od198_v1.bsp",
+  data .. "orx_191027_200101_191104_od200_v1.bsp",
+  data .. "orx_191101_200225_200214_od223_v1.bsp",
+  data .. "orx_200127_200324_200311_od232_v1.bsp",
+  data .. "orx_200305_200421_200410_od239_v1.bsp",
+  data .. "orx_200401_200418_200418_od242_v2.bsp",
+  data .. "orx_200414_200519_200504_od248_v1.bsp",
+  data .. "orx_200430_200714_200701_od263_v1.bsp",
+  data .. "orx_200616_200811_200727_od269_v1.bsp",
+  data .. "orx_200709_200814_200814_od276_v1.bsp",
+  data .. "orx_200811_200908_200828_od280_v1.bsp",
+  data .. "orx_200827_201020_201020_od294_v1.bsp",
+  data .. "orx_201020_201020_201020_od294_v1.bsp",
+  data .. "orx_201020_201109_201020_od294_v1.bsp",
+  data .. "orx_201020_210524_210103_od297_v1.bsp",
+  data .. "orx_210101_210330_210310_od302_v1.bsp",
+  data .. "orx_210115_210701_210426_od310-N-ADM-P_v1.bsp",
+  data .. "orx_210408_210701_210503_od311-N-ADM-F_v1.bsp",
+  data .. "orx_210509_231025_210119_od298-R-ADM1-P-DB1_v1.bsp"
+}
+
+local ID = {
+  OsirisRex = "OSIRIS-REX",
+  Bennu = "2101955"
+}
+
+local Frame = {
+  OsirisRex = "ORX_SPACECRAFT",
+  Polycam = "ORX_OCAMS_POLYCAM",
+  Rexis = "ORX_REXIS",
+  Bennu = coreKernels.Frame.Bennu
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(Kernels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(Kernels)
+end)
+
+asset.export("ID", ID)
+asset.export("Frame", Frame)

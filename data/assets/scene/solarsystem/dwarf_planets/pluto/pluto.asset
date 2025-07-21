@@ -1,51 +1,100 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
-asset.require("spice/base")
-asset.request('./trail')
+local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
+asset.require("./trail")
 
+
+
+local labelsPath = asset.resource({
+  Name = "Pluto Labels",
+  Type = "HttpSynchronization",
+  Identifier = "pluto_labels",
+  Version = 1
+})
 
 
 local Pluto = {
-    Identifier = "Pluto",
-    Parent = transforms.PlutoBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "PLUTO",
-            Observer = "PLUTO BARYCENTER",
-            Kernels = NewHorizonsKernels
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_PLUTO",
-            DestinationFrame = "GALACTIC"
-        },
-        Scale = {
-            Type = "StaticScale",
-            Scale = 1.0
-        }
+  Identifier = "Pluto",
+  Parent = transforms.PlutoBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = coreKernels.ID.Pluto,
+      Observer = coreKernels.ID.PlutoBarycenter
     },
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = { 1.173E6, 1.173E6, 1.173E6 },
-        SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Greyscale_USGS",
-                    Name = "Black & White [USGS]",
-                    FilePath = "WMS:https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/pluto/pluto_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=NEWHORIZONS_PLUTO_MOSAIC&SRS=EPSG:4326&BBOX=-180,-90,360,90",
-                    Enabled = true
-                }
-            }
-        }
-    },
-    Tag = { "planet_solarSystem", "planet_terrestrial" },
-    GUI = {
-        Path = "/Solar System/Dwarf Planets/Pluto"
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.Pluto,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1173000, 1173000, 1173000 },
+    Labels = {
+      Enabled = false,
+      FileName = labelsPath .. "pluto.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 8.5,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 650000.0, 4000000.0 },
+      DistanceEPS = 500000.0,
+      Color = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "planet_terrestrial", "dwarf_planet" },
+  GUI = {
+    Path = "/Solar System/Dwarf Planets/Pluto"
+  }
+}
+
+local PlutoLabel = {
+  Identifier = "PlutoLabel",
+  Parent = Pluto.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Pluto",
+    FontSize = 70.0,
+    Size = 9.10,
+    MinMaxSize = { 1, 100 },
+    BlendMode = "Additive",
+    OrientationOption = "Camera View Direction",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 2.0, 120.0 },
+    FadeWidths = { 1.0, 150.0 }
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "Pluto Label",
+    Path = "/Solar System/Dwarf Planets/Pluto",
+    Focusable = false,
+    Description = "Label for Pluto, visible at the solarsystem overview zoom level"
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Pluto)
+  openspace.addSceneGraphNode(PlutoLabel)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Pluto })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PlutoLabel)
+  openspace.removeSceneGraphNode(Pluto)
+end)
+
+asset.export(Pluto)
+asset.export(PlutoLabel)
+
+
+
+asset.meta = {
+  Name = "Pluto",
+  Description = "Pluto globe, and main planet label",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___TRANSFERFUNCTION___H__
 
 #include <ghoul/glm.h>
+#include <filesystem>
 #include <functional>
 #include <memory>
 #include <string>
@@ -39,29 +40,26 @@ class TransferFunction {
 public:
     using TfChangedCallback = std::function<void (const TransferFunction&)>;
 
-    TransferFunction(const std::string& filepath,
+    explicit TransferFunction(const std::filesystem::path& filepath,
         TfChangedCallback tfChangedCallback = TfChangedCallback());
     ~TransferFunction();
 
     TransferFunction(TransferFunction&& rhs) = default;
 
-    void setPath(const std::string& filepath);
+    void setPath(const std::filesystem::path& filepath);
     ghoul::opengl::Texture& texture();
     void bind();
     void update();
     glm::vec4 sample(size_t offset);
     size_t width();
     void setCallback(TfChangedCallback callback);
-    void setTextureFromTxt(std::shared_ptr<ghoul::opengl::Texture> ptr);
+    void setTextureFromTxt();
 
 private:
-    void setTextureFromTxt() {
-        setTextureFromTxt(_texture);
-    }
     void setTextureFromImage();
     void uploadTexture();
 
-    std::string _filepath;
+    std::filesystem::path _filepath;
     std::unique_ptr<ghoul::filesystem::File> _file;
     std::shared_ptr<ghoul::opengl::Texture> _texture;
     bool _needsUpdate = false;
@@ -69,12 +67,12 @@ private:
 };
 
 struct MappingKey {
-    MappingKey(float p, const glm::vec4& c): position(p), color(c) {};
-    MappingKey(float p): position(p), color(glm::vec4(0.0f)) {};
-    bool operator<(const MappingKey& rhs) {return position < rhs.position;};
+    MappingKey(float p, const glm::vec4& c): position(p), color(c) {}
+    MappingKey(float p): position(p), color(glm::vec4(0.f)) {}
+    bool operator<(const MappingKey& rhs) { return position < rhs.position; }
 
     float position = 0.f;
-    glm::vec4 color = glm::vec4(0.f, 0.f, 0.f, 0.f);
+    glm::vec4 color = glm::vec4(0.f);
 };
 
 } // namespace openspace

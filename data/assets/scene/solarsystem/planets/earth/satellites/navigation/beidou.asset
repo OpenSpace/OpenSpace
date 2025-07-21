@@ -1,23 +1,55 @@
-local assetHelper = asset.require('util/asset_helper')
-local shared = asset.require('../satellites_shared')
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local group = {
-    Title = "Beidou",
-    Url = "http://www.celestrak.com/NORAD/elements/beidou.txt",
-    TrailColor = { 0.75, 0.75, 0.35 }
+
+
+local omm = asset.resource({
+  Name = "Satellite OMM Data (Beidou)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_beidou",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=beidou&FORMAT=kvn",
+  Filename = "beidou.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+
+local BeidouSatellites = {
+  Identifier = "BeidouSatellites",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "beidou.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.75, 0.75, 0.35 },
+    TrailFade = 15,
+    PointSizeExponent = 5.0,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Beidou",
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
+  }
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
 
-
-local objectNames = {}
-
-asset.onInitialize(function ()
-    objectNames = shared.addSatelliteGroupObjects(group, tle, true)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(BeidouSatellites)
 end)
 
-asset.onDeinitialize(function ()
-    for _, n in ipairs(objectNames) do
-        openspace.removeSceneGraphNode(n)
-    end
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(BeidouSatellites)
 end)
+
+asset.export(BeidouSatellites)
+
+
+
+asset.meta = {
+  Name = "Satellites Navigation Beidou",
+  Description = "Satellites asset for Navigation Beidou. Data from Celestrak",
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/NORAD/elements/",
+  License = "Celestrak"
+}

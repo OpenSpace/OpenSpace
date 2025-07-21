@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,20 +24,17 @@
 
 #include <modules/imgui/include/guispacetimecomponent.h>
 
-#include <modules/imgui/include/gui.h>
+#include <modules/imgui/imguimodule.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/navigationhandler.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/time.h>
-#include <openspace/util/timeconversion.h>
+#include <openspace/util/timeconstants.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/scripting/scriptengine.h>
-
-#include <numeric>
 
 namespace {
     const ImVec2 Size = ImVec2(350, 500);
@@ -63,6 +60,12 @@ namespace {
         }
     }
 
+    constexpr std::string_view AnchorProperty =
+        "NavigationHandler.OrbitalNavigator.Anchor";
+
+    constexpr std::string_view RetargetAnchorProperty =
+        "NavigationHandler.OrbitalNavigator.RetargetAnchor";
+
 } // namespace
 
 namespace openspace::gui {
@@ -74,12 +77,14 @@ GuiSpaceTimeComponent::GuiSpaceTimeComponent()
 void GuiSpaceTimeComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
     bool v = _isEnabled;
-    ImGui::Begin(guiName().c_str(), &v, Size, 0.5f, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::SetNextWindowSize(Size, ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowBgAlpha(0.5f);
+    ImGui::Begin(guiName().c_str(), &v, ImGuiWindowFlags_AlwaysAutoResize);
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 
     std::vector<SceneGraphNode*> nodes =
-        global::renderEngine.scene()->allSceneGraphNodes();
+        global::renderEngine->scene()->allSceneGraphNodes();
 
     std::sort(
         nodes.begin(),
@@ -101,11 +106,12 @@ void GuiSpaceTimeComponent::render() {
             const bool pressed = ImGui::Button(n->guiName().c_str());
             ImGui::SameLine();
             if (pressed) {
-                global::scriptEngine.queueScript(
-                    "openspace.setPropertyValue('NavigationHandler.Origin', '" +
-                    n->identifier() + "');",
-                    scripting::ScriptEngine::RemoteScripting::Yes
+                const std::string script = std::format(
+                    "openspace.setPropertyValue('{}', '{}');"
+                    "openspace.setPropertyValue('{}', nil);",
+                    AnchorProperty, n->identifier(), RetargetAnchorProperty
                 );
+                global::scriptEngine->queueScript(script);
             }
         }
     }
@@ -113,7 +119,8 @@ void GuiSpaceTimeComponent::render() {
     ImGui::NewLine();
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
 
-    SceneGraphNode* currentFocus = global::navigationHandler.focusNode();
+    const SceneGraphNode* currentFocus =
+        global::navigationHandler->orbitalNavigator().anchorNode();
 
     std::string nodeNames;
     for (SceneGraphNode* n : nodes) {
@@ -130,30 +137,24 @@ void GuiSpaceTimeComponent::render() {
 
     const bool hasChanged = ImGui::Combo("", &currentPosition, nodeNames.c_str());
     if (hasChanged) {
-        global::scriptEngine.queueScript(
-            "openspace.setPropertyValue('NavigationHandler.Origin', '" +
-            nodes[currentPosition]->identifier() + "');",
-            scripting::ScriptEngine::RemoteScripting::Yes
+        const std::string script = std::format(
+            "openspace.setPropertyValue('{}', '{}');"
+            "openspace.setPropertyValue('{}', nil);",
+            AnchorProperty, nodes[currentPosition]->identifier(), RetargetAnchorProperty
         );
+        global::scriptEngine->queueScript(script);
     }
 
     ImGui::SameLine();
     const bool pressed = ImGui::Button("Refocus");
     if (pressed) {
-        // To refocus, we are first clearing the origin property before setting it back
-        // to its old value. The property mechanism's onChange does not fire if the same
-        // value is set again, hence the need for the clearing
-        global::scriptEngine.queueScript(
-            R"(
-                local o = openspace.getPropertyValue('NavigationHandler.Origin');
-                openspace.setPropertyValue('NavigationHandler.Origin', '');
-                openspace.setPropertyValue('NavigationHandler.Origin', o);
-            )",
-            scripting::ScriptEngine::RemoteScripting::Yes
+        const std::string script = std::format(
+            "openspace.setPropertyValue('{}', nil);", RetargetAnchorProperty
         );
+        global::scriptEngine->queueScript(script);
     }
 
-    float interpolationTime = global::navigationHandler.interpolationTime();
+    float interpolationTime = global::navigationHandler->interpolationTime();
     const bool interpolationTimeChanged = ImGui::SliderFloat(
         "Interpolation Time",
         &interpolationTime,
@@ -163,7 +164,7 @@ void GuiSpaceTimeComponent::render() {
     );
 
     if (interpolationTimeChanged) {
-        global::navigationHandler.setInterpolationTime(interpolationTime);
+        global::navigationHandler->setInterpolationTime(interpolationTime);
     }
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
@@ -177,88 +178,74 @@ void GuiSpaceTimeComponent::render() {
     CaptionText("Time Controls");
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
 
-    const std::vector<Scene::InterestingTime>& interestingTimes =
-        global::renderEngine.scene()->interestingTimes();
-    if (!interestingTimes.empty()) {
-        ImGui::Text("%s", "Interesting Times");
-
-        for (size_t i = 0; i < interestingTimes.size(); ++i) {
-            const Scene::InterestingTime& t = interestingTimes[i];
-            if (ImGui::Button(t.name.c_str())) {
-                global::scriptEngine.queueScript(
-                    "openspace.time.setTime(\"" + t.time + "\")",
-                    scripting::ScriptEngine::RemoteScripting::No
-                );
-            }
-
-            if (i != interestingTimes.size() - 1) {
-                ImGui::SameLine();
-            }
-        }
-    }
-
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
 
-    ImGui::Text("Current Date: %s", global::timeManager.time().UTC().c_str());
+    ImGui::Text(
+        "Current Date: %s",
+        std::string(global::timeManager->time().UTC()).c_str()
+    );
 
     constexpr int BufferSize = 256;
     static char Buffer[BufferSize];
-    bool dateChanged = ImGui::InputText(
+    const bool dateChanged = ImGui::InputText(
         "Change Date",
         Buffer,
         BufferSize,
         ImGuiInputTextFlags_EnterReturnsTrue
     );
     if (dateChanged) {
-        global::scriptEngine.queueScript(
-            "openspace.time.setTime(\"" + std::string(Buffer) + "\")",
-            scripting::ScriptEngine::RemoteScripting::No
+        // No sync or send because time settings are always synced and sent to the
+        // connected nodes and peers
+        const std::string script = std::format(
+            "openspace.time.setTime([[{}]])", std::string_view(Buffer)
         );
+        global::scriptEngine->queueScript(script);
     }
 
     showTooltip(
         "Entering a date here and confirming with ENTER sets the current simulation time "
         "to the entered date. The format of the date has to be either ISO 8601 "
         "YYYY-MM-DDThh:mm:ss (2017-08-27T04:00:00) or YYYY MMM DD hh:mm:ss "
-        "(2017 MAY 01 12:00:00). The hours are in 24h and specified as UTC.",
+        "(2017 MAY 01 12:00:00). The hours are in 24h and specified as UTC",
         _tooltipDelay
     );
 
     auto incrementTime = [shift = ImGui::GetIO().KeyShift](float days) {
         using namespace std::chrono;
 
-        const float duration = global::timeManager.defaultTimeInterpolationDuration();
+        const float duration = global::timeManager->defaultTimeInterpolationDuration();
 
-        const TimeKeyframeData predictedTime = global::timeManager.interpolate(
-            global::windowDelegate.applicationTime() + duration
-        );
+        const TimeManager::TimeKeyframeData predictedTime =
+            global::timeManager->interpolate(
+                global::windowDelegate->applicationTime() + duration
+            );
         const double j2000 = predictedTime.time.j2000Seconds();
         const long long seconds = duration_cast<std::chrono::seconds>(
             std::chrono::hours(24) * std::abs(days)
         ).count();
 
-        const double newTime = days < 0 ?
-            j2000 - seconds :
-            j2000 + seconds;
+        const double newTime = days < 0.f ? j2000 - seconds : j2000 + seconds;
 
         if (shift) {
-            // If any shift key is pressed we want to always jump to the time
-            global::scriptEngine.queueScript(
-                "openspace.time.setTime(" + std::to_string(newTime) + ")",
-                scripting::ScriptEngine::RemoteScripting::No
+            // If any shift key is pressed we want to always jump to the time.
+            // No sync or send because time settings are always synced and sent
+            // to the connected nodes and peers
+            global::scriptEngine->queueScript(
+                "openspace.time.setTime(" + std::to_string(newTime) + ")"
             );
         }
         else {
-            global::scriptEngine.queueScript(
-                "openspace.time.interpolateTime(" + std::to_string(newTime) + ", " +
-                std::to_string(duration) + ")",
-                scripting::ScriptEngine::RemoteScripting::No
+            // No sync or send because time settings are always synced and sent
+            // to the connected nodes and peers
+            const std::string script = std::format(
+                "openspace.time.interpolateTime({}, {})", newTime, duration
             );
+            global::scriptEngine->queueScript(script);
         }
     };
 
     const bool minusMonth = ImGui::Button("-Month");
-    showTooltip("OBS: A month here equals 30 days.", _tooltipDelay);
+    showTooltip("OBS: A month here equals 30 days", _tooltipDelay);
     if (minusMonth) {
         incrementTime(-30);
     }
@@ -284,16 +271,16 @@ void GuiSpaceTimeComponent::render() {
 
     const bool nowDay = ImGui::Button("Now");
     if (nowDay) {
-        std::string nowTime = Time::now().UTC();
+        std::string nowTime = std::string(Time::now().UTC());
         // UTC returns a string of the type YYYY MMM DDTHH:mm:ss.xxx
         // setTime doesn't like the T in it and wants a space instead
         nowTime[11] = ' ';
 
-        global::scriptEngine.queueScript(
-            "openspace.time.setTime(\"" + nowTime + "\")",
-            scripting::ScriptEngine::RemoteScripting::No
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
+        global::scriptEngine->queueScript(
+            std::format("openspace.time.setTime('{}')", nowTime)
         );
-
     }
     ImGui::SameLine();
 
@@ -319,26 +306,27 @@ void GuiSpaceTimeComponent::render() {
     if (plusMonth) {
         incrementTime(30);
     }
-    showTooltip("OBS: A month here equals 30 days.", _tooltipDelay);
+    showTooltip("OBS: A month here equals 30 days", _tooltipDelay);
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
 //
     {
-        const float dt = static_cast<float>(global::timeManager.targetDeltaTime());
+        const float dt = static_cast<float>(global::timeManager->targetDeltaTime());
         if (_firstFrame) {
-            const std::pair<double, std::string>& dtInfo = simplifyTime(dt);
+            const std::pair<double, std::string_view>& dtInfo = simplifyTime(dt);
             _deltaTime = static_cast<float>(dtInfo.first);
-            _deltaTimeUnit = timeUnitFromString(dtInfo.second.c_str());
+            _deltaTimeUnit = timeUnitFromString(dtInfo.second);
 
             _timeUnits = std::accumulate(
                 openspace::TimeUnits.begin(),
                 openspace::TimeUnits.end(),
                 std::string(""),
                 [](const std::string& a, const openspace::TimeUnit& unit) {
-                    return a + nameForTimeUnit(unit, true) + " / second" + '\0';
+                    return std::format(
+                        "{}{} / second", a, nameForTimeUnit(unit, true)
+                    ) + '\0';
                 }
             );
-
             _firstFrame = false;
         }
 
@@ -346,18 +334,18 @@ void GuiSpaceTimeComponent::render() {
             convertTime(dt, TimeUnit::Second, _deltaTimeUnit)
         );
 
-        bool valueChanged = ImGui::InputFloat(
+        const bool valueChanged = ImGui::InputFloat(
             "##inputValueDeltaTime",
             &_deltaTime,
             1.f,
             100.f,
-            -1,
+            "%.8f",
             ImGuiInputTextFlags_EnterReturnsTrue
         );
         ImGui::SameLine();
 
         int deltaTimeUnit = static_cast<int>(_deltaTimeUnit);
-        bool unitChanged = ImGui::Combo(
+        const bool unitChanged = ImGui::Combo(
             "##inputUnit",
             &deltaTimeUnit,
             _timeUnits.c_str()
@@ -366,19 +354,24 @@ void GuiSpaceTimeComponent::render() {
 
         if (valueChanged) {
             // If the value changed, we want to change the delta time to the new value
-
-            double newDt = convertTime(_deltaTime, _deltaTimeUnit, TimeUnit::Second);
-            global::scriptEngine.queueScript(
-                "openspace.time.interpolateDeltaTime(" + std::to_string(newDt) + ")",
-                scripting::ScriptEngine::RemoteScripting::No
+            const double newDt = convertTime(
+                _deltaTime,
+                _deltaTimeUnit,
+                TimeUnit::Second
             );
+
+            // No sync or send because time settings are always synced and sent
+            // to the connected nodes and peers
+            global::scriptEngine->queueScript(std::format(
+                "openspace.time.interpolateDeltaTime({})", newDt
+            ));
         }
         if (unitChanged) {
             // If only the unit changes, we keep the delta time, but need to convert the
             // value to the new unit
 
             _deltaTime = static_cast<float>(
-                convertTime(dt, TimeUnit::Second, static_cast<TimeUnit>(_deltaTimeUnit))
+                convertTime(dt, TimeUnit::Second, _deltaTimeUnit)
             );
         }
     }
@@ -416,24 +409,27 @@ void GuiSpaceTimeComponent::render() {
                 TimeUnit::Second
             );
 
-            global::scriptEngine.queueScript(
-                "openspace.time.setDeltaTime(" + std::to_string(newDeltaTime) + ")",
-                scripting::ScriptEngine::RemoteScripting::No
+            // No sync or send because time settings are always synced and sent
+            // to the connected nodes and peers
+            const std::string s = std::format(
+                "openspace.time.setDeltaTime({})", newDeltaTime
             );
+            global::scriptEngine->queueScript(s);
         }
         if (!ImGui::IsItemActive() && !ImGui::IsItemClicked()) {
             if (_slidingDelta != 0.f) {
-                global::scriptEngine.queueScript(
-                    "openspace.time.setDeltaTime(" + std::to_string(_oldDeltaTime) + ")",
-                    scripting::ScriptEngine::RemoteScripting::No
-                );
+                // No sync or send because time settings are always synced and sent
+                // to the connected nodes and peers
+                global::scriptEngine->queueScript(std::format(
+                    "openspace.time.setDeltaTime({})", _oldDeltaTime
+                ));
 
             }
             _slidingDelta = 0.f;
         }
     }
     else {
-        bool accelerationDeltaChanged = ImGui::SliderFloat(
+        const bool accelerationDeltaChanged = ImGui::SliderFloat(
             "Delta Time Slider",
             &_accelerationDelta,
             -100.f,
@@ -444,15 +440,18 @@ void GuiSpaceTimeComponent::render() {
         if (accelerationDeltaChanged || ImGui::IsItemActive() || ImGui::IsItemClicked()) {
             // We want the value to change by _accelerationDelta every 100 real world ms
             const double newDeltaTime = convertTime(
-                _deltaTime + _accelerationDelta * global::windowDelegate.deltaTime() * 10,
-                static_cast<TimeUnit>(_deltaTimeUnit),
+                _deltaTime +
+                    _accelerationDelta * global::windowDelegate->deltaTime() * 10,
+                _deltaTimeUnit,
                 TimeUnit::Second
             );
 
-            global::scriptEngine.queueScript(
-                "openspace.time.setDeltaTime(" + std::to_string(newDeltaTime) + ")",
-                scripting::ScriptEngine::RemoteScripting::No
+            // No sync or send because time settings are always synced and sent
+            // to the connected nodes and peers
+            const std::string script = std::format(
+                "openspace.time.setDeltaTime({})", newDeltaTime
             );
+            global::scriptEngine->queueScript(script);
         }
         else {
             _accelerationDelta = 0.f;
@@ -461,16 +460,13 @@ void GuiSpaceTimeComponent::render() {
         _deltaTime -= _slidingDelta;
     }
 
-    const bool isPaused = global::timeManager.isPaused();
+    const bool isPaused = global::timeManager->isPaused();
     const bool pauseChanged = ImGui::Button(
         isPaused ? "Resume" : "Pause",
         { ImGui::GetWindowWidth() / 2 - 7.5f, 0.f }
     );
     if (pauseChanged) {
-        global::scriptEngine.queueScript(
-            "openspace.time.interpolateTogglePause()",
-            scripting::ScriptEngine::RemoteScripting::No
-        );
+        global::scriptEngine->queueScript("openspace.time.interpolateTogglePause()");
     }
     ImGui::SameLine();
     const bool invert = ImGui::Button(
@@ -478,94 +474,98 @@ void GuiSpaceTimeComponent::render() {
         { ImGui::GetWindowWidth() / 2 - 7.5f, 0.f }
     );
     if (invert) {
-        global::scriptEngine.queueScript(
-            "openspace.time.interpolateDeltaTime(-1 * openspace.time.deltaTime());",
-            scripting::ScriptEngine::RemoteScripting::No
-        );
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
+        const std::string script =
+            "openspace.time.interpolateDeltaTime(-1 * openspace.time.deltaTime());";
+        global::scriptEngine->queueScript(script);
     }
 
     const bool minusDs = ImGui::Button("-1d/s");
     if (minusDs) {
-        global::scriptEngine.queueScript(
-            "openspace.time.interpolateDeltaTime(" + std::to_string(-24 * 60 * 60) + ")",
-            scripting::ScriptEngine::RemoteScripting::No
-        );
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
+        global::scriptEngine->queueScript(std::format(
+            "openspace.time.interpolateDeltaTime(-{})", timeconstants::SecondsPerDay
+        ));
     }
     ImGui::SameLine();
 
     const bool minusHs = ImGui::Button("-1h/s");
     if (minusHs) {
-        global::scriptEngine.queueScript(
-            "openspace.time.interpolateDeltaTime(" + std::to_string(-60 * 60) + ")",
-            scripting::ScriptEngine::RemoteScripting::No
-        );
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
+        global::scriptEngine->queueScript(std::format(
+            "openspace.time.interpolateDeltaTime(-{})", timeconstants::SecondsPerHour
+        ));
     }
     ImGui::SameLine();
 
     const bool minusMs = ImGui::Button("-1min/s");
     if (minusMs) {
-        global::scriptEngine.queueScript(
-            "openspace.time.interpolateDeltaTime(" + std::to_string(-60) + ")",
-            scripting::ScriptEngine::RemoteScripting::No
-        );
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
+        global::scriptEngine->queueScript(std::format(
+            "openspace.time.interpolateDeltaTime(-{})", timeconstants::SecondsPerMinute
+        ));
     }
     ImGui::SameLine();
 
     const bool minusSs = ImGui::Button("-1s/s");
     if (minusSs) {
-        global::scriptEngine.queueScript(
-            "openspace.time.interpolateDeltaTime(" + std::to_string(-1) + ")",
-            scripting::ScriptEngine::RemoteScripting::No
-        );
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
+        global::scriptEngine->queueScript("openspace.time.interpolateDeltaTime(-1)");
     }
     ImGui::SameLine();
 
     const bool zero = ImGui::Button("0");
     if (zero) {
-        global::scriptEngine.queueScript(
-            "openspace.time.interpolateDeltaTime(" + std::to_string(0) + ")",
-            scripting::ScriptEngine::RemoteScripting::No
-        );
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
+        global::scriptEngine->queueScript("openspace.time.interpolateDeltaTime(0)");
     }
     ImGui::SameLine();
 
 
     const bool plusSs = ImGui::Button("+1s/s");
     if (plusSs) {
-        global::scriptEngine.queueScript(
-            "openspace.time.interpolateDeltaTime(" + std::to_string(1) + ")",
-            scripting::ScriptEngine::RemoteScripting::No
-        );
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
+        global::scriptEngine->queueScript("openspace.time.interpolateDeltaTime(1)");
     }
     ImGui::SameLine();
 
     const bool plusMs = ImGui::Button("1min/s");
     if (plusMs) {
-        global::scriptEngine.queueScript(
-            "openspace.time.interpolateDeltaTime(" + std::to_string(60) + ")",
-            scripting::ScriptEngine::RemoteScripting::No
-        );
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
+        global::scriptEngine->queueScript(std::format(
+            "openspace.time.interpolateDeltaTime({})", timeconstants::SecondsPerMinute
+        ));
     }
     ImGui::SameLine();
 
     const bool plusHs = ImGui::Button("1h/s");
     if (plusHs) {
-        global::scriptEngine.queueScript(
-            "openspace.time.interpolateDeltaTime(" + std::to_string(60 * 60) + ")",
-            scripting::ScriptEngine::RemoteScripting::No
-        );
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
+        global::scriptEngine->queueScript(std::format(
+            "openspace.time.interpolateDeltaTime({})", timeconstants::SecondsPerHour
+        ));
     }
     ImGui::SameLine();
 
     const bool plusDs = ImGui::Button("1d/s");
     if (plusDs) {
-        global::scriptEngine.queueScript(
-            "openspace.time.interpolateDeltaTime(" + std::to_string(24 * 60 * 60) + ")",
-            scripting::ScriptEngine::RemoteScripting::No
-        );
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
+        global::scriptEngine->queueScript(std::format(
+            "openspace.time.interpolateDeltaTime({})", timeconstants::SecondsPerDay
+        ));
     }
 
     ImGui::End();
 }
 
-} // namespace openspace gui
+} // namespace openspace::gui

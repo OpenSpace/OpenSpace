@@ -1,0 +1,73 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Climate Model: Temperature Change (CCSM a1b) - 1870 - 2100"
+local Identifier = "noaa-sos-models-ipcc_temp-ccsm-a1b"
+local Description = [["The Intergovernmental Panel on Climate Change (IPCC) was
+established by WMO and UNEP to assess scientific, technical and socio- economic
+information relevant for the understanding of climate change, its potential impacts and
+options for adaptation and mitigation. It is open to all members of the UN and of WMO."
+- from www.ipcc.ch. In an effort to better visualize the future of climate change, the
+IPCC releases assessment reports on the current state of the atmosphere and what the
+future could hold. Models from various atmospheric and oceanic organizations are included
+in these reports in order to establish a broad understanding of the science. Data from
+three of the IPCC models following temperature change from 1870 - 2100 have been
+formatted for Science On a Sphere]]
+local URL = "https://sos.noaa.gov/catalog/datasets/climate-model-temperature-change-ccsm-a1b-1870-2100/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "ImageSequenceTileProvider",
+  FolderPath = syncedDirectory .. "4095",
+  Description = Description
+}
+
+local Colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar.png",
+  FaceCamera = false,
+  Scale = 0.2,
+  BackgroundColor = { 1.0, 1.0, 1.0, 1.0 },
+  CartesianPosition = { 1.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(Colorbar)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

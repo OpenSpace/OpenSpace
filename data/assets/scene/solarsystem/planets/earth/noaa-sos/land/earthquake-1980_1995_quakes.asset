@@ -1,0 +1,103 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Earthquakes: Cumulative - 1980 - 1995"
+local Identifier = "noaa-sos-land-earthquake-1980_1995_quakes"
+local Description = [[It is estimated that there are 500,000 detectable earthquakes in
+the world each year. Of those, 100,000 can be felt and 100 of them cause damage. Anything
+that causes seismic waves to radiate throughout the Earth is an earthquake. The cause of
+earthquakes can be natural, such as one tectonic plate slipping below another, or
+anthropogenic (cause by humans), such as drilling for fossil fuels, extraction of
+minerals, huge explosions, and the collapse of large buildings. Because most natural
+earthquakes occur due to slipping plates, the boundaries between tectonic plates are "hot
+spots" for earthquakes. In the Pacific Ocean, the Pacific Plate is referred to as the
+Ring of Fire because this is one of the most active plates where earthquakes and
+volcanoes frequently occur. In order to rate the strength and magnitude of earthquakes,
+the Richter magnitude scale was created. It is a base-10 logarithm scale of ground motion
+100km from the epicenter. Every whole-number increase in magnitude means the amplitude of
+the seismic wave is ten times greater. 4.0 - 4.9 on the scale is considered light, with
+some shaking of indoor items and significant damage unlikely]]
+local URL = "https://sos.noaa.gov/catalog/datasets/earthquakes-cumulative-1980-1995/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "ImageSequenceTileProvider",
+  FolderPath = syncedDirectory .. "1024",
+  Description = Description
+}
+
+local Legend = {
+  Identifier = Identifier .. "-legend",
+  Name = Name .. " (Legend)",
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "legend.png",
+  FaceCamera = false,
+  Scale = 0.3,
+  CartesianPosition = { 0.0, -0.6, -2.0 }
+}
+
+local Quakebar = {
+  Identifier = Identifier .. "-quake",
+  Name = Name .. " (Quake)",
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "quakebar.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.3, -2.0 }
+}
+
+local QuakebarCombined = {
+  Identifier = Identifier .. "-combined",
+  Name = Name .. " (Combined)",
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "quakebar_combined.png",
+  FaceCamera = false,
+  Scale = 0.6,
+  CartesianPosition = { 0.5, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Legend)
+  openspace.addScreenSpaceRenderable(Quakebar)
+  openspace.addScreenSpaceRenderable(QuakebarCombined)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.removeScreenSpaceRenderable(Legend)
+  openspace.removeScreenSpaceRenderable(Quakebar)
+  openspace.removeScreenSpaceRenderable(QuakebarCombined)
+end)
+
+asset.export(Layer)
+asset.export(Legend)
+asset.export(Quakebar)
+asset.export(QuakebarCombined)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

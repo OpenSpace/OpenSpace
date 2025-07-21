@@ -1,0 +1,77 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Agriculture: Cropland Yield (potential)"
+local Identifier = "noaa-sos-land-land_production-cropland_potential"
+local Description = [[A major component of the 2 Billion More Coming to Dinner film,
+these datasets show current and potential yields for the three top crops, corn, wheat and
+rice, measured in tons per hectare. Potential yield for a given area is determined by
+using the productivity of another region with analogous environmental conditions and
+optimized water and nutrient input as a benchmark. In this map, darker areas show smaller
+yields, while bright pink areas indicate higher yields]]
+local URL = "https://sos.noaa.gov/catalog/datasets/agriculture-cropland-yield-potential/"
+
+
+local syncedDirectory = asset.resource({
+	Name = Name,
+	Type = "HttpSynchronization",
+	Identifier = Identifier,
+	Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "4096.png",
+  Description = Description
+}
+
+local LayerCountries = {
+  Identifier = Identifier .. "-countries",
+  Name = Name .. " (w/ countries)",
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "4096_countries.png",
+  Description = Description
+}
+
+local Legend = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "legend.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerCountries)
+  openspace.addScreenSpaceRenderable(Legend)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Legend)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerCountries)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(LayerCountries)
+asset.export(Legend)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

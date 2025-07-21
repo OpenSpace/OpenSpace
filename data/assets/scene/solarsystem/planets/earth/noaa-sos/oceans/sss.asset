@@ -1,0 +1,68 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Sea Surface Salinity"
+local Identifier = "noaa-sos-oceans-sss"
+local Description = [[Processes that took place through Earth's history, such as the
+weathering of rocks, evaporation of ocean water, and the formation of sea ice, have made
+the ocean salty. Those are still at work today and are counterbalanced by processes that
+decrease the salt in the ocean, like freshwater input from rivers, precipitation, and the
+melting of ice. The result is an ocean surface where the salinity - the concentration of
+salt - changes and these changes, small as they may be, have large-scale effects on
+Earth's water cycle and ocean circulation]]
+local URL = "https://sos.noaa.gov/catalog/datasets/sea-surface-salinity/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "ImageSequenceTileProvider",
+  FolderPath = syncedDirectory .. "4096",
+  Description = Description
+}
+
+local Colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(Colorbar)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

@@ -1,31 +1,54 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-local kernel = asset.require('../kernels').sat375
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
 local RheaTrail = {
-    Identifier = "RheaTrail",
-    Parent = transforms.SaturnBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "RHEA",
-            Observer = "SATURN BARYCENTER",
-            Kernels = kernel
-        },
-        Color = { 0.5, 0.3, 0.3 },
-        Period = 108.0 / 24.0,
-        Resolution = 1000
+  Identifier = "RheaTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Rhea,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
-    Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
-    GUI = {
-        Name = "Rhea Trail",
-        Path = "/Solar System/Planets/Saturn/Moons"
-    }
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 108.0 / 24.0,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_major_saturn"
+  },
+  GUI = {
+    Name = "Rhea Trail",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Rhea",
+    Focusable = false,
+    Description = "Trail of Saturn's moon Rhea as observed by Saturn"
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(RheaTrail)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { RheaTrail })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(RheaTrail)
+end)
+
+asset.export(RheaTrail)
+
+
+
+asset.meta = {
+  Name = "Rhea Trail",
+  Description = "Main trail for Rhea",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

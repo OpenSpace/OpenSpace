@@ -1,0 +1,72 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Sea Surface Height Anomaly"
+local Identifier = "noaa-sos-oceans-sea_surface_height_anomaly"
+local Description = [[To gather long-term information about the world's oceans and
+currents, satellite instruments make extremely precise measurements of the height of the
+ocean surface above the center of the Earth, a measurement commonly called sea level.
+These data are combined to reveal the ocean surface topography (not to be confused with
+bathymetry, which is the relief on the bottom of the ocean). Sea surface height is of
+interest to scientists because it reveals information about how much heat is stored in
+the ocean. Warm water is less dense than cold water, so higher areas tend to be warmer
+than lower areas. Radar altimeter instruments onboard spacecraft have been continuously
+collecting sea surface height data over the global ocean for almost two decades]]
+local URL = "https://sos.noaa.gov/catalog/datasets/sea-surface-height-anomaly/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true,
+  UnzipFilesDestination = "images"
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "ImageSequenceTileProvider",
+  FolderPath = syncedDirectory .. "images",
+  Description = Description
+}
+
+local Colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar.png",
+  FaceCamera = false,
+  BackgroundColor = { 1.0, 1.0, 1.0, 1.0 },
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(Colorbar)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

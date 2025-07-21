@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,7 @@
 #include <modules/multiresvolume/rendering/simpletfbrickselector.h>
 #include <modules/multiresvolume/rendering/tfbrickselector.h>
 #include <modules/multiresvolume/rendering/tsp.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycastermanager.h>
@@ -42,11 +43,11 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/fmt.h>
-#include <ghoul/glm.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
+#include <ghoul/glm.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/framebufferobject.h>
@@ -54,104 +55,121 @@
 #include <ghoul/opengl/texture.h>
 #include <algorithm>
 #include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <iterator>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableMultiresVolume";
-    constexpr const char* KeyDataSource = "Source";
-    constexpr const char* KeyErrorHistogramsSource = "ErrorHistogramsSource";
-    constexpr const char* KeyHints = "Hints";
-    constexpr const char* KeyTransferFunction = "TransferFunction";
-
-    constexpr const char* KeyVolumeName = "VolumeName";
-    constexpr const char* KeyBrickSelector = "BrickSelector";
-    constexpr const char* KeyStartTime = "StartTime";
-    constexpr const char* KeyEndTime = "EndTime";
-    constexpr const char* GlslHelpersPath =
-        "${MODULES}/multiresvolume/shaders/helpers_fs.glsl";
-    constexpr const char* GlslHelperPath =
-        "${MODULES}/multiresvolume/shaders/helper.glsl";
-    constexpr const char* GlslHeaderPath =
-        "${MODULES}/multiresvolume/shaders/header.glsl";
+    constexpr std::string_view _loggerCat = "RenderableMultiresVolume";
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {
         "StepSizeCoefficient",
         "Stepsize Coefficient",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CurrentTimeInfo = {
         "CurrentTime",
         "Current Time",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MemoryBudgetInfo = {
         "MemoryBudget",
         "Memory Budget",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StreamingBudgetInfo = {
         "StreamingBudget",
         "Streaming Budget",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseGlobalTimeInfo = {
         "UseGlobalTime",
         "Global Time",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LoopInfo = {
         "Loop",
         "Loop",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SelectorNameInfo = {
         "Selector",
         "Brick Selector",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StatsToFileInfo = {
         "PrintStats",
         "Print Stats",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo StatsToFileNameInfo = {
         "PrintStatsFileName",
         "Stats Filename",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
         "ScalingExponent",
         "Scaling Exponent",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScalingInfo = {
         "Scaling",
         "Scaling",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TranslationInfo = {
         "Translation",
         "Translation",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
+
+    struct [[codegen::Dictionary(RenderableMultiresVolume)]] Parameters {
+        std::filesystem::path source;
+        std::optional<std::filesystem::path> errorHistogramsSource;
+        std::optional<int> scalingExponent;
+        std::optional<float> stepSizeCoefficient;
+        std::optional<glm::vec3> scaling;
+        std::optional<glm::vec3> translation;
+        std::optional<glm::vec3> rotation;
+
+        std::optional<std::string> startTime;
+        std::optional<std::string> endTime;
+
+        std::filesystem::path transferFunction;
+
+        std::optional<std::string> brickSelector;
+    };
+#include "renderablemultiresvolume_codegen.cpp"
 } // namespace
 
 namespace openspace {
@@ -169,117 +187,67 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     , _statsToFileName(StatsToFileNameInfo)
     , _scalingExponent(ScalingExponentInfo, 1, -10, 20)
     , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
-    , _rotation(RotationInfo, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(6.28f))
+    , _rotation(
+        RotationInfo,
+        glm::vec3(0.f),
+        glm::vec3(0.f),
+        glm::vec3(glm::two_pi<float>())
+    )
     , _scaling(ScalingInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f))
 {
-    if (dictionary.hasKeyAndValue<std::string>(KeyDataSource)) {
-        _filename = absPath(dictionary.value<std::string>(KeyDataSource));
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _filename = p.source;
+    _errorHistogramsPath = p.errorHistogramsSource.value_or(_errorHistogramsPath);
+    _scalingExponent = p.scalingExponent.value_or(_scalingExponent);
+    _stepSizeCoefficient = p.stepSizeCoefficient.value_or(_stepSizeCoefficient);
+    _scaling = p.scaling.value_or(_scaling);
+    _translation = p.translation.value_or(_translation);
+    _rotation = p.rotation.value_or(_rotation);
+
+    if (p.startTime.has_value() && p.endTime.has_value()) {
+        _startTime = SpiceManager::ref().ephemerisTimeFromDate(*p.startTime);
+        _endTime = SpiceManager::ref().ephemerisTimeFromDate(*p.endTime);
+        _loop = false;
     }
     else {
-        LERROR(fmt::format("Node did not contain a valid '{}'", KeyDataSource));
-        return;
-    }
-
-    if (dictionary.hasKeyAndValue<std::string>(KeyErrorHistogramsSource)) {
-        _errorHistogramsPath = absPath(
-            dictionary.value<std::string>(KeyErrorHistogramsSource)
-        );
-    }
-
-    if (dictionary.hasKeyAndValue<double>("ScalingExponent")) {
-        _scalingExponent = static_cast<int>(dictionary.value<double>("ScalingExponent"));
-    }
-
-    if (dictionary.hasKeyAndValue<double>("StepSizeCoefficient")) {
-        _stepSizeCoefficient = static_cast<float>(
-            dictionary.value<double>("StepSizeCoefficient")
-        );
-    }
-
-    if (dictionary.hasKeyAndValue<glm::vec3>("Scaling")) {
-        _scaling = dictionary.value<glm::vec3>("Scaling");
-    }
-
-    if (dictionary.hasKeyAndValue<glm::vec3>("Translation")) {
-        _translation = dictionary.value<glm::vec3>("Translation");
-    }
-
-    if (dictionary.hasKeyAndValue<glm::vec3>("Rotation")) {
-        _rotation = dictionary.value<glm::vec3>("Rotation");
-    }
-
-    std::string startTimeString, endTimeString;
-
-    bool hasTimeData = dictionary.getValue(KeyStartTime, startTimeString) &&
-                       dictionary.getValue(KeyEndTime, endTimeString);
-    if (hasTimeData) {
-        _startTime = SpiceManager::ref().ephemerisTimeFromDate(startTimeString);
-        _endTime = SpiceManager::ref().ephemerisTimeFromDate(endTimeString);
-        _loop = false;
-    } else {
         _loop = true;
         LWARNING("Node does not provide time information. Viewing one image / frame");
     }
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyTransferFunction)) {
-        _transferFunctionPath = absPath(
-            dictionary.value<std::string>(KeyTransferFunction)
-        );
-        _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
-    }
-    else {
-        LERROR(fmt::format("Node did not contain a valid '{}'", KeyTransferFunction));
-        return;
-    }
-
-    //_pscOffset = psc(glm::vec4(0.0));
-    //_boxScaling = glm::vec3(1.0);
-
-
-    /*if (dictionary.hasKey(KeyBoxScaling)) {
-        glm::vec4 scalingVec4(_boxScaling, _w);
-        success = dictionary.getValue(KeyBoxScaling, scalingVec4);
-        if (success) {
-            _boxScaling = scalingVec4.xyz;
-            _w = scalingVec4.w;
-        }
-        else {
-            success = dictionary.getValue(KeyBoxScaling, _boxScaling);
-            if (!success) {
-                LERROR("Node '" << name << "' did not contain a valid '" <<
-                    KeyBoxScaling << "'");
-                return;
-            }
-        }
-    }*/
+    _transferFunctionPath = p.transferFunction;
+    _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
 
     _tsp = std::make_shared<TSP>(_filename);
     _atlasManager = std::make_shared<AtlasManager>(_tsp.get());
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyBrickSelector)) {
-        _selectorName = dictionary.value<std::string>(KeyBrickSelector);
-    }
+    _selectorName = p.brickSelector.value_or(_selectorName);
 
     std::string selectorName = _selectorName;
     if (selectorName == "simple") {
         _selector = Selector::SIMPLE;
-    } else if (selectorName == "local") {
+    }
+    else if (selectorName == "local") {
         _selector = Selector::LOCAL;
-    } else {
+    }
+    else {
         _selector = Selector::TF;
     }
 
     addProperty(_selectorName);
-    _selectorName.onChange([&]() {
+    _selectorName.onChange([this]() {
         Selector s;
         std::string newSelectorName = _selectorName;
         if (newSelectorName == "simple") {
             s = Selector::SIMPLE;
-        } else if (newSelectorName == "local") {
+        }
+        else if (newSelectorName == "local") {
             s = Selector::LOCAL;
-        } else if (newSelectorName == "tf") {
+        }
+        else if (newSelectorName == "tf") {
             s = Selector::TF;
-        } else {
+        }
+        else {
             return;
         }
         setSelectorType(s);
@@ -417,14 +385,14 @@ void RenderableMultiresVolume::initializeGL() {
     );
     _raycaster->initialize();
 
-    global::raycasterManager.attachRaycaster(*_raycaster);
+    global::raycasterManager->attachRaycaster(*_raycaster);
 
-    auto onChange = [&](bool enabled) {
+    auto onChange = [this](bool enabled) {
         if (enabled) {
-            global::raycasterManager.attachRaycaster(*_raycaster);
+            global::raycasterManager->attachRaycaster(*_raycaster);
         }
         else {
-            global::raycasterManager.detachRaycaster(*_raycaster);
+            global::raycasterManager->detachRaycaster(*_raycaster);
         }
     };
 
@@ -451,37 +419,33 @@ bool RenderableMultiresVolume::initializeSelector() {
     switch (_selector) {
         case Selector::TF:
             if (_errorHistogramManager) {
-                std::stringstream cacheName;
-                ghoul::filesystem::File f = _filename;
-                cacheName << f.baseName() << "_" << nHistograms << "_errorHistograms";
-                std::string cacheFilename;
-                cacheFilename = FileSys.cacheManager()->cachedFilename(
-                    cacheName.str(),
-                    "",
-                    ghoul::filesystem::CacheManager::Persistent::Yes
+                 std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
+                     std::format("{}_{}_errorHistograms", _filename.stem(), nHistograms),
+                     ""
                 );
-                std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
-                std::string errorHistogramsPath = _errorHistogramsPath;
+                std::ifstream cacheFile(cached, std::ios::in | std::ios::binary);
                 if (cacheFile.is_open()) {
-                    // Read histograms from cache.
+                    // Read histograms from cache
                     cacheFile.close();
                     LINFO(
-                        fmt::format("Loading histograms from cache: {}", cacheFilename)
+                        std::format("Loading histograms from cache '{}'", cached)
                     );
-                    success &= _errorHistogramManager->loadFromFile(cacheFilename);
-                } else if (_errorHistogramsPath != "") {
-                    // Read histograms from scene data.
-                    LINFO(fmt::format(
-                        "Loading histograms from scene data: {}", _errorHistogramsPath
+                    success &= _errorHistogramManager->loadFromFile(cached);
+                }
+                else if (!_errorHistogramsPath.empty()) {
+                    // Read histograms from scene data
+                    LINFO(std::format(
+                        "Loading histograms from scene data '{}'", _errorHistogramsPath
                     ));
                     success &= _errorHistogramManager->loadFromFile(_errorHistogramsPath);
-                } else {
-                    // Build histograms from tsp file.
-                    LWARNING(fmt::format("Failed to open {}", cacheFilename));
+                }
+                else {
+                    // Build histograms from tsp file
+                    LWARNING(std::format("Failed to open '{}'", cached));
                     success &= _errorHistogramManager->buildHistograms(nHistograms);
                     if (success) {
-                        LINFO(fmt::format("Writing cache to {}", cacheFilename));
-                        _errorHistogramManager->saveToFile(cacheFilename);
+                        LINFO(std::format("Writing cache to '{}'", cached));
+                        _errorHistogramManager->saveToFile(cached);
                     }
                 }
                 success &= _tfBrickSelector && _tfBrickSelector->initialize();
@@ -490,31 +454,27 @@ bool RenderableMultiresVolume::initializeSelector() {
 
         case Selector::SIMPLE:
             if (_histogramManager) {
-                std::stringstream cacheName;
-                ghoul::filesystem::File f = _filename;
-                cacheName << f.baseName() << "_" << nHistograms << "_histograms";
-                std::string cacheFilename;
-                cacheFilename = FileSys.cacheManager()->cachedFilename(
-                    cacheName.str(),
-                    "",
-                    ghoul::filesystem::CacheManager::Persistent::Yes
+                std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
+                    std::format("{}_{}_histogram", _filename.stem(), nHistograms),
+                    ""
                 );
-                std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
+                std::ifstream cacheFile(cached, std::ios::in | std::ios::binary);
                 if (cacheFile.is_open()) {
                     // Read histograms from cache.
                     cacheFile.close();
-                    LINFO(fmt::format("Loading histograms from {}", cacheFilename));
-                    success &= _histogramManager->loadFromFile(cacheFilename);
-                } else {
+                    LINFO(std::format("Loading histograms from '{}'", cached));
+                    success &= _histogramManager->loadFromFile(cached);
+                }
+                else {
                     // Build histograms from tsp file.
-                    LWARNING(fmt::format("Failed to open '{}'", cacheFilename));
+                    LWARNING(std::format("Failed to open '{}'", cached));
                     success &= _histogramManager->buildHistograms(
                         _tsp.get(),
                         nHistograms
                     );
                     if (success) {
-                        LINFO(fmt::format("Writing cache to {}", cacheFilename));
-                        _histogramManager->saveToFile(cacheFilename);
+                        LINFO(std::format("Writing cache to '{}'", cached));
+                        _histogramManager->saveToFile(cached);
                     }
                 }
                 success &= _simpleTfBrickSelector && _simpleTfBrickSelector->initialize();
@@ -523,26 +483,26 @@ bool RenderableMultiresVolume::initializeSelector() {
 
         case Selector::LOCAL:
             if (_localErrorHistogramManager) {
-                ghoul::filesystem::File f = _filename;
-                std::string cacheFilename;
-                cacheFilename = FileSys.cacheManager()->cachedFilename(
-                    fmt::format("{}_{}_localErrorHistograms", f.baseName(), nHistograms),
-                    "",
-                    ghoul::filesystem::CacheManager::Persistent::Yes
+                 std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
+                    std::format(
+                        "{}_{}_localErrorHistograms", _filename.stem(), nHistograms
+                    ),
+                    ""
                 );
-                std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
+                std::ifstream cacheFile(cached, std::ios::in | std::ios::binary);
                 if (cacheFile.is_open()) {
                     // Read histograms from cache.
                     cacheFile.close();
-                    LINFO(fmt::format("Loading histograms from {}", cacheFilename));
-                    success &= _localErrorHistogramManager->loadFromFile(cacheFilename);
-                } else {
+                    LINFO(std::format("Loading histograms from '{}'", cached));
+                    success &= _localErrorHistogramManager->loadFromFile(cached);
+                }
+                else {
                     // Build histograms from tsp file.
-                    LWARNING(fmt::format("Failed to open {}", cacheFilename));
+                    LWARNING(std::format("Failed to open '{}'", cached));
                     success &= _localErrorHistogramManager->buildHistograms(nHistograms);
                     if (success) {
-                        LINFO(fmt::format("Writing cache to {}", cacheFilename));
-                        _localErrorHistogramManager->saveToFile(cacheFilename);
+                        LINFO(std::format("Writing cache to '{}'", cached));
+                        _localErrorHistogramManager->saveToFile(cached);
                     }
                 }
                 success &= _localTfBrickSelector && _localTfBrickSelector->initialize();
@@ -559,7 +519,7 @@ void RenderableMultiresVolume::preResolve(ghoul::opengl::ProgramObject* program)
 
     std::stringstream ss;
     ss << "opacity_" << getId();
-    program->setUniform(ss.str(), visible ? 1.0f : 0.0f);
+    program->setUniform(ss.str(), visible ? 1.f : 0.f);
 
     ss.str(std::string());
     ss << "stepSizeCoefficient_" << getId();
@@ -622,8 +582,9 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
 
         // Make sure that the directory exists
         ghoul::filesystem::File file(_statsFileName);
-        ghoul::filesystem::Directory directory(file.directoryName());
-        FileSys.createDirectory(directory, ghoul::filesystem::FileSystem::Recursive::Yes);
+        std::filesystem::path directory =
+            std::filesystem::path(_statsFileName).parent_path();
+        std::filesystem::create_directories(directory);
 
         std::ofstream ofs(_statsFileName, std::ofstream::out);
 
@@ -714,7 +675,7 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
 
     if (_raycaster) {
         glm::mat4 transform = glm::translate(
-            glm::mat4(1.0),
+            glm::mat4(1.f),
             static_cast<glm::vec3>(_translation) *
                 std::pow(10.f, static_cast<float>(_scalingExponent))
         );

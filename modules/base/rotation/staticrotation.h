@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 
 #include <openspace/scene/rotation.h>
 
-#include <openspace/properties/matrix/dmat3property.h>
+#include <openspace/properties/vector/vec3property.h>
 
 namespace openspace {
 
@@ -35,15 +35,16 @@ namespace documentation { struct Documentation; }
 
 class StaticRotation : public Rotation {
 public:
-    StaticRotation();
-    StaticRotation(const ghoul::Dictionary& dictionary);
+    explicit StaticRotation(const ghoul::Dictionary& dictionary);
 
     glm::dmat3 matrix(const UpdateData& data) const override;
 
     static documentation::Documentation Documentation();
 
 private:
-    properties::DMat3Property _rotationMatrix;
+    properties::Vec3Property _eulerRotation;
+    mutable glm::dmat3 _cachedMatrix = glm::dmat3(1.0);
+    mutable bool _matrixIsDirty = true;
 };
 
 } // namespace openspace

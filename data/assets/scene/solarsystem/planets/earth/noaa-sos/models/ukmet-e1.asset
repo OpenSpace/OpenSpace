@@ -1,0 +1,78 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Climate Model: Temperature Change (Hadley e1) - 1860 - 2099"
+local Identifier = "noaa-sos-models-ukmet-e1"
+local Description = [[Scientists use computer climate models as a way to understand how
+the climate has behaved in the past and how it is likely to change in the future.
+Scientists use different scenarios to allow them to evaluate all the different future
+possibilities for the climate. The United Kingdom Met Office Hadley Centre has created
+two datasets for Science On a Sphere, using two different scenarios. The first scenario,
+A1B-IMAGE, assumes a "business-as-usual" path forward in the future with continually
+increasing carbon dioxide rates. In this scenario, CO2 rises to 774ppm by 2099 and the
+global mean temperature increases by 4.41°C. The second scenario, E1, is an aggressive
+mitigation scenario that includes reduced fossil fuel use with the goal of keeping global
+mean warming below 2°C. In the E1 scenario, carbon dioxide increases to 435ppm by 2050
+and then drops to 421ppm by 2099, with a global mean temperature increase of 2.12°C]]
+local URL = "https://sos.noaa.gov/catalog/datasets/climate-model-temperature-change-hadley-e1-1860-2099/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "TemporalTileProvider",
+  Mode = "Folder",
+  Folder = {
+    Folder = syncedDirectory .. "2100",
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "000_%Y_1_E1_HQ.png"
+  },
+  Description = Description
+}
+
+local Colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(Colorbar)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

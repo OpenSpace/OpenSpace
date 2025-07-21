@@ -1,0 +1,91 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Ocean Acidification: Saturation State"
+local Identifier = "noaa-sos-oceans-ocean_acid-saturation"
+local Description = [[Ocean acidification is an often overlooked consequence of
+humankind's release of carbon dioxide emissions into the atmosphere from fossil fuel
+burning. Excess carbon dioxide enters the ocean and reacts with water to form carbonic
+acid, which decreases ocean pH (i.e., makes seawater less basic), and lowers carbonate
+ion concentrations. Organisms such as corals, clams, oysters, and some plankton use
+carbonate ions to create their shells and skeletons. Decreases in carbonate ion
+concentration will make it difficult for these creatures to form hard structures,
+particularly for juveniles. Ocean acidification may cause some organisms to die,
+reproduce less successfully, or leave an area. Other organisms such as seagrass and some
+plankton species may do better in oceans affected by ocean acidification because they use
+carbon dioxide to photosynthesize, but do not require carbonate ions to survive. Ocean
+ecosystem diversity and ecosystem services may therefore change dramatically from ocean
+acidification]]
+local URL = "https://sos.noaa.gov/catalog/datasets/ocean-acidification-saturation-state/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "TemporalTileProvider",
+  Mode = "Folder",
+  Folder = {
+    Folder = syncedDirectory .. "images",
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "ARAG.yearly.%Y.color.png"
+  },
+  Description = Description
+}
+
+local Reefs = {
+  Identifier = Identifier .. "-reefs",
+  Name = Name .. " (Reefs)",
+  Enabled = asset.enabled,
+  FilePath = syncedDirectory .. "reefs.png",
+  Description = Description
+}
+
+local Colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Reefs)
+  openspace.addScreenSpaceRenderable(Colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Reefs)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(Reefs)
+asset.export(Colorbar)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

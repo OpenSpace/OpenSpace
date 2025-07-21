@@ -1,0 +1,26 @@
+local Item = {
+  Type = "DashboardItemParallelConnection",
+  Identifier = "ParallelConnection",
+  GuiName = "Parallel Connection"
+}
+
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)
+
+asset.export(Item)
+
+
+
+asset.meta = {
+  Name = "Dashboard - ParallelConnection",
+  Description = "This asset provides a ParallelConnection dashboard item",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

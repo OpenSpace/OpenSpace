@@ -1,0 +1,30 @@
+local globe = asset.require("../../earth")
+
+
+
+local Layer = {
+  Identifier = "Coastlines",
+  FilePath = asset.resource("coastlines.wms"),
+  Enabled = asset.enabled
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "Overlays", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "Overlays", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "Earth Coastlines Layer",
+  Description = "Coastlines layer for Earth globe",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

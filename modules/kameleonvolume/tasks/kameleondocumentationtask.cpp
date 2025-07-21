@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,60 +27,60 @@
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 #include <openspace/openspace.h>
 #include <openspace/documentation/verifier.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/dictionaryjsonformatter.h>
+#include <filesystem>
 #include <fstream>
 
 namespace {
-    constexpr const char* KeyInput = "Input";
-    constexpr const char* KeyOutput = "Output";
-    constexpr const char* MainTemplateFilename = "${WEB}/kameleondocumentation/main.hbs";
-    constexpr const char* HandlebarsFilename = "${WEB}/common/handlebars-v4.0.5.js";
-    constexpr const char* JsFilename = "${WEB}/kameleondocumentation/script.js";
-    constexpr const char* BootstrapFilename = "${WEB}/common/bootstrap.min.css";
-    constexpr const char* CssFilename = "${WEB}/common/style.css";
+    constexpr std::string_view MainTemplateFilename =
+        "${WEB}/kameleondocumentation/main.hbs";
+    constexpr std::string_view HandlebarsFilename = "${WEB}/common/handlebars-v4.0.5.js";
+    constexpr std::string_view JsFilename = "${WEB}/kameleondocumentation/script.js";
+    constexpr std::string_view BootstrapFilename = "${WEB}/common/bootstrap.min.css";
+    constexpr std::string_view CssFilename = "${WEB}/common/style.css";
+
+    struct [[codegen::Dictionary(KameleonDocumentationTask)]] Parameters {
+        // The CDF file to extract data from
+        std::filesystem::path input;
+
+        // The HTML file to write documentation to
+        std::string output [[codegen::annotation("A valid filepath")]];
+    };
+#include "kameleondocumentationtask_codegen.cpp"
 } // namespace
 
 namespace openspace::kameleonvolume {
 
+documentation::Documentation KameleonDocumentationTask::documentation() {
+    return codegen::doc<Parameters>("kameleon_documentation_task");
+}
+
 KameleonDocumentationTask::KameleonDocumentationTask(const ghoul::Dictionary& dictionary)
 {
-    openspace::documentation::testSpecificationAndThrow(
-        documentation(),
-        dictionary,
-        "KameleonDocumentationTask"
-    );
-
-    _inputPath = absPath(dictionary.value<std::string>(KeyInput));
-    _outputPath = absPath(dictionary.value<std::string>(KeyOutput));
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _inputPath = absPath(p.input);
+    _outputPath = absPath(p.output);
 }
 
 std::string KameleonDocumentationTask::description() {
-    return fmt::format(
-        "Extract metadata from cdf file {} and output html documentation to {}",
+    return std::format(
+        "Extract metadata from CDF file '{}' and output HTML documentation to '{}'",
         _inputPath, _outputPath
     );
 }
 
 void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressCallback) {
-    KameleonVolumeReader reader(_inputPath);
+    KameleonVolumeReader reader = KameleonVolumeReader(_inputPath.string());
     ghoul::Dictionary kameleonDictionary = reader.readMetaData();
     progressCallback(0.33f);
-    ghoul::DictionaryJsonFormatter formatter;
 
+    ghoul::Dictionary dictionary;
+    dictionary.setValue("kameleon", std::move(kameleonDictionary));
+    dictionary.setValue("version", std::string(OPENSPACE_VERSION_NUMBER));
+    dictionary.setValue("input", _inputPath.string());
 
-    ghoul::Dictionary dictionary = {
-        { "kameleon", std::move(kameleonDictionary) },
-        { "version",
-            std::to_string(OPENSPACE_VERSION_MAJOR) + "." +
-            std::to_string(OPENSPACE_VERSION_MINOR) + "." +
-            std::to_string(OPENSPACE_VERSION_PATCH)
-        },
-        { "input", _inputPath }
-    };
-
-    std::string json = formatter.format(dictionary);
+    std::string json = ghoul::formatJson(dictionary);
     progressCallback(0.66f);
 
     std::ifstream handlebarsInput(absPath(HandlebarsFilename));
@@ -151,35 +151,7 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
 
     file << html.str();
 
-    progressCallback(1.0f);
-}
-
-documentation::Documentation KameleonDocumentationTask::documentation() {
-    using namespace documentation;
-    return {
-        "KameleonDocumentationTask",
-        "kameleon_documentation_task",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("KameleonDocumentationTask"),
-                Optional::No,
-                "The type of this task"
-            },
-            {
-                KeyInput,
-                new StringAnnotationVerifier("A file path to a cdf file"),
-                Optional::No,
-                "The cdf file to extract data from"
-            },
-            {
-                KeyOutput,
-                new StringAnnotationVerifier("A valid filepath"),
-                Optional::No,
-                "The html file to write documentation to"
-            }
-        }
-    };
+    progressCallback(1.f);
 }
 
 } // namespace openspace::kameleonvolume

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,103 +24,95 @@
 
 #include <openspace/util/keys.h>
 
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
-#include <ghoul/misc/misc.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <vector>
 
-namespace {
-    constexpr const char* _loggerCat = "Keys";
-} // namespace
-
 namespace openspace {
 
-bool hasKeyModifier(KeyAction lhs, KeyAction rhs) {
-    return static_cast<std::underlying_type_t<KeyAction>>(lhs) &
-           static_cast<std::underlying_type_t<KeyAction>>(rhs);
-}
-
-KeyAction operator|(KeyAction lhs, KeyAction rhs) {
-    return static_cast<KeyAction>(
-        static_cast<std::underlying_type_t<KeyAction>>(lhs) |
-        static_cast<std::underlying_type_t<KeyAction>>(rhs)
-    );
-}
-
-KeyAction operator|=(KeyAction& lhs, KeyAction rhs) {
-    return (lhs | rhs);
-}
-
-bool hasKeyModifier(KeyModifier lhs, KeyModifier rhs) {
-    return static_cast<std::underlying_type_t<KeyModifier>>(lhs) &
-           static_cast<std::underlying_type_t<KeyModifier>>(rhs);
-}
-
-
-KeyModifier operator|(KeyModifier lhs, KeyModifier rhs) {
-    return static_cast<KeyModifier>(
-        static_cast<std::underlying_type_t<KeyModifier>>(lhs) |
-        static_cast<std::underlying_type_t<KeyModifier>>(rhs)
-    );
-}
-
-KeyModifier operator|=(KeyModifier& lhs, KeyModifier rhs) {
-    return (lhs | rhs);
-}
-
-KeyWithModifier stringToKey(std::string str) {
-    // key only uppercase
-    std::transform(
-        str.begin(),
-        str.end(),
-        str.begin(),
-        [](char v) { return static_cast<char>(toupper(v)); }
-    );
-
+KeyWithModifier stringToKey(const std::string& str) {
     std::vector<std::string> tokens = ghoul::tokenizeString(str, '+');
-
-    // default is unknown
-    Key k = Key::Unknown;
-    const auto itKey = KeyMapping.find(tokens.back());
-    if (itKey != KeyMapping.end()) {
-        k = itKey->second;
+    // "Keypad +" will tokenize into "Keypad " + ""
+    if (tokens.size() == 2 && tokens[0] == "Keypad " && tokens[1].empty()) {
+        tokens = { std::string("Keypad +") };
     }
 
+    std::vector<std::string> originalTokens = tokens;
+    for (std::string& t : tokens) {
+        t = ghoul::toUpperCase(t);
+    }
 
-    KeyModifier m = KeyModifier::NoModifier;
+    // default is unknown
+    Key key = Key::Unknown;
+    std::string keyName = tokens.back();
+    const std::string keyNameOriginal = originalTokens.back();
+    for (const KeyInfo& ki : KeyInfos) {
+        if (ki.identifier == keyName || ki.name == keyName ||
+            ki.identifier == keyNameOriginal || ki.name == keyNameOriginal)
+        {
+            key = ki.key;
+            break;
+        }
+    }
+    if (key == Key::Unknown) {
+        throw ghoul::RuntimeError(std::format("Could not find key for '{}'", keyName));
+    }
+
+    KeyModifier m = KeyModifier::None;
+
     std::for_each(
         tokens.begin(),
         tokens.end() - 1,
         [&m](const std::string& s) {
-            const auto itMod = KeyModifierMapping.find(s);
-            if (itMod != KeyModifierMapping.end()) {
-                m = static_cast<KeyModifier>(
-                    static_cast<std::underlying_type_t<KeyModifier>>(m) |
-                    static_cast<std::underlying_type_t<KeyModifier>>(itMod->second)
-                );
+            bool found = false;
+            for (const KeyModifierInfo& kmi : KeyModifierInfos) {
+                if (kmi.identifier == s || kmi.name == s) {
+                    m |= kmi.modifier;
+                    found = true;
+                    break;
+                }
             }
-            else {
-                LERROR(fmt::format("Unknown modifier key '{}'", s));
+            if (!found) {
+                throw ghoul::RuntimeError(std::format("Unknown modifier key '{}'", s));
             }
         }
     );
 
-    return { k, m };
+    return { key, m };
 }
 
-bool operator<(const KeyWithModifier& lhs, const KeyWithModifier& rhs) {
-    if (lhs.modifier == rhs.modifier) {
-        return lhs.key < rhs.key;
-    }
-    else {
-        return lhs.modifier < rhs.modifier;
-    }
-}
+// Returns the 'identifier' of the key (compared to the ghoul::to_string which returns the
+// 'name' of the key
+std::string keyToString(KeyWithModifier keyWithModifier) {
+    using namespace openspace;
 
-bool operator==(const KeyWithModifier& lhs, const KeyWithModifier& rhs) {
-    return (lhs.key == rhs.key) && (lhs.modifier == rhs.modifier);
+    std::string modifier;
+    if (keyWithModifier.modifier != KeyModifier::None) {
+        for (const openspace::KeyModifierInfo& kmi : openspace::KeyModifierInfos) {
+            // No need for an extra check for the empty modifier since that is mapped
+            // to 0, meaning that the `hasKeyModifier` will always fail for it since it
+            // checks internally against != 0
+
+            if (hasKeyModifier(keyWithModifier.modifier, kmi.modifier)) {
+                modifier += std::format("{}+", kmi.identifier);
+            }
+        }
+    }
+
+    std::string key;
+    for (const openspace::KeyInfo& ki : openspace::KeyInfos) {
+        if (ki.key == keyWithModifier.key) {
+            key = std::string(ki.identifier);
+            break;
+        }
+    }
+
+    // The modifier has a residual + at the end that we use here
+    return modifier + key;
 }
 
 } // namespace openspace
@@ -128,43 +120,48 @@ bool operator==(const KeyWithModifier& lhs, const KeyWithModifier& rhs) {
 namespace ghoul {
 
 template <>
-std::string to_string(const openspace::Key& key) {
-    for (const std::pair<const std::string, openspace::Key>& p : openspace::KeyMapping) {
-        if (p.second == key) {
-            return p.first;
+std::string to_string(const openspace::Key& value) {
+    for (const openspace::KeyInfo& ki : openspace::KeyInfos) {
+        if (ki.key == value) {
+            return std::string(ki.name);
         }
     }
+
     throw ghoul::MissingCaseException();
 }
 
 template <>
-std::string to_string(const openspace::KeyModifier& mod) {
+std::string to_string(const openspace::KeyModifier& value) {
     using namespace openspace;
 
-    if (mod == KeyModifier::NoModifier) {
+    if (value == KeyModifier::None) {
         return "";
     }
 
     std::string result;
-    using K = const std::string;
-    using V = openspace::KeyModifier;
-    for (const std::pair<K, V>& p : KeyModifierMapping) {
-        if (hasKeyModifier(mod, p.second)) {
-            result += p.first + "+";
+    for (const KeyModifierInfo& kmi : KeyModifierInfos) {
+        // No need for an extra check for the empty modifier since that is mapped to 0,
+        // meaning that the `hasKeyModifier` will always fail for it since it checks
+        // internally against != 0
+
+        if (hasKeyModifier(value, kmi.modifier)) {
+            result += std::format("{}+", kmi.name);
         }
+
     }
     // The last addition has added an additional '+' that we
     // should remove
-    return result.substr(0, result.size() - 1);
+    result.pop_back();
+    return result;
 }
 
 template <>
-std::string to_string(const openspace::KeyWithModifier& key) {
-    if (key.modifier == openspace::KeyModifier::NoModifier) {
-        return to_string(key.key);
+std::string to_string(const openspace::KeyWithModifier& value) {
+    if (value.modifier == openspace::KeyModifier::None) {
+        return to_string(value.key);
     }
     else {
-        return to_string(key.modifier) + "+" + to_string(key.key);
+        return std::format("{}+{}", to_string(value.modifier), to_string(value.key));
     }
 }
 

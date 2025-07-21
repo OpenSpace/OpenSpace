@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,11 +30,9 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/opengl/programobject.h>
-//#include <ostream>
-//#include <iostream>
 
 namespace {
-    constexpr const char* _loggerCat = "DebugRenderer";
+    constexpr std::string_view _loggerCat = "DebugRenderer";
 } // namespace
 
 namespace openspace {
@@ -42,7 +40,7 @@ namespace openspace {
 DebugRenderer* DebugRenderer::_reference = nullptr;
 
 DebugRenderer::DebugRenderer()  {
-    _programObject = global::renderEngine.buildRenderProgram(
+    _programObject = global::renderEngine->buildRenderProgram(
         "BasicDebugShader",
         absPath("${MODULE_DEBUGGING}/rendering/debugshader_vs.glsl"),
         absPath("${MODULE_DEBUGGING}/rendering/debugshader_fs.glsl")
@@ -54,8 +52,6 @@ DebugRenderer::DebugRenderer(std::unique_ptr<ghoul::opengl::ProgramObject> progr
 {
     // nothing to do
 }
-
-DebugRenderer::~DebugRenderer() { }
 
 const DebugRenderer& DebugRenderer::ref() {
     if (!_reference) {
@@ -70,32 +66,32 @@ const DebugRenderer& DebugRenderer::ref() {
 }
 
 void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum mode,
-                                   const glm::vec4& rgba) const
+                                   const glm::vec4& color) const
 {
     if (clippingSpacePoints.empty()) {
         return;
     }
 
     // Generate a vao, vertex array object (keeping track of pointers to vbo)
-    GLuint _vaoID;
+    GLuint _vaoID = 0;
     glGenVertexArrays(1, &_vaoID);
     ghoul_assert(_vaoID != 0, "Could not generate vertex arrays");
 
     // Generate a vbo, vertex buffer object (storeing actual data)
-    GLuint _vertexBufferID;
+    GLuint _vertexBufferID = 0;
     glGenBuffers(1, &_vertexBufferID);
     ghoul_assert(_vertexBufferID != 0, "Could not create vertex buffer");
 
     // Activate the shader program and set the uniform color within the shader
     _programObject->activate();
-    _programObject->setUniform("color", rgba);
+    _programObject->setUniform("color", color);
 
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
     glBufferData(
         GL_ARRAY_BUFFER,
         clippingSpacePoints.size() * sizeof(clippingSpacePoints[0]),
-        &clippingSpacePoints[0],
+        clippingSpacePoints.data(),
         GL_STATIC_DRAW);
 
 
@@ -226,25 +222,5 @@ void DebugRenderer::renderCameraFrustum(const RenderData& data, const Camera& ot
     renderNiceBox(clippingSpaceFrustumCorners, rgba);
     glEnable(GL_CULL_FACE);
 }
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-const DebugRenderer::Vertices DebugRenderer::verticesFor(
-                                        const globebrowsing::AABB3& screenSpaceAABB) const
-{
-    Vertices vertices(8);
-    for (size_t i = 0; i < 8; i++) {
-        const bool cornerIsRight = i % 2 == 0;
-        const bool cornerIsUp = i > 3;
-        const bool cornerIsFar = (i / 2) % 2 == 1;
-
-        const double x = cornerIsRight ? screenSpaceAABB.max.x : screenSpaceAABB.min.x;
-        const double y = cornerIsUp ? screenSpaceAABB.max.y : screenSpaceAABB.min.y;
-        const double z = cornerIsFar ? screenSpaceAABB.max.z : screenSpaceAABB.min.z;
-
-        vertices[i] = glm::vec4(x, y, z, 1);
-    }
-    return vertices;
-}
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 
 } // namespace openspace

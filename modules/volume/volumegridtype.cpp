@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,9 +26,9 @@
 
 namespace openspace::volume {
 
-InvalidGridTypeError::InvalidGridTypeError(std::string gt)
-    : RuntimeError("Invalid grid type: '" + gt + "'")
-    , gridType(std::move(gt))
+InvalidGridTypeError::InvalidGridTypeError(std::string gridType_)
+    : RuntimeError(std::format("Invalid grid type: '{}'", gridType_))
+    , gridType(std::move(gridType_))
 {}
 
 VolumeGridType parseGridType(const std::string& gridType) {

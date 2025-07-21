@@ -1,0 +1,34 @@
+local globe = asset.require("../../mercury")
+
+
+
+local Layer = {
+  Identifier = "Messenger_LOI_Utah",
+  Name = "Messenger LOI [Utah]",
+  Enabled = asset.enabled,
+  ZIndex = 10,
+  FilePath = asset.resource("messenger_loi_utah.wms")
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "Messenger LOI [Utah]",
+  Description = [[Mercury LOI layer for Mercury globe. This map is hosted on the OpenSpace
+    server in Utah]],
+  Author = "USGS",
+  URL = "https://astrogeology.usgs.gov/search/map/Mercury/Messenger/Global/Mercury_MESSENGER_MDIS_Basemap_LOI_Mosaic_Global_166m",
+  License = "NASA/PDS"
+}
+

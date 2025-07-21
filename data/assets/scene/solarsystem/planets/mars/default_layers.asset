@@ -1,0 +1,21 @@
+asset.require("./layers/base_layers", true)
+asset.require("./layers/utah_layers", true)
+asset.require("./layers/sweden_layers", false)
+asset.require("./layers/newyork_layers", false)
+
+
+
+asset.meta = {
+  Name = "Default Mars Layers",
+  Description = [[Default Mars layers are: Mars texture, CTX Blended, HiRISE,
+    HiRISE Local Set, MOC WA Color, Viking MDIM, MOLA Pseudo Color, MOLA HRSC,
+    Themis IR Day, Themis IR Night, CTX Mosaic, MDEM200M (3D), HiRISE Local Set DEM (3D),
+    Mola Elevation (3D), Tile Indicies, and Size Reference.
+
+
+    Layers loaded from all servers
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

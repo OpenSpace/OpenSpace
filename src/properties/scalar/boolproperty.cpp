@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,58 +25,32 @@
 #include <openspace/properties/scalar/boolproperty.h>
 
 #include <ghoul/lua/ghoul_lua.h>
-
-#include <limits>
-#include <sstream>
-
-namespace {
-
-bool fromLuaConversion(lua_State* state, bool& success) {
-    success = (lua_isboolean(state, -1) == 1);
-    if (success) {
-        return lua_toboolean(state, -1) == 1;
-    }
-    else {
-        return false;
-    }
-}
-
-bool toLuaConversion(lua_State* state, bool value) {
-    lua_pushboolean(state, value);
-    return true;
-}
-
-bool fromStringConversion(const std::string& val, bool& success) {
-    std::stringstream s(val);
-    bool v;
-    s >> v;
-    success = !s.fail();
-    if (success) {
-        return v;
-    }
-    else {
-        throw ghoul::RuntimeError("Conversion error for string: " + val);
-    }
-}
-
-bool toStringConversion(std::string& outValue, bool inValue) {
-    outValue = inValue ? "true" : "false";
-    return true;
-}
-
-} // namespace
+#include <ghoul/lua/lua_helper.h>
 
 namespace openspace::properties {
 
-REGISTER_TEMPLATEPROPERTY_SOURCE(
-    BoolProperty,
-    bool,
-    false,
-    fromLuaConversion,
-    toLuaConversion,
-    fromStringConversion,
-    toStringConversion,
-    LUA_TBOOLEAN
-)
+BoolProperty::BoolProperty(Property::PropertyInfo info, bool value)
+    : TemplateProperty<bool>(std::move(info), value)
+{}
+
+std::string_view BoolProperty::className() const {
+    return "BoolProperty";
+}
+
+ghoul::lua::LuaTypes BoolProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Boolean;
+}
+
+void BoolProperty::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
+bool BoolProperty::toValue(lua_State* state) const {
+    return ghoul::lua::value<bool>(state);
+}
+
+std::string BoolProperty::stringValue() const {
+    return _value ? "true" : "false";
+}
 
 } // namespace openspace::properties

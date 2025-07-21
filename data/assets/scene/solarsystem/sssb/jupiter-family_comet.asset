@@ -1,0 +1,57 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
+
+local sssb = asset.resource({
+  Name = "Small SolarSystem Body Data (Jupiter Family Comet)",
+  Type = "HttpSynchronization",
+  Identifier = "sssb_data_jupiter-family_comet",
+  Version = 4
+})
+
+
+local Object = {
+  Identifier = "sssb_jupiter-family_comet",
+  Parent = transforms.SunEclipJ2000.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = sssb .. "sssb_data_jupiter-family_comet.csv",
+    Format = "SBDB",
+    Segments = 200,
+    SegmentQuality = 10,
+    Color = { 0.2, 0.8, 0.2 },
+    TrailFade = 28,
+    PointSizeExponent = 10.5
+  },
+  GUI = {
+    Name = "Jupiter-family Comets",
+    Path = "/Solar System/Small Bodies",
+    Focusable = false,
+    Description = [[Comets with a Tisserand's parameter with respect to Jupiter of between
+      2 and 3.]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Object)
+end)
+
+asset.export(Object)
+
+
+
+asset.meta = {
+  Name = "Jupiter Family Comets",
+  Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
+    Jupiter-family group]],
+  Author = "JPL Small-Body Database hosted by California Institute of Technology",
+  URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
+  License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010.
+    All documents available from this server may be protected under the U.S. and
+    Foreign Copyright Laws]]
+}

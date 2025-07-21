@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,38 +22,41 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/ext/levmarq.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/tuioear.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/touchinteraction.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/touchmarker.h
+  ext/levmarq.h
+  include/directinputsolver.h
+  include/tuioear.h
+  include/touchinteraction.h
+  include/touchmarker.h
+  include/win32_touch.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/ext/levmarq.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/tuioear.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/touchinteraction.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/touchmarker.cpp
+  ext/levmarq.cpp
+  src/directinputsolver.cpp
+  src/tuioear.cpp
+  src/touchinteraction.cpp
+  src/touchmarker.cpp
+  src/win32_touch.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/marker_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/marker_vs.glsl
+  shaders/marker_fs.glsl
+  shaders/marker_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
-    "Touch"
-    touch_module
-    STATIC
-    ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+  "Touch"
+  touch_module
+  STATIC
+  ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
-include_external_library(${touch_module} libTUIO11 ${CMAKE_CURRENT_SOURCE_DIR}/ext)
-
-disable_external_warnings_for_file(${CMAKE_CURRENT_SOURCE_DIR}/ext/levmarq.cpp)
-
+add_subdirectory(ext SYSTEM)
+target_link_libraries(${touch_module} PRIVATE libTUIO11)
+set_target_properties(libTUIO11 PROPERTIES FOLDER "External")

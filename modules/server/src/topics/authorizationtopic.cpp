@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,29 +30,19 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "AuthorizationTopic";
+    constexpr std::string_view _loggerCat = "AuthorizationTopic";
 
-    /* https://httpstatuses.com/ */
-    enum class StatusCode : int {
-        OK = 200,
-        Accepted = 202,
-
-        BadRequest = 400,
-        Unauthorized = 401,
-        NotAcceptable = 406,
-
-        NotImplemented = 501
-    };
-
-
-
-    nlohmann::json message(const std::string& message, StatusCode statusCode) {
-        return { { "message", message }, { "code", static_cast<int>(statusCode) } };
-    }
-
+    constexpr std::string_view KeyStatus = "status";
+    constexpr std::string_view Authorized = "authorized";
+    constexpr std::string_view IncorrectKey = "incorrectKey";
+    constexpr std::string_view BadRequest = "badRequest";
 } // namespace
 
 namespace openspace {
+
+AuthorizationTopic::AuthorizationTopic(std::string password)
+    : _password(std::move(password))
+{}
 
 bool AuthorizationTopic::isDone() const {
     return _isAuthenticated;
@@ -60,31 +50,31 @@ bool AuthorizationTopic::isDone() const {
 
 void AuthorizationTopic::handleJson(const nlohmann::json& json) {
     if (isDone()) {
-        _connection->sendJson(message("Already authorized.", StatusCode::OK));
-    } else {
+        _connection->sendJson(wrappedPayload({ KeyStatus, Authorized }));
+    }
+    else {
         try {
-            auto providedKey = json.at("key").get<std::string>();
+            const std::string providedKey = json.at("key").get<std::string>();
             if (authorize(providedKey)) {
-                _connection->sendJson(message("Authorization OK.", StatusCode::Accepted));
                 _connection->setAuthorized(true);
-                LINFO("Client successfully authorized.");
-            } else {
-                _connection->sendJson(message("Invalid key", StatusCode::NotAcceptable));
+                _connection->sendJson(wrappedPayload({ KeyStatus, Authorized }));
+                LINFO("Client successfully authorized");
             }
-        } catch (const std::out_of_range&) {
-            _connection->sendJson(
-                message("Invalid request, key must be provided.", StatusCode::BadRequest)
-            );
-        } catch (const std::domain_error&) {
-            _connection->sendJson(
-                message("Invalid request, invalid key format.", StatusCode::BadRequest)
-            );
+            else {
+                _connection->sendJson(wrappedPayload({ KeyStatus, IncorrectKey }));
+            }
+        }
+        catch (const std::out_of_range&) {
+            _connection->sendJson(wrappedPayload({ KeyStatus, BadRequest }));
+        }
+        catch (const std::domain_error&) {
+            _connection->sendJson(wrappedPayload({ KeyStatus, BadRequest }));
         }
     }
 }
 
 bool AuthorizationTopic::authorize(const std::string& key) {
-    _isAuthenticated = (key == global::configuration.serverPasskey);
+    _isAuthenticated = (key == _password);
     return _isAuthenticated;
 }
 

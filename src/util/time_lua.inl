@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,611 +22,479 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/globals.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
+#include <openspace/util/timeconstants.h>
 #include <openspace/util/timeconversion.h>
+#include <ghoul/lua/lua_helper.h>
 
-#include <ghoul/fmt.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/misc.h>
-#include <cctype>
-#include <ctime>
-
-namespace openspace::luascriptfunctions {
+namespace {
 
 /**
- * \ingroup LuaScripts
- * setDeltaTime(number):
- * Sets the delta time by calling the Time::setDeltaTime method
+ * Set the amount of simulation time that happens in one second of real time.
+ *
+ * \param deltaTime The value to set the speed to, in seconds per real time second
  */
-int time_setDeltaTime(lua_State* L) {
-    const int nArguments = lua_gettop(L);
-    if (nArguments == 1) {
-        const bool isNumber = (lua_isnumber(L, 1) != 0);
-        if (!isNumber) {
-            lua_settop(L, 0);
-            const char* msg = lua_pushfstring(
-                L,
-                "%s expected, got %s",
-                lua_typename(L, LUA_TNUMBER),
-                luaL_typename(L, -1)
-            );
-            return luaL_error(L, "bad argument #%d (%s)", 2, msg);
-        }
-        const double newDeltaTime = lua_tonumber(L, 1);
-        global::timeManager.setDeltaTime(newDeltaTime);
-    } else {
-        lua_settop(L, 0);
-        const char* msg = lua_pushfstring(L,
-            "Bad number of arguments. Expected 1 or 2.");
-        return ghoul::lua::luaError(L, fmt::format("bad argument ({})", msg));
-    }
-
-    lua_settop(L, 0);
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
+[[codegen::luawrap]] void setDeltaTime(double deltaTime) {
+    openspace::global::timeManager->setDeltaTime(deltaTime);
 }
 
 /**
-* \ingroup LuaScripts
-* time_interpolateDeltaTime(number [, number]):
-* Interpolates the delta time by calling the Time::interpolateDeltaTime method
-* Same behaviour as setDeltaTime, but interpolates the delta time.
-* If interpolationDuration is not provided, the interpolation time will be based on the
-* `defaultDeltaTimeInterpolationDuration` property of the TimeManager.
-*/
-int time_interpolateDeltaTime(lua_State* L) {
-    const int nArguments = lua_gettop(L);
-    if (nArguments == 2) {
-        const bool deltaIsNumber = (lua_isnumber(L, 1) != 0);
-        if (!deltaIsNumber) {
-            lua_settop(L, 0);
-            const char* msg = lua_pushfstring(
-                L,
-                "%s expected, got %s",
-                lua_typename(L, LUA_TNUMBER),
-                luaL_typename(L, -1)
-            );
-            return luaL_error(L, "bad argument #%d (%s)", 2, msg);
-        }
-
-        const bool durationIsNumber = (lua_isnumber(L, 2) != 0);
-        if (!durationIsNumber) {
-            lua_settop(L, 0);
-            const char* msg = lua_pushfstring(
-                L,
-                "%s expected, got %s",
-                lua_typename(L, LUA_TNUMBER),
-                luaL_typename(L, -1)
-            );
-            return luaL_error(L, "bad argument #%d (%s)", 2, msg);
-        }
-
-        const double interpolationDuration = lua_tonumber(L, 2);
-        const double newDeltaTime = lua_tonumber(L, 1);
-        global::timeManager.interpolateDeltaTime(newDeltaTime, interpolationDuration);
-    }
-    else if (nArguments == 1) {
-        const bool isNumber = (lua_isnumber(L, 1) != 0);
-        if (!isNumber) {
-            lua_settop(L, 0);
-            const char* msg = lua_pushfstring(
-                L,
-                "%s expected, got %s",
-                lua_typename(L, LUA_TNUMBER),
-                luaL_typename(L, -1)
-            );
-            return luaL_error(L, "bad argument #%d (%s)", 2, msg);
-        }
-        const double newDeltaTime = lua_tonumber(L, 1);
-        global::timeManager.interpolateDeltaTime(
-            newDeltaTime,
-            global::timeManager.defaultDeltaTimeInterpolationDuration()
-        );
-    }
-    else {
-        lua_settop(L, 0);
-        const char* msg = lua_pushfstring(L,
-            "Bad number of arguments. Expected 1 or 2.");
-        return ghoul::lua::luaError(L, fmt::format("bad argument ({})", msg));
-    }
-
-    lua_settop(L, 0);
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-
-
-/**
- * \ingroup LuaScripts
- * deltaTime():
- * Returns the delta time by calling the Time::deltaTime method
+ * Set the list of discrete delta time steps for the simulation speed that can be quickly
+ * jumped between. The list will be sorted to be in increasing order. A negative verison
+ * of each specified time step will be added per default as well.
+ *
+ * \param deltaTime The list of delta times, given in seconds per real time second.
+ *                  Should only include positive values.
  */
-int time_deltaTime(lua_State* L) {
-    lua_pushnumber(L, global::timeManager.deltaTime());
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-    return 1;
+[[codegen::luawrap]] void setDeltaTimeSteps(std::vector<double> deltaTime) {
+    openspace::global::timeManager->setDeltaTimeSteps(deltaTime);
 }
 
 /**
- * \ingroup LuaScripts
- * togglePause():
- * Toggles pause, i.e. setting the delta time to 0 and restoring it afterwards
+ * Immediately set the simulation speed to the first delta time step in the list that is
+ * larger than the current choice of simulation speed, if any.
  */
-int time_togglePause(lua_State* L) {
-    const int nArguments = lua_gettop(L);
-
-    if (nArguments == 0) {
-        global::timeManager.setPause(!global::timeManager.isPaused());
-    } else {
-        lua_settop(L, 0);
-        return luaL_error(
-            L,
-            "bad number of arguments, expected 0, got %i",
-            nArguments
-        );
-    }
-
-    lua_settop(L, 0);
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
+[[codegen::luawrap]] void setNextDeltaTimeStep() {
+    openspace::global::timeManager->setNextDeltaTimeStep();
 }
 
 /**
-* \ingroup LuaScripts
-* interpolateTogglePause([interpolationDuration]):
-* Same behaviour as togglePause, but with interpolation.
-* If no interpolation duration is provided, the interpolation time will be based on the
-* `defaultPauseInterpolationDuration` and `defaultUnpauseInterpolationDuration` properties
-* of the TimeManager.
-*/
-int time_interpolateTogglePause(lua_State* L) {
-    const int nArguments = lua_gettop(L);
-
-    if (nArguments == 1) {
-        const bool isNumber = (lua_isnumber(L, 1) != 0);
-        if (!isNumber) {
-            const char* msg = lua_pushfstring(
-                L,
-                "%s expected, got %s",
-                lua_typename(L, LUA_TNUMBER),
-                luaL_typename(L, -1)
-            );
-            return luaL_error(L, "bad argument #%d (%s)", 1, msg);
-        }
-
-        const double interpolationDuration = lua_tonumber(L, 1);
-
-        global::timeManager.interpolatePause(
-            !global::timeManager.isPaused(),
-            interpolationDuration
-        );
-    }
-    else if (nArguments == 0) {
-        const bool pause = !global::timeManager.isPaused();
-        global::timeManager.interpolatePause(pause,
-            pause ?
-            global::timeManager.defaultPauseInterpolationDuration() :
-            global::timeManager.defaultUnpauseInterpolationDuration()
-        );
-    } else {
-        lua_settop(L, 0);
-        return luaL_error(
-            L,
-            "bad number of arguments, expected 0 or 1, got %i",
-            nArguments
-        );
-    }
-
-    lua_settop(L, 0);
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-
-
-/**
- * \ingroup LuaScripts
- * togglePause():
- * Toggles a pause function i.e. setting the delta time to 0 and restoring it afterwards
+ * Immediately set the simulation speed to the first delta time step in the list that is
+ * smaller than the current choice of simulation speed, if any.
  */
-int time_setPause(lua_State* L) {
-    const int nArguments = lua_gettop(L);
-
-    if (nArguments == 1) {
-        const bool pause = lua_toboolean(L, 1) == 1;
-        global::timeManager.setPause(pause);
-    } else {
-        lua_settop(L, 0);
-        return luaL_error(
-            L,
-            "bad number of arguments, expected 1, got %i",
-            nArguments
-        );
-    }
-
-    lua_settop(L, 0);
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
+[[codegen::luawrap]] void setPreviousDeltaTimeStep() {
+    openspace::global::timeManager->setPreviousDeltaTimeStep();
 }
 
 /**
-* \ingroup LuaScripts
-* interpolateTogglePause(bool [, interpolationDuration]):
-* Same behaviour as setPause, but with interpolation.
-* If no interpolation duration is provided, the interpolation time will be based on the
-* `defaultPauseInterpolationDuration` and `defaultUnpauseInterpolationDuration` properties
-* of the TimeManager.
-*/
-int time_interpolatePause(lua_State* L) {
-    const int nArguments = lua_gettop(L);
-
-    if (nArguments == 2) {
-        const bool isNumber = (lua_isnumber(L, 2) != 0);
-        if (!isNumber) {
-            lua_settop(L, 0);
-            const char* msg = lua_pushfstring(
-                L,
-                "%s expected, got %s",
-                lua_typename(L, LUA_TNUMBER),
-                luaL_typename(L, -1)
-            );
-            return luaL_error(L, "bad argument #%d (%s)", 2, msg);
-        }
-        const double interpolationDuration = lua_tonumber(L, 2);
-        const bool pause = lua_toboolean(L, 1) == 1;
-        global::timeManager.interpolatePause(pause, interpolationDuration);
-    }
-    else if (nArguments == 1) {
-        const bool pause = lua_toboolean(L, 1) == 1;
-        global::timeManager.interpolatePause(pause,
-            pause ?
-            global::timeManager.defaultPauseInterpolationDuration() :
-            global::timeManager.defaultUnpauseInterpolationDuration()
-        );
-    } else {
-        lua_settop(L, 0);
-        return luaL_error(
-            L,
-            "bad number of arguments, expected 1 or 2, got %i",
-            nArguments
-        );
-    }
-
-    lua_settop(L, 0);
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-
-
-/**
- * \ingroup LuaScripts
- * setTime({number, string}):
- * Sets the simulation time to the passed value. If the parameter is a number, it is
- * interpreted as the number of seconds past the J2000 epoch and the
- * Time::setTime(double) method is called. If the parameter is a string, it is
- * interpreted as a structured date string and the Time::setTime(std::string) method
- * is called
+ * Interpolate the simulation speed to the first delta time step in the list that is
+ * larger than the current simulation speed, if any.
+ *
+ * \param interpolationDuration The number of seconds that the interpolation should
+ *                              be done over. If excluded, the time is decided based
+ *                              on the default value specified in the TimeManager.
  */
-int time_setTime(lua_State* L) {
-    const bool isFunction = (lua_isfunction(L, -1) != 0);
-    if (isFunction) {
-        // If the top of the stack is a function, it is ourself
-        const char* msg = lua_pushfstring(L, "method called without argument");
-        return ghoul::lua::luaError(L, fmt::format("bad argument #1 ({})", msg));
-    }
+[[codegen::luawrap]] void interpolateNextDeltaTimeStep(
+                                              std::optional<double> interpolationDuration)
+{
+    using namespace openspace;
 
-    const bool isNumber = (lua_isnumber(L, 1) != 0);
-    const bool isString = (lua_isstring(L, 1) != 0);
-    if (!isNumber && !isString) {
-        const char* msg = lua_pushfstring(
-            L,
-            "%s or %s expected, got %s",
-            lua_typename(L, LUA_TNUMBER),
-            lua_typename(L, LUA_TSTRING),
-            luaL_typename(L, -1)
-        );
-        return ghoul::lua::luaError(L, fmt::format("bad argument #1 ({})", msg));
-    }
-
-    const int nArguments = lua_gettop(L);
-    if (nArguments == 1) {
-        if (isNumber) {
-            double value = lua_tonumber(L, 1);
-            global::timeManager.setTimeNextFrame(value);
-            return 0;
-        }
-        if (isString) {
-            const char* time = lua_tostring(L, 1);
-            global::timeManager.setTimeNextFrame(Time::convertTime(time));
-            return 0;
-        }
-        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    } else {
-        return luaL_error(
-            L,
-            "bad number of arguments, expected 1 or 2, got %i",
-            nArguments
-        );
-    }
-    return 0;
-}
-
-
-/**
-* \ingroup LuaScripts
-* interpolateTime({number, string} [, interpolationDuration]):
-* Interpolates the simulation time to the passed value.
-* Same behaviour as setTime, but interpolates time.
-* If interpolationDuration is not provided, the interpolation time will be based on the
-* `defaultTimeInterpolationDuration` property of the TimeManager.
-*/
-int time_interpolateTime(lua_State* L) {
-    const bool isFunction = (lua_isfunction(L, -1) != 0);
-    if (isFunction) {
-        // If the top of the stack is a function, it is ourself
-        const char* msg = lua_pushfstring(L, "method called without argument");
-        return ghoul::lua::luaError(L, fmt::format("bad argument #1 ({})", msg));
-    }
-
-    const bool isNumber = (lua_isnumber(L, 1) != 0);
-    const bool isString = (lua_isstring(L, 1) != 0);
-    if (!isNumber && !isString) {
-        const char* msg = lua_pushfstring(
-            L,
-            "%s or %s expected, got %s",
-            lua_typename(L, LUA_TNUMBER),
-            lua_typename(L, LUA_TSTRING),
-            luaL_typename(L, -1)
-        );
-        return ghoul::lua::luaError(L, fmt::format("bad argument #1 ({})", msg));
-    }
-
-    if (lua_gettop(L) == 1) {
-        if (isNumber) {
-            double value = lua_tonumber(L, 1);
-            global::timeManager.interpolateTime(
-                value,
-                global::timeManager.defaultTimeInterpolationDuration()
-            );
-            return 0;
-        }
-        if (isString) {
-            const char* time = lua_tostring(L, 1);
-            global::timeManager.interpolateTime(
-                Time::convertTime(time),
-                global::timeManager.defaultTimeInterpolationDuration()
-            );
-            return 0;
-        }
-        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    }
-    else {
-        int nArguments = lua_gettop(L);
-        if (nArguments != 2) {
-            return luaL_error(
-                L,
-                "bad number of arguments, expected 1 or 2, got %i",
-                nArguments
-            );
-        }
-
-        double targetTime;
-        if (lua_isnumber(L, 1)) {
-            targetTime = lua_tonumber(L, 1);
-        }
-        else {
-            targetTime = Time::convertTime(lua_tostring(L, 1));
-        }
-
-        const double duration = lua_tonumber(L, 2);
-        if (duration > 0) {
-            global::timeManager.interpolateTime(targetTime, duration);
-        }
-        else {
-            global::timeManager.setTimeNextFrame(targetTime);
-        }
-    }
-    return 0;
-}
-
-
-/**
-* \ingroup LuaScripts
-* interpolateTimeRelative(number [, interpolationDuration]):
-* Interpolates the simulation time relatively, based on the specified number of seconds.
-* If interpolationDuration is not provided, the interpolation time will be based on the
-* `defaultTimeInterpolationDuration` property of the TimeManager.
-*/
-int time_interpolateTimeRelative(lua_State* L) {
-    const bool isFunction = (lua_isfunction(L, -1) != 0);
-    if (isFunction) {
-        // If the top of the stack is a function, it is ourself
-        const char* msg = lua_pushfstring(L, "method called without argument");
-        return ghoul::lua::luaError(L, fmt::format("bad argument #1 ({})", msg));
-    }
-
-    const bool isNumber = (lua_isnumber(L, 1) != 0);
-    if (!isNumber) {
-        const char* msg = lua_pushfstring(
-            L,
-            "%s or expected, got %s",
-            lua_typename(L, LUA_TNUMBER),
-            luaL_typename(L, -1)
-        );
-        return ghoul::lua::luaError(L, fmt::format("bad argument #1 ({})", msg));
-    }
-
-    if (lua_gettop(L) == 1 && isNumber) {
-        double delta = lua_tonumber(L, 1);
-        global::timeManager.interpolateTimeRelative(
-            delta,
-            global::timeManager.defaultTimeInterpolationDuration()
-        );
-        return 0;
-
-        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    }
-    else {
-        int nArguments = lua_gettop(L);
-        if (nArguments != 2) {
-            return luaL_error(
-                L,
-                "bad number of arguments, expected 1 or 2, got %i",
-                nArguments
-            );
-        }
-
-        double delta;
-        delta = lua_tonumber(L, 1);
-
-        const double duration = lua_tonumber(L, 2);
-        if (duration > 0) {
-            global::timeManager.interpolateTimeRelative(delta, duration);
-        }
-        else {
-            global::timeManager.setTimeNextFrame(
-                global::timeManager.time().j2000Seconds() + delta
-            );
-        }
-    }
-    return 0;
-}
-
-/**
- * \ingroup LuaScripts
- * currentTime():
- * Returns the current simulation time as the number of seconds past the J2000 epoch.
- * It is returned by calling the Time::currentTime method.
- */
-int time_currentTime(lua_State* L) {
-    lua_pushnumber(L, global::timeManager.time().j2000Seconds());
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-    return 1;
-}
-
-/**
- * \ingroup LuaScripts
- * UTC():
- * Returns the current simulation time as a structured ISO 8601 string using the UTC
- * timezone by calling the Time::UTC method
- */
-int time_currentTimeUTC(lua_State* L) {
-    lua_pushstring(L, global::timeManager.time().UTC().c_str());
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-    return 1;
-}
-
-/**
- * \ingroup LuaScripts
- * currentWallTime():
- * Returns the current wallclock time as a structured ISO 8601 string in the UTC timezone.
- */
-int time_currentWallTime(lua_State* L) {
-    std::time_t t = std::time(nullptr);
-    std::tm* utcTime = std::gmtime(&t);
-    ghoul_assert(utcTime, "Conversion to UTC failed");
-
-    std::string time = fmt::format(
-        "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}",
-        utcTime->tm_year + 1900,
-        utcTime->tm_mon + 1,
-        utcTime->tm_mday,
-        utcTime->tm_hour,
-        utcTime->tm_min,
-        utcTime->tm_sec
+    double interp = interpolationDuration.value_or(
+        global::timeManager->defaultDeltaTimeInterpolationDuration()
     );
-    lua_pushstring(L, time.c_str());
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-    return 1;
+    global::timeManager->interpolateNextDeltaTimeStep(interp);
 }
 
-int time_advancedTime(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::time_advanceTime");
+/**
+ * Interpolate the simulation speed to the first delta time step in the list that is
+ * smaller than the current simulation speed, if any.
+ *
+ * \param interpolationDuration The number of seconds that the interpolation should
+ *                              be done over. If excluded, the time is decided based
+ *                              on the default value specified in the TimeManager.
+ */
+[[codegen::luawrap]] void interpolatePreviousDeltaTimeStep(
+                                              std::optional<double> interpolationDuration)
+{
+    using namespace openspace;
 
-    double j2000Seconds = -1.0;
-    Time t;
-    bool usesISO = false;
-    if (lua_type(L, 1) == LUA_TSTRING) {
-        j2000Seconds = Time::convertTime(ghoul::lua::value<std::string>(L, 1));
-        usesISO = true;
-    }
-    else if (lua_type(L, 1) == LUA_TNUMBER) {
-        j2000Seconds = ghoul::lua::value<double>(L, 1);
-        usesISO = false;
-    }
+    double interp = interpolationDuration.value_or(
+        global::timeManager->defaultDeltaTimeInterpolationDuration()
+    );
+    global::timeManager->interpolatePreviousDeltaTimeStep(interp);
+}
 
-    double dt = 0.0;
-    if (lua_type(L, 2) == LUA_TNUMBER) {
-        dt = ghoul::lua::value<double>(L, 2);
+/**
+ * Set the amount of simulation time that happens in one second of real time, by smoothly
+ * interpolating to that value.
+ *
+ * \param deltaTime The value to set the speed to, in seconds per real time second
+ * \param interpolationDuration The number of seconds that the interpolation should
+ *                              be done over. If excluded, the time is decided based
+ *                              on the default value for delta time interpolation
+ *                              specified in the TimeManager.
+ */
+[[codegen::luawrap]] void interpolateDeltaTime(double deltaTime,
+                                              std::optional<double> interpolationDuration)
+{
+    using namespace openspace;
+
+    double interp = interpolationDuration.value_or(
+        global::timeManager->defaultDeltaTimeInterpolationDuration()
+    );
+
+    global::timeManager->interpolateDeltaTime(deltaTime, interp);
+}
+
+/**
+ * Returns the amount of simulated time that passes in one second of real time.
+ *
+ * \return The simulated delta time, in seconds per real time second
+ */
+[[codegen::luawrap]] double deltaTime() {
+    return openspace::global::timeManager->deltaTime();
+}
+
+/**
+ * Toggle the pause function, i.e. if the simulation is paused it will resume, and
+ * otherwise it will be paused. Note that to pause means temporarily setting the delta
+ * time to 0, and unpausing means restoring it to whatever delta time value is set.
+ */
+[[codegen::luawrap]] void togglePause() {
+    using namespace openspace;
+    global::timeManager->setPause(!global::timeManager->isPaused());
+}
+
+/**
+ * Toggle the pause function, i.e. if the simulation is paused it will resume, and
+ * otherwise it will be paused. This is done by smoothly interpolating from the
+ * current delta time value to 0 (pause), or from 0 to the current delta time value
+ * (unpause).
+ *
+ * \param interpolationDuration The number of seconds that the interpolation should be
+ *                              done over. If excluded, the time is decided based on the
+ *                              default value for pause/unpause specified in the
+ *                              TimeManager.
+ */
+[[codegen::luawrap]] void interpolateTogglePause(
+                                              std::optional<double> interpolationDuration)
+{
+    using namespace openspace;
+
+    double interp = interpolationDuration.value_or(
+        global::timeManager->isPaused() ?
+        global::timeManager->defaultUnpauseInterpolationDuration() :
+        global::timeManager->defaultPauseInterpolationDuration()
+    );
+
+    global::timeManager->interpolatePause(!global::timeManager->isPaused(), interp);
+}
+
+/**
+ * This allows for a keypress (via keybinding) to have dual functionality. In normal
+ * operational mode it will behave just like time_interpolateTogglePause, but during
+ * playback of a session recording it will pause the playback without manipulating the
+ * delta time.
+ */
+[[codegen::luawrap]] void pauseToggleViaKeyboard() {
+    using namespace openspace;
+
+    OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
+    if (m == OpenSpaceEngine::Mode::SessionRecordingPlayback) {
+        bool isPlaybackPaused = global::sessionRecordingHandler->isPlaybackPaused();
+        global::sessionRecordingHandler->setPlaybackPause(!isPlaybackPaused);
     }
     else {
-        std::string modifier = ghoul::lua::value<std::string>(L, 2);
-        if (modifier.empty()) {
-            return ghoul::lua::luaError(L, "Modifier string must not be empty");
-        }
-        ghoul::trimWhitespace(modifier);
-        bool isNegative = false;
-        if (modifier[0] == '-') {
-            isNegative = true;
-            modifier = modifier.substr(1);
-        }
-
-        auto it = std::find_if(
-            modifier.begin(),
-            modifier.end(),
-            [](unsigned char c) {
-                const bool digit = std::isdigit(c) != 0;
-                const bool isDot = c == '.';
-                return !digit && !isDot;
-            }
+        const bool isPaused = !global::timeManager->isPaused();
+        global::timeManager->interpolatePause(
+            isPaused,
+            isPaused ?
+                global::timeManager->defaultPauseInterpolationDuration() :
+                global::timeManager->defaultUnpauseInterpolationDuration()
         );
-
-        double value = std::stod(std::string(modifier.begin(), it));
-
-        std::string unitName = std::string(it, modifier.end());
-
-        TimeUnit unit = TimeUnit::Second;
-        if (unitName == "s") {
-            unit = TimeUnit::Second;
-        }
-        else if (unitName == "m") {
-            unit = TimeUnit::Minute;
-        }
-        else if (unitName == "h") {
-            unit = TimeUnit::Hour;
-        }
-        else if (unitName == "d") {
-            unit = TimeUnit::Day;
-        }
-        else if (unitName == "M") {
-            unit = TimeUnit::Month;
-        }
-        else if (unitName == "y") {
-            unit = TimeUnit::Year;
-        }
-        else {
-            return ghoul::lua::luaError(
-                L,
-                fmt::format("Unknown unit '{}'", unitName)
-            );
-        }
-
-        dt = convertTime(value, unit, TimeUnit::Second);
-        if (isNegative) {
-            dt *= -1.0;
-        }
     }
-
-    lua_pop(L, 2);
-
-    if (usesISO) {
-        ghoul::lua::push(L, Time(j2000Seconds + dt).ISO8601());
-    }
-    else {
-        ghoul::lua::push(L, j2000Seconds + dt);
-    }
-    return 1;
 }
 
-} // namespace openspace::luascriptfunctions
+/**
+ * Set whether the simulation should be paused or not. Note that to pause means
+ * temporarily setting the delta time to 0, and unpausing means restoring it to whatever
+ * delta time value is set.
+ *
+ * \param isPaused True if the simulation should be paused, and false otherwise
+ */
+[[codegen::luawrap]] void setPause(bool isPaused) {
+    openspace::global::timeManager->setPause(isPaused);
+}
+
+/**
+ * Same behaviour as `setPause`, but with interpolation. That is, if it should be paused,
+ * the delta time will be interpolated to 0, and if unpausing, the delta time will be
+ * interpolated to whatever delta time value is set.
+ *
+ * \param isPaused True if the simulation should be paused, and false otherwise
+ * \param interpolationDuration The number of seconds that the interpolation should be
+ *                              done over. If excluded, the time is decided based on the
+ *                              default value for pause/unpause specified in the
+ *                              TimeManager.
+ */
+[[codegen::luawrap]] void interpolatePause(bool isPaused,
+                                           std::optional<double> interpolationDuration)
+{
+    using namespace openspace;
+
+    double interp = interpolationDuration.value_or(
+        isPaused ?
+            global::timeManager->defaultPauseInterpolationDuration() :
+            global::timeManager->defaultUnpauseInterpolationDuration()
+    );
+
+    global::timeManager->interpolatePause(isPaused, interp);
+}
+
+/**
+ * Returns whether the simulation time is currently paused or is progressing.
+ *
+ * \return True if the simulation is paused, and false otherwise
+ */
+[[codegen::luawrap]] bool isPaused() {
+    return openspace::global::timeManager->isPaused();
+}
+
+/**
+ * Set the current simulation time to the specified value. The time can be specified
+ * either a number of seconds past the J2000 epoch, or as a ISO 8601 string.
+ *
+ * Note that providing time zone using the Z format is not supported. UTC is assumed.
+ *
+ * \param time The time to set. If the parameter is a number, the value is the number of
+ *             seconds past the J2000 epoch. If it is a string, it has to be a valid ISO
+ *             8601-like date string of the format YYYY-MM-DDTHH:MN:SS.
+ */
+[[codegen::luawrap]] void setTime(std::variant<double, std::string> time) {
+    using namespace openspace;
+
+    double t;
+    if (std::holds_alternative<std::string>(time)) {
+        t = Time::convertTime(std::get<std::string>(time));
+    }
+    else {
+        t = std::get<double>(time);
+    }
+
+    global::timeManager->setTimeNextFrame(Time(t));
+}
+
+ /**
+  * Set the current simulation time to the specified value, using interpolation. The time
+  * can be specified either a number of seconds past the J2000 epoch, or as a ISO 8601
+  * string.
+  *
+  * Note that providing time zone using the Z format is not supported. UTC is assumed.
+  *
+  * \param time The time to set. If the parameter is a number, the value is the number of
+  *             seconds past the J2000 epoch. If it is a string, it has to be a valid ISO
+  *             8601-like date string of the format YYYY-MM-DDTHH:MN:SS.
+  * \param interpolationDuration The number of seconds that the interpolation should
+  *                              be done over. If excluded, the time is decided based
+  *                              on the default value for time interpolation specified in
+  *                              the TimeManager.
+  */
+[[codegen::luawrap]] void interpolateTime(std::variant<std::string, double> time,
+                                          std::optional<double> interpolationDutation)
+{
+    using namespace openspace;
+
+    double targetTime =
+        std::holds_alternative<std::string>(time) ?
+        Time::convertTime(std::get<std::string>(time)) :
+        std::get<double>(time);
+
+
+    double interp = interpolationDutation.value_or(
+        global::timeManager->defaultTimeInterpolationDuration()
+    );
+    if (interp > 0) {
+        global::timeManager->interpolateTime(targetTime, interp);
+    }
+    else {
+        global::timeManager->setTimeNextFrame(Time(targetTime));
+    }
+}
+
+ /**
+  * Increment the current simulation time by the specified number of seconds, using
+  * interpolation.
+  *
+  * \param delta The number of seconds to increase the current simulation time by
+  * \param interpolationDuration The number of seconds that the interpolation should
+  *                              be done over. If excluded, the time is decided based
+  *                              on the default value for time interpolation specified in
+  *                              the TimeManager.
+  */
+[[codegen::luawrap]] void interpolateTimeRelative(double delta,
+                                              std::optional<double> interpolationDuration)
+{
+    using namespace openspace;
+
+    double interp = interpolationDuration.value_or(
+        global::timeManager->defaultTimeInterpolationDuration()
+    );
+
+    if (interp > 0) {
+        global::timeManager->interpolateTimeRelative(delta, interp);
+    }
+    else {
+        global::timeManager->setTimeNextFrame(
+            Time(global::timeManager->time().j2000Seconds() + delta)
+        );
+    }
+}
+
+/**
+ * Returns the current time as the number of seconds since the J2000 epoch.
+ *
+ * \return The current time, as the number of seconds since the J2000 epoch
+ */
+[[codegen::luawrap]] double currentTime() {
+    return openspace::global::timeManager->time().j2000Seconds();
+}
+
+/**
+ * Returns the current time as an ISO 8601 date string (YYYY-MM-DDTHH:MN:SS).
+ *
+ * \return The current time, as an ISO 8601 date string
+ */
+[[codegen::luawrap("UTC")]] std::string currentTimeUTC() {
+    return std::string(openspace::global::timeManager->time().ISO8601());
+}
+
+
+/**
+ * Returns the current time as an date string of the form
+ * (YYYY MON DDTHR:MN:SC.### ::RND) as returned by SPICE.
+ *
+ * \return The current time, in the format used by SPICE (YYYY MON DDTHR:MN:SC.### ::RND)
+ */
+[[codegen::luawrap("SPICE")]] std::string currentTimeSpice() {
+    return std::string(openspace::global::timeManager->time().UTC());
+}
+
+/**
+ * Returns the current wall time as an ISO 8601 date string (YYYY-MM-DDTHH-MN-SS) in the
+ * UTC timezone.
+ *
+ * \return The current wall time, in the UTC time zone, as an ISO 8601 date string
+ */
+[[codegen::luawrap]] std::string currentWallTime() {
+    return openspace::Time::currentWallTime();
+}
+
+/**
+ * Returns the current application time as the number of seconds since the OpenSpace
+ * application started.
+ *
+ * \return The number of seconds since OpenSpace started
+ */
+[[codegen::luawrap]] double currentApplicationTime() {
+    return openspace::global::windowDelegate->applicationTime();
+}
+
+/**
+ * Modify a specified timestamp by a given delta time. That is, advance the value either
+ * forwards or backwards in time.
+ *
+ * The returned value will be of the same type as the first argument. That is, either a
+ * number of seconds past the J2000 epoch, or an ISO 8601 date string.
+ *
+ * \param base The timestamp to alter, either given as an ISO 8601 date string or a
+ *             number of seconds past the J2000 epoch.
+ * \param change The amount of time to add to the specified timestamp. Can be given
+ *               either in a number of seconds (including negative), or as a string of
+ *               the form [-]XX(s,m,h,d,M,y] with (s)econds, (m)inutes, (h)ours, (d)ays,
+ *               (M)onths, and (y)ears as units and an optional - sign to move backwards
+ *               in time.
+ *
+ * \return The updated timestamp
+ */
+[[codegen::luawrap]] std::variant<std::string, double> advancedTime(
+                                                   std::variant<std::string, double> base,
+                                                 std::variant<std::string, double> change)
+{
+    std::string b;
+    if (std::holds_alternative<std::string>(base)) {
+        b = std::get<std::string>(base);
+    }
+    else {
+        b = openspace::Time(std::get<double>(base)).ISO8601();
+    }
+
+    std::string c;
+    if (std::holds_alternative<std::string>(change)) {
+        c = std::get<std::string>(change);
+    }
+    else {
+        double v = std::get<double>(change);
+        c = std::format("{}s", v);
+    }
+
+    std::string res = openspace::Time::advancedTime(std::move(b), std::move(c));
+
+    if (std::holds_alternative<std::string>(base)) {
+        return res;
+    }
+    else {
+        return openspace::Time::convertTime(res);
+    }
+}
+
+/**
+ * Convert the given time from either a J2000 seconds number to an ISO 8601 timestamp,
+ * or vice versa.
+ *
+ * If the given time is a timestamp, the function returns a double precision value
+ * representing the ephemeris version of that time; that is, the number of TDB seconds
+ * past the J2000 epoch.
+ *
+ * If the given time is a J2000 seconds value, the function returns a ISO 8601 timestamp.
+ *
+ * \param time The timestamp to convert, either given as an ISO 8601 date string or a
+ *             number of seconds past the J2000 epoch.
+ *
+ * \return The converted timestamp
+ */
+[[codegen::luawrap]] std::variant<std::string, double> convertTime(
+                                                   std::variant<std::string, double> time)
+{
+    using namespace openspace;
+
+    // Convert from timestamp to J2000 seconds
+    if (std::holds_alternative<std::string>(time)) {
+        return Time::convertTime(std::get<std::string>(time));
+    }
+    // Convert from J2000 seconds to ISO 8601 timestamp
+    else {
+        return std::string(Time(std::get<double>(time)).ISO8601());
+    }
+}
+
+/**
+ * Returns the number of seconds between the provided start time and end time.
+ *
+ * If the end time is before the start time, the return value is negative. If the start
+ * time is equal to the end time, the return value is 0.
+ *
+ * \param start The start time for the computation, given as an ISO 8601 date string
+ * \param end The end time for the computation, given as an ISO 8601 date string
+ *
+ * \return The time between the start time and end time
+ */
+[[codegen::luawrap]] double duration(std::string start, std::string end) {
+    using namespace openspace;
+
+    const double tStart = Time::convertTime(start);
+    const double tEnd = Time::convertTime(end);
+    return tEnd - tStart;
+}
+
+/**
+ * Returns the number of seconds per day, where a day in this case is exactly 24 hours.
+ * The total number of seconds is equal to 86400.
+ *
+ * \return The number of seconds in a day
+ */
+[[codegen::luawrap]] double secondsPerDay() {
+    return openspace::timeconstants::SecondsPerDay;
+}
+
+/**
+ * Returns the number of seconds in a Gregorian year, which is equal to 31556952.
+ *
+ * \return The number of seconds in a Gregorian year
+ */
+[[codegen::luawrap]] double secondsPerYear() {
+    // We could use a call to SPICE here, but the value is a constant anyway
+    return openspace::timeconstants::SecondsPerYear;
+}
+
+#include "time_lua_codegen.cpp"
+
+} // namespace

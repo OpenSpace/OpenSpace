@@ -1,0 +1,66 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Geomagnetic Tracklines"
+local Identifier = "noaa-sos-land-geomag_tracklines"
+local Description = [[Earth is like a giant magnet with a North and South Pole. However,
+the magnetic North and South Pole are not aligned with the Geographic North and South
+Pole. The Geographic North Pole is defined by the latitude 90° N and is the axis of the
+Earth's rotation. The Magnetic North Pole is where the Earth's magnetic field points
+vertically downward. The Earth creates its own magnetic field from the electric currents
+created in the liquid iron-nickel core]]
+local URL = "https://sos.noaa.gov/catalog/datasets/geomagnetic-tracklines/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "4096.png",
+  Description = Description
+}
+
+local Legend = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "legend.png",
+  FaceCamera = false,
+  Scale = 0.2,
+  CartesianPosition = { 0.75, 0.0, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Legend)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Legend)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(Legend)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

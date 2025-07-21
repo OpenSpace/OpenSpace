@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,20 +27,16 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/vector/vec2property.h>
+#include <openspace/rendering/transferfunction.h>
 #include <ghoul/opengl/uniformcache.h>
 
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
-class PowerScaledSphere;
+class Sphere;
 struct RenderData;
 struct UpdateData;
 
@@ -48,7 +44,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableSphere : public Renderable {
 public:
-    RenderableSphere(const ghoul::Dictionary& dictionary);
+    explicit RenderableSphere(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -60,28 +56,35 @@ public:
 
     static documentation::Documentation Documentation();
 
-private:
-    void loadTexture();
-
-    properties::StringProperty _texturePath;
-    properties::OptionProperty _orientation;
+protected:
+    virtual void bindTexture() = 0;
+    virtual void unbindTexture();
 
     properties::FloatProperty _size;
     properties::IntProperty _segments;
 
+    properties::OptionProperty _orientation;
+    properties::BoolProperty _mirrorTexture;
+
     properties::BoolProperty _disableFadeInDistance;
+    properties::FloatProperty _fadeInThreshold;
+    properties::FloatProperty _fadeOutThreshold;
+    properties::OptionProperty _blendingFuncOption;
+    properties::BoolProperty _disableDepth;
 
-    float _fadeOutThreshold = -1.0;
-    float _fadeInThreshold = 0.0;
-
+    glm::vec2 _dataMinMaxValues;
     ghoul::opengl::ProgramObject* _shader = nullptr;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    properties::BoolProperty _useColorMap;
 
-    std::unique_ptr<PowerScaledSphere> _sphere;
-
-    UniformCache(opacity, viewProjection, modelTransform, texture) _uniformCache;
-
+private:
+    std::unique_ptr<Sphere> _sphere;
     bool _sphereIsDirty = false;
+
+    properties::StringProperty _colorMap;
+    std::unique_ptr<TransferFunction> _transferFunction;
+
+    UniformCache(opacity, modelViewProjection, modelViewTransform, modelViewRotation,
+        colorTexture, mirrorTexture) _uniformCache;
 };
 
 } // namespace openspace

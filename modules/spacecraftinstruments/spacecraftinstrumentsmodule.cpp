@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,15 +31,11 @@
 #include <modules/spacecraftinstruments/rendering/renderableplaneprojection.h>
 #include <modules/spacecraftinstruments/rendering/renderableplanetprojection.h>
 #include <modules/spacecraftinstruments/rendering/renderableshadowcylinder.h>
-#include <modules/spacecraftinstruments/util/decoder.h>
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <modules/spacecraftinstruments/util/instrumentdecoder.h>
 #include <modules/spacecraftinstruments/util/targetdecoder.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 
@@ -48,29 +44,30 @@ ghoul::opengl::ProgramObjectManager SpacecraftInstrumentsModule::ProgramObjectMa
 SpacecraftInstrumentsModule::SpacecraftInstrumentsModule() : OpenSpaceModule(Name) {}
 
 void SpacecraftInstrumentsModule::internalInitialize(const ghoul::Dictionary&) {
+    ZoneScoped;
+
     ImageSequencer::initialize();
 
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Decoder>>(),
-        "Decoder"
-    );
+    FactoryManager::ref().addFactory<Decoder>("Decoder");
 
-    auto fDashboard = FactoryManager::ref().factory<DashboardItem>();
+    ghoul::TemplateFactory<DashboardItem>* fDashboard =
+        FactoryManager::ref().factory<DashboardItem>();
     ghoul_assert(fDashboard, "Dashboard factory was not created");
 
     fDashboard->registerClass<DashboardItemInstruments>("DashboardItemInstruments");
 
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 
-    fRenderable->registerClass<RenderableShadowCylinder>("RenderableShadowCylinder");
     fRenderable->registerClass<RenderableCrawlingLine>("RenderableCrawlingLine");
     fRenderable->registerClass<RenderableFov>("RenderableFov");
+    fRenderable->registerClass<RenderableModelProjection>("RenderableModelProjection");
     fRenderable->registerClass<RenderablePlaneProjection>("RenderablePlaneProjection");
     fRenderable->registerClass<RenderablePlanetProjection>("RenderablePlanetProjection");
-    fRenderable->registerClass<RenderableModelProjection>("RenderableModelProjection");
+    fRenderable->registerClass<RenderableShadowCylinder>("RenderableShadowCylinder");
 
-    auto fDecoder = FactoryManager::ref().factory<Decoder>();
+    ghoul::TemplateFactory<Decoder>* fDecoder = FactoryManager::ref().factory<Decoder>();
     fDecoder->registerClass<InstrumentDecoder>("Instrument");
     fDecoder->registerClass<TargetDecoder>("Target");
 }
@@ -87,11 +84,41 @@ std::vector<documentation::Documentation>
 SpacecraftInstrumentsModule::documentations() const
 {
     return {
+        DashboardItemInstruments::Documentation(),
+        RenderableCrawlingLine::Documentation(),
         RenderableFov::Documentation(),
         RenderableModelProjection::Documentation(),
+        RenderablePlaneProjection::Documentation(),
         RenderablePlanetProjection::Documentation(),
+        RenderableShadowCylinder::Documentation(),
         ProjectionComponent::Documentation()
     };
+}
+
+bool SpacecraftInstrumentsModule::addFrame(std::string body, std::string frame) {
+    if (body.empty() || frame.empty()) {
+        return false;
+    }
+    else {
+        _frameByBody.emplace_back(std::move(body), std::move(frame));
+        return true;
+    }
+}
+
+std::string SpacecraftInstrumentsModule::frameFromBody(const std::string& body) {
+    for (const std::pair<std::string, std::string>& pair : _frameByBody) {
+        if (pair.first == body) {
+            return pair.second;
+        }
+    }
+
+    constexpr std::string_view unionPrefix = "IAU_";
+    if (body.find(unionPrefix) == std::string::npos) {
+        return std::format("{}{}", unionPrefix, body);
+    }
+    else {
+        return body;
+    }
 }
 
 } // namespace openspace

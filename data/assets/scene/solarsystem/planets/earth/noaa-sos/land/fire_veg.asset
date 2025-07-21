@@ -1,0 +1,83 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Fire Observations and Vegetation - 2002 - 2011"
+local Identifier = "noaa-sos-land-fire_veg"
+local Description = [[This dataset leads viewers on a narrated global tour of fire
+  detections beginning in July 2002 and ending July 2011. The dataset also includes
+  vegetation and snow cover data to show how fires respond to seasonal changes. The tour
+  begins in Australia in 2002 by showing a network of massive grassland fires spreading
+  across interior Australia as well as the greener Eucalyptus forests in the northern and
+  eastern part of the continent. The tour then shifts to Asia where large numbers of
+  agricultural fires are visible first in China in June 2004, then across a huge swath of
+  Europe and western Russia in August, and then across India and Southeast Asia through
+  the early part of 2005]]
+local URL = "https://sos.noaa.gov/catalog/datasets/fire-observations-and-vegetation-2002-2011/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "ImageSequenceTileProvider",
+  FolderPath = syncedDirectory .. "2048",
+  Description = Description
+}
+
+local ColorbarFire = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "fire_colorbar.png",
+  FaceCamera = false,
+  CartesianPosition = { -0.5, -0.5, -2.0 }
+}
+
+local ColorbarVeg = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "veg_colorbar.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.5, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(ColorbarFire)
+  openspace.addScreenSpaceRenderable(ColorbarVeg)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(ColorbarVeg)
+  openspace.removeScreenSpaceRenderable(ColorbarFire)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(ColorbarFire)
+asset.export(ColorbarVeg)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

@@ -1,0 +1,14 @@
+width 10
+lower 0.0
+upper 1.0
+
+mappingkey  0.0     17   17    56   255
+mappingkey  0.083   47   38    142  255
+mappingkey  0.166   80   39    189  255
+mappingkey  0.332   139  49    139  255
+mappingkey  0.415   221  60    68   255
+mappingkey  0.498   243  95    20   255
+mappingkey  0.664   230  147   8    255
+mappingkey  0.830   230  195   34   255
+mappingkey  0.915   230  226   118  255
+mappingkey  1.0     255  255   255  255

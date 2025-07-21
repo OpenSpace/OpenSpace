@@ -1,0 +1,102 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Land Cover (map with slideshow of labels)"
+local Identifier = "noaa-sos-land-land_cover-slideshow"
+local Description = [[The Moderate Resolution Imaging Spectroradiometer (MODIS)
+instrument on NASA's Terra satellite provides scientists with a new view of the Earth.
+Using data collected by MODIS, researchers at Boston University were able to create these
+land cover maps. Understanding the land cover of Earth aids policy makers involved in
+natural resource management. The maps are also critical for scientists as they study
+changes in the Earth system and as they model the Earth system. For example, in order to
+calculate the carbon budget for the Earth system, scientists can use these maps to
+determine the extent of vegetation covering the land surface that is absorbing carbon
+dioxide. Each of the varying land types have different impacts on the Earth system. Snow
+and ice cover cool the planet by reflecting sunlight back to space, forests absorb huge
+amounts of carbon dioxide, and croplands and urban areas reflect the human impact on the
+Earth]]
+local URL = "https://sos.noaa.gov/catalog/datasets/land-cover-map-with-slideshow-of-labels/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local labelsDestination = syncedDirectory .. "labels/"
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "2048.jpg",
+  Description = Description
+}
+
+function create_label(number)
+  return {
+    Identifier = Identifier .. "-" .. number,
+    Name = Name .. " (" .. number .. ")",
+    Enabled = asset.enabled,
+    Type = "ScreenSpaceImageLocal",
+    TexturePath = labelsDestination .. "lcc_" .. number .. ".jpg",
+    FaceCamera = false,
+    CartesianPosition = { 0.75, 0.0, -2.0 }
+  }
+end
+
+local label_01 = create_label("01")
+local label_02 = create_label("02")
+local label_03 = create_label("03")
+local label_04 = create_label("04")
+local label_05 = create_label("05")
+local label_06 = create_label("06")
+local label_07 = create_label("07")
+local label_08 = create_label("08")
+local label_09 = create_label("09")
+local label_10 = create_label("10")
+local label_11 = create_label("11")
+local label_12 = create_label("12")
+local label_13 = create_label("13")
+local label_14 = create_label("14")
+local label_15 = create_label("15")
+local label_16 = create_label("16")
+
+local labels = {
+  label_01, label_02, label_03, label_04, label_05, label_06, label_07, label_08,
+  label_09, label_10, label_11, label_12, label_13, label_14, label_15, label_16
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+
+  for _,v in ipairs(labels) do
+    openspace.addScreenSpaceRenderable(v)
+  end
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer.Identifier)
+  for _,v in ipairs(labels) do
+    openspace.removeScreenSpaceRenderable(v)
+  end
+end)
+
+asset.export(Layer)
+for _,v in ipairs(labels) do
+  asset.export(v)
+end
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

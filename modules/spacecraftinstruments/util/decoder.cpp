@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,11 +33,11 @@ namespace openspace {
 
 std::unique_ptr<Decoder> Decoder::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary,
-                                                                  const std::string& type)
+                                                                    std::string_view type)
 {
     ghoul::TemplateFactory<Decoder>* factory = FactoryManager::ref().factory<Decoder>();
-    std::unique_ptr<Decoder> result = factory->create(type, dictionary);
-    return result;
+    Decoder* result = factory->create(type, dictionary);
+    return std::unique_ptr<Decoder>(result);
 }
 
 } // namespace openspace

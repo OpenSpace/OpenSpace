@@ -1,0 +1,89 @@
+-- Variables to store the state of the joystick between frames
+Joystick = {}
+Joystick.State = {}
+Joystick.State.IsInRollMode = false
+Joystick.State.Axis = {}
+
+local function bindLocalRoll(name, axis)
+  return [[
+    -- We only want to store the current state in the first mode that is enabled, otherwise we will overwrite the backup
+    if not Joystick.State.IsInRollMode then
+      -- Save current axis state
+      Joystick.State.Axis = openspace.navigation.joystickAxis("]] .. name .. "\", " .. axis .. [[)
+    end
+
+    -- Set new axis state
+    openspace.navigation.bindJoystickAxis("]] .. name .. "\", " .. axis .. [[, "LocalRoll", Joystick.State.Axis.Inverted, Joystick.State.Axis.JoystickType, Joystick.State.Axis.Sticky, Joystick.State.Axis.Flip, Joystick.State.Axis.Sensitivity)
+    Joystick.State.IsInRollMode = true
+  ]]
+end
+
+local function bindGlobalRoll(name, axis)
+  return [[
+    -- We only want to store the current state in the first mode that is enabled, otherwise we will overwrite the backup
+    if not Joystick.State.IsInRollMode then
+      -- Save current axis state
+      Joystick.State.Axis = openspace.navigation.joystickAxis("]] .. name .. "\", " .. axis .. [[)
+    end
+
+    -- Set new axis state
+    openspace.navigation.bindJoystickAxis("]] .. name .. "\", " .. axis .. [[, "GlobalRoll", Joystick.State.Axis.Inverted, Joystick.State.Axis.JoystickType, Joystick.State.Axis.Sticky, Joystick.State.Axis.Flip, Joystick.State.Axis.Sensitivity)
+    Joystick.State.IsInRollMode = true
+  ]]
+end
+
+local function permaBindLocalRoll(name, axis)
+  return [[
+    -- Save current axis state
+    Joystick.State.Axis = openspace.navigation.joystickAxis("]] .. name .. "\", " .. axis .. [[)
+
+    -- Set new axis state
+    openspace.navigation.bindJoystickAxis("]] .. name .. "\", " .. axis .. [[, "LocalRoll", Joystick.State.Axis.Inverted, Joystick.State.Axis.JoystickType, Joystick.State.Axis.Sticky, Joystick.State.Axis.Flip, Joystick.State.Axis.Sensitivity)
+  ]]
+end
+
+local function permaBindGlobalRoll(name, axis)
+  return [[
+    -- Save current axis state
+    Joystick.State.Axis = openspace.navigation.joystickAxis("]] .. name .. "\", " .. axis .. [[)
+
+    -- Set new axis state
+    openspace.navigation.bindJoystickAxis("]] .. name .. "\", " .. axis .. [[, "GlobalRoll", Joystick.State.Axis.Inverted, Joystick.State.Axis.JoystickType, Joystick.State.Axis.Sticky, Joystick.State.Axis.Flip, Joystick.State.Axis.Sensitivity)
+  ]]
+end
+
+local function unbindRoll(name, axis)
+  return [[
+    -- Reset previous state
+    if (Joystick.State.Axis.Type == "Property") then
+      openspace.navigation.bindJoystickAxisProperty("]] .. name .. "\", " .. axis .. [[, Joystick.State.Axis.PropertyUri, Joystick.State.Axis.MinValue, Joystick.State.Axis.MaxValue, Joystick.State.Axis.Inverted, Joystick.State.Axis.Flip, Joystick.State.Axis.IsRemote)
+    else
+      openspace.navigation.bindJoystickAxis("]] .. name .. "\", " .. axis .. [[, Joystick.State.Axis.Type, Joystick.State.Axis.Inverted, Joystick.State.Axis.JoystickType, Joystick.State.Axis.Sticky, Joystick.State.Axis.Flip, Joystick.State.Axis.Sensitivity)
+    end
+  ]]
+end
+
+
+-- Function that will find the first connected joystick with a name that matches one of
+-- the given possible names
+local function findJoystick(possibleNames)
+  -- Will only catch the joysticks that are connected before start up
+  local joysticks = openspace.navigation.listAllJoysticks()
+
+  for _, joyStickName in ipairs(joysticks) do
+    for _, name in ipairs(possibleNames) do
+      if joyStickName == name then
+        return name
+      end
+    end
+  end
+
+  return nil
+end
+
+asset.export("bindLocalRoll", bindLocalRoll)
+asset.export("bindGlobalRoll", bindGlobalRoll)
+asset.export("permaBindLocalRoll", permaBindLocalRoll)
+asset.export("permaBindGlobalRoll", permaBindGlobalRoll)
+asset.export("unbindRoll", unbindRoll)
+asset.export("findJoystick", findJoystick)

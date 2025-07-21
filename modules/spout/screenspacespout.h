@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,11 +29,7 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 
-#include <modules/spout/spoutlibrary.h>
-
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/triggerproperty.h>
+#include <modules/spout/spoutwrapper.h>
 
 namespace openspace {
 
@@ -41,9 +37,9 @@ namespace documentation { struct Documentation; }
 
 class ScreenSpaceSpout : public ScreenSpaceRenderable {
 public:
-    ScreenSpaceSpout(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceSpout(const ghoul::Dictionary& dictionary);
 
-    bool deinitializeGL() override;
+    void deinitializeGL() override;
 
     bool isReady() const override;
 
@@ -55,16 +51,7 @@ private:
     void bindTexture() override;
     void unbindTexture() override;
 
-    properties::StringProperty _spoutName;
-    properties::OptionProperty _spoutSelection;
-    properties::TriggerProperty _updateSelection;
-
-    SPOUTHANDLE _receiver;
-
-    bool _isSpoutDirty = true;
-    char _currentSenderName[256] = {};
-    bool _isFirstUpdate = true;
-    bool _isErrorMessageDisplayed = false;
+    spout::SpoutReceiverPropertyProxy _spoutReceiver;
 };
 
 } // namespace openspace

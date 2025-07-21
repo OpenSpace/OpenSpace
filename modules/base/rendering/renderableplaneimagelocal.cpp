@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,64 +32,100 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/crc32.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/texture.h>
 #include <fstream>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
-        "This value specifies an image that is loaded from disk and is used as a texture "
-        "that is applied to this plane. This image has to be square."
+        "A path to an image file to use as a texture for the plane.",
+        openspace::properties::Property::Visibility::User
     };
+
+    // A RenderablePlaneImageLocal creates a textured 3D plane, where the texture is
+    // provided by a local file on disk.
+    struct [[codegen::Dictionary(RenderablePlaneImageLocal)]] Parameters {
+        // [[codegen::verbatim(TextureInfo.description)]]
+        std::string texture;
+
+        // If this value is set to true, the image for this plane will not be loaded at
+        // startup but rather when image is shown for the first time. Additionally, if the
+        // plane is hidden, the image will automatically be unloaded.
+        std::optional<bool> lazyLoading;
+    };
+#include "renderableplaneimagelocal_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderablePlaneImageLocal::Documentation() {
-    using namespace documentation;
-    return {
-        "Renderable Plane Image Local",
+    return codegen::doc<Parameters>(
         "base_renderable_plane_image_local",
-        {
-            {
-                TextureInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                TextureInfo.description,
-            }
-        }
-    };
+        RenderablePlane::Documentation()
+    );
 }
 
 RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _texturePath(TextureInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderablePlaneImageLocal"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
-    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
+    _texturePath = absPath(p.texture).string();
+    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
 
     addProperty(_texturePath);
-    _texturePath.onChange([this]() {loadTexture(); });
-    _textureFile->setCallback(
-        [this](const ghoul::filesystem::File&) { _textureIsDirty = true; }
-    );
-}
+    _texturePath.onChange([this]() { loadTexture(); });
+    _textureFile->setCallback([this]() { _textureIsDirty = true; });
 
-bool RenderablePlaneImageLocal::isReady() const {
-    return RenderablePlane::isReady() && (_texture != nullptr);
+    _isLoadingLazily = p.lazyLoading.value_or(_isLoadingLazily);
+    if (_isLoadingLazily) {
+        _enabled.onChange([this]() {
+            if (!_enabled) {
+                BaseModule::TextureManager.release(_texture);
+                _texture = nullptr;
+            }
+            if (_enabled) {
+                _textureIsDirty = true;
+            }
+        });
+    }
+
+    _autoScale.onChange([this]() {
+        if (!_autoScale) {
+            return;
+        }
+
+        // Shape the plane based on the aspect ration of the image
+        const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
+        if (_textureDimensions != textureDim) {
+            const float aspectRatio = textureDim.x / textureDim.y;
+            const float planeAspectRatio = _size.value().x / _size.value().y;
+
+            if (std::abs(planeAspectRatio - aspectRatio) >
+                std::numeric_limits<float>::epsilon())
+            {
+                const glm::vec2 newSize =
+                    aspectRatio > 0.f ?
+                    glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
+                    glm::vec2(_size.value().x, _size.value().y * aspectRatio);
+                _size = newSize;
+            }
+
+            _textureDimensions = textureDim;
+        }
+    });
 }
 
 void RenderablePlaneImageLocal::initializeGL() {
     RenderablePlane::initializeGL();
 
-    loadTexture();
+    if (!_isLoadingLazily) {
+        loadTexture();
+    }
 }
 
 void RenderablePlaneImageLocal::deinitializeGL() {
@@ -104,33 +140,37 @@ void RenderablePlaneImageLocal::bindTexture() {
 }
 
 void RenderablePlaneImageLocal::update(const UpdateData& data) {
+    ZoneScoped;
+
     RenderablePlane::update(data);
 
-    if (_textureIsDirty) {
+    if (_textureIsDirty) [[unlikely]] {
         loadTexture();
         _textureIsDirty = false;
     }
 }
 
 void RenderablePlaneImageLocal::loadTexture() {
+    ZoneScoped;
+
     if (!_texturePath.value().empty()) {
         ghoul::opengl::Texture* t = _texture;
 
-        unsigned int hash = ghoul::hashCRC32File(_texturePath);
+        const unsigned int hash = ghoul::hashCRC32File(_texturePath);
 
         _texture = BaseModule::TextureManager.request(
             std::to_string(hash),
             [path = _texturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
                 std::unique_ptr<ghoul::opengl::Texture> texture =
-                    ghoul::io::TextureReader::ref().loadTexture(absPath(path));
+                    ghoul::io::TextureReader::ref().loadTexture(absPath(path), 2);
 
                 LDEBUGC(
                     "RenderablePlaneImageLocal",
-                    fmt::format("Loaded texture from '{}'", absPath(path))
+                    std::format("Loaded texture from '{}'", absPath(path))
                 );
                 texture->uploadTexture();
-
                 texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+                texture->purgeFromRAM();
 
                 return texture;
             }
@@ -138,10 +178,31 @@ void RenderablePlaneImageLocal::loadTexture() {
 
         BaseModule::TextureManager.release(t);
 
-        _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
-        _textureFile->setCallback(
-            [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
-        );
+        _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
+        _textureFile->setCallback([this]() { _textureIsDirty = true; });
+
+        if (!_autoScale) {
+            return;
+        }
+
+        // Shape the plane based on the aspect ration of the image
+        const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
+        if (_textureDimensions != textureDim) {
+            const float aspectRatio = textureDim.x / textureDim.y;
+            const float planeAspectRatio = _size.value().x / _size.value().y;
+
+            if (std::abs(planeAspectRatio - aspectRatio) >
+                std::numeric_limits<float>::epsilon())
+            {
+                const glm::vec2 newSize =
+                    aspectRatio > 0.f ?
+                    glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
+                    glm::vec2(_size.value().x, _size.value().y * aspectRatio);
+                _size = newSize;
+            }
+
+            _textureDimensions = textureDim;
+        }
     }
 }
 

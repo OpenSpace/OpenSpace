@@ -1,31 +1,35 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local transforms = asset.require('./transforms')
-local NewHorizonsModel = asset.require('./model')
+local NewHorizonsModel = asset.require("./model")
 
 
 
-local textures = NewHorizonsModel.NewHorizonsTextures
-local models = NewHorizonsModel.NewHorizonsModels
+local models = asset.resource({
+  Name = "New Horizons Model",
+  Type = "HttpSynchronization",
+  Identifier = "newhorizons_model",
+  Version = 2
+})
 
 local Labels = {
-    Identifier = "Labels",
-    Parent = NewHorizonsModel.NewHorizons.Identifier,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "NEW HORIZONS",
-        Geometry = {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/Labels.obj"
-        }, 
-        ColorTexture =  textures .. "/labels.png",
-        AmbientIntensity = 0.8
-    },
-    GUI = {
-        Path = "/Solar System/Missions/New Horizons"
-    }
+  Identifier = "Labels",
+  Parent = NewHorizonsModel.NewHorizons.Identifier,
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "Labels.obj",
+    AmbientIntensity = 0.8
+  },
+  GUI = {
+    Path = "/Solar System/Missions/New Horizons",
+    Focusable = false
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Labels)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Labels })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Labels)
+end)
+
+asset.export(Labels)

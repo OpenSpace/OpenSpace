@@ -1,0 +1,7 @@
+width 7
+lower 0.0
+upper 1.0
+
+mappingkey  0.0     45   45    45   255
+mappingkey  0.5     45   45    45   255
+mappingkey  1.0     45   45    45   255

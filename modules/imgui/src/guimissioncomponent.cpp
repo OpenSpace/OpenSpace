@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,13 +24,11 @@
 
 #include <modules/imgui/include/guimissioncomponent.h>
 
-#include <modules/imgui/include/gui.h>
+#include <modules/imgui/imguimodule.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
-#include <openspace/util/timerange.h>
-#include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 
 namespace {
@@ -39,13 +37,13 @@ namespace {
     void renderMission(const openspace::Mission& mission) {
         // The hashname is necessary since ImGui computes a hash based off the name of the
         // elements.  This does not play well with using %s as the name
-        std::string missionHashname = "##" + mission.name();
+        const std::string missionHashname = "##" + mission.name();
 
 
-        const double currentTime = openspace::global::timeManager.time().j2000Seconds();
-        openspace::MissionPhase::Trace t = mission.phaseTrace(currentTime, 0);
+        const double currentTime = openspace::global::timeManager->time().j2000Seconds();
+        const openspace::MissionPhase::Trace t = mission.phaseTrace(currentTime, 0);
 
-        int treeOption = t.empty() ? 0 : ImGuiTreeNodeFlags_DefaultOpen;
+        const int treeOption = t.empty() ? 0 : ImGuiTreeNodeFlags_DefaultOpen;
         if (ImGui::TreeNodeEx(
                 ("%s" + missionHashname).c_str(),
                 treeOption,
@@ -57,13 +55,13 @@ namespace {
                 ImGui::Text("%s", mission.description().c_str());
             }
 
-            openspace::TimeRange range = mission.timeRange();
-            openspace::Time startTime = openspace::Time(range.start);
-            openspace::Time endTime  = openspace::Time(range.end);
+            const openspace::TimeRange range = mission.timeRange();
+            const openspace::Time startTime = openspace::Time(range.start);
+            const openspace::Time endTime  = openspace::Time(range.end);
 
-            openspace::gui::CaptionText("Mission Progress");
+            openspace::CaptionText("Mission Progress");
 
-            ImGui::Text("%s", startTime.UTC().c_str());
+            ImGui::Text("%s", std::string(startTime.UTC()).c_str());
             ImGui::SameLine();
             float v = static_cast<float>(currentTime);
             const float s = static_cast<float>(startTime.j2000Seconds());
@@ -74,12 +72,12 @@ namespace {
                 &v,
                 s,
                 e,
-                openspace::global::timeManager.time().UTC().c_str()
+                std::string(openspace::global::timeManager->time().UTC()).c_str()
             );
             ImGui::SameLine();
-            ImGui::Text("%s", endTime.UTC().c_str());
+            ImGui::Text("%s", std::string(endTime.UTC()).c_str());
 
-            openspace::gui::CaptionText("Phases");
+            openspace::CaptionText("Phases");
 
             for (const openspace::Mission& m : mission.phases()) {
                 renderMission(m);
@@ -98,21 +96,26 @@ GuiMissionComponent::GuiMissionComponent()
 {}
 
 void GuiMissionComponent::render() {
-    if (!global::missionManager.hasCurrentMission()) {
-        return;
-    }
+
 
     ImGui::SetNextWindowCollapsed(_isCollapsed);
     bool v = _isEnabled;
-    ImGui::Begin(guiName().c_str(), &v, Size, 0.75f);
+    ImGui::SetNextWindowSize(Size, ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowBgAlpha(0.75f);
+    ImGui::Begin(guiName().c_str(), &v);
     _isEnabled = v;
 
     _isCollapsed = ImGui::IsWindowCollapsed();
 
-    const Mission& currentMission = global::missionManager.currentMission();
-    renderMission(currentMission);
+    if (global::missionManager->hasCurrentMission()) {
+        const Mission& currentMission = global::missionManager->currentMission();
+        renderMission(currentMission);
+    }
+    else {
+        ImGui::Text("%s", "No mission loaded");
+    }
 
     ImGui::End();
 }
 
-} // namespace openspace gui
+} // namespace openspace::gui

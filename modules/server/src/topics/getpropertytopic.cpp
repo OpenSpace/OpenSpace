@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,9 +28,8 @@
 #include <modules/server/include/jsonconverters.h>
 #include <modules/volume/transferfunctionhandler.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/navigationhandler.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/luaconsole.h>
@@ -42,29 +41,33 @@
 using nlohmann::json;
 
 namespace {
-const char* _loggerCat = "GetPropertyTopic";
-const char* AllPropertiesValue = "__allProperties";
-const char* AllNodesValue = "__allNodes";
-const char* AllScreenSpaceRenderablesValue = "__screenSpaceRenderables";
-const char* PropertyKey = "property";
-const char* RootPropertyOwner = "__rootOwner";
-}
+    constexpr std::string_view _loggerCat = "GetPropertyTopic";
+    constexpr std::string_view AllPropertiesValue = "__allProperties";
+    constexpr std::string_view AllNodesValue = "__allNodes";
+    constexpr std::string_view AllScreenSpaceRenderablesValue =
+        "__screenSpaceRenderables";
+    constexpr std::string_view RootPropertyOwner = "__rootOwner";
+} // namespace
 
 namespace openspace {
 
 void GetPropertyTopic::handleJson(const nlohmann::json& json) {
-    std::string requestedKey = json.at(PropertyKey).get<std::string>();
+    ZoneScoped;
+
+    const std::string requestedKey = json.at("property").get<std::string>();
+    ZoneText(requestedKey.c_str(), requestedKey.size());
     LDEBUG("Getting property '" + requestedKey + "'...");
     nlohmann::json response;
     if (requestedKey == AllPropertiesValue) {
         response = allProperties();
     }
     else if (requestedKey == AllNodesValue) {
-        response = wrappedPayload(sceneGraph()->allSceneGraphNodes());
+        const std::vector<SceneGraphNode*>& nodes = sceneGraph()->allSceneGraphNodes();
+        response = wrappedPayload(nodes);
     }
     else if (requestedKey == AllScreenSpaceRenderablesValue) {
         response = wrappedPayload({
-            { "value", global::renderEngine.screenSpaceRenderables() }
+            { "value", global::renderEngine->screenSpaceRenderables() }
         });
     }
     else if (requestedKey == RootPropertyOwner) {
@@ -81,15 +84,14 @@ bool GetPropertyTopic::isDone() const {
 }
 
 json GetPropertyTopic::allProperties() {
-    json payload {
+    const json payload {
         {
             "value",
             {
                 global::renderEngine,
                 global::luaConsole,
                 global::parallelPeer,
-                global::navigationHandler,
-                global::virtualPropertyManager,
+                global::navigationHandler
             }
         }
     };
@@ -101,8 +103,12 @@ json GetPropertyTopic::propertyFromKey(const std::string& key) {
     if (prop) {
         return wrappedPayload(prop);
     }
+    properties::PropertyOwner* node = propertyOwner(key);
+    if (node) {
+        return wrappedPayload(node);
+    }
 
-    return wrappedError(fmt::format("Property '{}' not found", key), 404);
+    return wrappedError(std::format("Property '{}' not found", key), 404);
 }
 
 } // namespace openspace

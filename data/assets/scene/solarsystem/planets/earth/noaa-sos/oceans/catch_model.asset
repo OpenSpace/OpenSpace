@@ -1,0 +1,70 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Fisheries Catch Model - 2005 vs 2050"
+local Identifier = "noaa-sos-oceans-catch_model"
+local Description = [[Climate change may pose a significant threat to fisheries
+resources globally. This dataset shows percent change in global fisheries catch projected
+to occur by 2050 due to climate change. Comparison is made with fisheries catch levels
+reported in 2005. This study suggests that the distribution of major fish stocks will
+shift because of climate change as ocean temperature changes. Areas in orange experience
+reduced fisheries catch while areas in blue experience higher fisheries catch. The
+general pattern is a poleward shift in potential fisheries catches - that is fish
+distributions will shift to higher latitude areas (towards poles) and cooler waters as
+ocean temperatures increase. The study also predicts species extinction to occur in areas
+where species are most sensitive to temperature changes, resulting in reduced fisheries
+catch in these areas]]
+local URL = "https://sos.noaa.gov/catalog/datasets/fisheries-catch-model-2005-vs-2050/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "4096.png",
+  Description = Description
+}
+
+local Colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar-catch.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(Colorbar)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

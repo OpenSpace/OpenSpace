@@ -1,0 +1,32 @@
+local globe = asset.require("../../earth")
+
+
+
+local Layer ={
+  Identifier = "Size_Reference",
+  Name = "Size Reference",
+  Enabled = asset.enabled,
+  Type = "SizeReferenceTileProvider",
+  Radii = globe.Earth.Renderable.Radii
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "Overlays", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "Overlays", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "Earth Size Reference",
+  Description = "Size reference layer for Earth globe",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,0 +1,33 @@
+local globe = asset.require("../../mercury")
+
+
+
+local Layer = {
+  Identifier = "Messenger_Mosaic2_Sweden",
+  Name = "Messenger Mosaic2 [Sweden]",
+  Enabled = asset.enabled,
+  ZIndex = 20,
+  FilePath = asset.resource("messenger_mosaic2_sweden.wms")
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "Messenger Mosaic2 [Sweden]",
+  Description = [[Mercury Messenger Mosaic2 layer for Mercury globe. This map is hosted on
+    the OpenSpace server in Sweden]],
+  Author = "USGS",
+  URL = "",
+  License = "NASA/PDS"
+}

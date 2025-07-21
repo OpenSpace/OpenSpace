@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,61 +26,49 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo SpacingInfo = {
         "Spacing",
         "Spacing",
         "This value determines the spacing (in pixels) that this item represents. The "
-        "default value is 15."
+        "default value is 15.",
+        openspace::properties::Property::Visibility::User
     };
+
+    // This `DashboardItem` adds a variable amount of spacing between two other
+    // `DashboardItem`s.
+    struct [[codegen::Dictionary(DashboardItemSpacing)]] Parameters {
+        // [[codegen::verbatim(SpacingInfo.description)]]
+        std::optional<float> spacing;
+    };
+#include "dashboarditemspacing_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItemSpacing::Documentation() {
-    using namespace documentation;
-    return {
-        "DashboardItem Spacing",
+    return codegen::doc<Parameters>(
         "base_dashboarditem_spacing",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("DashboardItemSpacing"),
-                Optional::No
-            },
-            {
-                SpacingInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                SpacingInfo.description
-            }
-        }
-    };
+        DashboardItem::Documentation()
+    );
 }
 
 DashboardItemSpacing::DashboardItemSpacing(const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
     , _spacing(SpacingInfo, 15.f, 0.f, 2048.f)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "DashboardItemSpacing"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasKey(SpacingInfo.identifier)) {
-        _spacing = static_cast<float>(dictionary.value<double>(SpacingInfo.identifier));
-    }
+    _spacing = p.spacing.value_or(_spacing);
     addProperty(_spacing);
 }
 
+void DashboardItemSpacing::update() {}
+
 void DashboardItemSpacing::render(glm::vec2& penPosition) {
     penPosition.y -= _spacing;
-}
-
-glm::vec2 DashboardItemSpacing::size() const {
-    return { 0.f, _spacing };
 }
 
 } // namespace openspace

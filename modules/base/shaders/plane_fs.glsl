@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,39 +24,43 @@
 
 #include "fragment.glsl"
 
-in float vs_screenSpaceDepth;
-in vec2 vs_st;
 in vec4 vs_gPosition;
 in vec3 vs_gNormal;
+in float vs_screenSpaceDepth;
+in vec2 vs_st;
 
-uniform sampler2D texture1;
-uniform bool additiveBlending;
+uniform sampler2D colorTexture;
 uniform float opacity = 1.0;
+uniform bool mirrorBackside = true;
+uniform vec3 multiplyColor;
 
 
 Fragment getFragment() {
-    Fragment frag;
-    if (gl_FrontFacing) {
-        frag.color = texture(texture1, vs_st);
+  Fragment frag;
+  if (gl_FrontFacing) {
+    frag.color = texture(colorTexture, vs_st);
+  }
+  else {
+    if (mirrorBackside) {
+      frag.color = texture(colorTexture, vec2(1.0 - vs_st.s, vs_st.t));
     }
     else {
-        frag.color = texture(texture1, vec2(1 - vs_st.s, vs_st.t));
+      frag.color = texture(colorTexture, vs_st);
     }
+  }
 
-    frag.color.a *= opacity;
-    if (frag.color.a == 0.0) {
-        discard;
-    }
+  frag.color.rgb *= multiplyColor;
 
-    frag.depth = vs_screenSpaceDepth;
+  frag.color.a *= opacity;
+  if (frag.color.a == 0.0) {
+    discard;
+  }
 
-    if (additiveBlending) {
-        frag.blend = BLEND_MODE_ADDITIVE;
-    }
+  frag.depth = vs_screenSpaceDepth;
 
-    // G-Buffer 
-    frag.gPosition  = vs_gPosition;
-    frag.gNormal    = vec4(vs_gNormal, 1.0);
-    
-    return frag;
+  // G-Buffer
+  frag.gPosition = vs_gPosition;
+  frag.gNormal = vec4(vs_gNormal, 1.0);
+
+  return frag;
 }

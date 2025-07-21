@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,66 +33,98 @@
 
 namespace openspace::interaction {
 
-float JoystickInputStates::axis(int axis) const {
-    ghoul_precondition(axis >= 0, "axis must be 0 or positive");
-
-    float res = std::accumulate(
-        begin(),
-        end(),
-        0.f,
-        [axis](float value, const JoystickInputState& state) {
-            if (state.isConnected) {
-                value += state.axes[axis];
+int JoystickInputStates::numAxes(const std::string& joystickName) const {
+    if (joystickName.empty()) {
+        int maxNumAxes = -1;
+        for (auto it = begin(); it < end(); it++) {
+            if (it->nAxes > maxNumAxes) {
+                maxNumAxes = it->nAxes;
             }
-            return value;
         }
-    );
+        return maxNumAxes;
+    }
 
-    // If multiple joysticks are connected, we might get values outside the -1,1 range by
-    // summing them up
-    glm::clamp(res, -1.f, 1.f);
-    return res;
+    for (const JoystickInputState& state : *this) {
+        if (state.name == joystickName) {
+            return state.nAxes;
+        }
+    }
+    return -1;
 }
 
-bool JoystickInputStates::button(int button, JoystickAction action) const {
+int JoystickInputStates::numButtons(const std::string& joystickName) const {
+    if (joystickName.empty()) {
+        int maxNumButtons = -1;
+        for (const JoystickInputState& state : *this) {
+            if (state.nButtons > maxNumButtons) {
+                maxNumButtons = state.nButtons;
+            }
+        }
+        return maxNumButtons;
+    }
+
+    for (const JoystickInputState& state : *this) {
+        if (state.name == joystickName) {
+            return state.nButtons;
+        }
+    }
+
+    return -1;
+}
+
+float JoystickInputStates::axis(const std::string& joystickName, int axis) const {
+    ghoul_precondition(axis >= 0, "axis must be 0 or positive");
+
+    if (joystickName.empty()) {
+        const float res = std::accumulate(
+            begin(),
+            end(),
+            0.f,
+            [axis](float value, const JoystickInputState& state) {
+                if (state.isConnected) {
+                    value += state.axes[axis];
+                }
+                return value;
+            }
+        );
+
+        // If multiple joysticks are connected, we might get values outside the -1,1 range
+        // by summing them up
+        return glm::clamp(res, -1.f, 1.f);
+    }
+
+    for (const JoystickInputState& state : *this) {
+        if (state.name == joystickName) {
+            return state.axes[axis];
+        }
+    }
+
+    return 0.f;
+}
+
+bool JoystickInputStates::button(const std::string& joystickName, int button,
+                                 JoystickAction action) const
+{
     ghoul_precondition(button >= 0, "button must be 0 or positive");
 
-    bool res = std::any_of(
-        begin(),
-        end(),
-        [button, action](const JoystickInputState& state) {
+    if (joystickName.empty()) {
+        const bool res = std::any_of(
+            begin(),
+            end(),
+            [button, action](const JoystickInputState& state) {
+                return state.isConnected ? (state.buttons[button] == action) : false;
+            }
+        );
+        return res;
+    }
+
+    for (const JoystickInputState& state : *this) {
+        if (state.name == joystickName) {
             return state.isConnected ? (state.buttons[button] == action) : false;
         }
-    );
-    return res;
+    }
+
+    return false;
 }
 
 } // namespace openspace::interaction
-
-namespace ghoul {
-
-template <>
-std::string to_string(const openspace::interaction::JoystickAction& action) {
-    switch (action) {
-        case openspace::interaction::JoystickAction::Idle:    return "Idle";
-        case openspace::interaction::JoystickAction::Press:   return "Press";
-        case openspace::interaction::JoystickAction::Repeat:  return "Repeat";
-        case openspace::interaction::JoystickAction::Release: return "Release";
-        default:                                              return "";
-    }
-}
-
-template <>
-openspace::interaction::JoystickAction from_string(const std::string& string) {
-    static const std::map<std::string, openspace::interaction::JoystickAction> Map = {
-        { "Idle",    openspace::interaction::JoystickAction::Idle },
-        { "Press",   openspace::interaction::JoystickAction::Press },
-        { "Repeat",  openspace::interaction::JoystickAction::Repeat },
-        { "Release", openspace::interaction::JoystickAction::Release }
-    };
-
-    return Map.at(string);
-
-}
-
-} // namespace ghoul

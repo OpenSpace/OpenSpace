@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,8 +40,6 @@ namespace openspace {
 
 MilkywayPointsConversionTask::MilkywayPointsConversionTask(const ghoul::Dictionary&) {}
 
-MilkywayPointsConversionTask::~MilkywayPointsConversionTask() {}
-
 std::string MilkywayPointsConversionTask::description() {
     return std::string();
 }
@@ -52,22 +50,22 @@ void MilkywayPointsConversionTask::perform(const Task::ProgressCallback& progres
     std::ofstream out(_outFilename, std::ios::out | std::ios::binary);
 
     std::string format;
-    int64_t nPoints;
+    int64_t nPoints = 0;
     in >> format >> nPoints;
 
-    size_t nFloats = nPoints * 7;
+    const size_t nFloats = nPoints * 7;
 
     std::vector<float> pointData(nFloats);
 
-    float x;
-    float y;
-    float z;
-    float r;
-    float g;
-    float b;
-    float a;
+    float x = 0.f;
+    float y = 0.f;
+    float z = 0.f;
+    float r = 0.f;
+    float g = 0.f;
+    float b = 0.f;
+    float a = 0.f;
 
-    for (int64_t i = 0; i < nPoints; ++i) {
+    for (int64_t i = 0; i < nPoints; i++) {
         in >> x >> y >> z >> r >> g >> b >> a;
         if (in.good()) {
             pointData[i * 7 + 0] = x;
@@ -80,7 +78,7 @@ void MilkywayPointsConversionTask::perform(const Task::ProgressCallback& progres
             progressCallback(static_cast<float>(i + 1) / nPoints);
         }
         else {
-            std::cout << "Failed to convert point data.";
+            std::cout << "Failed to convert point data";
             return;
         }
     }
@@ -92,8 +90,13 @@ void MilkywayPointsConversionTask::perform(const Task::ProgressCallback& progres
     out.close();
 }
 
-documentation::Documentation MilkywayPointsConversionTask::documentation() {
-    return documentation::Documentation();
+documentation::Documentation MilkywayPointsConversionTask::Documentation() {
+    return {
+        "MilkywayPointsConversionTask",
+        "galaxy_milkywaypointsconversiontask",
+        "",
+        {}
+    };
 }
 
 } // namespace openspace

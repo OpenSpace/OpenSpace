@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,41 +26,41 @@
 
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layergroup.h>
-#include <modules/globebrowsing/src/tileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 namespace openspace::globebrowsing {
 
 LayerManager::LayerManager() : properties::PropertyOwner({ "Layers" }) {}
 
-void LayerManager::initialize(const ghoul::Dictionary& layerGroupsDict) {
+void LayerManager::initialize(
+                  const std::map<layers::Group::ID, std::vector<ghoul::Dictionary>>& dict)
+{
+    ZoneScoped;
+
     // First create empty layer groups in case not all are specified
-    for (size_t i = 0; i < _layerGroups.size(); ++i) {
-        _layerGroups[i] = std::make_unique<LayerGroup>(layergroupid::GroupID(i));
-    }
-
-    const std::vector<std::string>& layerGroupNamesInDict = layerGroupsDict.keys();
-
-    // Create all the layer groups
-    for (const std::string& groupName : layerGroupNamesInDict) {
-        layergroupid::GroupID id = ghoul::from_string<layergroupid::GroupID>(groupName);
-
-        if (id != layergroupid::GroupID::Unknown) {
-            ghoul::Dictionary d = layerGroupsDict.value<ghoul::Dictionary>(groupName);
-            _layerGroups[static_cast<int>(id)]->setLayersFromDict(d);
+    for (size_t i = 0; i < _layerGroups.size(); i++) {
+        _layerGroups[i] = std::make_unique<LayerGroup>(layers::Groups[i]);
+        addPropertySubOwner(_layerGroups[i].get());
+        _layerGroups[i]->initialize();
+        auto it = dict.find(layers::Groups[i].id);
+        if (it == dict.end()) {
+            continue;
         }
-        else {
-            LWARNINGC("LayerManager", "Unknown layer group: " + groupName);
+
+        for (const ghoul::Dictionary& layer : it->second) {
+            try {
+                Layer* l = _layerGroups[i]->addLayer(layer);
+                l->initialize();
+            }
+            catch (const ghoul::RuntimeError& e) {
+                LERRORC(e.component, e.message);
+            }
         }
-    }
-
-    for (const std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
-        addPropertySubOwner(layerGroup.get());
-    }
-
-    for (const std::unique_ptr<LayerGroup>& lg : _layerGroups) {
-        lg->initialize();
     }
 }
 
@@ -70,58 +70,84 @@ void LayerManager::deinitialize() {
     }
 }
 
-Layer* LayerManager::addLayer(layergroupid::GroupID groupId,
-                              const ghoul::Dictionary& layerDict)
-{
-    ghoul_assert(groupId != layergroupid::Unknown, "Layer group ID must be known");
-    return _layerGroups[groupId]->addLayer(layerDict);
+Layer* LayerManager::addLayer(layers::Group::ID id, const ghoul::Dictionary& layerDict) {
+    ZoneScoped;
+
+    ghoul_assert(id != layers::Group::ID::Unknown, "Layer group ID must be known");
+
+    try {
+        return _layerGroups[static_cast<size_t>(id)]->addLayer(layerDict);
+    }
+    catch (const documentation::SpecificationError& e) {
+        logError(e);
+        return nullptr;
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERRORC(e.component, e.message);
+        return nullptr;
+    }
 }
 
-void LayerManager::deleteLayer(layergroupid::GroupID id, const std::string& layerName) {
-    ghoul_assert(id != layergroupid::Unknown, "Layer group ID must be known");
-    _layerGroups[id]->deleteLayer(layerName);
+void LayerManager::deleteLayer(layers::Group::ID id, const std::string& layerName) {
+    ZoneScoped;
+
+    ghoul_assert(id != layers::Group::ID::Unknown, "Layer group ID must be known");
+    _layerGroups[static_cast<size_t>(id)]->deleteLayer(layerName);
 }
 
-const LayerGroup& LayerManager::layerGroup(layergroupid::GroupID groupId) const {
-    return *_layerGroups[groupId];
+LayerGroup& LayerManager::layerGroup(layers::Group::ID groupId) {
+    return *_layerGroups[static_cast<size_t>(groupId)];
+}
+
+const LayerGroup& LayerManager::layerGroup(layers::Group::ID groupId) const {
+    return *_layerGroups[static_cast<size_t>(groupId)];
 }
 
 bool LayerManager::hasAnyBlendingLayersEnabled() const {
+    ZoneScoped;
+
     return std::any_of(
-        _layerGroups.begin(),
-        _layerGroups.end(),
+        _layerGroups.cbegin(),
+        _layerGroups.cend(),
         [](const std::unique_ptr<LayerGroup>& lg) {
             return lg->layerBlendingEnabled() && !lg->activeLayers().empty();
         }
     );
 }
 
-std::array<LayerGroup*, LayerManager::NumLayerGroups> LayerManager::layerGroups() const
-{
-    std::array<LayerGroup*, NumLayerGroups> res;
-    for (int i = 0; i < NumLayerGroups; ++i) {
+std::array<LayerGroup*, LayerManager::NumLayerGroups> LayerManager::layerGroups() const {
+    ZoneScoped;
+
+    std::array<LayerGroup*, NumLayerGroups> res = {};
+    for (size_t i = 0; i < NumLayerGroups; i++) {
         res[i] = _layerGroups[i].get();
     }
     return res;
 }
 
 void LayerManager::update() {
+    ZoneScoped;
+
     for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
         layerGroup->update();
     }
 }
 
 void LayerManager::reset(bool includeDisabled) {
+    ZoneScoped;
+
     for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
         for (Layer* layer : layerGroup->layers()) {
-            if (layer->enabled() || includeDisabled) {
-                tileprovider::reset(*layer->tileProvider());
+            if ((layer->enabled() || includeDisabled) && layer->tileProvider()) {
+                layer->tileProvider()->reset();
             }
         }
     }
 }
 
-void LayerManager::onChange(std::function<void(void)> callback) {
+void LayerManager::onChange(const std::function<void(Layer*)>& callback) {
+    ZoneScoped;
+
     for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
         layerGroup->onChange(callback);
     }

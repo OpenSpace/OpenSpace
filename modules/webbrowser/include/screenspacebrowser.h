@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,15 +28,25 @@
 #include <openspace/rendering/screenspacerenderable.h>
 
 #include <modules/webbrowser/include/webrenderhandler.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
+#include <openspace/properties/vector/uvec2property.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable : 4100)
 #endif // _MSC_VER
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#endif // __clang__
+
 #include <include/cef_client.h>
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif // __clang__
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -52,34 +62,45 @@ class WebKeyboardHandler;
 
 class ScreenSpaceBrowser : public ScreenSpaceRenderable {
 public:
-    ScreenSpaceBrowser(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceBrowser(const ghoul::Dictionary& dictionary);
+    ~ScreenSpaceBrowser() override = default;
 
-    bool initialize() override;
-    bool deinitialize() override;
-    void render() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
+
+    void render(const RenderData& renderData) override;
     void update() override;
     bool isReady() const override;
+
+    static documentation::Documentation Documentation();
+
+protected:
+    properties::UVec2Property _dimensions;
+    std::unique_ptr<BrowserInstance> _browserInstance;
+    bool _isDimensionsDirty = false;
+    properties::TriggerProperty _reload;
 
 private:
     class ScreenSpaceRenderHandler : public WebRenderHandler {
     public:
-        void draw();
-        void render();
+        void draw() override;
+        void render() override;
 
         void setTexture(GLuint t);
     };
 
-    properties::StringProperty _url;
-    properties::Vec2Property _dimensions;
     CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
+
+private:
+    void bindTexture() override;
+
+    properties::StringProperty _url;
+
     CefRefPtr<WebKeyboardHandler> _keyboardHandler;
-    std::unique_ptr<BrowserInstance> _browserInstance;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
 
+    bool _useAcceleratedRendering = false;
     bool _isUrlDirty = false;
-    bool _isDimensionsDirty = false;
 };
-
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__

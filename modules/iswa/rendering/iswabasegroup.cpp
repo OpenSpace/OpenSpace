@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,27 +28,29 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "IswaBaseGroup";
+    constexpr std::string_view _loggerCat = "IswaBaseGroup";
     using json = nlohmann::json;
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AlphaInfo = {
         "Alpha",
         "Alpha",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DeleteInfo = {
         "Delete",
         "Delete",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
-
 } // namespace
 
 namespace openspace {
@@ -58,7 +60,7 @@ IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
     , _enabled(EnabledInfo, true)
     , _alpha(AlphaInfo, 0.9f, 0.f, 1.f)
     , _delete(DeleteInfo)
-    , _type(std::move(type))
+    , _iswaType(std::move(type))
 {
     addProperty(_enabled);
     addProperty(_alpha);
@@ -70,7 +72,7 @@ IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
 IswaBaseGroup::~IswaBaseGroup() {}
 
 bool IswaBaseGroup::isType(const std::string& type) const {
-    return (_type == type);
+    return (_iswaType == type);
 }
 
 void IswaBaseGroup::updateGroup() {
@@ -95,12 +97,16 @@ ghoul::Event<ghoul::Dictionary>& IswaBaseGroup::groupEvent() {
 void IswaBaseGroup::registerProperties() {
     _enabled.onChange([this]() {
         LDEBUG("Group " + identifier() + " published enabledChanged");
-        _groupEvent.publish("enabledChanged", ghoul::Dictionary({{"enabled", _enabled}}));
+        ghoul::Dictionary d;
+        d.setValue("enabled", _enabled.value());
+        _groupEvent.publish("enabledChanged", d);
     });
 
     _alpha.onChange([this]() {
         LDEBUG("Group " + identifier() + " published alphaChanged");
-        _groupEvent.publish("alphaChanged", ghoul::Dictionary({ { "alpha", _alpha } }));
+        ghoul::Dictionary d;
+        d.setValue("alpha", static_cast<double>(_alpha));
+        _groupEvent.publish("alphaChanged", d);
     });
 
 

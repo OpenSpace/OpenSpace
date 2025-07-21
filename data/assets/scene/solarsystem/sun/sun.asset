@@ -1,31 +1,75 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
-local textures = asset.require('./sun_textures').TexturesPath
-asset.require("spice/base")
 
 
 
 local Sun = {
-    Identifier = "Sun",
-    Parent = transforms.SunIAU.Identifier,
-    Renderable = {
-        Type = "RenderablePlanet",
-        Enabled = false,
-        Frame = "IAU_SUN",
-        Body = "SUN",
-        Geometry = {
-            Type = "SimpleSphere",
-            Radius = 6.957E8,
-            Segments = 100
-        },
-        ColorTexture = textures .. "/sun.jpg",
-        PerformShading = false
+  Identifier = "Sun",
+  Parent = transforms.SunIAU.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Enabled = false,
+    Radii = { 695700000, 695700000, 695700000 },
+    LightSource = {
+      Identifier = "Camera",
+      Type = "CameraLightSource",
+      Intensity = 1.0
     },
-    GUI = {
-        Path = "/Solar System/Sun"
-    }
+    PerformShading = false
+  },
+  ApproachFactor = 15.0,
+  GUI = {
+    Name = "Sun Surface",
+    Path = "/Solar System/Sun",
+    Description = "Globe for the sun in our solar system"
+  }
+}
+
+local SunLabel = {
+  Identifier = "SunLabel",
+  Parent = Sun.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Sun",
+    FontSize = 70.0,
+    Size = 14.17,
+    MinMaxSize = { 1, 50 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "pc",
+    FadeDistances = { 1.33, 15.0 },
+    FadeWidths = { 1.0, 20.0 }
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "Sun Label",
+    Path = "/Solar System/Sun",
+    Focusable = false,
+    Description = "Label for the sun in our solar system"
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Sun)
+  openspace.addSceneGraphNode(SunLabel)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Sun })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SunLabel)
+  openspace.removeSceneGraphNode(Sun)
+end)
+
+asset.export(Sun)
+asset.export(SunLabel)
+
+
+
+asset.meta = {
+  Name = "Sun",
+  Description = "The Sun and label",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

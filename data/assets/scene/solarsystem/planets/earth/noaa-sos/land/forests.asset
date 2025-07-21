@@ -1,0 +1,122 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Forest Change (Extent, Gain, and Loss) - 2000 - 2014"
+local Identifier = "noaa-sos-land-forests"
+local Description = [[This dataset shows annual tree cover extent,gain, and loss from
+the year 2001 to 2014, at 30 meter resolution, as colored layers that can be seen
+together or one at a time as individual layers that can be toggled on and off. Green is
+used to represent tree cover in 2000, red shows tree cover loss between 2001-2014,
+blue shows tree cover gain between 2001-2014, and purple is gain and loss together due to
+replanting after loss has occurred]]
+local URL = "https://sos.noaa.gov/catalog/datasets/forest-change-extent-gain-and-loss-2000-2014/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local LayerCombined = {
+  Identifier = Identifier,
+  Name = Name,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "combined.png",
+  Description = Description
+}
+
+local LayerExtent = {
+  Identifier = Identifier .. "-extent",
+  Name = Name .. " (Extent)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "extent.png",
+  Description = Description
+}
+
+local LayerGain = {
+  Identifier = Identifier .. "-gain",
+  Name = Name .. " (Gain)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "gain.png",
+  Description = Description
+}
+
+local LayerLoss = {
+  Identifier = Identifier .. "-loss",
+  Name = Name .. " (Loss)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "loss.png",
+  Description = Description
+}
+
+local LayerMap = {
+  Identifier = Identifier .. "-map",
+  Name = Name .. " (Map)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "map.png",
+  Description = Description
+}
+
+local Label = {
+  Identifier = Identifier,
+  Name = Name,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "forest_label.png",
+  FaceCamera = false,
+  Scale = 0.13,
+  CartesianPosition = { 0.5, 0.0, -2.0 }
+}
+
+local Label1 = {
+  Identifier = Identifier .. "-alt",
+  Name = Name .. " (alt)",
+  Type = "ScreenSpaceImageLocal",
+  Enabled = false,
+  TexturePath = syncedDirectory .. "forest_label1.png",
+  FaceCamera = false,
+  Scale = 0.13,
+  CartesianPosition = { 0.5, 0.0, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerCombined)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerExtent)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerGain)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerLoss)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerMap)
+  openspace.addScreenSpaceRenderable(Label)
+  openspace.addScreenSpaceRenderable(Label1)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Label1)
+  openspace.removeScreenSpaceRenderable(Label)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerMap)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerLoss)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerGain)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerExtent)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerCombined)
+end)
+
+asset.export(LayerCombined)
+asset.export(LayerExtent)
+asset.export(LayerGain)
+asset.export(LayerLoss)
+asset.export(LayerMap)
+asset.export(Label)
+asset.export(Label1)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

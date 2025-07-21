@@ -1,0 +1,31 @@
+-- Different Number of Segments in Latitudinal and Longitudinal Direction
+-- This example adds a spherical grid with a radius of 100 meters, where the sphere is
+-- split up into 100 segments in the longitudinal direction and 10 segments in the
+-- latitudinal direction.
+
+local Node = {
+  Identifier = "RenderableSphericalGrid_Example_SegmentsLatLong",
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 100.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableSphericalGrid",
+    LatSegments = 100,
+    LongSegments = 10
+  },
+  GUI = {
+    Name = "RenderableSphericalGrid - Segments Lat/Long",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

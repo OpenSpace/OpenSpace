@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,8 +28,10 @@
 #include <openspace/scene/translation.h>
 
 #include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/util/time.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/exception.h>
+#include <openspace/util/time.h>
 
 namespace openspace {
 
@@ -50,36 +52,32 @@ public:
     /**
      * The constructor that retrieves the required Keplerian elements from the passed
      * \p dictionary. These values are then apssed to the setKeplerElements method for
-     * further processing.
-     * The \p dictionary is tested against the Documentation for conformance.
+     * further processing. The \p dictionary is tested against the Documentation for
+     * conformance.
      *
      * \param dictionary The ghoul::Dictionary containing all the information about the
      *        Keplerian elements (see Documentation)
      */
-    KeplerTranslation(const ghoul::Dictionary& dictionary);
+    explicit KeplerTranslation(const ghoul::Dictionary& dictionary);
 
     /// Default destructor
-    virtual ~KeplerTranslation() = default;
+    ~KeplerTranslation() override = default;
 
     /**
     * Method returning the translation vector at a given time.
     *
-    * \param time The time to use when doing the position lookup
+    * \param data Provides information from the engine about, for example, the time
     */
     glm::dvec3 position(const UpdateData& data) const override;
 
     /**
-     * Method returning the openspace::Documentation that describes the ghoul::Dictinoary
+     * Method returning the openspace::Documentation that describes the ghoul::Dictionary
      * that can be passed to the constructor.
      *
      * \return The openspace::Documentation that describes the ghoul::Dicitonary that can
      *         be passed to the constructor
      */
     static documentation::Documentation Documentation();
-
-protected:
-    /// Default construct that initializes all the properties and member variables
-    KeplerTranslation();
 
     /**
      * Sets the internal values for the Keplerian elements and the epoch as a string of
@@ -123,10 +121,12 @@ protected:
         double ascendingNode, double argumentOfPeriapsis, double meanAnomalyAtEpoch,
         double orbitalPeriod, double epoch);
 
-private:
-    /// Recombutes the rotation matrix used in the update method
+    /**
+     * Recombutes the rotation matrix used in the update method.
+     */
     void computeOrbitPlane() const;
 
+private:
     /**
      * This method computes the eccentric anomaly (location of the space craft taking the
      * eccentricity into acount) based on the mean anomaly (location of the space craft
@@ -159,10 +159,10 @@ private:
     /// Dirty flag for the _orbitPlaneRotation parameters
     mutable bool _orbitPlaneDirty = true;
     /// The rotation matrix that defines the plane of the orbit
-    mutable glm::dmat3 _orbitPlaneRotation;
+    mutable glm::dmat3 _orbitPlaneRotation = glm::dmat3(1.0);
 
     /// The cached position for the last time with which the update method was called
-    glm::dvec3 _position;
+    glm::dvec3 _position = glm::dvec3(0.0);
 };
 
 } // namespace openspace

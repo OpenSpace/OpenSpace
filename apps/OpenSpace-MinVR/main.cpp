@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,10 +29,10 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
-#include <ghoul/fmt.h>
-#include <ghoul/ghoul.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
+#include <ghoul/ghoul.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
@@ -49,7 +49,6 @@
 using namespace MinVR;
 using namespace openspace;
 
-namespace {
 
 class Handler : public VREventHandler, public VRRenderHandler, public VRInputDevice {
 public:
@@ -60,7 +59,9 @@ public:
     void appendNewInputEventsSinceLastCall(VRDataQueue* queue) override;
 };
 
-constexpr const char* _loggerCat = "main_minvr";
+namespace {
+
+constexpr std::string_view _loggerCat = "main_minvr";
 
 VRMain engine;
 Handler handler;
@@ -86,7 +87,7 @@ struct {
 
 bool HasInitializedGL = false;
 std::array<float, 30> LastFrametimes = { 1.f / 60.f }; // we can be optimistic here
-constexpr const char* MasterNode = "/MinVR/Desktop1";
+constexpr std::string_view MasterNode = "/MinVR/Desktop1";
 bool IsMasterNode = false;
 uint64_t FrameNumber = 0;
 std::chrono::time_point<std::chrono::high_resolution_clock> lastFrameTime;
@@ -103,7 +104,7 @@ void Handler::onVREvent(const VRDataIndex& eventData) {
     else {
         LERRORC(
             "onVREvent()",
-            fmt::format("Received an event named {} of unknown type", eventData.getName())
+            std::format("Received an event named {} of unknown type", eventData.getName())
         );
     }
 
@@ -200,7 +201,14 @@ void Handler::onVREvent(const VRDataIndex& eventData) {
             if (button == MouseButton::Right && action == MouseAction::Press) {
                 windowingGlobals.mouseButtons |= 1 << 2;
             }
-            global::openSpaceEngine.mouseButtonCallback(button, action);
+
+            using KM = KeyModifier;
+            KM mod = KM::NoModifier;
+            mod |= keyboardState.modifierShift ? KM::Shift : KM::NoModifier;
+            mod |= keyboardState.modifierCtrl ? KM::Control : KM::NoModifier;
+            mod |= keyboardState.modifierAlt ? KM::Alt : KM::NoModifier;
+
+            global::openSpaceEngine.mouseButtonCallback(button, action, mod);
         }
 
     }
@@ -236,7 +244,7 @@ void Handler::onVREvent(const VRDataIndex& eventData) {
         global::openSpaceEngine.decode(std::move(synchronizationBuffer));
     }
     else {
-        LERRORC("onVREvent()", fmt::format("Received an event of unknown type {}", type));
+        LERRORC("onVREvent()", std::format("Received an event of unknown type {}", type));
     }
 }
 
@@ -341,6 +349,14 @@ int main(int argc, char** argv) {
 
     ghoul::initialize();
 
+    // Register the path of the executable,
+    // to make it possible to find other files in the same directory.
+    FileSys.registerPathToken(
+        "${BIN}",
+        ghoul::filesystem::File(absPath(argv[0])).directoryName(),
+        ghoul::filesystem::FileSystem::Override::Yes
+    );
+
     // Create the OpenSpace engine and get arguments for the SGCT engine
     std::string windowConfiguration;
     try {
@@ -356,7 +372,7 @@ int main(int argc, char** argv) {
             LFATALC("main", "Could not find configuration: " + configurationFilePath);
             exit(EXIT_FAILURE);
         }
-        LINFO(fmt::format("Configuration Path: '{}'", configurationFilePath));
+        LINFO(std::format("Configuration Path: '{}'", configurationFilePath));
 
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");

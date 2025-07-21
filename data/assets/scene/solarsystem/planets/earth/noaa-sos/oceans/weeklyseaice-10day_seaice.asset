@@ -1,0 +1,64 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Sea Ice Extent- 1978 - Present"
+local Identifier = "noaa-sos-oceans-weeklyseaice-10day_seaice"
+local Description = [[Sea ice is simply ocean water that has frozen. At least 15% of the
+ocean is covered by sea ice some part of the year. This means that on average, sea ice
+covers almost 10 million square miles (about 25 million square kilometers) of the Earth.
+Sea ice is monitored closely by scientists because changing sea ice coverage can have a
+huge impact on the rest of the globe. Global warming is amplified in polar regions.
+Because of this, monitoring changes in sea ice can be a good indicator of climate change.
+The National Snow and Ice Data Center monitors sea ice using a passive microwave
+satellite data record that begins in 1978. The Special Sensor Microwave Imager/Sounder
+(SSMIS) is the current monitoring instrument. This sea ice extent dataset is on a 25km
+cell size grid covering both Arctic and Antarctic polar regions]]
+local URL = "https://sos.noaa.gov/catalog/datasets/sea-ice-extent-1978-present/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "TemporalTileProvider",
+  Mode = "Folder",
+  Folder = {
+    Folder = syncedDirectory .. "4096_png",
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "nt_monthext_%Y%m%d-%Y%m%d_n07_sos.png"
+  },
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

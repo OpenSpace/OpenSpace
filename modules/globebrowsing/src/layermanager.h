@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,8 @@
 
 namespace ghoul { class Dictionary; }
 
+namespace openspace::documentation { struct Documentation; }
+
 namespace openspace::globebrowsing {
 
 class Layer;
@@ -46,18 +48,19 @@ class TileTextureInitData;
  */
 class LayerManager : public properties::PropertyOwner {
 public:
-    constexpr static const int NumLayerGroups = layergroupid::NUM_LAYER_GROUPS;
+    constexpr static size_t NumLayerGroups = layers::Groups.size();
 
     LayerManager();
 
-    void initialize(const ghoul::Dictionary& layerGroupsDict);
+    void initialize(
+        const std::map<layers::Group::ID, std::vector<ghoul::Dictionary>>& dict);
     void deinitialize();
 
-    Layer* addLayer(layergroupid::GroupID groupId,
-        const ghoul::Dictionary& layerDict);
-    void deleteLayer(layergroupid::GroupID groupId, const std::string& layerName);
+    Layer* addLayer(layers::Group::ID id, const ghoul::Dictionary& layerDict);
+    void deleteLayer(layers::Group::ID id, const std::string& layerName);
 
-    const LayerGroup& layerGroup(layergroupid::GroupID) const;
+    LayerGroup& layerGroup(layers::Group::ID groupId);
+    const LayerGroup& layerGroup(layers::Group::ID groupId) const;
 
     bool hasAnyBlendingLayersEnabled() const;
 
@@ -66,7 +69,7 @@ public:
     void update();
     void reset(bool includeDisabled = false);
 
-    void onChange(std::function<void(void)> callback);
+    void onChange(const std::function<void(Layer* l)>& callback);
 
 private:
     std::array<std::unique_ptr<LayerGroup>, NumLayerGroups> _layerGroups;

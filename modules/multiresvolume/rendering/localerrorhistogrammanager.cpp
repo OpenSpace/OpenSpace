@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,10 +27,10 @@
 #include <modules/multiresvolume/rendering/tsp.h>
 #include <openspace/util/progressbar.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 
 namespace {
-    constexpr const char* _loggerCat = "LocalErrorHistogramManager";
+    constexpr std::string_view _loggerCat = "LocalErrorHistogramManager";
 } // namespace
 
 namespace openspace {
@@ -38,7 +38,7 @@ namespace openspace {
 LocalErrorHistogramManager::LocalErrorHistogramManager(TSP* tsp) : _tsp(tsp) {}
 
 bool LocalErrorHistogramManager::buildHistograms(int numBins) {
-    LINFO(fmt::format("Build histograms with {} bins each", numBins));
+    LINFO(std::format("Build histograms with {} bins each", numBins));
     _numBins = numBins;
 
     _file = &(_tsp->file());
@@ -82,8 +82,6 @@ bool LocalErrorHistogramManager::buildHistograms(int numBins) {
             success &= buildFromOctreeChild(bst, ot);
             if (!success) {
                 LERROR("Failed in buildFromOctreeChild");
-            }
-            if (!success) {
                 return false;
             }
             pb1.print(processedLeaves++);
@@ -99,8 +97,6 @@ bool LocalErrorHistogramManager::buildHistograms(int numBins) {
             success &= buildFromBstChild(bst, ot);
             if (!success) {
                 LERROR("Failed in buildFromBstChild");
-            }
-            if (!success) {
                 return false;
             }
             pb2.print(processedLeaves++);
@@ -129,17 +125,17 @@ bool LocalErrorHistogramManager::buildFromOctreeChild(unsigned int bstOffset,
 
         if (isOctreeLeaf) {
             childValues = readValues(childIndex);
-        } else {
+        }
+        else {
             const unsigned int childInnerNodeIndex = brickToInnerNodeIndex(childIndex);
             auto it = _voxelCache.find(childInnerNodeIndex);
             if (it != _voxelCache.end()) {
                 childValues = it->second;
-            } else {
-                LERROR(fmt::format(
+            }
+            else {
+                LERROR(std::format(
                     "Child {} visited without cache, {}, {}",
-                    childIndex,
-                    bstOffset,
-                    octreeOffset
+                    childIndex, bstOffset, octreeOffset
                 ));
                 return false;
             }
@@ -149,12 +145,14 @@ bool LocalErrorHistogramManager::buildFromOctreeChild(unsigned int bstOffset,
         if (octreeChildIndex == 0) {
             parentValues = readValues(parentIndex);
             _voxelCache[parentInnerNodeIndex] = parentValues;
-        } else {
+        }
+        else {
             auto it = _voxelCache.find(parentInnerNodeIndex);
             if (it != _voxelCache.end()) {
                 parentValues = it->second;
-            } else {
-                LERROR(fmt::format("Parent {} visited without cache", parentIndex));
+            }
+            else {
+                LERROR(std::format("Parent {} visited without cache", parentIndex));
                 return false;
             }
         }
@@ -231,13 +229,15 @@ bool LocalErrorHistogramManager::buildFromBstChild(unsigned int bstOffset,
 
         if (isBstLeaf) {
             childValues = readValues(childIndex);
-        } else {
+        }
+        else {
             unsigned int childInnerNodeIndex = brickToInnerNodeIndex(childIndex);
             auto it = _voxelCache.find(childInnerNodeIndex);
             if (it != _voxelCache.end()) {
                 childValues = it->second;
-            } else {
-                LERROR(fmt::format("Child {} visited without cache", childIndex));
+            }
+            else {
+                LERROR(std::format("Child {} visited without cache", childIndex));
                 return false;
             }
         }
@@ -246,12 +246,14 @@ bool LocalErrorHistogramManager::buildFromBstChild(unsigned int bstOffset,
         if (bstChildIndex == 1) {
             parentValues = readValues(parentIndex);
             _voxelCache[parentInnerNodeIndex] = parentValues;
-        } else {
+        }
+        else {
             auto it = _voxelCache.find(parentInnerNodeIndex);
             if (it != _voxelCache.end()) {
                 parentValues = it->second;
-            } else {
-                LERROR(fmt::format("Parent {} visited without cache", parentIndex));
+            }
+            else {
+                LERROR(std::format("Parent {} visited without cache", parentIndex));
                 return false;
             }
         }
@@ -301,7 +303,7 @@ bool LocalErrorHistogramManager::buildFromBstChild(unsigned int bstOffset,
     return true;
 }
 
-bool LocalErrorHistogramManager::loadFromFile(const std::string& filename) {
+bool LocalErrorHistogramManager::loadFromFile(const std::filesystem::path& filename) {
     std::ifstream file(filename, std::ios::in | std::ios::binary);
     if (!file.is_open()) {
         return false;
@@ -317,7 +319,7 @@ bool LocalErrorHistogramManager::loadFromFile(const std::string& filename) {
 
     file.read(reinterpret_cast<char*>(histogramData.data()), sizeof(float) * nFloats);
     _spatialHistograms = std::vector<Histogram>(_numInnerNodes);
-    for (unsigned int i = 0; i < _numInnerNodes; ++i) {
+    for (unsigned int i = 0; i < _numInnerNodes; i++) {
         const int offset = i * _numBins;
         // No need to deallocate histogram data, since histograms take ownership.
         float* data = new float[_numBins];
@@ -327,7 +329,7 @@ bool LocalErrorHistogramManager::loadFromFile(const std::string& filename) {
 
     file.read(reinterpret_cast<char*>(histogramData.data()), sizeof(float) * nFloats);
     _temporalHistograms = std::vector<Histogram>(_numInnerNodes);
-    for (unsigned int i = 0; i < _numInnerNodes; ++i) {
+    for (unsigned int i = 0; i < _numInnerNodes; i++) {
         const int offset = i * _numBins;
         // No need to deallocate histogram data, since histograms take ownership.
         float* data = new float[_numBins];
@@ -340,7 +342,7 @@ bool LocalErrorHistogramManager::loadFromFile(const std::string& filename) {
 }
 
 
-bool LocalErrorHistogramManager::saveToFile(const std::string& filename) {
+bool LocalErrorHistogramManager::saveToFile(const std::filesystem::path& filename) {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     if (!file.is_open()) {
         return false;
@@ -354,7 +356,7 @@ bool LocalErrorHistogramManager::saveToFile(const std::string& filename) {
     const int nFloats = _numInnerNodes * _numBins;
     std::vector<float> histogramData(nFloats);
 
-    for (unsigned int i = 0; i < _numInnerNodes; ++i) {
+    for (unsigned int i = 0; i < _numInnerNodes; i++) {
         int offset = i * _numBins;
         memcpy(
             &histogramData[offset],
@@ -364,7 +366,7 @@ bool LocalErrorHistogramManager::saveToFile(const std::string& filename) {
     }
     file.write(reinterpret_cast<char*>(histogramData.data()), sizeof(float) * nFloats);
 
-    for (unsigned int i = 0; i < _numInnerNodes; ++i) {
+    for (unsigned int i = 0; i < _numInnerNodes; i++) {
         int offset = i * _numBins;
         memcpy(
             &histogramData[offset],
@@ -433,7 +435,8 @@ const Histogram* LocalErrorHistogramManager::spatialHistogram(
     const unsigned int innerNodeIndex = brickToInnerNodeIndex(brickIndex);
     if (innerNodeIndex < _numInnerNodes) {
         return &(_spatialHistograms[innerNodeIndex]);
-    } else {
+    }
+    else {
         return nullptr;
     }
 }
@@ -444,7 +447,8 @@ const Histogram* LocalErrorHistogramManager::temporalHistogram(
     const unsigned int innerNodeIndex = brickToInnerNodeIndex(brickIndex);
     if (innerNodeIndex < _numInnerNodes) {
         return &(_temporalHistograms[innerNodeIndex]);
-    } else {
+    }
+    else {
         return nullptr;
     }
 }
@@ -454,7 +458,7 @@ int LocalErrorHistogramManager::parentOffset(int offset, int base) const {
         return -1;
     }
     const int depth = static_cast<int>(
-        floor(log(((base - 1) * offset + 1.0)) / log(base))
+        floor(log1p(((base - 1) * offset)) / log(base))
     );
     const int firstInLevel = static_cast<int>((pow(base, depth) - 1) / (base - 1));
     const int inLevelOffset = offset - firstInLevel;

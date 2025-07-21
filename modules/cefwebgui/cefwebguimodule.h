@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,8 +27,11 @@
 
 #include <openspace/util/openspacemodule.h>
 
+#include <modules/webgui/webguimodule.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
 namespace openspace {
 
@@ -42,13 +45,19 @@ public:
 
     void internalInitialize(const ghoul::Dictionary& configuration) override;
 
+    static documentation::Documentation Documentation();
+
 private:
     void startOrStopGui();
 
     properties::BoolProperty _enabled;
     properties::BoolProperty _visible;
+    properties::TriggerProperty _reload;
     properties::StringProperty _url;
+    properties::FloatProperty _guiScale;
     std::unique_ptr<BrowserInstance> _instance;
+
+    WebGuiModule::CallbackHandle _endpointCallback = -1;
 };
 
 } // namespace openspace

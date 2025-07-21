@@ -1,23 +1,55 @@
-local assetHelper = asset.require('util/asset_helper')
-local shared = asset.require('../satellites_shared')
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local group = {
-    Title = "Fengyun Debris",
-    Url = "http://www.celestrak.com/NORAD/elements/1999-025.txt",
-    TrailColor = { 0.25, 0.35, 0.45 }
+
+
+local omm = asset.resource({
+  Name = "Satellite OMM Data (Fengyun Debris)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_1999-025",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?INTDES=1999-025&FORMAT=kvn",
+  Filename = "1999-025.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+
+local DebrisFengyun = {
+  Identifier = "DebrisFengyun-1999-025",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "1999-025.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.784, 1.0, 0.737 },
+    TrailFade = 1.5,
+    PointSizeExponent = 5.0,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Fengyun Debris",
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
+  }
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
 
-
-local objectNames = {}
-
-asset.onInitialize(function ()
-    objectNames = shared.addSatelliteGroupObjects(group, tle, true)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(DebrisFengyun)
 end)
 
-asset.onDeinitialize(function ()
-    for _, n in ipairs(objectNames) do
-        openspace.removeSceneGraphNode(n)
-    end
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(DebrisFengyun)
 end)
+
+asset.export(DebrisFengyun)
+
+
+
+asset.meta = {
+  Name = "Satellites Debris - Fengyun Debris",
+  Description = "Satellites asset for Debris - Fengyun Debris. Data from Celestrak",
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/NORAD/elements/",
+  License = "Celestrak"
+}

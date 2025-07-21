@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING__BASICTYPES___H__
 
 #include <ghoul/glm.h>
+#include <array>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -37,20 +38,6 @@ namespace openspace::globebrowsing {
 struct AABB3 {
     glm::vec3 min = glm::vec3(std::numeric_limits<float>::max());
     glm::vec3 max = glm::vec3(-std::numeric_limits<float>::max());
-};
-
-
-
-struct Geodetic2 {
-    double lat;
-    double lon;
-};
-
-
-
-struct Geodetic3 {
-    Geodetic2 geodetic2;
-    double height;
 };
 
 
@@ -88,54 +75,50 @@ enum Quad {
 
 
 struct TileDepthTransform {
-    float scale;
-    float offset;
+    float scale = 1.f;
+    float offset = 0.f;
 };
 
 
 
 struct TileMetaData {
-    std::vector<float> maxValues;
-    std::vector<float> minValues;
-    std::vector<bool> hasMissingData;
+    // 4 => the number of rasters, which has a maximum of 4 for RGBA images, we don't
+    // currently support images with arbitrary number of color channels and I don't know
+    // if GDAL does either.  The std::vector here causes a dynamic memory allocation every
+    // time we return a Tile (which contains a TileMetaData as a member variable
+
+    std::array<float, 4> maxValues;
+    std::array<float, 4> minValues;
+    std::array<bool, 4> hasMissingData;
+    uint8_t nValues = 0;
 };
 
 
 
 /**
- * Defines a status and may have a Texture and TileMetaData
+ * Defines a status and may have a Texture and TileMetaData.
  */
 class Tile {
 public:
     /**
-    * Describe if this Tile is good for usage (OK) or otherwise
-    * the reason why it is not.
-    */
+     * Describe if this Tile is good for usage (OK) or otherwise the reason why it is not.
+     */
     enum class Status {
-        /**
-         * E.g when texture data is not currently in memory.
-         * texture and tileMetaData are both null
-         */
+        /// E.g when texture data is not currently in memory.
+        /// `texture` and `tileMetaData` are both `nullptr`
         Unavailable,
 
-        /**
-         * Can be set by <code>TileProvider</code>s if the requested
-         * <code>TileIndex</code> is undefined for that particular
-         * provider.
-         * texture and metaData are both null
-         */
+        /// Can be set by `TileProvider`s if the requested `TileIndex` is undefined for
+        /// that particular provider.
+        /// `texture` and `metaData` are both `nullptr`
         OutOfRange,
 
-        /**
-         * An IO Error happend
-         * texture and metaData are both null
-         */
+        /// An IO Error happend
+        /// `texture` and `metaData` are both `nullptr`
         IOError,
 
-        /**
-         * The Texture is uploaded to the GPU and good for usage.
-         * texture is defined. metaData may be defined.
-         */
+        /// The Texture is uploaded to the GPU and good for usage.
+        /// `texture` is defined. `metaData` may be defined.
         OK
     };
 
@@ -147,8 +130,8 @@ public:
 
 
 struct TileUvTransform {
-    glm::vec2 uvOffset;
-    glm::vec2 uvScale;
+    glm::vec2 uvOffset = glm::vec2(0.f);
+    glm::vec2 uvScale = glm::vec2(0.f);
 };
 
 
@@ -161,7 +144,10 @@ struct ChunkTile {
 
 
 
-using ChunkTilePile = std::vector<ChunkTile>;
+// The ChunkTilePile either contains 1 or 3 ChunkTile, depending on if layer-blending is
+// enabled. If it is enabled, we need the two adjacent levels, if it is not enabled, only
+// the current layer is needed
+using ChunkTilePile = std::array<std::optional<ChunkTile>, 3>;
 
 } // namespace openspace::globebrowsing
 

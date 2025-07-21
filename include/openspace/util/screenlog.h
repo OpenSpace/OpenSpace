@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,18 +27,19 @@
 
 #include <ghoul/logging/log.h>
 
+#include <ghoul/misc/profiling.h>
 #include <chrono>
 #include <mutex>
+#include <string_view>
 #include <vector>
 
 namespace openspace {
 
 /**
  * The ScreenLog is an implementation of the ghoul::logging::Log abstract interface that
- * can be used to present log messages in an on-screen GUI. For this, every incoming
- * log message (#log) is tagged with the current time and all stored log messages can
- * expire based on the time-to-live as specified in the constructor
- * (#removeExpiredEntries).
+ * can be used to present log messages in an on-screen GUI. For this, every incoming log
+ * message (#log) is tagged with the current time and all stored log messages can expire
+ * based on the time-to-live as specified in the constructor (#removeExpiredEntries).
  */
 class ScreenLog : public ghoul::logging::Log {
 public:
@@ -76,12 +77,13 @@ public:
      * \param logLevel The minimum ghoul::logging::LogLevel that messages must
      *        have in order to be stored in the ScreenLog
      */
-    ScreenLog(std::chrono::seconds timeToLive, LogLevel logLevel = LogLevel::Info);
+    explicit ScreenLog(std::chrono::seconds timeToLive,
+        LogLevel logLevel = LogLevel::Info);
 
     /**
      * Destructor
      */
-    ~ScreenLog() = default;
+    ~ScreenLog() override = default;
 
     /**
      * Overwritten ghoul::loggling::Log method that is called whenever a new log message
@@ -91,16 +93,16 @@ public:
      * \param category The category of the log message
      * \param message The actual log message that was transmitted
      */
-    void log(ghoul::logging::LogLevel level, const std::string& category,
-        const std::string& message) override;
+    void log(ghoul::logging::LogLevel level, std::string_view category,
+        std::string_view message) override;
 
     /**
      * This method removes all the stored LogEntry%s that have expired, calculated by
-     * their <code>timeStamp</code> and the #_timeToLive value.
+     * their `timeStamp` and the #_timeToLive value.
      *
-     * \post All entries retrieved by the #entries function have a <code>timeStamp</code>
-     *       that is lower than the current time + #_timeToLive. The current time used is
-     *       the time when this method was last called
+     * \post All entries retrieved by the #entries function have a `timeStamp` that is
+     *       lower than the current time + #_timeToLive. The current time used is the time
+     *       when this method was last called
      */
     void removeExpiredEntries();
 
@@ -116,7 +118,7 @@ private:
     std::vector<LogEntry> _entries;
 
     /// The time-to-live for the LogEntry%s in this ScreenLog. Is used by the
-    /// #removeExpiredEntries method to remove expired entries.
+    /// #removeExpiredEntries method to remove expired entries
     std::chrono::seconds _timeToLive;
 
     /// The minimum LogLevel of messages
@@ -124,7 +126,7 @@ private:
 
     /// A mutex to ensure thread-safety since the logging and the removal of expired
     /// entires can occur on different threads
-    mutable std::mutex _mutex;
+    mutable TracyLockable(std::mutex, _mutex);
 };
 
 } // namespace openspace

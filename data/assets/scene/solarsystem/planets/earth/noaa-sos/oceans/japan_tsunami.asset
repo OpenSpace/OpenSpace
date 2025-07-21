@@ -1,0 +1,53 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Japan Tsunami: Wave Heights - March 11, 2011"
+local Identifier = "noaa-sos-oceans-japan_tsunami"
+local Description = [[On March 11, 2011 at 2:45 local time, a 9.0 magnitude earthquake
+occurred 81 miles (130 km) off the east coast of Sendai, Japan, triggering a massive
+tsunami. It is estimated that the initial tsunami wave took 10 to 30 minutes to make its
+first landfall. Forecasted wave heights were up to 33 ft (10 m) and there were many
+reports of tsunami waves three stories high in parts of Japan. Across the Pacific Ocean,
+many countries issued evacuations along the coasts because of the predicted tsunami
+waves]]
+local URL = "https://sos.noaa.gov/catalog/datasets/japan-tsunami-wave-heights-march-11-2011/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "4096.png",
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

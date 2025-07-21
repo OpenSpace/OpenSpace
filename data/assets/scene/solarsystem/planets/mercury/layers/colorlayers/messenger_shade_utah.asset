@@ -1,0 +1,38 @@
+local globe = asset.require("../../mercury")
+
+
+
+local Layer = {
+  Identifier = "Messenger_SHADE_Utah",
+  Name = "Messenger SHADE [Utah]",
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = asset.resource("messenger_shade_utah.wms"),
+  Settings = {
+    Gamma = 1.33,
+    Multiplier = 1.15
+  },
+  BlendMode = "Multiply"
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "Messenger SHADE [Utah]",
+  Description = [[Mercury Messenger SHADE layer for Mercury globe. This map is hosted on
+    the OpenSpace server in Utah]],
+  Author = "USGS",
+  URL = "https://astrogeology.usgs.gov/search/map/Mercury/Topography/MESSENGER/Mercury_Messenger_USGS_ClrShade_Global_2km",
+  License = "NASA/PDS"
+}

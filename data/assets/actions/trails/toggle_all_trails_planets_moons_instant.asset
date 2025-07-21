@@ -1,0 +1,22 @@
+local ToggleTrailsInstant = {
+  Identifier = "os.ToggleTrailsInstant",
+  Name = "Toggle planet and moon trails (instant)",
+  Command = [[
+    openspace.toggleFade("{planetTrail_solarSystem}.Renderable", 0.0)
+    openspace.toggleFade("{moonTrail_solarSystem}.Renderable", 0.0)
+  ]],
+  Documentation = "Toggles the visibility of planet and moon trails",
+  GuiPath = "/Solar System",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.action.registerAction(ToggleTrailsInstant)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(ToggleTrailsInstant)
+end)
+
+asset.export("ToggleTrailsInstant", ToggleTrailsInstant.Identifier)

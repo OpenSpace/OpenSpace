@@ -1,0 +1,74 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Ship Multibeam Bathymetric Surveys Mosaic"
+local Identifier = "noaa-sos-oceans-ship_tracks-mosaic"
+local Description = [[Beneath the sea surface is an amazing sea floor that contains
+mountain ranges, trenches and plains. The ocean covers 71% of the Earth's surface, has an
+area of 139,400,000 square miles and an average depth of 2.3 miles. The first
+measurements of the sea floor were made with weighted lines that were lowered until they
+hit the bottom. Vast improvements have been made since that time, yet the majority of the
+sea floor remains unmapped. It's important to know the bathymetry, or the sea floor
+terrain, of the ocean for navigation and exploration purposes. Today, bathymetric maps
+are created using data from multibeam echosounders. A multibeam echosounder is a device
+that is mounted to the hull of a ship to determine the depth of water and the nature of
+the seabed. The system emits a broad acoustic pulse from under a ship and then records
+how long it takes the beams to return to the ship after bouncing off the sea floor. If
+the speed of sound in water is known for the full water column, then the depth of the sea
+floor can be calculated from the travel time. Multiple beams are sent out in a fan shape
+to collect depth information in a swath beneath the boat as it travels through the
+ocean]]
+local URL = "https://sos.noaa.gov/catalog/datasets/ship-multibeam-bathymetric-surveys-mosaic/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "4096.png",
+  Description = Description
+}
+
+local Legend = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "legend.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.85, 0.0, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Legend)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Legend)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(Legend)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,58 +22,89 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometry.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableconstellationbounds.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanet.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablerings.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/translation/keplertranslation.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/translation/spicetranslation.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/translation/tletranslation.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rotation/spicerotation.h
+  horizonsfile.h
+  kepler.h
+  rendering/renderableconstellationsbase.h
+  rendering/renderableconstellationbounds.h
+  rendering/renderableconstellationlines.h
+  rendering/renderableeclipsecone.h
+  rendering/renderablefluxnodes.h
+  rendering/renderablehabitablezone.h
+  rendering/renderablerings.h
+  rendering/renderableorbitalkepler.h
+  rendering/renderablestars.h
+  rendering/renderabletravelspeed.h
+  timeframe/timeframekernel.h
+  translation/gptranslation.h
+  translation/keplertranslation.h
+  translation/spicetranslation.h
+  translation/horizonstranslation.h
+  rotation/spicerotation.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometry.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableconstellationbounds.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanet.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablerings.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/translation/keplertranslation.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/translation/spicetranslation.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/translation/tletranslation.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rotation/spicerotation.cpp
+  horizonsfile.cpp
+  kepler.cpp
+  spacemodule_lua.inl
+  rendering/renderableconstellationsbase.cpp
+  rendering/renderableconstellationbounds.cpp
+  rendering/renderableconstellationlines.cpp
+  rendering/renderableeclipsecone.cpp
+  rendering/renderablefluxnodes.cpp
+  rendering/renderablehabitablezone.cpp
+  rendering/renderablerings.cpp
+  rendering/renderableorbitalkepler.cpp
+  rendering/renderablestars.cpp
+  rendering/renderabletravelspeed.cpp
+  timeframe/timeframekernel.cpp
+  translation/gptranslation.cpp
+  translation/keplertranslation.cpp
+  translation/spicetranslation.cpp
+  translation/horizonstranslation.cpp
+  rotation/spicerotation.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/constellationbounds_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/constellationbounds_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/nighttexture_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/nighttexture_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderableplanet_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderableplanet_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/rings_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/rings_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/shadow_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/shadow_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/shadow_nighttexture_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/shadow_nighttexture_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/star_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/star_ge.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/star_vs.glsl
+  shaders/constellationbounds_fs.glsl
+  shaders/constellationbounds_vs.glsl
+  shaders/constellationlines_fs.glsl
+  shaders/constellationlines_vs.glsl
+  shaders/keplerpoints_fs.glsl
+  shaders/keplerpoints_gs.glsl
+  shaders/keplerpoints_vs.glsl
+  shaders/keplertrails_fs.glsl
+  shaders/keplertrails_vs.glsl
+  shaders/fluxnodes_fs.glsl
+  shaders/fluxnodes_vs.glsl
+  shaders/habitablezone_vs.glsl
+  shaders/habitablezone_fs.glsl
+  shaders/rings_vs.glsl
+  shaders/rings_fs.glsl
+  shaders/star_fs.glsl
+  shaders/star_ge.glsl
+  shaders/star_vs.glsl
+  shaders/travelspeed_fs.glsl
+  shaders/travelspeed_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
-    "Space"
-    space_module
-    STATIC
-    ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+  "Space"
+  space_module
+  STATIC
+  ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+)
+target_precompile_headers(${space_module} PRIVATE
+  <openspace/documentation/documentation.h>
+  <openspace/documentation/verifier.h>
+  <openspace/properties/numericalproperty.h>
+  <openspace/rendering/renderable.h>
+  <ghoul/opengl/programobject.h>
+  <ghoul/opengl/shaderobject.h>
+  <ghoul/opengl/uniformcache.h>
 )

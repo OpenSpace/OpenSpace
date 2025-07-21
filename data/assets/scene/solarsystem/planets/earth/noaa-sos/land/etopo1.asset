@@ -1,0 +1,69 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "ETOPO1: Topography and Bathymetry"
+local Identifier = "noaa-sos-land-etopo1"
+local Description = [[ETOPO1 is a 1 arc-minute global relief model of Earth's surface
+that integrates land topography and ocean bathymetry. It was built from numerous global
+and regional data sets, and is available in "Ice Surface" (top of Antarctic and Greenland
+ice sheets) and "Bedrock" (base of the ice sheets) versions. The "Ice Surface" version is
+available for Science On a Sphere. This dataset is a higher resolution version of
+ETOPO2, which is a 2 arc-minute global relief model of Earth's surface. An arc-minute is
+1/60 of a degree. Scientists use high resolution maps like ETOPO1 to improve accuracy in
+tsunami forecasting, modeling, and warnings, and also to enhance ocean circulation
+modeling and Earth visualization]]
+local URL = "https://sos.noaa.gov/catalog/datasets/etopo1-topography-and-bathymetry/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "4096.jpg",
+  Description = Description
+}
+
+local Colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "etopo1_color_scale.png",
+  FaceCamera = false,
+  Scale = 0.1,
+  CartesianPosition = { 0.5, 0.0, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(Colorbar)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

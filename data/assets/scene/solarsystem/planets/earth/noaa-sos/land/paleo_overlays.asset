@@ -1,0 +1,124 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Paleoclimate Proxies"
+local Identifier = "noaa-sos-land-paleo_overlays"
+local Description = [[Every year, particles eroding from the continents are transported
+to the oceans by the wind as dust and by rivers as sands and gravels. Once they get to
+the ocean, they mix with billions of tons of dead plankton shells, sink, and settle on
+the seafloor. There, they accumulate vertically in layers on top of previous years'
+material. Similarly, this year's snow accumulates on top of the previous years' snow at
+the polar regions in places like Greenland and Antarctica. Over time, this process forms
+new layers of ice. Trees, much the same way, add yearly layers of new cells in concentric
+circles just below their bark - called tree rings. And, in many caves around the world,
+the strength of the seasonal cycle of a wet monsoon followed by a dry season is recorded
+in the chemistry of stalagmites rising up from the cave floor, formed by drips of
+mineral-rich water from the roof of the cave]]
+local URL = "https://sos.noaa.gov/catalog/datasets/paleoclimate-proxies/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local LayerBase = {
+  Identifier = Identifier,
+  Name = Name,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "4096.png",
+  Description = Description
+}
+
+local LayerCorals = {
+  Identifier = Identifier .. "-corals",
+  Name = Name .. " (Corals)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "corals.png",
+  Description = Description
+}
+
+local LayerIcerings = {
+  Identifier = Identifier .. "-icerings",
+  Name = Name .. " (Icerings)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "icerings.png",
+  Description = Description
+}
+
+local LayerOcean = {
+  Identifier = Identifier .. "-ocean",
+  Name = Name .. " (Ocean)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "ocean.png",
+  Description = Description
+}
+
+local LayerSpeleothem = {
+  Identifier = Identifier .. "-speleothem",
+  Name = Name .. " (Speleothem)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "speleothem.png",
+  Description = Description
+}
+
+local LayerTreeRings = {
+  Identifier = Identifier .. "-tree_rings",
+  Name = Name .. " (Tree Rings)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "tree_rings.png",
+  Description = Description
+}
+
+local Legend = {
+  Identifier = Identifier,
+  Name = Name,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "legend.jpg",
+  FaceCamera = false,
+  Scale = 0.2,
+  CartesianPosition = { 0.85, 0.0, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerCorals)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerIcerings)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerOcean)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerSpeleothem)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerTreeRings)
+  openspace.addScreenSpaceRenderable(Legend)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Legend)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerTreeRings)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerSpeleothem)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerOcean)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerIcerings)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerCorals)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
+end)
+
+asset.export(LayerBase)
+asset.export(LayerCorals)
+asset.export(LayerIcerings)
+asset.export(LayerOcean)
+asset.export(LayerSpeleothem)
+asset.export(LayerTreeRings)
+asset.export(Legend)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

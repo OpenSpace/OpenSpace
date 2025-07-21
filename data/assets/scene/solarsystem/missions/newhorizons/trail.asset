@@ -1,36 +1,42 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
+local transforms = asset.require("./transforms")
+local kernels = asset.require("./kernels")
 
 
 
 local TrailAtPluto = {
-    Identifier = "NewHorizonsTrailPluto",
-    Parent = transforms.PlutoBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailTrajectory",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "NEW HORIZONS",
-            Observer = "PLUTO BARYCENTER"
-        },
-        Color = { 1.0, 0.8, 0.4 },
-        ShowFullTrail = true,
-        StartTime = "2015 JUL 07 12:00:00",
-        EndTime = "2015 JUL 17 12:00:00",
-        PointSize = 5,
-        SampleInterval = 3600,
-        TimeStampSubsampleFactor = 4,
-        EnableFade = false,
-        Rendering = "Lines+Points"
+  Identifier = "NewHorizonsTrailPluto",
+  Parent = transforms.PlutoBarycenterAccurate.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.NewHorizons,
+      Observer = kernels.ID.PlutoBarycenter
     },
-    GUI = {
-        Name = "New Horizons Trail Pluto",
-        Path = "/Solar System/Missions/New Horizons"
-    }
+    Color = { 1.0, 0.8, 0.4 },
+    ShowFullTrail = true,
+    StartTime = "2015 JUL 07 12:00:00",
+    EndTime = "2015 JUL 17 12:00:00",
+    PointSize = 5,
+    SampleInterval = 100,
+    TimeStampSubsampleFactor = 4,
+    EnableFade = false,
+    Rendering = "Lines+Points"
+  },
+  GUI = {
+    Name = "New Horizons Trail Pluto",
+    Path = "/Solar System/Missions/New Horizons",
+    Focusable = false
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(TrailAtPluto)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-    TrailAtPluto
-})
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TrailAtPluto)
+end)
+
+asset.export(TrailAtPluto)

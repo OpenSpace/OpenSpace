@@ -1,0 +1,101 @@
+local transforms = asset.require("scene/solarsystem/heliosphere/transforms_heliosphere")
+
+
+
+local transferFunctions = asset.resource({
+  Name = "Fieldlines Transfer Functions",
+  Type = "HttpSynchronization",
+  Identifier = "sun_earth_event_july_2012-fieldlines_transferfunctions",
+  Version = 1
+})
+
+local fieldlineData = asset.resource({
+  Name = "Fieldlines Data PFSS",
+  Type = "HttpSynchronization",
+  Identifier = "sun_earth_event_july_2012-pfss",
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local DarkSun = {
+  Identifier = "os.2012july.DarkSun",
+  Name = "Dark sun",
+  Command = [[
+    local property = "Scene.Sun.Renderable.Layers.ColorLayers.Texture.Settings.Multiplier"
+    local textureMultiplier = openspace.propertyValue(property)
+    if (textureMultiplier < 0.01) then
+      openspace.setPropertyValueSingle(property, 1.0, 1)
+    else
+      openspace.setPropertyValueSingle(property, 0.0, 1)
+    end
+  ]],
+  Documentation = "Makes the Sun turn black",
+  GuiPath = "/2012July",
+  IsLocal = false
+}
+
+local pfssTransitionColorTable = transferFunctions .. "pfss_transition.txt"
+local pfssTopologyColorTable = transferFunctions .. "pfss_topology.txt"
+local pfssBsignColorTable = transferFunctions .. "pfss_bsign.txt"
+
+local PFSSPaths = {
+  SolarSoft = fieldlineData .. "leilas_solar_soft/"
+}
+
+local InteractionSphere = 695700000
+
+local PFSS = {
+  Identifier = "FL_PFSS",
+  Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
+  InteractionSphere = InteractionSphere,
+  Renderable = {
+    Type = "RenderableFieldlinesSequence",
+    SourceFolder = PFSSPaths.SolarSoft,
+    InputFileType = "Osfls",
+    ShowAtAllTimes = true,
+    Color = { 0.35, 0.51, 0.875, 0.22 },
+    FlowEnabled = true,
+    ReversedFlow = true,
+    FlowColor = { 1, 0.9, 1, 0.74 },
+    ParticleSize = 5,
+    ParticleSpacing = 250,
+    FlowSpeed = 75,
+    ColorTablePaths = {
+      pfssTopologyColorTable,
+      pfssBsignColorTable
+    },
+    ColorTableRanges = {
+      { 0, 2 },
+      { -1, 1 }
+    }
+  },
+  GUI = {
+    Name = "Fieldlines PFSS",
+    Path = "/Solar System/Heliosphere"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.action.registerAction(DarkSun)
+  openspace.addSceneGraphNode(PFSS)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PFSS)
+  openspace.action.removeAction(DarkSun)
+end)
+
+asset.export(PFSS)
+asset.export("DarkSun", DarkSun.Identifier)
+
+
+
+asset.meta = {
+  Name = "Fieldlines from PFSS model of 2012 event",
+  Description = "Magnetic fieldlines from PFSS model for a 2012 CME event",
+  Author = "CCMC",
+  URL = "",
+  License = "CC-BY"
+}

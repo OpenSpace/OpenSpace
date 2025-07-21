@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,9 +28,8 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/volume/transferfunctionproperty.h>
-#include <openspace/properties/binaryproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <memory>
 #include <string>
 
@@ -45,11 +44,9 @@ class Envelope;
 
 class TransferFunctionHandler : public properties::PropertyOwner {
 public:
-    TransferFunctionHandler(const properties::StringProperty& prop);
+    explicit TransferFunctionHandler(properties::StringProperty prop);
 
     void initialize();
-
-    void setHistogramProperty(openspace::Histogram& histogram);
 
     void setTexture();
     void loadStoredEnvelopes();
@@ -60,7 +57,7 @@ public:
 
     ghoul::opengl::Texture& texture();
     void uploadTexture();
-    bool hasTexture();
+    bool hasTexture() const;
 
     std::shared_ptr<openspace::TransferFunction> transferFunction();
 
@@ -72,7 +69,6 @@ private:
     properties::TriggerProperty _saveTransferFunction;
     std::string _filePath;
     properties::TransferFunctionProperty _transferFunctionProperty;
-    properties::BinaryProperty _histogramProperty;
     std::shared_ptr<openspace::TransferFunction> _transferFunction;
     std::shared_ptr<ghoul::opengl::Texture> _texture;
 };

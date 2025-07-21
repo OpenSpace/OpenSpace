@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,17 +32,28 @@
 #include <openspace/scene/translation.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <cmath>
+#include <optional>
 
 namespace {
-    constexpr const char* ProgramName = "EphemerisProgram";
-    constexpr const char* KeyTranslation = "Translation";
-
-    constexpr const std::array<const char*, 12> UniformNames = {
+#ifdef __APPLE__
+    constexpr std::array<const char*, 16> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
-        "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
-        "renderPhase"
+        "lineLength", "lineFadeAmount", "vertexSortingMethod", "idOffset", "nVertices",
+        "stride", "pointSize", "renderPhase", "useSplitRenderMode", "floatingOffset",
+        "numberOfUniqueVertices"
     };
+#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
+    constexpr std::array<const char*, 18> UniformNames = {
+        "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
+        "lineLength", "lineFadeAmount", "vertexSortingMethod", "idOffset", "nVertices",
+        "stride", "pointSize", "renderPhase", "viewport", "lineWidth", "floatingOffset",
+        "useSplitRenderMode", "numberOfUniqueVertices"
+    };
+#endif // __APPLE__
 
     // The possible values for the _renderingModes property
     enum RenderingMode {
@@ -62,196 +73,219 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB main color for the lines and points of the trail."
+        "This value determines the RGB main color for the lines and points of the trail.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableFadeInfo = {
         "EnableFade",
         "Enable line fading of old points",
         "Toggles whether the trail should fade older points out. If this value is "
-        "'true', the 'Fade' parameter determines the speed of fading. If this value is "
-        "'false', the entire trail is rendered at full opacity and color."
+        "true, the 'Fade' parameter determines the speed of fading. If this value is "
+        "false, the entire trail is rendered at full opacity and color.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
-        "Fade",
-        "Line fade",
-        "The fading factor that is applied to the trail if the 'EnableFade' value is "
-        "'true'. If it is 'false', this setting has no effect. The higher the number, "
-        "the less fading is applied."
+    constexpr openspace::properties::Property::PropertyInfo LineLengthInfo = {
+        "LineLength",
+        "Line Length",
+        "The extent of the rendered trail. A value of 0 will result in no trail and a "
+        "value of 1 will result in a trail that covers the entire extent. The setting "
+        "only applies if 'EnableFade' is true. If it is false, this setting has "
+        "no effect.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LineFadeAmountInfo = {
+        "LineFadeAmount",
+        "Line Fade Amount",
+        "The amount of the trail that should be faded. If the value is 0 then the "
+        "trail will have no fading applied. A value of 0.6 will result in a trail "
+        "where 60% of the extent of the trail will have fading applied to it. In other"
+        "words, the 40% closest to the head of the trail will be solid and the rest "
+        "will fade until completely transparent at the end of the trail. A value of 1 "
+        "will result in a trail that starts fading immediately, becoming fully "
+        "transparent by the end of the trail. This setting only applies if the "
+        "'EnableFade' value is true. If it is false, this setting has no effect.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the trail if the selected rendering "
-        "method includes lines. If the rendering mode is set to Points, this value is "
-        "ignored."
+        "Specifies the line width of the trail lines, if the selected rendering method "
+        "includes lines. If the rendering mode is Points, this value is ignored.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
         "PointSize",
         "Point Size",
-        "This value specifies the base size of the points along the line if the selected "
-        "rendering method includes points. If the rendering mode is set the Lines, this "
-        "value is ignored. If a subsampling of the values is performed, the subsampled "
-        "values are half this size."
+        "Specifies the base size of the points along the line, if the selected rendering "
+        "method includes points. If the rendering mode is Lines, this value is ignored. "
+        "If a subsampling of the values is performed, the subsampled values are half "
+        "this size.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderingModeInfo = {
         "Rendering",
         "Rendering Mode",
-        "Determines how the trail should be rendered to the screen.If 'Lines' is "
-        "selected, only the line part is visible, if 'Points' is selected, only the "
-        "corresponding points (and subpoints) are shown. 'Lines+Points' shows both parts."
+        "Determines how the trail should be rendered. If 'Lines' is selected, only the "
+        "line part is visible, if 'Points' is selected, only the corresponding points "
+        "(and subpoints) are shown. 'Lines+Points' shows both parts.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    struct [[codegen::Dictionary(RenderableTrail)]] Parameters {
+        // A translation used to compute locations along the path.
+        ghoul::Dictionary translation
+            [[codegen::reference("core_transform_translation")]];
+
+        // [[codegen::verbatim(LineColorInfo.description)]]
+        glm::vec3 color [[codegen::color()]];
+
+        // [[codegen::verbatim(EnableFadeInfo.description)]]
+        std::optional<bool> enableFade;
+
+        // [[codegen::verbatim(LineLengthInfo.description)]]
+        std::optional<float> lineLength;
+
+        // [[codegen::verbatim(LineFadeAmountInfo.description)]]
+        std::optional<float> lineFadeAmount;
+
+        // [[codegen::verbatim(LineWidthInfo.description)]]
+        std::optional<float> lineWidth;
+
+        // [[codegen::verbatim(PointSizeInfo.description)]]
+        std::optional<int> pointSize;
+
+        enum class RenderingMode {
+            Lines,
+            Points,
+            LinesPoints [[codegen::key("Lines+Points")]],
+            PointsLines [[codegen::key("Lines+Points")]]
+        };
+        // [[codegen::verbatim(RenderingModeInfo.description)]]
+        std::optional<RenderingMode> renderingMode [[codegen::key("Rendering")]];
+    };
+#include "renderabletrail_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableTrail::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableTrail",
-        "base_renderable_renderabletrail",
-        {
-            {
-                KeyTranslation,
-                new ReferencingVerifier("core_transform_translation"),
-                Optional::No,
-                "This object is used to compute locations along the path. Any "
-                "Translation object can be used here."
-            },
-            {
-                LineColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::No,
-                LineColorInfo.description
-            },
-            {
-                EnableFadeInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                EnableFadeInfo.description
-            },
-            {
-                FadeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                FadeInfo.description
-            },
-            {
-                LineWidthInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LineWidthInfo.description
-            },
-            {
-                PointSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                PointSizeInfo.description
-            },
-            {
-                RenderingModeInfo.identifier,
-                new StringInListVerifier(
-                    // Taken from the RenderingModeConversion map above
-                    { "Lines", "Points", "Lines+Points", "Points+Lines" }
-                ),
-                Optional::Yes,
-                RenderingModeInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("base_renderable_renderabletrail");
 }
 
-RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
-    , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _useLineFade(EnableFadeInfo, true)
-    , _lineFade(FadeInfo, 1.f, 0.f, 30.f)
-    , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
-    , _pointSize(PointSizeInfo, 1, 1, 64)
-    , _renderingModes(
-        RenderingModeInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+RenderableTrail::Appearance::Appearance()
+    : properties::PropertyOwner({
+        "Appearance",
+        "Appearance",
+        "The appearance of the trail"
+    })
+    , lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , useLineFade(EnableFadeInfo, true)
+    , lineWidth(LineWidthInfo, 10.f, 1.f, 20.f)
+    , pointSize(PointSizeInfo, 1, 1, 64)
+    , renderingModes(RenderingModeInfo)
+    , lineLength(LineLengthInfo, 1.f, 0.f, 1.f)
+    , lineFadeAmount(LineFadeAmountInfo, 1.f, 0.f, 1.f)
 {
-    addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
-
-    _translation = Translation::createFromDictionary(
-        dictionary.value<ghoul::Dictionary>(KeyTranslation)
-    );
-    addPropertySubOwner(_translation.get());
-
-    _lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
-    addProperty(_lineColor);
-
-    if (dictionary.hasKeyAndValue<bool>(EnableFadeInfo.identifier)) {
-        _useLineFade = dictionary.value<bool>(EnableFadeInfo.identifier);
-    }
-    addProperty(_useLineFade);
-
-    if (dictionary.hasKeyAndValue<double>(FadeInfo.identifier)) {
-        _lineFade = static_cast<float>(dictionary.value<double>(FadeInfo.identifier));
-    }
-    addProperty(_lineFade);
-
-    if (dictionary.hasKeyAndValue<double>(LineWidthInfo.identifier)) {
-        _lineWidth = static_cast<float>(dictionary.value<double>(
-            LineWidthInfo.identifier
-        ));
-    }
-    addProperty(_lineWidth);
-
-    if (dictionary.hasKeyAndValue<double>(PointSizeInfo.identifier)) {
-        _pointSize = static_cast<int>(dictionary.value<double>(PointSizeInfo.identifier));
-    }
-    addProperty(_pointSize);
-
-    _renderingModes.addOptions({
+    renderingModes.addOptions({
         { RenderingModeLines, "Lines" },
         { RenderingModePoints, "Points" },
         { RenderingModeLinesPoints, "Lines+Points" }
     });
 
-    // This map is not accessed out of order as long as the Documentation is adapted
-    // whenever the map changes. The documentation will check for valid values
-    if (dictionary.hasKeyAndValue<std::string>(RenderingModeInfo.identifier)) {
-        _renderingModes = RenderingModeConversion.at(
-            dictionary.value<std::string>(RenderingModeInfo.identifier)
-        );
+    lineColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(lineColor);
+    addProperty(lineWidth);
+    addProperty(pointSize);
+    addProperty(renderingModes);
+    addProperty(useLineFade);
+    addProperty(lineLength);
+    addProperty(lineFadeAmount);
+}
+
+RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
+    : Renderable(dictionary)
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    setRenderBin(RenderBin::Overlay);
+    addProperty(Fadeable::_opacity);
+
+    _translation = Translation::createFromDictionary(p.translation);
+    addPropertySubOwner(_translation.get());
+
+    _appearance.lineColor = p.color;
+    _appearance.useLineFade = p.enableFade.value_or(_appearance.useLineFade);
+    _appearance.lineLength = p.lineLength.value_or(_appearance.lineLength);
+    _appearance.lineWidth = p.lineWidth.value_or(_appearance.lineWidth);
+    _appearance.pointSize = p.pointSize.value_or(_appearance.pointSize);
+
+    if (p.renderingMode.has_value()) {
+        switch (*p.renderingMode) {
+            case Parameters::RenderingMode::Lines:
+                _appearance.renderingModes = RenderingModeLines;
+                break;
+            case Parameters::RenderingMode::Points:
+                _appearance.renderingModes = RenderingModePoints;
+                break;
+            case Parameters::RenderingMode::LinesPoints:
+            case Parameters::RenderingMode::PointsLines:
+                _appearance.renderingModes = RenderingModeLinesPoints;
+                break;
+        }
     }
     else {
-        _renderingModes = RenderingModeLines;
+        _appearance.renderingModes = RenderingModeLines;
     }
-    addProperty(_renderingModes);
+
+    addPropertySubOwner(_appearance);
+}
+
+void RenderableTrail::initialize() {
+    Renderable::initialize();
+    _translation->initialize();
 }
 
 void RenderableTrail::initializeGL() {
+    ZoneScoped;
+
+#ifdef __APPLE__
     _programObject = BaseModule::ProgramObjectManager.request(
-        ProgramName,
+        "EphemerisProgram",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine.buildRenderProgram(
-                ProgramName,
+            return global::renderEngine->buildRenderProgram(
+                "EphemerisProgram",
+                absPath("${MODULE_BASE}/shaders/renderabletrail_apple_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/renderabletrail_apple_fs.glsl")
+            );
+        }
+    );
+#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
+    _programObject = BaseModule::ProgramObjectManager.request(
+        "EphemerisProgram",
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return global::renderEngine->buildRenderProgram(
+                "EphemerisProgram",
                 absPath("${MODULE_BASE}/shaders/renderabletrail_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/renderabletrail_fs.glsl")
             );
         }
     );
+#endif // __APPLE__
 
     ghoul::opengl::updateUniformLocations(*_programObject, _uniformCache, UniformNames);
-
-    setRenderBin(Renderable::RenderBin::Overlay);
 }
 
 void RenderableTrail::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
-        ProgramName,
+        "EphemerisProgram",
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
     _programObject = nullptr;
@@ -261,127 +295,175 @@ bool RenderableTrail::isReady() const {
     return _programObject != nullptr;
 }
 
-void RenderableTrail::render(const RenderData& data, RendererTasks&) {
-    _programObject->activate();
-    _programObject->setUniform(_uniformCache.opacity, _opacity);
+glm::dvec3 RenderableTrail::translationPosition(Time time) const {
+    // Use empty modelTransform (local coordinates) and time 0; previous frame time
+    // doesn't matter
+    const UpdateData data = { {}, time, Time(0.0) };
+    // (2025-06-09, emmbr) No need to call update here, since it's only for caching
+    // the position and kills the trail performance. If behavior changes or we add
+    // a translation type that needs pre-update, we need add the update and address
+    // performance
+    //_translation->update(data);
+    return _translation->position(data);
+}
 
-    glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
+                                     const RenderData& data,
+                                     const glm::dmat4& modelTransform,
+                                     RenderInformation& info, int nVertices,
+                                     int ringOffset, bool useSplitRenderMode,
+                                     int numberOfUniqueVertices, int floatingOffset)
+{
+    ZoneScoped;
 
-    _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
+    // We pass in the model view transformation matrix as double in order to maintain
+    // high precision for vertices; especially for the trails, a high vertex precision
+    // is necessary as they are usually far away from their reference
+    const glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
+    _programObject->setUniform(
+        _uniformCache.modelViewTransform,
+        modelViewTransform * info._localTransform
+    );
 
-    _programObject->setUniform(_uniformCache.color, _lineColor);
-    _programObject->setUniform(_uniformCache.useLineFade, _useLineFade);
-    if (_useLineFade) {
-        _programObject->setUniform(_uniformCache.lineFade, _lineFade);
+    const int sorting = [](RenderInformation::VertexSorting s) {
+        switch (s) {
+            case RenderInformation::VertexSorting::NewestFirst: return 0;
+            case RenderInformation::VertexSorting::OldestFirst: return 1;
+            case RenderInformation::VertexSorting::NoSorting:   return 2;
+            default:                                  throw ghoul::MissingCaseException();
+        }
+    }(info.sorting);
+
+    // The vertex sorting method is used to tweak the fading along the trajectory
+    _programObject->setUniform(_uniformCache.vertexSortingMethod, sorting);
+
+    // This value is subtracted from the vertex id in the case of a potential ring
+    // buffer (as used in RenderableTrailOrbit) to keep the first vertex at its
+    // brightest
+    _programObject->setUniform(_uniformCache.idOffset, ringOffset);
+
+    _programObject->setUniform(_uniformCache.nVertices, nVertices);
+    _programObject->setUniform(_uniformCache.floatingOffset, floatingOffset);
+    _programObject->setUniform(_uniformCache.useSplitRenderMode, useSplitRenderMode);
+    _programObject->setUniform(_uniformCache.numberOfUniqueVertices,
+        numberOfUniqueVertices);
+
+#ifndef __APPLE__
+    std::array<GLint, 4> viewport;
+    global::renderEngine->openglStateCache().viewport(viewport.data());
+    _programObject->setUniform(
+        _uniformCache.viewport,
+        static_cast<float>(viewport[0]),
+        static_cast<float>(viewport[1]),
+        static_cast<float>(viewport[2]),
+        static_cast<float>(viewport[3])
+    );
+    _programObject->setUniform(
+        _uniformCache.lineWidth,
+        std::ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f))
+    );
+#endif // __APPLE__
+
+    if (renderPoints) {
+        // The stride parameter determines the distance between larger points and
+        // smaller ones
+        _programObject->setUniform(_uniformCache.stride, info.stride);
+        _programObject->setUniform(_uniformCache.pointSize, _appearance.pointSize);
     }
 
-    static std::map<RenderInformation::VertexSorting, int> SortingMapping = {
-        // Fragile! Keep in sync with shader
-        { RenderInformation::VertexSorting::NewestFirst, 0 },
-        { RenderInformation::VertexSorting::OldestFirst, 1 },
-        { RenderInformation::VertexSorting::NoSorting, 2}
+    // Fragile! Keep in sync with fragment shader
+    enum RenderPhase {
+        RenderPhaseLines = 0,
+        RenderPhasePoints
     };
 
-    const bool usingFramebufferRenderer =
-        global::renderEngine.rendererImplementation() ==
-        RenderEngine::RendererImplementation::Framebuffer;
+    glBindVertexArray(info._vaoID);
+    if (renderLines) {
+        _programObject->setUniform(_uniformCache.renderPhase, RenderPhaseLines);
+        // Subclasses of this renderer might be using the index array or might now be
+        // so we check if there is data available and if there isn't, we use the
+        // glDrawArrays draw call; otherwise the glDrawElements
+        if (info._iBufferID == 0) {
+            glDrawArrays(
+                GL_LINE_STRIP,
+                info.first,
+                info.count
+            );
+        }
+        else {
+            glDrawElements(
+                GL_LINE_STRIP,
+                info.count,
+                GL_UNSIGNED_INT,
+                reinterpret_cast<void*>(info.first * sizeof(unsigned int))
+            );
+        }
+    }
+    if (renderPoints) {
+        // Subclasses of this renderer might be using the index array or might now be
+        // so we check if there is data available and if there isn't, we use the
+        // glDrawArrays draw call; otherwise the glDrawElements
+        _programObject->setUniform(_uniformCache.renderPhase, RenderPhasePoints);
+        if (info._iBufferID == 0) {
+            glDrawArrays(GL_POINTS, info.first, info.count);
+        }
+        else {
+            glDrawElements(
+                GL_POINTS,
+                info.count,
+                GL_UNSIGNED_INT,
+                reinterpret_cast<void*>(info.first * sizeof(unsigned int))
+            );
+        }
+    }
+}
 
-    if (usingFramebufferRenderer) {
-        glDepthMask(false);
-        //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+void RenderableTrail::render(const RenderData& data, RendererTasks&) {
+    ZoneScoped;
+
+    _programObject->activate();
+    _programObject->setUniform(_uniformCache.opacity, opacity());
+
+    const glm::dmat4 modelTransform = calcModelTransform(data);
+
+    _programObject->setUniform(
+        _uniformCache.projectionTransform,
+        data.camera.projectionMatrix()
+    );
+
+    _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
+    _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
+    if (_appearance.useLineFade) {
+        const float startPoint = 1.f - _appearance.lineLength;
+        const float remainingRange = 1.f - startPoint;
+        const float delta = remainingRange * _appearance.lineFadeAmount;
+        const float endPoint = std::min(startPoint + delta, 1.f);
+        _programObject->setUniform(_uniformCache.lineLength, startPoint);
+        _programObject->setUniform(_uniformCache.lineFadeAmount, endPoint);
     }
 
-    const bool renderLines = (_renderingModes == RenderingModeLines) |
-                             (_renderingModes == RenderingModeLinesPoints);
+    /*glm::ivec2 resolution = global::renderEngine.renderingResolution();
+    _programObject->setUniform(_uniformCache.resolution, resolution);*/
 
-    const bool renderPoints = (_renderingModes == RenderingModePoints) |
-                              (_renderingModes == RenderingModeLinesPoints);
+    glDepthMask(false);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+    const bool renderLines = (_appearance.renderingModes == RenderingModeLines) ||
+                             (_appearance.renderingModes == RenderingModeLinesPoints);
+
+    const bool renderPoints = (_appearance.renderingModes == RenderingModePoints) ||
+                              (_appearance.renderingModes == RenderingModeLinesPoints);
 
     if (renderLines) {
-        glLineWidth(_lineWidth);
+#ifdef __APPLE__
+        glLineWidth(1);
+#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
+        glLineWidth(std::ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f)));
+#endif // __APPLE__
     }
     if (renderPoints) {
         glEnable(GL_PROGRAM_POINT_SIZE);
     }
-
-    auto render = [renderLines, renderPoints, p = _programObject, &data,
-                   &modelTransform, pointSize = _pointSize.value(), c = _uniformCache]
-                  (RenderInformation& info, int nVertices, int offset)
-    {
-        // We pass in the model view transformation matrix as double in order to maintain
-        // high precision for vertices; especially for the trails, a high vertex precision
-        // is necessary as they are usually far away from their reference
-        p->setUniform(
-            c.modelView,
-            data.camera.combinedViewMatrix() * modelTransform * info._localTransform
-        );
-
-        // The vertex sorting method is used to tweak the fading along the trajectory
-        p->setUniform(c.vertexSorting, SortingMapping[info.sorting]);
-
-        // This value is subtracted from the vertex id in the case of a potential ring
-        // buffer (as used in RenderableTrailOrbit) to keep the first vertex at its
-        // brightest
-        p->setUniform(c.idOffset, offset);
-
-        p->setUniform(c.nVertices, nVertices);
-
-        if (renderPoints) {
-            // The stride parameter determines the distance between larger points and
-            // smaller ones
-            p->setUniform(c.stride, info.stride);
-            p->setUniform(c.pointSize, pointSize);
-        }
-
-        // Fragile! Keep in sync with fragment shader
-        enum RenderPhase {
-            RenderPhaseLines = 0,
-            RenderPhasePoints
-        };
-
-        glBindVertexArray(info._vaoID);
-        if (renderLines) {
-            p->setUniform(c.renderPhase, RenderPhaseLines);
-            // Subclasses of this renderer might be using the index array or might now be
-            // so we check if there is data available and if there isn't, we use the
-            // glDrawArrays draw call; otherwise the glDrawElements
-            if (info._iBufferID == 0) {
-                glDrawArrays(
-                    GL_LINE_STRIP,
-                    info.first,
-                    info.count
-                );
-            }
-            else {
-                glDrawElements(
-                    GL_LINE_STRIP,
-                    info.count,
-                    GL_UNSIGNED_INT,
-                    reinterpret_cast<void*>(info.first * sizeof(unsigned int))
-                );
-            }
-        }
-        if (renderPoints) {
-            // Subclasses of this renderer might be using the index array or might now be
-            // so we check if there is data available and if there isn't, we use the
-            // glDrawArrays draw call; otherwise the glDrawElements
-            p->setUniform(c.renderPhase, RenderPhasePoints);
-            if (info._iBufferID == 0) {
-                glDrawArrays(GL_POINTS, info.first, info.count);
-            }
-            else {
-                glDrawElements(
-                    GL_POINTS,
-                    info.count,
-                    GL_UNSIGNED_INT,
-                    reinterpret_cast<void*>(info.first * sizeof(unsigned int))
-                );
-            }
-        }
-    };
 
     // The combined size of vertices; -1 because we duplicate the penultimate point
     const int totalNumber = _primaryRenderInformation.count +
@@ -393,18 +475,93 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
         0 :
         _primaryRenderInformation.first;
 
-    // Render the primary batch of vertices
-    render(_primaryRenderInformation, totalNumber, primaryOffset);
+    // Culling
+    //const glm::dvec3 trailPosWorld = glm::dvec3(
+    //    modelTransform * _primaryRenderInformation._localTransform *
+    //    glm::dvec4(0.0, 0.0, 0.0, 1.0)
+    //);
+    //const double distance = glm::distance(trailPosWorld, data.camera.eyePositionVec3());
 
-    // The secondary batch is optional, so we need to check whether we have any data here
-    if (_floatingRenderInformation._vaoID != 0 && _floatingRenderInformation.count != 0) {
-        render(
-            _floatingRenderInformation,
-            totalNumber,
-            // -1 because we duplicate the penultimate point between the vertices
-            -(primaryOffset + _primaryRenderInformation.count - 1)
+    //if (distance > boundingSphere() * DISTANCE_CULLING_RADII) {
+    //    // Reset
+    //    global::renderEngine->openglStateCache().resetBlendState();
+    //    global::renderEngine->openglStateCache().resetDepthState();
+    //    return;
+    //}
+
+    if (_useSplitRenderMode) {
+        // Splits the trail up into three parts for more accurate rendering
+        // of renderableTrailTrajectory trails
+
+        internalRender(
+            renderLines,
+            renderPoints,
+            data,
+            modelTransform,
+            _primaryRenderInformation,
+            _primaryRenderInformation.count,
+            _primaryRenderInformation.first,
+            _useSplitRenderMode,
+            _nUniqueVertices
         );
+
+        const int floatingOffset = std::max(0, _primaryRenderInformation.count - 1);
+        internalRender(
+            renderLines,
+            renderPoints,
+            data,
+            modelTransform,
+            _floatingRenderInformation,
+            _floatingRenderInformation.count,
+            _floatingRenderInformation.first,
+            _useSplitRenderMode,
+            _nUniqueVertices,
+            floatingOffset
+        );
+
+        const int offset = (_floatingRenderInformation.count > 0) ? 1 : 0;
+        internalRender(
+            renderLines,
+            renderPoints,
+            data,
+            modelTransform,
+            _secondaryRenderInformation,
+            _secondaryRenderInformation.count,
+            _secondaryRenderInformation.first,
+            _useSplitRenderMode,
+            _nUniqueVertices,
+            offset
+        );
+
     }
+    else {
+        // Render the primary batch of vertices
+        internalRender(
+            renderLines,
+            renderPoints,
+            data,
+            modelTransform,
+            _primaryRenderInformation,
+            totalNumber,
+            primaryOffset
+        );
+
+        // The secondary batch is optional. We need to check whether we have any data
+        if (_floatingRenderInformation._vaoID != 0 &&
+            _floatingRenderInformation.count != 0) {
+            internalRender(
+                renderLines,
+                renderPoints,
+                data,
+                modelTransform,
+                _floatingRenderInformation,
+                totalNumber,
+                // -1 because we duplicate the penultimate point between the vertices
+                -(primaryOffset + _primaryRenderInformation.count - 1)
+            );
+        }
+    }
+
 
     if (renderPoints) {
         glDisable(GL_PROGRAM_POINT_SIZE);
@@ -412,10 +569,9 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
     glBindVertexArray(0);
 
-    if (usingFramebufferRenderer) {
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glDepthMask(true);
-    }
+    // Reset
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
 
     _programObject->deactivate();
 }

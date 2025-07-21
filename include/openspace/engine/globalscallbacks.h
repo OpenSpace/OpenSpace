@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,58 +27,55 @@
 
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
+#include <openspace/util/touch.h>
+#include <ghoul/misc/boolean.h>
 #include <functional>
 #include <vector>
 
-namespace openspace::global {
+namespace openspace {
+    BooleanType(IsGuiWindow);
+} // namespace openspace
 
-namespace detail {
+namespace openspace::global::callback {
 
-std::vector<std::function<void()>>& gInitialize();
-std::vector<std::function<void()>>& gDeinitialize();
+using KeyboardCallback = std::function<bool(Key, KeyModifier, KeyAction, IsGuiWindow)>;
+using CharacterCallback = std::function<bool(unsigned int, KeyModifier, IsGuiWindow)>;
+using MouseButtonCallback =
+    std::function<bool(MouseButton, MouseAction, KeyModifier, IsGuiWindow)>;
+using MousePositionCallback = std::function<void(double, double, IsGuiWindow)>;
+using MouseScrollWheelCallback = std::function<bool(double, double, IsGuiWindow)>;
 
-std::vector<std::function<void()>>& gInitializeGL();
-std::vector<std::function<void()>>& gDeinitializeGL();
+inline std::vector<std::function<void()>>* initialize;
+inline std::vector<std::function<void()>>* deinitialize;
+inline std::vector<std::function<void()>>* initializeGL;
+inline std::vector<std::function<void()>>* deinitializeGL;
+inline std::vector<std::function<void()>>* preSync;
+inline std::vector<std::function<void()>>* postSyncPreDraw;
+inline std::vector<std::function<void()>>* render;
+inline std::vector<std::function<void()>>* draw2D;
+inline std::vector<std::function<void()>>* postDraw;
+inline std::vector<KeyboardCallback>* keyboard;
+inline std::vector<CharacterCallback>* character;
+inline std::vector<MouseButtonCallback>* mouseButton;
+inline std::vector<MousePositionCallback>* mousePosition;
+inline std::vector<MouseScrollWheelCallback>* mouseScrollWheel;
+inline std::vector<std::function<bool(TouchInput)>>* touchDetected;
+inline std::vector<std::function<bool(TouchInput)>>* touchUpdated;
+inline std::vector<std::function<void(TouchInput)>>* touchExit;
 
-std::vector<std::function<void()>>& gPreSync();
-std::vector<std::function<void()>>& gPostSyncPreDraw();
-std::vector<std::function<void()>>& gRender();
-std::vector<std::function<void()>>& gDraw2D();
-std::vector<std::function<void()>>& gPostDraw();
+/**
+ * If the framerate becomes slow, Chromium Embedded Framework (used in Web Browser Module)
+ * needs to perform its message loop work more frequently than once per frame. If this
+ * method is not called frequently enough, the GUI will become much less responsive. A
+ * future more long-term may decouple the browser's message work loop from the main render
+ * loop altogehter using a separate thread. Currently, this method is called from within
+ * the RenderEngine, between calls to individual renderables.
+ */
+extern void (*webBrowserPerformanceHotfix)();
 
-std::vector<std::function<bool(Key, KeyModifier, KeyAction)>>& gKeyboard();
-std::vector<std::function<bool(unsigned int, KeyModifier)>>& gCharacter();
+void create();
+void destroy();
 
-std::vector<std::function<bool(MouseButton, MouseAction)>>& gMouseButton();
-std::vector<std::function<void(double, double)>>& gMousePosition();
-std::vector<std::function<bool(double, double)>>& gMouseScrollWheel();
-
-} // namespace detail
-
-namespace callback {
-
-static std::vector<std::function<void()>>& initialize = detail::gInitialize();
-static std::vector<std::function<void()>>& deinitialize = detail::gDeinitialize();
-static std::vector<std::function<void()>>& initializeGL = detail::gInitializeGL();
-static std::vector<std::function<void()>>& deinitializeGL = detail::gDeinitializeGL();
-static std::vector<std::function<void()>>& preSync = detail::gPreSync();
-static std::vector<std::function<void()>>& postSyncPreDraw = detail::gPostSyncPreDraw();
-static std::vector<std::function<void()>>& render = detail::gRender();
-static std::vector<std::function<void()>>& draw2D = detail::gDraw2D();
-static std::vector<std::function<void()>>& postDraw = detail::gPostDraw();
-static std::vector<std::function<bool(Key, KeyModifier, KeyAction)>>& keyboard =
-    detail::gKeyboard();
-static std::vector<std::function<bool(unsigned int, KeyModifier)>>& character =
-    detail::gCharacter();
-static std::vector<std::function<bool(MouseButton, MouseAction)>>& mouseButton =
-    detail::gMouseButton();
-static std::vector<std::function<void(double, double)>>& mousePosition =
-    detail::gMousePosition();
-static std::vector<std::function<bool(double, double)>>& mouseScrollWheel =
-    detail::gMouseScrollWheel();
-
-} // namespace callback
-
-} // namespace openspace::global
+} // namespace openspace::global::callback
 
 #endif // __OPENSPACE_CORE___GLOBALSCALLBACKS___H__

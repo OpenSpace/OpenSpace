@@ -1,0 +1,38 @@
+asset.onInitialize(function()
+  local scale = openspace.dpiScaling()
+  openspace.printInfo("Setting the DPI scaling factor to " .. tostring(scale))
+
+
+  if openspace.modules.isLoaded("CefWebGui") then
+    openspace.setPropertyValueSingle(
+      "Modules.CefWebGui.GuiScale",
+      openspace.propertyValue("Modules.CefWebGui.GuiScale") * scale
+    )
+  end
+
+  local dashboards = openspace.property("Dashboard.*.FontSize")
+  for _, v in ipairs(dashboards) do
+    openspace.setPropertyValueSingle(
+      v,
+      openspace.propertyValue(v) * scale
+    )
+  end
+
+  local offset = openspace.propertyValue("Dashboard.StartPositionOffset")
+  openspace.setPropertyValueSingle(
+    "Dashboard.StartPositionOffset",
+    { offset[1] * scale, offset[2] * scale }
+  )
+end)
+
+
+
+asset.meta = {
+  Name = "DPI Scaling",
+  Description = [[Retrieves the DPI scaling from the operating system and applies it to a
+    few selected places to make them scale better on "large resolution but small size"
+    monitors]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

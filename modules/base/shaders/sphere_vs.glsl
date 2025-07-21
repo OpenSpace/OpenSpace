@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,35 +24,28 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
-
 layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
+layout(location = 1) in vec2 in_textureCoords;
 
-out vec2 vs_st;
+out vec2 vs_textureCoords;
 out vec4 vs_position;
-out float s;
-out vec4 vs_gPosition;
+out vec3 vs_normal;
+out float vs_screenSpaceDepth;
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
+uniform mat4 modelViewProjection;
+uniform mat4 modelViewTransform;
+uniform mat3 modelViewRotation;
 
 
 void main() {
-    vec4 tmp = in_position;
+  vs_normal = modelViewRotation * normalize(in_position.xyz);
+  vs_textureCoords = in_textureCoords;
 
-    mat4 mt = mat4(0.0, -1.0,  0.0, 0.0,
-                   1.0,  0.0,  0.0, 0.0,
-                   0.0,  0.0, -1.0, 0.0,
-                   0.0,  0.0,  0.0, 1.0) * ModelTransform;
+  vec4 position = modelViewProjection * vec4(in_position.xyz, 1.0);
+  vs_position = modelViewTransform * vec4(in_position.xyz, 1.0);
 
-    vec4 position = pscTransform(tmp, mt);
+  // Set z to 0 to disable near/far-plane clipping
+  gl_Position = vec4(position.xy, 0.0, position.w);
 
-    vs_position = tmp;
-    vs_st = in_st;
-    vs_gPosition = position;
-    
-    position = ViewProjection * position;
-    gl_Position =  z_normalization(position);
-
+  vs_screenSpaceDepth = position.w;
 }

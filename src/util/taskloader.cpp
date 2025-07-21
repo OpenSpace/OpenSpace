@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,39 +24,41 @@
 
 #include <openspace/util/taskloader.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/task.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/dictionary.h>
 #include <algorithm>
+#include <filesystem>
 
 namespace {
-    constexpr const char* _loggerCat = "TaskRunner";
+    constexpr std::string_view _loggerCat = "TaskRunner";
 } // namespace
 
 namespace openspace {
 
 std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(
-                                                 const ghoul::Dictionary& tasksDictionary)
+                                                      const ghoul::Dictionary& dictionary)
 {
     std::vector<std::unique_ptr<Task>> tasks;
 
-    const std::vector<std::string>& keys = tasksDictionary.keys();
-    for (const std::string& key : keys) {
-        std::string taskName;
-        ghoul::Dictionary subTask;
-        if (tasksDictionary.getValue(key, taskName)) {
+    for (const std::string_view key : dictionary.keys()) {
+        if (dictionary.hasValue<std::string>(key)) {
+            const std::string taskName = dictionary.value<std::string>(key);
             const std::string path = taskName + ".task";
             std::vector<std::unique_ptr<Task>> subTasks = tasksFromFile(path);
             std::move(subTasks.begin(), subTasks.end(), std::back_inserter(tasks));
-        } else if (tasksDictionary.getValue(key, subTask)) {
+        }
+        else if (dictionary.hasValue<ghoul::Dictionary>(key)) {
+            const ghoul::Dictionary subTask = dictionary.value<ghoul::Dictionary>(key);
             const std::string& taskType = subTask.value<std::string>("Type");
             std::unique_ptr<Task> task = Task::createFromDictionary(subTask);
             if (!task) {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Failed to create a Task object of type '{}'", taskType
                 ));
             }
@@ -67,10 +69,10 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(
 }
 
 std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& path) {
-    std::string absTasksFile = absPath(path);
-    if (!FileSys.fileExists(ghoul::filesystem::File(absTasksFile))) {
-        LERROR(fmt::format(
-            "Could not load tasks file '{}. File not found", absTasksFile
+    std::filesystem::path absTasksFile = absPath(path);
+    if (!std::filesystem::is_regular_file(absTasksFile)) {
+        LERROR(std::format(
+            "Could not load tasks file '{}'. File not found", absTasksFile
         ));
         return std::vector<std::unique_ptr<Task>>();
     }
@@ -78,14 +80,24 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& 
     ghoul::Dictionary tasksDictionary;
     try {
         ghoul::lua::loadDictionaryFromFile(absTasksFile, tasksDictionary);
-    } catch (const ghoul::RuntimeError& e) {
-        LERROR(fmt::format(
-            "Could not load tasks file '{}. Lua error: {}: {}",
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERROR(std::format(
+            "Could not load tasks file '{}'. Lua error: ({}) {}",
             absTasksFile, e.message, e.component
         ));
         return std::vector<std::unique_ptr<Task>>();
     }
-    return tasksFromDictionary(tasksDictionary);
+
+    try {
+        return tasksFromDictionary(tasksDictionary);
+    }
+    catch (const documentation::SpecificationError& e) {
+        LERROR(std::format("Could not load tasks file '{}': {}", absTasksFile, e.what()));
+        logError(e);
+
+        return std::vector<std::unique_ptr<Task>>();
+    }
 }
 
 } // namespace openspace

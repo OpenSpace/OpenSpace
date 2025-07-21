@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,24 +25,52 @@
 #ifndef __OPENSPACE_CORE___CONFIGURATION___H__
 #define __OPENSPACE_CORE___CONFIGURATION___H__
 
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/properties/property.h>
+#include <openspace/util/keys.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/dictionary.h>
+#include <filesystem>
 #include <map>
 #include <string>
 #include <vector>
 
-namespace openspace::documentation { struct Documentation; }
+namespace openspace {
 
-namespace openspace::configuration {
+namespace documentation { struct Documentation; }
 
 struct Configuration {
-    std::string windowConfiguration = "${CONFIG}/single.xml";
+    Configuration() = default;
+    Configuration(Configuration&&) = default;
+    Configuration(const Configuration&) = delete;
+    Configuration& operator=(const Configuration&) = delete;
+    Configuration& operator=(Configuration&&) = default;
+
+    ghoul::Dictionary createDictionary();
+
+    std::string windowConfiguration = "${CONFIG}/single.json";
     std::string asset;
+    std::string profile;
+
+    properties::Property::Visibility propertyVisibility =
+        properties::Property::Visibility::User;
+
+    bool showPropertyConfirmation = true;
+
     std::vector<std::string> globalCustomizationScripts;
     std::map<std::string, std::string> pathTokens = {
         { "CACHE" , "CACHE = \"${BASE}/cache\"" }
     };
     std::map<std::string, std::string> fonts;
+
+    struct FontSizes {
+        float frameInfo;
+        float shutdown;
+        float log;
+        float cameraInfo;
+        float versionInfo;
+    };
+    FontSizes fontSize;
 
     struct Logging {
         std::string level = "Info";
@@ -52,62 +80,71 @@ struct Configuration {
     };
     Logging logging;
 
-    std::string scriptLog = "";
+    std::string scriptLog;
+    bool verboseScriptLog = false;
+    int scriptLogRotation = 3;
 
     struct DocumentationInfo {
-        std::string lua = "";
-        std::string property = "";
-        std::string sceneProperty = "";
-        std::string keyboard = "";
-        std::string documentation = "";
-        std::string factory = "";
-        std::string license = "";
+        std::string path;
     };
     DocumentationInfo documentation;
 
+    std::string versionCheckUrl;
     bool useMultithreadedInitialization = false;
 
     struct LoadingScreen {
         bool isShowingMessages = true;
         bool isShowingNodeNames = true;
-        bool isShowingProgressbar = true;
+        bool isShowingLogMessages = true;
     };
     LoadingScreen loadingScreen;
 
     bool isCheckingOpenGLState = false;
     bool isLoggingOpenGLCalls = false;
+    bool isPrintingEvents = false;
+
+    Key consoleKey = Key::GraveAccent;
 
     float shutdownCountdown = 0.f;
 
     bool shouldUseScreenshotDate = false;
 
+    bool sandboxedLua = true;
+
     std::string onScreenTextScaling = "window";
-    bool usePerSceneCache = false;
+    bool usePerProfileCache = false;
 
     bool isRenderingOnMasterDisabled = false;
-    bool isSceneTranslationOnMasterDisabled = false;
+    glm::vec3 globalRotation = glm::vec3(0.0);
+    glm::vec3 screenSpaceRotation = glm::vec3(0.0);
+    glm::vec3 masterRotation = glm::vec3(0.0);
     bool isConsoleDisabled = false;
+    bool bypassLauncher = false;
+
+    enum LayerServer {
+        All = 0,
+        NewYork,
+        Sweden,
+        Utah,
+        None
+    };
+    LayerServer layerServer = LayerServer::All;
 
     std::map<std::string, ghoul::Dictionary> moduleConfigurations;
 
-    std::string renderingMethod = "Framebuffer";
-
     struct OpenGLDebugContext {
         bool isActive = false;
+        bool printStacktrace = false;
         bool isSynchronous = true;
         struct IdentifierFilter {
-            std::string type = "";
-            std::string source = "";
+            std::string type;
+            std::string source;
             unsigned int identifier = 0;
         };
         std::vector<IdentifierFilter> identifierFilters;
         std::vector<std::string> severityFilters;
     };
     OpenGLDebugContext openGLDebugContext;
-
-    std::string serverPasskey = "17308";
-    bool doesRequireSocketAuthentication = true;
-    std::vector<std::string> clientAddressWhitelist = {};
 
     struct HTTPProxy {
         bool usingHttpProxy = false;
@@ -119,17 +156,22 @@ struct Configuration {
     };
     HTTPProxy httpProxy;
 
+    // Values not read from the openspace.cfg file
+    std::string sgctConfigNameInitialized;
 
-    static documentation::Documentation Documentation;
+    static documentation::Documentation Documentation();
     ghoul::lua::LuaState state;
 };
 
-std::string findConfiguration(const std::string& filename = "openspace.cfg");
+std::filesystem::path findConfiguration(const std::string& filename = "openspace.cfg");
 
-Configuration loadConfigurationFromFile(const std::string& filename);
+Configuration loadConfigurationFromFile(const std::filesystem::path& configurationFile,
+    const std::filesystem::path& settingsFile,
+    const glm::ivec2& primaryMonitorResolution);
 
-void parseLuaState(Configuration& configuration);
+Configuration::LayerServer stringToLayerServer(std::string_view server);
+std::string layerServerToString(Configuration::LayerServer server);
 
-} // namespace openspace::configuration
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___CONFIGURATION___H__

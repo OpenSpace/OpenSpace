@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,12 +26,14 @@
 #define __OPENSPACE_CORE___SCRIPTENGINE___H__
 
 #include <openspace/util/syncable.h>
-#include <openspace/documentation/documentationgenerator.h>
-
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/boolean.h>
+#include <filesystem>
 #include <mutex>
+#include <optional>
+#include <queue>
+#include <functional>
 
 namespace openspace { class SyncBuffer; }
 
@@ -39,22 +41,51 @@ namespace openspace::scripting {
 
 /**
  * The ScriptEngine is responsible for handling the execution of custom Lua functions and
- * executing scripts (#runScript and #runScriptFile). Before usage, it has to be
- * #initialize%d and #deinitialize%d. New ScriptEngine::Library%s consisting of
- * ScriptEngine::Library::Function%s have to be added which can then be called using the
- * <code>openspace</code> namespac prefix in Lua. The same functions can be exposed to
- * other Lua states by passing them to the #initializeLuaState method.
+ * executing scripts (#runScript). Before usage, it has to be #initialize%d and
+ * #deinitialize%d. New ScriptEngine::Library%s consisting of Library::Function%s have to
+ * be added which can then be called using the `openspace` namespace prefix in Lua. The
+ * same functions can be exposed to other Lua states by passing them to the
+ * #initializeLuaState method.
  */
-class ScriptEngine : public Syncable, public DocumentationGenerator {
+class ScriptEngine : public Syncable {
 public:
-    BooleanType(RemoteScripting);
+    struct Script {
+        BooleanType(ShouldBeSynchronized);
+        BooleanType(ShouldSendToRemote);
+        BooleanType(ShouldBeLogged);
+        using Callback = std::function<void(ghoul::Dictionary)>;
 
-    static constexpr const char* OpenSpaceLibraryName = "openspace";
+        /// The Lua script that should be executed
+        std::string code;
 
-    ScriptEngine();
+        /// Determines whether a script should be sent to computers that are in the same
+        /// _cluster_ as the master machine that the user is interacting with. These are
+        /// usually different computers that tile a bigger display area and that need to
+        /// be tightly locked
+        ShouldBeSynchronized synchronized = ShouldBeSynchronized::Yes;
+
+        /// Determines whether a script should be send to a distant OpenSpace instance
+        /// that is not part of the same cluster. This is used in the ParallelConnection
+        /// feature that can connect OpenSpace instances in a connection that does not
+        /// require instantaneous synchronization
+        ShouldSendToRemote sendToRemote = ShouldSendToRemote::Yes;
+
+        /// Determines whether the script should be logged to a local script log file.
+        /// Note that this might be overwritten if the user requested a verbose log file
+        ShouldBeLogged addToLog = ShouldBeLogged::Yes;
+
+        /// A callback that will be called when the script finishes executing and that
+        /// provides access to the return value of the script
+        Callback callback = Callback();
+    };
+
+    static constexpr std::string_view OpenSpaceLibraryName = "openspace";
+
+    explicit ScriptEngine(bool sandboxedLua = true);
 
     /**
-     * Initializes the internal Lua state and registers a common set of library functions
+     * Initializes the internal Lua state and registers a common set of library functions.
+     *
      * \throw LuaRuntimeException If the creation of the new Lua state fails
      */
     void initialize();
@@ -71,26 +102,33 @@ public:
     void addLibrary(LuaLibrary library);
     bool hasLibrary(const std::string& name);
 
-    bool runScript(const std::string& script);
-    bool runScriptFile(const std::string& filename);
-
-    bool writeLog(const std::string& script);
-
     virtual void preSync(bool isMaster) override;
     virtual void encode(SyncBuffer* syncBuffer) override;
     virtual void decode(SyncBuffer* syncBuffer) override;
     virtual void postSync(bool isMaster) override;
 
-    void queueScript(const std::string &script, RemoteScripting remoteScripting);
+    void queueScript(Script script);
+    void queueScript(std::string script);
 
-    void setLogFile(const std::string& filename, const std::string& type);
+    // This function should only be used by external classes if you are sure that the
+    // passed script should really be executed at this point. Otherwise the #queueScript
+    // should be used
+    bool runScript(const Script& script);
 
-    std::vector<std::string> cachedScripts();
+    // Runs the `script` every `timeout` seconds wallclock time
+    void registerRepeatedScript(std::string identifier, std::string script,
+        double timeout, std::string preScript = "", std::string postScript = "");
+    void removeRepeatedScript(std::string_view identifier);
+
+    void scheduleScript(std::string script, double delay);
 
     std::vector<std::string> allLuaFunctions() const;
+    const std::vector<LuaLibrary>& allLuaLibraries() const;
 
 private:
     BooleanType(Replace);
+
+    void writeLog(const std::string& script);
 
     bool registerLuaLibrary(lua_State* state, LuaLibrary& library);
     void addLibraryFunctions(lua_State* state, LuaLibrary& library, Replace replace);
@@ -98,29 +136,47 @@ private:
     bool isLibraryNameAllowed(lua_State* state, const std::string& name);
 
     void addBaseLibrary();
-    void remapPrintFunction();
 
-    std::string generateJson() const override;
 
     ghoul::lua::LuaState _state;
     std::vector<LuaLibrary> _registeredLibraries;
 
+    std::queue<Script> _incomingScripts;
 
-    //sync variables
-    std::mutex _mutex;
-    std::vector<std::pair<std::string, bool>> _queuedScripts;
-    std::vector<std::string> _receivedScripts;
-    std::string _currentSyncedScript;
+    // Client scripts are mutex protected since decode and rendering may happen
+    // asynchronously
+    std::mutex _clientScriptsMutex;
+    std::queue<std::string> _clientScriptQueue;
+    std::queue<Script> _masterScriptQueue;
 
-    //parallel variables
-    //std::map<std::string, std::map<std::string, std::string>> _cachedScripts;
-    //std::mutex _cachedScriptsMutex;
+    std::vector<std::string> _scriptsToSync;
 
-    //logging variables
+    struct RepeatedScriptInfo {
+        /// This script is run everytime `timeout` seconds have passed
+        std::string script;
+
+        /// This script is run when the repeated script is unregistered
+        std::string postScript;
+
+        std::string identifier;
+        double timeout = 0.0;
+        double lastRun = 0.0;
+    };
+    std::vector<RepeatedScriptInfo> _repeatedScripts;
+
+    struct ScheduledScriptInfo {
+        // The script that should be executed
+        std::string script;
+
+        // The application timestamp at which time the script should be executed
+        double timestamp = 0.0;
+    };
+    std::vector<ScheduledScriptInfo> _scheduledScripts;
+
+    // Logging variables
     bool _logFileExists = false;
     bool _logScripts = true;
-    std::string _logType;
-    std::string _logFilename;
+    std::filesystem::path _logFilename;
 };
 
 } // namespace openspace::scripting

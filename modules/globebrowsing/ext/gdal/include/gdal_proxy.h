@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_proxy.h d10f99bfacb1d7c3331a539c4667d1c95199313d 2017-12-18 12:00:18Z Kurt Schwehr $
+ * $Id: gdal_proxy.h b10430acb1303d18052fc20ebc36de01e01398fd 2018-10-25 14:49:58 -0500 Sander Jansen $
  *
  * Project:  GDAL Core
  * Purpose:  GDAL Core C++/Private declarations
@@ -208,20 +208,20 @@ class     GDALProxyPoolRasterBand;
 class CPL_DLL GDALProxyPoolDataset : public GDALProxyDataset
 {
   private:
-        GIntBig          responsiblePID;
+        GIntBig          responsiblePID = -1;
 
-        char            *pszProjectionRef;
-        double           adfGeoTransform[6];
-        int              bHasSrcProjection;
-        int              bHasSrcGeoTransform;
-        char            *pszGCPProjection;
-        int              nGCPCount;
-        GDAL_GCP        *pasGCPList;
-        CPLHashSet      *metadataSet;
-        CPLHashSet      *metadataItemSet;
+        char            *pszProjectionRef = nullptr;
+        double           adfGeoTransform[6]{0,1,0,0,0,1};
+        int              bHasSrcProjection = false;
+        int              bHasSrcGeoTransform = false;
+        char            *pszGCPProjection = nullptr;
+        int              nGCPCount = 0;
+        GDAL_GCP        *pasGCPList = nullptr;
+        CPLHashSet      *metadataSet = nullptr;
+        CPLHashSet      *metadataItemSet = nullptr;
 
-        GDALProxyPoolCacheEntry* cacheEntry;
-        char            *m_pszOwner;
+        GDALProxyPoolCacheEntry* cacheEntry = nullptr;
+        char            *m_pszOwner = nullptr;
 
         GDALDataset *RefUnderlyingDataset(bool bForceOpen);
 
@@ -245,6 +245,11 @@ class CPL_DLL GDALProxyPoolDataset : public GDALProxyDataset
     void AddSrcBandDescription( GDALDataType eDataType, int nBlockXSize,
                                 int nBlockYSize );
 
+    // Used by VRT SimpleSource to add a single GDALProxyPoolRasterBand while
+    // keeping all other bands initialized to a nullptr. This is under the assumption,
+    // VRT SimpleSource will not have to access any other bands than the one added.
+    void AddSrcBand(int nBand, GDALDataType eDataType, int nBlockXSize,
+                                int nBlockYSize );
     void FlushCache() override;
 
     const char *GetProjectionRef() override;
@@ -279,17 +284,15 @@ class GDALProxyPoolMaskBand;
 class CPL_DLL GDALProxyPoolRasterBand : public GDALProxyRasterBand
 {
   private:
-    CPLHashSet      *metadataSet;
-    CPLHashSet      *metadataItemSet;
-    char            *pszUnitType;
-    char           **papszCategoryNames;
-    GDALColorTable  *poColorTable;
+    CPLHashSet      *metadataSet = nullptr;
+    CPLHashSet      *metadataItemSet = nullptr;
+    char            *pszUnitType = nullptr;
+    char           **papszCategoryNames = nullptr;
+    GDALColorTable  *poColorTable = nullptr;
 
-    int                               nSizeProxyOverviewRasterBand;
-    GDALProxyPoolOverviewRasterBand **papoProxyOverviewRasterBand;
-    GDALProxyPoolMaskBand            *poProxyMaskBand;
-
-    void Init();
+    int                               nSizeProxyOverviewRasterBand = 0;
+    GDALProxyPoolOverviewRasterBand **papoProxyOverviewRasterBand = nullptr;
+    GDALProxyPoolMaskBand            *poProxyMaskBand = nullptr;
 
     GDALRasterBand* RefUnderlyingRasterBand( bool bForceOpen );
 
@@ -338,11 +341,13 @@ class CPL_DLL GDALProxyPoolRasterBand : public GDALProxyRasterBand
 class GDALProxyPoolOverviewRasterBand : public GDALProxyPoolRasterBand
 {
   private:
-    GDALProxyPoolRasterBand *poMainBand;
-    int                      nOverviewBand;
+    GDALProxyPoolRasterBand *poMainBand = nullptr;
+    int                      nOverviewBand = 0;
 
-    GDALRasterBand          *poUnderlyingMainRasterBand;
-    int                      nRefCountUnderlyingMainRasterBand;
+    GDALRasterBand          *poUnderlyingMainRasterBand = nullptr;
+    int                      nRefCountUnderlyingMainRasterBand = 0;
+
+    CPL_DISALLOW_COPY_ASSIGN(GDALProxyPoolOverviewRasterBand)
 
   protected:
     GDALRasterBand* RefUnderlyingRasterBand() override;
@@ -364,10 +369,12 @@ class GDALProxyPoolOverviewRasterBand : public GDALProxyPoolRasterBand
 class GDALProxyPoolMaskBand : public GDALProxyPoolRasterBand
 {
   private:
-    GDALProxyPoolRasterBand *poMainBand;
+    GDALProxyPoolRasterBand *poMainBand = nullptr;
 
-    GDALRasterBand          *poUnderlyingMainRasterBand;
-    int                      nRefCountUnderlyingMainRasterBand;
+    GDALRasterBand          *poUnderlyingMainRasterBand = nullptr;
+    int                      nRefCountUnderlyingMainRasterBand = 0;
+
+    CPL_DISALLOW_COPY_ASSIGN(GDALProxyPoolMaskBand)
 
   protected:
     GDALRasterBand* RefUnderlyingRasterBand() override;

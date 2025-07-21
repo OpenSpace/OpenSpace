@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: thinplatespline.h 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $
+ * $Id: thinplatespline.h c85c58ac781ef781cd126006d91cb5eed2dd53e2 2018-05-18 18:16:52 +0200 Even Rouault $
  *
  * Project:  GDAL Warp API
  * Purpose:  Declarations for 2D Thin Plate Spline transformer.
@@ -76,7 +76,9 @@ class VizGeorefSpline2D
         y(nullptr),
         u(nullptr),
         unused(nullptr),
-        index(nullptr)
+        index(nullptr),
+        x_mean(0),
+        y_mean(0)
     {
         for( int i = 0; i < VIZGEOREF_MAX_VARS; i++ )
         {
@@ -187,6 +189,8 @@ class VizGeorefSpline2D
     int *unused; // [VIZ_GEOREF_SPLINE_MAX_POINTS];
     int *index; // [VIZ_GEOREF_SPLINE_MAX_POINTS];
 
+    double x_mean;
+    double y_mean;
   private:
     CPL_DISALLOW_COPY_ASSIGN(VizGeorefSpline2D)
 };

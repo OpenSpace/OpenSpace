@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,46 +22,58 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.25 FATAL_ERROR)
+cmake_policy(VERSION 3.25)
 
 project(OpenSpace)
 
-set(OPENSPACE_VERSION_MAJOR 0)
-set(OPENSPACE_VERSION_MINOR 13)
-set(OPENSPACE_VERSION_PATCH 0)
-set(OPENSPACE_VERSION_STRING "Beta-3")
+# CMake 4.0 will no longer allow minimum required version below 3.5 and some of our
+# dependencies have not been updated to reflect this. To make things work, we blanked
+# require to 3.10 here to remove those issues. Once CMake configures and generates
+# successfully without this next line, it can be removed
+set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
 
+set(OPENSPACE_RELEASE_BUILD OFF)
+set(OPENSPACE_VERSION_MAJOR)
+set(OPENSPACE_VERSION_MINOR)
+set(OPENSPACE_VERSION_PATCH)
+set(OPENSPACE_VERSION_STRING)
 
-set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
-set(OPENSPACE_CMAKE_EXT_DIR "${OPENSPACE_BASE_DIR}/support/cmake")
-set(GHOUL_BASE_DIR "${OPENSPACE_BASE_DIR}/ext/ghoul")
-
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_common.cmake)
-include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
-include(${OPENSPACE_CMAKE_EXT_DIR}/handle_applications.cmake)
-include(${OPENSPACE_CMAKE_EXT_DIR}/handle_modules.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/include_gtest.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_common.cmake)
+include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)
 
 begin_header("Configuring OpenSpace project")
+
+# Bail out if the user tries to generate a 32 bit project
+if (NOT ${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+  message(FATAL_ERROR "OpenSpace can only be generated for 64 bit architectures.")
+endif ()
 
 ##########################################################################################
 # Cleanup project                                                                        #
 ##########################################################################################
-set(OPENSPACE_APPS_DIR "${OPENSPACE_BASE_DIR}/apps")
-set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
-set_property(GLOBAL PROPERTY USE_FOLDERS On)
+if (NOT EXISTS "${PROJECT_SOURCE_DIR}/ext/ghoul/CMakeLists.txt")
+  message(FATAL_ERROR "Git submodules are missing. Please run "
+    "git submodule update --init --recursive to download the missing dependencies."
+  )
+endif ()
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER CMake)
 
 mark_as_advanced(CMAKE_BACKWARDS_COMPATIBILITY CMAKE_BUILD_TYPE CMAKE_DEBUG_POSTFIX
-    CMAKE_INSTALL_PREFIX CMAKE_OSX_ARCHITECTURES CMAKE_OSX_DEPLOYMENT_TARGET
-    CMAKE_OSX_SYSROOT CMAKE_RELEASE_POSTFIX)
+  CMAKE_INSTALL_PREFIX CMAKE_OSX_ARCHITECTURES CMAKE_OSX_DEPLOYMENT_TARGET
+  CMAKE_OSX_SYSROOT CMAKE_RELEASE_POSTFIX
+)
 
 # Set build output directories
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OPENSPACE_CMAKE_EXT_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OPENSPACE_BASE_DIR}/bin)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/support/cmake)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
+
+if (MSVC)
+  # Force all builds to be multi-threaded and increase number of sections in obj files
+  add_compile_options(/MP /bigobj)
+endif ()
 
 ##########################################################################################
 # Main                                                                                   #
@@ -83,176 +95,149 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-# See if working directory is clean or not
-execute_process(
-  COMMAND git diff-index --quiet HEAD --
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  RESULT_VARIABLE OPENSPACE_GIT_STATUS_RETURN
+option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
+
+if (MSVC)
+  option(OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION "Raise exceptions when encountering Inf's or Nan's in floating point numbers" OFF)
+
+  option(OPENSPACE_OPTIMIZATION_ENABLE_AVX "Enable AVX instruction set for compilation" OFF)
+  option(OPENSPACE_OPTIMIZATION_ENABLE_AVX2 "Enable AVX2 instruction set for compilation" OFF)
+  option(OPENSPACE_OPTIMIZATION_ENABLE_AVX512 "Enable AVX2 instruction set for compilation" OFF)
+  option(OPENSPACE_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS "Enable other optimizations, like LTCG, intrinsics, etc")
+
+  if (OPENSPACE_OPTIMIZATION_ENABLE_AVX AND OPENSPACE_OPTIMIZATION_ENABLE_AVX2)
+    message(FATAL_ERROR "Cannot enable AVX and AVX2 instructions simultaneously")
+  endif ()
+
+  if (OPENSPACE_OPTIMIZATION_ENABLE_AVX AND OPENSPACE_OPTIMIZATION_ENABLE_AVX512)
+    message(FATAL_ERROR "Cannot enable AVX and AVX512 instructions simultaneously")
+  endif ()
+
+  if (OPENSPACE_OPTIMIZATION_ENABLE_AVX2 AND OPENSPACE_OPTIMIZATION_ENABLE_AVX512)
+    message(FATAL_ERROR "Cannot enable AVX2 and AVX512 instructions simultaneously")
+  endif ()
+
+  set(GHOUL_OPTIMIZATION_ENABLE_AVX ${OPENSPACE_OPTIMIZATION_ENABLE_AVX} CACHE BOOL "" FORCE)
+  set(GHOUL_OPTIMIZATION_ENABLE_AVX2 ${OPENSPACE_OPTIMIZATION_ENABLE_AVX2} CACHE BOOL "" FORCE)
+  set(GHOUL_OPTIMIZATION_ENABLE_AVX512 ${OPENSPACE_OPTIMIZATION_ENABLE_AVX512} CACHE BOOL "" FORCE)
+  set(GHOUL_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS ${OPENSPACE_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS} CACHE BOOL "" FORCE)
+endif ()
+
+if (UNIX AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  if (NOT CMAKE_BUILD_TYPE)
+    # Can set to "RelWithDebInfo" or "Debug" also, but problems occur if this is blank by default
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Default build type" FORCE)
+  endif ()
+  if (NOT DEFINED CMAKE_CXX_FLAGS OR CMAKE_CXX_FLAGS MATCHES "")
+    set(CMAKE_CXX_FLAGS " ")
+  endif ()
+  STRING(FIND ${CMAKE_CXX_FLAGS} "GLM_ENABLE_EXPERIMENTAL" GLM_FLAG_POS)
+  if (${GLM_FLAG_POS} EQUAL -1)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGLM_ENABLE_EXPERIMENTAL" CACHE STRING "" FORCE)
+  endif ()
+  set(OpenGL_GL_PREFERENCE "GLVND" CACHE STRING "OpenGL Preference setting necessary for linux" FORCE)
+  # Fix for GCC tolerating space in target name
+  if (NOT DEFINED CMAKE_C_FLAGS OR CMAKE_C_FLAGS MATCHES "")
+    set(CMAKE_C_FLAGS " ")
+  endif ()
+  STRING(FIND ${CMAKE_C_FLAGS} "_GNU_SOURCE" GNUSOURCE_FLAG_POS)
+  if (${GNUSOURCE_FLAG_POS} EQUAL -1)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_GNU_SOURCE" CACHE STRING "" FORCE)
+  endif ()
+endif ()
+
+add_subdirectory(ext)
+add_subdirectory(src)
+
+add_subdirectory(support/coding/codegen)
+# It is important that the __codegen.h do not actually exist so
+# that this target is never considered as finished
+add_custom_target(
+  run_codegen
+  ALL DEPENDS
+    "${CMAKE_CURRENT_BINARY_DIR}/__codegen.h"
 )
-if (NOT OPENSPACE_GIT_STATUS_RETURN EQUAL 0) 
-    set(OPENSPACE_GIT_STATUS "uncomitted changes")
-else()
-    set(OPENSPACE_GIT_STATUS "")
-endif()
+add_dependencies(run_codegen codegen-tool)
+add_custom_command(
+  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/__codegen.h"
+  COMMAND codegen-tool ARGS "modules" "src"
+  WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+  VERBATIM
+)
+set_target_properties(codegen-lib PROPERTIES FOLDER "support")
+set_target_properties(codegen-tool PROPERTIES FOLDER "support")
+set_target_properties(run_codegen PROPERTIES FOLDER "support")
 
-option(OPENSPACE_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
-
-include(src/CMakeLists.txt)
-
-##########################################################################################
-# Add external dependencies                                                              #
-##########################################################################################
-# System libraries
-if (APPLE)
-    begin_dependency("Core Libraries")
-    target_include_directories(openspace-core PUBLIC "/Developer/Headers/FlatCarbon")
-    find_library(COREFOUNDATION_LIBRARY CoreFoundation)
-    find_library(CARBON_LIBRARY Carbon)
-    find_library(COCOA_LIBRARY Carbon)
-    find_library(APP_SERVICES_LIBRARY ApplicationServices)
-    mark_as_advanced(CARBON_LIBRARY COCOA_LIBRARY APP_SERVICES_LIBRARY)
-    target_link_libraries(openspace-core ${CARBON_LIBRARY} ${COREFOUNDATION_LIBRARY}
-        ${COCOA_LIBRARY} ${APP_SERVICES_LIBRARY})
-    end_dependency()
-endif()
-
-# Ghoul
-add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul)
-target_link_libraries(openspace-core Ghoul)
-set_folder_location(Lua "External")
-set_folder_location(lz4 "External")
-set_folder_location(GhoulTest "Unit Tests")
-link_directories("${GHOUL_LIBRARY_DIRS}")
-
-# Spice
-begin_dependency("Spice")
-add_subdirectory(${OPENSPACE_EXT_DIR}/spice)
-target_link_libraries(openspace-core Spice)
-set_folder_location(Spice "External")
-end_dependency()
-
-# Curl
-begin_dependency("CURL")
-if (WIN32)
-    set(CURL_ROOT_DIR "${OPENSPACE_EXT_DIR}/curl")
-    target_include_directories(openspace-core SYSTEM PUBLIC ${CURL_ROOT_DIR}/include)
-    target_link_libraries(openspace-core ${CURL_ROOT_DIR}/lib/libcurl.lib)
-    target_compile_definitions(openspace-core PUBLIC
-        "OPENSPACE_CURL_ENABLED" "CURL_STATICLIB")
-else ()
-    find_package(CURL)
-    if (CURL_FOUND)
-        target_include_directories(openspace-core SYSTEM PUBLIC ${CURL_INCLUDE_DIRS})
-        target_link_libraries(openspace-core ${CURL_LIBRARIES})
-        target_compile_definitions(openspace-core PUBLIC "OPENSPACE_CURL_ENABLED")
-    endif ()
-endif()
-end_dependency()
 
 # Qt
 # Unfortunately, we have to set this value manually; sigh
 # In the future, if the Qt version is updated, just add to this variable ---abock
 if (APPLE)
-    set(CMAKE_PREFIX_PATH
-        "~/Qt/5.6/clang_64/lib/cmake"
-        "~/Qt/5.7/clang_64/lib/cmake"
-        "~/Qt/5.8/clang_64/lib/cmake"
-    )
+  set(CMAKE_PREFIX_PATH
+    "~/Qt/5.6/clang_64/lib/cmake"
+    "~/Qt/5.7/clang_64/lib/cmake"
+    "~/Qt/5.8/clang_64/lib/cmake"
+    "~/Qt/5.9/clang_64/lib/cmake"
+    "~/Qt/5.10/clang_64/lib/cmake"
+    "~/Qt/5.11/clang_64/lib/cmake"
+    "~/Qt/5.12/clang_64/lib/cmake"
+    "~/Qt/5.15.1/clang_64/lib/cmake"
+    "~/Qt/6.2.3/macos/lib/cmake"
+  )
 endif ()
-
-if (MSVC)
-    option(OPENSPACE_ENABLE_VLD "Enable the Visual Leak Detector" OFF)
-    if (OPENSPACE_ENABLE_VLD)
-        begin_dependency("Visual Leak Detector")
-        target_compile_definitions(openspace-core PUBLIC "OPENSPACE_ENABLE_VLD")
-        target_link_libraries(openspace-core ${OPENSPACE_EXT_DIR}/vld/lib/vld.lib)
-        target_include_directories(openspace-core PUBLIC ${OPENSPACE_EXT_DIR}/vld)
-        end_dependency()
-    endif ()
-endif ()
-
-
-##########################################################################################
-# Tests                                                                                  #
-##########################################################################################
-option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
-if (OPENSPACE_HAVE_TESTS)
-    include_gtest("${GHOUL_BASE_DIR}/ext/googletest")
-
-    file(GLOB_RECURSE OPENSPACE_TEST_FILES ${OPENSPACE_BASE_DIR}/tests/*.inl)
-    add_executable(OpenSpaceTest ${OPENSPACE_BASE_DIR}/tests/main.cpp ${OPENSPACE_TEST_FILES})
-
-    target_include_directories(OpenSpaceTest PUBLIC
-        "${OPENSPACE_BASE_DIR}/include"
-        "${OPENSPACE_BASE_DIR}/tests"
-        "${OPENSPACE_EXT_DIR}/ghoul/ext/googletest/googletest/include"
-    )
-    target_compile_definitions(OpenSpaceTest PUBLIC
-        "GHL_THROW_ON_ASSERT" "GTEST_HAS_TR1_TUPLE=0"
-    )
-    target_link_libraries(OpenSpaceTest gtest openspace-core)
-
-    set_folder_location(OpenSpaceTest "Unit Tests")
-
-    if (MSVC)
-        set_target_properties(OpenSpaceTest PROPERTIES LINK_FLAGS
-            "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
-        )
-    endif ()
-    set_openspace_compile_settings(OpenSpaceTest)
-endif (OPENSPACE_HAVE_TESTS)
-
 
 begin_header("Configuring Modules")
-set(OPENSPACE_EXTERNAL_MODULES_PATHS "" CACHE STRING "List of external modules")
-handle_modules("${OPENSPACE_BASE_DIR}/modules" "${OPENSPACE_EXTERNAL_MODULES_PATHS}")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/modules")
 end_header("End: Configuring Modules")
-message(STATUS "")
+
 
 begin_header("Configuring Applications")
-handle_applications()
+add_subdirectory(apps)
 end_header("End: Configuring Applications")
-message(STATUS "")
+
+
+if (MSVC AND TARGET OpenSpace)
+  set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT OpenSpace)
+endif ()
+
+
+if (OPENSPACE_HAVE_TESTS)
+  add_subdirectory(support/coding/codegen/tests)
+  set_target_properties(run_test_codegen PROPERTIES FOLDER "Unit Tests/support")
+  set_target_properties(codegentest PROPERTIES FOLDER "Unit Tests")
+
+  begin_header("Generating OpenSpace unit test")
+  add_subdirectory(tests)
+  end_header()
+endif (OPENSPACE_HAVE_TESTS)
 
 
 # Web Browser and Web gui
 # Why not put these in the module's path? Because they do not have access to the
 # target as of July 2017, which is needed.
 if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
-    # wanted by CEF
-    set(CMAKE_BUILD_TYPE Debug CACHE INTERNAL "CMAKE_BUILD_TYPE")
+  # wanted by CEF
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING "CMAKE_BUILD_TYPE")
 
-    if (WIN32)
-        set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/OpenSpace/openspace.rc)
-    endif ()
+  set(PROJECT_ARCH "x86_64")
 
-    # Add the CEF binary distribution's cmake/ directory to the module path and
-    # find CEF to initialize it properly.
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
-    include(webbrowser_helpers)
+  if (WIN32)
+    set(RESOURCE_FILE openspace.rc)
+  endif ()
 
-    set_cef_targets("${CEF_ROOT}" OpenSpaceTest)
-    run_cef_platform_config("${CEF_ROOT}" "${CEF_TARGET}" "${WEBBROWSER_MODULE_PATH}")
-elseif (OPENSPACE_MODULE_WEBBROWSER)
-    message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
+  # Add the CEF binary distribution's cmake/ directory to the module path and
+  # find CEF to initialize it properly.
+  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
+  include(webbrowser_helpers)
+elseif ()
+  message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again")
 endif ()
 
 ##########################################################################################
 # Misc settings                                                                          #
 ##########################################################################################
-option(OPENSPACE_WITH_ABUFFER_RENDERER "Compile ABuffer Renderer" OFF)
-if (OPENSPACE_WITH_ABUFFER_RENDERER)
-    target_compile_definitions(openspace-core PUBLIC "OPENSPACE_WITH_ABUFFER_RENDERER")
-endif ()
-
-
-# Just in case, create the bin directory
-add_custom_command(
-    TARGET openspace-core
-    PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-)
 
 # Manage the CPack packaging
-include(${OPENSPACE_CMAKE_EXT_DIR}/packaging.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/packaging.cmake)
 
 end_header("End: Configuring OpenSpace project")

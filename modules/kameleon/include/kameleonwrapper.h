@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <ghoul/glm.h>
 #include <glm/gtx/std_based_type.hpp>
 #include <array>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -40,8 +41,8 @@ namespace ccmc {
 namespace openspace {
 
 struct LinePoint {
-    glm::vec3 position;
-    glm::vec4 color;
+    glm::vec3 position = glm::vec3(0.f);
+    glm::vec4 color = glm::vec4(0.f);
 };
 
 std::array<std::string, 3> gridVariables(ccmc::Model* model);
@@ -50,8 +51,8 @@ class KameleonWrapper {
 public:
     enum class Model {
         OpenGGCM,
-        BATSRUS,        // Magnetosphere
-        ENLIL,            // Heliosphere
+        BATSRUS, // Magnetosphere
+        ENLIL, // Heliosphere
         MAS,
         Adapt3D,
         SWMF,
@@ -78,17 +79,17 @@ public:
 
     using Fieldlines = std::vector<std::vector<LinePoint>>;
 
-    explicit KameleonWrapper(const std::string& filename);
+    explicit KameleonWrapper(const std::filesystem::path& filename);
     ~KameleonWrapper();
 
-    bool open(const std::string& filename);
+    bool open(const std::filesystem::path& filename);
     void close();
 
     float* uniformSampledValues(const std::string& var,
         const glm::size3_t& outDimensions) const;
 
     float* uniformSliceValues(const std::string& var, const glm::size3_t& outDimensions,
-        const float& zSlice) const;
+        float zSlice) const;
 
     float* uniformSampledVectorValues(const std::string& xVar, const std::string& yVar,
         const std::string& zVar, const glm::size3_t& outDimensions) const;
@@ -115,7 +116,6 @@ public:
     std::array<std::string, 3> gridUnits() const;
 
     std::array<std::string, 3> gridVariables() const;
-
 
     Model model() const;
     GridType gridType() const;
@@ -145,10 +145,10 @@ private:
     ccmc::Interpolator* _interpolator = nullptr;
 
     // Model parameters
-    glm::vec3 _min;
-    glm::vec3 _max;
-    glm::vec3 _validMin;
-    glm::vec3 _validMax;
+    glm::vec3 _min = glm::vec3(0.f);
+    glm::vec3 _max = glm::vec3(0.f);
+    glm::vec3 _validMin = glm::vec3(0.f);
+    glm::vec3 _validMax = glm::vec3(0.f);
     std::string _xCoordVar;
     std::string _yCoordVar;
     std::string _zCoordVar;

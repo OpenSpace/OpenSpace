@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,10 +25,11 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___RAWVOLUMEMETADATA___H__
 #define __OPENSPACE_MODULE_VOLUME___RAWVOLUMEMETADATA___H__
 
-#include <openspace/documentation/documentation.h>
 #include <modules/volume/volumegridtype.h>
+#include <ghoul/glm.h>
 
-#include <ghoul/misc/dictionary.h>
+namespace openspace::documentation { struct Documentation; }
+namespace ghoul { class Dictionary; }
 
 namespace openspace::volume {
 
@@ -36,24 +37,24 @@ struct RawVolumeMetadata {
     static RawVolumeMetadata createFromDictionary(const ghoul::Dictionary& dictionary);
     static documentation::Documentation Documentation();
 
-    ghoul::Dictionary dictionary();
+    ghoul::Dictionary dictionary() const;
 
-    glm::uvec3 dimensions;
+    glm::uvec3 dimensions = glm::uvec3(0);
     VolumeGridType gridType;
 
-    bool hasTime;
-    double time;
+    bool hasTime = false;
+    double time = 0.0;
 
-    bool hasValueRange;
-    float minValue;
-    float maxValue;
-    bool hasValueUnit;
+    bool hasValueRange = false;
+    float minValue = 0.f;
+    float maxValue = 0.f;
+    bool hasValueUnit = false;
     std::string valueUnit;
 
-    bool hasDomainBounds;
-    glm::vec3 lowerDomainBound;
-    glm::vec3 upperDomainBound;
-    bool hasDomainUnit;
+    bool hasDomainBounds = false;
+    glm::vec3 lowerDomainBound = glm::vec3(0.f);
+    glm::vec3 upperDomainBound = glm::vec3(0.f);
+    bool hasDomainUnit = false;
     std::string domainUnit;
 };
 

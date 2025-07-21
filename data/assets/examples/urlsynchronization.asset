@@ -1,50 +1,65 @@
--- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_SYNC enabled
-
-local assetHelper = asset.require("util/asset_helper")
-
-asset.syncedResource({
-    Name = "Example Single",
-    Type = "UrlSynchronization",
-    Identifier = "example_single",
-    Url = "http://celestrak.com/NORAD/elements/geo.txt"
+asset.resource({
+  Name = "Example Single",
+  Type = "UrlSynchronization",
+  Identifier = "example_single",
+  Url = "http://celestrak.com/NORAD/elements/geo.txt"
 })
 
-asset.syncedResource({
-    Name = "Example Multiple",
-    Type = "UrlSynchronization",
-    Identifier = "example_multiple",
-    Url = {
-        "http://celestrak.com/NORAD/elements/stations.txt",
-        "http://celestrak.com/NORAD/elements/gps-ops.txt",
-    }
+asset.resource({
+  Name = "Example Multiple",
+  Type = "UrlSynchronization",
+  Identifier = "example_multiple",
+  Url = {
+    "http://celestrak.com/NORAD/elements/stations.txt",
+    "http://celestrak.com/NORAD/elements/gps-ops.txt"
+  }
 })
 
-asset.syncedResource({
-    Name = "Example Large",
-    Type = "UrlSynchronization",
-    Identifier = "example_large",
-    Url = "http://ipv4.download.thinkbroadband.com/100MB.zip",
-    Override = true
+asset.resource({
+  Name = "Example Large",
+  Type = "UrlSynchronization",
+  Identifier = "example_large",
+  Url = {
+    "https://proof.ovh.net/files/100Mb.dat",
+
+    "http://ipv4.download.thinkbroadband.com/200MB.zip",
+    "http://ipv4.download.thinkbroadband.com/100MB.zip",
+    "http://ipv4.download.thinkbroadband.com/50MB.zip",
+    "http://ipv4.download.thinkbroadband.com/20MB.zip",
+    "http://ipv4.download.thinkbroadband.com/10MB.zip",
+    "http://ipv4.download.thinkbroadband.com/5MB.zip",
+  },
+  SecondsUntilResync = 0
 })
 
-asset.syncedResource({
-    Name = "Example Medium",
-    Type = "UrlSynchronization",
-    Identifier = "example_medium",
-    Url = "http://ipv4.download.thinkbroadband.com/5MB.zip",
-    Override = true
+asset.resource({
+  Name = "Example Medium",
+  Type = "UrlSynchronization",
+  Identifier = "example_medium",
+  Url = "http://ipv4.download.thinkbroadband.com/5MB.zip",
+  SecondsUntilResync = 0
 })
 
-asset.syncedResource({
-    Name = "Example No ident",
-    Type = "UrlSynchronization",
-    Url = "http://ipv4.download.thinkbroadband.com/5MB.zip"
+-- Load a resource without hashing, meaning that the bare directory name will be
+-- used for the downloaded file. If UseHash is true, the hash of the URL is appended
+-- to the directory name to produce a unique directory under all circumstances
+asset.resource({
+  Name = "Example No Hash",
+  Type = "UrlSynchronization",
+  Identifier = "no_hash",
+  Url = "http://liu-se.wms.openspaceproject.com/Mercury/Messenger_Mosaic/Messenger_Mosaic.wms",
+  UseHash = false
 })
 
-asset.syncedResource({
-    Name = "Example No Hash",
-    Type = "UrlSynchronization",
-    Identifier = "no_hash",
-    Url = "http://wms.itn.liu.se/Mercury/Messenger_Mosaic/Messenger_Mosaic.wms",
-    UseHash = false
-})
+
+
+asset.meta = {
+  Name = "UrlSynchronization",
+  Description = [[Example showing how to load resources (any type of data file) from
+    online sources, using the UrlSynchronization resource type. These can then be used
+    in other assets. See more information on resources on the OpenSpace wiki page.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

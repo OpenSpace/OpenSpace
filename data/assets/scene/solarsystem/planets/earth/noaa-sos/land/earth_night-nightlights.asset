@@ -1,0 +1,55 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Nighttime Lights"
+local Identifier = "noaa-sos-land-earth_night-nightlights"
+local Description = [[The data was recorded by the Defense Meteorological Satellite
+Program (DMSP) in the National Geophysical Data Center (NGDC), now part of NOAA National
+Centers for Environmental Information (NCEI). The data was collected using polar orbiting
+satellites that provide full cover of the globe twice a day. The satellites have an
+Operation Linescan system which allows them to detect low levels of visible-near infrared
+radiance at night. With this data, it is possible to detect clouds illuminated by
+moonlight, lights from cities and towns, industrial sites, gas flares, fires, lightning,
+and aurora. The Nighttime Lights of the World data set was complied from Defense
+Meteorological Satellite Program (DMSP) data spanning October 1994 - March 1995]]
+local URL = "https://sos.noaa.gov/catalog/datasets/nighttime-lights/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "4800.jpg",
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

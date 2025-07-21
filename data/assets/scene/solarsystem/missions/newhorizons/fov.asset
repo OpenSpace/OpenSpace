@@ -1,5 +1,6 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
+local transforms = asset.require("./transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -9,382 +10,406 @@ local AliceOffset = {   -7.9, -1.7,  8.3  }
 local RexOffset   = {      0,    0,    0  }
 
 local Lorri = {
-    Identifier = "NH_LORRI",
-    Parent = transforms.NewHorizonsPosition.Identifier,
-    Renderable = {
-        Type  = "RenderableFov",
-        Body  = "NEW HORIZONS",
-        Frame = "NH_SPACECRAFT",
-        Color = { 0.8, 0.7, 0.7 },
-        Instrument = {
-            Name       = "NH_LORRI",
-            Aberration = "NONE"
-        },
-        PotentialTargets = {
-            "Pluto",
-            "Charon",
-            -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
-        }
-    },
-    Transform = {
-        Translation = {
-            Type = "StaticTranslation",
-            Position = LorriOffset
-        }
-    },
-    GUI = {
-        Name = "LORRI",
-        Path = "/Solar System/Missions/New Horizons/Instruments"
+  Identifier = "NH_LORRI",
+  Parent = transforms.NewHorizonsPosition.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = LorriOffset
     }
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
+    Color = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = kernels.Frame.Lorri,
+      Aberration = "NONE"
+    },
+    PotentialTargets = {
+      kernels.ID.Pluto,
+      kernels.ID.Charon
+    }
+  },
+  GUI = {
+    Name = "LORRI",
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
+  }
 }
 
 local RalphLeisa = {
-    Identifier = "NH_RALPH_LEISA",
-    Parent = transforms.NewHorizonsPosition.Identifier,
-    Renderable = {
-        Type  = "RenderableFov",
-        Body  = "NEW HORIZONS",
-        Frame = "NH_SPACECRAFT",
-        RGB   = { 0.8, 0.7, 0.7 },
-        Instrument = {
-            Name       = "NH_RALPH_LEISA",
-            Aberration = "NONE"
-        },
-        PotentialTargets = {
-            "Pluto",
-            "Charon",
-            -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
-        }
-    },
-    Transform = {
-        Translation = {
-            Type = "StaticTranslation",
-            Position = RalphOffset
-        }
-    },
-    GUI = {
-        Name = "RALPH LEISA",
-        Path = "/Solar System/Missions/New Horizons/Instruments"
+  Identifier = "NH_RALPH_LEISA",
+  Parent = transforms.NewHorizonsPosition.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = RalphOffset
     }
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = kernels.Frame.RalphLeisa,
+      Aberration = "NONE"
+    },
+    PotentialTargets = {
+      kernels.ID.Pluto,
+      kernels.ID.Charon
+    }
+  },
+  GUI = {
+    Name = "RALPH LEISA",
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
+  }
 }
 
 local RalphMvicPan1 = {
-    Identifier = "NH_RALPH_MVIC_PAN1",
-    Parent = transforms.NewHorizonsPosition.Identifier,
-    Renderable = {
-        Type  = "RenderableFov",
-        Body  = "NEW HORIZONS",
-        Frame = "NH_SPACECRAFT",
-        RGB   = { 0.8, 0.7, 0.7 },
-        Instrument = {
-            Name       = "NH_RALPH_MVIC_PAN1",
-            Aberration = "NONE"
-        },
-        PotentialTargets = {
-            "Pluto",
-            "Charon",
-            -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
-        }
-    },
-    Transform = {
-        Translation = {
-            Type = "StaticTranslation",
-            Position = RalphOffset
-        }
-    },
-    GUI = {
-        Name = "RALPH MVIC PAN 1",
-        Path = "/Solar System/Missions/New Horizons/Instruments"
+  Identifier = "NH_RALPH_MVIC_PAN1",
+  Parent = transforms.NewHorizonsPosition.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = RalphOffset
     }
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = kernels.Frame.RalphMvicPan1,
+      Aberration = "NONE"
+    },
+    PotentialTargets = {
+      kernels.ID.Pluto,
+      kernels.ID.Charon
+    }
+  },
+  GUI = {
+    Name = "RALPH MVIC PAN 1",
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
+  }
 }
 
 local RalphMvicPan2 = {
-    Identifier = "NH_RALPH_MVIC_PAN2",
-    Parent = transforms.NewHorizonsPosition.Identifier,
-    Renderable = {
-        Type  = "RenderableFov",
-        Body  = "NEW HORIZONS",
-        Frame = "NH_SPACECRAFT",
-        RGB   = { 0.8, 0.7, 0.7 },
-        Instrument = {
-            Name       = "NH_RALPH_MVIC_PAN2",
-            Aberration = "NONE"
-        },
-        PotentialTargets = {
-            "Pluto",
-            "Charon",
-            -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
-        }
-    },
-    Transform = {
-        Translation = {
-            Type = "StaticTranslation",
-            Position = RalphOffset
-        }
-    },
-    GUI = {
-        Name = "RALPH MVIC PAN 2",
-        Path = "/Solar System/Missions/New Horizons/Instruments"
+  Identifier = "NH_RALPH_MVIC_PAN2",
+  Parent = transforms.NewHorizonsPosition.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = RalphOffset
     }
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = kernels.Frame.RalphMvicPan2,
+      Aberration = "NONE"
+    },
+    PotentialTargets = {
+      kernels.ID.Pluto,
+      kernels.ID.Charon
+    }
+  },
+  GUI = {
+    Name = "RALPH MVIC PAN 2",
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
+  }
 }
 
 local RalphMvicRed = {
-    Identifier = "NH_RALPH_MVIC_RED",
-    Parent = transforms.NewHorizonsPosition.Identifier,
-    Renderable = {
-        Type  = "RenderableFov",
-        Body  = "NEW HORIZONS",
-        Frame = "NH_SPACECRAFT",
-        RGB   = { 0.8, 0.7, 0.7 },
-        Instrument = {
-            Name       = "NH_RALPH_MVIC_RED",
-            Aberration = "NONE"
-        },
-        PotentialTargets = {
-            "Pluto",
-            "Charon",
-            -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
-        }
-    },
-    Transform = {
-        Translation = {
-            Type = "StaticTranslation",
-            Position = RalphOffset
-        }
-    },
-    GUI = {
-        Name = "RALPH MVIC RED",
-        Path = "/Solar System/Missions/New Horizons/Instruments"
+  Identifier = "NH_RALPH_MVIC_RED",
+  Parent = transforms.NewHorizonsPosition.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = RalphOffset
     }
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = kernels.Frame.RalphMvicRed,
+      Aberration = "NONE"
+    },
+    PotentialTargets = {
+      kernels.ID.Pluto,
+      kernels.ID.Charon
+    }
+  },
+  GUI = {
+    Name = "RALPH MVIC RED",
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
+  }
 }
 
 local RalphMvicBlue = {
-    Identifier = "NH_RALPH_MVIC_BLUE",
-    Parent = transforms.NewHorizonsPosition.Identifier,
-    Renderable = {
-        Type  = "RenderableFov",
-        Body  = "NEW HORIZONS",
-        Frame = "NH_SPACECRAFT",
-        RGB   = { 0.8, 0.7, 0.7 },
-        Instrument = {
-            Name       = "NH_RALPH_MVIC_BLUE",
-            Aberration = "NONE"
-        },
-        PotentialTargets = {
-            "Pluto",
-            "Charon",
-            -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
-        }
-    },
-    Transform = {
-        Translation = {
-            Type = "StaticTranslation",
-            Position = RalphOffset
-        }
-    },
-    GUI = {
-        Name = "RALPH MVIC BLUE",
-        Path = "/Solar System/Missions/New Horizons/Instruments"
+  Identifier = "NH_RALPH_MVIC_BLUE",
+  Parent = transforms.NewHorizonsPosition.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = RalphOffset
     }
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = kernels.Frame.RalphMvicBlue,
+      Aberration = "NONE"
+    },
+    PotentialTargets = {
+      kernels.ID.Pluto,
+      kernels.ID.Charon
+    }
+  },
+  GUI = {
+    Name = "RALPH MVIC BLUE",
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
+  }
 }
 
 local RalphMvicFt = {
-    Identifier = "NH_RALPH_MVIC_FT",
-    Parent = transforms.NewHorizonsPosition.Identifier,
-    Renderable = {
-        Type  = "RenderableFov",
-        Body  = "NEW HORIZONS",
-        Frame = "NH_SPACECRAFT",
-        RGB   = { 0.8, 0.7, 0.7 },
-        Instrument = {
-            Name       = "NH_RALPH_MVIC_FT",
-            Aberration = "NONE"
-        },
-        PotentialTargets = {
-            "Pluto",
-            "Charon",
-            -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
-        }
-    },
-    Transform = {
-        Translation = {
-            Type = "StaticTranslation",
-            Position = RalphOffset
-        }
-    },
-    GUI = {
-        Name = "RALPH MVIC FT",
-        Path = "/Solar System/Missions/New Horizons/Instruments"
+  Identifier = "NH_RALPH_MVIC_FT",
+  Parent = transforms.NewHorizonsPosition.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = RalphOffset
     }
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = kernels.Frame.RalphMvicFT,
+      Aberration = "NONE"
+    },
+    PotentialTargets = {
+      kernels.ID.Pluto,
+      kernels.ID.Charon
+    }
+  },
+  GUI = {
+    Name = "RALPH MVIC FT",
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
+  }
 }
 
 local RalphMvicMethane = {
-    Identifier = "NH_RALPH_MVIC_METHANE",
-    Parent = transforms.NewHorizonsPosition.Identifier,
-    Renderable = {
-        Type  = "RenderableFov",
-        Body  = "NEW HORIZONS",
-        Frame = "NH_SPACECRAFT",
-        RGB   = { 0.8, 0.7, 0.7 },
-        Instrument = {
-            Name       = "NH_RALPH_MVIC_METHANE",
-            Aberration = "NONE"
-        },
-        PotentialTargets = {
-            "Pluto",
-            "Charon",
-            -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
-        }
-    },
-    Transform = {
-        Translation = {
-            Type = "StaticTranslation",
-            Position = RalphOffset
-        }
-    },
-    GUI = {
-        Name = "RALPH MVIC METHANE",
-        Path = "/Solar System/Missions/New Horizons/Instruments"
+  Identifier = "NH_RALPH_MVIC_METHANE",
+  Parent = transforms.NewHorizonsPosition.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = RalphOffset
     }
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = kernels.Frame.RalphMvicMethane,
+      Aberration = "NONE"
+    },
+    PotentialTargets = {
+      kernels.ID.Pluto,
+      kernels.ID.Charon
+    }
+  },
+  GUI = {
+    Name = "RALPH MVIC METHANE",
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
+  }
 }
 
 local RalphMvicNir = {
-    Identifier = "NH_RALPH_MVIC_NIR",
-    Parent = transforms.NewHorizonsPosition.Identifier,
-    Renderable = {
-        Type  = "RenderableFov",
-        Body  = "NEW HORIZONS",
-        Frame = "NH_SPACECRAFT",
-        RGB   = { 0.8, 0.7, 0.7 },
-        Instrument = {
-            Name       = "NH_RALPH_MVIC_NIR",
-            Aberration = "NONE"
-        },
-        PotentialTargets = {
-            "Pluto",
-            "Charon",
-            -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
-        }
-    },
-    Transform = {
-        Translation = {
-            Type = "StaticTranslation",
-            Position = RalphOffset
-        }
-    },
-    GUI = {
-        Name = "RALPH MVIC NIR",
-        Path = "/Solar System/Missions/New Horizons/Instruments"
+  Identifier = "NH_RALPH_MVIC_NIR",
+  Parent = transforms.NewHorizonsPosition.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = RalphOffset
     }
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = kernels.Frame.RalphMvicNIR,
+      Aberration = "NONE"
+    },
+    PotentialTargets = {
+      kernels.ID.Pluto,
+      kernels.ID.Charon
+    }
+  },
+  GUI = {
+    Name = "RALPH MVIC NIR",
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
+  }
 }
 
 local AliceAirglow = {
-    Identifier = "NH_ALICE_AIRGLOW",
-    Parent = transforms.NewHorizonsPosition.Identifier,
-    Renderable = {
-        Type  = "RenderableFov",
-        Body  = "NEW HORIZONS",
-        Frame = "NH_SPACECRAFT",
-        RGB   = { 0.8, 0.7, 0.7 },
-        Instrument = {
-            Name       = "NH_ALICE_AIRGLOW",
-            Aberration = "NONE"
-        },
-        PotentialTargets = {
-            "Pluto",
-            "Charon",
-            -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
-        },
-        SimplifyBounds = true
-    },
-    Transform = {
-        Translation = {
-            Type = "StaticTranslation",
-            Position = AliceOffset
-        }
-    },
-    GUI = {
-        Name = "ALICE AIRGLOW",
-        Path = "/Solar System/Missions/New Horizons/Instruments"
+  Identifier = "NH_ALICE_AIRGLOW",
+  Parent = transforms.NewHorizonsPosition.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = AliceOffset
     }
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = kernels.Frame.AliceAirglow,
+      Aberration = "NONE"
+    },
+    PotentialTargets = {
+      kernels.ID.Pluto,
+      kernels.ID.Charon
+    },
+    SimplifyBounds = true
+  },
+  GUI = {
+    Name = "ALICE AIRGLOW",
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
+  }
 }
 
 local AliceSoc = {
-    Identifier = "NH_ALICE_SOC",
-    Parent = transforms.NewHorizonsPosition.Identifier,
-    Renderable = {
-        Type  = "RenderableFov",
-        Body  = "NEW HORIZONS",
-        Frame = "NH_SPACECRAFT",
-        RGB   = { 0.8, 0.7, 0.7 },
-        Instrument = {
-            Name       = "NH_ALICE_SOC",
-            Aberration = "NONE"
-        },
-        PotentialTargets = {
-            "Pluto",
-            "Charon",
-            -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
-        }
-    },
-    Transform = {
-        Translation = {
-            Type = "StaticTranslation",
-            Position = AliceOffset
-        }
-    },
-    GUI = {
-        Name = "ALICE SOC",
-        Path = "/Solar System/Missions/New Horizons/Instruments"
+  Identifier = "NH_ALICE_SOC",
+  Parent = transforms.NewHorizonsPosition.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = AliceOffset
     }
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.NewHorizons,
+    Frame = kernels.Frame.NewHorizons,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = kernels.Frame.AliceSOC,
+      Aberration = "NONE"
+    },
+    PotentialTargets = {
+      kernels.ID.Pluto,
+      kernels.ID.Charon
+    }
+  },
+  GUI = {
+    Name = "ALICE SOC",
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
+  }
 }
 
 local Rex = {
-    Identifier = "NH_REX",
-    Parent = transforms.NewHorizonsPosition.Identifier,
-    Renderable = {
-        Type  = "RenderableCrawlingLine",
-        Source = "NH_REX",
-        Target = "EARTH",
-        Instrument = "NH_REX",
-        Color = {
-            Start = { 1.0, 0.7, 0.0, 1.0},
-            End = {0.0, 0.0, 0.0, 0.0 }
-        }
+  Identifier = "NH_REX",
+  Parent = transforms.NewHorizonsPosition.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = RexOffset
     },
-    Transform = {
-        Rotation = {
-            Type = "StaticRotation",
-            Rotation = {
-                0.0, 1.0, 0.0,
-                0.0, 0.0, 1.0,
-                1.0, 0.0, 0.0
-            }
-        },
-        Translation = {
-            Type = "StaticTranslation",
-            Position = RexOffset
-        }
-    },
-    GUI = {
-        Name = "REX",
-        Path = "/Solar System/Missions/New Horizons/Instruments"
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { -math.pi / 2, 0.0, -math.pi / 2 }
     }
+  },
+  Renderable = {
+    Type = "RenderableCrawlingLine",
+    Source = kernels.ID.Rex,
+    Target = coreKernels.ID.Earth,
+    Instrument = kernels.Frame.Rex,
+    Color = {
+      Start = { 1.0, 0.7, 0.0, 1.0 },
+      End = { 0.0, 0.0, 0.0, 0.0 }
+    }
+  },
+  GUI = {
+    Name = "REX",
+    Path = "/Solar System/Missions/New Horizons/Instruments",
+    Focusable = false
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Lorri)
+  openspace.addSceneGraphNode(RalphLeisa)
+  openspace.addSceneGraphNode(RalphMvicPan1)
+  openspace.addSceneGraphNode(RalphMvicPan2)
+  openspace.addSceneGraphNode(RalphMvicRed)
+  openspace.addSceneGraphNode(RalphMvicBlue)
+  openspace.addSceneGraphNode(RalphMvicFt)
+  openspace.addSceneGraphNode(RalphMvicMethane)
+  openspace.addSceneGraphNode(RalphMvicNir)
+  openspace.addSceneGraphNode(AliceAirglow)
+  openspace.addSceneGraphNode(AliceSoc)
+  openspace.addSceneGraphNode(Rex)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-    Lorri,
-    RalphLeisa,
-    RalphMvicPan1,
-    RalphMvicPan2,
-    RalphMvicRed,
-    RalphMvicBlue,
-    RalphMvicFt,
-    RalphMvicMethane,
-    RalphMvicNir,
-    AliceAirglow,
-    AliceSoc,
-    Rex
-})
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Rex)
+  openspace.removeSceneGraphNode(AliceSoc)
+  openspace.removeSceneGraphNode(AliceAirglow)
+  openspace.removeSceneGraphNode(RalphMvicNir)
+  openspace.removeSceneGraphNode(RalphMvicMethane)
+  openspace.removeSceneGraphNode(RalphMvicFt)
+  openspace.removeSceneGraphNode(RalphMvicBlue)
+  openspace.removeSceneGraphNode(RalphMvicRed)
+  openspace.removeSceneGraphNode(RalphMvicPan2)
+  openspace.removeSceneGraphNode(RalphMvicPan1)
+  openspace.removeSceneGraphNode(RalphLeisa)
+  openspace.removeSceneGraphNode(Lorri)
+end)
+
+asset.export(Lorri)
+asset.export(RalphLeisa)
+asset.export(RalphMvicPan1)
+asset.export(RalphMvicPan2)
+asset.export(RalphMvicRed)
+asset.export(RalphMvicBlue)
+asset.export(RalphMvicFt)
+asset.export(RalphMvicMethane)
+asset.export(RalphMvicNir)
+asset.export(AliceAirglow)
+asset.export(AliceSoc)
+asset.export(Rex)

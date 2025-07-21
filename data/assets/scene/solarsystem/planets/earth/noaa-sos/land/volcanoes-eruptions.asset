@@ -1,0 +1,69 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Volcano Eruptions - through 2010"
+local Identifier = "noaa-sos-land-volcanoes-eruptions"
+local Description = [[According to the Smithsonian Institute's Global Volcanism Program,
+there are probably about 20 volcanoes erupting right now, and about 550 volcanoes have
+had historically documented eruptions. A volcano is an opening, or rupture, in the
+Earth's crust through which molten lava, ash, and gases are ejected. Volcanoes typically
+form in three different settings. The first is divergent plate boundaries, where tectonic
+plates are pulling apart from one another, such as the Mid-Atlantic Ocean Ridge. Most of
+these volcanoes are on the bottom of the ocean floor and are responsible for creating new
+sea floor. The second location is convergent plate boundaries, where two plates,
+typically an oceanic and continental plate, are colliding. The volcanoes along the
+Pacific Ring of Fire are from convergent plate boundaries. The third location is over
+hotspots, which are typically in the middle of tectonic plates and caused by hot magma
+rising to the surface. The volcanoes on Hawaii are the result of hotspots]]
+local URL = "https://sos.noaa.gov/catalog/datasets/volcano-eruptions-through-2010/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local LayerBase = {
+  Identifier = Identifier .. "-base",
+  Name = Name .. " (Base)",
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "land.jpg",
+  Description = Description
+}
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  FilePath = syncedDirectory .. "4096.png",
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
+end)
+
+asset.export(LayerBase)
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

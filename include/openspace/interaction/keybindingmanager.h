@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,10 +25,7 @@
 #ifndef __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
 #define __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
 
-#include <openspace/documentation/documentationgenerator.h>
-
 #include <openspace/util/keys.h>
-#include <ghoul/misc/boolean.h>
 
 namespace openspace {
     class Camera;
@@ -39,43 +36,25 @@ namespace openspace::scripting { struct LuaLibrary; }
 
 namespace openspace::interaction {
 
-class KeybindingManager : public DocumentationGenerator {
+class KeybindingManager {
 public:
-    BooleanType(IsSynchronized);
-
-    struct KeyInformation {
-        std::string command;
-        IsSynchronized synchronization;
-        std::string documentation;
-        std::string name;
-        std::string guiPath;
-    };
-
-    KeybindingManager();
-
     void resetKeyBindings();
 
-    void bindKeyLocal(Key key, KeyModifier modifier, std::string luaCommand,
-        std::string documentation = "", std::string name = "", std::string guiPath = "");
+    void bindKey(Key key, KeyModifier modifier, std::string action);
 
-    void bindKey(Key key, KeyModifier modifier, std::string luaCommand,
-        std::string documentation = "", std::string name = "", std::string guiPath = "");
+    void removeKeyBinding(const KeyWithModifier& key);
 
-    void removeKeyBinding(const std::string& key);
-
-    std::vector<std::pair<KeyWithModifier, KeyInformation>> keyBinding(
-        const std::string& key) const;
+    std::vector<std::pair<KeyWithModifier, std::string>> keyBinding(
+        const KeyWithModifier& key) const;
 
     static scripting::LuaLibrary luaLibrary();
 
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 
-    const std::multimap<KeyWithModifier, KeyInformation>& keyBindings() const;
+    const std::multimap<KeyWithModifier, std::string>& keyBindings() const;
 
 private:
-    std::string generateJson() const override;
-
-    std::multimap<KeyWithModifier, KeyInformation> _keyLua;
+    std::multimap<KeyWithModifier, std::string> _keyLua;
 };
 
 } // namespace openspace::interaction

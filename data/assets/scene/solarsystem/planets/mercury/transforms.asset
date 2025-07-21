@@ -1,22 +1,43 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
-asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
+
+
 
 local MercuryBarycenter = {
-    Identifier = "MercuryBarycenter",
-    Parent = transforms.SolarSystemBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "MERCURY",
-            Observer = "SUN"
-        }
-    },
-    GUI = {
-        Name = "Mercury Barycenter",
-        Path = "/Solar System/Planets/Mercury",
-        Hidden = true
+  Identifier = "MercuryBarycenter",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = coreKernels.ID.MercuryBarycenter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
+  },
+  GUI = {
+    Name = "Mercury Barycenter",
+    Path = "/Solar System/Planets/Mercury",
+    Focusable = false,
+    Hidden = true
+  }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { MercuryBarycenter })
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MercuryBarycenter)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MercuryBarycenter)
+end)
+
+asset.export(MercuryBarycenter)
+
+
+
+asset.meta = {
+  Name = "Mercury Transforms",
+  Description = "Mercury Barycenter transform",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

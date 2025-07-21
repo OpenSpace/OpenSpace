@@ -1,0 +1,143 @@
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+
+
+
+local textures = asset.resource({
+  Name = "Zenith Textures",
+  Type = "HttpSynchronization",
+  Identifier = "zenith_textures",
+  Version = 1
+})
+
+
+local ZenithPosition = {
+  Identifier = "ZenithPosition",
+  Parent = earthAsset.Earth.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 0.0,
+      Longitude = 0.0,
+      Altitude = 100000000.0,
+      UseCamera = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 0.0,
+      Longitude = 0.0,
+      UseHeightmap = false,
+      UseCamera = true
+    }
+  },
+  Tag = { "nightsky_marking" },
+  GUI = {
+    Name = "Zenith Position",
+    Path = "/Night Sky/Coordinate Systems/Altitude-Azimuth",
+    Hidden = true
+  }
+}
+
+local ZenithDot = {
+  Identifier = "ZenithDot",
+  Parent = ZenithPosition.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { -math.pi, 0.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Enabled = asset.enabled,
+    Size = 1000000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = textures .. "point3A.png",
+    BlendMode = "Additive"
+  },
+  Tag = { "nightsky_marking" },
+  GUI = {
+    Name = "Zenith",
+    Description = [[A dot representation of the Local Zenith, based on the camera's
+      current position on a planet. Use the provided show or toggle action to move it
+      between planets. The default is Earth.]],
+    Path = "/Night Sky/Coordinate Systems/Altitude-Azimuth"
+  }
+}
+
+local ShowZenith = {
+  Identifier = "os.nightsky.ShowZenith",
+  Name = "Show local zenith",
+  Command = [[
+    local camera = openspace.navigation.getNavigationState()
+    openspace.setParent("ZenithPosition", camera.Anchor)
+    openspace.setPropertyValueSingle("Scene.ZenithPosition.Translation.Globe", camera.Anchor)
+    openspace.setPropertyValueSingle("Scene.ZenithPosition.Rotation.Globe", camera.Anchor)
+    openspace.fadeIn("Scene.ZenithDot.Renderable")
+  ]],
+  Documentation = "Shows a dot for the local zenith",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
+  IsLocal = false
+}
+
+local HideZenith = {
+  Identifier = "os.nightsky.HideZenith",
+  Name = "Hide local zenith",
+  Command = [[
+    openspace.fadeOut("Scene.ZenithDot.Renderable")
+  ]],
+  Documentation = "Hides the dot for the local zenith",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
+  IsLocal = false
+}
+
+local ToggleZenith = {
+  Identifier = "os.nightsky.ToggleZenith",
+  Name = "Toggle local zenith",
+  Command = [[
+    local camera = openspace.navigation.getNavigationState()
+    openspace.setParent("ZenithPosition", camera.Anchor)
+    openspace.setPropertyValueSingle("Scene.ZenithPosition.Translation.Globe", camera.Anchor)
+    openspace.setPropertyValueSingle("Scene.ZenithPosition.Rotation.Globe", camera.Anchor)
+    openspace.toggleFade("Scene.ZenithDot.Renderable")
+  ]],
+  Documentation = "Toggles the dot for the local zenith",
+  GuiPath = "/Night Sky/Lines and Grids",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(ZenithPosition)
+  openspace.addSceneGraphNode(ZenithDot)
+  openspace.action.registerAction(ShowZenith)
+  openspace.action.registerAction(HideZenith)
+  openspace.action.registerAction(ToggleZenith)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(ToggleZenith)
+  openspace.action.removeAction(HideZenith)
+  openspace.action.removeAction(ShowZenith)
+  openspace.removeSceneGraphNode(ZenithDot)
+  openspace.removeSceneGraphNode(ZenithPosition)
+end)
+
+asset.export(ZenithPosition)
+asset.export(ZenithDot)
+asset.export("ShowZenith", ShowZenith.Identifier)
+asset.export("HideZenith", HideZenith.Identifier)
+asset.export("ToggleZenith", ToggleZenith.Identifier)
+
+
+
+asset.meta = {
+  Name = "Zenith",
+  Description = [[A dot representation of the Local Zenith (based on the current
+    camera positon), including actions to toggle, hide and show it.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

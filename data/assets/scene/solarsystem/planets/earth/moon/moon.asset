@@ -1,132 +1,144 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local sunAsset = asset.require('scene/solarsystem/sun/sun')
-local earthAsset = asset.require('../earth')
-asset.require('spice/base')
-asset.request('./trail')
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/sun")
+local earthAsset = asset.require("../earth")
+local coreKernels = asset.require("spice/core")
 
 
 
-local mapServiceConfigs = asset.localResource("map_service_configs")
+local labelsPath = asset.resource({
+  Name = "Moon Labels",
+  Type = "HttpSynchronization",
+  Identifier = "moon_labels",
+  Version = 1
+})
+
 
 local Moon = {
-    Identifier = "Moon",
-    Parent = transforms.EarthBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "MOON",
-            Observer = "EARTH BARYCENTER"
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_MOON",
-            DestinationFrame = "GALACTIC"
-        }
+  Identifier = "Moon",
+  Parent = transforms.EarthBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = coreKernels.ID.Moon,
+      Observer = coreKernels.ID.EarthBarycenter
     },
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = 1738140,
-        SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "WAC_Utah",
-                    Name = "WAC [Utah]",
-                    FilePath = mapServiceConfigs .. "/Utah/Wac.wms",
-                    Enabled = true
-                },
-                {
-                    Identifier = "WAC_Sweden",
-                    Name = "WAC [Sweden]",
-                    FilePath = mapServiceConfigs .. "/LiU/WAC.wms"
-                },
-                {
-                    Identifier = "ClemUvvis_Utah",
-                    Name = "Clem Uvvis [Utah]",
-                    FilePath = mapServiceConfigs .. "/Utah/ClemUvvis.wms"
-                },
-                {
-                    Identifier = "ClemUvvis_Sweden",
-                    Name = "Clem Uvvis [Sweden]",
-                    FilePath = mapServiceConfigs .. "/LiU/Clem_Uvvis.wms"
-                },
-                {
-                    Identifier = "UvvisHybrid_Utah",
-                    Name = "Uvvis Hybrid [Utah]",
-                    FilePath = mapServiceConfigs .. "/Utah/UvvisHybrid.wms"
-                },
-                {
-                    Identifier = "UvvisHybrid_Sweden",
-                    Name = "Uvvis Hybrid [Sweden]",
-                    FilePath = mapServiceConfigs .. "/LiU/Uvvis_Hybrid.wms"
-                },
-                {
-                    Identifier = "Kaguya_Utah",
-                    Name = "Kaguya [Utah]",
-                    FilePath = mapServiceConfigs .. "/Utah/Kaguya.wms"
-                },
-                {
-                    Identifier = "Kaguya_Sweden",
-                    Name = "Kaguya [Sweden]",
-                    FilePath = mapServiceConfigs .. "/LiU/Kaguya.wms"
-                },
-                {
-                    Identifier = "Lola_Clr_Shade_Utah",
-                    Name = "Lola Clear Shade [Utah]",
-                    FilePath = mapServiceConfigs .. "/Utah/LolaClrShade.wms"
-                },
-                {
-                    Identifier = "Lola_Clr_Shade_Sweden",
-                    Name = "Lola Clear Shade [Sweden]",
-                    FilePath = mapServiceConfigs .. "/LiU/Lola_Clr_Shade.wms"
-                },
-                {
-                    Identifier = "Lola_Shade_Utah",
-                    Name = "Lola Shade [Utah]",
-                    FilePath = mapServiceConfigs .. "/Utah/LolaShade.wms"
-                },
-                {
-                    Identifier = "Lola_Shade_Sweden",
-                    Name = "Lola Shade [Sweden]",
-                    FilePath = mapServiceConfigs .. "/LiU/Lola_Shade.wms"
-                },
-            },
-            HeightLayers = {
-                {
-                    Identifier = "LolaDem_Utah",
-                    Name = "Lola DEM [Utah]",
-                    FilePath = mapServiceConfigs .. "/Utah/LolaDem.wms",
-                    Enabled = true,
-                    TilePixelSize = 64,
-                    Settings = { Multiplier = 0.5 }
-                },
-                {
-                    Identifier = "LolaDem_Sweden",
-                    Name = "Lola DEM [Sweden]",
-                    FilePath = mapServiceConfigs .. "/LiU/Lola_DEM.wms",
-                    TilePixelSize = 64,
-                    Settings = { Multiplier = 0.5 }
-                }
-
-            }
-        },
-        ShadowGroup = {
-            Source1 = {
-                Name = sunAsset.Sun.Name,
-                Radius = 696.3E6
-            },
-            Caster1 = { 
-                Name = earthAsset.Earth.Name,
-                Radius = 6.371E6
-            }
-        }
-    },
-    GUI = {
-        Path = "/Solar System/Planets/Earth/Moon"
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.Moon,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = 1738140,
+    ShadowGroup = {
+      Sources = {
+        { Name = sunAsset.Sun.Identifier, Radius = 696300000 },
+      },
+      Casters = {
+        { Name = earthAsset.Earth.Identifier, Radius = 6371000 },
+      }
+    },
+    Labels = {
+      Enabled = false,
+      FileName = labelsPath .. "moon.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 7.6,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 100000.0, 500000.0 },
+      DistanceEPS = 1350000.0,
+      Color = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "moon_solarSystem", "moon_terrestrial", "moon_earth" },
+  GUI = {
+    Path = "/Solar System/Planets/Earth/Moon"
+  }
+}
+
+local MoonLabel = {
+  Identifier = "MoonLabel",
+  Parent = Moon.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Moon",
+    FontSize = 70.0,
+    Size = 6.0,
+    MinMaxSize = { 1, 40 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.4, 10.0 },
+    FadeWidths = { 0.1, 10.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Moon Label",
+    Path = "/Solar System/Planets/Earth/Moon",
+    Focusable = false,
+    Description = "Label for Earth's Moon"
+  }
+}
+
+local FocusMoon = {
+  Identifier = "os.earth.FocusMoon",
+  Name = "Focus on Moon",
+  Command = [[
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Moon")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+  ]],
+  Documentation = "Set camera focus on the Moon",
+  GuiPath = "/Solar System/Earth/Moon",
+  IsLocal = false
+}
+
+local ToggleMoonShading = {
+  Identifier = "os.earth.ToggleMoonShading",
+  Name = "Toggle Moon shading",
+  Command = [[
+    openspace.setPropertyValueSingle(
+      "Scene.Moon.Renderable.PerformShading",
+      not openspace.propertyValue("Scene.Moon.Renderable.PerformShading")
+    )
+  ]],
+  Documentation = "Toggles the shading of the Moon",
+  GuiPath = "/Solar System/Earth/Moon",
+  IsLocal = false
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Moon)
+  openspace.addSceneGraphNode(MoonLabel)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Moon })
+  openspace.action.registerAction(FocusMoon)
+  openspace.action.registerAction(ToggleMoonShading)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(ToggleMoonShading)
+  openspace.action.removeAction(FocusMoon)
+
+  openspace.removeSceneGraphNode(MoonLabel)
+  openspace.removeSceneGraphNode(Moon)
+end)
+
+asset.export(Moon)
+asset.export(MoonLabel)
+asset.export("FocusMoon", FocusMoon.Identifier)
+asset.export("ToggleMoonShading", ToggleMoonShading.Identifier)
+
+
+
+asset.meta = {
+  Name = "Moon",
+  Description = "Moon globe with labels and actions",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

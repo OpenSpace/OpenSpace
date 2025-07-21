@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <ghoul/misc/assert.h>
+#include <ghoul/glm.h>
 #include <cstring>
 
 namespace openspace {
@@ -30,9 +31,13 @@ namespace openspace {
 template <typename T>
 void SyncBuffer::encode(const T& v) {
     const size_t size = sizeof(T);
-    ghoul_assert(_encodeOffset + size < _n, "");
 
-    memcpy(_dataStream.data() + _encodeOffset, &v, size);
+    size_t anticpatedBufferSize = _encodeOffset + size;
+    if (anticpatedBufferSize >= _n) {
+        _dataStream.resize(anticpatedBufferSize);
+    }
+
+    std::memcpy(_dataStream.data() + _encodeOffset, &v, size);
     _encodeOffset += size;
 }
 
@@ -41,7 +46,7 @@ T SyncBuffer::decode() {
     const size_t size = sizeof(T);
     ghoul_assert(_decodeOffset + size < _n, "");
     T value;
-    memcpy(&value, _dataStream.data() + _decodeOffset, size);
+    std::memcpy(&value, _dataStream.data() + _decodeOffset, size);
     _decodeOffset += size;
     return value;
 }
@@ -50,7 +55,7 @@ template <typename T>
 void SyncBuffer::decode(T& value) {
     const size_t size = sizeof(T);
     ghoul_assert(_decodeOffset + size < _n, "");
-    memcpy(&value, _dataStream.data() + _decodeOffset, size);
+    std::memcpy(&value, _dataStream.data() + _decodeOffset, size);
     _decodeOffset += size;
 }
 

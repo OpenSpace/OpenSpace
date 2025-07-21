@@ -1,42 +1,83 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
-local textures = asset.syncedResource({
-    Name = "Quasars Textures",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_quasars_textures",
-    Version = 1
+local textures = asset.resource({
+  Name = "Point Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_point_textures",
+  Version = 1
 })
 
-local speck = asset.syncedResource({
-    Name = "Quasars Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_quasars_speck",
-    Version = 1
+local speck = asset.resource({
+  Name = "Quasars Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_quasars_speck",
+  Version = 3
 })
 
-local object = {
-    Identifier = "Quasars",
-    Renderable = {
-        Type = "RenderableBillboardsCloud",
-        Enabled = false,
-        Color = { 1.0, 0.4, 0.2 },
-        Transparency = 1.0,
-        File = speck .. "/quasars.speck",
-        Texture = textures .. "/point3.png",
-        Unit = "Mpc",
-        ScaleFactor = 537.31,
-        -- Fade in value in the same unit as "Unit"
-        FadeInDistances = { 1000.0, 10000.0 },
-        BillboardMaxSize = 30.0,
-        BillboardMinSize = 0.0,
+local colormaps = asset.resource({
+  Name = "Quasars Colormap",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_quasars_colormap",
+  Version = 1
+})
+
+
+local Object = {
+  Identifier = "Quasars",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    Enabled = true,
+    Opacity = 0.95,
+    File = speck .. "qso.speck",
+    Texture = {
+      File = textures .. "point3A.png",
     },
-    GUI = {
-        Path = "/Universe/Quasars"
+    Unit = "Mpc",
+    Fading = {
+      FadeInDistances = { 1000.0, 10000.0 } -- Fade in value in the same unit as "Unit"
+    },
+    Coloring = {
+      FixedColor = { 0.85, 0.35, 0.18 },
+      ColorMapping = {
+        Enabled = false,
+        File = colormaps .. "viridis.cmap",
+        ParameterOptions = {
+          { Key = "lookback_time", Range = { 1.4, 13.0 } }
+        }
+      }
+    },
+    SizeSettings = {
+      ScaleExponent = 23.5,
+      MaxSize = 0.3,
+      EnableMaxSizeControl = true
     }
+  },
+  GUI = {
+    Name = "Quasars",
+    Path = "/Universe/Deep Sky Surveys",
+    Focusable = false,
+    Description = [[Quasars are the most distant objects we see. They are extremely
+      active galaxies that contain supermassive black holes which gobble up material at a
+      furious rate. As the material falls into the black hole, it forms a disk and emits
+      high-energy light that we see to great distances. Census: 755,850 quasars.]]
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Object)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Object)
+end)
+
+asset.export(Object)
+
+
+
+asset.meta = {
+  Name = "Quasars",
+  Description = Object.GUI.Description,
+  Author = "Brian Abbott, Sohum Udani (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe"
+}

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,29 +22,43 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/galaxymodule.h  
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/galaxyraycaster.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablegalaxy.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/milkywayconversiontask.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/milkywaypointsconversiontask.h
+  galaxymodule.h
+  rendering/galaxyraycaster.h
+  rendering/renderablegalaxy.h
+  tasks/milkywayconversiontask.h
+  tasks/milkywaypointsconversiontask.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/galaxymodule.cpp  
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/galaxyraycaster.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablegalaxy.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/milkywayconversiontask.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/milkywaypointsconversiontask.cpp
+  galaxymodule.cpp
+  rendering/galaxyraycaster.cpp
+  rendering/renderablegalaxy.cpp
+  tasks/milkywayconversiontask.cpp
+  tasks/milkywaypointsconversiontask.cpp
 )
+
 source_group("Source Files" FILES ${SOURCE_FILES})
 
+set(SHADER_FILES
+  shaders/galaxyraycast.glsl
+  shaders/billboard_vs.glsl
+  shaders/billboard_fs.glsl
+  shaders/billboard_ge.glsl
+  shaders/points_fs.glsl
+  shaders/points_vs.glsl
+  shaders/raycasterbounds_fs.glsl
+  shaders/raycasterbounds_vs.glsl
+)
+
+source_group("Shader Files" FILES ${SHADER_FILES})
+
 create_new_module(
-    "Galaxy"
-    galaxy
-    STATIC
-    ${HEADER_FILES} ${SOURCE_FILES}
+  "Galaxy"
+  galaxy
+  STATIC
+  ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )

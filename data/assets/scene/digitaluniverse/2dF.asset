@@ -1,42 +1,74 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
-local textures = asset.syncedResource({
-    Name = "2dF Textures",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_2dF_textures",
-    Version = 1
+local textures = asset.resource({
+  Name = "Point Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_point_textures",
+  Version = 1
 })
 
-local speck = asset.syncedResource({
-    Name = "2dF Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_2dF_speck",
-    Version = 1
+local speck = asset.resource({
+  Name = "2dF Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_2dF_speck",
+  Version = 3
 })
 
-local object = {
-    Identifier = "2dF",
-    Renderable = {
-        Type = "RenderableBillboardsCloud",
-        Enabled = false,
-        Color = { 1.0, 1.0, 1.0 },
-        Transparency = 1.0,
-        File = speck .. "/2dF.speck",
-        Texture = textures .. "/point3.png",
-        ColorMap = speck .. "/lss.cmap",
-        ColorOption = { "redshift", "prox5Mpc" },
-        ColorRange = { { 0.0, 0.075 }, { 1.0, 50.0 } },
-        Unit = "Mpc",
-        ScaleFactor = 508.0
+
+local Object = {
+  Identifier = "2dF",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    Enabled = false,
+    Opacity = 1.0,
+    File = speck .. "2dF.speck",
+    Unit = "Mpc",
+    Texture = {
+      File = textures .. "point3A.png",
     },
-    GUI = {
-        Name = "2dF Galaxies",
-        Path = "/Universe/Galaxies"
+    Coloring = {
+      ColorMapping = {
+        File = speck .. "2dF.cmap",
+        ParameterOptions = {
+          { Key = "proximity", Range = { 1.0, 25.0 } },
+          { Key = "redshift", Range = { 0.0, 0.075 } }
+        }
+      }
+    },
+    SizeSettings = {
+      ScaleExponent = 22.6,
+      MaxSize = 0.2,
+      EnableMaxSizeControl = true
     }
+  },
+  GUI = {
+    Name = "2dF Galaxies",
+    Path = "/Universe/Deep Sky Surveys",
+    Focusable = false,
+    Description = [[The Two-degree Field (2dF) Survey was a project designed to map
+      portions of the extragalactic universe. The 2dF survey has three main components:
+      the North Galactic Pole strip, the South Galactic Pole strip, and the random fields
+      that surround the South Galactic Pole strip. Colors: Orange galaxies show dense
+      regions of galaxies, aqua galaxies are areas of intermediate density, and green
+      galaxies are areas of lower density. Census: 229,293 galaxies.]]
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Object)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Object)
+end)
+
+asset.export(Object)
+
+
+
+asset.meta = {
+  Name = "2dF Galaxies",
+  Description = Object.GUI.Description,
+  Author = "Brian Abbott (AMNH), Eric Gawiser (Rutgers U)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe"
+}

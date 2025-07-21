@@ -1,0 +1,196 @@
+local sun = asset.require("scene/solarsystem/sun/transforms")
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
+
+
+
+local models = asset.resource({
+  Name = "Apollo Boulders Models",
+  Type = "HttpSynchronization",
+  Identifier = "apollo_boulders",
+  Version = 2
+})
+
+
+local Station2Boulder1Holder = {
+  Identifier = "Station_2_Boulder1",
+  Parent = moon.Moon.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon.Moon.Identifier,
+      Longitude = -360 + 30.5294692,
+      Latitude = 20.098824,
+      Altitude = -2442.8,
+      UseHeightMap = false
+    }
+  },
+  GUI = {
+    Name = "Station 2 Boulder 1",
+    Path = "/Solar System/Missions/Apollo/17/Station 2"
+  }
+}
+
+local Station2Boulder1Model = {
+  Identifier = "Station2Boulder1Model",
+  Parent = Station2Boulder1Holder.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 0.06
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "b1-v2.obj",
+    RotationVector = { 243.243256, 206.270264, 309.677429 },
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    },
+    PerformShading = false,
+    EnableFaceCulling = false
+  },
+  GUI = {
+    Name = "Station 2 Boulder 1 Model",
+    Path = "/Solar System/Missions/Apollo/17/Station 2"
+  }
+}
+
+local Station2Boulder2Holder = {
+  Identifier = "Station_2_Boulder2",
+  Parent = moon.Moon.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon.Moon.Identifier,
+      Longitude = -360 + 30.5287892,
+      Latitude = 20.098240,
+      Altitude = -2434.6,
+      UseHeightMap = false
+    }
+  },
+  GUI = {
+    Name = "Station 2 Boulder 2",
+    Path = "/Solar System/Missions/Apollo/17/Station 2"
+  }
+}
+
+local Station2Boulder2Model = {
+  Identifier = "Station2Boulder2Model",
+  Parent = Station2Boulder2Holder.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 0.06
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "b2model.obj",
+    RotationVector = { 66.162155, 7.783780, 114.193550 },
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    },
+    PerformShading = false,
+    EnableFaceCulling = false
+  },
+  GUI = {
+    Name = "Station 2 Boulder 2 Model",
+    Path = "/Solar System/Missions/Apollo/17/Station 2"
+  }
+}
+
+local Station2Boulder3Holder = {
+  Identifier = "Station_2_Boulder3",
+  Parent = moon.Moon.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon.Moon.Identifier,
+      Longitude = -360 + 30.5294692,
+      Latitude = 20.098610,
+      Altitude = -2441.55,
+      UseHeightMap = false
+    }
+  },
+  GUI = {
+    Name = "Station 2 Boulder 3",
+    Path = "/Solar System/Missions/Apollo/17/Station 2"
+  }
+}
+
+local Station2Boulder3Model = {
+  Identifier = "Station2Boulder3Model",
+  Parent = Station2Boulder3Holder.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 0.06
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "b3model.obj",
+    RotationVector = { 161.513519, 243.243256, 65.806450 },
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    },
+    PerformShading = false,
+    EnableFaceCulling = false
+  },
+  GUI = {
+    Name = "Station 2 Boulder 3 Model",
+    Path = "/Solar System/Missions/Apollo/17/Station 2"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Station2Boulder1Holder)
+  openspace.addSceneGraphNode(Station2Boulder1Model)
+  openspace.addSceneGraphNode(Station2Boulder2Holder)
+  openspace.addSceneGraphNode(Station2Boulder2Model)
+  openspace.addSceneGraphNode(Station2Boulder3Holder)
+  openspace.addSceneGraphNode(Station2Boulder3Model)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Station2Boulder3Model)
+  openspace.removeSceneGraphNode(Station2Boulder3Holder)
+  openspace.removeSceneGraphNode(Station2Boulder2Model)
+  openspace.removeSceneGraphNode(Station2Boulder2Holder)
+  openspace.removeSceneGraphNode(Station2Boulder1Model)
+  openspace.removeSceneGraphNode(Station2Boulder1Holder)
+end)
+
+asset.export(Station2Boulder1Holder)
+asset.export(Station2Boulder1Model)
+asset.export(Station2Boulder2Holder)
+asset.export(Station2Boulder2Model)
+asset.export(Station2Boulder3Holder)
+asset.export(Station2Boulder3Model)
+
+
+
+asset.meta = {
+  Name = "Apollo 17 - Boulder Station 2",
+  Description = [[This asset shows 3D models of the boulders at station 2, which have been
+    reconstructed from the imagery taken of the Apollo 17 crew.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 #include <modules/multiresvolume/rendering/tsp.h>
 #include <openspace/util/progressbar.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 
 namespace openspace {
 
@@ -53,7 +53,7 @@ bool ErrorHistogramManager::buildHistograms(int numBins) {
     _histograms = std::vector<Histogram>(_numInnerNodes);
     LINFOC(
         "ErrorHistogramManager",
-        fmt::format("Build {} histograms with {} bins each", _numInnerNodes, numBins)
+        std::format("Build {} histograms with {} bins each", _numInnerNodes, numBins)
     );
 
     // All TSP Leaves
@@ -96,7 +96,7 @@ bool ErrorHistogramManager::buildFromLeaf(unsigned int bstOffset,
 
     int bstNode = bstOffset;
     bool bstRightOnly = true;
-    unsigned int bstLevel = 0;
+    //unsigned int bstLevel = 0;
 
     do {
         glm::vec3 leafOffset(0.f); // Leaf offset in leaf sized voxels
@@ -117,7 +117,8 @@ bool ErrorHistogramManager::buildFromLeaf(unsigned int bstOffset,
                     _histograms[innerNodeIndex] = Histogram(_minBin, _maxBin, _numBins);
                     ancestorVoxels = readValues(ancestorBrickIndex);
                     _voxelCache[innerNodeIndex] = ancestorVoxels;
-                } else {
+                }
+                else {
                     ancestorVoxels = it->second;
                 }
 
@@ -172,13 +173,13 @@ bool ErrorHistogramManager::buildFromLeaf(unsigned int bstOffset,
         bstRightOnly &= (bstNode % 2 == 0);
         bstNode = parentOffset(bstNode, 2);
 
-        bstLevel++;
+        //bstLevel++;
     } while (bstNode != -1);
 
     return true;
 }
 
-bool ErrorHistogramManager::loadFromFile(const std::string& filename) {
+bool ErrorHistogramManager::loadFromFile(const std::filesystem::path& filename) {
     std::ifstream file(filename, std::ios::in | std::ios::binary);
     if (!file.is_open()) {
         return false;
@@ -195,7 +196,7 @@ bool ErrorHistogramManager::loadFromFile(const std::string& filename) {
 
     _histograms = std::vector<Histogram>(_numInnerNodes);
 
-    for (int i = 0; i < static_cast<int>(_numInnerNodes); ++i) {
+    for (int i = 0; i < static_cast<int>(_numInnerNodes); i++) {
         int offset = i * _numBins;
         float* data = new float[_numBins];
         memcpy(data, &histogramData[offset], sizeof(float) * _numBins);
@@ -209,7 +210,7 @@ bool ErrorHistogramManager::loadFromFile(const std::string& filename) {
 }
 
 
-bool ErrorHistogramManager::saveToFile(const std::string& filename) {
+bool ErrorHistogramManager::saveToFile(const std::filesystem::path& filename) {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     if (!file.is_open()) {
         return false;
@@ -223,7 +224,7 @@ bool ErrorHistogramManager::saveToFile(const std::string& filename) {
     int nFloats = _numInnerNodes * _numBins;
     float* histogramData = new float[nFloats];
 
-    for (unsigned int i = 0; i < _numInnerNodes; ++i) {
+    for (unsigned int i = 0; i < _numInnerNodes; i++) {
         int offset = i * _numBins;
         memcpy(&histogramData[offset], _histograms[i].data(), sizeof(float) * _numBins);
     }
@@ -289,7 +290,8 @@ const Histogram* ErrorHistogramManager::histogram(unsigned int brickIndex) const
     const unsigned int innerNodeIndex = brickToInnerNodeIndex(brickIndex);
     if (innerNodeIndex < _numInnerNodes) {
         return &(_histograms[innerNodeIndex]);
-    } else {
+    }
+    else {
         return nullptr;
     }
 }
@@ -299,7 +301,7 @@ int ErrorHistogramManager::parentOffset(int offset, int base) const {
         return -1;
     }
     const int depth = static_cast<int>(
-        floor(log(((base - 1) * offset + 1.0)) / log(base))
+        floor(log1p(((base - 1) * offset)) / log(base))
     );
     const int firstInLevel = static_cast<int>((pow(base, depth) - 1) / (base - 1));
     const int inLevelOffset = offset - firstInLevel;
@@ -364,8 +366,7 @@ unsigned int ErrorHistogramManager::brickToInnerNodeIndex(unsigned int brickInde
 unsigned int ErrorHistogramManager::innerNodeToBrickIndex(
                                                         unsigned int innerNodeIndex) const
 {
-    // @TODO(abock): innerNodeIndex is an unsigned int, so it will never be < 0
-    if (innerNodeIndex < 0 || innerNodeIndex >= _numInnerNodes) {
+    if (innerNodeIndex >= _numInnerNodes) {
         return std::numeric_limits<unsigned int>::max(); // Not an inner node
     }
 

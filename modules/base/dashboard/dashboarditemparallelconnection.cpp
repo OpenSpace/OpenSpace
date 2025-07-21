@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,191 +32,77 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/distanceconversion.h>
 #include <ghoul/font/font.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr const char* KeyFontMono = "Mono";
-    constexpr const float DefaultFontSize = 10.f;
-
-    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
-        "FontName",
-        "Font Name",
-        "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font Size",
-        "This value determines the size of the font that is used to render the date."
-    };
+    // This `DashboardItem` displays information about the status of the parallel
+    // connection, which is whether OpenSpace is directly connected to other OpenSpace
+    // instances and can either control those instances or be controlled by the master of
+    // the session. If OpenSpace is not connected, this `DashboardItem` will not display
+    // anything.
+    //
+    // The information presented contains how many clients are connected to the same
+    // session and whether this machine is currently the host of the session.
+    struct [[codegen::Dictionary(DashboardItemParallelConnection)]] Parameters {};
+#include "dashboarditemparallelconnection_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItemParallelConnection::Documentation() {
-    using namespace documentation;
-    return {
-        "DashboardItem Parallel Connection",
+    return codegen::doc<Parameters>(
         "base_dashboarditem_parallelconnection",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("DashboardItemParallelConnection"),
-                Optional::No
-            },
-            {
-                FontNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                FontNameInfo.description
-            },
-            {
-                FontSizeInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                FontSizeInfo.description
-            }
-        }
-    };
+        DashboardTextItem::Documentation()
+    );
 }
 
 DashboardItemParallelConnection::DashboardItemParallelConnection(
                                                       const ghoul::Dictionary& dictionary)
-    : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, KeyFontMono)
-    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
-{
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "DashboardItemParallelConnection"
-    );
+    : DashboardTextItem(dictionary)
+{}
 
-    if (dictionary.hasKey(FontNameInfo.identifier)) {
-        _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
-    }
-    _fontName.onChange([this](){
-        _font = global::fontManager.font(_fontName, _fontSize);
-    });
-    addProperty(_fontName);
+void DashboardItemParallelConnection::update() {
+    ZoneScoped;
 
-    if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(
-            dictionary.value<double>(FontSizeInfo.identifier)
-        );
-    }
-    _fontSize.onChange([this](){
-        _font = global::fontManager.font(_fontName, _fontSize);
-    });
-    addProperty(_fontSize);
+    const ParallelConnection::Status status = global::parallelPeer->status();
+    const size_t nConnections = global::parallelPeer->nConnections();
+    const std::string& hostName = global::parallelPeer->hostName();
 
-    _font = global::fontManager.font(_fontName, _fontSize);
-}
-
-void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
-    const ParallelConnection::Status status = global::parallelPeer.status();
-    const size_t nConnections = global::parallelPeer.nConnections();
-    const std::string& hostName = global::parallelPeer.hostName();
-
-    std::string connectionInfo;
     int nClients = static_cast<int>(nConnections);
     if (status == ParallelConnection::Status::Host) {
         nClients--;
-        constexpr const char* Singular = "Hosting session with {} client";
-        constexpr const char* Plural = "Hosting session with {} clients";
+        constexpr std::string_view Singular = "Hosting session with {} client";
+        constexpr std::string_view Plural = "Hosting session with {} clients";
 
-        connectionInfo =
+        _buffer =
             (nClients == 1) ?
-            fmt::format(Singular, nClients) :
-            fmt::format(Plural, nClients);
+            std::format(Singular, nClients) :
+            std::format(Plural, nClients);
     }
     else if (status == ParallelConnection::Status::ClientWithHost) {
         nClients--;
-        connectionInfo = "Session hosted by '" + hostName + "'";
+        _buffer = "Session hosted by '" + hostName + "'";
     }
     else if (status == ParallelConnection::Status::ClientWithoutHost) {
-        connectionInfo = "Host is disconnected";
+        _buffer = "Host is disconnected";
     }
 
     if (status == ParallelConnection::Status::ClientWithHost ||
         status == ParallelConnection::Status::ClientWithoutHost)
     {
-        constexpr const char* Singular = "You and {} more client are tuned in";
-        constexpr const char* Plural = "You and {} more clients are tuned in";
-
-        connectionInfo += "\n";
+        _buffer += "\n";
 
         if (nClients > 2) {
-            connectionInfo += fmt::format(Plural, nClients - 1);
+            constexpr std::string_view Plural = "You and {} more clients are tuned in";
+            _buffer += std::format(Plural, nClients - 1);
         }
         else if (nClients == 2) {
-            connectionInfo += fmt::format(Singular, nClients - 1);
+            constexpr std::string_view Singular = "You and {} more client are tuned in";
+            _buffer += std::format(Singular, nClients - 1);
         }
         else if (nClients == 1) {
-            connectionInfo += "You are the only client";
+            _buffer += "You are the only client";
         }
-    }
-
-    if (!connectionInfo.empty()) {
-        penPosition.y -= _font->height();
-        RenderFont(*_font, penPosition, connectionInfo);
-    }
-}
-
-glm::vec2 DashboardItemParallelConnection::size() const {
-    ParallelConnection::Status status = global::parallelPeer.status();
-    size_t nConnections = global::parallelPeer.nConnections();
-    const std::string& hostName = global::parallelPeer.hostName();
-
-    std::string connectionInfo;
-    int nClients = static_cast<int>(nConnections);
-    if (status == ParallelConnection::Status::Host) {
-        nClients--;
-        if (nClients == 1) {
-            connectionInfo = "Hosting session with 1 client";
-        }
-        else {
-            connectionInfo = fmt::format("Hosting session with {} clients", nClients);
-        }
-    }
-    else if (status == ParallelConnection::Status::ClientWithHost) {
-        nClients--;
-        connectionInfo = "Session hosted by '" + hostName + "'";
-    }
-    else if (status == ParallelConnection::Status::ClientWithoutHost) {
-        connectionInfo = "Host is disconnected";
-    }
-
-    if (status == ParallelConnection::Status::ClientWithHost ||
-        status == ParallelConnection::Status::ClientWithoutHost)
-    {
-        constexpr const char* Singular = "You and {} more client are tuned in";
-        constexpr const char* Plural = "You and {} more clients are tuned in";
-
-        connectionInfo += "\n";
-        if (nClients > 2) {
-            std::string c = std::to_string(nClients - 1);
-            connectionInfo += fmt::format(Plural, nClients);
-        }
-        else if (nClients == 2) {
-            std::string c = std::to_string(nClients - 1);
-            connectionInfo += fmt::format(Singular, nClients - 1);
-        }
-        else if (nClients == 1) {
-            connectionInfo += "You are the only client";
-        }
-    }
-
-    if (!connectionInfo.empty()) {
-        return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-            *_font,
-            connectionInfo
-        ).boundingBox;
-    }
-    else {
-        return { 0.f, 0.f };
     }
 }
 

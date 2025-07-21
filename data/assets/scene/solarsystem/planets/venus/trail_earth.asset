@@ -1,0 +1,50 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local coreKernels = asset.require("spice/core")
+
+
+
+local VenusTrailEarth = {
+  Identifier = "VenusTrailEarth",
+  Parent = earthTransforms.EarthBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Enabled = false,
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = coreKernels.ID.Venus,
+      Observer = coreKernels.ID.Earth
+    },
+    Color = { 1.0, 0.5, 0.2 },
+    Period = 2900.0,
+    Resolution = 1000
+  },
+  Tag = { "planetTrail_solarSystem_alt", "planetTrail_terrestrial_alt" },
+  GUI = {
+    Name = "Venus trail from Earth",
+    Path = "/Solar System/Planets/Venus",
+    Focusable = false,
+    Description = "Alternate trail for Venus, showing Venus as observed from Earth"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(VenusTrailEarth)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(VenusTrailEarth)
+end)
+
+asset.export(VenusTrailEarth)
+
+
+
+asset.meta = {
+  Name = "Venus Trail from Earth",
+  Description = "Trail of Venus as observed by the Earth",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

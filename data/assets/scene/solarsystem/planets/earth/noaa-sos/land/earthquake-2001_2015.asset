@@ -1,0 +1,111 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Earthquakes - 2001-2015"
+local Identifier = "noaa-sos-land-earthquake-2001_2015"
+local Description = [[This animation shows every recorded earthquake in sequence as they
+occurred from January 1, 2001, through December 31, 2015, at a rate of 30 days per
+second. The earthquake hypocenters first appear as flashes then remain as colored circles
+before shrinking with time so as not to obscure subsequent earthquakes. The size of the
+circle represents the earthquake magnitude while the color represents its depth within
+the earth. At the end of the animation it will first show all quakes in this 15-year
+period. Next, it will show only those earthquakes greater than magnitude 6.5, the
+smallest earthquake size known to make a tsunami. Finally it will only show those
+earthquakes with magnitudes of magnitude 8.0 or larger, the "great" earthquakes most
+likely to pose a tsunami threat when they occur under the ocean or near a coastline and
+when they are shallow within the earth (less than 100 km or 60 mi. deep)]]
+local URL = "https://sos.noaa.gov/catalog/datasets/earthquakes-2001-2015/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local LayerAllquakes = {
+  Identifier = Identifier .. "-allquakes",
+  Name = Name .. " (All Quakes)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "All_Quakes_2001-2015_4k.jpg",
+  Description = Description
+}
+
+local LayerQuakeBasemap = {
+  Identifier = Identifier .. "-quake-basemap",
+  Name = Name .. " (Quake Basemap)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "quake_basemap_4k.jpg",
+  Description = Description
+}
+
+local LayerTsunamiBasemap = {
+  Identifier = Identifier .. "-tsunami-basemap",
+  Name = Name .. " (Tsunami Basemap)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "Tsunami_basemap_4k.jpg",
+  Description = Description
+}
+
+local LayerQuakesGte6p5 = {
+  Identifier = Identifier .. "-gte6_5",
+  Name = Name .. " (GTE 6.5)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "Quakes_gte6.5_2001-2015_4k.jpg",
+  Description = Description
+}
+
+local LayerQuakesGte8 = {
+  Identifier = Identifier .. "-gte8",
+  Name = Name .. " (GTE 8.0)",
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "Quakes_gte8_2001-2015_4k.jpg",
+  Description = Description
+}
+
+local Legend = {
+  Identifier = Identifier,
+  Name = Name,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "Earthquake_Legend.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerAllquakes)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerQuakeBasemap)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerTsunamiBasemap)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerQuakesGte6p5)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerQuakesGte8)
+  openspace.addScreenSpaceRenderable(Legend)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Legend)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerQuakesGte8)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerQuakesGte6p5)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerTsunamiBasemap)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerQuakeBasemap)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerAllquakes)
+end)
+
+asset.export(LayerAllquakes)
+asset.export(LayerQuakeBasemap)
+asset.export(LayerTsunamiBasemap)
+asset.export(LayerQuakesGte6p5)
+asset.export(LayerQuakesGte8)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

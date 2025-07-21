@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,98 +24,42 @@
 
 #include <openspace/properties/vector/uvec3property.h>
 
-#include <ghoul/glm.h>
+#include <openspace/util/json_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/misc/misc.h>
-#include <limits>
-#include <sstream>
-
-namespace {
-
-glm::uvec3 fromLuaConversion(lua_State* state, bool& success) {
-    glm::uvec3 result;
-    lua_pushnil(state);
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::uvec3>::value; ++i) {
-        int hasNext = lua_next(state, -2);
-        if (hasNext != 1) {
-            success = false;
-            return glm::uvec3(0);
-        }
-        if (lua_isnumber(state, -1) != 1) {
-            success = false;
-            return glm::uvec3(0);
-        }
-        else {
-            result[i] = static_cast<glm::uvec3::value_type>(lua_tonumber(state, -1));
-            lua_pop(state, 1);
-        }
-    }
-    // The last accessor argument and the table are still on the stack
-    lua_pop(state, 2);
-    success = true;
-    return result;
-}
-
-bool toLuaConversion(lua_State* state, glm::uvec3 value) {
-    lua_newtable(state);
-    int number = 1;
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::uvec3>::value; ++i) {
-        lua_pushnumber(state, static_cast<lua_Number>(value[i]));
-        lua_rawseti(state, -2, number);
-        ++number;
-    }
-    return true;
-}
-
-glm::uvec3 fromStringConversion(const std::string& val, bool& success) {
-    glm::uvec3 result;
-    std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
-    if (tokens.size() != static_cast<size_t>(result.length())) {
-        success = false;
-        return result;
-    }
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::uvec3>::value; ++i) {
-        std::stringstream s(tokens[i]);
-        glm::uvec3::value_type v;
-        s >> v;
-        if (s.fail()) {
-            success = false;
-            return result;
-        }
-        else {
-            result[i] = v;
-        }
-    }
-    success = true;
-    return result;
-}
-
-bool toStringConversion(std::string& outValue, glm::uvec3 inValue) {
-    outValue = "{";
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::uvec3>::value; ++i) {
-        outValue += std::to_string(inValue[i]) + ",";
-    }
-    outValue.pop_back();
-    outValue += "}";
-    return true;
-}
-
-} // namespace
+#include <ghoul/lua/lua_helper.h>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    UVec3Property,
-    glm::uvec3,
-    glm::uvec3(0),
-    glm::uvec3(std::numeric_limits<unsigned int>::lowest()),
-    glm::uvec3(std::numeric_limits<unsigned int>::max()),
-    glm::uvec3(1),
-    fromLuaConversion,
-    toLuaConversion,
-    fromStringConversion,
-    toStringConversion,
-    LUA_TTABLE
-)
+UVec3Property::UVec3Property(Property::PropertyInfo info, glm::uvec3 value,
+                             glm::uvec3 minValue, glm::uvec3 maxValue,
+                             glm::uvec3 stepValue)
+    : NumericalProperty<glm::uvec3>(
+        std::move(info),
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue)
+    )
+{}
+
+std::string_view UVec3Property::className() const {
+    return "UVec3Property";
+}
+
+ghoul::lua::LuaTypes UVec3Property::typeLua() const {
+    return ghoul::lua::LuaTypes::Table;
+}
+
+void UVec3Property::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
+glm::uvec3 UVec3Property::toValue(lua_State* state) const {
+    return ghoul::lua::value<glm::uvec3>(state);
+}
+
+std::string UVec3Property::stringValue() const {
+    return formatJson(_value);
+}
 
 } // namespace openspace::properties

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,25 +35,25 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 
 /**
- * Converts a set of exr image slices to a raw volume
- * with floating point RGBA data (32 bit per channel).
+ * Converts a set of exr image slices to a raw volume with floating point RGBA data (32
+ * bit per channel).
  */
 class MilkywayConversionTask : public Task {
 public:
-    MilkywayConversionTask(const ghoul::Dictionary& dictionary);
-    virtual ~MilkywayConversionTask();
+    explicit MilkywayConversionTask(const ghoul::Dictionary& dictionary);
+    ~MilkywayConversionTask() override = default;
     std::string description() override;
     void perform(const Task::ProgressCallback& onProgress) override;
 
-    static documentation::Documentation documentation();
+    static documentation::Documentation Documentation();
 
 private:
     std::string _inFilenamePrefix;
     std::string _inFilenameSuffix;
-    size_t _inFirstIndex;
-    size_t _inNSlices;
+    size_t _inFirstIndex = 0;
+    size_t _inNSlices = 0;
     std::string _outFilename;
-    glm::ivec3 _outDimensions;
+    glm::ivec3 _outDimensions = glm::ivec3(0);
 };
 
 } // namespace openspace

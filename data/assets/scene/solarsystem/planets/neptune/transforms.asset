@@ -1,22 +1,43 @@
-local assetHelper = asset.require('util/asset_helper')
-local sun_transforms_asset = asset.require('scene/solarsystem/sun/transforms')
-asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
+
+
 
 local NeptuneBarycenter = {
-    Identifier = "NeptuneBarycenter",
-    Parent = sun_transforms_asset.SolarSystemBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "NEPTUNE BARYCENTER",
-            Observer = "SUN"
-        }
-    },
-    GUI = {
-        Name = "Neptune Barycenter",
-        Path = "/Solar System/Planets/Neptune",
-        Hidden = true
+  Identifier = "NeptuneBarycenter",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = coreKernels.ID.NeptuneBarycenter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
+  },
+  GUI = {
+    Name = "Neptune Barycenter",
+    Path = "/Solar System/Planets/Neptune",
+    Focusable = false,
+    Hidden = true
+  }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { NeptuneBarycenter })
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(NeptuneBarycenter)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(NeptuneBarycenter)
+end)
+
+asset.export(NeptuneBarycenter)
+
+
+
+asset.meta = {
+  Name = "Neptune Transforms",
+  Description = "Neptune Barycenter transform",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

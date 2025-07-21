@@ -1,0 +1,206 @@
+local constellationsCSV = asset.resource("constellation_data.csv")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local constellations_helper = asset.require("util/constellations_helper")
+
+
+
+local images = asset.resource({
+  Name = "Constellation Images",
+  Type = "HttpSynchronization",
+  Identifier = "constellation_images",
+  Version = 4
+})
+
+local data = asset.resource({
+  Name = "Constellation Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_constellations_data",
+  Version = 1
+})
+
+
+--function that reads the file
+local function createConstellations(baseIdentifier, guiPath, constellationfile)
+  local genConstellations = {}
+  -- define parsec to meters
+  local PARSEC_CONSTANT = 3.0856776E16
+  -- how many parsecs away do you want the images to be?
+  -- this setting puts the billboards at the location of the constellation bounds grid from DU.
+  -- but they can really be anywhere since the billboard size will scale with distance.
+  local distanceMultiplier = 3.2
+  local baseScale = 1e17
+  local lines = openspace.readCSVFile(openspace.absPath(constellationfile))
+  for _, line in ipairs(lines) do
+    -- describes the data
+    local group = line[1]
+    local abbreviation = line[2]
+    local name = line[3]
+    local x = tonumber(line[4])
+    local y = tonumber(line[5])
+    local z = tonumber(line[6])
+    local scale = tonumber(line[7])
+    local imageName = line[8]
+    local rotX = tonumber(line[9])
+    local rotY = tonumber(line[10])
+    local rotZ = tonumber(line[11])
+    local centerStar = line[12]
+    local magVec = math.sqrt(x*x + y*y + z*z)
+    local normx = x / magVec
+    local normy = y / magVec
+    local normz = z / magVec
+
+    -- Use the full name in the data constellations.dat if possible
+    -- Otherwise, use the given name in the constellation_data.csv file
+    local foundName = constellations_helper.findFullName(abbreviation)
+    if foundName ~= nil then
+      name = foundName
+    end
+
+    group = (group == "" and globe or group)
+
+    local aconstellation = {
+      -- Identifier = guiPath .. "-" .. name,
+      Identifier = baseIdentifier .. "-" .. abbreviation,
+      Parent = transforms.SolarSystemBarycenter.Identifier,
+      Transform = {
+        Translation = {
+          Type = "StaticTranslation",
+          -- position is in parsecs from the SolarSystemBarycenter, so convert to meters
+          Position = {
+            normx * PARSEC_CONSTANT * distanceMultiplier,
+            normy * PARSEC_CONSTANT * distanceMultiplier,
+            normz * PARSEC_CONSTANT * distanceMultiplier
+          }
+        },
+        Rotation = {
+          Type = "StaticRotation",
+          Rotation = { tonumber(rotX), tonumber(rotY), tonumber(rotZ) }
+        }
+      },
+      Renderable = {
+        Type = "RenderablePlaneImageLocal",
+        Enabled = false,
+        Size = tonumber(baseScale * scale * distanceMultiplier / 10),
+        Origin = "Center",
+        Billboard = false,
+        LazyLoading = true,
+        Texture = images .. imageName,
+        BlendMode = "Additive",
+        Opacity = 0.1,
+        DimInAtmosphere = true
+      },
+      Tag = { "image_constellation", "constellation_art_" .. group, "daytime_hidden" },
+      GUI = {
+        Name = name .. " Image",
+        Path = "/Milky Way/Constellations/" .. guiPath,
+        Description = name .. " Image"
+      }
+    }
+    table.insert(genConstellations, aconstellation)
+  end
+  return genConstellations
+end
+
+local ShowArt = {
+  Identifier = "os.constellation_art.ShowArt",
+  Name = "Show all",
+  Command = [[
+    openspace.fadeIn("Scene.ImageConstellation*.Renderable")
+  ]],
+  Documentation = "Enables and fades up constellation art work",
+  GuiPath = "/Constellations/Art",
+  IsLocal = false
+}
+
+local HideArt = {
+  Identifier = "os.constellation_art.HideArt",
+  Name = "Hide all",
+  Command = [[
+    openspace.fadeOut("Scene.ImageConstellation*.Renderable")
+  ]],
+  Documentation = "Fades out constellation artwork",
+  GuiPath = "/Constellations/Art",
+  IsLocal = false
+}
+
+local DisableArt = {
+  Identifier = "os.constellation_art.DisableArt",
+  Name = "Disable all",
+  Command = [[
+    openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", false)
+  ]],
+  Documentation = "Disable constellation artwork",
+  GuiPath = "/Constellations/Art",
+  IsLocal = false
+}
+
+local ShowZodiacArt = {
+  Identifier = "os.constellation_art.ShowZodiacArt",
+  Name = "Show zodiac",
+  Command = [[
+    openspace.fadeIn("{constellation_art_zodiac}")
+  ]],
+  Documentation = "Enables and fades up zodiac art work",
+  GuiPath = "/Constellations/Art",
+  IsLocal = false
+}
+
+local HideZodiacArt = {
+  Identifier = "os.constellation_art.HideZodiacArt",
+  Name = "Hide zodiac",
+  Command = [[
+    openspace.fadeOut("{constellation_art_zodiac}")
+  ]],
+  Documentation = "Fades down zodiac art work",
+  GuiPath = "/Constellations/Art",
+  IsLocal = false
+}
+
+local nodes = {}
+
+
+asset.onInitialize(function()
+  local constellationsCSV = images .. "constellation_data.csv"
+
+  nodes = createConstellations("ImageConstellation", "Constellation Art", constellationsCSV)
+  for _, n in ipairs(nodes) do
+    openspace.addSceneGraphNode(n)
+  end
+
+  openspace.action.registerAction(ShowArt)
+  openspace.action.registerAction(HideArt)
+  openspace.action.registerAction(DisableArt)
+  openspace.action.registerAction(ShowZodiacArt)
+  openspace.action.registerAction(HideZodiacArt)
+end)
+
+asset.onDeinitialize(function()
+  for _, n in ipairs(nodes) do
+    openspace.removeSceneGraphNode(n.Identifier)
+  end
+
+  openspace.action.removeAction(HideZodiacArt)
+  openspace.action.removeAction(ShowZodiacArt)
+  openspace.action.removeAction(DisableArt)
+  openspace.action.removeAction(HideArt)
+  openspace.action.removeAction(ShowArt)
+end)
+
+for _, n in ipairs(nodes) do
+  asset.export(n)
+end
+asset.export("ShowArtAction", ShowArt.Identifier)
+asset.export("HideArtAction", HideArt.Identifier)
+asset.export("DisableArtAction", DisableArt.Identifier)
+asset.export("ShowZodiacArt", ShowZodiacArt.Identifier)
+asset.export("HideZodiacArt", HideZodiacArt.Identifier)
+
+
+
+asset.meta = {
+  Name = "Constellation Images",
+  Description = "Artistic images depicting the constellations",
+  Author = "James Hedberg",
+  URL = "http://jameshedberg.com",
+  License = "CC-BY"
+}

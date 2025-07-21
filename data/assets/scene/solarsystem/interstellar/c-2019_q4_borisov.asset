@@ -1,0 +1,111 @@
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+
+
+
+local trajectory = asset.resource({
+  Name = "C-2019 Q4 Borisov Trajectory",
+  Type = "HttpSynchronization",
+  Identifier = "borisov_horizons",
+  Version = 3
+})
+
+
+local C2019Q4BorisovTrail = {
+  Identifier = "C2019Q4BorisovTrail",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = trajectory .. "horizons_c2019q4borisov.hrz"
+      -- Target: Borisov (C/2019 Q4)
+      -- Observer: SSB
+      -- Start time: 2015-Jan-01 00:00:00 (first data point)
+      -- End time: 2050-Jan-01 00:00:00 (last data point)
+      -- Step size: 1 day
+    },
+    Color = { 0.15, 0.9, 0.15 },
+    StartTime = "2015 JAN 01 00:00:00",
+    EndTime = "2050 JAN 01 00:00:00",
+    SampleInterval = openspace.time.secondsPerDay()
+  },
+  GUI = {
+    Name = "2I/Borisov Trail",
+    Path = "/Solar System/Interstellar/Borisov",
+    Focusable = false,
+    Description = [[Trail of C-2019 Q4 Borisov from 2015 JAN 01 00:00:00
+    to 2050 JAN 01 00:00:00. Data from JPL Horizons]]
+  }
+}
+
+local C2019Q4BorisovPosition = {
+  Identifier = "C2019Q4BorisovPosition",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = trajectory .. "horizons_c2019q4borisov.hrz"
+    }
+  },
+  GUI = {
+    Name = "2I/Borisov",
+    Path = "/Solar System/Interstellar/Borisov",
+    Description = [[Position of C-2019 Q4 Borisov from 2015 JAN 01 00:00:00
+    to 2050 JAN 01 00:00:00. Data from JPL Horizons]]
+  }
+}
+
+local C2019Q4BorisovLabel = {
+  Identifier = "C2019Q4BorisovLabel",
+  Parent = C2019Q4BorisovPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "2I/Borisov",
+    FontSize = 70.0,
+    Size = 8.50,
+    MinMaxSize = { 1, 50 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 1.5, 50.0 },
+    FadeWidths = { 1.0, 40.0 }
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "2I/Borisov Label",
+    Path = "/Solar System/Interstellar/Borisov",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(C2019Q4BorisovPosition)
+  openspace.addSceneGraphNode(C2019Q4BorisovTrail)
+  openspace.addSceneGraphNode(C2019Q4BorisovLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(C2019Q4BorisovLabel)
+  openspace.removeSceneGraphNode(C2019Q4BorisovTrail)
+  openspace.removeSceneGraphNode(C2019Q4BorisovPosition)
+end)
+
+asset.export(C2019Q4BorisovPosition)
+asset.export(C2019Q4BorisovTrail)
+asset.export(C2019Q4BorisovLabel)
+
+
+
+asset.meta = {
+  Name = "C/2019 Q4 Borisov",
+  Description = [[This asset contains the trail and position of C-2019 Q4 Borisov from
+    2015 JAN 01 00:00:00 to 2050 JAN 01 00:00:00. Data from JPL Horizons]],
+  Author = "OpenSpace Team",
+  URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
+  License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010. All
+    documents available from this server may be protected under the U.S. and Foreign
+    Copyright Laws]]
+}

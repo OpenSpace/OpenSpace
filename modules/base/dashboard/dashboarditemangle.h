@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,14 +25,11 @@
 #ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMANGLE___H__
 #define __OPENSPACE_MODULE_BASE___DASHBOARDITEMANGLE___H__
 
-#include <openspace/rendering/dashboarditem.h>
+#include <openspace/rendering/dashboardtextitem.h>
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <utility>
-
-namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
 
@@ -40,40 +37,29 @@ class SceneGraphNode;
 
 namespace documentation { struct Documentation; }
 
-class DashboardItemAngle : public DashboardItem {
+class DashboardItemAngle : public DashboardTextItem {
 public:
-    DashboardItemAngle(const ghoul::Dictionary& dictionary);
-    virtual ~DashboardItemAngle() = default;
+    explicit DashboardItemAngle(const ghoul::Dictionary& dictionary);
+    ~DashboardItemAngle() override = default;
 
-    void render(glm::vec2& penPosition) override;
-
-    glm::vec2 size() const override;
+    void update() override;
 
     static documentation::Documentation Documentation();
 
 private:
-    enum Type {
-        Node = 0,
-        Focus,
-        Camera
-    };
-
     struct Component {
         properties::OptionProperty type;
-        properties::StringProperty nodeName;
+        properties::StringProperty nodeIdentifier;
         SceneGraphNode* node;
     };
 
-    std::pair<glm::dvec3, std::string> positionAndLabel(Component& comp) const;
+    static std::pair<glm::dvec3, std::string> positionAndLabel(Component& comp);
 
     Component _source;
     Component _reference;
     Component _destination;
 
-    properties::StringProperty _fontName;
-    properties::FloatProperty _fontSize;
-
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
+    std::vector<char> _localBuffer;
 };
 
 } // namespace openspace

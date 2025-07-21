@@ -1,0 +1,86 @@
+local sun = asset.require("scene/solarsystem/sun/transforms")
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
+
+
+
+local models = asset.resource({
+  Name = "Apollo Boulders Models",
+  Type = "HttpSynchronization",
+  Identifier = "apollo_boulders",
+  Version = 2
+})
+
+
+local Station7BoulderHolder = {
+  Identifier = "Station_7_Boulder",
+  Parent = moon.Moon.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon.Moon.Identifier,
+      Longitude = -360 + 30.8165882,
+      Latitude = 20.2908556,
+      Altitude = -2593.5,
+      UseHeightMap = true
+    }
+  },
+  GUI = {
+    Name = "Station 7 Boulder",
+    Path = "/Solar System/Missions/Apollo/17/Station 7"
+  }
+}
+
+local Station7BoulderModel = {
+  Identifier = "Station7BoulderModel",
+  Parent = Station7BoulderHolder.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 0.1
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "b7model.obj",
+    RotationVector = { 1.945950, 274.378387, 212.903214 },
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    },
+    PerformShading = false,
+    EnableFaceCulling = false
+  },
+  GUI = {
+    Name = "Station 7 Boulder Model",
+    Path = "/Solar System/Missions/Apollo/17/Station 7"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Station7BoulderHolder)
+  openspace.addSceneGraphNode(Station7BoulderModel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Station7BoulderModel)
+  openspace.removeSceneGraphNode(Station7BoulderHolder)
+end)
+
+asset.export(Station7BoulderHolder)
+asset.export(Station7BoulderModel)
+
+
+
+asset.meta = {
+  Name = "Apollo 17 - Boulder Station 7",
+  Description = [[This asset shows the 3D model of the boulder found at station 7, which
+    has been reconstructed from the imagery taken of the Apollo 17 crew.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

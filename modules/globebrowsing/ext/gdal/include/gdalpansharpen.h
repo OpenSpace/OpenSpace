@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdalpansharpen.h 4971449609881d6ffdca70188292293852d12691 2017-12-17 16:48:14Z Even Rouault $
+ * $Id: gdalpansharpen.h fe2d81c8819bf9794bce0210098e637565728350 2018-05-06 00:49:51 +0200 Even Rouault $
  *
  * Project:  GDAL Pansharpening module
  * Purpose:  Prototypes, and definitions for pansharpening related work.
@@ -187,13 +187,15 @@ typedef struct
  */
 class GDALPansharpenOperation
 {
-        GDALPansharpenOptions* psOptions;
-        std::vector<int> anInputBands;
-        std::vector<GDALDataset*> aVDS; // to destroy
-        std::vector<GDALRasterBand*> aMSBands; // original multispectral bands potentially warped into a VRT
-        int bPositiveWeights;
-        CPLWorkerThreadPool* poThreadPool;
-        int nKernelRadius;
+        CPL_DISALLOW_COPY_ASSIGN(GDALPansharpenOperation)
+
+        GDALPansharpenOptions* psOptions = nullptr;
+        std::vector<int> anInputBands{};
+        std::vector<GDALDataset*> aVDS{}; // to destroy
+        std::vector<GDALRasterBand*> aMSBands{}; // original multispectral bands potentially warped into a VRT
+        int bPositiveWeights = TRUE;
+        CPLWorkerThreadPool* poThreadPool = nullptr;
+        int nKernelRadius = 0;
 
         static void PansharpenJobThreadFunc(void* pUserData);
         static void PansharpenResampleJobThreadFunc(void* pUserData);

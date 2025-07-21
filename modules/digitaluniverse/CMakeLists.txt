@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,47 +22,29 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepoints.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledumeshes.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablebillboardscloud.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanescloud.h
+  rendering/renderabledumeshes.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepoints.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledumeshes.cpp 
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablebillboardscloud.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanescloud.cpp
+  rendering/renderabledumeshes.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pointssprite_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pointssprite_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_sprite_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_gs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_gs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboardpolygon_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboardpolygon_gs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboardpolygon_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/dumesh_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/dumesh_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/plane_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/plane_fs.glsl
+  shaders/dumesh_vs.glsl
+  shaders/dumesh_fs.glsl
+  shaders/plane_vs.glsl
+  shaders/plane_fs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
-    "DigitalUniverse"
-    digitaluniverse_module
-    STATIC
-    ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+  "DigitalUniverse"
+  digitaluniverse_module
+  STATIC
+  ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )

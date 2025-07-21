@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,36 +33,28 @@
 #include <optional>
 #include <set>
 
-namespace openspace { class GlobeBrowsingModule; }
-
 namespace openspace::globebrowsing {
 
 struct RawTile;
 
 /**
  * The responsibility of this class is to enqueue tile requests and fetching finished
- * <code>RawTile</code>s that has been asynchronously loaded.
+ * `RawTile`s that has been asynchronously loaded.
  */
 class AsyncTileDataProvider {
 public:
     /**
-     * \param rawTileDataReader is the reader that will be used for the asynchronous
-     * tile loading.
+     * \param name is the name for this provider
+     * \param rawTileDataReader is the reader that will be used for the asynchronous tile
+     *        loading
      */
     AsyncTileDataProvider(std::string name,
         std::unique_ptr<RawTileDataReader> rawTileDataReader);
-
-    ~AsyncTileDataProvider();
 
     /**
      * Creates a job which asynchronously loads a raw tile. This job is enqueued.
      */
     bool enqueueTileIO(const TileIndex& tileIndex);
-
-    /**
-     * Get all finished jobs.
-     */
-    std::vector<RawTile> rawTiles();
 
     /**
      * Get one finished job.
@@ -73,7 +65,7 @@ public:
     void reset();
     void prepareToBeDeleted();
 
-    bool shouldBeDeleted();
+    bool shouldBeDeleted() const;
 
     const RawTileDataReader& rawTileDataReader() const;
     float noDataValueAsFloat() const;
@@ -89,7 +81,7 @@ protected:
     };
 
     /**
-     * \returns true if tile of index <code>tileIndex</code> is not already enqueued.
+     * \return `true` if tile of index \p tileIndex is not already enqueued
      */
     bool satisfiesEnqueueCriteria(const TileIndex& tileIndex);
 
@@ -100,13 +92,14 @@ protected:
      */
     void endUnfinishedJobs();
 
+    void clearTiles();
+
     void endEnqueuedJobs();
 
     void performReset(ResetRawTileDataReader resetRawTileDataReader);
 
 private:
     const std::string _name;
-    GlobeBrowsingModule* _globeBrowsingModule;
     /// The reader used for asynchronous reading
     std::unique_ptr<RawTileDataReader> _rawTileDataReader;
 

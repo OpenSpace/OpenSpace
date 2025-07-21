@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +30,16 @@
 #pragma warning (disable : 4100)
 #endif // _MSC_VER
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#endif // __clang__
+
 #include <include/cef_client.h>
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif // __clang__
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -48,16 +57,18 @@ class WebKeyboardHandler;
 class BrowserInstance {
 public:
     static constexpr int SingleClick = 1;
-
-    BrowserInstance(WebRenderHandler* renderer, WebKeyboardHandler* keyboardHandler);
+    BrowserInstance(WebRenderHandler* renderer,
+        WebKeyboardHandler* keyboardHandler
+    );
     ~BrowserInstance();
 
     void loadUrl(const std::string& url);
+
     /**
      * Load a local file.
      *
      * \param path The path to load
-     * \return \c true if the path exists, \c false otherwise
+     * \return `true` if the path exists, `false` otherwise
      */
     bool loadLocalPath(std::string path);
     void initialize();
@@ -65,15 +76,19 @@ public:
     /**
      * Call when the window has been reshaped.
      *
-     * \param wrapper the windowWrapper capable of
+     * \param windowSize The size of the window in pixels
      */
     void reshape(const glm::ivec2& windowSize);
 
     /**
-     * encapsulate renderHandler's draw method
+     * Encapsulate renderHandler's draw method.
      */
     void draw();
     void close(bool force = false);
+
+#ifdef WIN32
+    void sendTouchEvent(const CefTouchEvent& event) const;
+#endif // WIN32
 
     bool sendKeyEvent(const CefKeyEvent& event);
     bool sendMouseClickEvent(const CefMouseEvent& event,
@@ -83,18 +98,28 @@ public:
     bool sendMouseMoveEvent(const CefMouseEvent& event);
 
     /**
-     * send scroll wheel event to browser
+     * Send scroll wheel event to browser.
      *
      * \param event Key event with position
      * \param delta The scroll amount in pixels
-     * \return if this scroll should be blocked or not
+     * \return `true` if this scroll should be blocked or not
      */
     bool sendMouseWheelEvent(const CefMouseEvent& event, const glm::ivec2& delta);
+
+    /**
+     * Set the browser zoom level. 1.0 = default, 2.0 = double, etc.
+     */
+    void setZoom(float ratio);
+
     void reloadBrowser();
+
+    void selectAll();
 
     const CefRefPtr<CefBrowser>& getBrowser() const;
 
-    bool hasContent(int x, int y);
+    bool hasContent(const glm::ivec2& pos) const;
+
+    bool _shouldReshape = false;
 
 private:
     CefRefPtr<WebRenderHandler> _renderHandler;
@@ -102,6 +127,7 @@ private:
     CefRefPtr<BrowserClient> _client;
     CefRefPtr<CefBrowser> _browser;
     bool _isInitialized = false;
+    double _zoomLevel = 1.0;
 };
 
 } // namespace openspace

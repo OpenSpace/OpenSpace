@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,82 +27,160 @@
 #include "PowerScaling/powerScalingMath.hglsl"
 
 layout(points) in;
-in vec4 psc_position[];
-in vec3 vs_brightness[];
+in vec3 vs_bvLumAbsMag[];
 in vec3 vs_velocity[];
-in vec4 vs_gPosition[];
 in float vs_speed[];
-in vec4 cam_position[];
 
 layout(triangle_strip, max_vertices = 4) out;
+out vec3 vs_position;
+out vec2 texCoords;
+flat out float ge_bv;
+flat out vec3 ge_velocity;
+flat out float ge_speed;
+flat out float gs_screenSpaceDepth;
 
-out vec4 vs_position;
-out vec4 ge_gPosition;               
-out vec3 ge_brightness;
-out vec3 ge_velocity;
-out float ge_speed;
-out vec2 texCoord;
-out float billboardSize;
+uniform float magnitudeExponent;
+uniform dvec3 eyePosition;
+uniform dvec3 cameraUp;
+uniform int sizeComposition;
+uniform float lumCent;
+uniform float radiusCent;
+uniform dmat4 cameraViewProjectionMatrix;
+uniform dmat4 modelMatrix;
 
-uniform mat4 projection;
+const double PARSEC = 3.08567756E16;
 
-uniform float scaleFactor;
-uniform float minBillboardSize;
-uniform vec2 screenSize;
+// FRAGILE
+// All of these values have to be synchronized with the values in the optionproperty
+const int SizeCompositionOptionLumSizeDistanceModulus = 0;
+const int SizeCompositionOptionAppBrightness = 1;
+const int SizeCompositionOptionLumSize = 2;
+const int SizeCompositionOptionLumSizeAbsMagnitude = 3;
+const int SizeCompositionOptionLumSizeAppMagnitude = 4;
 
-const vec2 corners[4] = vec2[4]( 
-    vec2(0.0, 1.0), 
-    vec2(0.0, 0.0), 
-    vec2(1.0, 1.0), 
-    vec2(1.0, 0.0) 
-);
+const float SunTemperature = 5800.0;
+const float SunAbsMagnitude = 4.83;
+const float SunRadius = 6.957E8; // meters
+
+
+float bvToKelvin(float bv) {
+  float tmp = 0.92 * bv;
+  return 4600 * (1.0 / (tmp + 1.7) + 1.0 / (tmp + 0.62));
+}
+
+double scaleForApparentBrightness(dvec3 dpos, float luminance) {
+  // Working like Partiview
+  double pSize = pow(10, 29.0 + magnitudeExponent);
+  float luminosity = luminance * 10.0;
+  double distanceToStar = length(dpos - eyePosition);
+  return (pSize * luminosity) / distanceToStar;
+}
+
+double scaleForLuminositySize(float bv, float luminance, float absMagnitude) {
+  double adjustedLuminance = luminance + 5E9;
+  float L_over_Lsun = pow(2.51, SunAbsMagnitude - absMagnitude);
+  float temperature = bvToKelvin(bv);
+  float relativeTemperature = SunTemperature / temperature;
+  double starRadius = SunRadius * pow(relativeTemperature, 2.0) * sqrt(L_over_Lsun);
+  return (lumCent * adjustedLuminance + (radiusCent * starRadius)) * pow(10.0, magnitudeExponent);
+}
+
+double scaleForAbsoluteMagnitude(float absMagnitude) {
+  return (-absMagnitude + 35) * pow(10.0, magnitudeExponent + 8.5);
+}
+
+double scaleForApparentMagnitude(dvec3 dpos, float absMag) {
+  double distanceToStarInMeters = length(dpos - eyePosition);
+  double distanceToCenterInMeters = length(eyePosition);
+  float distanceToStarInParsecs = float(distanceToStarInMeters/PARSEC);
+  float appMag = absMag + 5.0 * (log(distanceToStarInParsecs/10.0)/log(2.0));
+  return (-appMag + 50.0) * pow(10.0, magnitudeExponent + 7.5);
+}
+
+double scaleForDistanceModulus(float absMag) {
+  return exp((-30.623 - absMag) * 0.462) * pow(10.0, magnitudeExponent + 12.5) * 2000;
+}
 
 
 void main() {
-    // JCC: We want to display the Sun.
-    // if ((psc_position[0].x == 0.0) &&
-    //     (psc_position[0].y == 0.0) &&
-    //     (psc_position[0].z == 0.0))
-    // {
-    //     return;
-    // }
+  vec3 pos = gl_in[0].gl_Position.xyz;
+  vs_position = pos; // in object space
+  dvec4 dpos = modelMatrix * dvec4(pos, 1.0);
 
-    ge_brightness = vs_brightness[0];
-    ge_velocity = vs_velocity[0];
-    ge_speed = vs_speed[0];
+  ge_bv = vs_bvLumAbsMag[0].x;
+  ge_velocity = vs_velocity[0];
+  ge_speed = vs_speed[0];
 
-    float absoluteMagnitude = vs_brightness[0].z;
-    float modifiedSpriteSize =
-        exp((-30.623 - absoluteMagnitude) * 0.462) * scaleFactor * 2000;
+  double scaleMultiply = 1.0;
 
-    vec4 projPos[4];
-    for (int i = 0; i < 4; ++i) {
-        vec4 p1 = gl_in[0].gl_Position;
-        p1.xy += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5)));
-        projPos[i] = projection * p1;
-    }
+  if (sizeComposition == SizeCompositionOptionLumSizeDistanceModulus) {
+    float absMagnitude = vs_bvLumAbsMag[0].z;
 
-    // Calculate the positions of the lower left and upper right corners of the
-    // billboard in screen-space
-    vec2 ll = (((projPos[1].xy / projPos[1].w) + 1.0) / 2.0) * screenSize;
-    vec2 ur = (((projPos[2].xy / projPos[2].w) + 1.0) / 2.0) * screenSize;
+    scaleMultiply = scaleForDistanceModulus(absMagnitude);
+  }
+  else if (sizeComposition == SizeCompositionOptionAppBrightness) {
+    float luminance = vs_bvLumAbsMag[0].y;
 
-    // The billboard is smaller than one pixel, we can discard it
-    float sizeInPixels = length(ll - ur);
-    if (sizeInPixels < minBillboardSize) {
-        return;
-    }
+    scaleMultiply = scaleForApparentBrightness(dpos.xyz, luminance);
+  }
+  else if (sizeComposition == SizeCompositionOptionLumSize) {
+    float bv = vs_bvLumAbsMag[0].x;
+    float luminance = vs_bvLumAbsMag[0].y;
+    float absMagnitude = vs_bvLumAbsMag[0].z;
 
-    for (int i = 0; i < 4; i++) {
-        vs_position = gl_in[0].gl_Position;
-        gl_Position = projPos[i];
-        texCoord    = corners[i];
+    scaleMultiply = scaleForLuminositySize(bv, luminance, absMagnitude);
+  }
+  else if (sizeComposition == SizeCompositionOptionLumSizeAbsMagnitude) {
+    float absMagnitude = vs_bvLumAbsMag[0].z;
 
-        // G-Buffer
-        ge_gPosition  = vs_gPosition[0];
-        billboardSize = sizeInPixels;
-        EmitVertex();
-    }
+    scaleMultiply = scaleForAbsoluteMagnitude(absMagnitude);
+  }
+  else if (sizeComposition == SizeCompositionOptionLumSizeAppMagnitude) {
+    float absMagnitude = vs_bvLumAbsMag[0].z;
 
-    EndPrimitive();
+    scaleMultiply = scaleForApparentMagnitude(dpos.xyz, absMagnitude);
+  }
+
+  dvec3 normal = eyePosition - dpos.xyz;
+  dvec3 newRight = normalize(cross(cameraUp, normal));
+  dvec3 newUp = normalize(cross(normal, newRight));
+  dvec3 scaledRight = scaleMultiply * newRight;
+  dvec3 scaledUp = scaleMultiply * newUp;
+
+  vec4 lowerLeft = z_normalization(
+    vec4(cameraViewProjectionMatrix * dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w))
+  );
+
+  vec4 upperRight = z_normalization(
+    vec4(cameraViewProjectionMatrix * dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w))
+  );
+
+  vec4 lowerRight = z_normalization(
+    vec4(cameraViewProjectionMatrix * dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w))
+  );
+
+  vec4 upperLeft = z_normalization(
+    vec4(cameraViewProjectionMatrix * dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w))
+  );
+
+  gs_screenSpaceDepth = lowerLeft.w;
+
+  // Build primitive
+  gl_Position = lowerLeft;
+  texCoords = vec2(0.0, 0.0);
+  EmitVertex();
+
+  gl_Position = lowerRight;
+  texCoords = vec2(1.0, 0.0);
+  EmitVertex();
+
+  gl_Position = upperLeft;
+  texCoords = vec2(0.0, 1.0);
+  EmitVertex();
+
+  gl_Position = upperRight;
+  texCoords = vec2(1.0, 1.0);
+  EmitVertex();
+
+  EndPrimitive();
 }

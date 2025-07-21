@@ -1,32 +1,53 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-asset.require("spice/base")
-local kernel = asset.require('../kernels').jup310
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
 local CallistoTrail = {
-    Identifier = "CallistoTrail",
-    Parent = transforms.JupiterBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "CALLISTO",
-            Observer = "JUPITER BARYCENTER",
-            Kernels = kernel
-        },
-        Color = { 0.4, 0.3, 0.01 },
-        Period = 17.0,
-        Resolution = 1000
+  Identifier = "CallistoTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Callisto,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
-    Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter" },
-    GUI = {
-        Name = "Callisto Trail",
-        Path = "/Solar System/Planets/Jupiter/Moons"
-    }
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 17.0,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_major_jupiter"
+  },
+  GUI = {
+    Name = "Callisto Trail",
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Callisto",
+    Focusable = false
+  }
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(CallistoTrail)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { CallistoTrail })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(CallistoTrail)
+end)
+
+asset.export(CallistoTrail)
+
+
+
+asset.meta = {
+  Name = "Callisto Trail",
+  Description = "Trail of Callisto as observed by the Jupiter",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

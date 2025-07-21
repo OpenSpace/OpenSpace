@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,92 +25,102 @@
 #include <modules/spacecraftinstruments/util/labelparser.h>
 
 #include <openspace/util/spicemanager.h>
-#include <ghoul/fmt.h>
-#include <ghoul/filesystem/directory.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/stringhelper.h>
+#include <filesystem>
 #include <fstream>
 
 namespace {
-    constexpr const char* _loggerCat = "LabelParser";
-    constexpr const char* keySpecs   = "Read";
-    constexpr const char* keyConvert = "Convert";
-
-    constexpr const char* PlaybookIdentifierName = "LabelParser";
+    constexpr std::string_view _loggerCat = "LabelParser";
+    constexpr std::string_view KeySpecs = "Read";
+    constexpr std::string_view KeyConvert = "Convert";
 } // namespace
 
 namespace openspace {
 
-LabelParser::LabelParser(std::string name, std::string fileName,
-                         const ghoul::Dictionary& translationDictionary)
-    : _name(std::move(name))
-    , _fileName(std::move(fileName))
+LabelParser::LabelParser(std::filesystem::path fileName,
+                         const ghoul::Dictionary& dictionary)
+    : _fileName(std::move(fileName))
 {
-    // get the different instrument types
-    const std::vector<std::string>& decoders = translationDictionary.keys();
-    // for each decoder (assuming might have more if hong makes changes)
-    for (const std::string& decoderStr : decoders) {
-        ghoul::Dictionary typeDictionary;
-        translationDictionary.getValue(decoderStr, typeDictionary);
+    using ghoul::Dictionary;
 
-        //create dictionary containing all {playbookKeys , spice IDs}
+    // get the different instrument types
+    // for each decoder (assuming might have more if hong makes changes)
+    for (const std::string_view decoderStr : dictionary.keys()) {
+        if (!dictionary.hasValue<Dictionary>(decoderStr)) {
+            continue;
+        }
+
+        const Dictionary typeDict = dictionary.value<Dictionary>(decoderStr);
+
+        // create dictionary containing all {playbookKeys , spice IDs}
         if (decoderStr == "Instrument") {
             // for each playbook call -> create a Decoder object
-            const std::vector<std::string>& keys = typeDictionary.keys();
-            for (const std::string& key : keys) {
-                std::string currentKey = decoderStr + "." + key;
-
-                ghoul::Dictionary decoderDictionary =
-                    translationDictionary.value<ghoul::Dictionary>(currentKey);
+            for (const std::string_view key : typeDict.keys()) {
+                if (!typeDict.hasValue<Dictionary>(key)) {
+                    continue;
+                }
+                const Dictionary decoderDict = typeDict.value<Dictionary>(key);
 
                 std::unique_ptr<Decoder> decoder = Decoder::createFromDictionary(
-                    decoderDictionary,
-                    decoderStr
+                    decoderDict,
+                    std::string(decoderStr)
                 );
                 // insert decoder to map - this will be used in the parser to determine
                 // behavioral characteristics of each instrument
-                _fileTranslation[key] = std::move(decoder);
+                _fileTranslation[std::string(key)] = std::move(decoder);
             }
         }
         if (decoderStr == "Target") {
-            ghoul::Dictionary specsOfInterestDictionary;
-            typeDictionary.getValue(keySpecs, specsOfInterestDictionary);
-
-            _specsOfInterest.resize(specsOfInterestDictionary.size());
-            for (size_t n = 0; n < _specsOfInterest.size(); ++n) {
-                std::string readMe;
-                specsOfInterestDictionary.getValue(std::to_string(n + 1), readMe);
-                _specsOfInterest[n] = readMe;
+            if (!typeDict.hasValue<Dictionary>(KeySpecs) ||
+                !typeDict.hasValue<Dictionary>(KeySpecs))
+            {
+                continue;
             }
-            ghoul::Dictionary convertDictionary;
-            typeDictionary.getValue(keyConvert, convertDictionary);
 
-            const std::vector<std::string>& keys = convertDictionary.keys();
-            for (const std::string& key : keys) {
-                ghoul::Dictionary itemDictionary;
-                convertDictionary.getValue(key, itemDictionary);
+            const Dictionary specsOfInterestDict = typeDict.value<Dictionary>(KeySpecs);
+
+            _specsOfInterest.resize(specsOfInterestDict.size());
+            for (size_t n = 0; n < _specsOfInterest.size(); ++n) {
+                const std::string key = std::to_string(n + 1);
+                if (specsOfInterestDict.hasValue<std::string>(key)) {
+                    std::string readMe = specsOfInterestDict.value<std::string>(key);
+                    _specsOfInterest[n] = std::move(readMe);
+                }
+            }
+            const Dictionary convertDict = typeDict.value<Dictionary>(KeyConvert);
+
+            for (const std::string_view key : convertDict.keys()) {
+                if (!convertDict.hasValue<Dictionary>(key)) {
+                    continue;
+                }
+
+                const Dictionary item = convertDict.value<Dictionary>(key);
                 std::unique_ptr<Decoder> decoder = Decoder::createFromDictionary(
-                    itemDictionary,
-                    decoderStr
+                    item,
+                    std::string(decoderStr)
                 );
                 // insert decoder to map - this will be used in the parser to determine
                 // behavioral characteristics of each instrument
-                _fileTranslation[key] = std::move(decoder);
+                _fileTranslation[std::string(key)] = std::move(decoder);
             };
         }
     }
 }
 
 std::string LabelParser::decode(const std::string& line) {
-    for (std::pair<const std::string, std::unique_ptr<Decoder>>& key : _fileTranslation) {
-        std::size_t value = line.find(key.first);
+    using K = std::string;
+    using V = std::unique_ptr<Decoder>;
+    for (const std::pair<const K, V>& key : _fileTranslation) {
+        const size_t value = line.find(key.first);
         if (value != std::string::npos) {
-            std::string toTranslate = line.substr(value);
+            const std::string toTranslate = line.substr(value);
             return _fileTranslation[toTranslate]->translations()[0];
-
         }
     }
     return "";
@@ -120,7 +130,7 @@ std::string LabelParser::encode(const std::string& line) const {
     using K = std::string;
     using V = std::unique_ptr<Decoder>;
     for (const std::pair<const K, V>& key : _fileTranslation) {
-        std::size_t value = line.find(key.first);
+        const size_t value = line.find(key.first);
         if (value != std::string::npos) {
             return line.substr(value);
         }
@@ -129,83 +139,73 @@ std::string LabelParser::encode(const std::string& line) const {
 }
 
 bool LabelParser::create() {
-    using RawPath = ghoul::filesystem::Directory::RawPath;
-    ghoul::filesystem::Directory sequenceDir(_fileName, RawPath::Yes);
-    if (!FileSys.directoryExists(sequenceDir)) {
-        LERROR(fmt::format("Could not load Label Directory '{}'", sequenceDir.path()));
+    std::filesystem::path sequenceDir = absPath(_fileName);
+    if (!std::filesystem::is_directory(sequenceDir)) {
+        LERROR(std::format("Could not load label directory '{}'", sequenceDir));
         return false;
     }
 
-    std::string previousTarget;
     std::string lblName;
-
-
-    using Recursive = ghoul::filesystem::Directory::Recursive;
-    using Sort = ghoul::filesystem::Directory::Sort;
-    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::No);
-    for (const std::string& path : sequencePaths) {
-        size_t position = path.find_last_of('.') + 1;
-        if (position == 0 || position == std::string::npos) {
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& e : fs::recursive_directory_iterator(sequenceDir)) {
+        if (!e.is_regular_file()) {
             continue;
         }
 
-        ghoul::filesystem::File currentFile(path);
-        const std::string& extension = currentFile.fileExtension();
-
-        if (extension != "lbl" && extension != "LBL") {
+        const std::filesystem::path path = e.path();
+        const std::filesystem::path extension = path.extension();
+        if (extension != ".lbl" && extension != ".LBL") {
             continue;
         }
 
-        std::ifstream file(currentFile.path());
+        std::ifstream file = std::ifstream(path);
 
         if (!file.good()) {
-            LERROR(fmt::format("Failed to open label file '{}'", currentFile.path()));
+            LERROR(std::format("Failed to open label file '{}'", path));
             return false;
         }
 
         int count = 0;
 
         // open up label files
-        //TimeRange instrumentRange;
-
         double startTime = 0.0;
         double stopTime = 0.0;
         std::string line;
         do {
-            std::getline(file, line);
+            ghoul::getline(file, line);
 
             line.erase(std::remove(line.begin(), line.end(), '"'), line.end());
             line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
-            line.erase(std::remove(line.begin(), line.end(), '\r'), line.end() );
+            line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
 
             std::string read = line.substr(0, line.find_first_of('='));
 
-            _detectorType = "CAMERA"; //default value
+            _detectorType = "CAMERA"; // default value
 
-            constexpr const char* ErrorMsg =
+            constexpr std::string_view ErrorMsg =
                 "Unrecognized '{}' in line {} in file {}. The 'Convert' table must "
                 "contain the identity tranformation for all values encountered in the "
                 "label files, for example: ROSETTA = {{ \"ROSETTA\" }}";
 
-            /* Add more  */
+            // Add more
             if (read == "TARGET_NAME") {
                 _target = decode(line);
                 if (_target.empty()) {
-                    LWARNING(fmt::format(ErrorMsg, "TARGET_NAME", line, path));
+                    LWARNING(std::format(ErrorMsg, "TARGET_NAME", line, path));
                 }
                 count++;
             }
             if (read == "INSTRUMENT_HOST_NAME") {
                 _instrumentHostID = decode(line);
                 if (_instrumentHostID.empty()) {
-                    LWARNING(fmt::format(ErrorMsg, "INSTRUMENT_HOST_NAME", line, path));
+                    LWARNING(std::format(ErrorMsg, "INSTRUMENT_HOST_NAME", line, path));
                 }
                 count++;
             }
             if (read == "INSTRUMENT_ID") {
                 _instrumentID = decode(line);
                 if (_instrumentID.empty()) {
-                    LWARNING(fmt::format(ErrorMsg, "INSTRUMENT_ID", line, path));
+                    LWARNING(std::format(ErrorMsg, "INSTRUMENT_ID", line, path));
                 }
                 lblName = encode(line);
                 count++;
@@ -213,7 +213,7 @@ bool LabelParser::create() {
             if (read == "DETECTOR_TYPE") {
                 _detectorType = decode(line);
                 if (_detectorType.empty()) {
-                    LWARNING(fmt::format(ErrorMsg, "DETECTOR_TYPE", line, path));
+                    LWARNING(std::format(ErrorMsg, "DETECTOR_TYPE", line, path));
                 }
                 count++;
             }
@@ -224,7 +224,7 @@ bool LabelParser::create() {
                 startTime = SpiceManager::ref().ephemerisTimeFromDate(start);
                 count++;
 
-                getline(file, line);
+                ghoul::getline(file, line);
                 line.erase(std::remove(line.begin(), line.end(), '"'), line.end());
                 line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
                 line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
@@ -244,8 +244,8 @@ bool LabelParser::create() {
                     count++;
                 }
                 else{
-                    LERROR(fmt::format(
-                        "Label file {} deviates from generic standard", currentFile.path()
+                    LERROR(std::format(
+                        "Label file '{}' deviates from generic standard", path
                     ));
                     LINFO(
                         "Please make sure input data adheres to format from \
@@ -259,21 +259,20 @@ bool LabelParser::create() {
 
                 count = 0;
 
-                using namespace std::literals;
-                std::string p = path.substr(0, path.size() - ("lbl"s).size());
                 for (const std::string& ext : extensions) {
-                    std::string imagePath = p + ext;
-                    if (FileSys.fileExists(imagePath)) {
+                    std::filesystem::path imagePath = path;
+                    imagePath.replace_extension(ext);
+                    if (std::filesystem::is_regular_file(imagePath)) {
                         std::vector<std::string> spiceInstrument;
                         spiceInstrument.push_back(_instrumentID);
 
-                        Image image = {
-                            TimeRange(startTime, stopTime),
-                            imagePath,
-                            spiceInstrument,
-                            _target,
-                            false,
-                            false
+                        const Image image = {
+                            .timeRange = TimeRange(startTime, stopTime),
+                            .path = imagePath,
+                            .activeInstruments = spiceInstrument,
+                            .target = _target,
+                            .isPlaceholder = false,
+                            .projected = false
                         };
 
                         _subsetMap[image.target]._subset.push_back(image);
@@ -306,26 +305,28 @@ bool LabelParser::create() {
         }
     );
 
+    std::string previousTarget;
     for (const Image& image : tmp) {
-        if (previousTarget != image.target) {
-            previousTarget = image.target;
-            _targetTimes.emplace_back(image.timeRange.start , image.target);
-            std::sort(
-                _targetTimes.begin(),
-                _targetTimes.end(),
-                [](const std::pair<double, std::string> &a,
-                   const std::pair<double, std::string> &b) -> bool
-                {
-                    return a.first < b.first;
-                }
-            );
+        if (previousTarget == image.target) {
+            continue;
         }
+
+        previousTarget = image.target;
+        _targetTimes.emplace_back(image.timeRange.start , image.target);
+        std::sort(
+            _targetTimes.begin(),
+            _targetTimes.end(),
+            [](const std::pair<double, std::string>& a,
+               const std::pair<double, std::string>& b) -> bool
+            {
+                return a.first < b.first;
+            }
+        );
     }
 
     for (const std::pair<const std::string, ImageSubset>& target : _subsetMap) {
         _instrumentTimes.emplace_back(lblName, _subsetMap[target.first]._range);
     }
-    sendPlaybookInformation(PlaybookIdentifierName);
     return true;
 }
 

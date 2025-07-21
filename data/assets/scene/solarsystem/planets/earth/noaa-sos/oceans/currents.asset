@@ -1,0 +1,73 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Ocean Circulation (labeled currents)"
+local Identifier = "noaa-sos-oceans-currents"
+local Description = [[The ocean is not a still body of water. There is constant motion
+in the ocean in the form of a global ocean conveyor belt due to thermohaline currents.
+These currents are density driven, which are affected by both temperature and salinity.
+Cold, salty water is dense and sinks to the bottom of the ocean while warm water is less
+dense and rises to the surface. The "start" of the ocean conveyor belt is in the
+Norwegian Sea. Warm water is transported to the Norwegian Sea by the Gulf Stream. The
+warm water provides heat for the atmosphere in the northern latitudes that gets
+particularly cold during the winter. This loss of heat to the atmosphere makes the water
+cooler and denser, causing it to sink to the bottom of the ocean. As more warm water is
+transported north, the cooler water sinks and moves south to make room for the incoming
+warm water. This cold bottom water flows south of the equator all the way down to
+Antarctica. Eventually, the cold bottom waters are able to warm and rise to the surface,
+continuing the conveyor belt that encircles the global. It takes water almost 1000 years
+to move through the whole conveyor belt]]
+local URL = "https://sos.noaa.gov/catalog/datasets/ocean-circulation-labeled-currents/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "4096.jpg",
+  Description = Description
+}
+
+local Legend = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "legend.jpg",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Legend)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Legend)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(Legend)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___DOWNLOADMANAGER___H__
 
 #include <ghoul/misc/boolean.h>
+#include <filesystem>
 #include <functional>
 #include <future>
 #include <memory>
@@ -43,7 +44,7 @@ public:
         // Since the FileFuture object will be used from multiple threads, we have to be
         // careful about the access pattern, that is, no values should be read and written
         // by both the DownloadManager and the outside threads.
-        FileFuture(std::string file);
+        explicit FileFuture(std::filesystem::path file);
 
         // Values that are written by the DownloadManager to be consumed by others
         long long currentSize = -1;
@@ -52,7 +53,7 @@ public:
         float secondsRemaining = -1.f;
         bool isFinished = false;
         bool isAborted = false;
-        std::string filePath;
+        std::filesystem::path filePath;
         std::string errorMessage;
         std::string format;
         // Values set by others to be consumed by the DownloadManager
@@ -60,10 +61,10 @@ public:
     };
 
     struct MemoryFile {
-        char* buffer;
-        size_t size;
+        char* buffer = nullptr;
+        size_t size = 0;
         std::string format;
-        bool corrupted;
+        bool corrupted = false;
     };
 
     BooleanType(UseMultipleThreads);
@@ -88,7 +89,8 @@ public:
         return f.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
     }
 
-    DownloadManager(UseMultipleThreads useMultipleThreads = UseMultipleThreads::Yes);
+    explicit DownloadManager(
+        UseMultipleThreads useMultipleThreads = UseMultipleThreads::Yes);
 
     //downloadFile
     // url - specifies the target of the download
@@ -99,19 +101,18 @@ public:
     // finishedCallback - callback when download finished (happens on different thread)
     // progressCallback - callback for status during (happens on different thread)
     std::shared_ptr<FileFuture> downloadFile(const std::string& url,
-        const ghoul::filesystem::File& file,
+        const std::filesystem::path& file,
         OverrideFile overrideFile = OverrideFile::Yes,
         FailOnError failOnError = FailOnError::No, unsigned int timeout_secs = 0,
         DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),
-        DownloadProgressCallback progressCallback = DownloadProgressCallback()
-    );
+        DownloadProgressCallback progressCallback = DownloadProgressCallback()) const;
 
     std::future<MemoryFile> fetchFile(const std::string& url,
         SuccessCallback successCallback = SuccessCallback(),
         ErrorCallback errorCallback = ErrorCallback());
 
-    void getFileExtension(const std::string& url,
-        RequestFinishedCallback finishedCallback = RequestFinishedCallback());
+    void fileExtension(const std::string& url,
+        RequestFinishedCallback finishedCallback = RequestFinishedCallback()) const;
 
 private:
     bool _useMultithreadedDownload;

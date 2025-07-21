@@ -1,0 +1,61 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Sea Turtle Track: Pacific Ocean"
+local Identifier = "noaa-sos-oceans-pac_turtle"
+local Description = [[It is common for scientists to tag animals and release them into
+their natural environment in order to study their behaviors and migration. Adelita, a
+loggerhead (Caretta caretta) sea turtle, was originally captured off of Baja, Mexico as
+an 8-pound juvenile. After being raised in captivity, Adelita was released on August 10,
+1996 from Santa Rosaliita, a small town in Mexico on the Baja Peninsula. Adelita weighed
+223 pounds when she was released. Before she was released, Wallace J. Nichols, then a
+Ph.D. student at the University of Arizona, outfitted Adelita with a satellite tag. The
+tag transmitted a signal that allowed Adelita's track to be monitored post-release]]
+local URL = "https://sos.noaa.gov/catalog/datasets/sea-turtle-track-pacific-ocean/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "TemporalTileProvider",
+  Mode = "Folder",
+  Folder = {
+    Folder = syncedDirectory .. "2048",
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "pac-turtle-migration-%y%j-%H%M.jpg"
+  },
+  Description = Description
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

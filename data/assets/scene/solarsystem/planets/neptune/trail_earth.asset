@@ -1,0 +1,51 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local coreKernels = asset.require("spice/core")
+
+
+
+local NeptuneTrailEarth = {
+  Identifier = "NeptuneTrailEarth",
+  Parent = earthTransforms.EarthBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Enabled = false,
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = coreKernels.ID.Neptune,
+      Observer = coreKernels.ID.Earth
+    },
+    Color = { 0.2, 0.5, 1.0 },
+    Period = 60250.0,
+    Resolution = 3000
+  },
+  Tag = { "planetTrail_solarSystem_alt", "planetTrail_terrestrial_alt" },
+  GUI = {
+    Name = "Neptune trail from Earth",
+    Path = "/Solar System/Planets/Neptune",
+    Focusable = false,
+    Description = "Trail of Neptune as observed by the Earth"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(NeptuneTrailEarth)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(NeptuneTrailEarth)
+end)
+
+asset.export(NeptuneTrailEarth)
+
+
+
+asset.meta = {
+  Name = "Neptune Trail from Earth",
+  Description = [[Alternate trail of Neptune, as observed by the Earth rather then the
+    Sun]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

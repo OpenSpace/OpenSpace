@@ -1,0 +1,48 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
+
+
+
+local EarthBarycenterTrail = {
+  Identifier = "EarthBarycenterTrail",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Enabled = false,
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = coreKernels.ID.EarthBarycenter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
+    },
+    Color = { 0.5, 0.8, 1.0 },
+    Period = 365.242,
+    Resolution = 1000
+  },
+  Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
+  GUI = {
+    Name = "Earth Barycenter Trail",
+    Path = "/Solar System/Planets/Earth",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(EarthBarycenterTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(EarthBarycenterTrail)
+end)
+
+asset.export(EarthBarycenterTrail)
+
+
+
+asset.meta = {
+  Name = "Earth Trail",
+  Description = "Trail of Earth's Barycenter as observed by the Sun",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

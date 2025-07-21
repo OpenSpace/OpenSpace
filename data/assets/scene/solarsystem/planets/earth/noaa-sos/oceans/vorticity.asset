@@ -1,0 +1,68 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Ocean Surface Vorticity"
+local Identifier = "noaa-sos-oceans-vorticity"
+local Description = [[This animation shows daily values of the ocean surface relative
+vorticity as simulated by the Parallel Ocean Program (POP). Vorticity, which can be
+thought of as the rate of fluid rotation, is particularly useful for visualizing ocean
+turbulent flow, highlighting the presence of swirling eddies. A significant amount of the
+total kinetic energy in the world ocean is attributable to these turbulent motions,
+making them an important component in balances of energy, momentum, heat, salt, and
+chemical constituents (such as carbon dioxide) throughout the globe]]
+local URL = "https://sos.noaa.gov/catalog/datasets/ocean-surface-vorticity/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "ImageSequenceTileProvider",
+  FolderPath = syncedDirectory .. "frames",
+  Description = Description
+}
+
+local Colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(Colorbar)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

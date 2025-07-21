@@ -1,0 +1,55 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Buoy Locations (DART only)"
+local Identifier = "noaa-sos-oceans-dart_buoy"
+local Description = [[After the horrific events of the Indian Ocean Tsunami on December
+26, 2004, the need for a tsunami warning system was apparent. As part of the U.S.
+National Tsunami Hazard Mitigation Program (NTHMP), the Deep Ocean Assessment and
+Reporting of Tsunamis (DART) Project is an ongoing effort to maintain and improve the
+capability for the early detection and real-time reporting of tsunamis in the open ocean.
+Developed by NOAA's Pacific Marine Environmental Laboratory (PMEL) and operated by NOAA's
+National Data Buoy Center (NDBC), DART is essential to fulfilling NOAA's national
+responsibility for tsunami hazard mitigation and warnings. When completed in mid2007, the
+DART Project will consist of 32 DART buoys]]
+local URL = "https://sos.noaa.gov/catalog/datasets/buoy-locations-dart-only/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "2000.jpg",
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

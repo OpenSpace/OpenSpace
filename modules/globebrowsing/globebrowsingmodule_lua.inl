@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,273 +22,517 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/src/renderableglobe.h>
+#include <openspace/util/collisionhelper.h>
+#include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/stringhelper.h>
 
-#include <modules/globebrowsing/src/layer.h>
-#include <modules/globebrowsing/src/layermanager.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/query/query.h>
-#include <openspace/util/camera.h>
-#include <openspace/util/updatestructures.h>
-
-namespace openspace::globebrowsing::luascriptfunctions {
+namespace {
 
 /**
- * Adds a layer to the specified globe.
+ * Adds a layer to the specified globe. The second argument is the layer group which can
+ * be any of the supported layer groups. The third argument is the dictionary defining the
+ * layer.
+ *
+ * \param globeIdentifier The identifier of the scene graph node of which to add the
+ *                        layer. The renderable of the scene graph node must be a
+ *                        [RenderableGlobe](#globebrowsing_renderableglobe)
+ * \param layerGroup The identifier of the layer group in which to add the layer
+ * \param layer A dictionary defining the layer. See [this page](#globebrowsing_layer)
+ *              for details on what fields and settings the dictionary may contain
  */
-int addLayer(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::addLayer");
-
-    // String arguments
-    const std::string& globeName = ghoul::lua::value<std::string>(L, 1);
-    const std::string& layerGroupName = ghoul::lua::value<std::string>(L, 2);
+[[codegen::luawrap]] void addLayer(std::string globeIdentifier, std::string layerGroup,
+                                   ghoul::Dictionary layer)
+{
+    using namespace openspace;
+    using namespace globebrowsing;
 
     // Get the node and make sure it exists
-    SceneGraphNode* n = global::renderEngine.scene()->sceneGraphNode(globeName);
+    SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(globeIdentifier);
     if (!n) {
-        return ghoul::lua::luaError(L, "Unknown globe name: " + globeName);
+        throw ghoul::lua::LuaError("Unknown globe name: " + globeIdentifier);
     }
 
     // Get the renderable globe
     RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
     if (!globe) {
-        return ghoul::lua::luaError(L, "Renderable is not a globe: " + globeName);
+        throw ghoul::lua::LuaError("Renderable is not a globe: " + globeIdentifier);
     }
 
     // Get the layer group
-    layergroupid::GroupID groupID = ghoul::from_string<layergroupid::GroupID>(
-        layerGroupName
-    );
-    if (groupID == layergroupid::GroupID::Unknown) {
-        return ghoul::lua::luaError(L, "Unknown layer group: " + layerGroupName);
+    layers::Group::ID groupID = ghoul::from_string<layers::Group::ID>(layerGroup);
+    if (groupID == layers::Group::ID::Unknown) {
+        throw ghoul::lua::LuaError("Unknown layer group: " + layerGroup);
     }
+
+    // Add the name of the enclosing globe to layer dict, it is used to identify a cache
+    layer.setValue("GlobeName", globeIdentifier);
 
     // Get the dictionary defining the layer
-    ghoul::Dictionary d;
-    try {
-        ghoul::lua::luaDictionaryFromState(L, d);
+    Layer* l = globe->layerManager().addLayer(groupID, layer);
+    if (l) {
+        l->initialize();
     }
-    catch (const ghoul::lua::LuaFormatException& e) {
-        LERRORC("addLayerFromDictionary", e.what());
-        lua_settop(L, 0);
-        return 0;
-    }
-    lua_settop(L, 0);
-
-    Layer* layer = globe->layerManager().addLayer(groupID, d);
-    if (layer) {
-        layer->initialize();
-    }
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
 }
 
 /**
- * Deletes a layer from the specified globe.
- */
-int deleteLayer(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::deleteLayer");
+ * Removes a layer from the specified globe.
 
-    const std::string& globeName = luaL_checkstring(L, 1);
-    const std::string& layerGroupName = luaL_checkstring(L, 2);
-    const std::string& layerName = luaL_checkstring(L, 3);
-    lua_pop(L, 3);
+ * \param globeIdentifier The identifier of the scene graph node of which to remove the
+ *                        layer. The renderable of the scene graph node must be a
+ *                        [RenderableGlobe](#globebrowsing_renderableglobe)
+ * \param layerGroup The identifier of the layer group from which to remove the layer
+ * \param layerOrName Either the identifier for the layer or a dictionary with the
+ *                    `Identifier` key that is used instead
+ */
+[[codegen::luawrap]] void deleteLayer(std::string globeIdentifier, std::string layerGroup,
+                                 std::variant<std::string, ghoul::Dictionary> layerOrName)
+{
+    using namespace openspace;
+    using namespace globebrowsing;
 
     // Get the node and make sure it exists
-    SceneGraphNode* n = global::renderEngine.scene()->sceneGraphNode(globeName);
+    SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(globeIdentifier);
     if (!n) {
-        return ghoul::lua::luaError(L, "Unknown globe name: " + globeName);
+        throw ghoul::lua::LuaError("Unknown globe name: " + globeIdentifier);
     }
 
     // Get the renderable globe
     RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
     if (!globe) {
-        return ghoul::lua::luaError(L, "Renderable is not a globe: " + globeName);
+        throw ghoul::lua::LuaError("Renderable is not a globe: " + globeIdentifier);
     }
 
     // Get the layer group
-    layergroupid::GroupID groupID = ghoul::from_string<layergroupid::GroupID>(
-        layerGroupName
-    );
-    if (groupID == layergroupid::GroupID::Unknown) {
-        return ghoul::lua::luaError(L, "Unknown layer group: " + layerGroupName);
+    layers::Group::ID groupID = ghoul::from_string<layers::Group::ID>(layerGroup);
+    if (groupID == layers::Group::ID::Unknown) {
+        throw ghoul::lua::LuaError("Unknown layer group: " + layerGroup);
+    }
+
+    std::string layerName;
+    if (std::holds_alternative<std::string>(layerOrName)) {
+        layerName = std::get<std::string>(layerOrName);
+    }
+    else {
+        ghoul::Dictionary d = std::get<ghoul::Dictionary>(layerOrName);
+        if (!d.hasValue<std::string>("Identifier")) {
+            throw ghoul::lua::LuaError(
+                "Table passed to deleteLayer does not contain an Identifier"
+            );
+        }
+        layerName = d.value<std::string>("Identifier");
     }
 
     globe->layerManager().deleteLayer(groupID, layerName);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
 }
 
-int goToChunk(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::goToChunk");
+/**
+ * Returns the list of layers for the specified globe, for a specific layer group.
+ *
+ * \param globeIdentifier The identifier of the scene graph node for the globe
+ * \param layerGroup The identifier of the layer group for which to list the layers
+ */
+[[codegen::luawrap]] std::vector<std::string> layers(std::string globeIdentifier,
+                                                     std::string layerGroup)
+{
+    using namespace openspace;
+    using namespace globebrowsing;
 
-    const int x = ghoul::lua::value<int>(L, 1);
-    const int y = ghoul::lua::value<int>(L, 2);
-    const int level = ghoul::lua::value<int>(L, 3);
-    lua_pop(L, 3);
-
-    global::moduleEngine.module<GlobeBrowsingModule>()->goToChunk(x, y, level);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-
-int goToGeo(lua_State* L) {
-    const int nArguments = ghoul::lua::checkArgumentsAndThrow(L, 2, 3, "lua::goToGeo");
-
-    const double latitude = ghoul::lua::value<double>(L, 1);
-    const double longitude = ghoul::lua::value<double>(L, 2);
-
-    if (nArguments == 2) {
-        global::moduleEngine.module<GlobeBrowsingModule>()->goToGeo(latitude, longitude);
-    }
-    else if (nArguments == 3) {
-        const double altitude = ghoul::lua::value<double>(L, 3);
-        global::moduleEngine.module<GlobeBrowsingModule>()->goToGeo(
-            latitude,
-            longitude,
-            altitude
-        );
-    }
-
-    lua_settop(L, 0);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-
-int getGeoPosition(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::getGeoPosition");
-
-    const std::string& name = ghoul::lua::value<std::string>(L, 1);
-    const double latitude = ghoul::lua::value<double>(L, 2);
-    const double longitude = ghoul::lua::value<double>(L, 3);
-    const double altitude = ghoul::lua::value<double>(L, 4);
-    lua_pop(L, 4);
-
-    SceneGraphNode* n = sceneGraphNode(name);
+    SceneGraphNode* n = sceneGraphNode(globeIdentifier);
     if (!n) {
-        return ghoul::lua::luaError(L, "Unknown globe name: " + name);
+        throw ghoul::lua::LuaError("Unknown globe name: " + globeIdentifier);
     }
+
     const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
     if (!globe) {
-        return ghoul::lua::luaError(L, "Name must be a RenderableGlobe");
+        throw ghoul::lua::LuaError("Identifier must be a RenderableGlobe");
     }
 
-    GlobeBrowsingModule& mod = *(global::moduleEngine.module<GlobeBrowsingModule>());
-    glm::vec3 pos = mod.cartesianCoordinatesFromGeo(
-        *globe,
-        latitude,
-        longitude,
-        altitude
-    );
+    layers::Group::ID group = ghoul::from_string<layers::Group::ID>(layerGroup);
+    if (group == layers::Group::ID::Unknown) {
+        throw ghoul::lua::LuaError("Unknown layer group: " + layerGroup);
+    }
 
-    ghoul::lua::push(L, pos.x, pos.y, pos.z);
+    const LayerGroup& lg = globe->layerManager().layerGroup(group);
+    std::vector<Layer*> layers = lg.layers();
 
-    ghoul_assert(lua_gettop(L) == 3, "Incorrect number of items left on stack");
-    return 3;
+    std::vector<std::string> res;
+    res.reserve(layers.size());
+    for (Layer* l : layers) {
+        res.push_back(l->identifier());
+    }
+    return res;
 }
 
-int getGeoPositionForCamera(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getGeoPositionForCamera");
+/**
+ * Rearranges the order of a single layer on a globe. The first position in the list
+ * has index 0, and the last position is given by the number of layers minus one.
+ *
+ * The `source` and `destination` parameters can also be the identifiers of the layers to
+ * be moved. If `destination` is a name, the source layer is moved below that destination
+ * layer.
+ *
+ * \param globeIdentifier The identifier of the globe
+ * \param layerGroup The identifier of the layer group
+ * \param source The original position of the layer that should be moved, either as an
+ *               index in the list or the identifier of the layer to be moved
+ * \param destination The new position in the list, either as an index in the list or as
+ *                    the identifier of the layer after which to place the moved layer
+ */
+[[codegen::luawrap]] void moveLayer(std::string globeIdentifier, std::string layerGroup,
+                                    std::variant<int, std::string> source,
+                                    std::variant<int, std::string> destination)
+{
+    using namespace openspace;
+    using namespace globebrowsing;
 
-    GlobeBrowsingModule* module = global::moduleEngine.module<GlobeBrowsingModule>();
-    const RenderableGlobe* globe = module->castFocusNodeRenderableToGlobe();
-    if (!globe) {
-        return ghoul::lua::luaError(L, "Focus node must be a RenderableGlobe");
+    if (source == destination) {
+        return;
     }
 
-    const glm::dvec3 cameraPosition = global::navigationHandler.camera()->positionVec3();
-    const glm::dmat4 inverseModelTransform =
-        global::navigationHandler.focusNode()->inverseModelTransform();
-    const glm::dvec3 cameraPositionModelSpace =
-        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
+    SceneGraphNode* n = sceneGraphNode(globeIdentifier);
+    if (!n) {
+        throw ghoul::lua::LuaError(std::format("Unknown globe '{}'", globeIdentifier));
+    }
+
+    RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
+    if (!globe) {
+        throw ghoul::lua::LuaError("Identifier must be a RenderableGlobe");
+    }
+
+    layers::Group::ID group = ghoul::from_string<layers::Group::ID>(layerGroup);
+    if (group == layers::Group::ID::Unknown) {
+        throw ghoul::lua::LuaError(std::format("Unknown layer group '{}'", layerGroup));
+    }
+
+    LayerGroup& lg = globe->layerManager().layerGroup(group);
+    if (std::holds_alternative<int>(source) && std::holds_alternative<int>(destination)) {
+        // Short circut here, no need to get the layers
+        lg.moveLayer(std::get<int>(source), std::get<int>(destination));
+        return;
+    }
+
+    std::vector<Layer*> layers = lg.layers();
+
+    int sourceIdx = 0;
+    if (std::holds_alternative<int>(source)) {
+        sourceIdx = std::get<int>(source);
+    }
+    else {
+        auto it = std::find_if(
+            layers.cbegin(), layers.cend(),
+            [s = std::get<std::string>(source)](Layer* l) {
+                return l->identifier() == s;
+            }
+        );
+        if (it == layers.cend()) {
+            throw ghoul::lua::LuaError(std::format(
+                "Could not find source layer '{}'", std::get<std::string>(source)
+            ));
+        }
+
+        sourceIdx = static_cast<int>(std::distance(layers.cbegin(), it));
+    }
+
+    int destinationIdx = 0;
+    if (std::holds_alternative<int>(destination)) {
+        destinationIdx = std::get<int>(destination);
+    }
+    else {
+        auto it = std::find_if(
+            layers.cbegin(), layers.cend(),
+            [d = std::get<std::string>(destination)](Layer* l) {
+                return l->identifier() == d;
+            }
+        );
+        if (it == layers.cend()) {
+            throw ghoul::lua::LuaError(std::format(
+                "Could not find destination layer '{}'", std::get<std::string>(source)
+            ));
+        }
+
+        // +1 since we want to move the layer _below_ the specified layer
+        destinationIdx = static_cast<int>(std::distance(layers.cbegin(), it));
+    }
+
+    lg.moveLayer(sourceIdx, destinationIdx);
+}
+
+/**
+ * Go to the chunk on a globe with given index x, y, level.
+ *
+ * \param globeIdentifier The identifier of the scene graph node for the globe
+ * \param x The x value of the tile index
+ * \param y The y value of the tile index
+ * \param level The level of the tile index
+ */
+[[codegen::luawrap]] void goToChunk(std::string globeIdentifier, int x, int y, int level)
+{
+    using namespace openspace;
+    using namespace globebrowsing;
+
+    SceneGraphNode* n = sceneGraphNode(globeIdentifier);
+    if (!n) {
+        throw ghoul::lua::LuaError("Unknown globe name: " + globeIdentifier);
+    }
+
+    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
+    if (!globe) {
+        throw ghoul::lua::LuaError("Identifier must be a RenderableGlobe");
+    }
+
+    global::moduleEngine->module<GlobeBrowsingModule>()->goToChunk(*n, x, y, level);
+}
+
+/**
+ * Get geographic coordinates of the camera position in latitude, longitude, and altitude
+ * (degrees and meters).
+ *
+ * \param useEyePosition If true, use the view direction of the camera instead of the
+ *                       camera position
+ */
+[[codegen::luawrap]] std::tuple<double, double, double> geoPositionForCamera(
+                                                              bool useEyePosition = false)
+{
+    using namespace openspace;
+    using namespace globebrowsing;
+
+    GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
+    // focus vs anchor
+    const RenderableGlobe* globe = module->castFocusNodeRenderableToGlobe();
+    if (!globe) {
+        throw ghoul::lua::LuaError("Focus node must be a RenderableGlobe");
+    }
+    Camera* camera = global::navigationHandler->camera();
+
+    glm::dvec3 cameraPosition = camera->positionVec3();
+
+
+    const SceneGraphNode* anchor =
+        global::navigationHandler->orbitalNavigator().anchorNode();
+    const glm::dmat4 inverseModelTransform = glm::inverse(anchor->modelTransform());
+
+    glm::dvec3 target;
+
+    // @TODO (04-08-2022, micahnyc)
+    // adjust this to use the camera lookat
+    // once we fix this calculation, then we just add true to the function call in the
+    // asset
+    if (useEyePosition) {
+        const glm::dvec3 anchorPos = anchor->worldPosition();
+        const glm::dvec3 cameraDir = ghoul::viewDirection(camera->rotationQuaternion());
+        const double anchorToPosDistance = glm::distance(
+            anchorPos + globe->boundingSphere(),
+            cameraPosition
+        );
+        target = cameraPosition + anchorToPosDistance * cameraDir;
+    }
+    else {
+        target = glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
+    }
+
     const SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
-        cameraPositionModelSpace
+        target
     );
 
     const Geodetic2 geo2 = globe->ellipsoid().cartesianToGeodetic2(
         posHandle.centerToReferenceSurface
     );
-    const double altitude = glm::length(cameraPositionModelSpace -
-                                  posHandle.centerToReferenceSurface);
+    const double altitude = glm::length(
+        target - posHandle.centerToReferenceSurface
+    );
 
-    ghoul::lua::push(L, glm::degrees(geo2.lat), glm::degrees(geo2.lon), altitude);
-
-    ghoul_assert(lua_gettop(L) == 3, "Incorrect number of items left on stack");
-    return 3;
+    return { glm::degrees(geo2.lat), glm::degrees(geo2.lon), altitude };
 }
 
-int loadWMSCapabilities(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::loadWMSCapabilities");
-
-    std::string name = ghoul::lua::value<std::string>(L, 1);
-    std::string globe = ghoul::lua::value<std::string>(L, 2);
-    std::string url = ghoul::lua::value<std::string>(L, 3);
-
-    global::moduleEngine.module<GlobeBrowsingModule>()->loadWMSCapabilities(
+/**
+ * Loads and parses the WMS capabilities XML file from a remote server.
+ *
+ * \param name The name of the capabilities that can be used to later refer to the set of
+ *             capabilities
+ * \param globe The identifier of the globe for which this server is applicable
+ * \param url The URL at which the capabilities file can be found
+ */
+[[codegen::luawrap]] void loadWMSCapabilities(std::string name, std::string globe,
+                                              std::string url)
+{
+    using namespace openspace;
+    using namespace globebrowsing;
+    global::moduleEngine->module<GlobeBrowsingModule>()->loadWMSCapabilities(
         std::move(name),
         std::move(globe),
         std::move(url)
     );
-
-    lua_pop(L, 3);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
 }
 
-int removeWMSServer(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeWMSServer");
-
-    const std::string& name = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-
-    global::moduleEngine.module<GlobeBrowsingModule>()->removeWMSServer(name);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
+/**
+ * Removes the specified WMS server from the list of available servers. The name parameter
+ * corresponds to the first argument in the `loadWMSCapabilities` call that was used to
+ * load the WMS server.
+ *
+ * \param name The name of the WMS server to remove
+ */
+[[codegen::luawrap]] void removeWMSServer(std::string name) {
+    using namespace openspace;
+    using namespace globebrowsing;
+    global::moduleEngine->module<GlobeBrowsingModule>()->removeWMSServer(name);
 }
 
-int capabilities(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::capabilities");
+/**
+ * Returns an array of tables that describe the available layers that are supported by the
+ * WMS server identified by the provided name. The `URL` component of the returned table
+ * can be used in the `FilePath` argument for a call to the `addLayer` function to add the
+ * value to a globe.
+ *
+ * \param name The name of the WMS server for which to get the information
+ */
+[[codegen::luawrap]] std::vector<ghoul::Dictionary> capabilitiesWMS(std::string name) {
+    using namespace openspace;
+    using namespace globebrowsing;
 
-    const std::string& name = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
     GlobeBrowsingModule::Capabilities cap =
-        global::moduleEngine.module<GlobeBrowsingModule>()->capabilities(name);
+        global::moduleEngine->module<GlobeBrowsingModule>()->capabilities(name);
 
-    lua_newtable(L);
-    for (unsigned long i = 0; i < cap.size(); ++i) {
-        const GlobeBrowsingModule::Layer& l = cap[i];
+    std::vector<ghoul::Dictionary> res;
+    res.reserve(cap.size());
+    for (size_t i = 0; i < cap.size(); i++) {
+        ghoul::Dictionary c;
+        c.setValue("Name", cap[i].name);
+        c.setValue("URL", cap[i].url);
+        res.push_back(c);
+    }
+    return res;
+}
 
-        lua_newtable(L);
+/**
+ * Add a GeoJson layer specified by the given table to the specified globe.
+ *
+ * \param globeIdentifier The identifier of the scene graph node for the globe
+ * \param table A table with information about the GeoJson layer. See
+ *              [this page](#globebrowsing_geojsoncomponent) for details on what fields
+ *              and settings the table may contain
+ */
+[[codegen::luawrap]] void addGeoJson(std::string globeIdentifier, ghoul::Dictionary table)
+{
+    using namespace openspace;
+    using namespace globebrowsing;
 
-        ghoul::lua::push(L, "Name", l.name);
-        lua_settable(L, -3);
-
-        ghoul::lua::push(L, "URL", l.url);
-        lua_settable(L, -3);
-
-        lua_rawseti(L, -2, i + 1);
+    // Get the node and make sure it exists
+    SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(globeIdentifier);
+    if (!n) {
+        throw ghoul::lua::LuaError("Unknown globe name: " + globeIdentifier);
     }
 
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-    return 1;
+    // Get the renderable globe
+    RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
+    if (!globe) {
+        throw ghoul::lua::LuaError("Renderable is not a globe: " + globeIdentifier);
+    }
+
+    // Get the dictionary defining the layer
+    globe->geoJsonManager().addGeoJsonLayer(table);
 }
 
-} // namespace openspace::globebrowsing::luascriptfunctions
+/**
+ * Remove the GeoJson layer specified by the given table or string identifier from the
+ * specified globe.
+ *
+ * \param globeIdentifier The identifier of the scene graph node for the globe
+ * \param tableOrIdentifier Either an identifier for the GeoJson layer to be removed, or
+ *                          a table that includes the identifier
+ */
+[[codegen::luawrap]] void deleteGeoJson(std::string globeIdentifier,
+                          std::variant<std::string, ghoul::Dictionary> tableOrIdentifier)
+{
+    using namespace openspace;
+    using namespace globebrowsing;
+
+    // Get the node and make sure it exists
+    SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(globeIdentifier);
+    if (!n) {
+        throw ghoul::lua::LuaError("Unknown globe name: " + globeIdentifier);
+    }
+
+    // Get the renderable globe
+    RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
+    if (!globe) {
+        throw ghoul::lua::LuaError("Renderable is not a globe: " + globeIdentifier);
+    }
+
+    std::string identifier;
+    if (std::holds_alternative<std::string>(tableOrIdentifier)) {
+        identifier = std::get<std::string>(tableOrIdentifier);
+    }
+    else {
+        ghoul::Dictionary d = std::get<ghoul::Dictionary>(tableOrIdentifier);
+        if (!d.hasValue<std::string>("Identifier")) {
+            throw ghoul::lua::LuaError(
+                "Table passed to deleteLayer does not contain an Identifier"
+            );
+        }
+        identifier = d.value<std::string>("Identifier");
+    }
+
+    globe->geoJsonManager().deleteLayer(identifier);
+}
+
+/**
+ * Add a GeoJson layer from the given file name and add it to the current anchor node,
+ * if it is a globe. Note that you might have to increase the height offset for the
+ * added feature to be visible on the globe, if using a height map.
+ *
+ * \param filename The path to the GeoJSON file
+ * \param name An optional name that the loaded feature will get in the user interface
+ */
+[[codegen::luawrap]] void addGeoJsonFromFile(std::string filename,
+                                             std::optional<std::string> name)
+{
+    using namespace openspace;
+    using namespace globebrowsing;
+
+    std::filesystem::path path = absPath(filename);
+    if (!std::filesystem::is_regular_file(path)) {
+        throw ghoul::lua::LuaError(std::format(
+            "Could not find the provided file '{}'", filename
+        ));
+    }
+
+    std::string extension = path.extension().string();
+    extension = ghoul::toLowerCase(extension);
+
+    if (extension != ".geojson" && extension != ".json") {
+        throw ghoul::lua::LuaError(std::format(
+            "Unexpected file type '{}'. Expected '.geojson' or '.json' file", filename
+        ));
+    }
+
+    SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(
+        global::navigationHandler->anchorNode()->identifier()
+    );
+    if (!n) {
+        throw ghoul::lua::LuaError("Invalid anchor node");
+    }
+
+    RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
+    if (!globe) {
+        throw ghoul::lua::LuaError(
+            "Current anchor is not a globe (Expected 'RenderableGlobe')"
+        );
+    }
+
+    // Make a minimal dictionary to represent the geojson component
+    ghoul::Dictionary d;
+
+    std::string identifier = makeIdentifier(name.value_or(path.stem().string()));
+    d.setValue("Identifier", identifier);
+    d.setValue("File", path);
+    if (name.has_value()) {
+        d.setValue("Name", *name);
+    }
+
+    // Get the dictionary defining the layer
+    globe->geoJsonManager().addGeoJsonLayer(d);
+}
+
+#include "globebrowsingmodule_lua_codegen.cpp"
+
+} // namespace

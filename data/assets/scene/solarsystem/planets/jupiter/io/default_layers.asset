@@ -1,0 +1,11 @@
+asset.require("./layers/colorlayers/io_texture", true)
+
+
+
+asset.meta = {
+  Name = "Default Io Layers",
+  Description = "Default Io layers are: Io Texture",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

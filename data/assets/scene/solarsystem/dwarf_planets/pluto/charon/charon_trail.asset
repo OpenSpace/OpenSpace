@@ -1,0 +1,52 @@
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+
+
+local CharonBarycentricTrail = {
+  Identifier = "CharonBarycentricTrail",
+  Parent = transforms.PlutoBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Charon,
+      Observer = kernels.ID.PlutoBarycenter
+    },
+    Color = { 0.00, 0.62, 1.00 },
+    Period = 6.38723,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_dwarf",
+    "moonTrail_pluto",
+    "moonTrail_major",
+    "moonTrail_major_pluto"
+  },
+  GUI = {
+    Name = "Charon Barycentric Trail",
+    Path = "/Solar System/Dwarf Planets/Pluto/Charon",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(CharonBarycentricTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(CharonBarycentricTrail)
+end)
+
+asset.export(CharonBarycentricTrail)
+
+
+
+asset.meta = {
+  Name = "Charon Barycentric Trail",
+  Description = "Trail of Charon as observed by Pluto Barycenter",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

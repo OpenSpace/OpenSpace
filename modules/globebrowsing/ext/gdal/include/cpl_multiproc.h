@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_multiproc.h b5fb552a68377945dc4bff235f0e1af3728c75c6 2018-03-11 23:57:13Z Even Rouault $
+ * $Id: cpl_multiproc.h 49f2075cf4be6b103a5ab0b5a64f1ed3e2e7f46b 2018-11-27 21:21:53Z Robert Coup $
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  CPL Multi-Threading, and process handling portability functions.
@@ -139,22 +139,24 @@ CPL_C_END
 class CPL_DLL CPLMutexHolder
 {
   private:
-    CPLMutex   *hMutex;
+    CPLMutex   *hMutex = nullptr;
     // Only used for debugging.
-    const char *pszFile;
-    int         nLine;
+    const char *pszFile = nullptr;
+    int         nLine = 0;
+
+    CPL_DISALLOW_COPY_ASSIGN(CPLMutexHolder)
 
   public:
 
     /** Instantiates the mutex if not already done. */
-    CPLMutexHolder( CPLMutex **phMutex, double dfWaitInSeconds = 1000.0,
+    explicit CPLMutexHolder( CPLMutex **phMutex, double dfWaitInSeconds = 1000.0,
                     const char *pszFile = __FILE__,
                     int nLine = __LINE__,
                     int nOptions = CPL_MUTEX_RECURSIVE);
 
     /** This variant assumes the mutex has already been created. If not, it will
      * be a no-op */
-    CPLMutexHolder( CPLMutex* hMutex, double dfWaitInSeconds = 1000.0,
+    explicit CPLMutexHolder( CPLMutex* hMutex, double dfWaitInSeconds = 1000.0,
                     const char *pszFile = __FILE__,
                     int nLine = __LINE__ );
 
@@ -172,9 +174,11 @@ class CPL_DLL CPLMutexHolder
 class CPL_DLL CPLLockHolder
 {
   private:
-    CPLLock    *hLock;
-    const char *pszFile;
-    int         nLine;
+    CPLLock    *hLock = nullptr;
+    const char *pszFile = nullptr;
+    int         nLine = 0;
+
+    CPL_DISALLOW_COPY_ASSIGN(CPLLockHolder)
 
   public:
 
@@ -185,7 +189,7 @@ class CPL_DLL CPLLockHolder
 
     /** This variant assumes the lock has already been created. If not, it will
      * be a no-op */
-    CPLLockHolder( CPLLock* hSpin,
+    explicit CPLLockHolder( CPLLock* hSpin,
                     const char *pszFile = __FILE__,
                     int nLine = __LINE__ );
 
@@ -203,7 +207,7 @@ class CPL_DLL CPLLockHolder
 #define CTLS_CSVTABLEPTR                 3         /* cpl_csv.cpp */
 #define CTLS_CSVDEFAULTFILENAME          4         /* cpl_csv.cpp */
 #define CTLS_ERRORCONTEXT                5         /* cpl_error.cpp */
-#define CTLS_GDALDATASET_REC_PROTECT_MAP 6        /* gdaldataset.cpp */
+/* 6: unused */
 #define CTLS_PATHBUF                     7         /* cpl_path.cpp */
 #define CTLS_ABSTRACTARCHIVE_SPLIT       8         /* cpl_vsil_abstract_archive.cpp */
 #define CTLS_UNUSED4                     9
@@ -214,6 +218,7 @@ class CPL_DLL CPLLockHolder
 #define CTLS_CONFIGOPTIONS              14         /* cpl_conv.cpp */
 #define CTLS_FINDFILE                   15         /* cpl_findfile.cpp */
 #define CTLS_VSIERRORCONTEXT            16         /* cpl_vsi_error.cpp */
+#define CTLS_ERRORHANDLERACTIVEDATA     17         /* cpl_error.cpp */
 
 #define CTLS_MAX                        32
 

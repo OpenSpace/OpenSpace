@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,62 +27,39 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo IntensityInfo = {
         "Intensity",
         "Intensity",
-        "The intensity of this light source"
+        "The intensity of this light source.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
+
+    // This `LightSource` type represents a light source placed at the position of the
+    // camera. An object with this light source will always be illuminated from the
+    // current view direction.
+    struct [[codegen::Dictionary(CameraLightSource)]] Parameters {
+        // [[codegen::verbatim(IntensityInfo.description)]]
+        std::optional<float> intensity;
+    };
+#include "cameralightsource_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation CameraLightSource::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Camera Light Source",
-        "base_camera_light_source",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("CameraLightSource"),
-                Optional::No,
-                "The type of this light source"
-            },
-            {
-                IntensityInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                IntensityInfo.description
-            }
-        }
-    };
-}
-
-CameraLightSource::CameraLightSource()
-    : LightSource()
-    , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
-{
-    addProperty(_intensity);
+    return codegen::doc<Parameters>("base_camera_light_source");
 }
 
 CameraLightSource::CameraLightSource(const ghoul::Dictionary& dictionary)
     : LightSource(dictionary)
     , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
 {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _intensity = p.intensity.value_or(_intensity);
     addProperty(_intensity);
-
-    documentation::testSpecificationAndThrow(Documentation(),
-                                             dictionary,
-                                             "CameraLightSource");
-
-
-    if (dictionary.hasValue<double>(IntensityInfo.identifier)) {
-        _intensity = static_cast<float>(
-            dictionary.value<double>(IntensityInfo.identifier)
-        );
-    }
 }
 
 float CameraLightSource::intensity() const {

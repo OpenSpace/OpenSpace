@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,7 @@ namespace openspace {
 class LuaConsole : public properties::PropertyOwner {
 public:
     LuaConsole();
-    ~LuaConsole();
+    ~LuaConsole() override = default;
 
     void initialize();
     void deinitialize();
@@ -58,18 +58,22 @@ public:
     void render();
     float currentHeight() const;
 
+    void setCommandInputButton(Key key);
+
 private:
     void parallelConnectionChanged(const ParallelConnection::Status& status);
-
-    void addToCommand(std::string c);
+    void addToCommand(const std::string& c);
 
     properties::BoolProperty _isVisible;
-    properties::BoolProperty _remoteScripting;
+    properties::BoolProperty _shouldBeSynchronized;
+    properties::BoolProperty _shouldSendToRemote;
 
     properties::Vec4Property _backgroundColor;
     properties::Vec4Property _entryTextColor;
     properties::Vec4Property _historyTextColor;
     properties::IntProperty _historyLength;
+
+    Key _commandInputButton = Key::GraveAccent;
 
     size_t _inputPosition = 0;
     std::vector<std::string> _commandsHistory;

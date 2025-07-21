@@ -1,4 +1,4 @@
 set (OPENSPACE_DEPENDENCIES
-    kameleon
-    volume
+  kameleon
+  volume
 )

@@ -1,59 +1,143 @@
-local assetHelper = asset.require('util/asset_helper')
+local constellations_helper = asset.require("util/constellations_helper")
 
 
 
-local speck = asset.syncedResource({
-    Name = "Constellation Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_constellations_speck",
-    Version = 1
+local speck = asset.resource({
+  Name = "Constellation Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_constellations_data",
+  Version = 3
 })
 
-local constellationsExtragalactic = {
-    Identifier = "ConstellationsExtragalactic",
-    Renderable = {
-        Type = "RenderableDUMeshes",
-        Enabled = false,
-        Color = { 1.0, 0.4, 0.2 },
-        Transparency = 1.0,
-        ScaleFactor = 1.0,
-        File = speck .. "/constellationsEXGAL.speck",
-        LabelFile = speck .. "/constellationsEXGAL.label",
-        TextColor = { 0.8, 0.8, 0.8, 1.0 },
-        TextSize = 20.0,
-        TextMinSize = 20.0,
-        TextMaxSize = 30.0,
-        MeshColor = { { 0.6, 0.4, 0.4 }, { 0.8, 0.0, 0.0 }, { 0.0, 0.3, 0.8 } },
-        Unit = "Mpc"
+
+local function zodiacsString(zodiacsList)
+  local zodiacsString = "{"
+  local isFirst = true
+
+  for k, zodiac in pairs(zodiacsList) do
+    local fullName = constellations_helper.findFullName(zodiac)
+    if fullName ~= nil then
+      if isFirst then
+        isFirst = false
+      else
+        zodiacsString = zodiacsString .. ", "
+      end
+
+      zodiacsString = zodiacsString .. [["]] .. fullName .. [["]]
+    end
+  end
+
+  zodiacsString = zodiacsString .. "}"
+  return zodiacsString
+end
+
+
+local Constellations = {
+  Identifier = "Constellations",
+  Renderable = {
+    Type = "RenderableConstellationLines",
+    Enabled = false,
+    Labels = {
+      File = speck .. "constellation_lines.label",
+      Opacity = 0.3,
+      Color = { 0.8, 0.8, 0.8 },
+      Size = 14.5,
+      MinMaxSize = { 8, 170 },
+      Unit = "pc"
     },
-    GUI = {
-        Name = "Constellations (Extragalactic)",
-        Path = "/Milky Way/Constellations"
-    }
+    Opacity = 0.3,
+    File = speck .. "constellation_lines.speck",
+    NamesFile = speck .. "constellations.dat",
+    Colors = { { 0.6, 0.4, 0.4 }, { 0.8, 0.0, 0.0 }, { 0.0, 0.3, 0.8 } },
+    Unit = "pc",
+    DimInAtmosphere = true
+  },
+  Tag = { "daytime_hidden" },
+  GUI = {
+    Name = "Constellation Lines",
+    Path = "/Milky Way/Constellations",
+    Focusable = false,
+    Description = [[Lines connecting the stars that make up the constellation figures.
+      We represent the constellations by connecting the main stars that make up the
+      constellation "stick figures," as seen from Earth. Colors: most constellations
+      are pink, while the zodical constellations are red. We also color Orion and Ursa
+      Major blue as two recognizable constellations in the night sky. Census: 88
+      constellations.]]
+  }
 }
 
-local constellations = {
-    Identifier = "Constellations",
-    Renderable = {
-        Type = "RenderableDUMeshes",
-        Enabled = false,
-        Color = { 1.0, 0.4, 0.2 },
-        Transparency = 1.0,
-        ScaleFactor = 1.0,
-        File = speck .. "/constellations.speck",
-        LabelFile = speck .. "/constellations.label",
-        TextColor = { 0.8, 0.8, 0.8, 1.0 },
-        TextSize = 14.5,
-        TextMaxSize = 170.0,
-        TextMinSize = 8.0,
-        MeshColor = { { 0.6, 0.4, 0.4 }, { 0.8, 0.0, 0.0 }, { 0.0, 0.3, 0.8 } },
-        Unit = "pc"
-    },
-    GUI = {
-        Path = "/Milky Way/Constellations"
-    }
+-- Actions
+local ShowConstellations = {
+  Identifier = "os.constellations.ShowConstellations",
+  Name = "Show all",
+  Command = [[
+    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.ConstellationSelection", {})
+    openspace.fadeIn("Scene.Constellations.Renderable")
+  ]],
+  Documentation = "Shows all the constellations lines",
+  GuiPath = "/Constellations/Lines",
+  IsLocal = false
 }
 
+local HideConstellations = {
+  Identifier = "os.constellations.HideConstellations",
+  Name = "Hide all",
+  Command = [[
+    openspace.fadeOut("Scene.Constellations.Renderable", nil, "openspace.setPropertyValueSingle('Scene.Constellations.Renderable.Enabled', false); openspace.setPropertyValueSingle('Scene.Constellations.Renderable.ConstellationSelection', {})")
+  ]],
+  Documentation = "Hides all the constellations lines",
+  GuiPath = "/Constellations/Lines",
+  IsLocal = false
+}
+
+local ShowZodiacsIdentifier = "os.constellation.ShowZodiacs"
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { constellationsExtragalactic, constellations })
+
+asset.onInitialize(function()
+  -- Defining this in here as the zodiacsString function requires the file synchronization
+  -- to be completed
+
+  local zodiacsString = zodiacsString({
+    "CNC", "TAU", "PSC", "ARI", "LIB", "AQR", "CAP", "SCO", "VIR", "SGR", "GEM", "LEO"
+  })
+  local ShowZodiacs = {
+    Identifier = ShowZodiacsIdentifier,
+    Name = "Show zodiac",
+    Command = [[
+      openspace.setPropertyValueSingle("Scene.Constellations.Renderable.ConstellationSelection", ]] .. zodiacsString .. [[)
+      openspace.fadeIn("Scene.Constellations.Renderable")
+    ]],
+    Documentation = "Shows the zodiac constellations lines",
+    GuiPath = "/Constellations/Lines",
+    IsLocal = false
+  }
+
+  openspace.addSceneGraphNode(Constellations)
+
+  openspace.action.registerAction(ShowConstellations)
+  openspace.action.registerAction(HideConstellations)
+  openspace.action.registerAction(ShowZodiacs)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(ShowZodiacsIdentifier)
+  openspace.action.removeAction(HideConstellations)
+  openspace.action.removeAction(ShowConstellations)
+
+  openspace.removeSceneGraphNode(Constellations)
+end)
+
+asset.export(Constellations)
+asset.export("ShowConstellations", ShowConstellations.Identifier)
+asset.export("HideConstellations", HideConstellations.Identifier)
+asset.export("ShowZodiacs", ShowZodiacsIdentifier)
+
+
+
+asset.meta = {
+  Description = Constellations.GUI.Description,
+  Author = "Brian Abbott, Zack Reeves (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,8 +43,8 @@ struct RaycastData;
 
 class ToyVolumeRaycaster : public VolumeRaycaster {
 public:
-    ToyVolumeRaycaster(glm::vec4 color);
-    virtual ~ToyVolumeRaycaster() = default;
+    explicit ToyVolumeRaycaster(glm::vec4 color);
+    ~ToyVolumeRaycaster() override = default;
 
     void initialize();
     void deinitialize();
@@ -58,24 +58,24 @@ public:
         ghoul::opengl::ProgramObject& program) override;
     bool isCameraInside(const RenderData& data, glm::vec3& localPosition) override;
 
-    std::string boundsVertexShaderPath() const override;
-    std::string boundsFragmentShaderPath() const override;
-    std::string raycasterPath() const override;
-    std::string helperPath() const override;
+    std::filesystem::path boundsVertexShaderPath() const override;
+    std::filesystem::path boundsFragmentShaderPath() const override;
+    std::filesystem::path raycasterPath() const override;
+    std::filesystem::path helperPath() const override;
 
     void setColor(glm::vec4 color);
     void setModelTransform(glm::mat4 transform);
     void setTime(double time);
-    void setStepSize(float time);
+    void setStepSize(float stepSize);
 
 private:
     glm::dmat4 modelViewTransform(const RenderData& data);
 
     BoxGeometry _boundingBox;
-    glm::vec4 _color;
-    glm::mat4 _modelTransform;
-    float _stepSize;
-    double _time;
+    glm::vec4 _color = glm::vec4(0.f);
+    glm::mat4 _modelTransform = glm::mat4(1.f);
+    float _stepSize = 0.f;
+    double _time = 0.0;
 }; // ToyVolumeRaycaster
 
 } // openspace

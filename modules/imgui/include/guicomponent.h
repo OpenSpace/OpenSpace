@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,14 +37,16 @@ class GUI;
  */
 class GuiComponent : public properties::PropertyOwner {
 public:
-    /// Constructor that initializes this components member variables
-    GuiComponent(std::string identifier, std::string guiName = "");
+    /**
+     * Constructor that initializes this components member variables.
+     */
+    explicit GuiComponent(std::string identifier, std::string guiName = "");
 
     /**
      * Returns if this component is enabled, that is, if it is currently active and
      * visible on the screen.
      *
-     * \return \c true if this component is enabled, \c false otherwise
+     * \return `true` if this component is enabled, `false` otherwise
      */
     bool isEnabled() const;
 
@@ -56,29 +58,39 @@ public:
      */
     void setEnabled(bool enabled);
 
-    /// Initializes the component with everything that does not require an OpenGL context
+    /**
+     * Initializes the component with everything that does not require an OpenGL context.
+     */
     virtual void initialize();
 
-    /// Initializes the component with everything that requires an OpenGL context
+    /**
+     * Initializes the component with everything that requires an OpenGL context.
+     */
     virtual void initializeGL();
 
-    /// Deinitializes the component with things that do not require an OpenGL context
+    /**
+     * Deinitializes the component with things that do not require an OpenGL context.
+     */
     virtual void deinitialize();
 
-    /// Deinitializes the component with things that require an OpenGL context
+    /**
+     * Deinitializes the component with things that require an OpenGL context.
+     */
     virtual void deinitializeGL();
 
-    /// Renders the individual subcomponents to the screen
+    /**
+     * Renders the individual subcomponents to the screen.
+     */
     virtual void render() = 0;
 
     void setShowHelpTooltip(bool showHelpTooltip);
     void setShowHelpTooltipDelay(double delay);
 
 protected:
-    /// \c true if this component is enabled and visible on the screen
+    /// `true` if this component is enabled and visible on the screen
     properties::BoolProperty _isEnabled;
 
-    /// if \c true this window is currently collapsed. This setting mirrors the ImGui
+    /// if `true` this window is currently collapsed. This setting mirrors the ImGui
     /// internal state of the window
     properties::BoolProperty _isCollapsed;
 

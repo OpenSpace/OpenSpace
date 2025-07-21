@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,9 +28,12 @@
 #include <openspace/documentation/verifier.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureconversion.h>
+#include <filesystem>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TexturePathInfo = {
@@ -39,103 +42,94 @@ namespace {
         "Sets the path of the texture that is displayed on this screen space plane. If "
         "this value is changed, the image at the new path will automatically be loaded "
         "and displayed. The size of the image will also automatically set the default "
-        "size of this plane."
+        "size of this plane.",
+        openspace::properties::Property::Visibility::User
     };
+
+    // This `ScreenSpaceRenderable` can be used to display an image from a local file on
+    // disk.
+    //
+    // To load an image from a web URL, see
+    // [ScreenSpaceImageOnline](#base_screenspace_image_online).
+    struct [[codegen::Dictionary(ScreenSpaceImageLocal)]] Parameters {
+        std::optional<std::string> identifier;
+
+        // [[codegen::verbatim(TexturePathInfo.description)]]
+        std::optional<std::filesystem::path> texturePath;
+    };
+#include "screenspaceimagelocal_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation ScreenSpaceImageLocal::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "ScreenSpace Local Image",
-        "base_screenspace_image_local",
-        {
-            {
-                KeyName,
-                new StringVerifier,
-                Optional::Yes,
-                "Specifies the GUI name of the ScreenspaceImage"
-            },
-            {
-                TexturePathInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                TexturePathInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("base_screenspace_image_local");
 }
 
 ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _texturePath(TexturePathInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "ScreenSpaceImageLocal"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    int iIdentifier = 0;
-    if (_identifier.empty()) {
-        static int id = 0;
-        iIdentifier = id;
+    std::string identifier = p.identifier.value_or("ScreenSpaceImageLocal");
+    setIdentifier(makeUniqueIdentifier(std::move(identifier)));
 
-        if (iIdentifier == 0) {
-            setIdentifier("ScreenSpaceImageLocal");
+    _texturePath.onChange([this]() {
+        if (!std::filesystem::is_regular_file(absPath(_texturePath))) {
+            LERRORC(
+                "ScreenSpaceImageLocal",
+                std::format(
+                    "Image '{}' did not exist for '{}'", _texturePath.value(), _identifier
+                )
+            );
         }
         else {
-            setIdentifier("ScreenSpaceImageLocal" + std::to_string(iIdentifier));
+            _textureIsDirty = true;
         }
-        ++id;
-    }
-
-    if (_guiName.empty()) {
-        // Adding an extra space to the user-facing name as it looks nicer
-        setGuiName("ScreenSpaceImageLocal " + std::to_string(iIdentifier));
-    }
-
-    _texturePath.onChange([this]() { _textureIsDirty = true; });
+    });
     addProperty(_texturePath);
 
-    if (dictionary.hasKey(TexturePathInfo.identifier)) {
-        _texturePath = dictionary.value<std::string>(TexturePathInfo.identifier);
+    if (p.texturePath.has_value()) {
+        _texturePath = p.texturePath->string();
     }
 }
 
-bool ScreenSpaceImageLocal::deinitializeGL() {
+void ScreenSpaceImageLocal::deinitializeGL() {
     _texture = nullptr;
 
-    return ScreenSpaceRenderable::deinitializeGL();
+    ScreenSpaceRenderable::deinitializeGL();
 }
 
 void ScreenSpaceImageLocal::update() {
-    if (_textureIsDirty && !_texturePath.value().empty()) {
+    if (_textureIsDirty && !_texturePath.value().empty()) [[unlikely]] {
         std::unique_ptr<ghoul::opengl::Texture> texture =
-            ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
+            ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath), 2);
 
         if (texture) {
             // Images don't need to start on 4-byte boundaries, for example if the
             // image is only RGB
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-            texture->uploadTexture();
+            if (texture->format() == ghoul::opengl::Texture::Format::Red) {
+                texture->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_ONE });
+            }
 
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than
-            // linear
+            texture->uploadTexture();
             texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+            texture->purgeFromRAM();
 
             _texture = std::move(texture);
             _objectSize = _texture->dimensions();
             _textureIsDirty = false;
         }
-
     }
 }
 
 void ScreenSpaceImageLocal::bindTexture() {
-    _texture->bind();
+    if (_texture) [[likely]] {
+        _texture->bind();
+    }
 }
 
 } // namespace openspace

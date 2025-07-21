@@ -1,0 +1,145 @@
+local Hydra = asset.require("scene/solarsystem/dwarf_planets/pluto/minor/hydra")
+local Kerberos = asset.require("scene/solarsystem/dwarf_planets/pluto/minor/kerberos")
+local Nix = asset.require("scene/solarsystem/dwarf_planets/pluto/minor/nix")
+local Styx = asset.require("scene/solarsystem/dwarf_planets/pluto/minor/styx")
+
+
+
+local hydraTextures = asset.resource({
+  Name = "Hydra Textures",
+  Type = "HttpSynchronization",
+  Identifier = "hydra_textures",
+  Version = 1
+})
+
+local kerberosTextures = asset.resource({
+  Name = "Kerberos Textures",
+  Type = "HttpSynchronization",
+  Identifier = "kerberos_textures",
+  Version = 1
+})
+
+local nixTextures = asset.resource({
+  Name = "Nix Textures",
+  Type = "HttpSynchronization",
+  Identifier = "nix_textures",
+  Version = 1
+})
+
+local styxTextures = asset.resource({
+  Name = "Styx Textures",
+  Type = "HttpSynchronization",
+  Identifier = "styx_textures",
+  Version = 1
+})
+
+
+local HydraText = {
+  Identifier = "HydraText",
+  Parent = Hydra.Hydra.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 1000000, 0, 1000000 }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 1995262.315,
+    Origin = "Center",
+    Billboard = true,
+    Texture = hydraTextures .. "Hydra-Text.png",
+    BlendMode = "Additive"
+  },
+  GUI = {
+    Name = "Hydra Text",
+    Path = "/Solar System/Dwarf Planets/Pluto",
+    Focusable = false
+  }
+}
+
+local KerberosText = {
+  Identifier = "KerberosText",
+  Parent = Kerberos.Kerberos.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 1000000.0, 0, 1000000.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 19952623.15,
+    Origin = "Center",
+    Billboard = true,
+    Texture = kerberosTextures .. "Kerberos-Text.png",
+    BlendMode = "Additive"
+  },
+  GUI = {
+    Name = "Kerberos Text",
+    Path = "/Solar System/Dwarf Planets/Pluto",
+    Focusable = false
+  }
+}
+
+local NixText = {
+  Identifier = "NixText",
+  Parent = Nix.Nix.Identifier,
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 19952623.15,
+    Origin = "Center",
+    Billboard = true,
+    Texture = nixTextures .. "Nix-Text.png",
+    BlendMode = "Additive"
+  },
+  GUI = {
+    Name = "Nix Text",
+    Path = "/Solar System/Dwarf Planets/Pluto",
+    Focusable = false
+  }
+}
+
+local StyxText = {
+  Identifier = "StyxText",
+  Parent = Styx.Styx.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 1000000.0, 0, 1000000.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 19952623.15,
+    Origin = "Center",
+    Billboard = true,
+    Texture = styxTextures .. "Styx-Text.png",
+    BlendMode = "Additive"
+  },
+  GUI = {
+    Name = "Styx Text",
+    Path = "/Solar System/Dwarf Planets/Pluto",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(HydraText)
+  openspace.addSceneGraphNode(KerberosText)
+  openspace.addSceneGraphNode(NixText)
+  openspace.addSceneGraphNode(StyxText)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(StyxText)
+  openspace.removeSceneGraphNode(NixText)
+  openspace.removeSceneGraphNode(KerberosText)
+  openspace.removeSceneGraphNode(HydraText)
+end)
+
+asset.export(HydraText)
+asset.export(KerberosText)
+asset.export(NixText)
+asset.export(StyxText)

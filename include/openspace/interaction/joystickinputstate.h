@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,9 @@
 #ifndef __OPENSPACE_CORE___JOYSTICKINPUTSTATE___H__
 #define __OPENSPACE_CORE___JOYSTICKINPUTSTATE___H__
 
+#include <ghoul/format.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringconversion.h>
 #include <array>
 #include <memory>
@@ -34,7 +37,7 @@ namespace openspace::interaction {
 
 /**
  * Actions that any button of a joystick can have. Each button must be in one of these
- * states
+ * states.
  */
 enum class JoystickAction : uint8_t {
     /// Idle state if the button is unpressed and has been unpressed since last frame
@@ -51,12 +54,7 @@ enum class JoystickAction : uint8_t {
  * The input state of a single joystick.
  */
 struct JoystickInputState {
-    /// The maximum number of supported axes
-    static constexpr const int MaxAxes = 8;
-    /// The maximum number of supported buttons
-    static constexpr const int MaxButtons = 32;
-
-    /// Marks whether this joystick is connected. If this value is \c false, all other
+    /// Marks whether this joystick is connected. If this value is `false`, all other
     /// members of this struct are undefined
     bool isConnected = false;
 
@@ -65,47 +63,69 @@ struct JoystickInputState {
 
     /// The number of axes that this joystick supports
     int nAxes = 0;
-    /// The values for each axis. Each value is in the range [-1, 1]. Only the first
-    /// \c nAxes values are defined values, the rest are undefined
-    std::array<float, MaxAxes> axes;
+    /// The values for each axis. Each value is in the range [-1, 1]
+    std::vector<float> axes;
 
     /// The number of buttons that this joystick possesses
     int nButtons = 0;
-    /// The status of each button. Only the first \c nButtons values are defined, the rest
-    /// are undefined
-    std::array<JoystickAction, MaxButtons> buttons;
+    /// The status of each button
+    std::vector<JoystickAction> buttons;
 };
 
 /// The maximum number of joysticks that are supported by this system. This number is
 /// derived from the available GLFW constants
-constexpr const int MaxJoysticks = 16;
+constexpr int MaxJoysticks = 16;
 struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks> {
+    /// The maximum number of joysticks that are supported by this system. This number is
+    /// derived from the available GLFW constants
+    static constexpr int MaxNumJoysticks = 16;
+
+    /**
+     * This function return the number of axes the joystick with the given name has.
+     *
+     * \param joystickName The name of the joystick to check how many axes it has,
+     *        if empty the max number of axes for all joysticks are returned
+     * \return The number of axes for the joystick with the given name
+     */
+    int numAxes(const std::string& joystickName = "") const;
+
+    /**
+     * This function return the number of buttons the joystick with the given name has.
+     *
+     * \param joystickName The name of the joystick to check how many buttons it has,
+     *        if empty the max number of buttons for all joysticks are returned
+     * \return The number of buttons for the joystick with the given name
+     */
+    int numButtons(const std::string& joystickName = "") const;
+
     /**
      * This function adds the contributions of all connected joysticks for the provided
      * \p axis. After adding each joysticks contribution, the result is clamped to [-1,1].
      * If a joystick does not possess a particular axis, it's does not contribute to the
      * sum.
      *
+     * \param joystickName The name of the joystick, if empty all joysticks are combined
      * \param axis The numerical axis for which the values are added
      * \return The summed axis values of all connected joysticks
      *
      * \pre \p axis must be 0 or positive
      */
-    float axis(int axis) const;
+    float axis(const std::string& joystickName, int axis) const;
 
     /**
      * This functions checks whether any connected joystick has its \p button in the
      * passed \p action. Any joystick that does not posses the \p button, it will be
      * ignored.
      *
+     * \param joystickName The name of the joystick, if empty all joysticks are combined
      * \param button The button that is to be checked
      * \param action The action which is checked for each button
-     * \return \c true if there is at least one joystick whose \param button is in the
+     * \return `true` if there is at least one joystick whose \p button is in the
      *         \p action state
      *
      * \pre \p button must be 0 or positive
      */
-    bool button(int button, JoystickAction action) const;
+    bool button(const std::string& joystickName, int button, JoystickAction action) const;
 };
 
 } // namespace openspace::interaction
@@ -113,10 +133,25 @@ struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks>
 namespace ghoul {
 
 template <>
-std::string to_string(const openspace::interaction::JoystickAction& action);
+inline std::string to_string(const openspace::interaction::JoystickAction& value) {
+    switch (value) {
+        case openspace::interaction::JoystickAction::Idle:    return "Idle";
+        case openspace::interaction::JoystickAction::Press:   return "Press";
+        case openspace::interaction::JoystickAction::Repeat:  return "Repeat";
+        case openspace::interaction::JoystickAction::Release: return "Release";
+        default:                                             throw MissingCaseException();
+    }
+}
 
 template <>
-openspace::interaction::JoystickAction from_string(const std::string& str);
+constexpr openspace::interaction::JoystickAction from_string(std::string_view string) {
+    if (string == "Idle")    { return openspace::interaction::JoystickAction::Idle; }
+    if (string == "Press")   { return openspace::interaction::JoystickAction::Press; }
+    if (string == "Repeat")  { return openspace::interaction::JoystickAction::Repeat; }
+    if (string == "Release") { return openspace::interaction::JoystickAction::Release; }
+
+    throw RuntimeError(std::format("Unknown action '{}'", string));
+}
 
 } // namespace ghoul
 

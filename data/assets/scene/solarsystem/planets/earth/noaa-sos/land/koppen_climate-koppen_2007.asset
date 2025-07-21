@@ -1,0 +1,80 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Koppen-Geiger Climate Classification - 2007"
+local Identifier = "noaa-sos-land-koppen_climate-koppen_2007"
+local Description = [[Köppen climate classification is a widely used vegetation-based
+empirical climate classification system developed by German botanist-climatologist
+Wladimir Köppen. It's based on the idea that climate is best defined by native
+vegetation. The formulas used in the classification correspond to those of the vegetation
+zones (biomes) that were being mapped for the first time in the late 19th century. It was
+first published in 1884 and was revised until 1940 with collaboration by German
+climatologist Rudolf Geiger.This particular revision is from 2007]]
+local URL = "https://sos.noaa.gov/catalog/datasets/koppen-geiger-climate-classification-2007/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  FilePath = syncedDirectory .. "4096.jpg",
+  Description = Description
+}
+
+local Legend = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "legend.png",
+  FaceCamera = false,
+  Scale = 0.375,
+  CartesianPosition = { -0.75, -0.5, -2.0 }
+}
+
+local Legend1 = {
+  Identifier = Identifier .. "-alt",
+  Name = Name .. " (alt)",
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "legend2.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.75, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Legend)
+  openspace.addScreenSpaceRenderable(Legend1)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Legend1)
+  openspace.removeScreenSpaceRenderable(Legend)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(Legend)
+asset.export(Legend1)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

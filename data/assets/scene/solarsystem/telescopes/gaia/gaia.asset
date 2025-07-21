@@ -1,0 +1,60 @@
+local transforms = asset.require("./transforms")
+local sunTransform = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
+
+
+
+local model = asset.resource({
+  Name = "Gaia Model",
+  Type = "HttpSynchronization",
+  Identifier = "gaia_model",
+  Version = 2
+})
+
+
+local Gaia = {
+  Identifier = "Gaia",
+  Parent = transforms.GaiaPosition.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "Gaia",
+      XAxis = { 1.0, 0.0, 0.0 },
+      XAxisOrthogonal = true,
+      YAxis = sun.Sun.Identifier,
+      YAxisInvert = true
+    },
+    Scale = {
+      Type = "StaticScale",
+      Scale = 10.0
+    }
+  },
+  -- X Orthogonal
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = model .. "gaia.obj",
+    LightSources = {
+      sunTransform.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.4
+      }
+    }
+  },
+  GUI = {
+    Name = "Gaia",
+    Path = "/Solar System/Telescopes/Gaia"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Gaia)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Gaia)
+end)
+
+asset.export(Gaia)

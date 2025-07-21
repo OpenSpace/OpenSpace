@@ -1,0 +1,74 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Sea Surface Currents and Temperature (gray land)"
+local Identifier = "noaa-sos-oceans-ecco2_sst-gray_land"
+local Description = [[To increase understanding and predictive capability for the
+ocean's role in future climate change scenarios, the NASA Modeling, Analysis, and
+Prediction (MAP) program has created a project called Estimating the Circulation and
+Climate of the Ocean, Phase II (ECCO2): High-Resolution Global-Ocean and Sea-Ice Data
+Synthesis. ECCO2 produces increasingly accurate syntheses of all available global-scale
+ocean and sea-ice data at resolutions that start to resolve ocean eddies and other narrow
+current systems, which transport heat, and other properties within the ocean. ECCO2 data
+syntheses are created by using the available satellite and in-situ data in the
+Massachusetts Institute of Technology General Circulation Model (MIT GCM). ECCO2
+simulates ocean flows at all depths, but only surface flows are used in this
+visualization. The global sea surface current flows are colored by corresponding sea
+surface temperatures. The sea surface temperature data is also from the ECCO2 model]]
+local URL = "https://sos.noaa.gov/catalog/datasets/sea-surface-currents-and-temperature-gray-land/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true,
+  UnzipFilesDestination = "images"
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "ImageSequenceTileProvider",
+  FolderPath = syncedDirectory .. "images",
+  Description = Description
+}
+
+local Colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+asset.export(Colorbar)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

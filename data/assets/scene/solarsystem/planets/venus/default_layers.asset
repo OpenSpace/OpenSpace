@@ -1,0 +1,17 @@
+asset.require("./layers/base_layers", false)
+asset.require("./layers/newyork_layers", false)
+asset.require("./layers/utah_layers", true)
+
+
+
+asset.meta = {
+  Name = "Default Venus Layers",
+  Description = [[Default Venus layers are: Venus Texture, Magellan Mosaic,
+    Clouds Magellan Combo, and Magellan Elevation (3D).
+
+    Layers loaded from all available servers
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,0 +1,13 @@
+asset.require("./model")
+asset.require("./trails")
+asset.require("./mission")
+
+
+
+asset.meta = {
+  Name = "Euclid",
+  Description = "This asset includes all of the other assets for the Euclid mission.",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

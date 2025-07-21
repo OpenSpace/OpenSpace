@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,9 +45,10 @@ struct RaycastData;
 
 class GalaxyRaycaster : public VolumeRaycaster {
 public:
-    GalaxyRaycaster(ghoul::opengl::Texture& texture);
+    explicit GalaxyRaycaster(ghoul::opengl::Texture& texture,
+        const std::optional<std::filesystem::path>& raycastingShader = std::nullopt);
+    ~GalaxyRaycaster() override = default;
 
-    virtual ~GalaxyRaycaster();
     void initialize();
 
     void renderEntryPoints(const RenderData& data,
@@ -61,26 +62,33 @@ public:
     bool isCameraInside(const RenderData& data,
         glm::vec3& localPosition) override;
 
-    std::string boundsVertexShaderPath() const override;
-    std::string boundsFragmentShaderPath() const override;
-    std::string raycasterPath() const override;
-    std::string helperPath() const override;
+    std::filesystem::path boundsVertexShaderPath() const override;
+    std::filesystem::path boundsFragmentShaderPath() const override;
+    std::filesystem::path raycasterPath() const override;
+    std::filesystem::path helperPath() const override;
 
     void setAspect(const glm::vec3& aspect);
     void setModelTransform(glm::mat4 transform);
     void setTime(double time);
     void setStepSize(float stepSize);
     void setOpacityCoefficient(float opacityCoefficient);
+    void setAbsorptionMultiplier(float absorptionMultiply);
+    void setEmissionMultiplier(float emissionMultiply);
 
 private:
+    glm::dmat4 modelViewTransform(const RenderData& data);
+
     BoxGeometry _boundingBox;
-    float _stepSize;
-    glm::mat4 _modelTransform;
-    glm::vec3 _aspect;
-    double _time;
-    float _opacityCoefficient;
+    float _stepSize = 0.f;
+    glm::mat4 _modelTransform = glm::mat4(1.f);
+    glm::vec3 _aspect = glm::vec3(0.f);
+    double _time = 0.0;
+    float _opacityCoefficient = 0.f;
+    float _absorptionMultiply = 0.f;
+    float _emissionMultiply = 0.f;
     ghoul::opengl::Texture& _texture;
     std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;
+    std::filesystem::path _raycastingShader;
 
 }; // GalaxyRaycaster
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,10 +26,20 @@
 
 #include <modules/server/include/topics/authorizationtopic.h>
 #include <modules/server/include/topics/bouncetopic.h>
+#include <modules/server/include/topics/camerapathtopic.h>
+#include <modules/server/include/topics/cameratopic.h>
+#include <modules/server/include/topics/documentationtopic.h>
+#include <modules/server/include/topics/enginemodetopic.h>
+#include <modules/server/include/topics/errorlogtopic.h>
+#include <modules/server/include/topics/eventtopic.h>
+#include <modules/server/include/topics/flightcontrollertopic.h>
 #include <modules/server/include/topics/getpropertytopic.h>
 #include <modules/server/include/topics/luascripttopic.h>
+#include <modules/server/include/topics/missiontopic.h>
+#include <modules/server/include/topics/sessionrecordingtopic.h>
 #include <modules/server/include/topics/setpropertytopic.h>
-#include <modules/server/include/topics/shortcuttopic.h>
+#include <modules/server/include/topics/actionkeybindtopic.h>
+#include <modules/server/include/topics/skybrowsertopic.h>
 #include <modules/server/include/topics/subscriptiontopic.h>
 #include <modules/server/include/topics/timetopic.h>
 #include <modules/server/include/topics/topic.h>
@@ -37,86 +47,112 @@
 #include <modules/server/include/topics/versiontopic.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/io/socket/socket.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
 #include <ghoul/io/socket/websocketserver.h>
-#include <ghoul/logging/logmanager.h>
-#include <fmt/format.h>
+#include <ghoul/misc/profiling.h>
+#include <include/topics/profiletopic.h>
 
 namespace {
-    constexpr const char* _loggerCat = "ServerModule: Connection";
+    constexpr std::string_view _loggerCat = "ServerModule: Connection";
 
-    constexpr const char* MessageKeyType = "type";
-    constexpr const char* MessageKeyPayload = "payload";
-    constexpr const char* MessageKeyTopic = "topic";
+    constexpr std::string_view MessageKeyType = "type";
+    constexpr std::string_view MessageKeyPayload = "payload";
+    constexpr std::string_view MessageKeyTopic = "topic";
 
-    constexpr const char* VersionTopicKey = "version";
-    constexpr const char* AuthenticationTopicKey = "authorize";
-    constexpr const char* GetPropertyTopicKey = "get";
-    constexpr const char* LuaScriptTopicKey = "luascript";
-    constexpr const char* SetPropertyTopicKey = "set";
-    constexpr const char* ShortcutTopicKey = "shortcuts";
-    constexpr const char* SubscriptionTopicKey = "subscribe";
-    constexpr const char* TimeTopicKey = "time";
-    constexpr const char* TriggerPropertyTopicKey = "trigger";
-    constexpr const char* BounceTopicKey = "bounce";
 } // namespace
 
 namespace openspace {
 
-Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address)
+Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address,
+                       bool authorized, const std::string& password)
     : _socket(std::move(s))
     , _address(std::move(address))
+    , _isAuthorized(authorized)
 {
     ghoul_assert(_socket, "Socket must not be nullptr");
 
-    _topicFactory.registerClass<AuthorizationTopic>(AuthenticationTopicKey);
-    _topicFactory.registerClass<GetPropertyTopic>(GetPropertyTopicKey);
-    _topicFactory.registerClass<LuaScriptTopic>(LuaScriptTopicKey);
-    _topicFactory.registerClass<SetPropertyTopic>(SetPropertyTopicKey);
-    _topicFactory.registerClass<ShortcutTopic>(ShortcutTopicKey);
-    _topicFactory.registerClass<SubscriptionTopic>(SubscriptionTopicKey);
-    _topicFactory.registerClass<TimeTopic>(TimeTopicKey);
-    _topicFactory.registerClass<TriggerPropertyTopic>(TriggerPropertyTopicKey);
-    _topicFactory.registerClass<BounceTopic>(BounceTopicKey);
-    _topicFactory.registerClass<VersionTopic>(VersionTopicKey);
+    _topicFactory.registerClass(
+        "authorize",
+        [password](bool, const ghoul::Dictionary&, ghoul::MemoryPoolBase* pool) {
+            if (pool) {
+                void* ptr = pool->allocate(sizeof(AuthorizationTopic));
+                return new (ptr) AuthorizationTopic(password);
+            }
+            else {
+                return new AuthorizationTopic(password);
+            }
+        }
+    );
 
-    // see if the default config for requiring auth (on) is overwritten
-    _requireAuthorization = global::configuration.doesRequireSocketAuthentication;
+    _topicFactory.registerClass<BounceTopic>("bounce");
+    _topicFactory.registerClass<CameraTopic>("camera");
+    _topicFactory.registerClass<CameraPathTopic>("cameraPath");
+    _topicFactory.registerClass<DocumentationTopic>("documentation");
+    _topicFactory.registerClass<EngineModeTopic>("engineMode");
+    _topicFactory.registerClass<ErrorLogTopic>("errorLog");
+    _topicFactory.registerClass<EventTopic>("event");
+    _topicFactory.registerClass<FlightControllerTopic>("flightcontroller");
+    _topicFactory.registerClass<GetPropertyTopic>("get");
+    _topicFactory.registerClass<LuaScriptTopic>("luascript");
+    _topicFactory.registerClass<MissionTopic>("missions");
+    _topicFactory.registerClass<ProfileTopic>("profile");
+    _topicFactory.registerClass<SessionRecordingTopic>("sessionRecording");
+    _topicFactory.registerClass<SetPropertyTopic>("set");
+    _topicFactory.registerClass<ActionKeybindTopic>("actionsKeybinds");
+    _topicFactory.registerClass<SkyBrowserTopic>("skybrowser");
+    _topicFactory.registerClass<SubscriptionTopic>("subscribe");
+    _topicFactory.registerClass<TimeTopic>("time");
+    _topicFactory.registerClass<TriggerPropertyTopic>("trigger");
+    _topicFactory.registerClass<VersionTopic>("version");
 }
 
 void Connection::handleMessage(const std::string& message) {
+    ZoneScoped;
+
     try {
-        nlohmann::json j = nlohmann::json::parse(message.c_str());
+        const nlohmann::json j = nlohmann::json::parse(message.c_str());
         try {
             handleJson(j);
-        } catch (const std::exception& e) {
-            LERROR(fmt::format("JSON handling error from: {}. {}", message, e.what()));
         }
-    } catch (...) {
+        catch (const std::domain_error& e) {
+            LERROR(std::format("JSON handling error from: {}. {}", message, e.what()));
+        }
+    }
+    catch (const std::out_of_range& e) {
+        LERROR(std::format("JSON handling error from: {}. {}", message, e.what()));
+    }
+    catch (const std::exception& e) {
+        LERROR(e.what());
+    }
+    catch (...) {
         if (!isAuthorized()) {
             _socket->disconnect();
-            LERROR(fmt::format(
-                "Could not parse JSON: '{}'. Connection is unauthorized. Disconnecting.",
+            LERROR(std::format(
+                "Could not parse JSON '{}'. Connection is unauthorized. Disconnecting",
                 message
             ));
             return;
-        } else {
-            std::string sanitizedString = message;
-            std::transform(
-                message.begin(),
-                message.end(),
-                sanitizedString.begin(),
-                [](const unsigned char& c) {
-                    return std::isprint(c) ? c : ' ';
-                }
-            );
-            LERROR(fmt::format("Could not parse JSON: '{}'", sanitizedString));
         }
+
+        std::string sanitizedString = message;
+        std::transform(
+            message.begin(),
+            message.end(),
+            sanitizedString.begin(),
+            [](wchar_t c) {
+                return std::isprint(c, std::locale("")) ? char(c) : ' ';
+            }
+        );
+        LERROR(std::format("Could not parse JSON '{}'", sanitizedString));
     }
 }
 
 void Connection::handleJson(const nlohmann::json& json) {
+    ZoneScoped;
+
     auto topicJson = json.find(MessageKeyTopic);
     auto payloadJson = json.find(MessageKeyPayload);
 
@@ -131,39 +167,42 @@ void Connection::handleJson(const nlohmann::json& json) {
     }
 
     // The topic id may be an already discussed topic, or a new one.
-    TopicId topicId = *topicJson;
+    const TopicId topicId = topicJson->get<TopicId>();
     auto topicIt = _topics.find(topicId);
 
     if (topicIt == _topics.end()) {
+        ZoneScopedN("New Topic");
+
         // The topic id is not registered: Initialize a new topic.
         auto typeJson = json.find(MessageKeyType);
         if (typeJson == json.end() || !typeJson->is_string()) {
-            LERROR(fmt::format(
-                "A type must be specified (`{}`) as a string when "
-                "a new topic is initialized", MessageKeyType
-            ));
+            LERROR("Type must be specified as a string when a new topic is initialized");
             return;
         }
-        std::string type = *typeJson;
+        const std::string type = typeJson->get<std::string>();
+        ZoneText(type.c_str(), type.size());
 
-        if (!isAuthorized() && type != AuthenticationTopicKey) {
-            LERROR("Connection isn't authorized.");
+        if (!isAuthorized() && (type != "authorize")) {
+            LERROR("Connection is not authorized");
             return;
         }
 
-        std::unique_ptr<Topic> topic = _topicFactory.create(type);
-        topic->initialize(this, topicId);
+        std::unique_ptr<Topic> topic = std::unique_ptr<Topic>(_topicFactory.create(type));
+        topic->initialize(shared_from_this(), topicId);
         topic->handleJson(*payloadJson);
         if (!topic->isDone()) {
             _topics.emplace(topicId, std::move(topic));
         }
-    } else {
+    }
+    else {
+        ZoneScopedN("Existing Topic");
+
         if (!isAuthorized()) {
-            LERROR("Connection isn't authorized.");
+            LERROR("Connection is not authorized");
             return;
         }
 
-        // Dispatch the message to the existing topic.
+        // Dispatch the message to the existing topic
         Topic& topic = *topicIt->second;
         topic.handleJson(*payloadJson);
         if (topic.isDone()) {
@@ -173,16 +212,19 @@ void Connection::handleJson(const nlohmann::json& json) {
 }
 
 void Connection::sendMessage(const std::string& message) {
+    ZoneScoped;
+
     _socket->putMessage(message);
 }
 
 void Connection::sendJson(const nlohmann::json& json) {
+    ZoneScoped;
+
     sendMessage(json.dump());
 }
 
 bool Connection::isAuthorized() const {
-    // require either auth to be disabled or client to be authenticated
-    return !_requireAuthorization || isWhitelisted() || _isAuthorized;
+    return _isAuthorized;
 }
 
 void Connection::setThread(std::thread&& thread) {
@@ -199,11 +241,6 @@ ghoul::io::Socket* Connection::socket() {
 
 void Connection::setAuthorized(bool status) {
     _isAuthorized = status;
-}
-
-bool Connection::isWhitelisted() const {
-    const std::vector<std::string>& wl = global::configuration.clientAddressWhitelist;
-    return std::find(wl.begin(), wl.end(), _address) != wl.end();
 }
 
 } // namespace openspace

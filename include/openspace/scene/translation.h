@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,10 +27,10 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/scene/timeframe.h>
 #include <ghoul/glm.h>
-
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <functional>
-#include <memory>
 
 namespace ghoul { class Dictionary; }
 
@@ -42,15 +42,16 @@ namespace documentation {  struct Documentation; }
 
 class Translation : public properties::PropertyOwner {
 public:
-    static std::unique_ptr<Translation> createFromDictionary(
+    static ghoul::mm_unique_ptr<Translation> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
-    Translation();
-    virtual ~Translation() = default;
-    virtual bool initialize();
+    explicit Translation(const ghoul::Dictionary& dictionary);
+    virtual ~Translation() override = default;
 
+    virtual void initialize();
+
+    virtual void update(const UpdateData& data);
     glm::dvec3 position() const;
-    void update(const UpdateData& data);
 
     virtual glm::dvec3 position(const UpdateData& data) const = 0;
 
@@ -66,6 +67,7 @@ protected:
 
 private:
     bool _needsUpdate = true;
+    ghoul::mm_unique_ptr<TimeFrame> _timeFrame;
     double _cachedTime = -std::numeric_limits<double>::max();
     glm::dvec3 _cachedPosition = glm::dvec3(0.0);
     std::function<void()> _onParameterChangeCallback;

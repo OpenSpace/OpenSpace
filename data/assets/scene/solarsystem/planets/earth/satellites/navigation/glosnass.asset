@@ -1,23 +1,55 @@
-local assetHelper = asset.require('util/asset_helper')
-local shared = asset.require('../satellites_shared')
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local group = {
-    Title = "Glosnass",
-    Url = "http://www.celestrak.com/NORAD/elements/glo-ops.txt",
-    TrailColor = { 0.75, 0.75, 0.35 }
+
+
+local omm = asset.resource({
+  Name = "Satellite OMM Data (Glosnass)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_glo-ops",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=glo-ops&FORMAT=kvn",
+  Filename = "glo-ops.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+
+local GlosnassSatellites = {
+  Identifier = "GlosnassSatellites",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "glo-ops.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.75, 0.75, 0.35 },
+    TrailFade = 15,
+    PointSizeExponent = 5.0,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Glosnass",
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
+  }
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
 
-
-local objectNames = {}
-
-asset.onInitialize(function ()
-    objectNames = shared.addSatelliteGroupObjects(group, tle, false)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(GlosnassSatellites)
 end)
 
-asset.onDeinitialize(function ()
-    for _, n in ipairs(objectNames) do
-        openspace.removeSceneGraphNode(n)
-    end
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(GlosnassSatellites)
 end)
+
+asset.export(GlosnassSatellites)
+
+
+
+asset.meta = {
+  Name = "Satellites Navigation Glosnass",
+  Description = "Satellites asset for Navigation Glosnass. Data from Celestrak",
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/NORAD/elements/",
+  License = "Celestrak"
+}

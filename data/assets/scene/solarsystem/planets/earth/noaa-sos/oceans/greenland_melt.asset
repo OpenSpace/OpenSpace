@@ -1,0 +1,64 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Greenland Melting Trends"
+local Identifier = "noaa-sos-oceans-greenland_melt"
+local Description = [[Changes in the climate around Greenland can have a world-wide
+effect. According to Dr. Konrad Steffen, professor of geography at the University of
+Colorado and director of the NOAA joint institute CIRES, "For every degree (F) increase
+in the mean annual temperature near Greenland, the rate of sea level rise increases by
+about 10 percent." As Greenland warms, the ice that covers it melts and flows into the
+oceans. In order to study melting trends on Greenland, researchers at NASA developed a
+"melt index" which is the number of days that melting occurred multiplied by the melting
+area. There is a steady increase in the melt index from 1988 through present. In fact,
+in 2006 Greenland experienced more days of melting snow and at higher altitudes than the
+average over the past 18 years that have been studied]]
+local URL = "https://sos.noaa.gov/catalog/datasets/greenland-melting-trends/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+
+local Layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  ZIndex = 100,
+  Type = "TemporalTileProvider",
+  Mode = "Folder",
+  Folder = {
+    Folder = syncedDirectory .. "2048",
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "dav19_%Y.jpg"
+  },
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,56 +22,21 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/syncmodule.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/torrentclient.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/syncs/httpsynchronization.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/syncs/torrentsynchronization.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/syncs/urlsynchronization.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/syncassettask.h
+  syncmodule.h
+  syncs/httpsynchronization.h
+  syncs/urlsynchronization.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/syncmodule.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/torrentclient.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/syncs/httpsynchronization.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/syncs/torrentsynchronization.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/syncs/urlsynchronization.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/syncassettask.cpp
+  syncmodule.cpp
+  syncmodule_lua.inl
+  syncs/httpsynchronization.cpp
+  syncs/urlsynchronization.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 create_new_module("Sync" sync_module ${HEADER_FILES} ${SOURCE_FILES})
-
-#####
-# Libtorrent
-#####
-option(OPENSPACE_MODULE_SYNC_USE_LIBTORRENT "Use libtorrent" OFF)
-
-if (OPENSPACE_MODULE_SYNC_USE_LIBTORRENT)
-    set(Boost_USE_STATIC_LIBS ON)
-    set(Boost_USE_MULTITHREADED ON)
-    set(LIBTORRENT_encryption OFF CACHE BOOL "Use OpenSSL Encryption" FORCE)
-    set(LIBTORRENT_shared OFF CACHE BOOL "Use Libtorrent as shared library" FORCE)
-
-    include_external_library(
-        ${sync_module}
-        torrent-rasterbar
-        ${CMAKE_CURRENT_SOURCE_DIR}/ext/libtorrent
-    )
-    target_include_directories(
-        ${sync_module}
-        SYSTEM PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/ext/libtorrent/include
-    )
-
-    target_compile_definitions(openspace-module-sync PUBLIC SYNC_USE_LIBTORRENT)
-
-    mark_as_advanced(LIBTORRENT_build_examples LIBTORRENT_build_tests
-        LIBTORRENT_deprecated-functions LIBTORRENT_dht LIBTORRENT_encryption
-        LIBTORRENT_exceptions LIBTORRENT_exceptions LIBTORRENT_libiconv
-        LIBTORRENT_logging LIBTORRENT_shared LIBTORRENT_static_runtime)
-endif () # OPENSPACE_MODULE_SYNC_USE_LIBTORRENT

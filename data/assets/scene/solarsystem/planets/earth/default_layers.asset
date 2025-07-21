@@ -1,0 +1,25 @@
+asset.require("./layers/base_layers", true)
+asset.require("./layers/utah_layers", false)
+asset.require("./layers/sweden_layers", false)
+asset.require("./layers/newyork_layers", false)
+
+
+
+asset.meta = {
+  Name = "Default Earth Layers",
+  Description = [[Default Earth layers are: Blue Marble,
+    ESRI VIIRS Combo, ESRI NOAA20 Combo, ESRI World Imagery, VIIRS SNPP (Temporal),
+    Aqua Modis (Temporal), Terra Modis (Temporal),
+    AMSR2 GCOM W1 Sea Ice Concentration (Temporal), MODIS Terra Chlorophyll A (Temporal),
+    GHRSST L4 MUR Sea Surface Temperature (Temporal), BMNG, Blue Marble Height (3D),
+    World Elevation (3D), Earth at Night 2012, Earth at Night Texture,
+    Earth at Night (Temporal), Coastlines, Reference Features, Reference Labels,
+    Tile Indicies, Size Reference, Gebco and Modis Water Mask.
+
+
+    Layers loaded from all servers
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

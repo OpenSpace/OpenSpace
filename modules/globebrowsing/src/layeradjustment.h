@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,27 +28,29 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/globebrowsing/src/layergroupid.h>
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 
-namespace openspace::globebrowsing {
+namespace openspace::documentation { struct Documentation; }
 
-namespace tileprovider { struct TileProvider; }
+namespace openspace::globebrowsing {
 
 class LayerAdjustment : public properties::PropertyOwner {
 public:
     LayerAdjustment();
-    ~LayerAdjustment() = default;
+    ~LayerAdjustment() override = default;
 
     void setValuesFromDictionary(const ghoul::Dictionary& adjustmentDict);
 
-    layergroupid::AdjustmentTypeID type() const;
+    layers::Adjustment::ID type() const;
 
     glm::vec3 chromaKeyColor() const;
     float chromaKeyTolerance() const;
 
     void onChange(std::function<void(void)> callback);
+
+    static documentation::Documentation Documentation();
 
 private:
     void addVisibleProperties();
@@ -57,7 +59,7 @@ private:
     properties::FloatProperty _chromaKeyTolerance;
 
     properties::OptionProperty _typeOption;
-    layergroupid::AdjustmentTypeID _type;
+    layers::Adjustment::ID _typeId;
 
     std::function<void(void)> _onChangeCallback;
 };

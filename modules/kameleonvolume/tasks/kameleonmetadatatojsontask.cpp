@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,76 +26,53 @@
 
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 #include <openspace/documentation/verifier.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/dictionaryjsonformatter.h>
+#include <filesystem>
 #include <fstream>
 
 namespace {
-    constexpr const char* KeyInput = "Input";
-    constexpr const char* KeyOutput = "Output";
+    struct [[codegen::Dictionary(KameleonMetadataToJsonTask)]] Parameters {
+        // The CDF file to extract data from
+        std::filesystem::path input;
+
+        // The JSON file to export data into
+        std::string output [[codegen::annotation("A valid filepath")]];
+    };
+#include "kameleonmetadatatojsontask_codegen.cpp"
 } // namespace
 
 namespace openspace::kameleonvolume {
 
+documentation::Documentation KameleonMetadataToJsonTask::documentation() {
+    return codegen::doc<Parameters>("kameleon_metadata_to_json_task");
+}
+
 KameleonMetadataToJsonTask::KameleonMetadataToJsonTask(
                                                       const ghoul::Dictionary& dictionary)
 {
-    openspace::documentation::testSpecificationAndThrow(
-        documentation(),
-        dictionary,
-        "KameleonMetadataToJsonTask"
-    );
-
-    _inputPath = absPath(dictionary.value<std::string>(KeyInput));
-    _outputPath = absPath(dictionary.value<std::string>(KeyOutput));
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _inputPath = absPath(p.input);
+    _outputPath = absPath(p.output);
 }
 
 std::string KameleonMetadataToJsonTask::description() {
-    return fmt::format(
-        "Extract metadata from cdf file {} and write as json to {}",
+    return std::format(
+        "Extract metadata from CDF file '{}' and write as JSON to '{}'",
         _inputPath, _outputPath
     );
 }
 
 void KameleonMetadataToJsonTask::perform(const Task::ProgressCallback& progressCallback) {
-    KameleonVolumeReader reader(_inputPath);
+    KameleonVolumeReader reader = KameleonVolumeReader(_inputPath);
     ghoul::Dictionary dictionary = reader.readMetaData();
     progressCallback(0.5f);
 
-    ghoul::DictionaryJsonFormatter formatter;
-    std::string json = formatter.format(dictionary);
+    std::string json = ghoul::formatJson(dictionary);
     std::ofstream output(_outputPath);
     output << std::move(json);
-    progressCallback(1.0f);
-}
-
-documentation::Documentation KameleonMetadataToJsonTask::documentation() {
-    using namespace documentation;
-    return {
-        "KameleonMetadataToJsonTask",
-        "kameleon_metadata_to_json_task",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("KameleonMetadataToJsonTask"),
-                Optional::No,
-                "The type of this task"
-            },
-            {
-                KeyInput,
-                new StringAnnotationVerifier("A file path to a cdf file"),
-                Optional::No,
-                "The cdf file to extract data from"
-            },
-            {
-                KeyOutput,
-                new StringAnnotationVerifier("A valid filepath"),
-                Optional::No,
-                "The JSON file to export data into"
-            }
-        }
-    };
+    progressCallback(1.f);
 }
 
 } // namespace openspace::kameleonvolume

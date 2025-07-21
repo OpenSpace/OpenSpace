@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,9 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/properties//scalar/boolproperty.h>
 #include <ghoul/glm.h>
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <memory>
 
 namespace ghoul { class Dictionary; }
@@ -40,17 +42,21 @@ namespace documentation { struct Documentation; }
 
 class TimeFrame : public properties::PropertyOwner {
 public:
-    static std::unique_ptr<TimeFrame> createFromDictionary(
+    static ghoul::mm_unique_ptr<TimeFrame> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
     TimeFrame();
-    virtual ~TimeFrame() = default;
+    virtual ~TimeFrame() override = default;
 
     virtual bool initialize();
+    virtual void update(const Time& time) = 0;
 
-    virtual bool isActive(const Time& time) const = 0;
+    bool isActive() const;
 
     static documentation::Documentation Documentation();
+
+protected:
+    properties::BoolProperty _isInTimeFrame;
 };
 
 }  // namespace openspace

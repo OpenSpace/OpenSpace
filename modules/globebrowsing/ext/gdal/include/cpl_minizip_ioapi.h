@@ -1,4 +1,4 @@
-/* $Id: cpl_minizip_ioapi.h 2f03d19efafeda04a990e03e7fb3cf56dd11b213 2016-11-24 06:35:54Z Kurt Schwehr $ */
+/* $Id: cpl_minizip_ioapi.h 105d437a91a1a110bdeaba3bab046cd235701173 2018-07-02 12:01:26 +0200 Even Rouault $ */
 
 /* Modified version by Even Rouault. :
       - change fill_fopen_filefunc to cpl_fill_fopen_filefunc
@@ -79,6 +79,13 @@ void cpl_fill_fopen_filefunc (zlib_filefunc_def* pzlib_filefunc_def);
 #define ZSEEK(filefunc,filestream,pos,mode) ((*((filefunc).zseek_file))((filefunc).opaque,filestream,pos,mode))
 #define ZCLOSE(filefunc,filestream) ((*((filefunc).zclose_file))((filefunc).opaque,filestream))
 #define ZERROR(filefunc,filestream) ((*((filefunc).zerror_file))((filefunc).opaque,filestream))
+
+#define ZREAD64 ZREAD
+#define ZWRITE64 ZWRITE
+#define ZTELL64 ZTELL
+#define ZSEEK64 ZSEEK
+#define ZCLOSE64 ZCLOSE
+#define ZERROR64 ZERROR
 
 #ifdef __cplusplus
 }

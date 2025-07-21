@@ -1,0 +1,23 @@
+local globe = asset.require("../../earth")
+local snpp = asset.require("./definitions/snpp")
+
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", snpp.Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", snpp.Layer)
+end)
+
+
+
+asset.meta = {
+  Name = "VIIRS SNPP (Temporal)",
+  Description = "This layer has the best daily Earth Image",
+  Author = "NASA EOSDIS Global Imagery Browse Services",
+  URL =
+    "https://earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/gibs",
+  License = "NASA"
+}

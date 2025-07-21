@@ -1,0 +1,4 @@
+asset.require("./trails/earth")
+asset.require("./trails/ganymede")
+asset.require("./trails/jupiter")
+asset.require("./trails/ssb")

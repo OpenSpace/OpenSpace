@@ -1,51 +1,136 @@
-local guiCustomization = asset.require('customization/gui')
+asset.require("./static_server")
+local guiCustomization = asset.require("customization/gui")
 
--- Select which commit hashes to use for the frontend and backend
-local frontendHash = "f6db6a5dd79df1e310a75d50f8b1f97aea8a9596"
-local backendHash = "3e862a67ff2869d83187ad8bda05746b583d13d4"
 
-local dataProvider = "data.openspaceproject.com/files/webgui"
 
-local backend = asset.syncedResource({
-    Identifier = "WebGuiBackend",
-    Name = "Web Gui Backend",
-    Type = "UrlSynchronization",
-    Url = dataProvider .. "/backend/" ..  backendHash .. "/backend.js"
+-- Select which commit hashes to use for the UI frontend
+local frontendHash = "8e0c43cc406cc56dea3c5e1f0b4c45b1216927a5"
+
+-- The name of the file to download from the server
+local frontendFile = "frontend.zip"
+
+local frontend = asset.resource({
+  Identifier = "WebGuiFrontend",
+  Name = "Web Gui Frontend",
+  Type = "UrlSynchronization",
+  Url = "http://data.openspaceproject.com/files/webgui/frontend/" ..  frontendHash .. "/" .. frontendFile
 })
 
-local frontend = asset.syncedResource({
-    Identifier = "WebGuiFrontend",
-    Name = "Web Gui Frontend",
-    Type = "UrlSynchronization",
-    Url = dataProvider .. "/frontend/" ..  frontendHash .. "/frontend.zip"
+
+local showcomposerHash = "9071d8bc80d16dc1e081017e02297915563f0a64"
+local showcomposerFile = "showcomposer.zip"
+
+local showcomposer = asset.resource({
+  Identifier = "WebGuiShowComposer",
+  Name = "Web Gui ShowComposer",
+  Type = "UrlSynchronization",
+  Url = "http://data.openspaceproject.com/files/webgui/showcomposer/" ..  showcomposerHash .. "/" .. showcomposerFile
 })
 
-asset.onInitialize(function ()
-    -- Unzip the frontend bundle
-    local dest = frontend .. "/frontend"
-    if not openspace.directoryExists(dest) then
-        openspace.unzipFile(frontend .. "/frontend.zip", dest, true)
-    end
-    -- Do not serve the files if we are in webgui development mode.
-    -- In that case, you have to serve the webgui manually, using `npm start`.
-    if not guiCustomization.webguiDevelopmentMode then
-        openspace.setPropertyValueSingle(
-            "Modules.WebGui.ServerProcessEntryPoint", backend .. "/backend.js"
-        )
-        openspace.setPropertyValueSingle(
-            "Modules.WebGui.ServerProcessWorkingDirectory", frontend .. "/frontend"
-        )
-        openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", true)
-    end
 
-    -- The GUI contains date and simulation increment,
-    -- so let's remove these from the dashboard.
-    if openspace.getPropertyValue('Modules.CefWebGui.Visible') then
-        openspace.setPropertyValueSingle('Dashboard.Date.Enabled', false)
-        openspace.setPropertyValueSingle('Dashboard.SimulationIncrement.Enabled', false)
+local maps = asset.resource({
+  Identifier = "userinterface_maps",
+  Name = "Userinterface Maps",
+  Type = "HttpSynchronization",
+  Version = 1
+})
+
+
+asset.onInitialize(function()
+  -- Unzip the frontend bundle
+  local destFrontend = frontend .. "frontend"
+  if not openspace.directoryExists(destFrontend) then
+    openspace.unzipFile(frontend .. frontendFile, destFrontend, true)
+  end
+
+  local destShowcomposer = showcomposer .. "showcomposer"
+  if not openspace.directoryExists(destShowcomposer) then
+    openspace.unzipFile(showcomposer .. showcomposerFile, destShowcomposer, true)
+  end
+
+  -- Disable the server, add production gui endpoint, and restart server.
+  -- The temporary disabling avoids restarting the server on each property change.
+  -- TODO: Add a trigger property to the module to restart the server "manually"
+  -- and remove automatic restart on each property change,
+  -- since frequent restarting seems to be unstable on mac.
+
+  local enabled = openspace.propertyValue("Modules.WebGui.ServerProcessEnabled")
+  openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", false)
+
+  local directories = openspace.propertyValue("Modules.WebGui.Directories")
+  directories[#directories + 1] = "gui"
+  directories[#directories + 1] = frontend .. "frontend"
+  -- Add user directory for webpanels
+  directories[#directories + 1] = "webpanels"
+  directories[#directories + 1] = openspace.absPath("${USER_WEBPANELS}")
+
+  -- Add user directories for showcompower
+  directories[#directories + 1] = "showcomposer"
+  directories[#directories + 1] = showcomposer .. "showcomposer"
+  directories[#directories + 1] = "showcomposer/hub"
+  directories[#directories + 1] = showcomposer .. "showcomposer"
+  directories[#directories + 1] = "showcomposer/uploads"
+  directories[#directories + 1] = openspace.absPath("${USER_SHOWCOMPOSER_UPLOADS}")
+  directories[#directories + 1] = "showcomposer/projects"
+  directories[#directories + 1] = openspace.absPath("${USER_SHOWCOMPOSER_PROJECTS}")
+
+  -- Add asset folders
+  directories[#directories + 1] = "assets/maps"
+  directories[#directories + 1] = maps
+
+  openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
+  openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "gui")
+  openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", enabled)
+
+  -- The GUI contains date and simulation increment,
+  -- so let's remove these from the dashboard.
+  if openspace.propertyValue("Modules.CefWebGui.Visible") then
+    if openspace.hasProperty("Dashboard.Date.Enabled") then
+      openspace.setPropertyValueSingle("Dashboard.Date.Enabled", false)
     end
+    if openspace.hasProperty("Dashboard.SimulationIncrement.Enabled") then
+      openspace.setPropertyValueSingle("Dashboard.SimulationIncrement.Enabled", false)
+    end
+  end
+
+  -- Set the GUI default endpoint
+  local port = openspace.propertyValue("Modules.WebGui.Port")
+  -- As a developer, you can manually serve the webgui from port 4690
+  -- with the command `npm start` in the web gui repository
+  if guiCustomization.webguiDevelopmentMode then
+    port = 4690
+  end
+  openspace.setPropertyValueSingle(
+    "Modules.CefWebGui.GuiUrl",
+    "http://127.0.0.1:" .. port .. "/gui"
+  )
 end)
 
-asset.onDeinitialize(function ()
-    openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", false)
+asset.onDeinitialize(function()
+  -- Remove the frontend endpoint
+  local directories = openspace.propertyValue("Modules.WebGui.Directories")
+  local newDirectories = {}
+
+  -- @TODO(maci, 2019-08-23) see message below
+  --openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "")
+
+  for i = 0, #directories, 2 do
+    -- @TODO(abock, 2019-08-20) The explicit check for directories[i] is a workaround
+    -- for an error that was otherwise thrown when directories[i] was nil
+    if (directories[i] and string.find(directories[i], "frontend") == nil) then
+      newDirectories[#newDirectories + 1] = directories[i]
+      newDirectories[#newDirectories + 1] = directories[i + 1]
+    end
+  end
+  -- @TODO(maci, 2019-08-23) setting this value on exit was causing the server to restart
+  -- on macos, which in turn, stopped the application from exiting.
+  -- need to address in webguimodule.cpp
+  --openspace.setPropertyValueSingle("Modules.WebGui.Directories", newDirectories)
 end)
+
+asset.meta = {
+  Name = "WebGUI",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

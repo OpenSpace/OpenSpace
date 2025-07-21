@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,26 +39,26 @@ namespace {
         "Image URL",
         "Sets the URL of the texture that is displayed on this screen space plane. If "
         "this value is changed, the image at the new path will automatically be loaded "
-        "and displayed."
+        "and displayed.",
+        openspace::properties::Property::Visibility::User
     };
+
+    // A RenderablePlaneImageOnline creates a textured 3D plane, where the texture image
+    // is loaded from the internet though a web URL.
+    struct [[codegen::Dictionary(RenderablePlaneImageOnline)]] Parameters {
+        // [[codegen::verbatim(TextureInfo.description)]]
+        std::string url [[codegen::key("URL")]];
+    };
+#include "renderableplaneimageonline_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderablePlaneImageOnline::Documentation() {
-    using namespace documentation;
-    return {
-        "Renderable Plane Image Online",
+    return codegen::doc<Parameters>(
         "base_renderable_plane_image_online",
-        {
-            {
-                TextureInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                TextureInfo.description,
-            }
-        }
-    };
+        RenderablePlane::Documentation()
+    );
 }
 
 RenderablePlaneImageOnline::RenderablePlaneImageOnline(
@@ -66,21 +66,35 @@ RenderablePlaneImageOnline::RenderablePlaneImageOnline(
     : RenderablePlane(dictionary)
     , _texturePath(TextureInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderablePlaneImageOnline"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _texturePath.onChange([this]() { _textureIsDirty = true; });
+    _texturePath = p.url;
     addProperty(_texturePath);
 
-    std::string texturePath;
-    if (dictionary.hasKey(TextureInfo.identifier)) {
-        _texturePath = dictionary.value<std::string>(TextureInfo.identifier);
-    }
+    _autoScale.onChange([this]() {
+        if (!_autoScale) {
+            return;
+        }
 
-    addProperty(_texturePath);
+        // Shape the plane based on the aspect ration of the image
+        const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
+        if (_textureDimensions != textureDim) {
+            const float aspectRatio = textureDim.x / textureDim.y;
+            const float planeAspectRatio = _size.value().x / _size.value().y;
+
+            if (std::abs(planeAspectRatio - aspectRatio) >
+                std::numeric_limits<float>::epsilon())
+            {
+                _size =
+                    aspectRatio > 0.f ?
+                    glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
+                    glm::vec2(_size.value().x, _size.value().y * aspectRatio);
+            }
+
+            _textureDimensions = textureDim;
+        }
+    });
 }
 
 void RenderablePlaneImageOnline::deinitializeGL() {
@@ -98,32 +112,39 @@ void RenderablePlaneImageOnline::bindTexture() {
     }
 }
 
-void RenderablePlaneImageOnline::update(const UpdateData&) {
-    if (_textureIsDirty) {
-        if (!_imageFuture.valid()) {
-            std::future<DownloadManager::MemoryFile> future = downloadImageToMemory(
-                _texturePath
+void RenderablePlaneImageOnline::update(const UpdateData& data) {
+    RenderablePlane::update(data);
+
+    if (!_textureIsDirty) [[unlikely]] {
+        return;
+    }
+
+    if (!_imageFuture.valid()) {
+        std::future<DownloadManager::MemoryFile> future = downloadImageToMemory(
+            _texturePath
+        );
+        if (future.valid()) {
+            _imageFuture = std::move(future);
+        }
+    }
+
+    if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
+        const DownloadManager::MemoryFile imageFile = _imageFuture.get();
+
+        if (imageFile.corrupted) {
+            LERRORC(
+                "ScreenSpaceImageOnline",
+                std::format("Error loading image from URL '{}'", _texturePath.value())
             );
-            if (future.valid()) {
-                _imageFuture = std::move(future);
-            }
+            return;
         }
 
-        if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
-            DownloadManager::MemoryFile imageFile = _imageFuture.get();
-
-            if (imageFile.corrupted) {
-                LERRORC(
-                    "ScreenSpaceImageOnline",
-                    fmt::format("Error loading image from URL '{}'", _texturePath)
-                );
-                return;
-            }
-
+        try {
             std::unique_ptr<ghoul::opengl::Texture> texture =
                 ghoul::io::TextureReader::ref().loadTexture(
                     reinterpret_cast<void*>(imageFile.buffer),
                     imageFile.size,
+                    2,
                     imageFile.format
                 );
 
@@ -133,14 +154,38 @@ void RenderablePlaneImageOnline::update(const UpdateData&) {
                 glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
                 texture->uploadTexture();
-
-                // Textures of planets looks much smoother with AnisotropicMipMap rather
-                // than linear
                 texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+                texture->purgeFromRAM();
 
                 _texture = std::move(texture);
                 _textureIsDirty = false;
+
+                if (!_autoScale) {
+                    return;
+                }
+
+                // Shape the plane based on the aspect ration of the image
+                const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
+                if (_textureDimensions != textureDim) {
+                    const float aspectRatio = textureDim.x / textureDim.y;
+                    const float planeAspectRatio = _size.value().x / _size.value().y;
+
+                    if (std::abs(planeAspectRatio - aspectRatio) >
+                        std::numeric_limits<float>::epsilon())
+                    {
+                        _size =
+                            aspectRatio > 0.f ?
+                            glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
+                            glm::vec2(_size.value().x, _size.value().y * aspectRatio);
+                    }
+
+                    _textureDimensions = textureDim;
+                }
             }
+        }
+        catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
+            _textureIsDirty = false;
+            LERRORC(e.component, e.message);
         }
     }
 }
@@ -148,15 +193,15 @@ void RenderablePlaneImageOnline::update(const UpdateData&) {
 std::future<DownloadManager::MemoryFile>
 RenderablePlaneImageOnline::downloadImageToMemory(const std::string& url)
 {
-    return global::downloadManager.fetchFile(
+    return global::downloadManager->fetchFile(
         url,
-        [url](const DownloadManager::MemoryFile&) {
+        [](const DownloadManager::MemoryFile&) {
             LDEBUGC(
                 "ScreenSpaceImageOnline",
                 "Download to memory finished for screen space image"
             );
         },
-        [url](const std::string& err) {
+        [](const std::string& err) {
             LDEBUGC(
                 "ScreenSpaceImageOnline",
                 "Download to memory failer for screen space image: " + err

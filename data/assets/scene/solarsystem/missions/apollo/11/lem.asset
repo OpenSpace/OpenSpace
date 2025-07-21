@@ -1,0 +1,90 @@
+local sun = asset.require("scene/solarsystem/sun/transforms")
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
+
+
+
+local lem_model = asset.resource({
+  Name = "Apollo Lem Models",
+  Type = "HttpSynchronization",
+  Identifier = "apollo_lem_model",
+  Version = 4
+})
+
+
+local Apollo11Lem = {
+  Identifier = "Apollo11Lem",
+  Parent = moon.Moon.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon.Moon.Identifier,
+      Longitude = 23.47306,
+      Latitude = 0.67402,
+      Altitude = -1927.65,
+      UseHeightMap = false
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = moon.Moon.Identifier,
+      Longitude = 23.47306,
+      Latitude = 0.67402
+    }
+  },
+  GUI = {
+    Name = "Apollo 11 Lem Position",
+    Path = "/Solar System/Missions/Apollo/11"
+  }
+}
+
+local Apollo11LemModel = {
+  Identifier = "Apollo11LemModel",
+  Parent = Apollo11Lem.Identifier,
+  Transform = {
+      Scale = {
+      Type = "StaticScale",
+      Scale = 0.24
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = lem_model .. "LM-2_ver2clean.obj",
+    RotationVector = { -90.0, 283.86999, 0 },
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
+  },
+  GUI = {
+    Name = "Apollo 11 Lem",
+    Path = "/Solar System/Missions/Apollo/11"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Apollo11Lem)
+  openspace.addSceneGraphNode(Apollo11LemModel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Apollo11LemModel)
+  openspace.removeSceneGraphNode(Apollo11Lem)
+end)
+
+asset.export(Apollo11Lem)
+asset.export(Apollo11LemModel)
+
+
+
+asset.meta = {
+  Name = "Apollo 11 Lunar Module",
+  Description = [[This asset provides a 3D model of the Apollo Lunar Module/Lunar
+    Excursion Module.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

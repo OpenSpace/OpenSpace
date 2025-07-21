@@ -1,0 +1,67 @@
+local globe = asset.require("../../earth")
+
+
+
+local Name = "Ocean Currents"
+local Identifier = "noaa-sos-overlays-currents"
+local Description = [[Overlays are datasets with transparent backgrounds that contain
+foreground data used to augment other SOS datasets.This particular dataset is an overlay
+of ocean currents, taken from the Ocean Circulation dataset]]
+local URL = "https://sos.noaa.gov/catalog/datasets/ocean-currents/"
+
+
+local syncedDirectory = asset.resource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+
+local LayerCombined = {
+  Identifier = Identifier .. "-combined",
+  Name = Name .. " (Combined)",
+  FilePath = syncedDirectory .. "combined.png",
+  Description = Description
+}
+
+local LayerCurrents = {
+  Identifier = Identifier .. "-currents",
+  Name = Name .. " (Currents)",
+  FilePath = syncedDirectory .. "currents.png",
+  Description = Description
+}
+
+local LayerLabels = {
+  Identifier = Identifier .. "-labels",
+  Name = Name .. " (Labels)",
+  FilePath = syncedDirectory .. "labels.png",
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "Overlays", LayerCombined)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "Overlays", LayerCurrents)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "Overlays", LayerLabels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "Overlays", LayerLabels)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "Overlays", LayerCurrents)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "Overlays", LayerCombined)
+end)
+
+asset.export(LayerCombined)
+asset.export(LayerCurrents)
+asset.export(LayerLabels)
+
+
+
+asset.meta = {
+  Name = Name,
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

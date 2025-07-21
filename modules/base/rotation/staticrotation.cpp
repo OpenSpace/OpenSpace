@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,65 +32,96 @@ namespace {
         "Rotation",
         "Rotation",
         "This value is the used as a 3x3 rotation matrix that is applied to the scene "
-        "graph node that this transformation is attached to relative to its parent."
+        "graph node that this transformation is attached to relative to its parent.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
+
+    // Conversion from rotation matrix to euler angles, given that the rotation is a pure
+    // rotation matrix.
+    // Inspired by: https://www.learnopencv.com/rotation-matrix-to-euler-angles/
+    glm::dvec3 rotationMatrixToEulerAngles(glm::dmat4 mat) {
+        const double sy = glm::sqrt(mat[0][0] * mat[0][0] + mat[0][1] * mat[0][1]);
+        const bool singular = (sy < 1e-6);
+
+        glm::dvec3 res;
+        if (singular) {
+            res.x = glm::atan(-mat[2][1], mat[1][1]);
+            res.y = glm::atan(-mat[0][2], sy);
+            res.z = 0;
+        }
+        else {
+            res.x = glm::atan(mat[1][2], mat[2][2]);
+            res.y = glm::atan(-mat[0][2], sy);
+            res.z = glm::atan(mat[0][1], mat[0][0]);
+        }
+        return res;
+    }
+
+    // A StaticRotation is using a fixed and constant rotation factor that does not change
+    // over time. The rotation value is provided as a property that can be changed at
+    // runtime, but it will not change automatically over time.
+    struct [[codegen::Dictionary(StaticRotation)]] Parameters {
+        // Stores the static rotation as a vector containing Euler angles, a quaternion
+        // representation, or a rotation matrix.
+        //
+        // For the Euler angles, the values have to be provided in radians. To convert
+        // degres to radians, you can use the `math.rad` function.
+        //
+        // For the Quaternion representation, the values have to be provided in the order
+        // (w, x, y, z).
+        //
+        // For the matrix form, the provided matrix will be converted into Euler angles,
+        // an operation which might fail if the matrix is not a true rotation matrix. The
+        // values are assumed to be in row-major order.
+        std::variant<glm::dvec3, glm::dvec4, glm::dmat3x3> rotation;
+    };
+#include "staticrotation_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation StaticRotation::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Static Rotation",
-        "base_transform_rotation_static",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("StaticRotation"),
-                Optional::No
-            },
-            {
-                RotationInfo.identifier,
-                new OrVerifier({
-                    new DoubleVector3Verifier(),
-                    new DoubleMatrix3Verifier()
-                }),
-                Optional::No,
-                "Stores the static rotation as either a vector containing Euler angles "
-                "or by specifiying the 3x3 rotation matrix directly"
-            }
-        }
-    };
+    return codegen::doc<Parameters>("base_transform_rotation_static");
 }
 
-StaticRotation::StaticRotation()
-    : _rotationMatrix(RotationInfo, glm::dmat3(1.0), glm::dmat3(-1.0), glm::dmat3(1.0))
+StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary)
+    : Rotation(dictionary)
+    , _eulerRotation(
+        RotationInfo,
+        glm::vec3(0.f),
+        glm::vec3(-glm::pi<float>()),
+        glm::vec3(glm::pi<float>())
+    )
 {
-    addProperty(_rotationMatrix);
-    _rotationMatrix.onChange([this]() { requireUpdate(); });
-}
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary) : StaticRotation() {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "StaticRotation"
-    );
+    _eulerRotation.onChange([this]() {
+        _matrixIsDirty = true;
+        requireUpdate();
+    });
+    addProperty(_eulerRotation);
 
-
-    if (dictionary.hasKeyAndValue<glm::dvec3>(RotationInfo.identifier)) {
-        _rotationMatrix = glm::mat3_cast(
-            glm::dquat(dictionary.value<glm::dvec3>(RotationInfo.identifier))
+    if (std::holds_alternative<glm::dvec3>(p.rotation)) {
+        _eulerRotation = std::get<glm::dvec3>(p.rotation);
+    }
+    else if (std::holds_alternative<glm::dvec4>(p.rotation)) {
+        const glm::dvec4 data = std::get<glm::dvec4>(p.rotation);
+        _eulerRotation = rotationMatrixToEulerAngles(
+            glm::mat3_cast(glm::dquat(data.w, data.x, data.y, data.z))
         );
     }
-    else {
-        // Must be glm::dmat3 due to specification restriction
-        _rotationMatrix = dictionary.value<glm::dmat3>(RotationInfo.identifier);
+    else if (std::holds_alternative<glm::dmat3>(p.rotation)) {
+        _eulerRotation = rotationMatrixToEulerAngles(std::get<glm::dmat3>(p.rotation));
     }
+    _matrixIsDirty = true;
 }
 
 glm::dmat3 StaticRotation::matrix(const UpdateData&) const {
-    return _rotationMatrix;
+    if (_matrixIsDirty) [[unlikely]] {
+        _cachedMatrix = glm::mat3_cast(glm::quat(_eulerRotation.value()));
+        _matrixIsDirty = false;
+    }
+    return _cachedMatrix;
 }
 
 } // namespace openspace

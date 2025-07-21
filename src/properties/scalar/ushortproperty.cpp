@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,64 +24,42 @@
 
 #include <openspace/properties/scalar/ushortproperty.h>
 
+#include <openspace/util/json_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
-
-#include <limits>
-#include <sstream>
-
-namespace {
-
-unsigned short fromLuaConversion(lua_State* state, bool& success) {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        unsigned short val = static_cast<unsigned short>(lua_tonumber(state, -1));
-        lua_pop(state, 1);
-        return val;
-    }
-    else {
-        return 0;
-    }
-}
-
-bool toLuaConversion(lua_State* state, unsigned short value) {
-    lua_pushnumber(state, static_cast<lua_Number>(value));
-    return true;
-}
-
-unsigned short fromStringConversion(const std::string& val, bool& success) {
-    std::stringstream s(val);
-    unsigned short v;
-    s >> v;
-    success = !s.fail();
-    if (success) {
-        return v;
-    }
-    else {
-        throw ghoul::RuntimeError("Conversion error for string: " + val);
-    }
-}
-
-bool toStringConversion(std::string& outValue, unsigned short inValue) {
-    outValue = std::to_string(inValue);
-    return true;
-}
-
-} // namespace
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    UShortProperty,
-    unsigned short,
-    0,
-    std::numeric_limits<unsigned short>::lowest(),
-    std::numeric_limits<unsigned short>::max(),
-    1,
-    fromLuaConversion,
-    toLuaConversion,
-    fromStringConversion,
-    toStringConversion,
-    LUA_TNUMBER
-)
+UShortProperty::UShortProperty(Property::PropertyInfo info, unsigned short value,
+                               unsigned short minValue, unsigned short maxValue,
+                               unsigned short stepValue)
+    : NumericalProperty<unsigned short>(
+        std::move(info),
+        value,
+        minValue,
+        maxValue,
+        stepValue
+    )
+{}
+
+std::string_view UShortProperty::className() const {
+    return "UShortProperty";
+}
+
+ghoul::lua::LuaTypes UShortProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Number;
+}
+
+void UShortProperty::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
+unsigned short UShortProperty::toValue(lua_State* state) const {
+    return ghoul::lua::value<unsigned short>(state);
+}
+
+std::string UShortProperty::stringValue() const {
+    return formatJson(_value);
+}
+
 
 } // namespace openspace::properties
