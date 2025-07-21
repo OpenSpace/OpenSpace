@@ -7,15 +7,15 @@ function getCurrentTemporalLayer()
   local focusName = openspace.propertyValue("NavigationHandler.OrbitalNavigator.Anchor")
   local allUri = openspace.property("Scene." .. focusName .. ".*.UseFixedTime")
   local layers = {}
-  for i = 1, #(allUri) do 
+  for i = 1, #(allUri) do
     layers[i] = string.sub(allUri[i], 1, -14)
   end
   return layers
 end
 
 
-local lock_current = {
-  Identifier = "os.temporalLayer.lockCurrent",
+local LockCurrent = {
+  Identifier = "os.temporalLayer.LockCurrent",
   Name = "Lock Focus Node Temporal Layers",
   Command = [[
     local dateTime = getDateTime()
@@ -25,13 +25,14 @@ local lock_current = {
       openspace.setPropertyValueSingle(layers[i] .. ".UseFixedTime", true)
     end
   ]],
-  Documentation = "Set fixed date for all temporal layers for the currently focused node.",
+  Documentation = [[Set fixed date for all temporal layers for the currently 
+    focused node.]],
   GuiPath = "/Solar System",
-  isLocal = false
+  IsLocal = false
 }
 
-local unlock_current = {
-  Identifier = "os.temporalLayer.unlockCurrent",
+local UnlockCurrent = {
+  Identifier = "os.temporalLayer.UnlockCurrent",
   Name = "Unlock Focus Node Temporal Layers",
   Command = [[
     local layers = getCurrentTemporalLayer()
@@ -40,13 +41,14 @@ local unlock_current = {
       openspace.setPropertyValueSingle(layers[i] .. ".FixedTime", "")
     end
   ]],
-  Documentation = "Removes fixed date for all temporal layers for the currently focused node.",
+  Documentation = [[Removes fixed date for all temporal layers for the currently
+     focused node.]],
   GuiPath = "/Solar System",
-  isLocal = false
+  IsLocal = false
 }
 
-local lock_all = {
-  Identifier = "os.temporalLayer.lockAll",
+local LockAll = {
+  Identifier = "os.temporalLayer.LockAll",
   Name = "Lock All Temporal Layers",
   Command = [[
     local dateTime = getDateTime()
@@ -55,11 +57,11 @@ local lock_all = {
   ]],
   Documentation = "Set fixed date for all temporal layers in the scene.",
   GuiPath = "/Solar System",
-  isLocal = false
+  IsLocal = false
 }
 
-local unlock_all = {
-  Identifier = "os.temporalLayer.unlockAll",
+local UnlockAll = {
+  Identifier = "os.temporalLayer.UnlockAll",
   Name = "Unlock All Temporal Layers",
   Command = [[
     openspace.setPropertyValue("Scene.*.UseFixedTime", false)
@@ -67,29 +69,30 @@ local unlock_all = {
   ]],
   Documentation = "Removes fixed date for all temporal layers in the scene.",
   GuiPath = "/Solar System",
-  isLocal = false
+  IsLocal = false
 }
 
 
 asset.onInitialize(function()
-  openspace.action.registerAction(lock_current);
-  openspace.action.registerAction(unlock_current);
-  openspace.action.registerAction(lock_all);
-  openspace.action.registerAction(unlock_all);
+  openspace.action.registerAction(LockCurrent);
+  openspace.action.registerAction(UnlockCurrent);
+  openspace.action.registerAction(LockAll);
+  openspace.action.registerAction(UnlockAll);
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(unlock_all);
-  openspace.action.removeAction(lock_all);
-  openspace.action.removeAction(unlock_current);
-  openspace.action.removeAction(lock_current);
+  openspace.action.removeAction(UnlockAll);
+  openspace.action.removeAction(LockAll);
+  openspace.action.removeAction(UnlockCurrent);
+  openspace.action.removeAction(LockCurrent);
 end)
 
 
 asset.meta = {
   Name = "Temporal Layers - Lock Date",
   Version = "1.0",
-  Description = "Provides actions for locking and unlocking temporal layers to the current date.",
+  Description = [[Provides actions for locking and unlocking temporal layers to the
+     current date.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"
