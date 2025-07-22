@@ -173,7 +173,7 @@ namespace openspace {
 
 PostprocessingRenderer::PostprocessingRenderer()
     : properties::PropertyOwner({ "PostprocessingRenderer", "Postprocessing", "Renderer for post-processing effects" })
-    , _enableLensFlareP(EnableLensFlareInfo, false)
+    , _enableLensFlareP(EnableLensFlareInfo, true)
     , _chromaticDistortionP(ChromaticDistortionInfo, -2.25f, -100.0f, 100.0f)
     , _colorGradientAlphaP(ColorGradientAlphaInfo, 0.5f, 0.0f, 1.0f)
     , _downsampleP(DownsampleInfo, 2.0f, 1.0f, 8.0f)

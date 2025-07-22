@@ -35,18 +35,18 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/blend_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/bloom_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/blur_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/lensflare_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pass_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pass_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/blend_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/bloom_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/blur_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/lensflare_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pass_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pass_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
-    "Postprocessing"
-    postprocessing_module
-    STATIC
-    ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+  "Postprocessing"
+  postprocessing_module
+  STATIC
+  ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )

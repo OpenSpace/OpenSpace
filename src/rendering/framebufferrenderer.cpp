@@ -48,6 +48,7 @@
 #include <string>
 #include <vector>
 
+#define OPENSPACE_MODULE_POSTPROCESSING_ENABLED
 #ifdef OPENSPACE_MODULE_POSTPROCESSING_ENABLED
 #include <modules/postprocessing/postprocessingmodule.h>
 #endif
@@ -1132,14 +1133,32 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         TracyGpuZone("Deferred Caster Tasks")
         const ghoul::GLDebugGroup group("Deferred Caster Tasks");
 
-        // We use ping pong rendering in order to be able to render multiple deferred
-        // tasks at same time (e.g. more than 1 ATM being seen at once) to the same final
-        // buffer
-        glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer);
-        glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
+        #ifdef OPENSPACE_MODULE_POSTPROCESSING_ENABLED
+        if (PostprocessingModule::renderer().isEnabled()) {
+            PostprocessingModule::renderer().bindFramebuffer();
+        } else
+        #endif
+        {
+            // We use ping pong rendering in order to be able to render multiple deferred
+            // tasks at same time (e.g. more than 1 ATM being seen at once) to the same final
+            // buffer
+            glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer);
+            glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
+        }
 
         performDeferredTasks(tasks.deferredcasterTasks, viewport);
     }
+    
+    #ifdef OPENSPACE_MODULE_POSTPROCESSING_ENABLED
+    {
+        // Render Postprocessing effects
+        TracyGpuZone("Postprocessing");
+        const ghoul::GLDebugGroup group("Postprocessing");
+
+        glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
+        PostprocessingModule::renderer().render(camera);
+    }
+    #endif
 
     glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
     glEnablei(GL_BLEND, 0);
@@ -1186,12 +1205,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
     }
 
-    #ifdef OPENSPACE_MODULE_POSTPROCESSING_ENABLED
-    if (PostprocessingModule::renderer().isEnabled()){
-        PostprocessingModule::renderer().bindFramebuffer();
-    }
-    #endif
-
     {
         // Apply the selected TMO on the results and resolve the result to the default FBO
         TracyGpuZone("Apply TMO");
@@ -1206,11 +1219,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
         applyFXAA(viewport);
     }
-    
-    #ifdef OPENSPACE_MODULE_POSTPROCESSING_ENABLED
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
-    PostprocessingModule::renderer().render(camera);
-    #endif
 }
 
 void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>& tasks,
