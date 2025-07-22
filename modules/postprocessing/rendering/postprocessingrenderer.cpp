@@ -244,7 +244,7 @@ GLuint PostprocessingRenderer::framebuffer(){
 
 void PostprocessingRenderer::initialize(const ghoul::Dictionary&) {
     LDEBUG("PostprocessingRenderer::initialize");
-    global::screenSpaceRootPropertyOwner.addPropertySubOwner(this);
+    global::screenSpaceRootPropertyOwner->addPropertySubOwner(this);
 }
 
 void PostprocessingRenderer::initializeGL() {
@@ -343,19 +343,19 @@ void PostprocessingRenderer::initializeGL() {
     );
     ghoul::opengl::updateUniformLocations(*_blendProgram, _blendUniformCache, blendUniformNames);
 
-    _lensflareGradientTexture = ghoul::io::TextureReader::ref().loadTexture( absPath(LenscolorImagePath) );
+    _lensflareGradientTexture = ghoul::io::TextureReader::ref().loadTexture( absPath(LenscolorImagePath), 2 );
     if (_lensflareGradientTexture) {
-        LDEBUG(fmt::format("Loaded texture from '{}'", absPath(LenscolorImagePath) ));
+        LDEBUG(std::format("Loaded texture from '{}'", absPath(LenscolorImagePath) ));
         _lensflareGradientTexture->uploadTexture();
     }
-    _lensflareDustTexture = ghoul::io::TextureReader::ref().loadTexture( absPath(LensdirtImagePath) );
+    _lensflareDustTexture = ghoul::io::TextureReader::ref().loadTexture( absPath(LensdirtImagePath), 2 );
     if (_lensflareDustTexture) {
-        LDEBUG(fmt::format("Loaded texture from '{}'", absPath(LensdirtImagePath) ));
+        LDEBUG(std::format("Loaded texture from '{}'", absPath(LensdirtImagePath) ));
         _lensflareDustTexture->uploadTexture();
     }
-    _lensflareStarTexture = ghoul::io::TextureReader::ref().loadTexture( absPath(LensstarImagePath) );
+    _lensflareStarTexture = ghoul::io::TextureReader::ref().loadTexture( absPath(LensstarImagePath), 2 );
     if (_lensflareStarTexture) {
-        LDEBUG(fmt::format("Loaded texture from '{}'", absPath(LensstarImagePath) ));
+        LDEBUG(std::format("Loaded texture from '{}'", absPath(LensstarImagePath) ));
         _lensflareStarTexture->uploadTexture();
     }
     
@@ -374,7 +374,7 @@ void PostprocessingRenderer::deinitializeGL() {
 }
 
 void PostprocessingRenderer::updateResolution(){
-    _resolution = global::renderEngine.renderingResolution();
+    _resolution = global::renderEngine->renderingResolution();
     _resolutionLow = glm::ivec2( static_cast<float>(_resolution.x) / _downsampleP, static_cast<float>(_resolution.y) / _downsampleP );
     _aspectRatio = static_cast<float>(_resolution.x) / static_cast<float>(_resolution.y);
     
@@ -393,7 +393,7 @@ void PostprocessingRenderer::updateResolution(){
 
 void PostprocessingRenderer::update() {
 
-    bool resolutionIsDirty = _resolution != global::renderEngine.renderingResolution();
+    bool resolutionIsDirty = _resolution != global::renderEngine->renderingResolution();
     if (resolutionIsDirty){
         updateResolution();
     }

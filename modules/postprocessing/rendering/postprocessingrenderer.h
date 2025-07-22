@@ -29,7 +29,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/util/camera.h>
+#include <openspace/camera/camera.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <ghoul/opengl/texture.h>

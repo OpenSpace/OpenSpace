@@ -1189,26 +1189,8 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     #ifdef OPENSPACE_MODULE_POSTPROCESSING_ENABLED
     if (PostprocessingModule::renderer().isEnabled()){
         PostprocessingModule::renderer().bindFramebuffer();
-    }else{
-        glBindFramebuffer(GL_FRAMEBUFFER, _defaultFbo);
-        GLenum dBuffer[1] = { GL_COLOR_ATTACHMENT0 };
-        glDrawBuffers(1, dBuffer);
     }
-    #else
-        glBindFramebuffer(GL_FRAMEBUFFER, _defaultFbo);
-        GLenum dBuffer[1] = { GL_COLOR_ATTACHMENT0 };
-        glDrawBuffers(1, dBuffer);
     #endif
-
-    {
-        std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
-        if (doPerformanceMeasurements) {
-            perfInternal = std::make_unique<performance::PerformanceMeasurement>(
-                "FramebufferRenderer::render::deferredTasks"
-            );
-        }
-        performDeferredTasks(tasks.deferredcasterTasks);
-    }
 
     {
         // Apply the selected TMO on the results and resolve the result to the default FBO
