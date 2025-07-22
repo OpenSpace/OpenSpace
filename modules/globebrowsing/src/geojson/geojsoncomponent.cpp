@@ -587,7 +587,7 @@ void GeoJsonComponent::update() {
 }
 
 void GeoJsonComponent::readFile() {
-    std::ifstream file(_geoJsonFile);
+    std::ifstream file = std::ifstream(_geoJsonFile);
 
     if (!file.good()) {
         LERROR(std::format("Failed to open GeoJSON file: {}", _geoJsonFile.value()));
@@ -600,6 +600,14 @@ void GeoJsonComponent::readFile() {
         std::istreambuf_iterator<char>(file),
         std::istreambuf_iterator<char>()
     );
+
+    // For the loading, we want to assume that the current working directory is where the
+    // GeoJSON file is located
+    const std::filesystem::path cwd = std::filesystem::current_path();
+    std::filesystem::path jsonDir =
+        std::filesystem::path(_geoJsonFile.value()).parent_path();
+    std::filesystem::current_path(jsonDir);
+    defer { std::filesystem::current_path(cwd); };
 
     // Parse GeoJSON string into GeoJSON objects
     try {

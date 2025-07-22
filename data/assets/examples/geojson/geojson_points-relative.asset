@@ -1,0 +1,46 @@
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+
+
+local data = asset.resource({
+  Name = "GeoJSON Example Outfacing",
+  Type = "UrlSynchronization",
+  Identifier = "geojson_example_points",
+  Url = {
+    "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/points-relative.geojson",
+    "http://liu-se.cdn.openspaceproject.com/files/misc/target.png",
+  }
+})
+
+
+local ExamplePoints = {
+  Identifier = "Points-Example-Relative",
+  File = data .. "points-relative.geojson",
+  HeightOffset = 20000.0,
+  DefaultProperties = {
+    PointSize = 10.0
+  },
+  Name = "Example Points (Relative Path)"
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, ExamplePoints)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, ExamplePoints)
+end)
+
+asset.export(ExamplePoints)
+
+
+
+asset.meta = {
+  Name = "GeoJson Example - Points (Relative Path)",
+  Description = [[GeoJson example asset with points that are facing the camera
+    (default)]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
