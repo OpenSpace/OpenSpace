@@ -46,7 +46,7 @@ CefHost::CefHost([[maybe_unused]] const std::string& helperLocation) {
     CefSettings settings;
     const std::filesystem::path root =
         std::filesystem::path(helperLocation).parent_path();
-    const std::filesystem::path cefcache = std::format("{}/cefcache", root);
+    const std::filesystem::path cefcache = root / "cefcache";
     CefString(&settings.root_cache_path).FromString(cefcache.string());
 
 #ifndef __APPLE__

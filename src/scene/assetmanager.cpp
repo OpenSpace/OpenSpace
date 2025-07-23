@@ -377,7 +377,7 @@ bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
 
     if (!std::filesystem::is_regular_file(asset->path())) {
         LERROR(std::format(
-            "Could not load asset '{}': File does not exist", asset->path())
+            "Could not load asset '{}': File does not exist", asset->path().string())
         );
         return false;
     }
@@ -386,7 +386,7 @@ bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
         ghoul::lua::runScriptFile(*_luaState, asset->path());
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
-        LERROR(std::format("Could not load asset '{}': {}", asset->path(), e.message));
+        LERROR(std::format("Could not load asset '{}': {}", asset->path().string(), e.message));
         return false;
     }
     catch (const ghoul::RuntimeError& e) {
@@ -910,7 +910,7 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
                     "Loading asset {0} from {1} with enable state {3} different from "
                     "initial loading from {2} with state {4}. Only {4} will have an "
                     "effect",
-                    path, retriever, a->firstParent()->path(),
+                    path.string(), retriever.string(), a->firstParent()->path().string(),
                     explicitEnable.value_or(true), a->explicitEnabled().value_or(true)
                 ));
             }
@@ -935,13 +935,13 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
     if (!std::filesystem::is_regular_file(path)) {
         if (retriever.empty()) {
             throw ghoul::RuntimeError(std::format(
-                "Could not find asset file '{}' requested by profile", path
+                "Could not find asset file '{}' requested by profile", path.string()
             ));
         }
         else {
             throw ghoul::RuntimeError(std::format(
                 "Could not find asset file '{}' requested by '{}'",
-                path, retriever
+                path.string(), retriever.string()
             ));
         }
     }
@@ -967,7 +967,7 @@ void AssetManager::callOnInitialize(Asset* asset) const {
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
             throw ghoul::lua::LuaRuntimeException(std::format(
                 "When initializing '{}': {}",
-                asset->path(),
+                asset->path().string(),
                 ghoul::lua::value<std::string>(*_luaState, -1)
             ));
         }
@@ -990,7 +990,7 @@ void AssetManager::callOnDeinitialize(Asset* asset) const {
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
             throw ghoul::lua::LuaRuntimeException(std::format(
                 "When deinitializing '{}': {}",
-                asset->path(),
+                asset->path().string(),
                 ghoul::lua::value<std::string>(*_luaState, -1)
             ));
         }
@@ -1039,7 +1039,7 @@ std::filesystem::path AssetManager::generateAssetPath(
     // behave the same when passed into the `absPath` function
 
     // Construct the full path including the .asset extension
-    std::filesystem::path fullAssetPath = std::format("{}{}", prefix, assetPath);
+    std::filesystem::path fullAssetPath = std::format("{}{}", prefix.string(), assetPath);
     if (fullAssetPath.extension() != ".asset") {
         fullAssetPath.replace_extension(".asset");
     }

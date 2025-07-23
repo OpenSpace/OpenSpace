@@ -745,12 +745,12 @@ bool HorizonsDialog::handleRequest() {
 
         const std::filesystem::path& oldFile = _horizonsFile.file();
         std::filesystem::path newFile = oldFile;
-        newFile.replace_filename(std::format("{}_error.txt", newName));
+        newFile.replace_filename(std::format("{}_error.txt", newName.string()));
 
         std::filesystem::rename(oldFile, newFile);
 
         const std::string msg = std::format(
-            "For more information, see the saved error file '{}'", newFile
+            "For more information, see the saved error file '{}'", newFile.string()
         );
         appendLog(msg, LogLevel::Info);
     }
@@ -930,7 +930,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
 
             const std::filesystem::path errorName = validFile.filename().stem();
             const std::filesystem::path errorFile = validFile.replace_filename(
-                std::format("{}_error.txt", errorName)
+                std::format("{}_error.txt", errorName.string())
             );
 
             if (std::filesystem::is_regular_file(errorFile)) {

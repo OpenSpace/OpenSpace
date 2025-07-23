@@ -135,7 +135,7 @@ extractSeedPointsFromFiles(std::filesystem::path path, size_t nth)
 
     if (!std::filesystem::is_directory(path)) {
         throw ghoul::RuntimeError(std::format(
-            "The specified seed point directory: '{}' does not exist", path
+            "The specified seed point directory: '{}' does not exist", path.string()
         ));
     }
 
@@ -148,12 +148,12 @@ extractSeedPointsFromFiles(std::filesystem::path path, size_t nth)
 
         std::ifstream seedFile = std::ifstream(seedFilePath);
         if (!seedFile.good()) {
-            LERROR(std::format("Could not open seed points file '{}'", seedFilePath));
+            LERROR(std::format("Could not open seed points file '{}'", seedFilePath.string()));
             outMap.clear();
             return {};
         }
 
-        LDEBUG(std::format("Reading seed points from file '{}'", seedFilePath));
+        LDEBUG(std::format("Reading seed points from file '{}'", seedFilePath.string()));
         std::string line;
         std::vector<glm::vec3> outVec;
         int linenumber = 0;
@@ -169,7 +169,7 @@ extractSeedPointsFromFiles(std::filesystem::path path, size_t nth)
                     LERROR(std::format(
                         "Could not read line '{}' in file '{}'. Line is not formatted "
                         "with 3 values representing a point",
-                        linenumber, seedFilePath
+                        linenumber, seedFilePath.string()
                     ));
                 }
                 else {
@@ -180,7 +180,7 @@ extractSeedPointsFromFiles(std::filesystem::path path, size_t nth)
         }
 
         if (outVec.empty()) {
-            LERROR(std::format("Found no seed points in: {}", seedFilePath));
+            LERROR(std::format("Found no seed points in: {}", seedFilePath.string()));
             return {};
         }
 

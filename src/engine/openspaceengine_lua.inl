@@ -158,7 +158,7 @@ namespace {
 
     const bool hasCachedFile = std::filesystem::is_regular_file(fileName);
     if (hasCachedFile) {
-        LDEBUGC("OpenSpaceEngine", std::format("Cached file '{}' used", fileName));
+        LDEBUGC("OpenSpaceEngine", std::format("Cached file '{}' used", fileName.string()));
         return fileName;
     }
     else {
@@ -264,7 +264,7 @@ namespace {
                                                             bool includeFirstLine = false)
 {
     if (!std::filesystem::exists(file) || !std::filesystem::is_regular_file(file)) {
-        throw ghoul::lua::LuaError(std::format("Could not find file '{}'", file));
+        throw ghoul::lua::LuaError(std::format("Could not find file '{}'", file.string()));
     }
 
     std::vector<std::vector<std::string>> r = ghoul::loadCSVFile(file, includeFirstLine);
@@ -301,7 +301,7 @@ namespace {
  */
 [[codegen::luawrap]] ghoul::Dictionary loadJson(std::filesystem::path path) {
     if (!std::filesystem::exists(path)) {
-        throw ghoul::RuntimeError(std::format("File '{}' did not exist", path));
+        throw ghoul::RuntimeError(std::format("File '{}' did not exist", path.string()));
     }
 
     std::ifstream f(path);
@@ -323,7 +323,7 @@ namespace {
     return FileSys.resolveShellLink(std::move(path));
 #else // ^^^^ WIN32 // !WIN32 vvvv
     throw ghoul::lua::LuaError(std::format(
-        "Tried to resolve shortcut file '{}' on unsupported non-Windows platform", path
+        "Tried to resolve shortcut file '{}' on unsupported non-Windows platform", path.string()
     ));
 #endif // WIN32
 }

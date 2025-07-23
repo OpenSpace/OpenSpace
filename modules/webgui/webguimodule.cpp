@@ -279,7 +279,7 @@ void WebGuiModule::startProcess() {
     const std::string command = std::format(
         "\"{}\" \"{}\" --directories \"{}\" {} --http-port \"{}\" --ws-address \"{}\" "
         "--ws-port {} --auto-close --local",
-        node.string(), absPath(_entryPoint.value()), formattedDirectories,
+        node.string(), absPath(_entryPoint.value()).string(), formattedDirectories,
         defaultEndpoint, _port.value(), _address.value(), webSocketPort
     );
 

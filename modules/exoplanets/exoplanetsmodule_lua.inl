@@ -48,7 +48,7 @@ openspace::exoplanets::ExoplanetSystem findSystemInData(std::string_view starNam
     std::ifstream data(absPath(binPath), std::ios::in | std::ios::binary);
     if (!data.good()) {
         throw ghoul::lua::LuaError(std::format(
-            "Failed to open exoplanets data file '{}'", binPath
+            "Failed to open exoplanets data file '{}'", binPath.string()
         ));
     }
 
@@ -56,7 +56,7 @@ openspace::exoplanets::ExoplanetSystem findSystemInData(std::string_view starNam
     std::ifstream lut(absPath(lutPath));
     if (!lut.good()) {
         throw ghoul::lua::LuaError(std::format(
-            "Failed to open exoplanets look-up table '{}'", lutPath
+            "Failed to open exoplanets look-up table '{}'", lutPath.string()
         ));
     }
 
@@ -114,14 +114,14 @@ std::vector<std::string> hostStarsWithSufficientData() {
     std::ifstream lookupTableFile(absPath(lutPath));
     if (!lookupTableFile.good()) {
         throw ghoul::lua::LuaError(std::format(
-            "Failed to open lookup table file '{}'", lutPath
+            "Failed to open lookup table file '{}'", lutPath.string()
         ));
     }
 
     const std::filesystem::path binPath = module->exoplanetsDataPath();
     std::ifstream data(absPath(binPath), std::ios::in | std::ios::binary);
     if (!data.good()) {
-        throw ghoul::lua::LuaError(std::format("Failed to open data file '{}'", binPath));
+        throw ghoul::lua::LuaError(std::format("Failed to open data file '{}'", binPath.string()));
     }
 
     std::vector<std::string> names;
@@ -200,7 +200,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
 
     // No sync or send because this is already inside a Lua script, therefor it has
     // already been synced and sent to the connected nodes and peers
-    global::scriptEngine->queueScript({
+    global::scriptEngine->queueScript(scripting::ScriptEngine::Script{
         .code = "openspace.removeSceneGraphNode('" + starIdentifier + "');",
         .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
         .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No

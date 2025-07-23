@@ -76,7 +76,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
 
     std::ifstream file(path);
     if (!file.good()) {
-        throw ghoul::RuntimeError(std::format("Failed to open speck file '{}'", path));
+        throw ghoul::RuntimeError(std::format("Failed to open speck file '{}'", path.string()));
     }
 
     Dataset res;
@@ -130,7 +130,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
             // where <idx> is the data value index where the texture index is stored
             if (res.textureDataIndex != -1) {
                 throw ghoul::RuntimeError(std::format(
-                    "Error loading speck file '{}': Texturevar defined twice", path
+                    "Error loading speck file '{}': Texturevar defined twice", path.string()
                 ));
             }
 
@@ -149,7 +149,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
 
             if (res.orientationDataIndex != -1) {
                 throw ghoul::RuntimeError(std::format(
-                    "Error loading speck file '{}': Orientation index defined twice", path
+                    "Error loading speck file '{}': Orientation index defined twice", path.string()
                 ));
             }
 
@@ -187,7 +187,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
                 throw ghoul::RuntimeError(std::format(
                     "Error loading speck file {}: Too many arguments for texture on line "
                     "{}",
-                    path, currentLineNumber
+                    path.string(), currentLineNumber
                 ));
             }
 
@@ -208,7 +208,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
                 if (t.index == texture.index) {
                     throw ghoul::RuntimeError(std::format(
                         "Error loading speck file '{}': Texture index '{}' defined twice",
-                        path, texture.index
+                        path.string(), texture.index
                     ));
                 }
             }
@@ -229,7 +229,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
             "Error in line {} while reading the header information of file '{}'. Line is "
             "neither a comment line, nor starts with one of the supported keywords for "
             "SPECK files",
-            currentLineNumber, path
+            currentLineNumber, path.string()
         ));
     }
 
@@ -276,7 +276,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
         if (!std::isdigit(line[0]) && line[0] != '-') {
             throw ghoul::RuntimeError(std::format(
                 "Error loading speck file '{}': Header information and datasegment "
-                "intermixed", path
+                "intermixed", path.string()
             ));
         }
 
@@ -301,7 +301,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
             throw ghoul::RuntimeError(std::format(
                 "Error loading position information out of data line {} in file '{}'. "
                 "Value was not a number",
-                currentLineNumber - 1, path
+                currentLineNumber - 1, path.string()
             ));
         }
 
@@ -335,7 +335,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
                     throw ghoul::RuntimeError(std::format(
                         "Error loading data value {} out of data line {} in file '{}'. "
                         "Value was not a number",
-                        i, currentLineNumber - 1, path
+                        i, currentLineNumber - 1, path.string()
                     ));
                 }
             }
@@ -377,7 +377,7 @@ Labelset loadLabelFile(std::filesystem::path path) {
 
     std::ifstream file(path);
     if (!file.good()) {
-        throw ghoul::RuntimeError(std::format("Failed to open dataset file '{}'", path));
+        throw ghoul::RuntimeError(std::format("Failed to open dataset file '{}'", path.string()));
     }
 
     Labelset res;
@@ -412,7 +412,7 @@ Labelset loadLabelFile(std::filesystem::path path) {
             // included in the speck file)
             if (res.textColorIndex != -1) {
                 throw ghoul::RuntimeError(std::format(
-                    "Error loading label file '{}': Textcolor defined twice", path
+                    "Error loading label file '{}': Textcolor defined twice", path.string()
                 ));
             }
 
@@ -451,7 +451,7 @@ Labelset loadLabelFile(std::filesystem::path path) {
         if (!std::isdigit(line[0]) && line[0] != '-') {
             throw ghoul::RuntimeError(std::format(
                 "Error loading label file '{}': Header information and datasegment "
-                "intermixed", path
+                "intermixed", path.string()
             ));
         }
 
@@ -480,7 +480,7 @@ Labelset loadLabelFile(std::filesystem::path path) {
         if (!startsWith(rest, "text")) {
             throw ghoul::RuntimeError(std::format(
                 "Error loading label file '{}': File contains an unsupported value "
-                "between positions and text label", path
+                "between positions and text label", path.string()
             ));
         }
 
@@ -512,7 +512,7 @@ ColorMap loadCmapFile(std::filesystem::path path) {
     std::ifstream file = std::ifstream(path);
     if (!file.good()) {
         throw ghoul::RuntimeError(std::format(
-            "Failed to open color map file '{}'", path
+            "Failed to open color map file '{}'", path.string()
         ));
     }
 
@@ -579,7 +579,7 @@ ColorMap loadCmapFile(std::filesystem::path path) {
         LWARNINGC("SpeckLoader", std::format(
             "While loading color map '{}', the expected number of color values '{}' was "
             "different from the actual number of color values '{}'",
-            path, nColorLines, res.entries.size()
+            path.string(), nColorLines, res.entries.size()
         ));
     }
 

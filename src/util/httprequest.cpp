@@ -266,7 +266,7 @@ HttpFileDownload::HttpFileDownload(std::string url, std::filesystem::path destin
     , _destination(std::move(destination))
 {
     if (!overwrite && std::filesystem::is_regular_file(_destination)) {
-        throw ghoul::RuntimeError(std::format("File '{}' already exists", _destination));
+        throw ghoul::RuntimeError(std::format("File '{}' already exists", _destination.string()));
     }
 }
 
@@ -296,7 +296,7 @@ bool HttpFileDownload::setup() {
     // GetLastError() gives more details than errno.
     DWORD errorId = GetLastError();
     if (errorId == 0) {
-        LERRORC("HttpFileDownload", std::format("Cannot open file '{}'", _destination));
+        LERRORC("HttpFileDownload", std::format("Cannot open file '{}'", _destination.string()));
         return false;
     }
     std::array<char, 256> Buffer;
@@ -314,7 +314,7 @@ bool HttpFileDownload::setup() {
     std::string message(Buffer.data(), size);
     LERRORC(
         "HttpFileDownload",
-        std::format("Cannot open file '{}': {}", _destination, message)
+        std::format("Cannot open file '{}': {}", _destination.string(), message)
     );
     return false;
 #else // ^^^ WIN32 / !WIN32 vvv
@@ -325,7 +325,7 @@ bool HttpFileDownload::setup() {
             "HttpFileDownload",
             std::format(
                 "Cannot open file '{}': {}",
-                _destination,
+                _destination.string(),
                 std::string(strerror_r(errno, buffer.data(), sizeof(buffer)))
             )
         );
@@ -334,14 +334,14 @@ bool HttpFileDownload::setup() {
         LERRORC(
             "HttpFileDownload",
             std::format(
-                "Cannot open file '{}': {}", _destination, std::string(strerror(errno))
+                "Cannot open file '{}': {}", _destination.string(), std::string(strerror(errno))
             )
         );
         return false;
 #endif // __unix__
     }
 
-    LERRORC("HttpFileDownload", std::format("Cannot open file '{}'", _destination));
+    LERRORC("HttpFileDownload", std::format("Cannot open file '{}'", _destination.string()));
     return false;
 #endif // WIN32
 }

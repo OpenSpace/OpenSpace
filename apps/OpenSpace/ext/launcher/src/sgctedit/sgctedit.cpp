@@ -279,9 +279,16 @@ void SgctEdit::saveCluster() {
     const float roll = glm::radians(_lineRoll->text().toFloat());
     if (pitch != 0.f && yaw != 0.f && roll != 0.f) {
         glm::quat q = glm::quat(glm::vec3(pitch, yaw, roll));
+#ifndef __APPLE__
         _cluster.scene = {
             .orientation = sgct::quat(q.x, q.y, q.z, q.w)
         };
+#else
+        sgct::quat tmpQuat(q.x, q.y, q.z, q.w);
+        _cluster.scene = sgct::config::Scene{};
+        _cluster.scene->orientation = tmpQuat;
+#endif // __APPLE__ XCode has issues with initializing std::optional objects 
+    //or those without explicit constructors, discussion at https://github.com/hn-88/OpenSpace-AppleSiliconMac/issues/43
     }
 
     ghoul_assert(!_cluster.nodes.empty(), "There must be at least one node");
