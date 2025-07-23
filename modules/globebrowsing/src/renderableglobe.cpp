@@ -894,11 +894,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
                 if (_ringsComponent && _ringsComponent->isEnabled() &&
                     _ringsComponent->isVisible())
                 {
-                    _ringsComponent->draw(
-                        data,
-                        RingsComponent::RenderPass::GeometryAndShading,
-                        _shadowComponent->shadowMapData()
-                    );
+                    _ringsComponent->draw(data, _shadowComponent->shadowMapData());
                 }
             }
             else {
@@ -906,10 +902,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
                 if (_ringsComponent && _ringsComponent->isEnabled() &&
                     _ringsComponent->isVisible())
                 {
-                    _ringsComponent->draw(
-                        data,
-                        RingsComponent::RenderPass::GeometryAndShading
-                    );
+                    _ringsComponent->draw(data);
                 }
             }
         }

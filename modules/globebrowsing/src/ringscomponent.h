@@ -51,11 +51,6 @@ namespace documentation { struct Documentation; }
 
 class RingsComponent : public properties::PropertyOwner, public Fadeable {
 public:
-    enum class RenderPass {
-        GeometryOnly,
-        GeometryAndShading
-    };
-
     // Callback for when readiness state changes
     using ReadinessChangeCallback = std::function<void()>;
 
@@ -67,7 +62,7 @@ public:
 
     bool isReady() const;
 
-    void draw(const RenderData& data, RenderPass renderPass,
+    void draw(const RenderData& data,
         const ShadowComponent::ShadowMapData& shadowData = {}
     );
     void update(const UpdateData& data);

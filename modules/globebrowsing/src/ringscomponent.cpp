@@ -380,15 +380,10 @@ void RingsComponent::deinitializeGL() {
     _geometryOnlyShader = nullptr;
 }
 
-void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
+void RingsComponent::draw(const RenderData& data,
                           const ShadowComponent::ShadowMapData& shadowData)
 {
-    if (renderPass == RenderPass::GeometryAndShading) {
-        _shader->activate();
-    }
-    else if (renderPass == RenderPass::GeometryOnly) {
-        _geometryOnlyShader->activate();
-    }
+    _shader->activate();
 
     const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
@@ -405,164 +400,141 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
     ghoul::opengl::TextureUnit ringTextureUnlitUnit;
     ghoul::opengl::TextureUnit ringTextureColorUnit;
     ghoul::opengl::TextureUnit ringTextureTransparencyUnit;
-    if (renderPass == RenderPass::GeometryAndShading) {
-        if (_isAdvancedTextureEnabled) {
-            _shader->setUniform(
-                _uniformCacheAdvancedRings.modelViewProjectionMatrix,
-                modelViewProjectionTransform
-            );
-            _shader->setUniform(_uniformCacheAdvancedRings.textureOffset, _offset);
-            _shader->setUniform(
-                _uniformCacheAdvancedRings.colorFilterValue,
-                _colorFilter
-            );
-            _shader->setUniform(_uniformCacheAdvancedRings.nightFactor, _nightFactor);
-            _shader->setUniform(_uniformCacheAdvancedRings.sunPosition, _sunPosition);
+    if (_isAdvancedTextureEnabled) {
+        _shader->setUniform(
+            _uniformCacheAdvancedRings.modelViewProjectionMatrix,
+            modelViewProjectionTransform
+        );
+        _shader->setUniform(_uniformCacheAdvancedRings.textureOffset, _offset);
+        _shader->setUniform(_uniformCacheAdvancedRings.colorFilterValue, _colorFilter);
+        _shader->setUniform(_uniformCacheAdvancedRings.nightFactor, _nightFactor);
+        _shader->setUniform(_uniformCacheAdvancedRings.sunPosition, _sunPosition);
 
-            const glm::dmat4 inverseModelTransform = glm::inverse(modelTransform);
+        const glm::dmat4 inverseModelTransform = glm::inverse(modelTransform);
 
-            const glm::vec3 sunPositionObjectSpace = glm::normalize(
-                glm::vec3(inverseModelTransform * glm::vec4(_sunPosition, 0.f))
-            );
+        const glm::vec3 sunPositionObjectSpace = glm::normalize(
+            glm::vec3(inverseModelTransform * glm::vec4(_sunPosition, 0.f))
+        );
 
-            _shader->setUniform(
-                _uniformCacheAdvancedRings.sunPositionObj,
-                sunPositionObjectSpace
-            );
-            _shader->setUniform(
-                _uniformCacheAdvancedRings.zFightingPercentage,
-                _zFightingPercentage
-            );
-            _shader->setUniform(
-                _uniformCacheAdvancedRings.modelViewProjectionMatrix,
-                modelViewProjectionTransform
-            );
+        _shader->setUniform(
+            _uniformCacheAdvancedRings.sunPositionObj,
+            sunPositionObjectSpace
+        );
+        _shader->setUniform(
+            _uniformCacheAdvancedRings.zFightingPercentage,
+            _zFightingPercentage
+        );
+        _shader->setUniform(
+            _uniformCacheAdvancedRings.modelViewProjectionMatrix,
+            modelViewProjectionTransform
+        );
 
-            ringTextureFwrdUnit.activate();
-            _textureForwards->bind();
-            _shader->setUniform(
-                _uniformCacheAdvancedRings.textureForwards,
-                ringTextureFwrdUnit
-            );
+        ringTextureFwrdUnit.activate();
+        _textureForwards->bind();
+        _shader->setUniform(
+            _uniformCacheAdvancedRings.textureForwards,
+            ringTextureFwrdUnit
+        );
 
-            ringTextureBckwrdUnit.activate();
-            _textureBackwards->bind();
-            _shader->setUniform(
-                _uniformCacheAdvancedRings.textureBackwards,
-                ringTextureBckwrdUnit
-            );
+        ringTextureBckwrdUnit.activate();
+        _textureBackwards->bind();
+        _shader->setUniform(
+            _uniformCacheAdvancedRings.textureBackwards,
+            ringTextureBckwrdUnit
+        );
 
-            ringTextureUnlitUnit.activate();
-            _textureUnlit->bind();
-            _shader->setUniform(
-                _uniformCacheAdvancedRings.textureUnlit,
-                ringTextureUnlitUnit
-            );
+        ringTextureUnlitUnit.activate();
+        _textureUnlit->bind();
+        _shader->setUniform(
+            _uniformCacheAdvancedRings.textureUnlit,
+            ringTextureUnlitUnit
+        );
 
-            ringTextureColorUnit.activate();
-            _textureColor->bind();
-            _shader->setUniform(
-                _uniformCacheAdvancedRings.textureColor,
-                ringTextureColorUnit
-            );
+        ringTextureColorUnit.activate();
+        _textureColor->bind();
+        _shader->setUniform(
+            _uniformCacheAdvancedRings.textureColor,
+            ringTextureColorUnit
+        );
 
-            ringTextureTransparencyUnit.activate();
-            _textureTransparency->bind();
-            _shader->setUniform(
-                _uniformCacheAdvancedRings.textureTransparency,
-                ringTextureTransparencyUnit
-            );
-            _shader->setUniform(_uniformCacheAdvancedRings.opacity, opacity());
+        ringTextureTransparencyUnit.activate();
+        _textureTransparency->bind();
+        _shader->setUniform(
+            _uniformCacheAdvancedRings.textureTransparency,
+            ringTextureTransparencyUnit
+        );
+        _shader->setUniform(_uniformCacheAdvancedRings.opacity, opacity());
 
-            // Adding the model transformation to the final shadow matrix so we have a
-            // complete transformation from the model coordinates to the clip space of
-            // the light position.
-            _shader->setUniform(
-                _uniformCacheAdvancedRings.shadowMatrix,
-                shadowData.shadowMatrix * modelTransform
-            );
+        // Adding the model transformation to the final shadow matrix so we have a
+        // complete transformation from the model coordinates to the clip space of
+        // the light position.
+        _shader->setUniform(
+            _uniformCacheAdvancedRings.shadowMatrix,
+            shadowData.shadowMatrix * modelTransform
+        );
 
-            const glm::dmat4 camToObjectTransform = glm::inverse(
-                data.camera.combinedViewMatrix()
-                * modelTransform
-            );
+        const glm::dmat4 camToObjectTransform = glm::inverse(
+            data.camera.combinedViewMatrix() * modelTransform
+        );
 
-            _camPositionObjectSpace = glm::normalize(
-                glm::vec3(camToObjectTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0))
-            );
+        _camPositionObjectSpace = glm::normalize(
+            glm::vec3(camToObjectTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0))
+        );
 
-            _shader->setUniform(
-                _uniformCacheAdvancedRings.camPositionObj,
-                _camPositionObjectSpace
-            );
+        _shader->setUniform(
+            _uniformCacheAdvancedRings.camPositionObj,
+            _camPositionObjectSpace
+        );
 
-            ghoul::opengl::TextureUnit shadowMapUnit;
-            shadowMapUnit.activate();
-            glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
-            _shader->setUniform(
-                _uniformCacheAdvancedRings.shadowMapTexture,
-                shadowMapUnit
-            );
-
-            glEnable(GL_DEPTH_TEST);
-            glEnablei(GL_BLEND, 0);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        }
-        else {
-            _shader->setUniform(
-                _uniformCache.modelViewProjectionMatrix,
-                modelViewProjectionTransform
-            );
-            _shader->setUniform(_uniformCache.textureOffset, _offset);
-            _shader->setUniform(_uniformCache.colorFilterValue, _colorFilter);
-            _shader->setUniform(_uniformCache.nightFactor, _nightFactor);
-            _shader->setUniform(_uniformCache.sunPosition, _sunPosition);
-            _shader->setUniform(_uniformCache.zFightingPercentage, _zFightingPercentage);
-            _shader->setUniform(
-                _uniformCache.modelViewProjectionMatrix,
-                modelViewProjectionTransform
-            );
-            _shader->setUniform(_uniformCache.opacity, opacity());
-
-            ringTextureUnit.activate();
-            _texture->bind();
-            _shader->setUniform(_uniformCache.ringTexture, ringTextureUnit);
-
-            // Adding the model transformation to the final shadow matrix so we have a
-            // complete transformation from the model coordinates to the clip space of
-            // the light position.
-            _shader->setUniform(
-                _uniformCache.shadowMatrix,
-                shadowData.shadowMatrix * modelTransform
-            );
-
-            ghoul::opengl::TextureUnit shadowMapUnit;
-            shadowMapUnit.activate();
-            glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
-            _shader->setUniform(_uniformCache.shadowMapTexture, shadowMapUnit);
-        }
+        ghoul::opengl::TextureUnit shadowMapUnit;
+        shadowMapUnit.activate();
+        glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
+        _shader->setUniform(
+            _uniformCacheAdvancedRings.shadowMapTexture,
+            shadowMapUnit
+        );
 
         glEnable(GL_DEPTH_TEST);
         glEnablei(GL_BLEND, 0);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
-    else if (renderPass == RenderPass::GeometryOnly) {
-        _geometryOnlyShader->setUniform(
-            _geomUniformCache.modelViewProjectionMatrix,
+    else {
+        _shader->setUniform(
+            _uniformCache.modelViewProjectionMatrix,
             modelViewProjectionTransform
         );
-        _geometryOnlyShader->setUniform(_geomUniformCache.textureOffset, _offset);
+        _shader->setUniform(_uniformCache.textureOffset, _offset);
+        _shader->setUniform(_uniformCache.colorFilterValue, _colorFilter);
+        _shader->setUniform(_uniformCache.nightFactor, _nightFactor);
+        _shader->setUniform(_uniformCache.sunPosition, _sunPosition);
+        _shader->setUniform(_uniformCache.zFightingPercentage, _zFightingPercentage);
+        _shader->setUniform(
+            _uniformCache.modelViewProjectionMatrix,
+            modelViewProjectionTransform
+        );
+        _shader->setUniform(_uniformCache.opacity, opacity());
 
         ringTextureUnit.activate();
-        if (_isAdvancedTextureEnabled) {
-            _textureForwards->bind();
-        }
-        else {
-            _texture->bind();
-        }
+        _texture->bind();
+        _shader->setUniform(_uniformCache.ringTexture, ringTextureUnit);
 
-        _geometryOnlyShader->setUniform(_geomUniformCache.ringTexture, ringTextureUnit);
+        // Adding the model transformation to the final shadow matrix so we have a
+        // complete transformation from the model coordinates to the clip space of
+        // the light position.
+        _shader->setUniform(
+            _uniformCache.shadowMatrix,
+            shadowData.shadowMatrix * modelTransform
+        );
+
+        ghoul::opengl::TextureUnit shadowMapUnit;
+        shadowMapUnit.activate();
+        glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
+        _shader->setUniform(_uniformCache.shadowMapTexture, shadowMapUnit);
     }
+
+    glEnable(GL_DEPTH_TEST);
+    glEnablei(GL_BLEND, 0);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
@@ -572,13 +544,8 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
 
     glEnable(GL_CULL_FACE);
 
-    if (renderPass == RenderPass::GeometryAndShading) {
-        _shader->deactivate();
-        global::renderEngine->openglStateCache().resetBlendState();
-    }
-    else if (renderPass == RenderPass::GeometryOnly) {
-        _geometryOnlyShader->deactivate();
-    }
+    _shader->deactivate();
+    global::renderEngine->openglStateCache().resetBlendState();
 }
 
 void RingsComponent::update(const UpdateData& data) {
@@ -648,17 +615,14 @@ void RingsComponent::loadTexture() {
         );
 
         if (textureForwards) {
-            LDEBUG(
-                std::format(
-                    "Loaded forwards scattering texture from '{}'",
-                    absPath(_textureFwrdPath)
-                )
-            );
+            LDEBUG(std::format(
+                "Loaded forwards scattering texture from '{}'",
+                absPath(_textureFwrdPath)
+            ));
             _textureForwards = std::move(textureForwards);
 
             _textureForwards->uploadTexture();
-            _textureForwards->setFilter(
-                ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            _textureForwards->setFilter(Texture::FilterMode::AnisotropicMipMap);
 
             _textureFileForwards = std::make_unique<ghoul::filesystem::File>(
                 _textureFwrdPath.value()
@@ -674,17 +638,14 @@ void RingsComponent::loadTexture() {
         );
 
         if (textureBackwards) {
-            LDEBUG(
-                std::format(
-                    "Loaded backwards scattering texture from '{}'",
-                    absPath(_textureBckwrdPath)
-                )
-            );
+            LDEBUG(std::format(
+                "Loaded backwards scattering texture from '{}'",
+                absPath(_textureBckwrdPath)
+            ));
             _textureBackwards = std::move(textureBackwards);
 
             _textureBackwards->uploadTexture();
-            _textureBackwards->setFilter(
-                ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            _textureBackwards->setFilter(Texture::FilterMode::AnisotropicMipMap);
 
             _textureFileBackwards = std::make_unique<ghoul::filesystem::File>(
                 _textureBckwrdPath.value()
@@ -700,9 +661,9 @@ void RingsComponent::loadTexture() {
         );
 
         if (textureUnlit) {
-            LDEBUG(
-                std::format("Loaded unlit texture from '{}'", absPath(_textureUnlitPath))
-            );
+            LDEBUG(std::format(
+                "Loaded unlit texture from '{}'", absPath(_textureUnlitPath)
+            ));
             _textureUnlit = std::move(textureUnlit);
 
             _textureUnlit->uploadTexture();
@@ -744,15 +705,13 @@ void RingsComponent::loadTexture() {
         );
 
         if (textureTransparency) {
-            LDEBUG(
-                std::format("Loaded transparency texture from '{}'", absPath(_textureTransparencyPath))
-            );
+            LDEBUG(std::format(
+                "Loaded transparency texture from '{}'", absPath(_textureTransparencyPath)
+            ));
             _textureTransparency = std::move(textureTransparency);
             
             _textureTransparency->uploadTexture();
-            _textureTransparency->setFilter(
-                ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
-            );
+            _textureTransparency->setFilter(Texture::FilterMode::AnisotropicMipMap);
 
             _textureFileTransparency = std::make_unique<ghoul::filesystem::File>(
                 _textureTransparencyPath.value()
@@ -827,14 +786,6 @@ void RingsComponent::compileShadowShader() {
 
     try {
         global::renderEngine->removeRenderProgram(_shader.get());
-        // _shader = global::renderEngine->buildRenderProgram(
-        //     "RingsProgram",
-        //     absPath("${MODULE_GLOBEBROWSING}/shaders/rings_vs.glsl"),
-        //     absPath("${MODULE_GLOBEBROWSING}/shaders/rings_fs.glsl"),
-        //     dict
-        // );
-
-        // ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 
         // Uses multiple textures for the Rings
         // See https://bjj.mmedia.is/data/s_rings/index.html for theory behind it
