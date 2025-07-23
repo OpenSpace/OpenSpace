@@ -2,25 +2,29 @@ local earth = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 
+-- These two files are downloaded from the servers when the asset gets loaded. Specifying
+-- these two URLs in this way will cause them to be downloaded into the same folder on the
+-- harddisk. For this example this is important as the points-relative.geojson will ask
+-- for the image.png in the same folder by specifying "./image.png"
 local data = asset.resource({
-  Name = "GeoJSON Example Outfacing",
+  Name = "GeoJSON Example Relative Texture Path",
   Type = "UrlSynchronization",
-  Identifier = "geojson_example_points",
+  Identifier = "geojson_example_points_relative_path",
   Url = {
     "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/points-relative.geojson",
-    "http://liu-se.cdn.openspaceproject.com/files/misc/target.png",
+    "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/image.png"
   }
 })
 
 
 local ExamplePoints = {
-  Identifier = "Points-Example-Relative",
+  Identifier = "Points-Example-RelativeTexturePath",
   File = data .. "points-relative.geojson",
   HeightOffset = 20000.0,
   DefaultProperties = {
     PointSize = 10.0
   },
-  Name = "Example Points (Relative Path)"
+  Name = "Example Points (Relative Texture Path)"
 }
 
 
@@ -37,9 +41,10 @@ asset.export(ExamplePoints)
 
 
 asset.meta = {
-  Name = "GeoJson Example - Points (Relative Path)",
+  Name = "GeoJson Example - Points (Relative Texture Path)",
   Description = [[GeoJson example asset with points that are facing the camera
-    (default)]],
+    (default). This example is using a relative path to specify the location of the image
+    that is to be used.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"
