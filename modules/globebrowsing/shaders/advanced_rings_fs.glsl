@@ -103,7 +103,7 @@ Fragment getFragment() {
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(                0,  NSSamples - #{i}));
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i}, -NSSamples + #{i}));
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i},  0));
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i},  NSSamples - #{i}));
+      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(NSSamples - #{i},  NSSamples - #{i}));
     #endfor
     sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(0, 0));
     shadow = clamp(sum / (8.0 * NSSamples + 1.f), 0.05, 1.0);
