@@ -37,7 +37,6 @@ set(OPENSPACE_RELEASE_BUILD OFF)
 set(OPENSPACE_VERSION_MAJOR)
 set(OPENSPACE_VERSION_MINOR)
 set(OPENSPACE_VERSION_PATCH)
-set(OPENSPACE_VERSION_STRING)
 
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_common.cmake)
 include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)

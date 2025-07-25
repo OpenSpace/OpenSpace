@@ -420,7 +420,7 @@ void OpenSpaceEngine::initialize() {
     }
 
 
-    LINFOC("OpenSpace Version", std::string(OPENSPACE_VERSION_STRING_FULL));
+    LINFOC("OpenSpace Version", std::string(OPENSPACE_VERSION));
     LINFOC("Commit", std::string(OPENSPACE_GIT_FULL));
 
     // Register modules

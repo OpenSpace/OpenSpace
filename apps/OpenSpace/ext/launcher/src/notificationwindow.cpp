@@ -134,7 +134,7 @@ NotificationWindow::NotificationWindow(QWidget* parent)
     std::string URL = std::format(
         "https://raw.githubusercontent.com/OpenSpace/Notifications/refs/heads/master/"
         "{}.txt",
-        OPENSPACE_IS_RELEASE_BUILD ? OPENSPACE_VERSION_NUMBER : "master"
+        OPENSPACE_IS_RELEASE_BUILD ? OPENSPACE_VERSION : "master"
     );
 
     _request = std::make_unique<HttpMemoryDownload>(
