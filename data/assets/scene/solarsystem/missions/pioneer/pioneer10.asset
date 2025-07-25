@@ -45,7 +45,8 @@ local Pioneer10Trail = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1972 MAR 03 02:04:00",
     EndTime = "1990 JAN 02 00:00:00",
-    EnableFade = false
+    EnableFade = false,
+    SampleInterval = 1800
   },
   GUI = {
     Name = "Pioneer 10 Trail (SPICE)",
