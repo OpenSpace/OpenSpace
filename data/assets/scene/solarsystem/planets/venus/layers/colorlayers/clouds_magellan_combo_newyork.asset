@@ -22,8 +22,7 @@ local Layer = {
       TileProvider = {
         Identifier = "Clouds",
         Name = "Clouds",
-        FilePath = texturesPath .. "venus_clouds.jpg",
-        CacheSettings = { Enabled = false }
+        FilePath = texturesPath .. "venus_clouds.jpg"
       }
     },
     {
