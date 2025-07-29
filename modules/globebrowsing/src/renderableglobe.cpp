@@ -1260,6 +1260,12 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         );
     }
 
+    // Local shader
+    _localRenderer.program->setUniform(
+        "projectionTransform",
+        data.camera.sgctInternal.projectionMatrix()
+    );
+
     // Light direction uniforms, only used in fragment shader
     if (nightLayersActive || waterLayersActive || _performShading) {
         const glm::dvec3 directionToSunWorldSpace =
