@@ -17,7 +17,7 @@
   <BlockSizeY>512</BlockSizeY>
   <BandsCount>1</BandsCount>
   <DataType>Float32</DataType>
-  <DataValues NoData="0" Min="-11000" Max="8500"/>
+  <DataValues NoData="-3.40282347e+38" Min="-11000" Max="8500"/>
   <MaxConnections>5</MaxConnections>
   <ZeroBlockHttpCodes>404,400</ZeroBlockHttpCodes>
 </GDAL_WMS>

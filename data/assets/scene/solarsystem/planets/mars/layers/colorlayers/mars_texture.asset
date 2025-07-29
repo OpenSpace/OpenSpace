@@ -16,8 +16,7 @@ local Layer = {
   Enabled = asset.enabled,
   ZIndex = 5,
   FilePath = texturesPath .. "mars.png",
-  Description = "Default jpg texture for Mars",
-  CacheSettings = { Enabled = false }
+  Description = "Default jpg texture for Mars"
 }
 
 
