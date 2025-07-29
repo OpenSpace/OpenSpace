@@ -49,6 +49,7 @@ public:
     GLuint framebuffer();
     bool isEnabled();
     void bindFramebuffer();
+    void setSceneTexture(GLuint sceneTexture);
 
 private:
     

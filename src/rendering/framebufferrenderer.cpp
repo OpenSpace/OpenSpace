@@ -1133,21 +1133,17 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         TracyGpuZone("Deferred Caster Tasks")
         const ghoul::GLDebugGroup group("Deferred Caster Tasks");
 
-        #ifdef OPENSPACE_MODULE_POSTPROCESSING_ENABLED
-        if (PostprocessingModule::renderer().isEnabled()) {
-            PostprocessingModule::renderer().bindFramebuffer();
-        } else
-        #endif
-        {
-            // We use ping pong rendering in order to be able to render multiple deferred
-            // tasks at same time (e.g. more than 1 ATM being seen at once) to the same final
-            // buffer
-            glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer);
-            glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
-        }
+        // We use ping pong rendering in order to be able to render multiple deferred
+        // tasks at same time (e.g. more than 1 ATM being seen at once) to the same final
+        // buffer
+        glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer);
+        glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
 
         performDeferredTasks(tasks.deferredcasterTasks, viewport);
     }
+
+    glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
+    glEnablei(GL_BLEND, 0);
     
     #ifdef OPENSPACE_MODULE_POSTPROCESSING_ENABLED
     {
@@ -1155,13 +1151,12 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         TracyGpuZone("Postprocessing");
         const ghoul::GLDebugGroup group("Postprocessing");
 
-        glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
+        PostprocessingModule::renderer().setSceneTexture(
+            _pingPongBuffers.colorTexture[_pingPongIndex]
+        );
         PostprocessingModule::renderer().render(camera);
     }
     #endif
-
-    glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
-    glEnablei(GL_BLEND, 0);
 
     {
         TracyGpuZone("Overlay")

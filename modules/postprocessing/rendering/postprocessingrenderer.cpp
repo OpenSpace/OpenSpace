@@ -238,6 +238,13 @@ void PostprocessingRenderer::bindFramebuffer(){
     glDrawBuffers(1, db);
 }
 
+void PostprocessingRenderer::setSceneTexture(GLuint sceneTexture)
+{
+    if (sceneTexture != _sceneTexture) {
+        _sceneTexture = sceneTexture;
+    }
+}
+
 GLuint PostprocessingRenderer::framebuffer(){
     return _sceneFramebuffer;
 }
