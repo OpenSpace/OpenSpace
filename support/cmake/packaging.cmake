@@ -111,4 +111,31 @@ if (OPENSPACE_CREATE_INSTALLER)
   endif ()
 endif ()
 
+if(UNIX AND NOT APPLE)
+
+  # Binary
+    install(TARGETS OpenSpace RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+    
+    # Required assets
+    install(DIRECTORY config/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
+    install(DIRECTORY modules/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
+    install(DIRECTORY data/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
+    install(DIRECTORY scripts/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
+    install(DIRECTORY shaders/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
+    install(DIRECTORY documentation/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
+    
+    # Config
+    install(FILES openspace.cfg DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
+    
+    # Patch to be applied post-install or during packaging
+    install(FILES appdir/openspacecfg.patch DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
+
+  set(CPACK_GENERATOR "DEB")
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS "libglew2.2, libpng16-16, freeglut3, libxrandr2, libxinerama1, libx11-6, libxcursor1, libcurl4, libxi6, libasound2, libgdal30, libboost1.74-dev, qt6-base-dev, libmpv1, libvulkan1")
+  set(CPACK_DEBIAN_PACKAGE_SECTION "science")
+  set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+  set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
+  set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
+endif()
+
 include (CPack)
