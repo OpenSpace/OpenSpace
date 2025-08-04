@@ -382,9 +382,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
     {
         QLabel* versionLabel = new QLabel(centralWidget);
         versionLabel->setVisible(true);
-        versionLabel->setText(
-            QString::fromStdString(std::string(OPENSPACE_VERSION_STRING_FULL))
-        );
+        versionLabel->setText(QString::fromStdString(std::string(OPENSPACE_VERSION)));
         versionLabel->setObjectName("version-info");
         versionLabel->setGeometry(geometry::VersionString);
     }
@@ -503,7 +501,7 @@ void LauncherWindow::editConfiguration() {
 
     assert(cluster.generator);
     std::string err = sgct::validateConfigAgainstSchema(
-        path,
+        std::filesystem::path(path),
         _configPath / "schema/sgct.schema.json"
     );
     if (!err.empty()) {

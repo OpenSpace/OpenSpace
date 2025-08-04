@@ -29,8 +29,8 @@
 
 namespace openspace {
 
-WebRenderHandler::WebRenderHandler(bool accelerate)
-    : _acceleratedRendering(WebBrowserModule::canUseAcceleratedRendering() && accelerate)
+WebRenderHandler::WebRenderHandler()
+    : _acceleratedRendering(WebBrowserModule::canUseAcceleratedRendering())
 {
     if (_acceleratedRendering) {
         glCreateTextures(GL_TEXTURE_2D, 1, &_texture);

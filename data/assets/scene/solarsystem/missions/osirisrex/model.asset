@@ -131,7 +131,8 @@ local PolyCamFov = {
   },
   GUI = {
     Name = "POLYCAM FOV",
-    Path = "/Solar System/Missions/OSIRIS REx/Instruments"
+    Path = "/Solar System/Missions/OSIRIS REx/Instruments",
+    Focusable = false
   }
 }
 

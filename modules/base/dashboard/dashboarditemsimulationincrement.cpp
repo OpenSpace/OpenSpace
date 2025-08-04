@@ -38,7 +38,7 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo SimplificationInfo = {
         "Simplification",
-        "Time Simplification",
+        "Do Time Simplification",
         "If this value is enabled, the time is displayed in nuanced units, such as "
         "minutes, hours, days, years, etc. If this value is disabled, it is always "
         "displayed in seconds.",
@@ -153,7 +153,11 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
         _requestedUnit = static_cast<int>(unit);
         _doSimplification = false;
     }
-    _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
+    _requestedUnit.setVisibility(
+        _doSimplification ?
+        properties::Property::Visibility::Hidden :
+        properties::Property::Visibility::User
+    );
     addProperty(_requestedUnit);
 
     _transitionFormat = p.transitionFormat.value_or(_transitionFormat);

@@ -1,0 +1,104 @@
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+
+
+
+local trajectory = asset.resource({
+  Name = "3I/ATLAS Trajectory",
+  Type = "HttpSynchronization",
+  Identifier = "atlas_horizons",
+  Version = 1
+})
+
+
+local AtlasTrail = {
+  Identifier = "3I_AtlasTrail",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = trajectory .. "i3_atlas.hrz"
+    },
+    Color = { 0.85, 0.85, 0.0 },
+    StartTime = "2020 JUL 01 00:00:00",
+    EndTime = "2030 JUL 01 00:00:00",
+    SampleInterval = openspace.time.secondsPerDay() / 2
+  },
+  GUI = {
+    Name = "3I/ATLAS Trail",
+    Path = "/Solar System/Interstellar/ATLAS",
+    Focusable = false,
+    Description = [[Trail of 3I/ATLAS from 2020 JUL 01 00:00:00 to 2030 JUL 01 00:00:00.
+      Data from JPL Horizons.]]
+  }
+}
+
+local AtlasPosition = {
+  Identifier = "3I_AtlasPosition",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = trajectory .. "i3_atlas.hrz"
+    }
+  },
+  GUI = {
+    Name = "3I/ATLAS",
+    Path = "/Solar System/Interstellar/ATLAS",
+    Description = [[Position of 3I/ATLAS from 2020 JUL 01 00:00:00 to 2030 JUL 01
+      00:00:00. Data from JPL Horizons.]]
+  }
+}
+
+local AtlasLabel = {
+  Identifier = "3I_AtlasLabel",
+  Parent = AtlasPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "3I/ATLAS",
+    FontSize = 70.0,
+    Size = 8.50,
+    MinMaxSize = { 1, 50 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 1.5, 50.0 },
+    FadeWidths = { 1.0, 40.0 }
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "3I/ATLAS Label",
+    Path = "/Solar System/Interstellar/ATLAS",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(AtlasPosition)
+  openspace.addSceneGraphNode(AtlasTrail)
+  openspace.addSceneGraphNode(AtlasLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(AtlasLabel)
+  openspace.removeSceneGraphNode(AtlasTrail)
+  openspace.removeSceneGraphNode(AtlasPosition)
+end)
+
+asset.export(AtlasPosition)
+asset.export(AtlasTrail)
+asset.export(AtlasLabel)
+
+
+
+asset.meta = {
+  Name = "3I/ATLAS",
+  Description = [[This asset contains the trail and position of 3I/ATLAS from 2020
+    JUL 01 00:00:00 to 2030 JUL 01 00:00:00. Data from JPL Horizons.]],
+  Author = "OpenSpace Team",
+  URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
+  License = "NASA"
+}

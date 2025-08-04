@@ -68,7 +68,8 @@ namespace {
 
         if (element > static_cast<int>(parameters.size())) {
             throw ghoul::RuntimeError(std::format(
-                "Requested element {} but only {} are available", element, parameters.size()
+                "Requested element {} but only {} are available",
+                element, parameters.size()
             ));
         }
 

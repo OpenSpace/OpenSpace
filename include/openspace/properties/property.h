@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___PROPERTY___H__
 
 #include <openspace/util/json_helper.h>
+#include <ghoul/misc/boolean.h>
 #include <ghoul/misc/easing.h>
 #include <ghoul/lua/lua_types.h>
 #include <functional>
@@ -62,6 +63,8 @@ class PropertyOwner;
  */
 class Property {
 public:
+    BooleanType(NeedsConfirmation);
+
     /**
      * The visibility classes for Property%s. The classes are strictly ordered as
      * Hidden > Developer > AdvancedUser > User > NoviceUser > Always
@@ -93,18 +96,22 @@ public:
          * GCC requires an explicit constructor here, as it does not handle the default
          * argument for the struct initialization.
          */
-        constexpr PropertyInfo(const char* ident, const char* gui, const char* desc)
+        constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
+                              NeedsConfirmation needsConfirmation = NeedsConfirmation::No)
             : identifier(ident)
             , guiName(gui)
             , description(desc)
+            , needsConfirmation(needsConfirmation)
         {}
 
         constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
-                               Visibility vis)
+                               Visibility vis,
+                              NeedsConfirmation needsConfirmation = NeedsConfirmation::No)
             : identifier(ident)
             , guiName(gui)
             , description(desc)
             , visibility(vis)
+            , needsConfirmation(needsConfirmation)
         {}
 
         /// The unique identifier that is part of the fully qualified URI of this Property
@@ -115,6 +122,8 @@ public:
         const char* description;
         /// Determines the visibility of this Property in the user interface
         Visibility visibility = Visibility::Default;
+        /// Determines if the Property require confirmation upon value change
+        NeedsConfirmation needsConfirmation = NeedsConfirmation::No;
     };
 
     /// An OnChangeHandle is returned by the onChange method to uniquely identify an
@@ -406,11 +415,12 @@ public:
      * This method determines if this Property requires confirmation upon every change of
      * the value. This setting is only a hint and does not need to be followed by GUI
      * applications and does not have any effect on the Property::set or
-     * Property::setLuaValue methods. The default value is `false`.
+     * Property::setLuaValue methods.
      *
-     * \param state `true` if the Property needs confirmation, `false` otherwise
+     * \param needsConfirmation `true` if confirmation dialogs should be shown, `false`
+     *        otherwise.
      */
-    void setNeedsConfirmation(bool state);
+    void setNeedsConfirmation(bool needsConfirmation);
 
     /**
      * Default view options that can be used in the Property::setViewOption method. The
@@ -463,7 +473,7 @@ public:
 
     /**
      * Creates the information that is general to every Property and adds the
-     * `description`, `guiName`, `group`, `isReadOnly`, `needsConfirmation` `type`, 
+     * `description`, `guiName`, `group`, `isReadOnly`, `needsConfirmation` `type`,
      * and `visibility` keys and their values.
      *
      * \return The base description common to all Property classes
@@ -529,7 +539,7 @@ protected:
         std::optional<std::string> group;
         Visibility visibility = Visibility::Default;
         std::optional<bool> readOnly;
-        std::optional<bool> needsConfirmation;
+        bool needsConfirmation;
         std::unordered_map<std::string, bool> viewOptions;
     } _metaData;
 

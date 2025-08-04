@@ -79,6 +79,7 @@ local MoonLabel = {
   GUI = {
     Name = "Moon Label",
     Path = "/Solar System/Planets/Earth/Moon",
+    Focusable = false,
     Description = "Label for Earth's Moon"
   }
 }

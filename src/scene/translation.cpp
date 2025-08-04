@@ -81,8 +81,10 @@ Translation::Translation(const ghoul::Dictionary& dictionary)
     }
 }
 
-bool Translation::initialize() {
-    return true;
+void Translation::initialize() {
+    if (_timeFrame) {
+        _timeFrame->initialize();
+    }
 }
 
 void Translation::update(const UpdateData& data) {

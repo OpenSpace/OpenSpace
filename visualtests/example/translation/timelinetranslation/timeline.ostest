@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/translation/timelinetranslation/timeline.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "TimelineTranslation_Example",
+        "position": [
+          1.0311189800492941,
+          2.1323225599967124,
+          1.8748792871056505
+        ],
+        "pitch": 0.006423056819624335,
+        "referenceFrame": "Root",
+        "up": [
+          -0.838166803358293,
+          0.5274326923544645,
+          -0.13889263761575493
+        ],
+        "yaw": 0.0031925772521525044,
+        "timestamp": "2000 JAN 01 13:54:28"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

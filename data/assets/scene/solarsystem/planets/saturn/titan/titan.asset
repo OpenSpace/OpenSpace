@@ -73,6 +73,7 @@ local TitanLabel = {
   GUI = {
     Name = "Titan Label",
     Path = "/Solar System/Planets/Saturn/Major Moons/Titan",
+    Focusable = false,
     Description = "Label for Saturn's moon Titan"
   }
 }

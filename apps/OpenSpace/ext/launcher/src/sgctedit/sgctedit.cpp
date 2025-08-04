@@ -68,6 +68,19 @@ namespace {
         return false;
     }
 
+    bool hasMultipleGuiWindows(const sgct::config::Cluster& cluster) {
+        bool foundGui = false;
+        for (const sgct::config::Window& window : cluster.nodes.front().windows) {
+            if (window.draw2D) {
+                if (foundGui) {
+                    return true;
+                }
+                foundGui = true;
+            }
+        }
+        return false;
+    }
+
     std::vector<QRect> createMonitorInfoSet() {
         std::vector<QRect> monitorSizes;
         for (QScreen* screen : qApp->screens()) {
@@ -310,6 +323,21 @@ void SgctEdit::saveCluster() {
             "window 2 has to be bigger than window 3 (if it exists), and window 3 has to "
             "be bigger than window 4.\nOtherwise, rendering errors might occur.\n\nAre "
             "you sure you want to continue?",
+            QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No)
+        );
+        if (ret == QMessageBox::No) {
+            return;
+        }
+    }
+
+    if (hasMultipleGuiWindows(_cluster)) {
+        const int ret = QMessageBox::warning(
+            this,
+            "Multiple Windows with GUI Rendering",
+            "Multiple windows have 2D/GUI rendering enabled. Note that the interactable "
+            "user interface will only be shows on the first window with such a setting "
+            "if you proceed. Dashboards and other 2D elements will be shown on all "
+            "windows.\n\nAre you sure you want to continue?",
             QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No)
         );
         if (ret == QMessageBox::No) {

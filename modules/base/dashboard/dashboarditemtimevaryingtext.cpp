@@ -84,7 +84,7 @@ DashboardItemTimeVaryingText::DashboardItemTimeVaryingText(
 
     _formatString = p.formatString.value_or(_formatString);
     addProperty(_formatString);
-    
+
     _dataFile.onChange([this]() { loadDataFromJson(_dataFile); });
     _dataFile = p.dataFile.string();
     addProperty(_dataFile);
@@ -188,7 +188,6 @@ void DashboardItemTimeVaryingText::loadDataFromJson(const std::string& filePath)
             "Time varying text, '{}' is not a valid JSON file",
             filePath
         ));
-        return;
     }
 
     nlohmann::json jsonData;

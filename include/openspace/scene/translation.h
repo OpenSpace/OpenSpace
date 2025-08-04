@@ -48,7 +48,7 @@ public:
     explicit Translation(const ghoul::Dictionary& dictionary);
     virtual ~Translation() override = default;
 
-    virtual bool initialize();
+    virtual void initialize();
 
     virtual void update(const UpdateData& data);
     glm::dvec3 position() const;

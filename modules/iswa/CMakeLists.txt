@@ -25,17 +25,17 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
-  rendering/datacygnet.h
-  rendering/dataplane.h
-  rendering/datasphere.h
-  rendering/kameleonplane.h
   rendering/iswabasegroup.h
-  rendering/iswacygnet.h
   rendering/iswadatagroup.h
   rendering/iswakameleongroup.h
+  rendering/renderabledatacygnet.h
+  rendering/renderabledataplane.h
+  rendering/renderabledatasphere.h
+  rendering/renderableiswacygnet.h
+  rendering/renderablekameleonplane.h
+  rendering/renderabletexturecygnet.h
+  rendering/renderabletextureplane.h
   rendering/screenspacecygnet.h
-  rendering/texturecygnet.h
-  rendering/textureplane.h
   util/dataprocessor.h
   util/dataprocessorjson.h
   util/dataprocessorkameleon.h
@@ -51,17 +51,17 @@ set(SOURCE_FILES
   util/dataprocessorkameleon.cpp
   util/dataprocessortext.cpp
   util/iswamanager.cpp
-  rendering/datacygnet.cpp
-  rendering/dataplane.cpp
-  rendering/datasphere.cpp
   rendering/iswabasegroup.cpp
-  rendering/iswacygnet.cpp
   rendering/iswadatagroup.cpp
   rendering/iswakameleongroup.cpp
-  rendering/kameleonplane.cpp
+  rendering/renderabledatacygnet.cpp
+  rendering/renderabledataplane.cpp
+  rendering/renderabledatasphere.cpp
+  rendering/renderablekameleonplane.cpp
+  rendering/renderableiswacygnet.cpp
+  rendering/renderabletexturecygnet.cpp
+  rendering/renderabletextureplane.cpp
   rendering/screenspacecygnet.cpp
-  rendering/texturecygnet.cpp
-  rendering/textureplane.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

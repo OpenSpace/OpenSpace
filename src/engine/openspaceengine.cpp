@@ -33,6 +33,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/engine/settings.h>
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/event.h>
@@ -84,6 +85,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+#include <date/date.h>
 #include <glbinding/glbinding.h>
 #include <glbinding-aux/types_to_string.h>
 #include <filesystem>
@@ -157,7 +159,19 @@ namespace {
         "Disable All Mouse Inputs",
         "Disables all mouse inputs. Useful when using touch interaction, to prevent "
         "double inputs on touch (from both touch input and inserted mouse inputs).",
-        openspace::properties::Property::Visibility::User
+        openspace::properties::Property::Visibility::User,
+        openspace::properties::Property::NeedsConfirmation::Yes
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo
+        ShowPropertyConfirmationDialogInfo =
+    {
+        "ShowPropertyConfirmation",
+        "Show Property Confirmation",
+        "Controls whether confirmation dialogs are shown when making changes to certain "
+        "properties. If checked, the dialogs will be shown for properties that require "
+        "it. If unchecked, no dialogs will be shown.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     void viewportChanged() {
@@ -210,6 +224,7 @@ OpenSpaceEngine::OpenSpaceEngine()
     : properties::PropertyOwner({ "OpenSpaceEngine", "OpenSpace Engine" })
     , _printEvents(PrintEventsInfo, false)
     , _visibility(VisibilityInfo)
+    , _showPropertyConfirmationDialog(ShowPropertyConfirmationDialogInfo, true)
     , _fadeOnEnableDuration(FadeDurationInfo, 1.f, 0.f, 5.f)
     , _disableAllMouseInputs(DisableMouseInputInfo, false)
 {
@@ -228,6 +243,8 @@ OpenSpaceEngine::OpenSpaceEngine()
         { static_cast<int>(Visibility::Hidden), "Everything" },
     });
     addProperty(_visibility);
+
+    addProperty(_showPropertyConfirmationDialog);
 
     addProperty(_fadeOnEnableDuration);
     addProperty(_disableAllMouseInputs);
@@ -296,6 +313,7 @@ void OpenSpaceEngine::initialize() {
 
     _printEvents = global::configuration->isPrintingEvents;
     _visibility = static_cast<int>(global::configuration->propertyVisibility);
+    _showPropertyConfirmationDialog = global::configuration->showPropertyConfirmation;
 
     std::filesystem::path cacheFolder = absPath("${CACHE}");
     if (global::configuration->usePerProfileCache) {
@@ -402,7 +420,7 @@ void OpenSpaceEngine::initialize() {
     }
 
 
-    LINFOC("OpenSpace Version", std::string(OPENSPACE_VERSION_STRING_FULL));
+    LINFOC("OpenSpace Version", std::string(OPENSPACE_VERSION));
     LINFOC("Commit", std::string(OPENSPACE_GIT_FULL));
 
     // Register modules
@@ -864,6 +882,27 @@ void OpenSpaceEngine::deinitialize() {
     ZoneScoped;
 
     LTRACE("OpenSpaceEngine::deinitialize(begin)");
+
+    {
+        // We are storing the `hasStartedBefore` setting here instead of in the
+        // intialization phase as otherwise we'd always think that OpenSpace had been
+        // started before
+        openspace::Settings settings = loadSettings();
+
+        settings.hasStartedBefore = true;
+        const date::year_month_day now = date::year_month_day(
+            floor<date::days>(std::chrono::system_clock::now())
+        );
+        settings.lastStartedDate = std::format(
+            "{}-{:0>2}-{:0>2}",
+            static_cast<int>(now.year()),
+            static_cast<unsigned>(now.month()),
+            static_cast<unsigned>(now.day())
+        );
+
+        saveSettings(settings, findSettings());
+    }
+
 
     for (const std::function<void()>& func : *global::callback::deinitialize) {
         func();
@@ -1350,15 +1389,15 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
         return;
     }
 
-    for (const global::callback::KeyboardCallback& func : *global::callback::keyboard) {
-        const bool isConsumed = func(key, mod, action, isGuiWindow);
+    if (!global::configuration->isConsoleDisabled) {
+        const bool isConsumed = global::luaConsole->keyboardCallback(key, mod, action);
         if (isConsumed) {
             return;
         }
     }
 
-    if (!global::configuration->isConsoleDisabled) {
-        const bool isConsumed = global::luaConsole->keyboardCallback(key, mod, action);
+    for (const global::callback::KeyboardCallback& func : *global::callback::keyboard) {
+        const bool isConsumed = func(key, mod, action, isGuiWindow);
         if (isConsumed) {
             return;
         }
@@ -1704,6 +1743,7 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::RemoveTag,
             codegen::lua::DownloadFile,
             codegen::lua::CreateSingleColorImage,
+            codegen::lua::SaveBase64File,
             codegen::lua::IsMaster,
             codegen::lua::Version,
             codegen::lua::ReadCSVFile,
@@ -1729,6 +1769,10 @@ void OpenSpaceEngine::invalidatePropertyCache() {
     _isAllPropertiesCacheDirty = true;
 }
 
+void OpenSpaceEngine::invalidatePropertyOwnerCache() {
+    _isAllPropertyOwnersCacheDirty = true;
+}
+
 const std::vector<properties::Property*>& OpenSpaceEngine::allProperties() const {
     if (_isAllPropertiesCacheDirty) {
         _allPropertiesCache = global::rootPropertyOwner->propertiesRecursive();
@@ -1736,6 +1780,16 @@ const std::vector<properties::Property*>& OpenSpaceEngine::allProperties() const
     }
 
     return _allPropertiesCache;
+}
+
+const std::vector<properties::PropertyOwner*>& OpenSpaceEngine::allPropertyOwners() const
+{
+    if (_isAllPropertyOwnersCacheDirty) {
+        _allPropertyOwnersCache = global::rootPropertyOwner->subownersRecursive();
+        _isAllPropertyOwnersCacheDirty = false;
+    }
+
+    return _allPropertyOwnersCache;
 }
 
 AssetManager& OpenSpaceEngine::assetManager() {

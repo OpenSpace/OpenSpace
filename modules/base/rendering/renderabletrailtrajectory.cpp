@@ -169,7 +169,7 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     , _sampleInterval(SampleIntervalInfo, 2.0, 2.0, 1e6)
     , _timeStampSubsamplingFactor(TimeSubSampleInfo, 1, 1, 1000000000)
     , _renderFullTrail(RenderFullPathInfo, false)
-    , _numberOfReplacementPoints(AccurateTrailPositionsInfo, 100, 0, 1000)
+    , _nReplacementPoints(AccurateTrailPositionsInfo, 100, 0, 1000)
     , _maxVertex(glm::vec3(-std::numeric_limits<float>::max()))
     , _minVertex(glm::vec3(std::numeric_limits<float>::max()))
 {
@@ -203,10 +203,8 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     _timeStampSubsamplingFactor.onChange([this] { _subsamplingIsDirty = true; });
     addProperty(_timeStampSubsamplingFactor);
 
-    _numberOfReplacementPoints = p.accurateTrailPositions.value_or(
-        _numberOfReplacementPoints
-    );
-    addProperty(_numberOfReplacementPoints);
+    _nReplacementPoints = p.accurateTrailPositions.value_or(_nReplacementPoints);
+    addProperty(_nReplacementPoints);
 
     _enableSweepChunking = p.enableSweepChunking.value_or(_enableSweepChunking);
     addProperty(_enableSweepChunking);
@@ -258,10 +256,8 @@ void RenderableTrailTrajectory::reset() {
 
 void RenderableTrailTrajectory::update(const UpdateData& data) {
     if (_needsFullSweep) {
-
         if (_sweepIteration == 0) {
-            // Max number of vertices
-            constexpr unsigned int maxNumberOfVertices = 1000000;
+            constexpr unsigned int MaxVertices = 1000000;
 
             // Convert the start and end time from string representations to J2000 seconds
             _start = SpiceManager::ref().ephemerisTimeFromDate(_startTime);
@@ -270,45 +266,43 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
             _totalSampleInterval = _sampleInterval / _timeStampSubsamplingFactor;
 
-            // Cap _numberOfVertices in order to prevent overflow and extreme performance
+            // Cap _nVertices in order to prevent overflow and extreme performance
             // degredation/RAM usage
-            _numberOfVertices = std::min(
+            _nVertices = std::min(
                 static_cast<unsigned int>(std::ceil(timespan / _totalSampleInterval)),
-                maxNumberOfVertices
+                MaxVertices
             );
 
-            // We need to recalcuate the _totalSampleInterval if _numberOfVertices eqals
-            // maxNumberOfVertices. If we don't do this the position for each vertex
+            // We need to recalcuate the _totalSampleInterval if _nVertices equals
+            // MaxVertices. If we don't do this the position for each vertex
             // will not be correct for the number of vertices we are doing along the trail
-            _totalSampleInterval = (_numberOfVertices == maxNumberOfVertices) ?
-                (timespan / _numberOfVertices) : _totalSampleInterval;
+            _totalSampleInterval = (_nVertices == MaxVertices) ?
+                (timespan / _nVertices) : _totalSampleInterval;
 
             // Make space for the vertices
             _vertexArray.clear();
             _dVertexArray.clear();
             _timeVector.clear();
-            _vertexArray.resize(_numberOfVertices + 1);
-            _dVertexArray.resize(_numberOfVertices + 1);
-            _timeVector.resize(_numberOfVertices + 1);
+            _vertexArray.resize(_nVertices + 1);
+            _dVertexArray.resize(_nVertices + 1);
+            _timeVector.resize(_nVertices + 1);
         }
 
         // Calculate sweeping range for this iteration
         const unsigned int startIndex = _sweepIteration * _sweepChunkSize;
         const unsigned int nextIndex = (_sweepIteration + 1) * _sweepChunkSize;
-        unsigned int stopIndex = std::min(nextIndex, _numberOfVertices);
+        unsigned int stopIndex = std::min(nextIndex, _nVertices);
 
         // If iterative calculations are disabled
         if (!_enableSweepChunking) {
-            stopIndex = _numberOfVertices;
+            stopIndex = _nVertices;
         }
 
         // Calculate all vertex positions
         for (unsigned int i = startIndex; i < stopIndex; i++) {
-            const glm::dvec3 dp = _translation->position({
-                {},
-                Time(_start + i * _totalSampleInterval),
-                Time(0.0)
-            });
+            const glm::dvec3 dp = translationPosition(
+                Time(_start + i * _totalSampleInterval)
+            );
             const glm::vec3 p(dp.x, dp.y, dp.z);
             _vertexArray[i] = { p.x, p.y, p.z };
             _timeVector[i] = Time(_start + i * _totalSampleInterval).j2000Seconds();
@@ -323,12 +317,8 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         // Full sweep is complete here.
         // Adds the last point in time to the _vertexArray so that we
         // ensure that points for _start and _end always exists
-        if (stopIndex == _numberOfVertices) {
-            const glm::dvec3 dp = _translation->position({
-                {},
-                Time(_end),
-                Time(0.0)
-                });
+        if (stopIndex == _nVertices) {
+            const glm::dvec3 dp = translationPosition(Time(_end));
             const glm::vec3 p(dp.x, dp.y, dp.z);
             _vertexArray[stopIndex] = { p.x, p.y, p.z };
             _timeVector[stopIndex] = Time(_end).j2000Seconds();
@@ -386,7 +376,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             );
 
             // Calculate number of vertices in the trail
-            _numberOfUniqueVertices = static_cast<GLsizei>(
+            _nUniqueVertices = static_cast<GLsizei>(
                 std::distance(_timeVector.begin(), _timeVector.end())
             );
         }
@@ -396,12 +386,12 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             _secondaryRenderInformation.count = 0;
 
             // Set number of vertices in the trail
-            _numberOfUniqueVertices = _primaryRenderInformation.count;
+            _nUniqueVertices = _primaryRenderInformation.count;
         }
 
         // Determine the number of points to be recalculated
         int prePaddingDelta = 0;
-        if (!_renderFullTrail && _numberOfReplacementPoints == 0) {
+        if (!_renderFullTrail && _nReplacementPoints == 0) {
             // Enables trail from last point to current position
             // if we don't do any replacement points
             prePaddingDelta = 1;
@@ -409,16 +399,16 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         else {
             prePaddingDelta = std::min(
                 static_cast<int>(_primaryRenderInformation.count),
-                static_cast<int>(_numberOfReplacementPoints)
+                static_cast<int>(_nReplacementPoints)
             );
         }
         int postPaddingDelta = std::min(
             static_cast<int>(_secondaryRenderInformation.count),
-            static_cast<int>(_numberOfReplacementPoints)
+            static_cast<int>(_nReplacementPoints)
         );
 
         // Get current position of the object
-        const glm::dvec3 p = _translation->position(data);
+        const glm::dvec3 p = translationPosition(data.time);
 
         // Calculates all replacement points before the object
         glm::dvec3 v = p;
@@ -460,7 +450,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         }
 
         // Mid-point (model-space position for the object)
-        if (_numberOfReplacementPoints > 0 || !_renderFullTrail) {
+        if (_nReplacementPoints > 0 || !_renderFullTrail) {
             _replacementPoints.push_back({ 0.f, 0.f, 0.f });
         }
 
@@ -503,14 +493,11 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         _floatingRenderInformation.count =
             static_cast<GLsizei>(_replacementPoints.size());
 
-        _floatingRenderInformation._localTransform = glm::translate(
-            glm::dmat4(1.0),
-            p
-        );
+        _floatingRenderInformation._localTransform = glm::translate(glm::dmat4(1.0), p);
 
         // Adjusts number of unique vertices if we have inserted a new mid point
         if (_floatingRenderInformation.count > 0 && _renderFullTrail) {
-            _numberOfUniqueVertices++;
+            _nUniqueVertices++;
         }
 
         // Recalculate .count and .first based on the recalculated (floating) vertices
@@ -520,10 +507,9 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
         // Adjusts count such that it takes into account if we don't have any line
         // connecting with the object
-        if (_renderFullTrail && _numberOfReplacementPoints == 0) {
+        if (_renderFullTrail && _nReplacementPoints == 0) {
             _primaryRenderInformation.count += 1;
         }
-
 
         glBindVertexArray(_floatingRenderInformation._vaoID);
         glBindBuffer(GL_ARRAY_BUFFER, _floatingRenderInformation._vBufferID);
@@ -540,7 +526,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         // Renders the whole trail if time has passed the end time
         _primaryRenderInformation.first = 0;
         _primaryRenderInformation.count = static_cast<GLsizei>(_vertexArray.size());
-        _numberOfUniqueVertices = _primaryRenderInformation.count;
+        _nUniqueVertices = _primaryRenderInformation.count;
         _secondaryRenderInformation.first = 0;
         _secondaryRenderInformation.count = 0;
         _floatingRenderInformation.first = 0;
@@ -567,7 +553,6 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
     }
 
     glBindVertexArray(0);
-
 }
 
 } // namespace openspace

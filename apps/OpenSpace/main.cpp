@@ -42,6 +42,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
+#include <ghoul/misc/defer.h>
 #include <ghoul/misc/stacktrace.h>
 #ifdef WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -56,7 +57,6 @@
 #include <sgct/projection/nonlinearprojection.h>
 #include <sgct/user.h>
 #include <sgct/window.h>
-#include <date/date.h>
 #include <stb_image.h>
 #include <tracy/Tracy.hpp>
 #include <iostream>
@@ -82,6 +82,18 @@
 #include <launcherwindow.h>
 #include <QApplication>
 #include <QMessageBox>
+
+#ifdef WIN32
+extern "C" {
+    // These variables are checked by the different drivers to see if the discrete GPU
+    // should be preferred
+
+    // Nvidia Optimus: force switch to discrete GPU
+    __declspec(dllexport) DWORD NvOptimusEnablement = 1;
+    // AMD
+    __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+} // extern
+#endif // WIN32
 
 using namespace openspace;
 using namespace sgct;
@@ -747,6 +759,16 @@ void setSgctDelegateFunctions() {
 
         return currentWindow->isWindowResized();
     };
+    sgctDelegate.anyWindowHasResized = []() {
+        ZoneScoped;
+
+        for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
+            if (window->isWindowResized()) {
+                return true;
+            }
+        }
+        return false;
+    };
     sgctDelegate.averageDeltaTime = []() {
         ZoneScoped;
 
@@ -1073,47 +1095,66 @@ void setSgctDelegateFunctions() {
     sgctDelegate.setStatisticsGraphScale = [](float scale) {
         sgct::Engine::instance().setStatsGraphScale(scale);
     };
+    sgctDelegate.setStatisticsGraphOffset = [](glm::vec2 offset) {
+        sgct::Engine::instance().setStatsGraphOffset(sgct::vec2{ offset.x, offset.y });
+    };
     sgctDelegate.setMouseCursor = [](WindowDelegate::Cursor mouse) {
+        auto createGLFWCursor = [](int shape) {
+            GLFWerrorfun prevErrorCallback = glfwSetErrorCallback(nullptr);
+            defer { glfwSetErrorCallback(prevErrorCallback); };
+
+            GLFWcursor* cursor = glfwCreateStandardCursor(shape);
+            if (!cursor) {
+                LINFO(std::format(
+                    "Replacing unavailable cursor shape {} with arrow cursor ({})",
+                    shape, GLFW_ARROW_CURSOR
+                ));
+                return glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+            }
+
+            return cursor;
+        };
+
         static std::unordered_map<WindowDelegate::Cursor, GLFWcursor*> Cursors = {
             {
                 WindowDelegate::Cursor::Arrow,
-                glfwCreateStandardCursor(GLFW_ARROW_CURSOR)
+                createGLFWCursor(GLFW_ARROW_CURSOR)
             },
             {
                 WindowDelegate::Cursor::IBeam,
-                glfwCreateStandardCursor(GLFW_IBEAM_CURSOR)
+                createGLFWCursor(GLFW_IBEAM_CURSOR)
             },
             {
                 WindowDelegate::Cursor::CrossHair,
-                glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR)
+                createGLFWCursor(GLFW_CROSSHAIR_CURSOR)
             },
             {
                 WindowDelegate::Cursor::PointingHand,
-                glfwCreateStandardCursor(GLFW_POINTING_HAND_CURSOR)
+                createGLFWCursor(GLFW_POINTING_HAND_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeEW,
-                glfwCreateStandardCursor(GLFW_RESIZE_EW_CURSOR)
+                createGLFWCursor(GLFW_RESIZE_EW_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeNS,
-                glfwCreateStandardCursor(GLFW_RESIZE_NS_CURSOR)
+                createGLFWCursor(GLFW_RESIZE_NS_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeNWSE,
-                glfwCreateStandardCursor(GLFW_RESIZE_NWSE_CURSOR)
+                createGLFWCursor(GLFW_RESIZE_NWSE_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeNESW,
-                glfwCreateStandardCursor(GLFW_RESIZE_NESW_CURSOR)
+                createGLFWCursor(GLFW_RESIZE_NESW_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeAll,
-                glfwCreateStandardCursor(GLFW_RESIZE_ALL_CURSOR)
+                createGLFWCursor(GLFW_RESIZE_ALL_CURSOR)
             },
             {
                 WindowDelegate::Cursor::NotAllowed,
-                glfwCreateStandardCursor(GLFW_NOT_ALLOWED_CURSOR)
+                createGLFWCursor(GLFW_NOT_ALLOWED_CURSOR)
             },
         };
         ghoul_assert(
@@ -1480,7 +1521,10 @@ int main(int argc, char* argv[]) {
             config = launcher.selectedWindowConfig();
             if (config.find(labelFromCfgFile) != std::string::npos) {
                 if (config.find("sgct.config") == std::string::npos) {
-                    config = config.substr(0, config.length() - labelFromCfgFile.length());
+                    config = config.substr(
+                        0,
+                        config.length() - labelFromCfgFile.length()
+                    );
                 }
                 else {
                     config = windowConfiguration;
@@ -1501,7 +1545,6 @@ int main(int argc, char* argv[]) {
 
     {
         openspace::Settings settings = loadSettings();
-        settings.hasStartedBefore = true;
 
         const std::filesystem::path profile = global::configuration->profile;
 
@@ -1539,15 +1582,6 @@ int main(int argc, char* argv[]) {
 
         settings.configuration =
             isGeneratedWindowConfig ? "" : global::configuration->windowConfiguration;
-        const date::year_month_day now = date::year_month_day(
-            floor<date::days>(std::chrono::system_clock::now())
-        );
-        settings.lastStartedDate = std::format(
-            "{}-{:0>2}-{:0>2}",
-            static_cast<int>(now.year()),
-            static_cast<unsigned>(now.month()),
-            static_cast<unsigned>(now.day())
-        );
 
         saveSettings(settings, findSettings());
     }

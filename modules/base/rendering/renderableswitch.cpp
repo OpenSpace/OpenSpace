@@ -46,10 +46,10 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    // A RenderableSwitch can be used to render one of two renderables depending on the 
+    // A RenderableSwitch can be used to render one of two renderables depending on the
     // distance between the camera and the object's position.
     //
-    // The two renderables are specified separately: `RenderableNear` and `RenderableFar`. 
+    // The two renderables are specified separately: `RenderableNear` and `RenderableFar`.
     // These can be any renderable types.
     //
     // The `DistanceThreshold` property determines which renderable will be shown.

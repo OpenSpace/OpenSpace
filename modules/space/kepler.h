@@ -104,7 +104,7 @@ enum class Format {
     TLE,  //< Two-line elements
     OMM,  //< Orbit Mean-Elements Message
     SBDB, //< Small-Body Database
-    MPC   //< Minor Planet Center 
+    MPC   //< Minor Planet Center
 };
 /**
  * Reads the object information from the provided file.

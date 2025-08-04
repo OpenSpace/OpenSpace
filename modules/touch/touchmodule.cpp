@@ -201,7 +201,7 @@ void TouchModule::internalInitialize(const ghoul::Dictionary&) {
 
 bool TouchModule::processNewInput() {
     // Get new input from listener
-    std::vector<TouchInput> earInputs = _ear->takeInput();
+    std::vector<TouchInput> earInputs = _ear->takeInputs();
     std::vector<TouchInput> earRemovals = _ear->takeRemovals();
 
     for (const TouchInput& input : earInputs) {

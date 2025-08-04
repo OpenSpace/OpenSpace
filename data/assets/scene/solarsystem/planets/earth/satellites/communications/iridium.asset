@@ -28,7 +28,8 @@ local IridiumSatellites = {
   Tag = { "earth_satellites" },
   GUI = {
     Name = "Iridium",
-    Path = "/Solar System/Planets/Earth/Satellites"
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
   }
 }
 

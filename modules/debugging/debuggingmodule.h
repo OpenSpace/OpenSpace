@@ -29,6 +29,7 @@
 
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 #include <ghoul/font/font.h>
 
 namespace openspace {
@@ -50,6 +51,7 @@ protected:
 private:
     properties::BoolProperty _showStatistics;
     properties::FloatProperty _statisticsScale;
+    properties::Vec2Property _statisticsOffset;
     properties::BoolProperty _showFrameInformation;
 
     std::shared_ptr<ghoul::fontrendering::Font> _fontFrameInfo;

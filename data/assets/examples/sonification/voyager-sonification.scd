@@ -256,7 +256,7 @@ s.waitForBoot{
 		~distanceLimit = 0.5;
 
 		//Ambient amp
-		~ambientAmp = 1.0;
+		~ambientAmp = 0.1;
 
 		OSCdef.new(\Mode,
 			{

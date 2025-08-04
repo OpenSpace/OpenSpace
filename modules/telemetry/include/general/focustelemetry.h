@@ -56,4 +56,4 @@ private:
 
 } // namespace openspace
 
-#endif __OPENSPACE_MODULE_TELEMETRY___FOCUSTELEMETRY___H__
+#endif // __OPENSPACE_MODULE_TELEMETRY___FOCUSTELEMETRY___H__

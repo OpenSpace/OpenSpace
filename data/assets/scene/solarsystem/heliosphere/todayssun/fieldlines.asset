@@ -1,0 +1,203 @@
+local transforms = asset.require("scene/solarsystem/heliosphere/transforms_heliosphere")
+
+
+
+local transferFunctions = asset.resource({
+  Type = "HttpSynchronization",
+  Name = "Today's Sun Transfer Functions",
+  Identifier = "todayssun_transferfunctions",
+  Version = 1
+})
+
+
+local windSpeedPolarityColorTable = transferFunctions .. "polarity_spec.txt"
+local subEarthLevelColorTable = transferFunctions .. "subearth_spec.txt"
+local currentSheetColorTable = transferFunctions .. "currentsheet_spec.txt"
+local opennessColorTable = transferFunctions .."openness_spec.txt"
+
+local infoURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id="
+local dataURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID="
+
+local sunRadius = 695700000.0
+
+local fieldlinesSCS = {
+  Identifier = "WSA_54_Fieldlines_SCS_OI",
+  Parent = transforms.WSAOffset60.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = sunRadius
+    },
+  },
+  Renderable = {
+    Type = "RenderableFieldlinesSequence",
+    InputFileType = "Osfls",
+    LoadingType = "DynamicDownloading",
+    InfoURL = infoURL,
+    DataURL = dataURL,
+    DataID = 2286,
+    ShowAtAllTimes = false,
+    ColorMethod = "By Quantity",
+    ColorQuantity = 0, -- Polarity & solar wind speed
+    ColorTablePaths = {
+      windSpeedPolarityColorTable,
+      currentSheetColorTable
+    },
+    ColorTableRanges = {
+      { -1.0, 1.0 },
+      { 0.0, 1.0 }
+    }
+  },
+  GUI = {
+    Name = "Fieldlines: Corona SCS (Out-In Tracing)",
+    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Description = [[WSA 5.4 real-time output of the fieldline trace from the Schatten
+      Current Sheet model (SCS) outer boundary at 21.5 Rs to the source surface at 2.5 Rs
+      using GONGZ as input.]],
+    Focusable = false
+  }
+}
+
+local fieldlinesOI = {
+  Identifier = "WSA_54_Fieldlines_PFSS_OI",
+  Parent = transforms.WSAOffset60.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = sunRadius
+    },
+  },
+  Renderable = {
+    Type = "RenderableFieldlinesSequence",
+    InputFileType = "Osfls",
+    LoadingType = "DynamicDownloading",
+    InfoURL = infoURL,
+    DataURL = dataURL,
+    DataID = 2285,
+    ShowAtAllTimes = false,
+    ColorMethod = "By Quantity",
+    ColorQuantity = 0, -- Polarity & solar wind speed
+    ColorTablePaths = {
+      windSpeedPolarityColorTable,
+      currentSheetColorTable
+    },
+    ColorTableRanges = {
+      { -1.0, 1.0 },
+      { 0.0, 1.0 }
+    },
+  },
+  GUI = {
+    Name = "Fieldlines: Corona PFSS (Out-In Tracing)",
+    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Description = [[WSA 5.4 real-time output of the fieldline trace from the source
+      surface to the solar surface using GONGZ as input. PFSS is the Potential Field
+      Source Surface model, a part of WSA.]],
+    Focusable = false
+  }
+}
+
+local fieldlinesIO = {
+  Identifier = "WSA_54_Fieldlines_PFSS_IO",
+  Parent = transforms.WSAOffset60.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = sunRadius
+    },
+  },
+  Renderable = {
+    Type = "RenderableFieldlinesSequence",
+    InputFileType = "Osfls",
+    LoadingType = "DynamicDownloading",
+    InfoURL = infoURL,
+    DataURL = dataURL,
+    DataID = 2284,
+    ShowAtAllTimes = false,
+    ColorMethod = "By Quantity",
+    ColorQuantity = 0, -- Open/closed lines
+    ColorTablePaths = {
+      opennessColorTable
+    },
+    ColorTableRanges = {
+      { 0.0, 2.0 }
+    },
+  },
+  GUI = {
+    Name = "Fieldlines: Corona PFSS (In-Out Tracing)",
+    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Description = [[WSA 5.4 real-time output of the fieldline trace from the solar surface
+      outwards using GONGZ as input. PFSS is the Potential Field Source Surface model, a
+      part of WSA.]],
+    Focusable = false
+  }
+}
+
+local fieldlinesEarth = {
+  Identifier = "WSA_54_Fieldlines_Earth",
+  Parent = transforms.WSAOffset60.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = sunRadius
+    },
+  },
+  Renderable = {
+    Type = "RenderableFieldlinesSequence",
+    InputFileType = "Osfls",
+    LoadingType = "DynamicDownloading",
+    InfoURL = infoURL,
+    DataURL = dataURL,
+    DataID = 2287,
+    ShowAtAllTimes = false,
+    ColorMethod = "By Quantity",
+    ColorQuantity = 0, -- Polarity
+    ColorTablePaths = {
+      windSpeedPolarityColorTable,
+      subEarthLevelColorTable
+    },
+    ColorTableRanges = {
+      { 0.0, 1.0 },
+      { 0.0, 2.0 }
+    },
+  },
+  GUI = {
+    Name = "Fieldlines: Tracing from Earth",
+    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Description = [[WSA 5.4 real-time output of the field line trace from Earth using GONGZ
+      as input.]],
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(fieldlinesSCS)
+  openspace.addSceneGraphNode(fieldlinesOI)
+  openspace.addSceneGraphNode(fieldlinesIO)
+  openspace.addSceneGraphNode(fieldlinesEarth)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(fieldlinesEarth)
+  openspace.removeSceneGraphNode(fieldlinesIO)
+  openspace.removeSceneGraphNode(fieldlinesOI)
+  openspace.removeSceneGraphNode(fieldlinesSCS)
+end)
+
+asset.export(fieldlinesSCS)
+asset.export(fieldlinesOI)
+asset.export(fieldlinesIO)
+asset.export(fieldlinesEarth)
+
+
+
+asset.meta = {
+  Name = "WSA 5.4. Streaming Field Line Data Dynamically",
+  Version = "1.0",
+  Description = [[Downloading data from the WSA 5.4 simulation model, showing the dynamic
+    Sun at any point. It includes .osfls files (OpenSpace FieldLine Sequence) for field
+    lines.]],
+  Author = "CCMC",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

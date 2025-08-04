@@ -41,7 +41,7 @@ local Saturn = {
       TextureUnlit = texturesPath .. "unlit_original_single.png",
       TextureColor = texturesPath .. "color_original_single.png",
       TextureTransparency = texturesPath .. "trans_original_single.png",
-      ColorFilter = 0.8,
+      ColorFilter = 0.9,
 
       NightFactor = 1.0,
       Size = 140445000,
@@ -81,6 +81,7 @@ local SaturnLabel = {
   GUI = {
     Name = "Saturn Label",
     Path = "/Solar System/Planets/Saturn",
+    Focusable = false,
     Description = "Main planet label for Saturn"
   }
 }

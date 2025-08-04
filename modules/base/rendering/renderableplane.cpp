@@ -179,13 +179,13 @@ namespace {
             std::optional<bool> scaleByDistance;
 
             // [[codegen::verbatim(ApparentSizeMultiplierInfo.description)]]
-            std::optional<float> apparentSizeMultiplier [[codegen::greater(0.f)]];;
+            std::optional<float> apparentSizeMultiplier [[codegen::greater(0.f)]];
 
             // [[codegen::verbatim(ScaleByDistanceMaxHeightInfo.description)]]
-            std::optional<float> scaleByDistanceMaxHeight [[codegen::greater(0.f)]];;
+            std::optional<float> scaleByDistanceMaxHeight [[codegen::greater(0.f)]];
 
             // [[codegen::verbatim(ScaleByDistanceMinHeightInfo.description)]]
-            std::optional<float> scaleByDistanceMinHeight [[codegen::greater(0.f)]];;
+            std::optional<float> scaleByDistanceMinHeight [[codegen::greater(0.f)]];
         };
 
         // Settings for scaling points based on camera distance
@@ -224,9 +224,12 @@ RenderablePlane::DistanceScalingSettings::DistanceScalingSettings(
         const Parameters::DistanceScalingSettings settings = *p.distanceScalingSettings;
 
         scaleByDistance = settings.scaleByDistance.value_or(scaleByDistance);
-        apparentSizeMultiplier = settings.apparentSizeMultiplier.value_or(apparentSizeMultiplier);
-        scaleByDistanceMaxHeight = settings.scaleByDistanceMaxHeight.value_or(scaleByDistanceMaxHeight);
-        scaleByDistanceMinHeight = settings.scaleByDistanceMinHeight.value_or(scaleByDistanceMinHeight);
+        apparentSizeMultiplier =
+            settings.apparentSizeMultiplier.value_or(apparentSizeMultiplier);
+        scaleByDistanceMaxHeight =
+            settings.scaleByDistanceMaxHeight.value_or(scaleByDistanceMaxHeight);
+        scaleByDistanceMinHeight =
+            settings.scaleByDistanceMinHeight.value_or(scaleByDistanceMinHeight);
     }
 
     addProperty(scaleByDistance);

@@ -4,7 +4,8 @@
     "base_keybindings",
     "events/toggle_sun",
     "scene/solarsystem/planets/earth/earth",
-    "scene/solarsystem/planets/earth/satellites/satellites"
+    "scene/solarsystem/planets/earth/satellites/satellites",
+    "scene/solarsystem/planets/earth/noaa-sos/overlays/latlon_grid-white"
   ],
   "camera": {
     "altitude": 17000000.0,
@@ -67,8 +68,13 @@
   },
   "properties": [
     {
-      "name": "{earth_satellites}.Renderable.Enabled",
+      "name": "{earth_satellites~space_stations}.Renderable.Enabled",
       "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.Earth.Renderable.Layers.Overlays.noaa-sos-overlays-latlon_grid-white.Enabled",
+      "type": "setPropertyValueSingle",
       "value": "false"
     }
   ],

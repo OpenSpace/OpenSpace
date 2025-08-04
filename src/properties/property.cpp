@@ -24,6 +24,8 @@
 
 #include <openspace/properties/property.h>
 
+#include <openspace/engine/globals.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/properties/propertyowner.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
@@ -52,6 +54,7 @@ Property::Property(PropertyInfo info)
     ghoul_assert(!_guiName.empty(), "guiName must not be empty");
 
     setVisibility(info.visibility);
+    setNeedsConfirmation(info.needsConfirmation);
 }
 
 Property::~Property() {
@@ -101,6 +104,15 @@ std::string Property::groupIdentifier() const {
 void Property::setVisibility(Visibility visibility) {
     _metaData.visibility = visibility;
     notifyMetaDataChangeListeners();
+
+    // We only subscribe to meta data changes for visible properties, so if the
+    // visibility changes during runtime, we need to notify the property owner
+    // about the change for it to affect properties that are currently hidden
+    if (_owner) {
+        global::eventEngine->publishEvent<events::EventPropertyTreeUpdated>(
+            _owner->uri()
+        );
+    }
 }
 
 Property::Visibility Property::visibility() const {
@@ -116,8 +128,8 @@ bool Property::isReadOnly() const {
     return _metaData.readOnly.value_or(false);
 }
 
-void Property::setNeedsConfirmation(bool state) {
-    _metaData.needsConfirmation = state;
+void Property::setNeedsConfirmation(bool needsConfirmation) {
+    _metaData.needsConfirmation = needsConfirmation;
     notifyMetaDataChangeListeners();
 }
 
@@ -158,7 +170,9 @@ Property::OnChangeHandle Property::onDelete(std::function<void()> callback) {
     return handle;
 }
 
-Property::OnMetaDataChangeHandle Property::onMetaDataChange(std::function<void()> callback) {
+Property::OnMetaDataChangeHandle Property::onMetaDataChange(
+                                                           std::function<void()> callback)
+{
     ghoul_assert(callback, "The callback must not be empty");
 
     const OnMetaDataChangeHandle handle = _currentHandleValue++;
@@ -271,24 +285,25 @@ nlohmann::json Property::generateJsonDescription() const {
        { Visibility::Developer, "Developer" },
        { Visibility::Hidden, "Hidden" }
     };
+
     const std::string& vis = VisibilityConverter.at(_metaData.visibility);
     const bool isReadOnly = _metaData.readOnly.value_or(false);
-    const bool needsConfirmation = _metaData.needsConfirmation.value_or(false);
     const std::string groupId = groupIdentifier();
 
     nlohmann::json json = {
+        { "identifier", _identifier },
         { "description", _description },
         { "guiName", _guiName },
         { "group", groupId },
         { "isReadOnly", isReadOnly },
-        { "needsConfirmation", needsConfirmation },
+        { "needsConfirmation", _metaData.needsConfirmation },
         { "type", className() },
         { "visibility", vis }
     };
 
     if (_metaData.viewOptions.size() > 0) {
         nlohmann::json viewOptions = nlohmann::json::object();
-        for (const std::pair<std::string, bool>& p : _metaData.viewOptions) {
+        for (const std::pair<const std::string, bool>& p : _metaData.viewOptions) {
             viewOptions[p.first] = p.second;
         }
         json["viewOptions"] = viewOptions;

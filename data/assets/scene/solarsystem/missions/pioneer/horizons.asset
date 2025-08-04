@@ -32,6 +32,7 @@ local Pioneer10 = {
   GUI = {
     Name = "Pioneer 10 Trail (Horizons)",
     Path = "/Solar System/Missions/Pioneer",
+    Focusable = false,
     Description = [[Pioneer 10 Trail, spanning from March 4th, 1972 to January 1st, 2030.
       Data from JPL Horizons]]
   }
@@ -61,6 +62,7 @@ local Pioneer11 = {
   GUI = {
     Name = "Pioneer 11 Trail (Horizons)",
     Path = "/Solar System/Missions/Pioneer",
+    Focusable = false,
     Description = [[Pioneer 11 Trail, spanning from April 7th, 1973 to January 1st, 2030.
       Data from JPL Horizons]]
   }

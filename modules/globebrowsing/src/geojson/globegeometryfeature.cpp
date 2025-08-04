@@ -115,7 +115,7 @@ bool GlobeGeometryFeature::useHeightMap() const {
 }
 
 void GlobeGeometryFeature::updateTexture(bool isInitializeStep) {
-    std::string texture;
+    std::filesystem::path texture;
     GlobeBrowsingModule* m = global::moduleEngine->module<GlobeBrowsingModule>();
 
     if (!isInitializeStep && _properties.hasOverrideTexture()) {
@@ -144,15 +144,14 @@ void GlobeGeometryFeature::updateTexture(bool isInitializeStep) {
         _pointTexture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
     }
 
-    std::filesystem::path texturePath = absPath(texture);
-    if (std::filesystem::is_regular_file(texturePath)) {
+    if (std::filesystem::is_regular_file(texture)) {
         _hasTexture = true;
         _pointTexture->loadFromFile(texture);
         _pointTexture->uploadToGpu();
     }
     else {
         LERROR(std::format(
-            "Trying to use texture file that does not exist: {}", texturePath
+            "Trying to use texture file that does not exist: {}", texture
         ));
     }
 }

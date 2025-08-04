@@ -1,0 +1,32 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderablenodearrow/nodearrow_appearance.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "SolarSystemBarycenter",
+        "position": [
+          3355567.5645386074,
+          -1077102.5263252764,
+          10612408.751535231
+        ],
+        "pitch": 0.00014846629272829236,
+        "referenceFrame": "Root",
+        "up": [
+          -0.1374122343107596,
+          0.9801476043172428,
+          0.1429284842601172
+        ],
+        "yaw": -0.006137130538056054,
+        "timestamp": "2024 JUL 09 12:00:10"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

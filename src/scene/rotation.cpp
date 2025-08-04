@@ -90,8 +90,10 @@ void Rotation::requireUpdate() {
     _needsUpdate = true;
 }
 
-bool Rotation::initialize() {
-    return true;
+void Rotation::initialize() {
+    if (_timeFrame) {
+        _timeFrame->initialize();
+    }
 }
 
 const glm::dmat3& Rotation::matrix() const {

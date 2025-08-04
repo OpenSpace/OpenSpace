@@ -1,5 +1,5 @@
 local sun = asset.require("scene/solarsystem/sun/transforms")
-local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 
 
@@ -13,11 +13,11 @@ local models = asset.resource({
 
 local Station7BoulderHolder = {
   Identifier = "Station_7_Boulder",
-  Parent = moonAsset.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moonAsset.Moon.Identifier,
+      Globe = moon.Moon.Identifier,
       Longitude = -360 + 30.8165882,
       Latitude = 20.2908556,
       Altitude = -2593.5,

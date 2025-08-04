@@ -103,8 +103,9 @@ bool BrowserClient::FocusHandler::OnSetFocus(CefRefPtr<CefBrowser>, FocusSource)
     return false;
 }
 
-void BrowserClient::LoadHandler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame>,
-    int) {
+void BrowserClient::LoadHandler::OnLoadEnd(CefRefPtr<CefBrowser> browser,
+                                           CefRefPtr<CefFrame>, int)
+{
     // Focus status can be lost. Try to restore it
     if (_hasFocus && browser && browser->GetHost()) {
         browser->GetHost()->SetFocus(true);

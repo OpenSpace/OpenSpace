@@ -22,6 +22,7 @@ local MercuryBarycenterTrail = {
   GUI = {
     Name = "Mercury Barycenter Trail",
     Path = "/Solar System/Planets/Mercury",
+    Focusable = false,
     Description = "Barycenter Trail of Mercury as observed by the Sun"
   }
 }

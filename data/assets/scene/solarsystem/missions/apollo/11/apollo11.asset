@@ -1,7 +1,7 @@
 asset.require("../actions")
 asset.require("./actions")
 local sun = asset.require("scene/solarsystem/sun/transforms")
-local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 local descentKeyframes = asset.require("./lem_descent")
 local descentRotationKeyframes = asset.require("./lem_descent_rotation")
 local kernels = asset.require("./kernels")
@@ -28,7 +28,7 @@ local lemModel = asset.resource({
 
 local Apollo11Position = {
   Identifier = "Apollo11Position",
-  Parent = moonTransforms.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "1969 JUL 19 19:38:29.183",
@@ -83,7 +83,7 @@ local Apollo11Model = {
 
 local Apollo11MoonTrail = {
   Identifier = "Apollo11MoonTrail",
-  Parent = moonTransforms.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = false,
@@ -93,7 +93,7 @@ local Apollo11MoonTrail = {
       Observer = coreKernels.ID.Moon,
       Frame = coreKernels.Frame.Moon
     },
-    Color = { 0.180000,0.510000,0.750000 },
+    Color = { 0.18, 0.51, 0.75 },
     StartTime = "1969 JUL 19 19:38:29.183",
     EndTime = "1969 JUL 22 04:55:35.183",
     SampleInterval = 60,
@@ -101,7 +101,8 @@ local Apollo11MoonTrail = {
   },
   GUI = {
     Name = "Apollo 11 Moon Orbits",
-    Path = "/Solar System/Missions/Apollo/11"
+    Path = "/Solar System/Missions/Apollo/11",
+    Focusable = false
   }
 }
 
@@ -131,12 +132,12 @@ local lemRotation = {
 
 local Apollo11LemTrail = {
   Identifier = "Apollo11LemTrail",
-  Parent = moonTransforms.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = false,
     Translation = lemTranslation,
-    Color = { 0.780000,0.940000,0.340000 },
+    Color = { 0.78, 0.94, 0.34 },
     StartTime = "1969 JUL 20 19:10:25.183",
     EndTime = "1969 JUL 20 20:17:46.183",
     SampleInterval = 2,
@@ -144,13 +145,14 @@ local Apollo11LemTrail = {
   },
   GUI = {
     Name = "Apollo 11 Lunar Lander Trail",
-    Path = "/Solar System/Missions/Apollo/11"
+    Path = "/Solar System/Missions/Apollo/11",
+    Focusable = false
   }
 }
 
 local Apollo11LemPosition = {
   Identifier = "Apollo11LemPosition",
-  Parent = moonTransforms.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "1969 JUL 20 19:10:25.183"

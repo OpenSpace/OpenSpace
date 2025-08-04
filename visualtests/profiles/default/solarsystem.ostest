@@ -1,9 +1,28 @@
 {
   "profile": "default",
   "commands": [
-    { "type": "time", "value": "2019-01-01T00:00:00.00" },
-    { "type": "recording", "value": "solarsystem.osrec" },
-    { "type": "wait", "value": 2 },
-    { "type": "screenshot" }
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Sun",
+        "position": [
+          -3082098992796.97,
+          7510143942216.006,
+          6531725588347.369
+        ],
+        "pitch": 0.00014705044966541295,
+        "referenceFrame": "Root",
+        "up": [
+          0.7634485541647368,
+          0.5728161219067421,
+          -0.29837559489256715
+        ],
+        "yaw": 0.00046890991016960217,
+        "timestamp": "2025 JUN 28 12:24:27"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
   ]
 }

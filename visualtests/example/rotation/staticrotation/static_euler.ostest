@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/rotation/staticrotation/static_euler.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "StaticRotation_Example_Euler",
+        "position": [
+          -0.9261695427564991,
+          -1.3169741196364042,
+          -0.9196738243022521
+        ],
+        "pitch": 1.2129188623614168e-07,
+        "referenceFrame": "Root",
+        "up": [
+          -0.5584544523458155,
+          -0.17370483849247775,
+          0.811144409916901
+        ],
+        "yaw": 1.261254753415434e-07,
+        "timestamp": "2025 JUL 13 12:45:06"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

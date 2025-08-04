@@ -39,7 +39,8 @@ namespace {
  * true, any existing session recording file will be overwritten, false by default.
  */
 [[codegen::luawrap]] void stopRecording(std::filesystem::path recordFilePath,
-                                        std::string dataMode, std::optional<bool> overwrite)
+                                        std::string dataMode,
+                                        std::optional<bool> overwrite)
 {
     if (recordFilePath.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
@@ -61,12 +62,11 @@ namespace {
  * Starts a playback session with keyframe times that are relative to the time since the
  * recording was started (the same relative time applies to the playback). When playback
  * starts, the simulation time is automatically set to what it was at recording time. The
- * string argument is the filename to pull playback keyframes from (the file path is
- * relative to the RECORDINGS variable specified in the config file). If a second input
+ * file argument is the filename to the session recording file. If a second input
  * value of true is given, then playback will continually loop until it is manually
  * stopped.
  */
-[[codegen::luawrap]] void startPlayback(std::string file, bool loop = false,
+[[codegen::luawrap]] void startPlayback(std::filesystem::path file, bool loop = false,
                                         bool shouldWaitForTiles = true,
                                         std::optional<int> screenshotFps = std::nullopt)
 {

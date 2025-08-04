@@ -425,7 +425,7 @@ namespace {
                     throw ghoul::RuntimeError(std::format(
                         "Illformed packed date. Illegal year marker. {}", packedDate
                     ));
-            }; 
+            };
         }(packedDate[0]);
 
         auto yearRes = scn::scan<int>(packedDate.substr(1, 2), "{}");

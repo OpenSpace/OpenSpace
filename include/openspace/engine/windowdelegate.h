@@ -43,6 +43,7 @@ struct WindowDelegate {
     void (*setSynchronization)(bool enabled) = [](bool) {};
 
     bool (*windowHasResized)() = []() { return false; };
+    bool (*anyWindowHasResized)() = []() { return false; };
 
     double (*averageDeltaTime)() = []() { return 0.0; };
 
@@ -130,6 +131,7 @@ struct WindowDelegate {
         [](const glm::vec2&) { return glm::vec2(0); };
 
     void (*setStatisticsGraphScale)(float scale) = [](float) {};
+    void (*setStatisticsGraphOffset)(glm::vec2 offset) = [](glm::vec2) {};
 
     void (*setMouseCursor)(Cursor cursor) = [](Cursor) {};
 };

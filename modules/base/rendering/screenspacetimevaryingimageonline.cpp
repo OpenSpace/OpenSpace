@@ -41,7 +41,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
         "FilePath",
         "File Path",
-        "The file path to the data containing information about when to display which image.",
+        "The file path to the data containing information about when to display which "
+        "image.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -129,7 +130,7 @@ void ScreenSpaceTimeVaryingImageOnline::computeSequenceEndTime() {
     if (_timestamps.size() <= 1) {
         return;
     }
-    
+
     double first = _timestamps.front();
     double last = _timestamps.back();
     double avg = (last - first) / static_cast<double>(_timestamps.size() - 1);
@@ -224,7 +225,7 @@ void ScreenSpaceTimeVaryingImageOnline::loadImage(const std::string& imageUrl) {
     if (_imageFuture.valid()) {
         return;
     }
-    
+
     _imageFuture = global::downloadManager->fetchFile(
         imageUrl,
         [](const DownloadManager::MemoryFile&) {},

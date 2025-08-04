@@ -84,7 +84,7 @@ private:
             /// Selects which point to remove
             properties::OptionProperty removeSelector;
             /// Removes a point
-            properties::TriggerProperty removeButton;            
+            properties::TriggerProperty removeButton;
         };
 
         class Corners : public properties::PropertyOwner {

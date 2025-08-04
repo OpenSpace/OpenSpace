@@ -1,0 +1,38 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderablemodel/model_vertex_colors.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.RenderableModel_Example_Vertex_Colors.Renderable.AmbientIntensity",
+        "value": 0.8999999761581421
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderableModel_Example_Vertex_Colors",
+        "position": [
+          -0.08291515254698595,
+          0.2773725017433253,
+          2.530399822442419
+        ],
+        "pitch": -0.00023949122187149827,
+        "up": [
+          0.0086031315227578,
+          0.9940394706288581,
+          -0.10868080308822567
+        ],
+        "yaw": -0.005947437777884785,
+        "timestamp": "2024 JUL 09 12:00:10"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

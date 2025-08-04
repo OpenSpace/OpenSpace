@@ -391,6 +391,7 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
         LINFO("Assuming default value 1, meaning Emin03");
         _goesEnergyBins.setValue(1);
     }
+    setupProperties();
 }
 
 void RenderableFluxNodes::initialize() {
@@ -420,7 +421,6 @@ void RenderableFluxNodes::initializeGL() {
 
     // Needed for alpha transparency
     setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
-    setupProperties();
 }
 
 void RenderableFluxNodes::definePropertyCallbackFunctions() {

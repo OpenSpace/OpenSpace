@@ -37,7 +37,7 @@ class Syncable;
 
 /**
  * Manages a collection of `Syncable`s and ensures they are synchronized over SGCT nodes.
- * Encoding/Decoding order is handles internally.
+ * Encoding/Decoding order is handled internally.
  */
 class SyncEngine {
 public:
