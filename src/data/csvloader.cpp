@@ -281,8 +281,7 @@ std::vector<Dataset::Texture> loadTextureMapFile(std::filesystem::path path,
             throw ghoul::RuntimeError(std::format(
                 "Error loading texture map file {}: Line {} has too many parameters. "
                 "Expected 2: an integer index followed by a filename, where the file "
-                "name may not include whitespaces",
-                path, currentLineNumber
+                "name may not include whitespaces", path, currentLineNumber
             ));
         }
 

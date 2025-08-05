@@ -137,7 +137,6 @@ extractSeedPointsFromFiles(std::filesystem::path path, size_t nth)
         throw ghoul::RuntimeError(std::format(
             "The specified seed point directory: '{}' does not exist", path
         ));
-        return outMap;
     }
 
     namespace fs = std::filesystem;

@@ -83,9 +83,9 @@ void SingleImageProvider::reset() {
 
     _tileTexture = ghoul::io::TextureReader::ref().loadTexture(_filePath.value(), 2);
     if (!_tileTexture) {
-        throw ghoul::RuntimeError(
-            std::format("Unable to load texture '{}'", _filePath.value())
-        );
+        throw ghoul::RuntimeError(std::format(
+            "Unable to load texture '{}'", _filePath.value()
+        ));
     }
 
     _tileTexture->uploadTexture();

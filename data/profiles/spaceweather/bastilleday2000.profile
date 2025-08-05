@@ -111,13 +111,13 @@
     "author": "CCMC",
     "description": "This profile is showing the Coronal mass ejection of the bastille day 2000-07-14. The profile is data intensive and will require a powerful GPU.",
     "license": "MIT License",
-    "name": "Bastille day 2000",
+    "name": "Bastille Day 2000",
     "url": "https://www.openspaceproject.com",
     "version": "1.1"
   },
   "properties": [
     {
-      "name": "{earth_satellites}.Renderable.Enabled",
+      "name": "{earth_satellites~space_stations}.Renderable.Enabled",
       "type": "setPropertyValue",
       "value": "false"
     },

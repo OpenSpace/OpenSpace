@@ -1,12 +1,7 @@
 local ToggleLagrangianPoints = {
   Identifier = "os.jwst.ToggleLagrangianPoints",
   Name = "Toggle Lagrangian points",
-  Command = [[
-    local list = openspace.property("{lagrange_points_earth}.Renderable.Enabled")
-    for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
-    end
-  ]],
+  Command = [[openspace.toggleFade("{lagrange_points_earth}.Renderable")]],
   Documentation = "Toggle points and labels for the Lagrangian points for Earth Sun system",
   GuiPath = "/JWST",
   IsLocal = false
@@ -15,11 +10,11 @@ local ToggleLagrangianPoints = {
 local ToggleHudf = {
   Identifier = "os.jwst.ToggleHudf",
   Name = "Toggle Hubble Ultra Deep Field",
+  -- The tag used here matches both a screenspace renderable and a scene graph node,
+  -- hence the need for the double toggleFade
   Command = [[
-    local list = openspace.property("{mission_jwst_hudf}.*.Enabled")
-    for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
-    end
+    openspace.toggleFade("{mission_jwst_hudf}")
+    openspace.toggleFade("{mission_jwst_hudf}.Renderable")
   ]],
   Documentation = "Toggle Hubble Ultra Deep Field image and line towards its coordinate",
   GuiPath = "/JWST",
@@ -29,12 +24,7 @@ local ToggleHudf = {
 local ToggleL2 = {
   Identifier = "os.jwst.ToggleL2",
   Name = "Toggle L2 line and small L2 label",
-  Command = [[
-    local list = openspace.property("{lagrange_points_earth_l2_small}.*.Enabled")
-    for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
-    end
-  ]],
+  Command = [[openspace.toggleFade("{lagrange_points_earth_l2_small}.Renderable")]],
   Documentation = "Toggle L2 label, point and line",
   GuiPath = "/JWST",
   IsLocal = false
@@ -43,12 +33,7 @@ local ToggleL2 = {
 local ToggleFov = {
   Identifier = "os.jwst.ToggleFov",
   Name = "Toggle JWST field of view and view band",
-  Command = [[
-    local list = openspace.property("{mission_jwst_fov}.*.Enabled")
-    for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
-    end
-  ]],
+  Command = [[openspace.toggleFade("{mission_jwst_fov}.Renderable")]],
   Documentation = "Toggle James Webb Space Telecope field of view and view band",
   GuiPath = "/JWST",
   IsLocal = false
@@ -82,8 +67,7 @@ local ToggleSunTrail = {
   Identifier = "os.jwst.ToggleSunTrail",
   Name = "Toggle JWST Sun trail",
   Command = [[
-    local value = openspace.propertyValue("Scene.JWSTSunTrail.Renderable.Enabled")
-    openspace.setPropertyValueSingle("Scene.JWSTSunTrail.Renderable.Enabled", not value)
+    openspace.toggleFade("Scene.JWSTSunTrail.Renderable")
   ]],
   Documentation = "Toggle JWST trail relative to the Sun",
   GuiPath = "/JWST",
@@ -94,15 +78,8 @@ local ToggleTrailsExceptMoon = {
   Identifier = "os.jwst.ToggleTrailsExceptMoon",
   Name = "Toggle trails (except Moon)",
   Command = [[
-    local list = openspace.property("{planetTrail_solarSystem}.Renderable.Enabled")
-    for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
-    end
-    local moonlist = openspace.property("{moonTrail_solarSystem}.Renderable.Enabled")
-    for _,v in pairs(moonlist) do
-      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
-    end
-    openspace.setPropertyValueSingle("Scene.MoonTrail.Renderable.Enabled", true)
+    openspace.toggleFade("{planetTrail_solarSystem}.Renderable")
+    openspace.toggleFade("{moonTrail_solarSystem~moon_earth}.Renderable")
   ]],
   Documentation = "Toggle all planet and moon trails, except the Moon",
   GuiPath = "/JWST",
@@ -113,14 +90,9 @@ local ToggleJwstTrails = {
   Identifier = "os.jwst.ToggleJwstTrails",
   Name = "Toggle JWST trail",
   Command = [[
-    local list = {
-      "Scene.JWSTTrailLaunch.Renderable.Enabled",
-      "Scene.JWSTTrailCruise.Renderable.Enabled",
-      "Scene.JWSTTrailCoRevOrbit.Renderable.Enabled"
-    }
-    for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
-    end
+    openspace.toggleFade("Scene.JWSTTrailLaunch.Renderable")
+    openspace.toggleFade("Scene.JWSTTrailCruise.Renderable")
+    openspace.toggleFade("Scene.JWSTTrailCoRevOrbit.Renderable")
   ]],
   Documentation = "Toggle JWST launch, cruise and L2 co-revolving orbit trails, not the Sun trail",
   GuiPath = "/JWST",

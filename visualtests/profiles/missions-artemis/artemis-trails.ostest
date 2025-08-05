@@ -1,0 +1,46 @@
+{
+  "profile": "missions/artemis",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Earth",
+        "position": [
+          -390912585.5154724,
+          1166411653.8552532,
+          361086033.5951462
+        ],
+        "pitch": 0.008790521819658767,
+        "referenceFrame": "Root",
+        "up": [
+          -0.9519324580090529,
+          -0.2820438300421739,
+          -0.11948168614471805
+        ],
+        "yaw": 0.0017769462801508562,
+        "timestamp": "2022 DEC 12 20:39:57"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.ArtemisEarthTrail.Renderable.Appearance.EnableFade",
+        "value": false
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.ArtemisMoonTrail.Renderable.Appearance.EnableFade",
+        "value": false
+      }
+    },
+    {
+      "type": "wait",
+      "value": 30
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

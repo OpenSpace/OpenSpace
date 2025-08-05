@@ -1238,7 +1238,7 @@ void RenderEngine::renderVersionInformation() {
         if (global::versionChecker->hasLatestVersionInfo()) {
             VersionChecker::SemanticVersion ver = global::versionChecker->latestVersion();
 
-            std::string versionString = std::string(OPENSPACE_VERSION_STRING_FULL);
+            std::string versionString = std::string(OPENSPACE_VERSION);
             const VersionChecker::SemanticVersion current {
                 OPENSPACE_VERSION_MAJOR,
                 OPENSPACE_VERSION_MINOR,
@@ -1259,11 +1259,11 @@ void RenderEngine::renderVersionInformation() {
             );
         }
         else {
-            versionBox = _fontVersionInfo->boundingBox(OPENSPACE_VERSION_STRING_FULL);
+            versionBox = _fontVersionInfo->boundingBox(OPENSPACE_VERSION);
             FR::defaultRenderer().render(
                 *_fontVersionInfo,
                 glm::vec2(fontResolution().x - versionBox.x - 10.f, 5.f),
-                OPENSPACE_VERSION_STRING_FULL,
+                OPENSPACE_VERSION,
                 glm::vec4(0.5f, 0.5f, 0.5f, 1.f)
             );
         }

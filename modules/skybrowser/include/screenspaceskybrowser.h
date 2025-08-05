@@ -107,7 +107,7 @@ private:
 
     bool _borderColorIsDirty = false;
     bool _equatorialAimIsDirty = false;
-    bool _isDimensionsDirty = false;
+    bool _isBrowserDimensionsDirty = false;
 
     // Flags
     bool _isInitialized = false;

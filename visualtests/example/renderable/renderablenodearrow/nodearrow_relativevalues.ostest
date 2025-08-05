@@ -1,0 +1,31 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderablenodearrow/nodearrow_relativevalues.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderableNodeArrow_Example_Relative",
+        "position": [
+          70243395.33882928,
+          -7421101.627657054,
+          1084772.29507253
+        ],
+        "pitch": -0.0003364018728700039,
+        "up": [
+          -0.03810795710507466,
+          -0.21816122228651805,
+          0.9751684288858669
+        ],
+        "yaw": -0.005925726869286021,
+        "timestamp": "2024 JUL 09 12:00:10"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

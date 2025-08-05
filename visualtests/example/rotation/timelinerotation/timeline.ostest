@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/rotation/timelinerotation/timeline.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "TimelineRotation_Example",
+        "position": [
+          1.3286703973866394,
+          1.148222874224094,
+          -1.2735560937013664
+        ],
+        "pitch": 1.139264446392363e-07,
+        "referenceFrame": "Root",
+        "up": [
+          -0.5171613857782453,
+          -0.2933682320948763,
+          -0.8040392909910881
+        ],
+        "yaw": 1.1846655573190934e-07,
+        "timestamp": "2000 JAN 01 10:00:00"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

@@ -1,7 +1,4 @@
 {
-  "additional_scripts": [
-    "openspace.setPropertyValue(\"Scene.MoonTrail.Renderable.Appearance.Color\", {0.7, 0.5, 0.5});"
-  ],
   "assets": [
     "base",
     "base_keybindings",
@@ -133,7 +130,7 @@
   },
   "properties": [
     {
-      "name": "{earth_satellites}.Renderable.Enabled",
+      "name": "{earth_satellites~space_stations}.Renderable.Enabled",
       "type": "setPropertyValue",
       "value": "false"
     },
@@ -248,9 +245,14 @@
       "value": "false"
     },
     {
-      "name": "Scene.Earth.Renderable.Layers.ColorLayers.VIIRS_NOAA20_Temporal.Enabled",
+      "name": "Scene.Earth.Renderable.Layers.ColorLayers.Temporal_NOAA20_VIIRS.Enabled",
       "type": "setPropertyValueSingle",
       "value": "true"
+    },
+    {
+      "name": "Scene.MoonTrail.Renderable.Appearance.Color",
+      "type": "setPropertyValueSingle",
+      "value": "{0.7, 0.5, 0.5}"
     }
   ],
   "time": {

@@ -257,7 +257,7 @@ void ScreenSpaceSkyBrowser::updateTextureResolution() {
 
     // The radius has to be updated when the texture resolution has changed
     _radiusIsDirty = true;
-    _isDimensionsDirty = false;
+    _isBrowserDimensionsDirty = false;
     _borderRadiusTimer = 0;
 }
 
@@ -457,7 +457,7 @@ void ScreenSpaceSkyBrowser::update() {
     }
 
     // Check for dirty flags
-    if (_isDimensionsDirty) {
+    if (_isBrowserDimensionsDirty) {
         updateTextureResolution();
     }
     // After the texture has been updated, wait a little bit before updating the border
@@ -490,7 +490,7 @@ void ScreenSpaceSkyBrowser::setBorderRadius(double radius) {
 
 void ScreenSpaceSkyBrowser::setRatio(double ratio) {
     _radiusIsDirty = true;
-    _isDimensionsDirty = true;
+    _isBrowserDimensionsDirty = true;
     _dimensions = glm::uvec2(
         static_cast<unsigned int>(_dimensions.value().y * ratio),
         _dimensions.value().y

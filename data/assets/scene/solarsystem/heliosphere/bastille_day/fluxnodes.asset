@@ -35,23 +35,7 @@ local ToggleFluxnodes = {
   Identifier = "os.bastilleday.fluxnodes.ToggleFluxnodes",
   Name = "Toggle flux nodes",
   Command = [[
-    if openspace.propertyValue("Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Enabled") then
-      openspace.setPropertyValueSingle(
-        "Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Fade",
-        0.0,
-        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
-        "Linear",
-        'openspace.setPropertyValueSingle("Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Enabled", false)'
-      )
-    else
-      openspace.setPropertyValueSingle("Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Enabled", true)
-      openspace.setPropertyValueSingle(
-        "Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Fade",
-        1.0,
-        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
-        "Linear"
-      )
-    end
+    openspace.toggleFade("Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable")
   ]],
   Documentation = "Toggle flux node rendering of CME",
   GuiPath = "/Bastille-Day 2000",

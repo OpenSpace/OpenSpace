@@ -26,6 +26,7 @@
 
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <geos/io/GeoJSON.h>
 #include <scn/scan.h>
@@ -386,7 +387,7 @@ GeoJsonProperties::Tessellation::Tessellation()
 }
 
 GeoJsonProperties::GeoJsonProperties()
-    : properties::PropertyOwner({ "DefaultProperties" })
+    : properties::PropertyOwner({ "DefaultProperties", "Default Properties" })
     , opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , fillOpacity(FillOpacityInfo, 0.7f, 0.f, 1.f)
@@ -527,7 +528,8 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
             result.pointSize = static_cast<float>(value.getNumber());
         }
         else if (keyMatches(key, propertykeys::Texture, PointTextureInfo)) {
-            result.pointTexture = value.getString();
+            std::string texture = value.getString();
+            result.pointTexture = absPath(texture);
         }
         else if (keyMatches(key, propertykeys::PointTextureAnchor, PointAnchorOptionInfo))
         {
@@ -628,8 +630,8 @@ float PropertySet::pointSize() const {
     return overrideValues.pointSize.value_or(defaultValues.pointSize);
 }
 
-std::string PropertySet::pointTexture() const {
-    return overrideValues.pointTexture.value_or(defaultValues.pointTexture);
+std::filesystem::path PropertySet::pointTexture() const {
+    return overrideValues.pointTexture.value_or(defaultValues.pointTexture.value());
 }
 
 GeoJsonProperties::PointTextureAnchor PropertySet::pointTextureAnchor() const {

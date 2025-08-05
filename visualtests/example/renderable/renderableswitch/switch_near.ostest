@@ -1,0 +1,30 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderableswitch/switch_near.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderableSwitch_Example-Near",
+        "position": [
+          21473563910.440933,
+          -101581862250.76094,
+          744753747002.7205
+        ],
+        "referenceFrame": "Root",
+        "up": [
+          0.043890772085134776,
+          0.9900396531787756,
+          0.13377251309376073
+        ],
+        "timestamp": "2025 JUL 13 12:44:30"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

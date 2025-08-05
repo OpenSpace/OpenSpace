@@ -210,9 +210,9 @@ namespace {
             e += ".0";
         }
         if (e.size() <= 2) {
-            throw ghoul::RuntimeError(
-                std::format("Error parsing epoch '{}'. Invalid date string", epoch)
-            );
+            throw ghoul::RuntimeError(std::format(
+                "Error parsing epoch '{}'. Invalid date string", epoch
+            ));
         }
 
         std::string_view yearStr = std::string_view(e).substr(0, 2);

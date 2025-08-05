@@ -1,0 +1,30 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderabletravelspeed/travelspeed.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderableTravelSpeed_Example",
+        "position": [
+          -126158731.7913208,
+          -111363957.81072998,
+          507317981.489769
+        ],
+        "referenceFrame": "Root",
+        "up": [
+          0.9619224667383646,
+          -0.18862448138129917,
+          0.19780286400255834
+        ],
+        "timestamp": "2025 JUL 13 12:45:06"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

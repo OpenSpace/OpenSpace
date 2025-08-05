@@ -32,7 +32,7 @@ local Object = {
       ColorMapping = {
         File = speck .. "localgroup.cmap",
         ParameterOptions = {
-          { Key = "association" }
+          { Key = "association", Range = { 0, 4 } }
         }
       }
     },

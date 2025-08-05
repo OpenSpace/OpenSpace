@@ -77,12 +77,10 @@ asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(HUDFImage)
 
   openspace.addSceneGraphNode(HUDFPosition)
-  openspace.addSceneGraphNode(HUDFImage)
   openspace.addSceneGraphNode(HUDFJWSTLine)
 end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(HUDFPosition)
-  openspace.removeSceneGraphNode(HUDFImage)
   openspace.removeSceneGraphNode(HUDFJWSTLine)
 
   openspace.removeScreenSpaceRenderable(HUDFImage)

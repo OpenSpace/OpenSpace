@@ -1,0 +1,35 @@
+{
+  "profile": "default",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Sun",
+        "position": [
+          5.338814831483658e+16,
+          2.442952318908047e+16,
+          9842305366413544.0
+        ],
+        "pitch": -0.0011556405151879774,
+        "referenceFrame": "Root",
+        "up": [
+          -0.4405002770609792,
+          0.7934775096238351,
+          0.41994398153843965
+        ],
+        "yaw": 0.005834675237207817,
+        "timestamp": "2025 JUN 29 15:20:55"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Constellations.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

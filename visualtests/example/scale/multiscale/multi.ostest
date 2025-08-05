@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/scale/multiscale/multi.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "MultiScale_Example",
+        "position": [
+          2.228003414075766,
+          1.9077120816430038,
+          -0.35343191901244525
+        ],
+        "pitch": 1.0411423631560367e-07,
+        "referenceFrame": "Root",
+        "up": [
+          -0.16481956358155797,
+          0.009769482746131208,
+          -0.9862753513434562
+        ],
+        "yaw": 1.082633208637964e-07,
+        "timestamp": "2000 JAN 01 10:00:00"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

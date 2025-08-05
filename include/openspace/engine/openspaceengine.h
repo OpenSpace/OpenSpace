@@ -135,7 +135,9 @@ public:
     LoadingScreen* loadingScreen();
 
     void invalidatePropertyCache();
+    void invalidatePropertyOwnerCache();
     const std::vector<properties::Property*>& allProperties() const;
+    const std::vector<properties::PropertyOwner*>& allPropertyOwners() const;
 
     void createUserDirectoriesIfNecessary();
 
@@ -156,6 +158,7 @@ private:
 
     properties::BoolProperty _printEvents;
     properties::OptionProperty _visibility;
+    properties::BoolProperty _showPropertyConfirmationDialog;
     properties::FloatProperty _fadeOnEnableDuration;
     properties::BoolProperty _disableAllMouseInputs;
 
@@ -182,6 +185,9 @@ private:
 
     mutable bool _isAllPropertiesCacheDirty = true;
     mutable std::vector<properties::Property*> _allPropertiesCache;
+
+    mutable bool _isAllPropertyOwnersCacheDirty = true;
+    mutable std::vector<properties::PropertyOwner*> _allPropertyOwnersCache;
 };
 
 /**

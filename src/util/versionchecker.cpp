@@ -65,7 +65,7 @@ void VersionChecker::requestLatestVersion(const std::string& url) {
 
     std::string fullUrl = std::format(
         "{}?client_version={}&commit_hash={}&operating_system={}&profile={}",
-        url, OPENSPACE_VERSION_NUMBER, OPENSPACE_GIT_COMMIT, operatingSystem, profile
+        url, OPENSPACE_VERSION, OPENSPACE_GIT_COMMIT, operatingSystem, profile
     );
 
     if (_request) {

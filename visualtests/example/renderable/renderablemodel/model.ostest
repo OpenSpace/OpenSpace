@@ -1,0 +1,31 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderablemodel/model.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderableModel_Example",
+        "position": [
+          1.2677080222016937,
+          -1.6100306391786103,
+          0.9002225746248643
+        ],
+        "pitch": -0.00023949122186478687,
+        "up": [
+          -0.15683904344281488,
+          0.3850289907801695,
+          0.9094801760955251
+        ],
+        "yaw": -0.005947437777891253,
+        "timestamp": "2025 JUL 13 11:13:28"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

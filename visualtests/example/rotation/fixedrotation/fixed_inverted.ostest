@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/rotation/fixedrotation/fixed_inverted.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "FixedRotation_Example_InvertedAxis",
+        "position": [
+          -1.4166081754315842,
+          -2.6961558490430546,
+          1.8480414280473183
+        ],
+        "pitch": 1.1423456297565768e-07,
+        "referenceFrame": "Root",
+        "up": [
+          0.7890135515499571,
+          -0.5706274209510578,
+          -0.22768829993934236
+        ],
+        "yaw": -2.1209892553387453e-07,
+        "timestamp": "2025 JUL 13 12:45:06"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

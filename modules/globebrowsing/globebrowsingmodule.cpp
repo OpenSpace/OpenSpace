@@ -496,8 +496,8 @@ bool GlobeBrowsingModule::hasDefaultGeoPointTexture() const {
     return _hasDefaultGeoPointTexture;
 }
 
-std::string_view GlobeBrowsingModule::defaultGeoPointTexture() const {
-    return _defaultGeoPointTexturePath;
+std::filesystem::path GlobeBrowsingModule::defaultGeoPointTexture() const {
+    return _defaultGeoPointTexturePath.value();
 }
 
 scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {

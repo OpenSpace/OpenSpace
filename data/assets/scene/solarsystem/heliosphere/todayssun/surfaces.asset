@@ -107,7 +107,8 @@ local WSA_54_Magnetograms_GONGZ = {
       ['1'] = "Flux tube expansion factor evaluated at the source surface",
       ['4'] = "Observed Photospheric Field (Gauss)",
       ['5'] = "Distance from open field footpoint to nearest coronal boundary (deg)",
-      ['6'] = "Open (1,2,3) and closed (0) regions on the photosphere [1=in-to-out tracing; 2=out-to-in tracing; 3=both] (no units)",
+      ['6'] = [[Open (1,2,3) and closed (0) regions on the photosphere [1=in-to-out
+        tracing; 2=out-to-in tracing; 3=both] (no units)]],
       ['7'] = "Distance to current sheet at outer boundary (degrees)"
     },
     LayerMinMaxCapValues = {
@@ -147,7 +148,8 @@ local WSA_54_Magnetograms_ADAPT = {
       ['1'] = "Flux tube expansion factor evaluated at the source surface",
       ['4'] = "Observed Photospheric Field (Gauss)",
       ['5'] = "Distance from open field footpoint to nearest coronal boundary (deg)",
-      ['6'] = "Open (1,2,3) and closed (0) regions on the photosphere [1=in-to-out tracing; 2=out-to-in tracing; 3=both] (no units)",
+      ['6'] = [[Open (1,2,3) and closed (0) regions on the photosphere [1=in-to-out
+        tracing; 2=out-to-in tracing; 3=both] (no units)]],
       ['7'] = "Distance to current sheet at outer boundary (degrees)"
     },
     LayerMinMaxCapValues = {

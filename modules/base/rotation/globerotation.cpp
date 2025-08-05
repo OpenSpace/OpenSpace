@@ -181,11 +181,6 @@ void GlobeRotation::setUpdateVariables() {
 glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitude) const {
     ghoul_assert(_attachedNode, "Attached node cannot be nullptr");
 
-    const Geodetic3 pos = {
-        { .lat = glm::radians(latitude), .lon = glm::radians(longitude) },
-        altitudeFromCamera(*_attachedNode)
-    };
-
     const glm::vec3 groundPos = cartesianCoordinatesFromGeo(
         *_attachedNode,
         latitude,

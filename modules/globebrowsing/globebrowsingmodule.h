@@ -90,7 +90,7 @@ public:
     std::string mrfCacheLocation() const;
 
     bool hasDefaultGeoPointTexture() const;
-    std::string_view defaultGeoPointTexture() const;
+    std::filesystem::path defaultGeoPointTexture() const;
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;

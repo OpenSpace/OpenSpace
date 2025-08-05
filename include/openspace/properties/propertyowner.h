@@ -139,6 +139,15 @@ public:
     std::vector<Property*> propertiesRecursive() const;
 
     /**
+     * Returns a list of all PropertyOwners directly or indirectly owned by this
+     * PropertyOwner.
+     *
+     * \return A list of all PropertyOwners directly or indirectly owned by this
+     *         PropertyOwner
+     */
+    std::vector<PropertyOwner*> subownersRecursive() const;
+
+    /**
      * Retrieves a Property identified by \p uri from this PropertyOwner. If \p uri does
      * not contain a `.`  it is an identifier and must refer to a Property directly owned
      * by this PropertyOwner. If the identifier contains one or more `.`, the first part
@@ -338,9 +347,14 @@ protected:
     /// Collection of string tag(s) assigned to this property
     std::vector<std::string> _tags;
 
+    /// A cached version of the full URI of this property owner, which includes the
+    /// identifiers of all owners
+    std::string _uriCache;
+    bool _isUriCacheDirty = true;
 
 private:
-    /// Will regenerate the uri caches for all directly or indirectly owned properties
+    /// Will regenerate the uri caches for this property owner and all directly or
+    /// indirectly owned properties
     void updateUriCaches();
 };
 

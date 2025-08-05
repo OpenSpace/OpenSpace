@@ -78,11 +78,11 @@ namespace {
 
             constexpr int ArchitectureSize = 128;
             std::array<char, ArchitectureSize> architecture;
-            std::memset(architecture.data(), ArchitectureSize, 0);
+            std::memset(architecture.data(), 0, ArchitectureSize);
 
             constexpr int TypeSize = 16;
             std::array<char, TypeSize> type;
-            std::memset(type.data(), TypeSize, 0);
+            std::memset(type.data(), 0, TypeSize);
 
             getfat_c(
                 k.c_str(),
@@ -214,11 +214,11 @@ namespace {
 
             constexpr int ArchitectureSize = 128;
             std::array<char, ArchitectureSize> architecture;
-            std::memset(architecture.data(), ArchitectureSize, 0);
+            std::memset(architecture.data(), 0, ArchitectureSize);
 
             constexpr int TypeSize = 16;
             std::array<char, TypeSize> type;
-            std::memset(type.data(), TypeSize, 0);
+            std::memset(type.data(), 0, TypeSize);
 
             getfat_c(
                 k.c_str(),

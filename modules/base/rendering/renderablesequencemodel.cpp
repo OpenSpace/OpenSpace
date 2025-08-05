@@ -339,8 +339,18 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _modelTransform(
         ModelTransformInfo,
         glm::dmat4(1.0),
-        glm::dmat4(-1.0),
-        glm::dmat4(1.0)
+        glm::dmat4(
+            -1.0, -1.0, -1.0, -1.0,
+            -1.0, -1.0, -1.0, -1.0,
+            -1.0, -1.0, -1.0, -1.0,
+            -1.0, -1.0, -1.0, -1.0
+        ),
+        glm::dmat4(
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0
+        )
     )
     , _pivot(
         PivotInfo,
