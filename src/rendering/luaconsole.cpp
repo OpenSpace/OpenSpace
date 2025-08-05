@@ -45,6 +45,7 @@
 
 namespace {
     constexpr std::string_view HistoryFile = "ConsoleHistory";
+    constexpr std::string_view JumpCharacters = ".,'/()";
 
     constexpr int NoAutoComplete = -1;
 
@@ -262,6 +263,8 @@ void LuaConsole::initialize() {
             parallelConnectionChanged(status);
         }
     );
+
+    registerKeyHandlers();
 }
 
 void LuaConsole::deinitialize() {
@@ -348,255 +351,26 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         return false;
     }
 
-    if (key == Key::Escape) {
-        _isVisible = false;
+
+    KeyWithModifier keyCombination{ key, modifier };
+
+    // Call the registered function for the key combination pressed
+    auto it = _keyHandlers.find(keyCombination);
+    if (it != _keyHandlers.end()) {
+        it->second(); 
         return true;
     }
 
-    // Paste from clipboard
-    if (modifierControl && (key == Key::V || key == Key::Y)) {
-        addToCommand(sanitizeInput(ghoul::clipboardText()));
-        return true;
-    }
-
-    // Copy to clipboard
-    if (modifierControl && key == Key::C) {
-        ghoul::setClipboardText(_commands.at(_activeCommand));
-        return true;
-    }
-
-    // Cut to clipboard
-    if (modifierControl && key == Key::X) {
-        ghoul::setClipboardText(_commands.at(_activeCommand));
-        _commands.at(_activeCommand).clear();
-        _inputPosition = 0;
-    }
-
-    // Cut part after cursor to clipboard ("Kill")
-    if (modifierControl && key == Key::K) {
-        auto here = _commands.at(_activeCommand).begin() + _inputPosition;
-        auto end = _commands.at(_activeCommand).end();
-        ghoul::setClipboardText(std::string(here, end));
-        _commands.at(_activeCommand).erase(here, end);
-    }
-
-    // Go to the previous character
-    if (key == Key::Left || (modifierControl && key == Key::B)) {
-        if (_inputPosition > 0) {
-            --_inputPosition;
-        }
-        return true;
-    }
-
-    // Go to the next character
-    if (key == Key::Right || (modifierControl && key == Key::F)) {
-        _inputPosition = std::min(
-            _inputPosition + 1,
-            _commands.at(_activeCommand).length()
-        );
-        return true;
-    }
-
-    // Go to the previous '.' character
-    if (modifierControl && key == Key::Left) {
-        std::string current = _commands.at(_activeCommand);
-        std::reverse(current.begin(), current.end());
-        auto it = current.find('.', current.size() - (_inputPosition - 1));
-        if (it != std::string::npos) {
-            _inputPosition = current.size() - it;
-        }
-        else {
-            _inputPosition = 0;
-        }
-    }
-
-    // Go to the next '.' character
-    if (modifierControl && key == Key::Right) {
-        auto it = _commands.at(_activeCommand).find('.', _inputPosition);
-        if (it != std::string::npos) {
-            _inputPosition = it + 1;
-        }
-        else {
-            _inputPosition = _commands.at(_activeCommand).size();
-        }
-    }
-
-    // Go to previous command
-    if (key == Key::Up) {
-        if (_activeCommand > 0) {
-            --_activeCommand;
-        }
-        _inputPosition = _commands.at(_activeCommand).length();
-        return true;
-    }
-
-    // Go to next command (the last is empty)
-    if (key == Key::Down) {
-        if (_activeCommand < _commands.size() - 1) {
-            ++_activeCommand;
-        }
-        _inputPosition = _commands.at(_activeCommand).length();
-        return true;
-    }
-
-    // Remove character before _inputPosition
-    if (key == Key::BackSpace) {
-        if (_inputPosition > 0) {
-            _commands.at(_activeCommand).erase(_inputPosition - 1, 1);
-            --_inputPosition;
-        }
-        return true;
-    }
-
-    // Remove character after _inputPosition
-    if (key == Key::Delete) {
-        if (_inputPosition <= _commands.at(_activeCommand).size()) {
-            _commands.at(_activeCommand).erase(_inputPosition, 1);
-        }
-        return true;
-    }
-
-    // Go to the beginning of command string
-    if (key == Key::Home || (modifierControl && key == Key::A)) {
-        _inputPosition = 0;
-        return true;
-    }
-
-    // Go to the end of command string
-    if (key == Key::End || (modifierControl && key == Key::E)) {
-        _inputPosition = _commands.at(_activeCommand).size();
-        return true;
-    }
-
-    if (key == Key::Enter || key == Key::KeypadEnter) {
-        const std::string cmd = _commands.at(_activeCommand);
-        if (!cmd.empty()) {
-            using Script = scripting::ScriptEngine::Script;
-            global::scriptEngine->queueScript({
-                .code = cmd,
-                .synchronized = Script::ShouldBeSynchronized(_shouldBeSynchronized),
-                .sendToRemote = Script::ShouldSendToRemote(_shouldSendToRemote)
-            });
-
-            // Only add the current command to the history if it hasn't been
-            // executed before. We don't want two of the same commands in a row
-            if (_commandsHistory.empty() || (cmd != _commandsHistory.back())) {
-                _commandsHistory.push_back(_commands.at(_activeCommand));
-            }
-        }
-
-        // Some clean up after the execution of the command
-        _commands = _commandsHistory;
-        _commands.emplace_back("");
-        _activeCommand = _commands.size() - 1;
-        _inputPosition = 0;
-        return true;
-    }
-
-    if (key == Key::Tab) {
-        // We get a list of all the available commands and initially find the first
-        // command that starts with how much we typed sofar. We store the index so
-        // that in subsequent "tab" presses, we will discard previous commands. This
-        // implements the 'hop-over' behavior. As soon as another key is pressed,
-        // everything is set back to normal
-
-        // If the shift key is pressed, we decrement the current index so that we will
-        // find the value before the one that was previously found
-        if (_autoCompleteInfo.lastIndex != NoAutoComplete && modifierShift) {
-            _autoCompleteInfo.lastIndex -= 2;
-        }
-        std::vector<std::string> allCommands = global::scriptEngine->allLuaFunctions();
-        std::sort(allCommands.begin(), allCommands.end());
-
-        const std::string currentCommand = _commands.at(_activeCommand);
-
-        // Check if it is the first time the tab has been pressed. If so, we need to
-        // store the already entered command so that we can later start the search
-        // from there. We will overwrite the 'currentCommand' thus making the storage
-        // necessary
-        if (!_autoCompleteInfo.hasInitialValue) {
-            _autoCompleteInfo.initialValue = currentCommand;
-            _autoCompleteInfo.hasInitialValue = true;
-        }
-
-        for (int i = 0; i < static_cast<int>(allCommands.size()); i++) {
-            const std::string& command = allCommands[i];
-
-            // Check if the command has enough length (we don't want crashes here)
-            // Then check if the iterator-command's start is equal to what we want
-            // then check if we need to skip the first found values as the user has
-            // pressed TAB repeatedly
-            const size_t fullLength = _autoCompleteInfo.initialValue.length();
-            const bool correctLength = command.length() >= fullLength;
-
-            const std::string commandLowerCase = ghoul::toLowerCase(command);
-
-            const std::string initialValueLowerCase = ghoul::toLowerCase(
-                _autoCompleteInfo.initialValue
-            );
-
-            const bool correctCommand =
-                commandLowerCase.substr(0, fullLength) == initialValueLowerCase;
-
-            if (correctLength && correctCommand && (i > _autoCompleteInfo.lastIndex)) {
-                // We found our index, so store it
-                _autoCompleteInfo.lastIndex = i;
-
-                // We only want to auto-complete until the next separator "."
-                const size_t pos = command.find('.', fullLength);
-                if (pos == std::string::npos) {
-                    // If we don't find a separator, we autocomplete until the end
-                    // Set the found command as active command
-                    _commands.at(_activeCommand) = command + "();";
-                    // Set the cursor position to be between the brackets
-                    _inputPosition = _commands.at(_activeCommand).size() - 2;
-                }
-                else {
-                    // If we find a separator, we autocomplete until and including the
-                    // separator unless the autocompletion would be the same that we
-                    // already have (the case if there are multiple commands in the
-                    // same group
-                    const std::string subCommand = command.substr(0, pos + 1);
-                    if (subCommand == _commands.at(_activeCommand)) {
-                        continue;
-                    }
-                    else {
-                        _commands.at(_activeCommand) = command.substr(0, pos + 1);
-                        _inputPosition = _commands.at(_activeCommand).length();
-                        // We only want to remove the autocomplete info if we just
-                        // entered the 'default' openspace namespace
-                        if (command.substr(0, pos + 1) == "openspace.") {
-                            _autoCompleteInfo = {
-                                .lastIndex = NoAutoComplete,
-                                .hasInitialValue = false,
-                                .initialValue = ""
-                            };
-                        }
-                    }
-                }
-
-                break;
-            }
-        }
-        return true;
-    }
-    else {
-        // If any other key is pressed, we want to remove our previous findings
-        // The special case for Shift is necessary as we want to allow Shift+TAB
-        if (!modifierShift) {
-            _autoCompleteInfo = {
+    // If any other key is pressed, we want to remove our previous findings
+    // The special case for Shift is necessary as we want to allow Shift+TAB
+    if (key != Key::Tab && !modifierShift) {
+        _autoCompleteInfo = {
                 .lastIndex = NoAutoComplete,
                 .hasInitialValue = false,
                 .initialValue = ""
-            };
-        }
+        };
     }
-
-    // We want to ignore the function keys as they don't translate to text anyway
-    if (key >= Key::F1 && key <= Key::F25) {
-        return false;
-    }
-
+        
     // Do not consume modifier keys
     switch (key) {
         case Key::LeftShift:
@@ -893,4 +667,325 @@ void LuaConsole::parallelConnectionChanged(const ParallelConnection::Status& sta
     _shouldSendToRemote = (status == ParallelConnection::Status::Host);
 }
 
+void LuaConsole::registerKeyHandler(Key key, KeyModifier modifier,
+    std::function<void()> callback)
+{
+    _keyHandlers[{ key, modifier }] = std::move(callback);
+}
+
+void LuaConsole::registerKeyHandlers() {
+
+    registerKeyHandler(Key::Escape, KeyModifier::None, [this]() {
+        _isVisible = false;
+    });
+
+    // Paste from clipboard
+    registerKeyHandler(Key::V, KeyModifier::Control, [this]() {
+        addToCommand(sanitizeInput(ghoul::clipboardText()));
+    });
+
+    // Paste from clipboard
+    registerKeyHandler(Key::Y, KeyModifier::Control, [this]() {
+        addToCommand(sanitizeInput(ghoul::clipboardText()));
+    });
+
+    // Copy to clipboard
+    registerKeyHandler(Key::C, KeyModifier::Control, [this]() {
+        ghoul::setClipboardText(_commands.at(_activeCommand));
+    });
+
+    // Cut to clipboard
+    registerKeyHandler(Key::X, KeyModifier::Control, [this]() {
+        ghoul::setClipboardText(_commands.at(_activeCommand));
+        _commands.at(_activeCommand).clear();
+        _inputPosition = 0;
+    });
+
+    // Cut part after cursor to clipboard ("Kill")
+    registerKeyHandler(Key::K, KeyModifier::Control, [this]() {
+        auto here = _commands.at(_activeCommand).begin() + _inputPosition;
+        auto end = _commands.at(_activeCommand).end();
+        ghoul::setClipboardText(std::string(here, end));
+        _commands.at(_activeCommand).erase(here, end);
+    });
+
+    // Go to the previous JumpCharacter character
+    registerKeyHandler(Key::Left, KeyModifier::Control, [this]() {
+        std::string current = _commands.at(_activeCommand);
+        std::reverse(current.begin(), current.end());
+        const size_t start = current.size() - (_inputPosition - 1);
+        auto it = current.find_first_of(JumpCharacters, start);
+        if (it != std::string::npos) {
+            _inputPosition = current.size() - it;
+        }
+        else {
+            _inputPosition = 0;
+        }
+    });
+
+    // Go to the next JumpCharacter character
+    registerKeyHandler(Key::Right, KeyModifier::Control, [this]() {
+        auto it = _commands.at(_activeCommand).find_first_of(JumpCharacters,
+            _inputPosition + 1);
+        if (it != std::string::npos) {
+            _inputPosition = it;
+        }
+        else {
+            _inputPosition = _commands.at(_activeCommand).size();
+        }
+    });
+
+    // Go to the previous character
+    registerKeyHandler(Key::Left, KeyModifier::None, [this]() {
+        if (_inputPosition > 0) {
+            --_inputPosition;
+        }
+    });
+
+    // Go to the previous character
+    registerKeyHandler(Key::B, KeyModifier::Control, [this]() {
+        if (_inputPosition > 0) {
+            --_inputPosition;
+        }
+    });
+
+    // Go to the next character
+    registerKeyHandler(Key::Right, KeyModifier::None, [this]() {
+        _inputPosition = std::min(
+            _inputPosition + 1,
+            _commands.at(_activeCommand).length()
+        );
+    });
+
+    // Go to the next character
+    registerKeyHandler(Key::F, KeyModifier::Control, [this]() {
+        _inputPosition = std::min(
+            _inputPosition + 1,
+            _commands.at(_activeCommand).length()
+        );
+    });
+
+    // Go to previous command
+    registerKeyHandler(Key::Up, KeyModifier::None, [this]() {
+        if (_activeCommand > 0) {
+            --_activeCommand;
+        }
+        _inputPosition = _commands.at(_activeCommand).length();
+    });
+
+    // Go to next command (the last is empty)
+    registerKeyHandler(Key::Down, KeyModifier::None, [this]() {
+        if (_activeCommand < _commands.size() - 1) {
+            ++_activeCommand;
+        }
+        _inputPosition = _commands.at(_activeCommand).length();
+    });
+
+    // Remove character before _inputPosition
+    registerKeyHandler(Key::BackSpace, KeyModifier::None, [this]() {
+        if (_inputPosition > 0) {
+            _commands.at(_activeCommand).erase(_inputPosition - 1, 1);
+            --_inputPosition;
+        }
+    });
+
+    // Remove characters before _inputPosition until the previous JumpCharacter. 
+    registerKeyHandler(Key::BackSpace, KeyModifier::Control, [this]() {
+        if (_inputPosition == 0) {
+            return;
+        }
+
+        std::string& command = _commands.at(_activeCommand);
+
+        // If the previous character is a JumpCharacter, remove just that one. This
+        // behavior results in abc.de -> abc. -> abc -> 'empty string'
+        if (JumpCharacters.find(command[_inputPosition - 1]) != std::string::npos) {
+            command.erase(_inputPosition - 1, 1);
+            --_inputPosition;
+            return;
+        }
+
+        // Find the position of the last JumpCharacter before _inputPosition
+        size_t start = 0;
+        for (size_t i = _inputPosition; i > 0; --i) {
+            if (JumpCharacters.find(command[i - 1]) != std::string::npos) {
+                start = i;
+                break;
+            }
+        }
+
+        size_t count = _inputPosition - start;
+        command.erase(start, count);
+        _inputPosition -= count;
+    });
+
+    // Remove character after _inputPosition
+    registerKeyHandler(Key::Delete, KeyModifier::None, [this]() {
+        if (_inputPosition <= _commands.at(_activeCommand).size()) {
+            _commands.at(_activeCommand).erase(_inputPosition, 1);
+        }
+    });
+
+    // Remove characters after _inputPosition until the ne JumpCharacter
+    registerKeyHandler(Key::Delete, KeyModifier::Control, [this]() {
+        std::string& command = _commands.at(_activeCommand);
+        if (_inputPosition >= command.size()) {
+            return;
+        }
+
+        // If the next character after _inputPosition is a JumpCharacter, delete just that
+        if (JumpCharacters.find(command[_inputPosition]) != std::string::npos) {
+            command.erase(_inputPosition, 1);
+            return;
+        }
+
+        // Find the position of the next Jumpcharacter after _inputPosition
+        size_t next = command.find_first_of(JumpCharacters, _inputPosition);
+        size_t end = next != std::string::npos ? next : command.size();
+        command.erase(_inputPosition, end - _inputPosition);
+    });
+
+    // Go to the beginning of command string
+    registerKeyHandler(Key::Home, KeyModifier::None, [this]() {
+        _inputPosition = 0;
+    });
+
+    // Go to the beginning of command string
+    registerKeyHandler(Key::A, KeyModifier::Control, [this]() {
+        _inputPosition = 0;
+    });
+
+    // Go to end of command string
+    registerKeyHandler(Key::End, KeyModifier::None, [this]() {
+        _inputPosition = _commands.at(_activeCommand).size();
+    });
+
+    // Go to end of command string
+    registerKeyHandler(Key::E, KeyModifier::Control, [this]() {
+        _inputPosition = _commands.at(_activeCommand).size();
+    });
+
+
+    auto executeCommand = [this]() {
+        const std::string cmd = _commands.at(_activeCommand);
+        if (!cmd.empty()) {
+            using Script = scripting::ScriptEngine::Script;
+            global::scriptEngine->queueScript({
+                .code = cmd,
+                .synchronized = Script::ShouldBeSynchronized(_shouldBeSynchronized),
+                .sendToRemote = Script::ShouldSendToRemote(_shouldSendToRemote)
+                });
+
+            // Only add the current command to the history if it hasn't been
+            // executed before. We don't want two of the same commands in a row
+            if (_commandsHistory.empty() || (cmd != _commandsHistory.back())) {
+                _commandsHistory.push_back(_commands.at(_activeCommand));
+            }
+        }
+
+        // Some clean up after the execution of the command
+        _commands = _commandsHistory;
+        _commands.emplace_back("");
+        _activeCommand = _commands.size() - 1;
+        _inputPosition = 0;
+    };
+
+    registerKeyHandler(Key::Enter, KeyModifier::None, executeCommand);
+    registerKeyHandler(Key::KeypadEnter, KeyModifier::None, executeCommand);
+
+    auto nextCommand = [this]() {
+        // We get a list of all the available commands and initially find the first
+        // command that starts with how much we typed sofar. We store the index so
+        // that in subsequent "tab" presses, we will discard previous commands. This
+        // implements the 'hop-over' behavior. As soon as another key is pressed,
+        // everything is set back to normal
+
+
+        std::vector<std::string> allCommands = global::scriptEngine->allLuaFunctions();
+        std::sort(allCommands.begin(), allCommands.end());
+
+        const std::string currentCommand = _commands.at(_activeCommand);
+
+        // Check if it is the first time the tab has been pressed. If so, we need to
+        // store the already entered command so that we can later start the search
+        // from there. We will overwrite the 'currentCommand' thus making the storage
+        // necessary
+        if (!_autoCompleteInfo.hasInitialValue) {
+            _autoCompleteInfo.initialValue = currentCommand;
+            _autoCompleteInfo.hasInitialValue = true;
+        }
+
+        for (int i = 0; i < static_cast<int>(allCommands.size()); i++) {
+            const std::string& command = allCommands[i];
+
+            // Check if the command has enough length (we don't want crashes here)
+            // Then check if the iterator-command's start is equal to what we want
+            // then check if we need to skip the first found values as the user has
+            // pressed TAB repeatedly
+            const size_t fullLength = _autoCompleteInfo.initialValue.length();
+            const bool correctLength = command.length() >= fullLength;
+
+            const std::string commandLowerCase = ghoul::toLowerCase(command);
+
+            const std::string initialValueLowerCase = ghoul::toLowerCase(
+                _autoCompleteInfo.initialValue
+            );
+
+            const bool correctCommand =
+                commandLowerCase.substr(0, fullLength) == initialValueLowerCase;
+
+            if (correctLength && correctCommand && (i > _autoCompleteInfo.lastIndex)) {
+                // We found our index, so store it
+                _autoCompleteInfo.lastIndex = i;
+
+                // We only want to auto-complete until the next separator "."
+                const size_t pos = command.find('.', fullLength);
+                if (pos == std::string::npos) {
+                    // If we don't find a separator, we autocomplete until the end
+                    // Set the found command as active command
+                    _commands.at(_activeCommand) = command + "();";
+                    // Set the cursor position to be between the brackets
+                    _inputPosition = _commands.at(_activeCommand).size() - 2;
+                }
+                else {
+                    // If we find a separator, we autocomplete until and including the
+                    // separator unless the autocompletion would be the same that we
+                    // already have (the case if there are multiple commands in the
+                    // same group
+                    const std::string subCommand = command.substr(0, pos + 1);
+                    if (subCommand == _commands.at(_activeCommand)) {
+                        continue;
+                    }
+                    else {
+                        _commands.at(_activeCommand) = command.substr(0, pos + 1);
+                        _inputPosition = _commands.at(_activeCommand).length();
+                        // We only want to remove the autocomplete info if we just
+                        // entered the 'default' openspace namespace
+                        if (command.substr(0, pos + 1) == "openspace.") {
+                            _autoCompleteInfo = {
+                                .lastIndex = NoAutoComplete,
+                                .hasInitialValue = false,
+                                .initialValue = ""
+                            };
+                        }
+                    }
+                }
+                break;
+            }
+        }
+    };
+
+    registerKeyHandler(Key::Tab, KeyModifier::None, [nextCommand]() {
+        nextCommand();
+    });
+
+    registerKeyHandler(Key::Tab, KeyModifier::Shift, [this, nextCommand]() {
+        // If the shift key is pressed, we decrement the current index so that we will
+        // find the value before the one that was previously found
+        if (_autoCompleteInfo.lastIndex != NoAutoComplete) {
+            _autoCompleteInfo.lastIndex -= 2;
+        }
+        nextCommand();
+    });
+}
 } // namespace openspace

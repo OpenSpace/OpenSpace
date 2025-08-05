@@ -34,6 +34,7 @@
 #include <openspace/util/keys.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -63,6 +64,8 @@ public:
 private:
     void parallelConnectionChanged(const ParallelConnection::Status& status);
     void addToCommand(const std::string& c);
+    void registerKeyHandlers();
+    void registerKeyHandler(Key key, KeyModifier modifier, std::function<void()> callback);
 
     properties::BoolProperty _isVisible;
     properties::BoolProperty _shouldBeSynchronized;
@@ -79,6 +82,8 @@ private:
     std::vector<std::string> _commandsHistory;
     size_t _activeCommand = 0;
     std::vector<std::string> _commands;
+    // Map of registered keybinds and their corresponding callbacks
+    std::map<KeyWithModifier, std::function<void()>> _keyHandlers;
 
     struct {
         int lastIndex;
