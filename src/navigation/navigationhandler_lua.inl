@@ -506,80 +506,93 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
 }
 
 /**
- * Directly add to the global rotation of the camera (around the focus node).
+ * Adds an instantaneous impulse to the global rotation of the camera (around the focus
+ * node). This type of rotation corresponds to using the left mouse button and moving the
+ * mouse to rotate around the current focus object. The units for the provided parameters
+ * are somewhat arbitrary and the magnitude depends on the explicit use-case (continuously
+ * executing this function vs an individual impulse), but typically a range of [-500, 500]
+ * produces reasonable results.
  *
- * \param xValue the value to add in the x-direction (a positive value rotates to the
- *               right and a negative value to the left)
- * \param yValue the value to add in the y-direction (a positive value rotates the focus
- *               upwards and a negative value downwards)
+ * \param horizontal The value to add in the x-direction (a positive value rotates to the
+ *                   right and a negative value to the left)
+ * \param vertical The value to add in the y-direction (a positive value rotates the focus
+ *                 upwards and a negative value downwards)
  */
-[[codegen::luawrap]] void addGlobalRotation(double xValue, double yValue) {
+[[codegen::luawrap]] void addGlobalRotation(double horizontal, double vertical) {
     using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addGlobalRotation(
-        glm::dvec2(xValue, yValue)
+        glm::dvec2(horizontal, vertical)
     );
 }
 
 /**
- * Directly adds to the local rotation of the camera (around the camera's current
- * position).
+ * Adds an instantaneous impulse to the local rotation of the camera (around the camera's
+ * current position). This type of rotation corresponds to using the left mouse button and
+ * pressing the Ctrl key while moving mouse to rotate around the current camera position.
+ * The units for the provided parameters are somewhat arbitrary and the magnitude depends
+ * on the explicit use-case (continuously executing this function vs an individual
+ * impulse), but typically a range of [-250, 250] produces reasonable results.
  *
- * \param xValue the value to add in the x-direction (a positive value rotates to the
- *               left and a negative value to the right)
- * \param yValue the value to add in the y-direction (a positive value rotates the camera
- *               upwards and a negative value downwards)
+ * \param horizontal The value to add in the x-direction (a positive value rotates to the
+ *                   left and a negative value to the right)
+ * \param vertical The value to add in the y-direction (a positive value rotates the camera
+ *                 upwards and a negative value downwards)
  */
-[[codegen::luawrap]] void addLocalRotation(double xValue, double yValue) {
+[[codegen::luawrap]] void addLocalRotation(double horizontal, double vertical) {
     using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addLocalRotation(
-        glm::dvec2(xValue, yValue)
+        glm::dvec2(horizontal, vertical)
     );
 }
 
-
 /**
- * Directly adds to the truck movement of the camera. This is the movement along the line
- * from the camera to the focus node.
+ * Adds an instantaneous impulse to create a truck movement of the camera. This is the
+ * movement along the line from the camera to the focus node and corresponds to using the
+ * right mouse button and moving the mous up and down. The unit for the provided parameter
+ * is somewhat arbitrary and the magnitude depends on the explicit use-case (continuously
+ * executing this function vs an individual impulse), but typically a range of
+ * [-1000, 1000] produces reasonable results.
  *
- * A positive value moves the camera closer to the focus, and a negative value moves the
- * camera further away.
- *
- * \param value the value to add
+ * \param value A positive value moves the camera closer to the focus node, and a negative
+ *              value moves the camera further away.
  */
 [[codegen::luawrap]] void addTruckMovement(double value) {
     using namespace openspace;
-    // @TODO: Note that the x value isn't actually used and the code in the navigation
-    // handlers for these should be cleaned up. The same goes for the roll funcitons below
-    global::navigationHandler->orbitalNavigator().scriptStates().addTruckMovement(
-        glm::dvec2(0.0, value)
-    );
+    global::navigationHandler->orbitalNavigator().scriptStates().addTruckMovement(value);
 }
 
 /**
- * Directly adds to the local roll of the camera. This is the rotation around the camera's
- * forward/view direction.
+ * Adds an instantaneous impulse to the local roll of the camera. This is the rotation
+ * around the camera's forward direction and corresponds to using the middle mouse button
+ * and pressing and holding the middle mouse button while moving the mouse to the left and
+ * right. The unit for the provided parameter is somewhat arbitrary and the magnitude
+ * depends on the explicit use-case (continuously executing this function vs an individual
+ * impulse), but typically a range of [-250, 250] produces reasonable results.
  *
- * \param value the value to add
+ * \param value A positive value rolls the camera to the left and a negative value rolls
+ *              the camera to the right
  */
 [[codegen::luawrap]] void addLocalRoll(double value) {
     using namespace openspace;
-    global::navigationHandler->orbitalNavigator().scriptStates().addLocalRoll(
-        glm::dvec2(value, 0.0)
-    );
+    global::navigationHandler->orbitalNavigator().scriptStates().addLocalRoll(value);
 }
 
 /**
- * Directly adds to the global roll of the camera. This is a rotation around the line
- * between the focus node and the camera (not always the same as the camera view
- * direction)
+ * Adds an instantaneous impulse to the global roll of the camera. This is a rotation
+ * around the line between the focus node and the camera. This is almost always the same
+ * as the forward direction of the camera, unless a local rotation has panned the camera
+ * away from the focus object. The global roll corresponds to using the middle mouse
+ * button and moving the mouse left and right. The unit for the provided parameter is
+ * somewhat arbitrary and the magnitude depends on the explicit use-case (continuously
+ * executing this function vs an individual impulse), but typically a range of [-250, 250]
+ * produces reasonable results.
  *
- * \param value the value to add
+ * \param value A positive value rolls the camera to the left and a negative value rolls
+ *              the camera to the right
  */
 [[codegen::luawrap]] void addGlobalRoll(double value) {
     using namespace openspace;
-    global::navigationHandler->orbitalNavigator().scriptStates().addGlobalRoll(
-        glm::dvec2(value, 0.0)
-    );
+    global::navigationHandler->orbitalNavigator().scriptStates().addGlobalRoll(value);
 }
 
 /**

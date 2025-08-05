@@ -93,37 +93,36 @@ void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseState,
     if (primaryPressed && !keyShiftPressed && !keyAltPressed) {
         if (keyCtrlPressed) {
             const glm::dvec2 mousePositionDelta =
-                _localRotationState.previousPosition - mousePosition;
+                _localRotationState.previousValue - mousePosition;
             _localRotationState.velocity.set(
                 mousePositionDelta * _sensitivity,
                 deltaTime
             );
 
-            _globalRotationState.previousPosition = mousePosition;
+            _globalRotationState.previousValue = mousePosition;
             _globalRotationState.velocity.decelerate(deltaTime);
         }
         else {
             const glm::dvec2 mousePositionDelta =
-                _globalRotationState.previousPosition - mousePosition;
+                _globalRotationState.previousValue - mousePosition;
             _globalRotationState.velocity.set(
                 mousePositionDelta * (_sensitivity + _sensitivity * totalSensitivity / 5),
                 deltaTime
             );
 
-            _localRotationState.previousPosition = mousePosition;
+            _localRotationState.previousValue = mousePosition;
             _localRotationState.velocity.decelerate(deltaTime);
         }
     }
     else { // !button1Pressed
-        _localRotationState.previousPosition = mousePosition;
+        _localRotationState.previousValue = mousePosition;
         _localRotationState.velocity.decelerate(deltaTime);
 
-        _globalRotationState.previousPosition = mousePosition;
+        _globalRotationState.previousValue = mousePosition;
         _globalRotationState.velocity.decelerate(deltaTime);
     }
     if (secondaryPressed || (keyAltPressed && primaryPressed)) {
-        const glm::dvec2 mousePosDelta =
-            _truckMovementState.previousPosition - mousePosition;
+        const double mousePosDelta = _truckMovementState.previousValue - mousePosition.y;
 
         _truckMovementState.velocity.set(
             mousePosDelta * (_sensitivity + _sensitivity * totalSensitivity),
@@ -131,38 +130,36 @@ void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseState,
         );
     }
     else { // !button2Pressed
-        _truckMovementState.previousPosition = mousePosition;
+        _truckMovementState.previousValue = mousePosition.y;
         _truckMovementState.velocity.decelerate(deltaTime);
     }
     if (button3Pressed || (keyShiftPressed && primaryPressed)) {
         if (keyCtrlPressed) {
-            const glm::dvec2 mousePosDelta = _localRollState.previousPosition -
-                                            mousePosition;
+            const double mousePosDelta = _localRollState.previousValue - mousePosition.x;
             _localRollState.velocity.set(
                 mousePosDelta * _sensitivity,
                 deltaTime
             );
 
-            _globalRollState.previousPosition = mousePosition;
+            _globalRollState.previousValue = mousePosition.x;
             _globalRollState.velocity.decelerate(deltaTime);
         }
         else {
-            const glm::dvec2 mousePosDelta = _globalRollState.previousPosition -
-                                            mousePosition;
+            const double mousePosDelta = _globalRollState.previousValue - mousePosition.x;
             _globalRollState.velocity.set(
                 mousePosDelta * _sensitivity,
                 deltaTime
             );
 
-            _localRollState.previousPosition = mousePosition;
+            _localRollState.previousValue = mousePosition.x;
             _localRollState.velocity.decelerate(deltaTime);
         }
     }
     else { // !button3Pressed
-        _globalRollState.previousPosition = mousePosition;
+        _globalRollState.previousValue = mousePosition.x;
         _globalRollState.velocity.decelerate(deltaTime);
 
-        _localRollState.previousPosition = mousePosition;
+        _localRollState.previousValue = mousePosition.x;
         _localRollState.velocity.decelerate(deltaTime);
     }
 }
