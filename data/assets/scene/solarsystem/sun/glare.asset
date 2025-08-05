@@ -20,7 +20,7 @@ local SunGlare = {
     Billboard = "Camera Position Normal",
     Texture = textures .. "halo.png",
     BlendMode = "Additive",
-    Opacity = 0.65,
+    Opacity = 1.0,
     MultiplyColor = { 0.92, 0.93, 0.84 }
   },
   GUI = {

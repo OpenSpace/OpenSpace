@@ -101,9 +101,10 @@ void main(){
     // ghosts
     for (int i = 0; i < ghostsNumber; ++i) {
         vec2 offset = fract(texcoord + ghostVec * float(i));
+        float dist = distance(offset, vec2(0.5));
 
         // falloff from center
-        float weight = length(vec2(0.5) - offset) / length(vec2(0.5));
+        float weight = smoothstep(0.0, 0.75, dist)
         weight = pow(1.0 - weight, ghostsWeight);
 
         color += ghostsAlpha * sampleScaledBiasedTexture(mainColorTexture, offset, direction, distortion) * weight;
