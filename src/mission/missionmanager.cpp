@@ -34,11 +34,15 @@
 
 #include "missionmanager_lua.inl"
 
-namespace openspace {
+namespace {
+    struct MissionManagerException : public ghoul::RuntimeError {
+        explicit MissionManagerException(std::string message)
+            : ghoul::RuntimeError(std::move(message), "MissionManager")
+        {}
+    };
+} // namespace
 
-MissionManager::MissionManagerException::MissionManagerException(std::string error)
-    : ghoul::RuntimeError(std::move(error), "MissionManager")
-{}
+namespace openspace {
 
 MissionManager::MissionManager() : _currentMission(_missionMap.end()) {}
 

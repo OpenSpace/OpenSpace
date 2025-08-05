@@ -73,10 +73,9 @@ std::array<std::string, 3> gridVariables(ccmc::Model* model) {
 
     // validate
     if (tokens.size() != 3) {
-        throw ghoul::RuntimeError(
-            "Expected three dimensional grid system. Got " +
-            std::to_string(tokens.size()) + "dimensions"
-        );
+        throw ghoul::RuntimeError(std::format(
+            "Expected three dimensional grid system. Got {} dimensions", tokens.size()
+        ));
     }
 
     std::string x = std::move(tokens.at(0));

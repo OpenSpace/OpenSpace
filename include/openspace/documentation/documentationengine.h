@@ -39,23 +39,6 @@ namespace openspace::documentation {
  */
 class DocumentationEngine {
 public:
-    /**
-     * This exception is thrown by the addDocumentation method if a provided Documentation
-     * has an identifier, but the identifier was registered previously.
-     */
-    struct DuplicateDocumentationException : public ghoul::RuntimeError {
-        /**
-         * Constructor of a DuplicateDocumentationException storing the offending
-         * Documentation for later use.
-         *
-         * \param doc The Documentation whose identifier was previously registered
-         */
-        explicit DuplicateDocumentationException(Documentation doc);
-
-        /// The offending Documentation whose identifier was previously registered
-        Documentation documentation;
-    };
-
     DocumentationEngine();
 
     /**
