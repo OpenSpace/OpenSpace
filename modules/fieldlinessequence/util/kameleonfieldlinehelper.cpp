@@ -143,7 +143,7 @@ extractSeedPointsFromFiles(std::filesystem::path path, size_t nth)
     namespace fs = std::filesystem;
     for (const fs::directory_entry& spFile : fs::directory_iterator(path)) {
         fs::path seedFilePath = spFile.path();
-        if (!spFile.is_regular_file() || seedFilePath.extension() != "txt") {
+        if (!spFile.is_regular_file() || seedFilePath.extension() != ".txt") {
             continue;
         }
 

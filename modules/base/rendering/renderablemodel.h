@@ -78,6 +78,17 @@ private:
         BounceInfinitely
     };
 
+    void loadModelSequence(const std::filesystem::path& directory);
+    void computeSequenceEndTime();
+    int activeIndex(double currentTime) const;
+
+    properties::StringProperty _sourceDirectory;
+
+    std::vector<double> _timestamps;         // Sorted list of timestamps
+    std::map<double, std::string> _modelPaths; // Maps timestamps to model paths
+    int _activeIndex;                       // Currently active model index
+    double _sequenceEndTime;
+
     std::filesystem::path _file;
     std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
     bool _invertModelScale = false;

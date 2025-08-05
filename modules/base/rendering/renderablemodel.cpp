@@ -69,6 +69,59 @@ namespace {
 
     constexpr glm::vec4 PosBufferClearVal = glm::vec4(1e32, 1e32, 1e32, 1.f);
 
+    // Extracts the time from a filename
+    // Expected format: YYYYMMDD_HHMMSS.obj
+    double extractTimeFromFilename(const std::filesystem::path& filePath) {
+        std::string fileName = filePath.stem().string(); // excludes extension
+
+        if (fileName.length() < 15) { // Needs at least YYYYMMDD_HHMMSS
+            LERROR(std::format(
+                "Filename format incorrect for time extraction: {}",
+                fileName
+            ));
+            return 0.0;
+        }
+
+        try {
+            // Format the date string to be compatible with Time::convertTime
+            std::string dateStr = fileName.substr(0, 8); // YYYYMMDD
+            std::string timeStr = fileName.substr(9, 6);  // HHMMSS
+
+            // Insert separators for date
+            dateStr.insert(4, "-");
+            dateStr.insert(7, "-");
+
+            // Insert separators for time
+            timeStr.insert(2, ":");
+            timeStr.insert(5, ":");
+
+            std::string formattedTime = dateStr + "T" + timeStr;
+            return openspace::Time::convertTime(formattedTime);
+        }
+        catch (const std::exception& e) {
+            LERROR(std::format(
+                "Failed to parse time from filename '{}': {}",
+                fileName, e.what()
+            ));
+            return 0.0;
+        }
+    }
+
+    constexpr openspace::properties::Property::PropertyInfo SourceDirectoryInfo = {
+        "SourceDirectory",
+        "Source Directory",
+        "A directory from where to load the model files for the different time steps.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TriggerTimeJumpInfo = {
+        "TriggerTimeJump",
+        "Jump",
+        "Sets the time to be the first time of the model sequence.",
+        openspace::properties::Property::Visibility::User
+    };
+
+
     constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
         "EnableAnimation",
         "Enable Animation",
@@ -181,6 +234,9 @@ namespace {
         // model formats, such as .obj, .fbx, or .gltf. For a full list of supported file
         // formats, see https://github.com/assimp/assimp/blob/master/doc/Fileformats.md
         std::filesystem::path geometryFile;
+
+        // [[codegen::verbatim(SourceDirectoryInfo.description)]]
+        std::filesystem::path sourceDirectory [[codegen::directory()]];
 
         // The scale of the model. For example, if the model is in centimeters then
         // `ModelScale = 'Centimeter'` or `ModelScale = 0.01`. The value that this needs
@@ -297,8 +353,18 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _enableDepthTest(EnableDepthTestInfo, true)
     , _blendingFuncOption(BlendingOptionInfo)
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
+    , _sourceDirectory(SourceDirectoryInfo)
+    , _activeIndex(-1)
+    , _sequenceEndTime(0.0)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _sourceDirectory = absPath(p.sourceDirectory).string();
+    _sourceDirectory.onChange([this]() {
+        loadModelSequence(_sourceDirectory.value());
+        });
+
+    addProperty(_sourceDirectory);
 
     addProperty(Fadeable::_opacity);
 
@@ -497,6 +563,8 @@ bool RenderableModel::isReady() const {
 
 void RenderableModel::initialize() {
     ZoneScoped;
+
+    loadModelSequence(_sourceDirectory.value());
 
     for (const std::unique_ptr<LightSource>& ls : _lightSources) {
         ls->initialize();
@@ -712,6 +780,10 @@ void RenderableModel::deinitializeGL() {
             global::renderEngine->removeRenderProgram(p);
         }
     );
+
+    _timestamps.clear();
+    _modelPaths.clear();
+    _activeIndex = -1;
 
     _program = nullptr;
     _quadProgram = nullptr;
@@ -1000,8 +1072,56 @@ void RenderableModel::update(const UpdateData& data) {
         }
     }
 
+    // === TIME-VARYING MODEL FUNCTIONALITY ===
+    if (!_timestamps.empty()) {
+        const double currentTime = data.time.j2000Seconds();
 
-    if (_geometry->hasAnimation() && !_animationStart.empty()) {
+        // Check if we need to switch models based on current time
+        if (currentTime >= _timestamps.front() && currentTime < _sequenceEndTime) {
+            int idx = activeIndex(currentTime);
+            if (idx != _activeIndex && idx >= 0) {
+                _activeIndex = idx;
+
+                // Load the new model for this timestep
+                const std::string newModelPath = _modelPaths[_timestamps[_activeIndex]];
+                if (newModelPath != _file.string()) {
+                    _file = newModelPath;
+
+                    try {
+                        // Reload the model geometry
+                        _geometry = ghoul::io::ModelReader::ref().loadModel(
+                            _file,
+                            ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
+                            ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
+                        );
+
+                        // Re-initialize the new geometry
+                        _geometry->initialize();
+                        _geometry->calculateBoundingRadius();
+
+                        // Update bounding sphere
+                        setBoundingSphere(_geometry->boundingRadius() * _modelScale);
+                        setInteractionSphere(boundingSphere() * 0.1);
+
+                        LDEBUG(std::format("Switched to model: {}", _file.filename().string()));
+                    }
+                    catch (const std::exception& e) {
+                        LERROR(std::format("Failed to load time-varying model '{}': {}",
+                            _file, e.what()));
+                    }
+                }
+            }
+        }
+        else if (currentTime < _timestamps.front() || currentTime >= _sequenceEndTime) {
+            // Outside the time range - could hide the model or show first/last
+            if (_activeIndex != 0 && !_timestamps.empty()) {
+                _activeIndex = 0; // Show first model when outside range
+            }
+        }
+    }
+
+    // === EXISTING ANIMATION FUNCTIONALITY ===
+    if (_geometry && _geometry->hasAnimation() && !_animationStart.empty()) {
         double relativeTime = 0.0;
         const double now = data.time.j2000Seconds();
         const double startTime = Time::convertTime(_animationStart);
@@ -1016,55 +1136,146 @@ void RenderableModel::update(const UpdateData& data) {
         // forwards, \ indicates animation is played once backwards, time moves to the
         // right.
         switch (_animationMode) {
-            case AnimationMode::LoopFromStart:
-                // Start looping from the start time
-                // s//// ...
-                relativeTime = std::fmod(now - startTime, duration);
-                break;
-            case AnimationMode::LoopInfinitely:
-                // Loop both before and after the start time where the model is
-                // in the initial position at the start time. std::fmod is not a
-                // true modulo function, it just calculates the remainder of the division
-                // which can be negative. To make it true modulo it is bumped up to
-                // positive values when it is negative
-                // //s// ...
-                relativeTime = std::fmod(now - startTime, duration);
-                if (relativeTime < 0.0) {
-                    relativeTime += duration;
-                }
-                break;
-            case AnimationMode::BounceFromStart:
-                // Bounce from the start position. Bounce means to do the animation
-                // and when it ends, play the animation in reverse to make sure the model
-                // goes back to its initial position before starting again. Avoids a
-                // visible jump from the last position to the first position when loop
-                // starts again
-                // s/\/\/\/\ ...
-                relativeTime =
-                    duration - std::abs(fmod(now - startTime, 2 * duration) - duration);
-                break;
-            case AnimationMode::BounceInfinitely: {
-                // Bounce both before and after the start time where the model is
-                // in the initial position at the start time
-                // /\/\s/\/\ ...
-                double modulo = fmod(now - startTime, 2 * duration);
-                if (modulo < 0.0) {
-                    modulo += 2 * duration;
-                }
-                relativeTime = duration - std::abs(modulo - duration);
-                break;
+        case AnimationMode::LoopFromStart:
+            // Start looping from the start time
+            // s//// ...
+            relativeTime = std::fmod(now - startTime, duration);
+            break;
+        case AnimationMode::LoopInfinitely:
+            // Loop both before and after the start time where the model is
+            // in the initial position at the start time. std::fmod is not a
+            // true modulo function, it just calculates the remainder of the division
+            // which can be negative. To make it true modulo it is bumped up to
+            // positive values when it is negative
+            // //s// ...
+            relativeTime = std::fmod(now - startTime, duration);
+            if (relativeTime < 0.0) {
+                relativeTime += duration;
             }
-            case AnimationMode::Once:
-                // Play animation once starting from the start time and stay at the
-                // animation's last position when animation is over
-                // s/
-                relativeTime = now - startTime;
-                if (relativeTime > duration) {
-                    relativeTime = duration;
-                }
-                break;
+            break;
+        case AnimationMode::BounceFromStart:
+            // Bounce from the start position. Bounce means to do the animation
+            // and when it ends, play the animation in reverse to make sure the model
+            // goes back to its initial position before starting again. Avoids a
+            // visible jump from the last position to the first position when loop
+            // starts again
+            // s/\/\/\/\ ...
+            relativeTime =
+                duration - std::abs(fmod(now - startTime, 2 * duration) - duration);
+            break;
+        case AnimationMode::BounceInfinitely: {
+            // Bounce both before and after the start time where the model is
+            // in the initial position at the start time
+            // /\/\s/\/\ ...
+            double modulo = fmod(now - startTime, 2 * duration);
+            if (modulo < 0.0) {
+                modulo += 2 * duration;
+            }
+            relativeTime = duration - std::abs(modulo - duration);
+            break;
+        }
+        case AnimationMode::Once:
+            // Play animation once starting from the start time and stay at the
+            // animation's last position when animation is over
+            // s/
+            relativeTime = now - startTime;
+            if (relativeTime > duration) {
+                relativeTime = duration;
+            }
+            break;
         }
         _geometry->update(relativeTime);
+    }
+}
+
+void RenderableModel::loadModelSequence(const std::filesystem::path& directory) {
+    namespace fs = std::filesystem;
+
+    _timestamps.clear();
+    _modelPaths.clear();
+
+    if (!fs::exists(directory) || !fs::is_directory(directory)) {
+        LERROR(std::format("Source directory does not exist: {}", directory));
+        return;
+    }
+
+    // Supported model file extensions
+    std::vector<std::string> supportedExtensions = { ".obj", ".fbx", ".gltf", ".glb" };
+
+    // Find all model files in the directory
+    for (const fs::directory_entry& entry : fs::directory_iterator(directory)) {
+        if (!entry.is_regular_file()) {
+            continue;
+        }
+
+        std::string extension = entry.path().extension().string();
+        std::transform(extension.begin(), extension.end(), extension.begin(),
+            [](unsigned char c) { return std::tolower(c); });
+
+        if (std::find(supportedExtensions.begin(), supportedExtensions.end(), extension)
+            != supportedExtensions.end())
+        {
+            double timestamp = extractTimeFromFilename(entry.path());
+
+            if (timestamp > 0.0) {
+                _timestamps.push_back(timestamp);
+                _modelPaths[timestamp] = entry.path().string();
+                LDEBUG(std::format(
+                    "Added model: {} at time {}",
+                    entry.path().filename().string(), timestamp
+                ));
+            }
+        }
+    }
+
+    // Sort timestamps in ascending order
+    std::sort(_timestamps.begin(), _timestamps.end());
+
+    // Calculate the end time of the sequence
+    computeSequenceEndTime();
+
+    LINFO(std::format("Loaded {} models in time sequence", _timestamps.size()));
+
+    // If we found at least one model, set the first one as active
+    if (!_timestamps.empty()) {
+        _activeIndex = 0;
+        _file = _modelPaths[_timestamps[0]];
+    }
+}
+
+
+void RenderableModel::computeSequenceEndTime() {
+    if (_timestamps.size() <= 1) {
+        if (_timestamps.size() == 1) {
+            // If there's only one timestamp, set an arbitrary end time
+            _sequenceEndTime = _timestamps[0] + 60.0; // 60 seconds later
+        }
+        return;
+    }
+
+    double first = _timestamps.front();
+    double last = _timestamps.back();
+    double avg = (last - first) / static_cast<double>(_timestamps.size() - 1);
+    // Extend end time so the last value remains visible for one more interval
+    _sequenceEndTime = last + avg;
+}
+
+
+
+int RenderableModel::activeIndex(double currentTime) const {
+    if (_timestamps.empty()) {
+        return -1;
+    }
+
+    auto it = std::upper_bound(_timestamps.begin(), _timestamps.end(), currentTime);
+    if (it == _timestamps.begin()) {
+        return 0;
+    }
+    else if (it != _timestamps.end()) {
+        return static_cast<int>(std::distance(_timestamps.begin(), it)) - 1;
+    }
+    else {
+        return static_cast<int>(_timestamps.size()) - 1;
     }
 }
 

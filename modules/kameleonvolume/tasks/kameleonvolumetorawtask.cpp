@@ -125,6 +125,8 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
     // Status bar configuration
     const int barWidth = 50;
 
+    // ANSI escape code to clear the entire line
+    const std::string clearLine = "\033[2K\r";
 
     for (const fs::directory_entry& entry : fs::directory_iterator(_inputDirectory)) {
         if (!entry.is_regular_file() || entry.path().extension() != ".cdf") {
@@ -198,19 +200,18 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
         float progress = static_cast<float>(count) / static_cast<float>(totalFiles);
         progressCallback(progress);
 
-        // Create the progress bar string first
-        std::ostringstream progressBar;
-        progressBar << "[";
+        // Update the console status bar - clear the line first
+        std::cout << clearLine;
+
+        // Draw the new progress bar
+        std::cout << "[";
         int pos = static_cast<int>(barWidth * progress);
         for (int i = 0; i < barWidth; ++i) {
-            if (i < pos) progressBar << "=";
-            else if (i == pos) progressBar << ">";
-            else progressBar << " ";
+            if (i < pos) std::cout << "=";
+            else if (i == pos) std::cout << ">";
+            else std::cout << " ";
         }
-        progressBar << "] " << int(progress * 100.0) << "% (" << count << "/" << totalFiles << ")";
-
-        // Clear line and print new status
-        std::cout << "\r" << std::string(80, ' ') << "\r" << progressBar.str() << std::flush;
+        std::cout << "] " << int(progress * 100.0) << "% (" << count << "/" << totalFiles << ")" << std::flush;
     }
 
     std::cout << std::endl;
