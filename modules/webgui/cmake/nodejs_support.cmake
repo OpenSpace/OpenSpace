@@ -28,35 +28,35 @@
 
 function(DownloadNodeJs version download_dir)
   if (MSVC)
-    if(CMAKE_SYSTEM_PROCESSOR MATCHES "ARM64|aarch64")
+    if (CMAKE_SYSTEM_PROCESSOR MATCHES "ARM64|aarch64")
       set(basename "node")
       set(filename "${basename}.exe")
       set(path "v${version}/win-arm64/${filename}")
-    else() # Default to x64
+    else () # Default to x64
       set(basename "node")
       set(filename "${basename}.exe")
       set(path "v${version}/win-x64/${filename}")
-    endif()
+    endif ()
   elseif (APPLE)
-    if(CMAKE_SYSTEM_PROCESSOR MATCHES "ARM64|aarch64")
+    if (CMAKE_SYSTEM_PROCESSOR MATCHES "ARM64|aarch64")
       set(basename "node-v${version}-darwin-arm64")
       set(filename "${basename}.tar.gz")
       set(path "v${version}/${filename}")
-    else() # Default to x64
+    else () # Default to x64
       set(basename "node-v${version}-darwin-x64")
       set(filename "${basename}.tar.gz")
       set(path "v${version}/${filename}")
-    endif()
+    endif ()
   elseif (UNIX)
-    if(CMAKE_SYSTEM_PROCESSOR MATCHES "ARM64|aarch64")
+    if (CMAKE_SYSTEM_PROCESSOR MATCHES "ARM64|aarch64")
       set(basename "node-v${version}-linux-arm64")
       set(filename "${basename}.tar.xz")
       set(path "v${version}/${filename}")
-    else() # Default to x64
+    else () # Default to x64
       set(basename "node-v${version}-linux-x64")
       set(filename "${basename}.tar.xz")
       set(path "v${version}/${filename}")
-    endif()
+    endif ()
   endif ()
 
   # Create the file if it doesn't exist
@@ -106,4 +106,3 @@ function(DownloadNodeJs version download_dir)
 
   file(WRITE "${download_dir}/version.txt" "${version}")
 endfunction ()
-
