@@ -1,0 +1,30 @@
+--- openspace2048a1b.cfg	2025-07-24 08:53:32.220938823 +0530
++++ openspace2048a1bmod.cfg	2025-07-24 08:58:11.587054717 +0530
+@@ -92,21 +92,21 @@
+     FONTS = "${DATA}/fonts",
+     TASKS = "${DATA}/tasks",
+     -- If the the 'OPENSPACE_SYNC' environment variable is defined on the system, use that
+-    -- value.  Otherwise, fall back to the ${BASE}/sync folder instead.  This allows a
++    -- value.  Otherwise, fall back to the ${USER}/sync folder instead.  This allows a
+     -- reuse of the sync folder between multiple OpenSpace installations by simply setting
+     -- that environment variable
+-    SYNC = os.getenv("OPENSPACE_SYNC") or "${BASE}/sync",
++    SYNC = os.getenv("OPENSPACE_SYNC") or "${USER}/sync",
+     SCREENSHOTS = "${USER}/screenshots",
+     WEB = "${DATA}/web",
+     RECORDINGS = "${USER}/recordings",
+-    CACHE = "${BASE}/cache",
++    CACHE = "${USER}/cache",
+     CONFIG = "${BASE}/config",
+-    DOCUMENTATION = "${BASE}/documentation",
+-    LOGS = "${BASE}/logs",
++    DOCUMENTATION = "${USER}/documentation",
++    LOGS = "${USER}/logs",
+     MODULES = "${BASE}/modules",
+     SCRIPTS = "${BASE}/scripts",
+     SHADERS = "${BASE}/shaders",
+-    TEMPORARY = "${BASE}/temp",
++    TEMPORARY = "${USER}/temp",
+     GLOBEBROWSING = os.getenv("OPENSPACE_GLOBEBROWSING") or "${USER}/globebrowsing"
+ }
+ 
