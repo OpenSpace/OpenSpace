@@ -42,14 +42,14 @@ if (OPENSPACE_OPENVR_SUPPORT)
     if (WIN32)
       find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
         NAMES SGCTOpenVR.h
-        PATHS ${PROJECT_SOURCE_DIR}/ext/sgct/additional_includes/openvr NO_DEFAULT_PATH
+        PATHS ${PROJECT_SOURCE_DIR}//additional_includes/openvr NO_DEFAULT_PATH
         REQUIRED
       )
     else ()
       find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
         NAMES SGCTOpenVR.h
         PATH_SUFFIXES SGCTOpenVR
-        PATHS ${PROJECT_SOURCE_DIR}/ext/sgct/additional_includes/openvr
+        PATHS ${PROJECT_SOURCE_DIR}//additional_includes/openvr
         REQUIRED
       )
     endif ()
@@ -121,6 +121,12 @@ if (NOT OPENSPACE_HAVE_TESTS)
   # Unless overriden, disable sgct tests if OpenSpace tests are disabled
   set(SGCT_BUILD_TESTS FALSE CACHE BOOL "Enable ghoul unit tests")
 endif()
+
+if (UNIX AND (NOT APPLE))
+  # This prevents CPack errors when the Ubuntu build uses the system libpng
+  set(SGCT_DEP_INCLUDE_LIBPNG OFF CACHE BOOL "" FORCE) 
+endif ()
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct)
 target_link_libraries(OpenSpace PRIVATE sgct)
 
