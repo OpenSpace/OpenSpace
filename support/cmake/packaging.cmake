@@ -41,19 +41,22 @@ set(CPACK_PACKAGE_FILE_NAME
 )
 set(CPACK_STRIP_FILES 1)
 
-if (EXISTS "${PROJECT_SOURCE_DIR}/bin/OpenSpace")
-  install(DIRECTORY
-    ${PROJECT_SOURCE_DIR}/bin/
-    DESTINATION bin
-    USE_SOURCE_PERMISSIONS
-  )
-else ()
+if (EXISTS "${PROJECT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}")
+  message(STATUS "Directory '${PROJECT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}' exists. Taking the binaries from there.")
   install(DIRECTORY
     ${PROJECT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}/
     DESTINATION bin
     USE_SOURCE_PERMISSIONS
   )
+else ()
+  message(STATUS "Directory '${PROJECT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}' does not exist. Taking the binaries from '${PROJECT_SOURCE_DIR}/bin'.")
+  install(DIRECTORY
+    ${PROJECT_SOURCE_DIR}/bin/
+    DESTINATION bin
+    USE_SOURCE_PERMISSIONS
+  )
 endif ()
+
 
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/config/ DESTINATION config)
 
