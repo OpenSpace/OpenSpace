@@ -137,7 +137,7 @@ if(UNIX AND NOT APPLE)
     install(FILES openspace.cfg DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
     
     # Patch to be applied post-install or during packaging
-    install(FILES appdir/openspacecfg.patch DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
+    install(FILES support/cmake/openspacecfg.patch DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
 
   set(CPACK_GENERATOR "DEB")
   if (DEFINED OPENSPACE_DISTRO AND OPENSPACE_DISTRO STREQUAL "ubuntu24.04")
