@@ -36,8 +36,8 @@
 
 namespace {
     struct MissionManagerException : public ghoul::RuntimeError {
-        explicit MissionManagerException(std::string message)
-            : ghoul::RuntimeError(std::move(message), "MissionManager")
+        explicit MissionManagerException(std::string msg)
+            : ghoul::RuntimeError(std::move(msg), "MissionManager")
         {}
     };
 } // namespace

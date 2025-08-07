@@ -859,7 +859,7 @@ bool RenderableGlobe::isReady() const {
     return true;
 }
 
-void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask) {
+void RenderableGlobe::render(const RenderData& data, RendererTasks&) {
     const double distanceToCamera = glm::distance(
         data.camera.positionVec3(),
         data.modelTransform.translation
@@ -883,14 +883,14 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 
                 // Render from light source point of view
                 // (Rings are skipped because the shadow is drawn directly onto the globe)
-                renderChunks(lightRenderData, rendererTask, {}, true);
+                renderChunks(lightRenderData, true);
 
                 glEnable(GL_BLEND);
 
                 _shadowComponent->end();
 
                 // Render again from original point of view
-                renderChunks(data, rendererTask, _shadowComponent->shadowMapData());
+                renderChunks(data);
                 if (_ringsComponent && _ringsComponent->isEnabled() &&
                     _ringsComponent->isVisible())
                 {
@@ -898,7 +898,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
                 }
             }
             else {
-                renderChunks(data, rendererTask);
+                renderChunks(data);
                 if (_ringsComponent && _ringsComponent->isEnabled() &&
                     _ringsComponent->isVisible())
                 {
@@ -1069,10 +1069,7 @@ void RenderableGlobe::invalidateShader() {
 //  Rendering code
 //////////////////////////////////////////////////////////////////////////////////////////
 
-void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
-                                   const ShadowComponent::ShadowMapData& shadowData,
-                                   bool renderGeomOnly)
-{
+void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) {
     ZoneScoped;
 
     if (_layerManagerDirty) [[unlikely]] {
@@ -1356,7 +1353,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     // Render all chunks that want to be rendered globally
     _globalRenderer.program->activate();
     for (int i = 0; i < globalCount; i++) {
-        renderChunkGlobally(*_globalChunkBuffer[i], data, shadowData, renderGeomOnly);
+        renderChunkGlobally(*_globalChunkBuffer[i], data, renderGeomOnly);
     }
     _globalRenderer.program->deactivate();
 
@@ -1364,7 +1361,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     // Render all chunks that need to be rendered locally
     _localRenderer.program->activate();
     for (int i = 0; i < localCount; i++) {
-        renderChunkLocally(*_localChunkBuffer[i], data, shadowData, renderGeomOnly);
+        renderChunkLocally(*_localChunkBuffer[i], data, renderGeomOnly);
     }
     _localRenderer.program->deactivate();
 
@@ -1398,7 +1395,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 }
 
 void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& data,
-                                         const ShadowComponent::ShadowMapData& shadowData,
                                                                       bool renderGeomOnly)
 {
     ZoneScoped;
@@ -1475,7 +1471,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
             }
 
             program.setUniform("textureOffset", _ringsComponent->textureOffset());
-            program.setUniform("ringSize", (float)_ringsComponent->size());
+            program.setUniform("ringSize", static_cast<float>(_ringsComponent->size()));
         }
     }
 
@@ -1494,7 +1490,6 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 }
 
 void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& data,
-                                         const ShadowComponent::ShadowMapData& shadowData,
                                          bool renderGeomOnly)
 {
     ZoneScoped;
@@ -1592,7 +1587,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     }
     
     // Shadow Mapping
-    if (_shadowMappingProperties.shadowMapping && shadowData.shadowDepthTexture != 0) {
+    if (_shadowMappingProperties.shadowMapping) {
         // Bind ring textures for direct projection when rings component is available
         if (_ringsComponent && _ringsComponent->isEnabled()) {
             ghoul::opengl::TextureUnit ringTextureColorUnit;
@@ -1611,7 +1606,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
             }
 
             program.setUniform("textureOffset", _ringsComponent->textureOffset());
-            program.setUniform("ringSize", (float)_ringsComponent->size());
+            program.setUniform("ringSize", static_cast<float>(_ringsComponent->size()));
         }
     }
 

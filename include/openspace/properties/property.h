@@ -97,21 +97,21 @@ public:
          * argument for the struct initialization.
          */
         constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
-                              NeedsConfirmation needsConfirmation = NeedsConfirmation::No)
+                             NeedsConfirmation needsConfirmation_ = NeedsConfirmation::No)
             : identifier(ident)
             , guiName(gui)
             , description(desc)
-            , needsConfirmation(needsConfirmation)
+            , needsConfirmation(needsConfirmation_)
         {}
 
         constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
                                Visibility vis,
-                              NeedsConfirmation needsConfirmation = NeedsConfirmation::No)
+                             NeedsConfirmation needsConfirmation_ = NeedsConfirmation::No)
             : identifier(ident)
             , guiName(gui)
             , description(desc)
             , visibility(vis)
-            , needsConfirmation(needsConfirmation)
+            , needsConfirmation(needsConfirmation_)
         {}
 
         /// The unique identifier that is part of the fully qualified URI of this Property
