@@ -91,6 +91,13 @@ private:
         std::string initialValue;
     } _autoCompleteInfo;
 
+    struct {
+        int index;
+        std::string suggestion;
+        bool isReverse;
+    } _suggestionInfo;
+
+
     float _currentHeight = 0.f;
     float _targetHeight = 0.f;
     float _fullHeight = 0.f;

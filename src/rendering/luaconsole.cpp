@@ -184,6 +184,7 @@ LuaConsole::LuaConsole()
     )
     , _historyLength(HistoryLengthInfo, 13, 0, 100)
     , _autoCompleteInfo({NoAutoComplete, false, ""})
+    , _suggestionInfo({ NoAutoComplete, "" })
 {
     addProperty(_isVisible);
     addProperty(_shouldBeSynchronized);
@@ -358,7 +359,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     auto it = _keyHandlers.find(keyCombination);
     if (it != _keyHandlers.end()) {
         it->second(); 
-        return true;
+        return true; // TODO do we want return here or not? 
     }
 
     // If any other key is pressed, we want to remove our previous findings
@@ -369,6 +370,11 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
                 .hasInitialValue = false,
                 .initialValue = ""
         };
+        _suggestionInfo = {
+            .index = NoAutoComplete,
+            .suggestion = ""
+        };
+
     }
         
     // Do not consume modifier keys
@@ -563,6 +569,14 @@ void LuaConsole::render() {
         ghoul::fontrendering::CrDirection::Down
     );
 
+    // Render suggestion
+    RenderFont(
+        *_font,
+        inputLocation,
+        _suggestionInfo.suggestion, //(std::string(currentCommand.size() + 2, ' ') + _suggestionInfo.suggestion),
+        glm::vec4(0.7f, 0.7f, 0.7f, 1.f)
+    );
+
     // Just offset the ^ marker slightly for a nicer look
     inputLocation.y += 3 * dpiScaling.y;
 
@@ -573,6 +587,7 @@ void LuaConsole::render() {
         (std::string(_inputPosition - nChoppedCharsBeginning + 2, ' ') + "^"),
         _entryTextColor
     );
+
 
     glm::vec2 historyInputLocation = glm::vec2(
         HistoryFontSize * dpi / 2.f,
@@ -894,17 +909,113 @@ void LuaConsole::registerKeyHandlers() {
     registerKeyHandler(Key::KeypadEnter, KeyModifier::None, executeCommand);
 
     auto nextCommand = [this]() {
+        const std::string currentCommand = _commands.at(_activeCommand);
+
+        // Determine if are currently in a function or path context
+
+        constexpr std::string_view PathIdentifier = "\"'[";
+        size_t pathStartIndex = 0;
+        for (size_t i = _inputPosition; i > 0; --i) {
+            if (PathIdentifier.find(currentCommand[i - 1]) != std::string::npos) {
+                pathStartIndex = i;
+                break;
+            }
+        }
+
+        size_t functionStartIndex = currentCommand.rfind("openspace.");
+
+        functionStartIndex = functionStartIndex != std::string::npos ?
+            functionStartIndex : 0;
+
+        const bool isPathContext = pathStartIndex > functionStartIndex;
+
+        if (isPathContext) {
+            // Find the end of the path
+            std::string possiblePath = currentCommand.substr(pathStartIndex);
+            // Find the last ' " ] if any exists, which marks the end of the path string.
+            // Otherwise the rest of the string is assumed to be part of the path
+            size_t pathEnd = possiblePath.find_last_of("\"']");
+            std::string path = currentCommand.substr(pathStartIndex, pathEnd);
+
+            std::filesystem::path dir = path;
+            // If the extracted path is not a directory, it may be the start of a
+            // folder that we need to auto complete, so we check if the parent is a
+            // valid directory
+            if (!std::filesystem::is_directory(path) || !std::filesystem::exists(path)) {
+                std::filesystem::path p(path);
+                auto parent = p.parent_path();
+                if (!std::filesystem::is_directory(parent) || !std::filesystem::exists(parent)) {
+                    return;
+
+                }
+                dir = parent.string();
+            }
+
+            // Get the suggestions from directory
+            auto suggestions = ghoul::filesystem::walkDirectory(
+                dir,
+                ghoul::filesystem::Recursive::No,
+                ghoul::filesystem::Sorted::Yes
+            );
+
+
+            //bool includeSlashInSuggestion = false;
+            //if (!path.ends_with('/') && !path.ends_with('\\')) {
+            //    path += '/';
+            //    includeSlashInSuggestion = true;
+            //}
+
+
+
+            for (int i = 0; i < static_cast<int>(suggestions.size()); i++) {
+                const std::string suggestion = suggestions[i].string();
+                // TODO do we want to sanitize here or only convert \ into / ? 
+                const std::string suggestionLowerCase = sanitizeInput(suggestion);
+                const std::string pathLowerCase = sanitizeInput(path);
+
+                const size_t pathLen = pathLowerCase.length();
+
+                const bool correctLength = suggestionLowerCase.length() >= pathLen;
+                const bool isPathSubStr = suggestionLowerCase.substr(0, pathLen) == pathLowerCase;
+
+                if (correctLength && isPathSubStr && (i > _suggestionInfo.index)) {
+                    // We found our index so we store it
+                    _suggestionInfo.index = i;
+                    // We're only interested in the part of the path that is not already written
+                    _suggestionInfo.suggestion = suggestionLowerCase;
+                    break;
+                }
+
+            }
+
+            //if (_suggestionInfo.index < 0) {
+            //    _suggestionInfo.index = 0;
+            //}
+            //if (_suggestionInfo.index < suggestions.size()) {
+            //    
+
+
+            //    std::string suggestion = suggestions[_suggestionInfo.index].string();
+            //    // We're only interested in the part of the path that is not already written
+            //    size_t count = path.size();
+            //    count -= includeSlashInSuggestion ? 1 : 0;
+
+            //    _suggestionInfo.suggestion = suggestion.substr(count);
+            //    ++_suggestionInfo.index;
+            //}
+
+            return;
+        }
+
+
         // We get a list of all the available commands and initially find the first
         // command that starts with how much we typed sofar. We store the index so
         // that in subsequent "tab" presses, we will discard previous commands. This
         // implements the 'hop-over' behavior. As soon as another key is pressed,
         // everything is set back to normal
-
-
         std::vector<std::string> allCommands = global::scriptEngine->allLuaFunctions();
         std::sort(allCommands.begin(), allCommands.end());
 
-        const std::string currentCommand = _commands.at(_activeCommand);
 
         // Check if it is the first time the tab has been pressed. If so, we need to
         // store the already entered command so that we can later start the search
@@ -984,6 +1095,9 @@ void LuaConsole::registerKeyHandlers() {
         // find the value before the one that was previously found
         if (_autoCompleteInfo.lastIndex != NoAutoComplete) {
             _autoCompleteInfo.lastIndex -= 2;
+        }
+        if (_suggestionInfo.index != NoAutoComplete) {
+            _suggestionInfo.index -= 2;
         }
         nextCommand();
     });
