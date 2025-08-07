@@ -1,0 +1,50 @@
+local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local MavenPosition = {
+  Identifier = "MavenPosition",
+  Parent = marsTransforms.MarsBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Maven,
+      Observer = coreKernels.ID.Mars,
+      Frame = coreKernels.Frame.Galactic
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Maven,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "Maven Position",
+    Path = "/Solar System/Missions/Maven",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MavenPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MavenPosition)
+end)
+
+asset.export(MavenPosition)
+
+
+
+asset.meta = {
+  Name = "Maven Transforms",
+  Description = "Maven transforms, position relative to Mars",
+  Author = "CCMC",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

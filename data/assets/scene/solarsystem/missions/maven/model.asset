@@ -1,0 +1,62 @@
+local sun = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
+
+
+
+--local models = asset.resource({
+--  Name = "Maven Model",
+--  Type = "HttpSynchronization",
+--  Identifier = "artemis_1_models",
+--  Version = 1
+--})
+local models = "C:/Users/eolsson/Downloads/24882_Maven/"
+
+local MavenModel = {
+  Identifier = "MavenModel",
+  Parent = transforms.MavenPosition.Identifier,
+  ApproachFactor = 2700,
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "MavenModel",
+      XAxis = { 1.0, 0.0, 0.0 },
+      XAxisOrthogonal = true,
+      YAxis = sun.SunCenter.Identifier,
+      YAxisInvert = true
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "24882_Maven.glb",
+    LightSources = {
+      sun.LightSource
+    },
+    AmbientIntensity = 0.05
+  },
+  GUI = {
+    Name = "Maven Model",
+    Path = "/Solar System/Missions/Maven",
+    Description = "Model of Maven space craft"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MavenModel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MavenModel)
+end)
+
+asset.export(MavenModel)
+
+
+
+asset.meta = {
+  Name = "Maven Model",
+  Description = "Maven space craft model",
+  Author = "CCMC",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,0 +1,85 @@
+local pos = "C:/Users/eolsson/Downloads/maven/position/"
+local ori = "C:/Users/eolsson/Downloads/maven/orientation/"
+
+
+local Kernels = {
+  pos .. "maven_orb_rec_140922_150101_v1.bsp",
+--  pos .. "maven_orb_rec_150101_150401_v1.bsp",
+--  pos .. "maven_orb_rec_150401_150701_v1.bsp",
+--  pos .. "maven_orb_rec_150701_151001_v1.bsp",
+--  pos .. "maven_orb_rec_151001_160101_v1.bsp",
+--  pos .. "maven_orb_rec_160101_160401_v1.bsp",
+--  pos .. "maven_orb_rec_160401_160701_v1.bsp",
+--  pos .. "maven_orb_rec_160701_161001_v1.bsp",
+--  pos .. "maven_orb_rec_161001_170101_v1.bsp",
+--  pos .. "maven_orb_rec_170101_170401_v1.bsp",
+--  pos .. "maven_orb_rec_170401_170701_v1.bsp",
+--  pos .. "maven_orb_rec_170701_171001_v1.bsp",
+--  pos .. "maven_orb_rec_171001_180101_v1.bsp",
+--  pos .. "maven_orb_rec_180101_180401_v1.bsp",
+--  pos .. "maven_orb_rec_180401_180701_v1.bsp",
+--  pos .. "maven_orb_rec_180701_181001_v1.bsp",
+--  pos .. "maven_orb_rec_181001_190101_v1.bsp",
+--  pos .. "maven_orb_rec_190101_190401_v1.bsp",
+--  pos .. "maven_orb_rec_190401_190701_v1.bsp",
+--  pos .. "maven_orb_rec_190701_191001_v1.bsp",
+--  pos .. "maven_orb_rec_191001_200101_v1.bsp",
+--  pos .. "maven_orb_rec_200101_200401_v1.bsp",
+--  pos .. "maven_orb_rec_200401_200701_v1.bsp",
+--  pos .. "maven_orb_rec_200701_201001_v1.bsp",
+--  pos .. "maven_orb_rec_201001_210101_v1.bsp",
+--  pos .. "maven_orb_rec_210101_210401_v1.bsp",
+--  pos .. "maven_orb_rec_210401_210701_v1.bsp",
+--  pos .. "maven_orb_rec_210701_211001_v1.bsp",
+--  pos .. "maven_orb_rec_211001_220101_v1.bsp",
+--  pos .. "maven_orb_rec_220101_220401_v1.bsp",
+--  pos .. "maven_orb_rec_220401_220701_v1.bsp",
+--  pos .. "maven_orb_rec_220701_221001_v1.bsp",
+--  pos .. "maven_orb_rec_221001_230101_v1.bsp",
+--  pos .. "maven_orb_rec_230101_230401_v1.bsp",
+--  pos .. "maven_orb_rec_230401_230701_v1.bsp",
+--  pos .. "maven_orb_rec_230701_231001_v1.bsp",
+--  pos .. "maven_orb_rec_231001_240101_v1.bsp",
+--  pos .. "maven_orb_rec_240101_240401_v1.bsp",
+--  pos .. "maven_orb_rec_240401_240701_v1.bsp",
+--  pos .. "maven_orb_rec_240701_241001_v1.bsp",
+--  pos .. "maven_orb_rec_241001_250101_v1.bsp",
+--  pos .. "maven_orb_rec_250101_250401_v1.bsp",
+--  pos .. "maven_orb_rec_250401_250701_v1.bsp",
+
+  ori .. "mvn_sc_rel_140922_140928_v01.bc",
+  ori .. "mvn_sc_rel_140929_141005_v01.bc",
+  ori .. "mvn_sc_rel_141006_141012_v01.bc",
+  ori .. "mvn_sc_rel_141013_141019_v01.bc",
+  ori .. "mvn_sc_rel_141020_141026_v01.bc",
+  ori .. "mvn_sc_rel_141027_141102_v01.bc",
+  ori .. "mvn_sc_rel_141103_141109_v01.bc",
+  ori .. "mvn_sc_rel_141110_141116_v01.bc",
+  ori .. "mvn_sc_rel_141117_141123_v01.bc",
+  ori .. "mvn_sc_rel_141124_141130_v01.bc",
+  ori .. "mvn_sc_rel_141201_141207_v01.bc",
+  ori .. "mvn_sc_rel_141208_141214_v01.bc",
+  ori .. "mvn_sc_rel_141215_141221_v01.bc",
+  ori .. "mvn_sc_rel_141222_141228_v01.bc",
+  ori .. "mvn_sc_rel_141229_150104_v01.bc"
+}
+
+local ID = {
+  Maven = "MAVEN"
+}
+
+local Frame = {
+  Maven = "MAVEN_SPACECRAFT"
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(Kernels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(Kernels)
+end)
+
+asset.export("ID", ID)
+asset.export("Frame", Frame)

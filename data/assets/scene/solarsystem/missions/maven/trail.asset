@@ -1,0 +1,99 @@
+local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
+
+
+local MavensFirstTrail = {
+  Identifier = "MavensFirstTrail",
+  Parent = marsTransforms.MarsBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Enabled = false,
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Maven,
+      Observer = coreKernels.ID.Mars,
+      Frame = coreKernels.ID.Galactic
+    },
+    Color = { 0.106, 0.4, 0.761 },
+    Fade = 7.0,
+    StartTime = "2014 SEP 22 00:00:00.000",
+    EndTime = "2015 JAN 01 00:00:00.000",
+    SampleInterval = 60 -- Sample rate of once per minute
+  },
+  GUI = {
+    Name = "Maven First Orbit Trails",
+    Path = "/Solar System/Missions/Maven/Trails",
+    Focusable = false,
+    Description = "Maven's trail relative to Mars"
+  }
+}
+
+-- local MavensLatestTrail = {
+--   Identifier = "MavensLatestTrail",
+--   Parent = marsTransforms.MarsBarycenter.Identifier,
+--   Renderable = {
+--     Type = "RenderableTrailTrajectory",
+--     Enabled = false,
+--     Translation = {
+--       Type = "SpiceTranslation",
+--       Target = kernels.ID.Maven,
+--       Observer = coreKernels.ID.Mars,
+--       Frame = coreKernels.ID.Galactic
+--     },
+--     Color = { 0.106, 0.4, 0.761 },
+--     Fade = 7.0,
+--     StartTime = "2025 JAN 01 00:00:00.000",
+--     EndTime = "2015 JUL 01 00:00:00.000",
+--     SampleInterval = 60 -- Sample rate of once per minute
+--   },
+--   GUI = {
+--     Name = "Maven Latest Trails",
+--     Path = "/Solar System/Missions/Maven/Trails",
+--     Focusable = false,
+--     Description = "Maven's trail relative to Mars"
+--   }
+-- }
+
+local ToggleMavensTrail = {
+  Identifier = "Maven.ToggleMavensTrail",
+  Name = "Toggle Mavens Trail",
+  Command = [[
+    openspace.toggleFade("Scene.MavensFirstTrail.Renderable")
+  ]],
+  Documentation = "Toggle Mavens Trail",
+  GuiPath = "/Solar System",
+  IsLocal = false
+}
+
+local SetMavenTime = {
+  Identifier = "Maven.SetMavenTime",
+  Name = "Set time to Mavens first orbits",
+  Command = [[
+    openspace.time.setTime("2014-09-22T02:43:53.000")
+  ]],
+  Documentation = "Set time to Mavens' first few orbits",
+  GuiPath = "/Solar System",
+  IsLocal = false
+}
+
+asset.onInitialize(function()
+  openspace.action.registerAction(ToggleMavensTrail)
+  openspace.action.registerAction(SetMavenTime)
+  openspace.bindKey("M", ToggleMavensTrail.Identifier)
+  openspace.bindKey("SHIFT+M", SetMavenTime.Identifier)
+  openspace.addSceneGraphNode(MavensFirstTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MavensFirstTrail)
+  openspace.clearKey("SHIFT+M")
+  openspace.clearKey("M")
+  openspace.action.removeAction(SetMavenTime)
+  openspace.action.removeAction(ToggleMavensTrail)
+end)
+
+asset.export("ToggleMavensTrail", ToggleMavensTrail.Identifier)
+asset.export("SetMavenTime", SetMavenTime.Identifier)
+asset.export(MavensFirstTrail)
+
