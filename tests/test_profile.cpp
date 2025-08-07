@@ -27,14 +27,14 @@
 #include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <openspace/navigation/navigationstate.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/scene/profile.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <filesystem>
 #include <fstream>
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 
 // clang-tidy is convinced that it is possible to use emplace_back instead of push_back
 // for the profiole types, but I haven't been able to convince the Visual Studio
@@ -807,6 +807,7 @@ TEST_CASE("Removing non-exisiting asset (ignored)", "[profile]") {
 //
 TEST_CASE("Save settings to profile", "[profile]") {
     properties::PropertyOwner owner({ "base" });
+    global::rootPropertyOwner->addPropertySubOwner(owner);
     properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner.addProperty(p1);
     properties::StringProperty p2(properties::Property::PropertyInfo("p2", "c", "d"));
@@ -827,6 +828,8 @@ TEST_CASE("Save settings to profile", "[profile]") {
     Profile profile;
     profile.version = Profile::CurrentVersion;
     profile.saveCurrentSettingsToProfile(owner, "current-time", state);
+
+    global::rootPropertyOwner->removePropertySubOwner(owner);
 
     REQUIRE(profile.properties.size() == 2);
     CHECK(
@@ -857,6 +860,98 @@ TEST_CASE("Save settings to profile", "[profile]") {
     CHECK(profile.time->type == Profile::Time::Type::Absolute);
     CHECK(profile.time->value == "current-time");
 }
+
+TEST_CASE("Version 1.0 -> 1.1", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_10.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_11.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.0 -> 1.2", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_10.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_12.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.0 -> 1.3", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_10.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_13.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.0 -> 1.4", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_10.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_14.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.1 -> 1.2", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_11.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_12.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.1 -> 1.3", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_11.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_13.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.1 -> 1.4", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_11.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_14.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.2 -> 1.3", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_12.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_13.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.2 -> 1.4", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_12.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_14.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.3 -> 1.4", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_13.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_14.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+
 
 //
 // Error states

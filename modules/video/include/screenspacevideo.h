@@ -28,7 +28,7 @@
 #include <openspace/rendering/screenspacerenderable.h>
 
 #include <modules/video/include/videoplayer.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 
 namespace ghoul::opengl { class Texture; }
 
@@ -40,8 +40,9 @@ class ScreenSpaceVideo : public ScreenSpaceRenderable {
 public:
     explicit ScreenSpaceVideo(const ghoul::Dictionary& dictionary);
 
-    bool initializeGL() override;
-    bool deinitializeGL() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
+
     void update() override;
     void render(const RenderData& renderData) override;
 

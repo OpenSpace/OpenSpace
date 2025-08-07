@@ -39,6 +39,7 @@
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace {
@@ -194,7 +195,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiFocusableInfo = {
-        "IsFocusable",
+        "Focusable",
         "Focusable Hint",
         "This value serves as a hint to determine if it makes sense to focus the camera "
         "on this scene graph node. It only serves as a hint and does not actually "
@@ -923,7 +924,23 @@ void SceneGraphNode::renderDebugSphere(const Camera& camera, double size,
 void SceneGraphNode::setParent(SceneGraphNode& parent) {
     ghoul_assert(_parent != nullptr, "Node must be attached to a parent");
 
-    parent.attachChild(_parent->detachChild(*this));
+    // 1. Remove `this` from its currents parent's children
+    auto iter = std::find_if(
+        _parent->_children.begin(),
+        _parent->_children.end(),
+        [this](const ghoul::mm_unique_ptr<SceneGraphNode>& node) {
+            return node.get() == this;
+        }
+    );
+    ghoul_assert(iter != _parent->_children.end(), "This was not a child of its parent");
+    ghoul::mm_unique_ptr<SceneGraphNode> c = std::move(*iter);
+    _parent->_children.erase(iter);
+
+    // 2. Reparent `this`
+    _parent = &parent;
+
+    // 3. Add `this` to the new parent's children list
+    _parent->_children.push_back(std::move(c));
 }
 
 void SceneGraphNode::attachChild(ghoul::mm_unique_ptr<SceneGraphNode> child) {
@@ -1297,6 +1314,15 @@ const std::vector<std::string>& SceneGraphNode::onRecedeAction() const {
 
 const std::vector<std::string>& SceneGraphNode::onExitAction() const {
     return _onExitAction;
+}
+
+Ellipsoid SceneGraphNode::ellipsoid() const {
+    if (_renderable) {
+        return _renderable->ellipsoid();
+    }
+    else {
+        return Ellipsoid(glm::dvec3(interactionSphere()));
+    }
 }
 
 double SceneGraphNode::boundingSphere() const {

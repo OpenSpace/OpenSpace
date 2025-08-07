@@ -64,13 +64,14 @@ local MercuryLabel = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "au",
-    FadeDistances = { 1.5, 20.0 },
+    FadeDistances = { 0.75, 20.0 },
     FadeWidths = { 1.0, 30.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {
     Name = "Mercury Label",
-    Path = "/Solar System/Planets/Mercury"
+    Path = "/Solar System/Planets/Mercury",
+    Focusable = false
   }
 }
 

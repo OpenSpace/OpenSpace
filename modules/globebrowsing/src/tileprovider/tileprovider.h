@@ -28,14 +28,14 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/globebrowsing/src/basictypes.h>
-#include <modules/globebrowsing/src/ellipsoid.h>
 #include <modules/globebrowsing/src/layergroupid.h>
 #include <modules/globebrowsing/src/tileindex.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
 #include <modules/globebrowsing/src/timequantizer.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
+#include <openspace/util/ellipsoid.h>
 #include <unordered_map>
 #include <ghoul/opengl/programobject.h>
 

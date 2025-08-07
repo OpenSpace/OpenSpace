@@ -383,8 +383,21 @@ namespace {
             PositionNormal [[codegen::key("Camera Position Normal")]],
             FixedRotation [[codegen::key("Fixed Rotation")]]
         };
-        // [[codegen::verbatim(OrientationRenderOptionInfo.description)]]
-        std::optional<RenderOption> orientationRenderOption;
+
+        // Controls whether the planes for the points will be billboarded, that is
+        // oriented to face the camera. Setting this value to `true` is the same as
+        // setting it to \"Camera View Direction\", setting it to `false` is the same as
+        // setting it to \"Fixed Rotation\". If the value is not specified, the default
+        // value of `true` is used instead.
+        //
+        // \"Camera View Direction\" rotates the points so that the plane is orthogonal to
+        // the viewing direction of the camera (useful for planar displays), and \"Camera
+        // Position Normal\" rotates the points towards the position of the camera (useful
+        // for spherical displays, like dome theaters). In both these cases the points
+        // will be billboarded towards the camera. In contrast, \"Fixed Rotation\" does
+        // not rotate the points at all based on the camera and should be used when the
+        // dataset contains orientation information for the points.
+        std::optional<std::variant<bool, RenderOption>> billboard;
 
         // [[codegen::verbatim(UseOrientationDataInfo.description)]]
         std::optional<bool> useOrientationData;
@@ -637,10 +650,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     , _useAdditiveBlending(UseAdditiveBlendingInfo, true)
     , _useRotation(UseOrientationDataInfo, false)
     , _drawElements(DrawElementsInfo, true)
-    , _renderOption(
-        OrientationRenderOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _renderOption(OrientationRenderOptionInfo)
     , _nDataPoints(NumShownDataPointsInfo, 0)
     , _hasOrientationData(HasOrientationDataInfo, false)
 {
@@ -666,8 +676,23 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     _renderOption.addOption(RenderOption::PositionNormal, "Camera Position Normal");
     _renderOption.addOption(RenderOption::FixedRotation, "Fixed Rotation");
 
-    if (p.orientationRenderOption.has_value()) {
-        _renderOption = codegen::map<RenderOption>(*p.orientationRenderOption);
+    if (p.billboard.has_value()) {
+        ghoul_assert(
+            std::holds_alternative<bool>(*p.billboard) ||
+            std::holds_alternative<Parameters::RenderOption>(*p.billboard),
+            "Wrong type"
+        );
+
+        if (std::holds_alternative<bool>(*p.billboard)) {
+            _renderOption = std::get<bool>(*p.billboard) ?
+                RenderOption::ViewDirection :
+                RenderOption::FixedRotation;
+        }
+        else {
+            _renderOption = codegen::map<RenderOption>(
+                std::get<Parameters::RenderOption>(*p.billboard)
+            );
+        }
     }
     else {
         _renderOption = RenderOption::ViewDirection;
@@ -929,9 +954,7 @@ void RenderablePointCloud::initializeSingleTexture() {
     std::filesystem::path p = absPath(_texture.spriteTexturePath);
 
     if (!std::filesystem::is_regular_file(p)) {
-        throw ghoul::RuntimeError(std::format(
-            "Could not find image file '{}'", p
-        ));
+        throw ghoul::RuntimeError(std::format("Could not find image file '{}'", p));
     }
 
     loadTexture(p, 0);
@@ -993,9 +1016,7 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
         convertTextureFormat(*t, targetFormat);
     }
     else {
-        throw ghoul::RuntimeError(std::format(
-            "Could not find image file {}", path
-        ));
+        throw ghoul::RuntimeError(std::format("Could not find image file {}", path));
     }
 
     TextureFormat format = {
@@ -1210,6 +1231,7 @@ void RenderablePointCloud::renderPoints(const RenderData& data,
     _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
 
     _program->setUniform(_uniformCache.renderOption, _renderOption.value());
+
     _program->setUniform(_uniformCache.opacity, opacity());
 
     _program->setUniform(_uniformCache.scaleExponent, _sizeSettings.scaleExponent);

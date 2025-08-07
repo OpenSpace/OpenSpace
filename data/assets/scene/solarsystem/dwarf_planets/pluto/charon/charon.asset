@@ -43,7 +43,13 @@ local Charon = {
       Color = { 1.0, 1.0, 0.0 }
     }
   },
-  Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_major", "moon_major_pluto" },
+  Tag = {
+    "moon_solarSystem",
+    "moon_dwarf",
+    "moon_pluto",
+    "moon_major",
+    "moon_major_pluto"
+  },
   GUI = {
     Path = "/Solar System/Dwarf Planets/Pluto/Charon"
   }
@@ -70,6 +76,7 @@ local CharonLabel = {
   GUI = {
     Name = "Charon Label",
     Path = "/Solar System/Dwarf Planets/Pluto/Charon",
+    Focusable = false,
     Description = "Label for Pluto's moon Charon"
   }
 }

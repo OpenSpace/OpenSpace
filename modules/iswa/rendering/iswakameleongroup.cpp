@@ -51,7 +51,8 @@ namespace {
     };
 } // namespace
 
-namespace openspace{
+namespace openspace {
+
 IswaKameleonGroup::IswaKameleonGroup(std::string name, std::string type)
     : IswaDataGroup(name, type)
     , _resolution(ResolutionInfo, 100.f, 10.f, 200.f)
@@ -123,7 +124,7 @@ void IswaKameleonGroup::readFieldlinePaths(const std::filesystem::path& indexFil
                 _fieldlines.addOption(it.key());
                 _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
                     identifier() + "/" + it.key(),
-                    it.value(),
+                    it->get<std::string>(),
                     false
                 );
                 i++;

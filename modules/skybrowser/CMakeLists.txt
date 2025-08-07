@@ -31,7 +31,6 @@ set(HEADER_FILES
   include/utility.h
   include/targetbrowserpair.h
   include/wwtcommunicator.h
-  include/browser.h
   include/screenspaceskybrowser.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -44,7 +43,6 @@ set(SOURCE_FILES
   src/utility.cpp
   src/targetbrowserpair.cpp
   src/wwtcommunicator.cpp
-  src/browser.cpp
   src/screenspaceskybrowser.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

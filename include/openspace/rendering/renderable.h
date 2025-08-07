@@ -28,10 +28,10 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/fadeable.h>
 
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <string_view>
@@ -45,6 +45,7 @@ namespace ghoul::opengl {
 namespace openspace {
 
 class Camera;
+class Ellipsoid;
 struct RenderData;
 struct RendererTasks;
 struct SurfacePositionHandle;
@@ -102,6 +103,8 @@ public:
     // handled
     virtual SurfacePositionHandle calculateSurfacePositionHandle(
         const glm::dvec3& targetModelSpace) const;
+
+    virtual Ellipsoid ellipsoid() const;
 
     virtual bool renderedWithDesiredData() const;
 

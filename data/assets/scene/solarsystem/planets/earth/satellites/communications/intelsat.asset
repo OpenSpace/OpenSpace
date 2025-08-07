@@ -28,7 +28,8 @@ local IntelsatSatellites = {
   Tag = { "earth_satellites" },
   GUI = {
     Name = "Intelsat",
-    Path = "/Solar System/Planets/Earth/Satellites"
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
   }
 }
 

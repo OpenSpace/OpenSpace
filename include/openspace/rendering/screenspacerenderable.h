@@ -28,7 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/fadeable.h>
 
-#include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
@@ -70,10 +70,10 @@ public:
     };
     virtual void render(const RenderData& renderData);
 
-    virtual bool initialize();
-    virtual bool initializeGL();
-    virtual bool deinitialize();
-    virtual bool deinitializeGL();
+    virtual void initialize();
+    virtual void initializeGL();
+    virtual void deinitialize();
+    virtual void deinitializeGL();
 
     virtual void update();
     virtual bool isReady() const;
@@ -150,10 +150,13 @@ protected:
     properties::TriggerProperty _delete;
 
     glm::ivec2 _objectSize = glm::ivec2(0);
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+
+private:
     UniformCache(color, opacity, blackoutFactor, hue, value, saturation, mvpMatrix, tex,
         backgroundColor, gamma, borderColor, borderWidth, borderFeather,
         useAcceleratedRendering) _uniformCache;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 };
 
 } // namespace openspace

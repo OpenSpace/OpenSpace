@@ -26,15 +26,15 @@
 
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/selectionproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/list/doublelistproperty.h>
 #include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/matrix/dmat2property.h>
 #include <openspace/properties/matrix/dmat3property.h>
 #include <openspace/properties/matrix/dmat4property.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/selectionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
@@ -63,15 +63,13 @@ void renderTooltip(Property* prop, double delay) {
             ImGui::TextWrapped("%s", prop->description().c_str());
             ImGui::Spacing();
         }
-        ImGui::Text(
-            "%s",
-            (std::string("Identifier: ") + prop->uri()).c_str()
-        );
+        std::string t = std::format("Identifier: {}", prop->uri());
+        ImGui::Text("%s", t.c_str());
         ImGui::EndTooltip();
     }
 }
 
-void executeSetPropertyScript(const std::string& id, const std::string& value) {
+void executeSetPropertyScript(std::string_view id, const std::string& value) {
     global::scriptEngine->queueScript(
         std::format("openspace.setPropertyValueSingle('{}', {});", id, value)
     );
@@ -106,55 +104,37 @@ void renderOptionProperty(Property* prop, const std::string& ownerName,
     OptionProperty* p = static_cast<OptionProperty*>(prop);
     const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
-    bool isReadOnly = false;
-    if (p->metaData().hasValue<bool>("isReadOnly")) {
-        isReadOnly = p->metaData().value<bool>("isReadOnly");
-    }
+    bool isReadOnly = p->isReadOnly();
 
     int value = *p;
     const std::vector<OptionProperty::Option>& options = p->options();
-    switch (p->displayType()) {
-        case OptionProperty::DisplayType::Radio:
-            ImGui::Text("%s", name.c_str());
-            ImGui::Separator();
-            for (const OptionProperty::Option& o : options) {
-                ImGui::RadioButton(o.description.c_str(), &value, o.value);
-                if (showTooltip) {
-                    renderTooltip(prop, tooltipDelay);
-                }
-            }
-            ImGui::Separator();
-            break;
-        case OptionProperty::DisplayType::Dropdown: {
-            // The order of the options does not have to correspond with the value of the
-            // option
-            std::string nodeNames;
-            for (const OptionProperty::Option& o : options) {
-                nodeNames += o.description + '\0';
-            }
-            nodeNames += '\0';
 
-            int idx = static_cast<int>(std::distance(
-                options.begin(),
-                std::find_if(
-                    options.begin(),
-                    options.end(),
-                    [value](const OptionProperty::Option& o) { return o.value == value; }
-                )
-            ));
-
-            const bool hasChanged = ImGui::Combo(name.c_str(), &idx, nodeNames.c_str());
-            if (showTooltip) {
-                renderTooltip(prop, tooltipDelay);
-            }
-
-            if (hasChanged) {
-                value = options[idx].value;
-            }
-
-            break;
-        }
+    // The order of the options does not have to correspond with the value of the
+    // option
+    std::string nodeNames;
+    for (const OptionProperty::Option& o : options) {
+        nodeNames += o.description + '\0';
     }
+    nodeNames += '\0';
+
+    int idx = static_cast<int>(std::distance(
+        options.begin(),
+        std::find_if(
+            options.begin(),
+            options.end(),
+            [value](const OptionProperty::Option& o) { return o.value == value; }
+        )
+    ));
+
+    const bool hasChanged = ImGui::Combo(name.c_str(), &idx, nodeNames.c_str());
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
+    }
+
+    if (hasChanged) {
+        value = options[idx].value;
+    }
+
     if (value != p->value() && !isReadOnly) {
         executeSetPropertyScript(p->uri(), std::to_string(value));
     }
@@ -237,7 +217,7 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
     ImGui::PopID();
 }
 
-void renderListProperty(const std::string& name, const std::string& fullIdentifier,
+void renderListProperty(const std::string& name, std::string_view fullIdentifier,
                         const std::string& stringValue)
 {
     // Remove brackets from the string value

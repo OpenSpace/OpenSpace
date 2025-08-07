@@ -31,6 +31,7 @@ local Object = {
   GUI = {
     Name = "Star Distance Uncertainty",
     Path = "/Milky Way/Stars",
+    Focusable = false,
     Description = [[The uncertainty of a star's position is derived from the uncertainty
       in its parallax measurement. This results in a range in distance where the star
       could exist. Here we draw lines on top of select stars which give us a visual cue

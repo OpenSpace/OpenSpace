@@ -51,34 +51,34 @@ void ScriptCameraStates::updateStateFromInput(double deltaTime) {
         _globalRotationState.velocity.decelerate(deltaTime);
     }
 
-    if (_truckMovement != glm::dvec2(0.0)) {
+    if (_truckMovement != 0.0) {
         _truckMovementState.velocity.set(
             _truckMovement * _sensitivity,
             deltaTime
         );
-        _truckMovement = glm::dvec2(0.0);
+        _truckMovement = 0.0;
     }
     else {
         _truckMovementState.velocity.decelerate(deltaTime);
     }
 
-    if (_localRoll != glm::dvec2(0.0)) {
+    if (_localRoll != 0.0) {
         _localRollState.velocity.set(
             _localRoll * _sensitivity,
             deltaTime
         );
-        _localRoll = glm::dvec2(0.0);
+        _localRoll = 0.0;
     }
     else {
         _localRollState.velocity.decelerate(deltaTime);
     }
 
-    if (_globalRoll != glm::dvec2(0.0)) {
+    if (_globalRoll != 0.0) {
         _globalRollState.velocity.set(
             _globalRoll * _sensitivity,
             deltaTime
         );
-        _globalRoll = glm::dvec2(0.0);
+        _globalRoll = 0.0;
     }
     else {
         _globalRollState.velocity.decelerate(deltaTime);
@@ -93,15 +93,15 @@ void ScriptCameraStates::addGlobalRotation(const glm::dvec2& delta) {
     _globalRotation += delta;
 }
 
-void ScriptCameraStates::addTruckMovement(const glm::dvec2& delta) {
+void ScriptCameraStates::addTruckMovement(double delta) {
     _truckMovement += delta;
 }
 
-void ScriptCameraStates::addLocalRoll(const glm::dvec2& delta) {
+void ScriptCameraStates::addLocalRoll(double delta) {
     _localRoll += delta;
 }
 
-void ScriptCameraStates::addGlobalRoll(const glm::dvec2& delta) {
+void ScriptCameraStates::addGlobalRoll(double delta) {
     _globalRoll += delta;
 }
 

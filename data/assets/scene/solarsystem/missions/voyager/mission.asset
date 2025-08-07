@@ -7,42 +7,42 @@
 local Mission = {
   Identifier = "Voyager",
   Name = "Voyager",
-  Image = "https://upload.wikimedia.org/wikipedia/commons/8/87/Voyager_-_mission_logo.png",
+  Image = "https://data.openspaceproject.com/missions/voyager/Voyager_-_mission_logo.png",
   Description = "The twin Voyager 1 and 2 spacecraft are exploring where nothing from Earth has flown before. Continuing on their more-than-40-year journey since their 1977 launches, they each are much farther away from Earth and the sun than Pluto. In August 2012, Voyager 1 made the historic entry into interstellar space, the region between stars, filled with material ejected by the death of nearby stars millions of years ago. Voyager 2 entered interstellar space on November 5, 2018 and scientists hope to learn more about this region. Both spacecraft are still sending scientific information about their surroundings through the Deep Space Network, or DSN. The primary mission was the exploration of Jupiter and Saturn. After making a string of discoveries there — such as active volcanoes on Jupiter's moon Io and intricacies of Saturn's rings — the mission was extended. Voyager 2 went on to explore Uranus and Neptune, and is still the only spacecraft to have visited those outer planets. The adventurers' current mission, the Voyager Interstellar Mission (VIM), will explore the outermost edge of the Sun's domain. And beyond.",
   Milestones = {
     {
       Name = "Voyager 1 Jupiter Encounter",
       Date = "1979 MAR 05 00:00:00",
       Description = "Voyager 1 discovered a thin ring around Jupiter and two new Jovian moons: Thebe and Metis.",
-      Image = "https://voyager.jpl.nasa.gov/assets/images/galleries/approaches/jupiter2.gif"
+      Image = "https://data.openspaceproject.com/missions/voyager/jupiter2.gif"
     },
     {
       Name = "Voyager 2 Jupiter Encounter",
       Date = "1979 JUL 09 00:00:00",
       Description = "During the Jupiter leg of its journey, Voyager 2 explored the giant planet, its magnetosphere and moons in greater detail than had the Pioneer spacecraft that preceded it. Voyager 2 also used it as a springboard to Saturn, using the gravity-assist technique. Voyager 2 succeeded on all counts. It returned spectacular photos of the entire Jovian system, and time-lapse movies made from its images of Jupiter showed how the planet had changed since Voyager 1's visit. Its images of Io revealed changes in the moon's surface and the persistence of its volcanic eruptions. The spacecraft resolved the streaks Voyager 1 had shown on Europa into a collection of cracks in a thick and remarkably smooth icy crust. It also discovered a 14th moon and revealed a third component to the planet's rings.",
-      Image = "https://www.nasa.gov/sites/default/files/styles/full_width/public/thumbnails/image/voyager_2_jupiter_full_planet_incl_great_red_spot.jpg?itok=lSyZCyab"
+      Image = "https://data.openspaceproject.com/missions/voyager/voyager_2_jupiter_full_planet_incl_great_red_spot.png"
     },
     {
       Name = "Voyager 1 Saturn Encounter",
       Date = "1980 NOV 09 00:00:00",
-      Image = "https://voyager.jpl.nasa.gov/assets/images/galleries/images-voyager-took/saturn/1bg.jpg"
+      Image = "https://data.openspaceproject.com/missions/voyager/1bg.jpg"
     },
     {
       Name = "Voyager 2 Saturn Encounter",
       Date = "1981 AUG 25 00:00:00",
       Description = "Voyager 2 was to become the third spacecraft to visit Saturn. It gave us another close-range look at Saturn and its moons. Using its photopolarimeter, an instrument that had failed on Voyager 1, Voyager 2 was able to observe the planet's rings at much higher resolution and to discover many more ringlets. It also provided more detailed images of the ring spokes and kinks, and of the F-ring and its shepherding moons. Finally, it employed a gravity-assist maneuver at Saturn to help it reach its next destination, Uranus.",
-      Image = "https://voyager.jpl.nasa.gov/assets/images/galleries/images-voyager-took/saturn/saturn.gif"
+      Image = "https://data.openspaceproject.com/missions/voyager/saturn.gif"
     },
     {
       Name = "Voyager 2 Uranus Encounter",
       Date = "1986 JAN 24 00:00:00",
-      Image = "https://solarsystem.nasa.gov/internal_resources/445/",
+      Image = "https://data.openspaceproject.com/missions/voyager/PIA00346_modest.jpg",
       Description = "Following its flybys of Jupiter and Saturn, Voyager 2 became the first spacecraft to visit Uranus. Voyager 2 remains the only spacecraft to have flown by Uranus. The planet appeared to have few features but Voyager 2 found evidence of an ocean of boiling water about 500 miles (800 kilometers) below its cloud tops. Curiously, the average temperature of its Sun-facing pole was found to be the same as that at the equator. Voyager 2 discovered 10 new moons, two new rings, and a strangely tilted magnetic field stronger than that of Saturn. A gravity assist at Uranus propelled the spacecraft toward its next destination, Neptune."
     },
     {
       Name = "Voyager 2 Neptune Encounter",
       Date = "1989 AUG 25 00:00:00",
-      Image = "https://solarsystem.nasa.gov/internal_resources/444/",
+      Image = "https://data.openspaceproject.com/missions/voyager/PIA01492_modest.jpg",
       Description = "Voyager 2 is the only human-made object to have flown by Neptune. In the closest approach of its entire tour, the spacecraft passed less than 3,100 miles (5,000 kilometers) above the planet's cloud tops. It discovered five moons, four rings, and a 'Great Dark Spot' that vanished by the time the Hubble Space Telescope imaged Neptune five years later. Neptune's largest moon, Triton, was found to be the coldest known planetary body in the solar system, with a nitrogen ice 'volcano' on its surface."
     },
     {
@@ -69,12 +69,12 @@ local Mission = {
       Name = "Launches",
       TimeRange = { Start = "1977 AUG 20 00:00:00", End = "1977 SEP 05 00:00:00" },
       Description = "Both the Voyager spacecrafts carries a gold plated record that contains information about their home planet, including recordings of terrestrial sounds, music and greetings in 55 languages. Instructions on how to play the record are also included.",
-      Image = "https://www.nasa.gov/sites/default/files/styles/full_width/public/thumbnails/image/voyager_golden_record_0.jpg?itok=ujFbQDyF",
+      Image = "https://data.openspaceproject.com/missions/voyager/voyager_golden_record_0.jpg",
       Phases = {
         {
           Name = "Voyager 2 Launch",
           TimeRange = { Start = "1977 AUG 20 00:00:00", End = "1977 AUG 20 00:00:00" },
-          Image = "https://solarsystem.nasa.gov/internal_resources/446/"
+          Image = "https://data.openspaceproject.com/missions/voyager/image_1_pia01480.jpg"
         },
         {
           Name = "Voyager 1 Launch",

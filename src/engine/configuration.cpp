@@ -28,13 +28,14 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/settings.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/json.h>
+#include <openspace/util/json_helper.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/assert.h>
-#include <json/json.hpp>
 #include <optional>
 
 namespace {
@@ -74,6 +75,12 @@ namespace {
         // Determines the property visibility level that is selected when starting up
         // OpenSpace. If it is not provided, it defaults to 'User'
         std::optional<Visibility> propertyVisibility;
+
+        // Determines when the property confirmation modal should be shown when starting
+        // up OpenSpace. If it is not provided, it defaults to 'true', i.e., each
+        // individual property determines whether it requires a confirmation or not.
+        std::optional<bool> showPropertyConfirmation;
+        
 
         // A list of paths that are automatically registered with the file system. If a
         // key X is used in the table, it is then useable by referencing ${X} in all other
@@ -342,6 +349,7 @@ ghoul::Dictionary Configuration::createDictionary() {
     res.setValue("Asset", asset);
     res.setValue("Profile", profile);
     res.setValue("PropertyVisibility", static_cast<int>(propertyVisibility));
+    res.setValue("ShowPropertyConfirmation", static_cast<int>(showPropertyConfirmation));
 
     ghoul::Dictionary globalCustomizationScriptsDict;
     for (size_t i = 0; i < globalCustomizationScripts.size(); i++) {
@@ -545,6 +553,8 @@ void parseLuaState(Configuration& configuration) {
             *p.propertyVisibility
         );
     }
+
+    c.showPropertyConfirmation = p.showPropertyConfirmation.value_or(true);
     c.pathTokens = p.paths;
     c.fonts = p.fonts.value_or(c.fonts);
     c.fontSize.frameInfo = p.fontSize.frameInfo;
@@ -769,6 +779,19 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
         primaryMonitorResolution.x, primaryMonitorResolution.y
     );
     ghoul::lua::runScript(result.state, script);
+
+    // Local function to convert a dictionary to its JSON object's string representation
+    constexpr auto TableToJson = [](lua_State* state) {
+        if (!ghoul::lua::hasValue<ghoul::Dictionary>(state)) {
+            throw ghoul::lua::LuaError("TableToJson must receive a table object");
+        }
+        ghoul::Dictionary dict = ghoul::lua::value<ghoul::Dictionary>(state);
+        std::string stringRepresentation = formatJson(dict);
+        ghoul::lua::push(state, std::move(stringRepresentation));
+        return 1;
+    };
+    lua_pushcfunction(result.state, TableToJson);
+    lua_setglobal(result.state, "TableToJson");
 
     // If there is an initial config helper file, load it into the state
     if (std::filesystem::is_regular_file(absPath(InitialConfigHelper))) {

@@ -26,6 +26,7 @@
 
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <geos/io/GeoJSON.h>
 #include <scn/scan.h>
@@ -100,10 +101,24 @@ namespace {
     }
 
     std::optional<glm::vec3> hexToRgb(std::string_view hexColor) {
-        auto ret = scn::scan<int, int, int>(hexColor, "#{:2x}{:2x}{:2x}");
-        if (ret) {
-            auto [x, y, z] = ret->values();
-            return (1.f / 255.f) * glm::vec3(x, y, z);
+        // The string is supposed to have 7 characters:  #rrggbb
+        if (hexColor.size() != 7) {
+            return std::nullopt;
+        }
+
+        if (hexColor[0] == '#') {
+            hexColor = hexColor.substr(1);
+        }
+
+        auto retR = scn::scan<int>(hexColor.substr(0, 2), "{:x}");
+        auto retG = scn::scan<int>(hexColor.substr(2, 2), "{:x}");
+        auto retB = scn::scan<int>(hexColor.substr(4, 2), "{:x}");
+
+        if (retR && retG && retB) {
+            const int r = retR->value();
+            const int g = retG->value();
+            const int b = retB->value();
+            return (1.f / 255.f) * glm::vec3(r, g, b);
         }
         else {
             return std::nullopt;
@@ -372,7 +387,7 @@ GeoJsonProperties::Tessellation::Tessellation()
 }
 
 GeoJsonProperties::GeoJsonProperties()
-    : properties::PropertyOwner({ "DefaultProperties" })
+    : properties::PropertyOwner({ "DefaultProperties", "Default Properties" })
     , opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , fillOpacity(FillOpacityInfo, 0.7f, 0.f, 1.f)
@@ -380,16 +395,10 @@ GeoJsonProperties::GeoJsonProperties()
     , lineWidth(LineWidthInfo, 2.f, 0.01f, 10.f)
     , pointSize(PointSizeInfo, 10.f, 0.01f, 100.f)
     , pointTexture(PointTextureInfo)
-    , pointAnchorOption(
-        PointAnchorOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , pointAnchorOption(PointAnchorOptionInfo)
     , extrude(ExtrudeInfo, false)
     , performShading(PerformShadingInfo, false)
-    , altitudeModeOption(
-        AltitudeModeInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , altitudeModeOption(AltitudeModeInfo)
 {
     addProperty(opacity);
     color.setViewOption(properties::Property::ViewOptions::Color);
@@ -519,7 +528,8 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
             result.pointSize = static_cast<float>(value.getNumber());
         }
         else if (keyMatches(key, propertykeys::Texture, PointTextureInfo)) {
-            result.pointTexture = value.getString();
+            std::string texture = value.getString();
+            result.pointTexture = absPath(texture);
         }
         else if (keyMatches(key, propertykeys::PointTextureAnchor, PointAnchorOptionInfo))
         {
@@ -620,8 +630,8 @@ float PropertySet::pointSize() const {
     return overrideValues.pointSize.value_or(defaultValues.pointSize);
 }
 
-std::string PropertySet::pointTexture() const {
-    return overrideValues.pointTexture.value_or(defaultValues.pointTexture);
+std::filesystem::path PropertySet::pointTexture() const {
+    return overrideValues.pointTexture.value_or(defaultValues.pointTexture.value());
 }
 
 GeoJsonProperties::PointTextureAnchor PropertySet::pointTextureAnchor() const {

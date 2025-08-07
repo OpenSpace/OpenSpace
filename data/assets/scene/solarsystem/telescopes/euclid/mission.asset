@@ -1,7 +1,7 @@
 local Mission = {
   Identifier = "Euclid",
   Name = "Euclid",
-  Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2013/01/euclid_logo/12493233-3-eng-GB/Euclid_logo_pillars.png",
+  Image = "https://data.openspaceproject.com/missions/euclid/Euclid_logo_pillars.png",
   Description = [[Euclid is designed to explore the evolution of the dark universe. It will make a 3D-map of the universe (with time as the third dimension) by observing billions of galaxies out to 10 billion light-years, across more than a third of the sky.
 
   While dark energy accelerates the expansion of the universe and dark matter governs the growth of cosmic structures, scientists remain unsure about what dark energy and dark matter actually are.

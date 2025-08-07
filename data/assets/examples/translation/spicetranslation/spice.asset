@@ -1,7 +1,7 @@
 -- Basic
 -- This asset creates a time-varying translation with information from a SPICE kernel and
--- applies it to a SceneGraphNode that only displays coordinate axes. The position of the
--- coordinate axes are determined by SPICE, in this case pretending that the axes are
+-- applies it to a scene graph node that only displays coordinate axes. The position of
+-- the coordinate axes are determined by SPICE, in this case pretending that the axes are
 -- orbiting the same way the Moon does around Earth.
 -- For more information about SPICE see: https://naif.jpl.nasa.gov/naif/
 

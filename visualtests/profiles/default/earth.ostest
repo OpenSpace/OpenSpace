@@ -1,0 +1,40 @@
+{
+  "profile": "default",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Earth",
+        "position": [
+          18649625.5033414,
+          6662611.382639919,
+          11017254.262600612
+        ],
+        "up": [
+          -0.5025915644152299,
+          -0.022269866151295947,
+          0.8642371042950283
+        ],
+        "timestamp": "2025 JUN 28 12:24:27"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.ISS_trail.Renderable.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type":
+      "property",
+      "value": {
+        "property": "Scene.Tiangong_trail.Renderable.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

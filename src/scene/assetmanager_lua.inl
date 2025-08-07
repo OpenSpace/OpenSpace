@@ -42,6 +42,15 @@ namespace {
 }
 
 /**
+ * Reloads the asset with the specified name. If the asset was previously loaded explicity
+ * it will be removed and then re-added. If the asset was not previously loaded, it will
+ * only be loaded instead.
+ */
+[[codegen::luawrap]] void reload(std::string assetName) {
+    openspace::global::openSpaceEngine->assetManager().reload(assetName);
+}
+
+/**
  * Removes all assets that are currently loaded
  */
 [[codegen::luawrap]] void removeAll() {

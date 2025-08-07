@@ -12,19 +12,19 @@
     "aim": "",
     "anchor": "ArtemisModel",
     "frame": "Root",
-    "yaw": -0.003474,
-    "pitch":  0.008681,
-    "type": "setNavigationState",
+    "pitch": 0.008681,
     "position": {
       "x": 364.907409,
       "y": -65.898746,
       "z": 361.510673
     },
+    "type": "setNavigationState",
     "up": {
       "x": -0.128611,
-      "y": 0.944590,
+      "y": 0.94459,
       "z": 0.302006
-    }
+    },
+    "yaw": -0.003474
   },
   "delta_times": [
     1.0,
@@ -56,15 +56,18 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "Artemis Profile. Adds the Orion capsule (Artemis-1) model with an estimated trajectery",
+    "description": "Artemis Profile. Adds the Orion capsule (Artemis-1) model with its trajectery.",
     "license": "MIT License",
     "name": "Artemis",
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
+  "panel_visibility": {
+    "mission": true
+  },
   "properties": [
     {
-      "name": "{earth_satellites}.Renderable.Enabled",
+      "name": "{earth_satellites~space_stations}.Renderable.Enabled",
       "type": "setPropertyValue",
       "value": "false"
     },
@@ -95,11 +98,12 @@
     }
   ],
   "time": {
+    "is_paused": false,
     "type": "absolute",
     "value": "2022-11-21T12:00:00"
   },
   "version": {
     "major": 1,
-    "minor": 1
+    "minor": 4
   }
 }

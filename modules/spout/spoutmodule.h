@@ -36,6 +36,8 @@ public:
     SpoutModule();
 
     void internalInitialize(const ghoul::Dictionary&) override;
+
+    std::vector<documentation::Documentation> documentations() const override;
 };
 
 } // namespace openspace

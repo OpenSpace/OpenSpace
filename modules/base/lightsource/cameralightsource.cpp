@@ -37,6 +37,9 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
+    // This `LightSource` type represents a light source placed at the position of the
+    // camera. An object with this light source will always be illuminated from the
+    // current view direction.
     struct [[codegen::Dictionary(CameraLightSource)]] Parameters {
         // [[codegen::verbatim(IntensityInfo.description)]]
         std::optional<float> intensity;

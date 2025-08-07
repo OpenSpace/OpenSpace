@@ -1,7 +1,7 @@
 -- Basic
--- This asset creates a SceneGraphNode that only displays coordinate axes. The rotation of
--- coordinate axes are determined by executing a Lua file that returns the rotation matrix
--- to be used.
+-- This asset creates a scene graph node that only displays coordinate axes. The rotation
+-- of coordinate axes are determined by executing a Lua file that returns the rotation
+-- matrix to be used.
 --
 -- ```{literalinclude} example.lua
 -- :language: lua

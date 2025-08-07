@@ -30,7 +30,9 @@ set(HEADER_FILES
   include/connection.h
   include/connectionpool.h
   include/jsonconverters.h
+  include/logging/notificationlog.h
   include/serverinterface.h
+  include/topics/actionkeybindtopic.h
   include/topics/authorizationtopic.h
   include/topics/bouncetopic.h
   include/topics/camerapathtopic.h
@@ -43,9 +45,9 @@ set(HEADER_FILES
   include/topics/getpropertytopic.h
   include/topics/luascripttopic.h
   include/topics/missiontopic.h
+  include/topics/profiletopic.h
   include/topics/sessionrecordingtopic.h
   include/topics/setpropertytopic.h
-  include/topics/shortcuttopic.h
   include/topics/subscriptiontopic.h
   include/topics/timetopic.h
   include/topics/skybrowsertopic.h
@@ -60,7 +62,9 @@ set(SOURCE_FILES
   src/connection.cpp
   src/connectionpool.cpp
   src/jsonconverters.cpp
+  src/logging/notificationlog.cpp
   src/serverinterface.cpp
+  src/topics/actionkeybindtopic.cpp
   src/topics/authorizationtopic.cpp
   src/topics/bouncetopic.cpp
   src/topics/camerapathtopic.cpp
@@ -73,9 +77,9 @@ set(SOURCE_FILES
   src/topics/getpropertytopic.cpp
   src/topics/luascripttopic.cpp
   src/topics/missiontopic.cpp
+  src/topics/profiletopic.cpp
   src/topics/sessionrecordingtopic.cpp
   src/topics/setpropertytopic.cpp
-  src/topics/shortcuttopic.cpp
   src/topics/subscriptiontopic.cpp
   src/topics/timetopic.cpp
   src/topics/skybrowsertopic.cpp

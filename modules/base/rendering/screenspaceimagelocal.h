@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 
 namespace ghoul::opengl { class Texture; }
 
@@ -39,7 +39,7 @@ class ScreenSpaceImageLocal : public ScreenSpaceRenderable {
 public:
     explicit ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary);
 
-    bool deinitializeGL() override;
+    void deinitializeGL() override;
 
     void update() override;
 

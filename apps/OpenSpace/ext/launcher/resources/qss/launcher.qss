@@ -27,7 +27,7 @@ LauncherWindow  QLabel {
 }
 
 LauncherWindow  QLabel#label_choose, QLabel#label_options {
-  color: rgb(255, 255, 255);
+  color: white;
   font-size: 10pt;
 }
 
@@ -37,11 +37,11 @@ LauncherWindow  QLabel#clear {
 
 LauncherWindow  QLabel#version-info {
   font-size: 10pt;
-  color: #dfdfdf;
+  color: rgb(225, 225, 225);
 }
 
 LauncherWindow  QComboBox#config {
-  background: rgb(86, 86, 86);
+  background: rgb(96, 96, 96);
   border: 1px solid rgb(225, 225, 225);
   border-radius: 2px;
   padding: 1px 18px 1px 3px;
@@ -49,7 +49,7 @@ LauncherWindow  QComboBox#config {
   font-size: 10pt;
   font-family: Segoe UI;
   font-weight: bold;
-  color: rgb(255, 255, 255);
+  color: white;
 }
 
 LauncherWindow  QComboBox#config:hover {
@@ -61,6 +61,17 @@ LauncherWindow  QComboBox#config:disabled {
   color: rgb(225, 225, 225);
 }
 
+LauncherWindow  QMenu#newprofile {
+  background: rgb(60, 60, 60);
+  min-width: 8em;
+  max-width: 8em;
+  color: white;
+}
+
+LauncherWindow  QMenu#newprofile::item:selected {
+  background: rgb(110, 110, 110);
+}
+
 LauncherWindow  QPushButton#start {
   background: rgb(96, 96, 96);
   border: 2px solid rgb(225, 225, 225);
@@ -69,34 +80,34 @@ LauncherWindow  QPushButton#start {
   font-size: 16pt;
   font-weight: bold;
   letter-spacing: 1px;
-  color: rgb(255, 255, 255);
+  color: white;
 }
 LauncherWindow  QPushButton#start:hover {
-  background: rgb(120, 120, 120);
+  background: rgb(110, 110, 110);
 }
 LauncherWindow  QPushButton#start:disabled {
-  background: rgb(175, 175, 175);
-  color: rgb(225, 225, 225);
+  background: rgb(60, 60, 60);
+  border: 1px solid rgb(60, 60, 60);
+  color: rgb(90, 90, 90);
 }
 
 LauncherWindow  QPushButton#small {
-  background: rgb(86, 86, 86);
+  background: rgb(90, 90, 90);
   border: 1px solid rgb(225, 225, 225);
   border-radius: 2px;
   border-style: outset;
   min-height: 1em;
   font-size: 10pt;
   font-weight: bold;
-  color: rgb(255, 255, 255);
+  color: white;
 }
-
 LauncherWindow  QPushButton#small:hover {
   background: rgb(110, 110, 110);
 }
-
 LauncherWindow  QPushButton#small:disabled {
-  background: rgb(204, 204, 204);
-  color: rgb(86, 86, 86);
+  background: rgb(60, 60, 60);
+  border: 1px solid rgb(60, 60, 60);
+  color: rgb(90, 90, 90);
 }
 
 LauncherWindow  QPushButton#settings {
@@ -119,6 +130,12 @@ LauncherWindow QComboBox#config:focus
 LauncherWindow QPushButton#settings:focus {
   outline: 2px solid rgb(61, 189, 238);
 }
+
+LauncherWindow QTextEdit#notifications {
+  background-color: #242424;
+  color: #d7d7d7;
+}
+
 /*
  * ProfileEdit
  */
@@ -195,6 +212,10 @@ ScriptlogDialog  QListWidget {
   min-width: 60em;
 }
 
+MarkNodesDialog  QListWidget:focus {
+  border: 2px solid rgb(61, 189, 238);
+}
+
 /*
  * Horizons dialog
  */
@@ -211,7 +232,7 @@ HorizonsDialog  QLabel#thin {
 }
 
 HorizonsDialog  QLabel#normal {
-  color: rgb(0, 0, 0);
+  color: black;
 }
 
 /*

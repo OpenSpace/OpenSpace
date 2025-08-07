@@ -83,10 +83,10 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
 
 ScreenSpaceImageOnline::~ScreenSpaceImageOnline() {}
 
-bool ScreenSpaceImageOnline::deinitializeGL() {
+void ScreenSpaceImageOnline::deinitializeGL() {
     _texture = nullptr;
 
-    return ScreenSpaceRenderable::deinitializeGL();
+    ScreenSpaceRenderable::deinitializeGL();
 }
 
 void ScreenSpaceImageOnline::update() {
@@ -144,7 +144,7 @@ void ScreenSpaceImageOnline::update() {
             _textureIsDirty = false;
             LERRORC(e.component, e.message);
         }
-    }   
+    }
 }
 
 std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageToMemory(

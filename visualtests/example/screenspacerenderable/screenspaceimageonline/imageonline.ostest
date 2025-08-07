@@ -1,0 +1,23 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/screenspacerenderable/screenspaceimageonline/imageonline.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "ScreenSpace.ScreenSpaceImageOnline_Example.Scale",
+        "value": 0.75
+      }
+    },
+    {
+      "type": "wait",
+      "value": 30
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

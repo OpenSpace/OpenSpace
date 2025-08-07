@@ -49,18 +49,22 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "work in progress profile for the dawn mission",
+    "description": "A work in progress profile for the Dawn mission.",
     "license": "MIT License",
     "name": "Dawn",
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
+  "panel_visibility": {
+    "mission": true
+  },
   "time": {
+    "is_paused": false,
     "type": "absolute",
     "value": "2011-08-06T00:00:00"
   },
   "version": {
     "major": 1,
-    "minor": 0
+    "minor": 4
   }
 }

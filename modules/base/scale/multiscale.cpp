@@ -63,6 +63,19 @@ MultiScale::MultiScale(const ghoul::Dictionary& dictionary)
     }
 }
 
+void MultiScale::initialize() {
+    Scale::initialize();
+    for (const ghoul::mm_unique_ptr<Scale>& scale : _scales) {
+        scale->initialize();
+    }
+}
+
+void MultiScale::update(const UpdateData& data) {
+    for (const ghoul::mm_unique_ptr<Scale>& scale : _scales) {
+        scale->update(data);
+    }
+}
+
 glm::dvec3 MultiScale::scaleValue(const UpdateData& data) const {
     glm::dvec3 res = glm::dvec3(1.0);
     for (const ghoul::mm_unique_ptr<Scale>& scale : _scales) {

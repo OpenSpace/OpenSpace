@@ -36,6 +36,9 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
+    // A `Rotation` object describes a specific rotation for a scene graph node, which may
+    // or may not be time-dependent. The exact method of determining the rotation depends
+    // on the concrete type.
     struct [[codegen::Dictionary(Rotation)]] Parameters {
         // The type of the rotation that is described in this element. The available types
         // of rotations depend on the configuration of the application and can be written
@@ -87,8 +90,10 @@ void Rotation::requireUpdate() {
     _needsUpdate = true;
 }
 
-bool Rotation::initialize() {
-    return true;
+void Rotation::initialize() {
+    if (_timeFrame) {
+        _timeFrame->initialize();
+    }
 }
 
 const glm::dmat3& Rotation::matrix() const {

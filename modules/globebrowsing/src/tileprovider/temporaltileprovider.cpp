@@ -36,6 +36,7 @@
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ctime>
@@ -296,8 +297,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
         if (_folder.files.empty()) {
             throw ghoul::RuntimeError(std::format(
                 "Error loading layer '{}'. Folder '{}' does not contain any files that "
-                "matched the time format",
-                _identifier, _folder.folder
+                "matched the time format", _identifier, _folder.folder
             ));
         }
     }

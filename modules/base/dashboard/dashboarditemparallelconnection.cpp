@@ -34,13 +34,26 @@
 #include <ghoul/font/font.h>
 #include <ghoul/misc/profiling.h>
 
+namespace {
+    // This `DashboardItem` displays information about the status of the parallel
+    // connection, which is whether OpenSpace is directly connected to other OpenSpace
+    // instances and can either control those instances or be controlled by the master of
+    // the session. If OpenSpace is not connected, this `DashboardItem` will not display
+    // anything.
+    //
+    // The information presented contains how many clients are connected to the same
+    // session and whether this machine is currently the host of the session.
+    struct [[codegen::Dictionary(DashboardItemParallelConnection)]] Parameters {};
+#include "dashboarditemparallelconnection_codegen.cpp"
+} // namespace
+
 namespace openspace {
 
 documentation::Documentation DashboardItemParallelConnection::Documentation() {
-    documentation::Documentation doc = DashboardTextItem::Documentation();
-    doc.name = "DashboardItemParallelConnection";
-    doc.id = "base_dashboarditem_parallelconnection";
-    return doc;
+    return codegen::doc<Parameters>(
+        "base_dashboarditem_parallelconnection",
+        DashboardTextItem::Documentation()
+    );
 }
 
 DashboardItemParallelConnection::DashboardItemParallelConnection(
@@ -90,57 +103,6 @@ void DashboardItemParallelConnection::update() {
         else if (nClients == 1) {
             _buffer += "You are the only client";
         }
-    }
-}
-
-glm::vec2 DashboardItemParallelConnection::size() const {
-    ZoneScoped;
-
-    const ParallelConnection::Status status = global::parallelPeer->status();
-    const size_t nConnections = global::parallelPeer->nConnections();
-    const std::string& hostName = global::parallelPeer->hostName();
-
-    std::string connectionInfo;
-    int nClients = static_cast<int>(nConnections);
-    if (status == ParallelConnection::Status::Host) {
-        nClients--;
-        if (nClients == 1) {
-            connectionInfo = "Hosting session with 1 client";
-        }
-        else {
-            connectionInfo = std::format("Hosting session with {} clients", nClients);
-        }
-    }
-    else if (status == ParallelConnection::Status::ClientWithHost) {
-        nClients--;
-        connectionInfo = "Session hosted by '" + hostName + "'";
-    }
-    else if (status == ParallelConnection::Status::ClientWithoutHost) {
-        connectionInfo = "Host is disconnected";
-    }
-
-    if (status == ParallelConnection::Status::ClientWithHost ||
-        status == ParallelConnection::Status::ClientWithoutHost)
-    {
-        connectionInfo += "\n";
-        if (nClients > 2) {
-            constexpr std::string_view Plural = "You and {} more clients are tuned in";
-            connectionInfo += std::format(Plural, nClients);
-        }
-        else if (nClients == 2) {
-            constexpr std::string_view Singular = "You and {} more client are tuned in";
-            connectionInfo += std::format(Singular, nClients - 1);
-        }
-        else if (nClients == 1) {
-            connectionInfo += "You are the only client";
-        }
-    }
-
-    if (!connectionInfo.empty()) {
-        return _font->boundingBox(connectionInfo);
-    }
-    else {
-        return { 0.f, 0.f };
     }
 }
 

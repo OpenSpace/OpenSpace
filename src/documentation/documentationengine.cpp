@@ -276,14 +276,6 @@ namespace openspace::documentation {
 
 DocumentationEngine* DocumentationEngine::_instance = nullptr;
 
-DocumentationEngine::DuplicateDocumentationException::DuplicateDocumentationException(
-                                                                        Documentation doc)
-    : ghoul::RuntimeError(std::format(
-        "Duplicate Documentation with name '{}' and id '{}'", doc.name, doc.id
-    ))
-    , documentation(std::move(doc))
-{}
-
 DocumentationEngine::DocumentationEngine() {}
 
 void DocumentationEngine::initialize() {
@@ -671,7 +663,6 @@ void DocumentationEngine::writeJavascriptDocumentation() const {
     // Make into a javascript variable so that it is possible to open with static html
     std::ofstream out = std::ofstream(absPath("${DOCUMENTATION}/documentationData.js"));
     out << "var data = " << result.dump();
-    out.close();
 }
 
 void DocumentationEngine::writeJsonDocumentation() const {
@@ -732,7 +723,10 @@ void DocumentationEngine::addDocumentation(Documentation documentation) {
         );
 
         if (it != _documentations.end()) {
-            throw DuplicateDocumentationException(std::move(documentation));
+            throw ghoul::RuntimeError(std::format(
+                "Duplicate Documentation with name '{}' and id '{}'",
+                documentation.name, documentation.id
+            ));
         }
         else {
             _documentations.push_back(std::move(documentation));

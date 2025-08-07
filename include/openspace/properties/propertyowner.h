@@ -73,7 +73,7 @@ public:
      * The destructor will remove all Propertys and PropertyOwners it owns along with
      * itself.
      */
-    virtual ~PropertyOwner();
+    virtual ~PropertyOwner() = default;
 
     /**
      * Sets the identifier for this PropertyOwner. If the PropertyOwner does not have an
@@ -139,6 +139,15 @@ public:
     std::vector<Property*> propertiesRecursive() const;
 
     /**
+     * Returns a list of all PropertyOwners directly or indirectly owned by this
+     * PropertyOwner.
+     *
+     * \return A list of all PropertyOwners directly or indirectly owned by this
+     *         PropertyOwner
+     */
+    std::vector<PropertyOwner*> subownersRecursive() const;
+
+    /**
      * Retrieves a Property identified by \p uri from this PropertyOwner. If \p uri does
      * not contain a `.`  it is an identifier and must refer to a Property directly owned
      * by this PropertyOwner. If the identifier contains one or more `.`, the first part
@@ -193,8 +202,8 @@ public:
      */
     bool hasProperty(const Property* prop) const;
 
-    void setPropertyOwner(PropertyOwner* owner) { _owner = owner; }
-    PropertyOwner* owner() const { return _owner; }
+    void setPropertyOwner(PropertyOwner* owner);
+    PropertyOwner* owner() const;
 
     /**
      * Returns a list of all sub-owners this PropertyOwner has. Each name of a sub-owner
@@ -250,7 +259,7 @@ public:
      * PropertyOwner. This method will also inform the Property about the change in
      * ownership by calling the Property::setPropertyOwner method.
      *
-     * \param prop The Property whose ownership is changed.
+     * \param prop The Property whose ownership is changed
      */
     void addProperty(Property* prop);
 
@@ -337,6 +346,16 @@ protected:
     std::map<std::string, std::string> _groupNames;
     /// Collection of string tag(s) assigned to this property
     std::vector<std::string> _tags;
+
+    /// A cached version of the full URI of this property owner, which includes the
+    /// identifiers of all owners
+    std::string _uriCache;
+    bool _isUriCacheDirty = true;
+
+private:
+    /// Will regenerate the uri caches for this property owner and all directly or
+    /// indirectly owned properties
+    void updateUriCaches();
 };
 
 }  // namespace openspace::properties

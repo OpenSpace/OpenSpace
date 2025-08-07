@@ -452,26 +452,19 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
 
 ScreenSpaceRenderable::~ScreenSpaceRenderable() {}
 
-bool ScreenSpaceRenderable::initialize() {
-    return true;
-}
+void ScreenSpaceRenderable::initialize() {}
 
-bool ScreenSpaceRenderable::initializeGL() {
+void ScreenSpaceRenderable::initializeGL() {
     createShaders();
-    return isReady();
 }
 
-bool ScreenSpaceRenderable::deinitialize() {
-    return true;
-}
+void ScreenSpaceRenderable::deinitialize() {}
 
-bool ScreenSpaceRenderable::deinitializeGL() {
+void ScreenSpaceRenderable::deinitializeGL() {
     if (_shader) {
         global::renderEngine->removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
-
-    return true;
 }
 
 void ScreenSpaceRenderable::render(const RenderData& renderData) {
@@ -747,7 +740,7 @@ glm::vec3 ScreenSpaceRenderable::cartesianToSpherical(const glm::vec3& cartesian
     const float r = std::sqrt(
         std::pow(rotated.x, 2.f) + std::pow(rotated.y, 2.f) + std::pow(rotated.z, 2.f)
     );
-    const float theta = std::acos(rotated.z / r);
+    const float theta = std::acos(r != 0.f ? rotated.z / r : rotated.z);
     const float phi = std::atan2(rotated.y, rotated.x);
     return sanitizeSphericalCoordinates(glm::vec3(r, theta, phi));
 }

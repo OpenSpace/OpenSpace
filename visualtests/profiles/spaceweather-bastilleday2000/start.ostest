@@ -1,0 +1,26 @@
+{
+  "profile": "spaceweather/bastilleday2000",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Sun",
+        "position": [
+          2845751497.04803,
+          -589432763.0601707,
+          2886005103.077176
+        ],
+        "referenceFrame": "Root",
+        "up": [
+          -0.24515211661536596,
+          0.8737005599110933,
+          0.42017588142353923
+        ],
+        "timestamp": "2000 JUL 14 08:43:32"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

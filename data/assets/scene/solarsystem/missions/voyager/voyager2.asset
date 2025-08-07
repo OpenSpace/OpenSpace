@@ -102,7 +102,8 @@ local VoyagerTrailCruiseEarthJupiter = {
   Tag = { "voyager2_trail" },
   GUI = {
     Name = "Voyager 2 Trail Cruise Earth-Jupiter",
-    Path = "/Solar System/Missions/Voyager 2"
+    Path = "/Solar System/Missions/Voyager 2",
+    Focusable = false
   }
 }
 
@@ -127,7 +128,8 @@ local VoyagerTrailEncounterJupiter = {
   Tag = { "voyager2_trail" },
   GUI = {
     Name = "Voyager 2 Trail Encounter Jupiter",
-    Path = "/Solar System/Missions/Voyager 2"
+    Path = "/Solar System/Missions/Voyager 2",
+    Focusable = false
   }
 }
 
@@ -150,7 +152,8 @@ local VoyagerTrailCruiseJupiterSaturn = {
   Tag = { "voyager2_trail" },
   GUI = {
     Name = "Voyager 2 Trail Cruise Jupiter-Saturn",
-    Path = "/Solar System/Missions/Voyager 2"
+    Path = "/Solar System/Missions/Voyager 2",
+    Focusable = false
   }
 }
 
@@ -175,7 +178,8 @@ local VoyagerTrailEncounterSaturn = {
   Tag = { "voyager2_trail" },
   GUI = {
     Name = "Voyager 2 Trail Encounter Saturn",
-    Path = "/Solar System/Missions/Voyager 2"
+    Path = "/Solar System/Missions/Voyager 2",
+    Focusable = false
   }
 }
 
@@ -198,7 +202,8 @@ local VoyagerTrailCruiseSaturnUranus = {
   Tag = { "voyager2_trail" },
   GUI = {
     Name = "Voyager 2 Trail Cruise Saturn-Uranus",
-    Path = "/Solar System/Missions/Voyager 2"
+    Path = "/Solar System/Missions/Voyager 2",
+    Focusable = false
   }
 }
 
@@ -223,7 +228,8 @@ local VoyagerTrailEncounterUranus = {
   Tag = { "voyager2_trail" },
   GUI = {
     Name = "Voyager 2 Trail Encounter Uranus",
-    Path = "/Solar System/Missions/Voyager 2"
+    Path = "/Solar System/Missions/Voyager 2",
+    Focusable = false
   }
 }
 
@@ -246,7 +252,8 @@ local VoyagerTrailCruiseUranusNeptune = {
   Tag = { "voyager2_trail" },
   GUI = {
     Name = "Voyager 2 Trail Cruise Uranus-Neptune",
-    Path = "/Solar System/Missions/Voyager 2"
+    Path = "/Solar System/Missions/Voyager 2",
+    Focusable = false
   }
 }
 
@@ -271,7 +278,8 @@ local VoyagerTrailEncounterNeptune = {
   Tag = { "voyager2_trail" },
   GUI = {
     Name = "Voyager 2 Trail Encounter Neptune",
-    Path = "/Solar System/Missions/Voyager 2"
+    Path = "/Solar System/Missions/Voyager 2",
+    Focusable = false
   }
 }
 
@@ -294,7 +302,8 @@ local VoyagerTrailCruiseNeptuneInf = {
   Tag = { "voyager2_trail" },
   GUI = {
     Name = "Voyager 2 Trail Cruise Neptune-Inf",
-    Path = "/Solar System/Missions/Voyager 2"
+    Path = "/Solar System/Missions/Voyager 2",
+    Focusable = false
   }
 }
 

@@ -1,0 +1,21 @@
+-- Nodes sonification
+-- This example adds the ISS and Tiangong space stations to the NodesTelemetry in the
+-- Telemetry module. This should be used together with the nodesSonification.scd file in
+-- SuperCollider to listen to an example sonification of the nodes.
+--
+-- This is a good foundation for creating your own sonification of any node(s) in
+-- OpenSpace. If you want to use this to create your own sonification, you can copy this
+-- file and the nodesSonification.scd file to your own asset folder and modify them to
+-- your liking. In this file, that modification would be to replace the ISS and Tiangong
+-- identifies with the identifiers of the node(s) you want to sonify instead.
+--
+-- For more information about sonification in OpenSpace and how to use it, see the
+-- documentation:
+-- https://docs.openspaceproject.com/latest/creating-data-assets/modules/telemetry/sonification.html
+
+asset.require("scene/solarsystem/planets/earth/satellites/misc/iss")
+asset.require("scene/solarsystem/planets/earth/satellites/misc/tiangong")
+
+asset.onInitialize(function ()
+  openspace.telemetry.addNodes({ "ISS", "Tiangong" })
+end)

@@ -29,9 +29,9 @@
 
 #include <modules/skybrowser/include/utility.h>
 #include <modules/skybrowser/include/wwtdatahandler.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <filesystem>
 
 namespace openspace {
@@ -96,8 +96,6 @@ private:
     void incrementallyRotateCamera();
     void incrementallyAnimateTargets();
 
-    properties::BoolProperty _enabled;
-    properties::BoolProperty _showTitleInGuiBrowser;
     properties::BoolProperty _allowCameraRotation;
     properties::DoubleProperty _cameraRotationSpeed;
     properties::DoubleProperty _targetAnimationSpeed;

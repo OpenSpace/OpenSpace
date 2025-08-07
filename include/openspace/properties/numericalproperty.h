@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___NUMERICALPROPERTY___H__
 
 #include <openspace/properties/templateproperty.h>
+#include <openspace/util/json_helper.h>
 
 namespace openspace::properties {
 
@@ -47,8 +48,6 @@ public:
     float exponent() const;
     void setExponent(float exponent);
 
-    std::string jsonValue() const override;
-
     using TemplateProperty<T>::operator=;
 
     void setLuaInterpolationTarget(lua_State* state) override;
@@ -57,24 +56,8 @@ public:
         ghoul::EasingFunc<float> easingFunc = nullptr) override;
 
 protected:
-    static const std::string MinimumValueKey;
-    static const std::string MaximumValueKey;
-    static const std::string SteppingValueKey;
-    static const std::string ExponentValueKey;
-
-    T fromLuaConversion(lua_State* state) const override;
-    virtual void toLuaConversion(lua_State* state) const override;
-    virtual std::string toStringConversion() const override;
-
-    std::string generateAdditionalJsonDescription() const override;
-
-    /**
-     * convert a lua formatted value to a JSON formatted value.
-     *
-     * \param luaValue
-     * \return A JSON formatted string representation of the given Lua value
-     */
-    std::string luaToJson(std::string luaValue) const;
+    nlohmann::json generateAdditionalJsonDescription() const override;
+    using TemplateProperty<T>::toValue;
 
     T _minimumValue = T(0);
     T _maximumValue = T(0);

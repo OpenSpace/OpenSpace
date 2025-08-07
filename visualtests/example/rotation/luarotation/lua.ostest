@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/rotation/luarotation/lua.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "LuaRotation_Example",
+        "position": [
+          2.2193305670243912,
+          0.9368958852014988,
+          -0.45609846153570976
+        ],
+        "pitch": 1.7086202103165718e-07,
+        "referenceFrame": "Root",
+        "up": [
+          -0.09593001635134257,
+          -0.24270767425556006,
+          -0.9653447139857805
+        ],
+        "yaw": 1.7767094961930573e-07,
+        "timestamp": "2025 JUL 13 12:45:06"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

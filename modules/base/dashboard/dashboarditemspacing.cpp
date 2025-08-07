@@ -37,6 +37,8 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // This `DashboardItem` adds a variable amount of spacing between two other
+    // `DashboardItem`s.
     struct [[codegen::Dictionary(DashboardItemSpacing)]] Parameters {
         // [[codegen::verbatim(SpacingInfo.description)]]
         std::optional<float> spacing;
@@ -67,10 +69,6 @@ void DashboardItemSpacing::update() {}
 
 void DashboardItemSpacing::render(glm::vec2& penPosition) {
     penPosition.y -= _spacing;
-}
-
-glm::vec2 DashboardItemSpacing::size() const {
-    return { 0.f, _spacing };
 }
 
 } // namespace openspace

@@ -204,7 +204,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     // We need this to make sure that the browser is reloaded
     // once the endpoint comes online, on OpenSpace startup.
 
-    // TODO: See if the hardcoded endpoint `frontend` below can be removed.
+    // TODO: See if the hardcoded endpoint `gui` below can be removed.
     // Possible fix: Reload browser if cefwebgui is routed to localhost
     // and the same endpoint that just came online.
     WebGuiModule* webGuiModule = global::moduleEngine->module<WebGuiModule>();
@@ -212,7 +212,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     _endpointCallback = webGuiModule->addEndpointChangeCallback(
         [this](const std::string& endpoint, bool exists) {
             ZoneScopedN("CefWebGuiModule::endpointCallback");
-            if (exists && endpoint == "frontend" && _instance) {
+            if (exists && endpoint == "gui" && _instance) {
                 _instance->reloadBrowser();
             }
         }
@@ -228,7 +228,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     });
 
     global::callback::postDraw->emplace_back([this]() {
-        bool windowChanged = global::windowDelegate->windowHasResized();
+        bool windowChanged = global::windowDelegate->anyWindowHasResized();
         if (_instance && (windowChanged || _instance->_shouldReshape)) {
             const glm::ivec2 res = global::windowDelegate->guiWindowResolution();
             _instance->reshape(static_cast<glm::ivec2>(

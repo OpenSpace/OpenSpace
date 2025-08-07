@@ -46,7 +46,7 @@ namespace {
     // interpolate between two adjacent keyframes.
     struct [[codegen::Dictionary(TimelineScale)]] Parameters {
         // A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS and values
-        // that are valid Scale objects
+        // that are valid Scale objects.
         std::map<std::string, ghoul::Dictionary> keyframes
             [[codegen::reference("core_transform_scale")]];
 
@@ -81,6 +81,27 @@ TimelineScale::TimelineScale(const ghoul::Dictionary& dictionary)
     addProperty(_shouldInterpolate);
 }
 
+void TimelineScale::initialize() {
+    Scale::initialize();
+    for (const Keyframe<ghoul::mm_unique_ptr<Scale>>& kf : _timeline.keyframes()) {
+        kf.data->initialize();
+    }
+}
+
+void TimelineScale::update(const UpdateData& data) {
+    const double now = data.time.j2000Seconds();
+    using KeyframePointer = const Keyframe<ghoul::mm_unique_ptr<Scale>>*;
+
+    if (KeyframePointer prev = _timeline.lastKeyframeBefore(now, true);  prev) {
+        prev->data->update(data);
+    }
+    if (KeyframePointer next = _timeline.firstKeyframeAfter(now, true);  next) {
+        next->data->update(data);
+    }
+
+    Scale::update(data);
+}
+
 glm::dvec3 TimelineScale::scaleValue(const UpdateData& data) const {
     const double now = data.time.j2000Seconds();
     using KeyframePointer = const Keyframe<ghoul::mm_unique_ptr<Scale>>*;
@@ -108,10 +129,14 @@ glm::dvec3 TimelineScale::scaleValue(const UpdateData& data) const {
         return glm::mix(prev->data->scaleValue(data), next->data->scaleValue(data), t);
     }
     else {
-        return now < nextTime ?
-            prev->data->scaleValue(data) :
-            next->data->scaleValue(data);
+        if (prevTime <= now && now < nextTime) {
+            return prev->data->scaleValue(data);
+        }
+        else if (nextTime <= now) {
+            return next->data->scaleValue(data);
+        }
     }
+    return glm::dvec3(0.0);
 }
 
 } // namespace openspace

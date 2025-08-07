@@ -25,11 +25,12 @@
 #ifndef __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
 #define __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
 
+#include <openspace/util/openspacemodule.h>
+
 #include <modules/touch/include/touchmarker.h>
 #include <modules/touch/include/touchinteraction.h>
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/util/openspacemodule.h>
 #include <openspace/util/touch.h>
 #include <memory>
 

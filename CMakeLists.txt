@@ -27,11 +27,16 @@ cmake_policy(VERSION 3.25)
 
 project(OpenSpace)
 
+# CMake 4.0 will no longer allow minimum required version below 3.5 and some of our
+# dependencies have not been updated to reflect this. To make things work, we blanked
+# require to 3.10 here to remove those issues. Once CMake configures and generates
+# successfully without this next line, it can be removed
+set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
+
 set(OPENSPACE_RELEASE_BUILD OFF)
 set(OPENSPACE_VERSION_MAJOR)
 set(OPENSPACE_VERSION_MINOR)
 set(OPENSPACE_VERSION_PATCH)
-set(OPENSPACE_VERSION_STRING)
 
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_common.cmake)
 include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)
@@ -66,7 +71,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 if (MSVC)
   # Force all builds to be multi-threaded and increase number of sections in obj files
-  add_definitions(/MP /bigobj)
+  add_compile_options(/MP /bigobj)
 endif ()
 
 ##########################################################################################
@@ -151,15 +156,15 @@ add_custom_target(
   ALL DEPENDS
     "${CMAKE_CURRENT_BINARY_DIR}/__codegen.h"
 )
-add_dependencies(run_codegen codegen)
+add_dependencies(run_codegen codegen-tool)
 add_custom_command(
   OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/__codegen.h"
-  COMMAND codegen ARGS "modules" "src"
+  COMMAND codegen-tool ARGS "modules" "src"
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
   VERBATIM
 )
 set_target_properties(codegen-lib PROPERTIES FOLDER "support")
-set_target_properties(codegen PROPERTIES FOLDER "support")
+set_target_properties(codegen-tool PROPERTIES FOLDER "support")
 set_target_properties(run_codegen PROPERTIES FOLDER "support")
 
 

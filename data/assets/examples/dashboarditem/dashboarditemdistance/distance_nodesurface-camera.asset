@@ -1,0 +1,29 @@
+-- NodeSurface-Camera
+-- This example adds two invisible nodes and a dashboard item that shows the distance
+-- between those two nodes
+
+local Node = {
+  Identifier = "DashboardItemDistance_Example_NodeSurfaceCamera_Node",
+  BoundingSphere = 200.0,
+  GUI = {
+    Name = "DashboardItemDistance - NodeSurface-Camera"
+  }
+}
+
+local Item = {
+  Identifier = "DashboardItemDistance_Example_NodeSurfaceCamera",
+  Type = "DashboardItemDistance",
+  SourceType = "Node Surface",
+  SourceNodeIdentifier = Node.Identifier,
+  DestinationType = "Camera"
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+  openspace.removeSceneGraphNode(Node)
+end)

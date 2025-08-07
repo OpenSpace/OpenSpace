@@ -1,20 +1,20 @@
 local Mission = {
   Identifier = "JWST",
   Name = "James Webb Space Telescope",
-  Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2016/12/jwst_mission_logo/16561412-4-eng-GB/JWST_mission_logo_pillars.png",
+  Image = "https://data.openspaceproject.com/missions/jwst/JWST_mission_logo_pillars.png",
   Description = "The James Webb Space Telescope (sometimes called JWST or Webb) is an orbiting infrared observatory that will complement and extend the discoveries of the Hubble Space Telescope, with longer wavelength coverage and greatly improved sensitivity. The longer wavelengths enable Webb to look much closer to the beginning of time and to hunt for the unobserved formation of the first galaxies, as well as to look inside dust clouds where stars and planetary systems are forming today.",
   Milestones = {
     {
       Name = "Launch",
       Date = "2021 DEC 25 12:20:00",
-      Image = "https://webb.nasa.gov/ImagesContent/51775043129_7aeedc5a6d_k.jpg",
+      Image = "https://data.openspaceproject.com/missions/jwst/51775043129_7aeedc5a6d_k.jpg",
       Description = "Webb was launched from Arianespace's ELA-3 launch complex at Europe's Spaceport located near Kourou, French Guiana. It is beneficial for launch sites to be located near the equator - the spin of the Earth can help give an additional push. The surface of the Earth at the equator is moving at 1670 km/hr. The James Webb Space Telescope was launched on an Ariane 5 rocket. The launch vehicle and launch site were part of the European Space Agency's contribution to the mission. The Ariane 5 is one of the world's most reliable launch vehicles and was chosen for a combination of reliability (it was the only launch vehicle that met NASA's requirements for launching a mission like Webb) and for the value it brought via our international partnership."
     },
     {
       Name = "Arrival at L2 orbit",
       Date = "2022 JAN 24 00:00:00",
       Description = "When you ask an astronomer about the James Webb Space Telescope's orbit, they'll tell you something that sounds like it came from a science-fiction novel. The Webb won't be orbiting the Earth - instead we will send it almost a million miles out into space to a place called 'L2'. L2 is short-hand for the second Lagrange Point, a wonderful accident of gravity and orbital mechanics, and the perfect place to park the Webb telescope in space. There are five so-called 'Lagrange Points' - areas where gravity from the sun and Earth balance the orbital motion of a satellite. Putting a spacecraft at any of these points allows it to stay in a fixed position relative to the Earth and sun with a minimal amount of energy needed for course correction.",
-      Image = "https://www.nasa.gov/images/content/463480main_lagrange_point_lg_1.jpg",
+      Image = "https://data.openspaceproject.com/missions/jwst/463480main_lagrange_point_lg_1.webp",
       Link = "https://www.nasa.gov/topics/universe/features/webb-l2.html"
     },
     {
@@ -25,19 +25,19 @@ local Mission = {
       Name = "Fine phasing alignment",
       Date = "2022 MAR 11 00:00:00",
       Description = "While the purpose of this image was to focus on the bright star at the center for alignment evaluation, Webb's optics and NIRCam are so sensitive that the galaxies and stars seen in the background show up. At this stage of Webb's mirror alignment, known as “fine phasing,” each of the primary mirror segments have been adjusted to produce one unified image of the same star using only the NIRCam instrument. This image of the star, which is called 2MASS J17554042+6551277, uses a red filter to optimize visual contrast.",
-      Image = "https://www.nasa.gov/sites/default/files/thumbnails/image/telescope_alignment_evaluation_image_labeled.png"
+      Image = "https://data.openspaceproject.com/missions/jwst/telescope_alignment_evaluation_image_labeled.jpg"
     },
     {
       Name = "First deep field image released",
       Date = "2022 JUL 11 14:30:00",
       Description = "JWST's first science image was released a day early, on July 11, 2022, in an address by the President of the United States, Joe Biden. This deep field image is the highest-resolution and deepest infrared view of our Universe taken to date. The light from these galaxies is gravitationally lensed by the mass of the galaxy cluster SMACS 0723 in the foreground. It causes their light to be warped into beautiful arcs. This image shows SMACS 0723 as it was 4.6 billion years ago, but the background galaxies are much further away. The furthest light in this image has taken over 13 billion years to reach us. This image represents a part of the sky that's so small that it could fit behind a grain of sand on the tip of your finger held at arm's length.",
-      Image = "https://planetary.s3.amazonaws.com/web/assets/pictures/_2400x2448_crop_center-center_82_line/JWST-First-Deep-Field.jpg.webp",
+      Image = "https://data.openspaceproject.com/missions/jwst/JWST-First-Deep-Field.jpg.webp",
       Link = "https://webbtelescope.org/news/first-images/gallery"
     },
     {
       Name = "Alignment complete",
       Description = "Alignment of NASA's James Webb Space Telescope is now complete. After full review, the observatory has been confirmed to be capable of capturing crisp, well-focused images with each of its four powerful onboard science instruments. Upon completing the seventh and final stage of telescope alignment, the team held a set of key decision meetings and unanimously agreed that Webb is ready to move forward into its next and final series of preparations, known as science instrument commissioning. This process will take about two months before scientific operations begin in the summer.",
-      Image = "https://blogs.nasa.gov/webb/wp-content/uploads/sites/326/2022/04/webb_img_sharpness.png",
+      Image = "https://data.openspaceproject.com/missions/jwst/webb_img_sharpness.png",
       Date = "2022 APR 28 00:00:00",
       Link = "https://blogs.nasa.gov/webb/2022/04/28/nasas-webb-in-full-focus-ready-for-instrument-commissioning/"
     }
@@ -59,7 +59,7 @@ local Mission = {
             {
               Name = "Sunshield deployment",
               TimeRange = { Start = "2021 DEC 25 12:50:00", End = "2022 JAN 04 00:00:00" },
-              Image = "https://c1.staticflickr.com/5/4573/37594108385_36d5e25c8a_b.jpg",
+              Image = "https://data.openspaceproject.com/missions/jwst/37594108385_36d5e25c8a_b.jpg",
               Description = "The sunshield separates the observatory into a warm, sun-facing side (thermal models show the max temperature of the outermost layer is 383K or approximately 230F or 110C), and a cold side (with the coldest layer having a modeled minimum temp of 36K or around -394F or -236C). The five-layer sunshield keeps sunlight from interfering with the sensitive telescope instruments. The telescope operates under 50K (~-370F or ~-223C)"
             }
           }
@@ -67,9 +67,8 @@ local Mission = {
         {
           Name = "Telescope alignment",
           TimeRange = { Start = "2022 JAN 24 00:00:00", End = "2022 APR 28 00:00:00" },
-          Image = "https://blogs.nasa.gov/webb/wp-content/uploads/sites/326/2022/02/alignment_mosaic_compressed-1200x813.png",
-          Description = "Using the Fine Guidance Sensor, we pointed Webb at a single bright star and demonstrated that the observatory could acquire and lock onto targets, and we took data mainly with NIRCam. But because the primary mirror segments had yet to be aligned to work as a single mirror, there were distorted images of the same single target star. We then embarked on the long process of aligning all the telescope optics, beginning with identifying which primary mirror segment went with which image by moving each segment one at a time and ended a few months later with all the segments aligned as one and the secondary mirror aligned optimally.",
-          Link = "https://blogs.nasa.gov/webb/wp-content/uploads/sites/326/2022/02/SegmentAlignment.gif"
+          Image = "https://data.openspaceproject.com/missions/jwst/alignment_mosaic_compressed-1200x813.png",
+          Description = "Using the Fine Guidance Sensor, we pointed Webb at a single bright star and demonstrated that the observatory could acquire and lock onto targets, and we took data mainly with NIRCam. But because the primary mirror segments had yet to be aligned to work as a single mirror, there were distorted images of the same single target star. We then embarked on the long process of aligning all the telescope optics, beginning with identifying which primary mirror segment went with which image by moving each segment one at a time and ended a few months later with all the segments aligned as one and the secondary mirror aligned optimally."
         },
         {
           Name = "Science instrument commissioning",

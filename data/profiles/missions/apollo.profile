@@ -53,7 +53,7 @@
     },
     {
       "action": "os.apollo.FocusEarth",
-      "key": "Home"
+      "key": "HOME"
     },
     {
       "action": "os.apollo.FocusMoon",
@@ -82,11 +82,14 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "This profile contains all the apollo assets in openspace. Apollo 8,11,17 and some associated materials. ",
+    "description": "This profile contains all the apollo assets in OpenSpace. Apollo 8,11,17 and some associated materials.",
     "license": "MIT License",
     "name": "Apollo",
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
+  },
+  "panel_visibility": {
+    "mission": true
   },
   "properties": [
     {
@@ -101,11 +104,12 @@
     }
   ],
   "time": {
+    "is_paused": false,
     "type": "absolute",
     "value": "1968-12-21T12:51:51"
   },
   "version": {
     "major": 1,
-    "minor": 1
+    "minor": 4
   }
 }

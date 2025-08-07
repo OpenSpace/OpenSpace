@@ -27,11 +27,11 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/glm.h>
 #include <optional>
@@ -107,7 +107,7 @@ struct GeoJsonOverrideProperties {
     std::optional<float> lineWidth;
 
     std::optional<float> pointSize;
-    std::optional<std::string> pointTexture;
+    std::optional<std::filesystem::path> pointTexture;
     std::optional<GeoJsonProperties::PointTextureAnchor> pointTextureAnchor;
 
     std::optional<bool> extrude;
@@ -135,7 +135,7 @@ struct PropertySet {
     float lineWidth() const;
 
     float pointSize() const;
-    std::string pointTexture() const;
+    std::filesystem::path pointTexture() const;
     GeoJsonProperties::PointTextureAnchor pointTextureAnchor() const;
 
     bool extrude() const;

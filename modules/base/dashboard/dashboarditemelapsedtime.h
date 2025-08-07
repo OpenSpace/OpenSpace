@@ -27,9 +27,9 @@
 
 #include <openspace/rendering/dashboardtextitem.h>
 
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
 
@@ -41,8 +41,6 @@ public:
     ~DashboardItemElapsedTime() override = default;
 
     void update() override;
-
-    glm::vec2 size() const override;
 
     static documentation::Documentation Documentation();
 

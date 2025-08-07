@@ -41,10 +41,6 @@ namespace scripting { struct LuaLibrary; }
  */
 class MissionManager {
 public:
-    struct MissionManagerException : public ghoul::RuntimeError {
-        explicit MissionManagerException(std::string error);
-    };
-
     MissionManager();
 
     /**

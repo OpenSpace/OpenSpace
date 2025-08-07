@@ -26,6 +26,7 @@
 #include <modules/exoplanets/exoplanetshelper.h>
 #include <modules/exoplanets/tasks/exoplanetsdatapreparationtask.h>
 #include <openspace/scene/scene.h>
+#include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/csvreader.h>
 #include <ghoul/misc/stringhelper.h>
 #include <algorithm>
@@ -168,7 +169,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
  * The data is retrieved from the module's prepared datafile for exoplanets. This file is
  * in a binary format, for fast retrieval during runtime.
  *
- * \param starName The name of the star to get the information for.
+ * \param starName The name of the star to get the information for
  *
  * \return An object of the type [ExoplanetSystemData](#exoplanets_exoplanet_system_data)
  *         that can be used to create the scene graph nodes for the exoplanet system
@@ -190,7 +191,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
 /**
  * Remove a loaded exoplanet system.
  *
- * \param starName The name of the host star for the system to remove.
+ * \param starName The name of the host star for the system to remove
  */
 [[codegen::luawrap]] void removeExoplanetSystem(std::string starName) {
     using namespace openspace;
@@ -216,20 +217,6 @@ std::vector<std::string> hostStarsWithSufficientData() {
 [[codegen::luawrap]] std::vector<std::string> listOfExoplanets() {
     std::vector<std::string> names = hostStarsWithSufficientData();
     return names;
-}
-
-/**
- * Deprecated in favor of 'listOfExoplanets'
- */
-[[codegen::luawrap("getListOfExoplanets")]] std::vector<std::string>
-listOfExoplanetsDeprecated()
-{
-    LWARNINGC(
-        "Deprecation",
-        "'getListOfExoplanets' function is deprecated and should be replaced with "
-        "'listOfExoplanets'"
-    );
-    return listOfExoplanets();
 }
 
 /**
@@ -261,7 +248,7 @@ listOfExoplanetsDeprecated()
   * When dowloading the data from the archive we recommend including all columns, since a
   * few required ones are not selected by default.
   *
-  * \param csvFile A path to the CSV file to load the data from.
+  * \param csvFile A path to the CSV file to load the data from
   *
   * \return A list of objects of the type
   *         [ExoplanetSystemData](#exoplanets_exoplanet_system_data), that can be used to

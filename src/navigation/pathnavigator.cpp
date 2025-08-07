@@ -128,10 +128,7 @@ namespace openspace::interaction {
 
 PathNavigator::PathNavigator()
     : properties::PropertyOwner({ "PathNavigator", "Path Navigator" })
-    , _defaultPathType(
-        DefaultCurveOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _defaultPathType(DefaultCurveOptionInfo)
     , _includeRoll(IncludeRollInfo, false)
     , _speedScale(SpeedScaleInfo, 1.f, 0.01f, 2.f)
     , _applyIdleBehaviorOnFinish(IdleBehaviorOnFinishInfo, false)
@@ -590,19 +587,10 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
     return {
         "pathnavigation",
         {
-            codegen::lua::IsFlying,
             codegen::lua::ContinuePath,
             codegen::lua::PausePath,
             codegen::lua::StopPath,
             codegen::lua::SkipToEnd,
-            codegen::lua::FlyTo,
-            codegen::lua::FlyToHeight,
-            codegen::lua::FlyToNavigationState,
-            codegen::lua::ZoomToFocus,
-            codegen::lua::ZoomToDistance,
-            codegen::lua::ZoomToDistanceRelative,
-            codegen::lua::JumpTo,
-            codegen::lua::JumpToNavigationState,
             codegen::lua::CreatePath
         }
     };

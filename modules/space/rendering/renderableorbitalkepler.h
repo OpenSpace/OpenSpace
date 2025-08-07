@@ -30,7 +30,7 @@
 #include <modules/base/rendering/renderabletrail.h>
 #include <modules/space/kepler.h>
 #include <modules/space/translation/keplertranslation.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/objectmanager.h>
@@ -79,14 +79,21 @@ private:
     };
 
     void updateBuffers();
+    void calculateSegmentsForPoints(const RenderData& data);
+    void calculateSegmentsForTrails(const RenderData& data);
 
     bool _updateDataBuffersAtNextRender = false;
     long long _numObjects = 0;
-    std::vector<GLint> _segmentSize;
-    std::vector<GLint> _startIndex;
+    GLsizei _lineDrawCount = 0;
     properties::UIntProperty _segmentQuality;
     properties::UIntProperty _startRenderIdx;
     properties::UIntProperty _sizeRender;
+    std::vector<GLint> _segmentSizeRaw;
+    std::vector<GLint> _startIndexPoints;
+    std::vector<GLint> _segmentSizePoints;
+    std::vector<GLint> _startIndexTrails;
+    std::vector<GLint> _segmentSizeTrails;
+    std::vector<kepler::Parameters> _parameters;
 
     /// The layout of the VBOs
     struct TrailVBOLayout {

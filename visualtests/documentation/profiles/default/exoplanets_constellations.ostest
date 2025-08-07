@@ -1,0 +1,42 @@
+{
+  "profile": "default",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Sun",
+        "position": [
+          4.2836204326102717e+18,
+          2.2222127116626816e+18,
+          6.087962310159965e+17
+        ],
+        "pitch": -0.0011556405151880265,
+        "referenceFrame": "Root",
+        "up": [
+          -0.46454587327480573,
+          0.7812483269521142,
+          0.41695105618989703
+        ],
+        "yaw": 0.005834675237130913,
+        "timestamp": "2025 JUN 29 15:24:28"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Constellations.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Exoplanets.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

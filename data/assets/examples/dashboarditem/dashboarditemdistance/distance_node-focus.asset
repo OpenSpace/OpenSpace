@@ -1,0 +1,28 @@
+-- Node-Focus
+-- This example adds an invisible node and a dashboard item that shows the distance
+-- between this node and the current focus node.
+
+local Node = {
+  Identifier = "DashboardItemDistance_Example_NodeFocus_Node",
+  GUI = {
+    Name = "DashboardItemDistance - Node-Focus"
+  }
+}
+
+local Item = {
+  Identifier = "DashboardItemDistance_Example_NodeFocus",
+  Type = "DashboardItemDistance",
+  SourceType = "Node",
+  SourceNodeIdentifier = Node.Identifier,
+  DestinationType = "Focus"
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+  openspace.removeSceneGraphNode(Node1)
+end)

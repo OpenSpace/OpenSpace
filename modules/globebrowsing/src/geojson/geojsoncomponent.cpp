@@ -300,10 +300,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     )
     , _pointSizeScale(PointSizeScaleInfo, 1.f, 0.01f, 100.f)
     , _lineWidthScale(LineWidthScaleInfo, 1.f, 0.01f, 10.f)
-    , _pointRenderModeOption(
-        PointRenderModeInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _pointRenderModeOption(PointRenderModeInfo)
     , _drawWireframe(DrawWireframeInfo, false)
     , _preventUpdatesFromHeightMap(PreventHeightUpdateInfo, false)
     , _forceUpdateHeightData(ForceUpdateHeightDataInfo)
@@ -590,7 +587,7 @@ void GeoJsonComponent::update() {
 }
 
 void GeoJsonComponent::readFile() {
-    std::ifstream file(_geoJsonFile);
+    std::ifstream file = std::ifstream(_geoJsonFile);
 
     if (!file.good()) {
         LERROR(std::format("Failed to open GeoJSON file: {}", _geoJsonFile.value()));
@@ -603,6 +600,14 @@ void GeoJsonComponent::readFile() {
         std::istreambuf_iterator<char>(file),
         std::istreambuf_iterator<char>()
     );
+
+    // For the loading, we want to assume that the current working directory is where the
+    // GeoJSON file is located
+    const std::filesystem::path cwd = std::filesystem::current_path();
+    std::filesystem::path jsonDir =
+        std::filesystem::path(_geoJsonFile.value()).parent_path();
+    std::filesystem::current_path(jsonDir);
+    defer { std::filesystem::current_path(cwd); };
 
     // Parse GeoJSON string into GeoJSON objects
     try {
@@ -844,7 +849,7 @@ void GeoJsonComponent::flyToFeature(std::optional<int> index) const {
     float lon = centroidLon + _latLongOffset.value().y;
 
     const std::string script = std::format(
-        "openspace.globebrowsing.flyToGeo([[{}]], {}, {}, {})",
+        "openspace.navigation.flyToGeo([[{}]], {}, {}, {})",
         _globeNode.owner()->identifier(), lat, lon, d
     );
     global::scriptEngine->queueScript(script);

@@ -70,7 +70,8 @@ local EarthLabel = {
   GUI = {
     Name = "Earth Label",
     Path = "/Solar System/Planets/Earth",
-    Description = "Main label for Earth"
+    Description = "Main label for Earth",
+    Focusable = false
   }
 }
 
@@ -90,13 +91,32 @@ local FocusEarth = {
 local ToggleSatelliteTrails = {
   Identifier = "os.solarsystem.ToggleSatelliteTrails",
   Name = "Toggle satellite trails",
-  Command = [[
-    local list = openspace.property("{earth_satellites}.Renderable.Enabled")
-    for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
-    end
+  Command = [[openspace.toggleFade("{earth_satellites~space_stations}.Renderable")]],
+  Documentation = [[
+    Toggle trails on or off for the satellites around Earth (excluding space stations)
   ]],
-  Documentation = "Toggle trails on or off for satellites around Earth",
+  GuiPath = "/Solar System/Earth",
+  IsLocal = false
+}
+
+local ToggleSpaceStations = {
+  Identifier = "os.solarsystem.ToggleSpaceStations",
+  Name = "Toggle space stations",
+  Command = [[openspace.toggleFade("{space_stations}.Renderable")]],
+  Documentation = [[
+    Toggle visiblity of the space stations around Earth (including their trail).
+  ]],
+  GuiPath = "/Solar System/Earth",
+  IsLocal = false
+}
+
+local ToggleSpaceStationTrails = {
+  Identifier = "os.solarsystem.ToggleSpaceStationTrails",
+  Name = "Toggle space station trails",
+  Command = [[openspace.toggleFade("{space_stations&trails}.Renderable")]],
+  Documentation = [[
+    Toggle visiblity of the trails for the space stations around Earth.
+  ]],
   GuiPath = "/Solar System/Earth",
   IsLocal = false
 }
@@ -108,9 +128,13 @@ asset.onInitialize(function()
 
   openspace.action.registerAction(FocusEarth)
   openspace.action.registerAction(ToggleSatelliteTrails)
+  openspace.action.registerAction(ToggleSpaceStations)
+  openspace.action.registerAction(ToggleSpaceStationTrails)
 end)
 
 asset.onDeinitialize(function()
+  openspace.action.removeAction(ToggleSpaceStationTrails)
+  openspace.action.removeAction(ToggleSpaceStations)
   openspace.action.removeAction(ToggleSatelliteTrails)
   openspace.action.removeAction(FocusEarth)
 

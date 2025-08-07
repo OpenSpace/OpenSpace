@@ -29,6 +29,7 @@
 #include <openspace/util/spicemanager.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <memory>
 #include <fstream>
 
@@ -290,10 +291,10 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
 
     switch (state.model()) {
         case fls::Model::Batsrus:
-            innerBoundaryLimit = 2.5f;  // TODO specify in Lua?
+            innerBoundaryLimit = 0.f;  // TODO (2025-06-10 Elon) specify in Lua?
             break;
         case fls::Model::Enlil:
-            innerBoundaryLimit = 0.11f; // TODO specify in Lua?
+            innerBoundaryLimit = 0.11f;
             break;
         default:
             LERROR(
@@ -319,7 +320,7 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
         //--------------------------------------------------------------------------//
         auto interpolator = std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
         ccmc::Tracer tracer(kameleon, interpolator.get());
-        tracer.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
+        tracer.setInnerBoundary(innerBoundaryLimit);
         ccmc::Fieldline ccmcFieldline = tracer.bidirectionalTrace(
             tracingVar,
             seed.x,
@@ -375,6 +376,18 @@ void addExtraQuantities(ccmc::Kameleon* kameleon,
                         std::vector<std::string>& extraMagVars,
                         FieldlinesState& state)
 {
+    int nVariableAttributes = kameleon->getNumberOfVariableAttributes();
+    std::vector<std::string> variablesAttributeNames;
+    for (int i = 0; i < nVariableAttributes; ++i) {
+        std::string varname = kameleon->getVariableAttributeName(i);
+        std::string varunit = kameleon->getNativeUnit(varname);
+        std::string varVisualizationUnit = kameleon->getVisUnit(varname);
+        LINFO(std::format(
+            "Variable '{}' is : '{}'. Variable Unit: '{}'. Visualization unit: '{}'.",
+            i, varname, varunit, varVisualizationUnit
+        ));
+        variablesAttributeNames.push_back(varname);
+    }
 
     prepareStateAndKameleonForExtras(kameleon, extraScalarVars, extraMagVars, state);
 

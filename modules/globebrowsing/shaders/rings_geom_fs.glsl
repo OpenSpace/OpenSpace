@@ -27,6 +27,7 @@
 
 in vec2 vs_st;
 in float vs_screenSpaceDepth;
+in vec3 vs_normal;
 
 uniform sampler1D ringTexture;
 uniform vec2 textureOffset;
@@ -38,6 +39,11 @@ Fragment getFragment() {
 
   // The length of the texture coordinates vector is our distance from the center
   float radius = length(st);
+
+  // Discard if normal is perpendicular to the camera direction
+  if (abs(dot(normalize(vs_normal), vec3(0.0, 0.0, 1.0))) <= 0.01) {
+    discard;
+  }
 
   // We only want to consider ring-like objects so we need to discard everything else
   if (radius > 1.0) {

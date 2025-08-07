@@ -25,6 +25,7 @@
 #include <openspace/data/datamapping.h>
 
 #include <openspace/documentation/documentation.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/crc32.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/stringhelper.h>

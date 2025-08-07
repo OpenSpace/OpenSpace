@@ -27,8 +27,8 @@
 
 #include <openspace/scene/rotation.h>
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/glm.h>
@@ -43,7 +43,7 @@ class FixedRotation : public Rotation {
 public:
     explicit FixedRotation(const ghoul::Dictionary& dictionary);
 
-    bool initialize() override;
+    void initialize() override;
 
     void update(const UpdateData& data) override;
     glm::dmat3 matrix(const UpdateData& data) const override;

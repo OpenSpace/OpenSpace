@@ -21,6 +21,7 @@ local UranusTrail = {
   GUI = {
     Name = "Uranus Trail",
     Path = "/Solar System/Planets/Uranus",
+    Focusable = false,
     Description = "Trail of Uranus as observed by the Sun"
   }
 }

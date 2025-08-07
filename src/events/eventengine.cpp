@@ -26,6 +26,7 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/actionmanager.h>
+#include <ghoul/logging/logmanager.h>
 
 #include "eventengine_lua.inl"
 

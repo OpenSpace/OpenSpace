@@ -111,6 +111,16 @@ void log(int i, const EventTimeOfInterestReached& e) {
     ));
 }
 
+void log(int i, const EventMissionAdded& e) {
+    ghoul_assert(e.type == EventMissionAdded::Type, "Wrong type");
+    LINFO(std::format("[{}] MissionAdded: {}", i, e.identifier));
+}
+
+void log(int i, const EventMissionRemoved& e) {
+    ghoul_assert(e.type == EventMissionRemoved::Type, "Wrong type");
+    LINFO(std::format("[{}] MissionRemoved: {}", i, e.identifier));
+}
+
 void log(int i, [[maybe_unused]] const EventMissionEventReached& e) {
     ghoul_assert(e.type == EventMissionEventReached::Type, "Wrong type");
     LINFO(std::format("[{}] MissionEventReached", i));
@@ -229,6 +239,8 @@ std::string_view toString(Event::Type type) {
         case Event::Type::ApplicationShutdown: return "ApplicationShutdown";
         case Event::Type::CameraFocusTransition: return "CameraFocusTransition";
         case Event::Type::TimeOfInterestReached: return "TimeOfInterestReached";
+        case Event::Type::MissionAdded: return "MissionAdded";
+        case Event::Type::MissionRemoved: return "MissionRemoved";
         case Event::Type::MissionEventReached: return "MissionEventReached";
         case Event::Type::PlanetEclipsed: return "PlanetEclipsed";
         case Event::Type::InterpolationFinished: return "InterpolationFinished";
@@ -270,6 +282,12 @@ Event::Type fromString(std::string_view str) {
     }
     else if (str == "TimeOfInterestReached") {
         return Event::Type::TimeOfInterestReached;
+    }
+    else if (str == "MissionAdded") {
+        return Event::Type::MissionAdded;
+    }
+    else if (str == "MissionRemoved") {
+        return Event::Type::MissionRemoved;
     }
     else if (str == "MissionEventReached") {
         return Event::Type::MissionEventReached;
@@ -380,6 +398,18 @@ ghoul::Dictionary toParameter(const Event& e) {
                     d.setValue("Transition", "Exiting"s);
                     break;
             }
+            break;
+        case Event::Type::MissionAdded:
+            d.setValue(
+                "Identifier",
+                std::string(static_cast<const EventMissionAdded&>(e).identifier)
+            );
+            break;
+        case Event::Type::MissionRemoved:
+            d.setValue(
+                "Identifier",
+                std::string(static_cast<const EventMissionRemoved&>(e).identifier)
+            );
             break;
         case Event::Type::PlanetEclipsed:
             d.setValue(
@@ -526,6 +556,12 @@ void logAllEvents(const Event* e) {
             case Event::Type::TimeOfInterestReached:
                 log(i, *static_cast<const EventTimeOfInterestReached*>(e));
                 break;
+            case Event::Type::MissionAdded:
+                log(i, *static_cast<const EventMissionAdded*>(e));
+                break;
+            case Event::Type::MissionRemoved:
+                log(i, *static_cast<const EventMissionRemoved*>(e));
+                break;
             case Event::Type::MissionEventReached:
                 log(i, *static_cast<const EventMissionEventReached*>(e));
                 break;
@@ -621,6 +657,16 @@ EventTimeOfInterestReached::EventTimeOfInterestReached(const Time* time_,
     : Event(Type)
     , time(time_)
     , camera(camera_)
+{}
+
+EventMissionAdded::EventMissionAdded(const std::string_view identifier_)
+    : Event(Type)
+    , identifier(temporaryString(identifier_))
+{}
+
+EventMissionRemoved::EventMissionRemoved(const std::string_view identifier_)
+    : Event(Type)
+    , identifier(temporaryString(identifier_))
 {}
 
 EventMissionEventReached::EventMissionEventReached()

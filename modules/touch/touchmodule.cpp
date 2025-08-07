@@ -32,9 +32,8 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
-#include <algorithm>
+#include <ghoul/logging/logmanager.h>
 
 using namespace TUIO;
 
@@ -202,7 +201,7 @@ void TouchModule::internalInitialize(const ghoul::Dictionary&) {
 
 bool TouchModule::processNewInput() {
     // Get new input from listener
-    std::vector<TouchInput> earInputs = _ear->takeInput();
+    std::vector<TouchInput> earInputs = _ear->takeInputs();
     std::vector<TouchInput> earRemovals = _ear->takeRemovals();
 
     for (const TouchInput& input : earInputs) {

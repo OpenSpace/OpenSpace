@@ -1,0 +1,39 @@
+{
+  "profile": "missions/juice",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Ganymede",
+        "position": [
+          1705904.8927001953,
+          -13220558.698059082,
+          14536932.479980469
+        ],
+        "pitch": 0.0073357404466452445,
+        "referenceFrame": "Root",
+        "up": [
+          0.1290381876619581,
+          0.7411146322431872,
+          0.6588613268359002
+        ],
+        "yaw": 0.003612768499801233,
+        "timestamp": "2033 AUG 08 07:44:47"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.GanymedeMagnetosphere.Renderable.Flow.FlowEnabled",
+        "value": false
+      }
+    },
+    {
+      "type": "wait",
+      "value": 15
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

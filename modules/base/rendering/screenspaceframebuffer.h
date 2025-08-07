@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 
-#include <openspace/properties/vector/vec4property.h>
+#include <openspace/properties/vector/vec2property.h>
 
 namespace ghoul::opengl {
     class FramebufferObject;
@@ -40,7 +40,7 @@ namespace documentation { struct Documentation; }
 
 /**
  * Creates a texture by rendering to a framebuffer, this is then used on a screen space
- * plane. This class lets you ass renderfunctions that should render to a framebuffer with
+ * plane. This class lets you add renderfunctions that should render to a framebuffer with
  * an attached texture. The texture is then used on a screen space plane that works both
  * in fisheye and flat screens.
  */
@@ -51,12 +51,12 @@ public:
     explicit ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary);
     virtual ~ScreenSpaceFramebuffer() override;
 
-    bool initializeGL() override;
-    bool deinitializeGL() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
     void render(const RenderData& renderData) override;
     bool isReady() const override;
 
-    void setSize(glm::vec4 size);
+    void setSize(glm::vec2 size);
     void addRenderFunction(RenderFunction renderFunction);
     void removeAllRenderFunctions();
 
@@ -64,7 +64,7 @@ public:
 
 protected:
     void createFramebuffer();
-    properties::Vec4Property _size;
+    properties::Vec2Property _size;
 
 private:
     void bindTexture() override;

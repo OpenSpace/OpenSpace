@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/dashboardtextitem.h>
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 
 namespace openspace {
 
@@ -39,8 +39,6 @@ public:
     ~DashboardItemDate() override = default;
 
     void update() override;
-
-    glm::vec2 size() const override;
 
     static documentation::Documentation Documentation();
 

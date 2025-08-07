@@ -24,7 +24,9 @@ local Node = {
     -- the arrow
     ArrowHeadSize = 0.25,
     -- Set the arrow head width. A value of 1 makes it as wide as the body of the arrow
-    ArrowHeadWidthFactor = 1.0
+    ArrowHeadWidthFactor = 1.0,
+    -- How wide should the arrow be (meters)
+    Width = 1000000.0
   },
   GUI = {
     Name = "RenderableNodeArrow - Custom Appearance (Colored & Inverted)",

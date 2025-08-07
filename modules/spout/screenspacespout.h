@@ -39,7 +39,7 @@ class ScreenSpaceSpout : public ScreenSpaceRenderable {
 public:
     explicit ScreenSpaceSpout(const ghoul::Dictionary& dictionary);
 
-    bool deinitializeGL() override;
+    void deinitializeGL() override;
 
     bool isReady() const override;
 

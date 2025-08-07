@@ -25,11 +25,11 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
+#include <openspace/engine/configuration.h>
+#include <openspace/json.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <nlohmann/json.hpp>
 #include <nlohmann/json-schema.hpp>
 #include <sgct/config.h>
-#include <openspace/engine/configuration.h>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
@@ -39,7 +39,7 @@ using namespace openspace;
 namespace {
     void validate(std::string_view cfgString) {
         const std::filesystem::path schemaDir = absPath("${TESTDIR}/../config/schema");
-        const std::filesystem::path schema = schemaDir / "sgcteditor.schema.json";
+        const std::filesystem::path schema = schemaDir / "sgct.schema.json";
         std::string err = sgct::validateConfigAgainstSchema(cfgString, schema);
         if (!err.empty()) {
             throw std::runtime_error(err);
@@ -282,162 +282,6 @@ R"({
             "\"z\":0.0}},\"users\":[{\"eyeseparation\":0.06499999761581421,\"pos\":"
             "{\"x\":0.0,\"y\":0.0,\"z\":4.0}}],\"version\":1} - required property "
             "'masteraddress' not found in object\n"
-        )
-    );
-}
-
-TEST_CASE("SgctEdit: missingPos", "[sgctedit]") {
-    constexpr std::string_view Source =
-R"({
-  "generator": {
-    "major": 1,
-    "minor": 1,
-    "name": "SgctWindowConfig"
-  },
-  "masteraddress": "localhost",
-  "nodes": [
-    {
-      "address": "localhost",
-      "port": 20401,
-      "windows": [
-        {
-          "border": true,
-          "id": 0,
-          "monitor": 0,
-          "name": "name",
-          "pos": {
-            "x": 112,
-            "y": 77
-          },
-          "size": {
-            "x": 1280,
-            "y": 720
-          },
-          "viewports": [
-            {
-              "pos": {
-                "x": 0.0,
-                "y": 0.0
-              },
-              "projection": {
-                "heightoffset": 0.0,
-                "quality": "1024",
-                "type": "CylindricalProjection"
-              },
-              "size": {
-                "x": 1.0,
-                "y": 1.0
-              },
-              "tracked": true
-            }
-          ]
-        }
-      ]
-    }
-  ],
-  "scene": {
-    "orientation": {
-      "w": 0.0,
-      "x": 0.0,
-      "y": 0.0,
-      "z": 0.0
-    }
-  },
-  "users": [
-    {
-      "eyeseparation": 0.06499999761581421
-    }
-  ],
-  "version": 1
-})";
-    CHECK_THROWS_MATCHES(
-        validate(Source),
-        std::exception,
-        Catch::Matchers::Message(
-            "At /users/0 of {\"eyeseparation\":0.06499999761581421} - required "
-            "property 'pos' not found in object\n"
-        )
-    );
-}
-
-TEST_CASE("SgctEdit: missingGenerator", "[sgctedit]") {
-    constexpr std::string_view Source =
-R"({
-  "masteraddress": "localhost",
-  "nodes": [
-    {
-      "address": "localhost",
-      "port": 20401,
-      "windows": [
-        {
-          "border": true,
-          "id": 0,
-          "monitor": 0,
-          "name": "name",
-          "pos": {
-            "x": 112,
-            "y": 77
-          },
-          "size": {
-            "x": 1280,
-            "y": 720
-          },
-          "viewports": [
-            {
-              "pos": {
-                "x": 0.0,
-                "y": 0.0
-              },
-              "projection": {
-                "heightoffset": 0.0,
-                "quality": "1024",
-                "type": "CylindricalProjection"
-              },
-              "size": {
-                "x": 1.0,
-                "y": 1.0
-              },
-              "tracked": true
-            }
-          ]
-        }
-      ]
-    }
-  ],
-  "scene": {
-    "orientation": {
-      "w": 0.0,
-      "x": 0.0,
-      "y": 0.0,
-      "z": 0.0
-    }
-  },
-  "users": [
-    {
-      "eyeseparation": 0.06499999761581421,
-      "pos": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 4.0
-      }
-    }
-  ],
-  "version": 1
-})";
-    CHECK_THROWS_MATCHES(
-        validate(Source),
-        std::exception,
-        Catch::Matchers::Message(
-            "At  of {\"masteraddress\":\"localhost\",\"nodes\":[{\"address\":"
-            "\"localhost\",\"port\":20401,\"windows\":[{\"border\":true,\"id\":"
-            "0,\"monitor\":0,\"name\":\"name\",\"pos\":{\"x\":112,\"y\":77},\"size\":"
-            "{\"x\":1280,\"y\":720},\"viewports\":[{\"pos\":{\"x\":0.0,\"y\":0.0},"
-            "\"projection\":{\"heightoffset\":0.0,\"quality\":\"1024\",\"type\":"
-            "\"CylindricalProjection\"},\"size\":{\"x\":1.0,\"y\":1.0},\"tracked\":"
-            "true}]}]}],\"scene\":{\"orientation\":{\"w\":0.0,\"x\":0.0,\"y\":0.0,\"z\":"
-            "0.0}},\"users\":[{\"eyeseparation\":0.06499999761581421,\"pos\":{\"x\":"
-            "0.0,\"y\":0.0,\"z\":4.0}}],\"version\":1} - required property 'generator' "
-            "not found in object\n"
         )
     );
 }

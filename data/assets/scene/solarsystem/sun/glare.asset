@@ -17,7 +17,7 @@ local SunGlare = {
     Type = "RenderablePlaneImageLocal",
     Size = 41109609582.189,
     Origin = "Center",
-    Billboard = true,
+    Billboard = "Camera Position Normal",
     Texture = textures .. "halo.png",
     BlendMode = "Additive",
     Opacity = 0.65,
@@ -26,6 +26,7 @@ local SunGlare = {
   GUI = {
     Name = "Sun Glare",
     Path = "/Solar System/Sun",
+    Focusable = false,
     Description = "Sun glare effect. Enabled by default instead of sun globe"
   }
 }

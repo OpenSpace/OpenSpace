@@ -43,6 +43,7 @@ local JWSTPosition = {
   GUI = {
     Name = "JWST Position",
     Path = "/Solar System/Telescopes/JWST",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -63,6 +64,7 @@ local JWSTRotation = {
   GUI = {
     Name = "JWST Rotation",
     Path = "/Solar System/Telescopes/JWST",
+    Focusable = false,
     Hidden = true
   }
 }

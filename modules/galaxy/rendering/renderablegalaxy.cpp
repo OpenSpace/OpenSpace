@@ -146,7 +146,7 @@ namespace {
         "The number of integration steps used during the raycasting procedure.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
-    
+
     void saveCachedFile(const std::filesystem::path& file,
                         const std::vector<glm::vec3>& positions,
                         const std::vector<glm::vec3>& colors, int64_t nPoints,
@@ -254,10 +254,7 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     , _stepSize(StepSizeInfo, 0.01f, 0.001f, 0.05f, 0.001f)
     , _absorptionMultiply(AbsorptionMultiplyInfo, 40.f, 0.f, 200.f)
     , _emissionMultiply(EmissionMultiplyInfo, 200.f, 0.f, 1000.f)
-    , _starRenderingMethod(
-        StarRenderingMethodInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _starRenderingMethod(StarRenderingMethodInfo)
     , _enabledPointsRatio(EnabledPointsRatioInfo, 0.5f, 0.01f, 1.f)
     , _rotation(
         RotationInfo,
@@ -576,7 +573,7 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
             opacityCoefficient = 0;
         }
 
-        _opacityCoefficient = opacityCoefficient;
+        _opacityCoefficient = opacityCoefficient * opacity();
         ghoul_assert(
             _opacityCoefficient >= 0.f && _opacityCoefficient <= 1.f,
             "Opacity coefficient was not between 0 and 1"

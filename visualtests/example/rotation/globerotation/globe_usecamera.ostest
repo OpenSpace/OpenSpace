@@ -1,0 +1,38 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/rotation/globerotation/globe_usecamera.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "GlobeRotation_Example_UseCamera",
+        "position": [
+          2.676367238671011,
+          0.06455700496410402,
+          1.3015143071389919
+        ],
+        "referenceFrame": "Root",
+        "up": [
+          0.43296335871030023,
+          -0.19156046013286776,
+          -0.8808219571105047
+        ],
+        "yaw": 1.0958825369389411e-07,
+        "timestamp": "2025 JUL 13 12:45:06"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

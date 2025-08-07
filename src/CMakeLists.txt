@@ -89,12 +89,8 @@ set(OPENSPACE_SOURCE
   network/parallelconnection.cpp
   network/parallelpeer.cpp
   network/parallelpeer_lua.inl
-  properties/optionproperty.cpp
   properties/property.cpp
   properties/propertyowner.cpp
-  properties/selectionproperty.cpp
-  properties/stringproperty.cpp
-  properties/triggerproperty.cpp
   properties/list/doublelistproperty.cpp
   properties/list/intlistproperty.cpp
   properties/list/stringlistproperty.cpp
@@ -104,6 +100,10 @@ set(OPENSPACE_SOURCE
   properties/matrix/mat2property.cpp
   properties/matrix/mat3property.cpp
   properties/matrix/mat4property.cpp
+  properties/misc/optionproperty.cpp
+  properties/misc/selectionproperty.cpp
+  properties/misc/stringproperty.cpp
+  properties/misc/triggerproperty.cpp
   properties/scalar/boolproperty.cpp
   properties/scalar/doubleproperty.cpp
   properties/scalar/floatproperty.cpp
@@ -172,7 +172,10 @@ set(OPENSPACE_SOURCE
   util/collisionhelper.cpp
   util/coordinateconversion.cpp
   util/distanceconversion.cpp
+  util/dynamicfilesequencedownloader.cpp
+  util/ellipsoid.cpp
   util/factorymanager.cpp
+  util/geodetic.cpp
   util/httprequest.cpp
   util/json_helper.cpp
   util/keys.cpp
@@ -276,18 +279,12 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/network/parallelpeer.h
   ${PROJECT_SOURCE_DIR}/include/openspace/network/messagestructures.h
   ${PROJECT_SOURCE_DIR}/include/openspace/network/messagestructureshelper.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/properties/listproperty.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/properties/listproperty.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/numericalproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/numericalproperty.inl
-  ${PROJECT_SOURCE_DIR}/include/openspace/properties/optionproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/property.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/propertyowner.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/properties/selectionproperty.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/properties/stringproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/templateproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/templateproperty.inl
-  ${PROJECT_SOURCE_DIR}/include/openspace/properties/triggerproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/list/doublelistproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/list/intlistproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/list/stringlistproperty.h
@@ -297,6 +294,12 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/matrix/mat2property.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/matrix/mat3property.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/matrix/mat4property.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/properties/misc/listproperty.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/properties/misc/listproperty.inl
+  ${PROJECT_SOURCE_DIR}/include/openspace/properties/misc/optionproperty.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/properties/misc/selectionproperty.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/properties/misc/stringproperty.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/properties/misc/triggerproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/scalar/boolproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/scalar/doubleproperty.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/scalar/floatproperty.h
@@ -365,8 +368,11 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/util/coordinateconversion.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/distanceconstants.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/distanceconversion.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/util/dynamicfilesequencedownloader.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/util/ellipsoid.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/factorymanager.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/factorymanager.inl
+  ${PROJECT_SOURCE_DIR}/include/openspace/util/geodetic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/httprequest.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/job.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/json_helper.h
@@ -460,11 +466,25 @@ target_include_directories(openspace-core
     ${PROJECT_SOURCE_DIR}
 )
 
+target_link_libraries(openspace-core PUBLIC nlohmann_json)
+
+if (UNIX)
+  # On Arch Linux, if you have the package `oneapi` installed, this influences including
+  # the <exception> header and causes the header /usr/include/oneapi/tbb/task_group.h be
+  # pulled in, causing a compile problem
+  target_compile_definitions(
+    openspace-core
+      PUBLIC "_GLIBCXX_USE_TBB_PAR_BACKEND=0"
+      PUBLIC "_PSTL_PAR_BACKEND_SERIAL"
+  )
+endif ()
+
 target_precompile_headers(openspace-core PRIVATE
   <openspace/json.h>
   <openspace/properties/numericalproperty.h>
   [["ghoul/format.h"]]
   [["ghoul/glm.h"]]
+  [["ghoul/lua/lua_helper.h"]]
   [["ghoul/misc/assert.h"]]
   [["ghoul/misc/boolean.h"]]
   [["ghoul/misc/exception.h"]]

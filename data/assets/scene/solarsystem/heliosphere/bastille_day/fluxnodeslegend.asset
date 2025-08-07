@@ -19,23 +19,7 @@ local ToggleLegend = {
   Identifier = "os.bastilleday.fluxnodelegend.ToggleLegend",
   Name = "Toggle the legend image",
   Command = [[
-    if openspace.propertyValue("ScreenSpace.LegendFluxNodes-bastille-day-2000.Enabled") then
-      openspace.setPropertyValueSingle(
-        "ScreenSpace.LegendFluxNodes-bastille-day-2000.Fade",
-        0.0,
-        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
-        "Linear",
-        'openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Enabled", false)'
-      )
-    else
-      openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Enabled", true)
-      openspace.setPropertyValueSingle(
-        "ScreenSpace.LegendFluxNodes-bastille-day-2000.Fade",
-        1.0,
-        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
-        "Linear"
-      )
-    end
+    openspace.toggleFade("ScreenSpace.LegendFluxNodes-bastille-day-2000")
   ]],
   Documentation = "Toggle the legend image",
   GuiPath = "/Bastille-Day 2000",
@@ -46,13 +30,7 @@ local HideLegend = {
   Identifier = "os.bastilleday.fluxnodelegend.HideLegend",
   Name = "Hides the legend image",
   Command = [[
-    openspace.setPropertyValueSingle(
-      "ScreenSpace.LegendFluxNodes-bastille-day-2000.Fade",
-      0.0,
-      openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
-      "Linear",
-      'openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Enabled", false)'
-    )
+    openspace.fadeOut("ScreenSpace.LegendFluxNodes-bastille-day-2000")
   ]],
   Documentation = "Hides the legend image",
   GuiPath = "/Bastille-Day 2000",

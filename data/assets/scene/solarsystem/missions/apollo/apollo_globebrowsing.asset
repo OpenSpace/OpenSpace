@@ -39,10 +39,7 @@ local ToggleKaguyaLayer = {
   Identifier = "os.apollo.moon.ToggleKaguyaLayer",
   Name = "Toggle Kaguya layer",
   Command = [[
-    openspace.setPropertyValueSingle(
-      "Scene.Moon.Renderable.Layers.ColorLayers.Kaguya_Utah.Enabled",
-      not openspace.propertyValue("Scene.Moon.Renderable.Layers.ColorLayers.Kaguya_Utah.Enabled")
-    )
+    openspace.toggleFade("Scene.Moon.Renderable.Layers.ColorLayers.Kaguya_Utah")
   ]],
   Documentation = "Toggles Moon Kaguya color layer",
   GuiPath = "/Missions/Apollo",
@@ -80,3 +77,14 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(DisableApolloSites)
   openspace.action.removeAction(ToggleKaguyaLayer)
 end)
+
+
+
+asset.meta = {
+  Name = "Apollo - Globe Actions",
+  Description = [[This asset defines actions that are used to control the visibility of
+    features on the Moon's surface as they related to the different landing sites.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

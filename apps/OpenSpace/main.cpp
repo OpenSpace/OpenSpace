@@ -29,6 +29,9 @@
 #include <openspace/engine/settings.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/joystickinputstate.h>
+#include <openspace/util/progressbar.h>
+#include <openspace/util/task.h>
+#include <openspace/util/taskloader.h>
 #include <openspace/openspace.h>
 #include <ghoul/format.h>
 #include <ghoul/ghoul.h>
@@ -37,7 +40,9 @@
 #include <ghoul/cmdparser/multiplecommand.h>
 #include <ghoul/cmdparser/singlecommand.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
+#include <ghoul/misc/defer.h>
 #include <ghoul/misc/stacktrace.h>
 #ifdef WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -78,6 +83,18 @@
 #include <QApplication>
 #include <QMessageBox>
 
+#ifdef WIN32
+extern "C" {
+    // These variables are checked by the different drivers to see if the discrete GPU
+    // should be preferred
+
+    // Nvidia Optimus: force switch to discrete GPU
+    __declspec(dllexport) DWORD NvOptimusEnablement = 1;
+    // AMD
+    __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+} // extern
+#endif // WIN32
+
 using namespace openspace;
 using namespace sgct;
 
@@ -97,6 +114,11 @@ glm::ivec2 currentDrawResolution;
 #ifdef OPENVR_SUPPORT
 Window* FirstOpenVRWindow = nullptr;
 #endif
+
+// This value is specified from the commandline options and kept around to be run after
+// everything has been initialized. It's going to be std::nullopt unless a user wants to
+// run a task
+std::optional<std::string> taskToRun;
 
 //
 //  SPOUT-support
@@ -398,6 +420,40 @@ void mainInitFunc(GLFWwindow*) {
 
     // Query joystick status, those connected before start up
     checkJoystickStatus();
+
+    if (taskToRun.has_value()) {
+        // If a task was specified on the commandline line, we are loading that file and
+        // executing everything within
+
+        TaskLoader loader;
+        std::vector<std::unique_ptr<Task>> tasks = loader.tasksFromFile(*taskToRun);
+
+        size_t nTasks = tasks.size();
+        if (nTasks == 1) {
+            LINFO("Task queue has 1 item");
+        }
+        else {
+            LINFO(std::format("Task queue has {} items", tasks.size()));
+        }
+
+        for (size_t i = 0; i < tasks.size(); i++) {
+            Task& task = *tasks[i].get();
+            LINFO(std::format(
+                "Performing task {} out of {}: {}",
+                i + 1, tasks.size(), task.description()
+            ));
+            ProgressBar progressBar = ProgressBar(100);
+            auto onProgress = [&progressBar](float progress) {
+                progressBar.print(static_cast<int>(progress * 100.f));
+                };
+            task.perform(onProgress);
+        }
+        std::cout << "Done performing tasks" << std::endl;
+
+        // Done with the tasks, so we can terminate
+        Engine::instance().terminate();
+    }
+
 
     LTRACE("main::mainInitFunc(end)");
 }
@@ -703,6 +759,16 @@ void setSgctDelegateFunctions() {
 
         return currentWindow->isWindowResized();
     };
+    sgctDelegate.anyWindowHasResized = []() {
+        ZoneScoped;
+
+        for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
+            if (window->isWindowResized()) {
+                return true;
+            }
+        }
+        return false;
+    };
     sgctDelegate.averageDeltaTime = []() {
         ZoneScoped;
 
@@ -923,24 +989,40 @@ void setSgctDelegateFunctions() {
 
         return Engine::instance().windows().front()->id();
     };
+    sgctDelegate.nameForWindow = [](int windowIdx) {
+        ZoneScoped;
+
+        ghoul_assert(
+            windowIdx >= 0 &&
+            windowIdx < Engine::instance().windows().size(),
+            "Invalid window index"
+        );
+        return Engine::instance().windows()[windowIdx]->name();
+    };
     sgctDelegate.openGLProcedureAddress = [](const char* func) {
         ZoneScoped;
 
         return glfwGetProcAddress(func);
     };
-    sgctDelegate.getHorizFieldOfView = []() {
+    sgctDelegate.horizFieldOfView = [](int windowIdx) {
         ZoneScoped;
 
-        return static_cast<double>(
-            Engine::instance().windows().front()->horizFieldOfViewDegrees()
+        ghoul_assert(
+            windowIdx >= 0 &&
+            windowIdx < Engine::instance().windows().size(),
+            "Invalid window index"
         );
+        return Engine::instance().windows()[windowIdx]->horizFieldOfViewDegrees();
     };
-    sgctDelegate.setHorizFieldOfView = [](float hFovDeg) {
+    sgctDelegate.setHorizFieldOfView = [](int windowIdx, float hFovDeg) {
         ZoneScoped;
 
-        for (std::unique_ptr<sgct::Window> const& w : Engine::instance().windows()) {
-            w->setHorizFieldOfView(hFovDeg);
-        }
+        ghoul_assert(
+            windowIdx >= 0 &&
+            windowIdx < Engine::instance().windows().size(),
+            "Invalid window index"
+        );
+        Engine::instance().windows()[windowIdx]->setHorizFieldOfView(hFovDeg);
     };
     #ifdef WIN32
     sgctDelegate.getNativeWindowHandle = [](size_t windowIndex) -> void* {
@@ -1013,47 +1095,66 @@ void setSgctDelegateFunctions() {
     sgctDelegate.setStatisticsGraphScale = [](float scale) {
         sgct::Engine::instance().setStatsGraphScale(scale);
     };
+    sgctDelegate.setStatisticsGraphOffset = [](glm::vec2 offset) {
+        sgct::Engine::instance().setStatsGraphOffset(sgct::vec2{ offset.x, offset.y });
+    };
     sgctDelegate.setMouseCursor = [](WindowDelegate::Cursor mouse) {
+        auto createGLFWCursor = [](int shape) {
+            GLFWerrorfun prevErrorCallback = glfwSetErrorCallback(nullptr);
+            defer { glfwSetErrorCallback(prevErrorCallback); };
+
+            GLFWcursor* cursor = glfwCreateStandardCursor(shape);
+            if (!cursor) {
+                LINFO(std::format(
+                    "Replacing unavailable cursor shape {} with arrow cursor ({})",
+                    shape, GLFW_ARROW_CURSOR
+                ));
+                return glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+            }
+
+            return cursor;
+        };
+
         static std::unordered_map<WindowDelegate::Cursor, GLFWcursor*> Cursors = {
             {
                 WindowDelegate::Cursor::Arrow,
-                glfwCreateStandardCursor(GLFW_ARROW_CURSOR)
+                createGLFWCursor(GLFW_ARROW_CURSOR)
             },
             {
                 WindowDelegate::Cursor::IBeam,
-                glfwCreateStandardCursor(GLFW_IBEAM_CURSOR)
+                createGLFWCursor(GLFW_IBEAM_CURSOR)
             },
             {
                 WindowDelegate::Cursor::CrossHair,
-                glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR)
+                createGLFWCursor(GLFW_CROSSHAIR_CURSOR)
             },
             {
                 WindowDelegate::Cursor::PointingHand,
-                glfwCreateStandardCursor(GLFW_POINTING_HAND_CURSOR)
+                createGLFWCursor(GLFW_POINTING_HAND_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeEW,
-                glfwCreateStandardCursor(GLFW_RESIZE_EW_CURSOR)
+                createGLFWCursor(GLFW_RESIZE_EW_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeNS,
-                glfwCreateStandardCursor(GLFW_RESIZE_NS_CURSOR)
+                createGLFWCursor(GLFW_RESIZE_NS_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeNWSE,
-                glfwCreateStandardCursor(GLFW_RESIZE_NWSE_CURSOR)
+                createGLFWCursor(GLFW_RESIZE_NWSE_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeNESW,
-                glfwCreateStandardCursor(GLFW_RESIZE_NESW_CURSOR)
+                createGLFWCursor(GLFW_RESIZE_NESW_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeAll,
-                glfwCreateStandardCursor(GLFW_RESIZE_ALL_CURSOR)
+                createGLFWCursor(GLFW_RESIZE_ALL_CURSOR)
             },
             {
                 WindowDelegate::Cursor::NotAllowed,
-                glfwCreateStandardCursor(GLFW_NOT_ALLOWED_CURSOR)
+                createGLFWCursor(GLFW_NOT_ALLOWED_CURSOR)
             },
         };
         ghoul_assert(
@@ -1068,6 +1169,12 @@ void setSgctDelegateFunctions() {
 
 int main(int argc, char* argv[]) {
     ZoneScoped;
+
+    // For debugging purposes: Enforce Light Mode in Qt
+    // qputenv("QT_QPA_PLATFORM", "windows:darkmode=0");
+
+    // For debugging purposes: Enforce Dark Mode in Qt
+    // qputenv("QT_QPA_PLATFORM", "windows:darkmode=1");
 
 #ifdef OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
     _clearfp();
@@ -1118,41 +1225,56 @@ int main(int argc, char* argv[]) {
 
     CommandlineArguments commandlineArguments;
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-        commandlineArguments.configuration, "--file", "-f",
+        commandlineArguments.configuration,
+        "--file",
+        "-f",
         "Provides the path to the OpenSpace configuration file. Only the '${TEMPORARY}' "
         "path token is available and any other path has to be specified relative to the "
         "current working directory"
     ));
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-        commandlineArguments.windowConfig, "--config", "-c",
+        commandlineArguments.windowConfig,
+        "--config",
+        "-c",
         "Specifies the window configuration file that should be used to start OpenSpace "
         "and that will override whatever is specified in the `openspace.cfg` or the "
         "settings. This value can include path tokens, so for example "
         "`${CONFIG}/single.json` is a valid value."
     ));
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-        commandlineArguments.profile, "--profile", "-p",
+        commandlineArguments.profile,
+        "--profile",
+        "-p",
         "Specifies the profile that should be used to start OpenSpace and that overrides "
         "the profile specified in the `openspace.cfg` and the settings."
     ));
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-        commandlineArguments.propertyVisibility, "--propertyVisibility", "",
+        commandlineArguments.propertyVisibility,
+        "--propertyVisibility",
+        "",
         "Specifies UI visibility settings for properties that this OpenSpace is using. "
         "This value overrides the values specified in the `openspace.cfg` and the "
         "settings and also the environment variable, if that value is provided. Allowed "
         "values for this parameter are: `Developer`, `AdvancedUser`, `User`, and "
         "`NoviceUser`."
     ));
+    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+        commandlineArguments.task,
+        "--task",
+        "-t",
+        "Specifies a task that will be run after OpenSpace has been initialized. Once "
+        "the task finishes, the application will automatically close again. All other "
+        "commandline arguments are ignored, if a task is specified."
+    ));
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommandZeroArguments>(
-        commandlineArguments.bypassLauncher, "--bypassLauncher", "-b",
+        commandlineArguments.bypassLauncher,
+        "--bypassLauncher",
+        "-b",
         "Specifies whether the Launcher should be shown at startup or not. This value "
         "overrides the value specified in the `openspace.cfg` and the settings."
     ));
 
-    // setCommandLine returns a reference to the vector that will be filled later
-    const std::vector<std::string>& sgctArguments = parser.setCommandLine(
-        { argv, argv + argc }
-    );
+    parser.setCommandLine({ argv, argv + argc });
 
     try {
         const bool showHelp = parser.execute();
@@ -1165,8 +1287,16 @@ int main(int argc, char* argv[]) {
         LFATALC(e.component, e.message);
         exit(EXIT_FAILURE);
     }
-    // Take an actual copy of the arguments
-    std::vector<std::string> arguments = sgctArguments;
+
+    if (commandlineArguments.task.has_value()) {
+        // If a task was specified, we want to overwrite the used window and profile and
+        // not display the launcher
+        commandlineArguments.windowConfig = "${CONFIG}/single.json";
+        commandlineArguments.profile = "empty";
+        commandlineArguments.bypassLauncher = true;
+
+        taskToRun = *commandlineArguments.task;
+    }
 
     //
     // Set up SGCT functions for window delegate
@@ -1391,7 +1521,10 @@ int main(int argc, char* argv[]) {
             config = launcher.selectedWindowConfig();
             if (config.find(labelFromCfgFile) != std::string::npos) {
                 if (config.find("sgct.config") == std::string::npos) {
-                    config = config.substr(0, config.length() - labelFromCfgFile.length());
+                    config = config.substr(
+                        0,
+                        config.length() - labelFromCfgFile.length()
+                    );
                 }
                 else {
                     config = windowConfiguration;
@@ -1412,11 +1545,40 @@ int main(int argc, char* argv[]) {
 
     {
         openspace::Settings settings = loadSettings();
-        settings.hasStartedBefore = true;
 
-        const std::filesystem::path p = global::configuration->profile;
-        const std::filesystem::path reducedName = p.filename().replace_extension();
-        settings.profile = reducedName.string();
+        const std::filesystem::path profile = global::configuration->profile;
+
+        const bool isDefaultProfile = ghoul::filesystem::isSubdirectory(
+            profile,
+            absPath("${PROFILES}")
+        );
+        const bool isUserProfile = ghoul::filesystem::isSubdirectory(
+            profile,
+            absPath("${USER_PROFILES}")
+        );
+
+        if (isDefaultProfile) {
+            std::filesystem::path p = std::filesystem::relative(
+                profile,
+                absPath("${PROFILES}")
+            );
+            p.replace_extension();
+            settings.profile = p.string();
+        }
+        else if (isUserProfile) {
+            std::filesystem::path p = std::filesystem::relative(
+                profile,
+                absPath("${USER_PROFILES}")
+            );
+            p.replace_extension();
+            settings.profile = p.string();
+        }
+        else {
+            LWARNING(
+                "Cannot save remembered profile when starting a profile that is not in "
+                "the data/profiles or user/data/profiles folder."
+            );
+        }
 
         settings.configuration =
             isGeneratedWindowConfig ? "" : global::configuration->windowConfiguration;
@@ -1424,17 +1586,7 @@ int main(int argc, char* argv[]) {
         saveSettings(settings, findSettings());
     }
 
-    // Prepend the outgoing sgctArguments with the program name
-    // as well as the configuration file that sgct is supposed to use
-    arguments.insert(arguments.begin(), argv[0]);
-    arguments.insert(arguments.begin() + 1, "-config");
-    arguments.insert(
-        arguments.begin() + 2,
-        absPath(global::configuration->windowConfiguration).string()
-    );
-
     // Need to set this before the creation of the sgct::Engine
-
     Log::instance().setLogToConsole(false);
     Log::instance().setShowTime(false);
     Log::instance().setShowLogLevel(false);
@@ -1444,9 +1596,14 @@ int main(int argc, char* argv[]) {
     glfwWindowHint(GLFW_STENCIL_BITS, 8);
 #endif
 
+    std::filesystem::path winConf =
+        commandlineArguments.windowConfig.has_value() ?
+        *commandlineArguments.windowConfig :
+        global::configuration->windowConfiguration;
+
     // Determining SGCT configuration file
     LINFO(std::format(
-        "SGCT Configuration file: {}", absPath(global::configuration->windowConfiguration)
+        "SGCT Configuration file: {}", absPath(winConf)
     ));
 
 
@@ -1457,9 +1614,7 @@ int main(int argc, char* argv[]) {
     LDEBUG("Loading cluster information");
     config::Cluster cluster;
     try {
-        cluster = loadCluster(
-            absPath(global::configuration->windowConfiguration).string()
-        );
+        cluster = loadCluster(absPath(winConf).string());
     }
     catch (const std::runtime_error& e) {
         LFATALC("main", e.what());

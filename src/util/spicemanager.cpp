@@ -27,6 +27,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/lua_helper.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
@@ -1387,7 +1388,7 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
     return result;
 }
 
-void SpiceManager::loadLeapSecondsSpiceKernel() {
+std::filesystem::path SpiceManager::leapSecondKernel() {
     constexpr std::string_view Naif00012tlsSource = R"(KPL/LSK
 
 
@@ -1541,12 +1542,17 @@ DELTET/DELTA_AT        = ( 10,   @1972-JAN-1
 
 
 )";
-const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
     const std::filesystem::path file = path / "naif0012.tls";
     {
         std::ofstream f(file);
         f << Naif00012tlsSource;
     }
+    return file;
+}
+
+void SpiceManager::loadLeapSecondsSpiceKernel() {
+    std::filesystem::path file = leapSecondKernel();
     loadKernel(file);
 }
 

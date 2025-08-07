@@ -1,0 +1,41 @@
+-- TimeFrame
+-- This asset creates a rotation provided by a SPICE kernel and applies it to a scene
+-- graph node that only displays coordinate axes. The rotation of the coordinate axes are
+-- determined by SPICE, in this case pretending that the coordinate axes are rotating at
+-- the same rate as Earth. In this example, the rotation is only calculated between 2000
+-- JAN 01 and 2002 JAN 01 to exemplify a use-case in which the data from the SPICE kernel
+-- is not available for the whole duration.
+
+-- Load the default SPICE kernels, which is the planetary constants and the DE430 kernel
+asset.require("spice/core")
+
+local Node = {
+  Identifier = "SpiceRotation_Example_TimeFrame",
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_EARTH",
+      DestinationFrame = "GALACTIC",
+      TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2000 JAN 01",
+        End = "2002 JAN 01"
+      }
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "SpiceRotation - TimeFrame",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

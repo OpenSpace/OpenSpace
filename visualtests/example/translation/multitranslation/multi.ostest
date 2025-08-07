@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/translation/multitranslation/multi.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "MultiTranslation_Example",
+        "position": [
+          1.465026933328262,
+          1.6563928154434193,
+          1.5688075351919664
+        ],
+        "pitch": 0.00854425617059727,
+        "referenceFrame": "Root",
+        "up": [
+          -0.4315184146506983,
+          0.7915304745336118,
+          -0.4327486172155184
+        ],
+        "yaw": -0.0035178298521911116,
+        "timestamp": "2025 JUL 13 13:54:28"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

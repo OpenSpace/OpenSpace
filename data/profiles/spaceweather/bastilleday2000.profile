@@ -13,7 +13,6 @@
     "scene/solarsystem/heliosphere/bastille_day/magnetogram",
     "scene/solarsystem/heliosphere/bastille_day/magnetogram_textures",
     "scene/solarsystem/planets/earth/magnetosphere/magnetosphere",
-    "scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere",
     "scene/solarsystem/planets/earth/satellites/satellites",
     "scene/solarsystem/sun/euv_layer"
   ],
@@ -80,7 +79,7 @@
       "key": "I"
     },
     {
-      "action": "os.solarsystem.ToggleEuv",
+      "action": "os.solarsystem.sun.ToggleEuv",
       "key": "E"
     },
     {
@@ -110,15 +109,15 @@
   ],
   "meta": {
     "author": "CCMC",
-    "description": "This profile is showing the Coronal mass ejection of the bastille day 2000-07-14. The profile is data intensive and will require a powerful GPU",
+    "description": "This profile is showing the Coronal mass ejection of the bastille day 2000-07-14. The profile is data intensive and will require a powerful GPU.",
     "license": "MIT License",
-    "name": "Bastille day 2000",
+    "name": "Bastille Day 2000",
     "url": "https://www.openspaceproject.com",
     "version": "1.1"
   },
   "properties": [
     {
-      "name": "{earth_satellites}.Renderable.Enabled",
+      "name": "{earth_satellites~space_stations}.Renderable.Enabled",
       "type": "setPropertyValue",
       "value": "false"
     },
@@ -154,11 +153,12 @@
     }
   ],
   "time": {
+    "is_paused": false,
     "type": "absolute",
     "value": "2000-07-14T08:42:00"
   },
   "version": {
     "major": 1,
-    "minor": 1
+    "minor": 4
   }
 }

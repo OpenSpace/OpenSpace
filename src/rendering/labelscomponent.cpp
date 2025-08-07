@@ -31,6 +31,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/logging/logmanager.h>
 #include <optional>
 
 namespace {
@@ -167,7 +168,7 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _labelFile = absPath(p.file.value_or(""));
+    _labelFile = p.file.has_value() ? absPath(*p.file) : "";
     _useCache = p.useCaching.value_or(true);
 
     if (p.unit.has_value()) {

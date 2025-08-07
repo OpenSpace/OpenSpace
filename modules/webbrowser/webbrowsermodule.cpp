@@ -44,15 +44,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "WebBrowser";
 
-    #ifdef _MSC_VER
-        constexpr std::string_view SubprocessPath = "OpenSpace_Helper.exe";
-    #elif defined(__APPLE__)
-        constexpr std::string_view SubprocessPath =
-            "../Frameworks/OpenSpace Helper.app/Contents/MacOS/OpenSpace Helper";
-    #else
-        constexpr std::string_view SubprocessPath = "OpenSpace_Helper";
-    #endif
-
     constexpr openspace::properties::Property::PropertyInfo
         UpdateBrowserBetweenRenderablesInfo =
     {
@@ -78,6 +69,15 @@ namespace {
      * \return the absolute path to the file
      */
     std::filesystem::path findHelperExecutable() {
+#ifdef WIN32
+        constexpr std::string_view SubprocessPath = "OpenSpace_Helper.exe";
+#elif defined(__APPLE__)
+        constexpr std::string_view SubprocessPath =
+            "../Frameworks/OpenSpace Helper.app/Contents/MacOS/OpenSpace Helper";
+#else
+        constexpr std::string_view SubprocessPath = "OpenSpace_Helper";
+#endif
+
         const std::filesystem::path execLocation = absPath(std::format(
             "${{BIN}}/{}", SubprocessPath
         ));
@@ -109,7 +109,6 @@ namespace {
         std::optional<bool> disableAcceleratedRendering;
     };
 #include "webbrowsermodule_codegen.cpp"
-
 } // namespace
 
 namespace openspace {
@@ -156,13 +155,14 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _webHelperLocation = p.webHelperLocation.value_or(findHelperExecutable());
     _enabled = p.enabled.value_or(_enabled);
     _disableAcceleratedRendering =
         p.disableAcceleratedRendering.value_or(_disableAcceleratedRendering);
 
-    LDEBUG(std::format("CEF using web helper executable: {}", _webHelperLocation));
-    _cefHost = std::make_unique<CefHost>(_webHelperLocation.string());
+    std::filesystem::path webHelperLocation =
+        p.webHelperLocation.value_or(findHelperExecutable());
+    LDEBUG(std::format("CEF using web helper executable: {}", webHelperLocation));
+    _cefHost = std::make_unique<CefHost>(webHelperLocation.string());
     LDEBUG("Starting CEF... done");
 
     _updateBrowserBetweenRenderables =
@@ -180,6 +180,8 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 
 void WebBrowserModule::internalDeinitialize() {
     ZoneScoped;
+
+    _cefHost = nullptr;
 
     if (!_enabled) {
         return;

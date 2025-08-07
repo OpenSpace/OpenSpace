@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/scale/staticscale/static.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "StaticScale_Example",
+        "position": [
+          264196284048.23468,
+          181430908315.68057,
+          195898482141.12296
+        ],
+        "pitch": 0.0050389426745942245,
+        "referenceFrame": "Root",
+        "up": [
+          0.7071424850081574,
+          -0.40070577280747854,
+          -0.5825670687013211
+        ],
+        "yaw": 0.004635536562591554,
+        "timestamp": "2000 JAN 01 12:00:00"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

@@ -27,7 +27,8 @@ end)
 
 asset.meta = {
   Name = "Annular 2008-02-07",
-  Description = "Annular eclipse map for 2008-02-07",
+  Description = [[Annular eclipse map for 2008-02-07. The GeoJSON is adapted from the
+    data provided by Xavier M. Jubier (http://xjubier.free.fr).]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

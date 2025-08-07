@@ -36,6 +36,7 @@
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/easing.h>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
@@ -324,9 +325,9 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-        EnabledMinimumAllowedDistanceInfo =
+        EnableMinimumAllowedDistanceInfo =
     {
-        "EnabledMinimumAllowedDistance",
+        "EnableMinimumAllowedDistance",
         "Enable minimum allowed distance limit",
         "Enables or disables that the camera cannot go closer to an object than "
         "the set minimum allowed distance.",
@@ -341,7 +342,7 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledMaximumDistanceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EnableMaximumDistanceInfo = {
         "EnableMaximumAllowedDistance",
         "Enable Maximum Allowed Distance limit",
         "Enables or disables that the camera cannot go further away from an object than "
@@ -471,9 +472,9 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
 
 OrbitalNavigator::LimitZoom::LimitZoom()
     : properties::PropertyOwner(LimitZoomInfo)
-    , enableZoomInLimit(EnabledMinimumAllowedDistanceInfo, true)
+    , enableZoomInLimit(EnableMinimumAllowedDistanceInfo, true)
     , minimumAllowedDistance(MinimumDistanceInfo, 10.f, 0.f, 10000.f)
-    , enableZoomOutLimit(EnabledMaximumDistanceInfo, false)
+    , enableZoomOutLimit(EnableMaximumDistanceInfo, false)
     , maximumAllowedDistance(
         MaximumDistanceInfo,
         4e+27f,
@@ -1465,10 +1466,10 @@ glm::dquat OrbitalNavigator::roll(double deltaTime,
                                   const glm::dquat& localCameraRotation) const
 {
     const glm::dquat mouseRollQuat = glm::angleAxis(
-        _mouseStates.localRollVelocity().x * deltaTime +
-        _joystickStates.localRollVelocity().x * deltaTime +
-        _websocketStates.localRollVelocity().x * deltaTime +
-        _scriptStates.localRollVelocity().x * deltaTime,
+        _mouseStates.localRollVelocity() * deltaTime +
+        _joystickStates.localRollVelocity() * deltaTime +
+        _websocketStates.localRollVelocity() * deltaTime +
+        _scriptStates.localRollVelocity() * deltaTime,
         glm::dvec3(0.0, 0.0, 1.0)
     );
     return localCameraRotation * mouseRollQuat;
@@ -1765,10 +1766,10 @@ glm::dvec3 OrbitalNavigator::translateVertically(double deltaTime,
                                              centerToActualSurfaceModelSpace;
     const glm::dvec3 actualSurfaceToCamera = posDiff - centerToActualSurface;
 
-    const double totalVelocity = _joystickStates.truckMovementVelocity().y +
-                                 _mouseStates.truckMovementVelocity().y +
-                                 _websocketStates.truckMovementVelocity().y +
-                                 _scriptStates.truckMovementVelocity().y;
+    const double totalVelocity = _joystickStates.truckMovementVelocity() +
+                                 _mouseStates.truckMovementVelocity() +
+                                 _websocketStates.truckMovementVelocity() +
+                                 _scriptStates.truckMovementVelocity();
 
     return cameraPosition - actualSurfaceToCamera * totalVelocity * deltaTime;
 }
@@ -1786,10 +1787,10 @@ glm::dquat OrbitalNavigator::rotateHorizontally(double deltaTime,
     );
 
     const glm::dquat mouseCameraRollRotation = glm::angleAxis(
-        _mouseStates.globalRollVelocity().x * deltaTime +
-        _joystickStates.globalRollVelocity().x * deltaTime +
-        _websocketStates.globalRollVelocity().x * deltaTime +
-        _scriptStates.globalRollVelocity().x * deltaTime,
+        _mouseStates.globalRollVelocity() * deltaTime +
+        _joystickStates.globalRollVelocity() * deltaTime +
+        _websocketStates.globalRollVelocity() * deltaTime +
+        _scriptStates.globalRollVelocity() * deltaTime,
         directionFromSurfaceToCamera
     );
     return mouseCameraRollRotation * globalCameraRotation;

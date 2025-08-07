@@ -21,7 +21,8 @@ local EarthBarycenterTrail = {
   Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
   GUI = {
     Name = "Earth Barycenter Trail",
-    Path = "/Solar System/Planets/Earth"
+    Path = "/Solar System/Planets/Earth",
+    Focusable = false
   }
 }
 

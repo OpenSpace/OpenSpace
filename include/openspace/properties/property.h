@@ -25,7 +25,8 @@
 #ifndef __OPENSPACE_CORE___PROPERTY___H__
 #define __OPENSPACE_CORE___PROPERTY___H__
 
-#include <ghoul/misc/dictionary.h>
+#include <openspace/util/json_helper.h>
+#include <ghoul/misc/boolean.h>
 #include <ghoul/misc/easing.h>
 #include <ghoul/lua/lua_types.h>
 #include <functional>
@@ -62,6 +63,8 @@ class PropertyOwner;
  */
 class Property {
 public:
+    BooleanType(NeedsConfirmation);
+
     /**
      * The visibility classes for Property%s. The classes are strictly ordered as
      * Hidden > Developer > AdvancedUser > User > NoviceUser > Always
@@ -93,18 +96,22 @@ public:
          * GCC requires an explicit constructor here, as it does not handle the default
          * argument for the struct initialization.
          */
-        constexpr PropertyInfo(const char* ident, const char* gui, const char* desc)
+        constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
+                              NeedsConfirmation needsConfirmation = NeedsConfirmation::No)
             : identifier(ident)
             , guiName(gui)
             , description(desc)
+            , needsConfirmation(needsConfirmation)
         {}
 
         constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
-                               Visibility vis)
+                               Visibility vis,
+                              NeedsConfirmation needsConfirmation = NeedsConfirmation::No)
             : identifier(ident)
             , guiName(gui)
             , description(desc)
             , visibility(vis)
+            , needsConfirmation(needsConfirmation)
         {}
 
         /// The unique identifier that is part of the fully qualified URI of this Property
@@ -115,6 +122,8 @@ public:
         const char* description;
         /// Determines the visibility of this Property in the user interface
         Visibility visibility = Visibility::Default;
+        /// Determines if the Property require confirmation upon value change
+        NeedsConfirmation needsConfirmation = NeedsConfirmation::No;
     };
 
     /// An OnChangeHandle is returned by the onChange method to uniquely identify an
@@ -125,10 +134,19 @@ public:
     /// onDelete callback
     using OnDeleteHandle = uint32_t;
 
+    /// An OnMetaDataChangeHandle is returned by the onMetaDataChange method to uniquely
+    /// identify an onMetaDataChange callback
+    using OnMetaDataChangeHandle = uint32_t;
+
     /// This OnChangeHandle can be used to remove all onChange callbacks from this
     /// Property
     constexpr static OnChangeHandle OnChangeHandleAll =
         std::numeric_limits<OnChangeHandle>::max();
+
+    /// This OnMetaDataChangeHandle can be used to remove all onMetaDataChange callbacks
+    /// from this Property
+    constexpr static OnMetaDataChangeHandle OnMetaDataChangeHandleAll =
+        std::numeric_limits<OnMetaDataChangeHandle >::max();
 
     /**
      * The constructor for the property. The \p info (see PropertyInfo) contains
@@ -179,7 +197,7 @@ public:
      * \param state The Lua state to which the value will be encoded
      * \return `true` if the encoding succeeded, `false` otherwise
      */
-    virtual bool getLuaValue(lua_State* state) const;
+    virtual void getLuaValue(lua_State* state) const = 0;
 
     /**
      * This method sets the value encapsulated by this Property by deserializing the value
@@ -191,7 +209,7 @@ public:
      *
      * \param state The Lua state from which the value will be decoded
      */
-    virtual void setLuaValue(lua_State* state);
+    virtual void setLuaValue(lua_State* state) = 0;
 
     /**
      * Returns the Lua type that will be put onto the stack in the Property::getLua method
@@ -238,6 +256,21 @@ public:
     OnDeleteHandle onDelete(std::function<void()> callback);
 
     /**
+     * This method registers a \p callback function that will be called every time the
+     * notifyMetaDataChangeListener function was called. The callback can be removed by
+     * calling the removeOnMetaDataChange method with the OnMetaDataChangeHandle that was
+     * returned here.
+     *
+     * \param callback The callback function that is called when the meta data of the
+     *        property has been changed.
+     * \return An OnMetaDataChangeHandle that can be used in subsequent calls to remove a
+     *         callback
+     *
+     * \pre The \p callback must not be empty
+     */
+    OnMetaDataChangeHandle onMetaDataChange(std::function<void()> callback);
+
+    /**
      * This method deregisters a callback that was previously registered with the onChange
      * method. If OnChangeHandleAll is passed to this function, all registered callbacks
      * are removed.
@@ -263,6 +296,20 @@ public:
     void removeOnDelete(OnDeleteHandle handle);
 
     /**
+     * This method deregisters a callback that was previously registered with the
+     * onMetaDataChange method. If OnMetaDataChangeHandleAll is passed to this function,
+     * all registered callbacks are removed.
+     *
+     * \param handle An OnMetaDataChangeHandle that was returned from a previous call to
+     * onMetaDataChange by this property or OnMetaDataChangeHandleAll if all callbacks
+     * should be removed.
+     *
+     * \pre \p handle must refer to a callback that has been previously registred
+     * \pre \p handle must refer to a callback that has not been removed previously
+     */
+    void removeOnMetaDataChange(OnMetaDataChangeHandle handle);
+
+    /**
      * This method returns the unique identifier of this Property.
      *
      * \return The unique identifier of this Property
@@ -278,7 +325,7 @@ public:
      *
      * \return The fully qualified identifier for this Property
      */
-    std::string uri() const;
+    std::string_view uri() const;
 
     /**
      * Returns the PropertyOwner of this Property or `nullptr`, if it does not have an
@@ -286,7 +333,7 @@ public:
      *
      * \return The PropertyOwner of this Property
      */
-    PropertyOwner* owner() const;
+    const PropertyOwner* owner() const;
 
     /**
      * Assigned the Property to a new PropertyOwner. This method does not inform the
@@ -334,8 +381,7 @@ public:
 
     /**
      * Sets a hint about the visibility of the Property. Each application accessing the
-     * properties is free to ignore this hint. It is stored in the metaData Dictionary
-     * with the key: `Visibility`.
+     * properties is free to ignore this hint.
      *
      * \param visibility The new visibility of the Property
      */
@@ -352,23 +398,29 @@ public:
      * This method determines if this Property should be read-only in external
      * applications. This setting is only a hint and does not need to be followed by GUI
      * applications and does not have any effect on the Property::set or
-     * Property::setLuaValue methods. The value is stored in the metaData Dictionary with
-     * the key: `isReadOnly`. The default value is `false`.
+     * Property::setLuaValue methods. The default value is `false`.
      *
      * \param state `true` if the Property should be read only, `false` otherwise
      */
     void setReadOnly(bool state);
 
     /**
+     * Returns whether this property is read-only. This setting is only a hint and does
+     * not need to be followed by GUI applications and does not have any effect on the
+     * Property::set or Property::setLuaValue methods.
+     */
+    bool isReadOnly() const;
+
+    /**
      * This method determines if this Property requires confirmation upon every change of
      * the value. This setting is only a hint and does not need to be followed by GUI
      * applications and does not have any effect on the Property::set or
-     * Property::setLuaValue methods. The value is stored in the metaData Dictionary with
-     * the key: `needsConfirmation`. The default value is `false`.
+     * Property::setLuaValue methods.
      *
-     * \param state `true` if the Property needs confirmation, `false` otherwise
+     * \param needsConfirmation `true` if confirmation dialogs should be shown, `false`
+     *        otherwise.
      */
-    void setNeedsConfirmation(bool state);
+    void setNeedsConfirmation(bool needsConfirmation);
 
     /**
      * Default view options that can be used in the Property::setViewOption method. The
@@ -407,15 +459,6 @@ public:
     bool viewOption(const std::string& option, bool defaultValue = false) const;
 
     /**
-     * Returns the metaData that contains all information for external applications to
-     * correctly display information about the Property. No information that is stored in
-     * this Dictionary is necessary for the programmatic use of the Property.
-     *
-     * \return The Dictionary containing all meta data information about this Property
-     */
-    const ghoul::Dictionary& metaData() const;
-
-    /**
      * Get a valid JSON formatted representation of the Property's value.
      *
      * \return The value in a JSON compatible format
@@ -430,44 +473,22 @@ public:
 
     /**
      * Creates the information that is general to every Property and adds the
-     * `Identifier`, `Name`, `Type`, and `MetaData` keys and their values. The meta data
-     * is handles by the generateMetaDataJsonDescription method, which has to be
-     * overloaded if a concrete base class wants to add meta data that is not curated by
-     * the Property class.
+     * `description`, `guiName`, `group`, `isReadOnly`, `needsConfirmation` `type`,
+     * and `visibility` keys and their values.
      *
      * \return The base description common to all Property classes
      */
-    std::string generateJsonDescription() const;
-
-    /**
-     * Creates the information for the `MetaData` key-part of the JSON description for
-     * the Property. The result can be included as one key-value pair in the description
-     * text generated by subclasses. Only the metadata curated by the Property class is
-     * used in this method.
-     *
-     * \return The metadata information text for the property
-     */
-    std::string generateMetaDataJsonDescription() const;
+    nlohmann::json generateJsonDescription() const;
 
     /**
      * Creates the information that is specific to each subclass of Property%s. If a
      * subclass needs to add additional information into the description, it has to
      * override this method and return the string containing all of the additional
-     * information. The base implementation of the #description method will return the Lua
-     * script:
-     * ```
-     * return {
-     *     generateBaseDescription(),
-     *     generateMetaDataJsonDescription(),
-     *     generateAdditionalDescription()
-     * }
-     * ```
-     * #generateMetaDataJsonDescription and this method being the override points to
-     * customize the behavior.
+     * information.
      *
      * \return The information specific to each subclass of Property
      */
-    virtual std::string generateAdditionalJsonDescription() const;
+    virtual nlohmann::json generateAdditionalJsonDescription() const;
 
     /**
      * Returns whether or not the property value has changed.
@@ -481,12 +502,25 @@ public:
      */
     void resetToUnchanged();
 
+    /**
+     * This function must be called whenever this property's URI changes. Examples of this
+     * are if the PropertyOwner to which this Property belongs changes identifier or is
+     * reparented in any way.
+     */
+    void updateUriCache();
+
 protected:
     /**
      * This method must be called by all subclasses whenever the encapsulated value has
      * changed and potential listeners need to be informed.
      */
     void notifyChangeListeners();
+
+    /**
+     * This method must be called by all subclasses whenever the meta data has
+     * changed and potential listeners need to be informed.
+     */
+    void notifyMetaDataChangeListeners();
 
     /// The PropetyOwner this Property belongs to, or `nullptr`
     PropertyOwner* _owner = nullptr;
@@ -500,21 +534,34 @@ protected:
     /// The user-facing description of this Property
     std::string _description;
 
-    /// The Dictionary containing all meta data necessary for external applications
-    ghoul::Dictionary _metaData;
+    /// The meta data necessary for external applications
+    struct {
+        std::optional<std::string> group;
+        Visibility visibility = Visibility::Default;
+        std::optional<bool> readOnly;
+        bool needsConfirmation;
+        std::unordered_map<std::string, bool> viewOptions;
+    } _metaData;
 
-    /// The callback function sthat will be invoked whenever the value changes
+    /// The callback functions that will be invoked whenever the value changes
     std::vector<std::pair<OnChangeHandle, std::function<void()>>> _onChangeCallbacks;
 
-    /// The callback function sthat will be invoked whenever the value changes
+    /// The callback functions that will be invoked whenever the value changes
     std::vector<std::pair<OnDeleteHandle, std::function<void()>>> _onDeleteCallbacks;
+
+    /// A cached version of the full URI of this property, which includes the identifiers
+    /// of all owners
+    std::string _uriCache;
+    bool _isUriCacheDirty = true;
+
+    /// The callback functions that will be invoked whenever the meta data changes
+    std::vector<std::pair<OnMetaDataChangeHandle, std::function<void()>>>
+        _onMetaDataChangeCallbacks;
 
     /// Flag indicating that this property value has been changed after initialization
     bool _isValueDirty = false;
 
 private:
-    void notifyDeleteListeners();
-
     OnChangeHandle _currentHandleValue = 0;
 
 #ifdef _DEBUG

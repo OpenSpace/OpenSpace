@@ -29,6 +29,7 @@ local StarlinkSatellites = {
   GUI = {
     Name = "Starlink",
     Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false,
     Description = [[LEO satellite constellation launched by SpaceX to provide broadband
       internet access.]]
   }

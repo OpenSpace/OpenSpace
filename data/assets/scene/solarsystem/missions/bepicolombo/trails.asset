@@ -22,7 +22,8 @@ local BepiColomboTrailSun = {
   },
   GUI = {
     Name = "BepiColombo Trail (Sun)",
-    Path = "/Solar System/Missions/BepiColombo"
+    Path = "/Solar System/Missions/BepiColombo",
+    Focusable = false
   }
 }
 
@@ -43,7 +44,8 @@ local BepiColomboTrailMercury = {
   },
   GUI = {
     Name = "BepiColombo Trail (Mercury)",
-    Path = "/Solar System/Missions/BepiColombo"
+    Path = "/Solar System/Missions/BepiColombo",
+    Focusable = false
   }
 }
 

@@ -92,7 +92,7 @@ constexpr KeyAction operator|=(KeyAction& lhs, KeyAction rhs) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 enum class KeyModifier : uint8_t {
-    None = 0,
+    None       = 0x00,
     Shift      = 0x01,
     Control    = 0x02,
     Alt        = 0x04,
@@ -103,7 +103,7 @@ constexpr KeyModifier operator|(KeyModifier lhs, KeyModifier rhs) {
     return static_cast<KeyModifier>(
         static_cast<std::underlying_type_t<KeyModifier>>(lhs) |
         static_cast<std::underlying_type_t<KeyModifier>>(rhs)
-        );
+    );
 }
 
 constexpr KeyModifier operator|=(KeyModifier& lhs, KeyModifier rhs) {

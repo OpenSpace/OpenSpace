@@ -81,17 +81,30 @@ std::vector<Parameters> readOmmFile(const std::filesystem::path& file);
  * \return Information about all of the contained objects in the \p file
  *
  * \pre \p file must be a file and must exist
- * \throw ghoul::RuntimeError If the provided \p is not a valid JPL SBDB CSV format
+ * \throw ghoul::RuntimeError If the provided \p file is not a valid JPL SBDB CSV format
  */
 std::vector<Parameters> readSbdbFile(const std::filesystem::path& file);
+
+/**
+ * Reads the object information from a data file provided by the Minor Planet Center. Any
+ * possible header in the file is ignored.
+ *
+ * \param file The DAT file contained the ephemerides information
+ * \return Information about all of the contained objects in the \p file
+ *
+ * \pre \p file must be a file and must exist
+ * \throw ghoul::RuntimeError If the provided \p file is not a valid MPC DAT file
+ */
+std::vector<Parameters> readMpcFile(const std::filesystem::path& file);
 
 /**
  * The different formats that the readFile function is capable of loading.
  */
 enum class Format {
-    TLE,
-    OMM,
-    SBDB
+    TLE,  //< Two-line elements
+    OMM,  //< Orbit Mean-Elements Message
+    SBDB, //< Small-Body Database
+    MPC   //< Minor Planet Center
 };
 /**
  * Reads the object information from the provided file.

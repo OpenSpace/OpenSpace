@@ -81,16 +81,16 @@ void ScreenSpaceVideo::render(const RenderData& renderData) {
     }
 }
 
-bool ScreenSpaceVideo::initializeGL() {
-    _videoPlayer.initialize();
+void ScreenSpaceVideo::initializeGL() {
+    ScreenSpaceRenderable::initializeGL();
 
-    return ScreenSpaceRenderable::initializeGL();
+    _videoPlayer.initialize();
 }
 
-bool ScreenSpaceVideo::deinitializeGL() {
+void ScreenSpaceVideo::deinitializeGL() {
     _videoPlayer.destroy();
 
-    return ScreenSpaceRenderable::deinitializeGL();
+    ScreenSpaceRenderable::deinitializeGL();
 }
 
 void ScreenSpaceVideo::bindTexture() {

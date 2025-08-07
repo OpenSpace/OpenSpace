@@ -70,12 +70,15 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // This `DashboardItem` displays the remaining time until a provided `ReferenceTime`
+    // or the elapsed time since the `ReferenceTime`. The output can be configured through
+    // the `FormatString` and the unit that is used to display the configurable as well.
     struct [[codegen::Dictionary(DashboardItemElapsedTime)]] Parameters {
         // [[codegen::verbatim(FormatStringInfo.description)]]
         std::optional<std::string> formatString;
 
         // [[codegen::verbatim(ReferenceTimeInfo.description)]]
-        std::string referenceTime;
+        std::string referenceTime [[codegen::datetime()]];
 
         // [[codegen::verbatim(SimplifyTimeInfo.description)]]
         std::optional<bool> simplifyTime;
@@ -170,16 +173,6 @@ void DashboardItemElapsedTime::update() {
         // @CPP26(abock): This can be replaced with std::runtime_format
         _buffer = std::vformat(_formatString.value(), std::make_format_args(time));
     }
-}
-
-glm::vec2 DashboardItemElapsedTime::size() const {
-    ZoneScoped;
-
-    const double delta = global::timeManager->time().j2000Seconds() - _referenceJ2000;
-    // @CPP26(abock): This can be replaced with std::runtime_format
-    return _font->boundingBox(
-        std::vformat(_formatString.value(), std::make_format_args(delta))
-    );
 }
 
 } // namespace openspace

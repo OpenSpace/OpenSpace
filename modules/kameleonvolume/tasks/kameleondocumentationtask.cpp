@@ -78,7 +78,7 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
 
     ghoul::Dictionary dictionary;
     dictionary.setValue("kameleon", std::move(kameleonDictionary));
-    dictionary.setValue("version", std::string(OPENSPACE_VERSION_NUMBER));
+    dictionary.setValue("version", std::string(OPENSPACE_VERSION));
     dictionary.setValue("input", _inputPath.string());
 
     std::string json = ghoul::formatJson(dictionary);

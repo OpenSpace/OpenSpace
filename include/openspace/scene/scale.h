@@ -47,11 +47,11 @@ public:
     Scale(const ghoul::Dictionary& dictionary);
     virtual ~Scale() override = default;
 
-    virtual bool initialize();
+    virtual void initialize();
 
+    virtual void update(const UpdateData& data);
     glm::dvec3 scaleValue() const;
     virtual glm::dvec3 scaleValue(const UpdateData& data) const = 0;
-    virtual void update(const UpdateData& data);
 
     static documentation::Documentation Documentation();
 

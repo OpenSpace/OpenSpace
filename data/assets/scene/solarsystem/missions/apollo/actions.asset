@@ -54,8 +54,8 @@ end)
 
 
 asset.meta = {
-  Name = "Actions - Apollo missions",
-  Description = "Actions related to the Apollo missions",
+  Name = "Apollo - Actions",
+  Description = "This asset defines actions that apply to all Apollo missions",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

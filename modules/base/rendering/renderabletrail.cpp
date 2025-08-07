@@ -188,10 +188,7 @@ RenderableTrail::Appearance::Appearance()
     , useLineFade(EnableFadeInfo, true)
     , lineWidth(LineWidthInfo, 10.f, 1.f, 20.f)
     , pointSize(PointSizeInfo, 1, 1, 64)
-    , renderingModes(
-          RenderingModeInfo,
-          properties::OptionProperty::DisplayType::Dropdown
-    )
+    , renderingModes(RenderingModeInfo)
     , lineLength(LineLengthInfo, 1.f, 0.f, 1.f)
     , lineFadeAmount(LineFadeAmountInfo, 1.f, 0.f, 1.f)
 {
@@ -247,7 +244,11 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     }
 
     addPropertySubOwner(_appearance);
+}
 
+void RenderableTrail::initialize() {
+    Renderable::initialize();
+    _translation->initialize();
 }
 
 void RenderableTrail::initializeGL() {
@@ -292,6 +293,18 @@ void RenderableTrail::deinitializeGL() {
 
 bool RenderableTrail::isReady() const {
     return _programObject != nullptr;
+}
+
+glm::dvec3 RenderableTrail::translationPosition(Time time) const {
+    // Use empty modelTransform (local coordinates) and time 0; previous frame time
+    // doesn't matter
+    const UpdateData data = { {}, time, Time(0.0) };
+    // (2025-06-09, emmbr) No need to call update here, since it's only for caching
+    // the position and kills the trail performance. If behavior changes or we add
+    // a translation type that needs pre-update, we need add the update and address
+    // performance
+    //_translation->update(data);
+    return _translation->position(data);
 }
 
 void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
@@ -489,7 +502,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             _primaryRenderInformation.count,
             _primaryRenderInformation.first,
             _useSplitRenderMode,
-            _numberOfUniqueVertices
+            _nUniqueVertices
         );
 
         const int floatingOffset = std::max(0, _primaryRenderInformation.count - 1);
@@ -502,7 +515,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             _floatingRenderInformation.count,
             _floatingRenderInformation.first,
             _useSplitRenderMode,
-            _numberOfUniqueVertices,
+            _nUniqueVertices,
             floatingOffset
         );
 
@@ -516,7 +529,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             _secondaryRenderInformation.count,
             _secondaryRenderInformation.first,
             _useSplitRenderMode,
-            _numberOfUniqueVertices,
+            _nUniqueVertices,
             offset
         );
 
@@ -548,8 +561,6 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             );
         }
     }
-
-
 
 
     if (renderPoints) {

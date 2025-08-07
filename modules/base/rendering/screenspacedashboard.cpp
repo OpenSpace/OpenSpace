@@ -97,11 +97,11 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
     }
 }
 
-bool ScreenSpaceDashboard::initializeGL() {
+void ScreenSpaceDashboard::initializeGL() {
     ScreenSpaceFramebuffer::initializeGL();
 
     addRenderFunction([this]() {
-        glm::vec2 penPosition = glm::vec2(0.f, _size.value().w);
+        glm::vec2 penPosition = glm::vec2(0.f, _size.value().x);
 
         if (_useMainDashboard) {
             global::dashboard->render(penPosition);
@@ -110,8 +110,6 @@ bool ScreenSpaceDashboard::initializeGL() {
             _dashboard.render(penPosition);
         }
     });
-
-    return true;
 }
 
 void ScreenSpaceDashboard::update() {

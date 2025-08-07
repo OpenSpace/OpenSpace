@@ -1,6 +1,4 @@
-local heliosphereTransforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
-local propertyHelper = asset.require("util/property_helper")
-local rot = asset.require("./carrington_to_heeq_rotation")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -17,12 +15,11 @@ local SunRadius = 695700000
 -- Fieldlies from binaries
 local Fieldlines = {
   Identifier = "MAS-MHD-Fieldlines-bastille-day-2000",
-  Parent = heliosphereTransforms.HeliocentricEarthEquatorial180.Identifier,
+  Parent = sunTransforms.SunIAU.Identifier,
   -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
   -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
   InteractionSphere = 1 / SunRadius,
   Transform = {
-    Rotation = rot.CarringtonLongitudeToHEEQ180Rotation,
     Scale = {
       Type = "StaticScale",
       Scale = SunRadius
@@ -31,17 +28,14 @@ local Fieldlines = {
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = fieldlinesDirectory,
-    AlphaBlendlingEnabled = false,
     InputFileType = "Osfls",
+    LineWidth = 1.0,
+    ShowAtAllTimes = false,
+    ColorQuantity = 0,
     ColorTablePaths = {
-      asset.resource("transferfunctions/density-fieldlines.txt"),
-      asset.resource("transferfunctions/velocity-fieldlines.txt")
+      asset.resource("transferfunctions/density-fieldlines.txt")
     },
-    ColorTableRanges = {
-      { 0, 1000000 },
-      { 100, 2000 }
-    },
-    SimulationModel = "mas"
+    ColorMinMaxRange = { 0, 1000000 }
   },
   GUI = {
     Path = "/Solar System/Heliosphere/Bastille Day 2000",
@@ -55,23 +49,7 @@ local ToggleFieldlines = {
   Identifier = "os.bastilleday.fieldlines.ToggleFieldlines",
   Name = "Toggle fieldlines",
   Command = [[
-    if openspace.propertyValue("Scene.MAS-MHD-Fieldlines-bastille-day-2000.Renderable.Enabled") then
-      openspace.setPropertyValueSingle(
-        "Scene.MAS-MHD-Fieldlines-bastille-day-2000.Renderable.Fade",
-        0.0,
-        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
-        "Linear",
-        'openspace.setPropertyValueSingle("Scene.MAS-MHD-Fieldlines-bastille-day-2000.Renderable.Enabled", false)'
-      )
-    else
-      openspace.setPropertyValueSingle("Scene.MAS-MHD-Fieldlines-bastille-day-2000.Renderable.Enabled", true)
-      openspace.setPropertyValueSingle(
-        "Scene.MAS-MHD-Fieldlines-bastille-day-2000.Renderable.Fade",
-        1.0,
-        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
-        "Linear"
-      )
-    end
+    openspace.toggleFade("Scene.MAS-MHD-Fieldlines-bastille-day-2000.Renderable")
   ]],
   Documentation = "Toggle fieldline rendering of CME",
   GuiPath = "/Bastille-Day 2000",

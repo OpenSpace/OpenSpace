@@ -45,6 +45,12 @@ namespace {
         openspace::properties::Property::Visibility::Developer
     };
 
+    // A `TimeFrame` object determines the time frame during which a scene graph node is
+    // valid. If the simulation time is outside the time frame range, the scene graph node
+    // and all of its children are automatically disabled and any attached
+    // [Renderable](#renderable) will not be displayed either. Usually, the time frame
+    // corresponds to the time during which datasets are available or to disable a scene
+    // graph node during uninteresting periods of time.
     struct [[codegen::Dictionary(TimeFrame)]] Parameters {
         // The type of the time frame that is described in this element. The available
         // types of scaling depend on the configuration of the application and can be

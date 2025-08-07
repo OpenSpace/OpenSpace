@@ -42,18 +42,22 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "This scene contains model and trajectory of the NASA MESSENGER spacecraft with craft pointing data from 2011-03 to 2011-06. In addition, a rendering of Mercury's magnetosphere based on data recorded by MESSENGER can be enabled and viewed around the planet. Along with the mission data, additional maps were added to Mercury showing mineral abundances on the surface and a multi-color mosaic from the MDIS instrument",
+    "description": "This scene contains model and trajectory of the NASA MESSENGER spacecraft with pointing data from 2011-03 to 2011-06. In addition, a rendering of Mercury's magnetosphere based on data recorded by MESSENGER can be enabled and viewed around the planet. Along with the mission data, additional maps were added to Mercury showing mineral abundances on the surface and a multi-color mosaic from the MDIS instrument.",
     "license": "MIT License",
     "name": "Messenger",
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
+  "panel_visibility": {
+    "mission": true
+  },
   "time": {
+    "is_paused": false,
     "type": "absolute",
     "value": "2011-05-13T08:55:00"
   },
   "version": {
     "major": 1,
-    "minor": 0
+    "minor": 4
   }
 }

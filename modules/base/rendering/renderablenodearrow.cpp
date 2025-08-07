@@ -170,7 +170,7 @@ namespace {
         "Determines whether shading should be applied to the arrow model.",
         openspace::properties::Property::Visibility::User
     };
-    
+
     void updateDistanceBasedOnRelativeValues(const std::string& nodeName,
                                              bool useRelative,
                                              openspace::properties::FloatProperty& prop)
@@ -202,7 +202,6 @@ namespace {
             prop.setExponent(3.f);
             prop.setMaxValue(1000.f);
         }
-        // @TODO (emmbr, 2022-08-22): make GUI update when min/max value is updated
     }
 
     // A RenderableNodeArrow can be used to create a 3D arrow pointing in the direction

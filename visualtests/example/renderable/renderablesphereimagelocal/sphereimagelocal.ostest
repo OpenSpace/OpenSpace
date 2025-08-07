@@ -1,0 +1,36 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderablesphereimagelocal/sphereimagelocal.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderableSphereImageLocal_Example",
+        "position": [
+          -2.330324100692333,
+          2.1416512570715946,
+          0.17785787530815483
+        ],
+        "up": [
+          0.0988207842696825,
+          0.02491190844475033,
+          0.9947933702100982
+        ],
+        "timestamp": "2025 JUL 13 12:35:17"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

@@ -25,6 +25,7 @@
 #include <openspace/query/query.h>
 
 #include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 
@@ -60,8 +61,12 @@ properties::PropertyOwner* propertyOwner(const std::string& uri) {
     return property;
 }
 
-std::vector<properties::Property*> allProperties() {
-    return global::rootPropertyOwner->propertiesRecursive();
+const std::vector<properties::Property*>& allProperties() {
+    return global::openSpaceEngine->allProperties();
+}
+
+const std::vector<properties::PropertyOwner*>& allPropertyOwners() {
+    return global::openSpaceEngine->allPropertyOwners();
 }
 
 }  // namespace openspace

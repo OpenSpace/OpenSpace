@@ -18,7 +18,8 @@ local L2SunLine = {
   Tag = { "lagrange_points_earth_l2_small" },
   GUI = {
     Name = "Sun to L2 Line",
-    Path = "/Solar System/Planets/Earth/Lagrange Points"
+    Path = "/Solar System/Planets/Earth/Lagrange Points",
+    Focusable = false
   }
 }
 

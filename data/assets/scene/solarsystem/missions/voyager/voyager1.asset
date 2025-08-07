@@ -99,7 +99,8 @@ local VoyagerTrailCruiseEarthJupiter = {
   Tag = { "voyager1_trail" },
   GUI = {
     Name = "Voyager 1 Trail Cruise Earth-Jupiter",
-    Path = "/Solar System/Missions/Voyager 1"
+    Path = "/Solar System/Missions/Voyager 1",
+    Focusable = false
   }
 }
 
@@ -124,7 +125,8 @@ local VoyagerTrailEncounterJupiter = {
   Tag = { "voyager1_trail" },
   GUI = {
     Name = "Voyager 1 Trail Encounter Jupiter",
-    Path = "/Solar System/Missions/Voyager 1"
+    Path = "/Solar System/Missions/Voyager 1",
+    Focusable = false
   }
 }
 
@@ -147,7 +149,8 @@ local VoyagerTrailCruiseJupiterSaturn = {
   Tag = { "voyager1_trail" },
   GUI = {
     Name = "Voyager 1 Trail Cruise Jupiter-Saturn",
-    Path = "/Solar System/Missions/Voyager 1"
+    Path = "/Solar System/Missions/Voyager 1",
+    Focusable = false
   }
 }
 
@@ -172,7 +175,8 @@ local VoyagerTrailEncounterSaturn = {
   Tag = { "voyager1_trail" },
   GUI = {
     Name = "Voyager 1 Trail Encounter Saturn",
-    Path = "/Solar System/Missions/Voyager 1"
+    Path = "/Solar System/Missions/Voyager 1",
+    Focusable = false
   }
 }
 
@@ -195,7 +199,8 @@ local VoyagerTrailCruiseSaturnInf = {
   Tag = { "voyager1_trail" },
   GUI = {
     Name = "Voyager 1 Trail Cruise Saturn-Inf",
-    Path = "/Solar System/Missions/Voyager 1"
+    Path = "/Solar System/Missions/Voyager 1",
+    Focusable = false
   }
 }
 

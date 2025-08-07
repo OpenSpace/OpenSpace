@@ -27,8 +27,8 @@
 
 #include <openspace/rendering/dashboardtextitem.h>
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 
 namespace ghoul { class Dictionary; }
 
@@ -41,7 +41,6 @@ public:
     explicit DashboardItemFramerate(const ghoul::Dictionary& dictionary);
 
     void update() override;
-    glm::vec2 size() const override;
 
     static documentation::Documentation Documentation();
 

@@ -1029,6 +1029,13 @@ public:
      */
     UseException exceptionHandling() const;
 
+    /**
+     * Returns the path to the most current leap second kernel.
+     *
+     * \return The path to the most current leap second kernel.
+     */
+    static std::filesystem::path leapSecondKernel();
+
     static scripting::LuaLibrary luaLibrary();
 
 private:
@@ -1152,8 +1159,8 @@ private:
     std::vector<KernelInformation> _loadedKernels;
 
     // Map: id, vector of pairs. Pair: Start time, end time;
-    std::map<int, std::vector< std::pair<double, double>>> _ckIntervals;
-    std::map<int, std::vector< std::pair<double, double>>> _spkIntervals;
+    std::map<int, std::vector<std::pair<double, double>>> _ckIntervals;
+    std::map<int, std::vector<std::pair<double, double>>> _spkIntervals;
     std::map<int, std::set<double>> _ckCoverageTimes;
     std::map<int, std::set<double>> _spkCoverageTimes;
 

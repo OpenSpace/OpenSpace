@@ -1,6 +1,6 @@
 -- Basic
--- This asset creates a SceneGraphNode that only displays coordinate axes. The rotation of
--- the coordinate axes are determined by a combination of individual rotations. The
+-- This asset creates a scene graph node that only displays coordinate axes. The rotation
+-- of the coordinate axes are determined by a combination of individual rotations. The
 -- rotations are applied in the order in which they are specified
 
 local Node = {
