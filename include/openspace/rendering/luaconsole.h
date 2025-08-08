@@ -98,6 +98,24 @@ private:
     } _suggestionInfo;
 
 
+    enum class Context {
+        None = 0,
+        Function,
+        Path
+    };
+
+    struct {
+        Context context;
+        bool isDataDirty;
+        std::string baseInput; // What the user typed
+        std::string typedFragment; // The partial word being completed (if any)
+        std::vector<std::string> suggestions;
+        int currentIndex;
+        std::string suggestion;
+
+    } _autoCompleteState;
+
+
     float _currentHeight = 0.f;
     float _targetHeight = 0.f;
     float _fullHeight = 0.f;
