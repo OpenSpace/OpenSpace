@@ -46,6 +46,7 @@
 namespace {
     constexpr std::string_view HistoryFile = "ConsoleHistory";
     constexpr std::string_view JumpCharacters = ".,'/()";
+    constexpr std::string_view PathIdentifier = "\"'[";
 
     constexpr int NoAutoComplete = -1;
 
@@ -183,9 +184,6 @@ LuaConsole::LuaConsole()
         glm::vec4(1.f)
     )
     , _historyLength(HistoryLengthInfo, 13, 0, 100)
-    , _autoCompleteInfo({NoAutoComplete, false, ""})
-    , _suggestionInfo({ NoAutoComplete, "" })
-    , _autoCompleteState({ Context::None, true, "", "", {}, NoAutoComplete })
 {
     addProperty(_isVisible);
     addProperty(_shouldBeSynchronized);
@@ -200,6 +198,8 @@ LuaConsole::LuaConsole()
 
     _historyTextColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_historyTextColor);
+
+    resetAutoCompleteState();
 }
 
 void LuaConsole::initialize() {
@@ -366,26 +366,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     // If any other key is pressed, we want to remove our previous findings
     // The special case for Shift is necessary as we want to allow Shift+TAB
     if (key != Key::Tab && !modifierShift) {
-        _autoCompleteInfo = {
-                .lastIndex = NoAutoComplete,
-                .hasInitialValue = false,
-                .initialValue = ""
-        };
-        _suggestionInfo = {
-            .index = NoAutoComplete,
-            .suggestion = ""
-        };
-
-        _autoCompleteState = {
-            .context = Context::None,
-            .isDataDirty = true,
-            .baseInput = "",
-            .typedFragment = "",
-            .suggestions = {},
-            .currentIndex = 0,
-            .suggestion = ""
-        };
-
+        resetAutoCompleteState();
     }
         
     // Do not consume modifier keys
@@ -907,16 +888,12 @@ void LuaConsole::registerKeyHandlers() {
                 }
             }
 
+            // TODO fix where insertion should happen 
+            // openspace.asset.remove("C:/Users/anden88/Desktop/projects\Splitter2020")
+            // tries to insert /bin after ") characters
+
             // Clear suggestion
-            _autoCompleteState = {
-                .context = Context::None,
-                .isDataDirty = true,
-                .baseInput = "",
-                .typedFragment = "",
-                .suggestions = {},
-                .currentIndex = 0,
-                .suggestion = ""
-            };
+            resetAutoCompleteState();
         };
 
         if (_autoCompleteState.suggestion != "") {
@@ -951,361 +928,227 @@ void LuaConsole::registerKeyHandlers() {
     registerKeyHandler(Key::Enter, KeyModifier::None, executeCommand);
     registerKeyHandler(Key::KeypadEnter, KeyModifier::None, executeCommand);
 
-    auto nextCommand = [this]() {
-
-        // We get a list of all the available commands or paths and initially find the
-        // first match that starts with how much we typed sofar. We store the index so
-        // that in subsequent "tab" presses, we will discard previous matches. This
-        // implements the 'hop-over' behavior. As soon as another key is pressed,
-        // everything is set back to normal
-
-        const std::string currentCommand = _commands[_activeCommand];
-        // Determine if are currently in a function or path context
-        if (_autoCompleteState.isDataDirty) {
-
-            constexpr std::string_view PathIdentifier = "\"'[";
-            size_t pathStartIndex = 0;
-            for (size_t i = _inputPosition; i > 0; --i) {
-                if (PathIdentifier.find(currentCommand[i - 1]) != std::string::npos) {
-                    pathStartIndex = i;
-                    break;
-                }
-            }
-
-            // TODO anden88 2025-08-08: If the user typed e.g., "openspace.printInfo(open"
-            // We will not be able to autocomplete the last openspace. since the first
-            // instance we find is at the beginning, resulting in the fragment being wrongly
-            // assumed as "printInfo(open"
-            size_t functionStartIndex = currentCommand.rfind("openspace.");
-
-            if (functionStartIndex == std::string::npos) {
-                functionStartIndex = 0;
-            }
-
-            const bool isPathContext = pathStartIndex > functionStartIndex;
-
-            _autoCompleteState.context = isPathContext ? Context::Path : Context::Function;
-            _autoCompleteState.currentIndex = 0; // Start from beginning
-            //_autoCompleteState.isDataDirty = false;
-            _autoCompleteState.suggestion = "";
-
-
-            // Store path suggestions in state
-            if (_autoCompleteState.context == Context::Path) {
-                // Find the end of the path
-                std::string possiblePath = currentCommand.substr(pathStartIndex);
-                // Find the last ' " ] if any exists, which marks the end of the path string.
-                // Otherwise the rest of the string is assumed to be part of the path
-                size_t pathEnd = possiblePath.find_last_of("\"']");
-                std::string userTypedPath = currentCommand.substr(pathStartIndex, pathEnd);
-
-                std::filesystem::path path = std::filesystem::path(userTypedPath);
-
-                std::filesystem::path dirToSearch;
-                std::string typedFragment;
-
-                if (std::filesystem::exists(path) && std::filesystem::is_directory(path)) {
-                    // User typed a full valid directory - show its contents
-                    dirToSearch = path;
-                    typedFragment = "";
-                }
-                else {
-                    // Not a valid dir - check the parent
-                    std::filesystem::path parent = path.parent_path();
-                    if (std::filesystem::exists(parent) && std::filesystem::is_directory(parent)) {
-                        dirToSearch = parent;
-                        // We've lost the last separator at this point so we add it back again
-                        typedFragment = path.filename().string();
-                    }
-                    else {
-                        // Neither path nor parent is valid, cancel autocomplete
-                        return;
-                    }
-                }
-
-                // Get the entries in directory
-                std::vector<std::filesystem::path> suggestions =
-                    ghoul::filesystem::walkDirectory(
-                        dirToSearch,
-                        ghoul::filesystem::Recursive::No,
-                        ghoul::filesystem::Sorted::Yes
-                );
-
-                std::vector<std::string> entries;
-                for (const auto& entry : suggestions) {
-                    entries.push_back(entry.string());
-                }
-
-                _autoCompleteState.suggestions = std::move(entries);
-                _autoCompleteState.baseInput = dirToSearch.string();
-                _autoCompleteState.typedFragment = typedFragment;
-            }
-
-            if (_autoCompleteState.context == Context::Function) {
-                // Get a list of all the available commands
-                std::vector<std::string> allCommands = global::scriptEngine->allLuaFunctions();
-                std::sort(allCommands.begin(), allCommands.end());
-
-                _autoCompleteState.suggestions = allCommands;
-
-                std::string possibleFunction = currentCommand.substr(functionStartIndex);
-                // Find the nearest parenthesis if any exists, which marks the end of the
-                // function. Otherwise the rest of the string is assumed to be part of
-                // the function
-                size_t functionEnd = possibleFunction.find_first_of("()");
-                size_t fragmentBegin = possibleFunction.rfind('.', functionEnd) + 1; // + 1 to include the dot
-                std::string userTypedFunction = possibleFunction.substr(0, fragmentBegin);
-                std::string fragment = possibleFunction.substr(fragmentBegin, functionEnd - fragmentBegin);
-
-                _autoCompleteState.baseInput = userTypedFunction;
-                _autoCompleteState.typedFragment = fragment;
-            }
-        }
-
-        if (_autoCompleteState.isDataDirty) {
-            // Filter the suggestions based on what we've typed so far
-            std::set<std::string> results;
-
-            std::string baseInput = _autoCompleteState.baseInput;
-            std::string fragment = _autoCompleteState.typedFragment;
-
-            if (_autoCompleteState.context == Context::Function) {
-                baseInput = ghoul::toLowerCase(baseInput);
-                fragment = ghoul::toLowerCase(fragment);
-            }
-#ifdef WIN32
-            if (_autoCompleteState.context == Context::Path) {
-                baseInput = ghoul::toLowerCase(sanitizeInput(baseInput));
-                fragment = ghoul::toLowerCase(fragment);
-            }
-#endif // WIN32
-
-            for (const std::string& suggestion : _autoCompleteState.suggestions) {
-                std::string candidate = suggestion;
-                std::string result = suggestion;
-
-                if (_autoCompleteState.context == Context::Function) {
-                    candidate = ghoul::toLowerCase(suggestion);
-
-                    // We're only interested in autocomplete until the next separator "."
-                    const size_t offset = baseInput.size() + fragment.size();
-                    const size_t pos = candidate.find('.', offset);
-
-                    if (pos != std::string::npos) {
-                        result = candidate.substr(0, pos + 1); // include the "."
-                    }
-                }
-
-#ifdef WIN32
-                if (_autoCompleteState.context == Context::Path) {
-                    // On Windows compare lowercase paths since they are usually the same
-                    candidate = ghoul::toLowerCase(sanitizeInput(suggestion));
-                }
-#endif // WIN32
-
-                if (candidate.starts_with(baseInput + fragment)) {
-                    results.insert(result);
-                }
-            }
-
-            _autoCompleteState.suggestions.clear();
-            for (const std::string& candidate : results) {
-                _autoCompleteState.suggestions.push_back(candidate);
-            }
-
-            _autoCompleteState.isDataDirty = false;
-        }
-
-        if (_autoCompleteState.suggestions.empty()) {
-            return;
-        }
-
-        std::string suggestion = _autoCompleteState.suggestions[_autoCompleteState.currentIndex];
-        _autoCompleteState.suggestion = suggestion.substr(_autoCompleteState.baseInput.size() + _autoCompleteState.typedFragment.size());
-        _autoCompleteState.currentIndex = (_autoCompleteState.currentIndex + 1) %
-            static_cast<int>(_autoCompleteState.suggestions.size());
-
-
-        return;
-
-
-
-
-//
-//        if (isPathContext) {
-//            // Find the end of the path
-//            std::string possiblePath = currentCommand.substr(pathStartIndex);
-//            // Find the last ' " ] if any exists, which marks the end of the path string.
-//            // Otherwise the rest of the string is assumed to be part of the path
-//            size_t pathEnd = possiblePath.find_last_of("\"']");
-//            std::string path = currentCommand.substr(pathStartIndex, pathEnd);
-//
-//            std::filesystem::path dir = path;
-//            // If the extracted path is not a directory, it may be the start of a
-//            // folder that we need to auto complete, so we check if the parent is a
-//            // valid directory
-//            if (!std::filesystem::is_directory(path) || !std::filesystem::exists(path)) {
-//                std::filesystem::path p(path);
-//                auto parent = p.parent_path();
-//                if (!std::filesystem::is_directory(parent) || !std::filesystem::exists(parent)) {
-//                    return;
-//
-//                }
-//                dir = parent.string();
-//            }
-//
-//            // Get the suggestions from directory
-//            auto suggestions = ghoul::filesystem::walkDirectory(
-//                dir,
-//                ghoul::filesystem::Recursive::No,
-//                ghoul::filesystem::Sorted::Yes
-//            );
-//
-//
-//            //bool includeSlashInSuggestion = false;
-//            //if (!path.ends_with('/') && !path.ends_with('\\')) {
-//            //    path += '/';
-//            //    includeSlashInSuggestion = true;
-//            //}
-//
-//
-//
-//            for (int i = 0; i < static_cast<int>(suggestions.size()); i++) {
-//                const std::string suggestion = suggestions[i].string();
-//                // TODO do we want to sanitize here or only convert \ into / ? 
-//                const std::string suggestionLowerCase = sanitizeInput(suggestion);
-//                const std::string pathLowerCase = sanitizeInput(path);
-//#ifdef WIN32
-//                //Lowercase strings
-//#endif
-//
-//                const size_t pathLen = pathLowerCase.length();
-//
-//                const bool correctLength = suggestionLowerCase.length() >= pathLen;
-//                const bool isPathSubStr = suggestionLowerCase.substr(0, pathLen) == pathLowerCase;
-//
-//                if (correctLength && isPathSubStr && (i > _suggestionInfo.index)) {
-//                    // We found our index so we store it
-//                    _suggestionInfo.index = i;
-//                    // We're only interested in the part of the path that is not already written
-//                    _suggestionInfo.suggestion = suggestionLowerCase;
-//                    break;
-//                }
-//
-//            }
-//
-//            //if (_suggestionInfo.index < 0) {
-//            //    _suggestionInfo.index = 0;
-//            //}
-//            //if (_suggestionInfo.index < suggestions.size()) {
-//            //    
-//
-//
-//            //    std::string suggestion = suggestions[_suggestionInfo.index].string();
-//            //    // We're only interested in the part of the path that is not already written
-//            //    size_t count = path.size();
-//            //    count -= includeSlashInSuggestion ? 1 : 0;
-//
-//            //    _suggestionInfo.suggestion = suggestion.substr(count);
-//            //    ++_suggestionInfo.index;
-//            //}
-//
-//            return;
-//        }
-
-
-        // We get a list of all the available commands and initially find the first
-        // command that starts with how much we typed sofar. We store the index so
-        // that in subsequent "tab" presses, we will discard previous commands. This
-        // implements the 'hop-over' behavior. As soon as another key is pressed,
-        // everything is set back to normal
-        std::vector<std::string> allCommands = global::scriptEngine->allLuaFunctions();
-        std::sort(allCommands.begin(), allCommands.end());
-
-
-        // Check if it is the first time the tab has been pressed. If so, we need to
-        // store the already entered command so that we can later start the search
-        // from there. We will overwrite the 'currentCommand' thus making the storage
-        // necessary
-        if (!_autoCompleteInfo.hasInitialValue) {
-            _autoCompleteInfo.initialValue = currentCommand;
-            _autoCompleteInfo.hasInitialValue = true;
-        }
-
-        for (int i = 0; i < static_cast<int>(allCommands.size()); i++) {
-            const std::string& command = allCommands[i];
-
-            // Check if the command has enough length (we don't want crashes here)
-            // Then check if the iterator-command's start is equal to what we want
-            // then check if we need to skip the first found values as the user has
-            // pressed TAB repeatedly
-            const size_t fullLength = _autoCompleteInfo.initialValue.length();
-            const bool correctLength = command.length() >= fullLength;
-
-            const std::string commandLowerCase = ghoul::toLowerCase(command);
-
-            const std::string initialValueLowerCase = ghoul::toLowerCase(
-                _autoCompleteInfo.initialValue
-            );
-
-            const bool correctCommand =
-                commandLowerCase.substr(0, fullLength) == initialValueLowerCase;
-
-            if (correctLength && correctCommand && (i > _autoCompleteInfo.lastIndex)) {
-                // We found our index, so store it
-                _autoCompleteInfo.lastIndex = i;
-
-                // We only want to auto-complete until the next separator "."
-                const size_t pos = command.find('.', fullLength);
-                if (pos == std::string::npos) {
-                    // If we don't find a separator, we autocomplete until the end
-                    // Set the found command as active command
-                    _commands.at(_activeCommand) = command + "();";
-                    // Set the cursor position to be between the brackets
-                    _inputPosition = _commands.at(_activeCommand).size() - 2;
-                }
-                else {
-                    // If we find a separator, we autocomplete until and including the
-                    // separator unless the autocompletion would be the same that we
-                    // already have (the case if there are multiple commands in the
-                    // same group
-                    const std::string subCommand = command.substr(0, pos + 1);
-                    if (subCommand == _commands.at(_activeCommand)) {
-                        continue;
-                    }
-                    else {
-                        _commands.at(_activeCommand) = command.substr(0, pos + 1);
-                        _inputPosition = _commands.at(_activeCommand).length();
-                        // We only want to remove the autocomplete info if we just
-                        // entered the 'default' openspace namespace
-                        if (command.substr(0, pos + 1) == "openspace.") {
-                            _autoCompleteInfo = {
-                                .lastIndex = NoAutoComplete,
-                                .hasInitialValue = false,
-                                .initialValue = ""
-                            };
-                        }
-                    }
-                }
-                break;
-            }
-        }
-    };
-
-    registerKeyHandler(Key::Tab, KeyModifier::None, [nextCommand]() {
-        nextCommand();
+    registerKeyHandler(Key::Tab, KeyModifier::None, [this]() {
+        _autoCompleteState.cycleReverse = false;
+        autoCompleteCommand();
     });
 
-    registerKeyHandler(Key::Tab, KeyModifier::Shift, [this, nextCommand]() {
-        // If the shift key is pressed, we decrement the current index so that we will
-        // find the value before the one that was previously found
-        if (_autoCompleteInfo.lastIndex != NoAutoComplete) {
-            _autoCompleteInfo.lastIndex -= 2;
-        }
-        if (_suggestionInfo.index != NoAutoComplete) {
-            _suggestionInfo.index -= 2;
-        }
-        nextCommand();
+    registerKeyHandler(Key::Tab, KeyModifier::Shift, [this]() {
+        _autoCompleteState.cycleReverse = true;
+        autoCompleteCommand();
     });
 }
+
+void LuaConsole::autoCompleteCommand() {
+    // We get a list of all the available commands or paths and initially find the
+    // first match that starts with how much we typed sofar. We store the index so
+    // that in subsequent "tab" presses, we will discard previous matches. This
+    // implements the 'hop-over' behavior. As soon as another key is pressed,
+    // everything is set back to normal
+
+    const std::string currentCommand = _commands[_activeCommand];
+    // Determine if are currently in a function or path context
+    if (_autoCompleteState.isDataDirty) {
+        const size_t contextStart = detectContext(currentCommand);
+
+        switch (_autoCompleteState.context) {
+        case Context::Path:
+            if (!gatherPathSuggestions(contextStart)) {
+                return;
+            }
+            break;
+
+        case Context::Function:
+            gatherFunctionSuggestions(contextStart);
+            break;
+        default: {
+            throw ghoul::RuntimeError("Unhandled context");
+        }
+        }
+
+        filterSuggestions();
+        _autoCompleteState.isDataDirty = false;
+    }
+
+    cycleSuggestion();
+}
+
+void LuaConsole::resetAutoCompleteState() {
+    _autoCompleteState = {
+                .context = Context::None,
+                .isDataDirty = true,
+                .input = "",
+                .suggestions = {},
+                .currentIndex = -1,
+                .suggestion = "",
+                .cycleReverse = false
+    };
+}
+
+size_t LuaConsole::detectContext(std::string_view command) {
+    // Find the path starting point which can start with either " ' or [ character
+    size_t pathStartIndex = 0;
+    for (size_t i = _inputPosition; i > 0; --i) {
+        if (PathIdentifier.find(command[i - 1]) != std::string::npos) {
+            pathStartIndex = i;
+            break;
+        }
+    }
+
+    // TODO anden88 2025-08-08: Detect functions in a smarter way that allows nested
+    // function calls. The following example currently does not work.
+    // If the user typed e.g., "openspace.printInfo(open"
+    // We will not be able to autocomplete the last openspace. since the first
+    // instance we find is at the beginning, resulting in the fragment being wrongly
+    // assumed as "printInfo(open"
+    size_t functionStartIndex = command.rfind("openspace.");
+
+    if (functionStartIndex == std::string::npos) {
+        functionStartIndex = 0;
+    }
+
+    const bool isPathContext = pathStartIndex > functionStartIndex;
+
+    _autoCompleteState.context = isPathContext ? Context::Path : Context::Function;
+    return isPathContext ? pathStartIndex : functionStartIndex;
+}
+
+bool LuaConsole::gatherPathSuggestions(size_t contextStart) {
+    const std::string currentCommand = _commands[_activeCommand];
+    // Find the end of the path
+    const std::string possiblePath = currentCommand.substr(contextStart);
+    // Find the last ' " ] if any exists, which marks the end of the path string.
+    // Otherwise the rest of the string is assumed to be part of the path
+    const size_t pathEnd = possiblePath.find_last_of("\"']");
+    const std::string userTypedPath = currentCommand.substr(contextStart, pathEnd);
+
+    const std::filesystem::path path = std::filesystem::path(userTypedPath);
+
+    std::filesystem::path dirToSearch;
+
+    if (std::filesystem::exists(path) && std::filesystem::is_directory(path)) {
+        // User typed a full valid directory - show its contents
+        dirToSearch = path;
+    }
+    else {
+        // Not a valid dir - check the parent
+        std::filesystem::path parent = path.parent_path();
+        if (std::filesystem::exists(parent) && std::filesystem::is_directory(parent)) {
+            dirToSearch = parent;
+        }
+        else {
+            // Neither path nor parent is valid, cancel autocomplete
+            return false;
+        }
+    }
+
+    // Get the entries in directory
+    std::vector<std::filesystem::path> suggestions =
+        ghoul::filesystem::walkDirectory(
+            dirToSearch,
+            ghoul::filesystem::Recursive::No,
+            ghoul::filesystem::Sorted::Yes
+        );
+
+    std::vector<std::string> entries;
+    for (const auto& entry : suggestions) {
+        entries.push_back(entry.string());
+    }
+
+    _autoCompleteState.suggestions = std::move(entries);
+    _autoCompleteState.input = userTypedPath;
+
+    return true;
+}
+
+void LuaConsole::gatherFunctionSuggestions(size_t contextStart) {
+    const std::string currentCommand = _commands[_activeCommand];
+    // Get a list of all the available commands
+    std::vector<std::string> allCommands = global::scriptEngine->allLuaFunctions();
+    std::sort(allCommands.begin(), allCommands.end());
+
+    _autoCompleteState.suggestions = std::move(allCommands);
+
+    std::string possibleFunction = currentCommand.substr(contextStart);
+    // Find the nearest parenthesis if any exists, which marks the end of the
+    // function. Otherwise the rest of the string is assumed to be part of
+    // the function
+    size_t functionEnd = possibleFunction.find_first_of("()");
+    _autoCompleteState.input = possibleFunction.substr(0, functionEnd);
+}
+
+void LuaConsole::filterSuggestions() {
+    auto normalize = [this](const std::string& s) -> std::string {
+        std::string out = s;
+
+        if (_autoCompleteState.context == Context::Function) {
+            out = ghoul::toLowerCase(out);
+        }
+
+#ifdef WIN32
+        // Treat lowercase paths the same in Windows since for the most part
+        // C:/User/Desktop/Foo is te same as c:/user/desktop/foo
+        if (_autoCompleteState.context == Context::Path) {
+            out = ghoul::toLowerCase(sanitizeInput(out));
+        }
+#endif // WIN32
+
+        return out;
+    };
+
+    // We're only interested in unique matches
+    std::set<std::string> results;
+
+    std::string input = _autoCompleteState.input;
+
+    input = normalize(input);
+
+    for (const std::string& suggestion : _autoCompleteState.suggestions) {
+        std::string candidate = normalize(suggestion);
+        std::string result = suggestion;
+
+        if (_autoCompleteState.context == Context::Function) {
+            // We're only interested in autocomplete until the next separator "."
+            const size_t offset = input.size();
+            const size_t pos = candidate.find('.', offset);
+
+            if (pos != std::string::npos) {
+                result = candidate.substr(0, pos + 1); // include the "."
+            }
+        }
+
+        if (candidate.starts_with(input)) {
+            results.insert(result);
+        }
+    }
+
+    _autoCompleteState.suggestions.clear();
+    for (const std::string& candidate : results) {
+        _autoCompleteState.suggestions.push_back(candidate);
+    }
+    //_autoCompleteState.suggestion.assign(results.begin(), results.end());
+}
+
+void LuaConsole::cycleSuggestion() {
+    if (_autoCompleteState.suggestions.empty()) {
+        return;
+    }
+
+    const int size = static_cast<int>(_autoCompleteState.suggestions.size());
+    const int dir = _autoCompleteState.cycleReverse ? -1 : 1;
+
+    // First time cycling: pick start depending on direction
+    if (_autoCompleteState.currentIndex == NoAutoComplete) {
+        _autoCompleteState.currentIndex = _autoCompleteState.cycleReverse ? size - 1 : 0;
+    }
+    else {
+        // Wrap around on either start or end edges
+        _autoCompleteState.currentIndex =
+            (_autoCompleteState.currentIndex + dir + size) % size;
+    }
+
+    const std::string& suggestion = _autoCompleteState.suggestions[_autoCompleteState.currentIndex];
+    _autoCompleteState.suggestion = suggestion.substr(_autoCompleteState.input.size());
+}
+
 } // namespace openspace

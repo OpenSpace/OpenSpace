@@ -67,6 +67,15 @@ private:
     void registerKeyHandlers();
     void registerKeyHandler(Key key, KeyModifier modifier, std::function<void()> callback);
 
+    // Helper functions for tab autocomplete
+    void autoCompleteCommand();
+    void resetAutoCompleteState();
+    size_t detectContext(std::string_view command);
+    bool gatherPathSuggestions(size_t contextStart);
+    void gatherFunctionSuggestions(size_t contextStart);
+    void filterSuggestions();
+    void cycleSuggestion();
+
     properties::BoolProperty _isVisible;
     properties::BoolProperty _shouldBeSynchronized;
     properties::BoolProperty _shouldSendToRemote;
@@ -85,19 +94,6 @@ private:
     // Map of registered keybinds and their corresponding callbacks
     std::map<KeyWithModifier, std::function<void()>> _keyHandlers;
 
-    struct {
-        int lastIndex;
-        bool hasInitialValue;
-        std::string initialValue;
-    } _autoCompleteInfo;
-
-    struct {
-        int index;
-        std::string suggestion;
-        bool isReverse;
-    } _suggestionInfo;
-
-
     enum class Context {
         None = 0,
         Function,
@@ -107,11 +103,11 @@ private:
     struct {
         Context context;
         bool isDataDirty;
-        std::string baseInput; // What the user typed
-        std::string typedFragment; // The partial word being completed (if any)
+        std::string input; // Part of the command that we're intrested in
         std::vector<std::string> suggestions;
         int currentIndex;
         std::string suggestion;
+        bool cycleReverse = false;
 
     } _autoCompleteState;
 
