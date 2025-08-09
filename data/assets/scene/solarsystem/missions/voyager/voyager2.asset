@@ -120,8 +120,7 @@ local VoyagerTrailEncounterJupiter = {
     },
     Color = { 0.70, 0.50, 0.20 },
     EnableFade = false,
-    -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
-    StartTime = "1979 JUL 05 23:24:00",
+    StartTime = "1979 JUL 06",
     EndTime = "1979 JUL 15",
     SampleInterval = 100
   },
@@ -170,8 +169,7 @@ local VoyagerTrailEncounterSaturn = {
     },
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
-    -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
-    StartTime = "1981 AUG 22 23:08:30",
+    StartTime = "1981 AUG 23",
     EndTime = "1981 AUG 30",
     SampleInterval = 100
   },
@@ -220,8 +218,7 @@ local VoyagerTrailEncounterUranus = {
     },
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
-    -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
-    StartTime = "1986 JAN 21 23:30:00",
+    StartTime = "1986 JAN 22",
     EndTime = "1986 JAN 27",
     SampleInterval = 100
   },
@@ -270,8 +267,7 @@ local VoyagerTrailEncounterNeptune = {
     },
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
-    -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
-    StartTime = "1989 AUG 23 22:30:00",
+    StartTime = "1989 AUG 24",
     EndTime = "1989 AUG 26",
     SampleInterval = 100
   },
