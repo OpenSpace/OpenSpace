@@ -43,7 +43,7 @@ namespace scripting { struct LuaLibrary; }
 
 class Profile {
 public:
-    struct ParsingError : public ghoul::RuntimeError {
+    struct ParsingError final : public ghoul::RuntimeError {
         enum class Severity { Info, Warning, Error };
 
         ParsingError(Severity severity_, std::string msg);

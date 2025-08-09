@@ -54,7 +54,7 @@ namespace {
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-    struct SessionRecordingError : public ghoul::RuntimeError {
+    struct SessionRecordingError final : public ghoul::RuntimeError {
         explicit SessionRecordingError(std::string msg)
             : ghoul::RuntimeError(std::move(msg), "SessionRecording")
         {}

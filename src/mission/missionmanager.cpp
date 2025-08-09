@@ -35,7 +35,7 @@
 #include "missionmanager_lua.inl"
 
 namespace {
-    struct MissionManagerException : public ghoul::RuntimeError {
+    struct MissionManagerException final : public ghoul::RuntimeError {
         explicit MissionManagerException(std::string msg)
             : ghoul::RuntimeError(std::move(msg), "MissionManager")
         {}

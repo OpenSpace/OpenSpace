@@ -31,7 +31,7 @@
 #include <glm/gtx/transform.hpp>
 
 namespace {
-    struct RangeError : public ghoul::RuntimeError {
+    struct RangeError final : public ghoul::RuntimeError {
         explicit RangeError(std::string off) :
             ghoul::RuntimeError(
                 std::format("Value '{}' out of range", off),

@@ -36,7 +36,7 @@ namespace {
 
     using namespace openspace::interaction;
 
-    class LoadingError : public ghoul::RuntimeError {
+    class LoadingError final : public ghoul::RuntimeError {
     public:
         LoadingError(std::string error_, std::filesystem::path file_, int entry_)
             : ghoul::RuntimeError(

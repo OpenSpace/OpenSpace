@@ -47,7 +47,7 @@ public:
      * This exception is thrown if the ghoul::TemplateFactory could not be found in the
      * #factory method.
      */
-    struct FactoryNotFoundError : public ghoul::RuntimeError {
+    struct FactoryNotFoundError final : public ghoul::RuntimeError {
         /**
          * Constructor for FactoryNotFoundError, the \p type is a human-readable (-ish)
          * type descriptor for the type `T` for the TemplateFactory that could
