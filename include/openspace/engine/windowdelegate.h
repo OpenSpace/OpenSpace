@@ -94,7 +94,7 @@ struct WindowDelegate {
 
     void (*swapBuffer)() = []() {};
 
-    size_t (*nWindows)() = []() { return 0; };
+    size_t (*nWindows)() = []() { return size_t(0); };
 
     int (*currentWindowId)() = []() { return 0; };
 

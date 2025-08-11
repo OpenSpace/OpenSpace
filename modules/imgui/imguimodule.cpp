@@ -300,10 +300,10 @@ void ImGUIModule::internalInitializeGL() {
     strcpy(_iniFileBuffer.data(), file.c_str());
 #endif
 
-    const int nWindows = global::windowDelegate->nWindows();
+    const size_t nWindows = global::windowDelegate->nWindows();
     _contexts.resize(nWindows);
 
-    for (int i = 0; i < nWindows; i++) {
+    for (size_t i = 0; i < nWindows; i++) {
         _contexts[i] = ImGui::CreateContext();
         ImGui::SetCurrentContext(_contexts[i]);
 
