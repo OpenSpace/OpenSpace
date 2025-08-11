@@ -709,7 +709,7 @@ void RenderableOrbitalKepler::updateBuffers() {
 
 void RenderableOrbitalKepler::calculateSegmentsForPoints(const RenderData& data) {
     int startVertexIndex = 0;
-    for (int i = 0; i < _segmentSizeRaw.size(); i++) {
+    for (size_t i = 0; i < _segmentSizeRaw.size(); i++) {
         // Check how far along the trail we are
         const kepler::Parameters& orbit = _parameters[i];
         const double nRevs = (data.time.j2000Seconds() - orbit.epoch) / orbit.period;
@@ -732,7 +732,7 @@ void RenderableOrbitalKepler::calculateSegmentsForTrails(const RenderData& data)
 
     int nTotalTrailParts = 0;
     int startVertexIndex = 0;
-    for (int i = 0; i < _segmentSizeRaw.size(); i++) {
+    for (size_t i = 0; i < _segmentSizeRaw.size(); i++) {
         // Check how far along the trail we are
         const kepler::Parameters& orbit = _parameters[i];
         const double nRevs = (data.time.j2000Seconds() - orbit.epoch) / orbit.period;

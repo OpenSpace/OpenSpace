@@ -2063,7 +2063,7 @@ TEST_CASE("Documentation: Referencing", "[documentation]") {
         inner.setValue("a", 1);
         inner.setValue("b", 2.0);
         positive.setValue("Table", inner);
-    };
+    }
     const TestResult positiveRes = testSpecification(doc, positive);
     CHECK(positiveRes.success);
     CHECK(positiveRes.offenses.empty());
@@ -2082,7 +2082,7 @@ TEST_CASE("Documentation: Referencing", "[documentation]") {
         inner.setValue("a", 1);
         inner.setValue("b", true);
         negative2.setValue("Table", inner);
-    };
+    }
     negativeRes = testSpecification(doc, negative2);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2157,7 +2157,7 @@ TEST_CASE("Documentation: IntVector2Verifier", "[documentation]") {
         inner.setValue("1", true);
         inner.setValue("2", 1);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2192,7 +2192,7 @@ TEST_CASE("Documentation: DoubleVector2Verifier", "[documentation]") {
         inner.setValue("1", true);
         inner.setValue("2", 1.0);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2229,7 +2229,7 @@ TEST_CASE("Documentation: IntVector3Verifier", "[documentation]") {
         inner.setValue("2", 1);
         inner.setValue("3", "s"s);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2266,7 +2266,7 @@ TEST_CASE("Documentation: DoubleVector3Verifier", "[documentation]") {
         inner.setValue("2", 1.0);
         inner.setValue("3", "s"s);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2304,7 +2304,7 @@ TEST_CASE("Documentation: IntVector4Verifier", "[documentation]") {
         inner.setValue("3", "s"s);
         inner.setValue("4", 1);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2342,7 +2342,7 @@ TEST_CASE("Documentation: DoubleVector4Verifier", "[documentation]") {
         inner.setValue("3", "s"s);
         inner.setValue("4", 1);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2379,7 +2379,7 @@ TEST_CASE("Documentation: DoubleMatrix2x2Verifier", "[documentation]") {
         inner.setValue("2", 1.0);
         inner.setValue("3", "s"s);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2453,7 +2453,7 @@ TEST_CASE("Documentation: DoubleMatrix2x4Verifier", "[documentation]") {
         inner.setValue("2", 1.0);
         inner.setValue("3", "s"s);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2490,7 +2490,7 @@ TEST_CASE("Documentation: DoubleMatrix3x2Verifier", "[documentation]") {
         inner.setValue("2", 1.0);
         inner.setValue("3", "s"s);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2527,7 +2527,7 @@ TEST_CASE("Documentation: DoubleMatrix3x3Verifier", "[documentation]") {
         inner.setValue("2", 1.0);
         inner.setValue("3", "s"s);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2564,7 +2564,7 @@ TEST_CASE("Documentation: DoubleMatrix3x4Verifier", "[documentation]") {
         inner.setValue("2", 1.0);
         inner.setValue("3", "s"s);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2601,7 +2601,7 @@ TEST_CASE("Documentation: DoubleMatrix4x2Verifier", "[documentation]") {
         inner.setValue("2", 1.0);
         inner.setValue("3", "s"s);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2638,7 +2638,7 @@ TEST_CASE("Documentation: DoubleMatrix4x3Verifier", "[documentation]") {
         inner.setValue("2", 1.0);
         inner.setValue("3", "s"s);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2675,7 +2675,7 @@ TEST_CASE("Documentation: DoubleMatrix4x4Verifier", "[documentation]") {
         inner.setValue("2", 1.0);
         inner.setValue("3", "s"s);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);

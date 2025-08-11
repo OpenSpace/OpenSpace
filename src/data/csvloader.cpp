@@ -206,7 +206,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
             else if (zColumn.has_value() && i == *zColumn) {
                 entry.position.z = value;
             }
-            else if (nameColumn.has_value() && i == nameColumn) {
+            else if (nameColumn.has_value() && i == *nameColumn) {
                 // Note that were we use the original stirng value, rather than the
                 // converted one
                 entry.comment = strValue;
@@ -215,7 +215,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
                 entry.data.push_back(value);
             }
 
-            if (textureColumn.has_value() && i == textureColumn) {
+            if (textureColumn.has_value() && i == *textureColumn) {
                 uniqueTextureIndicesInData.emplace(static_cast<int>(value));
             }
         }

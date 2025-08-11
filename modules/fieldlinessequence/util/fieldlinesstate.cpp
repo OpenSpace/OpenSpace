@@ -50,9 +50,12 @@ void FieldlinesState::convertLatLonToCartesian(float scale) {
         const float r = p.x * scale;
         const float lat = glm::radians(p.y);
         const float lon = glm::radians(p.z);
-        const float rCosLat = r * cos(lat);
 
-        p = glm::vec3(rCosLat * cos(lon), rCosLat* sin(lon), r * sin(lat));
+        p = glm::vec3(
+            r * std::cos(lat) * std::cos(lon),
+            r * std::cos(lat) * std::sin(lon),
+            r * std::sin(lat)
+        );
     }
 }
 

@@ -43,7 +43,7 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         std::unique_ptr<FITS> file = std::make_unique<FITS>(path.string(), Read, true);
         if (!file.get()) {
             LERROR(std::format(
-                "Failed to open, therefor removing file {}", path.string()
+                "Failed to open, therefore removing file {}", path.string()
             ));
             std::filesystem::remove(path);
             return nullptr;
@@ -60,10 +60,18 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
                 "First layer chosen instead"
             );
             layerIndex = 0;
+            return nullptr;
         }
 
         std::valarray<float> layerValues =
             fitsValues->contents[std::slice(layerIndex*layerSize, layerSize, 1)];
+
+        if (layerValues.size() == 0) {
+            LERROR(std::format(
+                "Failed to load {} as no layers were available", path.string()
+            ));
+            return nullptr;
+        }
 
         float* imageData = new float[layerValues.size()];
         std::vector<glm::vec3> rgbLayers;

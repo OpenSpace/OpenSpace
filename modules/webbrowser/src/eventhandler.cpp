@@ -41,8 +41,8 @@ namespace {
      * Map from GLFW key codes to windows key codes, supported by JS and CEF.
      * See http://keycode.info/ for lookup
      *
-     * \param key
-     * \return the key code, if mapped or the GLFW key code
+     * \param key The key that we need to make
+     * \return The key code, if mapped or the GLFW key code
      */
     int mapFromGlfwToWindows(openspace::Key key) {
         switch (key) {

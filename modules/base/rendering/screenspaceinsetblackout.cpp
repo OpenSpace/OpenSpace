@@ -318,7 +318,7 @@ ScreenSpaceInsetBlackout::BlackoutShape::Spline::Spline(std::vector<glm::vec2>& 
 
     // Add options used when inserting a new point
     for (size_t i = 0; i < points.size() + 1; i++) {
-        addSelector.addOption(i, std::format("At position #{}", i + 1));
+        addSelector.addOption(static_cast<int>(i), std::format("At position #{}", i + 1));
     }
 
     // Only add controls for removing a point if there are any points that can be removed
@@ -330,7 +330,10 @@ ScreenSpaceInsetBlackout::BlackoutShape::Spline::Spline(std::vector<glm::vec2>& 
         addProperty(removeSelector);
         addProperty(removeButton);
         for (size_t i = 0; i < points.size(); i++) {
-            removeSelector.addOption(i, std::format("Point #{}", i + 1));
+            removeSelector.addOption(
+                static_cast<int>(i),
+                std::format("Point #{}", i + 1)
+            );
         }
     }
 }

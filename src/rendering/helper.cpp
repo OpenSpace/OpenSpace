@@ -225,13 +225,13 @@ void initialize() {
     };
     constexpr std::array<VertexXYUVRGBA, 6> Vtx = {
         // X     Y    U    V    R    G    B    A
-        VertexXYUVRGBA{ -1.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f },
-        VertexXYUVRGBA{ -1.f,  1.f, 0.f, 1.f, 1.f, 1.f, 1.f, 1.f },
-        VertexXYUVRGBA{  1.f,  1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f },
+        VertexXYUVRGBA{ { -1.f, -1.f }, { 0.f, 0.f }, { 1.f, 1.f, 1.f, 1.f } },
+        VertexXYUVRGBA{ { -1.f,  1.f }, { 0.f, 1.f }, { 1.f, 1.f, 1.f, 1.f } },
+        VertexXYUVRGBA{ {  1.f,  1.f }, { 1.f, 1.f }, { 1.f, 1.f, 1.f, 1.f } },
 
-        VertexXYUVRGBA{ -1.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f },
-        VertexXYUVRGBA{  1.f,  1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f },
-        VertexXYUVRGBA{  1.f, -1.f, 1.f, 0.f, 1.f, 1.f, 1.f, 1.f }
+        VertexXYUVRGBA{ { -1.f, -1.f }, { 0.f, 0.f }, { 1.f, 1.f, 1.f, 1.f } },
+        VertexXYUVRGBA{ {  1.f,  1.f }, { 1.f, 1.f }, { 1.f, 1.f, 1.f, 1.f } },
+        VertexXYUVRGBA{ {  1.f, -1.f }, { 1.f, 0.f }, { 1.f, 1.f, 1.f, 1.f } }
     };
     glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(VertexXYUVRGBA), Vtx.data(), GL_STATIC_DRAW);
 

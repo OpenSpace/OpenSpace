@@ -47,8 +47,6 @@ public:
      * \param profileName The name of the profile to create
      * \param assetBasePath The path to the folder where the assets live
      * \param userAssetBasePath The path to the folder where the user assets live
-     * \param builtInProfileBasePath The path to the folder in which the built-in profiles
-     *        live
      * \param profileBasePath The path to the folder in which all profiles live
      * \param parent Pointer to parent Qt widget
      */

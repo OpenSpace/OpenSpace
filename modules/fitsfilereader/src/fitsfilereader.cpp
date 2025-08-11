@@ -185,7 +185,7 @@ std::shared_ptr<TableData<T>> FitsFileReader::readTable(const std::filesystem::p
             return std::make_shared<TableData<T>>(std::move(loadedTable));
         }
     }
-    catch (FitsException& e) {
+    catch (const FitsException& e) {
         LERROR(std::format(
             "Could not read FITS table from file '{}'. Make sure it's not an image file",
             e.message()
@@ -692,5 +692,8 @@ std::shared_ptr<ImageData<T>> FitsFileReader::readImageInternal(PHDU& image) {
     }
     return nullptr;
 }
+
+template std::shared_ptr<TableData<float>> FitsFileReader::readTable(
+    const std::filesystem::path&, const std::vector<std::string>&, int, int, int, bool);
 
 } // namespace openspace
