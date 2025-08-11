@@ -75,6 +75,7 @@ private:
     void gatherFunctionSuggestions(size_t contextStart);
     void filterSuggestions();
     void cycleSuggestion();
+    void applySuggestion();
 
     properties::BoolProperty _isVisible;
     properties::BoolProperty _shouldBeSynchronized;
@@ -101,13 +102,14 @@ private:
     };
 
     struct {
-        Context context;
-        bool isDataDirty;
-        std::string input; // Part of the command that we're intrested in
-        std::vector<std::string> suggestions;
-        int currentIndex;
-        std::string suggestion;
+        Context context = Context::None;
+        bool isDataDirty = true;
+        std::string input = ""; // Part of the command that we're intrested in
+        std::vector<std::string> suggestions = {};
+        int currentIndex = -1;
+        std::string suggestion = "";
         bool cycleReverse = false;
+        size_t insertPosition = 0;
 
     } _autoCompleteState;
 

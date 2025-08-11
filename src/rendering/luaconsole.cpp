@@ -67,10 +67,6 @@ namespace {
     // Determines at which speed the console opens.
     constexpr float ConsoleOpenSpeed = 2.5;
 
-    // The number of characters to display after the cursor
-    // when horizontal scrolling is required.
-    constexpr int NVisibleCharsAfterCursor = 5;
-
     constexpr openspace::properties::Property::PropertyInfo VisibleInfo = {
         "IsVisible",
         "Is Visible",
@@ -365,7 +361,8 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
 
     // If any other key is pressed, we want to remove our previous findings
     // The special case for Shift is necessary as we want to allow Shift+TAB
-    if (key != Key::Tab && !modifierShift) {
+    const bool isShiftModifierOnly = (key == Key::LeftShift || key == Key::RightShift);
+    if (key != Key::Tab && !isShiftModifierOnly) {
         resetAutoCompleteState();
     }
         
@@ -489,74 +486,65 @@ void LuaConsole::render() {
 
     // Render the current command
     std::string currentCommand = _commands.at(_activeCommand);
-    // We chop off the beginning and end of the string until it fits on the screen (with
-    // a margin) this should be replaced as soon as the mono-spaced fonts work properly.
-    // Right now, every third character is a bit wider than the others
 
-    size_t nChoppedCharsBeginning = 0;
-    size_t nChoppedCharsEnd = 0;
+    // Render the command and suggestions with line breaks where required
+    const size_t totalCommandSize = 2 + currentCommand.size() +
+        _autoCompleteState.suggestion.size();
+    const size_t nCharactersPerRow = static_cast<size_t>(res.x * 0.95 /
+        static_cast<double>(_font->glyph('m')->width));
+    const size_t nCommandRows = totalCommandSize / nCharactersPerRow;
 
-    const size_t inputPositionFromEnd = currentCommand.size() - _inputPosition;
-    while (true) {
-        using namespace ghoul::fontrendering;
+    // The command is split in 3 parts to render the suggestion in a different color
+    std::string firstPart = _autoCompleteState.insertPosition != 0 ?
+        currentCommand.substr(0, _autoCompleteState.insertPosition) : currentCommand;
+    std::string secondPart = _autoCompleteState.insertPosition != 0 ?
+        currentCommand.substr(_autoCompleteState.insertPosition) : "";
 
-        // Compute the current width of the string and console prefix.
-        const float currentWidth =
-            _font->boundingBox("> " + currentCommand).x + inputLocation.x;
+    // We pad the strings with empty spaces so that each part is rendered in their correct
+    // positions, even if linebreaks are added    
+    // Pad suggestion before and after with ' '
+    const std::string suggestion = std::string(firstPart.size() + 2, ' ') +
+        _autoCompleteState.suggestion + std::string(secondPart.size(), ' ');
+    // Pad first part at the end with ' ' 
+    firstPart.insert(firstPart.end(), totalCommandSize - firstPart.size(), ' ');
+    // Pad second part in the beginning with ' ' 
+    secondPart.insert(secondPart.begin(), totalCommandSize - secondPart.size(), ' ');
 
-        // Compute the overflow in pixels
-        const float overflow = currentWidth - res.x * 0.995f;
-        if (overflow <= 0.f) {
-            break;
+    auto linebreakCommand = [nCharactersPerRow](const std::string& s) -> std::string {
+        const bool requiresSplitting = s.size() > nCharactersPerRow;
+
+        if (!requiresSplitting) {
+            return s;
         }
 
-        // Since the overflow is positive, at least one character needs to be removed.
-        const size_t nCharsOverflow = static_cast<size_t>(std::min(
-            std::max(1.f, overflow / _font->glyph('m')->width),
-            static_cast<float>(currentCommand.size())
-        ));
+        std::string result;
+        result.reserve(s.size() + s.size() / nCharactersPerRow);
 
-        // Do not hide the cursor and `NVisibleCharsAfterCursor` characters in the end.
-        const size_t maxAdditionalCharsToChopEnd = std::max(
-            0,
-            static_cast<int>(inputPositionFromEnd) - (NVisibleCharsAfterCursor + 1) -
-                static_cast<int>(nChoppedCharsEnd)
-        );
+        size_t count = 0;
+        for (char c : s) {
+            result += c;
+            count++;
 
-        // Do not hide the cursor in the beginning.
-        const size_t maxAdditionalCharsToChopBeginning = std::max(
-            0,
-            static_cast<int>(_inputPosition) - 1 -
-                static_cast<int>(nChoppedCharsBeginning)
-        );
+            if (c == '\n') {
+                count = 0;
+            }
 
-        // Prioritize chopping in the end of the string.
-        const size_t nCharsToChopEnd = std::min(
-            nCharsOverflow,
-            maxAdditionalCharsToChopEnd
-        );
-        const size_t nCharsToChopBeginning = std::min(
-            nCharsOverflow - nCharsToChopEnd,
-            maxAdditionalCharsToChopBeginning
-        );
+            if (count >= nCharactersPerRow) {
+                result += '\n';
+                count = 0;
+            }
+        }
 
-        nChoppedCharsBeginning += nCharsToChopBeginning;
-        nChoppedCharsEnd += nCharsToChopEnd;
+        return result;
+    };
 
-        const size_t displayLength =
-            _commands.at(_activeCommand).size() -
-            nChoppedCharsBeginning - nChoppedCharsEnd;
-
-        currentCommand = _commands.at(_activeCommand).substr(
-            nChoppedCharsBeginning,
-            displayLength
-        );
-    }
+    // Offset the command depending on how many rows we require for a nicer look
+    inputLocation.y += nCommandRows * EntryFontSize * 1.25f * dpiScaling.y;
 
     RenderFont(
         *_font,
         inputLocation,
-        "> " + currentCommand,
+        linebreakCommand("> " + firstPart),
         _entryTextColor
     );
 
@@ -564,11 +552,21 @@ void LuaConsole::render() {
     RenderFont(
         *_font,
         inputLocation,
-        (std::string(currentCommand.size() + 2, ' ') + _autoCompleteState.suggestion),
-        glm::vec4(0.7f, 0.7f, 0.7f, 1.f),
+        linebreakCommand(suggestion),
+        glm::vec4(0.7f, 0.7f, 0.7f, 1.f)
+    );
+
+    RenderFont(
+        *_font,
+        inputLocation,
+        linebreakCommand(secondPart),
+        _entryTextColor,
         ghoul::fontrendering::CrDirection::Down
     );
 
+    // Move the marker to the correct row if there are multiple
+    const size_t markerStartRow = nCommandRows - (_inputPosition + 2) / nCharactersPerRow;
+    inputLocation.y += markerStartRow * EntryFontSize * 1.25f * dpiScaling.y;
     // Just offset the ^ marker slightly for a nicer look
     inputLocation.y += 3 * dpiScaling.y;
 
@@ -576,10 +574,9 @@ void LuaConsole::render() {
     RenderFont(
         *_font,
         inputLocation,
-        (std::string(_inputPosition - nChoppedCharsBeginning + 2, ' ') + "^"),
+        (std::string((_inputPosition + 2)  % nCharactersPerRow, ' ') + "^"),
         _entryTextColor
     );
-
 
     glm::vec2 historyInputLocation = glm::vec2(
         HistoryFontSize * dpi / 2.f,
@@ -592,8 +589,10 @@ void LuaConsole::render() {
         commandSubset = _commandsHistory;
     }
     else {
+        // Historic lines are reduced by the number of rows the command is occupying
         commandSubset = std::vector<std::string>(
-            _commandsHistory.end() - _historyLength,
+            _commandsHistory.end() - _historyLength + std::min(nCommandRows,
+                static_cast<size_t>(_historyLength)),
             _commandsHistory.end()
         );
     }
@@ -874,33 +873,10 @@ void LuaConsole::registerKeyHandlers() {
 
 
     auto executeCommand = [this]() {
-
-        auto applySuggestion = [this]() {
-            _commands[_activeCommand] += _autoCompleteState.suggestion;
-            _inputPosition = _commands[_activeCommand].length();
-
-            if (_autoCompleteState.context == Context::Function) {
-                if (!_autoCompleteState.suggestion.ends_with('.')) {
-                    // We're in a leaf function
-                    _commands[_activeCommand] += "();";
-                    // Set the cursor position to be between the brackets
-                    _inputPosition++;
-                }
-            }
-
-            // TODO fix where insertion should happen 
-            // openspace.asset.remove("C:/Users/anden88/Desktop/projects\Splitter2020")
-            // tries to insert /bin after ") characters
-
-            // Clear suggestion
-            resetAutoCompleteState();
-        };
-
         if (_autoCompleteState.suggestion != "") {
             applySuggestion();
             return;
         }
-
 
         const std::string cmd = _commands.at(_activeCommand);
         if (!cmd.empty()) {
@@ -981,7 +957,8 @@ void LuaConsole::resetAutoCompleteState() {
                 .suggestions = {},
                 .currentIndex = -1,
                 .suggestion = "",
-                .cycleReverse = false
+                .cycleReverse = false,
+                .insertPosition = 0,
     };
 }
 
@@ -1058,6 +1035,15 @@ bool LuaConsole::gatherPathSuggestions(size_t contextStart) {
     _autoCompleteState.suggestions = std::move(entries);
     _autoCompleteState.input = userTypedPath;
 
+    if (pathEnd != std::string::npos) {
+        // There is something after the path so we want to insert inbetween
+        _autoCompleteState.insertPosition = contextStart + pathEnd;
+    }
+    else {
+        // There is nothing after the path so we render normally at the end
+        _autoCompleteState.insertPosition = currentCommand.size();
+    }
+
     return true;
 }
 
@@ -1075,6 +1061,15 @@ void LuaConsole::gatherFunctionSuggestions(size_t contextStart) {
     // the function
     size_t functionEnd = possibleFunction.find_first_of("()");
     _autoCompleteState.input = possibleFunction.substr(0, functionEnd);
+
+    if (functionEnd != std::string::npos) {
+        // There is something after the function so we want to insert inbetween
+        _autoCompleteState.insertPosition = contextStart + functionEnd;
+    }
+    else {
+        // There is nothing after the path so we render normally at the end
+        _autoCompleteState.insertPosition = currentCommand.size();
+    }
 }
 
 void LuaConsole::filterSuggestions() {
@@ -1149,6 +1144,29 @@ void LuaConsole::cycleSuggestion() {
 
     const std::string& suggestion = _autoCompleteState.suggestions[_autoCompleteState.currentIndex];
     _autoCompleteState.suggestion = suggestion.substr(_autoCompleteState.input.size());
+}
+
+void LuaConsole::applySuggestion() {
+    std::string& currentCommand = _commands[_activeCommand];
+    currentCommand.insert(
+        _autoCompleteState.insertPosition,
+        _autoCompleteState.suggestion
+    );
+    // Set cursor to the end of the command
+    _inputPosition = _autoCompleteState.insertPosition +
+        _autoCompleteState.suggestion.size();
+
+    if (_autoCompleteState.context == Context::Function) {
+        if (!_autoCompleteState.suggestion.ends_with('.')) {
+            // We're in a leaf function add paranthesis 
+            currentCommand.insert(_inputPosition, "()");
+            // Set the cursor position to be between the brackets
+            _inputPosition++;
+        }
+    }
+
+    // Clear suggestion
+    resetAutoCompleteState();
 }
 
 } // namespace openspace
