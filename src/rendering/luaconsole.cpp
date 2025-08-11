@@ -45,8 +45,9 @@
 
 namespace {
     constexpr std::string_view HistoryFile = "ConsoleHistory";
-    constexpr std::string_view JumpCharacters = ".,'/()";
-    constexpr std::string_view PathIdentifier = "\"'[";
+    constexpr std::string_view JumpCharacters = ".,'/()\\";
+    constexpr std::string_view PathStartIdentifier = "\"'[";
+    constexpr std::string_view PathEndIdentifier = "\"']";
 
     constexpr int NoAutoComplete = -1;
 
@@ -966,7 +967,7 @@ size_t LuaConsole::detectContext(std::string_view command) {
     // Find the path starting point which can start with either " ' or [ character
     size_t pathStartIndex = 0;
     for (size_t i = _inputPosition; i > 0; --i) {
-        if (PathIdentifier.find(command[i - 1]) != std::string::npos) {
+        if (PathStartIdentifier.find(command[i - 1]) != std::string::npos) {
             pathStartIndex = i;
             break;
         }
@@ -996,7 +997,7 @@ bool LuaConsole::gatherPathSuggestions(size_t contextStart) {
     const std::string possiblePath = currentCommand.substr(contextStart);
     // Find the last ' " ] if any exists, which marks the end of the path string.
     // Otherwise the rest of the string is assumed to be part of the path
-    const size_t pathEnd = possiblePath.find_last_of("\"']");
+    const size_t pathEnd = possiblePath.find_last_of(PathEndIdentifier);
     const std::string userTypedPath = currentCommand.substr(contextStart, pathEnd);
 
     const std::filesystem::path path = std::filesystem::path(userTypedPath);
@@ -1142,7 +1143,9 @@ void LuaConsole::cycleSuggestion() {
             (_autoCompleteState.currentIndex + dir + size) % size;
     }
 
-    const std::string& suggestion = _autoCompleteState.suggestions[_autoCompleteState.currentIndex];
+    const std::string& suggestion =
+        _autoCompleteState.suggestions[_autoCompleteState.currentIndex];
+    // Show only the characters not yet written 
     _autoCompleteState.suggestion = suggestion.substr(_autoCompleteState.input.size());
 }
 
