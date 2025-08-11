@@ -294,7 +294,7 @@ ScreenSpaceInsetBlackout::BlackoutShape::Spline::Spline(std::vector<glm::vec2>& 
     base = baseString;
 
     // Generate all Point objects and add them to GUI
-    for (int i = 0; i < data.size(); i++) {
+    for (size_t i = 0; i < data.size(); i++) {
         points.push_back(std::make_unique<Point>(
             data[i],
             std::format("Point{}Position", i),
@@ -317,7 +317,7 @@ ScreenSpaceInsetBlackout::BlackoutShape::Spline::Spline(std::vector<glm::vec2>& 
     addProperty(addButton);
 
     // Add options used when inserting a new point
-    for (int i = 0; i < points.size() + 1; i++) {
+    for (size_t i = 0; i < points.size() + 1; i++) {
         addSelector.addOption(i, std::format("At position #{}", i + 1));
     }
 
@@ -329,7 +329,7 @@ ScreenSpaceInsetBlackout::BlackoutShape::Spline::Spline(std::vector<glm::vec2>& 
         });
         addProperty(removeSelector);
         addProperty(removeButton);
-        for (int i = 0; i < points.size(); i++) {
+        for (size_t i = 0; i < points.size(); i++) {
             removeSelector.addOption(i, std::format("Point #{}", i + 1));
         }
     }

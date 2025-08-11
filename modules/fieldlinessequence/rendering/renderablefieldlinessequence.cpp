@@ -1043,7 +1043,7 @@ void RenderableFieldlinesSequence::firstUpdate() {
     _colorQuantity = _colorQuantityTemp;
     _maskingQuantity = _maskingQuantityTemp;
 
-    if (_colorQuantity < _colorTablePaths.size()) {
+    if (_colorQuantity < static_cast<int>(_colorTablePaths.size())) {
         _colorTablePath = _colorTablePaths[_colorQuantity].string();
     }
     else {
@@ -1108,7 +1108,8 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         currentTime < _files[_activeIndex].timestamp ||
         // if currentTime >= next timestamp, it means that we stepped forward to a
         // time represented by another state
-        (nextIndex < _files.size() && currentTime >= _files[nextIndex].timestamp) ||
+        (nextIndex < static_cast<int>(_files.size()) &&
+        currentTime >= _files[nextIndex].timestamp) ||
         // The case when we jumped passed last file. where nextIndex is not < file.size()
         currentTime >= _files[_activeIndex].timestamp)
     {

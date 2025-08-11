@@ -51,10 +51,10 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         // Convert fits path with fits-file-reader functions
         const std::shared_ptr<ImageData<float>> fitsValues =
             readImageInternal<float>(file->pHDU());
-        int layerSize = fitsValues->width * fitsValues->height;
+        const int layerSize = fitsValues->width * fitsValues->height;
 
-        int nLayers = static_cast<int>(fitsValues->contents.size()) / layerSize;
-        if (layerIndex >= nLayers) {
+        const int nLayers = static_cast<int>(fitsValues->contents.size()) / layerSize;
+        if (static_cast<int>(layerIndex) >= nLayers) {
             LERROR(
                 "Chosen layer in fits file is not supported. Index too high. "
                 "First layer chosen instead"

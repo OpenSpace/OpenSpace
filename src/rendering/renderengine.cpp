@@ -524,7 +524,7 @@ void RenderEngine::initializeGL() {
         global::windowDelegate->nWindows() == _windows.size(),
         "Invalid number of windows"
     );
-    for (int i = 0; i < global::windowDelegate->nWindows(); i++) {
+    for (size_t i = 0; i < global::windowDelegate->nWindows(); i++) {
         _windows[i]->horizFieldOfView = global::windowDelegate->horizFieldOfView(i);
     }
 
@@ -608,7 +608,7 @@ void RenderEngine::updateRenderer() {
             global::windowDelegate->nWindows() == _windows.size(),
             "Invalid number of windows"
         );
-        for (int i = 0; i < global::windowDelegate->nWindows(); i++) {
+        for (size_t i = 0; i < global::windowDelegate->nWindows(); i++) {
             _windows[i]->horizFieldOfView = global::windowDelegate->horizFieldOfView(i);
         }
     }
