@@ -54,7 +54,7 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         int layerSize = fitsValues->width * fitsValues->height;
 
         int nLayers = static_cast<int>(fitsValues->contents.size()) / layerSize;
-        if (layerIndex > nLayers -1) {
+        if (layerIndex >= nLayers) {
             LERROR(
                 "Chosen layer in fits file is not supported. Index too high. "
                 "First layer chosen instead"

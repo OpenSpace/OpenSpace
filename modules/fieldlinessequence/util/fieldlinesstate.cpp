@@ -418,10 +418,6 @@ void FieldlinesState::setTriggerTime(double t) {
 // If index is out of scope an empty vector is returned and the referenced bool is false.
 std::vector<float> FieldlinesState::extraQuantity(size_t index, bool& isSuccessful) const
 {
-    if (index == -1) {
-        isSuccessful = false;
-        return std::vector<float>();
-    }
     if (index < _extraQuantities.size()) {
         isSuccessful = true;
         return _extraQuantities[index];

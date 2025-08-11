@@ -67,9 +67,9 @@ public:
      *
      * \param camera A reference to the camera object to have its pose updated
      * \param ignoreFutureKeyframes `true` if only past keyframes are to be used
-     * \return true only if a new future keyframe is available to set camera pose
      */
     void updateCamera(Camera& camera, bool ignoreFutureKeyframes);
+
     static void updateCamera(Camera* camera, const CameraPose& prevPose,
         const CameraPose& nextPose, double t, bool ignoreFutureKeyframes);
 

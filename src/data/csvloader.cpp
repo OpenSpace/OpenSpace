@@ -88,9 +88,9 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
     // First row is the column names
     const std::vector<std::string>& columns = rows.front();
 
-    int xColumn = -1;
-    int yColumn = -1;
-    int zColumn = -1;
+    std::optional<size_t> xColumn;
+    std::optional<size_t> yColumn;
+    std::optional<size_t> zColumn;
     int nameColumn = -1;
     int textureColumn = -1;
 
@@ -164,7 +164,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         ));
     }
 
-    if (xColumn < 0 || yColumn < 0 || zColumn < 0) {
+    if (!xColumn.has_value() || !yColumn.has_value() || !zColumn.has_value()) {
         // One or more position columns weren't read
         LERROR(std::format(
             "Error loading data file '{}'. Missing X, Y or Z position column", filePath
@@ -197,13 +197,13 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
             // For now, all values are converted to float
             const float value = readFloatData(strValue);
 
-            if (i == xColumn) {
+            if (i == *xColumn) {
                 entry.position.x = value;
             }
-            else if (i == yColumn) {
+            else if (i == *yColumn) {
                 entry.position.y = value;
             }
-            else if (i == zColumn) {
+            else if (i == *zColumn) {
                 entry.position.z = value;
             }
             else if (i == nameColumn) {

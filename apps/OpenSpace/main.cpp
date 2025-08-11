@@ -977,7 +977,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.nWindows = []() {
         ZoneScoped;
 
-        return static_cast<int>(Engine::instance().windows().size());
+        return Engine::instance().windows().size();
     };
     sgctDelegate.currentWindowId = []() {
         ZoneScoped;
