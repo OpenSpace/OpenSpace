@@ -40,7 +40,7 @@
 namespace {
     constexpr glm::uvec2 BlackoutTextureSize = glm::uvec2(3840, 2160);
 
-    void checkCornerSpecification(std::vector<glm::vec2> corners) {
+    void checkCornerSpecification(const std::vector<glm::vec2>& corners) {
         if (corners.size() != 4) {
             openspace::documentation::TestResult res;
             res.success = false;
@@ -78,13 +78,14 @@ namespace {
         for (int i = 0; i < numberOfSegments; i++) {
             for (int s = 0; s < Subdivisions; s++) {
                 float tValue = stepSize * s;
-                splineData.push_back(ghoul::interpolateCatmullRom(
+                glm::vec2 value = ghoul::interpolateCatmullRom(
                     tValue,
                     *(controlPoints.begin() + i + 0),
                     *(controlPoints.begin() + i + 1),
                     *(controlPoints.begin() + i + 2),
                     *(controlPoints.begin() + i + 3)
-                ));
+                );
+                splineData.push_back(std::move(value));
             }
         }
         return splineData;
@@ -97,14 +98,13 @@ namespace {
         }
     }
 
-    std::string formatLine(std::string id, const std::vector<glm::vec2>& data)
-    {
+    std::string formatLine(std::string_view id, const std::vector<glm::vec2>& data) {
         if (data.empty()) {
             return "";
         }
 
         std::string str = std::format("{} = {{ ", id);
-        for (int i = 0; i < data.size(); ++i) {
+        for (size_t i = 0; i < data.size(); ++i) {
             std::string xVal = std::format("{}", data[i].x);
             std::string yVal = std::format("{}", data[i].y);
             xVal += (xVal.find(".") == std::string::npos) ? ".0" : "";
@@ -475,7 +475,7 @@ void ScreenSpaceInsetBlackout::BlackoutShape::checkAndUpdateGUI() {
     // Remove GUI elements so that we can add them in correct order again
     if (updatePropertyTree) {
         std::vector<openspace::properties::PropertyOwner*> subs = propertySubOwners();
-        for (int i = 0; i < subs.size(); i++) {
+        for (size_t i = 0; i < subs.size(); i++) {
             removePropertySubOwner(subs[i]);
         }
         addPropertySubOwner(*corners);

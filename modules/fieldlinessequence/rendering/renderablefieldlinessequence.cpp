@@ -1036,14 +1036,14 @@ void RenderableFieldlinesSequence::firstUpdate() {
     const std::vector<std::string>& extraNamesVec =
         file->state.extraQuantityNames();
 
-    for (int i = 0; i < quantities.size(); ++i) {
-        _colorQuantity.addOption(i, extraNamesVec[i]);
-        _maskingQuantity.addOption(i, extraNamesVec[i]);
+    for (size_t i = 0; i < quantities.size(); ++i) {
+        _colorQuantity.addOption(static_cast<int>(i), extraNamesVec[i]);
+        _maskingQuantity.addOption(static_cast<int>(i), extraNamesVec[i]);
     }
     _colorQuantity = _colorQuantityTemp;
     _maskingQuantity = _maskingQuantityTemp;
 
-    if (_colorTablePaths.size() > _colorQuantity) {
+    if (_colorQuantity < _colorTablePaths.size()) {
         _colorTablePath = _colorTablePaths[_colorQuantity].string();
     }
     else {

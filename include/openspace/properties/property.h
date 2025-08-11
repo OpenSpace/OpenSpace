@@ -195,7 +195,6 @@ public:
      * no-op.
      *
      * \param state The Lua state to which the value will be encoded
-     * \return `true` if the encoding succeeded, `false` otherwise
      */
     virtual void getLuaValue(lua_State* state) const = 0;
 

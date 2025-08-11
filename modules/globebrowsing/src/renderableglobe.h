@@ -155,7 +155,7 @@ private:
      *
      * The height can be negative if the height map contains negative values.
      *
-     * \param `position` is the position of a point that gets geodetically projected on
+     * \param position This is the position of a point that gets geodetically projected on
      *        the reference ellipsoid. `position` must be in Cartesian model space
      * \return The height from the reference ellipsoid to the globe surface
      */

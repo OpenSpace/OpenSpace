@@ -298,7 +298,7 @@ namespace {
 
 namespace openspace {
 
-RenderEngine::Window::Window(PropertyOwnerInfo info, int id)
+RenderEngine::Window::Window(PropertyOwnerInfo info, size_t id)
     : properties::PropertyOwner(info)
     , horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.f)
 {
@@ -498,7 +498,7 @@ void RenderEngine::initializeGL() {
 
     LTRACE("RenderEngine::initializeGL(begin)");
 
-    for (int i = 0; i < global::windowDelegate->nWindows(); i++) {
+    for (size_t i = 0; i < global::windowDelegate->nWindows(); i++) {
         std::string name = global::windowDelegate->nameForWindow(i);
         properties::PropertyOwner::PropertyOwnerInfo info = {
             .identifier = std::format("Window_{}", i),

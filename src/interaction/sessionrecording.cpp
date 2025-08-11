@@ -628,7 +628,7 @@ SessionRecording loadSessionRecording(const std::filesystem::path& filename) {
         }
 
         sessionRecording.entries.push_back(std::move(*entry));
-    };
+    }
 
     ghoul_assert(
         std::is_sorted(

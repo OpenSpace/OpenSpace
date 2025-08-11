@@ -99,7 +99,7 @@ public:
     /**
      * Adds the passed \p factory to the FactoryManager. Factories may only be added once.
      *
-     * \tparam Factory The type for which a factory should be created and added
+     * \tparam T The type for which a factory should be created and added
      * \param name A user-readable name for the registered factory
      *
      * \pre \p name must not be empty
