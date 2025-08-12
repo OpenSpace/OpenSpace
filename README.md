@@ -1,21 +1,17 @@
+![OpenSpace Logo](/data/openspace-horiz-logo-crop.png)
+
 <p align="center">
-  ![OpenSpace Logo](/data/openspace-horiz-logo-crop.png)
+  <em>An open-source interactive data visualization software designed to visualize the entire known universe</em>
 </p>
 
 <p align="center">
-  _An open-source interactive data visualization software designed to visualize the entire known universe_
+  <a href="https://docs.openspaceproject.com"><b>Docs</b></a> · <a href="https://join.slack.com/t/openspacesupport/shared_invite/zt-24uhn3wvo-gCGHgjg2m9tHzKUEb_FyMQ"><b>Slack</b></a> · <a href="http://openspaceproject.com"><b>Website</b></a> · <a href="https://www.youtube.com/@OpenSpaceProj"><b>YouTube</b></a>
 </p>
 
 <p align="center">
-  [**Docs**](https://docs.openspaceproject.com) · [**Slack**](https://join.slack.com/t/openspacesupport/shared_invite/zt-24uhn3wvo-gCGHgjg2m9tHzKUEb_FyMQ) · [**Website**](http://openspaceproject.com) · [**YouTube**](https://www.youtube.com/@OpenSpaceProj)
-</p>
-
-<p align="center">
-  [![License](https://img.shields.io/badge/License-MIT-purple.svg?style=flat-square)](LICENSE.md)
-<span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-  [![Download](https://img.shields.io/github/v/tag/OpenSpace/OpenSpace?label=Version&color=maroon&style=flat-square)](https://www.openspaceproject.com/installation)
-<span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-  [![Slack](https://img.shields.io/badge/slack-join?style=social&logo=slack)](https://join.slack.com/t/openspacesupport/shared_invite/zt-24uhn3wvo-gCGHgjg2m9tHzKUEb_FyMQ)
+  <a href="LICENSE.md"><img src="https://img.shields.io/badge/License-MIT-purple.svg?style=flat-square" alt="License"></a>
+  <a href="https://www.openspaceproject.com/installation"><img src="https://img.shields.io/github/v/tag/OpenSpace/OpenSpace?label=Version&color=maroon&style=flat-square" alt="Download"></a>
+  <a href="https://join.slack.com/t/openspacesupport/shared_invite/zt-24uhn3wvo-gCGHgjg2m9tHzKUEb_FyMQ"><img src="https://img.shields.io/badge/slack-join?style=social&logo=slack" alt="Slack"></a>
 </p>
 
 
@@ -32,7 +28,7 @@
 
 
 <h1 align="center">Background</h1>
-OpenSpace started as a collaboration between Sweden's [Linköping University](https://immvis.github.io) (LiU) and the [American Museum of Natural History](https://www.amnh.org) (AMNH). Development of the software began several years ago through a close collaboration with NASA Goddard's [Community Coordinated Modeling Center](https://ccmc.gsfc.nasa.gov) (CCMC) to model space weather forecasting and continued with visualizations of NASA's New Horizons mission to Pluto and ESA's Rosetta mission to 67P/Churyumov-Gerasimenko. This promising set of preliminary work provided a foundation for continued funding from NASA, the Swedish eScience Research Centre, and the Knut and Alice Wallenberg foundation, which has extended the collaboration to include the University of Utah's [Scientific Computing and Imaging](https://www.sci.utah.edu) (SCI) Institute, [New York University](https://www.nyu.edu)'s Tandon School of Engineering, multiple informal science institutions across the world, and multiple, international vendors.
+OpenSpace started as a collaboration between Sweden's <a href="https://immvis.github.io">Linköping University</a> (LiU) and the <a href="https://www.amnh.org">American Museum of Natural History</a>. Development of the software began several years ago through a close collaboration with NASA Goddard's <a href="https://ccmc.gsfc.nasa.gov">Community Coordinated Modeling Center</a> (CCMC) to model space weather forecasting and continued with visualizations of NASA's New Horizons mission to Pluto and ESA's Rosetta mission to 67P/Churyumov-Gerasimenko. This promising set of preliminary work provided a foundation for continued funding from NASA, the Swedish eScience Research Centre, and the Knut and Alice Wallenberg foundation, which has extended the collaboration to include the University of Utah's <a href="https://www.sci.utah.edu">Scientific Computing and Imaging</a> (SCI) Institute, <a href="https://www.nyu.edu">New York University</a>'s Tandon School of Engineering, multiple informal science institutions across the world, and multiple, international vendors.
 
 ![Image](https://docs.openspaceproject.com/latest/_static/images/presentation.jpg)
 
@@ -55,17 +51,17 @@ OpenSpace requires at least support for [OpenGL](https://www.opengl.org/) versio
 
 
 <h1 align="center">Getting Started</h1>
-This repository contains the source code and example profiles for OpenSpace, but does not contain any data. To build and install the application, please check out the [Documentation](https://docs.openspaceproject.com). Here, you will find the build instructions for all operating systems. Please note that the Apple Silicon series of chips do not support OpenGL natively and Metal 2 does not support `double` precision accuracy (see the [specification](https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf) Section 2.1), therefore only the Intel processors for MacOS are supported and maintained.
+This repository contains the source code and example profiles for OpenSpace, but does not contain any data. To build and install the application, please check out the <a href="https://docs.openspaceproject.com">Documentation</a>. Here, you will find the build instructions for all operating systems. Please note that the Apple Silicon series of chips do not support OpenGL natively and Metal 2 does not support `double` precision accuracy (see the <a href="https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf">specification</a> Section 2.1), therefore only the Intel processors for MacOS are supported and maintained.
 
 Requirements for compiling are:
 
   - CMake version 3.25 or above
   - C++ compiler supporting C++20/C++23 (Visual Studio 2022 17.11, GCC13, Clang17, AppleClang 15.0.0)
-  - [Qt](http://www.qt.io/download)
+  - <a href="https://www.qt.io/download">Qt</a>
 
 
 <h2 align="center">:bulb: Asking Questions :bulb:</h2>
-Feel free to create issues for missing features, bug reports, or compile problems or contact us via [email](mailto:support@openspaceproject.com?subject=OpenSpace:). Regarding any issues, you are very welcome on our [Slack support channel](https://openspacesupport.slack.com) to which you can freely [sign-up](https://join.slack.com/t/openspacesupport/shared_invite/zt-24uhn3wvo-gCGHgjg2m9tHzKUEb_FyMQ).
+Feel free to create issues for missing features, bug reports, or compile problems or contact us via <a href="mailto:support@openspaceproject.com?subject=OpenSpace:">email</a>. Regarding any issues, you are very welcome on our <a href="https://openspacesupport.slack.com">Slack support channel</a> to which you can freely <a href="https://join.slack.com/t/openspacesupport/shared_invite/zt-24uhn3wvo-gCGHgjg2m9tHzKUEb_FyMQ">sign-up</a>.
 
 <h2 align="center">:heart: Contributing :heart:</h2>
 Any contributions to the software are very welcome and can take a multitude of forms, from reporting a bug, fixing bugs, creating new content, writing new features, and even creating and sharing images and videos you have made with the software. Please feel free to share anything you want in the #showcase channel on the Slack.
@@ -73,17 +69,17 @@ Any contributions to the software are very welcome and can take a multitude of f
 ![Image](https://docs.openspaceproject.com/latest/_static/images/himalaya-nkpg-dome.jpg)
 
 <p align="center">
-  ![Repobeats](https://repobeats.axiom.co/api/embed/8e7f51f0116f558d420b7caccb10840a746a659f.svg "Repobeats analytics image")
+  <img src="https://repobeats.axiom.co/api/embed/8e7f51f0116f558d420b7caccb10840a746a659f.svg" alt="Repobeats analytics image">
 </p>
 
 
 <h1 align="center">License</h1>
-OpenSpace is under an permissive [MIT license](https://github.com/OpenSpace/OpenSpace/blob/master/LICENSE.md). The license files contains for more detail, but the short version is that you can use OpenSpace for commercial or non-commercial purposes as long as you give credit.
+OpenSpace is under an permissive <a href="https://github.com/OpenSpace/OpenSpace/blob/master/LICENSE.md">MIT license</a>. The license files contains for more detail, but the short version is that you can use OpenSpace for commercial or non-commercial purposes as long as you give credit.
 
 
-<h1 align="center"> Support</h1>
+<h1 align="center">Support</h1>
 OpenSpace is grateful for the support from the following institutions:
 
 <p align="center">
-  ![Image](https://docs.openspaceproject.com/latest/_static/logos/sponsors.png)
+  <img src="https://docs.openspaceproject.com/latest/_static/logos/sponsors.png" alt="Supporters">
 </p>
