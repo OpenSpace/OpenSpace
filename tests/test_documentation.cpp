@@ -88,7 +88,7 @@ TEST_CASE("Documentation: Constructor", "[documentation]") {
 
     // Range Verifiers
     doc.entries.emplace_back("InListDouble", new DoubleInRangeVerifier(0.0, 1.0));
-    doc.entries.emplace_back("InListInt", new IntInRangeVerifier({ 0, 1 }));
+    doc.entries.emplace_back("InListInt", new IntInRangeVerifier(0, 1));
 
     doc.entries.emplace_back(
         "NotInListDouble",

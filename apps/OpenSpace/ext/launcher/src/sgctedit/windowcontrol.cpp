@@ -979,14 +979,14 @@ void WindowControl::onSizeYChanged(int newValue) {
 }
 
 void WindowControl::onOffsetXChanged(int newValue) {
-    const float prevWidth = _windowDimensions.width();
+    const int prevWidth = _windowDimensions.width();
     _windowDimensions.setX(newValue);
     _windowDimensions.setWidth(prevWidth);
     emit windowChanged(_monitor->currentIndex(), _windowIndex, _windowDimensions);
 }
 
 void WindowControl::onOffsetYChanged(int newValue) {
-    const float prevHeight = _windowDimensions.height();
+    const int prevHeight = _windowDimensions.height();
     _windowDimensions.setY(newValue);
     _windowDimensions.setHeight(prevHeight);
     emit windowChanged(_monitor->currentIndex(), _windowIndex, _windowDimensions);

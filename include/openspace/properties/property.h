@@ -170,6 +170,8 @@ public:
      */
     virtual ~Property();
 
+    Property(Property&&) noexcept = default;
+
     /**
      * This method returns the class name of the Property. The method is used by the
      * TemplateFactory to create new instances of Propertys. The returned value is almost
