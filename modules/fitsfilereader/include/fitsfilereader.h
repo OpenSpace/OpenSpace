@@ -114,6 +114,9 @@ private:
     mutable std::mutex _mutex;
 };
 
+extern template std::shared_ptr<TableData<float>> FitsFileReader::readTable(
+    const std::filesystem::path&, const std::vector<std::string>&, int, int, int, bool);
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_FITSFILEREADER___FITSFILEREADER___H__

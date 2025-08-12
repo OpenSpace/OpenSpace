@@ -308,7 +308,7 @@ void LabelsComponent::render(const RenderData& data,
     labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
     labelInfo.renderType = renderOption;
     labelInfo.mvpMatrix = modelViewProjectionMatrix;
-    labelInfo.scale = pow(10.f, _size);
+    labelInfo.scale = std::pow(10.f, _size);
     labelInfo.enableDepth = true;
     labelInfo.enableFalseDepth = false;
 

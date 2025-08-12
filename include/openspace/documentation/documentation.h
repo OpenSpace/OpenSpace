@@ -111,7 +111,7 @@ struct TestResult {
  * a specification violation. This class contains the TestResult that would have otherwise
  * be returned in a call to #testSpecification.
  */
-struct SpecificationError : public ghoul::RuntimeError {
+struct SpecificationError final : public ghoul::RuntimeError {
     /**
      * Creates the SpecificationError exception instance.
      *

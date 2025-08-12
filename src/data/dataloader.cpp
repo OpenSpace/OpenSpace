@@ -268,7 +268,7 @@ std::optional<Dataset> loadCachedFile(const std::filesystem::path& path) {
     // data entries
 
     // commentIdx is the running index into the total comment buffer
-    int commentIdx = 0;
+    size_t commentIdx = 0;
     int valuesIdx = 0;
     for (Dataset::Entry& e : result.entries) {
         e.data.resize(nValues);
@@ -287,7 +287,7 @@ std::optional<Dataset> loadCachedFile(const std::filesystem::path& path) {
             std::memcpy(e.comment->data(), &commentBuffer[commentIdx], e.comment->size());
 
             // and then advance the index
-            commentIdx += static_cast<int>(e.comment->size());
+            commentIdx += e.comment->size();
         }
     }
 
@@ -741,7 +741,7 @@ bool Dataset::normalizeVariable(std::string_view variableName) {
     return true;
 }
 
-glm::vec2 Dataset::findValueRange(int variableIndex) const {
+glm::vec2 Dataset::findValueRange(size_t variableIndex) const {
     if (entries.empty()) {
         // Can't find range if there are no entries
         return glm::vec2(0.f);

@@ -563,7 +563,7 @@ void GeoJsonComponent::update() {
         return;
     }
 
-    const glm::vec3 offsets = glm::vec3(_latLongOffset.value(), _heightOffset);
+    const glm::vec3 offsets = glm::vec3(_latLongOffset.value(), _heightOffset.value());
 
     for (size_t i = 0; i < _geometryFeatures.size(); i++) {
         if (!_features[i]->enabled) {

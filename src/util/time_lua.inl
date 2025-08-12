@@ -279,7 +279,7 @@ namespace {
   *                              the TimeManager.
   */
 [[codegen::luawrap]] void interpolateTime(std::variant<std::string, double> time,
-                                          std::optional<double> interpolationDutation)
+                                          std::optional<double> interpolationDuration)
 {
     using namespace openspace;
 
@@ -289,7 +289,7 @@ namespace {
         std::get<double>(time);
 
 
-    double interp = interpolationDutation.value_or(
+    double interp = interpolationDuration.value_or(
         global::timeManager->defaultTimeInterpolationDuration()
     );
     if (interp > 0) {

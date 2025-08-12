@@ -377,7 +377,7 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
         .cameraLookUp = data.camera.lookUpVectorWorldSpace()
     };
 
-    const glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity);
+    const glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity.value());
 
     for (const dataloader::Labelset::Entry& e : _labelset.entries) {
         glm::vec3 scaledPos(e.position);

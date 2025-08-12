@@ -35,7 +35,6 @@ namespace documentation { struct Documentation; }
 class Transition {
 public:
     explicit Transition(const ghoul::Dictionary& dictionary);
-    ~Transition() = default;
 
     const std::string& from() const;
     const std::string& to() const;

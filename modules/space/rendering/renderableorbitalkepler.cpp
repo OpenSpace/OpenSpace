@@ -533,7 +533,7 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
         );
 
         // Because we want the property to work similar to the planet trails
-        const float fade = pow(
+        const float fade = std::pow(
             _appearance.trailFade.maxValue() - _appearance.trailFade, 2.f
         );
         _trailProgram->setUniform(_uniformTrailCache.trailFadeExponent, fade);
@@ -709,7 +709,7 @@ void RenderableOrbitalKepler::updateBuffers() {
 
 void RenderableOrbitalKepler::calculateSegmentsForPoints(const RenderData& data) {
     int startVertexIndex = 0;
-    for (int i = 0; i < _segmentSizeRaw.size(); i++) {
+    for (size_t i = 0; i < _segmentSizeRaw.size(); i++) {
         // Check how far along the trail we are
         const kepler::Parameters& orbit = _parameters[i];
         const double nRevs = (data.time.j2000Seconds() - orbit.epoch) / orbit.period;
@@ -727,12 +727,15 @@ void RenderableOrbitalKepler::calculateSegmentsForPoints(const RenderData& data)
 }
 
 void RenderableOrbitalKepler::calculateSegmentsForTrails(const RenderData& data) {
-    const float fade = pow(_appearance.trailFade.maxValue() - _appearance.trailFade, 2.f);
-    const float threshold = 1.f - pow(0.05f, 1.f / fade);
+    const float fade = std::pow(
+        _appearance.trailFade.maxValue() - _appearance.trailFade,
+        2.f
+    );
+    const float threshold = 1.f - std::pow(0.05f, 1.f / fade);
 
     int nTotalTrailParts = 0;
     int startVertexIndex = 0;
-    for (int i = 0; i < _segmentSizeRaw.size(); i++) {
+    for (size_t i = 0; i < _segmentSizeRaw.size(); i++) {
         // Check how far along the trail we are
         const kepler::Parameters& orbit = _parameters[i];
         const double nRevs = (data.time.j2000Seconds() - orbit.epoch) / orbit.period;

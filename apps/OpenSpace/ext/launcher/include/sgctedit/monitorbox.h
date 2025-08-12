@@ -39,8 +39,8 @@ public:
      * relative position and size, and window(s) that they contain.
      *
      * \param widgetSize The size of the display widget in pixels
-     * \param monitorResolution A vector containing each monitor's maximum display size in
-     *        pixels
+     * \param monitorResolutions A vector containing each monitor's maximum display size
+     *        in pixels
      * \param parent The parent which to which this MonitorBox belongs
      */
     MonitorBox(QRect widgetSize, const std::vector<QRect>& monitorResolutions,

@@ -94,14 +94,8 @@ private:
      */
     CefTouchEvent touchEvent(const TouchInput& input,
         const cef_touch_event_type_t eventType) const;
-#endif
+#endif // WIN32
 
-    /**
-     * Find the CEF key event to use for a given action.
-     *
-     * \param action
-     * \return
-     */
     cef_key_event_type_t keyEventType(KeyAction action);
 
     BrowserInstance* _browserInstance = nullptr;

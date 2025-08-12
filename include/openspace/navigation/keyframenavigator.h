@@ -49,15 +49,15 @@ public:
     BooleanType(Inclusive);
 
     struct CameraPose {
+        CameraPose() = default;
+        CameraPose(datamessagestructures::CameraKeyframe&& kf);
+        bool operator==(const CameraPose&) const noexcept = default;
+
         glm::dvec3 position = glm::dvec3(0.0);
         glm::quat rotation = glm::quat(0.f, 0.f, 0.f, 0.f);
         std::string focusNode;
         float scale = 1.f;
         bool followFocusNodeRotation = false;
-
-        CameraPose() = default;
-        CameraPose(datamessagestructures::CameraKeyframe&& kf);
-        auto operator<=>(const CameraPose&) const = default;
     };
 
     /**
@@ -67,9 +67,9 @@ public:
      *
      * \param camera A reference to the camera object to have its pose updated
      * \param ignoreFutureKeyframes `true` if only past keyframes are to be used
-     * \return true only if a new future keyframe is available to set camera pose
      */
     void updateCamera(Camera& camera, bool ignoreFutureKeyframes);
+
     static void updateCamera(Camera* camera, const CameraPose& prevPose,
         const CameraPose& nextPose, double t, bool ignoreFutureKeyframes);
 

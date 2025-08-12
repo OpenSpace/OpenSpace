@@ -199,7 +199,7 @@ namespace {
     }
 
     const size_t nElements = lines.size() / 3;
-    if (elementToExtract > nElements) {
+    if (elementToExtract > static_cast<int>(nElements)) {
         throw ghoul::RuntimeError(std::format(
             "Error loading {}. Element number {} requested, but only {} found",
             tle, nElements, elementToExtract

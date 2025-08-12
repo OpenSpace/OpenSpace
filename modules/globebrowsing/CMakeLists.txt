@@ -179,6 +179,12 @@ begin_dependency("GEOS")
 add_subdirectory(ext/geos SYSTEM)
 target_link_libraries(openspace-module-globebrowsing PRIVATE geos)
 
+if (MSVC)
+  target_compile_options(geos PRIVATE "/W0")
+else ()
+  target_compile_options(geos PRIVATE "-w")
+endif ()
+
 set_property(TARGET geos PROPERTY FOLDER "External")
 set_property(TARGET geos_c PROPERTY FOLDER "External")
 set_property(TARGET ryu PROPERTY FOLDER "External")

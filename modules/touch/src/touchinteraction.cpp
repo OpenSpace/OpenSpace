@@ -1065,7 +1065,8 @@ void TouchInteraction::step(double dt, bool directTouch) {
         // should make the touch interaction tap into the orbitalnavigator and let that
         // do the updating of the camera, instead of handling them separately. Then we
         // would keep them in sync and avoid duplicated camera updating code.
-        auto orbitalNavigator = global::navigationHandler->orbitalNavigator();
+        interaction::OrbitalNavigator& orbitalNavigator =
+            global::navigationHandler->orbitalNavigator();
         camPos = orbitalNavigator.pushToSurfaceOfAnchor(camPos);
 
         // @TODO (emmbr, 2023-02-08) with the line above, the ZoomInLimit might not be

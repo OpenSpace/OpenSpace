@@ -108,7 +108,7 @@ LabelParser::LabelParser(std::filesystem::path fileName,
                 // insert decoder to map - this will be used in the parser to determine
                 // behavioral characteristics of each instrument
                 _fileTranslation[std::string(key)] = std::move(decoder);
-            };
+            }
         }
     }
 }

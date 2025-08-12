@@ -454,7 +454,7 @@ DefaultTileProvider* TemporalTileProvider::retrieveTileProvider(const Time& t) {
             }
             default:
                 throw ghoul::MissingCaseException();
-        };
+        }
     }();
 
     DefaultTileProvider tileProvider = createTileProvider(timeStr);
