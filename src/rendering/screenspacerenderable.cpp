@@ -547,7 +547,7 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
 
     glm::mat4 scale = glm::scale(
         glm::mat4(1.f),
-        glm::vec3(_scale, textureRatio*_scale, 1.f)
+        glm::vec3(_scale.value(), textureRatio * _scale, 1.f)
     );
 
     return scale;

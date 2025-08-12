@@ -561,7 +561,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
                 glm::vec3 srfVec = r.surfaceVector * 1000.0;
 
                 // Standoff distance, we would otherwise end up *exactly* on the surface
-                srfVec *= _standOffDistance;
+                srfVec *= _standOffDistance.value();
 
                 second = {
                     .position = { srfVec.x, srfVec.y, srfVec.z },
