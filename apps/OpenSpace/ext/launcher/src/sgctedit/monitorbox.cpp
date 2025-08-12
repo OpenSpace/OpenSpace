@@ -46,12 +46,12 @@ MonitorBox::MonitorBox(QRect widgetSize, const std::vector<QRect>& monitorResolu
     const double aspectRatio = monitorArrangement.width() / monitorArrangement.height();
     if (aspectRatio > 1.0) {
         const float borderMargin = 2.f * MarginFractionWidgetSize * widgetSize.width();
-        const float height = widgetSize.width() / aspectRatio + borderMargin;
+        const double height = widgetSize.width() / aspectRatio + borderMargin;
         widgetSize.setHeight(static_cast<int>(height));
     }
     else {
         const float borderMargin = 2.f * MarginFractionWidgetSize * widgetSize.height();
-        const float width = widgetSize.height() * aspectRatio + borderMargin;
+        const double width = widgetSize.height() * aspectRatio + borderMargin;
         widgetSize.setWidth(static_cast<int>(width));
     }
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);

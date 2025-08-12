@@ -90,11 +90,8 @@ TEST_CASE("Documentation: Constructor", "[documentation]") {
     doc.entries.emplace_back("InListDouble", new DoubleInRangeVerifier(0.0, 1.0));
     doc.entries.emplace_back("InListInt", new IntInRangeVerifier(0, 1));
 
-    doc.entries.emplace_back(
-        "NotInListDouble",
-        new DoubleNotInRangeVerifier({ 0.0, 1.0 })
-    );
-    doc.entries.emplace_back("NotInListInt", new IntNotInRangeVerifier({ 0, 1 }));
+    doc.entries.emplace_back("NotInListDouble", new DoubleNotInRangeVerifier(0.0, 1.0));
+    doc.entries.emplace_back("NotInListInt", new IntNotInRangeVerifier(0, 1));
 
     // Misc Verifiers
     doc.entries.emplace_back("AnnotationBool", new BoolAnnotationVerifier("Bool"));
