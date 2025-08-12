@@ -1116,7 +1116,7 @@ void LuaConsole::filterSuggestions() {
 
     for (const std::string& suggestion : _autoCompleteState.suggestions) {
         std::string candidate = normalize(suggestion);
-        std::string result = suggestion;
+        std::string result = sanitizeInput(suggestion);
 
         if (_autoCompleteState.context == Context::Function) {
             // We're only interested in autocomplete until the next separator "."
