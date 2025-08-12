@@ -2732,10 +2732,10 @@ TEST_CASE("Documentation: Verifier Type Post Conditions", "[documentation]") {
     CHECK(!DoubleNotInListVerifier({ 0.0 }).type().empty());
     CHECK(!StringNotInListVerifier({ ""s }).type().empty());
 
-    CHECK(!IntInRangeVerifier({ 0, 1 }).type().empty());
-    CHECK(!DoubleInRangeVerifier({ 0.0, 1.0 }).type().empty());
-    CHECK(!IntNotInRangeVerifier({ 0, 1 }).type().empty());
-    CHECK(!DoubleNotInRangeVerifier({ 0.0, 1.0 }).type().empty());
+    CHECK(!IntInRangeVerifier(0, 1).type().empty());
+    CHECK(!DoubleInRangeVerifier(0.0, 1.0).type().empty());
+    CHECK(!IntNotInRangeVerifier(0, 1).type().empty());
+    CHECK(!DoubleNotInRangeVerifier(0.0, 1.0).type().empty());
 
     CHECK(!BoolAnnotationVerifier("A"s).type().empty());
     CHECK(!IntAnnotationVerifier("A"s).type().empty());

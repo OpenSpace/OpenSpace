@@ -69,6 +69,8 @@ public:
      */
     PropertyOwner(PropertyOwnerInfo info);
 
+    PropertyOwner(PropertyOwner&&) = default;
+
     /**
      * The destructor will remove all Propertys and PropertyOwners it owns along with
      * itself.
