@@ -125,7 +125,7 @@ void HorizonsDialog::typeOnChange(int index) {
     }
     else {
         QMessageBox::critical(this, "Error", "Invalid Horizons type");
-        styleLabel(_typeLabel, IsDirty::Yes);
+        styleLabel(_typeLabel, true);
     }
 }
 
