@@ -181,6 +181,7 @@ LuaConsole::LuaConsole()
         glm::vec4(1.f)
     )
     , _historyLength(HistoryLengthInfo, 13, 0, 100)
+    , _autoCompleteState{}
 {
     addProperty(_isVisible);
     addProperty(_shouldBeSynchronized);
@@ -195,8 +196,6 @@ LuaConsole::LuaConsole()
 
     _historyTextColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_historyTextColor);
-
-    resetAutoCompleteState();
 }
 
 void LuaConsole::initialize() {
@@ -364,7 +363,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     // The special case for Shift is necessary as we want to allow Shift+TAB
     const bool isShiftModifierOnly = (key == Key::LeftShift || key == Key::RightShift);
     if (key != Key::Tab && !isShiftModifierOnly) {
-        resetAutoCompleteState();
+        _autoCompleteState = AutoCompleteState();
     }
         
     // Do not consume modifier keys
@@ -1002,12 +1001,13 @@ void LuaConsole::autoCompleteCommand() {
         const size_t contextStart = detectContext(currentCommand);
 
         switch (_autoCompleteState.context) {
-            case Context::Path:
+        case Context::Path: {
                 const bool hasSugestions = gatherPathSuggestions(contextStart);
                 if (!hasSugestions) {
                     return;
                 }
                 break;
+            }
             case Context::Function:
                 gatherFunctionSuggestions(contextStart);
                 break;
@@ -1018,21 +1018,7 @@ void LuaConsole::autoCompleteCommand() {
         filterSuggestions();
         _autoCompleteState.isDataDirty = false;
     }
-
     cycleSuggestion();
-}
-
-void LuaConsole::resetAutoCompleteState() {
-    _autoCompleteState = {
-        .context = Context::None,
-        .isDataDirty = true,
-        .input = "",
-        .suggestions = {},
-        .currentIndex = -1,
-        .suggestion = "",
-        .cycleReverse = false,
-        .insertPosition = 0
-    };
 }
 
 size_t LuaConsole::detectContext(std::string_view command) {
@@ -1255,7 +1241,18 @@ void LuaConsole::applySuggestion() {
     }
 
     // Clear suggestion
-    resetAutoCompleteState();
+    _autoCompleteState = AutoCompleteState();
 }
+
+LuaConsole::AutoCompleteState::AutoCompleteState()
+    : context{ Context::None }
+    , isDataDirty{ true }
+    , input{ "" }
+    , suggestions{ }
+    , currentIndex{ NoAutoComplete }
+    , suggestion{ "" }
+    , cycleReverse{ false }
+    , insertPosition{ 0 }
+{ }
 
 } // namespace openspace

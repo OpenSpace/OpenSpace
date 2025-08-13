@@ -69,7 +69,6 @@ private:
 
     // Helper functions for tab autocomplete
     void autoCompleteCommand();
-    void resetAutoCompleteState();
     size_t detectContext(std::string_view command);
     bool gatherPathSuggestions(size_t contextStart);
     void gatherFunctionSuggestions(size_t contextStart);
@@ -101,17 +100,20 @@ private:
         Path
     };
 
-    struct {
-        Context context = Context::None;
-        bool isDataDirty = true;
+    struct AutoCompleteState {
+        AutoCompleteState();
+
+        Context context;
+        bool isDataDirty;
         std::string input; // Part of the command that we're intrested in
         std::vector<std::string> suggestions;
-        int currentIndex = -1;
+        int currentIndex;
         std::string suggestion;
-        bool cycleReverse = false;
-        size_t insertPosition = 0;
-    } _autoCompleteState;
+        bool cycleReverse;
+        size_t insertPosition;
+    };
 
+    AutoCompleteState  _autoCompleteState;
 
     float _currentHeight = 0.f;
     float _targetHeight = 0.f;
