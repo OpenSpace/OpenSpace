@@ -1191,10 +1191,8 @@ void LuaConsole::filterSuggestions() {
         }
     }
 
-    _autoCompleteState.suggestions.clear();
-    for (const std::string& candidate : results) {
-        _autoCompleteState.suggestions.push_back(candidate);
-    }
+    _autoCompleteState.suggestions =
+        std::vector<std::string>(results.begin(), results.end());
 }
 
 void LuaConsole::cycleSuggestion() {
