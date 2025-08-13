@@ -351,7 +351,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     }
 
 
-    KeyWithModifier keyCombination{ key, modifier };
+    KeyWithModifier keyCombination = KeyWithModifier(key, modifier);
 
     // Call the registered function for the key combination pressed
     auto it = _keyHandlers.find(keyCombination);
@@ -491,8 +491,8 @@ void LuaConsole::render() {
     // Render the command and suggestions with line breaks where required
     const size_t totalCommandSize = 2 + currentCommand.size() +
         _autoCompleteState.suggestion.size();
-    const size_t nCharactersPerRow = static_cast<size_t>(res.x * 0.95 /
-        static_cast<double>(_font->glyph('m')->width));
+    const size_t nCharactersPerRow = static_cast<size_t>(res.x * 0.925f /
+        static_cast<float>(_font->glyph('m')->width));
     const size_t nCommandRows = totalCommandSize / nCharactersPerRow;
 
     // The command is split in 3 parts to render the suggestion in a different color
@@ -511,7 +511,7 @@ void LuaConsole::render() {
     // Pad second part in the beginning with ' ' 
     secondPart.insert(secondPart.begin(), totalCommandSize - secondPart.size(), ' ');
 
-    auto linebreakCommand = [nCharactersPerRow](const std::string& s) -> std::string {
+    auto linebreakCommand = [nCharactersPerRow](const std::string& s) {
         const bool requiresSplitting = s.size() > nCharactersPerRow;
 
         if (!requiresSplitting) {
@@ -575,7 +575,7 @@ void LuaConsole::render() {
     RenderFont(
         *_font,
         inputLocation,
-        (std::string((_inputPosition + 2)  % nCharactersPerRow, ' ') + "^"),
+        (std::string((_inputPosition + 2) % nCharactersPerRow, ' ') + "^"),
         _entryTextColor
     );
 
@@ -675,16 +675,17 @@ void LuaConsole::parallelConnectionChanged(const ParallelConnection::Status& sta
 }
 
 void LuaConsole::registerKeyHandler(Key key, KeyModifier modifier,
-    std::function<void()> callback)
+                                                           std::function<void()> callback)
 {
     _keyHandlers[{ key, modifier }] = std::move(callback);
 }
 
 void LuaConsole::registerKeyHandlers() {
-
-    registerKeyHandler(Key::Escape, KeyModifier::None, [this]() {
-        _isVisible = false;
-    });
+    registerKeyHandler(
+        Key::Escape,
+        KeyModifier::None,
+        [this]() { _isVisible = false; }
+    );
 
     // Paste from clipboard
     registerKeyHandler(Key::V, KeyModifier::Control, [this]() {
@@ -702,179 +703,251 @@ void LuaConsole::registerKeyHandlers() {
     });
 
     // Cut to clipboard
-    registerKeyHandler(Key::X, KeyModifier::Control, [this]() {
-        ghoul::setClipboardText(_commands.at(_activeCommand));
-        _commands.at(_activeCommand).clear();
-        _inputPosition = 0;
-    });
-
-    // Cut part after cursor to clipboard ("Kill")
-    registerKeyHandler(Key::K, KeyModifier::Control, [this]() {
-        auto here = _commands.at(_activeCommand).begin() + _inputPosition;
-        auto end = _commands.at(_activeCommand).end();
-        ghoul::setClipboardText(std::string(here, end));
-        _commands.at(_activeCommand).erase(here, end);
-    });
-
-    // Go to the previous JumpCharacter character
-    registerKeyHandler(Key::Left, KeyModifier::Control, [this]() {
-        std::string current = _commands.at(_activeCommand);
-        std::reverse(current.begin(), current.end());
-        const size_t start = current.size() - (_inputPosition - 1);
-        auto it = current.find_first_of(JumpCharacters, start);
-        if (it != std::string::npos) {
-            _inputPosition = current.size() - it;
-        }
-        else {
+    registerKeyHandler(
+        Key::X,
+        KeyModifier::Control,
+        [this]() {
+            ghoul::setClipboardText(_commands.at(_activeCommand));
+            _commands.at(_activeCommand).clear();
             _inputPosition = 0;
         }
-    });
+    );
 
-    // Go to the next JumpCharacter character
-    registerKeyHandler(Key::Right, KeyModifier::Control, [this]() {
-        auto it = _commands.at(_activeCommand).find_first_of(JumpCharacters,
-            _inputPosition + 1);
-        if (it != std::string::npos) {
-            _inputPosition = it;
+    // Cut part after cursor to clipboard ("Kill")
+    registerKeyHandler(
+        Key::K,
+        KeyModifier::Control,
+        [this]() {
+            auto here = _commands.at(_activeCommand).begin() + _inputPosition;
+            auto end = _commands.at(_activeCommand).end();
+            ghoul::setClipboardText(std::string(here, end));
+            _commands.at(_activeCommand).erase(here, end);
         }
-        else {
-            _inputPosition = _commands.at(_activeCommand).size();
-        }
-    });
+    );
 
-    // Go to the previous character
-    registerKeyHandler(Key::Left, KeyModifier::None, [this]() {
-        if (_inputPosition > 0) {
-            --_inputPosition;
-        }
-    });
-
-    // Go to the previous character
-    registerKeyHandler(Key::B, KeyModifier::Control, [this]() {
-        if (_inputPosition > 0) {
-            --_inputPosition;
-        }
-    });
-
-    // Go to the next character
-    registerKeyHandler(Key::Right, KeyModifier::None, [this]() {
-        _inputPosition = std::min(
-            _inputPosition + 1,
-            _commands.at(_activeCommand).length()
-        );
-    });
-
-    // Go to the next character
-    registerKeyHandler(Key::F, KeyModifier::Control, [this]() {
-        _inputPosition = std::min(
-            _inputPosition + 1,
-            _commands.at(_activeCommand).length()
-        );
-    });
-
-    // Go to previous command
-    registerKeyHandler(Key::Up, KeyModifier::None, [this]() {
-        if (_activeCommand > 0) {
-            --_activeCommand;
-        }
-        _inputPosition = _commands.at(_activeCommand).length();
-    });
-
-    // Go to next command (the last is empty)
-    registerKeyHandler(Key::Down, KeyModifier::None, [this]() {
-        if (_activeCommand < _commands.size() - 1) {
-            ++_activeCommand;
-        }
-        _inputPosition = _commands.at(_activeCommand).length();
-    });
-
-    // Remove character before _inputPosition
-    registerKeyHandler(Key::BackSpace, KeyModifier::None, [this]() {
-        if (_inputPosition > 0) {
-            _commands.at(_activeCommand).erase(_inputPosition - 1, 1);
-            --_inputPosition;
-        }
-    });
-
-    // Remove characters before _inputPosition until the previous JumpCharacter. 
-    registerKeyHandler(Key::BackSpace, KeyModifier::Control, [this]() {
-        if (_inputPosition == 0) {
-            return;
-        }
-
-        std::string& command = _commands.at(_activeCommand);
-
-        // If the previous character is a JumpCharacter, remove just that one. This
-        // behavior results in abc.de -> abc. -> abc -> 'empty string'
-        if (JumpCharacters.find(command[_inputPosition - 1]) != std::string::npos) {
-            command.erase(_inputPosition - 1, 1);
-            --_inputPosition;
-            return;
-        }
-
-        // Find the position of the last JumpCharacter before _inputPosition
-        size_t start = 0;
-        for (size_t i = _inputPosition; i > 0; --i) {
-            if (JumpCharacters.find(command[i - 1]) != std::string::npos) {
-                start = i;
-                break;
+    // Go to the previous JumpCharacter character
+    registerKeyHandler(
+        Key::Left,
+        KeyModifier::Control,
+        [this]() {
+            std::string current = _commands.at(_activeCommand);
+            std::reverse(current.begin(), current.end());
+            const size_t start = current.size() - (_inputPosition - 1);
+            auto it = current.find_first_of(JumpCharacters, start);
+            if (it != std::string::npos) {
+                _inputPosition = current.size() - it;
+            }
+            else {
+                _inputPosition = 0;
             }
         }
+    );
 
-        size_t count = _inputPosition - start;
-        command.erase(start, count);
-        _inputPosition -= count;
-    });
+    // Go to the next JumpCharacter character
+    registerKeyHandler(
+        Key::Right,
+        KeyModifier::Control,
+        [this]() {
+            auto it = _commands.at(_activeCommand).find_first_of(JumpCharacters,
+                _inputPosition + 1);
+            if (it != std::string::npos) {
+                _inputPosition = it;
+            }
+            else {
+                _inputPosition = _commands.at(_activeCommand).size();
+            }
+        }
+    );
+
+    // Go to the previous character
+    registerKeyHandler(
+        Key::Left,
+        KeyModifier::None,
+        [this]() {
+            if (_inputPosition > 0) {
+                --_inputPosition;
+            }
+        }
+    );
+
+    // Go to the previous character
+    registerKeyHandler(
+        Key::B,
+        KeyModifier::Control,
+            [this]() {
+            if (_inputPosition > 0) {
+                --_inputPosition;
+            }
+        }
+    );
+
+    // Go to the next character
+    registerKeyHandler(
+        Key::Right,
+        KeyModifier::None,
+        [this]() {
+            _inputPosition = std::min(
+                _inputPosition + 1,
+                _commands.at(_activeCommand).length()
+            );
+        }
+    );
+
+    // Go to the next character
+    registerKeyHandler(
+        Key::F,
+        KeyModifier::Control,
+        [this]() {
+            _inputPosition = std::min(
+                _inputPosition + 1,
+                _commands.at(_activeCommand).length()
+            );
+        }
+    );
+
+    // Go to previous command
+    registerKeyHandler(
+        Key::Up,
+        KeyModifier::None,
+        [this]() {
+            if (_activeCommand > 0) {
+                --_activeCommand;
+            }
+            _inputPosition = _commands.at(_activeCommand).length();
+        }
+    );
+
+    // Go to next command (the last is empty)
+    registerKeyHandler(
+        Key::Down,
+        KeyModifier::None,
+        [this]() {
+            if (_activeCommand < _commands.size() - 1) {
+                ++_activeCommand;
+            }
+            _inputPosition = _commands.at(_activeCommand).length();
+        }
+    );
+
+    // Remove character before _inputPosition
+    registerKeyHandler(
+        Key::BackSpace,
+        KeyModifier::None,
+        [this]() {
+            if (_inputPosition > 0) {
+                _commands.at(_activeCommand).erase(_inputPosition - 1, 1);
+                --_inputPosition;
+            }
+        }
+    );
+
+    // Remove characters before _inputPosition until the previous JumpCharacter. 
+    registerKeyHandler(
+        Key::BackSpace,
+        KeyModifier::Control,
+        [this]() {
+            if (_inputPosition == 0) {
+                return;
+            }
+
+            std::string& command = _commands.at(_activeCommand);
+
+            // If the previous character is a JumpCharacter, remove just that one. This
+            // behavior results in abc.de -> abc. -> abc -> 'empty string'
+            if (JumpCharacters.find(command[_inputPosition - 1]) != std::string::npos) {
+                command.erase(_inputPosition - 1, 1);
+                --_inputPosition;
+                return;
+            }
+
+            // Find the position of the last JumpCharacter before _inputPosition
+            size_t start = 0;
+            for (size_t i = _inputPosition; i > 0; --i) {
+                if (JumpCharacters.find(command[i - 1]) != std::string::npos) {
+                    start = i;
+                    break;
+                }
+            }
+
+            size_t count = _inputPosition - start;
+            command.erase(start, count);
+            _inputPosition -= count;
+        }
+    );
 
     // Remove character after _inputPosition
-    registerKeyHandler(Key::Delete, KeyModifier::None, [this]() {
-        if (_inputPosition <= _commands.at(_activeCommand).size()) {
-            _commands.at(_activeCommand).erase(_inputPosition, 1);
+    registerKeyHandler(
+        Key::Delete,
+        KeyModifier::None,
+            [this]() {
+            if (_inputPosition <= _commands.at(_activeCommand).size()) {
+                _commands.at(_activeCommand).erase(_inputPosition, 1);
+            }
         }
-    });
+    );
 
     // Remove characters after _inputPosition until the ne JumpCharacter
-    registerKeyHandler(Key::Delete, KeyModifier::Control, [this]() {
-        std::string& command = _commands.at(_activeCommand);
-        if (_inputPosition >= command.size()) {
-            return;
-        }
+    registerKeyHandler(
+        Key::Delete,
+        KeyModifier::Control,
+        [this]() {
+            std::string& command = _commands.at(_activeCommand);
+            if (_inputPosition >= command.size()) {
+                return;
+            }
 
-        // If the next character after _inputPosition is a JumpCharacter, delete just that
-        if (JumpCharacters.find(command[_inputPosition]) != std::string::npos) {
-            command.erase(_inputPosition, 1);
-            return;
-        }
+            // If the next character after _inputPosition is a JumpCharacter, delete just that
+            if (JumpCharacters.find(command[_inputPosition]) != std::string::npos) {
+                command.erase(_inputPosition, 1);
+                return;
+            }
 
-        // Find the position of the next Jumpcharacter after _inputPosition
-        size_t next = command.find_first_of(JumpCharacters, _inputPosition);
-        size_t end = next != std::string::npos ? next : command.size();
-        command.erase(_inputPosition, end - _inputPosition);
-    });
+            // Find the position of the next Jumpcharacter after _inputPosition
+            size_t next = command.find_first_of(JumpCharacters, _inputPosition);
+            size_t end = next != std::string::npos ? next : command.size();
+            command.erase(_inputPosition, end - _inputPosition);
+        }
+    );
 
     // Go to the beginning of command string
-    registerKeyHandler(Key::Home, KeyModifier::None, [this]() {
-        _inputPosition = 0;
-    });
+    registerKeyHandler(
+        Key::Home,
+        KeyModifier::None,
+        [this]() {
+            _inputPosition = 0;
+        }
+    );
 
     // Go to the beginning of command string
-    registerKeyHandler(Key::A, KeyModifier::Control, [this]() {
-        _inputPosition = 0;
-    });
+    registerKeyHandler(
+        Key::A,
+        KeyModifier::Control,
+        [this]() {
+            _inputPosition = 0;
+        }
+    );
 
     // Go to end of command string
-    registerKeyHandler(Key::End, KeyModifier::None, [this]() {
-        _inputPosition = _commands.at(_activeCommand).size();
-    });
+    registerKeyHandler(
+        Key::End,
+        KeyModifier::None,
+        [this]() {
+            _inputPosition = _commands.at(_activeCommand).size();
+        }
+    );
 
     // Go to end of command string
-    registerKeyHandler(Key::E, KeyModifier::Control, [this]() {
-        _inputPosition = _commands.at(_activeCommand).size();
-    });
+    registerKeyHandler(
+        Key::E,
+        KeyModifier::Control,
+        [this]() {
+            _inputPosition = _commands.at(_activeCommand).size();
+        }
+    );
 
 
     auto executeCommand = [this]() {
-        if (_autoCompleteState.suggestion != "") {
+        if (!_autoCompleteState.suggestion.empty()) {
             applySuggestion();
             return;
         }
@@ -886,7 +959,7 @@ void LuaConsole::registerKeyHandlers() {
                 .code = cmd,
                 .synchronized = Script::ShouldBeSynchronized(_shouldBeSynchronized),
                 .sendToRemote = Script::ShouldSendToRemote(_shouldSendToRemote)
-                });
+            });
 
             // Only add the current command to the history if it hasn't been
             // executed before. We don't want two of the same commands in a row
@@ -929,18 +1002,17 @@ void LuaConsole::autoCompleteCommand() {
         const size_t contextStart = detectContext(currentCommand);
 
         switch (_autoCompleteState.context) {
-        case Context::Path:
-            if (!gatherPathSuggestions(contextStart)) {
-                return;
-            }
-            break;
-
-        case Context::Function:
-            gatherFunctionSuggestions(contextStart);
-            break;
-        default: {
-            throw ghoul::RuntimeError("Unhandled context");
-        }
+            case Context::Path:
+                const bool hasSugestions = gatherPathSuggestions(contextStart);
+                if (!hasSugestions) {
+                    return;
+                }
+                break;
+            case Context::Function:
+                gatherFunctionSuggestions(contextStart);
+                break;
+            default:
+                throw ghoul::RuntimeError("Unhandled context");
         }
 
         filterSuggestions();
@@ -952,14 +1024,14 @@ void LuaConsole::autoCompleteCommand() {
 
 void LuaConsole::resetAutoCompleteState() {
     _autoCompleteState = {
-                .context = Context::None,
-                .isDataDirty = true,
-                .input = "",
-                .suggestions = {},
-                .currentIndex = -1,
-                .suggestion = "",
-                .cycleReverse = false,
-                .insertPosition = 0,
+        .context = Context::None,
+        .isDataDirty = true,
+        .input = "",
+        .suggestions = {},
+        .currentIndex = -1,
+        .suggestion = "",
+        .cycleReverse = false,
+        .insertPosition = 0
     };
 }
 
@@ -1039,7 +1111,7 @@ bool LuaConsole::gatherPathSuggestions(size_t contextStart) {
     };
 
     std::vector<std::string> entries;
-    for (const auto& entry : suggestions) {
+    for (const std::filesystem::path& entry : suggestions) {
         // Filter paths that contain non-ASCII characters
         if (containsNonAscii(entry)) {
             continue;
@@ -1089,7 +1161,7 @@ void LuaConsole::gatherFunctionSuggestions(size_t contextStart) {
 }
 
 void LuaConsole::filterSuggestions() {
-    auto normalize = [this](const std::string& s) -> std::string {
+    auto normalize = [this](const std::string& s) {
         std::string out = s;
 
         if (_autoCompleteState.context == Context::Function) {
@@ -1137,7 +1209,6 @@ void LuaConsole::filterSuggestions() {
     for (const std::string& candidate : results) {
         _autoCompleteState.suggestions.push_back(candidate);
     }
-    //_autoCompleteState.suggestion.assign(results.begin(), results.end());
 }
 
 void LuaConsole::cycleSuggestion() {
@@ -1174,13 +1245,13 @@ void LuaConsole::applySuggestion() {
     _inputPosition = _autoCompleteState.insertPosition +
         _autoCompleteState.suggestion.size();
 
-    if (_autoCompleteState.context == Context::Function) {
-        if (!_autoCompleteState.suggestion.ends_with('.')) {
-            // We're in a leaf function add paranthesis 
-            currentCommand.insert(_inputPosition, "()");
-            // Set the cursor position to be between the brackets
-            _inputPosition++;
-        }
+    if (_autoCompleteState.context == Context::Function &&
+        !_autoCompleteState.suggestion.ends_with('.'))
+    {
+        // We're in a leaf function add paranthesis 
+        currentCommand.insert(_inputPosition, "()");
+        // Set the cursor position to be between the brackets
+        _inputPosition++;
     }
 
     // Clear suggestion

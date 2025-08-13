@@ -104,13 +104,12 @@ private:
     struct {
         Context context = Context::None;
         bool isDataDirty = true;
-        std::string input = ""; // Part of the command that we're intrested in
-        std::vector<std::string> suggestions = {};
+        std::string input; // Part of the command that we're intrested in
+        std::vector<std::string> suggestions;
         int currentIndex = -1;
-        std::string suggestion = "";
+        std::string suggestion;
         bool cycleReverse = false;
         size_t insertPosition = 0;
-
     } _autoCompleteState;
 
 
