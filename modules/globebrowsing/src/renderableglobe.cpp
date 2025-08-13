@@ -1272,6 +1272,10 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
         const glm::vec3 directionToSunObjSpace(_cachedInverseModelTransform *
             glm::dvec4(directionToSunWorldSpace, 0.0));
 
+        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
+        _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
+
         // Set the light direction uniforms for local renderer
         _globalRenderer.program->setUniform(
             "lightDirectionCameraSpace",
@@ -1292,6 +1296,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
                 -glm::normalize(directionToSunObjSpace)
             );
         }
+
+        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::No);
     }
 
     int globalCount = 0;
