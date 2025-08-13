@@ -300,10 +300,10 @@ void ImGUIModule::internalInitializeGL() {
     strcpy(_iniFileBuffer.data(), file.c_str());
 #endif
 
-    const int nWindows = global::windowDelegate->nWindows();
+    const size_t nWindows = global::windowDelegate->nWindows();
     _contexts.resize(nWindows);
 
-    for (int i = 0; i < nWindows; i++) {
+    for (size_t i = 0; i < nWindows; i++) {
         _contexts[i] = ImGui::CreateContext();
         ImGui::SetCurrentContext(_contexts[i]);
 
@@ -406,7 +406,7 @@ void ImGUIModule::internalInitializeGL() {
     {
         unsigned char* texData = nullptr;
         glm::ivec2 texSize = glm::ivec2(0, 0);
-        for (int i = 0; i < nWindows; i++) {
+        for (size_t i = 0; i < nWindows; i++) {
             ImGui::SetCurrentContext(_contexts[i]);
 
             ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&texData, &texSize.x, &texSize.y);
@@ -420,7 +420,7 @@ void ImGUIModule::internalInitializeGL() {
         _fontTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
         _fontTexture->uploadTexture();
     }
-    for (int i = 0; i < nWindows; i++) {
+    for (size_t i = 0; i < nWindows; i++) {
         const uintptr_t texture = static_cast<GLuint>(*_fontTexture);
         ImGui::SetCurrentContext(_contexts[i]);
         ImGui::GetIO().Fonts->TexID = reinterpret_cast<void*>(texture);

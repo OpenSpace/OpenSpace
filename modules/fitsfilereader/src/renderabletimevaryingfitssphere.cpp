@@ -626,7 +626,7 @@ void RenderableTimeVaryingFitsSphere::updateDynamicDownloading(double currentTim
 
         if (isInInterval &&
             _activeTriggerTimeIndex != -1 &&
-            _activeTriggerTimeIndex < _files.size())
+            _activeTriggerTimeIndex < static_cast<int>(_files.size()))
         {
             _firstUpdate = false;
             loadTexture();

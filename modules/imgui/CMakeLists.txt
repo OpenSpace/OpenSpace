@@ -76,4 +76,5 @@ create_new_module(
 
 add_subdirectory(ext/imgui SYSTEM)
 target_link_libraries(${imgui_module} PUBLIC Imgui)
+disable_compiler_warnings(Imgui)
 set_target_properties(Imgui PROPERTIES FOLDER "External")

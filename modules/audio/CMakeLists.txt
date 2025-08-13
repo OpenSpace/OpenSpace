@@ -56,5 +56,12 @@ add_subdirectory(ext/soloud/contrib SYSTEM)
 # Unfortunately, the soloud cmake tarket doesn't set the include directories correctly
 target_include_directories(openspace-module-audio SYSTEM PRIVATE ext/soloud/include)
 target_link_libraries(openspace-module-audio PRIVATE soloud)
+
+if (MSVC)
+  target_compile_options(soloud PRIVATE "/W0")
+else ()
+  target_compile_options(soloud PRIVATE "-w")
+endif ()
+
 set_property(TARGET soloud PROPERTY FOLDER "External")
 end_dependency("SoLoud")

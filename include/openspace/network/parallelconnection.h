@@ -68,7 +68,7 @@ public:
         std::vector<char> content;
     };
 
-    class ConnectionLostError : public ghoul::RuntimeError {
+    class ConnectionLostError final : public ghoul::RuntimeError {
     public:
         explicit ConnectionLostError(bool shouldLogError_ = true);
 

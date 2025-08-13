@@ -466,7 +466,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
         case ColorAddingBlending:
             glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
             break;
-    };
+    }
 
     if (_disableDepth) {
         glDepthMask(GL_FALSE);
