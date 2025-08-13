@@ -76,7 +76,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
 
     _topicFactory.registerClass(
         "authorize",
-        [password](bool, const ghoul::Dictionary&, ghoul::MemoryPoolBase* pool) {
+        [password](bool, const ghoul::Dictionary&, pmr::memory_resource* pool) {
             if (pool) {
                 void* ptr = pool->allocate(sizeof(AuthorizationTopic));
                 return new (ptr) AuthorizationTopic(password);

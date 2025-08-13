@@ -81,7 +81,7 @@ nlohmann::json MissionTopic::createPhaseJson(const MissionPhase& phase) const {
         };
 
         if (date.description.has_value()) {
-            jsonDate["description"] = *date.description;;
+            jsonDate["description"] = *date.description;
         }
         if (date.image.has_value()) {
             jsonDate["image"] = *date.image;

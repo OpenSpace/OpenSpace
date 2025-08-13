@@ -54,7 +54,9 @@ glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec);
  * Converts from galactic cartesian coordinates to ICRS decimal degrees coordinates
  * and distance.
  *
- * \param x, y, z X, Y, and Z coordinates
+ * \param x The x coordinate
+ * \param y The y coordinate
+ * \param z The z coordinate
  * \return A vector with the ra and dec decimal degrees in degrees and distance
  */
 glm::dvec3 galacticCartesianToIcrs(double x, double y, double z);

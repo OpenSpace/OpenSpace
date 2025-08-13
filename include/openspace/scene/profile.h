@@ -43,7 +43,7 @@ namespace scripting { struct LuaLibrary; }
 
 class Profile {
 public:
-    struct ParsingError : public ghoul::RuntimeError {
+    struct ParsingError final : public ghoul::RuntimeError {
         enum class Severity { Info, Warning, Error };
 
         ParsingError(Severity severity_, std::string msg);
@@ -56,14 +56,14 @@ public:
         int major = 0;
         int minor = 0;
 
-        auto operator<=>(const Version&) const = default;
+        bool operator==(const Version&) const noexcept = default;
     };
     struct Module {
         std::string name;
         std::optional<std::string> loadedInstruction;
         std::optional<std::string> notLoadedInstruction;
 
-        auto operator<=>(const Module&) const = default;
+        bool operator==(const Module&) const noexcept = default;
     };
     struct Meta {
         std::optional<std::string> name;
@@ -73,7 +73,7 @@ public:
         std::optional<std::string> url;
         std::optional<std::string> license;
 
-        auto operator<=>(const Meta&) const = default;
+        bool operator==(const Meta&) const noexcept = default;
     };
 
     struct Property {
@@ -86,7 +86,7 @@ public:
         std::string name;
         std::string value;
 
-        auto operator<=>(const Property&) const = default;
+        bool operator==(const Property&) const noexcept = default;
     };
 
     struct Action {
@@ -97,14 +97,14 @@ public:
         bool isLocal = false;
         std::string script;
 
-        auto operator<=>(const Action&) const = default;
+        bool operator==(const Action&) const = default;
     };
 
     struct Keybinding {
         KeyWithModifier key;
         std::string action;
 
-        auto operator<=>(const Keybinding&) const = default;
+        bool operator==(const Keybinding&) const noexcept = default;
     };
 
     struct Time {
@@ -117,7 +117,7 @@ public:
         std::string value;
         bool startPaused = false;
 
-        auto operator<=>(const Time&) const = default;
+        bool operator==(const Time&) const noexcept = default;
     };
 
     struct CameraGoToNode {
@@ -126,7 +126,7 @@ public:
         std::string anchor;
         std::optional<double> height;
 
-        auto operator<=>(const CameraGoToNode&) const = default;
+        bool operator==(const CameraGoToNode&) const noexcept = default;
     };
 
     struct CameraNavState {
@@ -140,7 +140,7 @@ public:
         std::optional<double> yaw;
         std::optional<double> pitch;
 
-        auto operator<=>(const CameraNavState&) const = default;
+        bool operator==(const CameraNavState&) const noexcept = default;
     };
 
     struct CameraGoToGeo {
@@ -151,7 +151,7 @@ public:
         double longitude = 0.0;
         std::optional<double> altitude;
 
-        auto operator<=>(const CameraGoToGeo&) const = default;
+        bool operator==(const CameraGoToGeo&) const noexcept = default;
     };
 
     using CameraType = std::variant<CameraGoToNode, CameraNavState, CameraGoToGeo>;
@@ -160,7 +160,7 @@ public:
     explicit Profile(const std::filesystem::path& path);
     std::string serialize() const;
 
-    auto operator<=>(const Profile&) const = default;
+    bool operator==(const Profile&) const noexcept = default;
 
     /**
      * Saves all current settings, starting from the profile that was loaded at startup,

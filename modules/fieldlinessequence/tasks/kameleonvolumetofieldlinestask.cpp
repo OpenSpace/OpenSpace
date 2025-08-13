@@ -154,7 +154,7 @@ void KameleonVolumeToFieldlinesTask::perform(
     std::unordered_map<std::string, std::vector<glm::vec3>> seedPoints =
         fls::extractSeedPointsFromFiles(_seedpointsPath, _nthSeedPoint);
     if (seedPoints.empty()) {
-        throw ghoul::RuntimeError("Falied to read seedpoints");
+        throw ghoul::RuntimeError("Failed to read seed points");
     }
 
     size_t fileNumber = 0;

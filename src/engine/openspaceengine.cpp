@@ -1808,7 +1808,7 @@ void setCameraFromProfile(const Profile& p) {
     }
 
     auto checkNodeExists = [](const std::string& node) {
-        if (global::renderEngine->scene()->sceneGraphNode(node) == nullptr) {
+        if (!global::renderEngine->scene()->sceneGraphNode(node)) {
             throw ghoul::RuntimeError(std::format(
                 "Error when setting camera from profile. Could not find node '{}'", node
             ));

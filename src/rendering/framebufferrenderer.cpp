@@ -952,7 +952,8 @@ void FramebufferRenderer::updateRaycastData() {
                 absPath(ExitFragmentShaderPath),
                 dict
             );
-        } catch (const ghoul::RuntimeError& e) {
+        }
+        catch (const ghoul::RuntimeError& e) {
             LERROR(e.message);
         }
 
@@ -965,7 +966,8 @@ void FramebufferRenderer::updateRaycastData() {
                 absPath(RaycastFragmentShaderPath),
                 outsideDict
             );
-        } catch (const ghoul::RuntimeError& e) {
+        }
+        catch (const ghoul::RuntimeError& e) {
             LERROR(e.message);
         }
 

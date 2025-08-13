@@ -334,7 +334,7 @@ void RenderableShadowCylinder::createCylinder(double time) {
 
     vecLightSource = glm::inverse(_stateMatrix) * vecLightSource;
 
-    vecLightSource *= _shadowLength;
+    vecLightSource *= _shadowLength.value();
     _vertices.clear();
 
     for (const glm::vec3& v : terminatorPoints) {

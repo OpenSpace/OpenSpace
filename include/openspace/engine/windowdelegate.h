@@ -94,17 +94,17 @@ struct WindowDelegate {
 
     void (*swapBuffer)() = []() {};
 
-    int (*nWindows)() = []() { return 0; };
+    size_t (*nWindows)() = []() { return size_t(0); };
 
     int (*currentWindowId)() = []() { return 0; };
 
     int (*firstWindowId)() = []() { return 0; };
 
-    std::string (*nameForWindow)(int windowIdx) = [](int) { return std::string(); };
+    std::string (*nameForWindow)(size_t windowIdx) = [](size_t) { return std::string(); };
 
-    float (*horizFieldOfView)(int windowIdx) = [](int) { return 0.f; };
+    float (*horizFieldOfView)(size_t windowIdx) = [](size_t) { return 0.f; };
 
-    void (*setHorizFieldOfView)(int windowIdx, float hFovDeg) = [](int, float) {};
+    void (*setHorizFieldOfView)(size_t windowIdx, float hFovDeg) = [](size_t, float) {};
 
     void* (*getNativeWindowHandle)(size_t windowIndex) = [](size_t) -> void* {
         return nullptr;

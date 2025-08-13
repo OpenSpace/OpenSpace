@@ -601,7 +601,9 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 
     if (p.colorTableRanges.has_value()) {
         _colorTableRanges = *p.colorTableRanges;
-        if (_colorTableRanges.size() > _colorQuantityTemp && _colorQuantityTemp >= 0) {
+        if (_colorQuantityTemp < static_cast<int>(_colorTableRanges.size()) &&
+            _colorQuantityTemp >= 0)
+        {
             _selectedColorRange = _colorTableRanges[_colorQuantityTemp];
         }
         else {
@@ -639,7 +641,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         // Note that we do not need to set _selectedColorRange in the constructor, due to
         // this onChange being declared before firstupdate() function that sets
         // _colorQuantity.
-        if (_colorTableRanges.size() > _colorQuantity) {
+        if (_colorQuantity < static_cast<int>(_colorTableRanges.size())) {
             _selectedColorRange = _colorTableRanges[_colorQuantity];
         }
         // If fewer data ranges are given than there are parameters in the data, use the
@@ -650,7 +652,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             _selectedColorRange = _colorTableRanges[0];
         }
 
-        if (_colorTablePaths.size() > _colorQuantity) {
+        if (_colorQuantity < static_cast<int>(_colorTablePaths.size())) {
             _colorTablePath = _colorTablePaths[_colorQuantity].string();
         }
         else {
@@ -660,7 +662,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 
     // This is to save the changes done in the gui for when you switch between options
     _selectedColorRange.onChange([this]() {
-        if (_colorTableRanges.size() > _colorQuantity) {
+        if (_colorQuantity < static_cast<int>(_colorTableRanges.size())) {
             _colorTableRanges[_colorQuantity] = _selectedColorRange;
         }
     });
@@ -680,7 +682,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 
     _maskingQuantity.onChange([this]() {
         _shouldUpdateMaskingBuffer = true;
-        if (_maskingRanges.size() > _maskingQuantity) {
+        if (_maskingQuantity < static_cast<int>(_maskingRanges.size())) {
             _selectedMaskingRange = _maskingRanges[_maskingQuantity];
         }
         else if (!_maskingRanges.empty()) {
@@ -692,7 +694,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     });
 
     _selectedMaskingRange.onChange([this]() {
-        if (_maskingRanges.size() > _maskingQuantity) {
+        if (_maskingQuantity < static_cast<int>(_maskingRanges.size())) {
             _maskingRanges[_maskingQuantity] = _selectedMaskingRange;
         }
     });
@@ -1034,14 +1036,14 @@ void RenderableFieldlinesSequence::firstUpdate() {
     const std::vector<std::string>& extraNamesVec =
         file->state.extraQuantityNames();
 
-    for (int i = 0; i < quantities.size(); ++i) {
-        _colorQuantity.addOption(i, extraNamesVec[i]);
-        _maskingQuantity.addOption(i, extraNamesVec[i]);
+    for (size_t i = 0; i < quantities.size(); ++i) {
+        _colorQuantity.addOption(static_cast<int>(i), extraNamesVec[i]);
+        _maskingQuantity.addOption(static_cast<int>(i), extraNamesVec[i]);
     }
     _colorQuantity = _colorQuantityTemp;
     _maskingQuantity = _maskingQuantityTemp;
 
-    if (_colorTablePaths.size() > _colorQuantity) {
+    if (_colorQuantity < static_cast<int>(_colorTablePaths.size())) {
         _colorTablePath = _colorTablePaths[_colorQuantity].string();
     }
     else {
@@ -1106,7 +1108,8 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         currentTime < _files[_activeIndex].timestamp ||
         // if currentTime >= next timestamp, it means that we stepped forward to a
         // time represented by another state
-        (nextIndex < _files.size() && currentTime >= _files[nextIndex].timestamp) ||
+        (nextIndex < static_cast<int>(_files.size()) &&
+        currentTime >= _files[nextIndex].timestamp) ||
         // The case when we jumped passed last file. where nextIndex is not < file.size()
         currentTime >= _files[_activeIndex].timestamp)
     {

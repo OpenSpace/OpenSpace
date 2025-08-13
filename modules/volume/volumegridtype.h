@@ -35,12 +35,6 @@ enum class VolumeGridType : int {
     Spherical = 1
 };
 
-struct InvalidGridTypeError : public ghoul::RuntimeError {
-    explicit InvalidGridTypeError(std::string gridType_);
-
-    std::string gridType;
-};
-
 VolumeGridType parseGridType(const std::string& gridType);
 std::string gridTypeToString(VolumeGridType);
 

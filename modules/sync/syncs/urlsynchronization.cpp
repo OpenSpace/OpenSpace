@@ -104,8 +104,7 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dictionary,
     if (p.filename.has_value() && _urls.size() > 1) {
         throw ghoul::RuntimeError(std::format(
             "UrlSynchronization ({}) requested overwrite filename but specified {} URLs "
-            "to download, which is not legal",
-            p.identifier, _urls.size()
+            "to download, which is not legal", p.identifier, _urls.size()
         ));
     }
     _filename = p.filename.value_or(_filename);

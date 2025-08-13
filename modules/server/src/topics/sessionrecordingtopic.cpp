@@ -132,7 +132,7 @@ void SessionRecordingTopic::sendJsonData() {
                 break;
         }
         stateJson[StateKey] = stateString;
-    };
+    }
     if (_sendFiles) {
         stateJson[FilesKey] = global::sessionRecordingHandler->playbackList();
     }

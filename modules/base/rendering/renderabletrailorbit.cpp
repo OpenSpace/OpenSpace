@@ -351,12 +351,12 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
 
         // If we would need to generate more new points than there are total points in the
         // array, it is faster to regenerate the entire array
-        if (nNewPoints >= _resolution) {
+        if (nNewPoints >= static_cast<uint64_t>(_resolution)) {
             fullSweep(data.time.j2000Seconds());
             return { false, true, UpdateReport::All };
         }
 
-        for (int i = 0; i < nNewPoints; i++) {
+        for (uint64_t i = 0; i < nNewPoints; i++) {
             _lastPointTime += secondsPerPoint;
 
             // Get the new permanent point and write it into the (previously) floating
