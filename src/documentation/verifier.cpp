@@ -644,7 +644,7 @@ TestResult TemplateVerifier<glm::ivec4>::operator()(const ghoul::Dictionary& dic
 }
 
 TableVerifier::TableVerifier(std::vector<DocumentationEntry> documentationEntries,
-                             std::optional<int> nEntries)
+                             std::optional<size_t> nEntries)
     : documentations(std::move(documentationEntries))
     , count(nEntries)
 {}

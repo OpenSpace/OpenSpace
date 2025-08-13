@@ -43,12 +43,6 @@ namespace openspace {
  */
 class KeplerTranslation : public Translation {
 public:
-    struct RangeError : public ghoul::RuntimeError {
-        explicit RangeError(std::string off);
-
-        std::string offender;
-    };
-
     /**
      * The constructor that retrieves the required Keplerian elements from the passed
      * \p dictionary. These values are then apssed to the setKeplerElements method for

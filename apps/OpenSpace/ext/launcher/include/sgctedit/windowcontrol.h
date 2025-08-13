@@ -69,7 +69,10 @@ public:
     /**
      * Sets the window dimensions.
      *
-     * \param newDims The x, y dimensions to set the window to
+     * \param x The x coordinate to set the window to
+     * \param y The y coordinate to set the window to
+     * \param width The width to set the window to
+     * \param height The height to set the window to
      */
     void setDimensions(int x, int y, int width, int height);
 
@@ -128,7 +131,8 @@ public:
      * \param quality The value for number of vertical lines of resolution. This will be
      *        compared against the QualityValues array in order to set the correct
      *        combobox index
-     * \tilt  The tilt of the fisheye in degrees
+     * \param tilt The tilt of the fisheye in degrees
+     * \param fov Set the field-of-view of the fisheye
      */
     void setProjectionFisheye(int quality, float tilt, float fov);
 

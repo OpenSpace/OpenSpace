@@ -276,10 +276,10 @@ void DateTime::decrementOnce(int value, char unit) {
             break;
 
         default:
-            throw ghoul::RuntimeError(
-                "Invalid unit format in TQ decrementOnce '" + std::to_string(unit) +
-                "'. Expected 'y', 'M', 'd', 'h', or 'm'"
-            );
+            throw ghoul::RuntimeError(std::format(
+                "Invalid unit format in TQ decrementOnce '{}'. Expected 'y', 'M', 'd', "
+                "'h', or 'm'", unit
+            ));
     }
 }
 
@@ -349,7 +349,9 @@ double TimeQuantizer::parseTimeResolutionStr(const std::string& resolutionStr) {
     _resolutionValue = value;
     _resolutionUnit = unit;
     if (*p) { // not a number
-        throw ghoul::RuntimeError("Cannot convert " + numberString + " to number");
+        throw ghoul::RuntimeError(std::format(
+            "Cannot convert {} to number", numberString
+        ));
     }
     else {
         verifyResolutionRestrictions(static_cast<int>(value), unit);

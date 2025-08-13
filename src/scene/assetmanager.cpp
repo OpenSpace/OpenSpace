@@ -940,8 +940,7 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
         }
         else {
             throw ghoul::RuntimeError(std::format(
-                "Could not find asset file '{}' requested by '{}'",
-                path, retriever
+                "Could not find asset file '{}' requested by '{}'", path, retriever
             ));
         }
     }

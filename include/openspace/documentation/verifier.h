@@ -265,7 +265,7 @@ public:
      *        value is not provided, any number (including 0) is allowed
      */
     explicit TableVerifier(std::vector<DocumentationEntry> documentationEntries = {},
-        std::optional<int> nEntries = std::nullopt);
+        std::optional<size_t> nEntries = std::nullopt);
 
     /**
      * Checks whether the \p key%'s value is a table (= ghoul::Dictionary) and (if
@@ -288,7 +288,7 @@ public:
 
     /// The documentations passed in the constructor
     std::vector<DocumentationEntry> documentations;
-    std::optional<int> count;
+    std::optional<size_t> count;
 };
 
 /**

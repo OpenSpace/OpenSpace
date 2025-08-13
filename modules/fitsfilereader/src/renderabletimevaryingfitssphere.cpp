@@ -353,8 +353,7 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
                 else {
                     throw ghoul::RuntimeError(std::format(
                         "The two values at {} needs to be of type double, a number with "
-                        "at least one decimal",
-                        intKey
+                        "at least one decimal", intKey
                     ));
                 }
             }
@@ -475,8 +474,7 @@ void RenderableTimeVaryingFitsSphere::extractMandatoryInfoFromSourceFolder() {
     if (!std::filesystem::is_directory(sourceFolder)) {
         throw ghoul::RuntimeError(std::format(
             "Source folder '{}' for RenderableTimeVaryingFitsSphere is not a valid "
-            "directory",
-            sourceFolder
+            "directory", sourceFolder
         ));
     }
     // Extract all file paths from the provided folder
@@ -628,7 +626,7 @@ void RenderableTimeVaryingFitsSphere::updateDynamicDownloading(double currentTim
 
         if (isInInterval &&
             _activeTriggerTimeIndex != -1 &&
-            _activeTriggerTimeIndex < _files.size())
+            _activeTriggerTimeIndex < static_cast<int>(_files.size()))
         {
             _firstUpdate = false;
             loadTexture();

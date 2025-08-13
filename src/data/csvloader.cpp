@@ -88,11 +88,11 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
     // First row is the column names
     const std::vector<std::string>& columns = rows.front();
 
-    int xColumn = -1;
-    int yColumn = -1;
-    int zColumn = -1;
-    int nameColumn = -1;
-    int textureColumn = -1;
+    std::optional<size_t> xColumn;
+    std::optional<size_t> yColumn;
+    std::optional<size_t> zColumn;
+    std::optional<size_t> nameColumn;
+    std::optional<size_t> textureColumn;
 
     int nDataColumns = 0;
     const bool hasExcludeColumns = specs.has_value() && specs->hasExcludeColumns();
@@ -106,17 +106,17 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
 
         if (isPositionColumn(col, specs)) {
             if (isColumnX(col, specs)) {
-                xColumn = static_cast<int>(i);
+                xColumn = i;
             }
             if (isColumnY(col, specs)) {
-                yColumn = static_cast<int>(i);
+                yColumn = i;
             }
             if (isColumnZ(col, specs)) {
-                zColumn = static_cast<int>(i);
+                zColumn = i;
             }
         }
         else if (isNameColumn(col, specs)) {
-            nameColumn = static_cast<int>(i);
+            nameColumn = i;
         }
         else if (hasExcludeColumns && specs->isExcludeColumn(col)) {
             skipColumns.push_back(i);
@@ -126,7 +126,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
             // Note that the texture column is also a regular column. Just save the index
             if (isTextureColumn(col, specs)) {
                 res.textureDataIndex = nDataColumns;
-                textureColumn = static_cast<int>(i);
+                textureColumn = i;
             }
 
             res.variables.push_back({
@@ -164,7 +164,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         ));
     }
 
-    if (xColumn < 0 || yColumn < 0 || zColumn < 0) {
+    if (!xColumn.has_value() || !yColumn.has_value() || !zColumn.has_value()) {
         // One or more position columns weren't read
         LERROR(std::format(
             "Error loading data file '{}'. Missing X, Y or Z position column", filePath
@@ -197,16 +197,16 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
             // For now, all values are converted to float
             const float value = readFloatData(strValue);
 
-            if (i == xColumn) {
+            if (xColumn.has_value() && i == *xColumn) {
                 entry.position.x = value;
             }
-            else if (i == yColumn) {
+            else if (yColumn.has_value() && i == *yColumn) {
                 entry.position.y = value;
             }
-            else if (i == zColumn) {
+            else if (zColumn.has_value() && i == *zColumn) {
                 entry.position.z = value;
             }
-            else if (i == nameColumn) {
+            else if (nameColumn.has_value() && i == *nameColumn) {
                 // Note that were we use the original stirng value, rather than the
                 // converted one
                 entry.comment = strValue;
@@ -215,7 +215,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
                 entry.data.push_back(value);
             }
 
-            if (i == textureColumn) {
+            if (textureColumn.has_value() && i == *textureColumn) {
                 uniqueTextureIndicesInData.emplace(static_cast<int>(value));
             }
         }
@@ -281,8 +281,7 @@ std::vector<Dataset::Texture> loadTextureMapFile(std::filesystem::path path,
             throw ghoul::RuntimeError(std::format(
                 "Error loading texture map file {}: Line {} has too many parameters. "
                 "Expected 2: an integer index followed by a filename, where the file "
-                "name may not include whitespaces",
-                path, currentLineNumber
+                "name may not include whitespaces", path, currentLineNumber
             ));
         }
 

@@ -345,24 +345,12 @@ void RenderableMultiresVolume::initializeGL() {
     constexpr unsigned int MaxInitialBudget = 2048;
     int initialBudget = std::min(MaxInitialBudget, maxNumBricks);
 
-    _currentTime = properties::IntProperty(
-        CurrentTimeInfo,
-        0,
-        0,
-        _tsp->header().numTimesteps - 1
-    );
-    _memoryBudget = properties::IntProperty(
-        MemoryBudgetInfo,
-        initialBudget,
-        0,
-        maxNumBricks
-    );
-    _streamingBudget = properties::IntProperty(
-        StreamingBudgetInfo,
-        initialBudget,
-        0,
-        maxNumBricks
-    );
+    _currentTime.setMaxValue(_tsp->header().numTimesteps - 1);
+    _memoryBudget = initialBudget;
+    _memoryBudget.setMaxValue(maxNumBricks);
+    _streamingBudget = initialBudget;
+    _streamingBudget.setMaxValue(maxNumBricks);
+
     addProperty(_currentTime);
     addProperty(_memoryBudget);
     addProperty(_streamingBudget);

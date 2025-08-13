@@ -73,10 +73,9 @@ std::array<std::string, 3> gridVariables(ccmc::Model* model) {
 
     // validate
     if (tokens.size() != 3) {
-        throw ghoul::RuntimeError(
-            "Expected three dimensional grid system. Got " +
-            std::to_string(tokens.size()) + "dimensions"
-        );
+        throw ghoul::RuntimeError(std::format(
+            "Expected three dimensional grid system. Got {} dimensions", tokens.size()
+        ));
     }
 
     std::string x = std::move(tokens.at(0));
@@ -732,7 +731,7 @@ glm::vec4 KameleonWrapper::modelScaleScaled() const {
     }
     else if (units[0] == "m" && units[1] == "radian" && units[2] == "radian") {
         // For spherical coordinate systems the radius is in meter
-        scale.w = -log10(1.f / _max.x);
+        scale.w = -std::log10(1.f / _max.x);
     }
 
     return scale;
@@ -1075,7 +1074,7 @@ std::vector<std::string> KameleonWrapper::variables() const {
     int numVariables = _model->getNumberOfVariables();
 
     for (int i = 0; i < numVariables; i++) {
-        variableNames.push_back(_model->getVariableName(i));;
+        variableNames.push_back(_model->getVariableName(i));
     }
     return variableNames;
 }

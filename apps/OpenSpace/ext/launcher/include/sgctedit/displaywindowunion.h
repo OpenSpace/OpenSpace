@@ -42,12 +42,10 @@ public:
      * Constructor for DisplayWindowUnion class, which manages the overall control layout
      * including monitorBox, multiple WindowControl columns, and additional controls.
      *
-     * \param monitorSizeList A vector containing QRect objects containing pixel dims of
-     *        each monitor
+     * \param monitorResolutions A vector containing QRect objects containing pixel dims
+     *        of each monitor
      * \param nMaxWindows The maximum number of windows allowed (depends on the number of
      *        monitors in the system)
-     * \param resetToDefault If set to true, all display and window settings will be
-     *        initialized to their default values
      * \param parent The parent to which this widget belongs
      */
     DisplayWindowUnion(const std::vector<QRect>& monitorResolutions,

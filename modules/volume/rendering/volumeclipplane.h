@@ -37,7 +37,6 @@ namespace openspace::volume {
 class VolumeClipPlane : public properties::PropertyOwner {
 public:
     explicit VolumeClipPlane(const ghoul::Dictionary& dictionary);
-    ~VolumeClipPlane() override = default;
 
     glm::vec3 normal() const;
     glm::vec2 offsets() const;

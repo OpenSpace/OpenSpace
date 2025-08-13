@@ -26,11 +26,6 @@
 
 namespace openspace::volume {
 
-InvalidGridTypeError::InvalidGridTypeError(std::string gridType_)
-    : RuntimeError(std::format("Invalid grid type: '{}'", gridType_))
-    , gridType(std::move(gridType_))
-{}
-
 VolumeGridType parseGridType(const std::string& gridType) {
     if (gridType == "Cartesian") {
         return VolumeGridType::Cartesian;
@@ -38,7 +33,7 @@ VolumeGridType parseGridType(const std::string& gridType) {
     if (gridType == "Spherical") {
         return VolumeGridType::Spherical;
     }
-    throw InvalidGridTypeError(gridType);
+    throw ghoul::RuntimeError(std::format("Invalid grid type: '{}'", gridType));
 }
 
 std::string gridTypeToString(VolumeGridType gridType) {

@@ -297,8 +297,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
         if (_folder.files.empty()) {
             throw ghoul::RuntimeError(std::format(
                 "Error loading layer '{}'. Folder '{}' does not contain any files that "
-                "matched the time format",
-                _identifier, _folder.folder
+                "matched the time format", _identifier, _folder.folder
             ));
         }
     }
@@ -455,7 +454,7 @@ DefaultTileProvider* TemporalTileProvider::retrieveTileProvider(const Time& t) {
             }
             default:
                 throw ghoul::MissingCaseException();
-        };
+        }
     }();
 
     DefaultTileProvider tileProvider = createTileProvider(timeStr);

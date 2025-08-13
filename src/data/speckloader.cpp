@@ -186,8 +186,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
             if (nNonEmptyTokens > 4) {
                 throw ghoul::RuntimeError(std::format(
                     "Error loading speck file {}: Too many arguments for texture on line "
-                    "{}",
-                    path, currentLineNumber
+                    "{}", path, currentLineNumber
                 ));
             }
 
@@ -228,8 +227,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
         throw ghoul::RuntimeError(std::format(
             "Error in line {} while reading the header information of file '{}'. Line is "
             "neither a comment line, nor starts with one of the supported keywords for "
-            "SPECK files",
-            currentLineNumber, path
+            "SPECK files", currentLineNumber, path
         ));
     }
 
@@ -300,8 +298,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
             // line count in the beginning of the while loop we are currently in
             throw ghoul::RuntimeError(std::format(
                 "Error loading position information out of data line {} in file '{}'. "
-                "Value was not a number",
-                currentLineNumber - 1, path
+                "Value was not a number", currentLineNumber - 1, path
             ));
         }
 
@@ -334,8 +331,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
                     // currently in
                     throw ghoul::RuntimeError(std::format(
                         "Error loading data value {} out of data line {} in file '{}'. "
-                        "Value was not a number",
-                        i, currentLineNumber - 1, path
+                        "Value was not a number", i, currentLineNumber - 1, path
                     ));
                 }
             }

@@ -146,7 +146,7 @@ public:
       * structure.
       *
       * \param assetBasePath The base path where to find all assets
-      * \param assetBasePath The base path where to find user assets
+      * \param userAssetBasePath The base path where to find user assets
       */
     void importModelData(const std::string& assetBasePath,
         const std::string& userAssetBasePath);

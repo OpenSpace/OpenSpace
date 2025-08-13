@@ -88,7 +88,7 @@ RenderableSwitch::RenderableSwitch(const ghoul::Dictionary& dictionary)
     if (!p.renderableNear.has_value() && !p.renderableFar.has_value()) {
         throw ghoul::RuntimeError(
             "Either a RenderableNear or a RenderableFar (or both) has to be provided, "
-            "but omitting both is invalid."
+            "but omitting both is invalid"
         );
     }
 

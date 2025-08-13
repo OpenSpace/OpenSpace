@@ -954,9 +954,7 @@ void RenderablePointCloud::initializeSingleTexture() {
     std::filesystem::path p = absPath(_texture.spriteTexturePath);
 
     if (!std::filesystem::is_regular_file(p)) {
-        throw ghoul::RuntimeError(std::format(
-            "Could not find image file '{}'", p
-        ));
+        throw ghoul::RuntimeError(std::format("Could not find image file '{}'", p));
     }
 
     loadTexture(p, 0);
@@ -1018,9 +1016,7 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
         convertTextureFormat(*t, targetFormat);
     }
     else {
-        throw ghoul::RuntimeError(std::format(
-            "Could not find image file {}", path
-        ));
+        throw ghoul::RuntimeError(std::format("Could not find image file {}", path));
     }
 
     TextureFormat format = {

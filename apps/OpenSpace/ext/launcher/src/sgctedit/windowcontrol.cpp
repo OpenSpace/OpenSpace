@@ -735,8 +735,8 @@ void WindowControl::resetToDefaults() {
     const float newHeight =
         _monitorResolutions[PrimaryMonitorIdx].height() * IdealScaleVerticalLines;
     const float newWidth = newHeight * IdealAspectRatio;
-    _windowDimensions.setHeight(newHeight);
-    _windowDimensions.setWidth(newWidth);
+    _windowDimensions.setHeight(static_cast<int>(newHeight));
+    _windowDimensions.setWidth(static_cast<int>(newWidth));
     _sizeX->setValue(static_cast<int>(newWidth));
     _sizeY->setValue(static_cast<int>(newHeight));
 
@@ -878,9 +878,9 @@ void WindowControl::generateWindowInformation(sgct::config::Window& window) cons
 
                 // The negative values for left & down are due to SGCT's convention
                 sgct::config::PlanarProjection projection;
-                projection.fov.right = fovH / 2.0;
+                projection.fov.right = static_cast<float>(fovH / 2.0);
                 projection.fov.left = -projection.fov.right;
-                projection.fov.up = fovV / 2.0;
+                projection.fov.up = static_cast<float>(fovV / 2.0);
                 projection.fov.down = -projection.fov.up;
                 vp.projection = projection;
                 break;
@@ -951,11 +951,11 @@ void WindowControl::updateWindowCount(int newWindowCount) {
 void WindowControl::onSizeXChanged(int newValue) {
     _windowDimensions.setWidth(newValue);
     if (_aspectRatioLocked) {
-        const int updatedHeight = _windowDimensions.width() / _aspectRatioSize;
+        const double updatedHeight = _windowDimensions.width() / _aspectRatioSize;
         _sizeY->blockSignals(true);
-        _sizeY->setValue(updatedHeight);
+        _sizeY->setValue(static_cast<int>(updatedHeight));
         _sizeY->blockSignals(false);
-        _windowDimensions.setHeight(updatedHeight);
+        _windowDimensions.setHeight(static_cast<int>(updatedHeight));
     }
     emit windowChanged(_monitor->currentIndex(), _windowIndex, _windowDimensions);
     if (_fovLocked) {
@@ -966,11 +966,11 @@ void WindowControl::onSizeXChanged(int newValue) {
 void WindowControl::onSizeYChanged(int newValue) {
     _windowDimensions.setHeight(newValue);
     if (_aspectRatioLocked) {
-        const int updatedWidth = _windowDimensions.height() * _aspectRatioSize;
+        const double updatedWidth = _windowDimensions.height() * _aspectRatioSize;
         _sizeX->blockSignals(true);
-        _sizeX->setValue(updatedWidth);
+        _sizeX->setValue(static_cast<int>(updatedWidth));
         _sizeX->blockSignals(false);
-        _windowDimensions.setWidth(updatedWidth);
+        _windowDimensions.setWidth(static_cast<int>(updatedWidth));
     }
     emit windowChanged(_monitor->currentIndex(), _windowIndex, _windowDimensions);
     if (_fovLocked) {
@@ -979,14 +979,14 @@ void WindowControl::onSizeYChanged(int newValue) {
 }
 
 void WindowControl::onOffsetXChanged(int newValue) {
-    const float prevWidth = _windowDimensions.width();
+    const int prevWidth = _windowDimensions.width();
     _windowDimensions.setX(newValue);
     _windowDimensions.setWidth(prevWidth);
     emit windowChanged(_monitor->currentIndex(), _windowIndex, _windowDimensions);
 }
 
 void WindowControl::onOffsetYChanged(int newValue) {
-    const float prevHeight = _windowDimensions.height();
+    const int prevHeight = _windowDimensions.height();
     _windowDimensions.setY(newValue);
     _windowDimensions.setHeight(prevHeight);
     emit windowChanged(_monitor->currentIndex(), _windowIndex, _windowDimensions);
