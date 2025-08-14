@@ -157,6 +157,18 @@ namespace {
 
 namespace openspace {
 
+
+LuaConsole::AutoCompleteState::AutoCompleteState()
+    : context{ Context::None }
+    , isDataDirty{ true }
+    , input{ "" }
+    , suggestions{ }
+    , currentIndex{ NoAutoComplete }
+    , suggestion{ "" }
+    , cycleReverse{ false }
+    , insertPosition{ 0 }
+{}
+
 LuaConsole::LuaConsole()
     : properties::PropertyOwner({ "LuaConsole", "Lua Console" })
     , _isVisible(VisibleInfo, false)
@@ -349,14 +361,12 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         return false;
     }
 
-
     KeyWithModifier keyCombination = KeyWithModifier(key, modifier);
 
     // Call the registered function for the key combination pressed
     auto it = _keyHandlers.find(keyCombination);
     if (it != _keyHandlers.end()) {
-        it->second(); 
-        //return true; // TODO do we want return here or not? 
+        it->second();
     }
 
     // If any other key is pressed, we want to remove our previous findings
@@ -365,7 +375,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     if (key != Key::Tab && !isShiftModifierOnly) {
         _autoCompleteState = AutoCompleteState();
     }
-        
+
     // Do not consume modifier keys
     switch (key) {
         case Key::LeftShift:
@@ -485,13 +495,16 @@ void LuaConsole::render() {
     );
 
     // Render the current command
-    std::string currentCommand = _commands.at(_activeCommand);
+    std::string currentCommand = _commands[_activeCommand];
 
-    // Render the command and suggestions with line breaks where required
+    // Render the command and suggestions with line breaks where required, + 2 accounts
+    // for the '> ' characters in the beginning of the command
     const size_t totalCommandSize = 2 + currentCommand.size() +
         _autoCompleteState.suggestion.size();
-    const size_t nCharactersPerRow = static_cast<size_t>(res.x * 0.925f /
-        static_cast<float>(_font->glyph('m')->width));
+    // Scalefactor 0.925f chosen arbitraily to fit characters on screen with some margin
+    const size_t nCharactersPerRow = static_cast<size_t>(
+        res.x * 0.925f / static_cast<float>(_font->glyph('m')->width)
+    );
     const size_t nCommandRows = totalCommandSize / nCharactersPerRow;
 
     // The command is split in 3 parts to render the suggestion in a different color
@@ -501,13 +514,13 @@ void LuaConsole::render() {
         currentCommand.substr(_autoCompleteState.insertPosition) : "";
 
     // We pad the strings with empty spaces so that each part is rendered in their correct
-    // positions, even if linebreaks are added    
+    // positions, even if linebreaks are added
     // Pad suggestion before and after with ' '
     const std::string suggestion = std::string(firstPart.size() + 2, ' ') +
         _autoCompleteState.suggestion + std::string(secondPart.size(), ' ');
-    // Pad first part at the end with ' ' 
+    // Pad first part at the end with ' '
     firstPart.insert(firstPart.end(), totalCommandSize - firstPart.size(), ' ');
-    // Pad second part in the beginning with ' ' 
+    // Pad second part in the beginning with ' '
     secondPart.insert(secondPart.begin(), totalCommandSize - secondPart.size(), ' ');
 
     auto linebreakCommand = [nCharactersPerRow](const std::string& s) {
@@ -665,7 +678,7 @@ void LuaConsole::setCommandInputButton(Key key) {
 
 void LuaConsole::addToCommand(const std::string& c) {
     const size_t length = c.length();
-    _commands.at(_activeCommand).insert(_inputPosition, c);
+    _commands[_activeCommand].insert(_inputPosition, c);
     _inputPosition += length;
 }
 
@@ -674,7 +687,7 @@ void LuaConsole::parallelConnectionChanged(const ParallelConnection::Status& sta
 }
 
 void LuaConsole::registerKeyHandler(Key key, KeyModifier modifier,
-                                                           std::function<void()> callback)
+                                    std::function<void()> callback)
 {
     _keyHandlers[{ key, modifier }] = std::move(callback);
 }
@@ -698,7 +711,7 @@ void LuaConsole::registerKeyHandlers() {
 
     // Copy to clipboard
     registerKeyHandler(Key::C, KeyModifier::Control, [this]() {
-        ghoul::setClipboardText(_commands.at(_activeCommand));
+        ghoul::setClipboardText(_commands[_activeCommand]);
     });
 
     // Cut to clipboard
@@ -706,8 +719,8 @@ void LuaConsole::registerKeyHandlers() {
         Key::X,
         KeyModifier::Control,
         [this]() {
-            ghoul::setClipboardText(_commands.at(_activeCommand));
-            _commands.at(_activeCommand).clear();
+            ghoul::setClipboardText(_commands[_activeCommand]);
+            _commands[_activeCommand].clear();
             _inputPosition = 0;
         }
     );
@@ -717,10 +730,10 @@ void LuaConsole::registerKeyHandlers() {
         Key::K,
         KeyModifier::Control,
         [this]() {
-            auto here = _commands.at(_activeCommand).begin() + _inputPosition;
-            auto end = _commands.at(_activeCommand).end();
+            auto here = _commands[_activeCommand].begin() + _inputPosition;
+            auto end = _commands[_activeCommand].end();
             ghoul::setClipboardText(std::string(here, end));
-            _commands.at(_activeCommand).erase(here, end);
+            _commands[_activeCommand].erase(here, end);
         }
     );
 
@@ -729,12 +742,12 @@ void LuaConsole::registerKeyHandlers() {
         Key::Left,
         KeyModifier::Control,
         [this]() {
-            std::string current = _commands.at(_activeCommand);
+            std::string current = _commands[_activeCommand];
             std::reverse(current.begin(), current.end());
             const size_t start = current.size() - (_inputPosition - 1);
-            auto it = current.find_first_of(JumpCharacters, start);
-            if (it != std::string::npos) {
-                _inputPosition = current.size() - it;
+            const size_t jumpCharPos = current.find_first_of(JumpCharacters, start);
+            if (jumpCharPos != std::string::npos) {
+                _inputPosition = current.size() - jumpCharPos;
             }
             else {
                 _inputPosition = 0;
@@ -747,13 +760,16 @@ void LuaConsole::registerKeyHandlers() {
         Key::Right,
         KeyModifier::Control,
         [this]() {
-            auto it = _commands.at(_activeCommand).find_first_of(JumpCharacters,
-                _inputPosition + 1);
-            if (it != std::string::npos) {
-                _inputPosition = it;
+            const std::string current = _commands[_activeCommand];
+            const size_t jumpCharPos = current.find_first_of(
+                JumpCharacters,
+                _inputPosition + 1
+            );
+            if (jumpCharPos != std::string::npos) {
+                _inputPosition = jumpCharPos;
             }
             else {
-                _inputPosition = _commands.at(_activeCommand).size();
+                _inputPosition = current.size();
             }
         }
     );
@@ -787,7 +803,7 @@ void LuaConsole::registerKeyHandlers() {
         [this]() {
             _inputPosition = std::min(
                 _inputPosition + 1,
-                _commands.at(_activeCommand).length()
+                _commands[_activeCommand].length()
             );
         }
     );
@@ -799,7 +815,7 @@ void LuaConsole::registerKeyHandlers() {
         [this]() {
             _inputPosition = std::min(
                 _inputPosition + 1,
-                _commands.at(_activeCommand).length()
+                _commands[_activeCommand].length()
             );
         }
     );
@@ -812,7 +828,7 @@ void LuaConsole::registerKeyHandlers() {
             if (_activeCommand > 0) {
                 --_activeCommand;
             }
-            _inputPosition = _commands.at(_activeCommand).length();
+            _inputPosition = _commands[_activeCommand].length();
         }
     );
 
@@ -824,7 +840,7 @@ void LuaConsole::registerKeyHandlers() {
             if (_activeCommand < _commands.size() - 1) {
                 ++_activeCommand;
             }
-            _inputPosition = _commands.at(_activeCommand).length();
+            _inputPosition = _commands[_activeCommand].length();
         }
     );
 
@@ -834,13 +850,13 @@ void LuaConsole::registerKeyHandlers() {
         KeyModifier::None,
         [this]() {
             if (_inputPosition > 0) {
-                _commands.at(_activeCommand).erase(_inputPosition - 1, 1);
+                _commands[_activeCommand].erase(_inputPosition - 1, 1);
                 --_inputPosition;
             }
         }
     );
 
-    // Remove characters before _inputPosition until the previous JumpCharacter. 
+    // Remove characters before _inputPosition until the previous JumpCharacter.
     registerKeyHandler(
         Key::BackSpace,
         KeyModifier::Control,
@@ -849,7 +865,7 @@ void LuaConsole::registerKeyHandlers() {
                 return;
             }
 
-            std::string& command = _commands.at(_activeCommand);
+            std::string& command = _commands[_activeCommand];
 
             // If the previous character is a JumpCharacter, remove just that one. This
             // behavior results in abc.de -> abc. -> abc -> 'empty string'
@@ -879,8 +895,8 @@ void LuaConsole::registerKeyHandlers() {
         Key::Delete,
         KeyModifier::None,
             [this]() {
-            if (_inputPosition <= _commands.at(_activeCommand).size()) {
-                _commands.at(_activeCommand).erase(_inputPosition, 1);
+            if (_inputPosition <= _commands[_activeCommand].size()) {
+                _commands[_activeCommand].erase(_inputPosition, 1);
             }
         }
     );
@@ -890,7 +906,7 @@ void LuaConsole::registerKeyHandlers() {
         Key::Delete,
         KeyModifier::Control,
         [this]() {
-            std::string& command = _commands.at(_activeCommand);
+            std::string& command = _commands[_activeCommand];
             if (_inputPosition >= command.size()) {
                 return;
             }
@@ -931,7 +947,7 @@ void LuaConsole::registerKeyHandlers() {
         Key::End,
         KeyModifier::None,
         [this]() {
-            _inputPosition = _commands.at(_activeCommand).size();
+            _inputPosition = _commands[_activeCommand].size();
         }
     );
 
@@ -940,7 +956,7 @@ void LuaConsole::registerKeyHandlers() {
         Key::E,
         KeyModifier::Control,
         [this]() {
-            _inputPosition = _commands.at(_activeCommand).size();
+            _inputPosition = _commands[_activeCommand].size();
         }
     );
 
@@ -951,7 +967,7 @@ void LuaConsole::registerKeyHandlers() {
             return;
         }
 
-        const std::string cmd = _commands.at(_activeCommand);
+        const std::string cmd = _commands[_activeCommand];
         if (!cmd.empty()) {
             using Script = scripting::ScriptEngine::Script;
             global::scriptEngine->queueScript({
@@ -963,7 +979,7 @@ void LuaConsole::registerKeyHandlers() {
             // Only add the current command to the history if it hasn't been
             // executed before. We don't want two of the same commands in a row
             if (_commandsHistory.empty() || (cmd != _commandsHistory.back())) {
-                _commandsHistory.push_back(_commands.at(_activeCommand));
+                _commandsHistory.push_back(_commands[_activeCommand]);
             }
         }
 
@@ -1031,12 +1047,11 @@ size_t LuaConsole::detectContext(std::string_view command) {
         }
     }
 
-    // TODO anden88 2025-08-08: Detect functions in a smarter way that allows nested
+    // @TODO (anden88, 2025-08-08): Detect functions in a smarter way that allows nested
     // function calls. The following example currently does not work.
-    // If the user typed e.g., "openspace.printInfo(open"
-    // We will not be able to autocomplete the last openspace. since the first
-    // instance we find is at the beginning, resulting in the fragment being wrongly
-    // assumed as "printInfo(open"
+    // If the user typed e.g., "openspace.printInfo(open", we will not be able to
+    // autocomplete the last openspace. since the first instance we find is at the
+    // beginning, resulting in the fragment being wrongly assumed as "printInfo(open"
     size_t functionStartIndex = command.rfind("openspace.");
 
     if (functionStartIndex == std::string::npos) {
@@ -1087,7 +1102,7 @@ bool LuaConsole::gatherPathSuggestions(size_t contextStart) {
         );
 
     auto containsNonAscii = [](const std::filesystem::path& p) {
-        auto s = p.generic_u8string();
+        const std::u8string s = p.generic_u8string();
         for (auto it = s.rbegin(); it != s.rend(); it++) {
             if (static_cast<unsigned char>(*it) > 0x7F) {
                 return true;
@@ -1102,7 +1117,7 @@ bool LuaConsole::gatherPathSuggestions(size_t contextStart) {
         if (containsNonAscii(entry)) {
             continue;
         }
-        
+
         entries.push_back(entry.string());
     }
 
@@ -1155,8 +1170,9 @@ void LuaConsole::filterSuggestions() {
         }
 
 #ifdef WIN32
-        // Treat lowercase paths the same in Windows since for the most part
-        // C:/User/Desktop/Foo is te same as c:/user/desktop/foo
+        // On Windows, file paths are generally case-insensitive. For example,
+        // "C:/User/Desktop/Foo" refers to the same location as "c:/user/desktop/foo"
+        // Normalize paths to lowercase so they are treated equivalently
         if (_autoCompleteState.context == Context::Path) {
             out = ghoul::toLowerCase(sanitizeInput(out));
         }
@@ -1173,20 +1189,20 @@ void LuaConsole::filterSuggestions() {
     input = normalize(input);
 
     for (const std::string& suggestion : _autoCompleteState.suggestions) {
-        std::string candidate = normalize(suggestion);
+        std::string suggestionNormalized = normalize(suggestion);
         std::string result = sanitizeInput(suggestion);
 
         if (_autoCompleteState.context == Context::Function) {
             // We're only interested in autocomplete until the next separator "."
             const size_t offset = input.size();
-            const size_t pos = candidate.find('.', offset);
+            const size_t pos = suggestionNormalized.find('.', offset);
 
             if (pos != std::string::npos) {
-                result = candidate.substr(0, pos + 1); // include the "."
+                result = result.substr(0, pos + 1); // include the "."
             }
         }
 
-        if (candidate.starts_with(input)) {
+        if (suggestionNormalized.starts_with(input)) {
             results.insert(result);
         }
     }
@@ -1215,7 +1231,7 @@ void LuaConsole::cycleSuggestion() {
 
     const std::string& suggestion =
         _autoCompleteState.suggestions[_autoCompleteState.currentIndex];
-    // Show only the characters not yet written 
+    // Show only the characters not yet written
     _autoCompleteState.suggestion = suggestion.substr(_autoCompleteState.input.size());
 }
 
@@ -1232,7 +1248,7 @@ void LuaConsole::applySuggestion() {
     if (_autoCompleteState.context == Context::Function &&
         !_autoCompleteState.suggestion.ends_with('.'))
     {
-        // We're in a leaf function add paranthesis 
+        // We're in a leaf function add paranthesis
         currentCommand.insert(_inputPosition, "()");
         // Set the cursor position to be between the brackets
         _inputPosition++;
@@ -1241,16 +1257,5 @@ void LuaConsole::applySuggestion() {
     // Clear suggestion
     _autoCompleteState = AutoCompleteState();
 }
-
-LuaConsole::AutoCompleteState::AutoCompleteState()
-    : context{ Context::None }
-    , isDataDirty{ true }
-    , input{ "" }
-    , suggestions{ }
-    , currentIndex{ NoAutoComplete }
-    , suggestion{ "" }
-    , cycleReverse{ false }
-    , insertPosition{ 0 }
-{ }
 
 } // namespace openspace

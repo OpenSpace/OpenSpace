@@ -103,14 +103,14 @@ private:
     struct AutoCompleteState {
         AutoCompleteState();
 
-        Context context;
-        bool isDataDirty;
+        Context context; // Assumed context we are currently in based on
+        bool isDataDirty; // Flag indicating if we need to update the suggestion data
         std::string input; // Part of the command that we're intrested in
-        std::vector<std::string> suggestions;
-        int currentIndex;
-        std::string suggestion;
-        bool cycleReverse;
-        size_t insertPosition;
+        std::vector<std::string> suggestions; // All suggestions found so far
+        int currentIndex; // Current suggestion index
+        std::string suggestion; // Current suggestion to show
+        bool cycleReverse; // Whether we should cycle suggestions forward or backwards
+        size_t insertPosition; // Where to insert the suggestion in the command
     };
 
     AutoCompleteState  _autoCompleteState;
