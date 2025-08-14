@@ -25,6 +25,7 @@
 #include <openspace/rendering/framebufferrenderer.h>
 
 #include <openspace/camera/camera.h>
+#include <openspace/rendering/postprocess.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/deferredcaster.h>
@@ -338,6 +339,11 @@ void FramebufferRenderer::initialize() {
     updateDeferredcastData();
     updateDownscaledVolume();
 
+    // Initialize bloom effect
+    _bloomEffect = std::make_unique<PostprocessingBloom>();
+    _bloomEffect->initialize();
+    _bloomEffect->setResolution(_resolution.x, _resolution.y);
+
     // Sets back to default FBO
     glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
 
@@ -401,6 +407,12 @@ void FramebufferRenderer::deinitialize() {
     glDeleteBuffers(1, &_vertexPositionBuffer);
     glDeleteVertexArrays(1, &_screenQuad);
 
+    // Cleanup bloom effect
+    if (_bloomEffect) {
+        _bloomEffect->deinitialize();
+        _bloomEffect.reset();
+    }
+
     global::raycasterManager->removeListener(*this);
     global::deferredcasterManager->removeListener(*this);
 }
@@ -439,6 +451,69 @@ void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::ivec4& viewp
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Saturation, _saturation);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Value, _value);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Viewport, glm::vec4(viewport));
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.Resolution, glm::vec2(_resolution));
+
+    glDepthMask(false);
+    glDisable(GL_DEPTH_TEST);
+
+    glBindVertexArray(_screenQuad);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+
+    glDepthMask(true);
+    glEnable(GL_DEPTH_TEST);
+
+    _hdrFilteringProgram->deactivate();
+}
+
+void FramebufferRenderer::applyTMOComposite(float blackoutFactor) {
+    ZoneScoped;
+    TracyGpuZone("applyTMOComposite");
+
+    GLint currentFbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFbo);
+    
+    // Create temporary texture to capture current framebuffer content
+    static GLuint captureTexture = 0;
+    static glm::ivec2 lastRes = glm::ivec2(0);
+    
+    if (captureTexture == 0 || lastRes != _resolution) {
+        if (captureTexture != 0) {
+            glDeleteTextures(1, &captureTexture);
+        }
+        glGenTextures(1, &captureTexture);
+        glBindTexture(GL_TEXTURE_2D, captureTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, _resolution.x, _resolution.y, 0, GL_RGBA, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        lastRes = _resolution;
+    }
+    
+    // Copy current framebuffer to texture
+    glBindTexture(GL_TEXTURE_2D, captureTexture);
+    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, _resolution.x, _resolution.y, 0);
+
+    _hdrFilteringProgram->activate();
+
+    ghoul::opengl::TextureUnit hdrFeedingTextureUnit;
+    hdrFeedingTextureUnit.activate();
+    glBindTexture(GL_TEXTURE_2D, captureTexture);
+
+    _hdrFilteringProgram->setUniform(
+        _hdrUniformCache.hdrFeedingTexture,
+        hdrFeedingTextureUnit
+    );
+
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutFactor, blackoutFactor);
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.hdrExposure, _hdrExposure);
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.gamma, _gamma);
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.Hue, _hue);
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.Saturation, _saturation);
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.Value, _value);
+    // Use full viewport for composite frame
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.Viewport, glm::vec4(0, 0, _resolution.x, _resolution.y));
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Resolution, glm::vec2(_resolution));
 
     glDepthMask(false);
@@ -669,6 +744,10 @@ void FramebufferRenderer::update() {
             }
         }
     }
+
+    if (_bloomEffect && _bloomEffect->isEnabled()) {
+        _bloomEffect->update();
+    }
 }
 
 void FramebufferRenderer::updateResolution() {
@@ -896,6 +975,11 @@ void FramebufferRenderer::updateResolution() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     if (glbinding::Binding::ObjectLabel.isResolved()) {
         glObjectLabel(GL_TEXTURE, _exitDepthTexture, -1, "Exit depth");
+    }
+
+    // Update bloom effect resolution
+    if (_bloomEffect) {
+        _bloomEffect->setResolution(_resolution.x, _resolution.y);
     }
 
     _dirtyResolution = false;
@@ -1137,6 +1221,14 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
     glEnablei(GL_BLEND, 0);
+
+    // Apply bloom effect before TMO (in HDR color space)
+    if (_bloomEffect && _bloomEffect->isEnabled()) {
+        TracyGpuZone("Apply Bloom");
+        const ghoul::GLDebugGroup group("Apply Bloom");
+        
+        _bloomEffect->render(_pingPongBuffers.colorTexture[_pingPongIndex]);
+    }
 
     {
         TracyGpuZone("Overlay")

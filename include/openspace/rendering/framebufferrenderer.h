@@ -49,6 +49,7 @@ namespace openspace {
 class Camera;
 struct DeferredcastData;
 struct DeferredcasterTask;
+class PostprocessingBloom;
 struct RaycastData;
 struct RaycasterTask;
 class Scene;
@@ -161,6 +162,14 @@ public:
     void enableFXAA(bool enable);
     void setDisableHDR(bool disable);
 
+    PostprocessingBloom* bloomEffect() const { return _bloomEffect.get(); }
+
+    /**
+     * Apply Tone Mapping Operator on the current framebuffer content for composite frame processing.
+     * This should be called after bloom but before GUI overlays.
+     */
+    void applyTMOComposite(float blackoutFactor);
+
     void update();
     void performRaycasterTasks(const std::vector<RaycasterTask>& tasks,
         const glm::ivec4& viewport);
@@ -207,6 +216,8 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _tmoProgram;
     std::unique_ptr<ghoul::opengl::ProgramObject> _fxaaProgram;
     std::unique_ptr<ghoul::opengl::ProgramObject> _downscaledVolumeProgram;
+
+    std::unique_ptr<PostprocessingBloom> _bloomEffect;
 
     UniformCache(hdrFeedingTexture, blackoutFactor, hdrExposure, gamma,
         Hue, Saturation, Value, Viewport, Resolution) _hdrUniformCache;

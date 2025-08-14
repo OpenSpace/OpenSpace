@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This is a template to disable vcpkg libs in output build dirs on windows -->
+<Project>
+  <PropertyGroup>
+    <VcpkgEnabled>false</VcpkgEnabled>
+    <VcpkgAutoLink>false</VcpkgAutoLink>
+  </PropertyGroup>
+  
+  <!-- Ensure this applies to all projects in subdirectories -->
+  <Import Project="$(MSBuildThisFileDirectory)**/*.props" Condition="Exists('$(MSBuildThisFileDirectory)**/*.props')" />
+</Project>

@@ -273,6 +273,45 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo BloomEnabledInfo = {
+        "BloomEnabled",
+        "Enable Bloom",
+        "Enable bloom post-processing effect.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BloomThresholdInfo = {
+        "BloomThreshold",
+        "Bloom Threshold",
+        "Brightness threshold for bloom effect. Only pixels brighter than this value "
+        "will contribute to the bloom.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BloomBlurPassesInfo = {
+        "BloomBlurPasses",
+        "Bloom Blur Passes",
+        "Number of blur passes for the bloom effect. More passes create a smoother "
+        "bloom but reduce performance.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BloomBlurMagnitudeInfo = {
+        "BloomBlurMagnitude",
+        "Bloom Blur Magnitude",
+        "Magnitude of the blur effect for bloom. Higher values create a larger bloom "
+        "radius.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BloomIntensityInfo = {
+        "BloomIntensity",
+        "Bloom Intensity",
+        "Intensity of the bloom effect. Controls how strong the bloom appears in the "
+        "final image.",
+        openspace::properties::Property::Visibility::User
+    };
+
     constexpr openspace::properties::Property::PropertyInfo EnabledFontColorInfo = {
         "EnabledFontColor",
         "Enabled Font Color",
@@ -324,6 +363,11 @@ RenderEngine::RenderEngine()
     , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
     , _applyBlackoutToMaster(ApplyBlackoutToMasterInfo, true)
     , _enableFXAA(FXAAInfo, true)
+    , _bloomEnabled(BloomEnabledInfo, true)
+    , _bloomThreshold(BloomThresholdInfo, 0.2f, 0.0f, 10.0f)
+    , _bloomBlurPasses(BloomBlurPassesInfo, 5, 1, 10)
+    , _bloomBlurMagnitude(BloomBlurMagnitudeInfo, 1.0e-4f, 1.0e-8f, 1.0e-2f)
+    , _bloomIntensity(BloomIntensityInfo, 1.0f, 0.0f, 5.0f)
     , _disableHDRPipeline(DisableHDRPipelineInfo, false)
     , _hdrExposure(HDRExposureInfo, 3.7f, 0.01f, 10.f)
     , _gamma(GammaInfo, 0.95f, 0.01f, 5.f)
@@ -371,6 +415,41 @@ RenderEngine::RenderEngine()
 
     _enableFXAA.onChange([this]() { _renderer.enableFXAA(_enableFXAA); });
     addProperty(_enableFXAA);
+
+    _bloomEnabled.onChange([this]() {
+        if (_renderer.bloomEffect()) {
+            _renderer.bloomEffect()->setEnabled(_bloomEnabled);
+        }
+    });
+    addProperty(_bloomEnabled);
+
+    _bloomThreshold.onChange([this]() {
+        if (_renderer.bloomEffect()) {
+            _renderer.bloomEffect()->setThreshold(_bloomThreshold);
+        }
+    });
+    addProperty(_bloomThreshold);
+
+    _bloomBlurPasses.onChange([this]() {
+        if (_renderer.bloomEffect()) {
+            _renderer.bloomEffect()->setBlurPasses(_bloomBlurPasses);
+        }
+    });
+    addProperty(_bloomBlurPasses);
+
+    _bloomBlurMagnitude.onChange([this]() {
+        if (_renderer.bloomEffect()) {
+            _renderer.bloomEffect()->setBlurMagnitude(_bloomBlurMagnitude);
+        }
+    });
+    addProperty(_bloomBlurMagnitude);
+
+    _bloomIntensity.onChange([this]() {
+        if (_renderer.bloomEffect()) {
+            _renderer.bloomEffect()->setIntensity(_bloomIntensity);
+        }
+    });
+    addProperty(_bloomIntensity);
 
     _disableHDRPipeline.onChange([this]() {
         _renderer.setDisableHDR(_disableHDRPipeline);
@@ -513,6 +592,15 @@ void RenderEngine::initializeGL() {
     _renderer.enableFXAA(_enableFXAA);
     _renderer.setHDRExposure(_hdrExposure);
     _renderer.initialize();
+
+    // Initialize bloom effect parameters
+    if (_renderer.bloomEffect()) {
+        _renderer.bloomEffect()->setEnabled(_bloomEnabled);
+        _renderer.bloomEffect()->setThreshold(_bloomThreshold);
+        _renderer.bloomEffect()->setBlurPasses(_bloomBlurPasses);
+        _renderer.bloomEffect()->setBlurMagnitude(_bloomBlurMagnitude);
+        _renderer.bloomEffect()->setIntensity(_bloomIntensity);
+    }
 
     _bloom.initialize();
     const glm::ivec2 res = renderingResolution();
@@ -920,7 +1008,7 @@ float RenderEngine::combinedBlackoutFactor() const {
     }
 }
 
-void RenderEngine::postDraw() {
+void RenderEngine::applyBloomEffect() {
     ZoneScoped;
 
     // Apply bloom postprocessing effect
@@ -955,6 +1043,16 @@ void RenderEngine::postDraw() {
         // Apply bloom effect
         _bloom.render(captureTexture);
     }
+}
+
+void RenderEngine::applyTMOEffect(float blackoutFactor) {
+    ZoneScoped;
+    
+    _renderer.applyTMOComposite(blackoutFactor);
+}
+
+void RenderEngine::postDraw() {
+    ZoneScoped;
 
     ++_frameNumber;
 }

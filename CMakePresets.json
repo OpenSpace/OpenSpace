@@ -1,0 +1,51 @@
+{
+    "version": 4,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 19,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "windows-min",
+            "generator": "Visual Studio 17 2022",
+            "binaryDir": "${sourceDir}/build",
+            "warnings": {
+                "dev": false,
+                "deprecated": false,
+                "systemVars": false
+            },
+            "environment": {
+                "VCPKG_ROOT": "",
+                "VCPKG_DEFAULT_TRIPLET": "",
+                "CMAKE_TOOLCHAIN_FILE": ""
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "GHOUL_HAVE_TESTS": "OFF",
+                "OPENSPACE_HAVE_TESTS": "OFF",
+                "OPENSPACE_MODULE_VIDEO": "OFF",
+                "OPENSPACE_MODULE_TOYVOLUME": "OFF",
+                "OPENSPACE_MODULE_AUDIO": "OFF",
+                "OPENSPACE_MODULE_POSTPROCESSING": "OFF",
+                "OPENSPACE_DISABLE_VCPKG": "ON",
+                "SGCT_BUILD_TESTS": "OFF",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            },
+            "hidden": false
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "windows-min",
+            "configurePreset": "windows-min",
+            "configuration": "RelWithDebInfo",
+            "jobs": 20,
+            "nativeToolOptions": [
+                "-consoleLoggerParameters:ForceConsoleColor"
+            ],
+            "inheritConfigureEnvironment": true,
+            "hidden": false
+        }
+    ]
+}

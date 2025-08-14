@@ -1283,6 +1283,7 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
 void OpenSpaceEngine::drawOverlays() {
     ZoneScoped;
     TracyGpuZone("Draw2D");
+    const ghoul::GLDebugGroup group("Overlays");
     LTRACE("OpenSpaceEngine::drawOverlays(begin)");
 #ifdef TRACY_ENABLE
     TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
@@ -1291,6 +1292,13 @@ void OpenSpaceEngine::drawOverlays() {
 
     viewportChanged();
 
+    // Apply bloom effect on the stitched / composited image
+    // global::renderEngine->applyBloomEffect();
+
+    // Apply TMO on the composite frame after bloom
+    // global::renderEngine->applyTMOEffect(global::renderEngine->combinedBlackoutFactor());
+
+    // Render the overlays on top of the rendered scene
     const bool isGuiWindow =
         global::windowDelegate->hasGuiWindow() ?
         global::windowDelegate->isGuiWindow() :

@@ -91,6 +91,8 @@ public:
 
     void renderOverlays(const ShutdownInformation& shutdownInfo);
     void renderEndscreen();
+    void applyBloomEffect();
+    void applyTMOEffect(float blackoutFactor);
     void postDraw();
 
     float hdrExposure() const;
@@ -161,13 +163,14 @@ public:
 
     uint64_t frameNumber() const;
 
+    float combinedBlackoutFactor() const;
+
 private:
     void renderScreenLog();
     void renderVersionInformation();
     void renderCameraInformation();
     void renderShutdownInformation(float timer, float fullTime);
     void renderDashboard() const;
-    float combinedBlackoutFactor() const;
 
     Camera* _camera = nullptr;
     Scene* _scene = nullptr;
@@ -195,6 +198,12 @@ private:
     properties::BoolProperty _applyBlackoutToMaster;
 
     properties::BoolProperty _enableFXAA;
+
+    properties::BoolProperty _bloomEnabled;
+    properties::FloatProperty _bloomThreshold;
+    properties::IntProperty _bloomBlurPasses;
+    properties::FloatProperty _bloomBlurMagnitude;
+    properties::FloatProperty _bloomIntensity;
 
     properties::BoolProperty _disableHDRPipeline;
     properties::FloatProperty _hdrExposure;

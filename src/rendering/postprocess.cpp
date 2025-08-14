@@ -229,6 +229,8 @@ void PostprocessingBloom::render(GLuint inputTexture) {
 
     renderExtract(inputTexture);
     renderBlur();
+
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
     renderBlend(inputTexture);
 
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
@@ -305,7 +307,6 @@ void PostprocessingBloom::renderBlur() {
 }
 
 void PostprocessingBloom::renderBlend(GLuint inputTexture) {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, _width, _height);
 
     glEnable(GL_BLEND);

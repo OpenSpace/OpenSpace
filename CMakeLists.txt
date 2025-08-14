@@ -57,6 +57,17 @@ if (NOT EXISTS "${PROJECT_SOURCE_DIR}/ext/ghoul/CMakeLists.txt")
   )
 endif ()
 
+# Optionally disable the use of vcpkg for Windows builds
+set(OPENSPACE_DISABLE_VCPKG OFF CACHE BOOL "Disable the use of vcpkg libs for Windows builds")
+if (WIN32 AND OPENSPACE_DISABLE_VCPKG)
+  # This works for all subprojects due to MSBuild's hierarchical search
+  configure_file(
+    "${CMAKE_SOURCE_DIR}/Directory.Build.Template.props"
+    "${CMAKE_BINARY_DIR}/Directory.Build.props"
+    COPYONLY
+  )
+endif ()
+
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER CMake)
 
