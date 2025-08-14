@@ -48,11 +48,6 @@
 #include <string>
 #include <vector>
 
-#define OPENSPACE_MODULE_POSTPROCESSING_ENABLED
-#ifdef OPENSPACE_MODULE_POSTPROCESSING_ENABLED
-#include <modules/postprocessing/postprocessingmodule.h>
-#endif
-
 namespace {
     constexpr std::string_view _loggerCat = "FramebufferRenderer";
 
@@ -609,10 +604,6 @@ void FramebufferRenderer::update() {
 
         ghoul::opengl::updateUniformLocations(*_hdrFilteringProgram, _hdrUniformCache);
     }
-    
-    #ifdef OPENSPACE_MODULE_POSTPROCESSING_ENABLED
-    PostprocessingModule::renderer().update();
-    #endif
 
     if (_fxaaProgram->isDirty()) {
         _fxaaProgram->rebuildFromFile();
@@ -1146,19 +1137,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
     glEnablei(GL_BLEND, 0);
-    
-    #ifdef OPENSPACE_MODULE_POSTPROCESSING_ENABLED
-    {
-        // Render Postprocessing effects
-        TracyGpuZone("Postprocessing");
-        const ghoul::GLDebugGroup group("Postprocessing");
-
-        PostprocessingModule::renderer().setSceneTexture(
-            _pingPongBuffers.colorTexture[_pingPongIndex]
-        );
-        PostprocessingModule::renderer().render(camera);
-    }
-    #endif
 
     {
         TracyGpuZone("Overlay")

@@ -514,6 +514,10 @@ void RenderEngine::initializeGL() {
     _renderer.setHDRExposure(_hdrExposure);
     _renderer.initialize();
 
+    _bloom.initialize();
+    const glm::ivec2 res = renderingResolution();
+    _bloom.setResolution(res.x, res.y);
+
     // set the close clip plane and the far clip plane to extreme values while in
     // development
     global::windowDelegate->setNearFarClippingPlane(0.001f, 1000.f);
@@ -553,6 +557,7 @@ void RenderEngine::initializeGL() {
 void RenderEngine::deinitializeGL() {
     ZoneScoped;
 
+    _bloom.deinitialize();
     _renderer.deinitialize();
 }
 
@@ -600,6 +605,9 @@ void RenderEngine::updateRenderer() {
     if (windowResized) {
         _renderer.setResolution(renderingResolution());
 
+        const glm::ivec2 res = renderingResolution();
+        _bloom.setResolution(res.x, res.y);
+
         using FR = ghoul::fontrendering::FontRenderer;
         FR::defaultRenderer().setFramebufferSize(fontResolution());
         FR::defaultProjectionRenderer().setFramebufferSize(renderingResolution());
@@ -614,6 +622,7 @@ void RenderEngine::updateRenderer() {
     }
 
     _renderer.update();
+    _bloom.update();
 }
 
 void RenderEngine::updateScreenSpaceRenderables() {
@@ -913,6 +922,39 @@ float RenderEngine::combinedBlackoutFactor() const {
 
 void RenderEngine::postDraw() {
     ZoneScoped;
+
+    // Apply bloom postprocessing effect
+    if (_bloom.isEnabled()) {
+        // Copy current framebuffer to texture for bloom processing
+        GLint currentFbo;
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFbo);
+        
+        // Create temporary texture to capture current framebuffer content
+        static GLuint captureTexture = 0;
+        static glm::ivec2 lastRes = glm::ivec2(0);
+        const glm::ivec2 res = renderingResolution();
+        
+        if (captureTexture == 0 || lastRes != res) {
+            if (captureTexture != 0) {
+                glDeleteTextures(1, &captureTexture);
+            }
+            glGenTextures(1, &captureTexture);
+            glBindTexture(GL_TEXTURE_2D, captureTexture);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, res.x, res.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            lastRes = res;
+        }
+        
+        // Copy current framebuffer to texture
+        glBindTexture(GL_TEXTURE_2D, captureTexture);
+        glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, res.x, res.y, 0);
+        
+        // Apply bloom effect
+        _bloom.render(captureTexture);
+    }
 
     ++_frameNumber;
 }

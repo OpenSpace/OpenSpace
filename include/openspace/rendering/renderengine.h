@@ -36,6 +36,7 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/framebufferrenderer.h>
+#include <openspace/rendering/postprocess.h>
 #include <chrono>
 #include <filesystem>
 
@@ -172,6 +173,7 @@ private:
     Scene* _scene = nullptr;
 
     FramebufferRenderer _renderer;
+    PostprocessingBloom _bloom;
     ghoul::Dictionary _rendererData;
     ghoul::Dictionary _resolveData;
     ScreenLog* _log = nullptr;
