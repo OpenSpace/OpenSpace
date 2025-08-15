@@ -130,6 +130,47 @@ if(UNIX AND NOT APPLE)
 
   # Binary
     install(TARGETS OpenSpace RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+    # ------------------------------------------------------------------------------
+    # Bundle Chromium Embedded Framework (CEF) runtime
+    # ------------------------------------------------------------------------------
+    
+    # Path to CEF binary dir - is set as CEF_ROOT in modules/webbrowser/cmake/cef_support.cmake
+    # set(CEF_BINARY_DIR "${CMAKE_SOURCE_DIR}/build/modules/webbrowser/ext/cef/cef_binary_127")
+    
+    # Main CEF shared library
+    install(FILES
+        ${CEF_ROOT}/Release/libcef.so
+        DESTINATION lib
+    )
+    
+    # Resources and locales (required for CEF to work properly)
+    install(DIRECTORY
+        ${CEF_ROOT}/Resources/
+        DESTINATION share/openspace/cef_resources
+    )
+
+    # Install all CEF .so files from the Release directory
+    file(GLOB CEF_SHARED_LIBS
+        "${CEF_BINARY_DIR}/Release/lib*.so"
+    )
+    
+    if(CEF_SHARED_LIBS)
+        install(FILES ${CEF_SHARED_LIBS} DESTINATION lib)
+    endif()
+    
+    install(DIRECTORY
+        ${CEF_ROOT}/Resources/locales/
+        DESTINATION share/openspace/cef_resources/locales
+    )
+    
+    # ------------------------------------------------------------------------------
+    # Ensure executable can find private libcef.so at runtime
+    # ------------------------------------------------------------------------------
+    set_target_properties(OpenSpace PROPERTIES
+        INSTALL_RPATH "$ORIGIN/../lib"
+    )
+
     
     # Required assets
     install(DIRECTORY config/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
