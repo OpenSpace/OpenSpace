@@ -175,7 +175,7 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     _translation->onParameterChange([this]() { _needsFullSweep = true; });
 
     _forceFullOrbitTrail = p.forceFullOrbitTrail.value_or(_forceFullOrbitTrail);
-    _forceFullOrbitTrail.onChange([&] {
+    _forceFullOrbitTrail.onChange([&]() {
         _needsFullSweep = true;
         _indexBufferDirty = true;
         _forceFlag = true;
@@ -184,22 +184,34 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
 
     // Start time in ISO 8601 format
     _startTime = p.startTime.value_or(_startTime);
-    _startTime.onChange([&] {_needsFullSweep = true; _indexBufferDirty = true; });
+    _startTime.onChange([&]() {
+        _needsFullSweep = true;
+        _indexBufferDirty = true;
+    });
     addProperty(_startTime);
 
     // End time in ISO 8601 format
     _endTime = p.endTime.value_or(_endTime);
-    _endTime.onChange([&] {_needsFullSweep = true; _indexBufferDirty = true; });
+    _endTime.onChange([&]() {
+        _needsFullSweep = true;
+        _indexBufferDirty = true;
+    });
     addProperty(_endTime);
 
     // Period is in days
     _period = p.period;
-    _period.onChange([&] { _needsFullSweep = true; _indexBufferDirty = true; });
+    _period.onChange([&]() {
+        _needsFullSweep = true;
+        _indexBufferDirty = true;
+    });
     _period.setExponent(3.f);
     addProperty(_period);
 
     _resolution = p.resolution;
-    _resolution.onChange([&] { _needsFullSweep = true; _indexBufferDirty = true; });
+    _resolution.onChange([&]() {
+        _needsFullSweep = true;
+        _indexBufferDirty = true;
+    });
     _resolution.setExponent(3.5f);
     addProperty(_resolution);
 
@@ -487,7 +499,9 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
                 _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
 
                 // if we are on the upper bounds of the array, we start at 0
-                if (_primaryRenderInformation.first == _primaryRenderInformation.count - 1) {
+                if (_primaryRenderInformation.first ==
+                    _primaryRenderInformation.count - 1
+                ) {
                     // If it is at the beginning, set it to the end first
                     _primaryRenderInformation.first = 0;
                 }

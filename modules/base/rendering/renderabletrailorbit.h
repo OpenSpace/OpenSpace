@@ -126,7 +126,7 @@ private:
     bool _indexBufferDirty = true;
     /// Flag to help determine if we should apply full sweep or not when
     /// _forceFullOrbitTrail is enabled
-    bool _forceFlag;
+    bool _forceFlag = false;
 
     /// The time stamp of the oldest point in the array
     double _firstPointTime = 0.0;
