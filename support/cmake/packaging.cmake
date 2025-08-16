@@ -60,6 +60,7 @@ else ()
   )
 endif ()
 
+if (WIN32)
 
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/config/ DESTINATION config)
 
@@ -84,6 +85,8 @@ install(FILES
   ${PROJECT_SOURCE_DIR}/README.md
   DESTINATION .
 )
+
+endif ()
 
 if (WIN32)
   set(CPACK_GENERATOR ZIP)
