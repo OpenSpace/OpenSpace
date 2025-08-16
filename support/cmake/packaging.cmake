@@ -237,7 +237,7 @@ if(UNIX AND NOT APPLE)
   # With @ONLY, only @VAR@ forms are replaced (not ${VAR}).
   ##########
   configure_file(
-      ${CMAKE_SOURCE_DIR}/support/scripts/openspace.in
+      ${CMAKE_SOURCE_DIR}/support/deb/openspace.in
       ${CMAKE_BINARY_DIR}/openspace
       @ONLY
     )
