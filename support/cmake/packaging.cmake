@@ -131,6 +131,10 @@ endif ()
 
 if(UNIX AND NOT APPLE)
 
+  # for Debian convention, package name should be in lowercase, and docdir path should be as below.
+  set(CPACK_PACKAGE_NAME "openspace")
+  set(CMAKE_INSTALL_DOCDIR "${CMAKE_INSTALL_DATADIR}/doc/${CPACK_PACKAGE_NAME}" CACHE PATH "" FORCE)
+
   # Binary
     install(TARGETS OpenSpace RUNTIME DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace/bin)
     install(TARGETS OpenSpace_Helper RUNTIME DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace/bin)
