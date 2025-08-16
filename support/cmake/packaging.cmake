@@ -223,7 +223,31 @@ if(UNIX AND NOT APPLE)
   set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
   set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "OpenSpace: interactive data visualization tool")
   set(CPACK_DEBIAN_PACKAGE_MAINTAINER "OpenSpace team <info@openspaceproject.com>")
+
+  # Post-install script to patch cfg file
   set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_SOURCE_DIR}/support/deb/postinst")
+
+  # Adding a script in bin which will set the env vars OPENSPACE_USER & OPENSPACE_GLOBEBROWSING
+  # since /usr/share would normally be owned by root and not writable by normal users.
+
+  ########
+  # configure_file(<input> <output> @ONLY): What this does is:
+  # Copies the <input> file to <output>.
+  # Substitutes variables inside the input that are written as @VAR@ with their current CMake values.
+  # With @ONLY, only @VAR@ forms are replaced (not ${VAR}).
+  ##########
+  configure_file(
+      ${CMAKE_SOURCE_DIR}/support/scripts/openspace.in
+      ${CMAKE_BINARY_DIR}/openspace
+      @ONLY
+    )
+    
+    install(
+      PROGRAMS ${CMAKE_BINARY_DIR}/openspace
+      DESTINATION bin
+      RENAME openspace
+    )
+
 endif ()
 
 include (CPack)
