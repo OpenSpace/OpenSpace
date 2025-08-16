@@ -47,6 +47,20 @@ local Saturn = {
       Size = 140445000,
       Offset = { 74500 / 140445.100671159, 1.0 }, -- min / max extend
     },
+    ShadowGroup = {
+      Sources = {
+        { Name = "Sun", Radius = 696300000 },
+      },
+      Casters = {
+        { Name = "Mimas", Radius = 207000 },
+        { Name = "Enceladus", Radius = 252000 },
+        { Name = "Tethys", Radius = 531100 },
+        { Name = "Dione", Radius = 561400 },
+        { Name = "Rhea", Radius = 765000 },
+        { Name = "Titan", Radius = 2576000 },
+        { Name = "Iapetus", Radius = 734000 }
+      }
+    },
     Shadows = {
       Enabled = true,
       DistanceFraction = 40.0
