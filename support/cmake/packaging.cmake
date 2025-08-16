@@ -223,6 +223,7 @@ if(UNIX AND NOT APPLE)
   set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
   set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "OpenSpace: interactive data visualization tool")
   set(CPACK_DEBIAN_PACKAGE_MAINTAINER "OpenSpace team <info@openspaceproject.com>")
+  set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_SOURCE_DIR}/support/deb/postinst")
 endif ()
 
 include (CPack)
