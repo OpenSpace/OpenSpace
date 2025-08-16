@@ -129,7 +129,7 @@ endif ()
 if(UNIX AND NOT APPLE)
 
   # Binary
-    install(TARGETS OpenSpace RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+    install(TARGETS OpenSpace RUNTIME DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace/bin)
 
     # ------------------------------------------------------------------------------
     # Bundle Chromium Embedded Framework (CEF) runtime
@@ -174,7 +174,13 @@ if(UNIX AND NOT APPLE)
     
     # Required assets
     install(DIRECTORY config/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
-    install(DIRECTORY modules/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
+    install(DIRECTORY modules/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace
+                FILES_MATCHING
+              PATTERN "*.glsl"
+              PATTERN "*.hglsl"
+              PATTERN "*.fs"
+              PATTERN "*.vs"
+              PATTERN "*.lua")
     install(DIRECTORY data/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
     install(DIRECTORY scripts/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
     install(DIRECTORY shaders/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
@@ -182,6 +188,12 @@ if(UNIX AND NOT APPLE)
     
     # Config
     install(FILES openspace.cfg DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
+
+    # Doc
+    install(FILES ${PROJECT_SOURCE_DIR}/ACKNOWLEDGMENTS.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/openspace)
+    install(FILES ${PROJECT_SOURCE_DIR}/CREDITS.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/openspace)
+    install(FILES ${PROJECT_SOURCE_DIR}/LICENSE.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/openspace)
+    install(FILES ${PROJECT_SOURCE_DIR}/README.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/openspace)
     
     # Patch to be applied post-install or during packaging
     install(FILES support/cmake/openspacecfg.patch DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
