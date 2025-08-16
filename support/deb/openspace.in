@@ -1,0 +1,16 @@
+#!/bin/sh
+# Wrapper to run OpenSpace from its bin directory, with user data in $HOME
+
+# Set environment variables so OpenSpace writes logs & data into $HOME
+export OPENSPACE_USER="$HOME/OpenSpace/user"
+export OPENSPACE_GLOBEBROWSING="$HOME/OpenSpaceData"
+
+# Make sure the directories exist
+mkdir -p "$OPENSPACE_USER" "$OPENSPACE_GLOBEBROWSING"
+
+# Go to the installed bin directory
+cd "@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_DATADIR@/openspace/bin" || exit 1
+
+# Launch OpenSpace
+exec ./OpenSpace "$@"
+
