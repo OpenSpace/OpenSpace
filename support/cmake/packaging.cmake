@@ -26,7 +26,10 @@ set(CPACK_MONOLITHIC_INSTALL TRUE)
 
 include(InstallRequiredSystemLibraries)
 
+if NOT (UNIX AND NOT APPLE)
 set(CPACK_PACKAGE_NAME "OpenSpace")
+endif ()
+
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.md")
 set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE.md")
 set(CPACK_PACKAGE_VERSION_MAJOR "${OPENSPACE_VERSION_MAJOR}")
@@ -129,7 +132,7 @@ if (OPENSPACE_CREATE_INSTALLER)
   endif ()
 endif ()
 
-if(UNIX AND NOT APPLE)
+if (UNIX AND NOT APPLE)
 
   # for Debian convention, package name should be in lowercase, and docdir path should be as below.
   set(CPACK_PACKAGE_NAME "openspace")
@@ -210,6 +213,7 @@ if(UNIX AND NOT APPLE)
   else ()
     set(CPACK_DEBIAN_PACKAGE_DEPENDS "libstdc++6 (>= 13), libglew2.2, libpng16-16, freeglut3, libjack0, libxrandr2, libxinerama1, libx11-6, libxcursor1, libcurl4, libxi6, libasound2, libgdal30, libboost1.74-dev, qt6-base-dev, libmpv1, libvulkan1")
   endif ()
+  
   # Map CMAKE_SYSTEM_PROCESSOR to Debian arch names
   if (CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|amd64")
       set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
@@ -224,6 +228,7 @@ if(UNIX AND NOT APPLE)
       set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${CMAKE_SYSTEM_PROCESSOR}")
       message(WARNING "Unknown architecture '${CMAKE_SYSTEM_PROCESSOR}', using as-is for DEB package.")
   endif ()
+  
   set(CPACK_DEBIAN_PACKAGE_SECTION "science")
   set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
   set(CPACK_DEBIAN_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}")
