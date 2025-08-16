@@ -199,9 +199,9 @@ if(UNIX AND NOT APPLE)
     install(FILES support/cmake/openspacecfg.patch DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
 
   if (DEFINED OPENSPACE_DISTRO AND OPENSPACE_DISTRO STREQUAL "ubuntu24.04")
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libglew2.2, libpng16-16t64, freeglut3-dev, libxrandr2, libxinerama1, libx11-6, libxcursor1, libcurl4t64, libxi6, libasound2t64, libgdal34t64, libboost-all-dev, qt6-base-dev, libmpv2, libvulkan1")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libglew2.2, libpng16-16t64, freeglut3-dev, libjack0, libxrandr2, libxinerama1, libx11-6, libxcursor1, libcurl4t64, libxi6, libasound2t64, libgdal34t64, libboost-all-dev, qt6-base-dev, libmpv2, libvulkan1")
   else ()
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libstdc++6 (>= 13), libglew2.2, libpng16-16, freeglut3, libxrandr2, libxinerama1, libx11-6, libxcursor1, libcurl4, libxi6, libasound2, libgdal30, libboost1.74-dev, qt6-base-dev, libmpv1, libvulkan1")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libstdc++6 (>= 13), libglew2.2, libpng16-16, freeglut3, libjack0, libxrandr2, libxinerama1, libx11-6, libxcursor1, libcurl4, libxi6, libasound2, libgdal30, libboost1.74-dev, qt6-base-dev, libmpv1, libvulkan1")
   endif ()
   # Map CMAKE_SYSTEM_PROCESSOR to Debian arch names
   if (CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|amd64")
