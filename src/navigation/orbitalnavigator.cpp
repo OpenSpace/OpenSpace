@@ -407,7 +407,18 @@ namespace {
             "Cannot have degenerate vector"
         );
 
-        const glm::dmat4 inverseModelTransform = glm::inverse(node.modelTransform());
+        glm::dmat4 modelTransform = node.modelTransform();
+        if (modelTransform[0][0] == 0.0) {
+            modelTransform[0][0] = std::numeric_limits<double>::epsilon();
+        }
+        if (modelTransform[1][1] == 0.0) {
+            modelTransform[1][1] = std::numeric_limits<double>::epsilon();
+        }
+        if (modelTransform[2][2] == 0.0) {
+            modelTransform[2][2] = std::numeric_limits<double>::epsilon();
+        }
+
+        const glm::dmat4 inverseModelTransform = glm::inverse(modelTransform);
         const glm::dvec3 cameraPositionModelSpace =
             glm::dvec3(inverseModelTransform * glm::dvec4(cameraPositionWorldSpace, 1.0));
         const openspace::SurfacePositionHandle posHandle =
@@ -1305,7 +1316,16 @@ OrbitalNavigator::CameraRotationDecomposition
     const glm::dvec3 cameraUp = cameraPose.rotation * Camera::UpDirectionCameraSpace;
     const glm::dvec3 cameraViewDirection = ghoul::viewDirection(cameraPose.rotation);
 
-    const glm::dmat4 modelTransform = reference.modelTransform();
+    glm::dmat4 modelTransform = reference.modelTransform();
+    if (modelTransform[0][0] == 0.0) {
+        modelTransform[0][0] = std::numeric_limits<double>::epsilon();
+    }
+    if (modelTransform[1][1] == 0.0) {
+        modelTransform[1][1] = std::numeric_limits<double>::epsilon();
+    }
+    if (modelTransform[2][2] == 0.0) {
+        modelTransform[2][2] = std::numeric_limits<double>::epsilon();
+    }
     const glm::dmat4 inverseModelTransform = glm::inverse(modelTransform);
     const glm::dvec3 cameraPositionModelSpace = glm::dvec3(inverseModelTransform *
                                                 glm::dvec4(cameraPose.position, 1));
