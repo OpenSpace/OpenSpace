@@ -86,7 +86,7 @@ void ActionDialog::createWidgets() {
     //  |                      | Is Local      | []  [choosescr] |    Row 5
     //  |                      | Script        | [ooooooooooooo] |    Row 6
     //  *----------------------*---------------*-----------------*
-    //  | [+] [-]              |               | <Save> <Cancel> |    Row 7
+    //  | [+] [-] [D]          |               | <Save> <Cancel> |    Row 7
     //  *----------------------*---------------*-----------------*
     //  |========================================================|    Row 8
     //  | Keybindings                                            |    Row 9
