@@ -133,6 +133,7 @@ if(UNIX AND NOT APPLE)
 
   # Binary
     install(TARGETS OpenSpace RUNTIME DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace/bin)
+    install(TARGETS OpenSpace_Helper RUNTIME DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace/bin)
 
     # ------------------------------------------------------------------------------
     # Bundle Chromium Embedded Framework (CEF) runtime
@@ -189,8 +190,10 @@ if(UNIX AND NOT APPLE)
     install(DIRECTORY shaders/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
     
     # Documentation
-    install(DIRECTORY documentation/ DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/openspace)
-    install(FILES ACKNOWLEDGMENTS.md CREDITS.md LICENSE.md README.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/openspace)
+    install(DIRECTORY documentation/ 
+        DESTINATION ${CMAKE_INSTALL_DOCDIR})
+    install(FILES ACKNOWLEDGMENTS.md CREDITS.md LICENSE.md README.md
+        DESTINATION ${CMAKE_INSTALL_DOCDIR})
     
     # Config
     install(FILES openspace.cfg DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
