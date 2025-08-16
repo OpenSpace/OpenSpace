@@ -26,7 +26,7 @@ set(CPACK_MONOLITHIC_INSTALL TRUE)
 
 include(InstallRequiredSystemLibraries)
 
-if NOT (UNIX AND NOT APPLE)
+if (WIN32 OR APPLE)
 set(CPACK_PACKAGE_NAME "OpenSpace")
 endif ()
 
