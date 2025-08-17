@@ -137,6 +137,7 @@ if (UNIX AND NOT APPLE)
   # for Debian convention, package name should be in lowercase, and docdir path should be as below.
   set(CPACK_PACKAGE_NAME "openspace")
   set(CMAKE_INSTALL_DOCDIR "${CMAKE_INSTALL_DATADIR}/doc/${CPACK_PACKAGE_NAME}" CACHE PATH "" FORCE)
+  
 
   # Binary
     install(TARGETS OpenSpace RUNTIME DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace/bin)
@@ -232,7 +233,8 @@ if (UNIX AND NOT APPLE)
   set(CPACK_DEBIAN_PACKAGE_SECTION "science")
   set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
   set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-  set(CPACK_DEBIAN_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}")
+  # Debian convention - ~ instead of - in version
+  string(REPLACE "-" "~" CPACK_DEBIAN_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}")
   set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
   set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "OpenSpace: interactive data visualization tool")
   set(CPACK_DEBIAN_PACKAGE_MAINTAINER "OpenSpace team <info@openspaceproject.com>")
