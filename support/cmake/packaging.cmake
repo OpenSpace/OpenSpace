@@ -35,8 +35,6 @@ set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE.md")
 set(CPACK_PACKAGE_VERSION_MAJOR "${OPENSPACE_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${OPENSPACE_VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${OPENSPACE_VERSION_PATCH}")
-# required for deb and tgz
-set(CPACK_PACKAGE_VERSION "${OPENSPACE_VERSION_MAJOR}.${OPENSPACE_VERSION_MINOR}.${OPENSPACE_VERSION_PATCH}")
 
 set(OPENSPACE_VERSION_NUMBER
   "${OPENSPACE_VERSION_MAJOR}.${OPENSPACE_VERSION_MINOR}.${OPENSPACE_VERSION_PATCH}"
@@ -136,6 +134,9 @@ if (UNIX AND NOT APPLE)
 
   # for Debian convention, package name should be in lowercase, and docdir path should be as below.
   set(CPACK_PACKAGE_NAME "openspace")
+  set(CPACK_PACKAGE_VERSION "0.21.2")           # upstream version only
+  set(CPACK_DEBIAN_PACKAGE_RELEASE "1~ubuntu24.04.1")  # or "1~noble1"
+  set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")     # get Package_Version-Release_Arch.deb
   set(CMAKE_INSTALL_DOCDIR "${CMAKE_INSTALL_DATADIR}/doc/${CPACK_PACKAGE_NAME}" CACHE PATH "" FORCE)
   
 
@@ -232,10 +233,7 @@ if (UNIX AND NOT APPLE)
   
   set(CPACK_DEBIAN_PACKAGE_SECTION "science")
   set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-  set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-  # Debian convention - ~ instead of - in version
-  string(REPLACE "-" "~" CPACK_DEBIAN_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}")
-  set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
+  set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)  # Automatic dependency analysis should append to CPACK_DEBIAN_PACKAGE_DEPENDS
   set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "OpenSpace: interactive data visualization tool")
   set(CPACK_DEBIAN_PACKAGE_MAINTAINER "OpenSpace team <info@openspaceproject.com>")
 
