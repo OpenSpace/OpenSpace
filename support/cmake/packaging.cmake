@@ -238,7 +238,12 @@ if (UNIX AND NOT APPLE)
   set(CPACK_DEBIAN_PACKAGE_MAINTAINER "OpenSpace team <info@openspaceproject.com>")
 
   # Post-install script to patch cfg file
-  set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_SOURCE_DIR}/support/deb/postinst")
+  configure_file(
+      ${CMAKE_SOURCE_DIR}/support/deb/postinst.in
+      ${CMAKE_BINARY_DIR}/support/deb/postinst
+      @ONLY
+    )
+  set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_BINARY_DIR}/support/deb/postinst")
 
   # Adding a script in bin which will set the env vars OPENSPACE_USER & OPENSPACE_GLOBEBROWSING
   # since /usr/share would normally be owned by root and not writable by normal users.
