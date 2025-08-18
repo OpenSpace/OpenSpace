@@ -99,6 +99,8 @@ public:
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
 
+    void renderOverlay() const;
+
     std::vector<std::string> listAllJoysticks() const;
     void setJoystickAxisMapping(std::string joystickName,
         int axis, JoystickCameraStates::AxisType mapping,
@@ -208,6 +210,14 @@ private:
     properties::BoolProperty _disableJoystickInputs;
     properties::BoolProperty _useKeyFrameInteraction;
     properties::FloatProperty _jumpToFadeDuration;
+
+    struct {
+        properties::BoolProperty enable;
+        bool isMouseFirstPress = false;
+        bool isMousePressed = false;
+        glm::vec2 clickPosition;
+        glm::vec2 currentPosition;
+    } _mouseVisualizer;
 };
 
 } // namespace openspace::interaction
