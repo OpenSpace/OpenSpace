@@ -245,6 +245,18 @@ if (UNIX AND NOT APPLE)
     )
   set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_BINARY_DIR}/support/deb/postinst")
 
+  # Exclude unwanted files from the .deb package
+  # The actual OpenSpace executable is inside the openspace/bin directory
+  set(CPACK_DEBIAN_PACKAGE_EXCLUDE_FROM_INSTALL
+        "/usr/bin/OpenSpace;/usr/bin/OpenSpace_Helper;/usr/bin/codegen-tool;
+        /usr/include;
+        /usr/share/glbinding;
+        /usr/share/Tracy;
+        /usr/share/man;
+        /usr/share/pkgconfig;
+        usr/share/SoLoud"
+    )
+
   # Adding a script in bin which will set the env vars OPENSPACE_USER & OPENSPACE_GLOBEBROWSING
   # since /usr/share would normally be owned by root and not writable by normal users.
 
