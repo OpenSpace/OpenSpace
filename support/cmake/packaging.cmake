@@ -45,6 +45,7 @@ set(CPACK_PACKAGE_FILE_NAME
 )
 set(CPACK_STRIP_FILES 1)
 
+if (WIN32 OR APPLE)
 if (EXISTS "${PROJECT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}")
   message(STATUS "Directory '${PROJECT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}' exists. Taking the binaries from there.")
   install(DIRECTORY
@@ -59,7 +60,9 @@ else ()
     DESTINATION bin
     USE_SOURCE_PERMISSIONS
   )
-endif ()
+endif () # if EXISTS
+
+endif () # WIN32 OR APPLE
 
 if (WIN32)
 
@@ -248,13 +251,7 @@ if (UNIX AND NOT APPLE)
   # Exclude unwanted files from the .deb package
   # The actual OpenSpace executable is inside the openspace/bin directory
   set(CPACK_DEBIAN_PACKAGE_EXCLUDE_FROM_INSTALL
-        "/usr/bin/OpenSpace;/usr/bin/OpenSpace_Helper;/usr/bin/codegen-tool;
-        /usr/include;
-        /usr/share/glbinding;
-        /usr/share/Tracy;
-        /usr/share/man;
-        /usr/share/pkgconfig;
-        usr/share/SoLoud"
+  "bin/OpenSpace;bin/OpenSpace_Helper;bin/codegen-tool;include;share/glbinding;share/Tracy;share/man;share/pkgconfig;share/SoLoud"
     )
 
   # Adding a script in bin which will set the env vars OPENSPACE_USER & OPENSPACE_GLOBEBROWSING
