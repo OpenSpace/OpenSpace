@@ -148,7 +148,7 @@ void DeltaTimesDialog::createWidgets() {
         _previousValueUnit = _valueUnit->count() - 1;
         _valueUnit->setCurrentIndex(_valueUnit->count() - 1);
         connect(
-            _valueUnit, &QComboBox::currentIndexChanged,
+            _valueUnit, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &DeltaTimesDialog::currentUnitChanged
         );
         box->addWidget(_valueUnit);
