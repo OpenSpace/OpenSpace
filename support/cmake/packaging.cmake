@@ -341,7 +341,7 @@ if (UNIX AND NOT APPLE)
 
     # Find and remove all .a files under lib/
     file(GLOB_RECURSE STATIC_LIBS
-        "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/*.a"
+        "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.a"
     )
     
     if(STATIC_LIBS)
