@@ -324,6 +324,13 @@ if (UNIX AND NOT APPLE)
     "${CMAKE_BINARY_DIR}/support/deb/postinst"
   )
 
+  install(FILES ${CMAKE_BINARY_DIR}/support/deb/changelog
+        DESTINATION ${CMAKE_INSTALL_DOCDIR}
+        RENAME changelog.Debian)
+  install(FILES ${CMAKE_BINARY_DIR}/support/deb/copyright
+        DESTINATION ${CMAKE_INSTALL_DOCDIR})
+
+
   
     # --------------------------------------------------------------------------
     # Remove unwanted developer files (headers, pkgconfig, etc.) from the staged install
