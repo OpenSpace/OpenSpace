@@ -259,8 +259,24 @@ if (UNIX AND NOT APPLE)
   set(CPACK_DEBIAN_PACKAGE_SECTION "science")
   set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
   set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)  # Automatic dependency analysis should append to CPACK_DEBIAN_PACKAGE_DEPENDS
-  set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "OpenSpace: interactive data visualization tool")
   set(CPACK_DEBIAN_PACKAGE_MAINTAINER "OpenSpace team <info@openspaceproject.com>")
+  # Short description (synopsis) — do NOT include package name, no trailing period,
+  # keep it concise (< ~80 chars)
+  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
+        "interactive 3D visualization of space and planetary data")
+    
+  # Extended (long) description — full sentences; paragraphs allowed
+  # Use bracket quotes so you can write multi-line text comfortably.
+  set(CPACK_DEBIAN_PACKAGE_DESCRIPTION [[
+    OpenSpace is an open-source, real-time 3D application for visualizing astronomy
+    and spaceflight data. It renders celestial bodies, star catalogs, and spacecraft
+    trajectories, and can be used on desktops and in dome theaters.
+    
+    It supports time navigation, high-resolution tiled planetary textures, and
+    loading mission ephemerides. The application can be scripted for presentations
+    and live shows, and is suitable for education, outreach, and research
+    visualizations.
+    ]])
 
   # Post-install script to patch cfg file
   ########
