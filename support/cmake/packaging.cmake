@@ -156,11 +156,17 @@ if (UNIX AND NOT APPLE)
     
     # Path to CEF binary dir - is set as CEF_ROOT in modules/webbrowser/cmake/cef_support.cmake
     # set(CEF_BINARY_DIR "${CMAKE_SOURCE_DIR}/build/modules/webbrowser/ext/cef/cef_binary_127")
+
+    # strip in place
+    execute_process(
+    COMMAND ${CMAKE_STRIP} --strip-unneeded ${CEF_ROOT}/Release/libcef.so
+    )
+
     
     # Main CEF shared library
     install(FILES
         ${CEF_ROOT}/Release/libcef.so
-        DESTINATION lib
+        DESTINATION lib/openspace
     )
     
     # Resources and locales (required for CEF to work properly)
@@ -175,7 +181,7 @@ if (UNIX AND NOT APPLE)
     )
     
     if(CEF_SHARED_LIBS)
-        install(FILES ${CEF_SHARED_LIBS} DESTINATION lib)
+        install(FILES ${CEF_SHARED_LIBS} DESTINATION lib/openspace)
     endif()
     
     install(DIRECTORY
@@ -187,7 +193,7 @@ if (UNIX AND NOT APPLE)
     # Ensure executable can find private libcef.so at runtime
     # ------------------------------------------------------------------------------
     set_target_properties(OpenSpace PROPERTIES
-        INSTALL_RPATH "$ORIGIN/../lib"
+        INSTALL_RPATH "$ORIGIN/../../../lib/openspace"
     )
 
     
