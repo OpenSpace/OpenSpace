@@ -241,28 +241,22 @@ if (UNIX AND NOT APPLE)
   set(CPACK_DEBIAN_PACKAGE_MAINTAINER "OpenSpace team <info@openspaceproject.com>")
 
   # Post-install script to patch cfg file
-  configure_file(
-      ${CMAKE_SOURCE_DIR}/support/deb/postinst.in
-      ${CMAKE_BINARY_DIR}/support/deb/postinst
-      @ONLY
-    )
-  set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_BINARY_DIR}/support/deb/postinst")
-
-  # Exclude unwanted files from the .deb package
-  # The actual OpenSpace executable is inside the openspace/bin directory
-  set(CPACK_DEBIAN_PACKAGE_EXCLUDE_FROM_INSTALL
-  "bin/OpenSpace;bin/OpenSpace_Helper;bin/codegen-tool;include;share/glbinding;share/Tracy;share/man;share/pkgconfig;share/SoLoud"
-    )
-
-  # Adding a script in bin which will set the env vars OPENSPACE_USER & OPENSPACE_GLOBEBROWSING
-  # since /usr/share would normally be owned by root and not writable by normal users.
-
   ########
   # configure_file(<input> <output> @ONLY): What this does is:
   # Copies the <input> file to <output>.
   # Substitutes variables inside the input that are written as @VAR@ with their current CMake values.
   # With @ONLY, only @VAR@ forms are replaced (not ${VAR}).
   ##########
+  configure_file(
+      ${CMAKE_SOURCE_DIR}/support/deb/postinst.in
+      ${CMAKE_BINARY_DIR}/support/deb/postinst
+      @ONLY
+    )
+  set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_BINARY_DIR}/support/deb/postinst")
+  
+  # Adding a script in bin which will set the env vars OPENSPACE_USER & OPENSPACE_GLOBEBROWSING
+  # since /usr/share would normally be owned by root and not writable by normal users.
+  
   configure_file(
       ${CMAKE_SOURCE_DIR}/support/deb/openspace.in
       ${CMAKE_BINARY_DIR}/openspace
@@ -274,6 +268,21 @@ if (UNIX AND NOT APPLE)
       DESTINATION bin
       RENAME openspace
     )
+
+  # --------------------------------------------------------------------------
+  # Remove unwanted developer files (headers, pkgconfig, etc.) from the staged install
+  # --------------------------------------------------------------------------
+  install(CODE "
+    message(STATUS \"Pruning developer files from install tree...\")
+    file(REMOVE_RECURSE
+      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/include\"
+      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/glbinding\"
+      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/Tracy\"
+      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/SoLoud\"
+      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/pkgconfig\"
+      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/man\"
+    )
+  ")
 
 endif ()
 
