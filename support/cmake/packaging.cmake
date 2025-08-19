@@ -363,13 +363,16 @@ if (UNIX AND NOT APPLE)
         \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/man/man3/zlib*\")
       file(REMOVE \${_zlib_man3})
     
-      # Multi-arch dirs
-      if (DEFINED CMAKE_LIBRARY_ARCHITECTURE)
-        file(REMOVE_RECURSE
-          \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/\${CMAKE_LIBRARY_ARCHITECTURE}/pkgconfig\"
-          \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/\${CMAKE_LIBRARY_ARCHITECTURE}/cmake\"
+      # Remove development-related files for runtime-only package
+      file(GLOB_RECURSE unwanted_pkgconfigs
+          "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/**/pkgconfig"
         )
-      endif ()
+        
+      file(GLOB_RECURSE unwanted_cmake_dirs
+          "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/**/cmake"
+        )
+        
+      file(REMOVE_RECURSE ${unwanted_pkgconfigs} ${unwanted_cmake_dirs})
     ")
     
 endif () # if UNIX and not APPLE
