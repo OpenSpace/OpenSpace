@@ -282,9 +282,15 @@ if (UNIX AND NOT APPLE)
       \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/pkgconfig\"
       \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/man\"
       \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/pkgconfig\"
-      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/x86_64-linux-gnu/pkgconfig\"
-      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/x86_64-linux-gnu/cmake\"
-    )
+      )
+
+    # Multi-arch specific dirs (e.g. x86_64-linux-gnu, aarch64-linux-gnu, etc.)
+    if (DEFINED CMAKE_LIBRARY_ARCHITECTURE)
+      file(REMOVE_RECURSE
+        \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/pkgconfig\"
+        \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/cmake\"
+      )
+    endif ()
   ")
 
 endif ()
