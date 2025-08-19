@@ -299,13 +299,10 @@ if (UNIX AND NOT APPLE)
   # Adding mandatory deb files
   string(TIMESTAMP CPACK_DEBIAN_CHANGELOG_DATE "%a, %d %b %Y %H:%M:%S %z")
 
-  configure_file(${CMAKE_SOURCE_DIR}/support/deb/control.in
-               ${CMAKE_BINARY_DIR}/support/deb/control @ONLY)
   configure_file(${CMAKE_SOURCE_DIR}/support/deb/changelog.in
                ${CMAKE_BINARY_DIR}/support/deb/changelog @ONLY)
 
   set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
-    "${CMAKE_BINARY_DIR}/support/deb/control"
     "${CMAKE_BINARY_DIR}/support/deb/changelog"
     "${CMAKE_BINARY_DIR}/support/deb/copyright"
     "${CMAKE_BINARY_DIR}/support/deb/postinst"
@@ -323,9 +320,14 @@ if (UNIX AND NOT APPLE)
       \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/Tracy\"
       \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/SoLoud\"
       \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/pkgconfig\"
-      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/man\"
       \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/pkgconfig\"
       )
+
+    # remove zlib man page
+    file(GLOB _zlib_man3
+      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/man/man3/zlib*"
+    )
+    file(REMOVE ${_zlib_man3})
 
     # Multi-arch specific dirs (e.g. x86_64-linux-gnu, aarch64-linux-gnu, etc.)
     if (DEFINED CMAKE_LIBRARY_ARCHITECTURE)
