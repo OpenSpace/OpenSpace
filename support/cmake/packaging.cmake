@@ -255,6 +255,11 @@ if (UNIX AND NOT APPLE)
       ${CMAKE_BINARY_DIR}/support/deb/postinst
       @ONLY
     )
+    # postinst permissions should be 0755
+    file(CHMOD ${CMAKE_BINARY_DIR}/support/deb/postinst
+     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                 GROUP_READ GROUP_EXECUTE
+                 WORLD_READ WORLD_EXECUTE)
   
   
   # Adding a script in bin which will set the env vars OPENSPACE_USER & OPENSPACE_GLOBEBROWSING
