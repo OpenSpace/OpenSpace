@@ -255,7 +255,7 @@ if (UNIX AND NOT APPLE)
       ${CMAKE_BINARY_DIR}/support/deb/postinst
       @ONLY
     )
-  set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_BINARY_DIR}/support/deb/postinst")
+  
   
   # Adding a script in bin which will set the env vars OPENSPACE_USER & OPENSPACE_GLOBEBROWSING
   # since /usr/share would normally be owned by root and not writable by normal users.
@@ -272,6 +272,22 @@ if (UNIX AND NOT APPLE)
       RENAME openspace
     )
 
+  # Adding mandatory deb files
+  string(TIMESTAMP CPACK_DEBIAN_CHANGELOG_DATE "%a, %d %b %Y %H:%M:%S %z")
+
+  configure_file(${CMAKE_SOURCE_DIR}/support/deb/control.in
+               ${CMAKE_BINARY_DIR}/support/deb/control @ONLY)
+  configure_file(${CMAKE_SOURCE_DIR}/support/deb/changelog.in
+               ${CMAKE_BINARY_DIR}/support/deb/changelog @ONLY)
+
+  set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
+    "${CMAKE_BINARY_DIR}/support/deb/control"
+    "${CMAKE_BINARY_DIR}/support/deb/changelog"
+    "${CMAKE_BINARY_DIR}/support/deb/copyright"
+    "${CMAKE_BINARY_DIR}/support/deb/postinst"
+  )
+
+  
   # --------------------------------------------------------------------------
   # Remove unwanted developer files (headers, pkgconfig, etc.) from the staged install
   # --------------------------------------------------------------------------
