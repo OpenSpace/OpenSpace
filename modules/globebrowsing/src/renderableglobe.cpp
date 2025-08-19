@@ -786,11 +786,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
                 _shadersNeedRecompilation = true;
             });
         }
-        
-        // Set up notification for shader recompilation when rings readiness changes
-        _ringsComponent->onReadinessChange([this]() {
-            _shadersNeedRecompilation = true;
-        });
     }
 
     if (p.shadows.has_value()) {
@@ -1792,7 +1787,8 @@ void RenderableGlobe::recompileShaders() {
     );
     pairs.emplace_back(
         "useRingShadows", 
-        std::to_string(_shadowMappingProperties.shadowMapping && _ringsComponent)
+        std::to_string(_shadowMappingProperties.shadowMapping && _ringsComponent && 
+                       _ringsComponent->isEnabled())
     );
     pairs.emplace_back("showChunkEdges", std::to_string(_debugProperties.showChunkEdges));
     pairs.emplace_back("showHeightResolution", "0");
