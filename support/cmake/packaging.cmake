@@ -191,10 +191,12 @@ if (UNIX AND NOT APPLE)
     # Required assets
     install(DIRECTORY config/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
     install(DIRECTORY modules/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace
-                PATTERN "*.cpp" EXCLUDE
-                PATTERN "*.h"   EXCLUDE
-                PATTERN "*.inl" EXCLUDE
-                PATTERN "CMakeLists.txt" EXCLUDE)
+                FILES_MATCHING
+              PATTERN "*.glsl"
+              PATTERN "*.hglsl"
+              PATTERN "*.fs"
+              PATTERN "*.vs"
+              PATTERN "*.lua")
     install(DIRECTORY data/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
     install(DIRECTORY scripts/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
     install(DIRECTORY shaders/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
