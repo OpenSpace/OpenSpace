@@ -339,6 +339,16 @@ if (UNIX AND NOT APPLE)
       \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/pkgconfig\"
       )
 
+    # Find and remove all .a files under lib/
+    file(GLOB_RECURSE STATIC_LIBS
+        "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/*.a"
+    )
+    
+    if(STATIC_LIBS)
+        message(STATUS "Pruning static libs: ${STATIC_LIBS}")
+        file(REMOVE ${STATIC_LIBS})
+    endif()
+
     # remove zlib man page
     file(GLOB _zlib_man3
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/man/man3/zlib*"
