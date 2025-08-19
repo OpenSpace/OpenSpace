@@ -1,6 +1,0 @@
-openspace (0.21.2-1) unstable; urgency=medium
-
-  * Initial Debian packaging of OpenSpace.
-  * Bundled with necessary runtime assets and wrapper script.
-
- -- OpenSpace Project Team <openspace@openspaceproject.com>  Tue, 19 Aug 2025 10:00:00 +0530
