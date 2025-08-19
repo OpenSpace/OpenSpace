@@ -141,7 +141,7 @@ if (UNIX AND NOT APPLE)
   set(CPACK_DEBIAN_PACKAGE_RELEASE "1~ubuntu24.04.1")  # or "1~noble1"
   set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")     # get Package_Version-Release_Arch.deb
   set(CMAKE_INSTALL_DOCDIR "${CMAKE_INSTALL_DATADIR}/doc/${CPACK_PACKAGE_NAME}" CACHE PATH "" FORCE)
-  
+  set(CMAKE_INSTALL_DATADIR share)  
 
   # Binary
     install(TARGETS OpenSpace RUNTIME DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace/bin)
