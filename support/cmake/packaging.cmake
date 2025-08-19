@@ -147,6 +147,9 @@ if (UNIX AND NOT APPLE)
     install(TARGETS OpenSpace RUNTIME DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace/bin)
     install(TARGETS OpenSpace_Helper RUNTIME DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace/bin)
 
+    # man page
+    install(FILES support/deb/openspace.1 DESTINATION share/man/man1)
+
     # ------------------------------------------------------------------------------
     # Bundle Chromium Embedded Framework (CEF) runtime
     # ------------------------------------------------------------------------------
