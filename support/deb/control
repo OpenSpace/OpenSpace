@@ -1,0 +1,11 @@
+Package: openspace
+Version: ${CPACK_PACKAGE_VERSION}
+Section: graphics
+Priority: optional
+Architecture: any
+Maintainer: OpenSpace Project Team <openspace@openspaceproject.com>
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Interactive data visualization software
+ OpenSpace is an open-source interactive data visualization software designed 
+ to visualize the entire known universe and portray our ongoing efforts to 
+ investigate the cosmos.
