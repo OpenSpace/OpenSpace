@@ -281,6 +281,9 @@ if (UNIX AND NOT APPLE)
       \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/SoLoud\"
       \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/pkgconfig\"
       \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/man\"
+      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/pkgconfig\"
+      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/x86_64-linux-gnu/pkgconfig\"
+      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/x86_64-linux-gnu/cmake\"
     )
   ")
 
