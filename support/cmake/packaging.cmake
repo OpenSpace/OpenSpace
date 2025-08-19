@@ -208,6 +208,26 @@ if (UNIX AND NOT APPLE)
       INSTALL_RPATH "${_openspace_privlib_rpath}"
     )
 
+    # After install step, fix RPATH to remove stray '.'
+    install(CODE "
+      file(GLOB_RECURSE _bins
+        \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/openspace/bin/OpenSpace*\"
+      )
+      foreach(_bin IN LISTS _bins)
+        execute_process(
+          COMMAND patchelf --print-rpath \"\${_bin}\"
+          OUTPUT_VARIABLE _rpath
+          OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+        if(\"${_rpath}\" MATCHES \".:\")
+          # Replace '.' with only our intended RPATH
+          execute_process(
+            COMMAND patchelf --set-rpath \"\\$ORIGIN/../../../lib/openspace\" \"\${_bin}\"
+          )
+        endif()
+      endforeach()
+    ")
+
 
     
     # Required assets
