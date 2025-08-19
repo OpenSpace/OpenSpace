@@ -50,6 +50,7 @@ struct SessionRecording {
         double timestamp = 0.0;
         double simulationTime = 0.0;
         std::variant<Camera, Script> value;
+        int id;
     };
 
     bool operator==(const SessionRecording&) const noexcept = default;

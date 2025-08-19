@@ -47,7 +47,8 @@ void KeyframeRecordingHandler::addCameraKeyframe(double sequenceTime) {
     SessionRecording::Entry entry = {
         sequenceTime,
         global::timeManager->time().j2000Seconds(),
-        KeyframeNavigator::CameraPose(std::move(kf))
+        KeyframeNavigator::CameraPose(std::move(kf)),
+        id++
     };
 
     auto it = std::upper_bound(
@@ -66,7 +67,8 @@ void KeyframeRecordingHandler::addScriptKeyframe(double sequenceTime, std::strin
     SessionRecording::Entry entry = {
         sequenceTime,
         global::timeManager->time().j2000Seconds(),
-        std::move(script)
+        std::move(script),
+        id++
     };
 
     auto it = std::upper_bound(
@@ -126,6 +128,10 @@ void KeyframeRecordingHandler::saveSequence(std::filesystem::path filename) {
 
 void KeyframeRecordingHandler::loadSequence(std::filesystem::path filename) {
     _timeline = loadSessionRecording(filename);
+    id = 1;
+    for (auto& entry : _timeline.entries) {
+        entry.id = id++;
+    }
 }
 
 void KeyframeRecordingHandler::play() {
