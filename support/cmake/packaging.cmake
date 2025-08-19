@@ -339,15 +339,22 @@ if (UNIX AND NOT APPLE)
       \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/pkgconfig\"
       )
 
-    # Find and remove all .a files under lib/
-    file(GLOB_RECURSE STATIC_LIBS
-        "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.a"
-    )
+    # Helper macro to prune files by pattern
+    macro(prune_by_pattern PATTERN)
+        file(GLOB_RECURSE FILES_TO_REMOVE
+            "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${PATTERN}"
+        )
+        if(FILES_TO_REMOVE)
+            message(STATUS "Pruning ${PATTERN}: ${FILES_TO_REMOVE}")
+            file(REMOVE ${FILES_TO_REMOVE})
+        endif()
+    endmacro()
     
-    if(STATIC_LIBS)
-        message(STATUS "Pruning static libs: ${STATIC_LIBS}")
-        file(REMOVE ${STATIC_LIBS})
-    endif()
+    # Remove all unwanted files
+    prune_by_pattern("*.a")         # static libs
+    prune_by_pattern("*.git")       # leftover git files (rare in installs)
+    prune_by_pattern(".gitignore")  # ignore files
+    prune_by_pattern("*.cmake")     # cmake config fragments
 
     # remove zlib man page
     file(GLOB _zlib_man3
