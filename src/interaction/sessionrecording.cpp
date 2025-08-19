@@ -673,6 +673,7 @@ std::vector<ghoul::Dictionary> sessionRecordingToDictionary(
         ghoul::Dictionary e;
         e.setValue("Timestamp", entry.timestamp);
         e.setValue("SimulationTime", entry.simulationTime);
+        e.setValue("Id", entry.id);
 
         if (std::holds_alternative<SessionRecording::Entry::Camera>(entry.value)) {
             const auto& cam = std::get<SessionRecording::Entry::Camera>(entry.value);

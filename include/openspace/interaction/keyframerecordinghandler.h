@@ -55,6 +55,7 @@ public:
 
 private:
     SessionRecording _timeline;
+    size_t id = 1;
 };
 
 } // namespace openspace
