@@ -328,49 +328,50 @@ if (UNIX AND NOT APPLE)
     # --------------------------------------------------------------------------
     # Remove unwanted developer files (headers, pkgconfig, etc.) from the staged install
     # --------------------------------------------------------------------------
-    
-    # Helper macro to prune files by pattern (defined at configure-time)
-    macro(prune_by_pattern PATTERN)
-        file(GLOB_RECURSE FILES_TO_REMOVE
-            "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${PATTERN}"
-        )
-        if(FILES_TO_REMOVE)
-            message(STATUS "Pruning ${PATTERN}: ${FILES_TO_REMOVE}")
-            file(REMOVE ${FILES_TO_REMOVE})
-        endif()
-    endmacro()
-    
     install(CODE "
-        message(STATUS \"Pruning developer files from install tree...\")
+      message(STATUS \"Pruning developer files from install tree...\")
+      file(REMOVE_RECURSE
+        \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/include\"
+        \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/glbinding\"
+        \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/Tracy\"
+        \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/SoLoud\"
+        \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/pkgconfig\"
+        \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/pkgconfig\"
+      )
+    
+      # Static libs
+      file(GLOB_RECURSE _static_libs
+        \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.a\")
+      file(REMOVE \${_static_libs})
+    
+      # Git leftovers
+      file(GLOB_RECURSE _gitfiles
+        \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.git\")
+      file(REMOVE \${_gitfiles})
+    
+      file(GLOB_RECURSE _gitignores
+        \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/.gitignore\")
+      file(REMOVE \${_gitignores})
+    
+      # CMake fragments
+      file(GLOB_RECURSE _cmakefiles
+        \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.cmake\")
+      file(REMOVE \${_cmakefiles})
+    
+      # zlib man page
+      file(GLOB _zlib_man3
+        \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/man/man3/zlib*\")
+      file(REMOVE \${_zlib_man3})
+    
+      # Multi-arch dirs
+      if (DEFINED CMAKE_LIBRARY_ARCHITECTURE)
         file(REMOVE_RECURSE
-          \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/include\"
-          \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/glbinding\"
-          \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/Tracy\"
-          \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/SoLoud\"
-          \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/pkgconfig\"
-          \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/pkgconfig\"
+          \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/\${CMAKE_LIBRARY_ARCHITECTURE}/pkgconfig\"
+          \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/\${CMAKE_LIBRARY_ARCHITECTURE}/cmake\"
         )
-    
-        prune_by_pattern(\"*.a\")         # static libs
-        prune_by_pattern(\"*.git\")       # leftover git files
-        prune_by_pattern(\".gitignore\")  # ignore files
-        prune_by_pattern(\"*.cmake\")     # cmake config fragments
-    
-        # remove zlib man page
-        file(GLOB _zlib_man3
-          \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/man/man3/zlib*\"
-        )
-        file(REMOVE \${_zlib_man3})
-    
-        # Multi-arch specific dirs (e.g. x86_64-linux-gnu, aarch64-linux-gnu, etc.)
-        if (DEFINED CMAKE_LIBRARY_ARCHITECTURE)
-          file(REMOVE_RECURSE
-            \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/\${CMAKE_LIBRARY_ARCHITECTURE}/pkgconfig\"
-            \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/\${CMAKE_LIBRARY_ARCHITECTURE}/cmake\"
-          )
-        endif ()
+      endif ()
     ")
-
-endif ()
+    
+endif () # if UNIX and not APPLE
 
 include (CPack)
