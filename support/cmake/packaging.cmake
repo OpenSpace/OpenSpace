@@ -266,17 +266,15 @@ if (UNIX AND NOT APPLE)
         "interactive 3D visualization of space and planetary data")
     
   # Extended (long) description — full sentences; paragraphs allowed
-  # Use bracket quotes so you can write multi-line text comfortably.
-  set(CPACK_DEBIAN_PACKAGE_DESCRIPTION [[
-    OpenSpace is an open-source, real-time 3D application for visualizing astronomy
-    and spaceflight data. It renders celestial bodies, star catalogs, and spacecraft
-    trajectories, and can be used on desktops and in dome theaters.
-    
-    It supports time navigation, high-resolution tiled planetary textures, and
-    loading mission ephemerides. The application can be scripted for presentations
-    and live shows, and is suitable for education, outreach, and research
-    visualizations.
-    ]])
+  set(CPACK_DEBIAN_PACKAGE_DESCRIPTION
+"OpenSpace is an open-source, real-time 3D application for visualizing astronomy
+ and spaceflight data. It renders celestial bodies, star catalogs, and spacecraft
+ trajectories, and can be used on desktops and in dome theaters.
+
+ It supports time navigation, high-resolution tiled planetary textures, and
+ loading mission ephemerides. The application can be scripted for presentations
+ and live shows, and is suitable for education, outreach, and research
+ visualizations.")
 
   # Post-install script to patch cfg file
   ########
