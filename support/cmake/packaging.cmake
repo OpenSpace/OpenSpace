@@ -352,58 +352,8 @@ if (UNIX AND NOT APPLE)
   install(FILES ${CMAKE_BINARY_DIR}/support/deb/copyright
         DESTINATION ${CMAKE_INSTALL_DOCDIR})
 
-
-  
-    # --------------------------------------------------------------------------
-    # Remove unwanted developer files (headers, pkgconfig, etc.) from the staged install
-    # --------------------------------------------------------------------------
-    install(CODE [[
-      message(STATUS "Pruning developer files from install tree...")
-      file(REMOVE_RECURSE
-        "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/include"
-        "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/glbinding"
-        "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/Tracy"
-        "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/SoLoud"
-        "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/pkgconfig"
-        "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/pkgconfig"
-      )
-    
-      # Static libs
-      file(GLOB_RECURSE _static_libs
-        "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.a")
-      file(REMOVE \${_static_libs})
-    
-      # Git leftovers
-      file(GLOB_RECURSE _gitfiles
-        "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.git")
-      file(REMOVE \${_gitfiles})
-    
-      file(GLOB_RECURSE _gitignores
-        "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/.gitignore")
-      file(REMOVE \${_gitignores})
-    
-      # CMake fragments
-      file(GLOB_RECURSE _cmakefiles
-        "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.cmake")
-      file(REMOVE \${_cmakefiles})
-    
-      # zlib man page
-      file(GLOB _zlib_man3
-        "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/man/man3/zlib*")
-      file(REMOVE \${_zlib_man3})
-    
-      # Remove development-related files for runtime-only package
-      file(GLOB_RECURSE unwanted_pkgconfigs
-        "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/**/pkgconfig"
-      )
-    
-      file(GLOB_RECURSE unwanted_cmake_dirs
-        "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/**/cmake"
-      )
-    
-      file(REMOVE_RECURSE \${unwanted_pkgconfigs} \${unwanted_cmake_dirs})
-    ]])
-
+  # Ensure CPack runs our prune step at the end of staging
+  set(CPACK_INSTALL_SCRIPTS "${CMAKE_SOURCE_DIR}/support/deb/prune.cmake")
     
 endif () # if UNIX and not APPLE
 
