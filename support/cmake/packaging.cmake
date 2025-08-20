@@ -337,6 +337,9 @@ if (UNIX AND NOT APPLE)
   configure_file(${CMAKE_SOURCE_DIR}/support/deb/changelog.in
                ${CMAKE_BINARY_DIR}/support/deb/changelog @ONLY)
 
+  configure_file(${CMAKE_SOURCE_DIR}/support/deb/copyright
+               ${CMAKE_BINARY_DIR}/support/deb/copyright @ONLY)
+
   set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
     "${CMAKE_BINARY_DIR}/support/deb/changelog"
     "${CMAKE_BINARY_DIR}/support/deb/copyright"
