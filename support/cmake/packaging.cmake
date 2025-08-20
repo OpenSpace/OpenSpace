@@ -352,8 +352,52 @@ if (UNIX AND NOT APPLE)
   install(FILES ${CMAKE_BINARY_DIR}/support/deb/copyright
         DESTINATION ${CMAKE_INSTALL_DOCDIR})
 
-  # Ensure CPack runs our prune step at the end of staging
-  set(CPACK_INSTALL_SCRIPTS "${CMAKE_SOURCE_DIR}/support/deb/prune.cmake")
+    # --------------------------------------------------------------------------
+    # Remove unwanted developer/source files from staged install
+    # --------------------------------------------------------------------------
+    
+    # Static libraries
+    file(GLOB_RECURSE _static_libs
+      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.a")
+    file(REMOVE ${_static_libs})
+    
+    # Git leftovers
+    file(GLOB_RECURSE _gitfiles
+      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.git")
+    file(GLOB_RECURSE _gitignores
+      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/.gitignore")
+    file(REMOVE ${_gitfiles} ${_gitignores})
+    
+    # Source files
+    file(GLOB_RECURSE _srcfiles
+      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.c"
+      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.cpp"
+      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.h"
+      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.hpp")
+    file(REMOVE ${_srcfiles})
+    
+    # CMake fragments
+    file(GLOB_RECURSE _cmakefiles
+      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.cmake"
+      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/CMakeLists.txt")
+    file(REMOVE ${_cmakefiles})
+    
+    # Remove whole unwanted directories
+    file(REMOVE_RECURSE
+      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/include"
+      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/glbinding"
+      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/Tracy"
+      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/SoLoud"
+      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/pkgconfig"
+      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/pkgconfig"
+    )
+    
+    # zlib man page
+    file(GLOB _zlib_man3
+      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/man/man3/zlib*")
+    file(REMOVE ${_zlib_man3})
+
+   # --------------------------------------------------------------------------
     
 endif () # if UNIX and not APPLE
 
