@@ -1043,10 +1043,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_DEPTH_TEST);
     }
 
-    if (_renderWireframe) {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    }
-
     // does only really need to be set when _castShadow changes
     _program->setUniform("has_shadow_depth_map", _castShadow);
 
@@ -1168,8 +1164,16 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
         // Render Pass 1
         // Render all parts of the model into the new framebuffer without opacity
+        if (_renderWireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+
         _geometry->render(*_program);
         _program->deactivate();
+
+        if (_renderWireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
 
         // Render pass 2
         // Render the whole model into the G-buffer with the correct opacity
@@ -1231,10 +1235,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
     if (!_enableDepthTest) {
         glEnable(GL_DEPTH_TEST);
-    }
-
-    if (_renderWireframe) {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
     global::renderEngine->openglStateCache().resetBlendState();
