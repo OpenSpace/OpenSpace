@@ -86,6 +86,7 @@ public:
     void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
         const glm::mat4& projectionMatrix);
 
+    void RenderEngine::moveScreenSpaceRenderable(std::string_view identifier, int direction)
     bool mouseActivationCallback(const glm::dvec2& mousePosition) const;
 
     void renderOverlays(const ShutdownInformation& shutdownInfo);
