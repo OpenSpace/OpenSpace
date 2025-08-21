@@ -397,6 +397,31 @@ if (UNIX AND NOT APPLE)
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/man/man3/zlib*")
     file(REMOVE ${_zlib_man3})
 
+    ### The above were not working, so trying the below, which seemed to work earlier.
+
+    install(CODE "
+    message(STATUS \"Pruning developer files from install tree...\")
+    file(REMOVE_RECURSE
+      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/include\"
+      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/glbinding\"
+      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/Tracy\"
+      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/SoLoud\"
+      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/pkgconfig\"
+      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/man\"
+      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/pkgconfig\"
+      )
+
+    # Multi-arch specific dirs (e.g. x86_64-linux-gnu, aarch64-linux-gnu, etc.)
+    # This is confirmed to not work - probably becuase CMAKE_LIBRARY_ARCHITECTURE is not defined.
+    if (DEFINED CMAKE_LIBRARY_ARCHITECTURE)
+      file(REMOVE_RECURSE
+        \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/pkgconfig\"
+        \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/cmake\"
+      )
+    endif ()
+  ")
+
+
    # --------------------------------------------------------------------------
     
 endif () # if UNIX and not APPLE
