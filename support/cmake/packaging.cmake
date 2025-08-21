@@ -397,7 +397,7 @@ if (UNIX AND NOT APPLE)
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/man/man3/zlib*")
     file(REMOVE ${_zlib_man3})
 
-    ### The above were not working, so trying the below, which seemed to work earlier.
+    ### The above were not sufficient, so adding the lines below.
 
     install(CODE "
     message(STATUS \"Pruning developer files from install tree...\")
@@ -409,16 +409,22 @@ if (UNIX AND NOT APPLE)
       \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/pkgconfig\"
       \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/man\"
       \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/pkgconfig\"
+      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/x86_64-linux-gnu/pkgconfig\"
+      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/x86_64-linux-gnu/cmake\"
+      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/aarch64-linux-gnu/pkgconfig\"
+      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/aarch64-linux-gnu/cmake\"
       )
 
     # Multi-arch specific dirs (e.g. x86_64-linux-gnu, aarch64-linux-gnu, etc.)
-    # This is confirmed to not work - probably becuase CMAKE_LIBRARY_ARCHITECTURE is not defined.
-    if (DEFINED CMAKE_LIBRARY_ARCHITECTURE)
-      file(REMOVE_RECURSE
-        \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/pkgconfig\"
-        \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/cmake\"
+    # Remove_Recurse will not emit errors if directories don't exist.
+
+    file(REMOVE \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib64/libsoloud.a\")
+
+    file(GLOB _lib_a_files
+      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/*.a\"
       )
-    endif ()
+    file(REMOVE \${_lib_a_files})    
+     
   ")
 
 
