@@ -55,6 +55,22 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo SingleLabelTextInfo = {
+        "SingleLabelText",
+        "Single Label Text",
+        "The text that this label should show when it is a single label. The label is a "
+        "single label when no data file with several labels have been given.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SingleLabelPositionInfo = {
+        "SingleLabelPosition",
+        "Single Label Position",
+        "The position of this label when it is a single label. The label is a "
+        "single label when no data file with several labels have been given.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
@@ -104,6 +120,12 @@ namespace {
 
         // [[codegen::verbatim(FileInfo.description)]]
         std::optional<std::filesystem::path> file;
+
+        // [[codegen::verbatim(SingleLabelTextInfo.description)]]
+        std::optional<std::string> singleLabelText;
+
+        // [[codegen::verbatim(SingleLabelPositionInfo.description)]]
+        std::optional<glm::dvec3> singleLabelPosition;
 
         // If true (default), the loaded labels file will be cached so that it can be
         // loaded faster at a later time. Note that this also means that changes in the
@@ -165,11 +187,34 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
         glm::ivec2(1000)
     )
     , _faceCamera(FaceCameraInfo, true)
+    , _singleLabelText(SingleLabelTextInfo, "")
+    , _singleLabelPosition(
+        SingleLabelPositionInfo,
+        glm::vec3(0.f),
+        glm::vec3(std::numeric_limits<float>::lowest()),
+        glm::vec3(std::numeric_limits<float>::max())
+    )
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _labelFile = p.file.has_value() ? absPath(*p.file) : "";
-    _useCache = p.useCaching.value_or(true);
+    if (p.file.has_value()) {
+        _labelFile = absPath(*p.file);
+        _useCache = p.useCaching.value_or(true);
+    }
+    else {
+        if (!p.singleLabelText.has_value()) {
+            LWARNING("Empty Label");
+        }
+
+        _singleLabelText = p.singleLabelText.value_or(_singleLabelText);
+        _useCache = false;
+        _isSingleLabel = true;
+        addProperty(_singleLabelText);
+
+        _singleLabelPosition =
+            p.singleLabelPosition.value_or(_singleLabelPosition.value());
+        addProperty(_singleLabelPosition);
+    }
 
     if (p.unit.has_value()) {
         _unit = codegen::map<DistanceUnit>(*p.unit);
@@ -263,8 +308,8 @@ void LabelsComponent::loadLabelsFromDataset(const dataloader::Dataset& dataset,
 void LabelsComponent::loadLabels() {
     ZoneScoped;
 
-    if (_createdFromDataset) {
-        // The labelset should already have been loaded
+    if (_createdFromDataset || _isSingleLabel) {
+        // The labelset should already have been loaded or there is no label file to load
         return;
     }
 
@@ -279,7 +324,7 @@ void LabelsComponent::loadLabels() {
 }
 
 bool LabelsComponent::isReady() const {
-    return !(_labelset.entries.empty());
+    return !(_labelset.entries.empty()) || _isSingleLabel;
 }
 
 bool LabelsComponent::enabled() const {
@@ -314,24 +359,39 @@ void LabelsComponent::render(const RenderData& data,
 
     const glm::vec4 textColor = glm::vec4(glm::vec3(_color), opacity() * fadeInVariable);
 
-    for (const dataloader::Labelset::Entry& e : _labelset.entries) {
-        if (!e.isEnabled) {
-            continue;
-        }
-
-        // Transform and scale the labels
+    if (_isSingleLabel) {
         const glm::vec3 transformedPos = glm::vec3(
-            _transformationMatrix * glm::dvec4(e.position, 1.0)
+            _transformationMatrix * glm::dvec4(_singleLabelPosition.value(), 1.0)
         );
-        const glm::vec3 scaledPos = glm::vec3(transformedPos * scale);
 
         ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
-            scaledPos,
-            e.text,
+            transformedPos,
+            _singleLabelText,
             textColor,
             labelInfo
         );
+    }
+    else {
+        for (const dataloader::Labelset::Entry& e : _labelset.entries) {
+            if (!e.isEnabled) {
+                continue;
+            }
+
+            // Transform and scale the labels
+            const glm::vec3 transformedPos = glm::vec3(
+                _transformationMatrix * glm::dvec4(e.position, 1.0)
+            );
+            const glm::vec3 scaledPos = glm::vec3(transformedPos * scale);
+
+            ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
+                *_font,
+                scaledPos,
+                e.text,
+                textColor,
+                labelInfo
+            );
+        }
     }
 }
 

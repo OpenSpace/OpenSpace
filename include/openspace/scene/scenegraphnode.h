@@ -32,6 +32,7 @@
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
+#include <openspace/rendering/labelscomponent.h>
 #include <openspace/util/ellipsoid.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
@@ -187,6 +188,9 @@ private:
     properties::BoolProperty _useGuiOrdering;
     properties::BoolProperty _guiFocusable;
     properties::FloatProperty _guiOrderingNumber;
+
+    // Label
+    std::unique_ptr<LabelsComponent> _label;
 
     // Transformation defined by translation, rotation and scale
     struct {

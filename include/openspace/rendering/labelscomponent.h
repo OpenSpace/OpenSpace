@@ -29,6 +29,7 @@
 #include <openspace/rendering/fadeable.h>
 
 #include <openspace/data/dataloader.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
@@ -82,6 +83,7 @@ private:
     std::filesystem::path _labelFile;
     DistanceUnit _unit = DistanceUnit::Parsec;
     dataloader::Labelset _labelset;
+    bool _isSingleLabel = false;
 
     bool _useCache = true;
 
@@ -97,6 +99,8 @@ private:
     properties::FloatProperty _fontSize;
     properties::IVec2Property _minMaxSize;
     properties::BoolProperty _faceCamera;
+    properties::StringProperty _singleLabelText;
+    properties::Vec3Property _singleLabelPosition;
 };
 
 } // namespace openspace
