@@ -653,6 +653,11 @@ SceneGraphNode::SceneGraphNode()
     addProperty(_guiOrderingNumber);
     addProperty(_useGuiOrdering);
     addProperty(_guiFocusable);
+
+    ghoul::Dictionary labelsDict;
+    labelsDict.setValue("SingleLabelText", _guiDisplayName.value());
+    _label = std::make_unique<LabelsComponent>(labelsDict);
+    addPropertySubOwner(_label.get());
 }
 
 SceneGraphNode::~SceneGraphNode() {}
@@ -686,6 +691,8 @@ void SceneGraphNode::initialize() {
     // Want this computed after the renderable and transforms have been initialized
     _evaluatedBoundingSphere = boundingSphere();
     _evaluatedInteractionSphere = interactionSphere();
+
+    _label->initialize();
 
     LDEBUG(std::format("Finished initializing: {}", identifier()));
 }
@@ -879,6 +886,36 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         if (const double is = interactionSphere();  is > 0.0) {
             renderDebugSphere(data.camera, is, glm::vec4(0.15f, 0.75f, 0.75f, 0.75f));
         }
+    }
+
+    if (_label->enabled()) {
+        glm::dmat4 modelMatrix =
+            glm::translate(glm::dmat4(1.0), newData.modelTransform.translation) *
+            glm::dmat4(newData.modelTransform.rotation) *
+            glm::scale(glm::dmat4(1.0), newData.modelTransform.scale);
+
+        glm::dvec3 cameraViewDirectionWorld = -newData.camera.viewDirectionWorldSpace();
+        glm::dvec3 cameraUpDirectionWorld = newData.camera.lookUpVectorWorldSpace();
+        glm::dvec3 orthoRight = glm::normalize(
+            glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
+        );
+        if (orthoRight == glm::dvec3(0.0)) {
+            glm::dvec3 otherVector = glm::vec3(
+                cameraUpDirectionWorld.y,
+                cameraUpDirectionWorld.x,
+                cameraUpDirectionWorld.z
+            );
+            orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionWorld));
+        }
+        glm::dvec3 orthoUp =
+            glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
+
+        const glm::dmat4 viewMatrix = newData.camera.combinedViewMatrix();
+        const glm::dmat4 projectionMatrix = newData.camera.projectionMatrix();
+        glm::dmat4 modelViewProjectionMatrix =
+            glm::dmat4(projectionMatrix * viewMatrix * modelMatrix);
+
+        _label->render(newData, modelViewProjectionMatrix, orthoRight, orthoUp);
     }
 }
 
