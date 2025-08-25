@@ -156,8 +156,8 @@ NotificationWindow::NotificationWindow(QWidget* parent)
         }
 
         // 1. Get the downloaded data
-        const std::vector<char>& data = _request->downloadedData();
-        std::string notificationText = std::string(data.begin(), data.end());
+        const std::vector<char>& d = _request->downloadedData();
+        std::string notificationText = std::string(d.begin(), d.end());
 
         // 2. Parse the retrieved data into entries
         std::vector<Entry> entries = parseEntries(notificationText);

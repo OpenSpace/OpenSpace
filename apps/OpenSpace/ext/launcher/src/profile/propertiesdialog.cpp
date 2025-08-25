@@ -418,7 +418,6 @@ void PropertiesDialog::selectLineFromScriptLog() {
                     if (value[0] == '\'') {
                         value[0] = '"';
                     }
-                    const QChar end = value[value.size() - 1];
                     if (value[value.size() - 1] == '\'') {
                         value[value.size() - 1] = '"';
                     }

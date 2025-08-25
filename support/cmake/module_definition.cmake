@@ -146,3 +146,13 @@ function (handle_module_dependencies target_name module_name)
     endforeach ()
   endif ()
 endfunction ()
+
+
+# Disables compiler warnings for the provided library
+function (disable_compiler_warnings target)
+  if (MSVC)
+    target_compile_options(${target} PRIVATE "/W0")
+  else ()
+    target_compile_options(${target} PRIVATE "-w")
+  endif ()
+endfunction()

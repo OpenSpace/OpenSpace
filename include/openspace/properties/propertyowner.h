@@ -67,7 +67,7 @@ public:
      * \pre The \p info 's #PropertyOwnerInfo::identifier must not contain any whitespaces
      * \pre The \p info 's #PropertyOwnerInfo::identifier must not contain any `.`
      */
-    PropertyOwner(PropertyOwnerInfo info);
+    explicit PropertyOwner(PropertyOwnerInfo info);
 
     /**
      * The destructor will remove all Propertys and PropertyOwners it owns along with

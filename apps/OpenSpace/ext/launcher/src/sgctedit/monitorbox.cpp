@@ -43,14 +43,16 @@ MonitorBox::MonitorBox(QRect widgetSize, const std::vector<QRect>& monitorResolu
 
     //
     // Set the size of the widget according to the aspect ratio of the total size
-    const float aspectRatio = monitorArrangement.width() / monitorArrangement.height();
-    if (aspectRatio > 1.f) {
+    const double aspectRatio = monitorArrangement.width() / monitorArrangement.height();
+    if (aspectRatio > 1.0) {
         const float borderMargin = 2.f * MarginFractionWidgetSize * widgetSize.width();
-        widgetSize.setHeight(widgetSize.width() / aspectRatio + borderMargin);
+        const double height = widgetSize.width() / aspectRatio + borderMargin;
+        widgetSize.setHeight(static_cast<int>(height));
     }
     else {
         const float borderMargin = 2.f * MarginFractionWidgetSize * widgetSize.height();
-        widgetSize.setWidth(widgetSize.height() * aspectRatio + borderMargin);
+        const double width = widgetSize.height() * aspectRatio + borderMargin;
+        widgetSize.setWidth(static_cast<int>(width));
     }
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     setFixedSize(widgetSize.width(), widgetSize.height());
@@ -59,15 +61,16 @@ MonitorBox::MonitorBox(QRect widgetSize, const std::vector<QRect>& monitorResolu
     // Map monitor resolution to widget coordinates
     const float margin = size().width() * MarginFractionWidgetSize;
     const float virtualWidth = size().width() * (1.f - MarginFractionWidgetSize * 2.f);
-    _monitorScaleFactor = virtualWidth / monitorArrangement.width();
+    _monitorScaleFactor = static_cast<float>(virtualWidth / monitorArrangement.width());
 
-    const float newHeight = virtualWidth / aspectRatio;
+    const double newHeight = virtualWidth / aspectRatio;
     for (const QRect& res : monitorResolutions) {
-        const float x = margin + (res.x() - monitorArrangement.x()) * _monitorScaleFactor;
-        const float y = margin + (size().height() - newHeight - margin) / 4.f +
+        const double x =
+            margin + (res.x() - monitorArrangement.x()) * _monitorScaleFactor;
+        const double y = margin + (size().height() - newHeight - margin) / 4.f +
             (res.y() - monitorArrangement.y()) * _monitorScaleFactor;
-        const float width = res.width() * _monitorScaleFactor;
-        const float height = res.height() * _monitorScaleFactor;
+        const double width = res.width() * _monitorScaleFactor;
+        const double height = res.height() * _monitorScaleFactor;
         _monitorDimensionsScaled.emplace_back(x, y, width, height);
     }
 }

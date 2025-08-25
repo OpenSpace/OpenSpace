@@ -276,14 +276,6 @@ namespace openspace::documentation {
 
 DocumentationEngine* DocumentationEngine::_instance = nullptr;
 
-DocumentationEngine::DuplicateDocumentationException::DuplicateDocumentationException(
-                                                                        Documentation doc)
-    : ghoul::RuntimeError(std::format(
-        "Duplicate Documentation with name '{}' and id '{}'", doc.name, doc.id
-    ))
-    , documentation(std::move(doc))
-{}
-
 DocumentationEngine::DocumentationEngine() {}
 
 void DocumentationEngine::initialize() {
@@ -731,7 +723,10 @@ void DocumentationEngine::addDocumentation(Documentation documentation) {
         );
 
         if (it != _documentations.end()) {
-            throw DuplicateDocumentationException(std::move(documentation));
+            throw ghoul::RuntimeError(std::format(
+                "Duplicate Documentation with name '{}' and id '{}'",
+                documentation.name, documentation.id
+            ));
         }
         else {
             _documentations.push_back(std::move(documentation));

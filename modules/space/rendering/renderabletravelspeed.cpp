@@ -176,7 +176,7 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
 
 void RenderableTravelSpeed::initialize() {
     _targetNode = sceneGraphNode(_targetName);
-    if (_targetNode == nullptr) {
+    if (!_targetNode) {
         throw ghoul::RuntimeError("Could not find Target Node");
     }
 }

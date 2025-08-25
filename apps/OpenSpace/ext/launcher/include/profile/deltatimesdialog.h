@@ -27,6 +27,7 @@
 
 #include <QDialog>
 
+class QComboBox;
 class QDialogButtonBox;
 class QLabel;
 class QListWidget;
@@ -65,7 +66,7 @@ private:
     void createWidgets();
 
     void listItemSelected();
-    void valueChanged(const QString& text);
+    void currentUnitChanged(int index);
     void saveDeltaTimeValue();
     void discardDeltaTimeValue();
     void addDeltaTimeValue();
@@ -89,8 +90,9 @@ private:
 
     QListWidget* _listWidget = nullptr;
     QLabel* _adjustLabel = nullptr;
-    QLineEdit* _seconds = nullptr;
-    QLabel* _value = nullptr;
+    QLineEdit* _value = nullptr;
+    QComboBox* _valueUnit = nullptr;
+    int _previousValueUnit = 0;
 
     QPushButton* _addButton = nullptr;
     QPushButton* _removeButton = nullptr;

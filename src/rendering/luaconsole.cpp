@@ -734,7 +734,8 @@ void LuaConsole::render() {
 
         // Compute the overflow in pixels
         const float overflow = currentWidth - res.x * 0.995f;
-        if (overflow <= 0.f) {
+        if (res.x == 1 || overflow <= 0.f) {
+            // The resolution might be equal 1 pixel if the windows was minimized
             break;
         }
 

@@ -185,8 +185,7 @@ void DashboardItemTimeVaryingText::loadDataFromJson(const std::string& filePath)
     std::ifstream file = std::ifstream(filePath);
     if (!file.is_open()) {
         throw ghoul::RuntimeError(std::format(
-            "Time varying text, '{}' is not a valid JSON file",
-            filePath
+            "Time varying text, '{}' is not a valid JSON file", filePath
         ));
     }
 

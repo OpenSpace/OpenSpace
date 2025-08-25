@@ -130,11 +130,11 @@ struct [[codegen::Dictionary(Action)]] Action {
     a.textColor = action.textColor;
     a.guiPath = action.guiPath.value_or(a.guiPath);
     if (!a.guiPath.starts_with('/')) {
-        throw ghoul::RuntimeError(
-            std::format(
-                "Tried to register action: '{}'. The field 'GuiPath' is set to '{}' but "
-                "should be '/{}' ", a.name, a.guiPath, a.guiPath)
-        );
+        throw ghoul::RuntimeError(std::format(
+            "Tried to register action: '{}'. The field 'GuiPath' is set to '{}' but "
+            "should be '/{}'",
+            a.name, a.guiPath, a.guiPath
+        ));
     }
     if (action.isLocal.has_value()) {
         a.isLocal = interaction::Action::IsLocal(*action.isLocal);

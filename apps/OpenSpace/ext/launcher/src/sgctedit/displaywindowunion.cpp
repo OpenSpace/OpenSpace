@@ -113,7 +113,7 @@ DisplayWindowUnion::DisplayWindowUnion(const std::vector<QRect>& monitorResoluti
 void DisplayWindowUnion::initialize(const std::vector<QRect>& monitorSizeList,
                                     const sgct::config::Cluster& cluster)
 {
-    for (int i = 0; i < cluster.nodes.front().windows.size(); i++) {
+    for (size_t i = 0; i < cluster.nodes.front().windows.size(); i++) {
         addWindow();
     }
 

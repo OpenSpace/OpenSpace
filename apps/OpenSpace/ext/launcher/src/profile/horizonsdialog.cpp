@@ -62,8 +62,7 @@ namespace {
     constexpr std::string_view Years = "calendar years";
     constexpr std::string_view Unitless = "equal intervals (unitless)";
 
-    BooleanType(IsDirty);
-    void styleLabel(QLabel* label, IsDirty isDirty) {
+    void styleLabel(QLabel* label, bool isDirty) {
         const std::string newStyle = isDirty ? "error" : "normal";
         label->setObjectName(QString::fromStdString(newStyle));
         label->style()->unpolish(label);
@@ -126,7 +125,7 @@ void HorizonsDialog::typeOnChange(int index) {
     }
     else {
         QMessageBox::critical(this, "Error", "Invalid Horizons type");
-        styleLabel(_typeLabel, IsDirty::Yes);
+        styleLabel(_typeLabel, true);
     }
 }
 
@@ -390,7 +389,7 @@ bool HorizonsDialog::isValidInput() {
     if (_fileEdit->text().isEmpty()) {
         QMessageBox::critical(this, "Error", "File path not selected");
         _fileEdit->setFocus();
-        styleLabel(_fileLabel, IsDirty::Yes);
+        styleLabel(_fileLabel, true);
         return false;
     }
 
@@ -400,14 +399,14 @@ bool HorizonsDialog::isValidInput() {
     {
         QMessageBox::critical(this, "Error", "Target not selected");
         _targetEdit->setFocus();
-        styleLabel(_targetLabel, IsDirty::Yes);
+        styleLabel(_targetLabel, true);
         return false;
     }
     if (_targetEdit->text().toStdString().find_first_of("¤<>§£´¨€") != std::string::npos)
     {
         QMessageBox::critical(this, "Error", "Target includes illegal characters");
         _targetEdit->setFocus();
-        styleLabel(_targetLabel, IsDirty::Yes);
+        styleLabel(_targetLabel, true);
         return false;
     }
 
@@ -417,14 +416,14 @@ bool HorizonsDialog::isValidInput() {
     {
         QMessageBox::critical(this, "Error", "Observer not selected");
         _centerEdit->setFocus();
-        styleLabel(_centerLabel, IsDirty::Yes);
+        styleLabel(_centerLabel, true);
         return false;
     }
     if (_centerEdit->text().toStdString().find_first_of("¤<>§£´¨€") != std::string::npos)
     {
         QMessageBox::critical(this, "Error", "Observer includes illegal characters");
         _centerEdit->setFocus();
-        styleLabel(_centerLabel, IsDirty::Yes);
+        styleLabel(_centerLabel, true);
         return false;
     }
 
@@ -433,7 +432,7 @@ bool HorizonsDialog::isValidInput() {
     if (_stepEdit->text().isEmpty()) {
         QMessageBox::critical(this, "Error", "Step size is not selected");
         _stepEdit->setFocus();
-        styleLabel(_stepLabel, IsDirty::Yes);
+        styleLabel(_stepLabel, true);
         return false;
     }
     // Numerical
@@ -448,7 +447,7 @@ bool HorizonsDialog::isValidInput() {
             ))
         );
         _stepEdit->setFocus();
-        styleLabel(_stepLabel, IsDirty::Yes);
+        styleLabel(_stepLabel, true);
         return false;
     }
     // In the case of arcseconds range is different
@@ -460,7 +459,7 @@ bool HorizonsDialog::isValidInput() {
                 "Angular step size needs to be in range 60 to 3600"
             );
             _stepEdit->setFocus();
-            styleLabel(_stepLabel, IsDirty::Yes);
+            styleLabel(_stepLabel, true);
             return false;
         }
     }
@@ -474,7 +473,7 @@ bool HorizonsDialog::isValidInput() {
             std::numeric_limits<int32_t>::max()
         )));
         _stepEdit->setFocus();
-        styleLabel(_stepLabel, IsDirty::Yes);
+        styleLabel(_stepLabel, true);
         return false;
     }
     return true;
@@ -706,13 +705,13 @@ bool HorizonsDialog::handleRequest() {
     }
 
     // Clean all widgets
-    styleLabel(_typeLabel, IsDirty::No);
-    styleLabel(_fileLabel, IsDirty::No);
-    styleLabel(_targetLabel, IsDirty::No);
-    styleLabel(_centerLabel, IsDirty::No);
-    styleLabel(_startLabel, IsDirty::No);
-    styleLabel(_endLabel, IsDirty::No);
-    styleLabel(_stepLabel, IsDirty::No);
+    styleLabel(_typeLabel, false);
+    styleLabel(_fileLabel, false);
+    styleLabel(_targetLabel, false);
+    styleLabel(_centerLabel, false);
+    styleLabel(_startLabel, false);
+    styleLabel(_endLabel, false);
+    styleLabel(_stepLabel, false);
 
     _importTimeButton->hide();
     _validTimeRange = std::pair<std::string, std::string>();
@@ -771,7 +770,7 @@ std::string HorizonsDialog::constructUrl() {
     }
     else {
         QMessageBox::critical(this, "Error", "Invalid Horizons type");
-        styleLabel(_typeLabel, IsDirty::Yes);
+        styleLabel(_typeLabel, true);
         return "";
     }
 
@@ -838,7 +837,7 @@ std::string HorizonsDialog::constructUrl() {
     }
     else {
         QMessageBox::critical(this, "Error", "Invalid time unit type");
-        styleLabel(_stepLabel, IsDirty::Yes);
+        styleLabel(_stepLabel, true);
         return "";
     }
 
@@ -907,11 +906,11 @@ openspace::HorizonsFile HorizonsDialog::handleAnswer(nlohmann::json& answer) {
                     "Error",
                     "File already exist, try another file path"
                 );
-                styleLabel(_fileLabel, IsDirty::Yes);
+                styleLabel(_fileLabel, true);
                 return openspace::HorizonsFile();
             default:
                 QMessageBox::critical(this, "Error", "Invalid answer");
-                styleLabel(_fileLabel, IsDirty::Yes);
+                styleLabel(_fileLabel, true);
                 return openspace::HorizonsFile();
         }
     }
@@ -958,9 +957,9 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 _timeTypeCombo->currentText().toStdString()
             );
             appendLog(msg, HorizonsDialog::LogLevel::Error);
-            styleLabel(_startLabel, IsDirty::Yes);
-            styleLabel(_endLabel, IsDirty::Yes);
-            styleLabel(_stepLabel, IsDirty::Yes);
+            styleLabel(_startLabel, true);
+            styleLabel(_endLabel, true);
+            styleLabel(_stepLabel, true);
 
             std::filesystem::remove(_horizonsFile.file());
             break;
@@ -970,7 +969,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 "Step size is too big, exceeds available time span for target",
                 HorizonsDialog::LogLevel::Error
             );
-            styleLabel(_stepLabel, IsDirty::Yes);
+            styleLabel(_stepLabel, true);
 
             std::filesystem::remove(_horizonsFile.file());
             break;
@@ -979,8 +978,8 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 "Time range is outside the valid range for target '{}'", _targetName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Error);
-            styleLabel(_startLabel, IsDirty::Yes);
-            styleLabel(_endLabel, IsDirty::Yes);
+            styleLabel(_startLabel, true);
+            styleLabel(_endLabel, true);
 
             _validTimeRange = readTimeRange();
             if (_validTimeRange.first.empty() || _validTimeRange.second.empty()) {
@@ -1012,7 +1011,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 _observerName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Info);
-            styleLabel(_centerLabel, IsDirty::Yes);
+            styleLabel(_centerLabel, true);
 
             std::filesystem::remove(_horizonsFile.file());
             break;
@@ -1023,8 +1022,8 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 "observer for the current target", _observerName, _targetName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Error);
-            styleLabel(_targetLabel, IsDirty::Yes);
-            styleLabel(_centerLabel, IsDirty::Yes);
+            styleLabel(_targetLabel, true);
+            styleLabel(_centerLabel, true);
 
             std::filesystem::remove(_horizonsFile.file());
             break;
@@ -1053,7 +1052,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 "for alternatives", _observerName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Info);
-            styleLabel(_centerLabel, IsDirty::Yes);
+            styleLabel(_centerLabel, true);
 
             const std::vector<std::string> matchingstations =
                 _horizonsFile.parseMatches(
@@ -1096,7 +1095,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 "Horizons command 'NEWS'", _targetName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Info);
-            styleLabel(_targetLabel, IsDirty::Yes);
+            styleLabel(_targetLabel, true);
 
             std::filesystem::remove(_horizonsFile.file());
             break;
@@ -1106,7 +1105,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 "Multiple matches were found for observer '{}'", _observerName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Warning);
-            styleLabel(_centerLabel, IsDirty::Yes);
+            styleLabel(_centerLabel, true);
 
             const std::vector<std::string> matchingObservers =
                 _horizonsFile.parseMatches("Name", "matches", ">MATCH NAME<");
@@ -1144,7 +1143,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 "Try to use '{}*' as target to search for possible matches", _targetName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Info);
-            styleLabel(_targetLabel, IsDirty::Yes);
+            styleLabel(_targetLabel, true);
 
             std::filesystem::remove(_horizonsFile.file());
             break;
@@ -1165,7 +1164,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 "Multiple matches were found for target '{}'", _targetName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Warning);
-            styleLabel(_targetLabel, IsDirty::Yes);
+            styleLabel(_targetLabel, true);
 
             const std::vector<std::string> matchingTargets =
                 _horizonsFile.parseMatches("Name", "matches", ">MATCH NAME<");

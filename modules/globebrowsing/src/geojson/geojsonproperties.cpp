@@ -387,7 +387,7 @@ GeoJsonProperties::Tessellation::Tessellation()
 }
 
 GeoJsonProperties::GeoJsonProperties()
-    : properties::PropertyOwner({ "DefaultProperties" })
+    : properties::PropertyOwner({ "DefaultProperties", "Default Properties" })
     , opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , fillOpacity(FillOpacityInfo, 0.7f, 0.f, 1.f)

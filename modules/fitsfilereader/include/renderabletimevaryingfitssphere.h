@@ -109,7 +109,6 @@ private:
     bool _renderForever = true;
     bool _inInterval = false;
 
-    bool _isLoadingStateFromDisk = false;
     // DynamicFileSequenceDownloader downloads and updates the renderable with
     // data downloaded from the web
     std::unique_ptr<DynamicFileSequenceDownloader> _dynamicFileDownloader;

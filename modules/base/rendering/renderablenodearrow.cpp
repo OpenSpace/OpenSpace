@@ -449,7 +449,7 @@ void RenderableNodeArrow::updateShapeTransforms(const RenderData& data) {
     // Create transformation matrices to reshape to size and position
     _cylinderTranslation = glm::translate(glm::dmat4(1.0), startPos);
     const glm::dvec3 cylinderScale = glm::dvec3(
-        s * glm::dvec4(_width, _width, cylinderLength, 0.0)
+        s * glm::dvec4(_width.value(), _width.value(), cylinderLength, 0.0)
     );
     _cylinderScale = glm::scale(glm::dmat4(1.0), cylinderScale);
 

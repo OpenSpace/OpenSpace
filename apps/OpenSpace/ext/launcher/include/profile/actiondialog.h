@@ -55,6 +55,7 @@ private:
     openspace::Profile::Action* selectedAction();
     void actionAdd();
     void actionRemove();
+    void actionDuplicate();
     void actionSelected();
     void actionSaved();
     void clearActionFields() const;
@@ -88,6 +89,7 @@ private:
         QTextEdit* script = nullptr;
         QPushButton* addButton = nullptr;
         QPushButton* removeButton = nullptr;
+        QPushButton* duplicateButton = nullptr;
         QDialogButtonBox* saveButtons = nullptr;
     } _actionWidgets;
 

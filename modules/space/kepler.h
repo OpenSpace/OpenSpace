@@ -101,10 +101,10 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file);
  * The different formats that the readFile function is capable of loading.
  */
 enum class Format {
-    TLE,  //< Two-line elements
-    OMM,  //< Orbit Mean-Elements Message
-    SBDB, //< Small-Body Database
-    MPC   //< Minor Planet Center
+    TLE,  ///< Two-line elements
+    OMM,  ///< Orbit Mean-Elements Message
+    SBDB, ///< Small-Body Database
+    MPC   ///< Minor Planet Center
 };
 /**
  * Reads the object information from the provided file.
