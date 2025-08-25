@@ -84,6 +84,8 @@ public:
     glm::vec3 sunPositionObj() const;
     glm::vec3 camPositionObj() const;
 
+    void setEllipsoidRadii(const glm::vec3& radii);
+
 private:
     void loadTexture();
     void createPlane();
@@ -107,13 +109,13 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     std::unique_ptr<ghoul::opengl::ProgramObject> _geometryOnlyShader;
     UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
-        sunPosition, ringTexture, shadowMatrix, shadowMapTexture, zFightingPercentage,
-        opacity
+        sunPosition, sunPositionObj, ringTexture, shadowMatrix, zFightingPercentage,
+        opacity, ellipsoidRadii
     ) _uniformCache;
     UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
         sunPosition, sunPositionObj, camPositionObj, textureForwards, textureBackwards,
         textureUnlit, textureColor, textureTransparency, shadowMatrix,
-        shadowMapTexture, zFightingPercentage, opacity
+        zFightingPercentage, opacity, ellipsoidRadii
     ) _uniformCacheAdvancedRings;
     UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture) _geomUniformCache;
 
@@ -139,6 +141,7 @@ private:
 
     glm::vec3 _sunPosition = glm::vec3(0.f);
     glm::vec3 _camPositionObjectSpace = glm::vec3(0.f);
+    glm::vec3 _ellipsoidRadii = glm::vec3(1.f);
 
     // Callback for readiness state changes
     ReadinessChangeCallback _readinessChangeCallback;
