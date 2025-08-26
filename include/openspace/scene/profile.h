@@ -97,7 +97,7 @@ public:
         bool isLocal = false;
         std::string script;
 
-        bool operator==(const Action&) const = default;
+        bool operator==(const Action&) const noexcept = default;
     };
 
     struct Keybinding {
