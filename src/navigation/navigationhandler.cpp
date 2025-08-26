@@ -102,12 +102,25 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MouseVisualizerInfo = {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo MouseVisualizerInfo = {
         "MouseInteractionVisualizer",
         "Mouse Interaction Visualizer",
+        "The mouse interaction visualizer shows the distance the mouse has been moved "
+        "since it was pressed down."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MouseVisualizerEnabledInfo = {
+        "Enabled",
+        "Enabled",
         "If this setting is enabled, the mouse interaction will be visualized on the "
         "screen by showing the distance the mouse has been moved since it was pressed "
         "down."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MouseVisualizerColorInfo = {
+        "Color",
+        "Color",
+        "The color used to render the line showing the mouse visualizer."
     };
 } // namespace
 
@@ -121,7 +134,14 @@ NavigationHandler::NavigationHandler()
     , _useKeyFrameInteraction(FrameInfo, false)
     , _jumpToFadeDuration(JumpToFadeDurationInfo, 1.f, 0.f, 10.f)
     , _mouseVisualizer({
-        properties::BoolProperty(MouseVisualizerInfo, false),
+        properties::PropertyOwner(MouseVisualizerInfo),
+        properties::BoolProperty(MouseVisualizerEnabledInfo, false),
+        properties::Vec4Property(
+            MouseVisualizerColorInfo,
+            glm::vec4(1.f),
+            glm::vec4(0.f),
+            glm::vec4(1.f)
+        ),
         false,
         false,
         glm::vec2(0.f),
@@ -137,7 +157,10 @@ NavigationHandler::NavigationHandler()
     addProperty(_useKeyFrameInteraction);
     addProperty(_jumpToFadeDuration);
 
-    addProperty(_mouseVisualizer.enable);
+    addPropertySubOwner(_mouseVisualizer.owner);
+    _mouseVisualizer.owner.addProperty(_mouseVisualizer.enable);
+    _mouseVisualizer.color.setViewOption(properties::Property::ViewOptions::Color);
+    _mouseVisualizer.owner.addProperty(_mouseVisualizer.color);
 }
 
 NavigationHandler::~NavigationHandler() {}
@@ -521,6 +544,8 @@ void NavigationHandler::mouseButtonCallback(MouseButton button, MouseAction acti
             }
             else if (action == MouseAction::Release) {
                 _mouseVisualizer.isMousePressed = false;
+                _mouseVisualizer.currentPosition = glm::vec2(0.f);
+                _mouseVisualizer.clickPosition = glm::vec2(0.f);
             }
         }
     }
@@ -532,11 +557,11 @@ void NavigationHandler::mousePositionCallback(double x, double y) {
 
         if (_mouseVisualizer.enable && _mouseVisualizer.isMousePressed) {
             if (_mouseVisualizer.isMouseFirstPress) {
-                _mouseVisualizer.clickPosition = glm::dvec2(x, y);
+                _mouseVisualizer.clickPosition = glm::vec2(x, y);
                 _mouseVisualizer.isMouseFirstPress = false;
             }
 
-            _mouseVisualizer.currentPosition = glm::dvec2(x, y);
+            _mouseVisualizer.currentPosition = glm::vec2(x, y);
         }
     }
 }
@@ -556,12 +581,13 @@ void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActio
 
 void NavigationHandler::renderOverlay() const {
     if (_mouseVisualizer.enable && _mouseVisualizer.isMousePressed) {
+        constexpr glm::vec4 StartColor = glm::vec4(0.4f, 0.4f, 0.4f, 0.25f);
         rendering::helper::renderLine(
             _mouseVisualizer.clickPosition,
             _mouseVisualizer.currentPosition,
             global::windowDelegate->currentWindowSize(),
-            glm::vec4(0.4f, 0.4f, 0.4f, 0.25f),
-            glm::vec4(1.f)
+            StartColor,
+            _mouseVisualizer.color
         );
     }
 }

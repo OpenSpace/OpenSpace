@@ -37,6 +37,7 @@
 #include <openspace/navigation/pathnavigator.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
 
@@ -212,7 +213,10 @@ private:
     properties::FloatProperty _jumpToFadeDuration;
 
     struct {
+        properties::PropertyOwner owner;
         properties::BoolProperty enable;
+        properties::Vec4Property color;
+
         bool isMouseFirstPress = false;
         bool isMousePressed = false;
         glm::vec2 clickPosition;
