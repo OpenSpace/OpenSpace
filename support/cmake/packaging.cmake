@@ -257,7 +257,7 @@ if (UNIX AND NOT APPLE)
     install(FILES support/cmake/openspacecfg.patch DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
 
   if (DEFINED OPENSPACE_DISTRO AND OPENSPACE_DISTRO STREQUAL "ubuntu24.04")
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libglew2.2, libpng16-16t64, libglut3.12, libjack0, libxrandr2, libxinerama1, libx11-6, libxcursor1, libcurl4t64, libxi6, libasound2t64, libgdal34t64, libmpv2, libvulkan1, patch")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libglew2.2, libpng16-16t64, libglut3.12, libjack0, libxrandr2, libgeos-dev, libxinerama1, libx11-6, libxcursor1, libcurl4t64, libxi6, libasound2t64, libgdal34t64, libmpv2, libvulkan1, patch")
   else ()
     set(CPACK_DEBIAN_PACKAGE_DEPENDS "libstdc++6 (>= 13), libglew2.2, libpng16-16, freeglut3, libjack0, libxrandr2, libxinerama1, libx11-6, libxcursor1, libcurl4, libxi6, libasound2, libgdal30, libboost1.74-dev, qt6-base-dev, libmpv1, libvulkan1, patch")
   endif ()
@@ -416,9 +416,10 @@ if (UNIX AND NOT APPLE)
       )
 
     # Multi-arch specific dirs (e.g. x86_64-linux-gnu, aarch64-linux-gnu, etc.)
-    # Remove_Recurse will not emit errors if directories don't exist.
+    # Remove_Recurse will not emit errors if directories don't exist, as above.
 
     file(REMOVE \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib64/libsoloud.a\")
+    file(REMOVE \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/geos-config\")
 
     file(GLOB _lib_a_files
       \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/*.a\"
