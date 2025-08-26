@@ -192,44 +192,17 @@ if (UNIX AND NOT APPLE)
     # ------------------------------------------------------------------------------
     # Ensure executable can find private libcef.so at runtime
     # ------------------------------------------------------------------------------
-    # Ensure no build-tree RPATH, and set an install-time RUNPATH to find bundled CEF
-    set(CMAKE_SKIP_BUILD_RPATH TRUE)
-    set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
-    
-    set(_openspace_privlib_rpath "$ORIGIN/../../../lib/openspace")
-    
+    # set an install-time RUNPATH to find bundled CEF
+    set(_openspace_privlib_rpath
+    "$ORIGIN/../../../lib/openspace:$ORIGIN/../../../lib")
+
     set_target_properties(OpenSpace PROPERTIES
       INSTALL_RPATH "${_openspace_privlib_rpath}"
     )
     
-    # helper binaries that also need CEF:
     set_target_properties(OpenSpace_Helper PROPERTIES
       INSTALL_RPATH "${_openspace_privlib_rpath}"
     )
-
-    # After install step, fix RPATH to remove stray '.'
-    install(CODE [[
-      file(GLOB_RECURSE _bins
-        "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/openspace/bin/OpenSpace*"
-      )
-      foreach(_bin IN LISTS _bins)
-        execute_process(
-          COMMAND patchelf --print-rpath "\${_bin}"
-          OUTPUT_VARIABLE _rpath
-          OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-        if("\${_rpath}" MATCHES ".:")
-          # Replace '.' with only our intended RPATH
-          execute_process(
-            COMMAND patchelf --set-rpath "$ORIGIN/../../../lib/openspace" "\${_bin}"
-          )
-        endif()
-      endforeach()
-    ]])
-
-
-
     
     # Required assets
     install(DIRECTORY config/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
