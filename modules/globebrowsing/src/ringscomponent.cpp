@@ -850,8 +850,8 @@ glm::vec3 RingsComponent::camPositionObj() const {
     return _camPositionObjectSpace;
 }
 
-void RingsComponent::setEllipsoidRadii(const glm::vec3& radii) {
-    _ellipsoidRadii = radii;
+void RingsComponent::setEllipsoidRadii(glm::vec3 radii) {
+    _ellipsoidRadii = std::move(radii);
 }
 
 void RingsComponent::onReadinessChange(ReadinessChangeCallback callback) {

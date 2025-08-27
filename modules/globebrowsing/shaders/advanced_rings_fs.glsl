@@ -81,7 +81,11 @@ Fragment getFragment() {
   float lerpFactor = dot(camPositionObj, sunPositionObj);
 
   // Jon Colors:
-  //vec4 diffuse = mix(colorFwrd * vec4(1, 0.88, 0.82, 1.0), colorBckwrd * vec4(1, 0.88, 0.82, 1.0), lerpFactor);
+  // vec4 diffuse = mix(
+  //   colorFwrd * vec4(1, 0.88, 0.82, 1.0),
+  //   colorBckwrd * vec4(1, 0.88, 0.82, 1.0),
+  //   lerpFactor
+  // );
   vec4 diffuse = mix(colorFwrd, colorBckwrd, lerpFactor) * colorMult;
   diffuse.a = colorFilterValue * transparency;
   float colorValue = length(diffuse.rgb) / 0.57735026919;
@@ -91,7 +95,12 @@ Fragment getFragment() {
 
   // Check if ray from fragment to sun intersects the ellipsoid (globe)
   // This creates more accurate shadowing for rings
-  bool intersectsGlobe = rayIntersectsEllipsoid(posObj, sunPositionObj, vec3(0.0), ellipsoidRadii);
+  bool intersectsGlobe = rayIntersectsEllipsoid(
+    posObj,
+    sunPositionObj,
+    vec3(0.0),
+    ellipsoidRadii
+  );
 
   // shadow == 1.0 means it is not in shadow
   float shadow = intersectsGlobe ? 0.05 : 1.0;

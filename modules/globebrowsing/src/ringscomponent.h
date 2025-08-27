@@ -84,7 +84,7 @@ public:
     glm::vec3 sunPositionObj() const;
     glm::vec3 camPositionObj() const;
 
-    void setEllipsoidRadii(const glm::vec3& radii);
+    void setEllipsoidRadii(glm::vec3 radii);
 
 private:
     void loadTexture();
