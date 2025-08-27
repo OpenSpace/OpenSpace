@@ -1113,18 +1113,16 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         // if currentTime >= next timestamp, it means that we stepped forward to a
         // time represented by another state
         (nextIndex < static_cast<int>(_files.size()) &&
-            currentTime >= _files[nextIndex].timestamp) ||
+        currentTime >= _files[nextIndex].timestamp) ||
         // The case when we jumped passed last file. where nextIndex is not < file.size()
         currentTime >= _files[_activeIndex].timestamp)
     {
         int previousIndex = _activeIndex;
         _activeIndex = updateActiveIndex(currentTime);
-
         // check index again after updating
         if (_activeIndex == -1) {
             return;
         }
-
         File& file = _files[_activeIndex];
         if (file.status == File::FileStatus::Downloaded) {
             // if LoadingType is StaticLoading all files will be Loaded
