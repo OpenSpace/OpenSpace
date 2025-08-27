@@ -397,7 +397,12 @@ if (UNIX AND NOT APPLE)
     file(GLOB _lib_a_files
       \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/*.a\"
       )
-    file(REMOVE \${_lib_a_files})    
+    file(REMOVE \${_lib_a_files})
+
+    file(GLOB _lib_arch_a_files
+      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/*/*.a\"
+      )
+    file(REMOVE \${_lib_arch_a_files})
      
   ")
 
