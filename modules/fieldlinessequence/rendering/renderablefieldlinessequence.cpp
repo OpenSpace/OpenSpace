@@ -1096,7 +1096,11 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         currentTime >= _files[0].timestamp &&
         currentTime < _sequenceEndTime;
 
-    // For the sake of this if statment, it is easiest to think of activeIndex as the
+    // Track if we need to update buffers
+    bool needsBufferUpdate = false;
+    bool fileWasJustLoaded = false;
+
+    // For the sake of this if statement, it is easiest to think of activeIndex as the
     // previous index and nextIndex as the current
     const int nextIndex = _activeIndex + 1;
     // if _activeIndex is -1 but we are in interval, it means we were before the start
@@ -1109,16 +1113,18 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         // if currentTime >= next timestamp, it means that we stepped forward to a
         // time represented by another state
         (nextIndex < static_cast<int>(_files.size()) &&
-        currentTime >= _files[nextIndex].timestamp) ||
+            currentTime >= _files[nextIndex].timestamp) ||
         // The case when we jumped passed last file. where nextIndex is not < file.size()
         currentTime >= _files[_activeIndex].timestamp)
     {
         int previousIndex = _activeIndex;
         _activeIndex = updateActiveIndex(currentTime);
+
         // check index again after updating
         if (_activeIndex == -1) {
             return;
         }
+
         File& file = _files[_activeIndex];
         if (file.status == File::FileStatus::Downloaded) {
             // if LoadingType is StaticLoading all files will be Loaded
@@ -1130,14 +1136,20 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
             _atLeastOneFileLoaded = true;
             computeSequenceEndTime();
             trackOldest(file);
-        }
-        // If we have a new index, buffers needs to update
-        if (previousIndex != _activeIndex) {
-            _shouldUpdateColorBuffer = true;
-            _shouldUpdateMaskingBuffer = true;
+            fileWasJustLoaded = true;
         }
 
+        // If we have a new index or just loaded a file, buffers need to update
+        if (previousIndex != _activeIndex || fileWasJustLoaded) {
+            needsBufferUpdate = true;
+        }
+    }
+
+    // Update all buffers together to maintain consistency
+    if (needsBufferUpdate) {
         updateVertexPositionBuffer();
+        _shouldUpdateColorBuffer = true;
+        _shouldUpdateMaskingBuffer = true;
     }
 
     if (_shouldUpdateColorBuffer) {
