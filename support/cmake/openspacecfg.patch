@@ -1,5 +1,5 @@
---- openspace.cfg	2025-08-21 20:41:44.793491957 +0530
-+++ openspace6b0de70.cfg.edited	2025-08-21 20:41:48.682572705 +0530
+--- openspace6b0de70.cfg	2025-08-28 14:05:47.513914461 +0530
++++ openspace6b0de70-edited.cfg	2025-08-28 14:10:38.924187458 +0530
 @@ -67,21 +67,21 @@
    FONTS = "${DATA}/fonts",
    TASKS = "${DATA}/tasks",
@@ -16,8 +16,9 @@
 -  CACHE = "${BASE}/cache",
 +  CACHE = "${USER}/cache",
    CONFIG = "${BASE}/config",
-   DOCUMENTATION = "${BASE}/documentation",
+-  DOCUMENTATION = "${BASE}/documentation",
 -  LOGS = "${BASE}/logs",
++  DOCUMENTATION = "${USER}/documentation",
 +  LOGS = "${USER}/logs",
    MODULES = "${BASE}/modules",
    SCRIPTS = "${BASE}/scripts",
