@@ -1096,7 +1096,11 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         currentTime >= _files[0].timestamp &&
         currentTime < _sequenceEndTime;
 
-    // For the sake of this if statment, it is easiest to think of activeIndex as the
+    // Track if we need to update buffers
+    bool needsBufferUpdate = false;
+    bool fileWasJustLoaded = false;
+
+    // For the sake of this if statement, it is easiest to think of activeIndex as the
     // previous index and nextIndex as the current
     const int nextIndex = _activeIndex + 1;
     // if _activeIndex is -1 but we are in interval, it means we were before the start
@@ -1130,14 +1134,20 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
             _atLeastOneFileLoaded = true;
             computeSequenceEndTime();
             trackOldest(file);
-        }
-        // If we have a new index, buffers needs to update
-        if (previousIndex != _activeIndex) {
-            _shouldUpdateColorBuffer = true;
-            _shouldUpdateMaskingBuffer = true;
+            fileWasJustLoaded = true;
         }
 
+        // If we have a new index or just loaded a file, buffers need to update
+        if (previousIndex != _activeIndex || fileWasJustLoaded) {
+            needsBufferUpdate = true;
+        }
+    }
+
+    // Update all buffers together to maintain consistency
+    if (needsBufferUpdate) {
         updateVertexPositionBuffer();
+        _shouldUpdateColorBuffer = true;
+        _shouldUpdateMaskingBuffer = true;
     }
 
     if (_shouldUpdateColorBuffer) {
