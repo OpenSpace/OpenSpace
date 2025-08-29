@@ -198,6 +198,26 @@ if (UNIX AND NOT APPLE)
         ${CEF_ROOT}/Resources/locales/
         DESTINATION lib/openspace/bin/locales
     )
+
+    # Install chrome-sandbox (needed if you want CEF sandboxing)
+    install(PROGRAMS
+        ${CEF_ROOT}/Release/chrome-sandbox
+        DESTINATION lib/openspace/bin
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                    GROUP_READ GROUP_EXECUTE
+                    WORLD_READ WORLD_EXECUTE
+                    SETUID
+    )
+    
+    # Install V8 snapshot and blob files (*.bin)
+    file(GLOB CEF_BIN_FILES
+        "${CEF_ROOT}/Release/*.bin"
+    )
+    
+    if(CEF_BIN_FILES)
+        install(FILES ${CEF_BIN_FILES} DESTINATION lib/openspace/bin)
+    endif()
+
     
     # ------------------------------------------------------------------------------
     # Ensure executable can find private libcef.so at runtime - $ORIGIN if in same bin directory
