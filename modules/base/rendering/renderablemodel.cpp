@@ -1102,7 +1102,15 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             _program->setUniform(_uniformCache.opacity, 1.f);
         }
 
+        if (_renderWireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+
         _geometry->render(*_program);
+
+        if (_renderWireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
     }
     else {
         // Prepare framebuffer
