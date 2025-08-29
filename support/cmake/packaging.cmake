@@ -144,8 +144,8 @@ if (UNIX AND NOT APPLE)
   set(CMAKE_INSTALL_DOCDIR "${CMAKE_INSTALL_DATADIR}/doc/${CPACK_PACKAGE_NAME}" CACHE PATH "" FORCE)
 
   # Binary
-    install(TARGETS OpenSpace RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/openspace/bin)
-    install(TARGETS OpenSpace_Helper RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/openspace/bin)
+    install(TARGETS OpenSpace RUNTIME DESTINATION lib/openspace/bin)
+    install(TARGETS OpenSpace_Helper RUNTIME DESTINATION lib/openspace/bin)
 
     # man page
     # Make sure the man directory exists
@@ -176,13 +176,13 @@ if (UNIX AND NOT APPLE)
     # Main CEF shared library
     install(FILES
         ${CEF_ROOT}/Release/libcef.so
-        DESTINATION lib/openspace
+        DESTINATION lib/openspace/bin
     )
     
     # Resources and locales (required for CEF to work properly)
     install(DIRECTORY
         ${CEF_ROOT}/Resources/
-        DESTINATION share/openspace/cef_resources
+        DESTINATION lib/openspace/bin
     )
 
     # Install all CEF .so files from the Release directory
@@ -191,41 +191,41 @@ if (UNIX AND NOT APPLE)
     )
     
     if(CEF_SHARED_LIBS)
-        install(FILES ${CEF_SHARED_LIBS} DESTINATION lib/openspace)
+        install(FILES ${CEF_SHARED_LIBS} DESTINATION lib/openspace/bin)
     endif()
     
     install(DIRECTORY
         ${CEF_ROOT}/Resources/locales/
-        DESTINATION share/openspace/cef_resources/locales
+        DESTINATION lib/openspace/bin/locales
     )
     
     # ------------------------------------------------------------------------------
-    # Ensure executable can find private libcef.so at runtime
+    # Ensure executable can find private libcef.so at runtime - not needed if in same bin directory
     # ------------------------------------------------------------------------------
     # set an install-time RUNPATH to find bundled CEF
-    set(_openspace_privlib_rpath
-    "$ORIGIN/../../../lib/openspace:$ORIGIN/../../../lib")
+    # set(_openspace_privlib_rpath
+    # "$ORIGIN/../../../lib/openspace:$ORIGIN/../../../lib")
 
-    set_target_properties(OpenSpace PROPERTIES
-      INSTALL_RPATH "${_openspace_privlib_rpath}"
-    )
+    # set_target_properties(OpenSpace PROPERTIES
+    #   INSTALL_RPATH "${_openspace_privlib_rpath}"
+    # )
     
-    set_target_properties(OpenSpace_Helper PROPERTIES
-      INSTALL_RPATH "${_openspace_privlib_rpath}"
-    )
+    # set_target_properties(OpenSpace_Helper PROPERTIES
+    #   INSTALL_RPATH "${_openspace_privlib_rpath}"
+    # )
     
     # Required assets
-    install(DIRECTORY config/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace/config)
-    install(DIRECTORY modules/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace/modules
+    install(DIRECTORY config/ DESTINATION lib/openspace/config)
+    install(DIRECTORY modules/ DESTINATION lib/openspace/modules
                 FILES_MATCHING
               PATTERN "*.glsl"
               PATTERN "*.hglsl"
               PATTERN "*.fs"
               PATTERN "*.vs"
               PATTERN "*.lua")
-    install(DIRECTORY data/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace/data)
-    install(DIRECTORY scripts/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace/scripts)
-    install(DIRECTORY shaders/ DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace/shaders)
+    install(DIRECTORY data/ DESTINATION lib/openspace/data)
+    install(DIRECTORY scripts/ DESTINATION lib/openspace/scripts)
+    install(DIRECTORY shaders/ DESTINATION lib/openspace/shaders)
     
     # Documentation
     install(DIRECTORY documentation/ 
@@ -234,10 +234,10 @@ if (UNIX AND NOT APPLE)
         DESTINATION ${CMAKE_INSTALL_DOCDIR})
     
     # Config
-    install(FILES openspace.cfg DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
+    install(FILES openspace.cfg DESTINATION lib/openspace)
 
     # Patch to be applied post-install or during packaging
-    install(FILES support/cmake/openspacecfg.patch DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace)
+    install(FILES support/cmake/openspacecfg.patch DESTINATION lib/openspace)
 
   if (DEFINED OPENSPACE_DISTRO AND OPENSPACE_DISTRO STREQUAL "ubuntu24.04")
     set(CPACK_DEBIAN_PACKAGE_DEPENDS "libglew2.2, libpng16-16t64, libglut3.12, libjack0, libxrandr2, libgeos-dev, libxinerama1, libx11-6, libxcursor1, libcurl4t64, libxi6, libasound2t64, libgdal34t64, libmpv2, libvulkan1, patch")
