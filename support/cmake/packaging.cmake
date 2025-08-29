@@ -144,11 +144,21 @@ if (UNIX AND NOT APPLE)
   set(CMAKE_INSTALL_DOCDIR "${CMAKE_INSTALL_DATADIR}/doc/${CPACK_PACKAGE_NAME}" CACHE PATH "" FORCE)
 
   # Binary
-    install(TARGETS OpenSpace RUNTIME DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace/bin)
-    install(TARGETS OpenSpace_Helper RUNTIME DESTINATION ${CMAKE_INSTALL_DATADIR}/openspace/bin)
+    install(TARGETS OpenSpace RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/openspace/bin)
+    install(TARGETS OpenSpace_Helper RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/openspace/bin)
 
     # man page
-    install(FILES support/deb/openspace.1 DESTINATION share/man/man1)
+    # Make sure the man directory exists
+    install(CODE "
+      file(MAKE_DIRECTORY \"\${CMAKE_INSTALL_PREFIX}/share/man/man1\")
+      
+      # Compress the man page and install it
+      execute_process(
+        COMMAND gzip -c \"${CMAKE_CURRENT_SOURCE_DIR}/support/deb/openspace.1\"
+        COMMAND ${CMAKE_COMMAND} -E copy /dev/stdin \"\${CMAKE_INSTALL_PREFIX}/share/man/man1/openspace.1.gz\"
+      )
+    ")
+
 
     # ------------------------------------------------------------------------------
     # Bundle Chromium Embedded Framework (CEF) runtime
