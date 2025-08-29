@@ -200,19 +200,17 @@ if (UNIX AND NOT APPLE)
     )
     
     # ------------------------------------------------------------------------------
-    # Ensure executable can find private libcef.so at runtime - not needed if in same bin directory
+    # Ensure executable can find private libcef.so at runtime - $ORIGIN if in same bin directory
     # ------------------------------------------------------------------------------
     # set an install-time RUNPATH to find bundled CEF
-    # set(_openspace_privlib_rpath
-    # "$ORIGIN/../../../lib/openspace:$ORIGIN/../../../lib")
-
-    # set_target_properties(OpenSpace PROPERTIES
-    #   INSTALL_RPATH "${_openspace_privlib_rpath}"
-    # )
+    set_target_properties(OpenSpace PROPERTIES
+        INSTALL_RPATH "$ORIGIN"
+    )
     
-    # set_target_properties(OpenSpace_Helper PROPERTIES
-    #   INSTALL_RPATH "${_openspace_privlib_rpath}"
-    # )
+    set_target_properties(OpenSpace_Helper PROPERTIES
+        INSTALL_RPATH "$ORIGIN"
+    )
+
     
     # Required assets
     install(DIRECTORY config/ DESTINATION lib/openspace/config)
