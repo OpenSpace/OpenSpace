@@ -9,8 +9,8 @@ export OPENSPACE_GLOBEBROWSING="$HOME/OpenSpaceData"
 mkdir -p "$OPENSPACE_USER" "$OPENSPACE_GLOBEBROWSING"
 
 # Go to the installed directory
-cd "@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_LIBDIR@/openspace" || exit 1
+cd "@CMAKE_INSTALL_PREFIX@/lib/openspace/bin" || exit 1
 
 # Launch OpenSpace
-exec ./bin/OpenSpace "$@"
+exec ./OpenSpace "$@"
 
