@@ -251,11 +251,27 @@ if (UNIX AND NOT APPLE)
     install(FILES ACKNOWLEDGMENTS.md CREDITS.md LICENSE.md README.md
         DESTINATION ${CMAKE_INSTALL_DOCDIR})
     
-    # Config
-    install(FILES openspace.cfg DESTINATION lib/openspace)
+    # Config file - patching it before adding to package
+    # --------------
+    # Location of original + patch
+    set(ORIG_CFG ${CMAKE_SOURCE_DIR}/openspace.cfg)
+    set(PATCH_FILE ${CMAKE_SOURCE_DIR}/support/cmake/openspacecfg.patch)
+    set(PATCHED_CFG ${CMAKE_BINARY_DIR}/openspace.cfg)
+    
+    # Generate the patched file at build time
+    add_custom_command(
+        OUTPUT ${PATCHED_CFG}
+        COMMAND ${CMAKE_COMMAND} -E copy ${ORIG_CFG} ${PATCHED_CFG}
+        COMMAND patch ${PATCHED_CFG} ${PATCH_FILE}
+        DEPENDS ${ORIG_CFG} ${PATCH_FILE}
+    )
+    
+    add_custom_target(patched_cfg ALL DEPENDS ${PATCHED_CFG})
+    
+    # Install the patched version
+    install(FILES ${PATCHED_CFG} DESTINATION lib/openspace RENAME openspace.cfg)
+    # --------------
 
-    # Patch to be applied post-install or during packaging
-    install(FILES support/cmake/openspacecfg.patch DESTINATION lib/openspace)
 
   if (DEFINED OPENSPACE_DISTRO AND OPENSPACE_DISTRO STREQUAL "ubuntu24.04")
     set(CPACK_DEBIAN_PACKAGE_DEPENDS "libglew2.2, libpng16-16t64, libglut3.12, libjack0, libxrandr2, libgeos-dev, libxinerama1, libx11-6, libxcursor1, libcurl4t64, libxi6, libasound2t64, libgdal34t64, libmpv2, libvulkan1, patch")
