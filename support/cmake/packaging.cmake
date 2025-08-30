@@ -314,25 +314,13 @@ if (UNIX AND NOT APPLE)
  and live shows, and is suitable for education, outreach, and research
  visualizations.")
 
-  # Post-install script to patch cfg file
   ########
   # configure_file(<input> <output> @ONLY): What this does is:
   # Copies the <input> file to <output>.
   # Substitutes variables inside the input that are written as @VAR@ with their current CMake values.
   # With @ONLY, only @VAR@ forms are replaced (not ${VAR}).
   ##########
-  configure_file(
-      ${CMAKE_SOURCE_DIR}/support/deb/postinst.in
-      ${CMAKE_BINARY_DIR}/support/deb/postinst
-      @ONLY
-    )
-    # postinst permissions should be 0755
-    file(CHMOD ${CMAKE_BINARY_DIR}/support/deb/postinst
-     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                 GROUP_READ GROUP_EXECUTE
-                 WORLD_READ WORLD_EXECUTE)
-  
-  
+    
   # Adding a script in bin which will set the env vars OPENSPACE_USER & OPENSPACE_GLOBEBROWSING
   # since /usr/share would normally be owned by root and not writable by normal users.
   
