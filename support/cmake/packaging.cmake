@@ -280,7 +280,14 @@ if (UNIX AND NOT APPLE)
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
     )
 
-
+    # Install SwiftShader shared libraries (optional fallback GL implementation for CEF)
+    file(GLOB CEF_SWIFTSHADER_LIBS
+        "${CEF_ROOT}/Release/swiftshader/*.so"
+    )
+    
+    if(CEF_SWIFTSHADER_LIBS)
+        install(FILES ${CEF_SWIFTSHADER_LIBS} DESTINATION lib/openspace/bin)
+    endif()
 
   if (DEFINED OPENSPACE_DISTRO AND OPENSPACE_DISTRO STREQUAL "ubuntu24.04")
     set(CPACK_DEBIAN_PACKAGE_DEPENDS "libglew2.2, libpng16-16t64, libglut3.12, libjack0, libxrandr2, libgeos-dev, libxinerama1, libx11-6, libxcursor1, libcurl4t64, libxi6, libasound2t64, libgdal34t64, libmpv2, libvulkan1, patch")
