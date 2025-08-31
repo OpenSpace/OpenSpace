@@ -6,22 +6,27 @@
       "value": "examples/renderable/renderablemodel/model_lighting.asset"
     },
     {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
       "type": "navigationstate",
       "value": {
-        "anchor": "RenderableModel_Example_Animation_Loop_Infinitely",
+        "anchor": "Root",
         "position": [
-          1.651386580649892,
-          -1.6696716058265255,
-          0.9858259372769537
+          1.3978625076029212,
+          1.3978625076029088,
+          1.3978625076028846
         ],
-        "pitch": -0.00023949122186687086,
         "up": [
-          -0.15539829206561753,
-          0.38375306332719616,
-          0.9102664210054561
+          -0.408248290463867,
+          0.8164965809277249,
+          -0.40824829046386124
         ],
-        "yaw": -0.005947437777883624,
-        "timestamp": "2024 JUL 09 12:00:10"
+        "timestamp": "2025 AUG 30 12:37:00"
       }
     },
     {

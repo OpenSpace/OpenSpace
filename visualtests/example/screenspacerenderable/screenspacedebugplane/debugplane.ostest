@@ -31,6 +31,40 @@
       }
     },
     {
+      "type": "property",
+      "value": {
+        "property": "RenderEngine.ShowLog",
+        "value": true
+      }
+    },
+    {
+      "type": "script",
+      "value": "openspace.printInfo('abcdefghijklmnopqrstuvwxyz')"
+    },
+    {
+      "type": "script",
+      "value": "openspace.printInfo('ABCDEFGHIJKLMNOPQRSTUVWXYZ')"
+    },
+    {
+      "type": "script",
+      "value": "openspace.printInfo('0123456789:-;!@#$%^&*()_+')"
+    },
+    {
+      "type": "wait",
+      "value": 5
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "RenderEngine.ShowLog",
+        "value": false
+      }
+    },
+    {
+      "type": "wait",
+      "value": 5
+    },
+    {
       "type": "screenshot"
     }
   ]

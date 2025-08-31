@@ -2,6 +2,14 @@
   "profile": "empty",
   "commands": [
     {
+      "type": "asset",
+      "value": "scene/solarsystem/planets/saturn/saturn.asset"
+    },
+    {
+      "type": "asset",
+      "value": "scene/solarsystem/planets/saturn/default_layers.asset"
+    },
+    {
       "type": "navigationstate",
       "value": {
         "anchor": "Saturn",
@@ -19,14 +27,6 @@
         "yaw": -0.003697938774824961,
         "timestamp": "2025 JUL 13 12:13:12"
       }
-    },
-    {
-      "type": "asset",
-      "value": "scene/solarsystem/planets/saturn/default_layers.asset"
-    },
-    {
-      "type": "asset",
-      "value": "scene/solarsystem/planets/saturn/saturn.asset"
     },
     {
       "type": "wait",
