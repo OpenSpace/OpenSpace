@@ -185,14 +185,21 @@ if (UNIX AND NOT APPLE)
         DESTINATION lib/openspace/bin
     )
 
-    # Install all CEF .so files from the Release directory
-    file(GLOB CEF_SHARED_LIBS
-        "${CEF_BINARY_DIR}/Release/lib*.so"
+    # Install EGL/GLES (must be bundled from CEF Release dir)
+    install(FILES
+        ${CEF_ROOT}/Release/libEGL.so
+        ${CEF_ROOT}/Release/libGLESv2.so
+        DESTINATION lib/openspace/bin
     )
     
-    if(CEF_SHARED_LIBS)
-        install(FILES ${CEF_SHARED_LIBS} DESTINATION lib/openspace/bin)
-    endif()
+    # Install Vulkan SwiftShader components (software renderer)
+    install(FILES
+        ${CEF_ROOT}/Release/libvk_swiftshader.so
+        ${CEF_ROOT}/Release/vk_swiftshader_icd.json
+        DESTINATION lib/openspace/bin
+    )
+    
+    # NOTE: Do NOT install libvulkan.so.1 from CEF_ROOT (use system libvulkan1 package)
     
     install(DIRECTORY
         ${CEF_ROOT}/Resources/locales/
@@ -280,14 +287,8 @@ if (UNIX AND NOT APPLE)
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
     )
 
-    # Install SwiftShader shared libraries (libEGL.so, libGLESv2.so, etc.)
-    file(GLOB CEF_SWIFTSHADER_LIBS
-        "${CEF_ROOT}/Release/swiftshader/*.so"
-    )
-    
-    if(CEF_SWIFTSHADER_LIBS)
-        install(FILES ${CEF_SWIFTSHADER_LIBS} DESTINATION lib/openspace/bin/swiftshader)
-    endif()
+
+
 
 
   if (DEFINED OPENSPACE_DISTRO AND OPENSPACE_DISTRO STREQUAL "ubuntu24.04")
