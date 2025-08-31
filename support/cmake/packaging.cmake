@@ -251,6 +251,11 @@ if (UNIX AND NOT APPLE)
     install(DIRECTORY data/ DESTINATION lib/openspace/data)
     install(DIRECTORY scripts/ DESTINATION lib/openspace/scripts)
     install(DIRECTORY shaders/ DESTINATION lib/openspace/shaders)
+    install(
+      DIRECTORY modules/globebrowsing/gdal_data
+      DESTINATION lib/openspace/modules/globebrowsing
+    )
+
     
     # Documentation
     install(DIRECTORY documentation/ 
@@ -432,6 +437,7 @@ if (UNIX AND NOT APPLE)
       \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/pkgconfig\"
       \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/man\"
       \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/pkgconfig\"
+      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/modules/globebrowsing/gdal_data\"
       \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/x86_64-linux-gnu/pkgconfig\"
       \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/x86_64-linux-gnu/cmake\"
       \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/aarch64-linux-gnu/pkgconfig\"
