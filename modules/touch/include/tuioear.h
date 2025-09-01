@@ -52,7 +52,7 @@ namespace openspace {
 
 class TuioEar : public TUIO::TuioListener {
 public:
-    TuioEar();
+    TuioEar(int port = 3333);
     ~TuioEar();
 
     /**
