@@ -115,7 +115,7 @@ bool GlobeGeometryFeature::useHeightMap() const {
 }
 
 void GlobeGeometryFeature::updateTexture(bool isInitializeStep) {
-    std::string texture;
+    std::filesystem::path texture;
     GlobeBrowsingModule* m = global::moduleEngine->module<GlobeBrowsingModule>();
 
     if (!isInitializeStep && _properties.hasOverrideTexture()) {
@@ -144,15 +144,14 @@ void GlobeGeometryFeature::updateTexture(bool isInitializeStep) {
         _pointTexture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
     }
 
-    std::filesystem::path texturePath = absPath(texture);
-    if (std::filesystem::is_regular_file(texturePath)) {
+    if (std::filesystem::is_regular_file(texture)) {
         _hasTexture = true;
         _pointTexture->loadFromFile(texture);
         _pointTexture->uploadToGpu();
     }
     else {
         LERROR(std::format(
-            "Trying to use texture file that does not exist: {}", texturePath
+            "Trying to use texture file that does not exist: {}", texture
         ));
     }
 }
@@ -264,7 +263,7 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
     geo->getCentroid(centroid);
     Geodetic3 geoCentroid = geometryhelper::coordsToGeodetic({ centroid }).front();
     _heightUpdateReferencePoints.push_back(std::move(geoCentroid));
-;
+
     std::vector<Geodetic3> envelopeGeoCoords =
         geometryhelper::geometryCoordsAsGeoVector(geo->getEnvelope().get());
 
@@ -570,7 +569,7 @@ std::vector<std::vector<glm::vec3>> GlobeGeometryFeature::createLineGeometry() {
             );
 
             const auto addLinePos = [&vertices, &positions](const glm::vec3& pos) {
-                vertices.push_back({ pos.x, pos.y, pos.z, 0.f, 0.f, 0.f });
+                vertices.push_back({ { pos.x, pos.y, pos.z }, { 0.f, 0.f, 0.f } });
                 positions.push_back(pos);
             };
 
@@ -652,11 +651,13 @@ void GlobeGeometryFeature::createPointGeometry() {
             // Normal is the out direction
             const glm::vec3 normal = glm::normalize(vf);
 
-            vertices.push_back({ vf.x, vf.y, vf.z, normal.x, normal.y, normal.z });
+            vertices.push_back({
+                { vf.x, vf.y, vf.z }, { normal.x, normal.y, normal.z }
+            });
 
             // Lines from center of the globe out to the point
-            extrudedLineVertices.push_back({ 0.f, 0.f, 0.f, 0.f, 0.f, 0.f });
-            extrudedLineVertices.push_back({ vf.x, vf.y, vf.z, 0.f, 0.f, 0.f });
+            extrudedLineVertices.push_back({ { 0.f, 0.f, 0.f }, { 0.f, 0.f, 0.f } });
+            extrudedLineVertices.push_back({ { vf.x, vf.y, vf.z }, { 0.f, 0.f, 0.f } });
         }
 
         vertices.shrink_to_fit();
@@ -747,9 +748,9 @@ void GlobeGeometryFeature::createPolygonGeometry() {
             else {
                 // Just add a triangle consisting of the three vertices
                 const glm::vec3 n = -glm::normalize(glm::cross(v1 - v0, v2 - v0));
-                polyVertices.push_back({ v0.x, v0.y, v0.z, n.x, n.y, n.z });
-                polyVertices.push_back({ v1.x, v1.y, v1.z, n.x, n.y, n.z });
-                polyVertices.push_back({ v2.x, v2.y, v2.z, n.x, n.y, n.z });
+                polyVertices.push_back({ { v0.x, v0.y, v0.z }, { n.x, n.y, n.z } });
+                polyVertices.push_back({ { v1.x, v1.y, v1.z }, { n.x, n.y, n.z } });
+                polyVertices.push_back({ { v2.x, v2.y, v2.z }, { n.x, n.y, n.z } });
             }
         }
     }

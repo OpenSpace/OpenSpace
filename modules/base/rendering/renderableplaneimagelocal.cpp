@@ -160,7 +160,7 @@ void RenderablePlaneImageLocal::loadTexture() {
 
         _texture = BaseModule::TextureManager.request(
             std::to_string(hash),
-            [path = _texturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
+            [path = _texturePath.value()]() -> std::unique_ptr<ghoul::opengl::Texture> {
                 std::unique_ptr<ghoul::opengl::Texture> texture =
                     ghoul::io::TextureReader::ref().loadTexture(absPath(path), 2);
 

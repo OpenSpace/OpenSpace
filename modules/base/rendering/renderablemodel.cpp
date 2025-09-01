@@ -283,8 +283,18 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _modelTransform(
         ModelTransformInfo,
         glm::dmat4(1.0),
-        glm::dmat4(-1.0),
-        glm::dmat4(1.0)
+        glm::dmat4(
+            -1.0, -1.0, -1.0, -1.0,
+            -1.0, -1.0, -1.0, -1.0,
+            -1.0, -1.0, -1.0, -1.0,
+            -1.0, -1.0, -1.0, -1.0
+        ),
+        glm::dmat4(
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0
+        )
     )
     , _pivot(
         PivotInfo,
@@ -821,7 +831,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         case ColorAddingBlending:
             glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
             break;
-    };
+    }
 
     if (!_enableDepthTest) {
         glDisable(GL_DEPTH_TEST);

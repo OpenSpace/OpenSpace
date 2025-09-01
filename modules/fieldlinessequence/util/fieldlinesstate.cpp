@@ -50,9 +50,12 @@ void FieldlinesState::convertLatLonToCartesian(float scale) {
         const float r = p.x * scale;
         const float lat = glm::radians(p.y);
         const float lon = glm::radians(p.z);
-        const float rCosLat = r * cos(lat);
 
-        p = glm::vec3(rCosLat * cos(lon), rCosLat* sin(lon), r * sin(lat));
+        p = glm::vec3(
+            r * std::cos(lat) * std::cos(lon),
+            r * std::cos(lat) * std::sin(lon),
+            r * std::sin(lat)
+        );
     }
 }
 
@@ -418,10 +421,6 @@ void FieldlinesState::setTriggerTime(double t) {
 // If index is out of scope an empty vector is returned and the referenced bool is false.
 std::vector<float> FieldlinesState::extraQuantity(size_t index, bool& isSuccessful) const
 {
-    if (index == -1) {
-        isSuccessful = false;
-        return std::vector<float>();
-    }
     if (index < _extraQuantities.size()) {
         isSuccessful = true;
         return _extraQuantities[index];

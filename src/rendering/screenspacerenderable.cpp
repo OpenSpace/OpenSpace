@@ -547,7 +547,7 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
 
     glm::mat4 scale = glm::scale(
         glm::mat4(1.f),
-        glm::vec3(_scale, textureRatio*_scale, 1.f)
+        glm::vec3(_scale.value(), textureRatio * _scale, 1.f)
     );
 
     return scale;
@@ -724,9 +724,9 @@ glm::vec3 ScreenSpaceRenderable::sphericalToCartesian(glm::vec3 spherical) const
     // and phi is the azimuth.
 
     const glm::vec3 sanitized = sanitizeSphericalCoordinates(std::move(spherical));
-    const float x = sanitized[0] * sin(sanitized[1]) * cos(sanitized[2]);
-    const float y = sanitized[0] * sin(sanitized[1]) * sin(sanitized[2]);
-    const float z = sanitized[0] * cos(sanitized[1]);
+    const float x = sanitized[0] * std::sin(sanitized[1]) * std::cos(sanitized[2]);
+    const float y = sanitized[0] * std::sin(sanitized[1]) * std::sin(sanitized[2]);
+    const float z = sanitized[0] * std::cos(sanitized[1]);
 
     // Now, convert rotate the coordinate system, so that z maps to y,
     // and y maps to -z. We want the pole to be in y instead of z.

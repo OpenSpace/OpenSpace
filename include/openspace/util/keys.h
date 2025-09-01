@@ -103,7 +103,7 @@ constexpr KeyModifier operator|(KeyModifier lhs, KeyModifier rhs) {
     return static_cast<KeyModifier>(
         static_cast<std::underlying_type_t<KeyModifier>>(lhs) |
         static_cast<std::underlying_type_t<KeyModifier>>(rhs)
-        );
+    );
 }
 
 constexpr KeyModifier operator|=(KeyModifier& lhs, KeyModifier rhs) {
@@ -390,7 +390,7 @@ struct KeyWithModifier {
     Key key = Key::Unknown;
     KeyModifier modifier = KeyModifier::None;
 
-    auto operator<=>(const KeyWithModifier&) const = default;
+    auto operator<=>(const KeyWithModifier&) const noexcept = default;
 };
 
 constexpr inline bool isKeypadKey(Key key) noexcept {

@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/rotation/spicerotation/spice_fixeddate.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "SpiceRotation_Example_FixedDate",
+        "position": [
+          -1.3421436605357413,
+          -1.4590079694043843,
+          -0.6431396151518061
+        ],
+        "pitch": 1.7086199878553997e-07,
+        "referenceFrame": "Root",
+        "up": [
+          -0.38742147559906626,
+          -0.049406725315003674,
+          0.9205778488201256
+        ],
+        "yaw": 1.776710009671442e-07,
+        "timestamp": "2025 JUL 13 12:45:06"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

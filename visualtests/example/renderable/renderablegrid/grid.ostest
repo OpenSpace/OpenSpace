@@ -1,0 +1,31 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderablegrid/grid.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderableGrid_Example",
+        "position": [
+          29.051677541246228,
+          -105.61110102457239,
+          76.39414914148158
+        ],
+        "pitch": -0.000239491221883572,
+        "up": [
+          -0.11365609828074467,
+          0.5615805017740438,
+          0.8195789353996421
+        ],
+        "yaw": -0.005947437777878668,
+        "timestamp": "2025 JUL 13 11:02:00"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

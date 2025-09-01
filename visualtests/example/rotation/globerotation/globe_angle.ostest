@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/rotation/globerotation/globe_angle.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "GlobeRotation_Example_Angle",
+        "position": [
+          2.761828258741099,
+          0.46065524937210195,
+          1.3704697280265687
+        ],
+        "pitch": 2.129054822441662e-07,
+        "referenceFrame": "Root",
+        "up": [
+          0.4504756641672437,
+          -0.048659285619664594,
+          -0.8914616929044483
+        ],
+        "yaw": 2.058864995713284e-07,
+        "timestamp": "2025 JUL 13 12:45:06"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

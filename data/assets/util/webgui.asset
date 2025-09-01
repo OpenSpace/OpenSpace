@@ -4,7 +4,7 @@ local guiCustomization = asset.require("customization/gui")
 
 
 -- Select which commit hashes to use for the UI frontend
-local frontendHash = "345f21d05a1e4210c42e22f7739e8e6abc372d09"
+local frontendHash = "baabd171ecbe61b2758970a2cdafb43fbcd1a23b"
 
 -- The name of the file to download from the server
 local frontendFile = "frontend.zip"
@@ -25,6 +25,14 @@ local showcomposer = asset.resource({
   Name = "Web Gui ShowComposer",
   Type = "UrlSynchronization",
   Url = "http://data.openspaceproject.com/files/webgui/showcomposer/" ..  showcomposerHash .. "/" .. showcomposerFile
+})
+
+
+local maps = asset.resource({
+  Identifier = "userinterface_maps",
+  Name = "Userinterface Maps",
+  Type = "HttpSynchronization",
+  Version = 1
 })
 
 
@@ -65,6 +73,10 @@ asset.onInitialize(function()
   directories[#directories + 1] = openspace.absPath("${USER_SHOWCOMPOSER_UPLOADS}")
   directories[#directories + 1] = "showcomposer/projects"
   directories[#directories + 1] = openspace.absPath("${USER_SHOWCOMPOSER_PROJECTS}")
+
+  -- Add asset folders
+  directories[#directories + 1] = "assets/maps"
+  directories[#directories + 1] = maps
 
   openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
   openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "gui")

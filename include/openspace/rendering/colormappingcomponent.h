@@ -46,9 +46,9 @@ namespace documentation { struct Documentation; }
  * like the color map file itself (converted to a texture), colors to use for missing
  * values and the available data columns and value ranges.
  *
- * @TODO Also provide a small shader snippet that can be included in fragment shaders
- * that use this color mapping. As well as a set of uniforms? Now every
- * renderable needs to handle this separately.  (emmbr, 2023-10-13)
+ * \todo Also provide a small shader snippet that can be included in fragment shaders that
+ * use this color mapping. As well as a set of uniforms? Now every renderable needs to
+ * handle this separately.  (emmbr, 2023-10-13)
  */
 class ColorMappingComponent : public properties::PropertyOwner {
 public:

@@ -1,0 +1,30 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/screenspacerenderable/screenspaceinsetblackout/insetblackout.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "ScreenSpace.ScreenSpaceInsetBlackout_Example.BorderColor",
+        "value": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "ScreenSpace.ScreenSpaceInsetBlackout_Example.BorderWidth",
+        "value": 2.0
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

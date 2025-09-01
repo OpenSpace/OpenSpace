@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderablecartesianaxes/cartesianaxes_parent.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderableCartesianAxes_Example_Parent",
+        "position": [
+          -2702172.8251342773,
+          76997053.80488586,
+          24395795.36685562
+        ],
+        "pitch": 0.0014819549212940508,
+        "referenceFrame": "Root",
+        "up": [
+          0.2547153819399344,
+          0.3001921369283056,
+          -0.9192414019884061
+        ],
+        "yaw": -0.006066943131778283,
+        "timestamp": "2000 JAN 01 12:00:00"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

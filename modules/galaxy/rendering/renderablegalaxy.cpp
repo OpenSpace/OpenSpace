@@ -573,7 +573,7 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
             opacityCoefficient = 0;
         }
 
-        _opacityCoefficient = opacityCoefficient;
+        _opacityCoefficient = opacityCoefficient * opacity();
         ghoul_assert(
             _opacityCoefficient >= 0.f && _opacityCoefficient <= 1.f,
             "Opacity coefficient was not between 0 and 1"

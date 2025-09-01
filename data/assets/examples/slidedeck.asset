@@ -11,8 +11,8 @@ asset.onInitialize(function()
     Scale = 0.7
   })
 
-  helper.addSlide(deck, "${DATA}/test2.jpg")
-  helper.addSlide(deck, "${DATA}/test3.jpg")
+  helper.addSlide(deck, openspace.absPath("${DATA}/test2.jpg"))
+  helper.addSlide(deck, openspace.absPath("${DATA}/test3.jpg"))
 
   local interpolationDuration = 0.5
 

@@ -1,0 +1,37 @@
+{
+  "profile": "spaceweather/todays_sun",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Sun",
+        "position": [
+          4818241664.523566,
+          628265319.9221227,
+          -252932963.33102685
+        ],
+        "referenceFrame": "Root",
+        "up": [
+          -0.09152340539662482,
+          0.8853866401416752,
+          0.4557564741429799
+        ],
+        "timestamp": "2025 JUN 30 10:48:38"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.WSA_54_Fieldlines_PFSS_IO.Renderable.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "wait",
+      "value": 30
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "profile": "spaceweather/solarstorm2012",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Sun",
+        "position": [
+          156877799121.96924,
+          192483951449.23526,
+          -158697340267.75372
+        ],
+        "referenceFrame": "Root",
+        "up": [
+          -0.24614021380004653,
+          0.7280829896225669,
+          0.6397735188117218
+        ],
+        "timestamp": "2012 JUL 14 07:00:45"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.*.Renderable.Flow.FlowEnabled",
+        "value": false
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

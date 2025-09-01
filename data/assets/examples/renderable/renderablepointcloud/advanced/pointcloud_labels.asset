@@ -29,7 +29,7 @@ local Node = {
   },
   GUI = {
     Name = "RenderablePointCloud - Labels",
-    Path = "/Examples/Advanced"
+    Path = "/Examples/RenderablePointCloud/Advanced"
   }
 }
 
@@ -66,7 +66,7 @@ local Node_LabelsFile = {
     }
   },
   GUI = {
-    Name = "Labels - Custom File",
+    Name = "RenderablePointCloud - Labels Custom File",
     Path = "/Examples/RenderablePointCloud/Advanced",
     Description = [[Example of a point cloud with labels, created from a .label file]]
   }

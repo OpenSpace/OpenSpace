@@ -206,7 +206,7 @@ private:
     std::chrono::high_resolution_clock::time_point _lastFrameTime;
 
     struct Window : properties::PropertyOwner {
-        Window(PropertyOwnerInfo info, int id);
+        Window(PropertyOwnerInfo info, size_t id);
 
         properties::FloatProperty horizFieldOfView;
     };

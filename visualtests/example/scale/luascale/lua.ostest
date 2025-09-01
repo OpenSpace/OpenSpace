@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/scale/luascale/lua.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "LuaScale_Example",
+        "position": [
+          3.4316828325932547,
+          2.938354025288038,
+          -0.5443736043235018
+        ],
+        "pitch": 1.0995394475463923e-07,
+        "referenceFrame": "Root",
+        "up": [
+          -0.16481956358156002,
+          0.009769482746134983,
+          -0.9862753513434557
+        ],
+        "yaw": 1.1433575514143556e-07,
+        "timestamp": "2000 JAN 01 10:00:00"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

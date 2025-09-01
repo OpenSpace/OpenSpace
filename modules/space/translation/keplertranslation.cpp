@@ -31,6 +31,15 @@
 #include <glm/gtx/transform.hpp>
 
 namespace {
+    struct RangeError final : public ghoul::RuntimeError {
+        explicit RangeError(std::string off) :
+            ghoul::RuntimeError(
+                std::format("Value '{}' out of range", off),
+                "KeplerTranslation"
+            )
+        {}
+    };
+
     template <typename T, typename Func>
     T solveIteration(const Func& function, T x0, const T& err = 0.0, int maxIter = 100) {
         T x2 = x0;
@@ -144,11 +153,6 @@ namespace {
 } // namespace
 
 namespace openspace {
-
-KeplerTranslation::RangeError::RangeError(std::string off)
-    : ghoul::RuntimeError("Value '" + off + "' out of range", "KeplerTranslation")
-    , offender(std::move(off))
-{}
 
 documentation::Documentation KeplerTranslation::Documentation() {
     return codegen::doc<Parameters>("space_transform_kepler");

@@ -298,7 +298,7 @@ namespace {
 
 namespace openspace {
 
-RenderEngine::Window::Window(PropertyOwnerInfo info, int id)
+RenderEngine::Window::Window(PropertyOwnerInfo info, size_t id)
     : properties::PropertyOwner(info)
     , horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.f)
 {
@@ -498,7 +498,7 @@ void RenderEngine::initializeGL() {
 
     LTRACE("RenderEngine::initializeGL(begin)");
 
-    for (int i = 0; i < global::windowDelegate->nWindows(); i++) {
+    for (size_t i = 0; i < global::windowDelegate->nWindows(); i++) {
         std::string name = global::windowDelegate->nameForWindow(i);
         properties::PropertyOwner::PropertyOwnerInfo info = {
             .identifier = std::format("Window_{}", i),
@@ -524,7 +524,7 @@ void RenderEngine::initializeGL() {
         global::windowDelegate->nWindows() == _windows.size(),
         "Invalid number of windows"
     );
-    for (int i = 0; i < global::windowDelegate->nWindows(); i++) {
+    for (size_t i = 0; i < global::windowDelegate->nWindows(); i++) {
         _windows[i]->horizFieldOfView = global::windowDelegate->horizFieldOfView(i);
     }
 
@@ -608,7 +608,7 @@ void RenderEngine::updateRenderer() {
             global::windowDelegate->nWindows() == _windows.size(),
             "Invalid number of windows"
         );
-        for (int i = 0; i < global::windowDelegate->nWindows(); i++) {
+        for (size_t i = 0; i < global::windowDelegate->nWindows(); i++) {
             _windows[i]->horizFieldOfView = global::windowDelegate->horizFieldOfView(i);
         }
     }
@@ -1238,7 +1238,7 @@ void RenderEngine::renderVersionInformation() {
         if (global::versionChecker->hasLatestVersionInfo()) {
             VersionChecker::SemanticVersion ver = global::versionChecker->latestVersion();
 
-            std::string versionString = std::string(OPENSPACE_VERSION_STRING_FULL);
+            std::string versionString = std::string(OPENSPACE_VERSION);
             const VersionChecker::SemanticVersion current {
                 OPENSPACE_VERSION_MAJOR,
                 OPENSPACE_VERSION_MINOR,
@@ -1259,11 +1259,11 @@ void RenderEngine::renderVersionInformation() {
             );
         }
         else {
-            versionBox = _fontVersionInfo->boundingBox(OPENSPACE_VERSION_STRING_FULL);
+            versionBox = _fontVersionInfo->boundingBox(OPENSPACE_VERSION);
             FR::defaultRenderer().render(
                 *_fontVersionInfo,
                 glm::vec2(fontResolution().x - versionBox.x - 10.f, 5.f),
-                OPENSPACE_VERSION_STRING_FULL,
+                OPENSPACE_VERSION,
                 glm::vec4(0.5f, 0.5f, 0.5f, 1.f)
             );
         }

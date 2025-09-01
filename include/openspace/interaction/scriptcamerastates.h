@@ -37,16 +37,16 @@ public:
 
     void addLocalRotation(const glm::dvec2& delta);
     void addGlobalRotation(const glm::dvec2& delta);
-    void addTruckMovement(const glm::dvec2& delta);
-    void addLocalRoll(const glm::dvec2& delta);
-    void addGlobalRoll(const glm::dvec2& delta);
+    void addTruckMovement(double delta);
+    void addLocalRoll(double delta);
+    void addGlobalRoll(double delta);
 
 private:
     glm::dvec2 _localRotation = glm::dvec2(0.0);
     glm::dvec2 _globalRotation = glm::dvec2(0.0);
-    glm::dvec2 _truckMovement = glm::dvec2(0.0);
-    glm::dvec2 _localRoll = glm::dvec2(0.0);
-    glm::dvec2 _globalRoll = glm::dvec2(0.0);
+    double _truckMovement = 0.0;
+    double _localRoll = 0.0;
+    double _globalRoll = 0.0;
 };
 
 } // namespace openspace::interaction

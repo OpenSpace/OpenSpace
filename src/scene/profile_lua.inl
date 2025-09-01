@@ -27,6 +27,32 @@
 namespace {
 
 /**
+ * Returns the name of the profile with which OpenSpace was started.
+ */
+[[codegen::luawrap]] std::string profileName() {
+    std::string p = openspace::global::configuration->profile;
+    const std::string builtInPath = absPath("${PROFILES}").string();
+    const std::string userPath = absPath("${USER_PROFILES}").string();
+
+    if (p.starts_with(builtInPath)) {
+        return p.substr(builtInPath.size() + 1);
+    }
+    else if (p.starts_with(userPath)) {
+        return p.substr(userPath.size() + 1);
+    }
+    else {
+        return p;
+    }
+}
+
+/**
+* Returns the full path of the profile with which OpenSpace was started.
+*/
+[[codegen::luawrap]] std::filesystem::path profilePath() {
+    return openspace::global::configuration->profile;
+}
+
+/**
  * Collects all changes that have been made since startup, including all property changes
  * and assets required, requested, or removed. All changes will be added to the profile
  * that OpenSpace was started with, and the new saved file will contain all of this

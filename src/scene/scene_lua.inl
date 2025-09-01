@@ -88,16 +88,14 @@ bool ownerMatchesGroupTag(const openspace::properties::PropertyOwner* owner,
             throw ghoul::RuntimeError(std::format(
                 "Only a single instruction to combine tags is supported. Found an "
                 "intersection ('{}') and a negation instruction ('{}') in the query: "
-                "'{}'",
-                Intersection, Negation, tagToMatch
+                "'{}'", Intersection, Negation, tagToMatch
             ));
         }
         if (tagToMatch.find(Union) != std::string_view::npos) {
             throw ghoul::RuntimeError(std::format(
                 "Only a single instruction to combine tags is supported. Found an "
                 "intersection ('{}') and a union instruction ('{}') in the query: "
-                "'{}'",
-                Intersection, Union, tagToMatch
+                "'{}'", Intersection, Union, tagToMatch
             ));
         }
 
@@ -115,16 +113,14 @@ bool ownerMatchesGroupTag(const openspace::properties::PropertyOwner* owner,
             throw ghoul::RuntimeError(std::format(
                 "Only a single instruction to combine tags is supported. Found a "
                 "negation ('{}') and an intersection instruction ('{}') in the query: "
-                "'{}'",
-                Negation, Intersection, tagToMatch
+                "'{}'", Negation, Intersection, tagToMatch
             ));
         }
         if (tagToMatch.find(Union) != std::string_view::npos) {
             throw ghoul::RuntimeError(std::format(
                 "Only a single instruction to combine tags is supported. Found a "
                 "negation ('{}') and a union instruction ('{}') in the query: "
-                "'{}'",
-                Negation, Union, tagToMatch
+                "'{}'", Negation, Union, tagToMatch
             ));
         }
 
@@ -142,16 +138,14 @@ bool ownerMatchesGroupTag(const openspace::properties::PropertyOwner* owner,
             throw ghoul::RuntimeError(std::format(
                 "Only a single instruction to combine tags is supported. Found a union "
                 "('{}') and a negation instruction ('{}') in the query: "
-                "'{}'",
-                Union, Negation, tagToMatch
+                "'{}'", Union, Negation, tagToMatch
             ));
         }
         if (tagToMatch.find(Intersection) != std::string_view::npos) {
             throw ghoul::RuntimeError(std::format(
                 "Only a single instruction to combine tags is supported. Found a union "
                 "('{}') and an intersection instruction ('{}') in the query: "
-                "'{}'",
-                Union, Intersection, tagToMatch
+                "'{}'", Union, Intersection, tagToMatch
             ));
         }
 
@@ -462,6 +456,12 @@ void applyRegularExpression(lua_State* L, std::string_view regex,
             }
         }
     }
+
+    // We need to do this check outside the for loop since the results of the postscript
+    // script might otherwise be overwritten by the following property values
+    if (interpolationDuration == 0.0 && !postScript.empty()) {
+        global::scriptEngine->runScript({ std::move(postScript) });
+    }
 }
 
 int setPropertyCallSingle(openspace::properties::Property& prop, const std::string& uri,
@@ -488,6 +488,10 @@ int setPropertyCallSingle(openspace::properties::Property& prop, const std::stri
             scene->removePropertyInterpolation(&prop);
         }
         prop.setLuaValue(L);
+
+        if (!postScript.empty()) {
+            global::scriptEngine->runScript({ std::move(postScript) });
+        }
     }
     else {
         prop.setLuaInterpolationTarget(L);

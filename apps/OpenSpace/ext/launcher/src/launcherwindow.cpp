@@ -240,7 +240,9 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
     {
         // Set up the default value for the edit button
         std::string selection = std::get<1>(_profileBox->currentSelection());
-        _editProfileButton->setEnabled(std::filesystem::exists(selection));
+        const bool exists = std::filesystem::exists(selection);
+        const bool isUser = selection.starts_with(_userProfilePath.string());
+        _editProfileButton->setEnabled(isUser && exists);
     }
 
     {
@@ -382,9 +384,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
     {
         QLabel* versionLabel = new QLabel(centralWidget);
         versionLabel->setVisible(true);
-        versionLabel->setText(
-            QString::fromStdString(std::string(OPENSPACE_VERSION_STRING_FULL))
-        );
+        versionLabel->setText(QString::fromStdString(std::string(OPENSPACE_VERSION)));
         versionLabel->setObjectName("version-info");
         versionLabel->setGeometry(geometry::VersionString);
     }

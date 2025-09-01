@@ -60,13 +60,11 @@ local Node_Interpolated = {
 }
 
 -- Load data from a Speck file. This allows storing all data in one single file, including
--- the texture mapping) Note that we disable this scene graph node per default here, as it
--- shows the same information as the CSV version
+-- the texture mapping).
 local Node_Speck = {
   Identifier = "RenderablePointCloud_Example_MultiTextured_Speck",
   Renderable = {
     Type = "RenderablePointCloud",
-    Enabled = false,
     -- When loading multi-texture information from a speck file, we do not need a
     -- DataMapping entry - all information is in the file
     File = asset.resource("../data/multitextured_speck/textures_points.speck"),

@@ -47,7 +47,7 @@ public:
      * This exception is thrown if the ghoul::TemplateFactory could not be found in the
      * #factory method.
      */
-    struct FactoryNotFoundError : public ghoul::RuntimeError {
+    struct FactoryNotFoundError final : public ghoul::RuntimeError {
         /**
          * Constructor for FactoryNotFoundError, the \p type is a human-readable (-ish)
          * type descriptor for the type `T` for the TemplateFactory that could
@@ -99,7 +99,7 @@ public:
     /**
      * Adds the passed \p factory to the FactoryManager. Factories may only be added once.
      *
-     * \tparam Factory The type for which a factory should be created and added
+     * \tparam T The type for which a factory should be created and added
      * \param name A user-readable name for the registered factory
      *
      * \pre \p name must not be empty

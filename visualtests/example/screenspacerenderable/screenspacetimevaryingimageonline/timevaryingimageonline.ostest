@@ -1,0 +1,23 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/screenspacerenderable/screenspacetimevaryingimageonline/timevaryingimageonline.asset"
+    },
+    {
+      "type": "time",
+      "value": "2024-05-10T15:15:00.000"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "ScreenSpace.ScreenSpaceTimeVaryingImageOnline_Example.Scale",
+        "value": 1.0
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

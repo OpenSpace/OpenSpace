@@ -83,6 +83,18 @@
 #include <QApplication>
 #include <QMessageBox>
 
+#ifdef WIN32
+extern "C" {
+    // These variables are checked by the different drivers to see if the discrete GPU
+    // should be preferred
+
+    // Nvidia Optimus: force switch to discrete GPU
+    __declspec(dllexport) DWORD NvOptimusEnablement = 1;
+    // AMD
+    __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+} // extern
+#endif // WIN32
+
 using namespace openspace;
 using namespace sgct;
 
@@ -965,7 +977,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.nWindows = []() {
         ZoneScoped;
 
-        return static_cast<int>(Engine::instance().windows().size());
+        return Engine::instance().windows().size();
     };
     sgctDelegate.currentWindowId = []() {
         ZoneScoped;
@@ -977,11 +989,10 @@ void setSgctDelegateFunctions() {
 
         return Engine::instance().windows().front()->id();
     };
-    sgctDelegate.nameForWindow = [](int windowIdx) {
+    sgctDelegate.nameForWindow = [](size_t windowIdx) {
         ZoneScoped;
 
         ghoul_assert(
-            windowIdx >= 0 &&
             windowIdx < Engine::instance().windows().size(),
             "Invalid window index"
         );
@@ -992,21 +1003,19 @@ void setSgctDelegateFunctions() {
 
         return glfwGetProcAddress(func);
     };
-    sgctDelegate.horizFieldOfView = [](int windowIdx) {
+    sgctDelegate.horizFieldOfView = [](size_t windowIdx) {
         ZoneScoped;
 
         ghoul_assert(
-            windowIdx >= 0 &&
             windowIdx < Engine::instance().windows().size(),
             "Invalid window index"
         );
         return Engine::instance().windows()[windowIdx]->horizFieldOfViewDegrees();
     };
-    sgctDelegate.setHorizFieldOfView = [](int windowIdx, float hFovDeg) {
+    sgctDelegate.setHorizFieldOfView = [](size_t windowIdx, float hFovDeg) {
         ZoneScoped;
 
         ghoul_assert(
-            windowIdx >= 0 &&
             windowIdx < Engine::instance().windows().size(),
             "Invalid window index"
         );
