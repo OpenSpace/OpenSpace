@@ -280,7 +280,7 @@ void SystemViewer::flyToStar(std::string_view hostIdentifier) const {
         "'NavigationHandler.OrbitalNavigator.Anchor',"
         "'" + std::string(hostIdentifier) +
         "')"
-        "openspace.pathnavigation.zoomToDistanceRelative(100.0, 5.0);"
+        "openspace.navigation.zoomToDistanceRelative(100.0, 5.0);"
     );
 }
 
