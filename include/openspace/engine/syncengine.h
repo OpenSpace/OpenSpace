@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,7 +37,7 @@ class Syncable;
 
 /**
  * Manages a collection of `Syncable`s and ensures they are synchronized over SGCT nodes.
- * Encoding/Decoding order is handles internally.
+ * Encoding/Decoding order is handled internally.
  */
 class SyncEngine {
 public:
@@ -48,7 +48,7 @@ public:
      *
      * \pre syncBufferSize must be bigger than 0
      */
-    SyncEngine(unsigned int syncBufferSize);
+    explicit SyncEngine(unsigned int syncBufferSize);
 
     /**
      * Encodes all added Syncables in the injected `SyncBuffer`. This method is only

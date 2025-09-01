@@ -1,0 +1,33 @@
+-- Styled
+-- This example creates a box grid where the grid lines are styled to have a specific
+-- color and line width.
+--
+-- Per default, the box will be given a size of 1x1x1 meters, and here it is scaled up by
+-- a factor of 100. It will hence have a size of 100x100x100 meters.
+
+local Node = {
+  Identifier = "RenderableBoxGrid_Example_Styled",
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 100
+    }
+  },
+  Renderable = {
+    Type = "RenderableBoxGrid",
+    LineWidth = 4.0,
+    Color = { 1.0, 1.0, 0.0 }
+  },
+  GUI = {
+    Name = "RenderableBoxGrid - Styled",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

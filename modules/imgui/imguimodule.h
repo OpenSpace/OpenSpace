@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -120,6 +120,7 @@ private:
     GLuint vao = 0;
     GLuint vbo = 0;
     GLuint vboElements = 0;
+    bool _hasContext = false;
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(tex, ortho) _uniformCache;
     std::unique_ptr<ghoul::opengl::Texture> _fontTexture;

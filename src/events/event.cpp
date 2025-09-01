@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -62,6 +62,11 @@ void log(int i, [[maybe_unused]] const EventProfileLoadingFinished& e) {
     LINFO(std::format("[{}] ProfileLoadingFinished", i));
 }
 
+void log(int i, const EventAssetLoadingFinished& e) {
+    ghoul_assert(e.type == EventAssetLoadingFinished::Type, "Wrong type");
+    LINFO(std::format("[{}] AssetLoadingFinished", i));
+}
+
 void log(int i, const EventApplicationShutdown& e) {
     ghoul_assert(e.type == EventApplicationShutdown::Type, "Wrong type");
     const std::string t = [](EventApplicationShutdown::State state) {
@@ -104,6 +109,16 @@ void log(int i, const EventTimeOfInterestReached& e) {
         "[{}] TimeOfInterestReached: {},  {}",
         i, e.time->UTC(), reinterpret_cast<const void*>(e.camera)
     ));
+}
+
+void log(int i, const EventMissionAdded& e) {
+    ghoul_assert(e.type == EventMissionAdded::Type, "Wrong type");
+    LINFO(std::format("[{}] MissionAdded: {}", i, e.identifier));
+}
+
+void log(int i, const EventMissionRemoved& e) {
+    ghoul_assert(e.type == EventMissionRemoved::Type, "Wrong type");
+    LINFO(std::format("[{}] MissionRemoved: {}", i, e.identifier));
 }
 
 void log(int i, [[maybe_unused]] const EventMissionEventReached& e) {
@@ -220,9 +235,12 @@ std::string_view toString(Event::Type type) {
     switch (type) {
         case Event::Type::ParallelConnection: return "ParallelConnection";
         case Event::Type::ProfileLoadingFinished: return "ProfileLoadingFinished";
+        case Event::Type::AssetLoadingFinished: return "AssetLoadingFinished";
         case Event::Type::ApplicationShutdown: return "ApplicationShutdown";
         case Event::Type::CameraFocusTransition: return "CameraFocusTransition";
         case Event::Type::TimeOfInterestReached: return "TimeOfInterestReached";
+        case Event::Type::MissionAdded: return "MissionAdded";
+        case Event::Type::MissionRemoved: return "MissionRemoved";
         case Event::Type::MissionEventReached: return "MissionEventReached";
         case Event::Type::PlanetEclipsed: return "PlanetEclipsed";
         case Event::Type::InterpolationFinished: return "InterpolationFinished";
@@ -253,6 +271,9 @@ Event::Type fromString(std::string_view str) {
     else if (str == "ProfileLoadingFinished") {
         return Event::Type::ProfileLoadingFinished;
     }
+    else if (str == "AssetLoadingFinished") {
+        return Event::Type::AssetLoadingFinished;
+    }
     else if (str == "ApplicationShutdown") {
         return Event::Type::ApplicationShutdown;
     }
@@ -261,6 +282,12 @@ Event::Type fromString(std::string_view str) {
     }
     else if (str == "TimeOfInterestReached") {
         return Event::Type::TimeOfInterestReached;
+    }
+    else if (str == "MissionAdded") {
+        return Event::Type::MissionAdded;
+    }
+    else if (str == "MissionRemoved") {
+        return Event::Type::MissionRemoved;
     }
     else if (str == "MissionEventReached") {
         return Event::Type::MissionEventReached;
@@ -371,6 +398,18 @@ ghoul::Dictionary toParameter(const Event& e) {
                     d.setValue("Transition", "Exiting"s);
                     break;
             }
+            break;
+        case Event::Type::MissionAdded:
+            d.setValue(
+                "Identifier",
+                std::string(static_cast<const EventMissionAdded&>(e).identifier)
+            );
+            break;
+        case Event::Type::MissionRemoved:
+            d.setValue(
+                "Identifier",
+                std::string(static_cast<const EventMissionRemoved&>(e).identifier)
+            );
             break;
         case Event::Type::PlanetEclipsed:
             d.setValue(
@@ -505,6 +544,9 @@ void logAllEvents(const Event* e) {
             case Event::Type::ProfileLoadingFinished:
                 log(i, *static_cast<const EventProfileLoadingFinished*>(e));
                 break;
+            case Event::Type::AssetLoadingFinished:
+                log(i, *static_cast<const EventAssetLoadingFinished*>(e));
+                break;
             case Event::Type::ApplicationShutdown:
                 log(i, *static_cast<const EventApplicationShutdown*>(e));
                 break;
@@ -513,6 +555,12 @@ void logAllEvents(const Event* e) {
                 break;
             case Event::Type::TimeOfInterestReached:
                 log(i, *static_cast<const EventTimeOfInterestReached*>(e));
+                break;
+            case Event::Type::MissionAdded:
+                log(i, *static_cast<const EventMissionAdded*>(e));
+                break;
+            case Event::Type::MissionRemoved:
+                log(i, *static_cast<const EventMissionRemoved*>(e));
                 break;
             case Event::Type::MissionEventReached:
                 log(i, *static_cast<const EventMissionEventReached*>(e));
@@ -586,6 +634,10 @@ EventProfileLoadingFinished::EventProfileLoadingFinished()
     : Event(Type)
 {}
 
+EventAssetLoadingFinished::EventAssetLoadingFinished()
+    : Event(Type)
+{}
+
 EventApplicationShutdown::EventApplicationShutdown(State state_)
     : Event(Type)
     , state(state_)
@@ -605,6 +657,16 @@ EventTimeOfInterestReached::EventTimeOfInterestReached(const Time* time_,
     : Event(Type)
     , time(time_)
     , camera(camera_)
+{}
+
+EventMissionAdded::EventMissionAdded(const std::string_view identifier_)
+    : Event(Type)
+    , identifier(temporaryString(identifier_))
+{}
+
+EventMissionRemoved::EventMissionRemoved(const std::string_view identifier_)
+    : Event(Type)
+    , identifier(temporaryString(identifier_))
 {}
 
 EventMissionEventReached::EventMissionEventReached()

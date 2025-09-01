@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,8 +27,8 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
@@ -56,7 +56,7 @@ struct LinePoint;
 
 class RenderableLabel : public Renderable {
 public:
-    RenderableLabel(const ghoul::Dictionary& dictionary);
+    explicit RenderableLabel(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;
@@ -72,6 +72,8 @@ public:
 
 protected:
     properties::OptionProperty _blendMode;
+
+    properties::StringProperty _text;
 
     float unit(int unit) const;
 
@@ -91,8 +93,6 @@ private:
     properties::FloatProperty _fontSize;
     properties::FloatProperty _size;
     properties::IVec2Property _minMaxSize;
-
-    properties::StringProperty _text;
 
     properties::BoolProperty _enableFadingEffect;
     properties::Vec2Property _fadeWidths;

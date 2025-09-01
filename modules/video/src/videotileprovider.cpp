@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,6 +34,7 @@
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "VideoTileProvider";
@@ -118,7 +119,7 @@ ChunkTile VideoTileProvider::chunkTile(TileIndex tileIndex, int parents, int max
         std::pow(2, tileIndex.level),
         std::pow(2, tileIndex.level - 1)
     };
-    const glm::vec2 ratios = { 1.f / nTiles.x, 1.f / nTiles.y };
+    const glm::vec2 ratios = glm::vec2(1.f / nTiles.x, 1.f / nTiles.y);
     const float offsetX = ratios.x * static_cast<float>(tileIndex.x);
     // The tiles on the y-axis should be traversed backwards
     const float offsetY = ratios.y * (nTiles.y - static_cast<float>(tileIndex.y) - 1.f);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,6 +40,19 @@
 #include <optional>
 
 namespace {
+    constexpr std::string_view _loggerCat = "RenderableSphere";
+    constexpr int DefaultBlending = 0;
+    constexpr int AdditiveBlending = 1;
+    constexpr int PolygonBlending = 2;
+    constexpr int ColorAddingBlending = 3;
+
+    std::map<std::string, int> BlendingMapping = {
+        { "Default", DefaultBlending },
+        { "Additive", AdditiveBlending },
+        { "Polygon", PolygonBlending },
+        { "Color Adding", ColorAddingBlending }
+    };
+
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
@@ -100,6 +113,42 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo UseColorMapInfo = {
+        "UseColorMap",
+        "Use Color Map",
+        "Used to toggle color map on or off for the sphere. Mainly used to transform "
+        "grayscale textures from data into color images.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ColorMapInfo = {
+        "ColorMap",
+        "Transfer Function (Color Map) Path",
+        "Color map / Transfer function to use if `UseColorMap` is enabled.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
+        "BlendingOption",
+        "Blending Options",
+        "Controls the blending function used to calculate the colors of the sphere with "
+        "respect to the opacity.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DisableDepthInfo = {
+        "DisableDepth",
+        "Disable Depth",
+        "If disabled, no depth values are taken into account for this sphere, meaning "
+        "that depth values are neither written or tested against during the rendering. "
+        "This can be useful for spheres that represent a background image.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    // This `Renderable` represents a simple sphere with an image. The image that is shown
+    // should be in an equirectangular projection/spherical panoramic image or else
+    // distortions will be introduced. The `Orientation` parameter determines whether the
+    // provided image is shown on the inside, outside, or both sides of the sphere.
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<float> size [[codegen::greater(0.f)]];
@@ -127,6 +176,18 @@ namespace {
 
         // [[codegen::verbatim(FadeOutThresholdInfo.description)]]
         std::optional<float> fadeOutThreshold [[codegen::inrange(0.0, 1.0)]];
+
+        // [[codegen::verbatim(ColorMapInfo.description)]]
+        std::optional<std::filesystem::path> colorMap;
+
+        // [[codegen::verbatim(UseColorMapInfo.description)]]
+        std::optional<bool> useColorMap;
+
+        // [[codegen::verbatim(BlendingOptionInfo.description)]]
+        std::optional<std::string> blendingOption;
+
+        // [[codegen::verbatim(DisableDepthInfo.description)]]
+        std::optional<bool> disableDepth;
     };
 #include "renderablesphere_codegen.cpp"
 } // namespace
@@ -141,11 +202,15 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _size(SizeInfo, 1.f, 0.f, 1e25f)
     , _segments(SegmentsInfo, 16, 4, 1000)
-    , _orientation(OrientationInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _orientation(OrientationInfo)
     , _mirrorTexture(MirrorTextureInfo, false)
     , _disableFadeInDistance(DisableFadeInOutInfo, false)
     , _fadeInThreshold(FadeInThresholdInfo, 0.f, 0.f, 1.f, 0.001f)
     , _fadeOutThreshold(FadeOutThresholdInfo, 0.f, 0.f, 1.f, 0.001f)
+    , _blendingFuncOption(BlendingOptionInfo)
+    , _disableDepth(DisableDepthInfo, false)
+    , _useColorMap(UseColorMapInfo, false)
+    , _colorMap(ColorMapInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -187,7 +252,49 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     _fadeOutThreshold = p.fadeOutThreshold.value_or(_fadeOutThreshold);
     addProperty(_fadeOutThreshold);
 
+    _blendingFuncOption.addOption(DefaultBlending, "Default");
+    _blendingFuncOption.addOption(AdditiveBlending, "Additive");
+    _blendingFuncOption.addOption(PolygonBlending, "Polygon");
+    _blendingFuncOption.addOption(ColorAddingBlending, "Color Adding");
+
+    addProperty(_blendingFuncOption);
+
+    if (p.blendingOption.has_value()) {
+        const std::string blendingOpt = *p.blendingOption;
+        _blendingFuncOption = BlendingMapping[blendingOpt];
+    }
+
+    _disableDepth = p.disableDepth.value_or(_disableDepth);
+    addProperty(_disableDepth);
+
     setBoundingSphere(_size);
+
+    if (p.colorMap.has_value()) {
+        _colorMap = p.colorMap->string();
+        _useColorMap = true;
+    }
+    addProperty(_useColorMap);
+
+    _colorMap.onChange([this]() {
+        if (!std::filesystem::exists(_colorMap.value())) {
+            LERROR(std::format(
+                "Path {} to color map is invalid.",
+                _colorMap.value()
+            ));
+            return;
+        }
+        _transferFunction = std::make_unique<TransferFunction>(_colorMap.value());
+    });
+    addProperty(_colorMap);
+
+    // This check is after color map in case a color map is given
+    // but using it on start-up is set to false.
+    if (p.useColorMap.has_value()) {
+        if (!p.colorMap.has_value()) {
+            throw ghoul::RuntimeError("No color map path was provided");
+        }
+        _useColorMap = *p.useColorMap;
+    }
 }
 
 bool RenderableSphere::isReady() const {
@@ -210,6 +317,10 @@ void RenderableSphere::initializeGL() {
     );
 
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+
+    if (_useColorMap) {
+        _transferFunction = std::make_unique<TransferFunction>(_colorMap.value());
+    }
 }
 
 void RenderableSphere::deinitializeGL() {
@@ -221,8 +332,8 @@ void RenderableSphere::deinitializeGL() {
             global::renderEngine->removeRenderProgram(p);
         }
     );
-
     _shader = nullptr;
+    _transferFunction = nullptr;
 }
 
 void RenderableSphere::render(const RenderData& data, RendererTasks&) {
@@ -309,6 +420,16 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
         return;
     }
 
+    // TextureUnit cannot be declared in if statement below
+    ghoul::opengl::TextureUnit transferFunctionUnit;
+    _shader->setUniform("usingTransferFunction", _useColorMap);
+    _shader->setUniform("transferFunction", transferFunctionUnit);
+    _shader->setUniform("dataMinMaxValues", _dataMinMaxValues);
+    if (_useColorMap) {
+        transferFunctionUnit.activate();
+        _transferFunction->bind();
+    }
+
     _shader->setUniform(_uniformCache.opacity, adjustedOpacity);
     _shader->setUniform(_uniformCache.mirrorTexture, _mirrorTexture.value());
 
@@ -330,7 +451,26 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_CULL_FACE);
     }
 
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    // Configure blending
+    glEnablei(GL_BLEND, 0);
+    switch (_blendingFuncOption) {
+        case DefaultBlending:
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        case AdditiveBlending:
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            break;
+        case PolygonBlending:
+            glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE);
+            break;
+        case ColorAddingBlending:
+            glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
+            break;
+    }
+
+    if (_disableDepth) {
+        glDepthMask(GL_FALSE);
+    }
 
     _sphere->render();
 
@@ -352,12 +492,14 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableSphere::update(const UpdateData&) {
-    if (_shader->isDirty()) {
+    if (_shader->isDirty()) [[unlikely]] {
         _shader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
-
-    if (_sphereIsDirty) {
+    if (!_transferFunction && std::filesystem::exists(_colorMap.value())) {
+        _transferFunction = std::make_unique<TransferFunction>(_colorMap.value());
+    }
+    if (_sphereIsDirty) [[unlikely]] {
         _sphere = std::make_unique<Sphere>(_size, _segments);
         _sphere->initialize();
         _sphereIsDirty = false;

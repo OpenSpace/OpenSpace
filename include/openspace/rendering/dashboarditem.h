@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,18 +38,28 @@ namespace documentation { struct Documentation; }
 
 class DashboardItem : public properties::PropertyOwner {
 public:
-    static documentation::Documentation Documentation();
-
     static std::unique_ptr<DashboardItem> createFromDictionary(
         const ghoul::Dictionary& dictionary
     );
 
-    DashboardItem(const ghoul::Dictionary& dictionary);
+    explicit DashboardItem(const ghoul::Dictionary& dictionary);
 
     bool isEnabled() const;
+    virtual void update() = 0;
+
+    /**
+     * Renders this DashboardItem at the provided \p penPosition. The position indicates
+     * where this DashboardItem should render itself and is provided in pixel-coordinates
+     * with the top-left corner of the screen being at (0,0). Each derived subclass shall
+     * update the \p penPosition according to the items that it should render. If, for
+     * example, a single line of text is rendered, the \p penPosition shall be updated by
+     * one line's worth of vertical separation.
+     *
+     * \p penPosition The position at which this DashboardItem should be rendered
+     */
     virtual void render(glm::vec2& penPosition) = 0;
 
-    virtual glm::vec2 size() const = 0;
+    static documentation::Documentation Documentation();
 
 protected:
     properties::BoolProperty _enabled;

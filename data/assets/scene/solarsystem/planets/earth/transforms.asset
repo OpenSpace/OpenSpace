@@ -16,6 +16,7 @@ local EarthBarycenter = {
   GUI = {
     Name = "Earth Barycenter",
     Path = "/Solar System/Planets/Earth",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -33,6 +34,7 @@ local EarthCenter = {
   GUI = {
     Name = "Earth Center",
     Path = "/Solar System/Planets/Earth",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -51,6 +53,7 @@ local EarthInertial = {
   GUI = {
     Name = "Earth Inertial",
     Path = "/Solar System/Planets/Earth",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -68,6 +71,7 @@ local EarthIAU = {
   GUI = {
     Name = "Earth IAU",
     Path = "/Solar System/Planets/Earth",
+    Focusable = false,
     Hidden = true
   }
 }

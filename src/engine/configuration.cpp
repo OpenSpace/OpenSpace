@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,14 +25,17 @@
 #include <openspace/engine/configuration.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/settings.h>
+#include <openspace/engine/moduleengine.h>
+#include <openspace/json.h>
+#include <openspace/util/json_helper.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/assert.h>
-#include <json/json.hpp>
 #include <optional>
 
 namespace {
@@ -72,6 +75,12 @@ namespace {
         // Determines the property visibility level that is selected when starting up
         // OpenSpace. If it is not provided, it defaults to 'User'
         std::optional<Visibility> propertyVisibility;
+
+        // Determines when the property confirmation modal should be shown when starting
+        // up OpenSpace. If it is not provided, it defaults to 'true', i.e., each
+        // individual property determines whether it requires a confirmation or not.
+        std::optional<bool> showPropertyConfirmation;
+        
 
         // A list of paths that are automatically registered with the file system. If a
         // key X is used in the table, it is then useable by referencing ${X} in all other
@@ -327,9 +336,6 @@ namespace {
         // Values in this table describe the behavior of the loading screen that is
         // displayed while the scene graph is created and initialized
         std::optional<LoadingScreen> loadingScreen;
-
-        // Configurations for each module
-        std::optional<std::map<std::string, ghoul::Dictionary>> moduleConfigurations;
     };
 #include "configuration_codegen.cpp"
 } // namespace
@@ -343,6 +349,7 @@ ghoul::Dictionary Configuration::createDictionary() {
     res.setValue("Asset", asset);
     res.setValue("Profile", profile);
     res.setValue("PropertyVisibility", static_cast<int>(propertyVisibility));
+    res.setValue("ShowPropertyConfirmation", static_cast<int>(showPropertyConfirmation));
 
     ghoul::Dictionary globalCustomizationScriptsDict;
     for (size_t i = 0; i < globalCustomizationScripts.size(); i++) {
@@ -522,9 +529,7 @@ void parseLuaState(Configuration& configuration) {
 
     // We go through all of the entries and lift them from global scope into the table on
     // the stack so that we can create a ghoul::Dictionary from this new table
-    const documentation::Documentation doc = codegen::doc<Parameters>(
-        "core_configuration"
-    );
+    const documentation::Documentation doc = Configuration::Documentation();
     for (const documentation::DocumentationEntry& e : doc.entries) {
         lua_pushstring(s, e.key.c_str());
         lua_getglobal(s, e.key.c_str());
@@ -548,6 +553,8 @@ void parseLuaState(Configuration& configuration) {
             *p.propertyVisibility
         );
     }
+
+    c.showPropertyConfirmation = p.showPropertyConfirmation.value_or(true);
     c.pathTokens = p.paths;
     c.fonts = p.fonts.value_or(c.fonts);
     c.fontSize.frameInfo = p.fontSize.frameInfo;
@@ -611,7 +618,14 @@ void parseLuaState(Configuration& configuration) {
             l.showLogMessages.value_or(c.loadingScreen.isShowingLogMessages);
     }
 
-    c.moduleConfigurations = p.moduleConfigurations.value_or(c.moduleConfigurations);
+    // ModuleConfigurations depend on the list of modules that are added, which has to be
+    // done dynamically. Hence we can't have it written directly into the struct
+    if (d.hasValue<ghoul::Dictionary>("ModuleConfigurations")) {
+        ghoul::Dictionary dict = d.value<ghoul::Dictionary>("ModuleConfigurations");
+        for (std::string_view key : dict.keys()) {
+            c.moduleConfigurations[std::string(key)] = dict.value<ghoul::Dictionary>(key);
+        }
+    }
 
     if (p.openGLDebugContext.has_value()) {
         const Parameters::OpenGLDebugContext& l = *p.openGLDebugContext;
@@ -691,8 +705,38 @@ void patchConfiguration(Configuration& configuration, const Settings& settings) 
     }
 }
 
-documentation::Documentation Configuration::Documentation =
-    codegen::doc<Parameters>("core_configuration");
+documentation::Documentation Configuration::Documentation() {
+    using namespace documentation;
+
+    documentation::Documentation doc = codegen::doc<Parameters>("core_configuration");
+
+    auto moduleConfiguration = std::make_shared<TableVerifier>();
+    for (OpenSpaceModule* mod : global::moduleEngine->modules()) {
+        std::string name = mod->identifier();
+        std::string id = mod->Documentation().id;
+
+        if (id.empty()) {
+            continue;
+        }
+
+        moduleConfiguration->documentations.push_back({
+            name,
+            new ReferencingVerifier(id),
+            Optional::Yes,
+            Private::No,
+            mod->Documentation().description
+        });
+    }
+    doc.entries.push_back({
+        "ModuleConfigurations",
+        std::move(moduleConfiguration),
+        Optional::Yes,
+        Private::No,
+        "Configurations for each module"
+    });
+
+    return doc;
+}
 
 std::filesystem::path findConfiguration(const std::string& filename) {
     std::filesystem::path directory = absPath("${BIN}");
@@ -735,6 +779,19 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
         primaryMonitorResolution.x, primaryMonitorResolution.y
     );
     ghoul::lua::runScript(result.state, script);
+
+    // Local function to convert a dictionary to its JSON object's string representation
+    constexpr auto TableToJson = [](lua_State* state) {
+        if (!ghoul::lua::hasValue<ghoul::Dictionary>(state)) {
+            throw ghoul::lua::LuaError("TableToJson must receive a table object");
+        }
+        ghoul::Dictionary dict = ghoul::lua::value<ghoul::Dictionary>(state);
+        std::string stringRepresentation = formatJson(dict);
+        ghoul::lua::push(state, std::move(stringRepresentation));
+        return 1;
+    };
+    lua_pushcfunction(result.state, TableToJson);
+    lua_setglobal(result.state, "TableToJson");
 
     // If there is an initial config helper file, load it into the state
     if (std::filesystem::is_regular_file(absPath(InitialConfigHelper))) {

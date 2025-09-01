@@ -23,6 +23,7 @@ local MercuryTrailEarth = {
   GUI = {
     Name = "Mercury trail from Earth",
     Path = "/Solar System/Planets/Mercury",
+    Focusable = false,
     Description = "Trail of Mercury as observed by the Earth"
   }
 }

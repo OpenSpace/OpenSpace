@@ -21,6 +21,7 @@ local Object = {
     Enabled = false,
     File = data .. "bound_20.dat",
     NamesFile = data .. "constellations.dat",
+    Color = { 0.45, 0.44, 0.30 }
     -- Selection = zodiacs
   },
   Transform = {
@@ -34,9 +35,11 @@ local Object = {
       Scale = 10e17
     }
   },
+  Tag = { "du_grid" },
   GUI = {
     Name = "Constellation Boundaries",
     Path = "/Milky Way/Constellations",
+    Focusable = false,
     Description = [[As a continent is divided into countries, astronomers divide the sky
       into 88 regions called constellations. Every object falls into one of these 88
       regions. The boundaries of these regions are shown in this asset. Use these in

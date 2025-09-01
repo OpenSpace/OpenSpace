@@ -1,6 +1,11 @@
 @echo off
 setlocal
 
+if NOT exist "C:\Program Files\7-Zip\7z.exe" (
+  echo 7-Zip is not installed. Please download it to "C:\Program Files\7-Zip\7z.exe" and install it from https://www.7-zip.org/
+  exit /b 1
+)
+
 :: This script might have been executed from the support folder
 if NOT exist openspace.cfg cd ..
 

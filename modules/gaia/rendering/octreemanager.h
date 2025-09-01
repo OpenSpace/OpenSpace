@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -260,7 +260,7 @@ private:
      * long as \p recursive is not set to false.
      *
      * \param node the node that should be removed
-     * \param deltaStars keeps track of how many stars that were removed.
+     * \param deltaStars keeps track of how many stars that were removed
      * \param recursive defines if decentents should be removed as well
      */
     std::map<int, std::vector<float>> removeNodeFromCache(OctreeNode& node,
@@ -294,7 +294,7 @@ private:
      *
      * \param node the node that should be inserted
      * \param mode the render mode that should be used
-     * \param deltaStars keeps track of how many stars that were added.
+     * \param deltaStars keeps track of how many stars that were added
      * \return the data to be inserted
      */
     std::vector<float> constructInsertData(const OctreeNode& node,

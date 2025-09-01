@@ -11,8 +11,8 @@ asset.onInitialize(function()
     Scale = 0.7
   })
 
-  helper.addSlide(deck, "${DATA}/test2.jpg")
-  helper.addSlide(deck, "${DATA}/test3.jpg")
+  helper.addSlide(deck, openspace.absPath("${DATA}/test2.jpg"))
+  helper.addSlide(deck, openspace.absPath("${DATA}/test3.jpg"))
 
   local interpolationDuration = 0.5
 
@@ -65,8 +65,11 @@ end)
 
 
 asset.onDeinitialize(function()
-  openspace.clearKey("KP_6")
   openspace.clearKey("KP_4")
+  openspace.action.removeAction("slide_deck.prevslide")
+  openspace.clearKey("KP_6")
+  openspace.action.removeAction("slide_deck.nextslide")
   openspace.clearKey("KP_0")
+  openspace.action.removeAction("slide_deck.toggleslides")
   helper.removeDeck(deck)
 end)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,33 +25,16 @@
 #include <openspace/scene/scene.h>
 
 #include <openspace/camera/camera.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/windowdelegate.h>
-#include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
-#include <openspace/interaction/sessionrecording.h>
-#include <openspace/navigation/navigationhandler.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/query/query.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/profile.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/sceneinitializer.h>
-#include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/luastate.h>
 #include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/defer.h>
-#include <ghoul/misc/easing.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringhelper.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <string>
+#include <source_location>
 #include <stack>
 
 #include "scene_lua.inl"
@@ -91,11 +74,214 @@ namespace {
 
     std::chrono::steady_clock::time_point currentTimeForInterpolation() {
         using namespace openspace::global;
-        if (sessionRecording->isSavingFramesDuringPlayback()) {
-            return sessionRecording->currentPlaybackInterpolationTime();
+        if (sessionRecordingHandler->isSavingFramesDuringPlayback()) {
+            return sessionRecordingHandler->currentPlaybackInterpolationTime();
         }
         else {
             return std::chrono::steady_clock::now();
+        }
+    }
+
+    using ProfilePropertyLua = std::variant<bool, float, std::string, ghoul::lua::nil_t>;
+    openspace::PropertyValueType propertyValueType(const std::string& value);
+    void handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::string& value,
+        bool& isTableValue, std::string_view propertyName);
+    ProfilePropertyLua propertyProcessValue(ghoul::lua::LuaState& L,
+        const std::string& value, bool& valueIsTable, std::string_view propertyName);
+    template <typename T>
+    void processPropertyValueTableEntries(ghoul::lua::LuaState& L,
+        const std::string& value, std::vector<T>& table, bool& valueIsTable,
+        std::string_view propertyName);
+
+
+    /**
+     * Accepts string version of a property value from a profile, and returns the
+     * supported data types that can be pushed to a Lua state. Currently, the full range
+     * of possible Lua values is not supported.
+     *
+     * \param value String representation of the value with which to set property
+     */
+    openspace::PropertyValueType propertyValueType(const std::string& value) {
+        auto isFloatValue = [](const std::string& s) {
+            try {
+                float converted = std::numeric_limits<float>::min();
+                converted = std::stof(s);
+                return (converted != std::numeric_limits<float>::min());
+            }
+            catch (...) {
+                return false;
+            }
+        };
+
+        if (value == "true" || value == "false") {
+            return openspace::PropertyValueType::Boolean;
+        }
+        else if (isFloatValue(value)) {
+            return openspace::PropertyValueType::Float;
+        }
+        else if (value == "nil") {
+            return openspace::PropertyValueType::Nil;
+        }
+        else if ((value.front() == '{') && (value.back() == '}')) {
+            return openspace::PropertyValueType::Table;
+        }
+        else {
+            return openspace::PropertyValueType::String;
+        }
+    }
+
+    /**
+     * Handles a Lua table entry, creating a vector of the correct variable type based
+     * on the profile string, and pushes this vector to the Lua stack.
+     *
+     * \param L The Lua state to (eventually) push to
+     * \param value String representation of the value with which to set property
+     */
+    void handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::string& value,
+                                     bool& isTableValue, std::string_view propertyName)
+    {
+        openspace::PropertyValueType enclosedType = openspace::PropertyValueType::Nil;
+        const size_t commaPos = value.find(',', 0);
+        if (commaPos != std::string::npos) {
+            enclosedType = propertyValueType(value.substr(0, commaPos));
+        }
+        else {
+            enclosedType = propertyValueType(value);
+        }
+
+        switch (enclosedType) {
+            case openspace::PropertyValueType::Boolean:
+                LERROR(std::format(
+                    "A Lua table of bool values is not supported. (processing "
+                    "property '{}')", propertyName
+                ));
+                break;
+            case openspace::PropertyValueType::Float:
+            {
+                std::vector<float> vals;
+                processPropertyValueTableEntries(
+                    L,
+                    value,
+                    vals,
+                    isTableValue,
+                    propertyName
+                );
+                ghoul::lua::push(L, vals);
+            }
+            break;
+            case openspace::PropertyValueType::String:
+            {
+                std::vector<std::string> vals;
+                processPropertyValueTableEntries(
+                    L,
+                    value,
+                    vals,
+                    isTableValue,
+                    propertyName
+                );
+                ghoul::lua::push(L, vals);
+            }
+            break;
+            case openspace::PropertyValueType::Table:
+            default:
+                LERROR(std::format(
+                    "Table-within-a-table values are not supported for profile a "
+                    "property (processing property '{}')", propertyName
+                ));
+                break;
+        }
+    }
+
+
+    /**
+     * Accepts string version of a property value from a profile, and processes it
+     * according to the data type of the value.
+     *
+     * \param L The Lua state to (eventually) push to
+     * \param value String representation of the value with which to set property
+     * \return The ProfilePropertyLua variant type translated from string representation
+     */
+    ProfilePropertyLua propertyProcessValue(ghoul::lua::LuaState& L,
+                                            const std::string& value, bool& valueIsTable,
+                                            std::string_view propertyName)
+    {
+        ProfilePropertyLua result;
+        const openspace::PropertyValueType pType = propertyValueType(value);
+
+        switch (pType) {
+            case openspace::PropertyValueType::Boolean:
+                result = (value == "true");
+                break;
+            case openspace::PropertyValueType::Float:
+                result = std::stof(value);
+                break;
+            case openspace::PropertyValueType::Nil:
+                result = ghoul::lua::nil_t();
+                break;
+            case openspace::PropertyValueType::Table: {
+                std::string val = value;
+                ghoul::trimSurroundingCharacters(val, '{');
+                ghoul::trimSurroundingCharacters(val, '}');
+                handlePropertyLuaTableEntry(L, val, valueIsTable, propertyName);
+                valueIsTable = true;
+                break;
+            }
+            case openspace::PropertyValueType::String:
+            default: {
+                std::string val = value;
+                ghoul::trimSurroundingCharacters(val, '\"');
+                ghoul::trimSurroundingCharacters(val, '[');
+                ghoul::trimSurroundingCharacters(val, ']');
+                result = val;
+                break;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Accepts string version of a property value from a profile, and adds it to a vector
+     * which will later be used to push as a Lua table containing values of type T
+     *
+     * \param L The Lua state to (eventually) push to
+     * \param value String representation of the value with which to set property
+     * \param table The std::vector container which has elements of type T for a Lua table
+     */
+    template <typename T>
+    void processPropertyValueTableEntries(ghoul::lua::LuaState& L,
+                                          const std::string& value, std::vector<T>& table,
+                                          bool& valueIsTable,
+                                          std::string_view propertyName)
+    {
+        size_t commaPos = 0;
+        size_t prevPos = 0;
+        std::string nextValue;
+        while (commaPos != std::string::npos) {
+            commaPos = value.find(',', prevPos);
+            if (commaPos != std::string::npos) {
+                nextValue = value.substr(prevPos, commaPos - prevPos);
+                prevPos = commaPos + 1;
+            }
+            else {
+                nextValue = value.substr(prevPos);
+            }
+            ghoul::trimSurroundingCharacters(nextValue, ' ');
+            ProfilePropertyLua t = propertyProcessValue(
+                L,
+                nextValue,
+                valueIsTable,
+                propertyName
+            );
+
+            try {
+                table.push_back(std::get<T>(t));
+            }
+            catch (std::bad_variant_access&) {
+                LERROR(std::format(
+                    "Error attempting to parse profile property setting for '{}' using "
+                    "value = {}", propertyName, value
+                ));
+            }
         }
     }
 
@@ -104,10 +290,6 @@ namespace {
 } // namespace
 
 namespace openspace {
-
-Scene::InvalidSceneError::InvalidSceneError(std::string msg, std::string comp)
-    : ghoul::RuntimeError(std::move(msg), std::move(comp))
-{}
 
 Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
     : properties::PropertyOwner({"Scene", "Scene"})
@@ -157,7 +339,7 @@ Camera* Scene::camera() const {
 
 void Scene::registerNode(SceneGraphNode* node) {
     if (_nodesByIdentifier.contains(node->identifier())) {
-        throw Scene::InvalidSceneError(std::format(
+        throw ghoul::RuntimeError(std::format(
             "Node with identifier '{}' already exists", node->identifier()
         ));
     }
@@ -220,7 +402,7 @@ void Scene::sortTopologically() {
     // Only the Root node can have an in-degree of 0
     SceneGraphNode* root = _nodesByIdentifier[RootNodeIdentifier];
     if (!root) {
-        throw Scene::InvalidSceneError("No root node found");
+        throw ghoul::RuntimeError("No root node found");
     }
 
     std::unordered_map<SceneGraphNode*, size_t> inDegrees;
@@ -538,12 +720,10 @@ void Scene::updateInterpolations() {
             1.f
         );
 
-        // @FRAGILE(abock): This method might crash if someone deleted the property
-        //                  underneath us. We take care of removing entire PropertyOwners,
-        //                  but we assume that Propertys live as long as their
-        //                  SceneGraphNodes. This is true in general, but if Propertys are
-        //                  created and destroyed often by the SceneGraphNode, this might
-        //                  become a problem.
+        // This method might crash if someone deleted the property underneath us. We take
+        // care of removing entire PropertyOwners, but we assume that Propertys live as
+        // long as their SceneGraphNodes. This is true in general, but if Propertys are
+        // created and destroyed often by the SceneGraphNode, this might become a problem.
         i.prop->interpolateValue(t, i.easingFunction);
 
         i.isExpired = (t == 1.f);
@@ -585,10 +765,10 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
             continue;
         }
         std::string uriOrRegex = prop.name;
-        std::string groupName;
-        if (doesUriContainGroupTag(uriOrRegex, groupName)) {
+        std::string groupName = groupTag(uriOrRegex);
+        if (!groupName.empty()) {
             // Remove group name from start of regex and replace with '*'
-            uriOrRegex = removeGroupNameFromUri(uriOrRegex);
+            uriOrRegex = removeGroupTagFromUri(uriOrRegex);
         }
         _profilePropertyName = uriOrRegex;
         ghoul::lua::push(L, uriOrRegex);
@@ -602,7 +782,6 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
         applyRegularExpression(
             L,
             uriOrRegex,
-            allProperties(),
             0.0,
             groupName,
             ghoul::EasingFunction::Linear,
@@ -617,7 +796,12 @@ void Scene::propertyPushProfileValueToLua(ghoul::lua::LuaState& L,
                                                                  const std::string& value)
 {
     _valueIsTable = false;
-    ProfilePropertyLua elem = propertyProcessValue(L, value);
+    ProfilePropertyLua elem = propertyProcessValue(
+        L,
+        value,
+        _valueIsTable,
+        _profilePropertyName
+    );
     if (!_valueIsTable) {
         std::visit(overloaded {
             [&L](bool v) {
@@ -636,148 +820,10 @@ void Scene::propertyPushProfileValueToLua(ghoul::lua::LuaState& L,
     }
 }
 
-ProfilePropertyLua Scene::propertyProcessValue(ghoul::lua::LuaState& L,
-                                                                 const std::string& value)
-{
-    ProfilePropertyLua result;
-    const PropertyValueType pType = propertyValueType(value);
-
-    switch (pType) {
-        case PropertyValueType::Boolean:
-            result = (value == "true");
-            break;
-        case PropertyValueType::Float:
-            result = std::stof(value);
-            break;
-        case PropertyValueType::Nil:
-            result = ghoul::lua::nil_t();
-            break;
-        case PropertyValueType::Table: {
-            std::string val = value;
-            ghoul::trimSurroundingCharacters(val, '{');
-            ghoul::trimSurroundingCharacters(val, '}');
-            handlePropertyLuaTableEntry(L, val);
-            _valueIsTable = true;
-            break;
-        }
-        case PropertyValueType::String:
-        default: {
-            std::string val = value;
-            ghoul::trimSurroundingCharacters(val, '\"');
-            ghoul::trimSurroundingCharacters(val, '[');
-            ghoul::trimSurroundingCharacters(val, ']');
-            result = val;
-            break;
-        }
-    }
-    return result;
-}
-
-void Scene::handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::string& value)
-{
-    PropertyValueType enclosedType = PropertyValueType::Nil;
-    const size_t commaPos = value.find(',', 0);
-    if (commaPos != std::string::npos) {
-        enclosedType = propertyValueType(value.substr(0, commaPos));
-    }
-    else {
-        enclosedType = propertyValueType(value);
-    }
-
-    switch (enclosedType) {
-        case PropertyValueType::Boolean:
-            LERROR(std::format(
-                "A Lua table of bool values is not supported. (processing property '{}')",
-                _profilePropertyName
-            ));
-            break;
-        case PropertyValueType::Float:
-            {
-                std::vector<float> vals;
-                processPropertyValueTableEntries(L, value, vals);
-                ghoul::lua::push(L, vals);
-            }
-            break;
-        case PropertyValueType::String:
-            {
-                std::vector<std::string> vals;
-                processPropertyValueTableEntries(L, value, vals);
-                ghoul::lua::push(L, vals);
-            }
-            break;
-        case PropertyValueType::Table:
-        default:
-            LERROR(std::format(
-                "Table-within-a-table values are not supported for profile a "
-                "property (processing property '{}')", _profilePropertyName
-            ));
-            break;
-    }
-}
-
-template <typename T>
-void Scene::processPropertyValueTableEntries(ghoul::lua::LuaState& L,
-    const std::string& value, std::vector<T>& table)
-{
-    size_t commaPos = 0;
-    size_t prevPos = 0;
-    std::string nextValue;
-    while (commaPos != std::string::npos) {
-        commaPos = value.find(',', prevPos);
-        if (commaPos != std::string::npos) {
-            nextValue = value.substr(prevPos, commaPos - prevPos);
-            prevPos = commaPos + 1;
-        }
-        else {
-            nextValue = value.substr(prevPos);
-        }
-        ghoul::trimSurroundingCharacters(nextValue, ' ');
-        ProfilePropertyLua tableElement = propertyProcessValue(L, nextValue);
-        try {
-            table.push_back(std::get<T>(tableElement));
-        }
-        catch (std::bad_variant_access&) {
-            LERROR(std::format(
-                "Error attempting to parse profile property setting for '{}' using "
-                "value = {}", _profilePropertyName, value
-            ));
-        }
-    }
-}
-
-PropertyValueType Scene::propertyValueType(const std::string& value) {
-    auto isFloatValue = [](const std::string& s) {
-        try {
-            float converted = std::numeric_limits<float>::min();
-            converted = std::stof(s);
-            return (converted != std::numeric_limits<float>::min());
-        }
-        catch (...) {
-            return false;
-        }
-    };
-
-    if (value == "true" || value == "false") {
-        return PropertyValueType::Boolean;
-    }
-    else if (isFloatValue(value)) {
-        return PropertyValueType::Float;
-    }
-    else if (value == "nil") {
-        return PropertyValueType::Nil;
-    }
-    else if ((value.front() == '{') && (value.back() == '}')) {
-        return PropertyValueType::Table;
-    }
-    else {
-        return PropertyValueType::String;
-    }
-}
-
 std::vector<properties::Property*> Scene::propertiesMatchingRegex(
-                                                        const std::string& propertyString)
+                                                          std::string_view propertyString)
 {
-    return findMatchesInAllProperties(propertyString, allProperties(), "");
+    return findMatchesInAllProperties(propertyString, "");
 }
 
 std::vector<std::string> Scene::allTags() const {
@@ -812,73 +858,125 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "setPropertyValue",
                 &luascriptfunctions::propertySetValue<false>,
-                {},
+                {
+                    { "uri", "String" },
+                    { "value", "Nil | String | Number | Boolean | Table" },
+                    { "duration", "Number?", "0.0" },
+                    { "easing", "EasingFunction?", "Linear" },
+                    { "postscript", "String?", "" }
+                },
                 "",
-                "Sets all property(s) identified by the URI (with potential wildcards) "
-                "in the first argument. The second argument can be any type, but it has "
-                "to match the type that the property (or properties) expect. If the "
-                "third is not present or is '0', the value changes instantly, otherwise "
-                "the change will take that many seconds and the value is interpolated at "
-                "each step in between. The fourth parameter is an optional easing "
-                "function if a 'duration' has been specified. If 'duration' is 0, this "
-                "parameter value is ignored. Otherwise, it can be one of many supported "
-                "easing functions. See easing.h for available functions. The fifth "
-                "argument is another Lua script that will be executed when the "
-                "interpolation provided in parameter 3 finishes.\n"
-                "The URI is interpreted using a wildcard in which '*' is expanded to "
-                "'(.*)' and bracketed components '{ }' are interpreted as group tag "
-                "names. Then, the passed value will be set on all properties that fit "
-                "the regex + group name combination.",
-                {}
+                R"(Sets the property or properties identified by the URI to the specified
+value. The `uri` identifies which property or properties are affected by this function
+call and can include both wildcards `*` which match anything, as well as tags (`{tag}`)
+which match scene graph nodes that have this tag. There is also the ability to combine two
+tags through the `&`, `|`, and `~` operators. `{tag1&tag2}` will match anything that has
+the tag1 and the tag2. `{tag1|tag2}` will match anything that has the tag1 or the tag 2,
+and `{tag1~tag2}` will match anything that has tag1 but not tag2. If no wildcards or tags
+are provided at most one property value will be changed. With wildcards or tags all
+properties that match the URI are changed instead. The second argument's type must match
+the type of the property or properties or an error is raised. If a duration is provided,
+the requested change will occur over the provided number of seconds. If no duration is
+provided or the duration is 0, the change occurs instantaneously.
+
+For example `openspace.setPropertyValue("*Trail.Renderable.Enabled", true)` will enable
+any property that ends with "Trail.Renderable.Enabled", for example
+"StarTrail.Renderable.Enabled", "EarthTrail.Renderable.Enabled", but not
+"EarthTrail.Renderable.Size".
+
+`openspace.setPropertyValue("{tag1}.Renderable.Enabled", true)` will enable any node in
+the scene that has the "tag1" assigned to it.
+
+If you only want to change a single property value, also see the #setPropertyValueSingle
+function as it will do so in a more efficient way. The `setPropertyValue` function will
+work for individual property value, but is more computationally expensive.
+
+\\param uri The URI that identifies the property or properties whose values should be
+changed. The URI can contain 0 or 1 wildcard `*` characters or a tag expression (`{tag}`)
+that identifies a property owner
+\\param value The new value to which the property/properties identified by the `uri`
+should be changed to. The type of this parameter must agree with the type of the selected
+property
+\\param duration The number of seconds over which the change will occur. If not provided
+or the provided value is 0, the change is instantaneously.
+\\param easing If a duration larger than 0 is provided, this parameter controls the manner
+in which the parameter is interpolated. Has to be one of "Linear", "QuadraticEaseIn",
+"QuadraticEaseOut", "QuadraticEaseInOut", "CubicEaseIn", "CubicEaseOut", "CubicEaseInOut",
+"QuarticEaseIn", "QuarticEaseOut", "QuarticEaseInOut", "QuinticEaseIn", "QuinticEaseOut",
+"QuinticEaseInOut", "SineEaseIn", "SineEaseOut", "SineEaseInOut", "CircularEaseIn",
+"CircularEaseOut", "CircularEaseInOut", "ExponentialEaseIn", "ExponentialEaseOut",
+"ExponentialEaseInOut", "ElasticEaseIn", "ElasticEaseOut", "ElasticEaseInOut",
+"BounceEaseIn", "BounceEaseOut", "BounceEaseInOut"
+\\param postscript A Lua script that will be executed once the change of property value
+is completed. If a duration larger than 0 was provided, it is at the end of the
+interpolation. If 0 was provided, the script runs immediately.
+)",
+                {
+                    std::source_location::current().file_name(),
+                    std::source_location::current().line()
+                }
             },
             {
                 "setPropertyValueSingle",
                 &luascriptfunctions::propertySetValue<true>,
-                {},
+                {
+                    { "uri", "String" },
+                    { "value", "Nil | String | Number | Boolean | Table" },
+                    { "duration", "Number?", "0.0" },
+                    { "easing", "EasingFunction?", "Linear" },
+                    { "postscript", "String?", "" }
+                },
                 "",
-                "Sets the property identified by the URI in the first argument. The "
-                "second argument can be any type, but it has to match the type that the "
-                "property expects. If the third is not present or is '0', the value "
-                "changes instantly, otherwise the change will take that many seconds and "
-                "the value is interpolated at each step in between. The fourth "
-                "parameter is an optional easing function if a 'duration' has been "
-                "specified. If 'duration' is 0, this parameter value is ignored. "
-                "Otherwise, it has to be one of the easing functions defined in the list "
-                "below. This is the same as calling the setValue method and passing "
-                "'single' as the fourth argument to setPropertyValue. The fifth argument "
-                "is another Lua script that will be executed when the interpolation "
-                "provided in parameter 3 finishes.\n Avaiable easing functions: "
-                "Linear, QuadraticEaseIn, QuadraticEaseOut, QuadraticEaseInOut, "
-                "CubicEaseIn, CubicEaseOut, CubicEaseInOut, QuarticEaseIn, "
-                "QuarticEaseOut, QuarticEaseInOut, QuinticEaseIn, QuinticEaseOut, "
-                "QuinticEaseInOut, SineEaseIn, SineEaseOut, SineEaseInOut, "
-                "CircularEaseIn, CircularEaseOut, CircularEaseInOut, ExponentialEaseIn, "
-                "ExponentialEaseOut, ExponentialEaseInOut, ElasticEaseIn, "
-                "ElasticEaseOut, ElasticEaseInOut, BounceEaseIn, BounceEaseOut, "
-                "BounceEaseInOut",
-                {}
-            },
-            {
-                "getPropertyValue",
-                &luascriptfunctions::propertyGetValueDeprecated,
-                {},
-                "",
-                "Returns the value the property, identified by the provided URI. "
-                "Deprecated in favor of the 'propertyValue' function",
-                {}
+                R"(Sets the single property identified by the URI to the specified value.
+The `uri` identifies which property is affected by this function call. The second
+argument's type must match the type of the property or an error is raised. If a duration
+is provided, the requested change will occur over the provided number of seconds. If no
+duration is provided or the duration is 0, the change occurs instantaneously.
+
+If you want to change multiple property values simultaneously, also see the
+#setPropertyValue function. The `setPropertyValueSingle` function however will work more
+efficiently for individual property values.
+
+\\param uri The URI that identifies the property
+\\param value The new value to which the property identified by the `uri` should be
+changed to. The type of this parameter must agree with the type of the selected property
+\\param duration The number of seconds over which the change will occur. If not provided
+or the provided value is 0, the change is instantaneously.
+\\param easing If a duration larger than 0 is provided, this parameter controls the manner
+in which the parameter is interpolated. Has to be one of "Linear", "QuadraticEaseIn",
+"QuadraticEaseOut", "QuadraticEaseInOut", "CubicEaseIn", "CubicEaseOut", "CubicEaseInOut",
+"QuarticEaseIn", "QuarticEaseOut", "QuarticEaseInOut", "QuinticEaseIn", "QuinticEaseOut",
+"QuinticEaseInOut", "SineEaseIn", "SineEaseOut", "SineEaseInOut", "CircularEaseIn",
+"CircularEaseOut", "CircularEaseInOut", "ExponentialEaseIn", "ExponentialEaseOut",
+"ExponentialEaseInOut", "ElasticEaseIn", "ElasticEaseOut", "ElasticEaseInOut",
+"BounceEaseIn", "BounceEaseOut", "BounceEaseInOut"
+\\param postscript This parameter specifies a Lua script that will be executed once the
+change of property value is completed. If a duration larger than 0 was provided, it is
+at the end of the interpolation. If 0 was provided, the script runs immediately.
+)",
+                {
+                    std::source_location::current().file_name(),
+                    std::source_location::current().line()
+                }
             },
             {
                 "propertyValue",
                 &luascriptfunctions::propertyGetValue,
-                {},
-                "",
-                "Returns the value the property, identified by the provided URI. "
-                "Deprecated in favor of the 'propertyValue' function",
-                {}
+                {
+                    { "uri", "String" }
+                },
+                "String | Number | Boolean | Table",
+                "Returns the value of the property identified by the provided URI. This "
+                "function will provide an error message if no property matching the URI "
+                "is found.",
+                {
+                    std::source_location::current().file_name(),
+                    std::source_location::current().line()
+                }
             },
             codegen::lua::HasProperty,
-            codegen::lua::PropertyDeprecated,
             codegen::lua::Property,
+            codegen::lua::PropertyOwner,
             codegen::lua::AddCustomProperty,
             codegen::lua::RemoveCustomProperty,
             codegen::lua::AddSceneGraphNode,

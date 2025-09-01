@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -210,12 +210,12 @@ void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableOrbitDisc::update(const UpdateData&) {
-    if (_shader->isDirty()) {
+    if (_shader->isDirty()) [[unlikely]] {
         _shader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
 
-    if (_planeIsDirty) {
+    if (_planeIsDirty) [[unlikely]] {
         _plane->updateSize(planeSize());
         _planeIsDirty = false;
     }

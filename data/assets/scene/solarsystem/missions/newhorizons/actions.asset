@@ -147,12 +147,7 @@ local DecreaseHeightmapCharon = {
 local TogglePlutoTrail = {
   Identifier = "os.newhorizons.TogglePlutoTrail",
   Name = "Toggle Pluto trail",
-  Command = [[
-    openspace.setPropertyValueSingle(
-      "Scene.PlutoBarycentricTrail.Renderable.Enabled",
-      not openspace.propertyValue("Scene.PlutoBarycentricTrail.Renderable.Enabled")
-    )
-  ]],
+  Command = [[openspace.toggleFade("Scene.PlutoBarycentricTrail.Renderable")]],
   Documentation = "Toggles the visibility of the trail behind Pluto",
   GuiPath = "/Missions/New Horizons",
   IsLocal = false
@@ -162,30 +157,12 @@ local TogglePlutoLabels = {
   Identifier = "os.newhorizons.TogglePlutoLabels",
   Name = "Toggle Pluto labels",
   Command = [[
-    openspace.setPropertyValueSingle(
-      "Scene.PlutoText.Renderable.Enabled",
-      not openspace.propertyValue("Scene.PlutoText.Renderable.Enabled")
-    )
-    openspace.setPropertyValueSingle(
-      "Scene.CharonText.Renderable.Enabled",
-      not openspace.propertyValue("Scene.CharonText.Renderable.Enabled")
-    )
-    openspace.setPropertyValueSingle(
-      "Scene.HydraText.Renderable.Enabled",
-      not openspace.propertyValue("Scene.HydraText.Renderable.Enabled")
-    )
-    openspace.setPropertyValueSingle(
-      "Scene.NixText.Renderable.Enabled",
-      not openspace.propertyValue("Scene.NixText.Renderable.Enabled")
-    )
-    openspace.setPropertyValueSingle(
-      "Scene.KerberosText.Renderable.Enabled",
-      not openspace.propertyValue("Scene.KerberosText.Renderable.Enabled")
-    )
-    openspace.setPropertyValueSingle(
-      "Scene.StyxText.Renderable.Enabled",
-      not openspace.propertyValue("Scene.StyxText.Renderable.Enabled")
-    )
+    openspace.toggleFade("Scene.PlutoText.Renderable")
+    openspace.toggleFade("Scene.CharonText.Renderable")
+    openspace.toggleFade("Scene.HydraText.Renderable")
+    openspace.toggleFade("Scene.NixText.Renderable")
+    openspace.toggleFade("Scene.KerberosText.Renderable")
+    openspace.toggleFade("Scene.StyxText.Renderable")
   ]],
   Documentation = "Toggles the visibility of the text labels of Pluto, Charon, Hydra, Nix, Kerberos, and Styx",
   GuiPath = "/Missions/New Horizons",
@@ -196,12 +173,7 @@ local ToggleNewHorizonsLabels = {
   Identifier = "os.newhorizons.ToggleNewHorizonsLabels",
   Name = "Toggle New Horizons labels",
   Command = [[
-    local v = openspace.propertyValue("Scene.Labels.Renderable.Opacity")
-    if v <= 0.5 then
-      openspace.setPropertyValueSingle("Scene.Labels.Renderable.Opacity", 1.0, 2.0)
-    else
-      openspace.setPropertyValueSingle("Scene.Labels.Renderable.Opacity", 0.0, 2.0)
-    end
+    openspace.toggleFade("Scene.Labels.Renderable")
   ]],
   Documentation = "Toggles the visibility of the labels for the New Horizons instruments",
   GuiPath = "/Missions/New Horizons",
@@ -212,14 +184,8 @@ local ToggleShadows = {
   Identifier = "os.newhorizons.ToggleShadows",
   Name = "Toggle shadows",
   Command = [[
-    openspace.setPropertyValueSingle(
-      "Scene.PlutoShadow.Renderable.Enabled",
-      not openspace.propertyValue("Scene.PlutoShadow.Renderable.Enabled")
-    )
-    openspace.setPropertyValueSingle(
-      "Scene.CharonShadow.Renderable.Enabled",
-      not openspace.propertyValue("Scene.CharonShadow.Renderable.Enabled")
-    )
+    openspace.toggleFade("Scene.PlutoShadow.Renderable")
+    openspace.toggleFade("Scene.CharonShadow.Renderable")
   ]],
   Documentation = "Toggles the visibility of the shadow visualization of Pluto and Charon",
   GuiPath = "/Missions/New Horizons",
@@ -230,10 +196,7 @@ local ToggleNewHorizonsTrail = {
   Identifier = "os.newhorizons.ToggleNewHorizonsTrail",
   Name = "Toggle New Horizons trail",
   Command = [[
-    openspace.setPropertyValueSingle(
-      "Scene.NewHorizonsTrailPluto.Renderable.Enabled",
-      not openspace.propertyValue("Scene.NewHorizonsTrailPluto.Renderable.Enabled")
-    )
+    openspace.toggleFade("Scene.NewHorizonsTrailPluto.Renderable")
   ]],
   Documentation = "Toggles the trail of New Horizons",
   GuiPath = "/Missions/New Horizons",

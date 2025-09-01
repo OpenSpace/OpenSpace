@@ -14,7 +14,7 @@ local KiloParsec = 3.086E19
 
 local MilkyWayVolume = {
   Identifier = "MilkyWayVolume",
-  Parent = transforms.SolarSystemBarycenter.Identifier,
+  -- No parent; this node is attached to the scene graph root
   Transform = {
     Translation = {
       Type = "StaticTranslation",

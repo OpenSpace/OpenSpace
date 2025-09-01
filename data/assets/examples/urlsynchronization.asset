@@ -20,11 +20,7 @@ asset.resource({
   Type = "UrlSynchronization",
   Identifier = "example_large",
   Url = {
-    "http://speedtest.tele2.net/100MB.zip",
-
     "https://proof.ovh.net/files/100Mb.dat",
-
-    "https://speed.hetzner.de/100MB.bin",
 
     "http://ipv4.download.thinkbroadband.com/200MB.zip",
     "http://ipv4.download.thinkbroadband.com/100MB.zip",

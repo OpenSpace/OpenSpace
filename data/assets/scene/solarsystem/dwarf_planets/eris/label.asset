@@ -23,6 +23,7 @@ local Label = {
   GUI = {
     Name = "Eris Label",
     Path = "/Solar System/Dwarf Planets/Eris",
+    Focusable = false,
     Description = "Label for Eris, visible at the solarsystem overview zoom level"
   }
 }

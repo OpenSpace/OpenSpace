@@ -43,7 +43,7 @@ local Pluto = {
       Color = { 1.0, 1.0, 0.0 }
     }
   },
-  Tag = { "planet_solarSystem", "planet_terrestrial", "dwarf_planet" },
+  Tag = { "planet_terrestrial", "dwarf_planet" },
   GUI = {
     Path = "/Solar System/Dwarf Planets/Pluto"
   }
@@ -70,6 +70,7 @@ local PlutoLabel = {
   GUI = {
     Name = "Pluto Label",
     Path = "/Solar System/Dwarf Planets/Pluto",
+    Focusable = false,
     Description = "Label for Pluto, visible at the solarsystem overview zoom level"
   }
 }

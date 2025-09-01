@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,6 +43,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/lua_helper.h>
 #include <ghoul/opengl/texture.h>
 #include <filesystem>
 #include <optional>
@@ -170,7 +171,7 @@ documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
 RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _gridType(GridTypeInfo)
     , _stepSize(StepSizeInfo, 0.02f, 0.001f, 0.1f)
     , _brightness(BrightnessInfo, 0.33f, 0.f, 1.f)
     , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)

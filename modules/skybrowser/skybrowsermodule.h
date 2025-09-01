@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,9 +29,9 @@
 
 #include <modules/skybrowser/include/utility.h>
 #include <modules/skybrowser/include/wwtdatahandler.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <filesystem>
 
 namespace openspace {
@@ -87,6 +87,7 @@ public:
 
     scripting::LuaLibrary luaLibrary() const override;
     std::vector<documentation::Documentation> documentations() const override;
+    static documentation::Documentation Documentation();
 
 protected:
     void internalInitialize(const ghoul::Dictionary& dict) override;
@@ -95,8 +96,6 @@ private:
     void incrementallyRotateCamera();
     void incrementallyAnimateTargets();
 
-    properties::BoolProperty _enabled;
-    properties::BoolProperty _showTitleInGuiBrowser;
     properties::BoolProperty _allowCameraRotation;
     properties::DoubleProperty _cameraRotationSpeed;
     properties::DoubleProperty _targetAnimationSpeed;

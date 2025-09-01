@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -229,7 +229,7 @@ TEST_CASE("SpiceManager: Get Target State", "[spicemanager]") {
         res = SpiceManager::ref().targetState("EARTH", "CASSINI", "J2000", corr, et)
     );
 
-    for (int i = 0; i < 3; i++){
+    for (int i = 0; i < 3; i++) {
         CHECK(state[i] == Catch::Approx(res.position[i]));
         CHECK(state[i+3] == Catch::Approx(res.velocity[i]));
     }

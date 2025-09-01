@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -96,9 +96,9 @@ documentation::Documentation ScreenSpaceBrowser::Documentation() {
 ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _dimensions(DimensionsInfo, glm::uvec2(0), glm::uvec2(0), glm::uvec2(3000))
-    , _url(UrlInfo)
     , _reload(ReloadInfo)
     , _renderHandler(new ScreenSpaceRenderHandler)
+    , _url(UrlInfo)
     , _keyboardHandler(new WebKeyboardHandler)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -109,7 +109,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
 
     _url = p.url.value_or(_url);
 
-    _dimensions = p.dimensions.value_or(global::windowDelegate->currentSubwindowSize());
+    _dimensions = p.dimensions.value_or(glm::vec2(1920, 1080));
 
     _browserInstance = std::make_unique<BrowserInstance>(
         _renderHandler.get(),
@@ -131,29 +131,24 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     }
 }
 
-bool ScreenSpaceBrowser::initializeGL() {
-    createShaders();
+void ScreenSpaceBrowser::initializeGL() {
+    ScreenSpaceRenderable::initializeGL();
 
+    createShaders();
     _browserInstance->initialize();
     _browserInstance->loadUrl(_url);
-    return isReady();
 }
 
-bool ScreenSpaceBrowser::deinitializeGL() {
+void ScreenSpaceBrowser::deinitializeGL() {
     LDEBUG(std::format("Deinitializing ScreenSpaceBrowser: {}", _url.value()));
 
     _browserInstance->close(true);
 
     WebBrowserModule* webBrowser = global::moduleEngine->module<WebBrowserModule>();
-    if (webBrowser) {
-        webBrowser->removeBrowser(_browserInstance.get());
-        _browserInstance.reset();
-    }
-    else {
-        LWARNING("Could not find WebBrowserModule");
-    }
+    webBrowser->removeBrowser(_browserInstance.get());
+    _browserInstance.reset();
 
-    return ScreenSpaceRenderable::deinitializeGL();
+    ScreenSpaceRenderable::deinitializeGL();
 }
 
 void ScreenSpaceBrowser::render(const RenderData& renderData) {

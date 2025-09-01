@@ -28,7 +28,8 @@ local Cubesats = {
   Tag = { "earth_satellites" },
   GUI = {
     Name = "CubeSat",
-    Path = "/Solar System/Planets/Earth/Satellites"
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
   }
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/lua_helper.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
@@ -36,6 +37,8 @@
 #include <format>
 #include "SpiceUsr.h"
 #include "SpiceZpr.h"
+
+#include "spicemanager_lua.inl"
 
 namespace {
     constexpr std::string_view _loggerCat = "SpiceManager";
@@ -63,8 +66,6 @@ namespace {
         }
     }
 } // namespace
-
-#include "spicemanager_lua.inl"
 
 namespace openspace {
 
@@ -485,7 +486,7 @@ std::vector<std::pair<int, std::string>> SpiceManager::spiceBodies(
 }
 
 bool SpiceManager::hasValue(int naifId, const std::string& item) const {
-    return bodfnd_c(naifId, item.c_str());
+    return bodfnd_c(naifId, item.c_str()) == SPICETRUE;
 }
 
 bool SpiceManager::hasValue(const std::string& body, const std::string& item) const {
@@ -515,7 +516,7 @@ bool SpiceManager::hasNaifId(const std::string& body) const {
     SpiceInt id = 0;
     bods2c_c(body.c_str(), &id, &success);
     reset_c();
-    return success;
+    return success == SPICETRUE;
 }
 
 int SpiceManager::frameId(const std::string& frame) const {
@@ -1387,7 +1388,7 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
     return result;
 }
 
-void SpiceManager::loadLeapSecondsSpiceKernel() {
+std::filesystem::path SpiceManager::leapSecondKernel() {
     constexpr std::string_view Naif00012tlsSource = R"(KPL/LSK
 
 
@@ -1541,12 +1542,17 @@ DELTET/DELTA_AT        = ( 10,   @1972-JAN-1
 
 
 )";
-const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
     const std::filesystem::path file = path / "naif0012.tls";
     {
         std::ofstream f(file);
         f << Naif00012tlsSource;
     }
+    return file;
+}
+
+void SpiceManager::loadLeapSecondsSpiceKernel() {
+    std::filesystem::path file = leapSecondKernel();
     loadKernel(file);
 }
 

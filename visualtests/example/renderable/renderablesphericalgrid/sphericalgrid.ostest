@@ -1,0 +1,29 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderablesphericalgrid/sphericalgrid.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderableSphericalGrid_Example",
+        "position": [
+          -2.670862345531653,
+          0.38945474988793644,
+          -0.0034232637362737353
+        ],
+        "up": [
+          8.06120309897801e-05,
+          0.0006405490241455759,
+          0.00997913817161211
+        ],
+        "timestamp": "2025 JUL 13 12:37:37"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

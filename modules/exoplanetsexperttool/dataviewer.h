@@ -34,7 +34,7 @@
 #include <modules/exoplanetsexperttool/views/filteringview.h>
 #include <modules/exoplanetsexperttool/views/systemview.h>
 #include <openspace/properties/list/intlistproperty.h>
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
 #include <ghoul/glm.h>
 #include <memory>
 #include <optional>

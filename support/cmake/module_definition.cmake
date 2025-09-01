@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2024                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -107,6 +107,7 @@ function (handle_module_dependencies target_name module_name)
   target_precompile_headers(${library_name} PRIVATE
     [["ghoul/format.h"]]
     [["ghoul/glm.h"]]
+    [["ghoul/lua/lua_helper.h"]]
     [["ghoul/misc/assert.h"]]
     [["ghoul/misc/boolean.h"]]
     [["ghoul/misc/exception.h"]]
@@ -145,3 +146,13 @@ function (handle_module_dependencies target_name module_name)
     endforeach ()
   endif ()
 endfunction ()
+
+
+# Disables compiler warnings for the provided library
+function (disable_compiler_warnings target)
+  if (MSVC)
+    target_compile_options(${target} PRIVATE "/W0")
+  else ()
+    target_compile_options(${target} PRIVATE "-w")
+  endif ()
+endfunction()

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -194,14 +194,14 @@ void NavigationHandler::setInterpolationTime(float durationInSeconds) {
     _orbitalNavigator.setRetargetInterpolationTime(durationInSeconds);
 }
 
-void NavigationHandler::triggerFadeToTransition(const std::string& transitionScript,
+void NavigationHandler::triggerFadeToTransition(std::string transitionScript,
                                                 std::optional<float> fadeDuration)
 {
     const float duration = fadeDuration.value_or(_jumpToFadeDuration);
 
     std::string script;
     if (duration < std::numeric_limits<float>::epsilon()) {
-        script = transitionScript;
+        script = std::move(transitionScript);
     }
     else {
         const std::string onArrivalScript = std::format(
@@ -807,9 +807,23 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             codegen::lua::ListAllJoysticks,
             codegen::lua::TargetNextInterestingAnchor,
             codegen::lua::TargetPreviousInterestingAnchor,
+            codegen::lua::SetFocus,
             codegen::lua::DistanceToFocus,
             codegen::lua::DistanceToFocusBoundingSphere,
-            codegen::lua::DistanceToFocusInteractionSphere
+            codegen::lua::DistanceToFocusInteractionSphere,
+            codegen::lua::JumpToGeo,
+            codegen::lua::FlyToGeo2,
+            codegen::lua::FlyToGeo,
+            codegen::lua::LocalPositionFromGeo,
+            codegen::lua::IsFlying,
+            codegen::lua::FlyTo,
+            codegen::lua::FlyToHeight,
+            codegen::lua::FlyToNavigationState,
+            codegen::lua::ZoomToFocus,
+            codegen::lua::ZoomToDistance,
+            codegen::lua::ZoomToDistanceRelative,
+            codegen::lua::JumpTo,
+            codegen::lua::JumpToNavigationState
         }
     };
 }

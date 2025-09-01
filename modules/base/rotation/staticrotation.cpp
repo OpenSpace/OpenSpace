@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -84,24 +84,22 @@ documentation::Documentation StaticRotation::Documentation() {
     return codegen::doc<Parameters>("base_transform_rotation_static");
 }
 
-StaticRotation::StaticRotation()
-    : _eulerRotation(
+StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary)
+    : Rotation(dictionary)
+    , _eulerRotation(
         RotationInfo,
         glm::vec3(0.f),
         glm::vec3(-glm::pi<float>()),
         glm::vec3(glm::pi<float>())
     )
 {
-    addProperty(_eulerRotation);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
     _eulerRotation.onChange([this]() {
         _matrixIsDirty = true;
         requireUpdate();
     });
-    _type = "StaticRotation";
-}
-
-StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary) : StaticRotation() {
-    const Parameters p = codegen::bake<Parameters>(dictionary);
+    addProperty(_eulerRotation);
 
     if (std::holds_alternative<glm::dvec3>(p.rotation)) {
         _eulerRotation = std::get<glm::dvec3>(p.rotation);
@@ -116,11 +114,10 @@ StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary) : StaticRota
         _eulerRotation = rotationMatrixToEulerAngles(std::get<glm::dmat3>(p.rotation));
     }
     _matrixIsDirty = true;
-    _type = "StaticRotation";
 }
 
 glm::dmat3 StaticRotation::matrix(const UpdateData&) const {
-    if (_matrixIsDirty) {
+    if (_matrixIsDirty) [[unlikely]] {
         _cachedMatrix = glm::mat3_cast(glm::quat(_eulerRotation.value()));
         _matrixIsDirty = false;
     }

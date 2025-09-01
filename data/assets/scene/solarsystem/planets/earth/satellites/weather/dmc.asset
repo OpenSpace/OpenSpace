@@ -28,7 +28,8 @@ local DisasterMonitoringConstellation = {
   Tag = { "earth_satellites" },
   GUI = {
     Name = "Disaster Monitoring",
-    Path = "/Solar System/Planets/Earth/Satellites"
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
   }
 }
 

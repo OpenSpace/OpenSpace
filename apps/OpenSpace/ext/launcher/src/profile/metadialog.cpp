@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -68,28 +68,34 @@ void MetaDialog::createWidgets() {
     QBoxLayout* layout = new QVBoxLayout(this);
     layout->addWidget(new QLabel("Name"));
     _nameEdit = new QLineEdit;
+    _nameEdit->setAccessibleName("Profile name");
     layout->addWidget(_nameEdit);
 
     layout->addWidget(new QLabel("Version"));
     _versionEdit = new QLineEdit;
+    _versionEdit->setAccessibleName("Profile version number");
     layout->addWidget(_versionEdit);
 
     layout->addWidget(new QLabel("Description"));
     _descriptionEdit = new QTextEdit;
     _descriptionEdit->setAcceptRichText(false);
     _descriptionEdit->setTabChangesFocus(true);
+    _descriptionEdit->setAccessibleName("Profile description");
     layout->addWidget(_descriptionEdit);
 
     layout->addWidget(new QLabel("Author"));
     _authorEdit = new QLineEdit;
+    _authorEdit->setAccessibleName("Profile author name");
     layout->addWidget(_authorEdit);
 
     layout->addWidget(new QLabel("URL"));
     _urlEdit = new QLineEdit;
+    _urlEdit->setAccessibleName("Profile url");
     layout->addWidget(_urlEdit);
 
     layout->addWidget(new QLabel("License"));
     _licenseEdit = new QLineEdit;
+    _licenseEdit->setAccessibleName("Profile license");
     layout->addWidget(_licenseEdit);
 
     layout->addWidget(new Line);

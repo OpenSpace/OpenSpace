@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,8 @@
 #ifndef __OPENSPACE_CORE___NAVIGATIONHANDLER___H__
 #define __OPENSPACE_CORE___NAVIGATIONHANDLER___H__
 
-#include <openspace/documentation/documentation.h>
+#include <openspace/properties/propertyowner.h>
+
 #include <openspace/interaction/joystickcamerastates.h>
 #include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/interaction/mouseinputstate.h>
@@ -34,13 +35,10 @@
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/navigation/pathnavigator.h>
-#include <openspace/properties/propertyowner.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/scene/profile.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
-#include <optional>
 
 namespace openspace {
     class Camera;
@@ -52,12 +50,12 @@ namespace openspace::scripting { struct LuaLibrary; }
 namespace openspace::interaction {
 
 struct JoystickInputStates;
-struct NavigationState;
-struct NodeCameraStateSpec;
-struct WebsocketInputStates;
 class KeyframeNavigator;
+struct NavigationState;
 class OrbitalNavigator;
 class PathNavigator;
+struct NodeCameraStateSpec;
+struct WebsocketInputStates;
 
 class NavigationHandler : public properties::PropertyOwner {
 public:
@@ -176,7 +174,7 @@ public:
      * \param fadeDuration An optional duration for the fading. If unspecified, use the
      *                     JumpToFadeDuration property
      */
-    void triggerFadeToTransition(const std::string& transitionScript,
+    void triggerFadeToTransition(std::string transitionScript,
         std::optional<float> fadeDuration = std::nullopt);
 
     /**

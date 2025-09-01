@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -298,9 +298,9 @@ documentation::Documentation RenderableFluxNodes::Documentation() {
 RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _earthdistGroup({ "Earthfocus" })
-    , _goesEnergyBins(GoesEnergyBinsInfo, properties::OptionProperty::DisplayType::Radio)
+    , _goesEnergyBins(GoesEnergyBinsInfo)
     , _styleGroup({ "Style" })
-    , _colorMode(ColorModeInfo, properties::OptionProperty::DisplayType::Radio)
+    , _colorMode(ColorModeInfo)
     , _streamColor(
         StreamColorInfo,
         glm::vec4(0.96f, 0.88f, 0.8f, 1.f),
@@ -311,7 +311,7 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
     , _colorTableRange(colorTableRangeInfo, { -2.f, 4.f }, { -8.f, -8.f }, { 8.f, 8.f })
     , _fluxColorAlpha(FluxColorAlphaInfo, 1.f, 0.f, 1.f)
     , _streamGroup({ "Streams" })
-    , _scalingMethod(ScalingmethodInfo, properties::OptionProperty::DisplayType::Radio)
+    , _scalingMethod(ScalingmethodInfo)
     , _nodesAmountGroup({ "NodeGroup" })
     , _nodeSize(NodeSizeInfo, 2.f, 1.f, 10.f)
     , _distanceThreshold(DistanceThresholdInfo, 0.f, 0.f, 1.f)
@@ -323,7 +323,7 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
     , _filteringLower(FilteringInfo, 0.f, 0.f, 5.f)
     , _filteringUpper(FilteringUpperInfo, 5.f, 0.f, 5.f)
     , _amountofNodes(AmountofNodesInfo, 1, 1, 100)
-    , _nodeskipMethod(NodeskipMethodInfo, properties::OptionProperty::DisplayType::Radio)
+    , _nodeskipMethod(NodeskipMethodInfo)
     , _defaultNodeSkip(DefaultNodeSkipInfo, 1, 1, 100)
     , _fluxNodeskipThreshold(FluxNodeskipThresholdInfo, 0, -20, 10)
     , _earthNodeSkip(EarthNodeSkipInfo, 1, 1, 100)
@@ -391,6 +391,7 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
         LINFO("Assuming default value 1, meaning Emin03");
         _goesEnergyBins.setValue(1);
     }
+    setupProperties();
 }
 
 void RenderableFluxNodes::initialize() {
@@ -420,7 +421,6 @@ void RenderableFluxNodes::initializeGL() {
 
     // Needed for alpha transparency
     setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
-    setupProperties();
 }
 
 void RenderableFluxNodes::definePropertyCallbackFunctions() {
@@ -593,7 +593,7 @@ void RenderableFluxNodes::populateStartTimes() {
             break;
         }
 
-        const std::string f = filePath.string();
+        const std::string f = filePath.filename().string();
         // if no file extention but word "time" in file name
         if (f.find("time") != std::string::npos && f.find('.') == std::string::npos) {
             timeFile = filePath;

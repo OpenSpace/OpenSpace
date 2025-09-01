@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -147,6 +147,45 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    void saveCachedFile(const std::filesystem::path& file,
+                        const std::vector<glm::vec3>& positions,
+                        const std::vector<glm::vec3>& colors, int64_t nPoints,
+                        float pointsRatio)
+    {
+        std::ofstream fileStream(file, std::ofstream::binary);
+
+        if (!fileStream.good()) {
+            LERROR(std::format("Error opening file '{}' for save cache file", file));
+            return;
+        }
+
+        fileStream.write(
+            reinterpret_cast<const char*>(&CurrentCacheVersion),
+            sizeof(int8_t)
+        );
+        fileStream.write(reinterpret_cast<const char*>(&nPoints), sizeof(int64_t));
+        fileStream.write(reinterpret_cast<const char*>(&pointsRatio), sizeof(float));
+        uint64_t nPositions = positions.size();
+        fileStream.write(reinterpret_cast<const char*>(&nPositions), sizeof(uint64_t));
+        fileStream.write(
+            reinterpret_cast<const char*>(positions.data()),
+            positions.size() * sizeof(glm::vec3)
+        );
+        uint64_t nColors = colors.size();
+        fileStream.write(reinterpret_cast<const char*>(&nColors), sizeof(uint64_t));
+        fileStream.write(
+            reinterpret_cast<const char*>(colors.data()),
+            colors.size() * sizeof(glm::vec3)
+        );
+    }
+
+    float safeLength(const glm::vec3& vector) {
+        const float maxComponent = std::max(
+            std::max(std::abs(vector.x), std::abs(vector.y)), std::abs(vector.z)
+        );
+        return glm::length(vector / maxComponent) * maxComponent;
+    }
+
     struct [[codegen::Dictionary(RenderableGalaxy)]] Parameters {
         // [[codegen::verbatim(VolumeRenderingEnabledInfo.description)]]
         std::optional<bool> volumeRenderingEnabled;
@@ -200,46 +239,6 @@ namespace {
         Points points;
     };
 #include "renderablegalaxy_codegen.cpp"
-
-
-    void saveCachedFile(const std::filesystem::path& file,
-                        const std::vector<glm::vec3>& positions,
-                        const std::vector<glm::vec3>& colors, int64_t nPoints,
-                        float pointsRatio)
-    {
-        std::ofstream fileStream(file, std::ofstream::binary);
-
-        if (!fileStream.good()) {
-            LERROR(std::format("Error opening file '{}' for save cache file", file));
-            return;
-        }
-
-        fileStream.write(
-            reinterpret_cast<const char*>(&CurrentCacheVersion),
-            sizeof(int8_t)
-        );
-        fileStream.write(reinterpret_cast<const char*>(&nPoints), sizeof(int64_t));
-        fileStream.write(reinterpret_cast<const char*>(&pointsRatio), sizeof(float));
-        uint64_t nPositions = positions.size();
-        fileStream.write(reinterpret_cast<const char*>(&nPositions), sizeof(uint64_t));
-        fileStream.write(
-            reinterpret_cast<const char*>(positions.data()),
-            positions.size() * sizeof(glm::vec3)
-        );
-        uint64_t nColors = colors.size();
-        fileStream.write(reinterpret_cast<const char*>(&nColors), sizeof(uint64_t));
-        fileStream.write(
-            reinterpret_cast<const char*>(colors.data()),
-            colors.size() * sizeof(glm::vec3)
-        );
-    }
-
-    float safeLength(const glm::vec3& vector) {
-        const float maxComponent = std::max(
-            std::max(std::abs(vector.x), std::abs(vector.y)), std::abs(vector.z)
-        );
-        return glm::length(vector / maxComponent) * maxComponent;
-    }
 } // namespace
 
 namespace openspace {
@@ -255,10 +254,7 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     , _stepSize(StepSizeInfo, 0.01f, 0.001f, 0.05f, 0.001f)
     , _absorptionMultiply(AbsorptionMultiplyInfo, 40.f, 0.f, 200.f)
     , _emissionMultiply(EmissionMultiplyInfo, 200.f, 0.f, 1000.f)
-    , _starRenderingMethod(
-        StarRenderingMethodInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _starRenderingMethod(StarRenderingMethodInfo)
     , _enabledPointsRatio(EnabledPointsRatioInfo, 0.5f, 0.01f, 1.f)
     , _rotation(
         RotationInfo,
@@ -577,7 +573,7 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
             opacityCoefficient = 0;
         }
 
-        _opacityCoefficient = opacityCoefficient;
+        _opacityCoefficient = opacityCoefficient * opacity();
         ghoul_assert(
             _opacityCoefficient >= 0.f && _opacityCoefficient <= 1.f,
             "Opacity coefficient was not between 0 and 1"

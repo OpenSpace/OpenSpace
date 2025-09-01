@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,20 +51,28 @@ namespace {
         progress.append("|");
         return progress;
     }
+
+    // This `DashboardItem` shows information about the currently active mission. This
+    // includes information about the currently active mission phase, the next phase, and
+    // all subphases of the currently active phase.
+    struct [[codegen::Dictionary(DashboardItemMission)]] Parameters {};
+#include "dashboarditemmission_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItemMission::Documentation() {
-    documentation::Documentation doc = DashboardTextItem::Documentation();
-    doc.name = "DashboardItemMission";
-    doc.id = "base_dashboarditem_mission";
-    return doc;
+    return codegen::doc<Parameters>(
+        "base_dashboarditem_mission",
+        DashboardTextItem::Documentation()
+    );
 }
 
 DashboardItemMission::DashboardItemMission(const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary, 15.f)
 {}
+
+void DashboardItemMission::update() {}
 
 void DashboardItemMission::render(glm::vec2& penPosition) {
     ZoneScoped;
@@ -118,6 +126,9 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
         );
     }
 
+    // Add spacing
+    penPosition.y -= _font->height();
+
     constexpr bool ShowAllPhases = false;
 
     using PhaseWithDepth = std::pair<const MissionPhase*, int>;
@@ -139,6 +150,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
                 1.0 - remaining / phase->timeRange().duration()
             );
             const std::string progress = progressToStr(25, t);
+            penPosition.y -= _font->height();
             RenderFont(
                 *_font,
                 penPosition,
@@ -148,7 +160,6 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
                 ),
                 currentMissionColor
             );
-            penPosition.y -= _font->height();
         }
         else {
             if (!phase->name().empty()) {
@@ -175,13 +186,6 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
     }
 
     penPosition.y += _font->height();
-}
-
-glm::vec2 DashboardItemMission::size() const {
-    ZoneScoped;
-
-    // @TODO fix this up ---abock
-    return { 0.f, 0.f };
 }
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,7 @@ class Translation;
  */
 class RenderableNodeArrow : public Renderable {
 public:
-    RenderableNodeArrow(const ghoul::Dictionary& dictionary);
+    explicit RenderableNodeArrow(const ghoul::Dictionary& dictionary);
     ~RenderableNodeArrow() override = default;
 
     void initializeGL() override;
@@ -60,6 +60,7 @@ public:
 private:
     struct Shading : properties::PropertyOwner {
         Shading();
+
         properties::BoolProperty enabled;
         properties::FloatProperty ambientIntensity;
         properties::FloatProperty diffuseIntensity;
@@ -70,7 +71,7 @@ private:
 
     Shading _shading;
 
-    ghoul::opengl::ProgramObject* _shaderProgram;
+    ghoul::opengl::ProgramObject* _shaderProgram = nullptr;
 
     properties::StringProperty _start;
     properties::StringProperty _end;

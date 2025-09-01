@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,6 +50,7 @@ namespace geos_nlohmann = nlohmann;
 #include <geos/geom/Geometry.h>
 #include <geos/io/GeoJSON.h>
 #include <geos/io/GeoJSONReader.h>
+#include <geos/operation/valid/MakeValid.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "GeoJsonComponent";
@@ -299,10 +300,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     )
     , _pointSizeScale(PointSizeScaleInfo, 1.f, 0.01f, 100.f)
     , _lineWidthScale(LineWidthScaleInfo, 1.f, 0.01f, 10.f)
-    , _pointRenderModeOption(
-        PointRenderModeInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _pointRenderModeOption(PointRenderModeInfo)
     , _drawWireframe(DrawWireframeInfo, false)
     , _preventUpdatesFromHeightMap(PreventHeightUpdateInfo, false)
     , _forceUpdateHeightData(ForceUpdateHeightDataInfo)
@@ -363,7 +361,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
 
     _defaultProperties.pointTexture.onChange([this]() {
         const std::filesystem::path texturePath = _defaultProperties.pointTexture.value();
-        // Not ethat an empty texture is also valid => use default texture from module
+        // Note that an empty texture is also valid => use default texture from module
         if (std::filesystem::is_regular_file(texturePath) || texturePath.empty()) {
             _textureIsDirty = true;
         }
@@ -378,9 +376,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     _defaultProperties.tessellation.enabled.onChange([this]() { _dataIsDirty = true; });
     _defaultProperties.tessellation.useLevel.onChange([this]() { _dataIsDirty = true; });
     _defaultProperties.tessellation.level.onChange([this]() { _dataIsDirty = true; });
-    _defaultProperties.tessellation.distance.onChange([this]() {
-        _dataIsDirty = true;
-    });
+    _defaultProperties.tessellation.distance.onChange([this]() { _dataIsDirty = true; });
 
     _forceUpdateHeightData.onChange([this]() {
         for (GlobeGeometryFeature& f : _geometryFeatures) {
@@ -498,8 +494,8 @@ void GeoJsonComponent::deinitializeGL() {
 
 bool GeoJsonComponent::isReady() const {
     const bool isReady = std::all_of(
-        std::begin(_geometryFeatures),
-        std::end(_geometryFeatures),
+        _geometryFeatures.cbegin(),
+        _geometryFeatures.cend(),
         std::mem_fn(&GlobeGeometryFeature::isReady)
     );
     return isReady && _linesAndPolygonsProgram && _pointsProgram;
@@ -567,7 +563,7 @@ void GeoJsonComponent::update() {
         return;
     }
 
-    const glm::vec3 offsets = glm::vec3(_latLongOffset.value(), _heightOffset);
+    const glm::vec3 offsets = glm::vec3(_latLongOffset.value(), _heightOffset.value());
 
     for (size_t i = 0; i < _geometryFeatures.size(); i++) {
         if (!_features[i]->enabled) {
@@ -575,11 +571,11 @@ void GeoJsonComponent::update() {
         }
         GlobeGeometryFeature& g = _geometryFeatures[i];
 
-        if (_dataIsDirty || _heightOffsetIsDirty) {
+        if (_dataIsDirty || _heightOffsetIsDirty) [[unlikely]] {
             g.setOffsets(offsets);
         }
 
-        if (_textureIsDirty) {
+        if (_textureIsDirty) [[unlikely]] {
             g.updateTexture();
         }
 
@@ -591,7 +587,7 @@ void GeoJsonComponent::update() {
 }
 
 void GeoJsonComponent::readFile() {
-    std::ifstream file(_geoJsonFile);
+    std::ifstream file = std::ifstream(_geoJsonFile);
 
     if (!file.good()) {
         LERROR(std::format("Failed to open GeoJSON file: {}", _geoJsonFile.value()));
@@ -604,6 +600,14 @@ void GeoJsonComponent::readFile() {
         std::istreambuf_iterator<char>(file),
         std::istreambuf_iterator<char>()
     );
+
+    // For the loading, we want to assume that the current working directory is where the
+    // GeoJSON file is located
+    const std::filesystem::path cwd = std::filesystem::current_path();
+    std::filesystem::path jsonDir =
+        std::filesystem::path(_geoJsonFile.value()).parent_path();
+    std::filesystem::current_path(jsonDir);
+    defer { std::filesystem::current_path(cwd); };
 
     // Parse GeoJSON string into GeoJSON objects
     try {
@@ -637,8 +641,18 @@ void GeoJsonComponent::readFile() {
 void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& feature,
                                           int indexInFile
 ) {
-    // Read the geometry
-    const geos::geom::Geometry* geom = feature.getGeometry();
+    const geos::geom::Geometry* nonValidatedGeometry = feature.getGeometry();
+
+    if (!nonValidatedGeometry->isValid()) {
+        LWARNING(std::format(
+            "Feature {} in GeoJson file '{}' has invalid geometry (for example due to "
+            "self-intersections or other non-simple geometry). If possible, the feature "
+            "will be split into separate features with valid geometry. However, note "
+            "that this may introduce artifacts.", indexInFile, _geoJsonFile.value()
+        ));
+    }
+    geos::operation::valid::MakeValid makeValid;
+    std::unique_ptr<geos::geom::Geometry> geom = makeValid.build(nonValidatedGeometry);
 
     // Read the properties
     GeoJsonOverrideProperties propsFromFile = propsFromGeoJson(feature);
@@ -654,7 +668,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
     }
     else if (geom->isPuntal()) {
         // If points, handle all point features as one feature, even multi-points
-        geomsToAdd = { geom };
+        geomsToAdd = { geom.get()};
     }
     else {
         const size_t nGeom = geom->getNumGeometries();
@@ -835,7 +849,7 @@ void GeoJsonComponent::flyToFeature(std::optional<int> index) const {
     float lon = centroidLon + _latLongOffset.value().y;
 
     const std::string script = std::format(
-        "openspace.globebrowsing.flyToGeo([[{}]], {}, {}, {})",
+        "openspace.navigation.flyToGeo([[{}]], {}, {}, {})",
         _globeNode.owner()->identifier(), lat, lon, d
     );
     global::scriptEngine->queueScript(script);

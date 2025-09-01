@@ -1,4 +1,3 @@
-asset.require("./debris/debris_asat")
 asset.require("./debris/debris_breezem")
 asset.require("./debris/debris_fengyun")
 asset.require("./debris/debris_iridium33")

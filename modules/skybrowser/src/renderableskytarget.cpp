@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -236,7 +236,8 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
     cameraOrientedRotation[1] = glm::dvec4(_upVector, 0.0);
     cameraOrientedRotation[2] = glm::dvec4(normal, 0.0);
 
-    const glm::dmat4 rotationTransform = _billboard ?
+    const glm::dmat4 rotationTransform =
+        _renderOption.value() != OrientationOption::FixedRotation ?
         cameraOrientedRotation :
         glm::dmat4(data.modelTransform.rotation);
 

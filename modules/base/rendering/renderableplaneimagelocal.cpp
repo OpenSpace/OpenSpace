@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,6 +45,8 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // A RenderablePlaneImageLocal creates a textured 3D plane, where the texture is
+    // provided by a local file on disk.
     struct [[codegen::Dictionary(RenderablePlaneImageLocal)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string texture;
@@ -118,10 +120,6 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
     });
 }
 
-bool RenderablePlaneImageLocal::isReady() const {
-    return RenderablePlane::isReady();
-}
-
 void RenderablePlaneImageLocal::initializeGL() {
     RenderablePlane::initializeGL();
 
@@ -146,7 +144,7 @@ void RenderablePlaneImageLocal::update(const UpdateData& data) {
 
     RenderablePlane::update(data);
 
-    if (_textureIsDirty) {
+    if (_textureIsDirty) [[unlikely]] {
         loadTexture();
         _textureIsDirty = false;
     }
@@ -162,7 +160,7 @@ void RenderablePlaneImageLocal::loadTexture() {
 
         _texture = BaseModule::TextureManager.request(
             std::to_string(hash),
-            [path = _texturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
+            [path = _texturePath.value()]() -> std::unique_ptr<ghoul::opengl::Texture> {
                 std::unique_ptr<ghoul::opengl::Texture> texture =
                     ghoul::io::TextureReader::ref().loadTexture(absPath(path), 2);
 

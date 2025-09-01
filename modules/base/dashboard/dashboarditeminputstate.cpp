@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -69,7 +69,12 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    struct [[codegen::Dictionary(DashboardItemPropertyValue)]] Parameters {
+    // This `DashboardItem` shows the current state of the different methods to provide
+    // user input: keyboard, mouse, and/or joystick.
+    //
+    // Each input method has the ability to be selectively disabled, meaning that all
+    // inputs from that input method are ignored by the system entirely.
+    struct [[codegen::Dictionary(DashboardItemInputState)]] Parameters {
         // [[codegen::verbatim(ShowWhenEnabledInfo.description)]]
         std::optional<bool> showWhenEnabled;
 
@@ -123,7 +128,7 @@ DashboardItemInputState::DashboardItemInputState(const ghoul::Dictionary& dictio
     addProperty(_showJoystick);
 }
 
-void DashboardItemInputState::render(glm::vec2& penPosition) {
+void DashboardItemInputState::update() {
     ZoneScoped;
 
     std::vector<std::string> text;
@@ -166,63 +171,7 @@ void DashboardItemInputState::render(glm::vec2& penPosition) {
         }
     }
 
-    if (!text.empty()) {
-        penPosition.y -= _font->height();
-        const std::string t = ghoul::join(std::move(text), "\n");
-        RenderFont(*_font, penPosition, t);
-    }
-}
-
-glm::vec2 DashboardItemInputState::size() const {
-    ZoneScoped;
-
-    std::vector<std::string> text;
-    if (_showKeyboard) {
-        if (global::navigationHandler->disabledKeybindings()) {
-            if (_showWhenDisabled) {
-                text.emplace_back("Keyboard shortcuts disabled");
-            }
-        }
-        else {
-            if (_showWhenEnabled) {
-                text.emplace_back("Keyboard shortcuts enabled");
-            }
-        }
-    }
-
-    if (_showMouse) {
-        if (global::navigationHandler->disabledMouse()) {
-            if (_showWhenDisabled) {
-                text.emplace_back("Mouse input disabled");
-            }
-        }
-        else {
-            if (_showWhenEnabled) {
-                text.emplace_back("Mouse input disabled");
-            }
-        }
-    }
-
-    if (_showJoystick) {
-        if (global::navigationHandler->disabledJoystick()) {
-            if (_showWhenDisabled) {
-                text.emplace_back("Joystick input disabled");
-            }
-        }
-        else {
-            if (_showWhenEnabled) {
-                text.emplace_back("Joystick input disabled");
-            }
-        }
-    }
-
-    if (!text.empty()) {
-        const std::string t = ghoul::join(std::move(text), "\n");
-        return _font->boundingBox(t);
-    }
-    else {
-        return glm::vec2(0.f, 0.f);
-    }
+    _buffer = ghoul::join(std::move(text), "\n");
 }
 
 } // namespace openspace

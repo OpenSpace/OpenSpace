@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,7 @@
 #include <modules/iswa/util/dataprocessorjson.h>
 
 #include <openspace/json.h>
-#include <openspace/properties/selectionproperty.h>
+#include <openspace/properties/misc/selectionproperty.h>
 #include <openspace/util/histogram.h>
 
 using json = nlohmann::json;
@@ -84,7 +84,7 @@ void DataProcessorJson::addDataValues(const std::string& data,
                 const int colsize = static_cast<int>(col.size());
 
                 for (int x = 0; x < colsize; ++x) {
-                    const float value = col.at(x);
+                    const float value = col.at(x).get<float>();
                     optionValues[i].push_back(value);
                     _min[i] = std::min(_min[i], value);
                     _max[i] = std::max(_max[i], value);
@@ -131,7 +131,7 @@ std::vector<float*> DataProcessorJson::processData(const std::string& data,
             const int colsize = static_cast<int>(col.size());
 
             for (int x = 0; x < colsize; ++x) {
-                const float value = col.at(x);
+                const float value = col.at(x).get<float>();
                 const int i = x + y * colsize;
 
                 dataOptions[option][i] = processDataPoint(value, option);

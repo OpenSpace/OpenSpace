@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,15 +54,10 @@ public:
     bool isReady() const;
 
     void addGeoJsonLayer(const ghoul::Dictionary& layerDict);
-    //void addGeoJsonLayer(const std::string& filePath); // TODO: just add from file
     void deleteLayer(const std::string& layerIdentifier);
 
     void update();
     void render(const RenderData& data);
-
-    //void onChange(std::function<void(Layer* l)> callback);
-
-    static documentation::Documentation Documentation();
 
 private:
     std::vector<std::unique_ptr<GeoJsonComponent>> _geoJsonObjects;

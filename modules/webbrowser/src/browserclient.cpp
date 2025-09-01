@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,6 +33,8 @@
 
 namespace openspace {
 
+bool BrowserClient::_hasFocus = false; // Define the static member variable
+
 BrowserClient::BrowserClient(WebRenderHandler* handler,
                              WebKeyboardHandler* keyboardHandler)
     : _renderHandler(handler)
@@ -46,6 +48,8 @@ BrowserClient::BrowserClient(WebRenderHandler* handler,
     _requestHandler = browserLauncher;
     _contextMenuHandler = new BrowserClient::NoContextMenuHandler;
     _displayHandler = new BrowserClient::DisplayHandler;
+    _loadHandler = new BrowserClient::LoadHandler;
+    _focusHandler = new BrowserClient::FocusHandler;
 }
 
 CefRefPtr<CefContextMenuHandler> BrowserClient::GetContextMenuHandler() {
@@ -72,6 +76,14 @@ CefRefPtr<CefDisplayHandler> BrowserClient::GetDisplayHandler() {
     return _displayHandler;
 }
 
+CefRefPtr<CefLoadHandler> BrowserClient::GetLoadHandler() {
+    return _loadHandler;
+}
+
+CefRefPtr<CefFocusHandler> BrowserClient::GetFocusHandler() {
+    return _focusHandler;
+}
+
 bool BrowserClient::NoContextMenuHandler::RunContextMenu(CefRefPtr<CefBrowser>,
                                                          CefRefPtr<CefFrame>,
                                                          CefRefPtr<CefContextMenuParams>,
@@ -82,10 +94,27 @@ bool BrowserClient::NoContextMenuHandler::RunContextMenu(CefRefPtr<CefBrowser>,
     return true;
 }
 
-bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser> browser,
-                                                  CefCursorHandle,
-                                                  cef_cursor_type_t type,
-                                                  const CefCursorInfo&)
+void BrowserClient::FocusHandler::OnTakeFocus(CefRefPtr<CefBrowser>, bool) {
+    _hasFocus = false;
+}
+
+bool BrowserClient::FocusHandler::OnSetFocus(CefRefPtr<CefBrowser>, FocusSource) {
+    _hasFocus = true;
+    return false;
+}
+
+void BrowserClient::LoadHandler::OnLoadEnd(CefRefPtr<CefBrowser> browser,
+                                           CefRefPtr<CefFrame>, int)
+{
+    // Focus status can be lost. Try to restore it
+    if (_hasFocus && browser && browser->GetHost()) {
+        browser->GetHost()->SetFocus(true);
+    }
+}
+
+bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser>, CefCursorHandle,
+                                                   cef_cursor_type_t type,
+                                                   const CefCursorInfo&)
 {
     WindowDelegate::Cursor newCursor;
     switch (type) {
@@ -129,6 +158,13 @@ bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser> browser
         case cef_cursor_type_t::CT_NOTALLOWED:
             newCursor = WindowDelegate::Cursor::NotAllowed;
             break;
+        case cef_cursor_type_t::CT_GRAB:
+        case cef_cursor_type_t::CT_GRABBING:
+            // There is no "grabbing" cursors in GLFW, so for now the pointing hand to
+            // make web objects that use drag-n-drop look more interactive.
+            // @TODO (emmbr, 2024-12-09) Add custom cursors for these cases
+            newCursor = WindowDelegate::Cursor::PointingHand;
+            break;
         default:
             newCursor = WindowDelegate::Cursor::Arrow;
             break;
@@ -136,4 +172,5 @@ bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser> browser
     global::windowDelegate->setMouseCursor(newCursor);
     return false;
 }
+
 } // namespace openspace

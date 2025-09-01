@@ -40,9 +40,9 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Mercury_Messenger_USGS_DEM_665m_v2_HillshadeColor")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Mercury_Messenger_USGS_DEM_665m_v2_Hillshade")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Mercury_Messenger_USGS_DEM_665m_v2_SlopeColor")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_Mercury_Messenger_USGS_DEM_665m_v2_HillshadeColor)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_Mercury_Messenger_USGS_DEM_665m_v2_Hillshade)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_Mercury_Messenger_USGS_DEM_665m_v2_SlopeColor)
 end)
 
 asset.export("Mercury_Messenger_USGS_DEM_665m_v2_HillshadeColor", treks_Mercury_Messenger_USGS_DEM_665m_v2_HillshadeColor)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -171,6 +171,39 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    void updateDistanceBasedOnRelativeValues(const std::string& nodeName,
+                                             bool useRelative,
+                                             openspace::properties::FloatProperty& prop)
+    {
+        using namespace::openspace;
+
+        SceneGraphNode* startNode = sceneGraphNode(nodeName);
+        if (!startNode) {
+            LERROR(std::format("Could not find start node '{}'", nodeName));
+            return;
+        }
+        const double boundingSphere = startNode->boundingSphere();
+
+        if (!useRelative) {
+            // Recompute distance (previous value was relative)
+            prop = static_cast<float>(prop * boundingSphere);
+            prop.setExponent(11.f);
+            prop.setMaxValue(1e20f);
+        }
+        else {
+            // Recompute distance (previous value was in meters)
+            if (boundingSphere < std::numeric_limits<double>::epsilon()) {
+                LERROR(std::format(
+                    "Start node '{}' has invalid bounding sphere", nodeName
+                ));
+                return;
+            }
+            prop = static_cast<float>(prop / boundingSphere);
+            prop.setExponent(3.f);
+            prop.setMaxValue(1000.f);
+        }
+    }
+
     // A RenderableNodeArrow can be used to create a 3D arrow pointing in the direction
     // of one scene graph node to another.
     //
@@ -217,7 +250,7 @@ namespace {
         std::optional<float> width [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(ShadingEnabledInfo.description)]]
-        std::optional<float> performShading;
+        std::optional<bool> performShading;
 
         // [[codegen::verbatim(AmbientIntensityInfo.description)]]
         std::optional<float> ambientIntensity [[codegen::greaterequal(0.f)]];
@@ -229,40 +262,6 @@ namespace {
         std::optional<float> specularIntensity [[codegen::greaterequal(0.f)]];
     };
 #include "renderablenodearrow_codegen.cpp"
-
-    void updateDistanceBasedOnRelativeValues(const std::string& nodeName,
-                                             bool useRelative,
-                                             openspace::properties::FloatProperty& prop)
-    {
-        using namespace::openspace;
-
-        SceneGraphNode* startNode = sceneGraphNode(nodeName);
-        if (!startNode) {
-            LERROR(std::format("Could not find start node '{}'", nodeName));
-            return;
-        }
-        const double boundingSphere = startNode->boundingSphere();
-
-        if (!useRelative) {
-            // Recompute distance (previous value was relative)
-            prop = static_cast<float>(prop * boundingSphere);
-            prop.setExponent(11.f);
-            prop.setMaxValue(1e20f);
-        }
-        else {
-            // Recompute distance (previous value was in meters)
-            if (boundingSphere < std::numeric_limits<double>::epsilon()) {
-                LERROR(std::format(
-                    "Start node '{}' has invalid bounding sphere", nodeName
-                ));
-                return;
-            }
-            prop = static_cast<float>(prop / boundingSphere);
-            prop.setExponent(3.f);
-            prop.setMaxValue(1000.f);
-        }
-        // @TODO (emmbr, 2022-08-22): make GUI update when min/max value is updated
-    }
 } // namespace
 
 namespace openspace {
@@ -385,7 +384,7 @@ void RenderableNodeArrow::deinitializeGL() {
 }
 
 bool RenderableNodeArrow::isReady() const {
-    return _shaderProgram;
+    return _shaderProgram != nullptr;
 }
 
 void RenderableNodeArrow::updateShapeTransforms(const RenderData& data) {
@@ -450,7 +449,7 @@ void RenderableNodeArrow::updateShapeTransforms(const RenderData& data) {
     // Create transformation matrices to reshape to size and position
     _cylinderTranslation = glm::translate(glm::dmat4(1.0), startPos);
     const glm::dvec3 cylinderScale = glm::dvec3(
-        s * glm::dvec4(_width, _width, cylinderLength, 0.0)
+        s * glm::dvec4(_width.value(), _width.value(), cylinderLength, 0.0)
     );
     _cylinderScale = glm::scale(glm::dmat4(1.0), cylinderScale);
 

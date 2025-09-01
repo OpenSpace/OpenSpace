@@ -133,7 +133,8 @@ local Trail67P = {
   },
   GUI = {
     Name = "67P Trail",
-    Path = "/Solar System/Comets/67P Churymov-Gerasimenko"
+    Path = "/Solar System/Comets/67P Churymov-Gerasimenko",
+    Focusable = false
   }
 }
 

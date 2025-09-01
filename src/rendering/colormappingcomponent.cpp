@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,34 +35,30 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Color Map Enabled",
-        "If this value is set to 'true', the provided color map is used (if one was "
-        "provided in the configuration). If no color map was provided, changing this "
-        "setting does not do anything.",
+        "Decides if the color mapping should be used or not.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
         "File",
         "Color Map File",
-        "The path to the color map file to use for coloring the points.",
+        "The path to the color map file to use. Should be a .cmap file",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ParameterInfo = {
         "Parameter",
         "Parameter",
-        "This value determines which paramenter is used for coloring the points based "
-        "on the color map. The property is set based on predefined options specified in "
-        "the asset file. When changing the parameter, the value range to used for the"
-        "mapping will also be changed. Per default, it is set to the last parameter in "
-        "the list of options.",
+        "The paramenter in the dataset to use for the color mapping. On change, the "
+        "value range to used for the mapping will also be changed.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RangeInfo = {
         "ValueRange",
         "Value Range",
-        "This value changes the range of values to be mapped with the current color map.",
+        "The range of values to use in the color mapping. The lowest value will be "
+        "mapped to the first color in the color map.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -150,30 +146,55 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This component handles settings for dynamic color mapping of data points based on
+    // the columns in a dataset. It is for example utilized by the
+    // [RenderablePointCloud](#base_renderablepointcloud) renderable type.
+    //
+    // The option for the parameters will be initialized based on the dataset used for
+    // the specific renderable. The value range will be set based on the min and max
+    // values for the respective column in the dataset, but can be manually adjusted.
+    // Per default, all columns will be loaded, but this can also be adjusted.
+    //
+    // In addition to specifying a color map (.cmap) file and changing the parameter used
+    // for determining the color, this component includes features such as:
+    //
+    //   - Inverting the color map
+    //
+    //   - Handling colors for missing data values (or hiding these data points)
+    //
+    //   - Handling colors for values outside the provided range
+    //
+    //   - Predefining which parameters to load from the dataset, and the range of values
+    // to use for color mapping
     struct [[codegen::Dictionary(ColorMappingComponent)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
 
         // [[codegen::verbatim(FileInfo.description)]]
-        std::optional<std::filesystem::path> file;
+        std::filesystem::path file;
 
         struct ColorMapParameter {
-            // The key for the data variable to use for color
+            // The key for the data variable to use for color.
             std::string key;
 
             // An optional value range to use for coloring when this option is selected.
             // If not included, the range will be set from the min and max value in the
-            // dataset
+            // dataset.
             std::optional<glm::vec2> range;
         };
-        // A list of options for color parameters to use for color mapping, that will
-        // appear as options in the drop-down menu in the user interface. Per default,
-        // the first option in the list is selected. Each option is a table in the form
-        // { Key = \"theKey\", Range = {min, max} }, where the value range is optional.
-        // If added, this range will automatically be set when the option is selected
+        // A list of options for parameters to use for color mapping that will appear
+        // as options in the drop-down menu in the user interface. Per default, the
+        // first option in the list is selected.
+        //
+        // Each option is a table in the form
+        // `{ Key = \"dataColumn\", Range = {min, max} }`, where the `Range` is optional.
+        // The specified range (or the min/max values for this data column) will be used
+        // for color mapping when the option is selected.
         std::optional<std::vector<ColorMapParameter>> parameterOptions;
 
-        // [[codegen::verbatim(ParameterInfo.description)]]
+        // The default parameter to use for the color map. The options for this parameter
+        // are either loaded from the dataset or provided in the `ParameterOptions` list.
+        // This value can be changed dynamically in the user interface.
         std::optional<std::string> parameter;
 
         // [[codegen::verbatim(RangeInfo.description)]]
@@ -216,7 +237,7 @@ ColorMappingComponent::ColorMappingComponent()
     : properties::PropertyOwner({ "ColorMapping", "Color Mapping", "" })
     , enabled(EnabledInfo, true)
     , invert(InvertColorMapInfo, false)
-    , dataColumn(ParameterInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , dataColumn(ParameterInfo)
     , colorMapFile(FileInfo)
     , valueRange(RangeInfo, glm::vec2(0.f))
     , setRangeFromData(SetRangeFromDataInfo)
@@ -318,9 +339,7 @@ ColorMappingComponent::ColorMappingComponent(const ghoul::Dictionary& dictionary
         _hasBelowRangeColorInAsset = true;
     }
 
-    if (p.file.has_value()) {
-        colorMapFile = p.file->string();
-    }
+    colorMapFile = p.file.string();
 
     invert = p.invert.value_or(invert);
 }

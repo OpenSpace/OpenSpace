@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
+#include <openspace/util/geodetic.h>
 #include <ghoul/glm.h>
 
 TEST_CASE("LatLonPatch: findCenterControlPoint", "[latlonpatch]") {
@@ -35,6 +36,7 @@ TEST_CASE("LatLonPatch: findCenterControlPoint", "[latlonpatch]") {
 }
 
 TEST_CASE("LatLonPatch: Find Closest Corner", "[latlonpatch]") {
+    using namespace openspace;
     using namespace openspace::globebrowsing;
 
     constexpr float piOver4 = glm::pi<float>() / 4.f;
@@ -53,6 +55,7 @@ TEST_CASE("LatLonPatch: Find Closest Corner", "[latlonpatch]") {
 }
 
 TEST_CASE("LatLonPatch: Find Closest Corner 2", "[latlonpatch]") {
+    using namespace openspace;
     using namespace openspace::globebrowsing;
 
     constexpr float piOver6 = glm::pi<float>() / 4.f;

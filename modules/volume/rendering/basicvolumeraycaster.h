@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -97,7 +97,7 @@ private:
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
     std::shared_ptr<openspace::TransferFunction> _transferFunction;
     BoxGeometry _boundingBox;
-    VolumeGridType _gridType;
+    VolumeGridType _gridType = VolumeGridType::Cartesian;
     glm::mat4 _modelTransform = glm::mat4(1.f);
     float _brightness = 1.f;
     float _rNormalization = 0.f;

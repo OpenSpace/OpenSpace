@@ -1,0 +1,128 @@
+local transforms = asset.require("scene/solarsystem/heliosphere/transforms_heliosphere")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+
+
+
+-- Slightly bigger size than the sphere radius to allow grid lines to not clip into sphere
+-- since the lines themselfs are not curved
+local gridSizeRadius = 7.0E8
+
+local CarringtonPrimeMeridian = {
+  Identifier = "CarringtonPrimeMeridian",
+  Parent = sunTransforms.SunIAU.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+       -- A shift to only show an arc on one side of the sun
+      Position = { 3500000.0, 0.0, 0.0 }
+    },
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0.0, 0.0, -math.rad(90) }
+    },
+    Scale = {
+      Type = "StaticScale",
+       -- Slightly smaller than grid size, to make the arc look better together with the
+       -- translation in x
+      Scale = 6.98E8
+    }
+  },
+  Renderable = {
+    Type = "RenderableSphericalGrid",
+    Size = gridSizeRadius,
+    Color = { 1.0, 0.0, 0.0 },
+    LineWidth = 2.0,
+    LongSegments = 2,
+    LatSegments = 64
+  },
+  GUI = {
+    Name = "Carrington Prime Meridian",
+    Path =  "/Solar System/Heliosphere",
+    Description = [[An arc showing the Carrington prime meridian of the Sun.
+      The line from pole to pole at 0 degree longitude.]],
+    Focusable = false
+  }
+}
+
+local WSA_GridSlice = {
+  Identifier = "WSA_GridSlice",
+  Parent = transforms.HeliocentricEarthEquatorial.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0.0, 0.0, -math.rad(90) }
+    },
+    Scale = {
+      Type = "StaticScale",
+      Scale = gridSizeRadius
+    }
+  },
+  Renderable = {
+    Type = "RenderableSphericalGrid",
+    Size = gridSizeRadius,
+    Color = { 0.8, 0.8, 0.8 },
+    LineWidth = 2.0,
+    LongSegments = 2,
+    LatSegments = 64
+  },
+  GUI = {
+    Name = "Solar Longitude Facing the Earth",
+    Path =  "/Solar System/Heliosphere",
+    Description = [[An arc on the Sun surface from pole to pole that always faces Earth.]],
+    Focusable = false
+  }
+}
+
+local WSA_Grid10Degrees = {
+  Identifier = "WSA_Grid10Degrees",
+  Parent = transforms.HeliocentricEarthEquatorial.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = gridSizeRadius
+    }
+  },
+  Renderable = {
+    Type = "RenderableSphericalGrid",
+    Size = gridSizeRadius,
+    Color = { 0.035, 0.675, 0.255 },
+    LineWidth = 1.0,
+    Segments = 36
+  },
+  GUI = {
+    Name = "Grid on Sun",
+    Path =  "/Solar System/Heliosphere",
+    Description = [[A grid aligned with the Sun-Earth line, with a 10-degree
+      separation between line segments by default.]],
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(CarringtonPrimeMeridian)
+  openspace.addSceneGraphNode(WSA_GridSlice)
+  openspace.addSceneGraphNode(WSA_Grid10Degrees)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(WSA_Grid10Degrees)
+  openspace.removeSceneGraphNode(WSA_GridSlice)
+  openspace.removeSceneGraphNode(CarringtonPrimeMeridian)
+end)
+
+asset.export(CarringtonPrimeMeridian)
+asset.export(WSA_GridSlice)
+asset.export(WSA_Grid10Degrees)
+
+
+
+asset.meta = {
+  Name = "Real-time Sun Grid Lines",
+  Version = "1.0",
+  Description = [[Grids that help show the Sun's orientation and rotation in relation to
+    Earth, including the Carrington prime meridian and Earth-facing longitudes.]],
+  Author = "CCMC",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

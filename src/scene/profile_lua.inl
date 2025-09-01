@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <ghoul/lua/lua_helper.h>
+
 namespace {
+
+/**
+ * Returns the name of the profile with which OpenSpace was started.
+ */
+[[codegen::luawrap]] std::string profileName() {
+    std::string p = openspace::global::configuration->profile;
+    const std::string builtInPath = absPath("${PROFILES}").string();
+    const std::string userPath = absPath("${USER_PROFILES}").string();
+
+    if (p.starts_with(builtInPath)) {
+        return p.substr(builtInPath.size() + 1);
+    }
+    else if (p.starts_with(userPath)) {
+        return p.substr(userPath.size() + 1);
+    }
+    else {
+        return p;
+    }
+}
+
+/**
+* Returns the full path of the profile with which OpenSpace was started.
+*/
+[[codegen::luawrap]] std::filesystem::path profilePath() {
+    return openspace::global::configuration->profile;
+}
 
 /**
  * Collects all changes that have been made since startup, including all property changes

@@ -22,6 +22,7 @@ local SerenaElena = {
   GUI = {
     Name = "MPO Serena Elena",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 

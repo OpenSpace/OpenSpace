@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,9 +28,9 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <filesystem>
 
@@ -63,11 +63,11 @@ public:
 
     scripting::LuaLibrary luaLibrary() const override;
     std::vector<documentation::Documentation> documentations() const override;
+    static documentation::Documentation Documentation();
 
 protected:
     void internalInitialize(const ghoul::Dictionary& dict) override;
 
-    properties::BoolProperty _enabled;
     properties::StringProperty _exoplanetsDataFolder;
     properties::StringProperty _bvColorMapPath;
     properties::StringProperty _starTexturePath;

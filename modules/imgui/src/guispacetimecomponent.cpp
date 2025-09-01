@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/timeconversion.h>
+#include <openspace/util/timeconstants.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/scripting/scriptengine.h>
 
@@ -420,12 +420,9 @@ void GuiSpaceTimeComponent::render() {
             if (_slidingDelta != 0.f) {
                 // No sync or send because time settings are always synced and sent
                 // to the connected nodes and peers
-                const std::string script = std::format(
+                global::scriptEngine->queueScript(std::format(
                     "openspace.time.setDeltaTime({})", _oldDeltaTime
-                );
-
-                using Script = scripting::ScriptEngine::Script;
-                global::scriptEngine->queueScript(script);
+                ));
 
             }
             _slidingDelta = 0.f;
@@ -489,7 +486,7 @@ void GuiSpaceTimeComponent::render() {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
         global::scriptEngine->queueScript(std::format(
-            "openspace.time.interpolateDeltaTime(-{})", SecondsPerDay
+            "openspace.time.interpolateDeltaTime(-{})", timeconstants::SecondsPerDay
         ));
     }
     ImGui::SameLine();
@@ -499,7 +496,7 @@ void GuiSpaceTimeComponent::render() {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
         global::scriptEngine->queueScript(std::format(
-            "openspace.time.interpolateDeltaTime(-{})", SecondsPerHour
+            "openspace.time.interpolateDeltaTime(-{})", timeconstants::SecondsPerHour
         ));
     }
     ImGui::SameLine();
@@ -509,7 +506,7 @@ void GuiSpaceTimeComponent::render() {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
         global::scriptEngine->queueScript(std::format(
-            "openspace.time.interpolateDeltaTime(-{})", SecondsPerMinute
+            "openspace.time.interpolateDeltaTime(-{})", timeconstants::SecondsPerMinute
         ));
     }
     ImGui::SameLine();
@@ -544,7 +541,7 @@ void GuiSpaceTimeComponent::render() {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
         global::scriptEngine->queueScript(std::format(
-            "openspace.time.interpolateDeltaTime({})", SecondsPerMinute
+            "openspace.time.interpolateDeltaTime({})", timeconstants::SecondsPerMinute
         ));
     }
     ImGui::SameLine();
@@ -554,7 +551,7 @@ void GuiSpaceTimeComponent::render() {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
         global::scriptEngine->queueScript(std::format(
-            "openspace.time.interpolateDeltaTime({})", SecondsPerHour
+            "openspace.time.interpolateDeltaTime({})", timeconstants::SecondsPerHour
         ));
     }
     ImGui::SameLine();
@@ -564,7 +561,7 @@ void GuiSpaceTimeComponent::render() {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
         global::scriptEngine->queueScript(std::format(
-            "openspace.time.interpolateDeltaTime({})", SecondsPerDay
+            "openspace.time.interpolateDeltaTime({})", timeconstants::SecondsPerDay
         ));
     }
 

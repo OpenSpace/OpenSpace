@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,13 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/misc/dictionary.h>
-
-#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <functional>
 #include <iterator>
 #include <numeric>
-#include <sstream>
 
 namespace openspace::documentation {
 
@@ -422,7 +420,7 @@ NotInListVerifier<T>::NotInListVerifier(std::vector<typename T::Type> vals)
 
 template <typename T>
 TestResult NotInListVerifier<T>::operator()(const ghoul::Dictionary& dict,
-                                         const std::string& key) const
+                                            const std::string& key) const
 {
     TestResult res = T::operator()(dict, key);
     if (res.success) {
@@ -682,13 +680,10 @@ std::string NotInRangeVerifier<T>::documentation() const {
            ghoul::to_string(upper) + " )";
 }
 
-
 template <typename T>
 AnnotationVerifier<T>::AnnotationVerifier(std::string a)
     : annotation(std::move(a))
-{
-
-}
+{}
 
 template <typename T>
 std::string AnnotationVerifier<T>::documentation() const {

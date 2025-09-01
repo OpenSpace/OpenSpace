@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,7 @@
 #include <modules/multiresvolume/rendering/simpletfbrickselector.h>
 #include <modules/multiresvolume/rendering/tfbrickselector.h>
 #include <modules/multiresvolume/rendering/tsp.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycastermanager.h>
@@ -60,13 +61,6 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableMultiresVolume";
-    constexpr std::string_view KeyDataSource = "Source";
-    constexpr std::string_view KeyErrorHistogramsSource = "ErrorHistogramsSource";
-    constexpr std::string_view KeyTransferFunction = "TransferFunction";
-
-    constexpr std::string_view KeyBrickSelector = "BrickSelector";
-    constexpr std::string_view KeyStartTime = "StartTime";
-    constexpr std::string_view KeyEndTime = "EndTime";
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {
         "StepSizeCoefficient",
@@ -158,6 +152,24 @@ namespace {
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::Developer
     };
+
+    struct [[codegen::Dictionary(RenderableMultiresVolume)]] Parameters {
+        std::filesystem::path source;
+        std::optional<std::filesystem::path> errorHistogramsSource;
+        std::optional<int> scalingExponent;
+        std::optional<float> stepSizeCoefficient;
+        std::optional<glm::vec3> scaling;
+        std::optional<glm::vec3> translation;
+        std::optional<glm::vec3> rotation;
+
+        std::optional<std::string> startTime;
+        std::optional<std::string> endTime;
+
+        std::filesystem::path transferFunction;
+
+        std::optional<std::string> brickSelector;
+    };
+#include "renderablemultiresvolume_codegen.cpp"
 } // namespace
 
 namespace openspace {
@@ -183,49 +195,19 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     )
     , _scaling(ScalingInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f))
 {
-    if (dictionary.hasValue<std::string>(KeyDataSource)) {
-        _filename = absPath(dictionary.value<std::string>(KeyDataSource));
-    }
-    else {
-        LERROR(std::format("Node did not contain a valid '{}'", KeyDataSource));
-        return;
-    }
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasValue<std::string>(KeyErrorHistogramsSource)) {
-        _errorHistogramsPath = absPath(
-            dictionary.value<std::string>(KeyErrorHistogramsSource)
-        );
-    }
+    _filename = p.source;
+    _errorHistogramsPath = p.errorHistogramsSource.value_or(_errorHistogramsPath);
+    _scalingExponent = p.scalingExponent.value_or(_scalingExponent);
+    _stepSizeCoefficient = p.stepSizeCoefficient.value_or(_stepSizeCoefficient);
+    _scaling = p.scaling.value_or(_scaling);
+    _translation = p.translation.value_or(_translation);
+    _rotation = p.rotation.value_or(_rotation);
 
-    if (dictionary.hasValue<double>("ScalingExponent")) {
-        _scalingExponent = static_cast<int>(dictionary.value<double>("ScalingExponent"));
-    }
-
-    if (dictionary.hasValue<double>("StepSizeCoefficient")) {
-        _stepSizeCoefficient = static_cast<float>(
-            dictionary.value<double>("StepSizeCoefficient")
-        );
-    }
-
-    if (dictionary.hasValue<glm::dvec3>("Scaling")) {
-        _scaling = dictionary.value<glm::dvec3>("Scaling");
-    }
-
-    if (dictionary.hasValue<glm::dvec3>("Translation")) {
-        _translation = dictionary.value<glm::dvec3>("Translation");
-    }
-
-    if (dictionary.hasValue<glm::dvec3>("Rotation")) {
-        _rotation = dictionary.value<glm::dvec3>("Rotation");
-    }
-
-    if (dictionary.hasValue<std::string>(KeyStartTime) &&
-        dictionary.hasValue<std::string>(KeyEndTime))
-    {
-        std::string startTimeString = dictionary.value<std::string>(KeyStartTime);
-        std::string endTimeString = dictionary.value<std::string>(KeyEndTime);
-        _startTime = SpiceManager::ref().ephemerisTimeFromDate(startTimeString);
-        _endTime = SpiceManager::ref().ephemerisTimeFromDate(endTimeString);
+    if (p.startTime.has_value() && p.endTime.has_value()) {
+        _startTime = SpiceManager::ref().ephemerisTimeFromDate(*p.startTime);
+        _endTime = SpiceManager::ref().ephemerisTimeFromDate(*p.endTime);
         _loop = false;
     }
     else {
@@ -233,44 +215,13 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
         LWARNING("Node does not provide time information. Viewing one image / frame");
     }
 
-    if (dictionary.hasValue<std::string>(KeyTransferFunction)) {
-        _transferFunctionPath = absPath(
-            dictionary.value<std::string>(KeyTransferFunction)
-        );
-        _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
-    }
-    else {
-        LERROR(std::format("Node did not contain a valid '{}'", KeyTransferFunction));
-        return;
-    }
-
-    //_pscOffset = psc(glm::vec4(0.f));
-    //_boxScaling = glm::vec3(1.f);
-
-
-    /*if (dictionary.hasKey(KeyBoxScaling)) {
-        glm::vec4 scalingVec4(_boxScaling, _w);
-        success = dictionary.getValue(KeyBoxScaling, scalingVec4);
-        if (success) {
-            _boxScaling = scalingVec4.xyz;
-            _w = scalingVec4.w;
-        }
-        else {
-            success = dictionary.getValue(KeyBoxScaling, _boxScaling);
-            if (!success) {
-                LERROR("Node '" << name << "' did not contain a valid '" <<
-                    KeyBoxScaling << "'");
-                return;
-            }
-        }
-    }*/
+    _transferFunctionPath = p.transferFunction;
+    _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
 
     _tsp = std::make_shared<TSP>(_filename);
     _atlasManager = std::make_shared<AtlasManager>(_tsp.get());
 
-    if (dictionary.hasValue<std::string>(KeyBrickSelector)) {
-        _selectorName = dictionary.value<std::string>(KeyBrickSelector);
-    }
+    _selectorName = p.brickSelector.value_or(_selectorName);
 
     std::string selectorName = _selectorName;
     if (selectorName == "simple") {
@@ -394,24 +345,12 @@ void RenderableMultiresVolume::initializeGL() {
     constexpr unsigned int MaxInitialBudget = 2048;
     int initialBudget = std::min(MaxInitialBudget, maxNumBricks);
 
-    _currentTime = properties::IntProperty(
-        CurrentTimeInfo,
-        0,
-        0,
-        _tsp->header().numTimesteps - 1
-    );
-    _memoryBudget = properties::IntProperty(
-        MemoryBudgetInfo,
-        initialBudget,
-        0,
-        maxNumBricks
-    );
-    _streamingBudget = properties::IntProperty(
-        StreamingBudgetInfo,
-        initialBudget,
-        0,
-        maxNumBricks
-    );
+    _currentTime.setMaxValue(_tsp->header().numTimesteps - 1);
+    _memoryBudget = initialBudget;
+    _memoryBudget.setMaxValue(maxNumBricks);
+    _streamingBudget = initialBudget;
+    _streamingBudget.setMaxValue(maxNumBricks);
+
     addProperty(_currentTime);
     addProperty(_memoryBudget);
     addProperty(_streamingBudget);

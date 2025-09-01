@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,11 +27,12 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
+#include <openspace/util/ellipsoid.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
@@ -120,7 +121,7 @@ public:
     const glm::dmat3& worldRotationMatrix() const;
     glm::dmat4 modelTransform() const;
     glm::dvec3 worldScale() const;
-    bool isTimeFrameActive(const Time& time) const;
+    bool isTimeFrameActive() const;
 
     SceneGraphNode* parent() const;
     std::vector<SceneGraphNode*> children() const;
@@ -129,6 +130,8 @@ public:
     const std::vector<std::string>& onReachAction() const;
     const std::vector<std::string>& onRecedeAction() const;
     const std::vector<std::string>& onExitAction() const;
+
+    Ellipsoid ellipsoid() const;
 
     double boundingSphere() const;
     double interactionSphere() const;
@@ -157,7 +160,8 @@ private:
     glm::dmat3 calculateWorldRotation() const;
     glm::dvec3 calculateWorldScale() const;
     void computeScreenSpaceData(RenderData& newData);
-    void renderDebugSphere(const Camera& camera, double size, const glm::vec4& color);
+    void renderDebugSphere(const Camera& camera, double size,
+        const glm::vec4& color) const;
 
     std::atomic<State> _state = State::Loaded;
     std::vector<ghoul::mm_unique_ptr<SceneGraphNode>> _children;
@@ -181,6 +185,7 @@ private:
     properties::StringProperty _guiDisplayName;
     properties::StringProperty _guiDescription;
     properties::BoolProperty _useGuiOrdering;
+    properties::BoolProperty _guiFocusable;
     properties::FloatProperty _guiOrderingNumber;
 
     // Transformation defined by translation, rotation and scale

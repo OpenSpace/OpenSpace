@@ -30,6 +30,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/json.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/coordinateconversion.h>
 #include <openspace/util/distanceconstants.h>
@@ -39,7 +40,6 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/logging/logmanager.h>
-#include <json/json.hpp>
 #include <scn/scan.h>
 #include <charconv>
 #include <cmath>
@@ -137,7 +137,8 @@ namespace {
                 s.columnInfo[key] = info;
             }
 
-            const std::vector<nlohmann::json> quickFilterGroups = j.at("quick_filters");
+            const std::vector<nlohmann::json> quickFilterGroups =
+                j.at("quick_filters").get<std::vector<nlohmann::json>>();
             s.quickFilterGroups.reserve(quickFilterGroups.size());
 
             for (const nlohmann::json& groupInfo : quickFilterGroups) {
@@ -146,10 +147,10 @@ namespace {
                 groupInfo.at("group_title").get_to(group.title);
 
                 if (groupInfo.contains("type")) {
-                    if (ghoul::toUpperCase(groupInfo.at("type")) == "OR") {
+                    if (ghoul::toUpperCase(groupInfo.at("type").get<std::string>()) == "OR") {
                         group.type = DataSettings::QuickFilterGroup::Type::Or;
                     }
-                    else if (ghoul::toUpperCase(groupInfo.at("type")) == "AND") {
+                    else if (ghoul::toUpperCase(groupInfo.at("type").get<std::string>()) == "AND") {
                         group.type = DataSettings::QuickFilterGroup::Type::And;
                     }
                     else {
@@ -159,7 +160,8 @@ namespace {
                 }
                 groupInfo.at("same_line").get_to(group.showOnSameLine);
 
-                const std::vector<nlohmann::json> quickFilters = groupInfo.at("filters");
+                const std::vector<nlohmann::json> quickFilters =
+                    groupInfo.at("filters").get<std::vector<nlohmann::json>>();
 
                 for (const nlohmann::json& filterInfo : quickFilters) {
                     DataSettings::QuickFilter quickFilter;
@@ -167,7 +169,8 @@ namespace {
                     filterInfo.at("name").get_to(quickFilter.name);
 
                     if (filterInfo.at("filter").is_array()) {
-                        const std::vector<nlohmann::json>& filters = filterInfo.at("filter");
+                        const std::vector<nlohmann::json>& filters =
+                            filterInfo.at("filter").get<std::vector<nlohmann::json>>();
                         quickFilter.filters.reserve(filters.size());
 
                         for (const nlohmann::json& f : filters) {

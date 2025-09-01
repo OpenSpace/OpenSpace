@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,7 +40,8 @@ namespace {
         "FormatString",
         "Format String",
         "The format text describing how this dashboard item renders its text. This text "
-        "must contain exactly one {} which is a placeholder that will contain the date.",
+        "must contain exactly one {} which is a placeholder that will contain the date "
+        "in the format as specified by `TimeFormat`.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -54,6 +55,10 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // This `DashboardItem` shows the current in-game simulation time. The `FormatString`
+    // and the `TimeFormat` options provide the ability to customize the output that is
+    // printed. See these two parameters for more information on how to structure the
+    // inputs.
     struct [[codegen::Dictionary(DashboardItemDate)]] Parameters {
         // [[codegen::verbatim(FormatStringInfo.description)]]
         std::optional<std::string> formatString;
@@ -67,13 +72,16 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemDate::Documentation() {
-    return codegen::doc<Parameters>("base_dashboarditem_date");
+    return codegen::doc<Parameters>(
+        "base_dashboarditem_date",
+        DashboardTextItem::Documentation()
+    );
 }
 
 DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary, 15.f)
-    , _formatString(FormatStringInfo, "Date: {} UTC")
-    , _timeFormat(TimeFormatInfo, "YYYY MON DDTHR:MN:SC.### ::RND")
+    , _formatString(FormatStringInfo, "Date: {}")
+    , _timeFormat(TimeFormatInfo, "YYYY MON DD HR:MN:SC.### UTC ::RND")
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -84,7 +92,7 @@ DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
     addProperty(_timeFormat);
 }
 
-void DashboardItemDate::render(glm::vec2& penPosition) {
+void DashboardItemDate::update() {
     ZoneScoped;
 
     std::string time = SpiceManager::ref().dateFromEphemerisTime(
@@ -93,27 +101,12 @@ void DashboardItemDate::render(glm::vec2& penPosition) {
     );
 
     try {
-        penPosition.y -= _font->height();
-        RenderFont(
-            *_font,
-            penPosition,
-            // @CPP26(abock): This can be replaced with std::runtime_format
-            std::vformat(_formatString.value(), std::make_format_args(time))
-        );
+        // @CPP26(abock): This can be replaced with std::runtime_format
+        _buffer = std::vformat(_formatString.value(), std::make_format_args(time));
     }
     catch (const std::format_error&) {
         LERRORC("DashboardItemDate", "Illegal format string");
     }
-}
-
-glm::vec2 DashboardItemDate::size() const {
-    ZoneScoped;
-
-    std::string_view time = global::timeManager->time().UTC();
-    // @CPP26(abock): This can be replaced with std::runtime_format
-    return _font->boundingBox(
-        std::vformat(_formatString.value(), std::make_format_args(time))
-    );
 }
 
 } // namespace openspace

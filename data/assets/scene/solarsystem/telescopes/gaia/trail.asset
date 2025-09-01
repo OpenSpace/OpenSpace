@@ -35,7 +35,8 @@ local GaiaTrail = {
   },
   GUI = {
     Name = "Gaia Trail",
-    Path = "/Solar System/Telescopes/Gaia"
+    Path = "/Solar System/Telescopes/Gaia",
+    Focusable = false
   }
 }
 
@@ -61,7 +62,8 @@ local GaiaTrailEclip = {
   },
   GUI = {
     Name = "Gaia Ecliptic Trail",
-    Path = "/Solar System/Telescopes/Gaia"
+    Path = "/Solar System/Telescopes/Gaia",
+    Focusable = false
   }
 }
 

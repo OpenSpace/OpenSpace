@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/logging/logmanager.h>
 #include <optional>
 
 namespace {
@@ -167,7 +168,7 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _labelFile = absPath(p.file.value_or(""));
+    _labelFile = p.file.has_value() ? absPath(*p.file) : "";
     _useCache = p.useCaching.value_or(true);
 
     if (p.unit.has_value()) {
@@ -307,7 +308,7 @@ void LabelsComponent::render(const RenderData& data,
     labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
     labelInfo.renderType = renderOption;
     labelInfo.mvpMatrix = modelViewProjectionMatrix;
-    labelInfo.scale = pow(10.f, _size);
+    labelInfo.scale = std::pow(10.f, _size);
     labelInfo.enableDepth = true;
     labelInfo.enableFalseDepth = false;
 

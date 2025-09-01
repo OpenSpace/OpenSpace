@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -252,23 +252,17 @@ documentation::Documentation RenderableLabel::Documentation() {
 
 RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary, { .automaticallyUpdateRenderBin = false })
-    , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _blendMode(BlendModeInfo)
+    , _text(TextInfo, "")
     , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _fontSize(FontSizeInfo, 50.f, 1.f, 100.f)
     , _size(SizeInfo, 8.f, 0.5f, 30.f)
     , _minMaxSize(MinMaxSizeInfo, glm::ivec2(8, 20), glm::ivec2(0), glm::ivec2(100))
-    , _text(TextInfo, "")
     , _enableFadingEffect(EnableFadingEffectInfo, false)
     , _fadeWidths(FadeWidthsInfo, glm::vec2(1.f), glm::vec2(0.f), glm::vec2(100.f))
     , _fadeDistances(FadeDistancesInfo, glm::vec2(1.f), glm::vec2(0.f), glm::vec2(100.f))
-    , _fadeUnitOption(
-        FadeUnitOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
-    , _orientationOption(
-        OrientationOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _fadeUnitOption(FadeUnitOptionInfo)
+    , _orientationOption(OrientationOptionInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -378,14 +372,12 @@ void RenderableLabel::initialize() {
 }
 
 void RenderableLabel::initializeGL() {
-    if (_font == nullptr) {
-        _font = global::fontManager->font(
-            "Mono",
-            _fontSize,
-            ghoul::fontrendering::FontManager::Outline::Yes,
-            ghoul::fontrendering::FontManager::LoadGlyphs::No
-        );
-    }
+    _font = global::fontManager->font(
+        "Mono",
+        _fontSize,
+        ghoul::fontrendering::FontManager::Outline::Yes,
+        ghoul::fontrendering::FontManager::LoadGlyphs::No
+    );
 }
 
 void RenderableLabel::deinitializeGL() {}

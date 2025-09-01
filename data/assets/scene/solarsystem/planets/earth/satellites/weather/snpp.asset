@@ -30,7 +30,7 @@ local SNPP = {
       DestinationFrame = coreKernels.Frame.J2000
     }
   },
-  Tag = { "earth_satellite", "SNPP" },
+  Tag = { "earth_satellites", "SNPP" },
   GUI = {
     Name = "SNPP",
     Path = "/Solar System/Planets/Earth/Satellites/SNPP"
@@ -53,10 +53,11 @@ local SNPPTrail = {
     Fade = 1.5,
     Resolution = 320
   },
-  Tag = { "earth_satellite", "SNPP" },
+  Tag = { "earth_satellites", "SNPP" },
   GUI = {
     Name = "SNPP Trail",
-    Path = "/Solar System/Planets/Earth/Satellites/SNPP"
+    Path = "/Solar System/Planets/Earth/Satellites/SNPP",
+    Focusable = false
   }
 }
 

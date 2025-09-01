@@ -57,7 +57,8 @@ local EuporieTrail = {
   },
   GUI = {
     Name = "Euporie Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Euporie"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Euporie",
+    Focusable = false
   }
 }
 
@@ -88,6 +89,7 @@ local EuporieLabel = {
   GUI = {
     Name = "Euporie Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Euporie",
+    Focusable = false,
     Description = "Label for Jupiter's moon Euporie (Pasiphae group)"
   }
 }
@@ -144,7 +146,8 @@ local S2003J18Trail = {
   },
   GUI = {
     Name = "S/2003 J 18 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J18"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J18",
+    Focusable = false
   }
 }
 
@@ -175,6 +178,7 @@ local S2003J18Label = {
   GUI = {
     Name = "S/2003 J 18 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J18",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2003 J 18 (Pasiphae group)"
   }
 }
@@ -231,7 +235,8 @@ local HelikeTrail = {
   },
   GUI = {
     Name = "Helike Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Helike"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Helike",
+    Focusable = false
   }
 }
 
@@ -262,6 +267,7 @@ local HelikeLabel = {
   GUI = {
     Name = "Helike Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Helike",
+    Focusable = false,
     Description = "Label for Jupiter's moon Helike (Pasiphae group)"
   }
 }
@@ -318,7 +324,8 @@ local OrthosieTrail = {
   },
   GUI = {
     Name = "Orthosie Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Orthosie"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Orthosie",
+    Focusable = false
   }
 }
 
@@ -349,6 +356,7 @@ local OrthosieLabel = {
   GUI = {
     Name = "Orthosie Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Orthosie",
+    Focusable = false,
     Description = "Label for Jupiter's moon Orthosie (Pasiphae group)"
   }
 }
@@ -405,7 +413,8 @@ local S2016J1Trail = {
   },
   GUI = {
     Name = "S/2016 J 1 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J1"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J1",
+    Focusable = false
   }
 }
 
@@ -436,6 +445,7 @@ local S2016J1Label = {
   GUI = {
     Name = "S/2016 J 1 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J1",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2016 J 1 (Pasiphae group)"
   }
 }
@@ -492,7 +502,8 @@ local S2003J15Trail = {
   },
   GUI = {
     Name = "S/2003 J 15 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J15"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J15",
+    Focusable = false
   }
 }
 
@@ -523,6 +534,7 @@ local S2003J15Label = {
   GUI = {
     Name = "S/2003 J 15 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J15",
+    Focusable = false,
     Description = "Label for Jupiter's moon OrthosiS/2003 J 15e (Pasiphae group)"
   }
 }
@@ -579,7 +591,8 @@ local AoedeTrail = {
   },
   GUI = {
     Name = "Aoede Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Aoede"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Aoede",
+    Focusable = false
   }
 }
 
@@ -610,6 +623,7 @@ local AoedeLabel = {
   GUI = {
     Name = "Aoede Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Aoede",
+    Focusable = false,
     Description = "Label for Jupiter's moon Aoede (Pasiphae group)"
   }
 }
@@ -666,7 +680,8 @@ local CallirrhoeTrail = {
   },
   GUI = {
     Name = "Callirrhoe Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Callirrhoe"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Callirrhoe",
+    Focusable = false
   }
 }
 
@@ -697,6 +712,7 @@ local CallirrhoeLabel = {
   GUI = {
     Name = "Callirrhoe Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Callirrhoe",
+    Focusable = false,
     Description = "Label for Jupiter's moon Callirrhoe (Pasiphae group)"
   }
 }
@@ -753,7 +769,8 @@ local EurydomeTrail = {
   },
   GUI = {
     Name = "Eurydome Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Eurydome"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Eurydome",
+    Focusable = false
   }
 }
 
@@ -784,6 +801,7 @@ local EurydomeLabel = {
   GUI = {
     Name = "Eurydome Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Eurydome",
+    Focusable = false,
     Description = "Label for Jupiter's moon Eurydome (Pasiphae group)"
   }
 }
@@ -840,7 +858,8 @@ local KoreTrail = {
   },
   GUI = {
     Name = "Kore Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Kore"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Kore",
+    Focusable = false
   }
 }
 
@@ -871,6 +890,7 @@ local KoreLabel = {
   GUI = {
     Name = "Kore Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Kore",
+    Focusable = false,
     Description = "Label for Jupiter's moon Kore (Pasiphae group)"
   }
 }
@@ -927,7 +947,8 @@ local CylleneTrail = {
   },
   GUI = {
     Name = "Cyllene Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Cyllene"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Cyllene",
+    Focusable = false
   }
 }
 
@@ -958,6 +979,7 @@ local CylleneLabel = {
   GUI = {
     Name = "Cyllene Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Cyllene",
+    Focusable = false,
     Description = "Label for Jupiter's moon Cyllene (Pasiphae group)"
   }
 }
@@ -1014,7 +1036,8 @@ local S2011J2Trail = {
   },
   GUI = {
     Name = "S/2011 J 2 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2011J2"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2011J2",
+    Focusable = false
   }
 }
 
@@ -1045,6 +1068,7 @@ local S2011J2Label = {
   GUI = {
     Name = "S/2011 J 2 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2011J2",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2011 J 2 (Pasiphae group)"
   }
 }
@@ -1101,7 +1125,8 @@ local S2017J1Trail = {
   },
   GUI = {
     Name = "S/2017 J 1 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J1"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J1",
+    Focusable = false
   }
 }
 
@@ -1132,6 +1157,7 @@ local S2017J1Label = {
   GUI = {
     Name = "S/2017 J 1 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J1",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2017 J 1 (Pasiphae group)"
   }
 }
@@ -1188,7 +1214,8 @@ local S2003J4Trail = {
   },
   GUI = {
     Name = "S/2003 J 4 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J4"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J4",
+    Focusable = false
   }
 }
 
@@ -1219,6 +1246,7 @@ local S2003J4Label = {
   GUI = {
     Name = "S/2003 J 4 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J4",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2003 J 4 (Pasiphae group)"
   }
 }
@@ -1275,7 +1303,8 @@ local PasiphaeTrail = {
   },
   GUI = {
     Name = "Pasiphae Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Pasiphae"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Pasiphae",
+    Focusable = false
   }
 }
 
@@ -1306,6 +1335,7 @@ local PasiphaeLabel = {
   GUI = {
     Name = "Pasiphae Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Pasiphae",
+    Focusable = false,
     Description = "Label for Jupiter's moon Pasiphae (Pasiphae group)"
   }
 }
@@ -1362,7 +1392,8 @@ local HegemoneTrail = {
   },
   GUI = {
     Name = "Hegemone Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Hegemone"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Hegemone",
+    Focusable = false
   }
 }
 
@@ -1393,6 +1424,7 @@ local HegemoneLabel = {
   GUI = {
     Name = "Hegemone Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Hegemone",
+    Focusable = false,
     Description = "Label for Jupiter's moon Hegemone (Pasiphae group)"
   }
 }
@@ -1449,7 +1481,8 @@ local SinopeTrail = {
   },
   GUI = {
     Name = "Sinope Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sinope"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sinope",
+    Focusable = false
   }
 }
 
@@ -1480,6 +1513,7 @@ local SinopeLabel = {
   GUI = {
     Name = "Sinope Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sinope",
+    Focusable = false,
     Description = "Label for Jupiter's moon Sinope (Pasiphae group)"
   }
 }
@@ -1536,7 +1570,8 @@ local SpondeTrail = {
   },
   GUI = {
     Name = "Sponde Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sponde"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sponde",
+    Focusable = false
   }
 }
 
@@ -1567,6 +1602,7 @@ local SpondeLabel = {
   GUI = {
     Name = "Sponde Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sponde",
+    Focusable = false,
     Description = "Label for Jupiter's moon Sponde (Pasiphae group)"
   }
 }
@@ -1623,7 +1659,8 @@ local AutonoeTrail = {
   },
   GUI = {
     Name = "Autonoe Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Autonoe"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Autonoe",
+    Focusable = false
   }
 }
 
@@ -1654,6 +1691,7 @@ local AutonoeLabel = {
   GUI = {
     Name = "Autonoe Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Autonoe",
+    Focusable = false,
     Description = "Label for Jupiter's moon Autonoe (Pasiphae group)"
   }
 }
@@ -1710,7 +1748,8 @@ local MegacliteTrail = {
   },
   GUI = {
     Name = "Megaclite Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Megaclite"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Megaclite",
+    Focusable = false
   }
 }
 
@@ -1741,6 +1780,7 @@ local MegacliteLabel = {
   GUI = {
     Name = "Megaclite Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Megaclite",
+    Focusable = false,
     Description = "Label for Jupiter's moon Megaclite (Pasiphae group)"
   }
 }
@@ -1797,7 +1837,8 @@ local S2016J4Trail = {
   },
   GUI = {
     Name = "S/2016 J 4 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J4"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J4",
+    Focusable = false
   }
 }
 
@@ -1828,6 +1869,7 @@ local S2016J4Label = {
   GUI = {
     Name = "S/2016 J 4 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J4",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2016 J 4 (Pasiphae group)"
   }
 }
@@ -1884,7 +1926,8 @@ local S2017J6Trail = {
   },
   GUI = {
     Name = "S/2017 J 6 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J6"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J6",
+    Focusable = false
   }
 }
 
@@ -1915,6 +1958,7 @@ local S2017J6Label = {
   GUI = {
     Name = "S/2017 J 6 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J6",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2017 J 6 (Pasiphae group)"
   }
 }
@@ -1971,7 +2015,8 @@ local S2003J23Trail = {
   },
   GUI = {
     Name = "S/2003 J 23 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J23"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J23",
+    Focusable = false
   }
 }
 
@@ -2002,6 +2047,7 @@ local S2003J23Label = {
   GUI = {
     Name = "S/2003 J 23 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J23",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2003 J 23 (Pasiphae group)"
   }
 }

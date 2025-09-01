@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +30,7 @@
 #include <modules/base/rendering/renderabletrail.h>
 #include <modules/space/kepler.h>
 #include <modules/space/translation/keplertranslation.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/objectmanager.h>
@@ -42,7 +42,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableOrbitalKepler : public Renderable {
 public:
-    RenderableOrbitalKepler(const ghoul::Dictionary& dictionary);
+    explicit RenderableOrbitalKepler(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -79,14 +79,21 @@ private:
     };
 
     void updateBuffers();
+    void calculateSegmentsForPoints(const RenderData& data);
+    void calculateSegmentsForTrails(const RenderData& data);
 
     bool _updateDataBuffersAtNextRender = false;
-    std::streamoff _numObjects;
-    std::vector<GLint> _segmentSize;
-    std::vector<GLint> _startIndex;
+    long long _numObjects = 0;
+    GLsizei _lineDrawCount = 0;
     properties::UIntProperty _segmentQuality;
     properties::UIntProperty _startRenderIdx;
     properties::UIntProperty _sizeRender;
+    std::vector<GLint> _segmentSizeRaw;
+    std::vector<GLint> _startIndexPoints;
+    std::vector<GLint> _segmentSizePoints;
+    std::vector<GLint> _startIndexTrails;
+    std::vector<GLint> _segmentSizeTrails;
+    std::vector<kepler::Parameters> _parameters;
 
     /// The layout of the VBOs
     struct TrailVBOLayout {
@@ -101,19 +108,19 @@ private:
     /// The backend storage for the vertex buffer object containing all points
     std::vector<TrailVBOLayout> _vertexBufferData;
 
-    GLuint _vertexArray;
-    GLuint _vertexBuffer;
+    GLuint _vertexArray = 0;
+    GLuint _vertexBuffer = 0;
 
-    ghoul::opengl::ProgramObject* _trailProgram;
-    ghoul::opengl::ProgramObject* _pointProgram;
+    ghoul::opengl::ProgramObject* _trailProgram = nullptr;
+    ghoul::opengl::ProgramObject* _pointProgram = nullptr;
     properties::StringProperty _path;
     properties::BoolProperty _contiguousMode;
     kepler::Format _format;
     RenderableOrbitalKepler::Appearance _appearance;
 
     // Line cache
-    UniformCache(modelView, projection, trailFadeExponent, colorFadeCutoffValue,
-        inGameTime, color, opacity)
+    UniformCache(modelViewTransform, projectionTransform, trailFadeExponent,
+        colorFadeCutoffValue, inGameTime, color, opacity)
         _uniformTrailCache;
 
     // Point cache

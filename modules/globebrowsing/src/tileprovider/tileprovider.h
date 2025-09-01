@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,14 +28,14 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/globebrowsing/src/basictypes.h>
-#include <modules/globebrowsing/src/ellipsoid.h>
 #include <modules/globebrowsing/src/layergroupid.h>
 #include <modules/globebrowsing/src/tileindex.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
 #include <modules/globebrowsing/src/timequantizer.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
+#include <openspace/util/ellipsoid.h>
 #include <unordered_map>
 #include <ghoul/opengl/programobject.h>
 
@@ -75,7 +75,7 @@ struct TileProvider : public properties::PropertyOwner {
     static unsigned int NumTileProviders;
 
     static std::unique_ptr<TileProvider> createFromDictionary(
-        layers::Layer::ID layerTypeID, const ghoul::Dictionary& dictionary);
+        const ghoul::Dictionary& dictionary);
 
     static void initializeDefaultTile();
     static void deinitializeDefaultTile();

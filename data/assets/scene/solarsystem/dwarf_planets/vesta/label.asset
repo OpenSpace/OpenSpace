@@ -23,6 +23,7 @@ local Label = {
   GUI = {
     Name = "Vesta Label",
     Path = "/Solar System/Dwarf Planets/Vesta",
+    Focusable = false,
     Description = "Label for Vesta, visible at the solarsystem overview zoom level"
   }
 }

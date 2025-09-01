@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -97,9 +97,10 @@ std::filesystem::path HttpSynchronization::directory() const {
 }
 
 void HttpSynchronization::start() {
-    if (isSyncing()) {
+    if (isSyncing() || isRejected()) {
         return;
     }
+
     _state = State::Syncing;
 
     const bool isSynced = isEachFileDownloaded();
@@ -108,9 +109,6 @@ void HttpSynchronization::start() {
         return;
     }
 
-    if (isRejected()) {
-        return;
-    }
 
     const std::string query = std::format(
         "?identifier={}&file_version={}&application_version={}",
@@ -167,7 +165,7 @@ void HttpSynchronization::createSyncFile(bool isFullySynchronized) const {
     std::filesystem::create_directories(dir);
 
     dir.replace_extension("ossync");
-    std::ofstream syncFile(dir, std::ofstream::out);
+    std::ofstream syncFile = std::ofstream(dir, std::ofstream::out);
 
     syncFile << std::format(
         "{}\n{}\n",
@@ -195,7 +193,7 @@ bool HttpSynchronization::isEachFileDownloaded() {
     }
 
     // Read contents of file
-    std::ifstream file(path);
+    std::ifstream file = std::ifstream(path);
     std::string line;
 
     file >> line;
@@ -404,7 +402,7 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
                 originalName.replace_extension().string();
 
             struct zip_t* z = zip_open(source.c_str(), 0, 'r');
-            const bool is64 = zip_is64(z);
+            const bool is64 = zip_is64(z) == 1;
             zip_close(z);
 
             if (is64) {

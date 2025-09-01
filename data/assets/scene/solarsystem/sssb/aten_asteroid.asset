@@ -26,6 +26,7 @@ local Object = {
   GUI = {
     Name = "Aten Asteroids",
     Path = "/Solar System/Small Bodies",
+    Focusable = false,
     Description = [[Earth-crossing Near-Earth-Asteroids with semi-major axes smaller than
       Earth's.]]
   }

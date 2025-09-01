@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,7 +55,7 @@ public:
      *
      * \pre \p name must not be empty
      */
-    OpenSpaceModule(std::string name);
+    explicit OpenSpaceModule(std::string name);
 
     /// Default destructor
     virtual ~OpenSpaceModule() override = default;
@@ -91,6 +91,12 @@ public:
      * \return A list of Documentation classes that are valid for this OpenSapceModule
      */
     virtual std::vector<documentation::Documentation> documentations() const;
+
+    /**
+     * Returns the documentation that describes the parameters that can be passed to the
+     * initialize function of this module.
+     */
+    static documentation::Documentation Documentation();
 
     /**
      * Returns the Lua library with functions defined by this OpenSpaceModule. The default

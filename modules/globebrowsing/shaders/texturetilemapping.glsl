@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -64,7 +64,11 @@
 #define SHOW_CHUNK_EDGES #{showChunkEdges}
 #define SHOW_HEIGHT_RESOLUTION #{showHeightResolution}
 #define SHOW_HEIGHT_INTENSITIES #{showHeightIntensities}
+
+// Show shadow from globe onto rings
 #define SHADOW_MAPPING_ENABLED #{enableShadowMapping}
+// Show shadow from rings onto globe
+#define USE_RING_SHADOWS #{useRingShadows}
 
 const vec3 DefaultLevelWeights = vec3(1.0, 0.0, 0.0);
 

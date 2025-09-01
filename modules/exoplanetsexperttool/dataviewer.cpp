@@ -84,15 +84,6 @@ namespace {
     constexpr char GetInTouchLink[] =
         "https://data.openspaceproject.com/release/ExoplanetExplorer/misc/get_in_touch";
 
-    void setRenderableEnabled(std::string_view id, bool value) {
-        using namespace openspace;
-        global::scriptEngine->queueScript(std::format(
-            "openspace.setPropertyValueSingle('{}', {});",
-            std::format("Scene.{}.Renderable.Enabled", id),
-            value ? "true" : "false"
-        ));
-    };
-
     bool hasTag(const openspace::SceneGraphNode* node, std::string_view tag) {
         if (!node) {
             return false;
@@ -516,7 +507,16 @@ void DataViewer::render() {
     renderPlanetTooltip(hoveredPlanet);
     handleDoubleClickHoveredPlanet(hoveredPlanet);
 
+    // Add vertical spacing before the menus, to account for main OpenSpace UI
+    float offset = 20.f; //px
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.f, offset));
+
     if (ImGui::BeginMainMenuBar()) {
+        ImGui::PopStyleVar(); // We don't want the padding to affect the other menus below, so pop here
+
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 0.8 * offset);
+        ImGui::TextDisabled("ExoplanetExplorer:");
+
         renderFileMenu();
 
         if (ImGui::BeginMenu("Windows")) {
@@ -609,6 +609,8 @@ void DataViewer::render() {
 
         ImGui::EndMainMenuBar();
     }
+
+
 
     // Windows
     if (showFilterSettingsWindow) {
@@ -1126,24 +1128,27 @@ void DataViewer::updateFilteredRowsProperty(std::optional<std::vector<size_t>> c
     auto mod = global::moduleEngine->module<ExoplanetsExpertToolModule>();
     properties::Property* filteredRowsProperty = mod->property("FilteredDataRows");
     if (filteredRowsProperty) {
-        std::vector<int> indices;
+        std::vector<std::string> indices;
 
         if (customIndices.has_value()) {
             std::transform(
                 customIndices.value().begin(), customIndices.value().end(), std::back_inserter(indices),
-                [](size_t i) { return static_cast<int>(i); }
+                [](size_t i) { return std::to_string(static_cast<int>(i)); }
             );
         }
         else {
             indices.reserve(_filteredData.size());
             std::transform(
                 _filteredData.begin(), _filteredData.end(), std::back_inserter(indices),
-                [](size_t i) { return static_cast<int>(i); }
+                [](size_t i) { return std::to_string(static_cast<int>(i)); }
             );
         }
 
-        // TODO: should set this over Lua script API instead
-        filteredRowsProperty->set(indices);
+        global::scriptEngine->queueScript(std::format(
+            "openspace.setPropertyValueSingle('{}', {{{}}})", // @TODO: does this work?
+            filteredRowsProperty->uri(),
+            ghoul::join(indices, ",")
+        ));
     }
 }
 

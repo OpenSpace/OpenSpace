@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,24 +56,12 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    std::string progressToStr(int size, double t) {
-        std::string progress = "|";
-        const int g = std::max(0, static_cast<int>((t * (size - 1)) + 1));
-        for (int i = 0; i < g; i++) {
-            progress.append("-");
-        }
-        progress.append(">");
-        for (int i = 0; i < size - g; i++) {
-            progress.append(" ");
-        }
-        progress.append("|");
-        return progress;
-    }
-
-    glm::vec2 addToBoundingbox(const glm::vec2& lhs, const glm::vec2& rhs) {
-        return glm::vec2(std::max(lhs.x, rhs.x), lhs.y + rhs.y);
-    }
-
+    // This dashboard item shows information about the status of individual instruments
+    // onboard a spacecraft with regards to upcoming image capture. An image sequence has
+    // to be registered in order to be able to show the necessary information. The
+    // dashboard item shows a visual representation on how much time has passed since the
+    // previous image capture and how much time remains until the instrument captures the
+    // next image.
     struct [[codegen::Dictionary(DashboardItemInstruments)]] Parameters {
         // [[codegen::verbatim(ActiveColorInfo.description)]]
         std::optional<glm::vec3> activeColor [[codegen::color()]];
@@ -116,6 +104,8 @@ DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dict
     _activeFlash = p.flashColor.value_or(_activeFlash);
     addProperty(_activeFlash);
 }
+
+void DashboardItemInstruments::update() {}
 
 void DashboardItemInstruments::render(glm::vec2& penPosition) {
     ZoneScoped;
@@ -252,87 +242,6 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
     // The last item added a CR but we want to undo it since it's the next item's
     // responsibility to move down
     penPosition.y += _font->height();
-}
-
-glm::vec2 DashboardItemInstruments::size() const {
-    const double time = global::timeManager->time().j2000Seconds();
-
-    if (!ImageSequencer::ref().isReady()) {
-        return glm::vec2(0.f);
-    }
-    const ImageSequencer& sequencer = ImageSequencer::ref();
-
-    const double previous = sequencer.prevCaptureTime(time);
-    const double next = sequencer.nextCaptureTime(time);
-    const double remaining = sequencer.nextCaptureTime(time) - time;
-    const float t = static_cast<float>(1.0 - remaining / (next - previous));
-
-    const std::string& str = SpiceManager::ref().dateFromEphemerisTime(
-        sequencer.nextCaptureTime(time),
-        "YYYY MON DD HR:MN:SC"
-    );
-
-    glm::vec2 size = glm::vec2(0.f);
-    if (remaining > 0.0) {
-        std::string progress = progressToStr(25, t);
-
-        size = addToBoundingbox(size, _font->boundingBox("Next instrument activity:"));
-
-        size = addToBoundingbox(
-            size,
-            _font->boundingBox(
-                std::format("{:.0f} s {:s} {:.1f} %", remaining, progress, t * 100.f)
-            )
-        );
-
-        size = addToBoundingbox(
-            size,
-            _font->boundingBox(std::format("Data acquisition time: {}", str))
-        );
-    }
-    const std::pair<double, std::string> nextTarget = sequencer.nextTarget(time);
-    const std::pair<double, std::string> currentTarget = sequencer.currentTarget(time);
-
-    if (currentTarget.first <= 0.0) {
-        return size;
-    }
-
-    const int timeleft = static_cast<int>(nextTarget.first - time);
-
-    const int hour = timeleft / 3600;
-    int second = timeleft % 3600;
-    const int minute = second / 60;
-    second = second % 60;
-
-
-    std::string hh;
-    if (hour < 10) {
-        hh = "0";
-    }
-    std::string mm;
-    if (minute < 10) {
-        mm = "0";
-    }
-    std::string ss;
-    if (second < 10) {
-        ss = "0";
-    }
-
-    hh.append(std::to_string(hour));
-    mm.append(std::to_string(minute));
-    ss.append(std::to_string(second));
-
-    size = addToBoundingbox(
-        size,
-        _font->boundingBox(
-            std::format("Data acquisition adjacency: [{}:{}:{}]", hh, mm, ss)
-        )
-    );
-
-    size.y += _font->height();
-
-    size = addToBoundingbox(size, _font->boundingBox("Active Instruments:"));
-    return size;
 }
 
 } // namespace openspace

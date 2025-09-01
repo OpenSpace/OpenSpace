@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -406,7 +406,7 @@ namespace {
         std::optional<int> lastRow;
 
         // [codegen::verbatim(ColumnNamesInfo.description)]]
-        std::optional<std::vector<std::string>> columnNames;
+        std::optional<ghoul::Dictionary> columnNames;
 
         // [codegen::verbatim(LodPixelThresholdInfo.description)]]
         std::optional<float> lodPixelThreshold;
@@ -472,12 +472,9 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _firstRow(FirstRowInfo, 0, 0, 2539913) // DR1-max: 2539913
     , _lastRow(LastRowInfo, 0, 0, 2539913)
     , _columnNamesList(ColumnNamesInfo)
-    , _fileReaderOption(
-        FileReaderOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
-    , _renderMode(RenderModeInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _shaderOption(ShaderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _fileReaderOption(FileReaderOptionInfo)
+    , _renderMode(RenderModeInfo)
+    , _shaderOption(ShaderOptionInfo)
     , _nRenderedStars(NumRenderedStarsInfo, 0, 0, 2000000000) // 2 Billion stars
     , _cpuRamBudgetProperty(CpuRamBudgetInfo, 0.f, 0.f, 1.f)
     , _gpuStreamBudgetProperty(GpuStreamBudgetInfo, 0.f, 0.f, 1.f)
@@ -636,9 +633,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         addProperty(_lastRow);
 
         if (p.columnNames.has_value()) {
-            const ghoul::Dictionary tmpDict = dictionary.value<ghoul::Dictionary>(
-                ColumnNamesInfo.identifier
-            );
+            const ghoul::Dictionary tmpDict = *p.columnNames;
 
             // Ugly fix for ASCII sorting when there are more columns read than 10.
             std::set<int> intKeys;
@@ -1018,7 +1013,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
         // Update vector with accumulated indices.
         for (const auto& [offset, subData] : updateData) {
-            if (offset >= _accumulatedIndices.size() - 1) {
+            if (offset >= static_cast<int>(_accumulatedIndices.size()) - 1) {
                 // @TODO(2023-03-08, alebo) We want to redo the whole rendering pipeline
                 // anyway, so right now we just bail out early if we get an invalid index
                 // that would trigger a crash

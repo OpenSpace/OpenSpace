@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,8 +38,6 @@
 #include <optional>
 
 namespace {
-    constexpr std::string_view KeyFilterColumnNames = "FilterColumnNames";
-
     constexpr std::string_view _loggerCat = "ReadFitsTask";
 
     struct [[codegen::Dictionary(ReadFitsTask)]] Parameters {
@@ -72,7 +70,7 @@ namespace {
         // A list of strings with the names of all the additional columns that are to be
         // read from the specified FITS file(s). These columns can be used for filtering
         // while constructing Octree later
-        std::optional<std::vector<std::string>> filterColumnNames;
+        std::optional<ghoul::Dictionary> filterColumnNames;
     };
 #include "readfitstask_codegen.cpp"
 } // namespace
@@ -90,8 +88,7 @@ ReadFitsTask::ReadFitsTask(const ghoul::Dictionary& dictionary) {
     _lastRow = p.lastRow.value_or(_lastRow);
 
     if (p.filterColumnNames.has_value()) {
-        const ghoul::Dictionary d =
-            dictionary.value<ghoul::Dictionary>(KeyFilterColumnNames);
+        const ghoul::Dictionary d = *p.filterColumnNames;
 
         // Ugly fix for ASCII sorting when there are more columns read than 10.
         std::set<int> intKeys;

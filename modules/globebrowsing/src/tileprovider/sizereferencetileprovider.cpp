@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,11 +56,11 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
 
     if (p.radii.has_value()) {
         if (std::holds_alternative<glm::dvec3>(*p.radii)) {
-            _ellipsoid = std::get<glm::dvec3>(*p.radii);
+            _ellipsoid = Ellipsoid(std::get<glm::dvec3>(*p.radii));
         }
         else {
             const double r = std::get<double>(*p.radii);
-            _ellipsoid = glm::dvec3(r, r, r);
+            _ellipsoid = Ellipsoid(glm::dvec3(r, r, r));
         }
     }
 }
@@ -68,7 +68,7 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
 Tile SizeReferenceTileProvider::tile(const TileIndex& tileIndex) {
     ZoneScoped;
 
-    const GeodeticPatch patch(tileIndex);
+    const GeodeticPatch patch = GeodeticPatch(tileIndex);
     const bool aboveEquator = patch.isNorthern();
     const double lat = aboveEquator ? patch.minLat() : patch.maxLat();
     const double lon1 = patch.minLon();

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,35 +33,13 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/scripting/lualibrary.h>
 
-namespace {
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "Decides if this module should be enabled."
-    };
-
-    struct [[codegen::Dictionary(VideoModule)]] Parameters {
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
-    };
-
-#include "videomodule_codegen.cpp"
-} // namespace
-
 namespace openspace {
 
 VideoModule::VideoModule()
     : OpenSpaceModule(VideoModule::Name)
-    , _enabled(EnabledInfo)
-{
-    addProperty(_enabled);
-}
+{}
 
-void VideoModule::internalInitialize(const ghoul::Dictionary& dict) {
-    const Parameters p = codegen::bake<Parameters>(dict);
-
-    _enabled = p.enabled.value_or(_enabled);
-
+void VideoModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul::TemplateFactory<globebrowsing::TileProvider>* fTileProvider =
         FactoryManager::ref().factory<globebrowsing::TileProvider>();
     ghoul_assert(fTileProvider, "TileProvider factory was not created");

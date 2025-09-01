@@ -1,0 +1,16 @@
+-- Basic
+-- This example adds a dashboard item to the main dashboard that shows the current camera
+-- orientation.
+
+local Item = {
+  Identifier = "DashboardItemCameraOrientation_Example",
+  Type = "DashboardItemCameraOrientation"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

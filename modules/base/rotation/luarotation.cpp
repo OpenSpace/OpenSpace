@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,8 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -49,6 +51,11 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This `Rotation` type generates the rotation for the attached scene graph node by
+    // calling the provided Lua script to create the full matrix used to orient the scene
+    // graph node. The returned matrix must be a valid rotation matrix. The script
+    // parameter describes in greater detail how the Lua script file should be
+    // constructed.
     struct [[codegen::Dictionary(LuaRotation)]] Parameters {
         // [[codegen::verbatim(ScriptInfo.description)]]
         std::filesystem::path script;
@@ -63,7 +70,8 @@ documentation::Documentation LuaRotation::Documentation() {
 }
 
 LuaRotation::LuaRotation(const ghoul::Dictionary& dictionary)
-    : _luaScriptFile(ScriptInfo)
+    : Rotation(dictionary)
+    , _luaScriptFile(ScriptInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -74,6 +82,7 @@ LuaRotation::LuaRotation(const ghoul::Dictionary& dictionary)
     });
 
     addProperty(_luaScriptFile);
+    global::scriptEngine->initializeLuaState(_state);
 
     _luaScriptFile = p.script.string();
 }

@@ -41,6 +41,7 @@ local JWSTBand = {
   GUI = {
     Name = "JWST Safe Viewing Band",
     Path = "/Solar System/Telescopes/JWST",
+    Focusable = false,
     Description = [[
       The safe viewing band for the James Webb Space Telescope at its current position.
     ]]
@@ -56,6 +57,7 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JWSTBand)
 end)
 
+asset.export(JWSTBand)
 
 
 asset.meta = {

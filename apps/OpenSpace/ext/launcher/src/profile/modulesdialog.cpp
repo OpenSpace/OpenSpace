@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,7 @@
 #include <QLabel>
 #include <QListWidget>
 #include <QLineEdit>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
 
@@ -92,11 +93,12 @@ void ModulesDialog::createWidgets() {
         _list->addItem(new QListWidgetItem(createOneLineSummary(m)));
     }
     layout->addWidget(_list);
-    
+
     {
         QBoxLayout* box = new QHBoxLayout;
         _buttonAdd = new QPushButton("Add new");
         connect(_buttonAdd, &QPushButton::clicked, this, &ModulesDialog::listItemAdded);
+        _buttonAdd->setAccessibleName("Add new module");
         box->addWidget(_buttonAdd);
 
         _buttonRemove = new QPushButton("Remove");
@@ -104,6 +106,7 @@ void ModulesDialog::createWidgets() {
             _buttonRemove, &QPushButton::clicked,
             this, &ModulesDialog::listItemRemove
         );
+        _buttonRemove->setAccessibleName("Remove module");
         box->addWidget(_buttonRemove);
 
         box->addStretch();
@@ -113,14 +116,14 @@ void ModulesDialog::createWidgets() {
     {
         _moduleLabel = new QLabel("Module");
         layout->addWidget(_moduleLabel);
-        
+
         _moduleEdit = new QLineEdit;
         _moduleEdit->setToolTip("Name of OpenSpace module related to this profile");
         layout->addWidget(_moduleEdit);
 
         _loadedLabel = new QLabel("Command if Module is Loaded");
         layout->addWidget(_loadedLabel);
-        
+
         _loadedEdit = new QLineEdit;
         _loadedEdit->setToolTip(
             "Lua command(s) to execute if OpenSpace has been compiled with the module"
@@ -129,7 +132,7 @@ void ModulesDialog::createWidgets() {
 
         _notLoadedLabel = new QLabel("Command if Module is NOT Loaded");
         layout->addWidget(_notLoadedLabel);
-        
+
         _notLoadedEdit = new QLineEdit;
         _notLoadedEdit->setToolTip(
             "Lua command(s) to execute if the module is not present in the OpenSpace "
@@ -159,12 +162,6 @@ void ModulesDialog::createWidgets() {
     layout->addWidget(new Line);
     {
         QBoxLayout* footerLayout = new QHBoxLayout;
-
-        _errorMsg = new QLabel;
-        _errorMsg->setObjectName("error-message");
-        _errorMsg->setWordWrap(true);
-        footerLayout->addWidget(_errorMsg);
-
         _buttonBox = new QDialogButtonBox;
         _buttonBox->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
         QObject::connect(
@@ -193,7 +190,7 @@ void ModulesDialog::listItemSelected() {
         else {
             _loadedEdit->clear();
         }
-        
+
         if (m.notLoadedInstruction.has_value()) {
             _notLoadedEdit->setText(QString::fromStdString(*m.notLoadedInstruction));
         }
@@ -227,7 +224,6 @@ void ModulesDialog::listItemAdded() {
         _list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
         //Scroll down to that blank line highlighted
         _list->setCurrentRow(_list->count() - 1);
-        _errorMsg->clear();
     }
 
     // Blank-out the 2 text fields, set combo box to index 0
@@ -254,7 +250,7 @@ void ModulesDialog::listItemAdded() {
 
 void ModulesDialog::listItemSave() {
     if (_moduleEdit->text().isEmpty()) {
-        _errorMsg->setText("Missing module name");
+        QMessageBox::critical(this, "Error", "Missing module name");
         return;
     }
 
@@ -311,7 +307,6 @@ void ModulesDialog::transitionToEditMode() {
     _loadedLabel->setText("<font color='black'>Command if Module is Loaded</font>");
     _notLoadedLabel->setText("<font color='black'>Command if Module is NOT Loaded</font>");
     editBoxDisabled(false);
-    _errorMsg->setText("");
 }
 
 void ModulesDialog::transitionFromEditMode() {
@@ -326,7 +321,6 @@ void ModulesDialog::transitionFromEditMode() {
     _moduleLabel->setText("<font color='light gray'>Module</font>");
     _loadedLabel->setText("<font color='light gray'>Command if Module is Loaded</font>");
     _notLoadedLabel->setText("<font color='light gray'>Command if Module is NOT Loaded</font>");
-    _errorMsg->setText("");
 }
 
 void ModulesDialog::editBoxDisabled(bool disabled) {

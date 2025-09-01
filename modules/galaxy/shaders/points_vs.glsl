@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,18 +42,18 @@ const double PARSEC = 3.08567756E16;
 
 
 void main() {
-	vs_position = vec4(in_position, 1.0);
-	dvec4 dpos = dvec4(vs_position);
+  vs_position = vec4(in_position, 1.0);
+  dvec4 dpos = dvec4(vs_position);
 
-	double distanceToStar = length(dpos.xyz - eyePosition);
-	vs_starBrightness = clamp(float(8000.0 * PARSEC / distanceToStar), 0.0, 1.0);
+  double distanceToStar = length(dpos.xyz - eyePosition);
+  vs_starBrightness = clamp(float(8000.0 * PARSEC / distanceToStar), 0.0, 1.0);
 
-	dpos.xyz *= 8.0;
-	dpos = modelMatrix * dpos;
-	dpos /= PARSEC;
+  dpos.xyz *= 8.0;
+  dpos = modelMatrix * dpos;
+  dpos /= PARSEC;
 
-	vec4 positionScreenSpace = z_normalization(vec4(viewProjectionMatrix * dpos));
-	vs_color = in_color;
-	vs_screenSpaceDepth = positionScreenSpace.w;
-	gl_Position = positionScreenSpace;
+  vec4 positionScreenSpace = z_normalization(vec4(viewProjectionMatrix * dpos));
+  vs_color = in_color;
+  vs_screenSpaceDepth = positionScreenSpace.w;
+  gl_Position = positionScreenSpace;
 }

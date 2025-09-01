@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,11 +25,12 @@
 #ifndef __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
 #define __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/rendering/renderable.h>
+
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/texturecomponent.h>
 #include <openspace/util/planegeometry.h>
 #include <openspace/util/updatestructures.h>
@@ -44,7 +45,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableOrbitDisc : public Renderable {
 public:
-    RenderableOrbitDisc(const ghoul::Dictionary& dictionary);
+    explicit RenderableOrbitDisc(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;

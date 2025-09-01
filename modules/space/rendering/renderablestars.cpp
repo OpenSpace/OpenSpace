@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,14 +49,6 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableStars";
-
-    constexpr std::array<const char*, 24> UniformNames = {
-        "modelMatrix", "cameraViewProjectionMatrix", "cameraUp", "eyePosition",
-        "colorOption", "magnitudeExponent", "sizeComposition", "lumCent", "radiusCent",
-        "colorTexture", "opacity", "otherDataTexture", "otherDataRange",
-        "filterOutOfRange", "fixedColor", "glareTexture", "glareMultiplier", "glareGamma",
-        "glareScale", "hasCore", "coreTexture", "coreMultiplier", "coreGamma", "coreScale"
-    };
 
     enum SizeComposition {
         DistanceModulus = 0,
@@ -308,6 +300,26 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo UseProperMotionInfo = {
+        "UseProperMotion",
+        "Enable proper motion of stars",
+        "If this setting is enabled and the loaded data file contains velocity "
+        "information for the stars, that information is used to move the stars' position "
+        "with progressing to show their proper motion through space."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ProperMotionEpochInfo = {
+        "ProperMotionEpoch",
+        "Proper motion epoch",
+        "This value defines the epoch for the positions provided in the data file in "
+        "J2000 seconds. This value is only needed if the `ProperMotion` is enabled as "
+        "well, in which case it determines the epoch at which the position of the star "
+        "starts. This means that if the time in the application is at the epoch, the "
+        "stars will be exactly at their determined position without any velocity-based "
+        "offset. If this value is not specified, 2000-01-01 12:00:00 will be used as the "
+        "epoch instead."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo EnableFadeInInfo = {
         "EnableFadeIn",
         "Enable Fade-in effect",
@@ -406,6 +418,12 @@ namespace {
         // [[codegen::verbatim(FadeInDistancesInfo.description)]]
         std::optional<glm::dvec2> fadeInDistances;
 
+        // [[codegen::verbatim(UseProperMotionInfo.description)]]
+        std::optional<bool> useProperMotion;
+
+        // [[codegen::verbatim(ProperMotionEpochInfo.description)]]
+        std::optional<double> properMotionEpoch;
+
         // [[codegen::verbatim(EnableFadeInInfo.description)]]
         std::optional<bool> enableFadeIn;
     };
@@ -432,11 +450,8 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         properties::StringProperty(MappingVzInfo),
         properties::StringProperty(MappingSpeedInfo)
     }
-    , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _otherDataOption(
-        OtherDataOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _colorOption(ColorOptionInfo)
+    , _otherDataOption(OtherDataOptionInfo)
     , _otherDataColorMapPath(OtherDataColorMapInfo)
     , _otherDataRange(
         OtherDataValueRangeInfo,
@@ -451,21 +466,22 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         properties::StringProperty(TextureInfo),
         properties::FloatProperty(MultiplierInfo, 1.f, 0.f, 20.f),
         properties::FloatProperty(GammaInfo, 1.f, 0.f, 5.f),
-        properties::FloatProperty(ScaleInfo, 1.f, 0.f, 1.f)
+        properties::FloatProperty(ScaleInfo, 1.f, 0.f, 1.f),
+        nullptr,
+        nullptr
     }
     , _glare {
         properties::PropertyOwner(GlareOwnerInfo),
         properties::StringProperty(TextureInfo),
         properties::FloatProperty(MultiplierInfo, 1.f, 0.f, 20.f),
         properties::FloatProperty(GammaInfo, 1.f, 0.f, 5.f),
-        properties::FloatProperty(ScaleInfo, 1.f, 0.f, 1.f)
+        properties::FloatProperty(ScaleInfo, 1.f, 0.f, 1.f),
+        nullptr,
+        nullptr
     }
     , _parameters {
         properties::PropertyOwner(SizeCompositionInfo),
-        properties::OptionProperty(
-            SizeCompositionMethodInfo,
-            properties::OptionProperty::DisplayType::Dropdown
-        ),
+        properties::OptionProperty(SizeCompositionMethodInfo),
         properties::FloatProperty(LumPercentInfo, 0.5f, 0.f, 3.f),
         properties::FloatProperty(RadiusPercentInfo, 0.5f, 0.f, 3.f)
     }
@@ -476,6 +492,8 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         glm::vec2(0.f),
         glm::vec2(100.f)
     )
+    , _useProperMotion(UseProperMotionInfo, true)
+    , _properMotionEpoch(ProperMotionEpochInfo, 0.0)
     , _enableFadeInDistance(EnableFadeInInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -586,6 +604,15 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addProperty(_filterOutOfRange);
 
 
+    _useProperMotion.onChange([this]() { _dataIsDirty = true; });
+    _useProperMotion = p.useProperMotion.value_or(_useProperMotion);
+    addProperty(_useProperMotion);
+
+
+    _properMotionEpoch = p.properMotionEpoch.value_or(_properMotionEpoch);
+    addProperty(_properMotionEpoch);
+
+
     auto markTextureAsDirty = [this]() {_pointSpreadFunctionTextureIsDirty = true; };
 
     if (p.core.has_value()) {
@@ -670,7 +697,7 @@ void RenderableStars::initializeGL() {
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     glBindVertexArray(0);
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
     loadData();
 
@@ -767,6 +794,14 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix();
     _program->setUniform(_uniformCache.cameraViewProjectionMatrix, viewProjectionMatrix);
 
+    _program->setUniform(_uniformCache.useProperMotion, _useProperMotion);
+    if (_useProperMotion) {
+        const double epoch = _properMotionEpoch;
+        const double curr = static_cast<double>(data.time.j2000Seconds());
+        const double diffTime = curr - epoch;
+        _program->setUniform(_uniformCache.diffTime, static_cast<float>(diffTime));
+    }
+
     _program->setUniform(_uniformCache.colorOption, _colorOption);
     _program->setUniform(_uniformCache.magnitudeExponent, _magnitudeExponent);
 
@@ -848,7 +883,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableStars::update(const UpdateData&) {
-    if (_speckFileIsDirty) {
+    if (_speckFileIsDirty) [[unlikely]] {
         loadData();
         _speckFileIsDirty = false;
         _dataIsDirty = true;
@@ -858,7 +893,7 @@ void RenderableStars::update(const UpdateData&) {
         return;
     }
 
-    if (_dataIsDirty) {
+    if (_dataIsDirty) [[unlikely]] {
         const int value = _colorOption;
         LDEBUG("Regenerating data");
 
@@ -897,15 +932,37 @@ void RenderableStars::update(const UpdateData&) {
         switch (colorOption) {
             case ColorOption::Color:
             case ColorOption::FixedColor:
-                glVertexAttribPointer(
-                    bvLumAbsMagAttrib,
-                    3,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    stride,
-                    reinterpret_cast<void*>(offsetof(ColorVBOLayout, value))
-                );
+                if (_useProperMotion) {
+                    glVertexAttribPointer(
+                        bvLumAbsMagAttrib,
+                        3,
+                        GL_FLOAT,
+                        GL_FALSE,
+                        stride,
+                        reinterpret_cast<void*>(offsetof(VelocityVBOLayout, value))
+                    );
 
+                    const GLint velocity = _program->attributeLocation("in_velocity");
+                    glEnableVertexAttribArray(velocity);
+                    glVertexAttribPointer(
+                        velocity,
+                        3,
+                        GL_FLOAT,
+                        GL_TRUE,
+                        stride,
+                        reinterpret_cast<void*>(offsetof(VelocityVBOLayout, vx))
+                    );
+                }
+                else {
+                    glVertexAttribPointer(
+                        bvLumAbsMagAttrib,
+                        3,
+                        GL_FLOAT,
+                        GL_FALSE,
+                        stride,
+                        reinterpret_cast<void*>(offsetof(ColorVBOLayout, value))
+                    );
+                }
                 break;
             case ColorOption::Velocity:
             {
@@ -971,12 +1028,12 @@ void RenderableStars::update(const UpdateData&) {
         _dataIsDirty = false;
     }
 
-    if (_pointSpreadFunctionTextureIsDirty) {
+    if (_pointSpreadFunctionTextureIsDirty) [[unlikely]] {
         LDEBUG("Reloading Point Spread Function texture");
         loadPSFTexture();
     }
 
-    if (_colorTextureIsDirty) {
+    if (_colorTextureIsDirty) [[unlikely]] {
         LDEBUG("Reloading Color Texture");
         _colorTexture = nullptr;
         if (!_colorTexturePath.value().empty()) {
@@ -997,7 +1054,7 @@ void RenderableStars::update(const UpdateData&) {
         _colorTextureIsDirty = false;
     }
 
-    if (_otherDataColorMapIsDirty) {
+    if (_otherDataColorMapIsDirty) [[unlikely]] {
         LDEBUG("Reloading Color Texture");
         _otherDataColorMapTexture = nullptr;
         if (!_otherDataColorMapPath.value().empty()) {
@@ -1016,9 +1073,9 @@ void RenderableStars::update(const UpdateData&) {
 
     }
 
-    if (_program->isDirty()) {
+    if (_program->isDirty()) [[unlikely]] {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
     }
 }
 
@@ -1074,18 +1131,38 @@ std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
             case ColorOption::Color:
             case ColorOption::FixedColor:
             {
-                union {
-                    ColorVBOLayout value;
-                    std::array<float, sizeof(ColorVBOLayout) / sizeof(float)> data;
-                } layout;
+                if (_useProperMotion) {
+                    union {
+                        VelocityVBOLayout value;
+                        std::array<float, sizeof(VelocityVBOLayout) / sizeof(float)> data;
+                    } layout;
 
-                layout.value.position = { pos.x, pos.y, pos.z };
-                layout.value.value = e.data[bvIdx];
-                layout.value.luminance = e.data[lumIdx];
-                layout.value.absoluteMagnitude = e.data[absMagIdx];
+                    layout.value.position = { pos.x, pos.y, pos.z };
+                    layout.value.value = e.data[bvIdx];
+                    layout.value.luminance = e.data[lumIdx];
+                    layout.value.absoluteMagnitude = e.data[absMagIdx];
 
-                result.insert(result.end(), layout.data.begin(), layout.data.end());
-                break;
+                    layout.value.vx = e.data[vxIdx];
+                    layout.value.vy = e.data[vyIdx];
+                    layout.value.vz = e.data[vzIdx];
+
+                    result.insert(result.end(), layout.data.begin(), layout.data.end());
+                    break;
+                }
+                else {
+                    union {
+                        ColorVBOLayout value;
+                        std::array<float, sizeof(ColorVBOLayout) / sizeof(float)> data;
+                    } layout;
+
+                    layout.value.position = { pos.x, pos.y, pos.z };
+                    layout.value.value = e.data[bvIdx];
+                    layout.value.luminance = e.data[lumIdx];
+                    layout.value.absoluteMagnitude = e.data[absMagIdx];
+
+                    result.insert(result.end(), layout.data.begin(), layout.data.end());
+                    break;
+                }
             }
             case ColorOption::Velocity:
             {

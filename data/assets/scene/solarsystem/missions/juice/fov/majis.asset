@@ -27,6 +27,7 @@ local MajisVisnir = {
   GUI = {
     Name = "Majis Visnir FOV",
     Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false,
     Description = [[
       The field-of-view for the Moon and Jupiter Imaging Spectrometer measuring in the
       visible and near-infrared spectra (0.4-1.9 um and 1.5-5.7 um).
@@ -57,7 +58,8 @@ local MajisVisnirB2 = {
   },
   GUI = {
     Name = "Majis Visnir B2 FOV",
-    Path = "/Solar System/Missions/Juice/Instruments"
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false
   }
 }
 
@@ -84,7 +86,8 @@ local MajisVisnirB4 = {
   },
   GUI = {
     Name = "Majis Visnir B4 FOV",
-    Path = "/Solar System/Missions/Juice/Instruments"
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false
   }
 }
 
@@ -111,7 +114,8 @@ local MajisIr = {
   },
   GUI = {
     Name = "Majis IR FOV",
-    Path = "/Solar System/Missions/Juice/Instruments"
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false
   }
 }
 
@@ -138,7 +142,8 @@ local MajisIrB2 = {
   },
   GUI = {
     Name = "Majis IR B2 FOV",
-    Path = "/Solar System/Missions/Juice/Instruments"
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false
   }
 }
 
@@ -165,7 +170,8 @@ local MajisIrB4 = {
   },
   GUI = {
     Name = "Majis IR B4 FOV",
-    Path = "/Solar System/Missions/Juice/Instruments"
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false
   }
 }
 
@@ -193,6 +199,7 @@ local Majis = {
   GUI = {
     Name = "Majis FOV",
     Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false,
     Description = [[
       The field-of-view for the Moon and Jupiter Imaging Spectrometer measuring in the
       visible and near-infrared spectra (0.4-1.9 um and 1.5-5.7 um).

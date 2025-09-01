@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,7 +38,7 @@ class QWidget;
 class AssetEdit final : public QDialog {
 Q_OBJECT
 public:
-    AssetEdit(QWidget* parent);
+    explicit AssetEdit(QWidget* parent);
 
 private:
     void createWidgets();
@@ -48,8 +48,6 @@ private:
 
     QBoxLayout* _layout = nullptr;
     QLineEdit* _nameEdit = nullptr;
-
-    QLabel* _errorMsg = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___ASSETEDIT___H__

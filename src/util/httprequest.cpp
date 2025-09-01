@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,8 +33,9 @@
 
 namespace openspace {
 
-HttpRequest::HttpRequest(std::string url)
+HttpRequest::HttpRequest(std::string url, ghoul::logging::LogLevel failureVerbosity)
     : _url(std::move(url))
+    , _failureVerbosity(failureVerbosity)
 {
     ghoul_assert(!_url.empty(), "url must not be empty");
 }
@@ -121,7 +122,8 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
 
         if (responseCode >= 400) {
-            LERRORC(
+            log(
+                _failureVerbosity,
                 "HttpRequest",
                 std::format("Failed download '{}' with code {}", _url, responseCode)
             );
@@ -132,7 +134,8 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
         }
     }
     else {
-        LERRORC(
+        log(
+            _failureVerbosity,
             "HttpRequest",
             std::format(
                 "Failed download '{}' with error {}", _url, curl_easy_strerror(res)
@@ -150,8 +153,8 @@ const std::string& HttpRequest::url() const {
 
 
 
-HttpDownload::HttpDownload(std::string url)
-    : _httpRequest(std::move(url))
+HttpDownload::HttpDownload(std::string url, ghoul::logging::LogLevel failureVerbosity)
+    : _httpRequest(std::move(url), failureVerbosity)
 {
     _httpRequest.onData([this](char* buffer, size_t size) {
         return handleData(buffer, size) && !_shouldCancel;
@@ -228,7 +231,10 @@ void HttpDownload::cancel() {
 bool HttpDownload::wait() {
     std::mutex conditionMutex;
     std::unique_lock lock(conditionMutex);
-    _downloadFinishCondition.wait(lock, [this]() { return _isFinished; });
+    _downloadFinishCondition.wait(
+        lock,
+        [this]() { return _isFinished || _shouldCancel; }
+    );
     if (_downloadThread.joinable()) {
         _downloadThread.join();
     }
@@ -253,8 +259,10 @@ std::atomic_int HttpFileDownload::nCurrentFileHandles = 0;
 std::mutex HttpFileDownload::_directoryCreationMutex;
 
 HttpFileDownload::HttpFileDownload(std::string url, std::filesystem::path destination,
-                                   Overwrite overwrite)
-    : HttpDownload(std::move(url))
+                                   Overwrite overwrite,
+                                   ghoul::logging::LogLevel failureVerbosity
+)
+    : HttpDownload(std::move(url), failureVerbosity)
     , _destination(std::move(destination))
 {
     if (!overwrite && std::filesystem::is_regular_file(_destination)) {
@@ -362,8 +370,9 @@ bool HttpFileDownload::handleData(char* buffer, size_t size) {
 
 
 
-HttpMemoryDownload::HttpMemoryDownload(std::string url)
-    : HttpDownload(std::move(url))
+HttpMemoryDownload::HttpMemoryDownload(std::string url,
+                                       ghoul::logging::LogLevel failureVerbosity)
+    : HttpDownload(std::move(url), failureVerbosity)
 {}
 
 const std::vector<char>& HttpMemoryDownload::downloadedData() const {

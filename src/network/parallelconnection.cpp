@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -90,33 +90,34 @@ void ParallelConnection::sendDataMessage(const DataMessage& dataMessage) {
 bool ParallelConnection::sendMessage(const Message& message) {
     const uint8_t messageTypeOut = static_cast<uint8_t>(message.type);
     const uint32_t messageSizeOut = static_cast<uint32_t>(message.content.size());
-    std::vector<char> header;
+    std::vector<char> payload;
 
-    //insert header into buffer
-    header.push_back('O');
-    header.push_back('S');
+    // insert header into buffer
+    payload.push_back('O');
+    payload.push_back('S');
 
-    header.insert(header.end(),
+    payload.insert(
+        payload.end(),
         reinterpret_cast<const char*>(&ProtocolVersion),
         reinterpret_cast<const char*>(&ProtocolVersion) + sizeof(uint8_t)
     );
 
-    header.insert(header.end(),
+    payload.insert(
+        payload.end(),
         reinterpret_cast<const char*>(&messageTypeOut),
         reinterpret_cast<const char*>(&messageTypeOut) + sizeof(uint8_t)
     );
 
-    header.insert(header.end(),
+    payload.insert(
+        payload.end(),
         reinterpret_cast<const char*>(&messageSizeOut),
         reinterpret_cast<const char*>(&messageSizeOut) + sizeof(uint32_t)
     );
 
-    const bool res = _socket->put<char>(header.data(), header.size());
-    if (!res) {
-        return false;
-    }
-    const bool res2 = _socket->put<char>(message.content.data(), message.content.size());
-    return res2;
+    payload.insert(payload.end(), message.content.begin(), message.content.end());
+
+    const bool res = _socket->put<char>(payload.data(), payload.size());
+    return res;
 }
 
 void ParallelConnection::disconnect() {

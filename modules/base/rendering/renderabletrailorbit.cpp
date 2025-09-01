@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -185,11 +185,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
 
     // 2
     // Write the current location into the floating position
-    const glm::vec3 p = _translation->position({
-        {},
-        data.time,
-        Time(0.0)
-    });
+    const glm::vec3 p = translationPosition(data.time);
     _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
 
     glBindVertexArray(_primaryRenderInformation._vaoID);
@@ -355,21 +351,17 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
 
         // If we would need to generate more new points than there are total points in the
         // array, it is faster to regenerate the entire array
-        if (nNewPoints >= _resolution) {
+        if (nNewPoints >= static_cast<uint64_t>(_resolution)) {
             fullSweep(data.time.j2000Seconds());
             return { false, true, UpdateReport::All };
         }
 
-        for (int i = 0; i < nNewPoints; i++) {
+        for (uint64_t i = 0; i < nNewPoints; i++) {
             _lastPointTime += secondsPerPoint;
 
             // Get the new permanent point and write it into the (previously) floating
             // location
-            const glm::vec3 p = _translation->position({
-                {},
-                Time(_lastPointTime),
-                Time(0.0)
-            });
+            const glm::vec3 p = translationPosition(Time(_lastPointTime));
             _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
 
             // Move the current pointer back one step to be used as the new floating
@@ -405,11 +397,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
 
             // Get the new permanent point and write it into the (previously) floating
             // location
-            const glm::vec3 p = _translation->position({
-                {},
-                Time(_firstPointTime),
-                Time(0.0)
-            });
+            const glm::vec3 p = translationPosition(Time(_firstPointTime));
             _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
 
             // if we are on the upper bounds of the array, we start at 0
@@ -452,7 +440,7 @@ void RenderableTrailOrbit::fullSweep(double time) {
     const double secondsPerPoint = periodSeconds / (_resolution - 1);
     // starting at 1 because the first position is a floating current one
     for (int i = 1; i < _resolution; i++) {
-        const glm::vec3 p = _translation->position({ {}, Time(time), Time(0.0) });
+        const glm::vec3 p = translationPosition(Time(time));
         _vertexArray[i] = { p.x, p.y, p.z };
 
         time -= secondsPerPoint;

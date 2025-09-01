@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 
 #include <modules/server/include/topics/topic.h>
 
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 
 namespace openspace {
 
@@ -48,8 +48,8 @@ private:
     // Provides the idle/recording/playback state int value in json message
     void sendJsonData();
 
-    interaction::SessionRecording::SessionState _lastState =
-        interaction::SessionRecording::SessionState::Idle;
+    interaction::SessionRecordingHandler::SessionState _lastState =
+        interaction::SessionRecordingHandler::SessionState::Idle;
     int _stateCallbackHandle = UnsetOnChangeHandle;
     bool _isDone = false;
 };

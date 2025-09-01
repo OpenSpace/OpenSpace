@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,20 +38,23 @@
 #include <optional>
 
 namespace {
-    constexpr std::string_view KeyLazyLoading = "LazyLoading";
     constexpr std::string_view _loggerCat = "RenderablePlaneTimeVaryingImage";
 
     constexpr openspace::properties::Property::PropertyInfo SourceFolderInfo = {
         "SourceFolder",
         "Source Folder",
-       "An image directory that is loaded from disk and contains the textures to use "
-       "for this plane.",
+        "An image directory that is loaded from disk and contains the textures to use "
+        "for this plane.",
        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderablePlaneTimeVaryingImage)]] Parameters {
         // [[codegen::verbatim(SourceFolderInfo.description)]]
         std::string sourceFolder;
+
+        // If set to `true` the images are only loaded when it is about to be shown
+        // instead of preloading them
+        std::optional<bool> lazyLoading;
     };
 #include "renderableplanetimevaryingimage_codegen.cpp"
 } // namespace
@@ -83,20 +86,17 @@ RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
     addProperty(_sourceFolder);
     _sourceFolder.onChange([this]() { _texture = loadTexture(); });
 
-    if (dictionary.hasKey(KeyLazyLoading)) {
-        _isLoadingLazily = dictionary.value<bool>(KeyLazyLoading);
-
-        if (_isLoadingLazily) {
-            _enabled.onChange([this]() {
-                if (_enabled) {
-                    _textureIsDirty = true;
-                }
-                else {
-                    BaseModule::TextureManager.release(_texture);
-                    _texture = nullptr;
-                }
-            });
-        }
+    _isLoadingLazily = p.lazyLoading.value_or(_isLoadingLazily);
+    if (_isLoadingLazily) {
+        _enabled.onChange([this]() {
+            if (_enabled) {
+                _textureIsDirty = true;
+            }
+            else {
+                BaseModule::TextureManager.release(_texture);
+                _texture = nullptr;
+            }
+        });
     }
 }
 

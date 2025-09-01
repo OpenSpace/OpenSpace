@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,6 +33,7 @@
 #include <modules/space/rendering/renderablerings.h>
 #include <modules/space/rendering/renderablestars.h>
 #include <modules/space/rendering/renderabletravelspeed.h>
+#include <modules/space/timeframe/timeframekernel.h>
 #include <modules/space/translation/keplertranslation.h>
 #include <modules/space/translation/spicetranslation.h>
 #include <modules/space/translation/gptranslation.h>
@@ -59,11 +60,22 @@ namespace {
         "disabled, the errors will be ignored silently.",
         openspace::properties::Property::Visibility::Developer
     };
+
+    struct [[codegen::Dictionary(SpaceModule)]] Parameters {
+        // [[codegen::verbatim(SpiceExceptionInfo.description)]]
+        std::optional<bool> showExceptions;
+    };
+#include "spacemodule_codegen.cpp"
+
 } // namespace
 
 namespace openspace {
 
 ghoul::opengl::ProgramObjectManager SpaceModule::ProgramObjectManager;
+
+documentation::Documentation SpaceModule::Documentation() {
+    return codegen::doc<Parameters>("module_space");
+}
 
 SpaceModule::SpaceModule()
     : OpenSpaceModule(Name)
@@ -94,6 +106,7 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     fRenderable->registerClass<RenderableStars>("RenderableStars");
     fRenderable->registerClass<RenderableTravelSpeed>("RenderableTravelSpeed");
 
+
     ghoul::TemplateFactory<Translation>* fTranslation =
         FactoryManager::ref().factory<Translation>();
     ghoul_assert(fTranslation, "Ephemeris factory was not created");
@@ -103,15 +116,21 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     fTranslation->registerClass<GPTranslation>("GPTranslation");
     fTranslation->registerClass<HorizonsTranslation>("HorizonsTranslation");
 
+
     ghoul::TemplateFactory<Rotation>* fRotation =
         FactoryManager::ref().factory<Rotation>();
     ghoul_assert(fRotation, "Rotation factory was not created");
 
     fRotation->registerClass<SpiceRotation>("SpiceRotation");
 
-    if (dictionary.hasValue<bool>(SpiceExceptionInfo.identifier)) {
-        _showSpiceExceptions = dictionary.value<bool>(SpiceExceptionInfo.identifier);
-    }
+
+    ghoul::TemplateFactory<TimeFrame>* fTimeFrame =
+        FactoryManager::ref().factory<TimeFrame>();
+    ghoul_assert(fTimeFrame, "Scale factory was not created");
+    fTimeFrame->registerClass<TimeFrameKernel>("TimeFrameKernel");
+
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _showSpiceExceptions = p.showExceptions.value_or(_showSpiceExceptions);
 }
 
 void SpaceModule::internalDeinitializeGL() {

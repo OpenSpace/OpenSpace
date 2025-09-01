@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2024                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -46,13 +46,22 @@ begin_dependency("SoLoud")
 set(SOLOUD_BACKEND_SDL2 OFF CACHE BOOL "")
 if (WIN32)
   set(SOLOUD_BACKEND_WINMM ON CACHE BOOL "")
-elseif (UNIX)
+elseif (UNIX AND NOT APPLE)
   set(SOLOUD_BACKEND_ALSA ON CACHE BOOL "")
+elseif (APPLE)
+  set(SOLOUD_BACKEND_COREAUDIO ON CACHE BOOL "")
 endif ()
-add_subdirectory(ext/soloud/contrib)
+add_subdirectory(ext/soloud/contrib SYSTEM)
 
 # Unfortunately, the soloud cmake tarket doesn't set the include directories correctly
 target_include_directories(openspace-module-audio SYSTEM PRIVATE ext/soloud/include)
 target_link_libraries(openspace-module-audio PRIVATE soloud)
+
+if (MSVC)
+  target_compile_options(soloud PRIVATE "/W0")
+else ()
+  target_compile_options(soloud PRIVATE "-w")
+endif ()
+
 set_property(TARGET soloud PROPERTY FOLDER "External")
 end_dependency("SoLoud")

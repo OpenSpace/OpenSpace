@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/dashboard.h>
@@ -130,7 +130,7 @@ ImGUIModule::ImGUIModule()
     global::callback::draw2D->emplace_back([this]() {
         ZoneScopedN("ImGUI");
 
-        if (!_isEnabled) {
+        if (!_isEnabled || !_hasContext) {
             return;
         }
 
@@ -160,7 +160,7 @@ ImGUIModule::ImGUIModule()
         {
             ZoneScopedN("ImGUI");
 
-            if (!isGuiWindow || !_isEnabled) {
+            if (!isGuiWindow || !_isEnabled || !_hasContext) {
                 return false;
             }
             return keyCallback(key, mod, action);
@@ -173,7 +173,7 @@ ImGUIModule::ImGUIModule()
         {
             ZoneScopedN("ImGUI");
 
-            if (!isGuiWindow || !_isEnabled) {
+            if (!isGuiWindow || !_isEnabled || !_hasContext) {
                 return false;
             }
             return charCallback(codepoint, modifier);
@@ -182,7 +182,7 @@ ImGUIModule::ImGUIModule()
 
     global::callback::mousePosition->emplace_back(
         [this](double x, double y, IsGuiWindow isGuiWindow) {
-            if (!isGuiWindow) {
+            if (!isGuiWindow || !_isEnabled || !_hasContext) {
                 return; // do nothing
             }
             _mousePosition = glm::vec2(static_cast<float>(x), static_cast<float>(y));
@@ -195,7 +195,7 @@ ImGUIModule::ImGUIModule()
         {
             ZoneScopedN("ImGUI");
 
-            if (!isGuiWindow) {
+            if (!isGuiWindow || !_isEnabled || !_hasContext) {
                 return false;
             }
 
@@ -214,7 +214,7 @@ ImGUIModule::ImGUIModule()
         [this](double, double posY, IsGuiWindow isGuiWindow) -> bool {
             ZoneScopedN("ImGUI");
 
-            if (!isGuiWindow || !_isEnabled) {
+            if (!isGuiWindow || !_isEnabled || !_hasContext) {
                 return false;
             }
             return mouseWheelCallback(posY);
@@ -223,18 +223,27 @@ ImGUIModule::ImGUIModule()
 
     global::callback::touchDetected->emplace_back(
         [this](TouchInput input) -> bool {
+            if (!_isEnabled || !_hasContext) {
+                return false;
+            }
             return touchDetectedCallback(input);
         }
     );
 
     global::callback::touchUpdated->emplace_back(
         [this](TouchInput input) -> bool {
+            if (!_isEnabled || !_hasContext) {
+                return false;
+            }
             return touchUpdatedCallback(input);
         }
     );
 
     global::callback::touchExit->emplace_back(
         [this](TouchInput input) {
+            if (!_isEnabled || !_hasContext) {
+                return;
+            }
             touchExitCallback(input);
         }
     );
@@ -258,7 +267,7 @@ void ImGUIModule::internalInitialize(const ghoul::Dictionary&) {
         global::screenSpaceRootPropertyOwner,
         global::moduleEngine,
         global::navigationHandler,
-        global::sessionRecording,
+        global::sessionRecordingHandler,
         global::timeManager,
         global::renderEngine,
         global::parallelPeer,
@@ -275,6 +284,8 @@ void ImGUIModule::internalDeinitialize() {
     for (gui::GuiComponent* comp : _components) {
         comp->deinitialize();
     }
+
+    _hasContext = false;
 }
 
 void ImGUIModule::internalInitializeGL() {
@@ -289,10 +300,10 @@ void ImGUIModule::internalInitializeGL() {
     strcpy(_iniFileBuffer.data(), file.c_str());
 #endif
 
-    const int nWindows = global::windowDelegate->nWindows();
+    const size_t nWindows = global::windowDelegate->nWindows();
     _contexts.resize(nWindows);
 
-    for (int i = 0; i < nWindows; i++) {
+    for (size_t i = 0; i < nWindows; i++) {
         _contexts[i] = ImGui::CreateContext();
         ImGui::SetCurrentContext(_contexts[i]);
 
@@ -378,6 +389,8 @@ void ImGUIModule::internalInitializeGL() {
         style.Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
     }
 
+    _hasContext = true;
+
     for (gui::GuiComponent* comp : _components) {
         comp->initialize();
     }
@@ -393,7 +406,7 @@ void ImGUIModule::internalInitializeGL() {
     {
         unsigned char* texData = nullptr;
         glm::ivec2 texSize = glm::ivec2(0, 0);
-        for (int i = 0; i < nWindows; i++) {
+        for (size_t i = 0; i < nWindows; i++) {
             ImGui::SetCurrentContext(_contexts[i]);
 
             ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&texData, &texSize.x, &texSize.y);
@@ -407,7 +420,7 @@ void ImGUIModule::internalInitializeGL() {
         _fontTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
         _fontTexture->uploadTexture();
     }
-    for (int i = 0; i < nWindows; i++) {
+    for (size_t i = 0; i < nWindows; i++) {
         const uintptr_t texture = static_cast<GLuint>(*_fontTexture);
         ImGui::SetCurrentContext(_contexts[i]);
         ImGui::GetIO().Fonts->TexID = reinterpret_cast<void*>(texture);

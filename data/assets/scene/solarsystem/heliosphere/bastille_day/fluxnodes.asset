@@ -1,6 +1,4 @@
-local heliosphereTransforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
-local propertyHelper = asset.require("util/property_helper")
-local rot = asset.require("./carrington_to_heeq_rotation")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -15,13 +13,10 @@ local fluxNodesBinaries = asset.resource({
 -- FluxNodes from binaries
 local Fluxnodes = {
   Identifier = "MAS-MHD-FluxNodes-bastille-day-2000",
-  Parent = heliosphereTransforms.HEEQ180ReferenceFrame.Identifier,
+  Parent = sunTransforms.SunIAU.Identifier,
   -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
   -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
   InteractionSphere = 695700000.0,
-  Transform = {
-    Rotation = rot.CarringtonLongitudeToHEEQ180Rotation
-  },
   Renderable = {
     Type = "RenderableFluxNodes",
     SourceFolder = fluxNodesBinaries,
@@ -40,23 +35,7 @@ local ToggleFluxnodes = {
   Identifier = "os.bastilleday.fluxnodes.ToggleFluxnodes",
   Name = "Toggle flux nodes",
   Command = [[
-    if openspace.propertyValue("Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Enabled") then
-      openspace.setPropertyValueSingle(
-        "Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Fade",
-        0.0,
-        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
-        "Linear",
-        'openspace.setPropertyValueSingle("Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Enabled", false)'
-      )
-    else
-      openspace.setPropertyValueSingle("Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Enabled", true)
-      openspace.setPropertyValueSingle(
-        "Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Fade",
-        1.0,
-        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
-        "Linear"
-      )
-    end
+    openspace.toggleFade("Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable")
   ]],
   Documentation = "Toggle flux node rendering of CME",
   GuiPath = "/Bastille-Day 2000",

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,9 @@
 #include <openspace/engine/settings.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/joystickinputstate.h>
+#include <openspace/util/progressbar.h>
+#include <openspace/util/task.h>
+#include <openspace/util/taskloader.h>
 #include <openspace/openspace.h>
 #include <ghoul/format.h>
 #include <ghoul/ghoul.h>
@@ -37,7 +40,9 @@
 #include <ghoul/cmdparser/multiplecommand.h>
 #include <ghoul/cmdparser/singlecommand.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
+#include <ghoul/misc/defer.h>
 #include <ghoul/misc/stacktrace.h>
 #ifdef WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -50,7 +55,6 @@
 #include <sgct/log.h>
 #include <sgct/projection/fisheye.h>
 #include <sgct/projection/nonlinearprojection.h>
-#include <sgct/settings.h>
 #include <sgct/user.h>
 #include <sgct/window.h>
 #include <stb_image.h>
@@ -79,6 +83,18 @@
 #include <QApplication>
 #include <QMessageBox>
 
+#ifdef WIN32
+extern "C" {
+    // These variables are checked by the different drivers to see if the discrete GPU
+    // should be preferred
+
+    // Nvidia Optimus: force switch to discrete GPU
+    __declspec(dllexport) DWORD NvOptimusEnablement = 1;
+    // AMD
+    __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+} // extern
+#endif // WIN32
+
 using namespace openspace;
 using namespace sgct;
 
@@ -91,13 +107,18 @@ constexpr std::string_view OpenVRTag = "OpenVR";
 // @TODO (abock, 2020-04-09): These state variables should disappear
 const Window* currentWindow = nullptr;
 const BaseViewport* currentViewport = nullptr;
-Frustum::Mode currentFrustumMode;
+FrustumMode currentFrustumMode;
 glm::mat4 currentModelMatrix;
 glm::ivec2 currentDrawResolution;
 
 #ifdef OPENVR_SUPPORT
 Window* FirstOpenVRWindow = nullptr;
 #endif
+
+// This value is specified from the commandline options and kept around to be run after
+// everything has been initialized. It's going to be std::nullopt unless a user wants to
+// run a task
+std::optional<std::string> taskToRun;
 
 //
 //  SPOUT-support
@@ -298,7 +319,7 @@ void mainInitFunc(GLFWwindow*) {
     // We save the startup value of the screenshots just in case we want to add a date
     // to them later in the RenderEngine
     std::filesystem::path screenshotPath = absPath("${SCREENSHOTS}");
-    sgct::Settings::instance().setCapturePath(screenshotPath);
+    sgct::Engine::instance().setCapturePath(screenshotPath);
     FileSys.registerPathToken("${STARTUP_SCREENSHOT}", std::move(screenshotPath));
 
     LDEBUG("Initializing OpenSpace Engine started");
@@ -400,6 +421,40 @@ void mainInitFunc(GLFWwindow*) {
     // Query joystick status, those connected before start up
     checkJoystickStatus();
 
+    if (taskToRun.has_value()) {
+        // If a task was specified on the commandline line, we are loading that file and
+        // executing everything within
+
+        TaskLoader loader;
+        std::vector<std::unique_ptr<Task>> tasks = loader.tasksFromFile(*taskToRun);
+
+        size_t nTasks = tasks.size();
+        if (nTasks == 1) {
+            LINFO("Task queue has 1 item");
+        }
+        else {
+            LINFO(std::format("Task queue has {} items", tasks.size()));
+        }
+
+        for (size_t i = 0; i < tasks.size(); i++) {
+            Task& task = *tasks[i].get();
+            LINFO(std::format(
+                "Performing task {} out of {}: {}",
+                i + 1, tasks.size(), task.description()
+            ));
+            ProgressBar progressBar = ProgressBar(100);
+            auto onProgress = [&progressBar](float progress) {
+                progressBar.print(static_cast<int>(progress * 100.f));
+                };
+            task.perform(onProgress);
+        }
+        std::cout << "Done performing tasks" << std::endl;
+
+        // Done with the tasks, so we can terminate
+        Engine::instance().terminate();
+    }
+
+
     LTRACE("main::mainInitFunc(end)");
 }
 
@@ -460,7 +515,7 @@ void mainRenderFunc(const sgct::RenderData& data) {
     glm::mat4 viewMatrix;
     std::memcpy(
         glm::value_ptr(viewMatrix),
-        data.viewMatrix.values,
+        data.viewMatrix.values.data(),
         sizeof(mat4)
     );
     viewMatrix = viewMatrix * glm::translate(glm::mat4(1.f), pos);
@@ -468,7 +523,7 @@ void mainRenderFunc(const sgct::RenderData& data) {
     glm::mat4 projectionMatrix;
     std::memcpy(
         glm::value_ptr(projectionMatrix),
-        data.projectionMatrix.values,
+        data.projectionMatrix.values.data(),
         sizeof(mat4)
     );
 #ifdef OPENVR_SUPPORT
@@ -484,7 +539,7 @@ void mainRenderFunc(const sgct::RenderData& data) {
         glm::mat4 modelMatrix;
         std::memcpy(
             glm::value_ptr(modelMatrix),
-            data.modelMatrix.values,
+            data.modelMatrix.values.data(),
             sizeof(mat4)
         );
         currentModelMatrix = modelMatrix;
@@ -500,12 +555,12 @@ void mainRenderFunc(const sgct::RenderData& data) {
 
             if (w.leftOrMain.isCreated() && w.leftOrMain.updateSenderSize(width, height))
             {
-                GLuint texId = window.frameBufferTexture(Window::TextureIndex::LeftEye);
+                GLuint texId = window.frameBufferTextureEye(Eye::MonoOrLeft);
                 w.leftOrMain.updateSender(texId, static_cast<int>(GL_TEXTURE_2D));
             }
 
             if (w.right.isCreated() && w.right.updateSenderSize(width, height)) {
-                GLuint texId = window.frameBufferTexture(Window::TextureIndex::RightEye);
+                GLuint texId = window.frameBufferTextureEye(Eye::Right);
                 w.right.updateSender(texId, static_cast<int>(GL_TEXTURE_2D));
             }
 
@@ -704,6 +759,16 @@ void setSgctDelegateFunctions() {
 
         return currentWindow->isWindowResized();
     };
+    sgctDelegate.anyWindowHasResized = []() {
+        ZoneScoped;
+
+        for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
+            if (window->isWindowResized()) {
+                return true;
+            }
+        }
+        return false;
+    };
     sgctDelegate.averageDeltaTime = []() {
         ZoneScoped;
 
@@ -732,7 +797,10 @@ void setSgctDelegateFunctions() {
     sgctDelegate.currentWindowSize = []() {
         ZoneScoped;
 
-        return glm::ivec2(currentWindow->resolution().x, currentWindow->resolution().y);
+        return glm::ivec2(
+            currentWindow->windowResolution().x,
+            currentWindow->windowResolution().y
+        );
     };
     sgctDelegate.currentSubwindowSize = []() {
         ZoneScoped;
@@ -741,19 +809,19 @@ void setSgctDelegateFunctions() {
             case Window::StereoMode::SideBySide:
             case Window::StereoMode::SideBySideInverted:
                 return glm::ivec2(
-                    currentWindow->resolution().x / 2,
-                    currentWindow->resolution().y
+                    currentWindow->windowResolution().x / 2,
+                    currentWindow->windowResolution().y
                 );
             case Window::StereoMode::TopBottom:
             case Window::StereoMode::TopBottomInverted:
                 return glm::ivec2(
-                    currentWindow->resolution().x,
-                    currentWindow->resolution().y / 2
+                    currentWindow->windowResolution().x,
+                    currentWindow->windowResolution().y / 2
                 );
             default:
                 return glm::ivec2(
-                    currentWindow->resolution().x * currentViewport->size().x,
-                    currentWindow->resolution().y * currentViewport->size().y
+                    currentWindow->windowResolution().x * currentViewport->size().x,
+                    currentWindow->windowResolution().y * currentViewport->size().y
                 );
         }
     };
@@ -767,7 +835,7 @@ void setSgctDelegateFunctions() {
                 return glm::ivec2(dim.x, dim.y);
             }
             else {
-                const ivec2 dim = currentWindow->finalFBODimensions();
+                const ivec2 dim = currentWindow->framebufferResolution();
                 return glm::ivec2(dim.x, dim.y);
             }
         }
@@ -788,7 +856,7 @@ void setSgctDelegateFunctions() {
         ZoneScoped;
 
         if (currentViewport) {
-            const ivec2 res = currentWindow->resolution();
+            const ivec2 res = currentWindow->windowResolution();
             const vec2 size = currentViewport->size();
             return glm::ivec2(size.x * res.x, size.y * res.y);
         }
@@ -803,23 +871,23 @@ void setSgctDelegateFunctions() {
     sgctDelegate.firstWindowResolution = []() {
         ZoneScoped;
         sgct::Window* window = Engine::instance().windows().front().get();
-        return glm::ivec2(window->resolution().x, window->resolution().y);
+        return glm::ivec2(window->windowResolution().x, window->windowResolution().y);
     };
     sgctDelegate.guiWindowResolution = []() {
         ZoneScoped;
-        const Window* guiWindow = nullptr;
+        const Window* guiWin = nullptr;
         for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
             if (window->hasTag("GUI")) {
-                guiWindow = window.get();
+                guiWin = window.get();
                 break;
             }
         }
 
-        if (!guiWindow) {
-            guiWindow = Engine::instance().windows().front().get();
+        if (!guiWin) {
+            guiWin = Engine::instance().windows().front().get();
         }
 
-        return glm::ivec2(guiWindow->resolution().x, guiWindow->resolution().y);
+        return glm::ivec2(guiWin->windowResolution().x, guiWin->windowResolution().y);
     };
     sgctDelegate.osDpiScaling = []() {
         ZoneScoped;
@@ -891,7 +959,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.takeScreenshot = [](bool applyWarping, std::vector<int> windowIds) {
         ZoneScoped;
 
-        sgct::Settings::instance().setCaptureFromBackBuffer(applyWarping);
+        sgct::Engine::instance().setCaptureFromBackBuffer(applyWarping);
         Engine::instance().takeScreenshot(std::move(windowIds));
         return Engine::instance().screenShotNumber();
     };
@@ -909,7 +977,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.nWindows = []() {
         ZoneScoped;
 
-        return static_cast<int>(Engine::instance().windows().size());
+        return Engine::instance().windows().size();
     };
     sgctDelegate.currentWindowId = []() {
         ZoneScoped;
@@ -921,24 +989,37 @@ void setSgctDelegateFunctions() {
 
         return Engine::instance().windows().front()->id();
     };
+    sgctDelegate.nameForWindow = [](size_t windowIdx) {
+        ZoneScoped;
+
+        ghoul_assert(
+            windowIdx < Engine::instance().windows().size(),
+            "Invalid window index"
+        );
+        return Engine::instance().windows()[windowIdx]->name();
+    };
     sgctDelegate.openGLProcedureAddress = [](const char* func) {
         ZoneScoped;
 
         return glfwGetProcAddress(func);
     };
-    sgctDelegate.getHorizFieldOfView = []() {
+    sgctDelegate.horizFieldOfView = [](size_t windowIdx) {
         ZoneScoped;
 
-        return static_cast<double>(
-            Engine::instance().windows().front()->horizFieldOfViewDegrees()
+        ghoul_assert(
+            windowIdx < Engine::instance().windows().size(),
+            "Invalid window index"
         );
+        return Engine::instance().windows()[windowIdx]->horizFieldOfViewDegrees();
     };
-    sgctDelegate.setHorizFieldOfView = [](float hFovDeg) {
+    sgctDelegate.setHorizFieldOfView = [](size_t windowIdx, float hFovDeg) {
         ZoneScoped;
 
-        for (std::unique_ptr<sgct::Window> const& w : Engine::instance().windows()) {
-            w->setHorizFieldOfView(hFovDeg);
-        }
+        ghoul_assert(
+            windowIdx < Engine::instance().windows().size(),
+            "Invalid window index"
+        );
+        Engine::instance().windows()[windowIdx]->setHorizFieldOfView(hFovDeg);
     };
     #ifdef WIN32
     sgctDelegate.getNativeWindowHandle = [](size_t windowIndex) -> void* {
@@ -957,9 +1038,9 @@ void setSgctDelegateFunctions() {
 
         switch (currentFrustumMode) {
             default:
-            case Frustum::Mode::MonoEye: return WindowDelegate::Frustum::Mono;
-            case Frustum::Mode::StereoLeftEye: return WindowDelegate::Frustum::LeftEye;
-            case Frustum::Mode::StereoRightEye: return WindowDelegate::Frustum::RightEye;
+            case FrustumMode::Mono: return WindowDelegate::Frustum::Mono;
+            case FrustumMode::StereoLeft: return WindowDelegate::Frustum::LeftEye;
+            case FrustumMode::StereoRight: return WindowDelegate::Frustum::RightEye;
         }
     };
     sgctDelegate.swapGroupFrameNumber = []() -> uint64_t {
@@ -967,7 +1048,7 @@ void setSgctDelegateFunctions() {
         return sgct::Window::swapGroupFrameNumber();
     };
     sgctDelegate.setScreenshotFolder = [](std::filesystem::path path) {
-        sgct::Settings::instance().setCapturePath(std::move(path));
+        sgct::Engine::instance().setCapturePath(std::move(path));
     };
     sgctDelegate.showStatistics = [](bool enabled) {
         Engine::instance().setStatsGraphVisibility(enabled);
@@ -984,7 +1065,7 @@ void setSgctDelegateFunctions() {
                 continue;
             }
 
-            const sgct::ivec2 res = window->resolution();
+            const sgct::ivec2 res = window->windowResolution();
             for (const std::unique_ptr<Viewport>& viewport : window->viewports()) {
                 const sgct::vec2 pos = viewport->position();
                 const sgct::vec2 size = viewport->size();
@@ -1011,47 +1092,66 @@ void setSgctDelegateFunctions() {
     sgctDelegate.setStatisticsGraphScale = [](float scale) {
         sgct::Engine::instance().setStatsGraphScale(scale);
     };
+    sgctDelegate.setStatisticsGraphOffset = [](glm::vec2 offset) {
+        sgct::Engine::instance().setStatsGraphOffset(sgct::vec2{ offset.x, offset.y });
+    };
     sgctDelegate.setMouseCursor = [](WindowDelegate::Cursor mouse) {
+        auto createGLFWCursor = [](int shape) {
+            GLFWerrorfun prevErrorCallback = glfwSetErrorCallback(nullptr);
+            defer { glfwSetErrorCallback(prevErrorCallback); };
+
+            GLFWcursor* cursor = glfwCreateStandardCursor(shape);
+            if (!cursor) {
+                LINFO(std::format(
+                    "Replacing unavailable cursor shape {} with arrow cursor ({})",
+                    shape, GLFW_ARROW_CURSOR
+                ));
+                return glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+            }
+
+            return cursor;
+        };
+
         static std::unordered_map<WindowDelegate::Cursor, GLFWcursor*> Cursors = {
             {
                 WindowDelegate::Cursor::Arrow,
-                glfwCreateStandardCursor(GLFW_ARROW_CURSOR)
+                createGLFWCursor(GLFW_ARROW_CURSOR)
             },
             {
                 WindowDelegate::Cursor::IBeam,
-                glfwCreateStandardCursor(GLFW_IBEAM_CURSOR)
+                createGLFWCursor(GLFW_IBEAM_CURSOR)
             },
             {
                 WindowDelegate::Cursor::CrossHair,
-                glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR)
+                createGLFWCursor(GLFW_CROSSHAIR_CURSOR)
             },
             {
                 WindowDelegate::Cursor::PointingHand,
-                glfwCreateStandardCursor(GLFW_POINTING_HAND_CURSOR)
+                createGLFWCursor(GLFW_POINTING_HAND_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeEW,
-                glfwCreateStandardCursor(GLFW_RESIZE_EW_CURSOR)
+                createGLFWCursor(GLFW_RESIZE_EW_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeNS,
-                glfwCreateStandardCursor(GLFW_RESIZE_NS_CURSOR)
+                createGLFWCursor(GLFW_RESIZE_NS_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeNWSE,
-                glfwCreateStandardCursor(GLFW_RESIZE_NWSE_CURSOR)
+                createGLFWCursor(GLFW_RESIZE_NWSE_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeNESW,
-                glfwCreateStandardCursor(GLFW_RESIZE_NESW_CURSOR)
+                createGLFWCursor(GLFW_RESIZE_NESW_CURSOR)
             },
             {
                 WindowDelegate::Cursor::ResizeAll,
-                glfwCreateStandardCursor(GLFW_RESIZE_ALL_CURSOR)
+                createGLFWCursor(GLFW_RESIZE_ALL_CURSOR)
             },
             {
                 WindowDelegate::Cursor::NotAllowed,
-                glfwCreateStandardCursor(GLFW_NOT_ALLOWED_CURSOR)
+                createGLFWCursor(GLFW_NOT_ALLOWED_CURSOR)
             },
         };
         ghoul_assert(
@@ -1061,79 +1161,24 @@ void setSgctDelegateFunctions() {
     };
 }
 
-std::string setWindowConfigPresetForGui(const std::string& labelFromCfgFile,
-                                        bool haveCliSGCTConfig)
-{
-    openspace::Configuration& config = *global::configuration;
-
-    std::string preset;
-    const bool sgctCfgFileSpecifiedByLua = !config.sgctConfigNameInitialized.empty();
-    if (haveCliSGCTConfig) {
-        preset = std::format("{} (from CLI)", config.windowConfiguration);
-    }
-    else if (sgctCfgFileSpecifiedByLua) {
-        preset = config.sgctConfigNameInitialized + labelFromCfgFile;
-    }
-    else {
-        preset = config.windowConfiguration;
-    }
-    return preset;
-}
-
-std::pair<std::string, bool> selectedSgctProfileFromLauncher(LauncherWindow& lw,
-                                                             bool hasCliSGCTConfig,
-                                                   const std::string& windowConfiguration,
-                                                      const std::string& labelFromCfgFile)
-{
-    std::string config = windowConfiguration;
-    bool isGeneratedConfig = false;
-    if (!hasCliSGCTConfig) {
-        config = lw.selectedWindowConfig();
-        if (config.find(labelFromCfgFile) != std::string::npos) {
-            if (config.find("sgct.config") == std::string::npos) {
-                config = config.substr(0, config.length() - labelFromCfgFile.length());
-            }
-            else {
-                config = windowConfiguration;
-                isGeneratedConfig = true;
-            }
-        }
-        else {
-            const std::filesystem::path c = absPath(config);
-
-            std::filesystem::path cj = c;
-            cj.replace_extension(".json");
-
-            if (c.extension().empty()) {
-                if (std::filesystem::exists(cj)) {
-                    config += ".json";
-                }
-                else {
-                    throw ghoul::RuntimeError(std::format(
-                        "Error loading configuration file '{}'. File could not be found",
-                        config
-                    ));
-                }
-            }
-            else {
-                // user customized SGCT config
-            }
-        }
-        global::configuration->windowConfiguration = config;
-    }
-    return { config, isGeneratedConfig };
-}
-
 } // namespace
 
 
 int main(int argc, char* argv[]) {
     ZoneScoped;
 
+    // For debugging purposes: Enforce Light Mode in Qt
+    // qputenv("QT_QPA_PLATFORM", "windows:darkmode=0");
+
+    // For debugging purposes: Enforce Dark Mode in Qt
+    // qputenv("QT_QPA_PLATFORM", "windows:darkmode=1");
+
 #ifdef OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
     _clearfp();
     _controlfp(_controlfp(0, 0) & ~(_EM_ZERODIVIDE | _EM_OVERFLOW), _MCW_EM);
 #endif // OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
+
+    std::setlocale(LC_ALL, "C");
 
 #ifdef WIN32
     SetUnhandledExceptionFilter(generateMiniDump);
@@ -1177,41 +1222,56 @@ int main(int argc, char* argv[]) {
 
     CommandlineArguments commandlineArguments;
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-        commandlineArguments.configuration, "--file", "-f",
+        commandlineArguments.configuration,
+        "--file",
+        "-f",
         "Provides the path to the OpenSpace configuration file. Only the '${TEMPORARY}' "
         "path token is available and any other path has to be specified relative to the "
         "current working directory"
     ));
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-        commandlineArguments.windowConfig, "--config", "-c",
+        commandlineArguments.windowConfig,
+        "--config",
+        "-c",
         "Specifies the window configuration file that should be used to start OpenSpace "
         "and that will override whatever is specified in the `openspace.cfg` or the "
         "settings. This value can include path tokens, so for example "
         "`${CONFIG}/single.json` is a valid value."
     ));
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-        commandlineArguments.profile, "--profile", "-p",
+        commandlineArguments.profile,
+        "--profile",
+        "-p",
         "Specifies the profile that should be used to start OpenSpace and that overrides "
         "the profile specified in the `openspace.cfg` and the settings."
     ));
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-        commandlineArguments.propertyVisibility, "--propertyVisibility", "",
+        commandlineArguments.propertyVisibility,
+        "--propertyVisibility",
+        "",
         "Specifies UI visibility settings for properties that this OpenSpace is using. "
         "This value overrides the values specified in the `openspace.cfg` and the "
         "settings and also the environment variable, if that value is provided. Allowed "
         "values for this parameter are: `Developer`, `AdvancedUser`, `User`, and "
         "`NoviceUser`."
     ));
+    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+        commandlineArguments.task,
+        "--task",
+        "-t",
+        "Specifies a task that will be run after OpenSpace has been initialized. Once "
+        "the task finishes, the application will automatically close again. All other "
+        "commandline arguments are ignored, if a task is specified."
+    ));
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommandZeroArguments>(
-        commandlineArguments.bypassLauncher, "--bypassLauncher", "-b",
+        commandlineArguments.bypassLauncher,
+        "--bypassLauncher",
+        "-b",
         "Specifies whether the Launcher should be shown at startup or not. This value "
         "overrides the value specified in the `openspace.cfg` and the settings."
     ));
 
-    // setCommandLine returns a reference to the vector that will be filled later
-    const std::vector<std::string>& sgctArguments = parser.setCommandLine(
-        { argv, argv + argc }
-    );
+    parser.setCommandLine({ argv, argv + argc });
 
     try {
         const bool showHelp = parser.execute();
@@ -1224,8 +1284,16 @@ int main(int argc, char* argv[]) {
         LFATALC(e.component, e.message);
         exit(EXIT_FAILURE);
     }
-    // Take an actual copy of the arguments
-    std::vector<std::string> arguments = sgctArguments;
+
+    if (commandlineArguments.task.has_value()) {
+        // If a task was specified, we want to overwrite the used window and profile and
+        // not display the launcher
+        commandlineArguments.windowConfig = "${CONFIG}/single.json";
+        commandlineArguments.profile = "empty";
+        commandlineArguments.bypassLauncher = true;
+
+        taskToRun = *commandlineArguments.task;
+    }
 
     //
     // Set up SGCT functions for window delegate
@@ -1321,9 +1389,6 @@ int main(int argc, char* argv[]) {
             global::configuration->bypassLauncher = *commandlineArguments.bypassLauncher;
         }
 
-        // Determining SGCT configuration file
-        LDEBUG("SGCT Configuration file: " + global::configuration->windowConfiguration);
-
         windowConfiguration = global::configuration->windowConfiguration;
     }
     catch (const documentation::SpecificationError& e) {
@@ -1346,12 +1411,20 @@ int main(int argc, char* argv[]) {
 
     // Call profile GUI
     const std::string labelFromCfgFile = " (from .cfg)";
-    std::string windowCfgPreset = setWindowConfigPresetForGui(
-        labelFromCfgFile,
-        commandlineArguments.windowConfig.has_value()
-    );
+    std::string windowCfgPreset;
+    if (commandlineArguments.windowConfig.has_value()) {
+        windowCfgPreset = std::format(
+            "{} (from CLI)", global::configuration->windowConfiguration
+        );
+    }
+    else if (!global::configuration->sgctConfigNameInitialized.empty()) {
+        windowCfgPreset =
+            global::configuration->sgctConfigNameInitialized + labelFromCfgFile;
+    }
+    else {
+        windowCfgPreset = global::configuration->windowConfiguration;
+    }
 
-    //TODO consider LFATAL if ${USER} doens't exist rather then recurisve create.
     global::openSpaceEngine->createUserDirectoriesIfNecessary();
 
     // (abock, 2020-12-07)  For some reason on Apple the keyboard handler in CEF will call
@@ -1383,17 +1456,16 @@ int main(int argc, char* argv[]) {
             );
         }
 
-        LauncherWindow win = LauncherWindow(
+        LauncherWindow launcher = LauncherWindow(
             !commandlineArguments.profile.has_value(),
             *global::configuration,
             !commandlineArguments.windowConfig.has_value(),
-            std::move(windowCfgPreset),
-            nullptr
+            std::move(windowCfgPreset)
         );
-        win.show();
+        launcher.show();
         QApplication::exec();
 
-        if (!win.wasLaunchSelected()) {
+        if (!launcher.wasLaunchSelected()) {
             exit(EXIT_SUCCESS);
         }
         glfwInit();
@@ -1438,14 +1510,26 @@ int main(int argc, char* argv[]) {
             size
         );
 
-        global::configuration->profile = win.selectedProfile();
-        std::tie(windowConfiguration, isGeneratedWindowConfig) =
-            selectedSgctProfileFromLauncher(
-                win,
-                commandlineArguments.windowConfig.has_value(),
-                windowConfiguration,
-                labelFromCfgFile
-            );
+        global::configuration->profile = launcher.selectedProfile();
+
+        std::string config = windowConfiguration;
+        isGeneratedWindowConfig = false;
+        if (!commandlineArguments.windowConfig.has_value()) {
+            config = launcher.selectedWindowConfig();
+            if (config.find(labelFromCfgFile) != std::string::npos) {
+                if (config.find("sgct.config") == std::string::npos) {
+                    config = config.substr(
+                        0,
+                        config.length() - labelFromCfgFile.length()
+                    );
+                }
+                else {
+                    config = windowConfiguration;
+                    isGeneratedWindowConfig = true;
+                }
+            }
+            global::configuration->windowConfiguration = config;
+        }
     }
     else {
         glfwInit();
@@ -1458,11 +1542,40 @@ int main(int argc, char* argv[]) {
 
     {
         openspace::Settings settings = loadSettings();
-        settings.hasStartedBefore = true;
 
-        const std::filesystem::path p = global::configuration->profile;
-        const std::filesystem::path reducedName = p.filename().replace_extension();
-        settings.profile = reducedName.string();
+        const std::filesystem::path profile = global::configuration->profile;
+
+        const bool isDefaultProfile = ghoul::filesystem::isSubdirectory(
+            profile,
+            absPath("${PROFILES}")
+        );
+        const bool isUserProfile = ghoul::filesystem::isSubdirectory(
+            profile,
+            absPath("${USER_PROFILES}")
+        );
+
+        if (isDefaultProfile) {
+            std::filesystem::path p = std::filesystem::relative(
+                profile,
+                absPath("${PROFILES}")
+            );
+            p.replace_extension();
+            settings.profile = p.string();
+        }
+        else if (isUserProfile) {
+            std::filesystem::path p = std::filesystem::relative(
+                profile,
+                absPath("${USER_PROFILES}")
+            );
+            p.replace_extension();
+            settings.profile = p.string();
+        }
+        else {
+            LWARNING(
+                "Cannot save remembered profile when starting a profile that is not in "
+                "the data/profiles or user/data/profiles folder."
+            );
+        }
 
         settings.configuration =
             isGeneratedWindowConfig ? "" : global::configuration->windowConfiguration;
@@ -1470,14 +1583,7 @@ int main(int argc, char* argv[]) {
         saveSettings(settings, findSettings());
     }
 
-    // Prepend the outgoing sgctArguments with the program name
-    // as well as the configuration file that sgct is supposed to use
-    arguments.insert(arguments.begin(), argv[0]);
-    arguments.insert(arguments.begin() + 1, "-config");
-    arguments.insert(arguments.begin() + 2, absPath(windowConfiguration).string());
-
     // Need to set this before the creation of the sgct::Engine
-
     Log::instance().setLogToConsole(false);
     Log::instance().setShowTime(false);
     Log::instance().setShowLogLevel(false);
@@ -1487,12 +1593,30 @@ int main(int argc, char* argv[]) {
     glfwWindowHint(GLFW_STENCIL_BITS, 8);
 #endif
 
+    std::filesystem::path winConf =
+        commandlineArguments.windowConfig.has_value() ?
+        *commandlineArguments.windowConfig :
+        global::configuration->windowConfiguration;
+
+    // Determining SGCT configuration file
+    LINFO(std::format(
+        "SGCT Configuration file: {}", absPath(winConf)
+    ));
+
+
     LDEBUG("Creating SGCT Engine");
     std::vector<std::string> arg(argv + 1, argv + argc);
     LDEBUG("Parsing commandline arguments");
-    const sgct::Configuration config = parseArguments(arg);
+    sgct::Configuration config = parseArguments(arg);
     LDEBUG("Loading cluster information");
-    config::Cluster cluster = loadCluster(absPath(windowConfiguration).string());
+    config::Cluster cluster;
+    try {
+        cluster = loadCluster(absPath(winConf).string());
+    }
+    catch (const std::runtime_error& e) {
+        LFATALC("main", e.what());
+        exit(EXIT_FAILURE);
+    }
 
     LDEBUG("Setting callbacks");
     Engine::Callbacks callbacks = {
@@ -1512,6 +1636,11 @@ int main(int argc, char* argv[]) {
         .drop = mainDropCallback
     };
     Log::instance().setNotifyLevel(Log::Level::Debug);
+
+    // Do not print message if clients are waiting for the master
+    config.printWaitMessage = config.printWaitMessage.value_or(false);
+    // Only timeout after 15 minutes
+    config.waitTimeout = config.waitTimeout.value_or(15.f * 60.f);
 
     try {
         Engine::create(std::move(cluster), std::move(callbacks), config);
@@ -1553,11 +1682,6 @@ int main(int argc, char* argv[]) {
         glfwPollEvents();
     }
 #endif // __APPLE__
-
-
-    // Do not print message if clients are waiting for the master
-    // Only timeout after 15 minutes
-    Engine::instance().setSyncParameters(false, 15.f * 60.f);
 
     LINFO("Starting rendering loop");
     Engine::instance().exec();

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,12 +31,11 @@ CefRefPtr<CefRenderProcessHandler> WebBrowserApp::GetRenderProcessHandler() {
 }
 
 void WebBrowserApp::OnContextCreated(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
-                                     CefRefPtr<CefV8Context>)
+                                     CefRefPtr<CefV8Context> context)
 {
-//    CEF_REQUIRE_UI_THREAD();
-//    CefRefPtr<CefV8Value> val = CefV8Value::CreateBool(true);
-//    CefRefPtr<CefV8Value> global = context->GetGlobal();
-//    global->SetValue("IsWithinCEF", val, V8_PROPERTY_ATTRIBUTE_NONE);
+    CefRefPtr<CefV8Value> val = CefV8Value::CreateBool(true);
+    CefRefPtr<CefV8Value> global = context->GetGlobal();
+    global->SetValue("isWithinCEF", val, V8_PROPERTY_ATTRIBUTE_NONE);
 }
 
 void WebBrowserApp::OnBeforeCommandLineProcessing(const CefString&,
@@ -51,7 +50,7 @@ void WebBrowserApp::OnBeforeCommandLineProcessing(const CefString&,
 #ifdef __APPLE__
     commandline->AppendSwitch("--disable-gpu-sandbox");
     commandline->AppendSwitch("--no-sandbox");
-#endif
+#endif // __APPLE__
 }
 
 } // namespace openspace

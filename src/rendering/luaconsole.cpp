@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -124,20 +124,36 @@ namespace {
     };
 
     std::string sanitizeInput(std::string str) {
-        // Remove carriage returns.
+        // Remove carriage returns
         str.erase(std::remove(str.begin(), str.end(), '\r'), str.end());
 
-        // Replace newlines with spaces.
         std::transform(
             str.begin(),
             str.end(),
             str.begin(),
-            [](char c) { return c == '\n' ? ' ' : c; }
+            [](char c) {
+                // Replace newlines with spaces
+                if (c == '\n') {
+                    return ' ';
+                }
+
+                // The documentation contains “ and ” which we convert to " to make them
+                // copy-and-pastable
+                if (c == -109 || c == -108) {
+                    return '"';
+                }
+
+                // Convert \ into / to make paths pastable
+                if (c == '\\') {
+                    return '/';
+                }
+
+                return c;
+            }
         );
 
         return str;
     }
-
 } // namespace
 
 namespace openspace {
@@ -718,7 +734,8 @@ void LuaConsole::render() {
 
         // Compute the overflow in pixels
         const float overflow = currentWidth - res.x * 0.995f;
-        if (overflow <= 0.f) {
+        if (res.x == 1 || overflow <= 0.f) {
+            // The resolution might be equal 1 pixel if the windows was minimized
             break;
         }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -68,7 +68,7 @@ public:
      *        time range
      * \throw RuntimeError If neither subphases or a time range is specified
      */
-    MissionPhase(const ghoul::Dictionary& dictionary);
+    explicit MissionPhase(const ghoul::Dictionary& dictionary);
 
     /**
      * Returns the name of the MissionPhase.
@@ -76,6 +76,13 @@ public:
      * \return The name of the MissionPhase
      */
     const std::string& name() const;
+
+    /**
+     * Returns the unique identifier of the MissionPhase.
+     *
+     * \return The unique identifier of the MissionPhase
+     */
+    const std::string& identifier() const;
 
     /**
      * Returns the TimeRange of the MissionPhase.
@@ -168,6 +175,8 @@ protected:
 
     /// The name of the MissionPhase
     std::string _name;
+    /// The identifier of the MissionPhase
+    std::string _identifier;
     /// The description of the MissionPhase
     std::string _description;
     /// The range in time that is covered by this MissionPhase

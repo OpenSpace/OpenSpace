@@ -29,6 +29,7 @@ local GpsSatellites = {
   GUI = {
     Name = "GPS",
     Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false,
     Description = [[The GPS satellites that give us our precise locations back on Earth.]]
   }
 }

@@ -1,0 +1,16 @@
+-- Basic
+-- This example shows how to create a time-varying text dashboard item.
+
+local Item = {
+  Type = "DashboardItemTimeVaryingText",
+  Identifier = "DashboardItemTimeVaryingText_Example",
+  DataFile = asset.resource("data/dummydata.json"),
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

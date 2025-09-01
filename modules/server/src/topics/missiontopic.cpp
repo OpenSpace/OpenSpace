@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -57,10 +57,10 @@ nlohmann::json MissionTopic::missionJson() const {
         captureTimesString[i] = std::move(str);
     }
     json json;
-    for (auto const& [name, mission] : missions) {
+    for (auto const& [identifier, mission] : missions) {
         nlohmann::json missionJson = createPhaseJson(mission);
         missionJson["capturetimes"] = captureTimesString;
-        json.push_back(std::move(missionJson));
+        json[identifier] = missionJson;
     }
     return json;
 }
@@ -81,7 +81,7 @@ nlohmann::json MissionTopic::createPhaseJson(const MissionPhase& phase) const {
         };
 
         if (date.description.has_value()) {
-            jsonDate["description"] = *date.description;;
+            jsonDate["description"] = *date.description;
         }
         if (date.image.has_value()) {
             jsonDate["image"] = *date.image;

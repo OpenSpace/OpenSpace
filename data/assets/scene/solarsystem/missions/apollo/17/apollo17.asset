@@ -1,3 +1,14 @@
 asset.require("./lem")
 asset.require("./actions")
 asset.require("../actions")
+
+
+
+asset.meta = {
+  Name = "Apollo 17",
+  Description = [[A meta asset that will include all of the other assets to show the
+    Apollo 17 launch, orbit, and landing sequence.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

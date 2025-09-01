@@ -1,0 +1,59 @@
+{
+  "profile": "missions/apollo",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Apollo11LemPosition",
+        "position": [
+          -409990.715133667,
+          -1097593.6156463623,
+          -2364701.1861953735
+        ],
+        "referenceFrame": "Root",
+        "up": [
+          -0.8264520261336258,
+          0.551603574337604,
+          -0.1127410540912411
+        ],
+        "yaw": 2.275612823454693e-07,
+        "timestamp": "1969 JUL 20 20:17:53"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_11.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Moon.Renderable.Layers.ColorLayers.A11_M177481212_p_longlat.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Apollo11MoonTrail.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Apollo11LemTrail.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "wait",
+      "value": 30
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

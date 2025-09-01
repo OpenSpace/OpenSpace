@@ -26,6 +26,7 @@ local Object = {
   GUI = {
     Name = "Transneptunian Object Asteroids",
     Path = "/Solar System/Small Bodies",
+    Focusable = false,
     Description = [[Any minor or dwarf planets in the solar system that orbit the Sun at a
       greater average distance than Neptune (semi-major axis of 30.1 AU).]]
   }

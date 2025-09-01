@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/translation/spicetranslation/spice_timeoffset.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "SpiceTranslation_Example_TimeOffset",
+        "position": [
+          -1.076552152633667,
+          -1.5895652174949646,
+          -0.9963250160217285
+        ],
+        "pitch": 0.0015241844535980298,
+        "referenceFrame": "Root",
+        "up": [
+          -0.6621816735769053,
+          0.6649793093939242,
+          -0.34542430322267204
+        ],
+        "yaw": -0.005848506428629104,
+        "timestamp": "2025 JUL 13 13:54:28"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

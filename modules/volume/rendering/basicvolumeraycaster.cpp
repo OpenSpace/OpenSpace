@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -154,7 +154,7 @@ bool BasicVolumeRaycaster::isCameraInside(const RenderData& data,
     const glm::vec4 modelPos = glm::inverse(modelViewTransform(data)) *
                                glm::vec4(0.f, 0.f, 0.f, 1.f);
 
-    localPosition = (glm::vec3(modelPos) + glm::vec3(0.5f));
+    localPosition = glm::vec3(modelPos) + glm::vec3(0.5f);
 
     return (localPosition.x > 0 && localPosition.x < 1 &&
             localPosition.y > 0 && localPosition.y < 1 &&

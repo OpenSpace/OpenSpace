@@ -16,20 +16,19 @@ local Layer = {
 
 
 asset.onInitialize(function()
-  openspace.printWarning("The map for the total eclipse of 30th March 2033 contains a geometry that cannot be read right now")
-  -- @TODO:  The file contains a non-simple geometry which is currently not supported
-  -- openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Layer)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Layer)
 end)
 
 asset.onDeinitialize(function()
-  -- openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Layer)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Layer)
 end)
 
 
 
 asset.meta = {
   Name = "Total 2033-03-30",
-  Description = "Total eclipse map for 2033-03-30",
+  Description = [[Total eclipse map for 2033-03-30. The GeoJSON is adapted from the
+    data provided by Xavier M. Jubier (http://xjubier.free.fr).]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

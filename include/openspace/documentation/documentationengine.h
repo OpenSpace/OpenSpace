@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,23 +39,6 @@ namespace openspace::documentation {
  */
 class DocumentationEngine {
 public:
-    /**
-     * This exception is thrown by the addDocumentation method if a provided Documentation
-     * has an identifier, but the identifier was registered previously.
-     */
-    struct DuplicateDocumentationException : public ghoul::RuntimeError {
-        /**
-         * Constructor of a DuplicateDocumentationException storing the offending
-         * Documentation for later use.
-         *
-         * \param doc The Documentation whose identifier was previously registered
-         */
-        DuplicateDocumentationException(Documentation doc);
-
-        /// The offending Documentation whose identifier was previously registered
-        Documentation documentation;
-    };
-
     DocumentationEngine();
 
     /**

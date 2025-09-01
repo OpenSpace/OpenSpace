@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/openspacemodule.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/profiling.h>
 
 #include "moduleengine_lua.inl"
@@ -183,6 +184,10 @@ scripting::LuaLibrary ModuleEngine::luaLibrary() {
             codegen::lua::IsLoaded
         }
     };
+}
+
+std::vector<documentation::Documentation> ModuleEngine::moduleDocumentations() const {
+    return AllModuleDocumentation();
 }
 
 } // namespace openspace

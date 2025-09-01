@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/constexpr.h>
+#include <algorithm>
 #include <array>
 #include <string>
 #include <utility>
@@ -62,65 +63,17 @@ enum class DistanceUnit {
     Chain,
     Furlong,
     Mile,
-    League
+    League,
+    NauticalMile
 };
 
-// Assumption:  Unit names are sequential in memory
-constexpr std::string_view DistanceUnitNanometer = "nanometer";
-constexpr std::string_view DistanceUnitMicrometer = "micrometer";
-constexpr std::string_view DistanceUnitMillimeter = "millimeter";
-constexpr std::string_view DistanceUnitCentimeter = "centimeter";
-constexpr std::string_view DistanceUnitDecimeter = "decimeter";
-constexpr std::string_view DistanceUnitMeter = "meter";
-constexpr std::string_view DistanceUnitKilometer = "km";
-constexpr std::string_view DistanceUnitAU = "AU";
-constexpr std::string_view DistanceUnitLighthour = "lighthour";
-constexpr std::string_view DistanceUnitLightday = "lightday";
-constexpr std::string_view DistanceUnitLightmonth = "lightmonth";
-constexpr std::string_view DistanceUnitLightyear = "lightyear";
-constexpr std::string_view DistanceUnitParsec = "parsec";
-constexpr std::string_view DistanceUnitKiloparsec = "kiloparsec";
-constexpr std::string_view DistanceUnitMegaparsec = "megaparsec";
-constexpr std::string_view DistanceUnitGigaparsec = "gigaparsec";
-constexpr std::string_view DistanceUnitGigalightyear = "gigalightyear";
-constexpr std::string_view DistanceUnitThou = "thou";
-constexpr std::string_view DistanceUnitInch = "inch";
-constexpr std::string_view DistanceUnitFoot = "foot";
-constexpr std::string_view DistanceUnitYard = "yard";
-constexpr std::string_view DistanceUnitChain = "chain";
-constexpr std::string_view DistanceUnitFurlong = "furlong";
-constexpr std::string_view DistanceUnitMile = "mile";
-constexpr std::string_view DistanceUnitLeague = "league";
+struct DistanceUnitName {
+    std::string_view singular;
+    std::string_view plural;
+    std::string_view abbreviation;
+};
 
-
-// Assumption:  Unit names are sequential in memory
-constexpr std::string_view DistanceUnitNanometers = "nanometers";
-constexpr std::string_view DistanceUnitMicrometers = "micrometers";
-constexpr std::string_view DistanceUnitMillimeters = "millimeters";
-constexpr std::string_view DistanceUnitCentimeters = "centimeters";
-constexpr std::string_view DistanceUnitDecimeters = "decimeters";
-constexpr std::string_view DistanceUnitMeters = "meters";
-constexpr std::string_view DistanceUnitKilometers = "km";
-constexpr std::string_view DistanceUnitAUs = "AU";
-constexpr std::string_view DistanceUnitLighthours = "lighthours";
-constexpr std::string_view DistanceUnitLightdays = "lightdays";
-constexpr std::string_view DistanceUnitLightmonths = "lightmonths";
-constexpr std::string_view DistanceUnitLightyears = "lightyears";
-constexpr std::string_view DistanceUnitParsecs = "parsecs";
-constexpr std::string_view DistanceUnitKiloparsecs = "kiloparsecs";
-constexpr std::string_view DistanceUnitMegaparsecs = "megaparsecs";
-constexpr std::string_view DistanceUnitGigaparsecs = "gigaparsecs";
-constexpr std::string_view DistanceUnitGigalightyears = "gigalightyears";
-constexpr std::string_view DistanceUnitThous = "thou";
-constexpr std::string_view DistanceUnitInches = "inches";
-constexpr std::string_view DistanceUnitFeet = "feet";
-constexpr std::string_view DistanceUnitYards = "yards";
-constexpr std::string_view DistanceUnitChains = "chains";
-constexpr std::string_view DistanceUnitFurlongs = "furlongs";
-constexpr std::string_view DistanceUnitMiles = "miles";
-constexpr std::string_view DistanceUnitLeagues = "leagues";
-
-constexpr std::array<DistanceUnit, static_cast<int>(DistanceUnit::League) + 1>
+constexpr std::array<DistanceUnit, static_cast<int>(DistanceUnit::NauticalMile) + 1>
 DistanceUnits = {
     DistanceUnit::Nanometer, DistanceUnit::Micrometer, DistanceUnit::Millimeter,
     DistanceUnit::Centimeter, DistanceUnit::Decimeter, DistanceUnit::Meter,
@@ -129,117 +82,92 @@ DistanceUnits = {
     DistanceUnit::Parsec, DistanceUnit::Kiloparsec, DistanceUnit::Megaparsec,
     DistanceUnit::Gigaparsec, DistanceUnit::Gigalightyear, DistanceUnit::Thou,
     DistanceUnit::Inch, DistanceUnit::Foot, DistanceUnit::Yard, DistanceUnit::Chain,
-    DistanceUnit::Furlong, DistanceUnit::Mile, DistanceUnit::League
+    DistanceUnit::Furlong, DistanceUnit::Mile, DistanceUnit::League,
+    DistanceUnit::NauticalMile
 };
 
-constexpr std::array<std::string_view, static_cast<int>(DistanceUnit::League) + 1>
-DistanceUnitNamesSingular = {
-    DistanceUnitNanometer, DistanceUnitMicrometer, DistanceUnitMillimeter,
-    DistanceUnitCentimeter, DistanceUnitDecimeter, DistanceUnitMeter,
-    DistanceUnitKilometer, DistanceUnitAU, DistanceUnitLighthour,
-    DistanceUnitLightday, DistanceUnitLightmonth, DistanceUnitLightyear,
-    DistanceUnitParsec, DistanceUnitKiloparsec, DistanceUnitMegaparsec,
-    DistanceUnitGigaparsec, DistanceUnitGigalightyear, DistanceUnitThou, DistanceUnitInch,
-    DistanceUnitFoot, DistanceUnitYard, DistanceUnitChain, DistanceUnitFurlong,
-    DistanceUnitMile, DistanceUnitLeague
-};
-
-constexpr std::array<std::string_view, static_cast<int>(DistanceUnit::League) + 1>
-DistanceUnitNamesPlural = {
-    DistanceUnitNanometers, DistanceUnitMicrometers, DistanceUnitMillimeters,
-    DistanceUnitCentimeters, DistanceUnitDecimeters, DistanceUnitMeters,
-    DistanceUnitKilometers, DistanceUnitAUs, DistanceUnitLighthours,
-    DistanceUnitLightdays, DistanceUnitLightmonths, DistanceUnitLightyears,
-    DistanceUnitParsecs, DistanceUnitKiloparsecs, DistanceUnitMegaparsecs,
-    DistanceUnitGigaparsecs, DistanceUnitGigalightyears, DistanceUnitThous,
-    DistanceUnitInches, DistanceUnitFeet, DistanceUnitYards, DistanceUnitChains,
-    DistanceUnitFurlongs, DistanceUnitMile, DistanceUnitLeague
-};
+// Note that the syntax here is required when initializing constexpr std::arrays with
+// structs
+constexpr std::array<DistanceUnitName, static_cast<int>(DistanceUnit::NauticalMile) + 1>
+DistanceUnitNames { {
+    { "Nanometer", "Nanometers", "nm" },
+    { "Micrometer", "Micrometers", "um" },
+    { "Millimeter", "Millimeters", "mm" },
+    { "Centimeter", "Centimeters", "cm" },
+    { "Decimeter", "Decimeters", "dm" },
+    { "Meter", "Meters", "m" },
+    { "Kilometer", "Kilometers", "km" },
+    { "AU", "AU", "au" },
+    { "Lighthour", "Lighthours", "lh" },
+    { "Lightday", "Lightdays", "ld" },
+    { "Lightmonth", "Lightmonths", "lm" },
+    { "Lightyear", "Lightyears", "ly" },
+    { "Parsec", "Parsecs", "pc" },
+    { "Kiloparsec", "Kiloparsecs", "kpc" },
+    { "Megaparsec", "Megaparsecs", "Mpc" },
+    { "Gigaparsec", "Gigaparsecs", "Gpc" },
+    { "Gigalightyear", "Gigalightyears", "Gly" },
+    { "Thou", "Thou", "th" },
+    { "Inch", "Inches", "in" },
+    { "Foot", "Feet", "ft" },
+    { "Yard", "Yards", "yd" },
+    { "Chain", "Chains", "ch" },
+    { "Furlong", "Furlongs", "fur" },
+    { "Mile", "Miles", "mi" },
+    { "League", "Leagues", "league" },
+    { "Nautical Mile", "Nautical Miles", "NM" }
+}};
 
 constexpr bool isValidDistanceUnitName(std::string_view name) {
-    for (std::string_view val : DistanceUnitNamesSingular) {
-        if (val == name) {
-            return true;
-        }
-    }
-
-    for (std::string_view val : DistanceUnitNamesPlural) {
-        if (val == name) {
+    for (DistanceUnit unit : DistanceUnits) {
+        const DistanceUnitName unitName = DistanceUnitNames[static_cast<int>(unit)];
+        if (name == unitName.singular || name == unitName.plural ||
+            name == unitName.abbreviation)
+        {
             return true;
         }
     }
     return false;
 }
 
-constexpr std::string_view nameForDistanceUnit(DistanceUnit unit, bool pluralForm = false)
+constexpr std::string_view nameForDistanceUnit(DistanceUnit unit,
+                                               bool usePluralForm = false)
 {
-    switch (unit) {
-        case DistanceUnit::Nanometer:
-        case DistanceUnit::Micrometer:
-        case DistanceUnit::Millimeter:
-        case DistanceUnit::Centimeter:
-        case DistanceUnit::Decimeter:
-        case DistanceUnit::Meter:
-        case DistanceUnit::Kilometer:
-        case DistanceUnit::AU:
-        case DistanceUnit::Lighthour:
-        case DistanceUnit::Lightday:
-        case DistanceUnit::Lightmonth:
-        case DistanceUnit::Lightyear:
-        case DistanceUnit::Parsec:
-        case DistanceUnit::Kiloparsec:
-        case DistanceUnit::Megaparsec:
-        case DistanceUnit::Gigaparsec:
-        case DistanceUnit::Gigalightyear:
-        case DistanceUnit::Thou:
-        case DistanceUnit::Inch:
-        case DistanceUnit::Foot:
-        case DistanceUnit::Yard:
-        case DistanceUnit::Chain:
-        case DistanceUnit::Furlong:
-        case DistanceUnit::Mile:
-        case DistanceUnit::League:
-            if (pluralForm) {
-                return DistanceUnitNamesPlural[static_cast<int>(unit)];
-            }
-            else {
-                return DistanceUnitNamesSingular[static_cast<int>(unit)];
-            }
-        default:
-            throw ghoul::MissingCaseException();
-    }
+    const DistanceUnitName unitName = DistanceUnitNames[static_cast<int>(unit)];
+    return usePluralForm ? unitName.plural : unitName.singular;
+}
+
+constexpr std::string_view abbreviationForDistanceUnit(DistanceUnit unit) {
+    return DistanceUnitNames[static_cast<int>(unit)].abbreviation;
 }
 
 constexpr DistanceUnit distanceUnitFromString(std::string_view unitName) {
-    int found = -1;
     int i = 0;
-    for (std::string_view val : DistanceUnitNamesSingular) {
-        if (val == unitName) {
-            found = i;
-            break;
+    for (DistanceUnit unit : DistanceUnits) {
+        const DistanceUnitName name = DistanceUnitNames[static_cast<int>(unit)];
+        if (name.singular == unitName || name.plural == unitName ||
+            name.abbreviation == unitName)
+        {
+            return static_cast<DistanceUnit>(i);
         }
         i++;
     }
 
-    i = 0;
-    for (std::string_view val : DistanceUnitNamesPlural) {
-        if (val == unitName) {
-            found = i;
-            break;
-        }
-        i++;
-    }
-
-
-    if (found != -1) {
-        return static_cast<DistanceUnit>(found);
-    }
-    else {
-        throw ghoul::MissingCaseException();
-    }
+    throw ghoul::MissingCaseException();
 }
 
-
+constexpr std::vector<std::string> distanceUnitList() {
+    std::vector<std::string> res(DistanceUnits.size());
+    std::transform(
+        DistanceUnits.begin(),
+        DistanceUnits.end(),
+        res.begin(),
+        [](DistanceUnit unit) {
+            return std::string(nameForDistanceUnit(unit));
+        }
+    );
+    return res;
+}
 
 std::pair<double, std::string_view> simplifyDistance(double meters,
     bool forceSingularForm = false);
@@ -296,6 +224,8 @@ constexpr double convertMeters(double meters, DistanceUnit requestedUnit) {
             return meters / distanceconstants::Mile;
         case DistanceUnit::League:
             return meters / (3.0 * distanceconstants::Mile);
+        case DistanceUnit::NauticalMile:
+            return meters / distanceconstants::NauticalMile;
         default:
             throw ghoul::MissingCaseException();
     }
@@ -353,6 +283,8 @@ constexpr double toMeter(DistanceUnit unit) {
             return distanceconstants::Mile;
         case DistanceUnit::League:
             return 3.0 * distanceconstants::Mile;
+        case DistanceUnit::NauticalMile:
+            return distanceconstants::NauticalMile;
         default:
             throw ghoul::MissingCaseException();
     }

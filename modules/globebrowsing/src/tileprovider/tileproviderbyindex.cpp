@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -71,6 +71,12 @@ namespace {
 
         // The list of all TileProviders and the indices at which they are used.
         std::vector<IndexProvider> tileProviders;
+
+        // The layer needs to know about the LayerGroupID this but we don't want it to be
+        // part of the parameters struct as that would mean it would be visible to the end
+        // user, which we don't want since this value just comes from whoever creates it,
+        // not the user.
+        int layerGroupID [[codegen::private()]];
     };
 #include "tileproviderbyindex_codegen.cpp"
 } // namespace
@@ -86,22 +92,8 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
 
     Parameters p = codegen::bake<Parameters>(dictionary);
 
-    // For now we need to inject the LayerGroupID this way. We don't want it to be part of
-    // the parameters struct as that would mean it would be visible to the end user, which
-    // we don't want since this value just comes from whoever creates it, not the user
-    ghoul_assert(dictionary.hasValue<int>("LayerGroupID"), "No Layer Group ID provided");
-    const layers::Group::ID group = static_cast<layers::Group::ID>(
-        dictionary.value<int>("LayerGroupID")
-    );
-
-    layers::Layer::ID typeID = layers::Layer::ID::DefaultTileProvider;
-    if (p.defaultTileProvider.hasValue<std::string>("Type")) {
-        const std::string type = p.defaultTileProvider.value<std::string>("Type");
-        typeID = ghoul::from_string<layers::Layer::ID>(type);
-    }
-
-    p.defaultTileProvider.setValue("LayerGroupID", static_cast<int>(group));
-    _defaultTileProvider = createFromDictionary(typeID, p.defaultTileProvider);
+    p.defaultTileProvider.setValue("LayerGroupID", p.layerGroupID);
+    _defaultTileProvider = createFromDictionary(p.defaultTileProvider);
 
     for (Parameters::IndexProvider& ip : p.tileProviders) {
         const TileIndex tileIndex = TileIndex(
@@ -110,17 +102,9 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
             static_cast<uint8_t>(ip.index.level)
         );
 
-        layers::Layer::ID providerID = layers::Layer::ID::DefaultTileProvider;
-        if (ip.tileProvider.hasValue<std::string>("Type")) {
-            const std::string type = ip.tileProvider.value<std::string>("Type");
-            providerID = ghoul::from_string<layers::Layer::ID>(type);
-        }
 
-        ip.tileProvider.setValue("LayerGroupID", static_cast<int>(group));
-        std::unique_ptr<TileProvider> stp = createFromDictionary(
-            providerID,
-            ip.tileProvider
-        );
+        ip.tileProvider.setValue("LayerGroupID", p.layerGroupID);
+        std::unique_ptr<TileProvider> stp = createFromDictionary(ip.tileProvider);
         const TileIndex::TileHashKey key = tileIndex.hashKey();
         _providers.emplace(key, std::move(stp));
     }

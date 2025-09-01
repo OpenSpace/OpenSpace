@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,6 +39,22 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableInterpolatedPoints";
+
+    void triggerInterpolation(std::string_view identifier, float v, float d) {
+        using namespace openspace;
+
+        std::string script = std::format(
+            "openspace.setPropertyValueSingle(\"{}\", {}, {})",
+            identifier, v, d
+        );
+        // No syncing, as this was triggered from a property change (which happened
+        // based on an already synced script)
+        global::scriptEngine->queueScript({
+            .code = script,
+            .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+        });
+    }
 
     constexpr openspace::properties::Property::PropertyInfo InterpolationValueInfo = {
         "Value",
@@ -141,10 +157,10 @@ namespace {
 
         struct Interpolation {
             // [[codegen::verbatim(InterpolationValueInfo.description)]]
-            std::optional<double> value;
+            std::optional<float> value;
 
             // [[codegen::verbatim(InterpolationSpeedInfo.description)]]
-            std::optional<double> speed;
+            std::optional<float> speed;
 
             // [[codegen::verbatim(UseSplineInfo.description)]]
             std::optional<bool> useSplineInterpolation;
@@ -180,66 +196,51 @@ RenderableInterpolatedPoints::Interpolation::Interpolation()
 {
     addProperty(value);
 
-    auto triggerInterpolation = [](std::string_view identifier, float v, float d) {
-        std::string script = std::format(
-            "openspace.setPropertyValueSingle(\"{}\", {}, {})",
-            identifier, v, d
-        );
-        // No syncing, as this was triggered from a property change (which happened
-        // based on an already synced script)
-        global::scriptEngine->queueScript({
-            .code = script,
-            .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
-            .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
-        });
-    };
-
-    interpolateToEnd.onChange([triggerInterpolation, this]() {
-        float remaining = value.maxValue() - value;
-        float duration = remaining / speed;
+    interpolateToEnd.onChange([this]() {
+        const float remaining = value.maxValue() - value;
+        const float duration = remaining / speed;
         triggerInterpolation(
             value.uri(),
             value.maxValue(),
             duration
         );
     });
+    addProperty(interpolateToEnd);
 
-    interpolateToStart.onChange([triggerInterpolation, this]() {
-        float duration = value / speed;
+    interpolateToStart.onChange([this]() {
+        const float duration = value / speed;
         triggerInterpolation(value.uri(), 0.f, duration);
     });
-
-    interpolateToNextStep.onChange([triggerInterpolation, this]() {
-        float prevValue = glm::floor(value);
-        float newValue = glm::min(prevValue + 1.f, value.maxValue());
-        float duration = 1.f / speed;
-        triggerInterpolation(value.uri(), newValue, duration);
-    });
-
-    interpolateToPrevStep.onChange([triggerInterpolation, this]() {
-        float prevValue = glm::ceil(value);
-        float newValue = glm::max(prevValue - 1.f, value.minValue());
-        float duration = 1.f / speed;
-        triggerInterpolation(value.uri(), newValue, duration);
-    });
-
-    addProperty(interpolateToEnd);
     addProperty(interpolateToStart);
+
+    interpolateToNextStep.onChange([this]() {
+        const float prevValue = glm::floor(value);
+        const float newValue = glm::min(prevValue + 1.f, value.maxValue());
+        const float duration = 1.f / speed;
+        triggerInterpolation(value.uri(), newValue, duration);
+    });
     addProperty(interpolateToNextStep);
+
+    interpolateToPrevStep.onChange([this]() {
+        const float prevValue = glm::ceil(value);
+        const float newValue = glm::max(prevValue - 1.f, value.minValue());
+        const float duration = 1.f / speed;
+        triggerInterpolation(value.uri(), newValue, duration);
+    });
     addProperty(interpolateToPrevStep);
+
     addProperty(speed);
 
     goToNextStep.onChange([this]() {
         float prevValue = glm::floor(value);
         value = glm::min(prevValue + 1.f, value.maxValue());
     });
+    addProperty(goToNextStep);
 
     goToPrevStep.onChange([this]() {
         float prevValue = glm::ceil(value);
         value = glm::max(prevValue - 1.f, value.minValue());
     });
-
-    addProperty(goToNextStep);
     addProperty(goToPrevStep);
 
     nSteps.setReadOnly(true);
@@ -257,12 +258,8 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
     addPropertySubOwner(_interpolation);
 
     if (p.interpolation.has_value()) {
-        _interpolation.value = static_cast<float>(
-            p.interpolation->value.value_or(_interpolation.value)
-        );
-        _interpolation.speed = static_cast<float>(
-            p.interpolation->speed.value_or(_interpolation.speed)
-        );
+        _interpolation.value = p.interpolation->value.value_or(_interpolation.value);
+        _interpolation.speed = p.interpolation->speed.value_or(_interpolation.speed);
         _interpolation.useSpline = p.interpolation->useSplineInterpolation.value_or(
             _interpolation.useSpline
         );
@@ -353,7 +350,7 @@ void RenderableInterpolatedPoints::setExtraUniforms() {
 }
 
 void RenderableInterpolatedPoints::preUpdate() {
-    if (_shouldReinitializeBufferdata) {
+    if (_shouldReinitializeBufferdata) [[unlikely]] {
         initializeBufferData();
         _shouldReinitializeBufferdata = false;
     }
@@ -387,11 +384,10 @@ void RenderableInterpolatedPoints::addPositionDataForPoint(unsigned int index,
                                                            std::vector<float>& result,
                                                            double& maxRadius) const
 {
-    using namespace dataloader;
     auto [firstIndex, secondIndex] = interpolationIndices(index);
 
-    const Dataset::Entry& e0 = _dataset.entries[firstIndex];
-    const Dataset::Entry& e1 = _dataset.entries[secondIndex];
+    const dataloader::Dataset::Entry& e0 = _dataset.entries[firstIndex];
+    const dataloader::Dataset::Entry& e1 = _dataset.entries[secondIndex];
 
     glm::dvec3 position0 = transformedPosition(e0);
     glm::dvec3 position1 = transformedPosition(e1);
@@ -418,8 +414,8 @@ void RenderableInterpolatedPoints::addPositionDataForPoint(unsigned int index,
             maxAllowedindex
         );
 
-        const Dataset::Entry& e00 = _dataset.entries[beforeIndex];
-        const Dataset::Entry& e11 = _dataset.entries[afterIndex];
+        const dataloader::Dataset::Entry& e00 = _dataset.entries[beforeIndex];
+        const dataloader::Dataset::Entry& e11 = _dataset.entries[afterIndex];
         glm::dvec3 positionBefore = transformedPosition(e00);
         glm::dvec3 positionAfter = transformedPosition(e11);
 
@@ -436,10 +432,9 @@ void RenderableInterpolatedPoints::addPositionDataForPoint(unsigned int index,
 void RenderableInterpolatedPoints::addColorAndSizeDataForPoint(unsigned int index,
                                                         std::vector<float>& result) const
 {
-    using namespace dataloader;
     auto [firstIndex, secondIndex] = interpolationIndices(index);
-    const Dataset::Entry& e0 = _dataset.entries[firstIndex];
-    const Dataset::Entry& e1 = _dataset.entries[secondIndex];
+    const dataloader::Dataset::Entry& e0 = _dataset.entries[firstIndex];
+    const dataloader::Dataset::Entry& e1 = _dataset.entries[secondIndex];
 
     if (hasColorData()) {
         const int colorParamIndex = currentColorParameterIndex();
@@ -463,10 +458,9 @@ void RenderableInterpolatedPoints::addColorAndSizeDataForPoint(unsigned int inde
 void RenderableInterpolatedPoints::addOrientationDataForPoint(unsigned int index,
                                                         std::vector<float>& result) const
 {
-    using namespace dataloader;
     auto [firstIndex, secondIndex] = interpolationIndices(index);
-    const Dataset::Entry& e0 = _dataset.entries[firstIndex];
-    const Dataset::Entry& e1 = _dataset.entries[secondIndex];
+    const dataloader::Dataset::Entry& e0 = _dataset.entries[firstIndex];
+    const dataloader::Dataset::Entry& e1 = _dataset.entries[secondIndex];
 
     glm::quat q0 = orientationQuaternion(e0);
     glm::quat q1 = orientationQuaternion(e1);
@@ -566,28 +560,27 @@ float RenderableInterpolatedPoints::computeCurrentLowerValue() const {
     }
 
     const float maxTValue = _interpolation.value.maxValue();
-    float maxAllowedT0 = glm::max(maxTValue - 1.f, 0.f);
+    const float maxAllowedT0 = glm::max(maxTValue - 1.f, 0.f);
     t0 = glm::clamp(t0, 0.f, maxAllowedT0);
     return t0;
 }
 
 float RenderableInterpolatedPoints::computeCurrentUpperValue() const {
-    float t0 = computeCurrentLowerValue();
-    float t1 = t0 + 1.f;
-    t1 = glm::clamp(t1, 0.f, _interpolation.value.maxValue());
+    const float t0 = computeCurrentLowerValue();
+    const float t1 = glm::clamp(t0 + 1.f, 0.f, _interpolation.value.maxValue());
     return t1;
 }
 
 std::pair<size_t, size_t>
 RenderableInterpolatedPoints::interpolationIndices(unsigned int index) const
 {
-    float t0 = computeCurrentLowerValue();
-    float t1 = computeCurrentUpperValue();
-    unsigned int t0Index = static_cast<unsigned int>(t0);
-    unsigned int t1Index = static_cast<unsigned int>(t1);
+    const float t0 = computeCurrentLowerValue();
+    const float t1 = computeCurrentUpperValue();
+    const unsigned int t0Index = static_cast<unsigned int>(t0);
+    const unsigned int t1Index = static_cast<unsigned int>(t1);
 
-    size_t lower = size_t(t0Index * _nDataPoints + index);
-    size_t upper = size_t(t1Index * _nDataPoints + index);
+    const size_t lower = size_t(t0Index * _nDataPoints + index);
+    const size_t upper = size_t(t1Index * _nDataPoints + index);
 
     return { lower, upper };
 }

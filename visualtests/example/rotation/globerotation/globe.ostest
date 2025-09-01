@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/rotation/globerotation/globe.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "GlobeRotation_Example",
+        "position": [
+          2.761828258741051,
+          0.4606552493719985,
+          1.3704697280267077
+        ],
+        "pitch": 2.129054965660454e-07,
+        "referenceFrame": "Root",
+        "up": [
+          0.4504756641672802,
+          -0.04865928561962907,
+          -0.8914616929044317
+        ],
+        "yaw": 2.0588649601861256e-07,
+        "timestamp": "2025 JUL 13 12:45:06"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

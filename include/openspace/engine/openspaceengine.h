@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,12 +26,12 @@
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/scene/profile.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
@@ -71,6 +71,8 @@ struct CommandlineArguments {
     std::optional<std::string> profile;
     std::optional<std::string> propertyVisibility;
     std::optional<bool> bypassLauncher;
+
+    std::optional<std::string> task;
 };
 
 class OpenSpaceEngine : public properties::PropertyOwner {
@@ -132,7 +134,15 @@ public:
     AssetManager& assetManager();
     LoadingScreen* loadingScreen();
 
+    void invalidatePropertyCache();
+    void invalidatePropertyOwnerCache();
+    const std::vector<properties::Property*>& allProperties() const;
+    const std::vector<properties::PropertyOwner*>& allPropertyOwners() const;
+
     void createUserDirectoriesIfNecessary();
+
+    uint64_t ramInUse() const;
+    uint64_t vramInUse() const;
 
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
@@ -148,6 +158,7 @@ private:
 
     properties::BoolProperty _printEvents;
     properties::OptionProperty _visibility;
+    properties::BoolProperty _showPropertyConfirmationDialog;
     properties::FloatProperty _fadeOnEnableDuration;
     properties::BoolProperty _disableAllMouseInputs;
 
@@ -171,6 +182,12 @@ private:
 
     int _nextCallbackHandle = 0;
     std::vector<std::pair<CallbackHandle, ModeChangeCallback>> _modeChangeCallbacks;
+
+    mutable bool _isAllPropertiesCacheDirty = true;
+    mutable std::vector<properties::Property*> _allPropertiesCache;
+
+    mutable bool _isAllPropertyOwnersCacheDirty = true;
+    mutable std::vector<properties::PropertyOwner*> _allPropertyOwnersCache;
 };
 
 /**

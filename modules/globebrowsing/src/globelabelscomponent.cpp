@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -280,10 +280,7 @@ GlobeLabelsComponent::GlobeLabelsComponent()
     , _fadeOutEnabled(FadeOutEnabledInfo, false)
     , _disableCulling(DisableCullingInfo, false)
     , _distanceEPS(DistanceEPSInfo, 100000.f, 1000.f, 10000000.f)
-    , _alignmentOption(
-        AlignmentOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _alignmentOption(AlignmentOptionInfo)
 {
     addProperty(_enabled);
     addProperty(_color);
@@ -322,7 +319,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
         return;
     }
 
-    const bool loadSuccess = loadLabelsData(absPath(*p.fileName));
+    const bool loadSuccess = loadLabelsData(*p.fileName);
     if (!loadSuccess) {
         return;
     }
@@ -472,10 +469,8 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
             }
             std::strncpy(lEntry.feature, token.c_str(), 255);
 
-            GlobeBrowsingModule* _globeBrowsingModule =
-                global::moduleEngine->module<openspace::GlobeBrowsingModule>();
-            lEntry.geoPosition = _globeBrowsingModule->cartesianCoordinatesFromGeo(
-                *_globe,
+            lEntry.geoPosition = cartesianCoordinatesFromGeo(
+                *static_cast<SceneGraphNode*>(_globe->owner()),
                 lEntry.latitude,
                 lEntry.longitude,
                 lEntry.diameter

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -94,6 +94,12 @@ namespace {
         "The labels for the grid."
     };
 
+    // This `Renderable` can be used to create a planar grid, to for example illustrate
+    // distances in 3D space.
+    //
+    // The grid is created by specifying a size and how many segments to split each
+    // dimension into. A secondary color can be used to highlight grid lines with a
+    // given interval.
     struct [[codegen::Dictionary(RenderableGrid)]] Parameters {
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
@@ -117,8 +123,7 @@ namespace {
         std::optional<glm::vec2> size;
 
         // [[codegen::verbatim(LabelsInfo.description)]]
-        std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("labelscomponent")]];
+        std::optional<ghoul::Dictionary> labels [[codegen::reference("labelscomponent")]];
     };
 #include "renderablegrid_codegen.cpp"
 } // namespace
@@ -182,7 +187,7 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderableGrid::isReady() const {
-    return _hasLabels ? _gridProgram && _labels->isReady() : _gridProgram != nullptr;
+    return _gridProgram && (_hasLabels ? _labels->isReady() : true);
 }
 
 void RenderableGrid::initialize() {
@@ -237,7 +242,7 @@ void RenderableGrid::deinitializeGL() {
     _gridProgram = nullptr;
 }
 
-void RenderableGrid::render(const RenderData& data, RendererTasks&){
+void RenderableGrid::render(const RenderData& data, RendererTasks&) {
     _gridProgram->activate();
 
     const glm::dmat4 modelTransform = calcModelTransform(data);
@@ -273,9 +278,9 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
     // Change GL state:
 #ifndef __APPLE__
     glLineWidth(_lineWidth);
-#else
+#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
     glLineWidth(1.f);
-#endif
+#endif // __APPLE__
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
@@ -288,9 +293,9 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
     // Render major grid
 #ifndef __APPLE__
     glLineWidth(_highlightLineWidth);
-#else
+#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
     glLineWidth(1.f);
-#endif
+#endif // __APPLE__
     _gridProgram->setUniform("gridColor", _highlightColor);
 
     glBindVertexArray(_highlightVaoID);
@@ -313,7 +318,7 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
 }
 
 void RenderableGrid::update(const UpdateData&) {
-    if (!_gridIsDirty) {
+    if (!_gridIsDirty) [[likely]] {
         return;
     }
 

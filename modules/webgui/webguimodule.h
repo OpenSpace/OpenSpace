@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,8 +27,8 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/list/stringlistproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <ghoul/misc/process.h>
@@ -44,11 +44,14 @@ public:
     using EndpointCallback = std::function<void(const std::string&, bool)>;
 
     static constexpr const char* Name = "WebGui";
+
     WebGuiModule();
     int port() const;
     std::string address() const;
     CallbackHandle addEndpointChangeCallback(EndpointCallback cb);
     void removeEndpointChangeCallback(CallbackHandle);
+
+    static documentation::Documentation Documentation();
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;

@@ -15,8 +15,7 @@ local Layer = {
   Name = "LAMO [Local]",
   Enabled = asset.enabled,
   ZIndex = 5,
-  FilePath = textures .. "ceres_lamo_4096x2048.png",
-  CacheSettings = { Enabled = false }
+  FilePath = textures .. "ceres_lamo_4096x2048.png"
 }
 
 

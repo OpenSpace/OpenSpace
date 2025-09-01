@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,8 +27,8 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/matrix/dmat4property.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
@@ -42,7 +42,7 @@ namespace openspace {
 
 class RenderableCartesianAxes : public Renderable {
 public:
-    RenderableCartesianAxes(const ghoul::Dictionary& dictionary);
+    explicit RenderableCartesianAxes(const ghoul::Dictionary& dictionary);
     ~RenderableCartesianAxes() override = default;
 
     void initializeGL() override;

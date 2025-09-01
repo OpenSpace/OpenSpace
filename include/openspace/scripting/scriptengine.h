@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -76,7 +76,7 @@ public:
 
         /// A callback that will be called when the script finishes executing and that
         /// provides access to the return value of the script
-        Callback callback;
+        Callback callback = Callback();
     };
 
     static constexpr std::string_view OpenSpaceLibraryName = "openspace";
@@ -102,7 +102,6 @@ public:
     void addLibrary(LuaLibrary library);
     bool hasLibrary(const std::string& name);
 
-
     virtual void preSync(bool isMaster) override;
     virtual void encode(SyncBuffer* syncBuffer) override;
     virtual void decode(SyncBuffer* syncBuffer) override;
@@ -110,6 +109,18 @@ public:
 
     void queueScript(Script script);
     void queueScript(std::string script);
+
+    // This function should only be used by external classes if you are sure that the
+    // passed script should really be executed at this point. Otherwise the #queueScript
+    // should be used
+    bool runScript(const Script& script);
+
+    // Runs the `script` every `timeout` seconds wallclock time
+    void registerRepeatedScript(std::string identifier, std::string script,
+        double timeout, std::string preScript = "", std::string postScript = "");
+    void removeRepeatedScript(std::string_view identifier);
+
+    void scheduleScript(std::string script, double delay);
 
     std::vector<std::string> allLuaFunctions() const;
     const std::vector<LuaLibrary>& allLuaLibraries() const;
@@ -126,7 +137,6 @@ private:
 
     void addBaseLibrary();
 
-    bool runScript(const Script& script);
 
     ghoul::lua::LuaState _state;
     std::vector<LuaLibrary> _registeredLibraries;
@@ -140,6 +150,28 @@ private:
     std::queue<Script> _masterScriptQueue;
 
     std::vector<std::string> _scriptsToSync;
+
+    struct RepeatedScriptInfo {
+        /// This script is run everytime `timeout` seconds have passed
+        std::string script;
+
+        /// This script is run when the repeated script is unregistered
+        std::string postScript;
+
+        std::string identifier;
+        double timeout = 0.0;
+        double lastRun = 0.0;
+    };
+    std::vector<RepeatedScriptInfo> _repeatedScripts;
+
+    struct ScheduledScriptInfo {
+        // The script that should be executed
+        std::string script;
+
+        // The application timestamp at which time the script should be executed
+        double timestamp = 0.0;
+    };
+    std::vector<ScheduledScriptInfo> _scheduledScripts;
 
     // Logging variables
     bool _logFileExists = false;

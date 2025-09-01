@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,8 +32,8 @@
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
-#include <openspace/interaction/keyframerecording.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/keyframerecordinghandler.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -107,11 +107,11 @@ void registerCoreClasses(scripting::ScriptEngine& engine) {
     engine.addLibrary(Time::luaLibrary());
     engine.addLibrary(interaction::ActionManager::luaLibrary());
     engine.addLibrary(interaction::KeybindingManager::luaLibrary());
-    engine.addLibrary(interaction::KeyframeRecording::luaLibrary());
+    engine.addLibrary(interaction::KeyframeRecordingHandler::luaLibrary());
     engine.addLibrary(interaction::NavigationHandler::luaLibrary());
     engine.addLibrary(interaction::OrbitalNavigator::luaLibrary());
     engine.addLibrary(interaction::PathNavigator::luaLibrary());
-    engine.addLibrary(interaction::SessionRecording::luaLibrary());
+    engine.addLibrary(interaction::SessionRecordingHandler::luaLibrary());
     engine.addLibrary(scripting::ScriptScheduler::luaLibrary());
     engine.addLibrary(scripting::generalSystemCapabilities());
     engine.addLibrary(scripting::openglSystemCapabilities());

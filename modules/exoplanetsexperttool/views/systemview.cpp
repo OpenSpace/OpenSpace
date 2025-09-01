@@ -32,6 +32,7 @@
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scripting/scriptengine.h>
 #include <modules/imgui/include/imgui_include.h>
 
 namespace {

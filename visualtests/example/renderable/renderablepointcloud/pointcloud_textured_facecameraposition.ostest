@@ -1,0 +1,31 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderablepointcloud/pointcloud_textured_facecameraposition.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderablePointCloud_Example_Textured_FaceCameraPosition",
+        "position": [
+          85168957.41774313,
+          73790110.28810193,
+          66036958.391623214
+        ],
+        "pitch": -0.005462881077919689,
+        "up": [
+          0.13302776880195175,
+          0.5712706642303452,
+          -0.8099095263777275
+        ],
+        "yaw": -0.004130253806717332,
+        "timestamp": "2025 JUL 13 12:11:05"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

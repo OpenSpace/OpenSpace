@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2024                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -26,6 +26,7 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   dashboard/dashboarditemangle.h
+  dashboard/dashboarditemcameraorientation.h
   dashboard/dashboarditemdate.h
   dashboard/dashboarditemdistance.h
   dashboard/dashboarditemelapsedtime.h
@@ -37,6 +38,7 @@ set(HEADER_FILES
   dashboard/dashboarditemsimulationincrement.h
   dashboard/dashboarditemspacing.h
   dashboard/dashboarditemtext.h
+  dashboard/dashboarditemtimevaryingtext.h
   dashboard/dashboarditemvelocity.h
   lightsource/cameralightsource.h
   lightsource/scenegraphlightsource.h
@@ -50,6 +52,7 @@ set(HEADER_FILES
   rendering/pointcloud/sizemappingcomponent.h
   rendering/renderablecartesianaxes.h
   rendering/renderabledisc.h
+  rendering/renderabledistancelabel.h
   rendering/renderablelabel.h
   rendering/renderablemodel.h
   rendering/renderablenodearrow.h
@@ -62,6 +65,7 @@ set(HEADER_FILES
   rendering/renderablesphere.h
   rendering/renderablesphereimagelocal.h
   rendering/renderablesphereimageonline.h
+  rendering/renderableswitch.h
   rendering/renderabletimevaryingsphere.h
   rendering/renderabletrail.h
   rendering/renderabletrailorbit.h
@@ -70,18 +74,28 @@ set(HEADER_FILES
   rendering/screenspaceframebuffer.h
   rendering/screenspaceimagelocal.h
   rendering/screenspaceimageonline.h
+  rendering/screenspaceinsetblackout.h
+  rendering/screenspacerenderablerenderable.h
+  rendering/screenspacetimevaryingimageonline.h
   rotation/timelinerotation.h
   rotation/constantrotation.h
   rotation/fixedrotation.h
+  rotation/globerotation.h
   rotation/luarotation.h
+  rotation/multirotation.h
   rotation/staticrotation.h
   scale/luascale.h
+  scale/multiscale.h
   scale/nonuniformstaticscale.h
   scale/staticscale.h
   scale/timedependentscale.h
+  scale/timelinescale.h
+  task/convertmodeltask.h
   timeframe/timeframeinterval.h
   timeframe/timeframeunion.h
+  translation/globetranslation.h
   translation/luatranslation.h
+  translation/multitranslation.h
   translation/statictranslation.h
   translation/timelinetranslation.h
 )
@@ -89,6 +103,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   dashboard/dashboarditemangle.cpp
+  dashboard/dashboarditemcameraorientation.cpp
   dashboard/dashboarditemdate.cpp
   dashboard/dashboarditemdistance.cpp
   dashboard/dashboarditemelapsedtime.cpp
@@ -100,6 +115,7 @@ set(SOURCE_FILES
   dashboard/dashboarditemsimulationincrement.cpp
   dashboard/dashboarditemspacing.cpp
   dashboard/dashboarditemtext.cpp
+  dashboard/dashboarditemtimevaryingtext.cpp
   dashboard/dashboarditemvelocity.cpp
   lightsource/cameralightsource.cpp
   lightsource/scenegraphlightsource.cpp
@@ -113,6 +129,7 @@ set(SOURCE_FILES
   rendering/pointcloud/sizemappingcomponent.cpp
   rendering/renderablecartesianaxes.cpp
   rendering/renderabledisc.cpp
+  rendering/renderabledistancelabel.cpp
   rendering/renderablelabel.cpp
   rendering/renderablemodel.cpp
   rendering/renderablenodearrow.cpp
@@ -125,6 +142,7 @@ set(SOURCE_FILES
   rendering/renderablesphere.cpp
   rendering/renderablesphereimagelocal.cpp
   rendering/renderablesphereimageonline.cpp
+  rendering/renderableswitch.cpp
   rendering/renderabletimevaryingsphere.cpp
   rendering/renderabletrail.cpp
   rendering/renderabletrailorbit.cpp
@@ -134,18 +152,28 @@ set(SOURCE_FILES
   rendering/screenspaceframebuffer.cpp
   rendering/screenspaceimagelocal.cpp
   rendering/screenspaceimageonline.cpp
+  rendering/screenspaceinsetblackout.cpp
+  rendering/screenspacerenderablerenderable.cpp
+  rendering/screenspacetimevaryingimageonline.cpp
   rotation/timelinerotation.cpp
   rotation/constantrotation.cpp
   rotation/fixedrotation.cpp
+  rotation/globerotation.cpp
   rotation/luarotation.cpp
+  rotation/multirotation.cpp
   rotation/staticrotation.cpp
   scale/luascale.cpp
+  scale/multiscale.cpp
   scale/nonuniformstaticscale.cpp
   scale/staticscale.cpp
   scale/timedependentscale.cpp
+  scale/timelinescale.cpp
+  task/convertmodeltask.cpp
   timeframe/timeframeinterval.cpp
   timeframe/timeframeunion.cpp
+  translation/globetranslation.cpp
   translation/luatranslation.cpp
+  translation/multitranslation.cpp
   translation/statictranslation.cpp
   translation/timelinetranslation.cpp
 )
@@ -181,6 +209,8 @@ set(SHADER_FILES
   shaders/renderabletrail_vs.glsl
   shaders/screenspace_fs.glsl
   shaders/screenspace_vs.glsl
+  shaders/screenspaceinsetblackout_vs.glsl
+  shaders/screenspaceinsetblackout_fs.glsl
   shaders/sphere_fs.glsl
   shaders/sphere_vs.glsl
 )

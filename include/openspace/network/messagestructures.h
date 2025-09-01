@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,7 +47,7 @@ enum class Type : uint32_t {
 
 struct CameraKeyframe {
     CameraKeyframe() = default;
-    CameraKeyframe(const std::vector<char>& buffer) {
+    explicit CameraKeyframe(const std::vector<char>& buffer) {
         deserialize(buffer);
     }
     CameraKeyframe(glm::dvec3 pos, glm::dquat rot, std::string focusNode,
@@ -381,10 +381,6 @@ struct TimeTimeline {
 
 struct ScriptMessage {
     ScriptMessage() = default;
-    ScriptMessage(const std::vector<char>& buffer) {
-        deserialize(buffer);
-    }
-    virtual ~ScriptMessage() {}
 
     std::string _script;
     double _timestamp = 0.0;
@@ -444,8 +440,8 @@ struct ScriptMessage {
         ss << _script;
     }
 
-    virtual void read(std::istream* in) {
-        uint32_t strLen;
+    void read(std::istream* in) {
+        uint32_t strLen = 0;
         //Read string length from file
         in->read(reinterpret_cast<char*>(&strLen), sizeof(strLen));
         //Read back full string
