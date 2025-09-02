@@ -7,6 +7,11 @@ export OPENSPACE_GLOBEBROWSING="$HOME/OpenSpaceData"
 
 # Make sure the directories exist
 mkdir -p "$OPENSPACE_USER" "$OPENSPACE_GLOBEBROWSING"
+mkdir -p "$OPENSPACE_USER/documentation"
+
+# Copy documentation files from /usr/share/doc/openspace
+# without overwriting
+cp -r -n /usr/share/doc/openspace/* "$OPENSPACE_USER/documentation/"
 
 # Go to the installed directory
 cd "@CMAKE_INSTALL_PREFIX@/lib/openspace/bin" || exit 1
