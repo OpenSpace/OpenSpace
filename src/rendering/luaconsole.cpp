@@ -502,11 +502,15 @@ void LuaConsole::render() {
     const size_t totalCommandSize = 2 + currentCommand.size() +
         _autoCompleteState.suggestion.size();
     // Scalefactor 0.925f chosen arbitraily to fit characters on screen with some margin
+    float charsperRow = res.x * 0.925f / static_cast<float>(_font->glyph('m')->width);
     const size_t nCharactersPerRow = std::max(
         static_cast < size_t>(1),
-        static_cast<size_t>(res.x * 0.925f / static_cast<float>(_font->glyph('m')->width))
+        static_cast<size_t>(charsperRow)
     );
-    const size_t nCommandRows = totalCommandSize / nCharactersPerRow;
+    size_t nCommandRows = static_cast<size_t>(
+        std::ceil(static_cast<double>(totalCommandSize) / nCharactersPerRow)
+    );
+    nCommandRows = nCommandRows > 1 ? nCommandRows - 1 : 0;
 
     // The command is split in 3 parts to render the suggestion in a different color
     std::string firstPart = _autoCompleteState.insertPosition != 0 ?
@@ -541,6 +545,7 @@ void LuaConsole::render() {
 
             if (c == '\n') {
                 count = 0;
+                continue;
             }
 
             if (count >= nCharactersPerRow) {
@@ -599,14 +604,16 @@ void LuaConsole::render() {
 
     // @CPP: Replace with array_view
     std::vector<std::string> commandSubset;
-    if (_commandsHistory.size() < static_cast<size_t>(_historyLength)) {
+    if ((_commandsHistory.size() + nCommandRows) < static_cast<size_t>(_historyLength)) {
         commandSubset = _commandsHistory;
     }
     else {
         // Historic lines are reduced by the number of rows the command is occupying
+        const size_t historyOffset = std::min(
+            nCommandRows, static_cast<size_t>(_historyLength)
+        );
         commandSubset = std::vector<std::string>(
-            _commandsHistory.end() - _historyLength + std::min(nCommandRows,
-                static_cast<size_t>(_historyLength)),
+            _commandsHistory.end() - _historyLength + historyOffset,
             _commandsHistory.end()
         );
     }
@@ -802,6 +809,11 @@ void LuaConsole::registerKeyHandlers() {
         Key::Right,
         KeyModifier::None,
         [this]() {
+            if (!_autoCompleteState.suggestion.empty()) {
+                applySuggestion();
+                return;
+            }
+
             _inputPosition = std::min(
                 _inputPosition + 1,
                 _commands[_activeCommand].length()
@@ -1007,18 +1019,18 @@ void LuaConsole::registerKeyHandlers() {
 
 void LuaConsole::autoCompleteCommand() {
     // We get a list of all the available commands or paths and initially find the
-    // first match that starts with how much we typed sofar. We store the index so
+    // first match that starts with how much we typed so far. We store the index so
     // that in subsequent "tab" presses, we will discard previous matches. This
     // implements the 'hop-over' behavior. As soon as another key is pressed,
     // everything is set back to normal
 
     const std::string currentCommand = _commands[_activeCommand];
-    // Determine if are currently in a function or path context
+    // Determine if we are currently in a function or path context
     if (_autoCompleteState.isDataDirty) {
         const size_t contextStart = detectContext(currentCommand);
 
         switch (_autoCompleteState.context) {
-        case Context::Path: {
+            case Context::Path: {
                 const bool hasSugestions = gatherPathSuggestions(contextStart);
                 if (!hasSugestions) {
                     return;
@@ -1039,7 +1051,7 @@ void LuaConsole::autoCompleteCommand() {
 }
 
 size_t LuaConsole::detectContext(std::string_view command) {
-    // Find the path starting point which can start with either " ' or [ character
+    // Find the path starting point which can start with either " ' or [
     size_t pathStartIndex = 0;
     for (size_t i = _inputPosition; i > 0; --i) {
         if (PathStartIdentifier.find(command[i - 1]) != std::string::npos) {
