@@ -786,11 +786,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
                 _shadersNeedRecompilation = true;
             });
         }
-        
-        // Set up notification for shader recompilation when rings readiness changes
-        _ringsComponent->onReadinessChange([this]() {
-            _shadersNeedRecompilation = true;
-        });
     }
 
     if (p.shadows.has_value()) {
@@ -1272,6 +1267,10 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
         const glm::vec3 directionToSunObjSpace(_cachedInverseModelTransform *
             glm::dvec4(directionToSunWorldSpace, 0.0));
 
+        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
+        _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
+
         // Set the light direction uniforms for local renderer
         _globalRenderer.program->setUniform(
             "lightDirectionCameraSpace",
@@ -1292,6 +1291,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
                 -glm::normalize(directionToSunObjSpace)
             );
         }
+
+        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::No);
     }
 
     int globalCount = 0;
@@ -1786,7 +1787,8 @@ void RenderableGlobe::recompileShaders() {
     );
     pairs.emplace_back(
         "useRingShadows", 
-        std::to_string(_shadowMappingProperties.shadowMapping && _ringsComponent)
+        std::to_string(_shadowMappingProperties.shadowMapping && _ringsComponent && 
+                       _ringsComponent->isEnabled())
     );
     pairs.emplace_back("showChunkEdges", std::to_string(_debugProperties.showChunkEdges));
     pairs.emplace_back("showHeightResolution", "0");

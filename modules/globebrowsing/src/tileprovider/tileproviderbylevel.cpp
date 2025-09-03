@@ -87,8 +87,13 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
 
         const std::string provId = tileProviderDict.value<std::string>("Identifier");
         tp->setIdentifier(provId);
-        const std::string providerName = tileProviderDict.value<std::string>("Name");
-        tp->setGuiName(providerName);
+        if (tileProviderDict.hasValue<std::string>("Name")) {
+            const std::string providerName = tileProviderDict.value<std::string>("Name");
+            tp->setGuiName(providerName);
+        }
+        else {
+            tp->setGuiName(provId);
+        }
         addPropertySubOwner(tp.get());
 
         _levelTileProviders.push_back(std::move(tp));

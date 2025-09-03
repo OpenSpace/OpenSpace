@@ -26,8 +26,8 @@ local ToggleTrails = {
   Identifier = "os.planetsmoons.ToggleTrails",
   Name = "Toggle planet and moon trails",
   Command = [[
-    openspace.toggleFade("{planetTrail_solarSystem}.Renderable.Fade")
-    openspace.toggleFade("{moonTrail_solarSystem}.Renderable.Fade")
+    openspace.toggleFade("{planetTrail_solarSystem}.Renderable")
+    openspace.toggleFade("{moonTrail_solarSystem}.Renderable")
   ]],
   Documentation = "Toggle fade for planet and moon trails in the Scene",
   GuiPath = "/Trails",

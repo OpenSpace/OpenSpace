@@ -504,7 +504,7 @@ void LuaConsole::render() {
         _autoCompleteState.suggestion.size();
     // Scalefactor 0.925f chosen arbitraily to fit characters on screen with some margin
     const size_t nCharactersPerRow = std::max(
-        static_cast < size_t>(1),
+        static_cast<size_t>(1),
         static_cast<size_t>(res.x * 0.925f / static_cast<float>(_font->glyph('m')->width))
     );
     size_t nCommandRows = static_cast<size_t>(

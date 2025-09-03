@@ -69,7 +69,10 @@ Any contributions to the software are very welcome and can take a multitude of f
 ![Image](https://docs.openspaceproject.com/latest/_static/images/himalaya-nkpg-dome.jpg)
 
 <p align="center">
-  <img src="https://repobeats.axiom.co/api/embed/8e7f51f0116f558d420b7caccb10840a746a659f.svg" alt="Repobeats analytics image">
+  <h3>OpenSpace activity</h3>
+  <img src="https://repobeats.axiom.co/api/embed/8e7f51f0116f558d420b7caccb10840a746a659f.svg" alt="Repobeats analytics image OpenSpace repository">
+  <h3>OpenSpace User Interface activity</h3>
+  <img src="https://repobeats.axiom.co/api/embed/65a17767719d8a61268b34add1e603fbd4a24156.svg" alt="Repobeats analytics image OpenSpace-WebGui repository">
 </p>
 
 

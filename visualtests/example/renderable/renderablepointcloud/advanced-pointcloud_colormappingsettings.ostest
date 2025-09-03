@@ -3,25 +3,23 @@
   "commands": [
     {
       "type": "asset",
-      "value": "examples/renderable/renderablepointcloud/pointcloud_units.asset"
+      "value": "examples/renderable/renderablepointcloud/advanced/pointcloud_colormappingsettings.asset"
     },
     {
       "type": "navigationstate",
       "value": {
-        "anchor": "RenderablePointCloud_Example_AdvancedColorMapping",
+        "anchor": "Root",
         "position": [
-          86830043.40988699,
-          75229269.83959264,
-          67324904.96128677
+          69902627.19672933,
+          69902627.19672896,
+          69902627.19672847
         ],
-        "pitch": -0.005462881077923724,
         "up": [
-          0.13302776880201936,
-          0.5712706642302865,
-          -0.8099095263777577
+          -0.4082482904638681,
+          0.8164965809277258,
+          -0.40824829046385847
         ],
-        "yaw": -0.004130253806708483,
-        "timestamp": "2025 JUL 13 12:13:18"
+        "timestamp": "2025 AUG 30 12:45:46"
       }
     },
     {
