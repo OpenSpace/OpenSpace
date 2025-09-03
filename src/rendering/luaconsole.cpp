@@ -503,14 +503,15 @@ void LuaConsole::render() {
     const size_t totalCommandSize = 2 + currentCommand.size() +
         _autoCompleteState.suggestion.size();
     // Scalefactor 0.925f chosen arbitraily to fit characters on screen with some margin
-    float charsperRow = res.x * 0.925f / static_cast<float>(_font->glyph('m')->width);
     const size_t nCharactersPerRow = std::max(
         static_cast < size_t>(1),
-        static_cast<size_t>(charsperRow)
+        static_cast<size_t>(res.x * 0.925f / static_cast<float>(_font->glyph('m')->width))
     );
     size_t nCommandRows = static_cast<size_t>(
         std::ceil(static_cast<double>(totalCommandSize) / nCharactersPerRow)
     );
+    // We're intrested in the zero based index when computing the input position
+    // If the characters fit on one line we should not add any extra rows
     nCommandRows = nCommandRows > 1 ? nCommandRows - 1 : 0;
 
     // The command is split in 3 parts to render the suggestion in a different color
