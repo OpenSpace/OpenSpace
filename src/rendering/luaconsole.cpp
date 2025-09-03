@@ -348,6 +348,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
                 _isVisible = false;
                 _commands.back() = "";
                 _inputPosition = 0;
+                _autoCompleteState = AutoCompleteState();
             }
         }
         else {
