@@ -39,6 +39,18 @@
 
 namespace ghoul::opengl { class ProgramObject; }
 
+enum class Alignment{
+    TopLeft,
+    TopCenter,
+    TopRight,
+    CenterLeft,
+    Center,
+    CenterRight,
+    BottomLeft,
+    BottomCenter,
+    BottomRight
+}
+
 namespace openspace {
 
 namespace documentation { struct Documentation; }
@@ -49,6 +61,9 @@ namespace documentation { struct Documentation; }
  * camera. It implements protected methods and properties for converting the planes from
  * Spherical to Cartesian coordinates and back. It also specifies the interface that its
  * children need to implement.
+ * Enhanced features:
+ * - RenderOrder: Controls draw order (lower values render first)
+ * - Alignment: 9-point alignment system (TopLeft, Center, etc.)
  */
 class ScreenSpaceRenderable : public properties::PropertyOwner, public Fadeable {
 public:
@@ -78,7 +93,7 @@ public:
     virtual void update();
     virtual bool isReady() const;
     bool isEnabled() const;
-    bool isUsingRaeCoords() const;
+    //bool isUsingRaeCoords() const;
     bool isFacingCamera() const;
     void setEnabled(bool isEnabled);
     float depth();
@@ -92,13 +107,35 @@ public:
     bool isIntersecting(const glm::vec2& coord);
     void translate(glm::vec2 translation, glm::vec2 position);
     void setCartesianPosition(const glm::vec3& position);
-    void setRaeFromCartesianPosition(const glm::vec3& position);
-    glm::vec3 raePosition() const;
+    //void setRaeFromCartesianPosition(const glm::vec3& position);
+    //glm::vec3 raePosition() const;
 
     static documentation::Documentation Documentation();
 
+    constexpr properties::Property::PropertyInfo RenderOrderInfo = {
+        "RenderOrder",
+        "Render Order",
+        "Lower values render first (behind higher values)",
+        properties::Property::Visibility::User
+    };
+    
+    constexpr properties::Property::PropertyInfo AlignmentInfo = {
+        "Alignment",
+        "Alignment",
+        "Anchor point for positioning",
+        properties::Property::Visibility::User
+    }; 
+
 protected:
+    void setEnabled(bool isEnabled);
+    float depth();
+    float scale() const;
     void createShaders(ghoul::Dictionary dict = ghoul::Dictionary());
+    void setRenderOrder(float order);
+    float renderOrder() const;
+    void setAlignment(Alignment alignment);
+    Alignment alignment() const;
+
     std::string makeUniqueIdentifier(std::string name);
 
     virtual glm::mat4 scaleMatrix();
@@ -106,8 +143,8 @@ protected:
     glm::mat4 translationMatrix();
     glm::mat4 localRotationMatrix();
 
-    glm::vec3 raeToCartesian(const glm::vec3& rae) const;
-    glm::vec3 cartesianToRae(const glm::vec3& cartesian) const;
+    //glm::vec3 raeToCartesian(const glm::vec3& rae) const;
+    //glm::vec3 cartesianToRae(const glm::vec3& cartesian) const;
 
     void draw(const glm::mat4& modelTransform, const RenderData& renderData,
         bool useAcceleratedRendering = false);
@@ -115,8 +152,8 @@ protected:
     virtual void bindTexture() = 0;
     virtual void unbindTexture();
 
-    glm::vec3 sphericalToRae(const glm::vec3& spherical) const;
-    glm::vec3 raeToSpherical(const glm::vec3& rae) const;
+   // glm::vec3 sphericalToRae(const glm::vec3& spherical) const;
+   // glm::vec3 raeToSpherical(const glm::vec3& rae) const;
     glm::vec3 cartesianToSpherical(const glm::vec3& cartesian) const;
     glm::vec3 sphericalToCartesian(glm::vec3 spherical) const;
     glm::vec3 sanitizeSphericalCoordinates(glm::vec3 spherical) const;
@@ -124,7 +161,7 @@ protected:
     properties::BoolProperty _enabled;
     properties::BoolProperty _renderDuringBlackout;
     properties::BoolProperty _usePerspectiveProjection;
-    properties::BoolProperty _useRadiusAzimuthElevation;
+   // properties::BoolProperty _useRadiusAzimuthElevation;
     properties::BoolProperty _faceCamera;
 
     // x, y, z
@@ -133,7 +170,7 @@ protected:
     // Radius, azimuth, elevation,
     // where azimuth is relative to negative y axis and
     // elevation is angle from plane with normal z.
-    properties::Vec3Property _raePosition;
+   // properties::Vec3Property _raePosition;
 
     // Local rotation (roll, pitch, yaw)
     properties::Vec3Property _localRotation;
@@ -148,6 +185,9 @@ protected:
     properties::Vec3Property _multiplyColor;
     properties::Vec4Property _backgroundColor;
     properties::TriggerProperty _delete;
+
+    properties::FloatProperty _renderOrder;
+    properties::OptionProperty _alignment;
 
     glm::ivec2 _objectSize = glm::ivec2(0);
 
