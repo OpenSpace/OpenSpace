@@ -324,13 +324,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ReportGlErrorsInfo = {
-        "ReportGlErrors",
-        "Report GL errors",
-        "If set to true, any OpenGL errors will be reported if encountered.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     struct [[codegen::Dictionary(RenderableGaiaStars)]] Parameters {
         // [[codegen::verbatim(FilePathInfo.description)]]
         std::string file;
@@ -480,7 +473,6 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _gpuStreamBudgetProperty(GpuStreamBudgetInfo, 0.f, 0.f, 1.f)
     , _maxGpuMemoryPercent(MaxGpuMemoryPercentInfo, 0.45f, 0.f, 1.f)
     , _maxCpuMemoryPercent(MaxCpuMemoryPercentInfo, 0.5f, 0.f, 1.f)
-    , _reportGlErrors(ReportGlErrorsInfo, false)
     , _accumulatedIndices(1, 0)
 {
     using File = ghoul::filesystem::File;
@@ -654,9 +646,6 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
             throw ghoul::RuntimeError("User defined FirstRow is bigger than LastRow");
         }
     }
-
-    _reportGlErrors = p.reportGlErrors.value_or(_reportGlErrors);
-    addProperty(_reportGlErrors);
 
     // Add a read-only property for the number of rendered stars per frame.
     _nRenderedStars.setReadOnly(true);
@@ -939,8 +928,6 @@ void RenderableGaiaStars::deinitializeGL() {
 }
 
 void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
-    checkGlErrors("Before render");
-
     // Save current FBO
     GLint defaultFbo = 0;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
@@ -1184,8 +1171,6 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         glBindVertexArray(0);
     }
 
-    checkGlErrors("After buffer updates");
-
     // Activate shader program and send uniforms.
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(false);
@@ -1337,36 +1322,6 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
     glDepthMask(true);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    checkGlErrors("After render");
-}
-
-void RenderableGaiaStars::checkGlErrors(const std::string& identifier) const {
-    if (_reportGlErrors) {
-        const GLenum error = glGetError();
-        if (error != GL_NO_ERROR) {
-            switch (error) {
-            case GL_INVALID_ENUM:
-                LINFO(identifier + " - GL_INVALID_ENUM");
-                break;
-            case GL_INVALID_VALUE:
-                LINFO(identifier + " - GL_INVALID_VALUE");
-                break;
-            case GL_INVALID_OPERATION:
-                LINFO(identifier + " - GL_INVALID_OPERATION");
-                break;
-            case GL_INVALID_FRAMEBUFFER_OPERATION:
-                LINFO(identifier + " - GL_INVALID_FRAMEBUFFER_OPERATION");
-                break;
-            case GL_OUT_OF_MEMORY:
-                LINFO(identifier + " - GL_OUT_OF_MEMORY");
-                break;
-            default:
-                LINFO(identifier + " - Unknown error");
-                break;
-            }
-        }
-    }
 }
 
 void RenderableGaiaStars::update(const UpdateData&) {
