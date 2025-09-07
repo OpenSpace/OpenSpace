@@ -63,7 +63,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DisableKeybindingsInfo = {
         "DisableKeybindings",
-        "Disable all Keybindings",
+        "Disable all keybindings",
         "Disables all keybindings without removing them. Please note that this does not "
         "apply to the key to open the console.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -93,7 +93,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo JumpToFadeDurationInfo = {
         "JumpToFadeDuration",
-        "JumpTo Fade Duration",
+        "Jump to fade duration",
         "The number of seconds the fading of the rendering should take per default when "
         "navigating through a 'jump' transition. This is when the rendering is first "
         "faded to black, then the camera is moved, and then the rendering fades in "

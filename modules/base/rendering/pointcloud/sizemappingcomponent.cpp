@@ -33,7 +33,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
-        "Size Mapping Enabled",
+        "Size mapping enabled",
         "If this value is set to 'true' and at least one column was loaded as an option "
         "for size mapping, the chosen data column will be used to scale the size of the "
         "points. The first option in the list is selected per default.",
@@ -42,7 +42,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo OptionInfo = {
         "Parameter",
-        "Parameter Option",
+        "Parameter option",
         "This value determines which parameter is used for scaling of the point. The "
         "parameter value will be used as a multiplicative factor to scale the size of "
         "the points. Note that they may however still be scaled by max size adjustment "
@@ -52,7 +52,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
-        "Scale Factor",
+        "Scale factor",
         "This value is a multiplicative factor that is applied to the data values that "
         "are used to scale the points, when size mapping is applied.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -60,7 +60,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo IsRadiusInfo = {
         "IsRadius",
-        "Size is Radius",
+        "Size is radius",
         "If true, the size value in the data is interpreted as the radius of the points. "
         "Otherwise, it is interpreted as the diameter.",
         openspace::properties::Property::Visibility::AdvancedUser

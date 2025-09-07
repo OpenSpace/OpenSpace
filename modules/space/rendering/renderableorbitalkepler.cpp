@@ -61,7 +61,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SegmentQualityInfo = {
         "SegmentQuality",
-        "Segment Quality",
+        "Segment quality",
         "A segment quality value for the orbital trail. A value from 1 (lowest) to "
         "10 (highest) that controls the number of line segments in the rendering of the "
         "orbital trail. This does not control the direct number of segments because "
@@ -71,7 +71,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TrailWidthInfo = {
         "TrailWidth",
-        "Trail Width",
+        "Trail width",
         "The line width used for the trail, if the selected rendering method includes "
         "lines. If the rendering mode is set to Points, this value is ignored.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -79,14 +79,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PointSizeExponentInfo = {
         "PointSizeExponent",
-        "Point Size Exponent",
+        "Point size exponent",
         "An exponential scale value to set the absolute size of the point.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableMaxSizeInfo = {
         "EnableMaxSize",
-        "Enable Max Size",
+        "Enable max size",
         "If true, the Max Size property will be used as an upper limit for the size of "
         "the point. This reduces the size of the points when approaching them, so that "
         "they stick to a maximum visual size depending on the Max Size value.",
@@ -95,7 +95,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MaxSizeInfo = {
         "MaxSize",
-        "Max Size",
+        "Max size",
         "Controls the maximum allowed size for the points, when the max size control "
         "feature is enabled. This limits the visual size of the points based on the "
         "distance to the camera. The larger the value, the larger the points are allowed "
@@ -106,7 +106,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RenderingModeInfo = {
         "Rendering",
-        "Rendering Mode",
+        "Rendering mode",
         "Determines how the trail should be rendered. If 'Trail' is selected, "
         "only the line part is visible, if 'Point' is selected, only the "
         "current satellite/debris point is visible.",
@@ -122,7 +122,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
         "TrailFade",
-        "Trail Fade",
+        "Trail fade",
         "Determines how fast the trail fades out. A smaller number shows less of the "
         "trail and a larger number shows more.",
         openspace::properties::Property::Visibility::User
@@ -130,21 +130,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EnableOutlineInfo = {
         "EnableOutline",
-        "Enable Point Outline",
+        "Enable point outline",
         "Determines if the points should be rendered with an outline or not.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo OutlineColorInfo = {
         "OutlineColor",
-        "Outline Color",
+        "Outline color",
         "The color of the outline.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo OutlineWidthInfo = {
         "OutlineWidth",
-        "Outline Width",
+        "Outline width",
         "Determines the thickness of the outline. A value of 0 will not show any "
         "outline, while a value of 1 will cover the whole point.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -152,7 +152,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo StartRenderIdxInfo = {
         "StartRenderIdx",
-        "Contiguous Starting Index of Render",
+        "Contiguous starting index of render",
         "Index of the first object in the block to render (all prior objects will be "
         "ignored). The block of objects to render will be determined by StartRenderIdx "
         "and RenderSize.",
@@ -161,14 +161,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RenderSizeInfo = {
         "RenderSize",
-        "Contiguous Size of Render Block",
+        "Contiguous size of render block",
         "Number of objects to render sequentially from StartRenderIdx.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ContiguousModeInfo = {
         "ContiguousMode",
-        "Contiguous Mode",
+        "Contiguous mode",
         "If enabled, the contiguous set of objects starting from StartRenderIdx "
         "of size RenderSize will be rendered. If disabled, the number of objects "
         "defined by UpperLimit will rendered from an evenly dispersed sample of the "

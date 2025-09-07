@@ -47,7 +47,7 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo StartTimeInfo = {
         "StartTime",
-        "Start Time",
+        "Start time",
         "The start time for the range of this trajectory. The date must be in ISO 8601 "
         "format: YYYY MM DD HH:mm:ss.xxx.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -55,7 +55,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EndTimeInfo = {
         "EndTime",
-        "End Time",
+        "End time",
         "The end time for the range of this trajectory. The date must be in ISO 8601 "
         "format: YYYY MM DD HH:mm:ss.xxx.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -63,7 +63,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SampleIntervalInfo = {
         "SampleInterval",
-        "Sample Interval",
+        "Sample interval",
         "The interval between samples of the trajectory. This value (together with "
         "'TimeStampSubsampleFactor') determines how far apart (in seconds) the samples "
         "are spaced along the trajectory.",
@@ -72,7 +72,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TimeSubSampleInfo = {
         "TimeStampSubsampleFactor",
-        "Time Stamp Subsampling Factor",
+        "Time stamp subsampling factor",
         "The factor that is used to create subsamples along the trajectory. This value "
         "(together with 'SampleInterval') determines how far apart (in seconds) the "
         "samples are spaced along the trajectory. Subsamples are rendered as smaller "
@@ -83,7 +83,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RenderFullPathInfo = {
         "ShowFullTrail",
-        "Render Full Trail",
+        "Render full trail",
         "If true, the entire trail will be rendered. If false, only the trail until "
         "the current time in the application will be shown.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -91,7 +91,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo AccurateTrailInfo = {
         "AccurateTrail",
-        "Use Accurate Trail",
+        "Use accurate trail",
         "If true, the trail around the spacecraft will be recalculated to present a "
         "smoother trail. If false, the original trail will be used.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -99,7 +99,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo AccurateTrailPositionsInfo = {
         "AccurateTrailPositions",
-        "Number of Accurate Trail Points",
+        "Number of accurate trail points",
         "The number of vertices, each side of the object, that will be recalculated "
         "for greater accuracy. This also ensures that the object connects with the "
         "trail.",

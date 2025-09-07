@@ -47,21 +47,21 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo
     DefaultTimeInterpolationDurationInfo = {
         "DefaultTimeInterpolationDuration",
-        "Default Time Interpolation Duration",
+        "Default time interpolation duration",
         "The default duration taken to interpolate between times."
     };
 
     constexpr openspace::properties::Property::PropertyInfo
     DefaultDeltaTimeInterpolationDurationInfo = {
         "DefaultDeltaTimeInterpolationDuration",
-        "Default Delta Time Interpolation Duration",
+        "Default delta time interpolation duration",
         "The default duration taken to interpolate between delta times."
     };
 
     constexpr openspace::properties::Property::PropertyInfo
         DefaultPauseInterpolationDurationInfo = {
         "DefaultPauseInterpolationDuration",
-        "Default Pause Interpolation Duration",
+        "Default pause interpolation duration",
         "The default duration taken to transition to the paused state, when "
         "interpolating."
     };
@@ -69,7 +69,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo
         DefaultUnpauseInterpolationDurationInfo = {
         "DefaultUnpauseInterpolationDuration",
-        "Default Unpause Interpolation Duration",
+        "Default unpause interpolation duration",
         "The default duration taken to transition to the unpaused state, when "
         "interpolating."
     };

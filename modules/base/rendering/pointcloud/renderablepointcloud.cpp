@@ -81,7 +81,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AllowTextureCompressionInfo =
     {
         "AllowCompression",
-        "Allow Compression",
+        "Allow compression",
         "If true, the textures will be compressed to preserve graphics card memory. This "
         "is enabled per default, but may lead to visible artefacts for certain images, "
         "especially up close. Set this to false to disable any hardware compression of "
@@ -91,7 +91,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo UseAlphaInfo = {
         "UseAlphaChannel",
-        "Use Alpha Channel",
+        "Use alpha channel",
         "If true, include transparency information in the loaded textures, if there "
         "is any. If false, all loaded textures will be converted to RGB format. \n"
         "This setting can be used if you have textures with transparency, but do not "
@@ -103,7 +103,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "File",
-        "Point Sprite Texture File",
+        "Point sprite texture file",
         "The path to the texture of the point sprite. Note that if multiple textures "
         "option is set in the asset, by providing a texture folder, this value will be "
         "ignored.",
@@ -112,7 +112,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TextureModeInfo = {
         "TextureMode",
-        "Texture Mode",
+        "Texture mode",
         "This tells which texture mode is being used for this renderable. There are "
         "three different texture modes: 1) One single sprite texture used for all "
         "points, 2) Multiple textures, that are mapped to the points based on a column "
@@ -124,14 +124,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PointColorInfo = {
         "FixedColor",
-        "Fixed Color",
+        "Fixed color",
         "The color of the points, when no color map is used.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
-        "Draw Elements",
+        "Draw elements",
         "Enables/Disables the drawing of the points.",
         openspace::properties::Property::Visibility::NoviceUser
     };
@@ -147,7 +147,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
         "FadeInDistances",
-        "Fade-In Start and End Distances",
+        "Fade-in start and end distances",
         "Determines the initial and final distances from the origin of the dataset at "
         "which the points will start and end fading-in. The distances are specified in "
         "the same unit as the points, that is, the one provodied as the Unit, or meters. "
@@ -160,7 +160,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EnableDistanceFadeInfo = {
         "Enabled",
-        "Enable Distance-based Fading",
+        "Enable distance-based fading",
         "Enables/disables the Fade-in effect based on camera distance. Automatically set "
         "to true if FadeInDistances are specified in the asset.",
         openspace::properties::Property::Visibility::User
@@ -177,7 +177,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo UseAdditiveBlendingInfo = {
         "UseAdditiveBlending",
-        "Use Additive Blending",
+        "Use additive blending",
         "If true (default), the color of points rendered on top of each other is "
         "blended additively, resulting in a brighter color where points overlap. "
         "If false, no such blending will take place and the color of the point "
@@ -188,7 +188,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo UseOrientationDataInfo = {
         "UseOrientationData",
-        "Use Orientation Data",
+        "Use orientation data",
         "If true, the orientation data in the dataset is included when rendering the "
         "points, if there is any. To see the rotation, you also need to set the "
         "\"Orientation Render Option\" to \"Fixed Rotation\".",
@@ -198,7 +198,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo OrientationRenderOptionInfo =
     {
         "OrientationRenderOption",
-        "Orientation Render Option",
+        "Orientation render option",
         "Controls how the planes for the points will be oriented. \"Camera View "
         "Direction\" rotates the points so that the plane is orthogonal to the viewing "
         "direction of the camera (useful for planar displays), and \"Camera Position "
@@ -212,21 +212,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo NumShownDataPointsInfo = {
         "NumberOfDataPoints",
-        "Number of Shown Data Points",
+        "Number of shown data points",
         "Information about how many points are being rendered.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo HasOrientationDataInfo = {
         "HasOrientationData",
-        "Has Orientation Data",
+        "Has orientation data",
         "Set to true if orientation data was read from the dataset.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleExponentInfo = {
         "ScaleExponent",
-        "Scale Exponent",
+        "Scale exponent",
         "An exponential scale value used to set the absolute size of the point. In "
         "general, the larger distance the dataset covers, the larger this value should "
         "be. If not included, it is computed based on the maximum positional component "
@@ -239,7 +239,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
-        "Scale Factor",
+        "Scale factor",
         "A multiplicative factor used to adjust the size of the points, after the "
         "exponential scaling and any max size control effects. Simply just increases "
         "or decreases the visual size of the points.",
@@ -248,7 +248,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo UseMaxSizeControlInfo = {
         "EnableMaxSizeControl",
-        "Enable Max Size Control",
+        "Enable max size control",
         "If true, the Max Size property will be used as an upper limit for the size of "
         "the point. This reduces the size of the points when approaching them, so that "
         "they stick to a maximum visual size depending on the Max Size value.",
@@ -257,7 +257,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MaxSizeInfo = {
         "MaxSize",
-        "Max Size",
+        "Max size",
         "Controls the maximum allowed size for the points, when the max size control "
         "feature is enabled. This limits the visual size of the points based on the "
         "distance to the camera. The larger the value, the larger the points may be. "
@@ -269,14 +269,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EnableOutlineInfo = {
         "EnableOutline",
-        "Enable Point Outline",
+        "Enable point outline",
         "Determines whether each point should have an outline or not.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo OutlineColorInfo = {
         "OutlineColor",
-        "Outline Color",
+        "Outline color",
         "The color of the outline. Darker colors will be less visible if \"Additive "
         "Blending\" is enabled.",
         openspace::properties::Property::Visibility::User
@@ -284,7 +284,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo OutlineWidthInfo = {
         "OutlineWidth",
-        "Outline Width",
+        "Outline width",
         "The thickness of the outline, given as a value relative to the size of the "
         "point. A value of 0 will not show any outline, while a value of 1 will cover "
         "the whole point.",
@@ -293,7 +293,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo OutlineStyleInfo = {
         "OutlineStyle",
-        "Outline Style",
+        "Outline style",
         "Decides the style of the outline (round, square, or a line at the bottom). "
         "The style also affects the shape of the points.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -301,7 +301,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ApplyColorMapToOutlineInfo = {
         "ApplyColorMapToOutline",
-        "Apply Color Map to Outline",
+        "Apply color map to outline",
         "If true and the outline is enabled, the color map will be applied to the "
         "outline rather than the point body. Only works if color mapping is enabled.",
         openspace::properties::Property::Visibility::AdvancedUser

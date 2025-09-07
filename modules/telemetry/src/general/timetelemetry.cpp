@@ -45,7 +45,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TimeUnitOptionInfo = {
         "TimeUnit",
-        "Time Unit",
+        "Time unit",
         "The time unit that the telemetry should use for the time speed. For example, if "
         "the unit is set to 'Hour' then the unit for the time speed is simulation hours "
         "per real life second.",
@@ -60,12 +60,11 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TimePrecisionInfo = {
         "TimePrecision",
-        "TimePrecision",
+        "Time precision",
         "The precision in seconds used to determine when to send updated time data to "
         "the Open Sound Control receiver.",
         openspace::properties::Property::Visibility::User
     };
-
 } // namespace
 
 namespace openspace {

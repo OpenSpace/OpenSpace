@@ -91,14 +91,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TextureSourceInfo = {
         "TextureSource",
-        "Texture Source",
+        "Texture source",
         "A directory on disk from which to load the texture files for the sphere.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FitsLayerInfo = {
         "FitsLayer",
-        "Texture Layer",
+        "Texture layer",
         "The index, a whole positive number, of the layer in the FITS file to use as "
         "texture. If not specified, the first layer in the data will be used regardless. "
         "When specified, that data layer will be the option used.",
@@ -107,21 +107,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FitsLayerNameInfo = {
         "LayerNames",
-        "Texture Layer Options",
+        "Texture layer options",
         "This value specifies which name of the fits layer to use as texture.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureFilterInfo = {
         "TextureFilter",
-        "Texture Filter",
+        "Texture filter",
         "Option to choose nearest neighbor or linear filtering for the texture.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SaveDownloadsOnShutdown = {
         "SaveDownloadsOnShutdown",
-        "Save Downloads On Shutdown",
+        "Save downloads on shutdown",
         "This is an option for if dynamically downloaded files should be saved for the"
         "next run or not.",
         openspace::properties::Property::Visibility::AdvancedUser

@@ -53,7 +53,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DistanceUnitInfo = {
         "DistanceUnit",
-        "Distance Unit",
+        "Distance unit",
         "The unit used for the distance part of the telemetry information.",
         openspace::properties::Property::Visibility::User
     };
@@ -66,7 +66,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LowDistancePrecisionInfo = {
         "LowDistancePrecision",
-        "Distance Precision (Low)",
+        "Distance precision (low)",
         "The precision in meters used to determine when to send updated distance data "
         "to the Open Sound Control receiver. This is the low precision value (low level "
         "of detail) that is used for objects that are not the current focus, saving "
@@ -76,7 +76,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo HighDistancePrecisionInfo = {
         "HighDistancePrecision",
-        "Distance Precision (High)",
+        "Distance precision (high)",
         "The precision in meters used to determine when to send updated distance data "
         "to the Open Sound Control receiver. This is the high precision value (high "
         "level of detail) that is used when the monitored object is the current focus, "
@@ -86,7 +86,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LowAnglePrecisionInfo = {
         "LowAnglePrecision",
-        "Angle Precision (Low)",
+        "Angle precision (low)",
         "The precision in radians used to determine when to send updated angle data "
         "to the Open Sound Control receiver. This is the low precision value (low level "
         "of detail) that is used for objects that are not the current focus, saving "
@@ -96,7 +96,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo HighAnglePrecisionInfo = {
         "HighAnglePrecision",
-        "Angle Precision (High)",
+        "Angle precision (high)",
         "The precision in radians used to determine when to send updated angle data "
         "to the Open Sound Control receiver. This is the high precision value (high "
         "level of detail) that is used when the monitored object is the current focus, "

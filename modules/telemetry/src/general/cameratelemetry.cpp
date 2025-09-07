@@ -52,7 +52,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo CameraSpeedDistanceUnitInfo =
     {
         "CameraSpeedDistanceUnit",
-        "Camera Speed Unit (Distance)",
+        "Camera speed unit (distance)",
         "Choose a distance unit that is used for the camera speed. "
         "For example, if the distacne unit 'Kilometer' is chosen, then the unit used for "
         "the camera speed will be kilometers per second.",
@@ -67,7 +67,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PositionPrecisionInfo = {
         "PositionPrecision",
-        "Position Precision",
+        "Position precision",
         "The precision in meters used to determin when to send updated camera positional "
         "data to the Open Sound Control receiver.",
         openspace::properties::Property::Visibility::User
@@ -75,7 +75,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RotationPrecisionInfo = {
         "RotationPrecision",
-        "Rotation Precision",
+        "Rotation precision",
         "The precision used to determin when to send updated camera rotational "
         "data to the Open Sound Control receiver.",
         openspace::properties::Property::Visibility::User
@@ -83,7 +83,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SpeedPrecisionInfo = {
         "SpeedPrecision",
-        "Speed Precision",
+        "Speed precision",
         "The precision in meters per second used to determin when to send updated camera "
         "speed data to the Open Sound Control receiver.",
         openspace::properties::Property::Visibility::User

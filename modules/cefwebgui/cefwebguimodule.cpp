@@ -55,21 +55,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo VisibleInfo = {
         "Visible",
-        "Is Visible",
+        "Is visible",
         "This setting determines whether the browser should be visible or not.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiUrlInfo = {
         "GuiUrl",
-        "GUI URL",
+        "Gui URL",
         "The URL of the webpage that is used to load the WebGUI from.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiScaleInfo = {
         "GuiScale",
-        "Gui Scale",
+        "Gui scale",
         "GUI scale multiplier.",
         openspace::properties::Property::Visibility::Always
     };

@@ -139,7 +139,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ModelSpaceRenderingInfo = {
         "ModelSpaceRenderingCutoffLevel",
-        "Model Space Rendering Cutoff Level",
+        "Model space rendering cutoff level",
         "The tile level that is used as the cut off between rendering tiles using the "
         "globe model rendering vs the flat in-game rendering method. The value is a "
         "trade-off between not having precision errors in the rendering and representing "
@@ -169,7 +169,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo AccurateNormalsInfo = {
         "UseAccurateNormals",
-        "Use Accurate Normals",
+        "Use accurate normals",
         "Determines whether higher-accuracy normals should be used in the rendering. "
         "These normals are calculated based on the height field information and are thus "
         "only available if the planet has a height map layer.",
@@ -178,14 +178,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
         "AmbientIntensity",
-        "Ambient Intensity",
+        "Ambient intensity",
         "The intensity factor for the ambient light used for light shading.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourceNodeInfo = {
         "LightSourceNode",
-        "Light Source",
+        "Light source",
         "The identifier of a scene graph node that should be used as the source of "
         "illumination for the globe. If not specified, the solar system's Sun is used.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -200,21 +200,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EclipseHardShadowsInfo = {
         "EclipseHardShadows",
-        "Eclipse Hard Shadows",
+        "Eclipse hard shadows",
         "Enables the rendering of eclipse shadows using hard shadows.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadowMappingInfo = {
         "ShadowMapping",
-        "Shadow Mapping",
+        "Shadow mapping",
         "Enables shadow mapping algorithm. Used by renderable rings, too.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderAtDistanceInfo = {
         "RenderAtDistance",
-        "Render at Distance",
+        "Render at distance",
         "Tells the rendering engine not to perform distance based performance culling "
         "for this globe. Turning this property on will let the globe to be seen at far "
         "away distances when normally it would be hidden.",
@@ -223,14 +223,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ZFightingPercentageInfo = {
         "ZFightingPercentage",
-        "Z-Fighting Percentage",
+        "Z-fighting percentage",
         "The percentage of the correct distance to the surface being shadowed.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo NumberShadowSamplesInfo = {
         "NumberShadowSamples",
-        "Number of Shadow Samples",
+        "Number of shadow samples",
         "The number of samples used during shadow mapping calculation (Percentage Closer "
         "Filtering).",
         openspace::properties::Property::Visibility::Developer
@@ -238,7 +238,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TargetLodScaleFactorInfo = {
         "TargetLodScaleFactor",
-        "Target Level of Detail Scale Factor",
+        "Target level of detail scale factor",
         "Determines the targeted level-of-detail of the tiles for this globe. A higher "
         "value means that the tiles rendered are a higher resolution for the same "
         "distance of the camera to the planet.",
@@ -247,7 +247,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo CurrentLodScaleFactorInfo = {
         "CurrentLodScaleFactor",
-        "Current Level of Detail Scale Factor (Read Only)",
+        "Current level of detail scale factor (read only)",
         "The currently used scale factor whose target value is deteremined by "
         "'TargetLodScaleFactor'.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -255,7 +255,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo OrenNayarRoughnessInfo = {
         "OrenNayarRoughness",
-        "orenNayarRoughness",
+        "Oren-Nayar roughness",
         "The roughness factor that is used for the Oren-Nayar lighting mode.",
         openspace::properties::Property::Visibility::Developer
     };

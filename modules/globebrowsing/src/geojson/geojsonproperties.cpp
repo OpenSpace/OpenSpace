@@ -186,7 +186,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FillOpacityInfo = {
         "FillOpacity",
-        "Fill Opacity",
+        "Fill opacity",
         "This value determines the opacity of the filled portion of a polygon. Will "
         "also be used for extruded features.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -194,7 +194,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FillColorInfo = {
         "FillColor",
-        "Fill Color",
+        "Fill color",
         "The color of the filled portion of a rendered polygon. Will also be used for "
         "extruded features.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -202,14 +202,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
+        "Line width",
         "The width of any rendered lines.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
         "PointSize",
-        "Point Size",
+        "Point size",
         "The size of any rendered points. The size will be scaled based on the "
         "bounding sphere of the globe.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -217,7 +217,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PointTextureInfo = {
         "PointTexture",
-        "Point Texture",
+        "Point texture",
         "A texture to be used for rendering points. No value means to use the default "
         "texture provided by the GlobeBrowsing module. If no texture is provided there "
         "either, the point will be rendered as a plane and colored by the color value.",
@@ -234,7 +234,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PerformShadingInfo = {
         "PerformShading",
-        "Perform Shading",
+        "Perform shading",
         "If true, perform shading on any create meshes, either from polygons or "
         "extruded lines. The shading will be computed based on any light sources of the "
         "GeoJson component.",
@@ -243,7 +243,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo AltitudeModeInfo = {
         "AltitudeMode",
-        "Altitude Mode",
+        "Altitude mode",
         "The altitude mode decides how any height values of the geo coordinates should "
         "be interpreted. Absolute means that the height is interpreted as the height "
         "above the reference ellipsoid, while RelativeToGround takes the height map "
@@ -254,7 +254,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PointAnchorOptionInfo = {
         "PointTextureAnchor",
-        "Point Texture Anchor",
+        "Point texture anchor",
         "Decides the placement of the point texture in relation to the position. "
         "Default is a the bottom of the texture, but it can also be put at the center.",
         openspace::properties::Property::Visibility::User
@@ -272,7 +272,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo UseTessellationLevelInfo = {
         "UseTessellationLevel",
-        "Use Tessellation Level",
+        "Use tessellation level",
         "If true, use the 'Tessellation Level' to control the level of detail for the "
         "tessellation. The distance used will be the 'Tessellation Distance' divided by "
         "the 'Tessellation Level', so the higher the level value, the smaller each "
@@ -282,7 +282,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TessellationLevelInfo = {
         "TessellationLevel",
-        "Tessellation Level",
+        "Tessellation level",
         "When manual tessellation is enabled, this value will be used to determine how "
         "much tessellation to apply. The resulting distance used for subdividing the "
         "geometry will be the 'Tessellation Distance' divided by this value. Zero means "
@@ -292,7 +292,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TessellationDistanceInfo = {
         "TessellationDistance",
-        "Tessellation Distance",
+        "Tessellation distance",
         "Defult distance to use for tessellation of line and polygon geometry. Anything "
         "larger than this distance will be automatically subdivided into smaller pieces "
         "matching this distance, while anything smaller will not be subdivided. Per "

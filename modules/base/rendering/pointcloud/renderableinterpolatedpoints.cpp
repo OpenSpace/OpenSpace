@@ -67,14 +67,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo StepsInfo = {
         "NumberOfSteps",
-        "Number of Steps",
+        "Number of steps",
         "The number of steps available in the dataset, including the initial positions.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo JumpToNextInfo = {
         "JumpToNext",
-        "Jump to Next",
+        "Jump to next",
         "Immediately set the interpolation value to correspond to the next set of point "
         "positions compared to the current.",
         openspace::properties::Property::Visibility::User
@@ -82,7 +82,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo JumpToPrevInfo = {
         "JumpToPrevious",
-        "Jump to Previous",
+        "Jump to previous",
         "Immediately set the interpolation value to correspond to the previous set of "
         "point positions compared to the current.",
         openspace::properties::Property::Visibility::User
@@ -90,7 +90,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo InterpolateToNextInfo = {
         "InterpolateToNext",
-        "Interpolate to Next",
+        "Interpolate to next",
         "Trigger an interpolation to the next set of point positions. The duration of "
         "the interpolation is set based on the Interpolaton Speed property.",
         openspace::properties::Property::Visibility::User
@@ -98,7 +98,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo InterpolateToPrevInfo = {
         "InterpolateToPrevious",
-        "Interpolate to Previous",
+        "Interpolate to previous",
         "Trigger an interpolation to the previous set of point positions. The duration "
         "of the interpolation is set based on the Interpolaton Speed property.",
         openspace::properties::Property::Visibility::User
@@ -106,7 +106,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo InterpolateToEndInfo = {
         "InterpolateToEnd",
-        "Interpolate to End",
+        "Interpolate to end",
         "Trigger an interpolation all the way to the final set of positions. The "
         "duration of the interpolation is set based on the Interpolaton Speed property.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -114,7 +114,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo InterpolateToStartInfo = {
         "InterpolateToStart",
-        "Interpolate to Start",
+        "Interpolate to start",
         "Trigger an inverted interpolation to the initial set of positions. The duration "
         "of the interpolation is set based on the Interpolaton Speed property.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -122,7 +122,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo InterpolationSpeedInfo = {
         "Speed",
-        "Interpolation Speed",
+        "Interpolation speed",
         "Affects how long the interpolation takes when triggered using one of the "
         "trigger properties. A value of 1 means that a step takes 1 second.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -130,7 +130,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo UseSplineInfo = {
         "UseSplineInterpolation",
-        "Use Spline Interpolation",
+        "Use spline interpolation",
         "If true, the points will be interpolated using a Catmull-Rom spline instead of "
         "linearly. This leads to a smoother transition at the breakpoints, i.e. between "
         "each step.",

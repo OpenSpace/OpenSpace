@@ -58,7 +58,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ColorMethodInfo = {
         "ColorMethod",
-        "Color Method",
+        "Color method",
         "Color lines uniformly or using color tables based on extra quantities like, for "
         "examples, temperature or particle density.",
         openspace::properties::Property::Visibility::User
@@ -66,14 +66,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ColorQuantityInfo = {
         "ColorQuantity",
-        "Quantity to Color By",
+        "Quantity to color by",
         "Quantity used to color lines if the 'By Quantity' color method is selected.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorMinMaxInfo = {
         "ColorMinMaxRange",
-        "Color Min Max Range",
+        "Color min max range",
         "A min-max range for what the lowest and highest values of the color table can "
         "be set to.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -81,28 +81,28 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
         "ColorTablePath",
-        "Path to Color Table",
+        "Path to color table",
         "Color Table/Transfer Function to use for 'By Quantity' coloring.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorUniformInfo = {
         "Color",
-        "Uniform Line Color",
+        "Uniform line color",
         "The uniform color of lines shown when 'Color Method' is set to 'Uniform'.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorUseABlendingInfo = {
         "ABlendingEnabled",
-        "Additive Blending",
+        "Additive blending",
         "Activate/deactivate additive blending.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DomainEnabledInfo = {
         "DomainEnabled",
-        "Domain Limits",
+        "Domain limits",
         "Enable/Disable domain limits.",
         openspace::properties::Property::Visibility::User
     };
@@ -137,7 +137,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FlowEnabledInfo = {
         "FlowEnabled",
-        "Flow Enabled",
+        "Flow enabled",
         "Toggles the rendering of moving particles along the lines. Can, for example, "
         "illustrate magnetic flow.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -145,28 +145,28 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FlowColorInfo = {
         "FlowColor",
-        "Flow Color",
+        "Flow color",
         "Color of particles flow direction indication.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FlowReversedInfo = {
         "ReversedFlow",
-        "Reversed Flow",
+        "Reversed flow",
         "Toggle to make the flow move in the opposite direction.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FlowParticleSizeInfo = {
         "ParticleSize",
-        "Particle Size",
+        "Particle size",
         "Size of the particles.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FlowParticleSpacingInfo = {
         "ParticleSpacing",
-        "Particle Spacing",
+        "Particle spacing",
         "Spacing inbetween particles.",
         openspace::properties::Property::Visibility::User
     };
@@ -180,7 +180,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MaskingEnabledInfo = {
         "MaskingEnabled",
-        "Masking Enabled",
+        "Masking enabled",
         "Enable/disable masking. Use masking to show lines where a given quantity is "
         "within a given range, for example, if you only want to see where the "
         "temperature is between 10 and 20 degrees. Also used for masking out line "
@@ -190,35 +190,35 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MaskingMinMaxInfo = {
         "MaskingMinLimit",
-        "Lower Limit",
+        "Lower limit",
         "Lower and upper limit of the valid masking range.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MaskingQuantityInfo = {
         "MaskingQuantity",
-        "Quantity used for Masking",
+        "Quantity used for masking",
         "Quantity used for masking.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
+        "Line width",
         "This value specifies the line width of the fieldlines.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TimeJumpButtonInfo = {
         "TimeJumpToStart",
-        "Jump to Start Of Sequence",
+        "Jump to start of sequence",
         "Performs a time jump to the start of the sequence.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SaveDownloadsOnShutdown = {
         "SaveDownloadsOnShutdown",
-        "Save Downloads On Shutdown",
+        "Save downloads on shutdown",
         "This is an option for if dynamically downloaded should be saved between runs "
         "or not.",
         openspace::properties::Property::Visibility::User

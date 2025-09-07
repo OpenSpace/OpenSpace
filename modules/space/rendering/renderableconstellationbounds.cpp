@@ -46,7 +46,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo VertexInfo = {
         "File",
-        "Vertex File Path",
+        "Vertex file path",
         "A file that contains the vertex locations of the constellations bounds, as RA "
         "Dec coordinates on the celestial sphere.",
         openspace::properties::Property::Visibility::AdvancedUser

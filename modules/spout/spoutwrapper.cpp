@@ -36,14 +36,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo NameSenderInfo = {
         "SpoutName",
-        "Spout Sender Name",
+        "Spout sender name",
         "This value sets the Spout sender to use a specific name.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo NameReceiverInfo = {
         "SpoutName",
-        "Spout Receiver Name",
+        "Spout receiver name",
         "This value explicitly sets the Spout receiver to use a specific name. If this "
         "is not a valid name, the first Spout image is used instead",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -51,7 +51,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
         "SpoutSelection",
-        "Spout Selection",
+        "Spout selection",
         "This property displays all available Spout sender on the system. If one them is "
         "selected, its value is stored in the 'SpoutName' property, overwriting its "
         "previous value.",
@@ -60,7 +60,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo UpdateInfo = {
         "UpdateSelection",
-        "Update Selection",
+        "Update selection",
         "If this property is trigged, the 'SpoutSelection' options will be refreshed.",
         openspace::properties::Property::Visibility::AdvancedUser
     };

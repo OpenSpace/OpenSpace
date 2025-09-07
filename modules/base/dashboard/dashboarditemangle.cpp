@@ -48,7 +48,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SourceTypeInfo = {
         "SourceType",
-        "Source Type",
+        "Source type",
         "The type of position that is used as the triangle apex used to calculate the "
         "angle.",
         openspace::properties::Property::Visibility::User
@@ -56,7 +56,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SourceNodeIdentifierInfo = {
         "SourceNodeIdentifier",
-        "Source Node Identifier",
+        "Source node identifier",
         "If a scene graph node is selected as type, this value specifies the identifier "
         "of the node that is to be used as the apex of the triangle used to calculate "
         "the angle. The computed angle is the incident angle to Source in the triangle ("
@@ -66,7 +66,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ReferenceTypeInfo = {
         "ReferenceType",
-        "Reference Type",
+        "Reference type",
         "The type of position that is used as the destination of the reference line used "
         "to calculate the angle. The computed angle is the incident angle to Source in "
         "the triangle (Source, Reference, Destination).",
@@ -76,7 +76,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ReferenceNodeIdentifierInfo =
     {
         "ReferenceNodeIdentifier",
-        "Reference Node Identifier",
+        "Reference node identifier",
         "If a scene graph node is selected as type, this value specifies the identifier "
         "of the node that is to be used as the reference direction to compute the angle.",
         openspace::properties::Property::Visibility::User
@@ -84,7 +84,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DestinationTypeInfo = {
         "DestinationType",
-        "Destination Type",
+        "Destination type",
         "The type of position that is used as the destination to calculate the angle. "
         "The computed angle is the incident angle to Source in the triangle ("
         "Source, Reference, Destination).",
@@ -95,7 +95,7 @@ namespace {
         DestinationNodeIdentifierInfo =
     {
         "DestinationNodeIdentifier",
-        "Destination Node Identifier",
+        "Destination node identifier",
         "If a scene graph node is selected as type, this value specifies the identifier "
         "of the node that is to be used as the destination for computing the angle.",
         openspace::properties::Property::Visibility::User

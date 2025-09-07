@@ -56,14 +56,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
         "File",
-        "File Path",
+        "File path",
         "The path to the file with data for the stars to be rendered.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FileReaderOptionInfo = {
         "FileReaderOption",
-        "File Reader Option",
+        "File reader option",
         "This value tells the renderable what format the input data file has. "
         "'Fits' will read a FITS file, construct an Octree from it and render full "
         "data. 'Speck' will read a SPECK file, construct an Octree from it and render "
@@ -77,7 +77,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RenderModeInfo = {
         "RenderMode",
-        "Render Mode",
+        "Render mode",
         "This value determines which predefined columns to use in rendering. If "
         "'Static' only the position of the stars is used. 'Color' uses position + color "
         "parameters and 'Motion' uses pos, color as well as velocity for the stars.",
@@ -86,7 +86,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShaderOptionInfo = {
         "ShaderOption",
-        "Shader Option",
+        "Shader option",
         "This value determines which shaders to use while rendering. If 'Point_*' is "
         "chosen then gl_Points will be rendered and then spread out with a bloom "
         "filter. If 'Billboard_*' is chosen then the geometry shaders will generate "
@@ -98,7 +98,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PsfTextureInfo = {
         "Texture",
-        "Point Spread Function Texture",
+        "Point spread function texture",
         "The path to the texture that should be used as a point spread function for the "
         "stars.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -106,7 +106,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LuminosityMultiplierInfo = {
         "LuminosityMultiplier",
-        "Luminosity Multiplier",
+        "Luminosity multiplier",
         "Factor by which to multiply the luminosity with. [Works in Color and Motion "
         "modes].",
         openspace::properties::Property::Visibility::User
@@ -114,7 +114,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MagnitudeBoostInfo = {
         "MagnitudeBoost",
-        "Magnitude Boost",
+        "Magnitude boost",
         "Sets what percent of the star magnitude that will be used as boost to star "
         "size. [Works only with billboards in Color and Motion modes].",
         openspace::properties::Property::Visibility::User
@@ -122,7 +122,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo CutOffThresholdInfo = {
         "CutOffThreshold",
-        "Cut Off Threshold",
+        "Cut off threshold",
         "Set threshold for when to cut off star rendering. Stars closer than this "
         "threshold are given full opacity. Farther away, stars dim proportionally to the "
         "4-logarithm of their distance.",
@@ -138,14 +138,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BillboardSizeInfo = {
         "BillboardSize",
-        "Billboard Size",
+        "Billboard size",
         "Set the billboard size of all stars. [Works only with billboards].",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CloseUpBoostDistInfo = {
         "CloseUpBoostDist",
-        "Close-Up Boost Distance [pc]",
+        "Close-up boost distance [pc]",
         "Set the distance where stars starts to increase in size. Unit is Parsec [Works "
         "only with billboards].",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -153,7 +153,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TmPointFilterSizeInfo = {
         "FilterSize",
-        "Filter Size [px]",
+        "Filter size [px]",
         "Set the filter size in pixels used in tonemapping for point splatting rendering"
         "[Works only with points].",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -161,7 +161,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TmPointSigmaInfo = {
         "Sigma",
-        "Normal Distribution Sigma",
+        "Normal distribution sigma",
         "Set the normal distribution sigma used in tonemapping for point splatting "
         "rendering. [Works only with points].",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -169,7 +169,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo AdditionalNodesInfo = {
         "AdditionalNodes",
-        "Additional Nodes",
+        "Additional nodes",
         "Determines how many additional nodes around the camera that will be fetched "
         "from disk. The first value determines how many additional layers of parents "
         "that will be fetched. The second value determines how many layers of descendant "
@@ -179,7 +179,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TmPointPxThresholdInfo = {
         "PixelWeightThreshold",
-        "Pixel Weight Threshold",
+        "Pixel weight threshold",
         "Set the threshold for how big the elliptic weight of a pixel has to be to "
         "contribute to the final elliptic shape. A smaller value gives a more visually "
         "pleasing result while a bigger value will speed up the rendering on skewed "
@@ -189,7 +189,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorMap",
-        "Color Texture",
+        "Color texture",
         "The path to the texture that is used to convert from the magnitude of the star "
         "to its color. The texture is used as a one dimensional lookup function.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -197,7 +197,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FirstRowInfo = {
         "FirstRow",
-        "First Row to Read",
+        "First row to read",
         "Defines the first row that will be read from the specified FITS file No need to "
         "define if data already has been processed. [Works only with "
         "FileReaderOption::Fits].",
@@ -206,7 +206,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LastRowInfo = {
         "LastRow",
-        "Last Row to Read",
+        "Last row to read",
         "Defines the last row that will be read from the specified FITS file; has to be "
         "equal to or greater than FirstRow. No need to define if data already has been "
         "processed. [Works only with FileReaderOption::Fits].",
@@ -215,7 +215,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ColumnNamesInfo = {
         "ColumnNames",
-        "Column Names",
+        "Column names",
         "A list of strings with the names of all the columns that are to be read from "
         "the specified FITS file. No need to define if data already has been processed. "
         "[Works only with FileReaderOption::Fits].",
@@ -224,14 +224,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo NumRenderedStarsInfo = {
         "NumRenderedStars",
-        "Rendered Stars",
+        "Rendered stars",
         "The number of rendered stars in the current frame.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CpuRamBudgetInfo = {
         "CpuRamBudget",
-        "CPU RAM Budget",
+        "CPU RAM budget",
         "Current remaining budget (bytes) on the CPU RAM for loading more node data "
         "files.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -239,7 +239,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GpuStreamBudgetInfo = {
         "GpuStreamBudget",
-        "GPU Stream Budget",
+        "GPU stream budget",
         "Current remaining memory budget [in number of chunks] on the GPU for streaming "
         "additional stars.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -247,7 +247,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LodPixelThresholdInfo = {
         "LodPixelThreshold",
-        "LOD Pixel Threshold",
+        "LOD pixel threshold",
         "The number of total pixels a nodes AABB can have in clipping space before its "
         "parent is fetched as LOD cache.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -255,14 +255,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MaxGpuMemoryPercentInfo = {
         "MaxGpuMemoryPercent",
-        "Max GPU Memory",
+        "Max GPU memory",
         "Sets the max percent of existing GPU memory budget that the streaming will use.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MaxCpuMemoryPercentInfo = {
         "MaxCpuMemoryPercent",
-        "Max CPU Memory",
+        "Max CPU memory",
         "Sets the max percent of existing CPU memory budget that the streaming of files "
         "will use.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -270,7 +270,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FilterPosXInfo = {
         "FilterPosX",
-        "PosX Threshold",
+        "PosX threshold",
         "If defined then only stars with Position X values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
         "read as +Inf). Measured in kiloParsec.",
@@ -279,7 +279,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FilterPosYInfo = {
         "FilterPosY",
-        "PosY Threshold",
+        "PosY threshold",
         "If defined then only stars with Position Y values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
         "read as +Inf). Measured in kiloParsec.",
@@ -288,7 +288,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FilterPosZInfo = {
         "FilterPosZ",
-        "PosZ Threshold",
+        "PosZ threshold",
         "If defined then only stars with Position Z values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
         "read as +Inf). Measured in kiloParsec.",
@@ -297,7 +297,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FilterGMagInfo = {
         "FilterGMag",
-        "GMag Threshold",
+        "GMag threshold",
         "If defined then only stars with G mean magnitude values between [min, max] will "
         "be rendered (if min is set to 20.0 it is read as -Inf, if max is set to 20.0 it "
         "is read as +Inf). If min = max then all values equal min|max will be filtered "
@@ -307,7 +307,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FilterBpRpInfo = {
         "FilterBpRp",
-        "Bp-Rp Threshold",
+        "Bp-Rp threshold",
         "If defined then only stars with Bp-Rp color values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
         "read as +Inf). If min = max then all values equal min|max will be filtered "
@@ -317,7 +317,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FilterDistInfo = {
         "FilterDist",
-        "Dist Threshold",
+        "Dist threshold",
         "If defined then only stars with Distances values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
         "read as +Inf). Measured in kParsec.",
@@ -326,7 +326,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ReportGlErrorsInfo = {
         "ReportGlErrors",
-        "Report GL Errors",
+        "Report GL errors",
         "If set to true, any OpenGL errors will be reported if encountered.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
