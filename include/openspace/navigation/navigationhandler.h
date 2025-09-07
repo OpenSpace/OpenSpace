@@ -37,6 +37,7 @@
 #include <openspace/navigation/pathnavigator.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
 
@@ -98,6 +99,8 @@ public:
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
+
+    void renderOverlay() const;
 
     std::vector<std::string> listAllJoysticks() const;
     void setJoystickAxisMapping(std::string joystickName,
@@ -208,6 +211,17 @@ private:
     properties::BoolProperty _disableJoystickInputs;
     properties::BoolProperty _useKeyFrameInteraction;
     properties::FloatProperty _jumpToFadeDuration;
+
+    struct {
+        properties::PropertyOwner owner;
+        properties::BoolProperty enable;
+        properties::Vec4Property color;
+
+        bool isMouseFirstPress = false;
+        bool isMousePressed = false;
+        glm::vec2 clickPosition;
+        glm::vec2 currentPosition;
+    } _mouseVisualizer;
 };
 
 } // namespace openspace::interaction
