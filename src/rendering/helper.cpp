@@ -596,6 +596,7 @@ void renderLine(const glm::vec2& startPosition, const glm::vec2& endPosition,
         GL_STATIC_DRAW
     );
 
+    glEnable(GL_LINE_SMOOTH);
     glLineWidth(6.f);
     glDrawArrays(GL_LINES, 0, 2);
     glPointSize(6.f);
