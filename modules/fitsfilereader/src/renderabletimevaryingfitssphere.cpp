@@ -447,8 +447,8 @@ glm::vec2 RenderableTimeVaryingFitsSphere::minMaxTextureDataValues(
     std::vector<float> pixelValues;
     pixelValues.reserve(width * height * 4);
 
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
             glm::vec4 texel = t->texelAsFloat(x, y);
             pixelValues.push_back(texel.r);
             pixelValues.push_back(texel.g);

@@ -97,7 +97,7 @@ CameraTelemetry::CameraTelemetry(const std::string& ip, int port)
     , _cameraSpeedDistanceUnitOption(CameraSpeedDistanceUnitInfo)
     , _precisionProperties(CameraTelemetry::PrecisionProperties(PrecisionInfo))
 {
-    for (int i = 0; i < DistanceUnitNames.size(); ++i) {
+    for (int i = 0; i < DistanceUnitNames.size(); i++) {
         _cameraSpeedDistanceUnitOption.addOption(i, DistanceUnitNames[i].singular.data());
     }
 

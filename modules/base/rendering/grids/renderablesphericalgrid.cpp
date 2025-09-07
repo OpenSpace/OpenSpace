@@ -293,7 +293,7 @@ void RenderableSphericalGrid::update(const UpdateData&) {
 
     int nr = 0;
 
-    for (int lat = 0; lat <= _latSegments; ++lat) {
+    for (int lat = 0; lat <= _latSegments; lat++) {
         // define an extra vertex around the y-axis due to texture mapping
         for (int lng = 0; lng <= _longSegments; lng++) {
             // inclination angle (north to south)

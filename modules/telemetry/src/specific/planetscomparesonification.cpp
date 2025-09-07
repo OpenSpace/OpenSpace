@@ -171,7 +171,7 @@ PlanetsCompareSonification::PlanetsCompareSonification(const std::string& ip, in
     addProperty(_selectedScaleInterpolationTime);
 
     // Planet selection properties
-    for (int i = 0; i < PlanetsOptions.size(); ++i) {
+    for (int i = 0; i < PlanetsOptions.size(); i++) {
         _firstPlanet.addOption(i, PlanetsOptions[i].data());
         _secondPlanet.addOption(i, PlanetsOptions[i].data());
     }

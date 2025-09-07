@@ -395,11 +395,11 @@ void RenderableInterpolatedPoints::addPositionDataForPoint(unsigned int index,
     const double r = glm::max(glm::length(position0), glm::length(position1));
     maxRadius = glm::max(maxRadius, r);
 
-    for (int j = 0; j < 3; ++j) {
+    for (int j = 0; j < 3; j++) {
         result.push_back(static_cast<float>(position0[j]));
     }
 
-    for (int j = 0; j < 3; ++j) {
+    for (int j = 0; j < 3; j++) {
         result.push_back(static_cast<float>(position1[j]));
     }
 
@@ -419,11 +419,11 @@ void RenderableInterpolatedPoints::addPositionDataForPoint(unsigned int index,
         glm::dvec3 positionBefore = transformedPosition(e00);
         glm::dvec3 positionAfter = transformedPosition(e11);
 
-        for (int j = 0; j < 3; ++j) {
+        for (int j = 0; j < 3; j++) {
             result.push_back(static_cast<float>(positionBefore[j]));
         }
 
-        for (int j = 0; j < 3; ++j) {
+        for (int j = 0; j < 3; j++) {
             result.push_back(static_cast<float>(positionAfter[j]));
         }
     }

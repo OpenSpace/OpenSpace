@@ -74,7 +74,7 @@ TimeTelemetry::TimeTelemetry(const std::string& ip, int port)
     , _timeUnitOption(TimeUnitOptionInfo)
     , _precisionProperties(TimeTelemetry::PrecisionProperties(PrecisionInfo))
 {
-    for (size_t i = 0; i < TimeUnitNames.size(); ++i) {
+    for (size_t i = 0; i < TimeUnitNames.size(); i++) {
         _timeUnitOption.addOption(static_cast<int>(i), TimeUnitNames[i].singular.data());
     }
 

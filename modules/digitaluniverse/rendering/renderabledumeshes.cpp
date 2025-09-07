@@ -543,7 +543,7 @@ bool RenderableDUMeshes::readSpeckFile() {
             dim >> mesh.numU >> mesh.numV;
 
             // We can now read the vertices data:
-            for (int l = 0; l < mesh.numU * mesh.numV; ++l) {
+            for (int l = 0; l < mesh.numU * mesh.numV; l++) {
                 ghoul::getline(file, line);
                 if (line.substr(0, 1) == "}") {
                     break;

@@ -1036,7 +1036,7 @@ void RenderableFieldlinesSequence::firstUpdate() {
     const std::vector<std::string>& extraNamesVec =
         file->state.extraQuantityNames();
 
-    for (size_t i = 0; i < quantities.size(); ++i) {
+    for (size_t i = 0; i < quantities.size(); i++) {
         _colorQuantity.addOption(static_cast<int>(i), extraNamesVec[i]);
         _maskingQuantity.addOption(static_cast<int>(i), extraNamesVec[i]);
     }

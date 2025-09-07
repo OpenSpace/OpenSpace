@@ -416,7 +416,7 @@ void RenderableConstellationLines::loadData() {
         dim >> constellationLine.numV;
 
         // We can now read the vertices data:
-        for (int l = 0; l < constellationLine.numV; ++l) {
+        for (int l = 0; l < constellationLine.numV; l++) {
             ghoul::getline(file, line);
             if (line.substr(0, 1) == "}") {
                 break;

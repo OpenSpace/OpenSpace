@@ -432,7 +432,7 @@ void PlanetsSonification::update(const Camera* camera) {
     }
 
     // Update data for all planets
-    for (int i = 0; i < _planets.size(); ++i) {
+    for (int i = 0; i < _planets.size(); i++) {
         // Increase presision if the planet is in focus
         if (focusNode->identifier() == _planets[i].name) {
             _anglePrecision = _precisionProperties.highAnglePrecision;

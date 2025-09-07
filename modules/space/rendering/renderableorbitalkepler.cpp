@@ -637,7 +637,7 @@ void RenderableOrbitalKepler::updateBuffers() {
     _vertexBufferData.resize(nVerticesTotal);
 
     size_t vertexBufIdx = 0;
-    for (int orbitIdx = 0; orbitIdx < numOrbits; ++orbitIdx) {
+    for (int orbitIdx = 0; orbitIdx < numOrbits; orbitIdx++) {
         const kepler::Parameters& orbit = _parameters[orbitIdx];
 
         ghoul::Dictionary d;

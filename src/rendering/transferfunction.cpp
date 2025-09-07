@@ -179,7 +179,7 @@ void TransferFunction::setTextureFromTxt() {
         const float dist = fpos - prevKey->position;
         const float weight = dist / (currentKey->position - prevKey->position);
 
-        for (int channel = 0; channel < 4; ++channel) {
+        for (int channel = 0; channel < 4; channel++) {
             const size_t position = 4 * i + channel;
             // Interpolate linearly between prev and next mapping key
             float value = (prevKey->color[channel] * (1.f - weight) +

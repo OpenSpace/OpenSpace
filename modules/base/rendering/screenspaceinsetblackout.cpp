@@ -104,7 +104,7 @@ namespace {
         }
 
         std::string str = std::format("{} = {{ ", id);
-        for (size_t i = 0; i < data.size(); ++i) {
+        for (size_t i = 0; i < data.size(); i++) {
             std::string xVal = std::format("{}", data[i].x);
             std::string yVal = std::format("{}", data[i].y);
             xVal += (xVal.find(".") == std::string::npos) ? ".0" : "";

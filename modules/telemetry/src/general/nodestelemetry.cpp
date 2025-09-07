@@ -113,7 +113,7 @@ NodesTelemetry::NodesTelemetry(const std::string& ip, int port)
     , _distanceUnitOption(DistanceUnitInfo)
     , _precisionProperties(NodesTelemetry::PrecisionProperties(PrecisionInfo))
 {
-    for (int i = 0; i < DistanceUnitNames.size(); ++i) {
+    for (int i = 0; i < DistanceUnitNames.size(); i++) {
         _distanceUnitOption.addOption(i, DistanceUnitNames[i].singular.data());
     }
 
@@ -168,7 +168,7 @@ void NodesTelemetry::update(const Camera* camera) {
     bool includeElevation = module->includeElevationAngle();
 
     // Update data for all nodes
-    for (int i = 0; i < _nodes.size(); ++i) {
+    for (int i = 0; i < _nodes.size(); i++) {
         // Increase precision if the node is in focus
         if (focusNode->identifier() == _nodes[i].identifier) {
             _anglePrecision = _precisionProperties.highAnglePrecision;

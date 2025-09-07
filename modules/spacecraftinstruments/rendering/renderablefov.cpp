@@ -652,7 +652,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
                 return r.surfaceVector * 1000.0 * _standOffDistance.value();
             };
 
-            for (size_t m = 0; m < InterpolationSteps; ++m) {
+            for (size_t m = 0; m < InterpolationSteps; m++) {
                 const double t = static_cast<double>(m) / (InterpolationSteps);
                 const glm::dvec3 tBound = glm::mix(iBound, jBound, t);
 

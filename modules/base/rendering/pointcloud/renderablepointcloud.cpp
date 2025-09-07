@@ -1623,7 +1623,7 @@ void RenderablePointCloud::addPositionDataForPoint(unsigned int index,
     const double r = glm::length(position);
 
     // Add values to result
-    for (int j = 0; j < 3; ++j) {
+    for (int j = 0; j < 3; j++) {
         result.push_back(static_cast<float>(position[j]));
     }
 
@@ -1727,7 +1727,7 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
     std::vector<float> result;
     result.reserve(nAttributesPerPoint() * _dataset.entries.size());
     size_t vertexCount = 0;
-    for (size_t i = 0; i < subResults.size(); ++i) {
+    for (size_t i = 0; i < subResults.size(); i++) {
         result.insert(result.end(), subResults[i].begin(), subResults[i].end());
         int nVertices = static_cast<int>(subResults[i].size()) / nAttributesPerPoint();
         if (!_textureArrays.empty()) {

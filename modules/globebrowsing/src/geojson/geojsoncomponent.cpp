@@ -532,7 +532,7 @@ void GeoJsonComponent::render(const RenderData& data) {
     };
 
     // Do two render passes, to properly render opacity of overlaying objects
-    for (int renderPass = 0; renderPass < 2; ++renderPass) {
+    for (int renderPass = 0; renderPass < 2; renderPass++) {
         for (size_t i = 0; i < _geometryFeatures.size(); i++) {
             if (_features[i]->enabled && _features[i]->isVisible()) {
                 _geometryFeatures[i].render(

@@ -108,13 +108,13 @@ void ModuleEngine::deinitialize() {
 
     LDEBUG("Deinitializing modules");
 
-    for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); ++mIt) {
+    for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); mIt++) {
         LDEBUG(std::format("Deinitializing module '{}'", (*mIt)->identifier()));
         (*mIt)->deinitialize();
     }
     LDEBUG("Finished deinitializing modules");
 
-    for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); ++mIt) {
+    for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); mIt++) {
         LDEBUG(std::format("Destroying module '{}'", (*mIt)->identifier()));
         (*mIt) = nullptr;
     }
@@ -127,7 +127,7 @@ void ModuleEngine::deinitializeGL() {
     ZoneScoped;
 
     LDEBUG("Deinitializing OpenGL of modules");
-    for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); ++mIt) {
+    for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); mIt++) {
         LDEBUG(std::format("Deinitializing OpenGL of module '{}'", (*mIt)->identifier()));
         (*mIt)->deinitializeGL();
 
