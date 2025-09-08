@@ -34,7 +34,7 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo ShouldInterpolateInfo = {
         "ShouldInterpolate",
-        "Should Interpolate",
+        "Should interpolate",
         "If this value is set to 'true', an interpolation is applied between the given "
         "keyframes. If this value is set to 'false', the interpolation is not applied.",
         openspace::properties::Property::Visibility::AdvancedUser

@@ -70,7 +70,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TextureFwrdInfo = {
         "TextureFwrd",
-        "TextureFwrd",
+        "Texture forward",
         "This value is the path to a texture on disk that contains a one-dimensional "
         "texture which is used for forward scattering light in these rings.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -78,7 +78,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TextureBckwrdInfo = {
         "TextureBckwrd",
-        "TextureBckwrd",
+        "Texture backward",
         "This value is the path to a texture on disk that contains a one-dimensional "
         "texture which is used for backward scattering light in these rings.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -86,7 +86,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TextureUnlitInfo = {
         "TextureUnlit",
-        "TextureUnlit",
+        "Texture unlit",
         "This value is the path to a texture on disk that contains a one-dimensional "
         "texture which is used for unlit part in these rings.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -94,7 +94,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TextureColorInfo = {
         "TextureColor",
-        "TextureColor",
+        "Texture color",
         "This value is the path to a texture on disk that contains a one-dimensional "
         "texture color which is used for unlit part in these rings.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -102,7 +102,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TextureTransparencyInfo = {
         "TextureTransparency",
-        "TextureTransparency",
+        "Texture transparency",
         "This value is the path to a texture on disk that contains a one-dimensional "
         "texture transparency which is used for unlit part in these rings.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -127,7 +127,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo NightFactorInfo = {
         "NightFactor",
-        "Night Factor",
+        "Night factor",
         "This value is a multiplicative factor that is applied to the side of the rings "
         "that is facing away from the Sun. If this value is equal to '1', no darkening "
         "of the night side occurs.",
@@ -136,7 +136,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ColorFilterInfo = {
         "ColorFilter",
-        "Color Filter",
+        "Color filter",
         "This value affects the filtering out of part of the rings depending on the "
         "color values of the texture. The higher value, the more rings are filtered out.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -144,7 +144,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ZFightingPercentageInfo = {
         "ZFightingPercentage",
-        "Z-Fighting Percentage",
+        "Z-fighting percentage",
         "The percentage of the correct distance to the surface being shadowed. "
         "Possible values: [0.0, 1.0].",
         openspace::properties::Property::Visibility::Developer
@@ -152,7 +152,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo NumberShadowSamplesInfo = {
         "NumberShadowSamples",
-        "Number of Shadow Samples",
+        "Number of shadow samples",
         "The number of samples used during shadow mapping calculation "
         "(Percentage Closer Filtering).",
         openspace::properties::Property::Visibility::Developer

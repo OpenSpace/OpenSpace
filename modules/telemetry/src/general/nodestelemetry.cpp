@@ -53,7 +53,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DistanceUnitInfo = {
         "DistanceUnit",
-        "Distance Unit",
+        "Distance unit",
         "The unit used for the distance part of the telemetry information.",
         openspace::properties::Property::Visibility::User
     };
@@ -66,7 +66,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LowDistancePrecisionInfo = {
         "LowDistancePrecision",
-        "Distance Precision (Low)",
+        "Distance precision (low)",
         "The precision in meters used to determine when to send updated distance data "
         "to the Open Sound Control receiver. This is the low precision value (low level "
         "of detail) that is used for objects that are not the current focus, saving "
@@ -76,7 +76,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo HighDistancePrecisionInfo = {
         "HighDistancePrecision",
-        "Distance Precision (High)",
+        "Distance precision (high)",
         "The precision in meters used to determine when to send updated distance data "
         "to the Open Sound Control receiver. This is the high precision value (high "
         "level of detail) that is used when the monitored object is the current focus, "
@@ -86,7 +86,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LowAnglePrecisionInfo = {
         "LowAnglePrecision",
-        "Angle Precision (Low)",
+        "Angle precision (low)",
         "The precision in radians used to determine when to send updated angle data "
         "to the Open Sound Control receiver. This is the low precision value (low level "
         "of detail) that is used for objects that are not the current focus, saving "
@@ -96,7 +96,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo HighAnglePrecisionInfo = {
         "HighAnglePrecision",
-        "Angle Precision (High)",
+        "Angle precision (high)",
         "The precision in radians used to determine when to send updated angle data "
         "to the Open Sound Control receiver. This is the high precision value (high "
         "level of detail) that is used when the monitored object is the current focus, "
@@ -113,7 +113,7 @@ NodesTelemetry::NodesTelemetry(const std::string& ip, int port)
     , _distanceUnitOption(DistanceUnitInfo)
     , _precisionProperties(NodesTelemetry::PrecisionProperties(PrecisionInfo))
 {
-    for (int i = 0; i < DistanceUnitNames.size(); ++i) {
+    for (int i = 0; i < DistanceUnitNames.size(); i++) {
         _distanceUnitOption.addOption(i, DistanceUnitNames[i].singular.data());
     }
 
@@ -168,7 +168,7 @@ void NodesTelemetry::update(const Camera* camera) {
     bool includeElevation = module->includeElevationAngle();
 
     // Update data for all nodes
-    for (int i = 0; i < _nodes.size(); ++i) {
+    for (int i = 0; i < _nodes.size(); i++) {
         // Increase precision if the node is in focus
         if (focusNode->identifier() == _nodes[i].identifier) {
             _anglePrecision = _precisionProperties.highAnglePrecision;

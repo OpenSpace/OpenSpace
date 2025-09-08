@@ -50,21 +50,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShowKeyboardInfo = {
         "ShowKeyboard",
-        "Show Keyboard information",
+        "Show keyboard information",
         "Display the state of the keyboard input.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowMouseInfo = {
         "ShowMouse",
-        "Show Mouse information",
+        "Show mouse information",
         "Display the state of the mouse input.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowJoystickInfo = {
         "ShowJoystick",
-        "Show Joystick information",
+        "Show joystick information",
         "Display the state of the joystick input.",
         openspace::properties::Property::Visibility::User
     };

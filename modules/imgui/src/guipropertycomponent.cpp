@@ -39,7 +39,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo UseTreeInfo = {
         "TreeLayout",
-        "Use Tree Layout",
+        "Use tree layout",
         "If this value is checked, this component will display the properties using a "
         "tree layout, rather than using a flat map. This value should only be set on "
         "property windows that display SceneGraphNodes, or the application might crash.",

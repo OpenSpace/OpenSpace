@@ -40,7 +40,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DimensionsInfo = {
         "Dimensions",
-        "Browser Dimensions",
+        "Browser dimensions",
         "The dimensions of the web browser window in pixels.",
         openspace::properties::Property::Visibility::User
     };

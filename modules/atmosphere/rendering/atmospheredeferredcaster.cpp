@@ -694,7 +694,7 @@ std::pair<GLuint, GLuint> AtmosphereDeferredcaster::calculateDeltaS() {
     program->setUniform("ozoneLayerEnabled", _ozoneEnabled);
     program->setUniform("HO", _ozoneHeightScale);
     glClear(GL_COLOR_BUFFER_BIT);
-    for (int layer = 0; layer < _rSamples; ++layer) {
+    for (int layer = 0; layer < _rSamples; layer++) {
         program->setUniform("layer", layer);
         step3DTexture(*program, layer);
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -777,7 +777,7 @@ void AtmosphereDeferredcaster::calculateInscattering(GLuint deltaSRayleigh,
     program->setUniform("SAMPLES_MU", _muSamples);
     program->setUniform("SAMPLES_R", _rSamples);
     glClear(GL_COLOR_BUFFER_BIT);
-    for (int layer = 0; layer < _rSamples; ++layer) {
+    for (int layer = 0; layer < _rSamples; layer++) {
         program->setUniform("layer", layer);
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
@@ -831,7 +831,7 @@ void AtmosphereDeferredcaster::calculateDeltaJ(int scatteringOrder,
     program.setUniform("SAMPLES_NU", _nuSamples);
     program.setUniform("SAMPLES_MU", _muSamples);
     program.setUniform("SAMPLES_R", _rSamples);
-    for (int layer = 0; layer < _rSamples; ++layer) {
+    for (int layer = 0; layer < _rSamples; layer++) {
         program.setUniform("layer", layer);
         step3DTexture(program, layer);
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -911,7 +911,7 @@ void AtmosphereDeferredcaster::calculateDeltaS(int scatteringOrder,
     program.setUniform("SAMPLES_NU", _nuSamples);
     program.setUniform("SAMPLES_MU", _muSamples);
     program.setUniform("SAMPLES_R", _rSamples);
-    for (int layer = 0; layer < _rSamples; ++layer) {
+    for (int layer = 0; layer < _rSamples; layer++) {
         program.setUniform("layer", layer);
         step3DTexture(program, layer);
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -980,7 +980,7 @@ void AtmosphereDeferredcaster::calculateInscattering(int scatteringOrder,
     program.setUniform("SAMPLES_NU", _nuSamples);
     program.setUniform("SAMPLES_MU", _muSamples);
     program.setUniform("SAMPLES_R", _rSamples);
-    for (int layer = 0; layer < _rSamples; ++layer) {
+    for (int layer = 0; layer < _rSamples; layer++) {
         program.setUniform("layer", layer);
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
@@ -1085,7 +1085,7 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
     const GLuint deltaJTable = createTexture(_textureSize, "DeltaJ", 3);
 
     // loop in line 6 in algorithm 4.1
-    for (int scatteringOrder = 2; scatteringOrder <= 4; ++scatteringOrder) {
+    for (int scatteringOrder = 2; scatteringOrder <= 4; scatteringOrder++) {
         // line 7 in algorithm 4.1
         calculateDeltaJ(
             scatteringOrder,

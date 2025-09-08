@@ -201,7 +201,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
 
     size_t lineStartIdx = 0;
     // Loop through all fieldlines
-    for (json::iterator lineIter = jFile.begin(); lineIter != jFile.end(); ++lineIter) {
+    for (json::iterator lineIter = jFile.begin(); lineIter != jFile.end(); lineIter++) {
         // The 'data' field in the 'trace' variable contains all vertex positions and the
         // extra quantities. Each element is an array related to one vertex point.
         const std::vector<std::vector<float>>& jData =
@@ -369,13 +369,13 @@ void FieldlinesState::saveStateToJson(const std::string& absPath) {
     const size_t nExtras = _extraQuantities.size();
 
     size_t pointIndex = 0;
-    for (size_t lineIndex = 0; lineIndex < nLines; ++lineIndex) {
+    for (size_t lineIndex = 0; lineIndex < nLines; lineIndex++) {
         json jData = json::array();
         for (GLsizei i = 0; i < _lineCount[lineIndex]; i++, ++pointIndex) {
             const glm::vec3 pos = _vertexPositions[pointIndex];
             json jDataElement = { pos.x, pos.y, pos.z };
 
-            for (size_t extraIndex = 0; extraIndex < nExtras; ++extraIndex) {
+            for (size_t extraIndex = 0; extraIndex < nExtras; extraIndex++) {
                 jDataElement.push_back(_extraQuantities[extraIndex][pointIndex]);
             }
             jData.push_back(jDataElement);

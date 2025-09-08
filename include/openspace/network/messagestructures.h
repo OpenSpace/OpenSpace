@@ -461,7 +461,7 @@ struct ScriptMessage {
         }
         std::string tmpReadbackScript;
         _script.erase();
-        for (int i = 0; i < numScriptLines; ++i) {
+        for (int i = 0; i < numScriptLines; i++) {
             ghoul::getline(iss, tmpReadbackScript);
             size_t start = tmpReadbackScript.find_first_not_of(" ");
             tmpReadbackScript = tmpReadbackScript.substr(start);

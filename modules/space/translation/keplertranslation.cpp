@@ -84,7 +84,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo AscendingNodeInfo = {
         "AscendingNode",
-        "Right ascension of ascending Node",
+        "Right ascension of ascending node",
         "This value determines the right ascension of the ascending node in degrees, "
         "that is the location of position along the orbit where the inclined plane and "
         "the horizonal reference plane intersect.",
@@ -93,7 +93,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ArgumentOfPeriapsisInfo = {
         "ArgumentOfPeriapsis",
-        "Argument of Periapsis",
+        "Argument of periapsis",
         "This value determines the argument of periapsis in degrees, that is the "
         "position on the orbit that is closest to the orbiting body.",
         openspace::properties::Property::Visibility::AdvancedUser

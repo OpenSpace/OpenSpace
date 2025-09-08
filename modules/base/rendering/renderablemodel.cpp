@@ -71,35 +71,35 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
         "EnableAnimation",
-        "Enable Animation",
+        "Enable animation",
         "Enable or disable the animation for the model if it has any.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
         "AmbientIntensity",
-        "Ambient Intensity",
+        "Ambient intensity",
         "A multiplier for ambient lighting.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DiffuseIntensityInfo = {
         "DiffuseIntensity",
-        "Diffuse Intensity",
+        "Diffuse intensity",
         "A multiplier for diffuse lighting.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpecularIntensityInfo = {
         "SpecularIntensity",
-        "Specular Intensity",
+        "Specular intensity",
         "A multiplier for specular lighting.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadingInfo = {
         "PerformShading",
-        "Perform Shading",
+        "Perform shading",
         "Determines whether shading should be applied to this model, based on the "
         "provided list of light sources. If false, the model will be fully illuminated.",
         openspace::properties::Property::Visibility::User
@@ -107,14 +107,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EnableFaceCullingInfo = {
         "EnableFaceCulling",
-        "Enable Face Culling",
+        "Enable face culling",
         "Enable OpenGL automatic face culling optimization.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ModelTransformInfo = {
         "ModelTransform",
-        "Model Transform",
+        "Model transform",
         "An extra model transform matrix that is applied to the model before all other "
         "transformations are applied.",
         openspace::properties::Property::Visibility::Developer
@@ -129,7 +129,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ModelScaleInfo = {
         "ModelScale",
-        "Model Scale",
+        "Model scale",
         "The scale of the model. If a numeric value is provided in the asset file, the "
         "scale will be that exact value. If instead a unit name is provided, this is the "
         "value that that name represents. For example 'Centimeter' becomes 0.01.",
@@ -138,21 +138,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RotationVecInfo = {
         "RotationVector",
-        "Rotation Vector",
+        "Rotation vector",
         "A rotation vector with Euler angles, specified in degrees.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourcesInfo = {
         "LightSources",
-        "Light Sources",
+        "Light sources",
         "A list of light sources that this model should accept light from.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableDepthTestInfo = {
         "EnableDepthTest",
-        "Enable Depth Test",
+        "Enable depth test",
         "If true, depth testing is enabled for the model. This means that parts of the "
         "model that are occluded by other parts will not be rendered. If disabled, the "
         "depth of the model part will not be taken into account in rendering and some "
@@ -162,7 +162,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
         "BlendingOption",
-        "Blending Options",
+        "Blending options",
         "Controls the blending function used to calculate the colors of the model with "
         "respect to the opacity.",
         openspace::properties::Property::Visibility::AdvancedUser

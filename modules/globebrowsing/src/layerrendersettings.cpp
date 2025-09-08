@@ -27,7 +27,7 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo SetDefaultInfo = {
         "SetDefault",
-        "Set Default",
+        "Set default",
         "If this value is triggered it will reset all of these values to their default "
         "values.",
         openspace::properties::Property::Visibility::User

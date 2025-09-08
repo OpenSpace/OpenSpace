@@ -41,7 +41,7 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo DistanceThresholdInfo = {
         "DistanceThreshold",
-        "Distance Threshold",
+        "Distance threshold",
         "Threshold in meters for when the switch happens between the two renderables.",
         openspace::properties::Property::Visibility::AdvancedUser
     };

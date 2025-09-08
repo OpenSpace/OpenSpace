@@ -62,7 +62,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
-        "Number of Segments",
+        "Number of segments",
         "The number of segments that the sphere is split into.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -83,21 +83,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MirrorTextureInfo = {
         "MirrorTexture",
-        "Mirror Texture",
+        "Mirror texture",
         "If true, mirror the texture along the x-axis.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInOutInfo = {
         "DisableFadeInOut",
-        "Disable Fade-In/Fade-Out effects",
+        "Disable fade-in/fade-out effects",
         "Enables/Disables the fade in and out effects.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInThresholdInfo = {
         "FadeInThreshold",
-        "Fade-In Threshold",
+        "Fade-in threshold",
         "The distance from the center of the Milky Way at which the sphere should start "
         "to fade in, given as a percentage of the size of the object. A value of zero "
         "means that no fading in will happen.",
@@ -106,7 +106,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FadeOutThresholdInfo = {
         "FadeOutThreshold",
-        "Fade-Out Threshold",
+        "Fade-out threshold",
         "A threshold for when the sphere should start fading out, given as a percentage "
         "of how much of the sphere that is visible before the fading should start. A "
         "value of zero means that no fading out will happen.",
@@ -115,7 +115,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo UseColorMapInfo = {
         "UseColorMap",
-        "Use Color Map",
+        "Use color map",
         "Used to toggle color map on or off for the sphere. Mainly used to transform "
         "grayscale textures from data into color images.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -123,14 +123,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ColorMapInfo = {
         "ColorMap",
-        "Transfer Function (Color Map) Path",
+        "Transfer function (color map) path",
         "Color map / Transfer function to use if `UseColorMap` is enabled.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
         "BlendingOption",
-        "Blending Options",
+        "Blending options",
         "Controls the blending function used to calculate the colors of the sphere with "
         "respect to the opacity.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -138,7 +138,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DisableDepthInfo = {
         "DisableDepth",
-        "Disable Depth",
+        "Disable depth",
         "If disabled, no depth values are taken into account for this sphere, meaning "
         "that depth values are neither written or tested against during the rendering. "
         "This can be useful for spheres that represent a background image.",

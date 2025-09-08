@@ -43,7 +43,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ServerProcessEnabledInfo = {
         "ServerProcessEnabled",
-        "Enable Server Process",
+        "Enable server process",
         "Enable the node js based process used to serve the Web GUI.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -64,7 +64,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo WebSocketInterfaceInfo = {
         "WebSocketInterface",
-        "WebSocket Interface",
+        "WebSocket interface",
         "The identifier of the websocket interface to use when communicating.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -72,7 +72,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ServerProcessEntryPointInfo =
     {
         "ServerProcessEntryPoint",
-        "Server Process Entry Point",
+        "Server process entry point",
         "The node js command to invoke.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -88,7 +88,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DefaultEndpointInfo = {
         "DefaultEndpoint",
-        "Default Endpoint",
+        "Default endpoint",
         "The 'default' endpoint. The server will redirect http requests from / to "
         "/<DefaultEndpoint>.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -96,7 +96,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ServedDirectoriesInfo = {
         "ServedDirectories",
-        "ServedDirectories",
+        "Served directories",
         "Directories that are currently served. This value is set by the server process, "
         "as a verification of the actually served directories. For example, an onChange "
         "callback can be registered to this, to reload browsers when the server is "

@@ -34,7 +34,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo CollapsedInfo = {
         "Collapsed",
-        "Is Collapsed",
+        "Is collapsed",
         "This setting determines whether this window is collapsed or not.",
         openspace::properties::Property::Visibility::AdvancedUser
     };

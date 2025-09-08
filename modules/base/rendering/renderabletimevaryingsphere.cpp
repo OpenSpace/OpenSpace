@@ -52,7 +52,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TextureSourceInfo = {
         "TextureSource",
-        "Texture Source",
+        "Texture source",
         "A directory containing images that are loaded from disk and used for texturing "
         "the sphere. The images are expected to be equirectangular projections.",
         openspace::properties::Property::Visibility::AdvancedUser

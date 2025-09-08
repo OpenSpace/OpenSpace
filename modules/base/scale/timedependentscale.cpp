@@ -33,7 +33,7 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo ReferenceDateInfo = {
         "ReferenceDate",
-        "Reference Date",
+        "Reference date",
         "The date at which this scale will be 0. The current value of the scale is "
         "computed by taking the difference between the current time and the reference "
         "date and multiplying it by the speed. This field must be formatted as: "
@@ -51,7 +51,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ClampToPositiveInfo = {
         "ClampToPositive",
-        "Clamp to Positive",
+        "Clamp to positive",
         "If this value is true, the velocity computation will be clamped to a positive "
         "value if the current simulation time is before the `ReferenceDate`. This is "
         "useful for instantaneous events that only propagate forwards in time. The "

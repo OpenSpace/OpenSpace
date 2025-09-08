@@ -683,12 +683,12 @@ TileMetaData RawTileDataReader::tileMetaData(RawTile& rawTile,
     std::fill(ppData.hasMissingData.begin(), ppData.hasMissingData.end(), false);
 
     bool allIsMissing = true;
-    for (int y = 0; y < region.numPixels.y; ++y) {
+    for (int y = 0; y < region.numPixels.y; y++) {
         const size_t yi =
             (static_cast<unsigned long long>(region.numPixels.y) - 1 - y) * bytesPerLine;
         size_t i = 0;
-        for (int x = 0; x < region.numPixels.x; ++x) {
-            for (size_t raster = 0; raster < _initData.nRasters; ++raster) {
+        for (int x = 0; x < region.numPixels.x; x++) {
+            for (size_t raster = 0; raster < _initData.nRasters; raster++) {
                 const float noDataValue = noDataValueAsFloat();
                 const float val = interpretFloat(
                     _initData.glType,

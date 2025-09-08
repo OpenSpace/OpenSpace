@@ -31,14 +31,14 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo ChromaKeyColorInfo = {
         "ChromaKeyColor",
-        "Chroma Key Color",
+        "Chroma key color",
         "This color is used as the chroma key for the layer that is adjusted.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ChromaKeyToleranceInfo = {
         "ChromaKeyTolerance",
-        "Chroma Key Tolerance",
+        "Chroma key tolerance",
         "This value determines the tolerance that is used to determine whether a color "
         "is matching the selected Chroma key.",
         openspace::properties::Property::Visibility::AdvancedUser

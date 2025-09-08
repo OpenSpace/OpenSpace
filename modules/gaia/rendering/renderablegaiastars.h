@@ -109,12 +109,6 @@ private:
      */
     int readBinaryOctreeStructureFile(const std::filesystem::path& folderPath);
 
-    /**
-     * Checks for any OpenGL errors and reports these to the log if _reportGlErrors is
-     * set to true.
-     */
-    void checkGlErrors(const std::string& identifier) const;
-
     properties::StringProperty _filePath;
     std::unique_ptr<ghoul::filesystem::File> _dataFile;
     bool _dataIsDirty = true;
@@ -163,8 +157,6 @@ private:
     properties::FloatProperty _gpuStreamBudgetProperty;
     properties::FloatProperty _maxGpuMemoryPercent;
     properties::FloatProperty _maxCpuMemoryPercent;
-
-    properties::BoolProperty _reportGlErrors;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(model, view, cameraPos, cameraLookUp, viewScaling, projection,

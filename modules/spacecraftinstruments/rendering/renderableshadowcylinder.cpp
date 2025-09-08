@@ -45,7 +45,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShadowLengthInfo = {
         "ShadowLength",
-        "Shadow Length",
+        "Shadow length",
         "A factor that controls the length of the shadow that is cast by the target "
         "object. The total length of the shadow is equal to the distance from the "
         "target to the light source multiplied with this value.",
@@ -54,21 +54,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShadowColorInfo = {
         "ShadowColor",
-        "Shadow Color",
+        "Shadow color",
         "The color used for the shadow cylinder.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo TerminatorTypeInfo = {
         "TerminatorType",
-        "Terminator Type",
+        "Terminator type",
         "Determines the type of terminator to use for calculating the shadow eclipse.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourceInfo = {
         "LightSource",
-        "Light Source",
+        "Light source",
         "The SPICE name of the object that is used as the illuminator for computing the "
         "shadow cylinder.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -83,14 +83,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BodyInfo = {
         "Body",
-        "Target Body",
+        "Target body",
         "The SPICE name of target body that is used as the shadow caster.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BodyFrameInfo = {
         "BodyFrame",
-        "Body Frame",
+        "Body frame",
         "The SPICE name of the reference frame in which the shadow cylinder is "
         "expressed.",
         openspace::properties::Property::Visibility::AdvancedUser

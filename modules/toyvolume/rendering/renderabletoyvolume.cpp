@@ -42,14 +42,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
         "ScalingExponent",
-        "Scaling Exponent",
+        "Scaling exponent",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
-        "Step Size",
+        "Step size",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -78,7 +78,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DownscaleVolumeRenderingInfo =
     {
         "Downscale",
-        "Downscale Factor Volume Rendering",
+        "Downscale factor volume rendering",
         "The downscaling factor used when rendering the current volume.",
         openspace::properties::Property::Visibility::AdvancedUser
     };

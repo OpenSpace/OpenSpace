@@ -42,7 +42,7 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo EffectiveTemperatureInfo = {
         "EffectiveTemperature",
-        "Effective Temperature",
+        "Effective temperature",
         "The effective temperature of the corresponding star, in Kelvin. Used to compute "
         "the width and size of the disc.",
         openspace::properties::Property::Visibility::User

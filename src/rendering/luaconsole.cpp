@@ -71,7 +71,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo VisibleInfo = {
         "IsVisible",
-        "Is Visible",
+        "Is visible",
         "Determines whether the Lua console is shown on the screen or not. Toggling it "
         "will fade the console in and out.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -79,7 +79,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShouldBeSynchronizedInfo = {
        "ShouldBeSynchronized",
-       "Should Be Synchronized",
+       "Should be synchronized",
        "Determines whether the entered commands will only be executed locally (if this "
        "is disabled), or whether they will be send to other connected nodes, for "
        "example in a cluster environment.",
@@ -88,7 +88,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShouldSendToRemoteInfo = {
         "ShouldSendToRemote",
-        "Should Send To Remote",
+        "Should send to remote",
         "Determines whether the entered commands will only be executed locally (if this "
         "is disabled), or whether they will be send to connected remote instances (other "
         "peers through a parallel connection).",
@@ -97,28 +97,28 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BackgroundColorInfo = {
         "BackgroundColor",
-        "Background Color",
+        "Background color",
         "Sets the background color of the console.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EntryTextColorInfo = {
         "EntryTextColor",
-        "Entry Text Color",
+        "Entry text color",
         "Sets the text color of the entry area of the console.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HistoryTextColorInfo = {
         "HistoryTextColor",
-        "History Text Color",
+        "History text color",
         "Sets the text color of the history area of the console.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HistoryLengthInfo = {
         "HistoryLength",
-        "History Length",
+        "History length",
         "Determines the length of the history in number of lines.",
         openspace::properties::Property::Visibility::AdvancedUser
     };

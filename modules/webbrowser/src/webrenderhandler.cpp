@@ -93,7 +93,7 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser>, CefRenderHandler::PaintEle
     }
 
     // Copy the updated rectangle line by line.
-    for (int y = lowerUpdatingRectBound.y; y < upperUpdatingRectBound.y; ++y) {
+    for (int y = lowerUpdatingRectBound.y; y < upperUpdatingRectBound.y; y++) {
         const int lineOffset = y * w + lowerUpdatingRectBound.x;
         // Chromium stores image upside down compared to OpenGL, so we flip it:
         const int invLineOffset = (h - y - 1) * w + lowerUpdatingRectBound.x;

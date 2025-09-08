@@ -50,7 +50,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FixedDateInfo = {
         "FixedDate",
-        "Fixed Date",
+        "Fixed date",
         "A time to lock the rotation to. Setting this to an empty string will "
         "unlock the time and return to rotation based on current simulation time.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -58,7 +58,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TimeOffsetInfo = {
         "TimeOffset",
-        "Time Offset",
+        "Time offset",
         "A time offset, in seconds, added to the simulation time (or Fixed Date if any), "
         "at which to compute the rotation.",
         openspace::properties::Property::Visibility::User

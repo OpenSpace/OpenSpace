@@ -46,7 +46,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FieldLineSeedsInfo = {
         "FieldlineSeedsIndexFile",
-        "Fieldline Seedpoints",
+        "Fieldline seedpoints",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::Developer
     };

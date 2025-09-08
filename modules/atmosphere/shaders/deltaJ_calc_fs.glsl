@@ -162,7 +162,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
       groundTransmittance = transmittance(transmittanceTexture, Rg, muGround, distanceToGround, Rg, Rt);
     }
 
-    for (int phi_i = 0; phi_i < INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; ++phi_i) {
+    for (int phi_i = 0; phi_i < INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; phi_i++) {
       float phi = (float(phi_i) + 0.5) * stepPhi;
       // spherical coordinates: dw = dtheta*dphi*sin(theta)*rho^2
       // rho = 1, we are integrating over a unit sphere

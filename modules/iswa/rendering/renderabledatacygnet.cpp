@@ -43,49 +43,49 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DataOptionsInfo = {
         "DataOptions",
-        "Data Options",
+        "Data options",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseLogInfo = {
         "UseLog",
-        "Use Logarithm",
+        "Use logarithm",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseHistogramInfo = {
         "UseHistogram",
-        "Auto Contrast",
+        "Auto contrast",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AutoFilterInfo = {
         "AutoFilter",
-        "Auto Filter",
+        "Auto filter",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo NormalizeValuesInfo = {
         "NormValues",
-        "Normalize Values",
+        "Normalize values",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo BackgroundInfo = {
         "BackgroundValues",
-        "Background Values",
+        "Background values",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionsFile = {
         "Transferfunctions",
-        "Transfer Functions",
+        "Transfer functions",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::Developer
     };

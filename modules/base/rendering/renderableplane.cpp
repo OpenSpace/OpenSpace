@@ -56,7 +56,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo OrientationRenderOptionInfo =
     {
         "OrientationRenderOption",
-        "Orientation Render Option",
+        "Orientation render option",
         "Controls how the plane will be oriented. \"Camera View Direction\" rotates the "
         "plane so that it is orthogonal to the viewing direction of the camera (useful "
         "for planar displays), and \"Camera Position Normal\" rotates the plane towards "
@@ -70,7 +70,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MirrorBacksideInfo = {
         "MirrorBackside",
-        "Mirror Backside of Image Plane",
+        "Mirror backside of image plane",
         "If false, the image plane will not be mirrored when viewed from the backside. "
         "This is usually desirable when the image shows data at a specific location, but "
         "not if it is displaying text for example.",
@@ -86,14 +86,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo AutoScaleInfo = {
         "AutoScale",
-        "Auto Scale",
+        "Auto scale",
         "Decides whether the plane should automatically adjust in size to match the "
         "aspect ratio of the content. Otherwise it will remain in the given size."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleByDistanceInfo = {
         "ScaleByDistance",
-        "Scale By Distance",
+        "Scale by distance",
         "Decides whether the plane should automatically adjust in size to based on "
         "the distance to the camera. Otherwise it will remain in the given size.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -101,7 +101,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ApparentSizeMultiplierInfo = {
         "ApparentSizeMultiplier",
-        "Apparent Size Multiplier",
+        "Apparent size multiplier",
         "Value that controls the visual size of the object when using distance scaling."
         "A value of 1.0 results in a natural angular size based on camera distance and "
         "field of view. Smaller values (e.g., 0.01) make the object appear smaller, while"
@@ -112,7 +112,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ScaleByDistanceMaxHeightInfo =
     {
         "ScaleByDistanceMaxHeight",
-        "Scale By Distance Max Height",
+        "Scale by distance max height",
         "The maximum height in meters a plane can get when using distance scaling.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -120,21 +120,21 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ScaleByDistanceMinHeightInfo =
     {
         "ScaleByDistanceMinHeight",
-        "Scale By Distance Min Height",
+        "Scale by distance min height",
         "The minimum height in meters a plane can get when using distance scaling.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
-        "Blending Mode",
+        "Blending mode",
         "Determines the blending mode that is applied to this plane.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
-        "Multiply Color",
+        "Multiply color",
         "An RGB color to multiply with the plane's texture. Useful for applying "
         "a color to grayscale images.",
         openspace::properties::Property::Visibility::User

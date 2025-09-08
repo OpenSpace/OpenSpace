@@ -33,14 +33,14 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
         "RotationAxis",
-        "Rotation Axis",
+        "Rotation axis",
         "This value is the rotation axis around which the object will rotate.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationRateInfo = {
         "RotationRate",
-        "Rotation Rate",
+        "Rotation rate",
         "This value determines the number of revolutions per in-game second.",
         openspace::properties::Property::Visibility::AdvancedUser
     };

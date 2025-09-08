@@ -30,7 +30,7 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
         "FilePath",
-        "File Path",
+        "File path",
         "The file path that is used for this image provider. The file must point to an "
         "image that is then loaded and used for all tiles.",
         openspace::properties::Property::Visibility::User

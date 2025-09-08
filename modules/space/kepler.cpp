@@ -150,7 +150,7 @@ namespace {
         const bool isInLeapYear =
             std::find(LeapYears.begin(), LeapYears.end(), year) != LeapYears.end();
 
-        for (int m = 0; m < month; ++m) {
+        for (int m = 0; m < month; m++) {
             dayCount += DaysOfMonths[m];
             if (m == February && isInLeapYear) {
                 dayCount += 1;

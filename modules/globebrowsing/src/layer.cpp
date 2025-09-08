@@ -55,7 +55,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
-        "Blend Mode",
+        "Blend mode",
         "This value specifies the blend mode that is applied to this layer. The blend "
         "mode determines how this layer is added to the underlying layers beneath.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -105,7 +105,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GuiDescriptionInfo = {
         "GuiDescription",
-        "Gui Description",
+        "Gui description",
         "This is the description for the scene graph node to be shown in the gui "
         "example: Earth is a special place.",
         openspace::properties::Property::Visibility::Hidden

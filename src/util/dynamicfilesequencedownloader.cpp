@@ -395,7 +395,7 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
     std::vector<File*>::iterator currentIt = _filesCurrentlyDownloading.begin();
 
     // Since size of filesCurrentlyDownloading can change per iteration, keep size-call
-    for (size_t i = 0; i != _filesCurrentlyDownloading.size(); ++i) {
+    for (size_t i = 0; i != _filesCurrentlyDownloading.size(); i++) {
         File* file = *currentIt;
         HttpFileDownload* dl = file->download.get();
 

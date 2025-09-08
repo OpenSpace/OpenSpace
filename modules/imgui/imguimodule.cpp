@@ -59,7 +59,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo CollapsedInfo = {
         "Collapsed",
-        "Is Collapsed",
+        "Is collapsed",
         "This setting determines whether this window is collapsed or not.",
         openspace::properties::Property::Visibility::Developer
     };
@@ -74,7 +74,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo HelpTextDelayInfo = {
         "HelpTextDelay",
-        "Tooltip Delay (in s)",
+        "Tooltip delay (in s)",
         "This value determines the delay in seconds after which the tooltip is shown.",
         openspace::properties::Property::Visibility::Developer
     };

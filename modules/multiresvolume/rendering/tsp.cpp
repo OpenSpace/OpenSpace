@@ -135,7 +135,7 @@ bool TSP::construct() {
     LDEBUG("Constructing TSP tree");
 
     // Loop over the OTs (one per BST node)
-    for (unsigned int OT = 0; OT < _numBSTNodes; ++OT) {
+    for (unsigned int OT = 0; OT < _numBSTNodes; OT++) {
         // Start at the root of each OT
         unsigned int OTNode = OT * _numOTNodes;
 
@@ -279,7 +279,7 @@ bool TSP::calculateSpatialError() {
 
     // First pass: Calculate average color for each brick
     LDEBUG("Calculating spatial error, first pass");
-    for (unsigned int brick = 0; brick<_numTotalNodes; ++brick) {
+    for (unsigned int brick = 0; brick<_numTotalNodes; brick++) {
         // Offset in file
         std::streampos offset = dataPosition() +
                                 static_cast<long long>(brick*numBrickVals*sizeof(float));
@@ -307,7 +307,7 @@ bool TSP::calculateSpatialError() {
     // Second pass: For each brick, compare the covered leaf voxels with
     // the brick average
     LDEBUG("Calculating spatial error, second pass");
-    for (unsigned int brick = 0; brick < _numTotalNodes; ++brick) {
+    for (unsigned int brick = 0; brick < _numTotalNodes; brick++) {
         // Fetch mean intensity
         float brickAvg = averages[brick];
 
@@ -326,7 +326,7 @@ bool TSP::calculateSpatialError() {
         else {
 
             // Calculate "standard deviation" corresponding to leaves
-            for (auto lb = leafBricksCovered.begin(); lb != leafBricksCovered.end(); ++lb)
+            for (auto lb = leafBricksCovered.begin(); lb != leafBricksCovered.end(); lb++)
             {
                 // Read brick
                 std::streampos offset = dataPosition() +
@@ -337,7 +337,7 @@ bool TSP::calculateSpatialError() {
                     static_cast<size_t>(numBrickVals)*sizeof(float));
 
                 // Add to sum
-                for (auto v = buffer.begin(); v != buffer.end(); ++v) {
+                for (auto v = buffer.begin(); v != buffer.end(); v++) {
                     stdDev += pow(*v - brickAvg, 2.f);
                 }
             }
@@ -408,7 +408,7 @@ bool TSP::calculateTemporalError() {
     std::vector<float> errors(_numTotalNodes);
 
     // Calculate temporal error for one brick at a time
-    for (unsigned int brick = 0; brick<_numTotalNodes; ++brick) {
+    for (unsigned int brick = 0; brick<_numTotalNodes; brick++) {
         unsigned int numBrickVals = _paddedBrickDim * _paddedBrickDim * _paddedBrickDim;
 
         // Save the individual voxel's average over timesteps. Because the
@@ -441,10 +441,10 @@ bool TSP::calculateTemporalError() {
         else {
             // Calculate standard deviation per voxel, average over brick
             float avgStdDev = 0.f;
-            for (unsigned int voxel = 0; voxel<numBrickVals; ++voxel) {
+            for (unsigned int voxel = 0; voxel<numBrickVals; voxel++) {
                 float stdDev = 0.f;
                 for (auto leaf = coveredBricks.begin();
-                    leaf != coveredBricks.end(); ++leaf)
+                    leaf != coveredBricks.end(); leaf++)
                 {
                     // Sample the leaves at the corresponding voxel position
                     _file.seekg(dataPosition() +

@@ -177,7 +177,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
     std::set<int> uniqueTextureIndicesInData;
 
     // Skip first row (column names)
-    for (size_t rowIdx = 1; rowIdx < rows.size(); ++rowIdx) {
+    for (size_t rowIdx = 1; rowIdx < rows.size(); rowIdx++) {
         const std::vector<std::string>& row = rows[rowIdx];
 
         Dataset::Entry entry;

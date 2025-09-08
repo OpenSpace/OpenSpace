@@ -39,21 +39,21 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo XColorInfo = {
         "XColor",
-        "X Color",
+        "X color",
         "The color of the x-axis.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo YColorInfo = {
         "YColor",
-        "Y Color",
+        "Y color",
         "The color of the y-axis.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZColorInfo = {
         "ZColor",
-        "Z Color",
+        "Z color",
         "The color of the z-axis.",
         openspace::properties::Property::Visibility::NoviceUser
     };

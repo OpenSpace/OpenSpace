@@ -527,7 +527,7 @@ void ScriptEngine::decode(SyncBuffer* syncBuffer) {
     size_t nScripts;
     syncBuffer->decode(nScripts);
 
-    for (size_t i = 0; i < nScripts; ++i) {
+    for (size_t i = 0; i < nScripts; i++) {
         std::string script;
         syncBuffer->decode(script);
         _clientScriptQueue.push(std::move(script));

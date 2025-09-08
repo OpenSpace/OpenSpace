@@ -597,7 +597,7 @@ std::vector<std::vector<glm::vec3>> GlobeGeometryFeature::createLineGeometry() {
                     );
 
                 // Don't add the first position. Has been added as last in previous step
-                for (size_t si = 1; si < subdividedPositions.size(); ++si) {
+                for (size_t si = 1; si < subdividedPositions.size(); si++) {
                     const geometryhelper::PosHeightPair& pair = subdividedPositions[si];
                     addLinePos(glm::vec3(pair.position));
                 }

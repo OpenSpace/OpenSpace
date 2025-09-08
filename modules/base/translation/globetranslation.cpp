@@ -41,7 +41,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GlobeInfo = {
         "Globe",
-        "Attached Globe",
+        "Attached globe",
         "The node on which the longitude/latitude is specified. If the node is a globe, "
         "the correct height information for the globe is used. Otherwise, the position "
         "is specified based on the longitude and latitude on the node's interaction "
@@ -78,7 +78,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo UseHeightmapInfo = {
         "UseHeightmap",
-        "Use Heightmap",
+        "Use heightmap",
         "If this value is 'true', the altitude specified in 'Altitude' will be treated "
         "as an offset from the heightmap. Otherwise, it will be an offset from the "
         "globe's reference ellipsoid. The default value is 'false'.",
@@ -87,14 +87,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo UseCameraInfo = {
         "UseCamera",
-        "Use Camera",
+        "Use camera",
         "If this value is 'true', the lat and lon are updated to match the camera.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseCameraAltitudeInfo = {
         "UseCameraAltitude",
-        "Use Camera Altitude",
+        "Use camera altitude",
         "If this value is 'true', the altitude is updated to match the camera.",
         openspace::properties::Property::Visibility::AdvancedUser
     };

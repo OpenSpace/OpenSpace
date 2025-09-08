@@ -421,7 +421,7 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& 
 
     // Reclaim indices from previous render call
     for (auto removedKey = _removedKeysInPrevCall.rbegin();
-         removedKey != _removedKeysInPrevCall.rend(); ++removedKey) {
+         removedKey != _removedKeysInPrevCall.rend(); removedKey++) {
 
         // Uses a reverse loop to try to decrease the biggest chunk
         if (*removedKey == static_cast<int>(_biggestChunkIndexInUse) - 1) {
@@ -762,7 +762,7 @@ void OctreeManager::writeNodeToMultipleFiles(const std::string& outFilePrefix,
         }
         if (threadWrites) {
             // Make sure all threads are done.
-            for (int thread = 0; thread < 8; ++thread) {
+            for (int thread = 0; thread < 8; thread++) {
                 writeThreads[thread].join();
             }
         }
@@ -974,7 +974,7 @@ bool OctreeManager::insertInNode(OctreeNode& node, const std::vector<float>& sta
         createNodeChildren(node);
 
         // Distribute stars from parent node into children
-        for (size_t n = 0; n < MAX_STARS_PER_NODE; ++n) {
+        for (size_t n = 0; n < MAX_STARS_PER_NODE; n++) {
             // Position data.
             auto posBegin = node.posData.begin() + n * POS_SIZE;
             auto posEnd = posBegin + POS_SIZE;

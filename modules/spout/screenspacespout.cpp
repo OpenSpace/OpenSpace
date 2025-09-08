@@ -34,7 +34,7 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo NameInfo = {
         "SpoutName",
-        "Spout Sender Name",
+        "Spout sender name",
         "This value explicitly sets the Spout receiver to use a specific name. If this "
         "is not a valid name, an empty image is used.",
         openspace::properties::Property::Visibility::AdvancedUser

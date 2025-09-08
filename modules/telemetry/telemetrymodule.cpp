@@ -58,7 +58,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo IpAddressInfo = {
         "IpAddress",
-        "IP Address",
+        "IP address",
         "The network IP address that the telemetry Open Sound Control messages is sent "
         "to.",
         openspace::properties::Property::Visibility::User
@@ -73,7 +73,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo AngleCalculationModeInfo = {
         "AngleCalculationMode",
-        "Angle Calculation Mode",
+        "Angle calculation mode",
         "This setting changes the method used to calculate any angles in the "
         "telemetries. The Horizontal mode, generally works well for flat displays or "
         "forward facing immersive environments. The Circular mode, generally works well "
@@ -85,7 +85,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo IncludeElevationAngleInfo = {
         "IncludeElevationAngle",
-        "Include Elevation Angle",
+        "Include elevation angle",
         "This setting determines if an additional elevation angle should be calculated "
         "for the telemetries that calculate angles. This angle determines where the "
         "object is placed within a vertical plane of reference in relation to the "

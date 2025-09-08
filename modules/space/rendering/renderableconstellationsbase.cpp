@@ -42,7 +42,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo NamesFileInfo = {
         "NamesFile",
-        "Constellation Names File Path",
+        "Constellation names file path",
         "Specifies the file that contains the mapping between constellation "
         "abbreviations and full names of the constellations. If this value is empty, the "
         "abbreviations are used as the full names.",
@@ -51,14 +51,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
+        "Line width",
         "The line width used for the constellation shape.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
         "ConstellationSelection",
-        "Constellation Selection",
+        "Constellation selection",
         "The selected constellations are displayed on the celestial sphere.",
         openspace::properties::Property::Visibility::NoviceUser
     };

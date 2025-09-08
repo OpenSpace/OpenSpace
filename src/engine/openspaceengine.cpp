@@ -130,7 +130,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PrintEventsInfo = {
         "PrintEvents",
-        "Print Events",
+        "Print events",
         "If this is enabled, all events that are propagated through the system are "
         "printed to the log.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -138,7 +138,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo VisibilityInfo = {
         "PropertyVisibility",
-        "Property Visibility",
+        "Property visibility",
         "Hides or displays different settings in the GUI depending on how advanced they "
         "are.",
         openspace::properties::Property::Visibility::Always
@@ -146,7 +146,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FadeDurationInfo = {
         "FadeDuration",
-        "Fade Duration (seconds)",
+        "Fade duration (seconds)",
         "Controls how long time the fading in/out takes when enabling/disabling an "
         "object through a checkbox in the UI. Holding SHIFT while clicking the "
         "checkbox will enable/disable the renderable without fading, as will setting "
@@ -156,7 +156,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DisableMouseInputInfo = {
         "DisableMouseInputs",
-        "Disable All Mouse Inputs",
+        "Disable all mouse inputs",
         "Disables all mouse inputs. Useful when using touch interaction, to prevent "
         "double inputs on touch (from both touch input and inserted mouse inputs).",
         openspace::properties::Property::Visibility::User,
@@ -167,7 +167,7 @@ namespace {
         ShowPropertyConfirmationDialogInfo =
     {
         "ShowPropertyConfirmation",
-        "Show Property Confirmation",
+        "Show property confirmation",
         "Controls whether confirmation dialogs are shown when making changes to certain "
         "properties. If checked, the dialogs will be shown for properties that require "
         "it. If unchecked, no dialogs will be shown.",
@@ -1299,6 +1299,7 @@ void OpenSpaceEngine::drawOverlays() {
     if (isGuiWindow) {
         global::renderEngine->renderOverlays(_shutdown);
         global::sessionRecordingHandler->render();
+        global::navigationHandler->renderOverlay();
     }
 
     for (const std::function<void()>& func : *global::callback::draw2D) {

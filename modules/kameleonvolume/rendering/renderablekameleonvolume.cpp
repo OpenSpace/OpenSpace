@@ -67,14 +67,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LowerDomainBoundInfo = {
         "LowerDomainBound",
-        "Lower Domain Bound",
+        "Lower domain bound",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UpperDomainBoundInfo = {
         "UpperDomainBound",
-        "Upper Domain Bound",
+        "Upper domain bound",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -88,21 +88,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LowerValueBoundInfo = {
         "LowerValueBound",
-        "Lower Value Bound",
+        "Lower value bound",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UpperValueBoundInfo = {
         "UpperValueBound",
-        "Upper Value Bound",
+        "Upper value bound",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GridTypeInfo = {
         "GridType",
-        "Grid Type",
+        "Grid type",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::Developer
     };
@@ -116,14 +116,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SourcePathInfo = {
         "SourcePath",
-        "Source Path",
+        "Source path",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "TransferFunctionPath",
-        "Transfer Function Path",
+        "Transfer function path",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };

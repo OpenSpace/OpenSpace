@@ -241,7 +241,7 @@ void ReadFileJob::execute() {
         values[idx++] = std::isnan(radial_vel_err[i]) ? 0.f : radial_vel_err[i];
 
         // Read extra columns, if any. This will slow down the sorting tremendously!
-        for (size_t col = _nDefaultCols; col < nColumnsRead; ++col) {
+        for (size_t col = _nDefaultCols; col < nColumnsRead; col++) {
             std::vector<float> vecData = std::move(tableContent[_allColumns[col]]);
             values[idx++] = std::isnan(vecData[col]) ? 0.f : vecData[col];
         }

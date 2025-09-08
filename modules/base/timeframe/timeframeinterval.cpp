@@ -33,7 +33,7 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo HasStartInfo = {
         "HasStart",
-        "Has Start",
+        "Has start",
         "If enabled, this TimeFrame will be inactive before the Start.",
         openspace::properties::Property::Visibility::User
     };
@@ -47,7 +47,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo HasEndInfo = {
         "HasEnd",
-        "Has End",
+        "Has end",
         "If enabled, this TimeFrame will be inactive after the End.",
         openspace::properties::Property::Visibility::User
     };

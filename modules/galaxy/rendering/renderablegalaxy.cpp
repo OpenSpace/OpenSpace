@@ -66,7 +66,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo VolumeRenderingEnabledInfo = {
         "VolumeRenderingEnabled",
-        "Volume Rendering",
+        "Volume rendering",
         "Decides whether the volume rendering component of the galaxy rendering should "
         "be enabled or not. If disabled, the volume rendering is skipped.",
         openspace::properties::Property::Visibility::User
@@ -74,7 +74,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo StarRenderingEnabledInfo = {
         "StarRenderingEnabled",
-        "Star Rendering",
+        "Star rendering",
         "Decides whether the point-based star rendering component of the galaxy "
         "rendering should be enabled or not. If disabled, the point-based star rendering "
         "is skipped.",
@@ -83,7 +83,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
-        "Step Size",
+        "Step size",
         "Determines the distance between steps taken in the volume rendering. The lower "
         "the number is, the better the rendering looks, but also takes more "
         "computational resources to render.",
@@ -92,7 +92,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo AbsorptionMultiplyInfo = {
         "AbsorptionMultiply",
-        "Absorption Multiplier",
+        "Absorption multiplier",
         "A unit-less scale factor for the probability of dust absorbing a light "
         "particle. The amount of absorption determines the spectrum of the light that is "
         "emitted from the galaxy.",
@@ -101,7 +101,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EmissionMultiplyInfo = {
         "EmissionMultiply",
-        "Emission Multiplier",
+        "Emission multiplier",
         "A unit-less scale factor for the amount of light being emitted by dust in the "
         "galaxy.",
         openspace::properties::Property::Visibility::User
@@ -116,7 +116,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo StarRenderingMethodInfo = {
         "StarRenderingMethod",
-        "Star Rendering Method",
+        "Star rendering method",
         "The rendering method used for visualizing the stars.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -134,7 +134,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DownscaleVolumeRenderingInfo =
     {
         "Downscale",
-        "Downscale Factor Volume Rendering",
+        "Downscale factor volume rendering",
         "The downscaling factor used when rendering the volume.",
         openspace::properties::Property::Visibility::User
     };
@@ -142,7 +142,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo NumberOfRayCastingStepsInfo =
     {
         "Steps",
-        "Number of RayCasting Steps",
+        "Number of raycasting steps",
         "The number of integration steps used during the raycasting procedure.",
         openspace::properties::Property::Visibility::AdvancedUser
     };

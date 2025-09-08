@@ -52,7 +52,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShadowLengthInfo = {
         "ShadowLength",
-        "Shadow Length",
+        "Shadow length",
         "A factor that controls the length of the rendered shadow cone. The total length "
         "will be the distance from the shadower to the shadowee multiplied by this "
         "value.",
@@ -61,35 +61,35 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShowUmbralShadowInfo = {
         "ShowUmbralShadow",
-        "Show Umbral Shadow",
+        "Show umbral shadow",
         "Decides whether the umbral portion of the shadow should be shown.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo UmbralShadowColorInfo = {
         "UmbralShadowColor",
-        "Umbral Shadow Color",
+        "Umbral shadow color",
         "The color for the shadow cylinder that represents the umbral shadow.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowPenumbralShadowInfo = {
         "ShowPenumbralShadow",
-        "Show Penumbral Shadow",
+        "Show penumbral shadow",
         "Decides whether the penumbral portion of the shadow should be shown.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo PenumbralShadowColorInfo = {
         "PenumbralShadowColor",
-        "Penumbral Shadow Color",
+        "Penumbral shadow color",
         "The color for the shadow cylinder that represents the penumbral shadow.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourceInfo = {
         "LightSource",
-        "Light Source",
+        "Light source",
         "The SPICE name of the object that is used as the illuminator when computing the "
         "shadow cylinder.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -97,7 +97,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LightSourceFrameInfo = {
         "LightSourceFrame",
-        "Light Source Frame",
+        "Light source frame",
         "The SPICE name of the body-fixed reference frame for the light source.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -111,7 +111,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShadowerFrameInfo = {
         "ShadowerFrame",
-        "Shadower Frame",
+        "Shadower frame",
         "The SPICE name of the body-fixed reference frame for the shadower.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
