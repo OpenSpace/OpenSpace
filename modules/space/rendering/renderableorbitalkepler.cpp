@@ -687,11 +687,10 @@ void RenderableOrbitalKepler::updateBuffers() {
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), nullptr);
 
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
+    glVertexAttribLPointer(
         1,
         2,
         GL_DOUBLE,
-        GL_FALSE,
         sizeof(TrailVBOLayout),
         reinterpret_cast<GLvoid*>(4 * sizeof(GL_FLOAT))
     );
@@ -713,8 +712,8 @@ void RenderableOrbitalKepler::calculateSegmentsForPoints(const RenderData& data)
         // Check how far along the trail we are
         const kepler::Parameters& orbit = _parameters[i];
         const double nRevs = (data.time.j2000Seconds() - orbit.epoch) / orbit.period;
-        double frac = nRevs - std::trunc(nRevs);
-        frac += (frac < 0.0) ? 1.0: 0.0;
+        float frac = static_cast<float>(nRevs - std::trunc(nRevs));
+        frac += (frac < 0.f) ? 1.f: 0.f;
 
         // Get the closest vertex before that point
         const int nSegments = _segmentSizeRaw[i] - 1;
@@ -739,8 +738,8 @@ void RenderableOrbitalKepler::calculateSegmentsForTrails(const RenderData& data)
         // Check how far along the trail we are
         const kepler::Parameters& orbit = _parameters[i];
         const double nRevs = (data.time.j2000Seconds() - orbit.epoch) / orbit.period;
-        double frac = nRevs - std::trunc(nRevs);
-        frac += (frac < 0.0) ? 1.0 : 0.0;
+        float frac = static_cast<float>(nRevs - std::trunc(nRevs));
+        frac += (frac < 0.f) ? 1.f : 0.f;
 
         int p0Start = 0;
         int p0Length = 0;
