@@ -22,37 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+bool rayIntersectsEllipsoid(vec3 rayOrigin, vec3 rayDir, vec3 ellipsoidCenter,
+                            vec3 ellipsoidRadii)
+{
+  // Translate ray to ellipsoid's local coordinate system
+  vec3 oc = rayOrigin - ellipsoidCenter;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+  // Normalize by ellipsoid radii to convert to unit sphere problem
+  vec3 ocNorm = oc / ellipsoidRadii;
+  vec3 dirNorm = rayDir / ellipsoidRadii;
 
-layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec2 in_st;
-layout(location = 2) in vec3 in_normal;
+  // Quadratic equation coefficients: A*t^2 + B*t + C = 0
+  float a = dot(dirNorm, dirNorm);
+  float b = dot(ocNorm, dirNorm); // Note: factor of 2 moved to discriminant calc
+  float c = dot(ocNorm, ocNorm) - 1.0;
 
-out vec2 vs_st;
-out float vs_screenSpaceDepth;
-out vec4 shadowCoords;
-out vec3 vs_normal;
-out vec3 posObj;
+  // Calculate discriminant (optimized: b^2 - ac since we factored out the 2)
+  float discriminant = b * b - a * c;
 
-uniform dmat4 modelViewProjectionMatrix;
+  // Early exit if no intersection
+  if (discriminant < 0.0) {
+    return false;
+  }
 
-// ShadowMatrix is the matrix defined by:
-// textureCoordsMatrix * projectionMatrix * combinedViewMatrix * modelMatrix
-// where textureCoordsMatrix is just a scale and bias computation: [-1,1] to [0,1]
-uniform dmat4 shadowMatrix;
+  // Check if at least one intersection is in front of ray origin
+  // For quadratic A*t^2 + 2*B*t + C = 0, if we want to check if any t >= 0:
+  // If C <= 0, ray origin is inside ellipsoid, so definitely intersects
+  if (c <= 0.0) {
+    return true;
+  }
 
-
-void main() {
-  vs_st = in_st;
-  vs_normal = mat3(modelViewProjectionMatrix) * in_normal;
-  posObj = vec3(in_position, 0.0);
-
-  dvec4 positionClipSpace  = modelViewProjectionMatrix * dvec4(in_position, 0.0, 1.0);
-  vec4 positionClipSpaceZNorm = z_normalization(vec4(positionClipSpace));
-
-  shadowCoords = vec4(shadowMatrix * dvec4(in_position, 0.0, 1.0));
-  vs_screenSpaceDepth  = positionClipSpaceZNorm.w;
-  gl_Position = positionClipSpaceZNorm;
+  // If both intersections exist and C > 0, check if the smaller root t1 >= 0
+  // t1 = (-b - sqrt(discriminant)) / a
+  // Since we need t1 >= 0: -b - sqrt(discriminant) >= 0
+  // This means: -b >= sqrt(discriminant), so b <= -sqrt(discriminant)
+  // Since sqrt(discriminant) >= 0, this means b <= 0
+  return b <= 0.0;
 }
