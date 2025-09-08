@@ -889,6 +889,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
                 if (_ringsComponent && _ringsComponent->isEnabled() &&
                     _ringsComponent->isVisible())
                 {
+                    _ringsComponent->setEllipsoidRadii(glm::vec3(_ellipsoid.radii()));
                     _ringsComponent->draw(data, _shadowComponent->shadowMapData());
                 }
             }
@@ -897,6 +898,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
                 if (_ringsComponent && _ringsComponent->isEnabled() &&
                     _ringsComponent->isVisible())
                 {
+                    _ringsComponent->setEllipsoidRadii(glm::vec3(_ellipsoid.radii()));
                     _ringsComponent->draw(data);
                 }
             }

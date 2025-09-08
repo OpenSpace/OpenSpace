@@ -312,12 +312,6 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     //=======================================================================
     const glm::dmat4 lightProjectionMatrix = glm::dmat4(_lightCamera->projectionMatrix());
 
-    // The model transformation missing in the final shadow matrix is add when rendering
-    // each object (using its transformations provided by the RenderData structure)
-    _shadowData.shadowMatrix =
-        ToTextureCoordsMatrix * lightProjectionMatrix *
-        _lightCamera->combinedViewMatrix();
-
 
     // Saves current state
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_currentFBO);
