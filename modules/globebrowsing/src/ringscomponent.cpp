@@ -420,10 +420,6 @@ void RingsComponent::draw(const RenderData& data,
             sunPositionObjectSpace
         );
         _shader->setUniform(
-            _uniformCacheAdvancedRings.zFightingPercentage,
-            _zFightingPercentage
-        );
-        _shader->setUniform(
             _uniformCacheAdvancedRings.modelViewProjectionMatrix,
             modelViewProjectionTransform
         );
@@ -465,14 +461,6 @@ void RingsComponent::draw(const RenderData& data,
         _shader->setUniform(_uniformCacheAdvancedRings.opacity, opacity());
         _shader->setUniform(_uniformCacheAdvancedRings.ellipsoidRadii, _ellipsoidRadii);
 
-        // Adding the model transformation to the final shadow matrix so we have a
-        // complete transformation from the model coordinates to the clip space of
-        // the light position.
-        _shader->setUniform(
-            _uniformCacheAdvancedRings.shadowMatrix,
-            shadowData.shadowMatrix * modelTransform
-        );
-
         const glm::dmat4 camToObjectTransform = glm::inverse(
             data.camera.combinedViewMatrix() * modelTransform
         );
@@ -502,7 +490,6 @@ void RingsComponent::draw(const RenderData& data,
         
         _shader->setUniform(_uniformCache.sunPositionObj, sunPositionObjectSpace);
         
-        _shader->setUniform(_uniformCache.zFightingPercentage, _zFightingPercentage);
         _shader->setUniform(
             _uniformCache.modelViewProjectionMatrix,
             modelViewProjectionTransform
@@ -513,14 +500,6 @@ void RingsComponent::draw(const RenderData& data,
         ringTextureUnit.activate();
         _texture->bind();
         _shader->setUniform(_uniformCache.ringTexture, ringTextureUnit);
-
-        // Adding the model transformation to the final shadow matrix so we have a
-        // complete transformation from the model coordinates to the clip space of
-        // the light position.
-        _shader->setUniform(
-            _uniformCache.shadowMatrix,
-            shadowData.shadowMatrix * modelTransform
-        );
     }
 
     glEnable(GL_DEPTH_TEST);
