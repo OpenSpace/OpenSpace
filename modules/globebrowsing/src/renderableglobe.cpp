@@ -1459,7 +1459,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     }
 
     // Shadow Mapping
-    if (_shadowMappingProperties.shadowMapping) {
+    if (_shadowMappingProperties.shadowMapping && _performShading) {
         // Bind ring textures for direct projection when rings component is available
         if (_ringsComponent && _ringsComponent->isEnabled()) {
             ghoul::opengl::TextureUnit ringTextureColorUnit;
