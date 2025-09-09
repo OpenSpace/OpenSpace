@@ -394,6 +394,11 @@ void RingsComponent::draw(const RenderData& data,
         glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
         * modelTransform;
 
+    const glm::dmat4 inverseModelTransform = glm::inverse(modelTransform);
+    const glm::vec3 sunPositionObjectSpace = glm::normalize(
+        glm::vec3(inverseModelTransform * glm::vec4(_sunPosition, 0.f))
+    );
+
     ghoul::opengl::TextureUnit ringTextureUnit;
     ghoul::opengl::TextureUnit ringTextureFwrdUnit;
     ghoul::opengl::TextureUnit ringTextureBckwrdUnit;
@@ -410,19 +415,9 @@ void RingsComponent::draw(const RenderData& data,
         _shader->setUniform(_uniformCacheAdvancedRings.nightFactor, _nightFactor);
         _shader->setUniform(_uniformCacheAdvancedRings.sunPosition, _sunPosition);
 
-        const glm::dmat4 inverseModelTransform = glm::inverse(modelTransform);
-
-        const glm::vec3 sunPositionObjectSpace = glm::normalize(
-            glm::vec3(inverseModelTransform * glm::vec4(_sunPosition, 0.f))
-        );
-
         _shader->setUniform(
             _uniformCacheAdvancedRings.sunPositionObj,
             sunPositionObjectSpace
-        );
-        _shader->setUniform(
-            _uniformCacheAdvancedRings.zFightingPercentage,
-            _zFightingPercentage
         );
         _shader->setUniform(
             _uniformCacheAdvancedRings.modelViewProjectionMatrix,
@@ -464,14 +459,7 @@ void RingsComponent::draw(const RenderData& data,
             ringTextureTransparencyUnit
         );
         _shader->setUniform(_uniformCacheAdvancedRings.opacity, opacity());
-
-        // Adding the model transformation to the final shadow matrix so we have a
-        // complete transformation from the model coordinates to the clip space of
-        // the light position.
-        _shader->setUniform(
-            _uniformCacheAdvancedRings.shadowMatrix,
-            shadowData.shadowMatrix * modelTransform
-        );
+        _shader->setUniform(_uniformCacheAdvancedRings.ellipsoidRadii, _ellipsoidRadii);
 
         const glm::dmat4 camToObjectTransform = glm::inverse(
             data.camera.combinedViewMatrix() * modelTransform
@@ -484,14 +472,6 @@ void RingsComponent::draw(const RenderData& data,
         _shader->setUniform(
             _uniformCacheAdvancedRings.camPositionObj,
             _camPositionObjectSpace
-        );
-
-        ghoul::opengl::TextureUnit shadowMapUnit;
-        shadowMapUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
-        _shader->setUniform(
-            _uniformCacheAdvancedRings.shadowMapTexture,
-            shadowMapUnit
         );
 
         glEnable(GL_DEPTH_TEST);
@@ -507,29 +487,19 @@ void RingsComponent::draw(const RenderData& data,
         _shader->setUniform(_uniformCache.colorFilterValue, _colorFilter);
         _shader->setUniform(_uniformCache.nightFactor, _nightFactor);
         _shader->setUniform(_uniformCache.sunPosition, _sunPosition);
-        _shader->setUniform(_uniformCache.zFightingPercentage, _zFightingPercentage);
+        
+        _shader->setUniform(_uniformCache.sunPositionObj, sunPositionObjectSpace);
+        
         _shader->setUniform(
             _uniformCache.modelViewProjectionMatrix,
             modelViewProjectionTransform
         );
         _shader->setUniform(_uniformCache.opacity, opacity());
+        _shader->setUniform(_uniformCache.ellipsoidRadii, _ellipsoidRadii);
 
         ringTextureUnit.activate();
         _texture->bind();
         _shader->setUniform(_uniformCache.ringTexture, ringTextureUnit);
-
-        // Adding the model transformation to the final shadow matrix so we have a
-        // complete transformation from the model coordinates to the clip space of
-        // the light position.
-        _shader->setUniform(
-            _uniformCache.shadowMatrix,
-            shadowData.shadowMatrix * modelTransform
-        );
-
-        ghoul::opengl::TextureUnit shadowMapUnit;
-        shadowMapUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
-        _shader->setUniform(_uniformCache.shadowMapTexture, shadowMapUnit);
     }
 
     glEnable(GL_DEPTH_TEST);
@@ -857,6 +827,10 @@ glm::vec3 RingsComponent::sunPositionObj() const {
 
 glm::vec3 RingsComponent::camPositionObj() const {
     return _camPositionObjectSpace;
+}
+
+void RingsComponent::setEllipsoidRadii(glm::vec3 radii) {
+    _ellipsoidRadii = std::move(radii);
 }
 
 void RingsComponent::onReadinessChange(ReadinessChangeCallback callback) {

@@ -22,30 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+bool rayIntersectsEllipsoid(vec3 rayOrigin, vec3 rayDir, vec3 ellipsoidCenter,
+                            vec3 ellipsoidRadii)
+{
+  // Translate ray to ellipsoid's local coordinate system
+  vec3 oc = rayOrigin - ellipsoidCenter;
 
-layout (location = 0) in vec4 vertexData; // 1: x, 2: y, 3: z, 4: timeOffset,
-layout (location = 1) in dvec2 orbitData; // 1: epoch, 2: period
+  // Normalize by ellipsoid radii to convert to unit sphere problem
+  vec3 ocNorm = oc / ellipsoidRadii;
+  vec3 dirNorm = rayDir / ellipsoidRadii;
 
-uniform double inGameTime;
+  // Quadratic equation coefficients: A*t^2 + B*t + C = 0
+  float a = dot(dirNorm, dirNorm);
+  float b = dot(ocNorm, dirNorm); // Note: factor of 2 moved to discriminant calc
+  float c = dot(ocNorm, ocNorm) - 1.0;
 
-flat out float currentRevolutionFraction;
-flat out float vertexRevolutionFraction;
+  // Calculate discriminant (optimized: b^2 - ac since we factored out the 2)
+  float discriminant = b * b - a * c;
 
-void main() {
-  double epoch = orbitData.x;
-  double period = orbitData.y;
-
-  // calculate nr of periods, get fractional part to know where the vertex closest to the
-  // debris part is right now
-  double numOfRevolutions = (inGameTime - epoch) / period;
-  currentRevolutionFraction = float(numOfRevolutions - double(int(numOfRevolutions)));
-  if (currentRevolutionFraction < 0.0) {
-    currentRevolutionFraction += 1.0;
+  // Early exit if no intersection
+  if (discriminant < 0.0) {
+    return false;
   }
 
-  // Same procedure for the current vertex
-  vertexRevolutionFraction = float(vertexData.w / period);
+  // Check if at least one intersection is in front of ray origin
+  // For quadratic A*t^2 + 2*B*t + C = 0, if we want to check if any t >= 0:
+  // If C <= 0, ray origin is inside ellipsoid, so definitely intersects
+  if (c <= 0.0) {
+    return true;
+  }
 
-  gl_Position = vec4(vertexData.xyz, 1.0);
+  // If both intersections exist and C > 0, check if the smaller root t1 >= 0
+  // t1 = (-b - sqrt(discriminant)) / a
+  // Since we need t1 >= 0: -b - sqrt(discriminant) >= 0
+  // This means: -b >= sqrt(discriminant), so b <= -sqrt(discriminant)
+  // Since sqrt(discriminant) >= 0, this means b <= 0
+  return b <= 0.0;
 }

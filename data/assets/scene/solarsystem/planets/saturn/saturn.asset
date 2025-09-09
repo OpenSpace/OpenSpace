@@ -62,7 +62,7 @@ local Saturn = {
       }
     },
     Shadows = {
-      Enabled = true,
+      Enabled = false,
       DistanceFraction = 40.0
     }
   },
