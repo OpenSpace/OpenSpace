@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,14 +46,14 @@ namespace {
         "stride", "pointSize", "renderPhase", "useSplitRenderMode", "floatingOffset",
         "numberOfUniqueVertices"
     };
-#else
+#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
     constexpr std::array<const char*, 18> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineLength", "lineFadeAmount", "vertexSortingMethod", "idOffset", "nVertices",
         "stride", "pointSize", "renderPhase", "viewport", "lineWidth", "floatingOffset",
         "useSplitRenderMode", "numberOfUniqueVertices"
     };
-#endif
+#endif // __APPLE__
 
     // The possible values for the _renderingModes property
     enum RenderingMode {
@@ -88,7 +88,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineLengthInfo = {
         "LineLength",
-        "Line Length",
+        "Line length",
         "The extent of the rendered trail. A value of 0 will result in no trail and a "
         "value of 1 will result in a trail that covers the entire extent. The setting "
         "only applies if 'EnableFade' is true. If it is false, this setting has "
@@ -98,10 +98,10 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineFadeAmountInfo = {
         "LineFadeAmount",
-        "Line Fade Amount",
+        "Line fade amount",
         "The amount of the trail that should be faded. If the value is 0 then the "
         "trail will have no fading applied. A value of 0.6 will result in a trail "
-        "where 60% of the extent of the trail will have fading applied to it. In other"
+        "where 60% of the extent of the trail will have fading applied to it. In other "
         "words, the 40% closest to the head of the trail will be solid and the rest "
         "will fade until completely transparent at the end of the trail. A value of 1 "
         "will result in a trail that starts fading immediately, becoming fully "
@@ -112,7 +112,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
+        "Line width",
         "Specifies the line width of the trail lines, if the selected rendering method "
         "includes lines. If the rendering mode is Points, this value is ignored.",
         openspace::properties::Property::Visibility::User
@@ -120,7 +120,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
         "PointSize",
-        "Point Size",
+        "Point size",
         "Specifies the base size of the points along the line, if the selected rendering "
         "method includes points. If the rendering mode is Lines, this value is ignored. "
         "If a subsampling of the values is performed, the subsampled values are half "
@@ -130,7 +130,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RenderingModeInfo = {
         "Rendering",
-        "Rendering Mode",
+        "Rendering mode",
         "Determines how the trail should be rendered. If 'Lines' is selected, only the "
         "line part is visible, if 'Points' is selected, only the corresponding points "
         "(and subpoints) are shown. 'Lines+Points' shows both parts.",
@@ -188,10 +188,7 @@ RenderableTrail::Appearance::Appearance()
     , useLineFade(EnableFadeInfo, true)
     , lineWidth(LineWidthInfo, 10.f, 1.f, 20.f)
     , pointSize(PointSizeInfo, 1, 1, 64)
-    , renderingModes(
-          RenderingModeInfo,
-          properties::OptionProperty::DisplayType::Dropdown
-    )
+    , renderingModes(RenderingModeInfo)
     , lineLength(LineLengthInfo, 1.f, 0.f, 1.f)
     , lineFadeAmount(LineFadeAmountInfo, 1.f, 0.f, 1.f)
 {
@@ -219,9 +216,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     setRenderBin(RenderBin::Overlay);
     addProperty(Fadeable::_opacity);
 
-    _translation = Translation::createFromDictionary(
-        dictionary.value<ghoul::Dictionary>("Translation")
-    );
+    _translation = Translation::createFromDictionary(p.translation);
     addPropertySubOwner(_translation.get());
 
     _appearance.lineColor = p.color;
@@ -249,7 +244,11 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     }
 
     addPropertySubOwner(_appearance);
+}
 
+void RenderableTrail::initialize() {
+    Renderable::initialize();
+    _translation->initialize();
 }
 
 void RenderableTrail::initializeGL() {
@@ -266,7 +265,7 @@ void RenderableTrail::initializeGL() {
             );
         }
     );
-#else
+#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
     _programObject = BaseModule::ProgramObjectManager.request(
         "EphemerisProgram",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
@@ -277,7 +276,7 @@ void RenderableTrail::initializeGL() {
             );
         }
     );
-#endif
+#endif // __APPLE__
 
     ghoul::opengl::updateUniformLocations(*_programObject, _uniformCache, UniformNames);
 }
@@ -294,6 +293,18 @@ void RenderableTrail::deinitializeGL() {
 
 bool RenderableTrail::isReady() const {
     return _programObject != nullptr;
+}
+
+glm::dvec3 RenderableTrail::translationPosition(Time time) const {
+    // Use empty modelTransform (local coordinates) and time 0; previous frame time
+    // doesn't matter
+    const UpdateData data = { {}, time, Time(0.0) };
+    // (2025-06-09, emmbr) No need to call update here, since it's only for caching
+    // the position and kills the trail performance. If behavior changes or we add
+    // a translation type that needs pre-update, we need add the update and address
+    // performance
+    //_translation->update(data);
+    return _translation->position(data);
 }
 
 void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
@@ -337,7 +348,7 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
     _programObject->setUniform(_uniformCache.numberOfUniqueVertices,
         numberOfUniqueVertices);
 
-#if !defined(__APPLE__)
+#ifndef __APPLE__
     std::array<GLint, 4> viewport;
     global::renderEngine->openglStateCache().viewport(viewport.data());
     _programObject->setUniform(
@@ -351,7 +362,7 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
         _uniformCache.lineWidth,
         std::ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f))
     );
-#endif // !defined(__APPLE__)
+#endif // __APPLE__
 
     if (renderPoints) {
         // The stride parameter determines the distance between larger points and
@@ -446,9 +457,9 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     if (renderLines) {
 #ifdef __APPLE__
         glLineWidth(1);
-#else
+#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
         glLineWidth(std::ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f)));
-#endif
+#endif // __APPLE__
     }
     if (renderPoints) {
         glEnable(GL_PROGRAM_POINT_SIZE);
@@ -491,7 +502,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             _primaryRenderInformation.count,
             _primaryRenderInformation.first,
             _useSplitRenderMode,
-            _numberOfUniqueVertices
+            _nUniqueVertices
         );
 
         const int floatingOffset = std::max(0, _primaryRenderInformation.count - 1);
@@ -504,7 +515,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             _floatingRenderInformation.count,
             _floatingRenderInformation.first,
             _useSplitRenderMode,
-            _numberOfUniqueVertices,
+            _nUniqueVertices,
             floatingOffset
         );
 
@@ -518,7 +529,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             _secondaryRenderInformation.count,
             _secondaryRenderInformation.first,
             _useSplitRenderMode,
-            _numberOfUniqueVertices,
+            _nUniqueVertices,
             offset
         );
 
@@ -550,8 +561,6 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             );
         }
     }
-
-
 
 
     if (renderPoints) {

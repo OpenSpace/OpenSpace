@@ -2,8 +2,8 @@ local FadeUpTrails = {
   Identifier = "os.planetsmoons.FadeUpTrails",
   Name = "Show planet and moon trails",
   Command = [[
-    openspace.setPropertyValue("{planetTrail_solarSystem}.Renderable.Fade", 1, 2)
-    openspace.setPropertyValue("{moonTrail_solarSystem}.Renderable.Fade", 1, 2)
+    openspace.fadeIn("{planetTrail_solarSystem}.Renderable")
+    openspace.fadeIn("{moonTrail_solarSystem}.Renderable")
   ]],
   Documentation = "Fade up all planet and moon trails in the Scene",
   GuiPath = "/Trails",
@@ -14,8 +14,8 @@ local FadeDownTrails = {
   Identifier = "os.planetsmoons.FadeDownTrails",
   Name = "Hide planet and moon trails",
   Command = [[
-    openspace.setPropertyValue("{planetTrail_solarSystem}.Renderable.Fade", 0, 2)
-    openspace.setPropertyValue("{moonTrail_solarSystem}.Renderable.Fade", 0, 2)
+    openspace.fadeOut("{planetTrail_solarSystem}.Renderable")
+    openspace.fadeOut("{moonTrail_solarSystem}.Renderable")
   ]],
   Documentation = "Fade down all planet and moon trails in the Scene",
   GuiPath = "/Trails",
@@ -26,25 +26,8 @@ local ToggleTrails = {
   Identifier = "os.planetsmoons.ToggleTrails",
   Name = "Toggle planet and moon trails",
   Command = [[
-    local capList = openspace.property("{planetTrail_solarSystem}.Renderable.Fade")
-    local list = openspace.property("{moonTrail_solarSystem}.Renderable.Fade")
-    if (#capList == 0) and (#list == 0) then
-      openspace.printWarning("No trails to toggle")
-    else
-      local prop
-      if (#capList > 0) then
-        prop = capList[1]
-      else
-        prop = list[1]
-      end
-      local currentFade = openspace.propertyValue(prop)
-      local newFade = 0
-      if currentFade < 1 then
-        newFade = 1
-      end
-      openspace.setPropertyValue("{planetTrail_solarSystem}.Renderable.Fade", newFade, 2)
-      openspace.setPropertyValue("{moonTrail_solarSystem}.Renderable.Fade", newFade, 2)
-    end
+    openspace.toggleFade("{planetTrail_solarSystem}.Renderable")
+    openspace.toggleFade("{moonTrail_solarSystem}.Renderable")
   ]],
   Documentation = "Toggle fade for planet and moon trails in the Scene",
   GuiPath = "/Trails",

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,7 +45,7 @@ struct RaycastData;
 
 class GalaxyRaycaster : public VolumeRaycaster {
 public:
-    GalaxyRaycaster(ghoul::opengl::Texture& texture,
+    explicit GalaxyRaycaster(ghoul::opengl::Texture& texture,
         const std::optional<std::filesystem::path>& raycastingShader = std::nullopt);
     ~GalaxyRaycaster() override = default;
 

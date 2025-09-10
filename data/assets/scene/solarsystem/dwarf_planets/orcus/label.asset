@@ -23,6 +23,7 @@ local Label = {
   GUI = {
     Name = "Orcus Label",
     Path = "/Solar System/Dwarf Planets/Orcus",
+    Focusable = false,
     Description = "Label for Orcus, visible at the solarsystem overview zoom level"
   }
 }

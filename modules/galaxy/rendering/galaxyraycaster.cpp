@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -103,29 +103,16 @@ glm::dmat4 GalaxyRaycaster::modelViewTransform(const RenderData& data) {
 void GalaxyRaycaster::preRaycast(const RaycastData& data,
                                  ghoul::opengl::ProgramObject& program)
 {
-    const std::string stepSizeUniformName = "maxStepSize" + std::to_string(data.id);
-    const std::string galaxyTextureUniformName = "galaxyTexture" +
-                                                 std::to_string(data.id);
-    const std::string volumeAspectUniformName = "aspect" + std::to_string(data.id);
-    const std::string opacityCoefficientUniformName = "opacityCoefficient" +
-                                                      std::to_string(data.id);
-
-    const std::string absorptionMultiplyUniformName = "absorptionMultiply" +
-                                                  std::to_string(data.id);
-
-    const std::string emissionMultiplyUniformName = "emissionMultiply" +
-                                                    std::to_string(data.id);
-
-    program.setUniform(volumeAspectUniformName, _aspect);
-    program.setUniform(stepSizeUniformName, _stepSize);
-    program.setUniform(opacityCoefficientUniformName, _opacityCoefficient);
-    program.setUniform(absorptionMultiplyUniformName, _absorptionMultiply);
-    program.setUniform(emissionMultiplyUniformName, _emissionMultiply);
+    program.setUniform(std::format("aspect{}", data.id), _aspect);
+    program.setUniform(std::format("maxStepSize{}", data.id), _stepSize);
+    program.setUniform(std::format("opacityCoefficient{}", data.id), _opacityCoefficient);
+    program.setUniform(std::format("absorptionMultiply{}", data.id), _absorptionMultiply);
+    program.setUniform(std::format("emissionMultiply{}", data.id), _emissionMultiply);
 
     _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
     _textureUnit->activate();
     _texture.bind();
-    program.setUniform(galaxyTextureUniformName, *_textureUnit);
+    program.setUniform(std::format("galaxyTexture{}", data.id), *_textureUnit);
 }
 
 void GalaxyRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObject&) {

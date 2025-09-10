@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/util/keys.h>
@@ -47,21 +47,21 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo
     DefaultTimeInterpolationDurationInfo = {
         "DefaultTimeInterpolationDuration",
-        "Default Time Interpolation Duration",
+        "Default time interpolation duration",
         "The default duration taken to interpolate between times."
     };
 
     constexpr openspace::properties::Property::PropertyInfo
     DefaultDeltaTimeInterpolationDurationInfo = {
         "DefaultDeltaTimeInterpolationDuration",
-        "Default Delta Time Interpolation Duration",
+        "Default delta time interpolation duration",
         "The default duration taken to interpolate between delta times."
     };
 
     constexpr openspace::properties::Property::PropertyInfo
         DefaultPauseInterpolationDurationInfo = {
         "DefaultPauseInterpolationDuration",
-        "Default Pause Interpolation Duration",
+        "Default pause interpolation duration",
         "The default duration taken to transition to the paused state, when "
         "interpolating."
     };
@@ -69,7 +69,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo
         DefaultUnpauseInterpolationDurationInfo = {
         "DefaultUnpauseInterpolationDuration",
-        "Default Unpause Interpolation Duration",
+        "Default unpause interpolation duration",
         "The default duration taken to transition to the unpaused state, when "
         "interpolating."
     };
@@ -88,8 +88,8 @@ namespace {
     double currentApplicationTimeForInterpolation() {
         using namespace openspace;
 
-        if (global::sessionRecording->isSavingFramesDuringPlayback()) {
-            return global::sessionRecording->currentApplicationInterpolationTime();
+        if (global::sessionRecordingHandler->isSavingFramesDuringPlayback()) {
+            return global::sessionRecordingHandler->currentApplicationInterpolationTime();
         }
         else {
             return global::windowDelegate->applicationTime();

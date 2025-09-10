@@ -28,7 +28,8 @@ local EducationSatellites = {
   Tag = { "earth_satellites" },
   GUI = {
     Name = "Education",
-    Path = "/Solar System/Planets/Earth/Satellites"
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
   }
 }
 

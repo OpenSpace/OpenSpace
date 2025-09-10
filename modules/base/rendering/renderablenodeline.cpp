@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,7 +43,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo StartNodeInfo = {
         "StartNode",
-        "Start Node",
+        "Start node",
         "The identifier of the node the line starts from. Defaults to 'Root' if not "
         "specified.",
         openspace::properties::Property::Visibility::User
@@ -51,7 +51,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EndNodeInfo = {
         "EndNode",
-        "End Node",
+        "End node",
         "The identifier of the node the line ends at. Defaults to 'Root' if not "
         "specified.",
         openspace::properties::Property::Visibility::User
@@ -66,14 +66,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
+        "Line width",
         "The width of the line. The larger number, the thicker the line.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StartOffsetInfo = {
         "StartOffset",
-        "Offset to Start Node",
+        "Offset to start node",
         "A distance from the start node at which the rendered line should begin. "
         "By default it takes a value in meters, but if 'UseRelativeOffsets' is set "
         "to true it is read as a multiplier times the bounding sphere of the node.",
@@ -82,7 +82,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EndOffsetInfo = {
         "EndOffset",
-        "Offset to End Node",
+        "Offset to end node",
         "A distance to the end node at which the rendered line should end. "
         "By default it takes a value in meters, but if 'UseRelativeOffsets' is set "
         "to true it is read as a multiplier times the bounding sphere of the node.",
@@ -91,7 +91,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RelativeOffsetsInfo = {
         "UseRelativeOffsets",
-        "Use Relative Offsets",
+        "Use relative offsets",
         "If true, the offset values are interpreted as relative values to be multiplied "
         "with the bounding sphere of the start/end node. If false, the value is "
         "interpreted as a distance in meters.",
@@ -114,6 +114,13 @@ namespace {
         return diffPos;
     }
 
+    // This `Renderable` connects two scene graph nodes by drawing a line between them.
+    // The line will update dynamically if the position of the nodes change.
+    //
+    // One use case for the `RenderableNodeLine` is to visualize the distance between two
+    // objects. For this, a [RenderableDistanceLabel](#base_renderable_distancelabel) can
+    // also be added to show the distance as a number. That renderable is designed to show
+    // the distance between the start and end node for a given `RenderableNodeLine`.
     struct [[codegen::Dictionary(RenderableNodeLine)]] Parameters {
         // [[codegen::verbatim(StartNodeInfo.description)]]
         std::optional<std::string> startNode [[codegen::identifier()]];
@@ -142,7 +149,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableNodeLine::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_renderablenodeline");
+    return codegen::doc<Parameters>("base_renderable_nodeline");
 }
 
 RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)

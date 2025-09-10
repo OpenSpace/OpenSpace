@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,24 +37,19 @@ out vec2 fs_uv;
 out vec3 ellipsoidNormalCameraSpace;
 out vec3 levelWeights;
 out vec3 positionCameraSpace;
+out vec3 posObjSpace;
+out vec3 normalObjSpace;
 
 #if USE_ACCURATE_NORMALS
   out vec3 ellipsoidTangentThetaCameraSpace;
   out vec3 ellipsoidTangentPhiCameraSpace;
 #endif // USE_ACCURATE_NORMALS
 
+uniform dmat4 modelTransform;
+
 #if USE_ECLIPSE_SHADOWS
   out vec3 positionWorldSpace;
-  uniform dmat4 modelTransform;
 #endif // USE_ECLIPSE_SHADOWS
-
-#if SHADOW_MAPPING_ENABLED
-  // ShadowMatrix is the matrix defined by:
-  // textureCoordsMatrix * projectionMatrix * combinedViewMatrix * modelMatrix
-  // where textureCoordsMatrix is just a scale and bias computation: [-1,1] to [0,1]
-  uniform dmat4 shadowMatrix;
-  out vec4 shadowCoords;
-#endif // SHADOW_MAPPING_ENABLED
 
 uniform mat4 modelViewProjectionTransform;
 uniform mat4 modelViewTransform;
@@ -133,12 +128,10 @@ void main() {
   gl_Position = fs_position;
   ellipsoidNormalCameraSpace = mat3(modelViewTransform) * pair.normal;
   positionCameraSpace = vec3(modelViewTransform * vec4(pair.position, 1.0));
+  posObjSpace = pair.position;
+  normalObjSpace = pair.normal;
 
 #if USE_ECLIPSE_SHADOWS
   positionWorldSpace = vec3(modelTransform * dvec4(pair.position, 1.0));
 #endif // USE_ECLIPSE_SHADOWS
-
-#if SHADOW_MAPPING_ENABLED
-  shadowCoords = vec4(shadowMatrix * dvec4(pair.position, 1.0));
-#endif // SHADOW_MAPPING_ENABLED
 }

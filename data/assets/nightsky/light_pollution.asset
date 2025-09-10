@@ -42,8 +42,7 @@ local LightPollutionSphere = {
     Orientation = "Inside",
     MirrorTexture = true,
     FadeOutThreshold = 1.00,
-    RenderBinMode = "PostDeferredTransparent",
-    Enabled = asset.enabled
+    RenderBinMode = "PostDeferredTransparent"
   },
   GUI = {
     Name = "Light Pollution Sphere",

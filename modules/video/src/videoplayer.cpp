@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,14 +29,13 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/openglstatecache.h>
-
 
 namespace {
     constexpr std::string_view _loggerCat = "VideoPlayer";
@@ -61,7 +60,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GoToStartInfo = {
         "GoToStart",
-        "Go To Start",
+        "Go To start",
         "Sets the time to the beginning of the video and pauses it."
     };
 
@@ -74,30 +73,44 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo AudioInfo = {
         "PlayAudio",
-        "Play Audio",
+        "Play audio",
         "Play audio."
     };
 
     constexpr openspace::properties::Property::PropertyInfo StartTimeInfo = {
         "StartTime",
-        "Start Time",
+        "Start time",
         "The date and time that the video should start in the format "
         "'YYYY MM DD hh:mm:ss'."
     };
 
     constexpr openspace::properties::Property::PropertyInfo EndTimeInfo = {
         "EndTime",
-        "End Time",
+        "End time",
         "The date and time that the video should end in the format "
         "'YYYY MM DD hh:mm:ss'."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LoopVideoInfo = {
         "LoopVideo",
-        "Loop Video",
+        "Loop video",
         "If checked, the video is continues playing from the start when it reaches the "
         "end of the video."
     };
+
+    bool checkMpvError(int status) {
+        if (status < 0) {
+            LERROR(std::format("Libmpv API error: {}", mpv_error_string(status)));
+            return false;
+        }
+        return true;
+    }
+
+    void* getOpenGLProcAddress(void*, const char* name) {
+        return reinterpret_cast<void*>(
+            openspace::global::windowDelegate->openGLProcedureAddress(name)
+        );
+    }
 
     struct [[codegen::Dictionary(VideoPlayer)]] Parameters {
         // [[codegen::verbatim(VideoInfo.description)]]
@@ -129,23 +142,6 @@ namespace {
 
 namespace openspace {
 
-namespace {
-
-bool checkMpvError(int status) {
-    if (status < 0) {
-        LERROR(std::format("Libmpv API error: {}", mpv_error_string(status)));
-        return false;
-    }
-    return true;
-}
-
-void* getOpenGLProcAddress(void*, const char* name) {
-    return reinterpret_cast<void*>(
-        global::windowDelegate->openGLProcedureAddress(name)
-    );
-}
-} // namespace
-
 void VideoPlayer::onMpvRenderUpdate(void* ctx) {
     // The wakeup flag is set here to enable the mpv_render_context_render
     // path in the main loop.
@@ -155,12 +151,7 @@ void VideoPlayer::onMpvRenderUpdate(void* ctx) {
 }
 
 void VideoPlayer::observePropertyMpv(MpvKey key) {
-    mpv_observe_property(
-        _mpvHandle,
-        static_cast<uint64_t>(key),
-        keys[key],
-        formats[key]
-    );
+    mpv_observe_property(_mpvHandle, static_cast<uint64_t>(key), keys[key], formats[key]);
 }
 
 void VideoPlayer::setPropertyStringMpv(const char* name, const char* value) {
@@ -414,15 +405,17 @@ void VideoPlayer::initializeMpv() {
         LINFO("mpv init failed");
     }
 
-    mpv_opengl_init_params gl_init_params{ getOpenGLProcAddress, nullptr };
+    mpv_opengl_init_params glInitParams;
+    glInitParams.get_proc_address = getOpenGLProcAddress;
+    glInitParams.get_proc_address_ctx = nullptr;
     int adv = 1; // Use libmpv advanced mode since we will use the update callback
     // Decouple mpv from waiting to get the correct fps. Use with flag video-timing-offset
     // set to 0
     int blockTime = 0;
 
-    mpv_render_param params[]{
+    mpv_render_param params[] = {
         { MPV_RENDER_PARAM_API_TYPE, const_cast<char*>(MPV_RENDER_API_TYPE_OPENGL) },
-        { MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &gl_init_params },
+        { MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &glInitParams },
         { MPV_RENDER_PARAM_ADVANCED_CONTROL, &adv },
         { MPV_RENDER_PARAM_BLOCK_FOR_TARGET_TIME, &blockTime },
         { MPV_RENDER_PARAM_INVALID, nullptr }
@@ -439,11 +432,7 @@ void VideoPlayer::initializeMpv() {
     // request a new frame to be rendered.
     // (Separate from the normal event handling mechanism for the sake of
     //  users which run OpenGL on a different thread.)
-    mpv_render_context_set_update_callback(
-        _mpvRenderContext,
-        onMpvRenderUpdate,
-        this
-    );
+    mpv_render_context_set_update_callback(_mpvRenderContext, onMpvRenderUpdate, this);
 
     // Load file
     const std::string file = _videoFile.string();
@@ -455,10 +444,10 @@ void VideoPlayer::initializeMpv() {
     }
 
     glGenFramebuffers(1, &_fbo);
-    //Create FBO to render video into
+    // Create FBO to render video into
     createTexture(_videoResolution);
 
-    //Observe video parameters
+    // Observe video parameters
     observePropertyMpv(MpvKey::Duration);
     observePropertyMpv(MpvKey::Meta);
     observePropertyMpv(MpvKey::Height);
@@ -495,13 +484,9 @@ void VideoPlayer::update() {
         return;
     }
 
-    if (_preventMultipleUpdatesSemaphore) {
-        _preventMultipleUpdatesSemaphore = false;
-        return;
-    }
-
-    if (global::sessionRecording->isSavingFramesDuringPlayback()) {
-        const double dt = global::sessionRecording->fixedDeltaTimeDuringFrameOutput();
+    if (global::sessionRecordingHandler->isSavingFramesDuringPlayback()) {
+        const double dt =
+            global::sessionRecordingHandler->fixedDeltaTimeDuringFrameOutput();
         if (_playbackMode == PlaybackMode::MapToSimulationTime) {
             _currentVideoTime = correctVideoPlaybackTime();
         }
@@ -512,11 +497,12 @@ void VideoPlayer::update() {
         const MpvKey key = MpvKey::Time;
         mpv_set_property(_mpvHandle, keys[key], formats[key], &_currentVideoTime);
 
-        uint64_t result;
-        do {
+        uint64_t result = mpv_render_context_update(_mpvRenderContext);
+        while ((result & MPV_RENDER_UPDATE_FRAME) == 0) {
+            renderFrame();
+
             result = mpv_render_context_update(_mpvRenderContext);
-        } while ((result & MPV_RENDER_UPDATE_FRAME) == 0);
-        renderFrame();
+        }
         return;
     }
 
@@ -549,7 +535,7 @@ void VideoPlayer::renderFrame() {
     // details. This function fills the fbo and texture with data, after it
     // we can get the data on the GPU, not the CPU
     const int fboInt = static_cast<int>(_fbo);
-    mpv_opengl_fbo mpfbo{
+    mpv_opengl_fbo mpfbo = {
         fboInt,
         _videoResolution.x,
         _videoResolution.y,
@@ -691,7 +677,6 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             // Each time a size property is updated, it means libmpv is updating the video
             // so we have to re-render the first frame to show it
             renderFrame();
-
             break;
         }
         case MpvKey::Width: {
@@ -711,7 +696,6 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             // Each time a size property is updated, it means libmpv is updating the video
             // so we have to re-render the first frame to show it
             renderFrame();
-
             break;
         }
         case MpvKey::Time: {
@@ -819,8 +803,6 @@ void VideoPlayer::postSync(bool isMaster) {
             seekToTime(_correctPlaybackTime, PauseAfterSeek(isMappingTime));
         }
     }
-
-    _preventMultipleUpdatesSemaphore = true;
 }
 
 const std::unique_ptr<ghoul::opengl::Texture>& VideoPlayer::frameTexture() const {
@@ -908,9 +890,7 @@ void VideoPlayer::resizeTexture(glm::ivec2 size) {
         _videoResolution = size;
         LINFO(std::format("Resizing texture: width: {} height: {}", size.x, size.y));
 
-        // Delete texture
         _frameTexture = nullptr;
-
         createTexture(size);
     }
 }

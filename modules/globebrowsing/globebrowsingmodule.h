@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,10 +25,12 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/util/openspacemodule.h>
+
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
-#include <openspace/util/openspacemodule.h>
+#include <openspace/util/ellipsoid.h>
 #include <ghoul/glm.h>
 #include <future>
 #include <memory>
@@ -37,8 +39,6 @@
 namespace openspace::globebrowsing {
     class RenderableGlobe;
     struct TileIndex;
-    struct Geodetic2;
-    struct Geodetic3;
 
     namespace cache { class MemoryAwareTileCache; }
 } // namespace openspace::globebrowsing
@@ -46,6 +46,9 @@ namespace openspace::globebrowsing {
 namespace openspace {
 
 class Camera;
+struct Geodetic2;
+struct Geodetic3;
+class SceneGraphNode;
 
 class GlobeBrowsingModule : public OpenSpaceModule {
 public:
@@ -53,24 +56,12 @@ public:
 
     GlobeBrowsingModule();
 
-    void goToChunk(const globebrowsing::RenderableGlobe& globe, int x, int y, int level);
-    void goToGeo(const globebrowsing::RenderableGlobe& globe,
-        double latitude, double longitude);
-
-    void goToGeo(const globebrowsing::RenderableGlobe& globe,
-        double latitude, double longitude, double altitude);
-
-    glm::vec3 cartesianCoordinatesFromGeo(const globebrowsing::RenderableGlobe& globe,
-        double latitude, double longitude, std::optional<double> altitude = std::nullopt);
-
-    glm::dvec3 geoPosition() const;
-
-    double altitudeFromCamera(const globebrowsing::RenderableGlobe& globe,
-        bool useHeightMap = false) const;
+    void goToChunk(const SceneGraphNode& globe, int x, int y, int level);
 
     globebrowsing::cache::MemoryAwareTileCache* tileCache();
     scripting::LuaLibrary luaLibrary() const override;
     std::vector<documentation::Documentation> documentations() const override;
+    static documentation::Documentation Documentation();
 
     const globebrowsing::RenderableGlobe* castFocusNodeRenderableToGlobe();
 
@@ -99,21 +90,12 @@ public:
     std::string mrfCacheLocation() const;
 
     bool hasDefaultGeoPointTexture() const;
-    std::string_view defaultGeoPointTexture() const;
+    std::filesystem::path defaultGeoPointTexture() const;
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
 
 private:
-    void goToChunk(const globebrowsing::RenderableGlobe& globe,
-        const globebrowsing::TileIndex& ti, const glm::vec2& uv);
-
-    void goToGeodetic2(const globebrowsing::RenderableGlobe& globe,
-        globebrowsing::Geodetic2 geo2);
-
-    void goToGeodetic3(const globebrowsing::RenderableGlobe& globe,
-        globebrowsing::Geodetic3 geo3);
-
     properties::UIntProperty _tileCacheSizeMB;
 
     properties::StringProperty _defaultGeoPointTexturePath;

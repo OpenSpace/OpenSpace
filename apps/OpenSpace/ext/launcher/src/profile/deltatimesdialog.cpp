@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 #include "profile/line.h"
 #include <openspace/scene/profile.h>
 #include <ghoul/format.h>
+#include <QComboBox>
 #include <QDialogButtonBox>
 #include <QDoubleValidator>
 #include <QEvent>
@@ -35,6 +36,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <array>
@@ -88,7 +90,7 @@ DeltaTimesDialog::DeltaTimesDialog(QWidget* parent, std::vector<double>* deltaTi
     setWindowTitle("Simulation Time Increments");
     createWidgets();
 
-    for (size_t d = 0; d < _deltaTimesData.size(); ++d) {
+    for (size_t d = 0; d < _deltaTimesData.size(); d++) {
         const std::string summary = createSummaryForDeltaTime(d, true);
         _listWidget->addItem(new QListWidgetItem(QString::fromStdString(summary)));
     }
@@ -107,7 +109,7 @@ void DeltaTimesDialog::createWidgets() {
     _listWidget->setAutoScroll(true);
     _listWidget->setLayoutMode(QListView::SinglePass);
     layout->addWidget(_listWidget);
-    
+
     {
         QBoxLayout* buttonLayout = new QHBoxLayout;
         _addButton = new QPushButton("Add Entry");
@@ -128,18 +130,28 @@ void DeltaTimesDialog::createWidgets() {
         layout->addLayout(buttonLayout);
     }
 
-    _adjustLabel = new QLabel("Set Simulation Time Increment for key");
+    _adjustLabel = new QLabel("Set Simulation Time Increment (in seconds) for key");
     layout->addWidget(_adjustLabel);
-    
+
     {
         QBoxLayout* box = new QHBoxLayout;
-        _seconds = new QLineEdit;
-        _seconds->setValidator(new QDoubleValidator);
-        connect(_seconds, &QLineEdit::textChanged, this, &DeltaTimesDialog::valueChanged);
-        box->addWidget(_seconds);
-
-        _value = new QLabel;
+        _value = new QLineEdit;
+        _value->setValidator(new QDoubleValidator);
+        _value->setAccessibleName("Set simulation time increment in seconds for key");
         box->addWidget(_value);
+
+        _valueUnit = new QComboBox;
+        _valueUnit->addItems({
+            "years/second", "months/second", "weeks/second", "days/second",
+            "hours/second", "minutes/second", "seconds/second"
+        });
+        _previousValueUnit = _valueUnit->count() - 1;
+        _valueUnit->setCurrentIndex(_valueUnit->count() - 1);
+        connect(
+            _valueUnit, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &DeltaTimesDialog::currentUnitChanged
+        );
+        box->addWidget(_valueUnit);
         layout->addLayout(box);
     }
 
@@ -165,11 +177,6 @@ void DeltaTimesDialog::createWidgets() {
     layout->addWidget(new Line);
     {
         QBoxLayout* footer = new QHBoxLayout;
-        _errorMsg = new QLabel;
-        _errorMsg->setObjectName("error-message");
-        _errorMsg->setWordWrap(true);
-        footer->addWidget(_errorMsg);
-
         _buttonBox = new QDialogButtonBox;
         _buttonBox->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
         connect(
@@ -219,10 +226,10 @@ void DeltaTimesDialog::listItemSelected() {
 
     if (!_deltaTimesData.empty()) {
         if (_deltaTimesData.at(index) == 0) {
-            _seconds->clear();
+            _value->clear();
         }
         else {
-            _seconds->setText(QString::number(_deltaTimesData.at(index)));
+            _value->setText(QString::number(_deltaTimesData.at(index)));
         }
     }
     _editModeNewItem = true;
@@ -230,7 +237,7 @@ void DeltaTimesDialog::listItemSelected() {
 }
 
 void DeltaTimesDialog::setLabelForKey(int index, bool editMode, std::string_view color) {
-    std::string labelS = "Set Simulation Time Increment for key";
+    std::string labelS = "Set Simulation Time Increment (in seconds) for key";
     if (index >= static_cast<int>(_deltaTimesData.size())) {
         index = static_cast<int>(_deltaTimesData.size()) - 1;
     }
@@ -242,17 +249,15 @@ void DeltaTimesDialog::setLabelForKey(int index, bool editMode, std::string_view
     )));
 }
 
-void DeltaTimesDialog::valueChanged(const QString& text) {
-    if (text.isEmpty()) {
-        _errorMsg->setText("");
-    }
-    else {
-        const double value = text.toDouble();
-        if (value != 0.0) {
-            _value->setText(QString::fromStdString(timeDescription(value)));
-            _errorMsg->setText("");
-        }
-    }
+void DeltaTimesDialog::currentUnitChanged(int index) {
+    double value = _value->text().toDouble();
+    const uint64_t currentUnit = TimeIntervals[_previousValueUnit].secondsPerInterval;
+    const uint64_t newUnit = TimeIntervals[index].secondsPerInterval;
+
+    value = (value * currentUnit) / newUnit;
+    _value->setText(QString::number(value, 'g', 15));
+
+    _previousValueUnit = index;
 }
 
 bool DeltaTimesDialog::isLineEmpty(int index) {
@@ -282,10 +287,14 @@ void DeltaTimesDialog::addDeltaTimeValue() {
         _listWidget->addItem(new QListWidgetItem(messageAddValue));
     }
     else {
-        _errorMsg->setText("Exceeded maximum amount of simulation time increments");
+        QMessageBox::critical(
+            this,
+            "Error",
+            "Exceeded maximum amount of simulation time increments"
+        );
     }
     _listWidget->setCurrentRow(_listWidget->count() - 1);
-    _seconds->setFocus(Qt::OtherFocusReason);
+    _value->setFocus(Qt::OtherFocusReason);
     _editModeNewItem = true;
 }
 
@@ -293,7 +302,7 @@ void DeltaTimesDialog::saveDeltaTimeValue() {
     QListWidgetItem* item = _listWidget->currentItem();
     if (item && !_deltaTimesData.empty()) {
         const int index = _listWidget->row(item);
-        _deltaTimesData.at(index) = _seconds->text().toDouble();
+        _deltaTimesData.at(index) = _value->text().toDouble();
         const std::string summary = createSummaryForDeltaTime(index, true);
         _listWidget->item(index)->setText(QString::fromStdString(summary));
         transitionEditMode(index, false);
@@ -336,19 +345,16 @@ void DeltaTimesDialog::transitionEditMode(int index, bool state) {
     _saveButton->setEnabled(state);
     _discardButton->setEnabled(state);
     _adjustLabel->setEnabled(state);
-    _seconds->setEnabled(state);
-    _errorMsg->clear();
+    _value->setEnabled(state);
 
     if (state) {
-        _seconds->setFocus(Qt::OtherFocusReason);
+        _value->setFocus(Qt::OtherFocusReason);
         setLabelForKey(index, true, "black");
     }
     else {
         _addButton->setFocus(Qt::OtherFocusReason);
         setLabelForKey(index, false, "light gray");
-        _value->clear();
     }
-    _errorMsg->clear();
 }
 
 void DeltaTimesDialog::parseSelections() {

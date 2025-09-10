@@ -59,7 +59,7 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "This profile shows approximately 936,000 asteroids from the JPL Horizons Small-Body Database (SBDB). Included in this profile (and defined on our wiki): Amor Asteroids, Apollo Asteroids, Aten Asteroids, Atira Asteroids, Centaur Asteroids, Chiron-Type Comets, Encke-Type Comets, Halley-Type Comets, Inner Main Asteroid Belt Asteroids, Jupiter Family Comets, Jupiter Trojan Asteroids, Main Asteroid Belt Asteroids, Mars-Crossing Asteroids, Outer Main Asteroid Belt Asteroids, Potentially Hazardous Asteroids (PHAs), and Trans-Neptunian Asteroids",
+    "description": "This profile shows approximately 936,000 asteroids from the JPL Horizons Small-Body Database (SBDB). Included in this profile (and defined on our wiki): Amor Asteroids, Apollo Asteroids, Aten Asteroids, Atira Asteroids, Centaur Asteroids, Chiron-Type Comets, Encke-Type Comets, Halley-Type Comets, Inner Main Asteroid Belt Asteroids, Jupiter Family Comets, Jupiter Trojan Asteroids, Main Asteroid Belt Asteroids, Mars-Crossing Asteroids, Outer Main Asteroid Belt Asteroids, Potentially Hazardous Asteroids (PHAs), and Trans-Neptunian Asteroids.",
     "license": "MIT License",
     "name": "Asteroids",
     "url": "https://www.openspaceproject.com",
@@ -164,6 +164,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 2
+    "minor": 4
   }
 }

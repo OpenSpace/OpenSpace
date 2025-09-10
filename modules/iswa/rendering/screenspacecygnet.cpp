@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,13 +29,27 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/timemanager.h>
 
+namespace {
+    struct [[codegen::Dictionary(ScreenSpaceCygnet)]] Parameters {
+        int cygnetId;
+        int updateInterval;
+    };
+#include "screenspacecygnet_codegen.cpp"
+} // namespace
+
 namespace openspace {
+
+documentation::Documentation ScreenSpaceCygnet::Documentation() {
+    return codegen::doc<Parameters>("iswa_screenspace_cygnet");
+}
 
 ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     : ScreenSpaceImageOnline(dictionary)
 {
-    _cygnetId = static_cast<int>(dictionary.value<double>("CygnetId"));
-    _updateTime = static_cast<int>(dictionary.value<double>("UpdateInterval"));
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _cygnetId = p.cygnetId;
+    _updateTime = p.updateInterval;
 
     _downloadImage = true;
     _texturePath = IswaManager::ref().iswaUrl(
@@ -53,11 +67,10 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     _minRealTimeUpdateInterval = 100;
 
     _delete.onChange([this]() {
-        global::scriptEngine->queueScript(
-            "openspace.iswa.removeScreenSpaceCygnet("+std::to_string(_cygnetId)+");",
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
+        const std::string script = std::format(
+            "openspace.iswa.removeScreenSpaceCygnet({});", _cygnetId
         );
+        global::scriptEngine->queueScript(script);
     });
 }
 

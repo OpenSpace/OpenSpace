@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,115 +37,124 @@
 using namespace openspace;
 using json = nlohmann::json;
 
-// Struct to hold the data for some of the tests
-struct HorizonsTestData {
-    std::string observer, target, start, stop, step, unit;
-};
+namespace {
 
-// Avoid repetitive code by using these functions
+    // Struct to hold the data for some of the tests
+    struct HorizonsTestData {
+        std::string observer;
+        std::string target;
+        std::string start;
+        std::string stop;
+        std::string step;
+        std::string unit;
+    };
+
+    // Avoid repetitive code by using these functions
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
-void testHorizonsAnswer(const HorizonsTestData& data, HorizonsType type,
-                        const std::filesystem::path& filePath,
-                        HorizonsResultCode expectedAnswerCode)
-{
-    const std::string url = constructHorizonsUrl(
-        type,
-        data.target,
-        data.observer,
-        data.start,
-        data.stop,
-        data.step,
-        data.unit
-    );
-    const json answer = sendHorizonsRequest(url, filePath);
-    HorizonsResultCode code = isValidHorizonsAnswer(answer);
-    CHECK(code == expectedAnswerCode);
+    void testHorizonsAnswer(const HorizonsTestData& data, HorizonsType type,
+        const std::filesystem::path& filePath,
+        HorizonsResultCode expectedAnswerCode)
+    {
+        const std::string url = constructHorizonsUrl(
+            type,
+            data.target,
+            data.observer,
+            data.start,
+            data.stop,
+            data.step,
+            data.unit
+        );
+        const json answer = sendHorizonsRequest(url, filePath);
+        HorizonsResultCode code = isValidHorizonsAnswer(answer);
+        CHECK(code == expectedAnswerCode);
 
-    CHECK(std::filesystem::is_regular_file(filePath));
-    std::filesystem::remove(filePath);
-    CHECK(!std::filesystem::is_regular_file(filePath));
-}
-
-void testHorizonsAnswerAndResult(const HorizonsTestData& data, HorizonsType type,
-                                 const std::filesystem::path& filePath,
-                                 HorizonsResultCode expectedAnswerCode,
-                                 HorizonsResultCode expectedResultCode,
-                                 bool shouldDeleteFile = true)
-{
-    const std::string url = constructHorizonsUrl(
-        type,
-        data.target,
-        data.observer,
-        data.start,
-        data.stop,
-        data.step,
-        data.unit
-    );
-    json answer = sendHorizonsRequest(url, filePath);
-    HorizonsResultCode answerCode = isValidHorizonsAnswer(answer);
-    CHECK(answerCode == expectedAnswerCode);
-
-    // Extract the result from the json object and test it
-    auto result = answer.find("result");
-    CHECK(result != answer.end());
-
-    const HorizonsFile horizonsFile(filePath, *result);
-    HorizonsResultCode resultCode = isValidHorizonsFile(horizonsFile.file());
-    CHECK(resultCode == expectedResultCode);
-
-    CHECK(std::filesystem::is_regular_file(filePath));
-    if (shouldDeleteFile) {
+        CHECK(std::filesystem::is_regular_file(filePath));
         std::filesystem::remove(filePath);
         CHECK(!std::filesystem::is_regular_file(filePath));
     }
-}
 
-void testReadingHorizons(HorizonsType type, const std::filesystem::path& filePath,
-                       const double t0, const double x0, const double y0, const double z0,
-                       const double t1, const double x1, const double y1, const double z1,
-                       const double t2, const double x2, const double y2, const double z2)
-{
-    // Get files and make sure they exist
-    const std::filesystem::path kernel = absPath("${TESTDIR}/horizonsTest/naif0012.tls");
-    CHECK(std::filesystem::is_regular_file(kernel));
-    CHECK(std::filesystem::is_regular_file(filePath));
+    void testHorizonsAnswerAndResult(const HorizonsTestData& data, HorizonsType type,
+        const std::filesystem::path& filePath,
+        HorizonsResultCode expectedAnswerCode,
+        HorizonsResultCode expectedResultCode,
+        bool shouldDeleteFile = true)
+    {
+        const std::string url = constructHorizonsUrl(
+            type,
+            data.target,
+            data.observer,
+            data.start,
+            data.stop,
+            data.step,
+            data.unit
+        );
+        json answer = sendHorizonsRequest(url, filePath);
+        HorizonsResultCode answerCode = isValidHorizonsAnswer(answer);
+        CHECK(answerCode == expectedAnswerCode);
 
-    // Initialize SpiceManager and load leap second kernel
-    SpiceManager::initialize();
-    openspace::SpiceManager::ref().loadKernel(kernel);
+        // Extract the result from the json object and test it
+        auto result = answer.find("result");
+        CHECK(result != answer.end());
 
-    // Read the file
-    HorizonsResult result = readHorizonsFile(filePath);
+        const HorizonsFile horizonsFile(filePath, result->get<std::string>());
+        HorizonsResultCode resultCode = isValidHorizonsFile(horizonsFile.file());
+        CHECK(resultCode == expectedResultCode);
 
-    // Check the result
-    CHECK(result.type == type);
-    CHECK(result.errorCode == HorizonsResultCode::Valid);
+        CHECK(std::filesystem::is_regular_file(filePath));
+        if (shouldDeleteFile) {
+            std::filesystem::remove(filePath);
+            CHECK(!std::filesystem::is_regular_file(filePath));
+        }
+    }
 
-    std::vector<HorizonsKeyframe> data = result.data;
-    REQUIRE(data.size() == 3);
+    void testReadingHorizons(HorizonsType type, const std::filesystem::path& filePath,
+                             double t0, double x0, double y0, double z0, double t1,
+                             double x1, double y1, double z1, double t2, double x2,
+                             double y2, double z2)
+    {
+        // Get files and make sure they exist
+        const std::filesystem::path kernel =
+            absPath("${TESTDIR}/horizonsTest/naif0012.tls");
+        CHECK(std::filesystem::is_regular_file(kernel));
+        CHECK(std::filesystem::is_regular_file(filePath));
 
-    CHECK(data[0].time == Catch::Approx(t0));
-    CHECK(data[0].position.x == Catch::Approx(x0));
-    CHECK(data[0].position.y == Catch::Approx(y0));
-    CHECK(data[0].position.z == Catch::Approx(z0));
+        // Initialize SpiceManager and load leap second kernel
+        SpiceManager::initialize();
+        openspace::SpiceManager::ref().loadKernel(kernel);
+
+        // Read the file
+        HorizonsResult result = readHorizonsFile(filePath);
+
+        // Check the result
+        CHECK(result.type == type);
+        CHECK(result.errorCode == HorizonsResultCode::Valid);
+
+        std::vector<HorizonsKeyframe> data = result.data;
+        REQUIRE(data.size() == 3);
+
+        CHECK(data[0].time == Catch::Approx(t0));
+        CHECK(data[0].position.x == Catch::Approx(x0));
+        CHECK(data[0].position.y == Catch::Approx(y0));
+        CHECK(data[0].position.z == Catch::Approx(z0));
 
 
-    CHECK(data[1].time == Catch::Approx(t1));
-    CHECK(data[1].position.x == Catch::Approx(x1));
-    CHECK(data[1].position.y == Catch::Approx(y1));
-    CHECK(data[1].position.z == Catch::Approx(z1));
+        CHECK(data[1].time == Catch::Approx(t1));
+        CHECK(data[1].position.x == Catch::Approx(x1));
+        CHECK(data[1].position.y == Catch::Approx(y1));
+        CHECK(data[1].position.z == Catch::Approx(z1));
 
 
-    CHECK(data[2].time == Catch::Approx(t2));
-    CHECK(data[2].position.x == Catch::Approx(x2));
-    CHECK(data[2].position.y == Catch::Approx(y2));
-    CHECK(data[2].position.z == Catch::Approx(z2));
+        CHECK(data[2].time == Catch::Approx(t2));
+        CHECK(data[2].position.x == Catch::Approx(x2));
+        CHECK(data[2].position.y == Catch::Approx(y2));
+        CHECK(data[2].position.z == Catch::Approx(z2));
 
-    // Clean up
-    openspace::SpiceManager::ref().unloadKernel(kernel);
-    openspace::SpiceManager::deinitialize();
-}
+        // Clean up
+        openspace::SpiceManager::ref().unloadKernel(kernel);
+        openspace::SpiceManager::deinitialize();
+    }
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
+}
 
 // Test if the space module is enable or not
 TEST_CASE("HorizonsFile: Space module", "[horizonsfile]") {
@@ -736,19 +745,19 @@ TEST_CASE("HorizonsFile: Reading Vector data from request", "[horizonsfile]") {
         absPath("${TESTDIR}/horizonsTest/validVectorFile.hrz");
 
     const double t0 = 706449669.18513119;
-    const double x0 = -126379670172.70331;
-    const double y0 = 63049830070.652786;
-    const double z0 = -126710964556.55870;
+    const double x0 = -126367222949.377166748;
+    const double y0 = 63060654906.4096450806;
+    const double z0 = -126727123841.2694549561;
 
     const double t1 = 706492869.18512082;
-    const double x1 = -127019567853.94952;
-    const double y1 = 62510445746.414017;
-    const double z1 = -125904395646.64995;
+    const double x1 = -127007207301.5597076416;
+    const double y1 = 62521315275.043838501;
+    const double z1 = -125920644491.178314209;
 
     const double t2 = 706536069.18511045;
-    const double x2 = -127654909093.56494;
-    const double y2 = 61968790989.645737;
-    const double z2 = -125093260079.10854;
+    const double x2 = -127642636109.8239135742;
+    const double y2 = 61979705046.1750488281;
+    const double z2 = -125109598352.4534301758;
 
     testReadingHorizons(
         type, filePathVector,
@@ -770,19 +779,19 @@ TEST_CASE("HorizonsFile: Reading Observer data from request", "[horizonsfile]") 
         absPath("${TESTDIR}/horizonsTest/validObserverFile.hrz");
 
     const double t0 = 706449669.18513119;
-    const double x0 = -126371142157.29857;
-    const double y0 = 63056923889.044579;
-    const double z0 = -126721572150.18513;
+    const double x0 = -126358694845.7201385498;
+    const double y0 = 63067750258.2510452271;
+    const double z0 = -126737728343.3621063232;
 
     const double t1 = 706492869.18512082;
-    const double x1 = -127011112787.76295;
-    const double y1 = 62517559574.749786;
-    const double z1 = -125915045896.36182;
+    const double x1 = -126998752832.9455413818;
+    const double y1 = 62528427647.3945465088;
+    const double z1 = -125931292434.5601806641;
 
     const double t2 = 706536069.18511045;
-    const double x2 = -127646529740.40393;
-    const double y2 = 61975921972.090714;
-    const double z2 = -125103951590.60988;
+    const double x2 = -127634254978.5487976074;
+    const double y2 = 61986837622.6675033569;
+    const double z2 = -125120288440.1994018555;
 
     testReadingHorizons(
         type, filePathObserver,

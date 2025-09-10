@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <geos/io/GeoJSON.h>
 #include <scn/scan.h>
@@ -100,17 +101,31 @@ namespace {
     }
 
     std::optional<glm::vec3> hexToRgb(std::string_view hexColor) {
-        auto ret = scn::scan<int, int, int>(hexColor, "#{:2x}{:2x}{:2x}");
-        if (ret) {
-            auto [x, y, z] = ret->values();
-            return (1.f / 255.f) * glm::vec3(x, y, z);
+        // The string is supposed to have 7 characters:  #rrggbb
+        if (hexColor.size() != 7) {
+            return std::nullopt;
+        }
+
+        if (hexColor[0] == '#') {
+            hexColor = hexColor.substr(1);
+        }
+
+        auto retR = scn::scan<int>(hexColor.substr(0, 2), "{:x}");
+        auto retG = scn::scan<int>(hexColor.substr(2, 2), "{:x}");
+        auto retB = scn::scan<int>(hexColor.substr(4, 2), "{:x}");
+
+        if (retR && retG && retB) {
+            const int r = retR->value();
+            const int g = retG->value();
+            const int b = retB->value();
+            return (1.f / 255.f) * glm::vec3(r, g, b);
         }
         else {
             return std::nullopt;
         }
     }
 
-    glm::vec3 getColorValue(const geos::io::GeoJSONValue& value) {
+    glm::vec3 colorValue(const geos::io::GeoJSONValue& value) {
         // Default garish color used for when the color loading fails
         glm::vec3 color = glm::vec3(1.f, 0.f, 1.f);
         if (value.isArray()) {
@@ -171,7 +186,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FillOpacityInfo = {
         "FillOpacity",
-        "Fill Opacity",
+        "Fill opacity",
         "This value determines the opacity of the filled portion of a polygon. Will "
         "also be used for extruded features.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -179,7 +194,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FillColorInfo = {
         "FillColor",
-        "Fill Color",
+        "Fill color",
         "The color of the filled portion of a rendered polygon. Will also be used for "
         "extruded features.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -187,14 +202,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
+        "Line width",
         "The width of any rendered lines.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
         "PointSize",
-        "Point Size",
+        "Point size",
         "The size of any rendered points. The size will be scaled based on the "
         "bounding sphere of the globe.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -202,7 +217,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PointTextureInfo = {
         "PointTexture",
-        "Point Texture",
+        "Point texture",
         "A texture to be used for rendering points. No value means to use the default "
         "texture provided by the GlobeBrowsing module. If no texture is provided there "
         "either, the point will be rendered as a plane and colored by the color value.",
@@ -219,7 +234,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PerformShadingInfo = {
         "PerformShading",
-        "Perform Shading",
+        "Perform shading",
         "If true, perform shading on any create meshes, either from polygons or "
         "extruded lines. The shading will be computed based on any light sources of the "
         "GeoJson component.",
@@ -228,7 +243,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo AltitudeModeInfo = {
         "AltitudeMode",
-        "Altitude Mode",
+        "Altitude mode",
         "The altitude mode decides how any height values of the geo coordinates should "
         "be interpreted. Absolute means that the height is interpreted as the height "
         "above the reference ellipsoid, while RelativeToGround takes the height map "
@@ -239,7 +254,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PointAnchorOptionInfo = {
         "PointTextureAnchor",
-        "Point Texture Anchor",
+        "Point texture anchor",
         "Decides the placement of the point texture in relation to the position. "
         "Default is a the bottom of the texture, but it can also be put at the center.",
         openspace::properties::Property::Visibility::User
@@ -257,7 +272,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo UseTessellationLevelInfo = {
         "UseTessellationLevel",
-        "Use Tessellation Level",
+        "Use tessellation level",
         "If true, use the 'Tessellation Level' to control the level of detail for the "
         "tessellation. The distance used will be the 'Tessellation Distance' divided by "
         "the 'Tessellation Level', so the higher the level value, the smaller each "
@@ -267,7 +282,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TessellationLevelInfo = {
         "TessellationLevel",
-        "Tessellation Level",
+        "Tessellation level",
         "When manual tessellation is enabled, this value will be used to determine how "
         "much tessellation to apply. The resulting distance used for subdividing the "
         "geometry will be the 'Tessellation Distance' divided by this value. Zero means "
@@ -277,7 +292,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TessellationDistanceInfo = {
         "TessellationDistance",
-        "Tessellation Distance",
+        "Tessellation distance",
         "Defult distance to use for tessellation of line and polygon geometry. Anything "
         "larger than this distance will be automatically subdivided into smaller pieces "
         "matching this distance, while anything smaller will not be subdivided. Per "
@@ -372,7 +387,7 @@ GeoJsonProperties::Tessellation::Tessellation()
 }
 
 GeoJsonProperties::GeoJsonProperties()
-    : properties::PropertyOwner({ "DefaultProperties" })
+    : properties::PropertyOwner({ "DefaultProperties", "Default Properties" })
     , opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , fillOpacity(FillOpacityInfo, 0.7f, 0.f, 1.f)
@@ -380,16 +395,10 @@ GeoJsonProperties::GeoJsonProperties()
     , lineWidth(LineWidthInfo, 2.f, 0.01f, 10.f)
     , pointSize(PointSizeInfo, 10.f, 0.01f, 100.f)
     , pointTexture(PointTextureInfo)
-    , pointAnchorOption(
-        PointAnchorOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , pointAnchorOption(PointAnchorOptionInfo)
     , extrude(ExtrudeInfo, false)
     , performShading(PerformShadingInfo, false)
-    , altitudeModeOption(
-        AltitudeModeInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , altitudeModeOption(AltitudeModeInfo)
 {
     addProperty(opacity);
     color.setViewOption(properties::Property::ViewOptions::Color);
@@ -504,13 +513,13 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
             result.opacity = static_cast<float>(value.getNumber());
         }
         else if (keyMatches(key, propertykeys::Color, ColorInfo)) {
-            result.color = getColorValue(value);
+            result.color = colorValue(value);
         }
         else if (keyMatches(key, propertykeys::FillOpacity, FillOpacityInfo)) {
             result.fillOpacity = static_cast<float>(value.getNumber());
         }
         else if (keyMatches(key, propertykeys::FillColor, FillColorInfo)) {
-            result.fillColor = getColorValue(value);
+            result.fillColor = colorValue(value);
         }
         else if (keyMatches(key, propertykeys::LineWidth, LineWidthInfo)) {
             result.lineWidth = static_cast<float>(value.getNumber());
@@ -519,7 +528,8 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
             result.pointSize = static_cast<float>(value.getNumber());
         }
         else if (keyMatches(key, propertykeys::Texture, PointTextureInfo)) {
-            result.pointTexture = value.getString();
+            std::string texture = value.getString();
+            result.pointTexture = absPath(texture);
         }
         else if (keyMatches(key, propertykeys::PointTextureAnchor, PointAnchorOptionInfo))
         {
@@ -620,8 +630,8 @@ float PropertySet::pointSize() const {
     return overrideValues.pointSize.value_or(defaultValues.pointSize);
 }
 
-std::string PropertySet::pointTexture() const {
-    return overrideValues.pointTexture.value_or(defaultValues.pointTexture);
+std::filesystem::path PropertySet::pointTexture() const {
+    return overrideValues.pointTexture.value_or(defaultValues.pointTexture.value());
 }
 
 GeoJsonProperties::PointTextureAnchor PropertySet::pointTextureAnchor() const {

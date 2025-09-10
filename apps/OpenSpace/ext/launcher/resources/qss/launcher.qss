@@ -9,8 +9,13 @@ QLabel#heading {
   font-size: 12pt;
 }
 
-QLabel#error-message {
-  color: rgb(221, 17, 17);
+QPushButton:focus,
+QTextEdit:focus,
+QTabWidget:focus,
+QCheckBox:focus,
+QComboBox:focus {
+  outline: none;
+  border: 2px solid rgb(61, 189, 238);
 }
 
 /*
@@ -22,7 +27,7 @@ LauncherWindow  QLabel {
 }
 
 LauncherWindow  QLabel#label_choose, QLabel#label_options {
-  color: #dddddd;
+  color: white;
   font-size: 10pt;
 }
 
@@ -32,24 +37,23 @@ LauncherWindow  QLabel#clear {
 
 LauncherWindow  QLabel#version-info {
   font-size: 10pt;
-  color: #dfdfdf;
+  color: rgb(225, 225, 225);
 }
 
 LauncherWindow  QComboBox#config {
   background: rgb(96, 96, 96);
-  border: 1px solid rgb(128, 128, 128);
-  border-radius: 3px;
-  border-color: rgb(225, 225, 225);
+  border: 1px solid rgb(225, 225, 225);
+  border-radius: 2px;
   padding: 1px 18px 1px 3px;
   min-width: 14em;
   font-size: 10pt;
   font-family: Segoe UI;
   font-weight: bold;
-  color: rgb(255, 255, 255);
+  color: white;
 }
 
 LauncherWindow  QComboBox#config:hover {
-  background: rgb(120, 120, 120);
+  background: rgb(110, 110, 110);
 }
 
 LauncherWindow  QComboBox#config:disabled {
@@ -57,39 +61,53 @@ LauncherWindow  QComboBox#config:disabled {
   color: rgb(225, 225, 225);
 }
 
-LauncherWindow  QPushButton#large {
-  background: rgb(128, 128, 128);
+LauncherWindow  QMenu#newprofile {
+  background: rgb(60, 60, 60);
+  min-width: 8em;
+  max-width: 8em;
+  color: white;
+}
+
+LauncherWindow  QMenu#newprofile::item:selected {
+  background: rgb(110, 110, 110);
+}
+
+LauncherWindow  QPushButton#start {
+  background: rgb(96, 96, 96);
+  border: 2px solid rgb(225, 225, 225);
   border-radius: 2px;
   border-style: outset;
-  border-width: 2px;
-  border-color: rgb(225, 225, 225);
   font-size: 16pt;
   font-weight: bold;
-  color: rgb(239, 239, 239);
+  letter-spacing: 1px;
+  color: white;
 }
-LauncherWindow  QPushButton#large:hover {
-  background: rgb(150, 150, 150);
+LauncherWindow  QPushButton#start:hover {
+  background: rgb(110, 110, 110);
+}
+LauncherWindow  QPushButton#start:disabled {
+  background: rgb(60, 60, 60);
+  border: 1px solid rgb(60, 60, 60);
+  color: rgb(90, 90, 90);
 }
 
 LauncherWindow  QPushButton#small {
-  background: rgb(96, 96, 96);
+  background: rgb(90, 90, 90);
+  border: 1px solid rgb(225, 225, 225);
   border-radius: 2px;
   border-style: outset;
-  border-width: 1px;
-  border-color: rgb(225, 225, 225);
   min-height: 1em;
   font-size: 10pt;
   font-weight: bold;
-  color: rgb(255, 255, 255);
+  color: white;
 }
-
 LauncherWindow  QPushButton#small:hover {
-  background: rgb(120, 120, 120);
+  background: rgb(110, 110, 110);
 }
-
 LauncherWindow  QPushButton#small:disabled {
-  color: rgb(180, 180, 180);
-  background: rgb(160, 160, 160);
+  background: rgb(60, 60, 60);
+  border: 1px solid rgb(60, 60, 60);
+  color: rgb(90, 90, 90);
 }
 
 LauncherWindow  QPushButton#settings {
@@ -101,6 +119,22 @@ LauncherWindow  QPushButton#settings:hover {
   border-image: url(:/images/cogwheel-highlight);
 }
 
+LauncherWindow QPushButton#small:focus,
+LauncherWindow QPushButton#start:focus,
+LauncherWindow QComboBox#config:focus
+{
+  outline: none;
+  border: 2px solid rgb(61, 189, 238);
+}
+
+LauncherWindow QPushButton#settings:focus {
+  outline: 2px solid rgb(61, 189, 238);
+}
+
+LauncherWindow QTextEdit#notifications {
+  background-color: #242424;
+  color: #d7d7d7;
+}
 
 /*
  * ProfileEdit
@@ -165,12 +199,7 @@ DeltaTimesDialog  QListWidget {
 /*
  * Camera
  */
-CameraDialog  QLabel#error-message {
-  min-width: 10em;
-}
-
 CameraDialog  QLabel#camera-description {
-  color:rgb(96, 96, 96);
   margin: 1em;
   margin-top: 0.2em;
   margin-bottom: 0.4em;
@@ -181,6 +210,10 @@ CameraDialog  QLabel#camera-description {
  */
 ScriptlogDialog  QListWidget {
   min-width: 60em;
+}
+
+MarkNodesDialog  QListWidget:focus {
+  border: 2px solid rgb(61, 189, 238);
 }
 
 /*
@@ -198,12 +231,8 @@ HorizonsDialog  QLabel#thin {
   font-weight: normal;
 }
 
-HorizonsDialog  QLabel#error {
-  color: rgb(221, 17, 17);
-}
-
 HorizonsDialog  QLabel#normal {
-  color: rgb(0, 0, 0);
+  color: black;
 }
 
 /*
@@ -223,8 +252,13 @@ WindowControl QLabel#notice {
 /*
  * Settings
  */
-SettingsWidget  QLabel#information {
+SettingsDialog QLabel#information {
   font-style: italic;
   font-weight: normal;
   font-size: 8pt;
+}
+
+SettingsDialog QComboBox#dropdown:focus {
+  outline: none;
+  border: 2px solid rgb(61, 189, 238);
 }

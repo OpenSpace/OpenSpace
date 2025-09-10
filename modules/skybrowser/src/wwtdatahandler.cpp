@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,7 +51,7 @@ namespace {
 
     bool hasAttribute(const tinyxml2::XMLElement* element, std::string_view name) {
         const std::string n = std::string(name);
-        return element->FindAttribute(n.c_str());
+        return element->FindAttribute(n.c_str()) != nullptr;
     }
 
     std::string attribute(const tinyxml2::XMLElement* element, std::string_view name) {

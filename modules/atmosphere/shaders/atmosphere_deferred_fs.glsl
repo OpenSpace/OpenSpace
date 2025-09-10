@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -531,9 +531,9 @@ void main() {
   st.y = st.y / (resolution.y / viewport[3]) + (viewport[1] / resolution.y);
 
   // Color from G-Buffer
-  vec3 color = texture(mainColorTexture, st).rgb;
+  vec4 color = texture(mainColorTexture, st);
   if (cullAtmosphere == 1) {
-    renderTarget.rgb = color;
+    renderTarget = color;
     return;
   }
 
@@ -544,7 +544,7 @@ void main() {
   double maxLength = 0.0;   // in KM
   bool intersect = atmosphereIntersection(ray, Rt - (ATM_EPSILON * 0.001), offset, maxLength);
   if (!intersect) {
-    renderTarget.rgb = color;
+    renderTarget = color;
     return;
   }
 
@@ -599,7 +599,7 @@ void main() {
 
   if (pixelDepth < offset) {
     // ATM Occluded - Something in front of ATM
-    renderTarget.rgb = color;
+    renderTarget = color;
     return;
   }
 
@@ -630,13 +630,13 @@ void main() {
   vec3 attenuation;
 
   vec3 inscatterColor = inscatterRadiance(x, tF, irradianceFactor, v, s, r,
-    vec3(positionObjectsCoords), maxLength, pixelDepth, color, sunIntensityInscatter, mu,
+    vec3(positionObjectsCoords), maxLength, pixelDepth, color.rgb, sunIntensityInscatter, mu,
     attenuation, groundHit);
   vec3 atmColor = vec3(0.0);
   if (groundHit) {
     vec2 eclipseShadowPlanet = calcShadow(shadowDataArray, positionWorldCoords.xyz, true);
     float sunIntensityGround = sunRadiance * eclipseShadowPlanet.y;
-    atmColor = groundColor(x, tF, v, s, attenuation, color, normal.xyz, irradianceFactor,
+    atmColor = groundColor(x, tF, v, s, attenuation, color.rgb, normal.xyz, irradianceFactor,
       normal.w, sunIntensityGround);
   }
   else {
@@ -647,6 +647,6 @@ void main() {
 
   // Final Color of ATM plus terrain. We want to support opacity so we blend between the
   // planet color and the full atmosphere color using the opacity value
-  vec3 c = mix(color, inscatterColor + atmColor, opacity);
+  vec3 c = mix(color.rgb, inscatterColor + atmColor, opacity);
   renderTarget = vec4(c, 1.0);
 }

@@ -25,6 +25,7 @@ local Position = {
   GUI = {
     Name = "Sedna Position",
     Path = "/Solar System/Dwarf Planets/Sedna",
+    Focusable = false,
     Hidden = true
   }
 }

@@ -19,6 +19,7 @@ local Trail = {
   GUI = {
     Name = "Quaoar Trail",
     Path = "/Solar System/Dwarf Planets/Quaoar",
+    Focusable = false,
     Description = "Trail of Quaoar"
   }
 }

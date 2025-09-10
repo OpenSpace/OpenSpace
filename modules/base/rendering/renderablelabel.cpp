@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -91,7 +91,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
-        "Blending Mode",
+        "Blending mode",
         "This determines the blending mode that is applied to the renderable.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -105,7 +105,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
-        "Font Size",
+        "Font size",
         "The font size (in points) for the label.",
         openspace::properties::Property::Visibility::User
     };
@@ -127,35 +127,35 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MinMaxSizeInfo = {
         "MinMaxSize",
-        "Min and Max Size",
+        "Min and max size",
         "The minimum and maximum size (in pixels) of the label.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
-        "Transformation Matrix",
+        "Transformation matrix",
         "Transformation matrix to be applied to the label.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OrientationOptionInfo = {
         "OrientationOption",
-        "Orientation Option",
+        "Orientation option",
         "Label orientation rendering mode.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableFadingEffectInfo = {
         "EnableFading",
-        "Enable/Disable Fade-in Effect",
+        "Enable/disable fade-in effect",
         "Enable/Disable the Fade-in effect.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeWidthsInfo = {
         "FadeWidths",
-        "Fade Widths",
+        "Fade widths",
         "The distances over which the fading takes place, given in the specified unit. "
         "The first value is the distance before the closest distance and the second "
         "the one after the furthest distance. For example, with the unit Parsec (pc), "
@@ -166,7 +166,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FadeDistancesInfo = {
         "FadeDistances",
-        "Fade Distances",
+        "Fade distances",
         "The distance range in which the labels should be fully opaque, specified in "
         "the chosen unit. The distance from the position of the label to the camera.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -174,7 +174,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FadeUnitOptionInfo = {
         "FadeUnit",
-        "Fade Distance Unit",
+        "Fade distance Unit",
         "Distance unit for fade-in/-out distance calculations. Defaults to \"au\".",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -252,23 +252,17 @@ documentation::Documentation RenderableLabel::Documentation() {
 
 RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary, { .automaticallyUpdateRenderBin = false })
-    , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _blendMode(BlendModeInfo)
+    , _text(TextInfo, "")
     , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _fontSize(FontSizeInfo, 50.f, 1.f, 100.f)
     , _size(SizeInfo, 8.f, 0.5f, 30.f)
     , _minMaxSize(MinMaxSizeInfo, glm::ivec2(8, 20), glm::ivec2(0), glm::ivec2(100))
-    , _text(TextInfo, "")
     , _enableFadingEffect(EnableFadingEffectInfo, false)
     , _fadeWidths(FadeWidthsInfo, glm::vec2(1.f), glm::vec2(0.f), glm::vec2(100.f))
     , _fadeDistances(FadeDistancesInfo, glm::vec2(1.f), glm::vec2(0.f), glm::vec2(100.f))
-    , _fadeUnitOption(
-        FadeUnitOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
-    , _orientationOption(
-        OrientationOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _fadeUnitOption(FadeUnitOptionInfo)
+    , _orientationOption(OrientationOptionInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -378,14 +372,12 @@ void RenderableLabel::initialize() {
 }
 
 void RenderableLabel::initializeGL() {
-    if (_font == nullptr) {
-        _font = global::fontManager->font(
-            "Mono",
-            _fontSize,
-            ghoul::fontrendering::FontManager::Outline::Yes,
-            ghoul::fontrendering::FontManager::LoadGlyphs::No
-        );
-    }
+    _font = global::fontManager->font(
+        "Mono",
+        _fontSize,
+        ghoul::fontrendering::FontManager::Outline::Yes,
+        ghoul::fontrendering::FontManager::LoadGlyphs::No
+    );
 }
 
 void RenderableLabel::deinitializeGL() {}

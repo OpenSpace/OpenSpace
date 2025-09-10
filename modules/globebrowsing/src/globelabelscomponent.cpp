@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -70,28 +70,28 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
-        "Font Size",
+        "Font size",
         "Font size for the rendering labels. This is different fromt text size.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinMaxSizeInfo = {
         "MinMaxSize",
-        "Min/Max Text Size",
+        "Min/max text size",
         "Minimum and maximum label size, in pixels.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "LabelsSize",
-        "Labels Size",
+        "Labels size",
         "This value affects the size scale of the labels.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo HeightOffsetInfo = {
         "HeightOffset",
-        "Height Offset",
+        "Height offset",
         "This value moves the label away from the globe surface by the specified "
         "distance (in meters).",
         openspace::properties::Property::Visibility::User
@@ -106,7 +106,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FadeDistancesInfo = {
         "FadeDistances",
-        "Fade-In Distances",
+        "Fade-in distances",
         "The distances above the globe's surface at which the labels start fading in or "
         "out, given in meters. The final distances are also adjusted by the specified "
         "height offset.",
@@ -115,7 +115,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FadeInEnabledInfo = {
         "FadeInEnabled",
-        "Fade In Enabled",
+        "Fade-in enabled",
         "Sets whether the labels fade in when approaching the globe from a distance. If "
         "false, no fading happens and the labels immediately has full opacity.",
         openspace::properties::Property::Visibility::User
@@ -123,7 +123,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FadeOutEnabledInfo = {
         "FadeOutEnabled",
-        "Fade Out Enabled",
+        "Fade-out enabled",
         "Sets whether the labels fade out when approaching the surface of the globe. If "
         "false, no fading happens and the labels stays in full opacity.",
         openspace::properties::Property::Visibility::User
@@ -131,21 +131,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DisableCullingInfo = {
         "DisableCulling",
-        "Culling Disabled",
+        "Culling disabled",
         "Labels culling disabled.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo DistanceEPSInfo = {
         "DistanceEPS",
-        "Culling Distance",
+        "Culling distance",
         "Labels culling distance from globe's center.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo AlignmentOptionInfo = {
         "AlignmentOption",
-        "Alignment Option",
+        "Alignment option",
         "Labels are aligned horizontally or circularly related to the planet.",
         openspace::properties::Property::Visibility::User
     };
@@ -280,10 +280,7 @@ GlobeLabelsComponent::GlobeLabelsComponent()
     , _fadeOutEnabled(FadeOutEnabledInfo, false)
     , _disableCulling(DisableCullingInfo, false)
     , _distanceEPS(DistanceEPSInfo, 100000.f, 1000.f, 10000000.f)
-    , _alignmentOption(
-        AlignmentOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _alignmentOption(AlignmentOptionInfo)
 {
     addProperty(_enabled);
     addProperty(_color);
@@ -322,7 +319,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
         return;
     }
 
-    const bool loadSuccess = loadLabelsData(absPath(*p.fileName));
+    const bool loadSuccess = loadLabelsData(*p.fileName);
     if (!loadSuccess) {
         return;
     }
@@ -472,10 +469,8 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
             }
             std::strncpy(lEntry.feature, token.c_str(), 255);
 
-            GlobeBrowsingModule* _globeBrowsingModule =
-                global::moduleEngine->module<openspace::GlobeBrowsingModule>();
-            lEntry.geoPosition = _globeBrowsingModule->cartesianCoordinatesFromGeo(
-                *_globe,
+            lEntry.geoPosition = cartesianCoordinatesFromGeo(
+                *static_cast<SceneGraphNode*>(_globe->owner()),
                 lEntry.latitude,
                 lEntry.longitude,
                 lEntry.diameter

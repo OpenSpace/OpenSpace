@@ -1,6 +1,5 @@
-local propertyHelper = asset.require("util/property_helper")
-local transforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
-local rot = asset.require("./carrington_to_heeq_rotation")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local transformsHelio = asset.require("scene/solarsystem/heliosphere/transforms_heliosphere")
 
 
 
@@ -21,13 +20,10 @@ local TexturesPathMeridial = asset.resource({
 
 local EquatorialCutplane = {
   Identifier = "EquatorialCutplane-bastille-day-2000",
-  Parent = transforms.HEEQ180ReferenceFrame.Identifier,
+  Parent = transforms.SunIAU.Identifier,
   -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
   -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
   InteractionSphere = 695700000.0,
-  Transform = {
-    Rotation = rot.CarringtonLongitudeToHEEQ180Rotation
-  },
   Renderable = {
     Type = "RenderablePlaneTimeVaryingImage",
     Size = 157000000000,
@@ -47,7 +43,7 @@ local EquatorialCutplane = {
 
 local MeridialCutplane = {
   Identifier = "MeridialCutplane-bastille-day-2000",
-  Parent = transforms.HEEQ180ReferenceFrame.Identifier,
+  Parent = transformsHelio.HeliocentricEarthEquatorial180.Identifier,
   -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
   -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
   InteractionSphere = 695700000,
@@ -78,23 +74,7 @@ local ToggleEquatorial = {
   Identifier = "os.bastilleday.fluxnodescutplane.ToggleEquatorial",
   Name = "Toggle equatorial cutplane",
   Command = [[
-    if openspace.propertyValue("Scene.EquatorialCutplane-bastille-day-2000.Renderable.Enabled") then
-      openspace.setPropertyValueSingle(
-        "Scene.EquatorialCutplane-bastille-day-2000.Renderable.Fade",
-        0.0,
-        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
-        "Linear",
-        'openspace.setPropertyValueSingle("Scene.EquatorialCutplane-bastille-day-2000.Renderable.Enabled", false)'
-      )
-    else
-      openspace.setPropertyValueSingle("Scene.EquatorialCutplane-bastille-day-2000.Renderable.Enabled", true)
-      openspace.setPropertyValueSingle(
-        "Scene.EquatorialCutplane-bastille-day-2000.Renderable.Fade",
-        1.0,
-        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
-        "Linear"
-      )
-    end
+    openspace.toggleFade("Scene.EquatorialCutplane-bastille-day-2000.Renderable")
   ]],
   Documentation = "Toggle equatorial cutplane of CME",
   GuiPath = "/Bastille-Day 2000",
@@ -105,23 +85,7 @@ local ToggleMeridial = {
   Identifier = "os.bastilleday.fluxnodescutplane.ToggleMeridial",
   Name = "Toggle meridial cutplane",
   Command = [[
-    if openspace.propertyValue("Scene.MeridialCutplane-bastille-day-2000.Renderable.Enabled") then
-      openspace.setPropertyValueSingle(
-        "Scene.MeridialCutplane-bastille-day-2000.Renderable.Fade",
-        0.0,
-        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
-        "Linear",
-        'openspace.setPropertyValueSingle("Scene.MeridialCutplane-bastille-day-2000.Renderable.Enabled", false)'
-      )
-    else
-      openspace.setPropertyValueSingle("Scene.MeridialCutplane-bastille-day-2000.Renderable.Enabled", true)
-      openspace.setPropertyValueSingle(
-        "Scene.MeridialCutplane-bastille-day-2000.Renderable.Fade",
-        1.0,
-        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
-        "Linear"
-      )
-    end
+    openspace.toggleFade("Scene.MeridialCutplane-bastille-day-2000.Renderable")
   ]],
   Documentation = "Toggle meridial cutplane of CME",
   GuiPath = "/Bastille-Day 2000",

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,35 +31,31 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    constexpr std::string_view KeyInFilenamePrefix = "InFilenamePrefix";
-    constexpr std::string_view KeyInFilenameSuffix = "InFilenameSuffix";
-    constexpr std::string_view KeyInFirstIndex = "InFirstIndex";
-    constexpr std::string_view KeyInNSlices = "InNSlices";
-    constexpr std::string_view KeyOutFilename = "OutFilename";
-    constexpr std::string_view KeyOutDimensions = "OutDimensions";
+    struct [[codegen::Dictionary(MilkywayConversionTask)]] Parameters {
+        std::string inFilenamePrefix;
+        std::string inFilenameSuffix;
+        int inFirstIndex;
+        int inNSlices;
+        std::string outFilename;
+        glm::ivec3 outDimensions;
+    };
+#include "milkywayconversiontask_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
+documentation::Documentation MilkywayConversionTask::Documentation() {
+    return codegen::doc<Parameters>("galaxy_milkywayconversiontask");
+}
+
 MilkywayConversionTask::MilkywayConversionTask(const ghoul::Dictionary& dictionary) {
-    if (dictionary.hasKey(KeyInFilenamePrefix)) {
-        _inFilenamePrefix = dictionary.value<std::string>(KeyInFilenamePrefix);
-    }
-    if (dictionary.hasKey(KeyInFilenameSuffix)) {
-        _inFilenameSuffix = dictionary.value<std::string>(KeyInFilenameSuffix);
-    }
-    if (dictionary.hasKey(KeyInFirstIndex)) {
-        _inFirstIndex = static_cast<size_t>(dictionary.value<int>(KeyInFirstIndex));
-    }
-    if (dictionary.hasKey(KeyInNSlices)) {
-        _inNSlices = static_cast<size_t>(dictionary.value<int>(KeyInNSlices));
-    }
-    if (dictionary.hasKey(KeyOutFilename)) {
-        _outFilename = dictionary.value<std::string>(KeyOutFilename);
-    }
-    if (dictionary.hasKey(KeyOutDimensions)) {
-        _outDimensions = dictionary.value<glm::ivec3>(KeyOutDimensions);
-    }
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _inFilenamePrefix = p.inFilenamePrefix;
+    _inFilenameSuffix = p.inFilenameSuffix;
+    _inFirstIndex = p.inFirstIndex;
+    _inNSlices = p.inNSlices;
+    _outFilename = p.outFilename;
+    _outDimensions = p.outDimensions;
 }
 
 std::string MilkywayConversionTask::description() {
@@ -97,13 +93,6 @@ void MilkywayConversionTask::perform(const Task::ProgressCallback& onProgress) {
     };
 
     rawWriter.write(sampleFunction, onProgress);
-}
-
-documentation::Documentation MilkywayConversionTask::Documentation() {
-    return {
-        "MilkywayConversionTask",
-        "galaxy_milkywayconversiontask"
-    };
 }
 
 } // namespace openspace

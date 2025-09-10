@@ -56,7 +56,8 @@ local AlbiorixTrail = {
   },
   GUI = {
     Name = "Albiorix Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Albiorix"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Albiorix",
+    Focusable = false
   }
 }
 
@@ -86,7 +87,8 @@ local AlbiorixLabel = {
   },
   GUI = {
     Name = "Albiorix Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Albiorix"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Albiorix",
+    Focusable = false
   }
 }
 
@@ -142,7 +144,8 @@ local BebhionnTrail = {
   },
   GUI = {
     Name = "Bebhionn Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Bebhionn"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Bebhionn",
+    Focusable = false
   }
 }
 
@@ -172,7 +175,8 @@ local BebhionnLabel = {
   },
   GUI = {
     Name = "Bebhionn Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Bebhionn"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Bebhionn",
+    Focusable = false
   }
 }
 
@@ -228,7 +232,8 @@ local ErriapusTrail = {
   },
   GUI = {
     Name = "Erriapus Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Erriapus"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Erriapus",
+    Focusable = false
   }
 }
 
@@ -258,7 +263,8 @@ local ErriapusLabel = {
   },
   GUI = {
     Name = "Erriapus Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Erriapus"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Erriapus",
+    Focusable = false
   }
 }
 
@@ -314,7 +320,8 @@ local TarvosTrail = {
   },
   GUI = {
     Name = "Tarvos Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Tarvos"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Tarvos",
+    Focusable = false
   }
 }
 
@@ -344,7 +351,8 @@ local TarvosLabel = {
   },
   GUI = {
     Name = "Tarvos Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Tarvos"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Tarvos",
+    Focusable = false
   }
 }
 

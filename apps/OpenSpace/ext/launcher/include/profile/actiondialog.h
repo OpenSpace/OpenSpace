@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,7 @@
 class QCheckBox;
 class QComboBox;
 class QDialogButtonBox;
+class QErrorMessage;
 class QGridLayout;
 class QLabel;
 class QLineEdit;
@@ -54,6 +55,7 @@ private:
     openspace::Profile::Action* selectedAction();
     void actionAdd();
     void actionRemove();
+    void actionDuplicate();
     void actionSelected();
     void actionSaved();
     void clearActionFields() const;
@@ -78,7 +80,7 @@ private:
     struct {
         QListWidget* list = nullptr;
         QLineEdit* identifier = nullptr;
-        QLabel* infoText = nullptr;
+        QErrorMessage* infoText = nullptr;
         QLineEdit* name = nullptr;
         QLineEdit* guiPath = nullptr;
         QLineEdit* documentation = nullptr;
@@ -87,6 +89,7 @@ private:
         QTextEdit* script = nullptr;
         QPushButton* addButton = nullptr;
         QPushButton* removeButton = nullptr;
+        QPushButton* duplicateButton = nullptr;
         QDialogButtonBox* saveButtons = nullptr;
     } _actionWidgets;
 

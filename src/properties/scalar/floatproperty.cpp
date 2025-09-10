@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,7 @@
 
 #include <openspace/properties/scalar/floatproperty.h>
 
+#include <openspace/util/json_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
 
 namespace openspace::properties {
@@ -37,8 +38,20 @@ std::string_view FloatProperty::className() const {
     return "FloatProperty";
 }
 
-int FloatProperty::typeLua() const {
-    return LUA_TNUMBER;
+ghoul::lua::LuaTypes FloatProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Number;
+}
+
+void FloatProperty::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
+float FloatProperty::toValue(lua_State* state) const {
+    return ghoul::lua::value<float>(state);
+}
+
+std::string FloatProperty::stringValue() const {
+    return formatJson(_value);
 }
 
 } // namespace openspace::properties

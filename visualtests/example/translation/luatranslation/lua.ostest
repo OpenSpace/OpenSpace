@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/translation/luatranslation/lua.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "LuaTranslation_Example_Focus",
+        "position": [
+          1.7394894504597527,
+          1.9667063879402242,
+          1.8627126199438753
+        ],
+        "pitch": 0.008544256170590956,
+        "referenceFrame": "Root",
+        "up": [
+          -0.4315184146506912,
+          0.7915304745336127,
+          -0.43274861721552405
+        ],
+        "yaw": -0.0035178298521984035,
+        "timestamp": "2025 JUL 13 13:54:28"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+-- Ellipse
+-- This example creates a disc with an ellipic shape, using a non-uniform scaling.
+--
+-- This renderable requires a texture to be loaded, even for just a single color. Use the
+-- utility function that exists for creating single color textures for this purpose.
+local purpleTexture = openspace.createSingleColorImage(
+  "example_disc_color_purple",
+  { 0.5, 0.0, 0.5 }
+)
+
+local Node = {
+  Identifier = "RenderableDisc_Example_Ellipse",
+  Transform = {
+    -- Elliptic discs can be created using a non-uniform scaling
+    Scale = {
+      Type = "NonUniformStaticScale",
+      Scale = { 2.0, 1.0, 1.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableDisc",
+    Size = 100.0,
+    Texture = purpleTexture
+  },
+  GUI = {
+    Name = "RenderableDisc - Ellipse",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

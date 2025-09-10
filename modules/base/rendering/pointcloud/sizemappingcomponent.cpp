@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
-        "Size Mapping Enabled",
+        "Size mapping enabled",
         "If this value is set to 'true' and at least one column was loaded as an option "
         "for size mapping, the chosen data column will be used to scale the size of the "
         "points. The first option in the list is selected per default.",
@@ -42,7 +42,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo OptionInfo = {
         "Parameter",
-        "Parameter Option",
+        "Parameter option",
         "This value determines which parameter is used for scaling of the point. The "
         "parameter value will be used as a multiplicative factor to scale the size of "
         "the points. Note that they may however still be scaled by max size adjustment "
@@ -52,7 +52,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
-        "Scale Factor",
+        "Scale factor",
         "This value is a multiplicative factor that is applied to the data values that "
         "are used to scale the points, when size mapping is applied.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -60,7 +60,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo IsRadiusInfo = {
         "IsRadius",
-        "Size is Radius",
+        "Size is radius",
         "If true, the size value in the data is interpreted as the radius of the points. "
         "Otherwise, it is interpreted as the diameter.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -121,10 +121,7 @@ documentation::Documentation SizeMappingComponent::Documentation() {
 SizeMappingComponent::SizeMappingComponent()
     : properties::PropertyOwner({ "SizeMapping", "Size Mapping", "" })
     , enabled(EnabledInfo, true)
-    , parameterOption(
-        OptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , parameterOption(OptionInfo)
     , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 1000.f)
     , isRadius(IsRadiusInfo, false)
 {
@@ -145,7 +142,7 @@ SizeMappingComponent::SizeMappingComponent(const ghoul::Dictionary& dictionary)
 
     if (p.parameterOptions.has_value()) {
         std::vector<std::string> opts = *p.parameterOptions;
-        for (size_t i = 0; i < opts.size(); ++i) {
+        for (size_t i = 0; i < opts.size(); i++) {
             // Note that options are added in order
             parameterOption.addOption(static_cast<int>(i), opts[i]);
 
@@ -170,10 +167,10 @@ SizeMappingComponent::SizeMappingComponent(const ghoul::Dictionary& dictionary)
             const Parameters::ScaleUnit scaleUnit =
                 std::get<Parameters::ScaleUnit>(*p.scaleFactor);
             const DistanceUnit distanceUnit = codegen::map<DistanceUnit>(scaleUnit);
-            scaleFactor = toMeter(distanceUnit);
+            scaleFactor = static_cast<float>(toMeter(distanceUnit));
         }
         else if (std::holds_alternative<double>(*p.scaleFactor)) {
-            scaleFactor = std::get<double>(*p.scaleFactor);
+            scaleFactor = static_cast<float>(std::get<double>(*p.scaleFactor));
         }
     }
 

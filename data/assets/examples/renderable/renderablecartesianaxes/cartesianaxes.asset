@@ -1,6 +1,6 @@
 -- Basic
--- This asset creates a SceneGraphNode that only displays coordinate axes. The
--- parent is not set which defaults to placing the axes at the center the Sun.
+-- This example creates a scene graph node that only displays coordinate axes. The parent
+-- is not set which defaults to placing the axes at the center of the Sun.
 
 local Node = {
   Identifier = "RenderableCartesianAxes_Example",

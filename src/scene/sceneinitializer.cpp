@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,82 +32,80 @@
 
 namespace openspace {
 
-void SingleThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
-    node->initialize();
-    _initializedNodes.push_back(node);
-}
-
-std::vector<SceneGraphNode*> SingleThreadedSceneInitializer::takeInitializedNodes() {
-    std::vector<SceneGraphNode*> nodes = std::move(_initializedNodes);
-    return nodes;
-}
-
-bool SingleThreadedSceneInitializer::isInitializing() const {
-    return false;
-}
-
-MultiThreadedSceneInitializer::MultiThreadedSceneInitializer(unsigned int nThreads)
-    : _threadPool(nThreads)
+SceneInitializer::SceneInitializer(unsigned int nThreads)
+    : _nThreads(nThreads)
+    , _threadPool(nThreads) // The threadpool handles 0 threads gracefully
 {}
 
-void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
+void SceneInitializer::initializeNode(SceneGraphNode* node) {
     ZoneScoped;
 
-    auto initFunction = [this, node]() {
-        ZoneScopedN("MultiThreadedInit");
+    if (_nThreads == 0) {
+        // If we initialize nodes on the main thread, we don't need to update any loading
+        // screen as those changes won't be visible anyway as it is rendered on the same
+        // main thread
 
-        LoadingScreen* loadingScreen = global::openSpaceEngine->loadingScreen();
+        ZoneScopedN("SingleThreadedInit");
+        node->initialize();
+        _initializedNodes.push_back(node);
+    }
+    else {
+        auto initFunction = [this, node]() {
+            ZoneScopedN("MultiThreadedInit");
+
+            LoadingScreen* loadingScreen = global::openSpaceEngine->loadingScreen();
+
+            LoadingScreen::ProgressInfo progressInfo;
+            progressInfo.progress = 1.f;
+            if (loadingScreen) {
+                loadingScreen->updateItem(
+                    node->identifier(),
+                    node->guiName(),
+                    LoadingScreen::ItemStatus::Initializing,
+                    progressInfo
+                );
+            }
+
+            try {
+                node->initialize();
+            }
+            catch (const ghoul::RuntimeError& e) {
+                LERRORC(e.component, e.message);
+            }
+            const std::lock_guard g(_mutex);
+            _initializedNodes.push_back(node);
+            _initializingNodes.erase(node);
+
+            if (loadingScreen) {
+                loadingScreen->updateItem(
+                    node->identifier(),
+                    node->guiName(),
+                    LoadingScreen::ItemStatus::Finished,
+                    progressInfo
+                );
+            }
+            };
 
         LoadingScreen::ProgressInfo progressInfo;
-        progressInfo.progress = 1.f;
+        progressInfo.progress = 0.f;
+
+        LoadingScreen* loadingScreen = global::openSpaceEngine->loadingScreen();
         if (loadingScreen) {
             loadingScreen->updateItem(
                 node->identifier(),
                 node->guiName(),
-                LoadingScreen::ItemStatus::Initializing,
+                LoadingScreen::ItemStatus::Started,
                 progressInfo
             );
         }
 
-        try {
-            node->initialize();
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC(e.component, e.message);
-        }
         const std::lock_guard g(_mutex);
-        _initializedNodes.push_back(node);
-        _initializingNodes.erase(node);
-
-        if (loadingScreen) {
-            loadingScreen->updateItem(
-                node->identifier(),
-                node->guiName(),
-                LoadingScreen::ItemStatus::Finished,
-                progressInfo
-            );
-        }
-    };
-
-    LoadingScreen::ProgressInfo progressInfo;
-    progressInfo.progress = 0.f;
-
-    LoadingScreen* loadingScreen = global::openSpaceEngine->loadingScreen();
-    if (loadingScreen) {
-        loadingScreen->updateItem(
-            node->identifier(),
-            node->guiName(),
-            LoadingScreen::ItemStatus::Started,
-            progressInfo
-        );
+        _initializingNodes.insert(node);
+        _threadPool.enqueue(initFunction);
     }
-
-    const std::lock_guard g(_mutex);
-    _initializingNodes.insert(node);
-    _threadPool.enqueue(initFunction);
 }
 
-std::vector<SceneGraphNode*> MultiThreadedSceneInitializer::takeInitializedNodes() {
+std::vector<SceneGraphNode*> SceneInitializer::takeInitializedNodes() {
     // Some of the scene graph nodes might still be in the initialization queue and we
     // should wait for those to finish or we end up in some half-initialized state since
     // other parts of the application already know about their existence
@@ -120,7 +118,7 @@ std::vector<SceneGraphNode*> MultiThreadedSceneInitializer::takeInitializedNodes
     return nodes;
 }
 
-bool MultiThreadedSceneInitializer::isInitializing() const {
+bool SceneInitializer::isInitializing() const {
     const std::lock_guard g(_mutex);
     return !_initializingNodes.empty();
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -90,28 +90,28 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
         "EnableAnimation",
-        "Enable Animation",
+        "Enable animation",
         "Enable or disable the animation for the model if it has any.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
         "AmbientIntensity",
-        "Ambient Intensity",
+        "Ambient intensity",
         "A multiplier for ambient lighting.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DiffuseIntensityInfo = {
         "DiffuseIntensity",
-        "Diffuse Intensity",
+        "Diffuse intensity",
         "A multiplier for diffuse lighting.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpecularIntensityInfo = {
         "SpecularIntensity",
-        "Specular Intensity",
+        "Specular intensity",
         "A multiplier for specular lighting.",
         openspace::properties::Property::Visibility::User
     };
@@ -126,7 +126,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShadingInfo = {
         "PerformShading",
-        "Perform Shading",
+        "Perform shading",
         "Determines whether shading should be applied to this model, based on the "
         "provided list of light sources. If false, the model will be fully illuminated.",
         openspace::properties::Property::Visibility::User
@@ -134,14 +134,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EnableFaceCullingInfo = {
         "EnableFaceCulling",
-        "Enable Face Culling",
+        "Enable face culling",
         "Enable OpenGL automatic face culling optimization.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ModelTransformInfo = {
         "ModelTransform",
-        "Model Transform",
+        "Model transform",
         "An extra model transform matrix that is applied to the model before all other "
         "transformations are applied.",
         openspace::properties::Property::Visibility::Developer
@@ -156,7 +156,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ModelScaleInfo = {
         "ModelScale",
-        "Model Scale",
+        "Model scale",
         "The scale of the model. If a numeric value is provided in the asset file, the "
         "scale will be that exact value. If instead a unit name is provided, this is the "
         "value that that name represents. For example 'Centimeter' becomes 0.01.",
@@ -165,21 +165,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RotationVecInfo = {
         "RotationVector",
-        "Rotation Vector",
+        "Rotation vector",
         "A rotation vector with Euler angles, specified in degrees.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourcesInfo = {
         "LightSources",
-        "Light Sources",
+        "Light sources",
         "A list of light sources that this model should accept light from.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableDepthTestInfo = {
         "EnableDepthTest",
-        "Enable Depth Test",
+        "Enable depth test",
         "If true, depth testing is enabled for the model. This means that parts of the "
         "model that are occluded by other parts will not be rendered. If disabled, the "
         "depth of the model part will not be taken into account in rendering and some "
@@ -217,7 +217,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
         "BlendingOption",
-        "Blending Options",
+        "Blending options",
         "Controls the blending function used to calculate the colors of the model with "
         "respect to the opacity.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -237,28 +237,19 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This `Renderable` shows a three-dimensional model. The provided model may contain
+    // textures and animations and is affected by the optionally-provided light sources.
+    // Each model's scale can be adapted by the `ModelScale` and `InvertModelScale`
+    // parameters to account for discrepancies in the units that a model was created in.
+    // See the Documentation page "Scaling of models" for more detailed information.
+    //
+    // Limitation: At the time, only animations of the "Keyframe" type are supported. See
+    // each specific model format to see if it supports that type of animation.
     struct [[codegen::Dictionary(RenderableModel)]] Parameters {
-        // The file or files that should be loaded in this RenderableModel. The file can
-        // contain filesystem tokens. This specifies the model that is rendered by
-        // the Renderable.
+        // The file or files that should be loaded in this RenderableModel. Most common
+        // model formats, such as .obj, .fbx, or .gltf. For a full list of supported file
+        // formats, see https://github.com/assimp/assimp/blob/master/doc/Fileformats.md
         std::filesystem::path geometryFile;
-
-        enum class [[codegen::map(openspace::DistanceUnit)]] ScaleUnit {
-            Nanometer,
-            Micrometer,
-            Millimeter,
-            Centimeter,
-            Decimeter,
-            Meter,
-            Kilometer,
-            Thou,
-            Inch,
-            Foot,
-            Yard,
-            Chain,
-            Furlong,
-            Mile
-        };
 
         // The scale of the model. For example, if the model is in centimeters then
         // `ModelScale = 'Centimeter'` or `ModelScale = 0.01`. The value that this needs
@@ -266,7 +257,7 @@ namespace {
         // of OpenSpace can be tricky to find. Essentially, it depends on the model
         // software that the model was created with and the original intention of the
         // modeler.
-        std::optional<std::variant<ScaleUnit, double>> modelScale;
+        std::optional<std::variant<std::string, double>> modelScale;
 
         // By default the given `ModelScale` is used to scale down the model. By setting
         // this setting to true the scaling is inverted to that the model is instead
@@ -284,18 +275,10 @@ namespace {
         // In format `'YYYY MM DD hh:mm:ss'`.
         std::optional<std::string> animationStartTime [[codegen::datetime()]];
 
-        enum class [[codegen::map(openspace::TimeUnit)]] AnimationTimeUnit {
-            Nanosecond,
-            Microsecond,
-            Millisecond,
-            Second,
-            Minute
-        };
-
         // The time scale for the animation relative to seconds. For example, if the
         // animation is in milliseconds then `AnimationTimeScale = 0.001` or
         // `AnimationTimeScale = \"Millisecond\"`.
-        std::optional<std::variant<AnimationTimeUnit, float>> animationTimeScale;
+        std::optional<std::variant<std::string, float>> animationTimeScale;
 
         enum class AnimationMode {
             Once,
@@ -395,8 +378,18 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _modelTransform(
         ModelTransformInfo,
         glm::dmat4(1.0),
-        glm::dmat4(-1.0),
-        glm::dmat4(1.0)
+        glm::dmat4(
+            -1.0, -1.0, -1.0, -1.0,
+            -1.0, -1.0, -1.0, -1.0,
+            -1.0, -1.0, -1.0, -1.0,
+            -1.0, -1.0, -1.0, -1.0
+        ),
+        glm::dmat4(
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0
+        )
     )
     , _pivot(
         PivotInfo,
@@ -407,6 +400,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _modelScale(ModelScaleInfo, 1.0, std::numeric_limits<double>::epsilon(), 4e+27)
     , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
     , _enableDepthTest(EnableDepthTestInfo, true)
+    , _blendingFuncOption(BlendingOptionInfo)
     , _renderWireframe(RenderWireframeInfo, false)
     , _frustumSize(FrustumSizeInfo, 1.f)
     , _useCache(UseCacheInfo, true)
@@ -423,17 +417,14 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     addProperty(Fadeable::_opacity);
 
-    if (p.forceRenderInvisible.has_value()) {
-        _forceRenderInvisible = *p.forceRenderInvisible;
-
-        if (!_forceRenderInvisible) {
-            // Asset file have specifically said to not render invisible parts,
-            // do not notify in the log if invisible parts are detected and dropped
-            _notifyInvisibleDropped = false;
-        }
+    _forceRenderInvisible = p.forceRenderInvisible.value_or(_forceRenderInvisible);
+    if (p.forceRenderInvisible.has_value() && !_forceRenderInvisible) {
+        // Asset file have specifically said to not render invisible parts, do not notify
+        // in the log if invisible parts are detected and dropped
+        _notifyInvisibleDropped = false;
     }
 
-    _file = absPath(p.geometryFile);
+    _file = p.geometryFile;
     if (!std::filesystem::exists(_file)) {
         throw ghoul::RuntimeError(std::format("Cannot find model file '{}'", _file));
     }
@@ -441,11 +432,21 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _invertModelScale = p.invertModelScale.value_or(_invertModelScale);
 
     if (p.modelScale.has_value()) {
-        if (std::holds_alternative<Parameters::ScaleUnit>(*p.modelScale)) {
-            const Parameters::ScaleUnit scaleUnit =
-                std::get<Parameters::ScaleUnit>(*p.modelScale);
-            const DistanceUnit distanceUnit = codegen::map<DistanceUnit>(scaleUnit);
-            _modelScale = toMeter(distanceUnit);
+        if (std::holds_alternative<std::string>(*p.modelScale)) {
+            const std::string stringUnit = std::get<std::string>(*p.modelScale);
+
+            // Find matching unit name in list of supported unit names
+            if (isValidDistanceUnitName(stringUnit)) {
+                DistanceUnit distanceUnit = distanceUnitFromString(stringUnit);
+                _modelScale = toMeter(distanceUnit);
+            }
+            else {
+                LERROR(std::format(
+                    "The given unit name '{}' does not match any currently supported "
+                    "unit names", stringUnit
+                ));
+                _modelScale = 1.0;
+            }
         }
         else if (std::holds_alternative<double>(*p.modelScale)) {
             _modelScale = std::get<double>(*p.modelScale);
@@ -468,17 +469,20 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         if (std::holds_alternative<float>(*p.animationTimeScale)) {
             _animationTimeScale = std::get<float>(*p.animationTimeScale);
         }
-        else if (std::holds_alternative<Parameters::AnimationTimeUnit>(
-                *p.animationTimeScale
-            ))
-        {
-            const Parameters::AnimationTimeUnit animationTimeUnit =
-                std::get<Parameters::AnimationTimeUnit>(*p.animationTimeScale);
-            const TimeUnit timeUnit = codegen::map<TimeUnit>(animationTimeUnit);
+        else if (std::holds_alternative<std::string>(*p.animationTimeScale)) {
+            const std::string stringUnit = std::get<std::string>(*p.animationTimeScale);
 
-            _animationTimeScale = static_cast<double>(
-                convertTime(1.0, timeUnit, TimeUnit::Second)
-            );
+            if (isValidTimeUnitName(stringUnit)) {
+                TimeUnit timeUnit = timeUnitFromString(stringUnit);
+                _animationTimeScale = convertTime(1.0, timeUnit, TimeUnit::Second);
+            }
+            else {
+                LERROR(std::format(
+                    "The given unit name '{}' does not match any currently supported "
+                    "unit names", stringUnit
+                ));
+                _animationTimeScale = 1.0;
+            }
         }
         else {
             throw ghoul::MissingCaseException();
@@ -515,12 +519,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _renderWireframe = p.renderWireframe.value_or(_renderWireframe);
     _frustumSize = p.frustumSize.value_or(_frustumSize);
 
-    if (p.vertexShader.has_value()) {
-        _vertexShaderPath = p.vertexShader->string();
-    }
-    if (p.fragmentShader.has_value()) {
-        _fragmentShaderPath = p.fragmentShader->string();
-    }
+    _vertexShaderPath = p.vertexShader.value_or(_vertexShaderPath);
+    _fragmentShaderPath = p.fragmentShader.value_or(_fragmentShaderPath);
 
     if (p.lightSources.has_value()) {
         const std::vector<ghoul::Dictionary> lightsources = *p.lightSources;
@@ -722,10 +722,10 @@ void RenderableModel::initializeGL() {
     // Initialize shaders
     std::string program = std::string(ProgramName);
     if (!_vertexShaderPath.empty()) {
-        program += "|vs=" + _vertexShaderPath;
+        program += "|vs=" + _vertexShaderPath.string();
     }
     if (!_fragmentShaderPath.empty()) {
-        program += "|fs=" + _fragmentShaderPath;
+        program += "|fs=" + _fragmentShaderPath.string();
     }
     _program = BaseModule::ProgramObjectManager.request(
         program,
@@ -733,11 +733,11 @@ void RenderableModel::initializeGL() {
             const std::filesystem::path vs =
                 _vertexShaderPath.empty() ?
                 absPath("${MODULE_BASE}/shaders/model_vs.glsl") :
-                std::filesystem::path(_vertexShaderPath);
+                _vertexShaderPath;
             const std::filesystem::path fs =
                 _fragmentShaderPath.empty() ?
                 absPath("${MODULE_BASE}/shaders/model_fs.glsl") :
-                std::filesystem::path(_fragmentShaderPath);
+                _fragmentShaderPath;
 
             return global::renderEngine->buildRenderProgram(program, vs, fs);
         }
@@ -758,7 +758,8 @@ void RenderableModel::initializeGL() {
             const std::filesystem::path fs =
                 absPath("${MODULE_BASE}/shaders/modelOpacity_fs.glsl");
 
-            return global::renderEngine->buildRenderProgram("ModelOpacityProgram",
+            return global::renderEngine->buildRenderProgram(
+                "ModelOpacityProgram",
                 vs,
                 fs
             );
@@ -868,10 +869,10 @@ void RenderableModel::deinitializeGL() {
 
     std::string program = std::string(ProgramName);
     if (!_vertexShaderPath.empty()) {
-        program += "|vs=" + _vertexShaderPath;
+        program += "|vs=" + _vertexShaderPath.string();
     }
     if (!_fragmentShaderPath.empty()) {
-        program += "|fs=" + _fragmentShaderPath;
+        program += "|fs=" + _fragmentShaderPath.string();
     }
     BaseModule::ProgramObjectManager.release(
         program,
@@ -1037,7 +1038,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         case ColorAddingBlending:
             glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
             break;
-    };
+    }
 
     if (!_enableDepthTest) {
         glDisable(GL_DEPTH_TEST);
@@ -1243,12 +1244,12 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableModel::update(const UpdateData& data) {
-    if (_program->isDirty()) {
+    if (_program->isDirty()) [[unlikely]] {
         _program->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
     }
 
-    if (_quadProgram->isDirty()) {
+    if (_quadProgram->isDirty()) [[unlikely]] {
         _quadProgram->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_quadProgram, _uniformOpacityCache);
     }

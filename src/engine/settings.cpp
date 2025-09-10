@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,6 +49,7 @@ namespace version1 {
 
         Settings settings;
         settings.hasStartedBefore = get_to<bool>(json, "started-before");
+        settings.lastStartedDate = get_to<std::string>(json, "last-started-date");
         settings.configuration = get_to<std::string>(json, "config");
         settings.rememberLastConfiguration = get_to<bool>(json, "config-remember");
         settings.profile = get_to<std::string>(json, "profile");
@@ -139,6 +140,9 @@ void saveSettings(const Settings& settings, const std::filesystem::path& filenam
 
     if (settings.hasStartedBefore.has_value()) {
         json["started-before"] = *settings.hasStartedBefore;
+    }
+    if (settings.lastStartedDate.has_value()) {
+        json["last-started-date"] = *settings.lastStartedDate;
     }
     if (settings.configuration.has_value()) {
         json["config"] = *settings.configuration;

@@ -1,0 +1,30 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/scale/timedependentscale/timedependent.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "TimeDependentScale_Example",
+        "position": [
+          -2991058.88298585,
+          -2285714.1229588315,
+          -2428696.6970863957
+        ],
+        "referenceFrame": "Root",
+        "up": [
+          0.25080181719545336,
+          0.531495745722298,
+          -0.8090801695571069
+        ],
+        "timestamp": "2000 JAN 30 10:00:00"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

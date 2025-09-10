@@ -28,7 +28,8 @@ local GalileoSatellites = {
   Tag = { "earth_satellites" },
   GUI = {
     Name = "Galileo",
-    Path = "/Solar System/Planets/Earth/Satellites"
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
   }
 }
 

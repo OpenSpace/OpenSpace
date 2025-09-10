@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,8 +32,6 @@
 #include <modules/globebrowsing/src/geojson/geojsonmanager.h>
 #include <modules/globebrowsing/src/geojson/geojsonproperties.h>
 #include <modules/globebrowsing/src/globelabelscomponent.h>
-#include <modules/globebrowsing/src/globetranslation.h>
-#include <modules/globebrowsing/src/globerotation.h>
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layeradjustment.h>
 #include <modules/globebrowsing/src/layergroup.h>
@@ -68,6 +66,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/geodetic.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
@@ -100,27 +99,27 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
         "TileCacheSize",
-        "Tile Cache Size",
+        "Tile cache size",
         "The maximum size of the MemoryAwareTileCache, on the CPU and GPU.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DefaultGeoPointTextureInfo = {
         "DefaultGeoPointTexture",
-        "Default Geo Point Texture",
+        "Default geo point texture",
         "A path to a texture to use as default for GeoJson points."
     };
 
     constexpr openspace::properties::Property::PropertyInfo MRFCacheEnabledInfo = {
         "MRFCacheEnabled",
-        "MRF Cache Enabled",
+        "MRF cache enabled",
         "Determines whether automatic caching of globe browsing data is enabled.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MRFCacheLocationInfo = {
         "MRFCacheLocation",
-        "MRF Cache Location",
+        "MRF cache location",
         "The location of the root folder for the MRF cache of globe browsing data.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -198,6 +197,10 @@ namespace {
 } // namespace
 
 namespace openspace {
+
+documentation::Documentation GlobeBrowsingModule::Documentation() {
+    return codegen::doc<Parameters>("module_globebrowsing");
+}
 
 GlobeBrowsingModule::GlobeBrowsingModule()
     : OpenSpaceModule(Name)
@@ -289,16 +292,6 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     ghoul_assert(fRenderable, "Renderable factory was not created");
     fRenderable->registerClass<globebrowsing::RenderableGlobe>("RenderableGlobe");
 
-    ghoul::TemplateFactory<Translation>* fTranslation =
-        FactoryManager::ref().factory<Translation>();
-    ghoul_assert(fTranslation, "Translation factory was not created");
-    fTranslation->registerClass<globebrowsing::GlobeTranslation>("GlobeTranslation");
-
-    ghoul::TemplateFactory<Rotation>* fRotation =
-        FactoryManager::ref().factory<Rotation>();
-    ghoul_assert(fRotation, "Rotation factory was not created");
-    fRotation->registerClass<globebrowsing::GlobeRotation>("GlobeRotation");
-
     FactoryManager::ref().addFactory<TileProvider>("TileProvider");
 
     ghoul::TemplateFactory<TileProvider>* fTileProvider =
@@ -334,9 +327,6 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
     return {
         globebrowsing::Layer::Documentation(),
         globebrowsing::LayerAdjustment::Documentation(),
-        globebrowsing::LayerManager::Documentation(),
-        globebrowsing::GlobeTranslation::Documentation(),
-        globebrowsing::GlobeRotation::Documentation(),
         globebrowsing::RenderableGlobe::Documentation(),
         globebrowsing::DefaultTileProvider::Documentation(),
         globebrowsing::ImageSequenceTileProvider::Documentation(),
@@ -347,186 +337,37 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
         globebrowsing::TileProviderByDate::Documentation(),
         globebrowsing::TileProviderByIndex::Documentation(),
         globebrowsing::TileProviderByLevel::Documentation(),
-        globebrowsing::GeoJsonManager::Documentation(),
         globebrowsing::GeoJsonComponent::Documentation(),
         globebrowsing::GeoJsonProperties::Documentation(),
         GlobeLabelsComponent::Documentation(),
         RingsComponent::Documentation(),
-        ShadowComponent::Documentation()
+        ShadowComponent::Documentation(),
+        DashboardItemGlobeLocation::Documentation()
     };
 }
 
-void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
+void GlobeBrowsingModule::goToChunk(const SceneGraphNode& node,
                                     int x, int y, int level)
 {
     ghoul_assert(level < std::numeric_limits<uint8_t>::max(), "Level way too big");
-    goToChunk(
-        globe,
-        globebrowsing::TileIndex(x, y, static_cast<uint8_t>(level)),
-        glm::vec2(0.5f, 0.5f)
-    );
-}
-
-void GlobeBrowsingModule::goToGeo(const globebrowsing::RenderableGlobe& globe,
-                                  double latitude, double longitude)
-{
-    using namespace globebrowsing;
-    goToGeodetic2(
-        globe,
-        Geodetic2{ glm::radians(latitude), glm::radians(longitude) }
-    );
-}
-
-void GlobeBrowsingModule::goToGeo(const globebrowsing::RenderableGlobe& globe,
-                                  double latitude, double longitude, double altitude)
-{
-    using namespace globebrowsing;
-    goToGeodetic3(
-        globe,
-        {
-            Geodetic2{ glm::radians(latitude), glm::radians(longitude) },
-            altitude
-        }
-    );
-}
-
-glm::vec3 GlobeBrowsingModule::cartesianCoordinatesFromGeo(
-                                              const globebrowsing::RenderableGlobe& globe,
-                                                                          double latitude,
-                                                                         double longitude,
-                                                           std::optional<double> altitude)
-{
+    using namespace openspace;
     using namespace globebrowsing;
 
-    const Geodetic3 pos = {
-        { .lat = glm::radians(latitude), .lon = glm::radians(longitude) },
-        altitude.value_or(altitudeFromCamera(globe))
-    };
-
-    return glm::vec3(globe.ellipsoid().cartesianPosition(pos));
-}
-
-glm::dvec3 GlobeBrowsingModule::geoPosition() const {
-    using namespace globebrowsing;
-
-    const SceneGraphNode* n = global::navigationHandler->orbitalNavigator().anchorNode();
-    if (!n) {
-        return glm::dvec3(0.0);
-    }
-    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
-    if (!globe) {
-        return glm::dvec3(0.0);
-    }
-
-    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
-    const glm::dmat4 inverseModelTransform = glm::inverse(n->modelTransform());
-    const glm::dvec3 cameraPositionModelSpace =
-        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
-    const SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
-        cameraPositionModelSpace
+    const GeodeticPatch patch = GeodeticPatch(
+        globebrowsing::TileIndex(x, y, static_cast<uint8_t>(level))
     );
-
-    const Geodetic2 geo2 = globe->ellipsoid().cartesianToGeodetic2(
-        posHandle.centerToReferenceSurface
-    );
-
-    const double lat = glm::degrees(geo2.lat);
-    const double lon = glm::degrees(geo2.lon);
-
-    double altitude = glm::length(
-        cameraPositionModelSpace - posHandle.centerToReferenceSurface
-    );
-
-    if (glm::length(cameraPositionModelSpace) <
-        glm::length(posHandle.centerToReferenceSurface))
-    {
-        altitude = -altitude;
-    }
-
-    return glm::dvec3(lat, lon, altitude);
-}
-
-double GlobeBrowsingModule::altitudeFromCamera(
-                                       const globebrowsing::RenderableGlobe& globe,
-                                       bool useHeightMap) const
-{
-    using namespace globebrowsing;
-
-    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
-    SceneGraphNode* sgn = dynamic_cast<SceneGraphNode*>(globe.owner());
-    if (!sgn) {
-        LERROR("Could not find scene graph node for globe");
-        return 0.0;
-    }
-
-    const glm::dmat4 inverseModelTransform = glm::inverse(sgn->modelTransform());
-
-    const glm::dvec3 cameraPositionModelSpace =
-        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
-
-    SurfacePositionHandle posHandle = globe.calculateSurfacePositionHandle(
-        cameraPositionModelSpace
-    );
-
-    if (useHeightMap) {
-        const glm::dvec3 centerToActualSurface = posHandle.centerToReferenceSurface +
-            posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
-
-        return glm::length(cameraPositionModelSpace - centerToActualSurface);
-    }
-    else {
-        // Do not use height map => compute distance to reference surface
-        return glm::length(cameraPositionModelSpace - posHandle.centerToReferenceSurface);
-    }
-}
-
-void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
-                                    const globebrowsing::TileIndex& ti,
-                                    const glm::vec2& uv)
-{
-    using namespace globebrowsing;
-
-    const GeodeticPatch patch(ti);
     const Geodetic2 corner = patch.corner(SOUTH_WEST);
     Geodetic2 positionOnPatch = patch.size();
-    positionOnPatch.lat *= uv.y;
-    positionOnPatch.lon *= uv.x;
+    positionOnPatch.lat *= 0.5f;
+    positionOnPatch.lon *= 0.5f;
     const Geodetic2 pointPosition = {
         .lat = corner.lat + positionOnPatch.lat,
         .lon = corner.lon + positionOnPatch.lon
     };
 
-    const double altitude = altitudeFromCamera(globe);
+    const double altitude = altitudeFromCamera(node);
 
-    goToGeodetic3(globe, { pointPosition, altitude });
-}
-
-void GlobeBrowsingModule::goToGeodetic2(const globebrowsing::RenderableGlobe& globe,
-                                        globebrowsing::Geodetic2 geo2)
-{
-    using namespace globebrowsing;
-
-    const double altitude = altitudeFromCamera(globe);
-
-    goToGeodetic3(globe, { geo2, altitude });
-}
-
-void GlobeBrowsingModule::goToGeodetic3(const globebrowsing::RenderableGlobe& globe,
-                                        globebrowsing::Geodetic3 geo3)
-{
-    using namespace globebrowsing;
-    const glm::dvec3 positionModelSpace = globe.ellipsoid().cartesianPosition(geo3);
-
-    interaction::NavigationState state;
-    state.anchor = globe.owner()->identifier();
-    state.referenceFrame = globe.owner()->identifier();
-    state.position = positionModelSpace;
-    // For globes, we know that the up-direction will always be positive Z.
-    // @TODO (2023-12-06 emmbr) Eventually, we want each scene graph node to be aware of
-    // its own preferred up-direction. At that time, this should no longer be hardcoded
-    state.up = glm::dvec3(0.0, 0.0, 1.0);
-
-    global::navigationHandler->setNavigationStateNextFrame(state);
+    goToGeodetic3(node, { pointPosition, altitude });
 }
 
 const globebrowsing::RenderableGlobe*
@@ -659,8 +500,8 @@ bool GlobeBrowsingModule::hasDefaultGeoPointTexture() const {
     return _hasDefaultGeoPointTexture;
 }
 
-std::string_view GlobeBrowsingModule::defaultGeoPointTexture() const {
-    return _defaultGeoPointTexturePath;
+std::filesystem::path GlobeBrowsingModule::defaultGeoPointTexture() const {
+    return _defaultGeoPointTexturePath.value();
 }
 
 scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
@@ -670,23 +511,15 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             codegen::lua::AddLayer,
             codegen::lua::DeleteLayer,
             codegen::lua::Layers,
-            codegen::lua::LayersDeprecated,
             codegen::lua::MoveLayer,
             codegen::lua::GoToChunk,
-            codegen::lua::JumpToGeo,
-            codegen::lua::GoToGeoDeprecated,
-            codegen::lua::FlyToGeo2,
-            codegen::lua::FlyToGeo,
-            codegen::lua::LocalPositionFromGeo,
-            codegen::lua::LocalPositionFromGeoDeprecated,
             codegen::lua::GeoPositionForCamera,
-            codegen::lua::GeoPositionForCameraDeprecated,
             codegen::lua::LoadWMSCapabilities,
             codegen::lua::RemoveWMSServer,
             codegen::lua::CapabilitiesWMS,
             codegen::lua::AddGeoJson,
             codegen::lua::DeleteGeoJson,
-            codegen::lua::AddGeoJsonFromFile,
+            codegen::lua::AddGeoJsonFromFile
         },
         .scripts = {
             absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua"),

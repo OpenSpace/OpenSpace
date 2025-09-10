@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,8 +45,7 @@ namespace {
 namespace openspace {
 
 BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
-                                 WebKeyboardHandler* keyboardHandler,
-                                 bool accelerateRendering)
+                                 WebKeyboardHandler* keyboardHandler)
     : _renderHandler(renderer)
     , _keyboardHandler(keyboardHandler)
     , _client(new BrowserClient(_renderHandler.get(), _keyboardHandler.get()))
@@ -57,7 +56,7 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
     windowInfo.SetAsWindowless(0);
 
     // Use accelerated rendering if possible
-    if (WebBrowserModule::canUseAcceleratedRendering() && accelerateRendering) {
+    if (WebBrowserModule::canUseAcceleratedRendering()) {
         windowInfo.shared_texture_enabled = true;
         LINFO("Enabling shared texture mode for CEF");
     }
@@ -125,7 +124,6 @@ void BrowserInstance::reshape(const glm::ivec2& windowSize) {
 void BrowserInstance::draw() {
     ZoneScoped;
     TracyGpuZone("CEF Draw");
-
 
     if (_zoomLevel != _browser->GetHost()->GetZoomLevel()) {
         _browser->GetHost()->SetZoomLevel(_zoomLevel);

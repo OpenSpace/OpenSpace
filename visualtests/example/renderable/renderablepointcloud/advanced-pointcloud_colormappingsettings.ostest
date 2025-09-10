@@ -1,0 +1,29 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderablepointcloud/advanced/pointcloud_colormappingsettings.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Root",
+        "position": [
+          69902627.19672933,
+          69902627.19672896,
+          69902627.19672847
+        ],
+        "up": [
+          -0.4082482904638681,
+          0.8164965809277258,
+          -0.40824829046385847
+        ],
+        "timestamp": "2025 AUG 30 12:45:46"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

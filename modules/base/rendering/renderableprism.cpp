@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LinesInfo = {
         "NumLines",
-        "Number of Lines",
+        "Number of lines",
         "The number of lines connecting the two shapes of the prism. They will be evenly "
         "distributed around the bounding circle that makes up the shape of the prism.",
         openspace::properties::Property::Visibility::User
@@ -77,7 +77,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BaseRadiusInfo = {
         "BaseRadius",
-        "Base Radius",
+        "Base radius",
         "The radius of the base of the prism's shape, in meters. By default it is given "
         "the same radius as the outer shape.",
         openspace::properties::Property::Visibility::User
@@ -85,7 +85,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
+        "Line width",
         "The width of the lines. The larger number, the thicker the lines.",
         openspace::properties::Property::Visibility::User
     };
@@ -247,8 +247,8 @@ void RenderablePrism::updateVertexData() {
     using namespace rendering::helper;
 
     // Get unit circle vertices on the XY-plane
-    std::vector<VertexXYZ> unitVertices = createRingXYZ(_nShapeSegments.value(), 1.f);
-    std::vector<VertexXYZ> unitVerticesLines = createRingXYZ(_nLines.value(), 1.f);
+    std::vector<VertexXYZ> unitVertices = createRingXYZ(_nShapeSegments, 1.f);
+    std::vector<VertexXYZ> unitVerticesLines = createRingXYZ(_nLines, 1.f);
 
     // hacked-up FOV adaptation
     const auto doFOV = (_width > 0.f && _height > 0.f && _nShapeSegments == 4 && _nLines == 4);
@@ -434,11 +434,12 @@ void RenderablePrism::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderablePrism::update(const UpdateData& data) {
-    if (_shader->isDirty()) {
+    if (_shader->isDirty()) [[unlikely]] {
         _shader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
-    if (_prismIsDirty) {
+
+    if (_prismIsDirty) [[unlikely]] {
         updateVertexData();
         updateBufferData();
         setBoundingSphere(_length * glm::compMax(data.modelTransform.scale));

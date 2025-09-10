@@ -1,4 +1,4 @@
-asset.export("keyframes", {
+local keyframes = {
   -- ["1969-7-20T20:9:53"] = {
   --   Type = "StaticRotation",
   --   Rotation = { -1.3815, -0.0048, -0.4891 }
@@ -1583,4 +1583,17 @@ asset.export("keyframes", {
     Type = "StaticRotation",
     Rotation = { -0.0794, -0.0088, -0.2447 }
   }
-})
+}
+
+asset.export("keyframes", keyframes)
+
+
+
+asset.meta = {
+  Name = "Apollo 11 Descent Orientation",
+  Description = [[This asset provides orientation information about Apollo 11 as it is in
+    the final stages of the descent onto the Moon.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

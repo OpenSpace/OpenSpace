@@ -47,6 +47,7 @@ local DawnPosition = {
   GUI = {
     Name = "Dawn Position",
     Path = "/Solar System/Missions/Dawn",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -94,7 +95,8 @@ local DawnTrail = {
   },
   GUI = {
     Name = "Dawn Trail",
-    Path = "/Solar System/Missions/Dawn"
+    Path = "/Solar System/Missions/Dawn",
+    Focusable = false
   }
 }
 
@@ -116,7 +118,8 @@ local DawnFramingCamera1 = {
   },
   GUI = {
     Name = "Dawn Framing Camera 1",
-    Path = "/Solar System/Missions/Dawn"
+    Path = "/Solar System/Missions/Dawn",
+    Focusable = false
   }
 }
 
@@ -137,7 +140,8 @@ local DawnFramingCamera2 = {
   },
   GUI = {
     Name = "Dawn Framing Camera 2",
-    Path = "/Solar System/Missions/Dawn"
+    Path = "/Solar System/Missions/Dawn",
+    Focusable = false
   }
 }
 

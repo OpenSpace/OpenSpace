@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,9 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/vector/vec2property.h>
+#include <openspace/rendering/transferfunction.h>
 #include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::opengl { class ProgramObject; }
@@ -42,7 +44,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableSphere : public Renderable {
 public:
-    RenderableSphere(const ghoul::Dictionary& dictionary);
+    explicit RenderableSphere(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -67,12 +69,19 @@ protected:
     properties::BoolProperty _disableFadeInDistance;
     properties::FloatProperty _fadeInThreshold;
     properties::FloatProperty _fadeOutThreshold;
+    properties::OptionProperty _blendingFuncOption;
+    properties::BoolProperty _disableDepth;
+
+    glm::vec2 _dataMinMaxValues;
+    ghoul::opengl::ProgramObject* _shader = nullptr;
+    properties::BoolProperty _useColorMap;
 
 private:
-    ghoul::opengl::ProgramObject* _shader = nullptr;
-
     std::unique_ptr<Sphere> _sphere;
     bool _sphereIsDirty = false;
+
+    properties::StringProperty _colorMap;
+    std::unique_ptr<TransferFunction> _transferFunction;
 
     UniformCache(opacity, modelViewProjection, modelViewTransform, modelViewRotation,
         colorTexture, mirrorTexture) _uniformCache;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,9 +32,8 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
-#include <algorithm>
+#include <ghoul/logging/logmanager.h>
 
 using namespace TUIO;
 
@@ -43,7 +42,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EnableTouchInfo = {
         "EnableTouchInteraction",
-        "Enable Touch Interaction",
+        "Enable touch interaction",
         "Use this property to turn on/off touch input navigation in the 3D scene. "
         "Disabling will reset all current touch inputs to the navigation.",
         openspace::properties::Property::Visibility::User
@@ -51,7 +50,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EventsInfo = {
         "DetectedTouchEvent",
-        "Detected Touch Event",
+        "Detected touch event",
         "True when there is an active touch event.",
         openspace::properties::Property::Visibility::Hidden
     };
@@ -60,14 +59,14 @@ namespace {
         DefaultDirectTouchRenderableTypesInfo =
     {
         "DefaultDirectTouchRenderableTypes",
-        "Default Direct Touch Renderable Types",
+        "Default direct touch renderable types",
         "A list of renderable types that will automatically use the \'direct "
         "manipulation\' scheme when interacted with, keeping the finger on a static "
         "position on the interaction sphere of the object when touching. Good for "
         "relatively spherical objects.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
-} // namespace openspace
+} // namespace
 
 namespace openspace {
 
@@ -117,7 +116,7 @@ bool TouchModule::isDefaultDirectTouchType(std::string_view renderableType) cons
         _sortedDefaultRenderableTypes.end();
 }
 
-void TouchModule::internalInitialize(const ghoul::Dictionary&){
+void TouchModule::internalInitialize(const ghoul::Dictionary&) {
     _ear.reset(new TuioEar());
 
     global::callback::initializeGL->push_back([this]() {
@@ -130,7 +129,7 @@ void TouchModule::internalInitialize(const ghoul::Dictionary&){
         if (nativeWindowHandle) {
             _win32TouchHook = std::make_unique<Win32TouchHook>(nativeWindowHandle);
         }
-#endif
+#endif // WIN32
     });
 
     global::callback::deinitializeGL->push_back([this]() {
@@ -142,14 +141,14 @@ void TouchModule::internalInitialize(const ghoul::Dictionary&){
     // thread so we don't need a mutex here
     global::callback::touchDetected->push_back(
         [this](TouchInput i) {
-            addTouchInput(i);
+            addTouchInput(std::move(i));
             return true;
         }
     );
 
     global::callback::touchUpdated->push_back(
         [this](TouchInput i) {
-            updateOrAddTouchInput(i);
+            updateOrAddTouchInput(std::move(i));
             return true;
         }
     );
@@ -202,7 +201,7 @@ void TouchModule::internalInitialize(const ghoul::Dictionary&){
 
 bool TouchModule::processNewInput() {
     // Get new input from listener
-    std::vector<TouchInput> earInputs = _ear->takeInput();
+    std::vector<TouchInput> earInputs = _ear->takeInputs();
     std::vector<TouchInput> earRemovals = _ear->takeRemovals();
 
     for (const TouchInput& input : earInputs) {
@@ -245,9 +244,7 @@ bool TouchModule::processNewInput() {
     }
 
     // Return true if we got new input
-    if (_touchPoints.size() == _lastTouchInputs.size() &&
-        !_touchPoints.empty())
-    {
+    if (_touchPoints.size() == _lastTouchInputs.size() && !_touchPoints.empty()) {
         // @TODO (emmbr26, 2023-02-03) Looks to me like this code will always return
         // true? That's a bit weird and should probably be investigated
         bool newInput = true;

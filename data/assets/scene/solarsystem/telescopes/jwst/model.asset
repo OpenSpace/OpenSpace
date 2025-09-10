@@ -1,0 +1,64 @@
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
+
+
+
+local models = asset.resource({
+  Name = "JWST Model",
+  Type = "HttpSynchronization",
+  Identifier = "jwst_model",
+  Version = 3
+})
+
+
+local JWSTModel = {
+  Identifier = "JWSTModel",
+  Parent = transforms.JWSTRotation.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = transforms.LaunchTime
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Enabled = asset.enabled,
+    GeometryFile = models .. "jwst_anim74_2fps_2018_nb.osmodel",
+    ModelScale = 0.0328, -- First scale down with centimeters then scale up with feet
+    EnableAnimation = true,
+    AnimationStartTime = "2021 12 25 12:20:00",
+    AnimationTimeScale = "Millisecond",
+    AnimationMode = "Once",
+    LightSources = {
+      sunTransforms.LightSource
+    },
+    PerformShading = true
+  },
+  GUI = {
+    Name = "James Webb Space Telescope Model",
+    Path = "/Solar System/Telescopes/JWST",
+    Description = [[
+      Animated model of the James Webb Space Telescope that shows its deployment in
+      real time.
+    ]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(JWSTModel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JWSTModel)
+end)
+
+asset.export(JWSTModel)
+
+
+
+asset.meta = {
+  Name = "James Webb Space Telescope Model",
+  Description = [[James Webb Space Telescope animated model.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

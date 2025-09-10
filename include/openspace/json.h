@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,7 +36,12 @@
 #pragma GCC diagnostic ignored "-Wuseless-cast"
 #endif // __GNUC__
 
-#include <json/json.hpp>
+#define JSON_HAS_CPP_11
+#define JSON_HAS_CPP_14
+#define JSON_HAS_CPP_17
+#define JSON_HAS_CPP_20
+#define JSON_USE_IMPLICIT_CONVERSIONS 0
+#include <nlohmann/json.hpp>
 
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop

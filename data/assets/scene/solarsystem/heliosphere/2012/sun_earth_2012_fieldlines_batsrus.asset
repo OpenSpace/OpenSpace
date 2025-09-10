@@ -1,5 +1,5 @@
 asset.require("scene/solarsystem/heliosphere/2012/reset_loop_action")
-local transforms = asset.require("scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere")
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms_gsm_sm")
 
 
 
@@ -59,14 +59,15 @@ local InteractionSphere = 6380000  -- A value slightly bigger than earth radius
 ----------------------LUTZ's JULY TRACES-------------------------
 local BatsrusJ12OpenClosed = {
   Identifier = "FL_BATSRUS_J12_OpenClosed",
-  Parent = transforms.GSMReferenceFrame.Identifier,
+  Parent = transforms.GeocentricSolarMagnetospheric.Identifier,
   InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.openClosed,
     InputFileType = "Osfls",
-    Color = { 0.7, 0.4, 0.0, 0.6 }, -- Default color
-    ColorMethod = "By Quantity", -- Color by Quantity
+    ShowAtAllTimes = false,
+    Color = { 0.7, 0.4, 0.0, 0.6 },
+    ColorMethod = "By Quantity",
     ColorQuantity = 0, -- Temperature
     ColorTablePaths = {
       batsrusTemperatureColorTable,
@@ -78,7 +79,7 @@ local BatsrusJ12OpenClosed = {
     ColorTableRanges = colorRanges,
     MaskingEnabled = true,
     MaskingQuantity = 4, -- Topology
-    MaskingRanges = { {2.5, 3.0} } -- Corresponds to closed fieldlines only
+    MaskingRanges = { { 2.5, 3.0 } } -- Corresponds to closed fieldlines only
   },
   GUI = {
     Name = "Fieldlines BATSRUS J12 Open/Closed",
@@ -89,15 +90,16 @@ local BatsrusJ12OpenClosed = {
 --------------------- VELOCITY FLOWLINES ------------------------
 local BatsrusJ12FlowLines = {
   Identifier = "FL_BATSRUS_J12_FlowLines",
-  Parent = transforms.GSMReferenceFrame.Identifier,
+  Parent = transforms.GeocentricSolarMagnetospheric.Identifier,
   InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.velocityFlow,
     InputFileType = "Osfls",
-    ColorMethod = "By Quantity", -- Color by Quantity
+    ShowAtAllTimes = false,
+    ColorMethod = "By Quantity",
     ColorQuantity = 3, -- Velocity
-    Color = { 0.7, 0.4, 0.0, 0.12 }, -- Default color
+    Color = { 0.7, 0.4, 0.0, 0.12 },
     ColorTablePaths = {
       batsrusTemperatureColorTable,
       batsrusDensityColorTable,
@@ -116,13 +118,14 @@ local BatsrusJ12FlowLines = {
 --------------------- Ashers seedpoints ------------------------
 local BatsrusAsherStaticSeedsFlowLines = {
   Identifier = "FL_BATSRUS_ASHER_STATIC_SSEDS_FlowLines",
-  Parent = transforms.GSMReferenceFrame.Identifier,
+  Parent = transforms.GeocentricSolarMagnetospheric.Identifier,
   InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     Enabled = false,
     SourceFolder = unzippedDataDestination.asherStatic,
     InputFileType = "Osfls",
+    ShowAtAllTimes = false,
     ColorTablePaths = {
       batsrusTemperatureColorTable,
       batsrusDensityColorTable,

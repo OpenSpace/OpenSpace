@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,31 +44,21 @@
 namespace {
     constexpr std::string_view _loggerCat = "WebBrowser";
 
-    #ifdef _MSC_VER
-        constexpr std::string_view SubprocessPath = "OpenSpace_Helper.exe";
-    #elif defined(__APPLE__)
-        constexpr std::string_view SubprocessPath =
-            "../Frameworks/OpenSpace Helper.app/Contents/MacOS/OpenSpace Helper";
-    #else
-        constexpr std::string_view SubprocessPath = "OpenSpace_Helper";
-    #endif
-
     constexpr openspace::properties::Property::PropertyInfo
         UpdateBrowserBetweenRenderablesInfo =
     {
         "UpdateBrowserBetweenRenderables",
-        "Update Browser Between Renderables",
+        "Update browser between renderables",
         "Run the message loop of the browser between calls to render individual "
-        "renderables. When disabled, the browser message loop only runs "
-        "once per frame.",
+        "renderables. When disabled, the browser message loop only runs once per frame.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo BrowserUpdateIntervalInfo = {
         "BrowserUpdateInterval",
-        "Browser Update Interval",
-        "The time in microseconds between running the message loop of the browser. "
-        "Only used if UpdateBrowserBetweenRenderables is true.",
+        "Browser update interval",
+        "The time in microseconds between running the message loop of the browser. Only "
+        "used if UpdateBrowserBetweenRenderables is true.",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -79,6 +69,15 @@ namespace {
      * \return the absolute path to the file
      */
     std::filesystem::path findHelperExecutable() {
+#ifdef WIN32
+        constexpr std::string_view SubprocessPath = "OpenSpace_Helper.exe";
+#elif defined(__APPLE__)
+        constexpr std::string_view SubprocessPath =
+            "../Frameworks/OpenSpace Helper.app/Contents/MacOS/OpenSpace Helper";
+#else
+        constexpr std::string_view SubprocessPath = "OpenSpace_Helper";
+#endif
+
         const std::filesystem::path execLocation = absPath(std::format(
             "${{BIN}}/{}", SubprocessPath
         ));
@@ -90,15 +89,39 @@ namespace {
         return execLocation;
     }
 
+    struct [[codegen::Dictionary(WebBrowserModule)]] Parameters {
+        // The location of the web helper application
+        std::optional<std::filesystem::path> webHelperLocation;
+
+        // Determines whether the WebBrowser module is enabled
+        std::optional<bool> enabled;
+
+        // [[codegen::verbatim(UpdateBrowserBetweenRenderablesInfo.description)]]
+        std::optional<bool> updateBrowserBetweenRenderables;
+
+        // [[codegen::verbatim(BrowserUpdateIntervalInfo.description)]]
+        std::optional<float> browserUpdateInterval;
+
+        // Forcably disables accelerated rendering, even if other preconditions
+        // would otherwise allow the use of it to speed up the rendering of the
+        // user interface. This setting can be used to circumvent an otherwise
+        // fatal crash that is caused by the accelerated rendering.
+        std::optional<bool> disableAcceleratedRendering;
+    };
+#include "webbrowsermodule_codegen.cpp"
 } // namespace
 
 namespace openspace {
+
+documentation::Documentation WebBrowserModule::Documentation() {
+    return codegen::doc<Parameters>("module_webbrowser");
+}
 
 WebBrowserModule::WebBrowserModule()
     : OpenSpaceModule(WebBrowserModule::Name)
     , _updateBrowserBetweenRenderables(UpdateBrowserBetweenRenderablesInfo, true)
     , _browserUpdateInterval(BrowserUpdateIntervalInfo, 1.f, 1.f, 1000.f)
-    , _eventHandler(new EventHandler)
+    , _eventHandler(std::make_unique<EventHandler>())
 {
     global::callback::deinitialize->emplace_back([this]() {
         ZoneScopedN("WebBrowserModule");
@@ -127,8 +150,38 @@ WebBrowserModule::WebBrowserModule()
 
 WebBrowserModule::~WebBrowserModule() {}
 
+void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
+    ZoneScoped;
+
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _enabled = p.enabled.value_or(_enabled);
+    _disableAcceleratedRendering =
+        p.disableAcceleratedRendering.value_or(_disableAcceleratedRendering);
+
+    std::filesystem::path webHelperLocation =
+        p.webHelperLocation.value_or(findHelperExecutable());
+    LDEBUG(std::format("CEF using web helper executable: {}", webHelperLocation));
+    _cefHost = std::make_unique<CefHost>(webHelperLocation.string());
+    LDEBUG("Starting CEF... done");
+
+    _updateBrowserBetweenRenderables =
+        p.updateBrowserBetweenRenderables.value_or(_updateBrowserBetweenRenderables);
+    _browserUpdateInterval = p.browserUpdateInterval.value_or(_browserUpdateInterval);
+
+    _eventHandler->initialize();
+
+    // register ScreenSpaceBrowser
+    ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
+        FactoryManager::ref().factory<ScreenSpaceRenderable>();
+    ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
+    fScreenSpaceRenderable->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
+}
+
 void WebBrowserModule::internalDeinitialize() {
     ZoneScoped;
+
+    _cefHost = nullptr;
 
     if (!_enabled) {
         return;
@@ -142,47 +195,10 @@ void WebBrowserModule::internalDeinitialize() {
     }
 }
 
-void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
-    ZoneScoped;
-
-    if (dictionary.hasValue<bool>("WebHelperLocation")) {
-        _webHelperLocation = absPath(dictionary.value<std::string>("WebHelperLocation"));
-    }
-    else {
-        _webHelperLocation = findHelperExecutable();
-    }
-
-    if (dictionary.hasValue<bool>("Enabled")) {
-        _enabled = dictionary.value<bool>("Enabled");
-    }
-
-    LDEBUG(std::format("CEF using web helper executable: {}", _webHelperLocation));
-    _cefHost = std::make_unique<CefHost>(_webHelperLocation.string());
-    LDEBUG("Starting CEF... done");
-
-    if (dictionary.hasValue<bool>(UpdateBrowserBetweenRenderablesInfo.identifier)) {
-        _updateBrowserBetweenRenderables =
-            dictionary.value<bool>(UpdateBrowserBetweenRenderablesInfo.identifier);
-    }
-
-    if (dictionary.hasValue<double>(BrowserUpdateIntervalInfo.identifier)) {
-        _browserUpdateInterval = static_cast<float>(
-            dictionary.value<double>(BrowserUpdateIntervalInfo.identifier)
-        );
-    }
-
-    _eventHandler->initialize();
-
-    // register ScreenSpaceBrowser
-    ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
-        FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
-    fScreenSpaceRenderable->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
-}
-
 void WebBrowserModule::addBrowser(BrowserInstance* browser) {
     ZoneScoped;
 
+    ghoul_assert(browser, "Browser must not be a nullptr");
     if (_enabled) {
         _browsers.push_back(browser);
         if (_updateBrowserBetweenRenderables) {
@@ -239,10 +255,14 @@ bool WebBrowserModule::canUseAcceleratedRendering() {
     );
     bool isVersionOk = OpenGLCap.openGLVersion() >= acceleratedVersion;
     bool isExtensionsOk = it != OpenGLCap.extensions().end();
-    return isVersionOk && isExtensionsOk;
-#else
+    bool isVendorOk =
+        OpenGLCap.gpuVendor() ==
+        ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Vendor::Nvidia;
+    return isVersionOk && isExtensionsOk &&
+           isVendorOk && !_disableAcceleratedRendering;
+#else  // ^^^^ WIN32 // !WIN32 vvvv
     return false;
-#endif
+#endif // WIN32
 }
 
 std::vector<documentation::Documentation> WebBrowserModule::documentations() const {

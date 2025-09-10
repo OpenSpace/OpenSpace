@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QTextStream>
 #include <QVBoxLayout>
@@ -157,13 +158,11 @@ void PropertiesDialog::createWidgets() {
     }
     layout->addWidget(new Line);
     {
+        _errorMsg = new QMessageBox(this);
+        _errorMsg->setIcon(QMessageBox::Critical);
+        _errorMsg->setText("Invalid input data");
+
         QBoxLayout* footerLayout = new QHBoxLayout;
-
-        _errorMsg = new QLabel;
-        _errorMsg->setObjectName("error-message");
-        _errorMsg->setWordWrap(true);
-        footerLayout->addWidget(_errorMsg);
-
         _buttonBox = new QDialogButtonBox;
         _buttonBox->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
 
@@ -238,6 +237,7 @@ void PropertiesDialog::listItemAdded() {
 
 void PropertiesDialog::listItemSave() {
     if (!areRequiredFormsFilled()) {
+        _errorMsg->exec();
         return;
     }
 
@@ -274,7 +274,7 @@ bool PropertiesDialog::areRequiredFormsFilled() {
         errors += "Missing value";
         requiredFormsFilled = false;
     }
-    _errorMsg->setText("<font color='red'>" + errors + "</font>");
+    _errorMsg->setInformativeText(errors);
     return requiredFormsFilled;
 }
 
@@ -322,7 +322,6 @@ void PropertiesDialog::transitionToEditMode() {
     _propertyLabel->setText("<font color='black'>Property</font>");
     _valueLabel->setText("<font color='black'>Value to set</font>");
     editBoxDisabled(false);
-    _errorMsg->setText("");
 }
 
 void PropertiesDialog::transitionFromEditMode() {
@@ -338,7 +337,6 @@ void PropertiesDialog::transitionFromEditMode() {
     _propertyLabel->setText("<font color='light gray'>Property</font>");
     _valueLabel->setText("<font color='light gray'>Value to set</font>");
     editBoxDisabled(true);
-    _errorMsg->setText("");
 }
 
 void PropertiesDialog::editBoxDisabled(bool disabled) {
@@ -411,12 +409,21 @@ void PropertiesDialog::selectLineFromScriptLog() {
                 }
 
                 // Remove the string markers around the property
-                const QString property = textList[0].mid(1, textList[0].size() - 2);
+                const QString prop = textList[0].mid(1, textList[0].size() - 2).trimmed();
 
-                textList.removeFirst();
-                const QString value = textList.join(",");
+                QString value = textList[1].trimmed();
+                // If they exist, we need to replace the single string markers around the
+                // property, with double string markers
+                if (value.size() > 2) {
+                    if (value[0] == '\'') {
+                        value[0] = '"';
+                    }
+                    if (value[value.size() - 1] == '\'') {
+                        value[value.size() - 1] = '"';
+                    }
+                }
 
-                _propertyEdit->setText(property.trimmed());
+                _propertyEdit->setText(prop);
                 _valueEdit->setText(value.trimmed());
                 listItemSave();
             }

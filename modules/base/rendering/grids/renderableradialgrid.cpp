@@ -3,7 +3,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GridSegmentsInfo = {
         "GridSegments",
-        "Number of Grid Segments",
+        "Number of grid segments",
         "Specifies the number of segments for the grid, in the radial and angular "
         "direction respectively.",
         openspace::properties::Property::Visibility::User
@@ -54,21 +54,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo CircleSegmentsInfo = {
         "CircleSegments",
-        "Number of Circle Segments",
+        "Number of circle segments",
         "The number of segments that is used to render each circle in the grid.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
+        "Line width",
         "The width of the grid lines. The larger number, the thicker the lines.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RadiiInfo = {
         "Radii",
-        "Inner and Outer Radius",
+        "Inner and outer radius",
         "The radii values that determine the size of the circular grid. The first value "
         "is the radius of the inmost ring and the second is the radius of the outmost "
         "ring.",
@@ -81,6 +81,12 @@ namespace {
         "The labels for the grid."
     };
 
+    // This `Renderable` creates a planar circular grid with a given size. Optionally, it
+    // may have a hole in the center.
+    //
+    // The size is determined by two radii values: The first (inner) radius defines the
+    // hole in the center. The second (outer) radius defines the full grid size. To create
+    // a solid circle that connects at the center, set the inner radius to zero (default).
     struct [[codegen::Dictionary(RenderableRadialGrid)]] Parameters {
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
@@ -113,7 +119,7 @@ documentation::Documentation RenderableRadialGrid::Documentation() {
 RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
-    , _gridSegments(GridSegmentsInfo, glm::ivec2(1), glm::ivec2(1), glm::ivec2(200))
+    , _gridSegments(GridSegmentsInfo, glm::ivec2(10), glm::ivec2(1), glm::ivec2(200))
     , _circleSegments(CircleSegmentsInfo, 36, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
     , _radii(RadiiInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(20.f))
@@ -158,7 +164,7 @@ RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderableRadialGrid::isReady() const {
-    return _hasLabels ? _gridProgram && _labels->isReady() : _gridProgram != nullptr;
+    return _gridProgram && (_hasLabels ? _labels->isReady() : true);
 }
 
 void RenderableRadialGrid::initialize() {
@@ -252,7 +258,7 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableRadialGrid::update(const UpdateData&) {
-    if (!_gridIsDirty) {
+    if (!_gridIsDirty) [[likely]] {
         return;
     }
 

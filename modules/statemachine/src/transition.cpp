@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,7 +54,7 @@ Transition::Transition(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _from = p.from;
     _to = p.to;
-    _action = p.action.value_or("");
+    _action = p.action.value_or(_action);
 }
 
 const std::string& Transition::from() const {
@@ -66,14 +66,7 @@ const std::string& Transition::to() const {
 }
 
 void Transition::performAction() const {
-    if (_action.empty()) {
-        return;
-    }
-    global::scriptEngine->queueScript(
-        _action,
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
-    );
+    global::scriptEngine->queueScript(_action);
 }
 
 } // namespace openspace

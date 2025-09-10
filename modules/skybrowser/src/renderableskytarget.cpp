@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,14 +49,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo crossHairSizeInfo = {
         "CrosshairSize",
-        "Crosshair Size",
+        "Crosshair size",
         "The size of the crosshair given as a field of view (in degrees).",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RectangleThresholdInfo = {
         "RectangleThreshold",
-        "Rectangle Threshold",
+        "Rectangle threshold",
         "A threshold value for the vertical field of view, in degrees, that decides when "
         "a rectangle will be used to visualize the target in addition to the crosshair. "
         "When the field of view is smaller than this value, only the crosshair will be "
@@ -66,21 +66,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
+        "Line width",
         "The thickness of the line of the target. The larger number, the thicker line.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo VerticalFovInfo = {
         "VerticalFov",
-        "Vertical Field Of View",
+        "Vertical field of view",
         "The vertical field of view of the target.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ApplyRollInfo = {
        "ApplyRoll",
-       "Apply Roll",
+       "Apply roll",
        "If true, always rotate the target to have its up direction aligned with the up "
        "direction of the camera.",
        openspace::properties::Property::Visibility::User
@@ -236,7 +236,8 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
     cameraOrientedRotation[1] = glm::dvec4(_upVector, 0.0);
     cameraOrientedRotation[2] = glm::dvec4(normal, 0.0);
 
-    const glm::dmat4 rotationTransform = _billboard ?
+    const glm::dmat4 rotationTransform =
+        _renderOption.value() != OrientationOption::FixedRotation ?
         cameraOrientedRotation :
         glm::dmat4(data.modelTransform.rotation);
 

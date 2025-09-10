@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,7 @@
 #include <modules/iswa/util/dataprocessorjson.h>
 
 #include <openspace/json.h>
-#include <openspace/properties/selectionproperty.h>
+#include <openspace/properties/misc/selectionproperty.h>
 #include <openspace/util/histogram.h>
 
 using json = nlohmann::json;
@@ -79,12 +79,12 @@ void DataProcessorJson::addDataValues(const std::string& data,
             const json& row = variables[options[i]];
 //            int rowsize = row.size();
 
-            for (size_t y = 0; y < row.size(); ++y) {
+            for (size_t y = 0; y < row.size(); y++) {
                 const json& col = row.at(y);
                 const int colsize = static_cast<int>(col.size());
 
-                for (int x = 0; x < colsize; ++x) {
-                    const float value = col.at(x);
+                for (int x = 0; x < colsize; x++) {
+                    const float value = col.at(x).get<float>();
                     optionValues[i].push_back(value);
                     _min[i] = std::min(_min[i], value);
                     _max[i] = std::max(_max[i], value);
@@ -126,12 +126,12 @@ std::vector<float*> DataProcessorJson::processData(const std::string& data,
         json row = variables[options[option]];
         const int rowsize = static_cast<int>(row.size());
 
-        for (int y = 0; y < rowsize; ++y) {
+        for (int y = 0; y < rowsize; y++) {
             json col = row.at(y);
             const int colsize = static_cast<int>(col.size());
 
-            for (int x = 0; x < colsize; ++x) {
-                const float value = col.at(x);
+            for (int x = 0; x < colsize; x++) {
+                const float value = col.at(x).get<float>();
                 const int i = x + y * colsize;
 
                 dataOptions[option][i] = processDataPoint(value, option);

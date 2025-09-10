@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,9 +33,9 @@ namespace openspace {
 
 class ScannerDecoder : public Decoder {
 public:
-    ScannerDecoder(const ghoul::Dictionary& dictionary);
+    explicit ScannerDecoder(const ghoul::Dictionary& dictionary);
 
-    virtual const std::string& decoderType() const override;
+    virtual std::string_view decoderType() const override;
     const std::vector<std::string>& spiceIDs() const;
     void setStopCommand(std::string stopCommand);
 

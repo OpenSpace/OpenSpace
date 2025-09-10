@@ -44,7 +44,8 @@ local Object = {
   },
   GUI = {
     Name = "Stars (Denver)",
-    Path = "/Milky Way/Stars"
+    Path = "/Milky Way/Stars",
+    Focusable = false
   }
 }
 

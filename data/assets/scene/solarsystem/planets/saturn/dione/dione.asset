@@ -71,6 +71,7 @@ local DioneLabel = {
   GUI = {
     Name = "Dione Label",
     Path = "/Solar System/Planets/Saturn/Major Moons/Dione",
+    Focusable = false,
     Description = "Label for Saturn's moon Dione"
   }
 }

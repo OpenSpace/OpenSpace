@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -199,7 +199,7 @@ namespace {
     }
 
     const size_t nElements = lines.size() / 3;
-    if (elementToExtract > nElements) {
+    if (elementToExtract > static_cast<int>(nElements)) {
         throw ghoul::RuntimeError(std::format(
             "Error loading {}. Element number {} requested, but only {} found",
             tle, nElements, elementToExtract

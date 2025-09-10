@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -68,14 +68,14 @@ public:
         std::vector<char> content;
     };
 
-    class ConnectionLostError : public ghoul::RuntimeError {
+    class ConnectionLostError final : public ghoul::RuntimeError {
     public:
         explicit ConnectionLostError(bool shouldLogError_ = true);
 
         bool shouldLogError;
     };
 
-    ParallelConnection(std::unique_ptr<ghoul::io::TcpSocket> socket);
+    explicit ParallelConnection(std::unique_ptr<ghoul::io::TcpSocket> socket);
 
     bool isConnectedOrConnecting() const;
     void sendDataMessage(const ParallelConnection::DataMessage& dataMessage);

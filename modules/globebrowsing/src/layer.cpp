@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,7 +44,6 @@ namespace {
     constexpr std::string_view KeyName = "Name";
     constexpr std::string_view KeyDesc = "Description";
     constexpr std::string_view KeyLayerGroupID = "LayerGroupID";
-    constexpr std::string_view KeyAdjustment = "Adjustment";
 
     constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
@@ -56,7 +55,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
-        "Blend Mode",
+        "Blend mode",
         "This value specifies the blend mode that is applied to this layer. The blend "
         "mode determines how this layer is added to the underlying layers beneath.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -106,7 +105,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GuiDescriptionInfo = {
         "GuiDescription",
-        "Gui Description",
+        "Gui description",
         "This is the description for the scene graph node to be shown in the gui "
         "example: Earth is a special place.",
         openspace::properties::Property::Visibility::Hidden
@@ -159,25 +158,9 @@ namespace {
         // Specifies the render settings that should be applied to this layer
         std::optional<Settings> settings;
 
-        struct LayerAdjustment {
-            enum class Type {
-                None,
-                ChromaKey,
-                TransferFunction
-            };
-
-            // Specifies the type of the adjustment that is applied
-            std::optional<Type> type;
-
-            // Specifies the chroma key used when selecting 'ChromaKey' for the 'Type'
-            std::optional<glm::dvec3> chromaKeyColor;
-
-            // Specifies the tolerance to match the color to the chroma key when the
-            // 'ChromaKey' type is selected for the 'Type'
-            std::optional<double> chromaKeyTolerance;
-        };
         // Parameters that set individual adjustment parameters for this layer
-        std::optional<LayerAdjustment> adjustment;
+        std::optional<ghoul::Dictionary> adjustment
+            [[codegen::reference("globebrowsing_layeradjustment")]];
 
         enum class BlendMode {
             Normal,
@@ -204,15 +187,14 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
         layerDict.hasKey(KeyDesc) ? layerDict.value<std::string>(KeyDesc) : ""
     })
     , _parent(parent)
-    , _typeOption(TypeInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _blendModeOption(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _typeOption(TypeInfo)
+    , _blendModeOption(BlendModeInfo)
     , _enabled(EnabledInfo, false)
     , _reset(ResetInfo)
     , _remove(RemoveInfo)
     , _guiDescription(GuiDescriptionInfo)
     , _solidColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _layerGroupId(id)
-
 {
     const Parameters p = codegen::bake<Parameters>(layerDict);
 
@@ -266,10 +248,8 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
             p.settings->multiplier.value_or(_renderSettings.multiplier);
         _renderSettings.offset = p.settings->offset.value_or(_renderSettings.offset);
     }
-    if (layerDict.hasValue<ghoul::Dictionary>(KeyAdjustment)) {
-        _layerAdjustment.setValuesFromDictionary(
-            layerDict.value<ghoul::Dictionary>(KeyAdjustment)
-        );
+    if (p.adjustment.has_value()) {
+        _layerAdjustment.setValuesFromDictionary(*p.adjustment);
     }
 
     // Add options to option properties
@@ -535,7 +515,7 @@ void Layer::initializeBasedOnType(layers::Layer::ID id, ghoul::Dictionary initDi
                 const std::string name = initDict.value<std::string>(KeyName);
                 LDEBUG("Initializing tile provider for layer: '" + name + "'");
             }
-            _tileProvider = TileProvider::createFromDictionary(id, initDict);
+            _tileProvider = TileProvider::createFromDictionary(initDict);
             break;
         case layers::Layer::ID::SolidColor:
             if (initDict.hasValue<glm::dvec3>(ColorInfo.identifier)) {
@@ -546,7 +526,7 @@ void Layer::initializeBasedOnType(layers::Layer::ID id, ghoul::Dictionary initDi
 }
 
 void Layer::addVisibleProperties() {
-    switch (type()) {
+    switch (_typeId) {
         // Intentional fall through. Same for all tile layers
         case layers::Layer::ID::DefaultTileProvider:
         case layers::Layer::ID::SingleImageProvider:

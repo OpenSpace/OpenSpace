@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -92,7 +92,7 @@ constexpr KeyAction operator|=(KeyAction& lhs, KeyAction rhs) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 enum class KeyModifier : uint8_t {
-    None = 0,
+    None       = 0x00,
     Shift      = 0x01,
     Control    = 0x02,
     Alt        = 0x04,
@@ -103,7 +103,7 @@ constexpr KeyModifier operator|(KeyModifier lhs, KeyModifier rhs) {
     return static_cast<KeyModifier>(
         static_cast<std::underlying_type_t<KeyModifier>>(lhs) |
         static_cast<std::underlying_type_t<KeyModifier>>(rhs)
-        );
+    );
 }
 
 constexpr KeyModifier operator|=(KeyModifier& lhs, KeyModifier rhs) {
@@ -389,6 +389,8 @@ constexpr std::array<KeyInfo, 120> KeyInfos = {
 struct KeyWithModifier {
     Key key = Key::Unknown;
     KeyModifier modifier = KeyModifier::None;
+
+    auto operator<=>(const KeyWithModifier&) const noexcept = default;
 };
 
 constexpr inline bool isKeypadKey(Key key) noexcept {
@@ -402,22 +404,6 @@ constexpr inline bool isKeypadKey(Key key) noexcept {
 
 KeyWithModifier stringToKey(const std::string& str);
 std::string keyToString(KeyWithModifier keyWithModifier);
-
-// @TODO (abock, 2021-08-12) This function should die
-constexpr bool operator<(const KeyWithModifier& lhs, const KeyWithModifier& rhs) noexcept
-{
-    if (lhs.modifier == rhs.modifier) {
-        return lhs.key < rhs.key;
-    }
-    else {
-        return lhs.modifier < rhs.modifier;
-    }
-}
-
-constexpr bool operator==(const KeyWithModifier& lhs, const KeyWithModifier& rhs) noexcept
-{
-    return (lhs.key == rhs.key) && (lhs.modifier == rhs.modifier);
-}
 
 } // namespace openspace
 

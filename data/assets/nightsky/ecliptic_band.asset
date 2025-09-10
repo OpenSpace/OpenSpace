@@ -6,7 +6,7 @@ local textures = asset.resource({
   Name = "Ecliptic Band Textures",
   Type = "HttpSynchronization",
   Identifier = "ecliptic_band_textures",
-  Version = 2
+  Version = 3
 })
 
 
@@ -34,9 +34,10 @@ local EclipticLine = {
     Opacity = 0.8,
     Color = { 0.5, 0.24, 0.24 },
     LineWidth = 4.0,
-    GridSegments = { 1, 1 },
+    GridSegments = {1 , 1},
     Enabled = asset.enabled
   },
+  Tag = { "nightsky_marking" },
   GUI = {
     Name = "Ecliptic",
     Description = "A line representation of the Ecliptic plane.",
@@ -55,14 +56,16 @@ local EclipticBand = {
   },
   Renderable = {
     Type = "RenderableSphereImageLocal",
-    Texture = textures .. "band2x.png",
+    Texture = textures .. "ecliptic.png",
     Size = 9.46377307652E17,
     Segments = 50,
     DisableFadeInOut = true,
     Orientation = "Inside",
-    Opacity = 0.05,
-    Enabled = asset.enabled
+    Opacity = 0.99,
+    Enabled = asset.enabled,
+    RenderBinMode = "PostDeferredTransparent",
   },
+  Tag = { "nightsky_marking" },
   GUI = {
     Name = "Ecliptic Band",
     Description = "A band representation of the Ecliptic plane.",
@@ -128,6 +131,27 @@ local ToggleEclipticBand = {
   IsLocal = false
 }
 
+local SetBandWhiteAction = {
+  Identifier = "os.nightsky.SetEclipticBandWhite",
+  Name = "Set Ecliptic Band to black and white",
+  Command = [[
+    openspace.setPropertyValueSingle("Scene.EclipticBand.Renderable.Texture", "]] .. textures:gsub("\\","/") .. [[eclipticWhite.png")
+  ]],
+  Documentation = "Sets the color of the ecliptic band to white",
+  GuiPath = "/Night Sky/Lines and Grids/Ecliptic",
+  IsLocal = false
+}
+
+local SetBandColorsAction = {
+  Identifier = "os.nightsky.SetEclipticBandColors",
+  Name = "Set Ecliptic Band to colors",
+  Command = [[
+    openspace.setPropertyValueSingle("Scene.EclipticBand.Renderable.Texture", "]] .. textures:gsub("\\","/") .. [[ecliptic.png")
+  ]],
+  Documentation = "Sets the color of the ecliptic band to colored",
+  GuiPath = "/Night Sky/Lines and Grids/Ecliptic",
+  IsLocal = false
+}
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EclipticLine)
@@ -138,9 +162,13 @@ asset.onInitialize(function()
   openspace.action.registerAction(ShowEclipticBand)
   openspace.action.registerAction(HideEclipticBand)
   openspace.action.registerAction(ToggleEclipticBand)
+  openspace.action.registerAction(SetBandWhiteAction)
+  openspace.action.registerAction(SetBandColorsAction)
 end)
 
 asset.onDeinitialize(function()
+  openspace.action.removeAction(SetBandColorsAction)
+  openspace.action.removeAction(SetBandWhiteAction)
   openspace.action.removeAction(ToggleEclipticBand)
   openspace.action.removeAction(HideEclipticBand)
   openspace.action.removeAction(ShowEclipticBand)
@@ -159,6 +187,8 @@ asset.export("ToggleEclipticLine", ToggleEclipticLine.Identifier)
 asset.export("ShowEclipticBand", ShowEclipticBand.Identifier)
 asset.export("HideEclipticBand", HideEclipticBand.Identifier)
 asset.export("ToggleEclipticBand", ToggleEclipticBand.Identifier)
+asset.export("SetBandWhiteAction", SetBandWhiteAction.Identifier)
+asset.export("SetBandColorsAction", SetBandColorsAction.Identifier)
 
 
 
@@ -166,7 +196,7 @@ asset.meta = {
   Name = "Ecliptic Band/Line",
   Description = [[A line and band representation of the Ecliptic plane, including actions
     to toggle, hide and show each of them.]],
-  Author = "OpenSpace Team",
+  Author = "OpenSpace Team / Ken Murphy",
   URL = "http://openspaceproject.com",
   License = "MIT license"
 }

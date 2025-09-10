@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,9 +28,9 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/gaia/rendering/octreemanager.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/list/stringlistproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
@@ -109,12 +109,6 @@ private:
      */
     int readBinaryOctreeStructureFile(const std::filesystem::path& folderPath);
 
-    /**
-     * Checks for any OpenGL errors and reports these to the log if _reportGlErrors is
-     * set to true.
-     */
-    void checkGlErrors(const std::string& identifier) const;
-
     properties::StringProperty _filePath;
     std::unique_ptr<ghoul::filesystem::File> _dataFile;
     bool _dataIsDirty = true;
@@ -163,8 +157,6 @@ private:
     properties::FloatProperty _gpuStreamBudgetProperty;
     properties::FloatProperty _maxGpuMemoryPercent;
     properties::FloatProperty _maxCpuMemoryPercent;
-
-    properties::BoolProperty _reportGlErrors;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(model, view, cameraPos, cameraLookUp, viewScaling, projection,

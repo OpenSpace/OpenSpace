@@ -82,7 +82,8 @@ local Atmosphere = {
   GUI = {
     Name = "Earth Atmosphere",
     Path = "/Solar System/Planets/Earth",
-    Description = "Atmosphere of Earth"
+    Description = "Atmosphere of Earth",
+    Focusable = false
   }
 }
 

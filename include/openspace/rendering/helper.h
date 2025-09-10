@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -63,6 +63,9 @@ void renderBox(const glm::vec2& position, const glm::vec2& size, const glm::vec4
 void renderBox(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color,
     const ghoul::opengl::Texture& texture, Anchor anchor = Anchor::NW);
 
+void renderLine(const glm::vec2& startPosition, const glm::vec2& endPosition,
+    const glm::vec2& size, const glm::vec4& startColor, const glm::vec4& endColor);
+
 struct Shaders {
     struct {
         std::unique_ptr<ghoul::opengl::ProgramObject> program;
@@ -104,6 +107,11 @@ struct VertexObjects {
 
         int nElements = 64;
     } cone;
+
+    struct {
+        GLuint vao = 0;
+        GLuint vbo = 0;
+    } line;
 
     struct {
         GLuint vao = 0;

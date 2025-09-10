@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,6 +36,8 @@
 #include <ghoul/logging/logmanager.h>
 #include <optional>
 
+#include "screenspacedashboard_lua.inl"
+
 namespace {
     constexpr openspace::properties::Property::PropertyInfo UseMainInfo = {
         "UseMainDashboard",
@@ -46,6 +48,8 @@ namespace {
     };
 
     struct [[codegen::Dictionary(ScreenSpaceDashboard)]] Parameters {
+        std::optional<std::string> identifier [[codegen::private()]];
+
         // [[codegen::verbatim(UseMainInfo.description)]]
         std::optional<bool> useMainDashboard;
 
@@ -57,8 +61,6 @@ namespace {
     };
 #include "screenspacedashboard_codegen.cpp"
 } // namespace
-
-#include "screenspacedashboard_lua.inl"
 
 namespace openspace {
 
@@ -72,15 +74,8 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    std::string identifier;
-    if (dictionary.hasValue<std::string>(KeyIdentifier)) {
-        identifier = dictionary.value<std::string>(KeyIdentifier);
-    }
-    else {
-        identifier = "ScreenSpaceDashboard";
-    }
-    identifier = makeUniqueIdentifier(identifier);
-    setIdentifier(std::move(identifier));
+    std::string identifier = p.identifier.value_or("ScreenSpaceDashboard");
+    setIdentifier(makeUniqueIdentifier(std::move(identifier)));
 
     _useMainDashboard = p.useMainDashboard.value_or(_useMainDashboard);
     addProperty(_useMainDashboard);
@@ -102,11 +97,11 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
     }
 }
 
-bool ScreenSpaceDashboard::initializeGL() {
+void ScreenSpaceDashboard::initializeGL() {
     ScreenSpaceFramebuffer::initializeGL();
 
     addRenderFunction([this]() {
-        glm::vec2 penPosition = glm::vec2(0.f, _size.value().w);
+        glm::vec2 penPosition = glm::vec2(0.f, _size.value().x);
 
         if (_useMainDashboard) {
             global::dashboard->render(penPosition);
@@ -115,16 +110,6 @@ bool ScreenSpaceDashboard::initializeGL() {
             _dashboard.render(penPosition);
         }
     });
-
-    return true;
-}
-
-bool ScreenSpaceDashboard::deinitializeGL() {
-    return ScreenSpaceFramebuffer::deinitializeGL();
-}
-
-bool ScreenSpaceDashboard::isReady() const {
-    return ScreenSpaceFramebuffer::isReady();
 }
 
 void ScreenSpaceDashboard::update() {

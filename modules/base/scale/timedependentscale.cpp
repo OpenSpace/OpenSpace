@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,7 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo ReferenceDateInfo = {
         "ReferenceDate",
-        "Reference Date",
+        "Reference date",
         "The date at which this scale will be 0. The current value of the scale is "
         "computed by taking the difference between the current time and the reference "
         "date and multiplying it by the speed. This field must be formatted as: "
@@ -51,7 +51,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ClampToPositiveInfo = {
         "ClampToPositive",
-        "Clamp to Positive",
+        "Clamp to positive",
         "If this value is true, the velocity computation will be clamped to a positive "
         "value if the current simulation time is before the `ReferenceDate`. This is "
         "useful for instantaneous events that only propagate forwards in time. The "
@@ -83,11 +83,12 @@ namespace {
 namespace openspace {
 
 documentation::Documentation TimeDependentScale::Documentation() {
-    return codegen::doc<Parameters>("base_scale_timedependent");
+    return codegen::doc<Parameters>("base_transform_scale_timedependent");
 }
 
 TimeDependentScale::TimeDependentScale(const ghoul::Dictionary& dictionary)
-    : _referenceDate(ReferenceDateInfo, "")
+    : Scale(dictionary)
+    , _referenceDate(ReferenceDateInfo, "")
     , _speed(SpeedInfo, 1.0, 0.0, 1e12)
     , _clampToPositive(ClampToPositiveInfo, true)
 {
@@ -105,7 +106,7 @@ TimeDependentScale::TimeDependentScale(const ghoul::Dictionary& dictionary)
 }
 
 glm::dvec3 TimeDependentScale::scaleValue(const UpdateData& data) const {
-    if (_cachedReferenceDirty) {
+    if (_cachedReferenceDirty) [[unlikely]] {
         _cachedReference = Time::convertTime(_referenceDate);
         _cachedReferenceDirty = false;
     }

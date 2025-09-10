@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -57,14 +57,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
         "TextColor",
-        "Text Color",
+        "Text color",
         "The text color for the astronomical object.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextOpacityInfo = {
         "TextOpacity",
-        "Text Opacity",
+        "Text opacity",
         "Determines the transparency of the text label, where 1 is completely opaque "
         "and 0 fully transparent.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -72,14 +72,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
         "TextSize",
-        "Text Size",
+        "Text size",
         "The text size for the astronomical object labels.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelFileInfo = {
         "LabelFile",
-        "Label File",
+        "Label file",
         "The path to the label file that contains information about the astronomical "
         "objects being rendered.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -87,7 +87,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LabelMinMaxSizeInfo = {
         "TextMinMaxSize",
-        "Text Min/Max Size",
+        "Text min/max size",
         "The minimum and maximum size (in pixels) of the text for the labels for the "
         "astronomical objects being rendered.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -95,21 +95,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
+        "Line width",
         "If the DU mesh is of wire type, this value determines the width of the lines.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
-        "Draw Elements",
+        "Draw elements",
         "Enables/Disables the drawing of the astronomical objects.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
         "DrawLabels",
-        "Draw Labels",
+        "Draw labels",
         "Determines whether labels should be drawn or hidden.",
         openspace::properties::Property::Visibility::NoviceUser
     };
@@ -123,7 +123,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOption",
-        "Render Option",
+        "Render option",
         "Debug option for rendering of billboards and texts.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -192,7 +192,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         glm::ivec2(1000)
     )
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 16.f)
-    , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _renderOption(RenderOptionInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -284,16 +284,14 @@ void RenderableDUMeshes::initializeGL() {
 
     createMeshes();
 
-    if (_hasLabel) {
-        if (!_font) {
-            constexpr int FontSize = 50;
-            _font = global::fontManager->font(
-                "Mono",
-                static_cast<float>(FontSize),
-                ghoul::fontrendering::FontManager::Outline::Yes,
-                ghoul::fontrendering::FontManager::LoadGlyphs::No
-            );
-        }
+    if (_hasLabel && !_font) {
+        constexpr int FontSize = 50;
+        _font = global::fontManager->font(
+            "Mono",
+            static_cast<float>(FontSize),
+            ghoul::fontrendering::FontManager::Outline::Yes,
+            ghoul::fontrendering::FontManager::LoadGlyphs::No
+        );
     }
 }
 
@@ -379,7 +377,7 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
         .cameraLookUp = data.camera.lookUpVectorWorldSpace()
     };
 
-    const glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity);
+    const glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity.value());
 
     for (const dataloader::Labelset::Entry& e : _labelset.entries) {
         glm::vec3 scaledPos(e.position);
@@ -435,7 +433,7 @@ void RenderableDUMeshes::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableDUMeshes::update(const UpdateData&) {
-    if (_program->isDirty()) {
+    if (_program->isDirty()) [[unlikely]] {
         _program->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
     }
@@ -545,7 +543,7 @@ bool RenderableDUMeshes::readSpeckFile() {
             dim >> mesh.numU >> mesh.numV;
 
             // We can now read the vertices data:
-            for (int l = 0; l < mesh.numU * mesh.numV; ++l) {
+            for (int l = 0; l < mesh.numU * mesh.numV; l++) {
                 ghoul::getline(file, line);
                 if (line.substr(0, 1) == "}") {
                     break;

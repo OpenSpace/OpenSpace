@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,7 @@
 
 #include <openspace/properties/scalar/uintproperty.h>
 
+#include <openspace/util/json_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
 
 namespace openspace::properties {
@@ -44,13 +45,17 @@ std::string_view UIntProperty::className() const {
     return "UIntProperty";
 }
 
-int UIntProperty::typeLua() const {
-    return LUA_TNUMBER;
+ghoul::lua::LuaTypes UIntProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Number;
 }
 
-unsigned int UIntProperty::fromLuaConversion(lua_State* state) const {
+void UIntProperty::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
+unsigned int UIntProperty::toValue(lua_State* state) const {
     if (ghoul::lua::hasValue<double>(state)) {
-        return static_cast<int>(ghoul::lua::value<double>(state));
+        return static_cast<unsigned int>(ghoul::lua::value<double>(state));
     }
     else if (ghoul::lua::hasValue<unsigned int>(state)) {
         return ghoul::lua::value<unsigned int>(state);
@@ -58,6 +63,10 @@ unsigned int UIntProperty::fromLuaConversion(lua_State* state) const {
     else {
         throw ghoul::RuntimeError("Error extracting value in UIntProperty");
     }
+}
+
+std::string UIntProperty::stringValue() const {
+    return formatJson(_value);
 }
 
 } // namespace openspace::properties

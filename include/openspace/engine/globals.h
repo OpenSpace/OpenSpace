@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___GLOBALS___H__
 #define __OPENSPACE_CORE___GLOBALS___H__
 
-#include <functional>
 #include <memory>
 #include <vector>
 
@@ -57,10 +56,9 @@ namespace interaction {
     class ActionManager;
     class InteractionMonitor;
     class KeybindingManager;
-    class KeyframeRecording;
+    class KeyframeRecordingHandler;
     class NavigationHandler;
-    class SessionRecording;
-    class KeyframeRecording;
+    class SessionRecordingHandler;
 } // namespace interaction
 namespace properties { class PropertyOwner; }
 namespace scripting {
@@ -95,9 +93,9 @@ inline interaction::InteractionMonitor* interactionMonitor;
 inline interaction::JoystickInputStates* joystickInputStates;
 inline interaction::WebsocketInputStates* websocketInputStates;
 inline interaction::KeybindingManager* keybindingManager;
+inline interaction::KeyframeRecordingHandler* keyframeRecording;
 inline interaction::NavigationHandler* navigationHandler;
-inline interaction::SessionRecording* sessionRecording;
-inline interaction::KeyframeRecording* keyframeRecording;
+inline interaction::SessionRecordingHandler* sessionRecordingHandler;
 inline properties::PropertyOwner* rootPropertyOwner;
 inline properties::PropertyOwner* screenSpaceRootPropertyOwner;
 inline properties::PropertyOwner* userPropertyOwner;

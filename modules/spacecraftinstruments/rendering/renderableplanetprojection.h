@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,9 +28,9 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/uniformcache.h>
 
@@ -45,7 +45,7 @@ namespace planetgeometry { class PlanetGeometry; }
 
 class RenderablePlanetProjection : public Renderable {
 public:
-    RenderablePlanetProjection(const ghoul::Dictionary& dict);
+    explicit RenderablePlanetProjection(const ghoul::Dictionary& dict);
     ~RenderablePlanetProjection() override;
 
     void initializeGL() override;

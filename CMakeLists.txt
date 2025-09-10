@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2024                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -27,11 +27,16 @@ cmake_policy(VERSION 3.25)
 
 project(OpenSpace)
 
+# CMake 4.0 will no longer allow minimum required version below 3.5 and some of our
+# dependencies have not been updated to reflect this. To make things work, we blanked
+# require to 3.10 here to remove those issues. Once CMake configures and generates
+# successfully without this next line, it can be removed
+set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
+
 set(OPENSPACE_RELEASE_BUILD OFF)
 set(OPENSPACE_VERSION_MAJOR)
 set(OPENSPACE_VERSION_MINOR)
 set(OPENSPACE_VERSION_PATCH)
-set(OPENSPACE_VERSION_STRING)
 
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_common.cmake)
 include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)
@@ -66,7 +71,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 if (MSVC)
   # Force all builds to be multi-threaded and increase number of sections in obj files
-  add_definitions(/MP /bigobj)
+  add_compile_options(/MP /bigobj)
 endif ()
 
 ##########################################################################################
@@ -89,30 +94,10 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
+option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
+
 if (MSVC)
   option(OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION "Raise exceptions when encountering Inf's or Nan's in floating point numbers" OFF)
-
-  option(OPENSPACE_OPTIMIZATION_ENABLE_AVX "Enable AVX instruction set for compilation" OFF)
-  option(OPENSPACE_OPTIMIZATION_ENABLE_AVX2 "Enable AVX2 instruction set for compilation" OFF)
-  option(OPENSPACE_OPTIMIZATION_ENABLE_AVX512 "Enable AVX2 instruction set for compilation" OFF)
-  option(OPENSPACE_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS "Enable other optimizations, like LTCG, intrinsics, etc")
-
-  if (OPENSPACE_OPTIMIZATION_ENABLE_AVX AND OPENSPACE_OPTIMIZATION_ENABLE_AVX2)
-    message(FATAL_ERROR "Cannot enable AVX and AVX2 instructions simultaneously")
-  endif ()
-
-  if (OPENSPACE_OPTIMIZATION_ENABLE_AVX AND OPENSPACE_OPTIMIZATION_ENABLE_AVX512)
-    message(FATAL_ERROR "Cannot enable AVX and AVX512 instructions simultaneously")
-  endif ()
-
-  if (OPENSPACE_OPTIMIZATION_ENABLE_AVX2 AND OPENSPACE_OPTIMIZATION_ENABLE_AVX512)
-    message(FATAL_ERROR "Cannot enable AVX2 and AVX512 instructions simultaneously")
-  endif ()
-
-  set(GHOUL_OPTIMIZATION_ENABLE_AVX ${OPENSPACE_OPTIMIZATION_ENABLE_AVX} CACHE BOOL "" FORCE)
-  set(GHOUL_OPTIMIZATION_ENABLE_AVX2 ${OPENSPACE_OPTIMIZATION_ENABLE_AVX2} CACHE BOOL "" FORCE)
-  set(GHOUL_OPTIMIZATION_ENABLE_AVX512 ${OPENSPACE_OPTIMIZATION_ENABLE_AVX512} CACHE BOOL "" FORCE)
-  set(GHOUL_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS ${OPENSPACE_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS} CACHE BOOL "" FORCE)
 endif ()
 
 if (UNIX AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -149,15 +134,15 @@ add_custom_target(
   ALL DEPENDS
     "${CMAKE_CURRENT_BINARY_DIR}/__codegen.h"
 )
-add_dependencies(run_codegen codegen)
+add_dependencies(run_codegen codegen-tool)
 add_custom_command(
   OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/__codegen.h"
-  COMMAND codegen ARGS "modules" "src"
+  COMMAND codegen-tool ARGS "modules" "src"
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
   VERBATIM
 )
 set_target_properties(codegen-lib PROPERTIES FOLDER "support")
-set_target_properties(codegen PROPERTIES FOLDER "support")
+set_target_properties(codegen-tool PROPERTIES FOLDER "support")
 set_target_properties(run_codegen PROPERTIES FOLDER "support")
 
 
@@ -183,11 +168,6 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/modules")
 end_header("End: Configuring Modules")
 
 
-add_subdirectory(support/coding/codegen/tests)
-set_target_properties(run_test_codegen PROPERTIES FOLDER "Unit Tests/support")
-set_target_properties(codegentest PROPERTIES FOLDER "Unit Tests")
-
-
 begin_header("Configuring Applications")
 add_subdirectory(apps)
 end_header("End: Configuring Applications")
@@ -198,8 +178,11 @@ if (MSVC AND TARGET OpenSpace)
 endif ()
 
 
-option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
 if (OPENSPACE_HAVE_TESTS)
+  add_subdirectory(support/coding/codegen/tests)
+  set_target_properties(run_test_codegen PROPERTIES FOLDER "Unit Tests/support")
+  set_target_properties(codegentest PROPERTIES FOLDER "Unit Tests")
+
   begin_header("Generating OpenSpace unit test")
   add_subdirectory(tests)
   end_header()
@@ -223,7 +206,7 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   # find CEF to initialize it properly.
   set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
   include(webbrowser_helpers)
-elseif ()
+else ()
   message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again")
 endif ()
 

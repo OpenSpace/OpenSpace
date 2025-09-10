@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 #include <modules/base/translation/statictranslation.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderable.h>
@@ -38,6 +39,7 @@
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace {
@@ -45,7 +47,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ComputeScreenSpaceInfo = {
         "ComputeScreenSpaceData",
-        "Compute Screen Space Data",
+        "Compute screen space data",
         "If this value is set to 'true', the screenspace-based properties are calculated "
         "at regular intervals. If these values are set to 'false', they are not updated.",
         openspace::properties::Property::Visibility::Developer
@@ -53,35 +55,35 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ScreenSpacePositionInfo = {
         "ScreenSpacePosition",
-        "ScreenSpacePosition",
+        "ScreenSpace position",
         "The x,y position in screen space. Can be used for placing GUI elements.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenVisibilityInfo = {
         "ScreenVisibility",
-        "ScreenVisibility",
+        "Screen visibility",
         "Determines if the node is currently visible on screen.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DistanceFromCamToNodeInfo = {
         "DistanceFromCamToNode",
-        "DistanceFromCamToNode",
+        "Distance from camera to node",
         "The distance from the camera to the node surface.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenSizeRadiusInfo = {
         "ScreenSizeRadius",
-        "ScreenSizeRadius",
+        "Screen size radius",
         "The screen size of the radius of the node.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo VisibilityDistanceInfo = {
         "VisibilityDistance",
-        "VisibilityDistance",
+        "Visibility distance",
         "The distace in world coordinates between node and camera at which the "
         "screenspace object will become visible.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -89,7 +91,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BoundingSphereInfo = {
         "BoundingSphere",
-        "Bounding Sphere",
+        "Bounding sphere",
         "The bounding sphere of the scene graph node meaning that everything that this "
         "scene graph node renders must be contained within this sphere. This value is "
         "only used as an override to the bounding sphere calculated by the Renderable, "
@@ -100,7 +102,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo InteractionSphereInfo = {
         "InteractionSphere",
-        "Interaction Sphere",
+        "Interaction sphere",
         "The minimum radius that the camera is allowed to get close to this scene graph "
         "node. This value is only used as an override to the bounding sphere calculated "
         "by the Renderable, if present. If this value is -1, the Renderable's computed "
@@ -110,7 +112,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EvalBoundingSphereInfo = {
         "EvaluatedBoundingSphere",
-        "Evaluated Bounding Sphere",
+        "Evaluated bounding sphere",
         "This read-only property contains the evaluated value for the bounding sphere. "
         "This is the actual value that is used internally within the software. If the "
         "BoundingSphere property is set to -1, it is the computed value, otherwise it "
@@ -120,7 +122,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EvalInteractionSphereInfo = {
         "EvaluatedInteractionSphere",
-        "Evaluated Interaction Sphere",
+        "Evaluated interaction sphere",
         "This read-only property contains the evaluated value for the interaction "
         "sphere. This is the actual value that is used internally within the software. "
         "If the InteractionSphere property is set to -1, it is the computed value, "
@@ -130,7 +132,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ApproachFactorInfo = {
         "ApproachFactor",
-        "Approach Factor",
+        "Approach factor",
         "This value is a multiplication factor for the interaction sphere that "
         "determines when the camera is 'approaching' the scene graph node.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -138,7 +140,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ReachFactorInfo = {
         "ReachFactor",
-        "Reach Factor",
+        "Reach factor",
         "This value is a multiplication factor for the interaction sphere that "
         "determines when the camera has 'reached' the scene graph node.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -146,7 +148,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GuiPathInfo = {
         "GuiPath",
-        "Gui Path",
+        "GUI path",
         "This is the path for the scene graph node in the gui example: "
         "/Solar System/Planets/Earth.",
         openspace::properties::Property::Visibility::Hidden
@@ -154,14 +156,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GuiNameInfo = {
         "GuiName",
-        "Gui Name",
+        "GUI name",
         "This is the name for the scene graph node in the gui. Example: Earth.",
         openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiDescriptionInfo = {
         "GuiDescription",
-        "Gui Description",
+        "GUI description",
         "This is the description for the scene graph node to be shown in the gui. "
         "Example: Earth is a special place.",
         openspace::properties::Property::Visibility::Hidden
@@ -169,7 +171,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GuiHiddenInfo = {
         "GuiHidden",
-        "Gui Hidden",
+        "GUI hidden",
         "This represents if the scene graph node should be shown in the gui. "
         "Example: false.",
         openspace::properties::Property::Visibility::Hidden
@@ -177,7 +179,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GuiOrderInfo = {
         "GuiOrderingNumber",
-        "Gui Ordering Number",
+        "GUI ordering number",
         "This is an optional numerical value that will affect the sorting of this scene "
         "graph node in relation to its neighbors in the GUI. Nodes with the same value "
         "will be sorted alphabetically.",
@@ -186,15 +188,24 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo UseGuiOrderInfo = {
         "UseGuiOrdering",
-        "Use Gui Ordering",
+        "Use GUI ordering",
         "If true, use the 'GuiOrderingNumber' to place this scene graph node in a "
         "sorted way in relation to its neighbors in the GUI",
         openspace::properties::Property::Visibility::Hidden
     };
 
+    constexpr openspace::properties::Property::PropertyInfo GuiFocusableInfo = {
+        "Focusable",
+        "Focusable Hint",
+        "This value serves as a hint to determine if it makes sense to focus the camera "
+        "on this scene graph node. It only serves as a hint and does not actually "
+        "prevent the focussing. The default value is `true`.",
+        openspace::properties::Property::Visibility::Hidden
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ShowDebugSphereInfo = {
         "ShowDebugSphere",
-        "Show Debug Sphere",
+        "Show debug sphere",
         "If enabled the bounding sphere of this scene graph node is rendered as a debug "
         "method. The interaction sphere is rendered in cyan and the bounding sphere in "
         "purple. If only one is visible, this may be because the spheres have equal "
@@ -206,7 +217,7 @@ namespace {
         SupportsDirectInteractionInfo =
     {
         "SupportsDirectInteraction",
-        "Supports Direct Interaction",
+        "Supports direct interaction",
         "Only relevant when using touch interaction. If true, the \'direct "
         "manipulation\' scheme will be used when interacting with this scene graph "
         "node, meaning that the positions on the interaction sphere that intersects "
@@ -276,12 +287,14 @@ namespace {
             // all its children. Depending on the 'Type' of the scaling, this can either
             // be a static scaling or a time-varying one
             std::optional<ghoul::Dictionary> scale
-                [[codegen::reference("core_transform_scaling")]];
+                [[codegen::reference("core_transform_scale")]];
         };
 
         // This describes a set of transformations that are applied to this scene graph
         // node and all of its children. There are only three possible values
-        // corresponding to a 'Translation', a 'Rotation', and a 'Scale'
+        // corresponding to a 'Translation', a 'Rotation', and a 'Scale'. The combined
+        // transformation will be computed by first applying the 'Scale', followed by the
+        // 'Rotation', and then the 'Translation'.
         std::optional<Transform> transform;
 
         // This value is a multiplication factor for the interaction sphere that
@@ -340,6 +353,9 @@ namespace {
             // not display, for example, barycenters
             std::optional<bool> hidden;
 
+            // [[codegen::verbatim(GuiFocusableInfo.description)]]
+            std::optional<bool> focusable;
+
             // If this value is specified, the scene graph node will be ordered in
             // relation to its neighbors in the GUI based on this value, so that nodes
             // with a higher value appear later in the list. Scene graph nodes with the
@@ -347,7 +363,7 @@ namespace {
             //
             // The nodes without a given value will be placed at the bottom of the list
             // and sorted alphabetically.
-            std::optional<double> orderingNumber;
+            std::optional<float> orderingNumber;
         };
         // Additional information that is passed to GUI applications. These are all hints
         // and do not have any impact on the actual function of the scene graph node
@@ -406,6 +422,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         if (p.gui->orderingNumber.has_value()) {
             result->_guiOrderingNumber = *p.gui->orderingNumber;
         }
+        result->_guiFocusable = p.gui->focusable.value_or(result->_guiFocusable);
     }
 
     result->_boundingSphere = p.boundingSphere.value_or(result->_boundingSphere);
@@ -553,18 +570,8 @@ SceneGraphNode::SceneGraphNode()
     , _guiDisplayName(GuiNameInfo)
     , _guiDescription(GuiDescriptionInfo)
     , _useGuiOrdering(UseGuiOrderInfo, false)
+    , _guiFocusable(GuiFocusableInfo, true)
     , _guiOrderingNumber(GuiOrderInfo, 0.f)
-    , _transform {
-        ghoul::mm_unique_ptr<Translation>(
-            global::memoryManager->PersistentMemory.alloc<StaticTranslation>()
-        ),
-        ghoul::mm_unique_ptr<Rotation>(
-            global::memoryManager->PersistentMemory.alloc<StaticRotation>()
-        ),
-        ghoul::mm_unique_ptr<Scale>(
-            global::memoryManager->PersistentMemory.alloc<StaticScale>()
-        )
-    }
     , _boundingSphere(BoundingSphereInfo, -1.0, -1.0, 1e12)
     , _evaluatedBoundingSphere(EvalBoundingSphereInfo)
     , _interactionSphere(InteractionSphereInfo, -1.0, -1.0, 1e12)
@@ -581,6 +588,29 @@ SceneGraphNode::SceneGraphNode()
     , _showDebugSphere(ShowDebugSphereInfo, false)
     , _followRotationDistance(FollowRotationDistanceInfo, -1.0, -1.0)
 {
+    {
+        ghoul::Dictionary translation;
+        translation.setValue("Type", std::string("StaticTranslation"));
+        translation.setValue("Position", glm::dvec3(0.0));
+        _transform.translation = ghoul::mm_unique_ptr<Translation>(
+            global::memoryManager->PersistentMemory.alloc<StaticTranslation>(translation)
+        );
+
+        ghoul::Dictionary rotation;
+        rotation.setValue("Type", std::string("StaticRotation"));
+        rotation.setValue("Rotation", glm::dvec3(0.0));
+        _transform.rotation = ghoul::mm_unique_ptr<Rotation>(
+            global::memoryManager->PersistentMemory.alloc<StaticRotation>(rotation)
+        );
+
+        ghoul::Dictionary scale;
+        scale.setValue("Type", std::string("StaticScale"));
+        scale.setValue("Scale", 1.0);
+        _transform.scale = ghoul::mm_unique_ptr<Scale>(
+            global::memoryManager->PersistentMemory.alloc<StaticScale>(scale)
+        );
+    }
+
     addProperty(_computeScreenSpaceValues);
     addProperty(_screenSpacePosition);
     _screenVisibility.setReadOnly(true);
@@ -638,6 +668,7 @@ SceneGraphNode::SceneGraphNode()
     addProperty(_guiPath);
     addProperty(_guiOrderingNumber);
     addProperty(_useGuiOrdering);
+    addProperty(_guiFocusable);
 }
 
 SceneGraphNode::~SceneGraphNode() {}
@@ -645,6 +676,11 @@ SceneGraphNode::~SceneGraphNode() {}
 void SceneGraphNode::initialize() {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(global::openSpaceEngine->ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
+#endif // TRACY_ENABLE
+
 
     LDEBUG(std::format("Initializing: {}", identifier()));
 
@@ -673,7 +709,11 @@ void SceneGraphNode::initialize() {
 void SceneGraphNode::initializeGL() {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
-    TracyGpuZone("initializeGL")
+    TracyGpuZone("initializeGL");
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(global::openSpaceEngine->ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
+#endif // TRACY_ENABLE
 
     LDEBUG(std::format("Initializing GL: {}", identifier()));
 
@@ -751,25 +791,31 @@ void SceneGraphNode::traversePostOrder(const std::function<void(SceneGraphNode*)
 void SceneGraphNode::update(const UpdateData& data) {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(global::openSpaceEngine->ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
+#endif // TRACY_ENABLE
 
-    if (_state != State::Initialized && _state != State::GLInitialized) {
+    if (_state != State::GLInitialized) {
         return;
     }
-    if (!isTimeFrameActive(data.time)) {
+
+    if (_timeFrame) {
+        _timeFrame->update(data.time);
+    }
+
+    if (!isTimeFrameActive()) {
         return;
     }
 
-    if (_transform.translation) {
-        _transform.translation->update(data);
-    }
+    ghoul_assert(_transform.translation, "No translation exists");
+    _transform.translation->update(data);
 
-    if (_transform.rotation) {
-        _transform.rotation->update(data);
-    }
+    ghoul_assert(_transform.rotation, "No rotation exists");
+    _transform.rotation->update(data);
 
-    if (_transform.scale) {
-        _transform.scale->update(data);
-    }
+    ghoul_assert(_transform.scale, "No scale exists");
+    _transform.scale->update(data);
     UpdateData newUpdateData = data;
 
     // Assumes _worldRotationCached and _worldScaleCached have been calculated for parent
@@ -801,19 +847,15 @@ void SceneGraphNode::update(const UpdateData& data) {
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(global::openSpaceEngine->ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
+#endif // TRACY_ENABLE
 
-    if (_state != State::GLInitialized) {
-        return;
-    }
-
-    const bool visible = _renderable && _renderable->isVisible() &&
-        _renderable->isReady();
-
-    if (!visible) {
-        return;
-    }
-
-    if (!isTimeFrameActive(data.time)) {
+    if (_state != State::GLInitialized ||
+        !(_renderable && _renderable->isVisible() && _renderable->isReady()) ||
+        !isTimeFrameActive())
+    {
         return;
     }
 
@@ -838,15 +880,14 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
 
         _renderable->render(newData, tasks);
 
-        if (_computeScreenSpaceValues) {
+        if (_computeScreenSpaceValues) [[unlikely]] {
             computeScreenSpaceData(newData);
         }
     }
 
     const bool isInStickerBin =
         data.renderBinMask & static_cast<int>(Renderable::RenderBin::Sticker);
-
-    if (_showDebugSphere && isInStickerBin) {
+    if (_showDebugSphere && isInStickerBin) [[unlikely]] {
         if (const double bs = boundingSphere();  bs > 0.0) {
             renderDebugSphere(data.camera, bs, glm::vec4(0.5f, 0.15f, 0.5f, 0.75f));
         }
@@ -858,7 +899,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
 }
 
 void SceneGraphNode::renderDebugSphere(const Camera& camera, double size,
-                                       const glm::vec4& color)
+                                       const glm::vec4& color) const
 {
     const glm::dvec3 scaleVec = _worldScaleCached * size;
     const glm::dmat4 modelTransform =
@@ -899,7 +940,23 @@ void SceneGraphNode::renderDebugSphere(const Camera& camera, double size,
 void SceneGraphNode::setParent(SceneGraphNode& parent) {
     ghoul_assert(_parent != nullptr, "Node must be attached to a parent");
 
-    parent.attachChild(_parent->detachChild(*this));
+    // 1. Remove `this` from its currents parent's children
+    auto iter = std::find_if(
+        _parent->_children.begin(),
+        _parent->_children.end(),
+        [this](const ghoul::mm_unique_ptr<SceneGraphNode>& node) {
+            return node.get() == this;
+        }
+    );
+    ghoul_assert(iter != _parent->_children.end(), "This was not a child of its parent");
+    ghoul::mm_unique_ptr<SceneGraphNode> c = std::move(*iter);
+    _parent->_children.erase(iter);
+
+    // 2. Reparent `this`
+    _parent = &parent;
+
+    // 3. Add `this` to the new parent's children list
+    _parent->_children.push_back(std::move(c));
 }
 
 void SceneGraphNode::attachChild(ghoul::mm_unique_ptr<SceneGraphNode> child) {
@@ -1184,18 +1241,18 @@ glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
     }
 }
 
-bool SceneGraphNode::isTimeFrameActive(const Time& time) const {
+bool SceneGraphNode::isTimeFrameActive() const {
     for (SceneGraphNode* dep : _dependencies) {
-        if (!dep->isTimeFrameActive(time)) {
+        if (!dep->isTimeFrameActive()) {
             return false;
         }
     }
 
-    if (_parent && !_parent->isTimeFrameActive(time)) {
+    if (_parent && !_parent->isTimeFrameActive()) {
         return false;
     }
 
-    return !_timeFrame || _timeFrame->isActive(time);
+    return !_timeFrame || _timeFrame->isActive();
 }
 
 glm::dmat3 SceneGraphNode::calculateWorldRotation() const {
@@ -1273,6 +1330,15 @@ const std::vector<std::string>& SceneGraphNode::onRecedeAction() const {
 
 const std::vector<std::string>& SceneGraphNode::onExitAction() const {
     return _onExitAction;
+}
+
+Ellipsoid SceneGraphNode::ellipsoid() const {
+    if (_renderable) {
+        return _renderable->ellipsoid();
+    }
+    else {
+        return Ellipsoid(glm::dvec3(interactionSphere()));
+    }
 }
 
 double SceneGraphNode::boundingSphere() const {

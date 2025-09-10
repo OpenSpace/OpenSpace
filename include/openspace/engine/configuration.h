@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___CONFIGURATION___H__
 #define __OPENSPACE_CORE___CONFIGURATION___H__
 
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/properties/property.h>
 #include <openspace/util/keys.h>
 #include <ghoul/lua/luastate.h>
@@ -54,6 +55,8 @@ struct Configuration {
     properties::Property::Visibility propertyVisibility =
         properties::Property::Visibility::User;
 
+    bool showPropertyConfirmation = true;
+
     std::vector<std::string> globalCustomizationScripts;
     std::map<std::string, std::string> pathTokens = {
         { "CACHE" , "CACHE = \"${BASE}/cache\"" }
@@ -78,6 +81,7 @@ struct Configuration {
     Logging logging;
 
     std::string scriptLog;
+    bool verboseScriptLog = false;
     int scriptLogRotation = 3;
 
     struct DocumentationInfo {
@@ -155,7 +159,7 @@ struct Configuration {
     // Values not read from the openspace.cfg file
     std::string sgctConfigNameInitialized;
 
-    static documentation::Documentation Documentation;
+    static documentation::Documentation Documentation();
     ghoul::lua::LuaState state;
 };
 

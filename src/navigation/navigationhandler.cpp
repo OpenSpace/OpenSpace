@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/actionmanager.h>
@@ -37,7 +38,7 @@
 #include <openspace/navigation/waypoint.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/query/query.h>
-#include <openspace/scene/profile.h>
+#include <openspace/rendering/helper.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
@@ -64,7 +65,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DisableKeybindingsInfo = {
         "DisableKeybindings",
-        "Disable all Keybindings",
+        "Disable all keybindings",
         "Disables all keybindings without removing them. Please note that this does not "
         "apply to the key to open the console.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -94,12 +95,33 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo JumpToFadeDurationInfo = {
         "JumpToFadeDuration",
-        "JumpTo Fade Duration",
+        "Jump to fade duration",
         "The number of seconds the fading of the rendering should take per default when "
         "navigating through a 'jump' transition. This is when the rendering is first "
         "faded to black, then the camera is moved, and then the rendering fades in "
         "again.",
         openspace::properties::Property::Visibility::User
+    };
+
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo MouseVisualizerInfo = {
+        "MouseInteractionVisualizer",
+        "Mouse Interaction Visualizer",
+        "The mouse interaction visualizer shows the distance the mouse has been moved "
+        "since it was pressed down."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MouseVisualizerEnabledInfo = {
+        "Enabled",
+        "Enabled",
+        "If this setting is enabled, the mouse interaction will be visualized on the "
+        "screen by showing the distance the mouse has been moved since it was pressed "
+        "down."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MouseVisualizerColorInfo = {
+        "Color",
+        "Color",
+        "The color used to render the line showing the mouse visualizer."
     };
 } // namespace
 
@@ -112,6 +134,20 @@ NavigationHandler::NavigationHandler()
     , _disableJoystickInputs(DisableJoystickInputInfo, false)
     , _useKeyFrameInteraction(FrameInfo, false)
     , _jumpToFadeDuration(JumpToFadeDurationInfo, 1.f, 0.f, 10.f)
+    , _mouseVisualizer({
+        properties::PropertyOwner(MouseVisualizerInfo),
+        properties::BoolProperty(MouseVisualizerEnabledInfo, false),
+        properties::Vec4Property(
+            MouseVisualizerColorInfo,
+            glm::vec4(1.f),
+            glm::vec4(0.f),
+            glm::vec4(1.f)
+        ),
+        false,
+        false,
+        glm::vec2(0.f),
+        glm::vec2(0.f)
+    })
 {
     addPropertySubOwner(_orbitalNavigator);
     addPropertySubOwner(_pathNavigator);
@@ -121,6 +157,11 @@ NavigationHandler::NavigationHandler()
     addProperty(_disableJoystickInputs);
     addProperty(_useKeyFrameInteraction);
     addProperty(_jumpToFadeDuration);
+
+    addPropertySubOwner(_mouseVisualizer.owner);
+    _mouseVisualizer.owner.addProperty(_mouseVisualizer.enable);
+    _mouseVisualizer.color.setViewOption(properties::Property::ViewOptions::Color);
+    _mouseVisualizer.owner.addProperty(_mouseVisualizer.color);
 }
 
 NavigationHandler::~NavigationHandler() {}
@@ -195,14 +236,14 @@ void NavigationHandler::setInterpolationTime(float durationInSeconds) {
     _orbitalNavigator.setRetargetInterpolationTime(durationInSeconds);
 }
 
-void NavigationHandler::triggerFadeToTransition(const std::string& transitionScript,
+void NavigationHandler::triggerFadeToTransition(std::string transitionScript,
                                                 std::optional<float> fadeDuration)
 {
     const float duration = fadeDuration.value_or(_jumpToFadeDuration);
 
     std::string script;
     if (duration < std::numeric_limits<float>::epsilon()) {
-        script = transitionScript;
+        script = std::move(transitionScript);
     }
     else {
         const std::string onArrivalScript = std::format(
@@ -219,11 +260,11 @@ void NavigationHandler::triggerFadeToTransition(const std::string& transitionScr
     }
 
     // No syncing, as this was called from a script that should have been synced already
-    global::scriptEngine->queueScript(
-        std::move(script),
-        scripting::ScriptEngine::ShouldBeSynchronized::No,
-        scripting::ScriptEngine::ShouldSendToRemote::No
-    );
+    global::scriptEngine->queueScript({
+        .code = std::move(script),
+        .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+        .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+    });
 }
 
 void NavigationHandler::updateCamera(double deltaTime) {
@@ -499,12 +540,33 @@ const KeyboardInputState& NavigationHandler::keyboardInputState() const {
 void NavigationHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
     if (!_disableMouseInputs) {
         _mouseInputState.mouseButtonCallback(button, action);
+
+        if (_mouseVisualizer.enable) {
+            if (action == MouseAction::Press) {
+                _mouseVisualizer.isMouseFirstPress = true;
+                _mouseVisualizer.isMousePressed = true;
+            }
+            else if (action == MouseAction::Release) {
+                _mouseVisualizer.isMousePressed = false;
+                _mouseVisualizer.currentPosition = glm::vec2(0.f);
+                _mouseVisualizer.clickPosition = glm::vec2(0.f);
+            }
+        }
     }
 }
 
 void NavigationHandler::mousePositionCallback(double x, double y) {
     if (!_disableMouseInputs) {
         _mouseInputState.mousePositionCallback(x, y);
+
+        if (_mouseVisualizer.enable && _mouseVisualizer.isMousePressed) {
+            if (_mouseVisualizer.isMouseFirstPress) {
+                _mouseVisualizer.clickPosition = glm::vec2(x, y);
+                _mouseVisualizer.isMouseFirstPress = false;
+            }
+
+            _mouseVisualizer.currentPosition = glm::vec2(x, y);
+        }
     }
 }
 
@@ -519,6 +581,19 @@ void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActio
     // There is no need to disable the keyboard callback based on a property as the vast
     // majority of input is coming through Lua scripts anyway which are not blocked here
     _keyboardInputState.keyboardCallback(key, modifier, action);
+}
+
+void NavigationHandler::renderOverlay() const {
+    if (_mouseVisualizer.enable && _mouseVisualizer.isMousePressed) {
+        constexpr glm::vec4 StartColor = glm::vec4(0.4f, 0.4f, 0.4f, 0.25f);
+        rendering::helper::renderLine(
+            _mouseVisualizer.clickPosition,
+            _mouseVisualizer.currentPosition,
+            global::windowDelegate->currentWindowSize(),
+            StartColor,
+            _mouseVisualizer.color
+        );
+    }
 }
 
 bool NavigationHandler::disabledKeybindings() const {
@@ -811,9 +886,23 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             codegen::lua::ListAllJoysticks,
             codegen::lua::TargetNextInterestingAnchor,
             codegen::lua::TargetPreviousInterestingAnchor,
+            codegen::lua::SetFocus,
             codegen::lua::DistanceToFocus,
             codegen::lua::DistanceToFocusBoundingSphere,
-            codegen::lua::DistanceToFocusInteractionSphere
+            codegen::lua::DistanceToFocusInteractionSphere,
+            codegen::lua::JumpToGeo,
+            codegen::lua::FlyToGeo2,
+            codegen::lua::FlyToGeo,
+            codegen::lua::LocalPositionFromGeo,
+            codegen::lua::IsFlying,
+            codegen::lua::FlyTo,
+            codegen::lua::FlyToHeight,
+            codegen::lua::FlyToNavigationState,
+            codegen::lua::ZoomToFocus,
+            codegen::lua::ZoomToDistance,
+            codegen::lua::ZoomToDistanceRelative,
+            codegen::lua::JumpTo,
+            codegen::lua::JumpToNavigationState
         }
     };
 }

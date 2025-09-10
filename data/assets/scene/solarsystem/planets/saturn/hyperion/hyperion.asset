@@ -69,6 +69,7 @@ local HyperionLabel = {
   GUI = {
     Name = "Hyperion Label",
     Path = "/Solar System/Planets/Saturn/Major Moons/Hyperion",
+    Focusable = false,
     Description = "Label for Saturn's moon Hyperion"
   }
 }

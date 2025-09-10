@@ -22,7 +22,7 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_ldam_10")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_ldam_10)
 end)
 
 asset.export("ldam_10", treks_ldam_10)

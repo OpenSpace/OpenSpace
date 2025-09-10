@@ -15,6 +15,12 @@ local speck = asset.resource({
 
 local DeepSkyObjects = {
   Identifier = "DeepSkyObjects",
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, 0, math.pi }
+    }
+  },
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = false,
@@ -41,21 +47,22 @@ local DeepSkyObjects = {
       EnableMaxSizeControl = true
     }
   },
-  Transform = {
-    Rotation = {
-      Type = "StaticRotation",
-      Rotation = { 0, 0, math.pi }
-    }
-  },
   GUI = {
     Name = "Deep Sky Objects Points",
     Path = "/Universe/Nearby Surveys",
+    Focusable = false,
     Description = "Point cloud and labels for Deep Sky Objects"
   }
 }
 
 local DeepSkyObjectsImages = {
   Identifier = "DeepSkyObjectsImages",
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { math.pi, math.pi, 0 }
+    }
+  },
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = false,
@@ -66,7 +73,7 @@ local DeepSkyObjectsImages = {
     },
     -- Use fixed orientation, and rotate planes based on orientation information in
     -- the dataset
-    OrientationRenderOption = "Fixed Rotation",
+    Billboard = "Fixed Rotation",
     UseOrientationData = true,
     Unit = "pc",
     SizeSettings = {
@@ -79,15 +86,10 @@ local DeepSkyObjectsImages = {
       ScaleExponent = 0.0
     }
   },
-  Transform = {
-    Rotation = {
-      Type = "StaticRotation",
-      Rotation = { math.pi, math.pi, 0 }
-    }
-  },
   GUI = {
     Name = "Deep Sky Objects Images",
     Path = "/Universe/Nearby Surveys",
+    Focusable = false,
     Description = [[Census: 63 images and labels. DU Version 1.3. <br> These data are
       2-D images of Messier objects placed in 3-D space. Not only do we place these
       images at the proper location and give them the correct orientation, we also

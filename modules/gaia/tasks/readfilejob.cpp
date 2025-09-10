@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -59,8 +59,8 @@ void ReadFileJob::execute() {
     );
 
     if (!table) {
-        throw ghoul::RuntimeError(
-            std::format("Failed to open Fits file '{}'", _inFilePath
+        throw ghoul::RuntimeError(std::format(
+            "Failed to open Fits file '{}'", _inFilePath
         ));
     }
 
@@ -241,7 +241,7 @@ void ReadFileJob::execute() {
         values[idx++] = std::isnan(radial_vel_err[i]) ? 0.f : radial_vel_err[i];
 
         // Read extra columns, if any. This will slow down the sorting tremendously!
-        for (size_t col = _nDefaultCols; col < nColumnsRead; ++col) {
+        for (size_t col = _nDefaultCols; col < nColumnsRead; col++) {
             std::vector<float> vecData = std::move(tableContent[_allColumns[col]]);
             values[idx++] = std::isnan(vecData[col]) ? 0.f : vecData[col];
         }

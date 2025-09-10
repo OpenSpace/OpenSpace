@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,13 +33,9 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <numeric>
 
 namespace {
     const ImVec2 WindowSize = ImVec2(350, 500);
@@ -329,9 +325,8 @@ void GuiGlobeBrowsingComponent::render() {
                 std::remove(layerName.begin(), layerName.end(), ' '),
                 layerName.end()
             );
-            global::scriptEngine->queueScript(
-                std::format(
-                    "openspace.globebrowsing.addLayer(\
+            const std::string script = std::format(
+                "openspace.globebrowsing.addLayer(\
                         '{}', \
                         '{}', \
                         {{ \
@@ -341,15 +336,13 @@ void GuiGlobeBrowsingComponent::render() {
                             Enabled = true\
                         }}\
                     );",
-                    n,
-                    type,
-                    layerName,
-                    l.name,
-                    l.url
-                ),
-                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
+                n,
+                type,
+                layerName,
+                l.name,
+                l.url
             );
+            global::scriptEngine->queueScript(script);
         };
 
         if (addColor) {

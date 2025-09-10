@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,8 +39,8 @@ uniform mat4 modelViewProjection;
 
 // Uniforms needed to color by quantity
 uniform int colorMethod;
-uniform sampler1D colorTable;
-uniform vec2 colorTableRange;
+uniform sampler1D transferFunction;
+uniform vec2 selectedColorRange;
 
 // Uniforms needed for Particle Flow
 uniform vec4 flowColor;
@@ -69,8 +69,8 @@ const int colorByQuantity = 1;
 vec4 getTransferFunctionColor() {
   // Remap the color scalar to a [0,1] range
   float lookUpVal =
-    (in_color_scalar - colorTableRange.x) / (colorTableRange.y - colorTableRange.x);
-  return texture(colorTable, lookUpVal);
+    (in_color_scalar - selectedColorRange.x) / (selectedColorRange.y - selectedColorRange.x);
+  return texture(transferFunction, lookUpVal);
 }
 
 bool isPartOfParticle(double time, int vertexId, int particleSize, int particleSpeed,
@@ -92,7 +92,7 @@ void main() {
 
   if (usingDomain && hasColor) {
     float radius = length(in_position);
-
+    // If position is outside of domain
     if (in_position.x < domainLimX.x || in_position.x > domainLimX.y ||
         in_position.y < domainLimY.x || in_position.y > domainLimY.y ||
         in_position.z < domainLimZ.x || in_position.z > domainLimZ.y ||

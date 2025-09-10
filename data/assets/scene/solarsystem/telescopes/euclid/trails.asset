@@ -1,7 +1,8 @@
 local kernels = asset.require("./kernels")
 local earth = asset.require("scene/solarsystem/planets/earth/transforms")
 local solarsystem = asset.require("scene/solarsystem/sun/transforms")
-local transforms = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2")
+local transforms = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/transforms")
+local l2kernels = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/kernels")
 local coreKernels = asset.require("spice/core")
 
 
@@ -25,7 +26,8 @@ local EuclidTrailSun = {
   },
   GUI = {
     Name = "Euclid Trail (Sun)",
-    Path = "/Solar System/Telescopes/Euclid"
+    Path = "/Solar System/Telescopes/Euclid",
+    Focusable = false
   }
 }
 
@@ -46,7 +48,8 @@ local EuclidTrailEarth = {
   },
   GUI = {
     Name = "Euclid Trail (Earth)",
-    Path = "/Solar System/Telescopes/Euclid"
+    Path = "/Solar System/Telescopes/Euclid",
+    Focusable = false
   }
 }
 
@@ -63,7 +66,7 @@ local EuclidTrailOrbit = {
     Translation = {
       Type = "SpiceTranslation",
       Target = kernels.ID.Euclid,
-      Observer = transforms.ID.L2,
+      Observer = l2kernels.ID.L2,
       Frame = coreKernels.Frame.Galactic
     },
     Color = { 0.863, 0.0, 0.902 },
@@ -73,6 +76,7 @@ local EuclidTrailOrbit = {
   GUI = {
     Name = "Euclid Orbit Trail",
     Path = "/Solar System/Telescopes/Euclid",
+    Focusable = false,
     Description = "Euclid Orbit Trail relative to L2"
   }
 }
@@ -90,8 +94,8 @@ local EuclidTrailCoRevOrbit = {
     Translation = {
       Type = "SpiceTranslation",
       Target = kernels.ID.Euclid,
-      Observer = transforms.ID.L2,
-      Frame = transforms.Frame.L2Corevolving
+      Observer = l2kernels.ID.L2,
+      Frame = l2kernels.Frame.L2Corevolving
     },
     Color = { 0.863, 0.0, 0.902 },
     Period = 182.621099, -- About 6 months
@@ -100,6 +104,7 @@ local EuclidTrailCoRevOrbit = {
   GUI = {
     Name = "Euclid L2 Co-Revolving Orbit Trail",
     Path = "/Solar System/Telescopes/Euclid",
+    Focusable = false,
     Description = "Euclid Orbit Trail relative to L2"
   }
 }

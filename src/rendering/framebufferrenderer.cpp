@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -943,7 +943,8 @@ void FramebufferRenderer::updateRaycastData() {
                 absPath(ExitFragmentShaderPath),
                 dict
             );
-        } catch (const ghoul::RuntimeError& e) {
+        }
+        catch (const ghoul::RuntimeError& e) {
             LERROR(e.message);
         }
 
@@ -956,7 +957,8 @@ void FramebufferRenderer::updateRaycastData() {
                 absPath(RaycastFragmentShaderPath),
                 outsideDict
             );
-        } catch (const ghoul::RuntimeError& e) {
+        }
+        catch (const ghoul::RuntimeError& e) {
             LERROR(e.message);
         }
 

@@ -1,0 +1,36 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderablesphericalgrid/sphericalgrid_styled.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderableSphericalGrid_Example_Styled",
+        "position": [
+          -2.6332080885026468,
+          0.3839641527113749,
+          -0.003375002000572856
+        ],
+        "up": [
+          0.00806120309896291,
+          0.06405490241443945,
+          0.9979138171612184
+        ],
+        "timestamp": "2025 JUL 13 12:41:23"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

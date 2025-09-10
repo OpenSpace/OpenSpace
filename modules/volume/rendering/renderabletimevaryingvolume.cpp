@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,6 +43,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/lua_helper.h>
 #include <ghoul/opengl/texture.h>
 #include <filesystem>
 #include <optional>
@@ -54,7 +55,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
-        "Step Size",
+        "Step size",
         "Specifies how often to sample during raycasting. Lower step size leads to "
         "higher resolution.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -62,7 +63,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GridTypeInfo = {
         "GridType",
-        "Grid Type",
+        "Grid type",
         "The grid type to use for the volume.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -83,14 +84,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SourceDirectoryInfo = {
         "SourceDirectory",
-        "Source Directory",
+        "Source directory",
         "A directory from where to load the data files for the different time steps.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "TransferFunctionPath",
-        "Transfer Function Path",
+        "Transfer function path",
         "The path to the transfer function file.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -170,7 +171,7 @@ documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
 RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _gridType(GridTypeInfo)
     , _stepSize(StepSizeInfo, 0.02f, 0.001f, 0.1f)
     , _brightness(BrightnessInfo, 0.33f, 0.f, 1.f)
     , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)

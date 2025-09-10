@@ -1,0 +1,45 @@
+-- Two nodes and focus
+-- This example adds two invisible scene graph nodes and then shows the angle between the
+-- current focus node and those two nodes.
+
+local Node1 = {
+  Identifier = "DashboardItemAngle_Example_TwoNodesFocus_Node1",
+  GUI = {
+    Name = "DashboardItemAngle - Two Nodes & Focus (Node 1)"
+  }
+}
+
+local Node2 = {
+  Identifier = "DashboardItemAngle_Example_TwoNodesFocus_Node2",
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 20.0, 1.0, 0.0 }
+    }
+  },
+  GUI = {
+    Name = "DashboardItemAngle - Two Nodes & Focus (Node 2)"
+  }
+}
+
+local Item = {
+  Identifier = "DashboardItemAngle_Example_TwoNodesFocus",
+  Type = "DashboardItemAngle",
+  SourceType = "Focus",
+  ReferenceType = "Node",
+  ReferenceNodeIdentifier = Node1.Identifier,
+  DestinationType = "Node",
+  DestinationNodeIdentifier = Node2.Identifier
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node1)
+  openspace.addSceneGraphNode(Node2)
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+  openspace.removeSceneGraphNode(Node2)
+  openspace.removeSceneGraphNode(Node1)
+end)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <glm/gtx/euler_angles.hpp>
-
 #include <modules/base/rotation/staticrotation.h>
 
 #include <openspace/documentation/documentation.h>
@@ -35,14 +33,6 @@ namespace {
         "Rotation",
         "This value is the used as a 3x3 rotation matrix that is applied to the scene "
         "graph node that this transformation is attached to relative to its parent.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo EulerSequenceInfo = {
-        "EulerSequence",
-        "Euler Sequence",
-        "This value specifies in which order the rotations should be applied to "
-        "compose the final rotation matrix.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -84,18 +74,6 @@ namespace {
         // an operation which might fail if the matrix is not a true rotation matrix. The
         // values are assumed to be in row-major order.
         std::variant<glm::dvec3, glm::dvec4, glm::dmat3x3> rotation;
-
-        enum class EulerSequence {
-            XYZ,
-            XZY,
-            YXZ,
-            YZX,
-            ZXY,
-            ZYX,
-            Default
-        };
-
-        std::optional<EulerSequence> eulerSequence;
     };
 #include "staticrotation_codegen.cpp"
 } // namespace
@@ -106,47 +84,22 @@ documentation::Documentation StaticRotation::Documentation() {
     return codegen::doc<Parameters>("base_transform_rotation_static");
 }
 
-StaticRotation::StaticRotation()
-    : _eulerRotation(
+StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary)
+    : Rotation(dictionary)
+    , _eulerRotation(
         RotationInfo,
         glm::vec3(0.f),
         glm::vec3(-glm::pi<float>()),
         glm::vec3(glm::pi<float>())
-    ),
-    _eulerSequence(
-        EulerSequenceInfo,
-        properties::OptionProperty::DisplayType::Dropdown
     )
 {
-    addProperty(_eulerRotation);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
     _eulerRotation.onChange([this]() {
         _matrixIsDirty = true;
         requireUpdate();
     });
-
-    _eulerSequence.addOptions(
-        {
-            { static_cast<int>(Parameters::EulerSequence::XYZ), "XYZ" },
-            { static_cast<int>(Parameters::EulerSequence::XZY), "XZY" },
-            { static_cast<int>(Parameters::EulerSequence::YXZ), "YXZ" },
-            { static_cast<int>(Parameters::EulerSequence::YZX), "YZX" },
-            { static_cast<int>(Parameters::EulerSequence::ZXY), "ZXY" },
-            { static_cast<int>(Parameters::EulerSequence::ZYX), "ZYX" },
-            { static_cast<int>(Parameters::EulerSequence::Default), "Default" },
-        }
-    );
-
-    addProperty(_eulerSequence);
-    _eulerSequence.onChange([this]() {
-        _matrixIsDirty = true;
-        requireUpdate();
-    });
-
-    _type = "StaticRotation";
-}
-
-StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary) : StaticRotation() {
-    const Parameters p = codegen::bake<Parameters>(dictionary);
+    addProperty(_eulerRotation);
 
     if (std::holds_alternative<glm::dvec3>(p.rotation)) {
         _eulerRotation = std::get<glm::dvec3>(p.rotation);
@@ -160,107 +113,12 @@ StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary) : StaticRota
     else if (std::holds_alternative<glm::dmat3>(p.rotation)) {
         _eulerRotation = rotationMatrixToEulerAngles(std::get<glm::dmat3>(p.rotation));
     }
-
-    if (p.eulerSequence.has_value()) {
-        _eulerSequence = static_cast<int>(p.eulerSequence.value());
-    }
-    else {
-        _eulerSequence = static_cast<int>(Parameters::EulerSequence::Default);
-    }
-
     _matrixIsDirty = true;
-    _type = "StaticRotation";
 }
 
 glm::dmat3 StaticRotation::matrix(const UpdateData&) const {
-    if (_matrixIsDirty) {
-        // Correct for pauls @ XZY
-        /*switch (_eulerSequence.value()) {
-        case static_cast<int>(Parameters::EulerSequence::XYZ):
-            _cachedMatrix = glm::mat3(
-                glm::eulerAngleX(_eulerRotation.value().x) *
-                glm::eulerAngleY(_eulerRotation.value().y) *
-                glm::eulerAngleZ(_eulerRotation.value().z)
-            );
-            break;
-        case static_cast<int>(Parameters::EulerSequence::XZY):
-            _cachedMatrix = glm::mat3(
-                glm::eulerAngleX(_eulerRotation.value().x) *
-                glm::eulerAngleZ(_eulerRotation.value().y) *
-                glm::eulerAngleY(_eulerRotation.value().z)
-            );
-            break;
-        case static_cast<int>(Parameters::EulerSequence::YXZ):
-            _cachedMatrix = glm::mat3(
-                glm::eulerAngleY(_eulerRotation.value().x) *
-                glm::eulerAngleX(_eulerRotation.value().y) *
-                glm::eulerAngleZ(_eulerRotation.value().z)
-            );
-            break;
-        case static_cast<int>(Parameters::EulerSequence::YZX):
-            _cachedMatrix = glm::mat3(
-                glm::eulerAngleY(_eulerRotation.value().x) *
-                glm::eulerAngleZ(_eulerRotation.value().y) *
-                glm::eulerAngleX(_eulerRotation.value().z)
-            );
-            break;
-        case static_cast<int>(Parameters::EulerSequence::ZXY):
-            _cachedMatrix = glm::mat3(
-                glm::eulerAngleZ(_eulerRotation.value().x) *
-                glm::eulerAngleX(_eulerRotation.value().y) *
-                glm::eulerAngleY(_eulerRotation.value().z)
-            );
-            break;
-        case static_cast<int>(Parameters::EulerSequence::ZYX):
-            _cachedMatrix = glm::mat3(
-                glm::eulerAngleZ(_eulerRotation.value().x) *
-                glm::eulerAngleY(_eulerRotation.value().y) *
-                glm::eulerAngleX(_eulerRotation.value().z)
-            );
-            break;
-        }
-        //_cachedMatrix = glm::mat3_cast(glm::quat(_eulerRotation.value()));
-        _matrixIsDirty = false;
-        */
-        auto x = glm::eulerAngleX(_eulerRotation.value().x);
-        auto y = glm::eulerAngleY(_eulerRotation.value().y);
-        auto z = glm::eulerAngleZ(_eulerRotation.value().z);
-        switch (_eulerSequence.value()) {
-        case static_cast<int>(Parameters::EulerSequence::XYZ):
-            _cachedMatrix = glm::mat3(
-                x * y * z
-            );
-            break;
-        case static_cast<int>(Parameters::EulerSequence::XZY):
-            _cachedMatrix = glm::mat3(
-                x * z * y
-            );
-            break;
-        case static_cast<int>(Parameters::EulerSequence::YXZ):
-            _cachedMatrix = glm::mat3(
-                y * x * z
-            );
-            break;
-        case static_cast<int>(Parameters::EulerSequence::YZX):
-            _cachedMatrix = glm::mat3(
-                y * z * x
-            );
-            break;
-        case static_cast<int>(Parameters::EulerSequence::ZXY):
-            _cachedMatrix = glm::mat3(
-                z * x * y
-            );
-            break;
-        case static_cast<int>(Parameters::EulerSequence::ZYX):
-            _cachedMatrix = glm::mat3(
-                z * y * x
-            );
-            break;
-        case static_cast<int>(Parameters::EulerSequence::Default):
-            _cachedMatrix = glm::mat3_cast(glm::quat(_eulerRotation.value()));
-            break;
-        }
-
+    if (_matrixIsDirty) [[unlikely]] {
+        _cachedMatrix = glm::mat3_cast(glm::quat(_eulerRotation.value()));
         _matrixIsDirty = false;
     }
     return _cachedMatrix;

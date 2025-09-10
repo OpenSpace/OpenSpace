@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,15 +26,15 @@
 
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/selectionproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/list/doublelistproperty.h>
 #include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/matrix/dmat2property.h>
 #include <openspace/properties/matrix/dmat3property.h>
 #include <openspace/properties/matrix/dmat4property.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/selectionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
@@ -63,19 +63,15 @@ void renderTooltip(Property* prop, double delay) {
             ImGui::TextWrapped("%s", prop->description().c_str());
             ImGui::Spacing();
         }
-        ImGui::Text(
-            "%s",
-            (std::string("Identifier: ") + prop->uri()).c_str()
-        );
+        std::string t = std::format("Identifier: {}", prop->uri());
+        ImGui::Text("%s", t.c_str());
         ImGui::EndTooltip();
     }
 }
 
-void executeSetPropertyScript(const std::string& id, const std::string& value) {
+void executeSetPropertyScript(std::string_view id, const std::string& value) {
     global::scriptEngine->queueScript(
-        std::format("openspace.setPropertyValueSingle('{}', {});", id, value),
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+        std::format("openspace.setPropertyValueSingle('{}', {});", id, value)
     );
 }
 
@@ -108,55 +104,37 @@ void renderOptionProperty(Property* prop, const std::string& ownerName,
     OptionProperty* p = static_cast<OptionProperty*>(prop);
     const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
-    bool isReadOnly = false;
-    if (p->metaData().hasValue<bool>("isReadOnly")) {
-        isReadOnly = p->metaData().value<bool>("isReadOnly");
-    }
+    bool isReadOnly = p->isReadOnly();
 
     int value = *p;
     const std::vector<OptionProperty::Option>& options = p->options();
-    switch (p->displayType()) {
-        case OptionProperty::DisplayType::Radio:
-            ImGui::Text("%s", name.c_str());
-            ImGui::Separator();
-            for (const OptionProperty::Option& o : options) {
-                ImGui::RadioButton(o.description.c_str(), &value, o.value);
-                if (showTooltip) {
-                    renderTooltip(prop, tooltipDelay);
-                }
-            }
-            ImGui::Separator();
-            break;
-        case OptionProperty::DisplayType::Dropdown: {
-            // The order of the options does not have to correspond with the value of the
-            // option
-            std::string nodeNames;
-            for (const OptionProperty::Option& o : options) {
-                nodeNames += o.description + '\0';
-            }
-            nodeNames += '\0';
 
-            int idx = static_cast<int>(std::distance(
-                options.begin(),
-                std::find_if(
-                    options.begin(),
-                    options.end(),
-                    [value](const OptionProperty::Option& o) { return o.value == value; }
-                )
-            ));
-
-            const bool hasChanged = ImGui::Combo(name.c_str(), &idx, nodeNames.c_str());
-            if (showTooltip) {
-                renderTooltip(prop, tooltipDelay);
-            }
-
-            if (hasChanged) {
-                value = options[idx].value;
-            }
-
-            break;
-        }
+    // The order of the options does not have to correspond with the value of the
+    // option
+    std::string nodeNames;
+    for (const OptionProperty::Option& o : options) {
+        nodeNames += o.description + '\0';
     }
+    nodeNames += '\0';
+
+    int idx = static_cast<int>(std::distance(
+        options.begin(),
+        std::find_if(
+            options.begin(),
+            options.end(),
+            [value](const OptionProperty::Option& o) { return o.value == value; }
+        )
+    ));
+
+    const bool hasChanged = ImGui::Combo(name.c_str(), &idx, nodeNames.c_str());
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
+    }
+
+    if (hasChanged) {
+        value = options[idx].value;
+    }
+
     if (value != p->value() && !isReadOnly) {
         executeSetPropertyScript(p->uri(), std::to_string(value));
     }
@@ -239,14 +217,9 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
     ImGui::PopID();
 }
 
-void renderListProperty(const std::string& name, const std::string& fullIdentifier,
+void renderListProperty(const std::string& name, std::string_view fullIdentifier,
                         const std::string& stringValue)
 {
-    ghoul_assert(
-        stringValue.size() > 2,
-        "an empty list should have the string value '[]'"
-    );
-
     // Remove brackets from the string value
     const std::string value = stringValue.substr(1, stringValue.size() - 2);
 
@@ -373,8 +346,8 @@ void renderIntProperty(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     IntProperty::ValueType value = *p;
-    const int min = p->minValue();
-    const int max = p->maxValue();
+    const int min = std::max(p->minValue(), std::numeric_limits<int>::lowest() + 1);
+    const int max = std::min(p->maxValue(), std::numeric_limits<int>::max() - 1);
 
     const bool changed = ImGui::SliderInt(name.c_str(), &value, min, max);
     if (showTooltip) {
@@ -397,8 +370,14 @@ void renderIVec2Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     IVec2Property::ValueType value = *p;
-    const int min = glm::compMin(p->minValue());
-    const int max = glm::compMax(p->maxValue());
+    const int min = std::max(
+        glm::compMin(p->minValue()),
+        std::numeric_limits<int>::lowest() / 2
+    );
+    const int max = std::min(
+        glm::compMax(p->maxValue()),
+        std::numeric_limits<int>::max() / 2
+    );
     const bool changed = ImGui::SliderInt2(name.c_str(), &value.x, min, max);
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
@@ -420,8 +399,14 @@ void renderIVec3Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     IVec3Property::ValueType value = *p;
-    const int min = glm::compMin(p->minValue());
-    const int max = glm::compMax(p->maxValue());
+    const int min = std::max(
+        glm::compMin(p->minValue()),
+        std::numeric_limits<int>::lowest() / 2
+    );
+    const int max = std::min(
+        glm::compMax(p->maxValue()),
+        std::numeric_limits<int>::max() / 2
+    );
     const bool changed = ImGui::SliderInt3(name.c_str(), &value.x, min, max);
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
@@ -442,8 +427,14 @@ void renderIVec4Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     IVec4Property::ValueType value = *p;
-    const int min = glm::compMin(p->minValue());
-    const int max = glm::compMax(p->maxValue());
+    const int min = std::max(
+        glm::compMin(p->minValue()),
+        std::numeric_limits<int>::lowest() / 2
+    );
+    const int max = std::min(
+        glm::compMax(p->maxValue()),
+        std::numeric_limits<int>::max() / 2
+    );
     const bool changed = ImGui::SliderInt4(name.c_str(), &value.x, min, max);
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
@@ -464,8 +455,8 @@ void renderFloatProperty(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     FloatProperty::ValueType value = *p;
-    const float min = p->minValue();
-    const float max = p->maxValue();
+    const float min = std::max(p->minValue(), std::numeric_limits<float>::lowest() / 2.f);
+    const float max = std::min(p->maxValue(), std::numeric_limits<float>::max() / 2.f);
     const bool changed = ImGui::SliderFloat(
         name.c_str(),
         &value,
@@ -494,8 +485,14 @@ void renderVec2Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     Vec2Property::ValueType value = *p;
-    const float min = glm::compMin(p->minValue());
-    const float max = glm::compMax(p->maxValue());
+    const float min = std::max(
+        glm::compMin(p->minValue()),
+        std::numeric_limits<float>::lowest() / 2.f
+    );
+    const float max = std::min(
+        glm::compMax(p->maxValue()),
+        std::numeric_limits<float>::max() / 2.f
+    );
     const bool changed = ImGui::SliderFloat2(
         name.c_str(),
         &value.x,
@@ -524,8 +521,14 @@ void renderVec3Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     Vec3Property::ValueType value = *p;
-    const float min = glm::compMin(p->minValue());
-    const float max = glm::compMax(p->maxValue());
+    const float min = std::max(
+        glm::compMin(p->minValue()),
+        std::numeric_limits<float>::lowest() / 2.f
+    );
+    const float max = std::min(
+        glm::compMax(p->maxValue()),
+        std::numeric_limits<float>::max() / 2.f
+    );
     bool changed = false;
     if (prop->viewOption(Property::ViewOptions::Color)) {
         changed = ImGui::ColorEdit3(name.c_str(), glm::value_ptr(value));
@@ -560,8 +563,14 @@ void renderVec4Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     Vec4Property::ValueType value = *p;
-    const float min = glm::compMin(p->minValue());
-    const float max = glm::compMax(p->maxValue());
+    const float min = std::max(
+        glm::compMin(p->minValue()),
+        std::numeric_limits<float>::lowest() / 2.f
+    );
+    const float max = std::min(
+        glm::compMax(p->maxValue()),
+        std::numeric_limits<float>::max() / 2.f
+    );
     bool changed = false;
     if (prop->viewOption(Property::ViewOptions::Color)) {
         changed = ImGui::ColorEdit4(name.c_str(), glm::value_ptr(value));
@@ -596,8 +605,14 @@ void renderDVec2Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     glm::vec2 value = glm::dvec2(*p);
-    const float min = static_cast<float>(glm::compMin(p->minValue()));
-    const float max = static_cast<float>(glm::compMax(p->maxValue()));
+    const float min = std::max(
+        static_cast<float>(glm::compMin(p->minValue())),
+        std::numeric_limits<float>::lowest() / 2.f
+    );
+    const float max = std::min(
+        static_cast<float>(glm::compMax(p->maxValue())),
+        std::numeric_limits<float>::max() / 2.f
+    );
     const bool changed = ImGui::SliderFloat2(
         name.c_str(),
         &value.x,
@@ -626,8 +641,14 @@ void renderDVec3Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     glm::vec3 value = glm::dvec3(*p);
-    const float min = static_cast<float>(glm::compMin(p->minValue()));
-    const float max = static_cast<float>(glm::compMax(p->maxValue()));
+    const float min = std::max(
+        static_cast<float>(glm::compMin(p->minValue())),
+        std::numeric_limits<float>::lowest() / 2.f
+    );
+    const float max = std::min(
+        static_cast<float>(glm::compMax(p->maxValue())),
+        std::numeric_limits<float>::max() / 2.f
+    );
     const bool changed = ImGui::SliderFloat3(
         name.c_str(),
         glm::value_ptr(value),
@@ -656,8 +677,14 @@ void renderDVec4Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     glm::vec4 value = glm::dvec4(*p);
-    const float min = static_cast<float>(glm::compMin(p->minValue()));
-    const float max = static_cast<float>(glm::compMax(p->maxValue()));
+    const float min = std::max(
+        static_cast<float>(glm::compMin(p->minValue())),
+        std::numeric_limits<float>::lowest() / 2.f
+    );
+    const float max = std::min(
+        static_cast<float>(glm::compMax(p->maxValue())),
+        std::numeric_limits<float>::max() / 2.f
+    );
     const bool changed = ImGui::SliderFloat4(
         name.c_str(),
         &value.x,
@@ -692,13 +719,19 @@ void renderDMat2Property(Property* prop, const std::string& ownerName,
         glm::compMin(p->minValue()[0]),
         glm::compMin(p->minValue()[1])
     );
-    const float min = static_cast<float>(glm::compMin(minValues));
+    const float min = std::max(
+        static_cast<float>(glm::compMin(minValues)),
+        std::numeric_limits<float>::lowest() / 2.f
+    );
 
     const glm::dvec2 maxValues = glm::dvec2(
         glm::compMax(p->maxValue()[0]),
         glm::compMax(p->maxValue()[1])
     );
-    const float max = static_cast<float>(glm::compMax(maxValues));
+    const float max = std::min(
+        static_cast<float>(glm::compMax(maxValues)),
+        std::numeric_limits<float>::max() / 2.f
+    );
 
     bool changed = false;
     changed |= ImGui::SliderFloat2(
@@ -745,14 +778,20 @@ void renderDMat3Property(Property* prop, const std::string& ownerName,
         glm::compMin(p->minValue()[1]),
         glm::compMin(p->minValue()[2])
     );
-    const float min = static_cast<float>(glm::compMin(minValues));
+    const float min = std::max(
+        static_cast<float>(glm::compMin(minValues)),
+        std::numeric_limits<float>::lowest() / 2.f
+    );
 
     const glm::dvec3 maxValues = glm::dvec3(
         glm::compMax(p->maxValue()[0]),
         glm::compMax(p->maxValue()[1]),
         glm::compMax(p->maxValue()[2])
     );
-    const float max = static_cast<float>(glm::compMax(maxValues));
+    const float max = std::min(
+        static_cast<float>(glm::compMax(maxValues)),
+        std::numeric_limits<float>::max() / 2.f
+    );
 
     bool changed = false;
     changed |= ImGui::SliderFloat3(
@@ -808,7 +847,10 @@ void renderDMat4Property(Property* prop, const std::string& ownerName,
         glm::compMin(p->minValue()[2]),
         glm::compMin(p->minValue()[3])
     );
-    const float min = static_cast<float>(glm::compMin(minValues));
+    const float min = std::max(
+        static_cast<float>(glm::compMin(minValues)),
+        std::numeric_limits<float>::lowest() / 2.f
+    );
 
     const glm::dvec4 maxValues = glm::dvec4(
         glm::compMax(p->maxValue()[0]),
@@ -816,7 +858,10 @@ void renderDMat4Property(Property* prop, const std::string& ownerName,
         glm::compMax(p->maxValue()[2]),
         glm::compMax(p->maxValue()[3])
     );
-    const float max = static_cast<float>(glm::compMax(maxValues));
+    const float max = std::min(
+        static_cast<float>(glm::compMax(maxValues)),
+        std::numeric_limits<float>::max() / 2.f
+    );
 
     bool changed = false;
     changed |= ImGui::SliderFloat4(

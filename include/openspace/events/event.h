@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -60,9 +60,12 @@ struct Event {
     enum class Type : uint8_t {
         ParallelConnection,
         ProfileLoadingFinished,
+        AssetLoadingFinished,
         ApplicationShutdown,
         CameraFocusTransition,
         TimeOfInterestReached,
+        MissionAdded,
+        MissionRemoved,
         MissionEventReached,
         PlanetEclipsed,
         InterpolationFinished,
@@ -146,6 +149,20 @@ struct EventProfileLoadingFinished : public Event {
      * Creates an instance of an EventProfileLoadingFinished event.
      */
     EventProfileLoadingFinished();
+};
+
+/**
+* This event is created when the loading of all assets are finished. This is emitted
+* regardless of whether it is the initial startup of a profile, or any subsequent asset
+* being loaded e.g., through add or drag-and-drop.
+*/
+struct EventAssetLoadingFinished : public Event {
+    static constexpr Type Type = Event::Type::AssetLoadingFinished;
+
+    /**
+     * Creates an instance of an AssetLoadingFinished event.
+     */
+    EventAssetLoadingFinished();
 };
 
 /**
@@ -242,13 +259,45 @@ struct EventTimeOfInterestReached : public Event {
 
 
 /**
+ * This event is created when a mission is added.
+ */
+struct EventMissionAdded : public Event {
+    static constexpr Type Type = Event::Type::MissionAdded;
+
+    /**
+     * Creates an instance of an EventMissionAdded event.
+     *
+     * \param identifier The identifier of the mission added
+     */
+    EventMissionAdded(std::string_view identifier);
+
+    const tstring identifier;
+};
+
+/**
+ * This event is created when a mission is removed.
+ */
+struct EventMissionRemoved : public Event {
+    static constexpr Type Type = Event::Type::MissionRemoved;
+
+    /**
+     * Creates an instance of an EventMissionRemoved event.
+     *
+     * \param identifier The identifier of the mission removed
+     */
+    EventMissionRemoved(std::string_view identifier);
+
+    const tstring identifier;
+};
+
+/**
  * This event is created when the end of a mission phase is reached. This event is
  * currently unused.
  */
 struct EventMissionEventReached : public Event {
     static constexpr Type Type = Event::Type::MissionEventReached;
 
-    // Not sure which kind of parameters we want to pass here
+    // Not sure which kind of parameters we want to pass here.
     EventMissionEventReached();
 };
 
@@ -261,7 +310,7 @@ struct EventPlanetEclipsed : public Event {
 
     /**
      * Creates an instance of an EventPlanetEclipsed event.
-     *
+
      * \param eclipsee_ The scene graph node that is eclipsed by another object
      * \param eclipser_ The scene graph node that is eclipsing the other object
      *

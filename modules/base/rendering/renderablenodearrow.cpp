@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,14 +47,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo StartNodeInfo = {
         "StartNode",
-        "Start Node",
+        "Start node",
         "The identifier of the node the arrow starts from.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EndNodeInfo = {
         "EndNode",
-        "End Node",
+        "End node",
         "The identifier of the node the arrow should point towards.",
         openspace::properties::Property::Visibility::NoviceUser
     };
@@ -68,7 +68,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
-        "Number of Segments",
+        "Number of segments",
         "The number of segments that the shapes of the arrow are divided into. A higher "
         "number leads to a higher resolution and smoother shape.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -76,7 +76,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo InvertInfo = {
         "Invert",
-        "Invert Direction",
+        "Invert direction",
         "If true, the arrow direction is inverted so that it points to the start node "
         "instead of the end node.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -84,7 +84,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ArrowHeadSizeInfo = {
         "ArrowHeadSize",
-        "Arrow Head Size",
+        "Arrow head size",
         "The length of the arrow head, given in relative value of the entire length of "
         "the arrow. For example, 0.1 makes the arrow head length be 10% of the full "
         "arrow length.",
@@ -93,7 +93,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ArrowHeadWidthInfo = {
         "ArrowHeadWidthFactor",
-        "Arrow Head Width Factor",
+        "Arrow head width factor",
         "A factor that is multiplied with the width, or the arrow itself, to determine "
         "the width of the base of the arrow head.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -101,7 +101,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo OffsetDistanceInfo = {
         "Offset",
-        "Offset Distance",
+        "Offset distance",
         "The distance from the center of the start node where the arrow starts. "
         "If 'UseRelativeOffset' is true, the value should be given as a factor to "
         "multiply with the bounding sphere of the node. Otherwise, the value is "
@@ -111,7 +111,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RelativeOffsetInfo = {
         "UseRelativeOffset",
-        "Use Relative Offset Distance",
+        "Use relative offset distance",
         "Decides whether to use relative distances for the offset distance. This means "
         "that the offset distance will be computed as the provided 'Offset' value times "
         "the bounding sphere of the start node. If false, meters is used.",
@@ -129,7 +129,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RelativeLengthInfo = {
         "UseRelativeLength",
-        "Use Relative Length",
+        "Use relative length",
         "Decides whether to use relative size for the length of the arrow. This means "
         "that the arrow length will be computed as the provided 'Length' value times "
         "the bounding sphere of the start node. If false, meters is used.",
@@ -145,31 +145,64 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
         "AmbientIntensity",
-        "Ambient Intensity",
+        "Ambient intensity",
         "A multiplier for ambient lighting for the shading of the arrow.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DiffuseIntensityInfo = {
         "DiffuseIntensity",
-        "Diffuse Intensity",
+        "Diffuse intensity",
         "A multiplier for diffuse lighting for the shading of the arrow.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpecularIntensityInfo = {
         "SpecularIntensity",
-        "Specular Intensity",
+        "Specular intensity",
         "A multiplier for specular lighting for the shading of the arrow.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadingEnabledInfo = {
         "PerformShading",
-        "Perform Shading",
+        "Perform shading",
         "Determines whether shading should be applied to the arrow model.",
         openspace::properties::Property::Visibility::User
     };
+
+    void updateDistanceBasedOnRelativeValues(const std::string& nodeName,
+                                             bool useRelative,
+                                             openspace::properties::FloatProperty& prop)
+    {
+        using namespace::openspace;
+
+        SceneGraphNode* startNode = sceneGraphNode(nodeName);
+        if (!startNode) {
+            LERROR(std::format("Could not find start node '{}'", nodeName));
+            return;
+        }
+        const double boundingSphere = startNode->boundingSphere();
+
+        if (!useRelative) {
+            // Recompute distance (previous value was relative)
+            prop = static_cast<float>(prop * boundingSphere);
+            prop.setExponent(11.f);
+            prop.setMaxValue(1e20f);
+        }
+        else {
+            // Recompute distance (previous value was in meters)
+            if (boundingSphere < std::numeric_limits<double>::epsilon()) {
+                LERROR(std::format(
+                    "Start node '{}' has invalid bounding sphere", nodeName
+                ));
+                return;
+            }
+            prop = static_cast<float>(prop / boundingSphere);
+            prop.setExponent(3.f);
+            prop.setMaxValue(1000.f);
+        }
+    }
 
     // A RenderableNodeArrow can be used to create a 3D arrow pointing in the direction
     // of one scene graph node to another.
@@ -217,7 +250,7 @@ namespace {
         std::optional<float> width [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(ShadingEnabledInfo.description)]]
-        std::optional<float> performShading;
+        std::optional<bool> performShading;
 
         // [[codegen::verbatim(AmbientIntensityInfo.description)]]
         std::optional<float> ambientIntensity [[codegen::greaterequal(0.f)]];
@@ -229,40 +262,6 @@ namespace {
         std::optional<float> specularIntensity [[codegen::greaterequal(0.f)]];
     };
 #include "renderablenodearrow_codegen.cpp"
-
-    void updateDistanceBasedOnRelativeValues(const std::string& nodeName,
-                                             bool useRelative,
-                                             openspace::properties::FloatProperty& prop)
-    {
-        using namespace::openspace;
-
-        SceneGraphNode* startNode = sceneGraphNode(nodeName);
-        if (!startNode) {
-            LERROR(std::format("Could not find start node '{}'", nodeName));
-            return;
-        }
-        const double boundingSphere = startNode->boundingSphere();
-
-        if (!useRelative) {
-            // Recompute distance (previous value was relative)
-            prop = static_cast<float>(prop * boundingSphere);
-            prop.setExponent(11.f);
-            prop.setMaxValue(1e20f);
-        }
-        else {
-            // Recompute distance (previous value was in meters)
-            if (boundingSphere < std::numeric_limits<double>::epsilon()) {
-                LERROR(std::format(
-                    "Start node '{}' has invalid bounding sphere", nodeName
-                ));
-                return;
-            }
-            prop = static_cast<float>(prop / boundingSphere);
-            prop.setExponent(3.f);
-            prop.setMaxValue(1000.f);
-        }
-        // @TODO (emmbr, 2022-08-22): make GUI update when min/max value is updated
-    }
 } // namespace
 
 namespace openspace {
@@ -385,7 +384,7 @@ void RenderableNodeArrow::deinitializeGL() {
 }
 
 bool RenderableNodeArrow::isReady() const {
-    return _shaderProgram;
+    return _shaderProgram != nullptr;
 }
 
 void RenderableNodeArrow::updateShapeTransforms(const RenderData& data) {
@@ -450,7 +449,7 @@ void RenderableNodeArrow::updateShapeTransforms(const RenderData& data) {
     // Create transformation matrices to reshape to size and position
     _cylinderTranslation = glm::translate(glm::dmat4(1.0), startPos);
     const glm::dvec3 cylinderScale = glm::dvec3(
-        s * glm::dvec4(_width, _width, cylinderLength, 0.0)
+        s * glm::dvec4(_width.value(), _width.value(), cylinderLength, 0.0)
     );
     _cylinderScale = glm::scale(glm::dmat4(1.0), cylinderScale);
 

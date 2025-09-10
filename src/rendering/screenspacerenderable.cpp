@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,7 +52,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RenderDuringBlackoutInfo = {
         "RenderDuringBlackout",
-        "Render during Blackout",
+        "Render during blackout",
         "If true, this screen space renderable is going to ignore the global blackout "
         "factor from the Render Engine and will always render at full opacity. If "
         "false, it will adhere to the factor and fade out like the rest of the 3D "
@@ -64,7 +64,7 @@ namespace {
         UseRadiusAzimuthElevationInfo =
     {
         "UseRadiusAzimuthElevation",
-        "Use Radius Azimuth and Elevation",
+        "Use radius azimuth and elevation",
         "Determines whether the location of this screen space plane will be specified "
         "using radius, azimuth and elevation (if 'true') or using Cartesian coordinates. "
         "The Cartesian coordinate system is useful if a regular rendering is applied, "
@@ -76,14 +76,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UsePerspectiveProjectionInfo =
     {
         "UsePerspectiveProjection",
-        "Use Perspective Projection",
+        "Use perspective projection",
         "Determines whetether the z/radius values affects the size of the plane or not.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CartesianPositionInfo = {
         "CartesianPosition",
-        "Cartesian Coordinates",
+        "Cartesian coordinates",
         "Determines the position of this screen space plane in Cartesian "
         "three-dimensional coordinates (meters).",
         openspace::properties::Property::Visibility::NoviceUser
@@ -91,7 +91,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RadiusAzimuthElevationInfo = {
         "RadiusAzimuthElevation",
-        "Radius Azimuth Elevation",
+        "Radius azimuth elevation",
         "Determines the position of this screen space plane in a coordinate system based "
         "on radius (meters), azimuth (radians), and elevation (radians).",
         openspace::properties::Property::Visibility::NoviceUser
@@ -99,7 +99,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
         "Scale",
-        "Scale Value",
+        "Scale value",
         "A scale factor for the plane that can be used to increase or decrease the "
         "visual size. The default size is determined separately for each screen space "
         "renderable type and may for example be affected by the size of an image being "
@@ -109,14 +109,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LocalRotationInfo = {
         "Rotation",
-        "Local Rotation",
+        "Local rotation",
         "An Euler rotation (x, y, z) to apply to the screen space object.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
-        "Multiply Color",
+        "Multiply color",
         "If set, the plane's texture is multiplied with this color. Useful for applying "
         "a color grayscale images.",
         openspace::properties::Property::Visibility::User
@@ -124,7 +124,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BackgroundColorInfo = {
         "BackgroundColor",
-        "Background Color",
+        "Background color",
         "A fixed color that is combined with the screen space renderable to create the "
         "final color. The actual color of the screen space renderable is alpha-blended "
         "with the background color to produce the final result.",
@@ -141,7 +141,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FaceCameraInfo = {
         "FaceCamera",
-        "Face Camera",
+        "Face camera",
         "If enabled, the object will be rotated to face the camera position. Any local "
         "rotation is then applied after this rotation.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -149,7 +149,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GammaOffsetInfo = {
         "GammaOffset",
-        "Gamma Correction Offset",
+        "Gamma correction offset",
         "Sets the gamma correction of the texture that is applied in addition to the "
         "global gamma value.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -157,21 +157,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BorderWidthInfo = {
         "BorderWidth",
-        "Border Width",
+        "Border width",
         "The width of the border.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BorderColorInfo = {
         "BorderColor",
-        "Border Color",
+        "Border color",
         "The color of the border.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BorderFeatherInfo = {
         "BorderFeather",
-        "Border Feather",
+        "Border feather",
         "If this value is enabled and a border width is set, the border will be rendered "
         "as a feathered border rather than a hard corner."
     };
@@ -234,6 +234,9 @@ namespace {
 
         // [[codegen::verbatim(ScaleInfo.description)]]
         std::optional<float> scale;
+
+        // [[codegen::verbatim(LocalRotationInfo.description)]]
+        std::optional<glm::vec3> rotation;
 
         // [[codegen::verbatim(GammaOffsetInfo.description)]]
         std::optional<float> gammaOffset;
@@ -350,15 +353,31 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         setGuiName(*p.name);
     }
 
+    _enabled = p.enabled.value_or(_enabled);
     addProperty(_enabled);
+
     _renderDuringBlackout = p.renderDuringBlackout.value_or(_renderDuringBlackout);
     addProperty(_renderDuringBlackout);
+
+    _useRadiusAzimuthElevation =
+        p.useRadiusAzimuthElevation.value_or(_useRadiusAzimuthElevation);
     addProperty(_useRadiusAzimuthElevation);
+
+    _usePerspectiveProjection =
+        p.usePerspectiveProjection.value_or(_usePerspectiveProjection);
     addProperty(_usePerspectiveProjection);
+
+    _faceCamera = p.faceCamera.value_or(_faceCamera);
     addProperty(_faceCamera);
+
+    if (_useRadiusAzimuthElevation) {
+        _raePosition = p.radiusAzimuthElevation.value_or(_raePosition);
+    }
+    else {
+        _cartesianPosition = p.cartesianPosition.value_or(_cartesianPosition);
+    }
     addProperty(_cartesianPosition);
     addProperty(_raePosition);
-    addProperty(_gammaOffset);
 
     // Setting spherical/euclidean onchange handler
     _useRadiusAzimuthElevation.onChange([this]() {
@@ -370,47 +389,35 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         }
     });
 
+    _gammaOffset = p.gammaOffset.value_or(_gammaOffset);
+    addProperty(_gammaOffset);
+
+    _scale = p.scale.value_or(_scale);
     addProperty(_scale);
-    addProperty(_multiplyColor);
-    addProperty(_backgroundColor);
-    addProperty(Fadeable::_opacity);
-    addProperty(Fadeable::_fade);
-    addProperty(_localRotation);
-
-    addProperty(_borderColor);
-    addProperty(_borderWidth);
-    addProperty(_borderFeather);
-
-    _borderWidth = p.borderWidth.value_or(_borderWidth);
-
-    _borderColor = p.borderColor.value_or(_borderColor);
-    _borderColor.setViewOption(properties::Property::ViewOptions::Color);
 
     _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
     _multiplyColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_multiplyColor);
 
     _backgroundColor = p.backgroundColor.value_or(_backgroundColor);
     _backgroundColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_backgroundColor);
 
-    _enabled = p.enabled.value_or(_enabled);
-    _gammaOffset = p.gammaOffset.value_or(_gammaOffset);
-
-    _useRadiusAzimuthElevation =
-        p.useRadiusAzimuthElevation.value_or(_useRadiusAzimuthElevation);
-
-    if (_useRadiusAzimuthElevation) {
-        _raePosition = p.radiusAzimuthElevation.value_or(_raePosition);
-    }
-    else {
-        _cartesianPosition = p.cartesianPosition.value_or(_cartesianPosition);
-    }
-
-    _scale = p.scale.value_or(_scale);
     _opacity = p.opacity.value_or(_opacity);
-    _usePerspectiveProjection =
-        p.usePerspectiveProjection.value_or(_usePerspectiveProjection);
+    addProperty(Fadeable::_opacity);
+    addProperty(Fadeable::_fade);
 
-    _faceCamera = p.faceCamera.value_or(_faceCamera);
+    _localRotation = p.rotation.value_or(_localRotation);
+    addProperty(_localRotation);
+
+    _borderColor = p.borderColor.value_or(_borderColor);
+    _borderColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_borderColor);
+
+    addProperty(_borderFeather);
+
+    _borderWidth = p.borderWidth.value_or(_borderWidth);
+    addProperty(_borderWidth);
 
     if (p.tag.has_value()) {
         if (std::holds_alternative<std::string>(*p.tag)) {
@@ -434,37 +441,30 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         // No sync or send because this is already inside a Lua script that was triggered
         // when this triggerProperty was pressed in the gui, therefor it has already been
         // synced and sent to the connected nodes and peers
-        global::scriptEngine->queueScript(
-            std::move(script),
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
-        );
+        global::scriptEngine->queueScript({
+            .code = std::move(script),
+            .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+        });
     });
     addProperty(_delete);
 }
 
 ScreenSpaceRenderable::~ScreenSpaceRenderable() {}
 
-bool ScreenSpaceRenderable::initialize() {
-    return true;
-}
+void ScreenSpaceRenderable::initialize() {}
 
-bool ScreenSpaceRenderable::initializeGL() {
+void ScreenSpaceRenderable::initializeGL() {
     createShaders();
-    return isReady();
 }
 
-bool ScreenSpaceRenderable::deinitialize() {
-    return true;
-}
+void ScreenSpaceRenderable::deinitialize() {}
 
-bool ScreenSpaceRenderable::deinitializeGL() {
+void ScreenSpaceRenderable::deinitializeGL() {
     if (_shader) {
         global::renderEngine->removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
-
-    return true;
 }
 
 void ScreenSpaceRenderable::render(const RenderData& renderData) {
@@ -547,7 +547,7 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
 
     glm::mat4 scale = glm::scale(
         glm::mat4(1.f),
-        glm::vec3(_scale, textureRatio*_scale, 1.f)
+        glm::vec3(_scale.value(), textureRatio * _scale, 1.f)
     );
 
     return scale;
@@ -653,7 +653,8 @@ glm::mat4 ScreenSpaceRenderable::translationMatrix() {
 }
 
 void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform,
-                                 const RenderData& renderData)
+                                 const RenderData& renderData,
+                                 bool useAcceleratedRendering)
 {
     glDisable(GL_CULL_FACE);
 
@@ -678,6 +679,7 @@ void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform,
     _shader->setUniform(_uniformCache.borderWidth, borderUV);
     _shader->setUniform(_uniformCache.borderColor, _borderColor);
     _shader->setUniform(_uniformCache.borderFeather, _borderFeather);
+    _shader->setUniform(_uniformCache.useAcceleratedRendering, useAcceleratedRendering);
     _shader->setUniform(
         _uniformCache.mvpMatrix,
         global::renderEngine->scene()->camera()->viewProjectionMatrix() * modelTransform
@@ -722,9 +724,9 @@ glm::vec3 ScreenSpaceRenderable::sphericalToCartesian(glm::vec3 spherical) const
     // and phi is the azimuth.
 
     const glm::vec3 sanitized = sanitizeSphericalCoordinates(std::move(spherical));
-    const float x = sanitized[0] * sin(sanitized[1]) * cos(sanitized[2]);
-    const float y = sanitized[0] * sin(sanitized[1]) * sin(sanitized[2]);
-    const float z = sanitized[0] * cos(sanitized[1]);
+    const float x = sanitized[0] * std::sin(sanitized[1]) * std::cos(sanitized[2]);
+    const float y = sanitized[0] * std::sin(sanitized[1]) * std::sin(sanitized[2]);
+    const float z = sanitized[0] * std::cos(sanitized[1]);
 
     // Now, convert rotate the coordinate system, so that z maps to y,
     // and y maps to -z. We want the pole to be in y instead of z.
@@ -738,7 +740,7 @@ glm::vec3 ScreenSpaceRenderable::cartesianToSpherical(const glm::vec3& cartesian
     const float r = std::sqrt(
         std::pow(rotated.x, 2.f) + std::pow(rotated.y, 2.f) + std::pow(rotated.z, 2.f)
     );
-    const float theta = std::acos(rotated.z / r);
+    const float theta = std::acos(r != 0.f ? rotated.z / r : rotated.z);
     const float phi = std::atan2(rotated.y, rotated.x);
     return sanitizeSphericalCoordinates(glm::vec3(r, theta, phi));
 }

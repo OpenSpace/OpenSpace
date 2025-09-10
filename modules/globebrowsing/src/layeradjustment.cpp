@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,14 +31,14 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo ChromaKeyColorInfo = {
         "ChromaKeyColor",
-        "Chroma Key Color",
+        "Chroma key color",
         "This color is used as the chroma key for the layer that is adjusted.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ChromaKeyToleranceInfo = {
         "ChromaKeyTolerance",
-        "Chroma Key Tolerance",
+        "Chroma key tolerance",
         "This value determines the tolerance that is used to determine whether a color "
         "is matching the selected Chroma key.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -80,7 +80,7 @@ LayerAdjustment::LayerAdjustment()
     : properties::PropertyOwner({ "Adjustment" })
     , _chromaKeyColor(ChromaKeyColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _chromaKeyTolerance(ChromaKeyToleranceInfo, 0.f, 0.f, 1.f)
-    , _typeOption(TypeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _typeOption(TypeInfo)
     , _typeId(static_cast<layers::Adjustment::ID>(_typeOption.value()))
 {
     // Add options to option properties
@@ -138,7 +138,7 @@ layers::Adjustment::ID LayerAdjustment::type() const {
 }
 
 void LayerAdjustment::addVisibleProperties() {
-    switch (type()) {
+    switch (_typeId) {
         case layers::Adjustment::ID::None:
             break;
         case layers::Adjustment::ID::ChromaKey:

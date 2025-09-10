@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,6 +50,7 @@ namespace geos_nlohmann = nlohmann;
 #include <geos/geom/Geometry.h>
 #include <geos/io/GeoJSON.h>
 #include <geos/io/GeoJSONReader.h>
+#include <geos/operation/valid/MakeValid.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "GeoJsonComponent";
@@ -74,7 +75,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo HeightOffsetInfo = {
         "HeightOffset",
-        "Height Offset",
+        "Height offset",
         "A height offset value, in meters. Useful for moving a feature closer to or "
         "farther away from the surface.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -82,7 +83,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo CoordinateOffsetInfo = {
         "CoordinateOffset",
-        "Geographic Coordinate Offset",
+        "Geographic coordinate offset",
         "A latitude and longitude offset value, in decimal degrees. Can be used to "
         "move the object on the surface and correct potential mismatches with other "
         "renderings. Note that changing it during runtime leads to all positions being "
@@ -100,7 +101,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PreventHeightUpdateInfo = {
         "PreventHeightUpdate",
-        "Prevent Update From Heightmap",
+        "Prevent update from heightmap",
         "If true, the polygon mesh will not be automatically updated based on the "
         "heightmap, even if the 'RelativeToGround' altitude option is set and the "
         "heightmap updates. The data can still be force updated.",
@@ -109,7 +110,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ForceUpdateHeightDataInfo = {
         "ForceUpdateHeightData",
-        "Force Update Height Data",
+        "Force update height data",
         "Triggering this leads to a recomputation of the heights based on the globe "
         "height map value at the geometry's positions.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -117,7 +118,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PointRenderModeInfo = {
         "PointRenderMode",
-        "Points Aligned to",
+        "Points aligned to",
         "Decides how the billboards for the points should be rendered in terms of up "
         "direction and whether the plane should face the camera. See details on the "
         "different options in the wiki.",
@@ -126,7 +127,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FlyToFeatureInfo = {
         "FlyToFeature",
-        "Fly To Feature",
+        "Fly to feature",
         "Triggering this leads to the camera flying to a position that show the GeoJson "
         "feature. The flight will account for any lat, long or height offset.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -134,7 +135,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo CentroidCoordinateInfo = {
         "CentroidCoordinate",
-        "Centroid Coordinate",
+        "Centroid coordinate",
         "The lat long coordinate of the centroid position of the read geometry. Note "
         "that this value does not incude the offset.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -142,7 +143,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BoundingBoxInfo = {
         "BoundingBox",
-        "Bounding Box",
+        "Bounding box",
         "The lat long coordinates of the lower and upper corner of the bounding box of "
         "the read geometry. Note that this value does not incude the offset.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -150,7 +151,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PointSizeScaleInfo = {
         "PointSizeScale",
-        "Point Size Scale",
+        "Point size scale",
         "An extra scale value that can be used to increase or decrease the scale of any "
         "rendered points in the component, even if a value is set from the GeoJson file.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -158,7 +159,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthScaleInfo = {
         "LineWidthScale",
-        "Line Width Scale",
+        "Line width scale",
         "An extra scale value that can be used to increase or decrease the width of any "
         "rendered lines in the component, even if a value is set from the GeoJson file. "
         "Note that there is a max limit for how wide lines can be.",
@@ -299,10 +300,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     )
     , _pointSizeScale(PointSizeScaleInfo, 1.f, 0.01f, 100.f)
     , _lineWidthScale(LineWidthScaleInfo, 1.f, 0.01f, 10.f)
-    , _pointRenderModeOption(
-        PointRenderModeInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _pointRenderModeOption(PointRenderModeInfo)
     , _drawWireframe(DrawWireframeInfo, false)
     , _preventUpdatesFromHeightMap(PreventHeightUpdateInfo, false)
     , _forceUpdateHeightData(ForceUpdateHeightDataInfo)
@@ -363,7 +361,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
 
     _defaultProperties.pointTexture.onChange([this]() {
         const std::filesystem::path texturePath = _defaultProperties.pointTexture.value();
-        // Not ethat an empty texture is also valid => use default texture from module
+        // Note that an empty texture is also valid => use default texture from module
         if (std::filesystem::is_regular_file(texturePath) || texturePath.empty()) {
             _textureIsDirty = true;
         }
@@ -378,9 +376,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     _defaultProperties.tessellation.enabled.onChange([this]() { _dataIsDirty = true; });
     _defaultProperties.tessellation.useLevel.onChange([this]() { _dataIsDirty = true; });
     _defaultProperties.tessellation.level.onChange([this]() { _dataIsDirty = true; });
-    _defaultProperties.tessellation.distance.onChange([this]() {
-        _dataIsDirty = true;
-    });
+    _defaultProperties.tessellation.distance.onChange([this]() { _dataIsDirty = true; });
 
     _forceUpdateHeightData.onChange([this]() {
         for (GlobeGeometryFeature& f : _geometryFeatures) {
@@ -498,8 +494,8 @@ void GeoJsonComponent::deinitializeGL() {
 
 bool GeoJsonComponent::isReady() const {
     const bool isReady = std::all_of(
-        std::begin(_geometryFeatures),
-        std::end(_geometryFeatures),
+        _geometryFeatures.cbegin(),
+        _geometryFeatures.cend(),
         std::mem_fn(&GlobeGeometryFeature::isReady)
     );
     return isReady && _linesAndPolygonsProgram && _pointsProgram;
@@ -536,7 +532,7 @@ void GeoJsonComponent::render(const RenderData& data) {
     };
 
     // Do two render passes, to properly render opacity of overlaying objects
-    for (int renderPass = 0; renderPass < 2; ++renderPass) {
+    for (int renderPass = 0; renderPass < 2; renderPass++) {
         for (size_t i = 0; i < _geometryFeatures.size(); i++) {
             if (_features[i]->enabled && _features[i]->isVisible()) {
                 _geometryFeatures[i].render(
@@ -567,7 +563,7 @@ void GeoJsonComponent::update() {
         return;
     }
 
-    const glm::vec3 offsets = glm::vec3(_latLongOffset.value(), _heightOffset);
+    const glm::vec3 offsets = glm::vec3(_latLongOffset.value(), _heightOffset.value());
 
     for (size_t i = 0; i < _geometryFeatures.size(); i++) {
         if (!_features[i]->enabled) {
@@ -575,11 +571,11 @@ void GeoJsonComponent::update() {
         }
         GlobeGeometryFeature& g = _geometryFeatures[i];
 
-        if (_dataIsDirty || _heightOffsetIsDirty) {
+        if (_dataIsDirty || _heightOffsetIsDirty) [[unlikely]] {
             g.setOffsets(offsets);
         }
 
-        if (_textureIsDirty) {
+        if (_textureIsDirty) [[unlikely]] {
             g.updateTexture();
         }
 
@@ -591,7 +587,7 @@ void GeoJsonComponent::update() {
 }
 
 void GeoJsonComponent::readFile() {
-    std::ifstream file(_geoJsonFile);
+    std::ifstream file = std::ifstream(_geoJsonFile);
 
     if (!file.good()) {
         LERROR(std::format("Failed to open GeoJSON file: {}", _geoJsonFile.value()));
@@ -604,6 +600,14 @@ void GeoJsonComponent::readFile() {
         std::istreambuf_iterator<char>(file),
         std::istreambuf_iterator<char>()
     );
+
+    // For the loading, we want to assume that the current working directory is where the
+    // GeoJSON file is located
+    const std::filesystem::path cwd = std::filesystem::current_path();
+    std::filesystem::path jsonDir =
+        std::filesystem::path(_geoJsonFile.value()).parent_path();
+    std::filesystem::current_path(jsonDir);
+    defer { std::filesystem::current_path(cwd); };
 
     // Parse GeoJSON string into GeoJSON objects
     try {
@@ -637,8 +641,18 @@ void GeoJsonComponent::readFile() {
 void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& feature,
                                           int indexInFile
 ) {
-    // Read the geometry
-    const geos::geom::Geometry* geom = feature.getGeometry();
+    const geos::geom::Geometry* nonValidatedGeometry = feature.getGeometry();
+
+    if (!nonValidatedGeometry->isValid()) {
+        LWARNING(std::format(
+            "Feature {} in GeoJson file '{}' has invalid geometry (for example due to "
+            "self-intersections or other non-simple geometry). If possible, the feature "
+            "will be split into separate features with valid geometry. However, note "
+            "that this may introduce artifacts.", indexInFile, _geoJsonFile.value()
+        ));
+    }
+    geos::operation::valid::MakeValid makeValid;
+    std::unique_ptr<geos::geom::Geometry> geom = makeValid.build(nonValidatedGeometry);
 
     // Read the properties
     GeoJsonOverrideProperties propsFromFile = propsFromGeoJson(feature);
@@ -654,7 +668,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
     }
     else if (geom->isPuntal()) {
         // If points, handle all point features as one feature, even multi-points
-        geomsToAdd = { geom };
+        geomsToAdd = { geom.get()};
     }
     else {
         const size_t nGeom = geom->getNumGeometries();
@@ -834,25 +848,19 @@ void GeoJsonComponent::flyToFeature(std::optional<int> index) const {
     float lat = centroidLat + _latLongOffset.value().x;
     float lon = centroidLon + _latLongOffset.value().y;
 
-    global::scriptEngine->queueScript(
-        std::format(
-            "openspace.globebrowsing.flyToGeo([[{}]], {}, {}, {})",
-            _globeNode.owner()->identifier(), lat, lon, d
-        ),
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+    const std::string script = std::format(
+        "openspace.navigation.flyToGeo([[{}]], {}, {}, {})",
+        _globeNode.owner()->identifier(), lat, lon, d
     );
+    global::scriptEngine->queueScript(script);
 }
 
 void GeoJsonComponent::triggerDeletion() const {
-    global::scriptEngine->queueScript(
-        std::format(
-            "openspace.globebrowsing.deleteGeoJson([[{}]], [[{}]])",
-            _globeNode.owner()->identifier(), _identifier
-        ),
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+    const std::string script = std::format(
+        "openspace.globebrowsing.deleteGeoJson([[{}]], [[{}]])",
+        _globeNode.owner()->identifier(), _identifier
     );
+    global::scriptEngine->queueScript(script);
 }
 
 } // namespace openspace::globebrowsing

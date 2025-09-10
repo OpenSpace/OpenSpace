@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -167,11 +167,12 @@ void JoystickCameraStates::updateStateFromInput(
                         t.propertyUri, value
                     );
 
-                    global::scriptEngine->queueScript(
-                        script,
-                        scripting::ScriptEngine::ShouldBeSynchronized(t.isRemote),
-                        scripting::ScriptEngine::ShouldSendToRemote(t.isRemote)
-                    );
+                    using Script = scripting::ScriptEngine::Script;
+                    global::scriptEngine->queueScript({
+                        .code = script,
+                        .synchronized = Script::ShouldBeSynchronized(t.isRemote),
+                        .sendToRemote = Script::ShouldSendToRemote(t.isRemote)
+                    });
                     break;
             }
         }
@@ -187,15 +188,16 @@ void JoystickCameraStates::updateStateFromInput(
                 );
 
                 if (active) {
-                    global::scriptEngine->queueScript(
-                        it->second.command,
-                        scripting::ScriptEngine::ShouldBeSynchronized(
+                    using Script = scripting::ScriptEngine::Script;
+                    global::scriptEngine->queueScript({
+                        .code = it->second.command,
+                        .synchronized = Script::ShouldBeSynchronized(
                             it->second.synchronization
                         ),
-                        scripting::ScriptEngine::ShouldSendToRemote(
+                        .sendToRemote = Script::ShouldSendToRemote(
                             it->second.synchronization
                         )
-                    );
+                    });
                 }
             }
         }
@@ -209,21 +211,21 @@ void JoystickCameraStates::updateStateFromInput(
     }
 
     if (zoom.first) {
-        _truckMovementState.velocity.set(glm::dvec2(zoom.second), deltaTime);
+        _truckMovementState.velocity.set(zoom.second, deltaTime);
     }
     else {
         _truckMovementState.velocity.decelerate(deltaTime);
     }
 
     if (localRoll.first) {
-        _localRollState.velocity.set(glm::dvec2(localRoll.second), deltaTime);
+        _localRollState.velocity.set(localRoll.second, deltaTime);
     }
     else {
         _localRollState.velocity.decelerate(deltaTime);
     }
 
     if (globalRoll.first) {
-        _globalRollState.velocity.set(glm::dvec2(globalRoll.second), deltaTime);
+        _globalRollState.velocity.set(globalRoll.second, deltaTime);
     }
     else {
         _globalRollState.velocity.decelerate(deltaTime);

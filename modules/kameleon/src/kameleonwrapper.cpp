@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -73,10 +73,9 @@ std::array<std::string, 3> gridVariables(ccmc::Model* model) {
 
     // validate
     if (tokens.size() != 3) {
-        throw ghoul::RuntimeError(
-            "Expected three dimensional grid system. Got " +
-            std::to_string(tokens.size()) + "dimensions"
-        );
+        throw ghoul::RuntimeError(std::format(
+            "Expected three dimensional grid system. Got {} dimensions", tokens.size()
+        ));
     }
 
     std::string x = std::move(tokens.at(0));
@@ -202,9 +201,9 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
     };
 
     // ProgressBar pb(static_cast<int>(outDimensions.x));
-    for (size_t x = 0; x < outDimensions.x; ++x) {
-        for (size_t y = 0; y < outDimensions.y; ++y) {
-            for (size_t z = 0; z < outDimensions.z; ++z) {
+    for (size_t x = 0; x < outDimensions.x; x++) {
+        for (size_t y = 0; y < outDimensions.y; y++) {
+            for (size_t z = 0; z < outDimensions.z; z++) {
                 const size_t index = x + y * outDimensions.x +
                                      z * outDimensions.x * outDimensions.y;
 
@@ -303,7 +302,7 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
     const double dist = ((varMax - varMin) / NBins) * stop;
 
     const double varMaxNew = varMin + dist;
-    for(size_t i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) {
         const double normalizedVal = (doubleData[i] - varMin) / (varMaxNew - varMin);
 
         data[i] = static_cast<float>(glm::clamp(normalizedVal, 0.0, 1.0));
@@ -360,9 +359,9 @@ float* KameleonWrapper::uniformSliceValues(const std::string& var,
 
     float missingValue = _model->getMissingValue();
 
-    for (size_t x = 0; x < outDimensions.x; ++x) {
-        for (size_t y = 0; y < outDimensions.y; ++y) {
-            for(size_t z = 0; z < outDimensions.z; ++z){
+    for (size_t x = 0; x < outDimensions.x; x++) {
+        for (size_t y = 0; y < outDimensions.y; y++) {
+            for (size_t z = 0; z < outDimensions.z; z++) {
 
                 const float xi = (hasXSlice) ? slice : x;
                 const float yi = (hasYSlice) ? slice : y;
@@ -485,10 +484,10 @@ float* KameleonWrapper::uniformSampledVectorValues(const std::string& xVar,
     //LDEBUG(zVar << "Max: " << varZMax);
 
     //ProgressBar pb(static_cast<int>(outDimensions.x));
-    for (size_t x = 0; x < outDimensions.x; ++x) {
+    for (size_t x = 0; x < outDimensions.x; x++) {
         //pb.print(x);
-        for (size_t y = 0; y < outDimensions.y; ++y) {
-            for (size_t z = 0; z < outDimensions.z; ++z) {
+        for (size_t y = 0; y < outDimensions.y; y++) {
+            for (size_t z = 0; z < outDimensions.z; z++) {
                 const size_t index = x * NumChannels + y * NumChannels * outDimensions.x +
                                      z * NumChannels * outDimensions.x * outDimensions.y;
 
@@ -732,7 +731,7 @@ glm::vec4 KameleonWrapper::modelScaleScaled() const {
     }
     else if (units[0] == "m" && units[1] == "radian" && units[2] == "radian") {
         // For spherical coordinate systems the radius is in meter
-        scale.w = -log10(1.f / _max.x);
+        scale.w = -std::log10(1.f / _max.x);
     }
 
     return scale;
@@ -1075,7 +1074,7 @@ std::vector<std::string> KameleonWrapper::variables() const {
     int numVariables = _model->getNumberOfVariables();
 
     for (int i = 0; i < numVariables; i++) {
-        variableNames.push_back(_model->getVariableName(i));;
+        variableNames.push_back(_model->getVariableName(i));
     }
     return variableNames;
 }

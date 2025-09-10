@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLEGLOBE___H__
 
 #include <openspace/rendering/renderable.h>
+
 #include <modules/base/rendering/renderablemodel.h>
 #include <modules/base/rendering/directionallightsource.h>
 #include <modules/globebrowsing/src/ellipsoid.h>
@@ -38,10 +39,11 @@
 #include <modules/globebrowsing/src/shadowcomponent.h>
 #include <modules/globebrowsing/src/skirtedgrid.h>
 #include <modules/globebrowsing/src/tileindex.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/util/ellipsoid.h>
 #include <ghoul/misc/memorypool.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <cstddef>
@@ -72,7 +74,7 @@ struct Chunk {
         WantSplit
     };
 
-    Chunk(const TileIndex& ti);
+    explicit Chunk(const TileIndex& ti);
 
     const TileIndex tileIndex;
     const GeodeticPatch surfacePatch;
@@ -98,7 +100,7 @@ enum class ShadowCompType {
  */
 class RenderableGlobe : public Renderable {
 public:
-    RenderableGlobe(const ghoul::Dictionary& dictionary);
+    explicit RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe() override = default;
 
     void initializeGL() override;
@@ -115,7 +117,7 @@ public:
 
     bool renderedWithDesiredData() const override;
 
-    const Ellipsoid& ellipsoid() const;
+    Ellipsoid ellipsoid() const override;
     const LayerManager& layerManager() const;
     LayerManager& layerManager();
     const GeoJsonManager& geoJsonManager() const;
@@ -189,15 +191,13 @@ private:
      *
      * The height can be negative if the height map contains negative values.
      *
-     * \param `position` is the position of a point that gets geodetically projected on
+     * \param position This is the position of a point that gets geodetically projected on
      *        the reference ellipsoid. `position` must be in Cartesian model space
      * \return The height from the reference ellipsoid to the globe surface
      */
     float getHeight(const glm::dvec3& position) const;
 
-    void renderChunks(const RenderData& data, RendererTasks& rendererTask,
-        const ShadowComponent::ShadowMapData& shadowData = {}, bool renderGeomOnly = false
-    );
+    void renderChunks(const RenderData& data, bool renderGeomOnly = false);
 
     /**
      * Chunks can be rendered either globally or locally. Global rendering is performed
@@ -208,7 +208,7 @@ private:
      * lead to jagging. We only render global chunks for lower chunk levels.
      */
     void renderChunkGlobally(const Chunk& chunk, const RenderData& data,
-        const ShadowComponent::ShadowMapData& shadowData = {}, bool renderGeomOnly = false
+        bool renderGeomOnly = false
     );
 
     /**
@@ -248,9 +248,7 @@ private:
     void setCommonUniforms(ghoul::opengl::ProgramObject& programObject,
         const Chunk& chunk, const RenderData& data);
 
-
     void recompileShaders();
-
 
     void splitChunkNode(Chunk& cn, int depth);
     void mergeChunkNode(Chunk& cn);
@@ -259,6 +257,40 @@ private:
     void freeChunkNode(Chunk* n);
 
     std::vector<const RenderableModel*> getShadowers(const SceneGraphNode* node);
+    static constexpr int MinSplitDepth = 2;
+    static constexpr int MaxSplitDepth = 22;
+
+    properties::BoolProperty _performShading;
+    properties::BoolProperty _useAccurateNormals;
+    properties::FloatProperty _ambientIntensity;
+    properties::StringProperty _lightSourceNodeName;
+
+    properties::BoolProperty _renderAtDistance;
+    properties::BoolProperty _eclipseShadowsEnabled;
+    properties::BoolProperty _eclipseHardShadows;
+    properties::FloatProperty _targetLodScaleFactor;
+    properties::FloatProperty _currentLodScaleFactor;
+    properties::FloatProperty _orenNayarRoughness;
+    properties::IntProperty _nActiveLayers;
+
+    struct {
+        properties::BoolProperty showChunkEdges;
+        properties::BoolProperty levelByProjectedAreaElseDistance;
+        properties::TriggerProperty resetTileProviders;
+        properties::BoolProperty performFrustumCulling;
+        properties::IntProperty  modelSpaceRenderingCutoffLevel;
+        properties::IntProperty  dynamicLodIterationCount;
+    } _debugProperties;
+
+    properties::PropertyOwner _debugPropertyOwner;
+
+    struct {
+        properties::BoolProperty shadowMapping;
+        properties::FloatProperty zFightingPercentage;
+        properties::IntProperty nShadowSamples;
+    } _shadowMappingProperties;
+
+    properties::PropertyOwner _shadowMappingPropertyOwner;
 
     Ellipsoid _ellipsoid;
     SkirtedGrid _grid;
@@ -274,7 +306,6 @@ private:
     std::vector<const Chunk*> _globalChunkBuffer;
     std::vector<const Chunk*> _localChunkBuffer;
     std::vector<const Chunk*> _traversalMemory;
-
 
     Chunk _leftRoot;  // Covers all negative longitudes
     Chunk _rightRoot; // Covers all positive longitudes
@@ -298,7 +329,6 @@ private:
     } _localRenderer;
 
     SceneGraphNode* _lightSourceNode = nullptr;
-    properties::StringProperty _lightSourceNodeName;
 
     bool _shadersNeedRecompilation = true;
     bool _lodScaleFactorDirty = true;
@@ -306,6 +336,7 @@ private:
     bool _nLayersIsDirty = true;
     bool _allChunksAvailable = true;
     bool _layerManagerDirty = true;
+    bool _resetTileProviders = false;
     size_t _iterationsOfAvailableData = 0;
     size_t _iterationsOfUnavailableData = 0;
     Layer* _lastChangedLayer = nullptr;

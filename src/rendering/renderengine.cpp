@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -83,7 +83,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShowOverlayClientsInfo = {
         "ShowOverlayOnClients",
-        "Show Overlay Information on Clients",
+        "Show overlay information on clients",
         "If this value is enabled, the overlay information text is also automatically "
         "rendered on client nodes. This values is disabled by default.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -100,7 +100,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo VerticalLogOffsetInfo = {
         "VerticalLogOffset",
-        "Vertical Log Offset",
+        "Vertical log offset",
         "The vertical offset for the on-screen log in [0,1] coordinates, a factor that "
         "is scaled with the vertical resolution.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -116,7 +116,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShowCameraInfo = {
         "ShowCamera",
-        "Shows information about the current camera state, such as friction",
+        "Shows camera information",
         "This value determines whether the information about the current camera state is "
         "shown on the screen.",
         openspace::properties::Property::Visibility::User
@@ -124,7 +124,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ScreenshotWindowIdsInfo = {
         "ScreenshotWindowId",
-        "Screenshow Window Ids",
+        "Screenshow window ids",
         "The list of window identifiers whose screenshot will be taken the next time "
         "anyone triggers a screenshot. If this list is empty (the default), all windows "
         "will have their screenshot taken. Id's that do not exist are silently ignored.",
@@ -133,7 +133,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ApplyWarpingInfo = {
         "ApplyWarpingScreenshot",
-        "Apply Warping to Screenshots",
+        "Apply warping to screenshots",
         "This value determines whether a warping should be applied before taking a "
         "screenshot. If it is enabled, all post processing is applied as well, which "
         "includes everything rendered on top of the rendering, such as the user "
@@ -143,7 +143,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ScreenshotUseDateInfo = {
         "ScreenshotUseDate",
-        "Screenshot Folder uses Date",
+        "Screenshot folder uses date",
         "If this value is set to 'true', screenshots will be saved to a folder that "
         "contains the time at which this value was enabled.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -151,7 +151,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DisableMasterInfo = {
         "DisableMasterRendering",
-        "Disable Master Rendering",
+        "Disable master rendering",
         "If this value is enabled, the rendering on the master node will be disabled. "
         "Every other aspect of the application will be unaffected by this and it will "
         "still respond to user input. This setting is reasonably only useful in the case "
@@ -162,7 +162,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GlobalRotationInfo = {
         "GlobalRotation",
-        "Global Rotation",
+        "Global rotation",
         "Applies a global view rotation. Use this to rotate the position of the "
         "focus node away from the default location on the screen. This setting "
         "persists even when a new focus node is selected. Defined using pitch, yaw, "
@@ -172,7 +172,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ScreenSpaceRotationInfo = {
         "ScreenSpaceRotation",
-        "Screen Space Rotation",
+        "Screen space rotation",
         "Applies a rotation to all screen space renderables. Defined using pitch, yaw, "
         "roll in radians.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -180,7 +180,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MasterRotationInfo = {
         "MasterRotation",
-        "Master Rotation",
+        "Master rotation",
         "Applies a view rotation for only the master node, defined using pitch, yaw, "
         "roll in radians.This can be used to compensate the master view direction for "
         "tilted display systems in clustered immersive environments.",
@@ -189,7 +189,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DisableHDRPipelineInfo = {
         "DisableHDRPipeline",
-        "Disable HDR Rendering",
+        "Disable HDR rendering",
         "If this value is enabled, the rendering will disable the HDR color handling and "
         "the LDR color pipeline will be used. Be aware of possible over exposure in the "
         "final colors.",
@@ -198,7 +198,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo HDRExposureInfo = {
         "HDRExposure",
-        "HDR Exposure",
+        "HDR exposure",
         "This value determines the amount of light per unit area reaching the equivalent "
         "of an electronic image sensor.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -206,7 +206,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
         "Gamma",
-        "Gamma Correction",
+        "Gamma correction",
         "Gamma, is the nonlinear operation used to encode and decode luminance or "
         "tristimulus values in the image",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -235,7 +235,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FramerateLimitInfo = {
         "FramerateLimit",
-        "Framerate Limit",
+        "Framerate limit",
         "If set to a value bigger than 0, the framerate will be limited to that many "
         "frames per second without using V-Sync.",
         openspace::properties::Property::Visibility::User
@@ -243,7 +243,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo HorizFieldOfViewInfo = {
         "HorizFieldOfView",
-        "Horizontal Field of View",
+        "Horizontal field of view",
         "Adjusts the degrees of the horizontal field of view. The vertical field of "
         "view will be automatically adjusted to match, according to the current "
         "aspect ratio.",
@@ -252,7 +252,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GlobalBlackoutFactorInfo = {
         "BlackoutFactor",
-        "Blackout Factor",
+        "Blackout factor",
         "The blackout factor of the rendering. This can be used for fading in or out the "
         "rendering window.",
         openspace::properties::Property::Visibility::User
@@ -260,7 +260,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ApplyBlackoutToMasterInfo = {
         "ApplyBlackoutToMaster",
-        "Apply Blackout to Master",
+        "Apply blackout to master",
         "If this value is 'true', the blackout factor is applied to the master node. "
         "Regardless of this value, the clients will always adhere to the factor.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -275,20 +275,40 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EnabledFontColorInfo = {
         "EnabledFontColor",
-        "Enabled Font Color",
+        "Enabled font color",
         "The font color used for enabled options.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisabledFontColorInfo = {
         "DisabledFontColor",
-        "Disabled Font Color",
+        "Disabled font color",
         "The font color used for disabled options.",
         openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo WindowingInfo = {
+        "Windowing",
+        "Windowing",
+        "Contains properties that concern the specific rendering settings of individual "
+        "windows. Note that the number of properties in this owner are determined by the "
+        "configuration file and might be different from run to run."
     };
 } // namespace
 
 namespace openspace {
+
+RenderEngine::Window::Window(PropertyOwnerInfo info, size_t id)
+    : properties::PropertyOwner(info)
+    , horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.f)
+{
+    horizFieldOfView.onChange([this, id]() {
+        if (global::windowDelegate->isMaster()) {
+            global::windowDelegate->setHorizFieldOfView(id, horizFieldOfView);
+        }
+    });
+    addProperty(horizFieldOfView);
+}
 
 RenderEngine::RenderEngine()
     : properties::PropertyOwner({ "RenderEngine", "Render Engine" })
@@ -311,7 +331,7 @@ RenderEngine::RenderEngine()
     , _saturation(SaturationInfo, 1.f, 0.f, 2.f)
     , _value(ValueInfo, 1.f, 0.f, 2.f)
     , _framerateLimit(FramerateLimitInfo, 0, 0, 500)
-    , _horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.f)
+    , _windowing(WindowingInfo)
     , _globalRotation(
         GlobalRotationInfo,
         glm::vec3(0.f),
@@ -330,8 +350,18 @@ RenderEngine::RenderEngine()
         glm::vec3(-glm::pi<float>()),
         glm::vec3(glm::pi<float>())
     )
-    , _enabledFontColor(EnabledFontColorInfo, glm::vec4(0.2f, 0.75f, 0.2f, 1.f))
-    , _disabledFontColor(DisabledFontColorInfo, glm::vec4(0.55f, 0.2f, 0.2f, 1.f))
+    , _enabledFontColor(
+        EnabledFontColorInfo,
+        glm::vec4(0.2f, 0.75f, 0.2f, 1.f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+    )
+    , _disabledFontColor(
+        DisabledFontColorInfo,
+        glm::vec4(0.55f, 0.2f, 0.2f, 1.f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+    )
 {
     addProperty(_showOverlayOnClients);
     addProperty(_showLog);
@@ -408,13 +438,9 @@ RenderEngine::RenderEngine()
     });
     addProperty(_screenshotUseDate);
 
-    _horizFieldOfView.onChange([this]() {
-        if (global::windowDelegate->isMaster()) {
-            global::windowDelegate->setHorizFieldOfView(_horizFieldOfView);
-        }
-    });
-    addProperty(_horizFieldOfView);
-
+    addPropertySubOwner(_windowing);
+    // Adding the actual window owners later in the initialize, as we don't know yet how
+    // many windows will exist
 
     addProperty(_framerateLimit);
     addProperty(_globalRotation);
@@ -472,6 +498,17 @@ void RenderEngine::initializeGL() {
 
     LTRACE("RenderEngine::initializeGL(begin)");
 
+    for (size_t i = 0; i < global::windowDelegate->nWindows(); i++) {
+        std::string name = global::windowDelegate->nameForWindow(i);
+        properties::PropertyOwner::PropertyOwnerInfo info = {
+            .identifier = std::format("Window_{}", i),
+            .guiName = name.empty() ? std::format("Window {}", i) : name
+        };
+        auto w = std::make_unique<Window>(info, i);
+        _windowing.addPropertySubOwner(w.get());
+        _windows.push_back(std::move(w));
+    }
+
     _renderer.setResolution(renderingResolution());
     _renderer.enableFXAA(_enableFXAA);
     _renderer.setHDRExposure(_hdrExposure);
@@ -483,7 +520,13 @@ void RenderEngine::initializeGL() {
 
     // Set horizontal FOV value with whatever the field of view (in degrees) is of the
     // initialized window
-    _horizFieldOfView = static_cast<float>(global::windowDelegate->getHorizFieldOfView());
+    ghoul_assert(
+        global::windowDelegate->nWindows() == _windows.size(),
+        "Invalid number of windows"
+    );
+    for (size_t i = 0; i < global::windowDelegate->nWindows(); i++) {
+        _windows[i]->horizFieldOfView = global::windowDelegate->horizFieldOfView(i);
+    }
 
     const Configuration::FontSizes fontSize = global::configuration->fontSize;
     {
@@ -561,8 +604,13 @@ void RenderEngine::updateRenderer() {
         FR::defaultRenderer().setFramebufferSize(fontResolution());
         FR::defaultProjectionRenderer().setFramebufferSize(renderingResolution());
         // Override the aspect ratio property value to match that of resized window
-        _horizFieldOfView =
-            static_cast<float>(global::windowDelegate->getHorizFieldOfView());
+        ghoul_assert(
+            global::windowDelegate->nWindows() == _windows.size(),
+            "Invalid number of windows"
+        );
+        for (size_t i = 0; i < global::windowDelegate->nWindows(); i++) {
+            _windows[i]->horizFieldOfView = global::windowDelegate->horizFieldOfView(i);
+        }
     }
 
     _renderer.update();
@@ -572,6 +620,10 @@ void RenderEngine::updateScreenSpaceRenderables() {
     ZoneScoped;
 
     for (std::unique_ptr<ScreenSpaceRenderable>& ssr : *global::screenSpaceRenderables) {
+#ifdef TRACY_ENABLE
+        TracyPlot("RAM", static_cast<int64_t>(global::openSpaceEngine->ramInUse()));
+        TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
+#endif // TRACY_ENABLE
         ssr->update();
     }
 }
@@ -706,6 +758,10 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
             .gamma = _gamma
         };
         for (ScreenSpaceRenderable* ssr : ssrs) {
+#ifdef TRACY_ENABLE
+            TracyPlot("RAM", static_cast<int64_t>(global::openSpaceEngine->ramInUse()));
+            TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
+#endif // TRACY_ENABLE
             ssr->render(data);
         }
         glDisable(GL_BLEND);
@@ -775,11 +831,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RotationalFriction';
             openspace.setPropertyValueSingle(f, not openspace.propertyValue(f));)";
 
-        global::scriptEngine->queueScript(
-            std::string(ToggleRotationFrictionScript),
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript(std::string(ToggleRotationFrictionScript));
         return true;
     }
 
@@ -788,11 +840,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
             local f = 'NavigationHandler.OrbitalNavigator.Friction.ZoomFriction';
             openspace.setPropertyValueSingle(f, not openspace.propertyValue(f));)";
 
-        global::scriptEngine->queueScript(
-            std::string(ToggleZoomFrictionScript),
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript(std::string(ToggleZoomFrictionScript));
         return true;
     }
 
@@ -801,11 +849,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RollFriction';
             openspace.setPropertyValueSingle(f, not openspace.propertyValue(f));)";
 
-        global::scriptEngine->queueScript(
-            std::string(ToggleRollFrictionScript),
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript(std::string(ToggleRollFrictionScript));
         return true;
     }
 
@@ -890,17 +934,19 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
         std::format(FirstLine, timer, fullTime),
         ghoul::fontrendering::CrDirection::Down
     );
-    // Important: Length of this string is the same as the first line to make them align
-    RenderFont(*_fontShutdown, penPosition, "Press ESC again to abort");
+    // Important: Length of this string is the same as the first line after value
+    // expansion to make them visually align
+    constexpr std::string_view SecondLine = " Press any key to abort ";
+    RenderFont(*_fontShutdown, penPosition, SecondLine);
 }
 
 void RenderEngine::renderDashboard() const {
     ZoneScoped;
 
-    const glm::vec2 dashboardStart = global::dashboard->getStartPositionOffset();
+    const glm::ivec2 dashboardStart = global::dashboard->startPositionOffset();
     glm::vec2 penPosition = glm::vec2(
         dashboardStart.x,
-        dashboardStart.y + fontResolution().y - global::luaConsole->currentHeight()
+        fontResolution().y - dashboardStart.y - global::luaConsole->currentHeight()
     );
 
     global::dashboard->render(penPosition);
@@ -1246,7 +1292,7 @@ void RenderEngine::renderVersionInformation() {
         if (global::versionChecker->hasLatestVersionInfo()) {
             VersionChecker::SemanticVersion ver = global::versionChecker->latestVersion();
 
-            std::string versionString = std::string(OPENSPACE_VERSION_STRING_FULL);
+            std::string versionString = std::string(OPENSPACE_VERSION);
             const VersionChecker::SemanticVersion current {
                 OPENSPACE_VERSION_MAJOR,
                 OPENSPACE_VERSION_MINOR,
@@ -1267,11 +1313,11 @@ void RenderEngine::renderVersionInformation() {
             );
         }
         else {
-            versionBox = _fontVersionInfo->boundingBox(OPENSPACE_VERSION_STRING_FULL);
+            versionBox = _fontVersionInfo->boundingBox(OPENSPACE_VERSION);
             FR::defaultRenderer().render(
                 *_fontVersionInfo,
                 glm::vec2(fontResolution().x - versionBox.x - 10.f, 5.f),
-                OPENSPACE_VERSION_STRING_FULL,
+                OPENSPACE_VERSION,
                 glm::vec4(0.5f, 0.5f, 0.5f, 1.f)
             );
         }
@@ -1348,6 +1394,7 @@ void RenderEngine::renderScreenLog() {
     constexpr size_t MaxNumberMessages = 20;
     constexpr int CategoryLength = 30;
     constexpr int MessageLength = 280;
+    constexpr float LineSpacing = 1.15f;
     constexpr std::chrono::seconds FadeTime(5);
 
     const std::vector<ScreenLog::LogEntry>& entries = _log->entries();
@@ -1381,6 +1428,9 @@ void RenderEngine::renderScreenLog() {
 
         const glm::vec4 white = glm::vec4(0.9f, 0.9f, 0.9f, alpha);
 
+        const float y =
+            _fontLog->height() * nRows * LineSpacing + fontRes.y * _verticalLogOffset;
+
         std::array<char, 15 + 1 + CategoryLength + 3> buf;
         {
             std::fill(buf.begin(), buf.end(), char(0));
@@ -1394,10 +1444,7 @@ void RenderEngine::renderScreenLog() {
 
             RenderFont(
                 *_fontLog,
-                glm::vec2(
-                    10.f,
-                    _fontLog->pointSize() * nRows * 2 + fontRes.y * _verticalLogOffset
-                ),
+                glm::vec2(10.f, y),
                 std::string_view(buf.data(), end - buf.data()),
                 white
             );
@@ -1412,10 +1459,7 @@ void RenderEngine::renderScreenLog() {
             char* end = std::format_to(buf.data(), "({})", lvl);
             RenderFont(
                 *_fontLog,
-                glm::vec2(
-                    10 + (30 + 3) * _fontLog->pointSize(),
-                    _fontLog->pointSize() * nRows * 2 + fontRes.y * _verticalLogOffset
-                ),
+                glm::vec2(10 + (30 + 3) * _fontLog->pointSize(), y),
                 std::string_view(buf.data(), end - buf.data()),
                 color
             );
@@ -1423,10 +1467,7 @@ void RenderEngine::renderScreenLog() {
 
         RenderFont(
             *_fontLog,
-            glm::vec2(
-                10 + 44 * _fontLog->pointSize(),
-                _fontLog->pointSize() * nRows * 2 + fontRes.y * _verticalLogOffset
-            ),
+            glm::vec2(10 + 44 * _fontLog->pointSize(), y),
             message,
             white
         );

@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/rotation/fixedrotation/fixed.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "FixedRotation_Example",
+        "position": [
+          -1.28594750904553,
+          -2.0773860792448353,
+          0.4872372027657727
+        ],
+        "pitch": 1.1423456469650254e-07,
+        "referenceFrame": "Root",
+        "up": [
+          0.7134788888912736,
+          -0.5449567406414979,
+          -0.44042028329297933
+        ],
+        "yaw": -2.1209891432061812e-07,
+        "timestamp": "2025 JUL 13 12:45:06"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

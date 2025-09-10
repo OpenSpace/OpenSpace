@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/scene/scene.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace {
 
@@ -64,11 +65,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
         RenderedPathIdentifier
     );
 
-    global::scriptEngine->queueScript(
-        addParentScript,
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
-    );
+    global::scriptEngine->queueScript(addParentScript);
 
     // Get the poses along the path
     std::vector<CameraPose> poses;
@@ -98,9 +95,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
         "}";
 
         global::scriptEngine->queueScript(
-            std::format("openspace.addSceneGraphNode({})", pointNode),
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
+            std::format("openspace.addSceneGraphNode({})", pointNode)
         );
     };
 
@@ -121,9 +116,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
         "}";
 
         global::scriptEngine->queueScript(
-            std::format("openspace.addSceneGraphNode({})", lineNode),
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
+            std::format("openspace.addSceneGraphNode({})", lineNode)
         );
     };
 
@@ -158,11 +151,10 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
 // Removes the currently rendered camera path if there is one.
 [[codegen::luawrap]] void removeRenderedCameraPath() {
     using namespace openspace;
-    global::scriptEngine->queueScript(
-        std::format("openspace.removeSceneGraphNode('{}');", RenderedPathIdentifier),
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+    const std::string script = std::format(
+        "openspace.removeSceneGraphNode('{}');", RenderedPathIdentifier
     );
+    global::scriptEngine->queueScript(script);
 }
 
 /**
@@ -191,11 +183,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
         RenderedPointsIdentifier
     );
 
-    global::scriptEngine->queueScript(
-        addParentScript,
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
-    );
+    global::scriptEngine->queueScript(addParentScript);
 
     const std::vector<glm::dvec3> points = currentPath->controlPoints();
 
@@ -230,9 +218,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
         "}";
 
         global::scriptEngine->queueScript(
-            std::format("openspace.addSceneGraphNode({})", node),
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
+            std::format("openspace.addSceneGraphNode({})", node)
         );
     }
 }
@@ -240,13 +226,11 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
 // Removes the rendered control points.
 [[codegen::luawrap]] void removePathControlPoints() {
     using namespace openspace;
-    global::scriptEngine->queueScript(
-        std::format("openspace.removeSceneGraphNode('{}');", RenderedPointsIdentifier),
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+    const std::string script = std::format(
+        "openspace.removeSceneGraphNode('{}');", RenderedPointsIdentifier
     );
+    global::scriptEngine->queueScript(script);
 }
-
 
 #include "debuggingmodule_lua_codegen.cpp"
 

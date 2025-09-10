@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,6 +37,8 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // This `DashboardItem` adds a variable amount of spacing between two other
+    // `DashboardItem`s.
     struct [[codegen::Dictionary(DashboardItemSpacing)]] Parameters {
         // [[codegen::verbatim(SpacingInfo.description)]]
         std::optional<float> spacing;
@@ -47,7 +49,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemSpacing::Documentation() {
-    return codegen::doc<Parameters>("base_dashboarditem_spacing");
+    return codegen::doc<Parameters>(
+        "base_dashboarditem_spacing",
+        DashboardItem::Documentation()
+    );
 }
 
 DashboardItemSpacing::DashboardItemSpacing(const ghoul::Dictionary& dictionary)
@@ -60,12 +65,10 @@ DashboardItemSpacing::DashboardItemSpacing(const ghoul::Dictionary& dictionary)
     addProperty(_spacing);
 }
 
+void DashboardItemSpacing::update() {}
+
 void DashboardItemSpacing::render(glm::vec2& penPosition) {
     penPosition.y -= _spacing;
-}
-
-glm::vec2 DashboardItemSpacing::size() const {
-    return { 0.f, _spacing };
 }
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo UseTreeInfo = {
         "TreeLayout",
-        "Use Tree Layout",
+        "Use tree layout",
         "If this value is checked, this component will display the properties using a "
         "tree layout, rather than using a flat map. This value should only be set on "
         "property windows that display SceneGraphNodes, or the application might crash.",

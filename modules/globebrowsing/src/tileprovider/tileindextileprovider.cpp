@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo UniqueBackgroundColors = {
         "UniqueBackgroundColor",
-        "Unique Background Color",
+        "Unique background color",
         "If 'true' each index tile will have a unique background color assigned to it.",
         openspace::properties::Property::Visibility::Developer
     };
@@ -64,7 +64,7 @@ Tile TileIndexTileProvider::tile(const TileIndex& tileIndex) {
     );
     const glm::vec2 position = glm::vec2(
         initData.dimensions.x / 4 -
-        (initData.dimensions.x / 32) * log10(1 << tileIndex.level),
+        (initData.dimensions.x / 32) * std::log10(1 << tileIndex.level),
         initData.dimensions.y / 2 + fontSize
     );
 

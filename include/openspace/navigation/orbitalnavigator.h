@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,11 +33,12 @@
 #include <openspace/interaction/mousecamerastates.h>
 #include <openspace/interaction/scriptcamerastates.h>
 #include <openspace/interaction/websocketcamerastates.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/triggerproperty.h>
+#include <openspace/util/syncdata.h>
 #include <ghoul/glm.h>
 #include <glm/gtx/quaternion.hpp>
 #include <optional>
@@ -103,11 +104,10 @@ public:
     void setCamera(Camera* camera);
     void clearPreviousState();
 
-    void setFocusNode(const SceneGraphNode* focusNode,
-        bool resetVelocitiesOnChange = true);
-    void setFocusNode(const std::string& focusNode, bool resetVelocitiesOnChange = true);
-    void setAnchorNode(const std::string& anchorNode);
-    void setAimNode(const std::string& aimNode);
+    void setFocusNode(const SceneGraphNode* node, bool resetVelocities = true);
+    void setFocusNode(const std::string& identifier, bool resetVelocities = true);
+    void setAnchorNode(const std::string& identifier);
+    void setAimNode(const std::string& identifier);
 
     void startRetargetAnchor();
     void startRetargetAim();
@@ -148,6 +148,9 @@ public:
      */
     glm::dvec3 pushToSurfaceOfAnchor(const glm::dvec3& cameraPosition) const;
 
+    void updateAnchorOnSync();
+    std::vector<Syncable*> syncables();
+
     /**
      * \return The Lua library that contains all Lua functions available to affect the
      *         OrbitalNavigator
@@ -172,14 +175,13 @@ private:
         properties::FloatProperty friction;
     };
 
-    void setAnchorNode(const SceneGraphNode* anchorNode,
-        bool resetVelocitiesOnChange = true);
-    void setAimNode(const SceneGraphNode* aimNode);
+    void updateAnchorNode(const SceneGraphNode* anchorNode);
+    void updateAimNode(const SceneGraphNode* aimNode);
 
     void updatePreviousAnchorState();
     void updatePreviousAimState();
 
-    Camera* _camera;
+    Camera* _camera = nullptr;
 
     Friction _friction;
 
@@ -244,12 +246,14 @@ private:
     WebsocketCameraStates _websocketStates;
     ScriptCameraStates _scriptStates;
 
+    SyncData<std::string> _syncedAnchorNode;
     const SceneGraphNode* _anchorNode = nullptr;
     const SceneGraphNode* _aimNode = nullptr;
 
     std::optional<glm::dvec3>_previousAnchorNodePosition;
     std::optional<glm::dquat> _previousAnchorNodeRotation;
     std::optional<glm::dvec3> _previousAimNodePosition;
+    bool _resetVelocitiesOnAnchorChange = true;
 
     double _currentCameraToSurfaceDistance = 0.0;
     bool _directlySetStereoDistance = false;

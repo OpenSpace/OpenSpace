@@ -25,7 +25,8 @@ local TrailAtPluto = {
   },
   GUI = {
     Name = "New Horizons Trail Pluto",
-    Path = "/Solar System/Missions/New Horizons"
+    Path = "/Solar System/Missions/New Horizons",
+    Focusable = false
   }
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -298,19 +298,19 @@ MemoryAwareTileCache::MemoryAwareTileCache(int tileCacheSize)
     addProperty(_applyTileCacheSize);
 
     _cpuAllocatedTileData.setMaxValue(
-        static_cast<int>(CpuCap.installedMainMemory() * 0.95)
+        static_cast<int>(CpuCap.installedMainMemory() * 0.95f)
     );
     _cpuAllocatedTileData.setReadOnly(true);
     addProperty(_cpuAllocatedTileData);
 
     _gpuAllocatedTileData.setMaxValue(
-        static_cast<int>(CpuCap.installedMainMemory() * 0.95)
+        static_cast<int>(CpuCap.installedMainMemory() * 0.95f)
     );
     _gpuAllocatedTileData.setReadOnly(true);
     addProperty(_gpuAllocatedTileData);
 
     _tileCacheSize.setMaxValue(
-        static_cast<int>(CpuCap.installedMainMemory() * 0.95)
+        static_cast<int>(CpuCap.installedMainMemory() * 0.95f)
     );
     addProperty(_tileCacheSize);
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,127 +27,19 @@
 #include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <openspace/navigation/navigationstate.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/scene/profile.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <filesystem>
 #include <fstream>
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 
 // clang-tidy is convinced that it is possible to use emplace_back instead of push_back
 // for the profiole types, but I haven't been able to convince the Visual Studio
 // compiler to agree
 // NOLINTBEGIN(modernize-use-emplace)
-
-namespace openspace {
-    bool operator==(const openspace::Profile::Version& lhs,
-                    const openspace::Profile::Version& rhs) noexcept
-    {
-        return lhs.major == rhs.major && lhs.minor == rhs.minor;
-    }
-
-    bool operator==(const openspace::Profile::Module& lhs,
-                    const openspace::Profile::Module& rhs) noexcept
-    {
-        return lhs.name == rhs.name &&
-               lhs.loadedInstruction == rhs.loadedInstruction &&
-               lhs.notLoadedInstruction == rhs.notLoadedInstruction;
-    }
-
-    bool operator==(const openspace::Profile::Meta& lhs,
-                    const openspace::Profile::Meta& rhs) noexcept
-    {
-        return lhs.name == rhs.name &&
-               lhs.version == rhs.version &&
-               lhs.description == rhs.description &&
-               lhs.author == rhs.author &&
-               lhs.url == rhs.url &&
-               lhs.license == rhs.license;
-    }
-
-    bool operator==(const openspace::Profile::Property& lhs,
-                    const openspace::Profile::Property& rhs) noexcept
-    {
-        return lhs.setType == rhs.setType &&
-               lhs.name == rhs.name &&
-               lhs.value == rhs.value;
-    }
-
-    bool operator==(const openspace::Profile::Action& lhs,
-                    const openspace::Profile::Action& rhs) noexcept
-    {
-        return lhs.identifier == rhs.identifier &&
-               lhs.documentation == rhs.documentation &&
-               lhs.name == rhs.name &&
-               lhs.guiPath == rhs.guiPath &&
-               lhs.isLocal == rhs.isLocal &&
-               lhs.script == rhs.script;
-    }
-
-    bool operator==(const openspace::Profile::Keybinding& lhs,
-                    const openspace::Profile::Keybinding& rhs) noexcept
-    {
-        return lhs.key == rhs.key && lhs.action == rhs.action;
-    }
-
-    bool operator==(const openspace::Profile::Time& lhs,
-                    const openspace::Profile::Time& rhs) noexcept
-    {
-        return lhs.type == rhs.type && lhs.value == rhs.value;
-    }
-
-    bool operator==(const openspace::Profile::CameraGoToNode& lhs,
-        const openspace::Profile::CameraGoToNode& rhs) noexcept
-    {
-        return lhs.anchor == rhs.anchor && lhs.height == rhs.height;
-    }
-
-    bool operator==(const openspace::Profile::CameraNavState& lhs,
-                    const openspace::Profile::CameraNavState& rhs) noexcept
-    {
-        return lhs.anchor == rhs.anchor &&
-               lhs.aim == rhs.aim &&
-               lhs.referenceFrame == rhs.referenceFrame &&
-               lhs.position == rhs.position &&
-               lhs.up == rhs.up &&
-               lhs.yaw == rhs.yaw &&
-               lhs.pitch == rhs.pitch;
-    }
-
-    bool operator==(const openspace::Profile::CameraGoToGeo& lhs,
-                    const openspace::Profile::CameraGoToGeo& rhs) noexcept
-    {
-        return lhs.anchor == rhs.anchor &&
-               lhs.latitude == rhs.latitude &&
-               lhs.longitude == rhs.longitude &&
-               lhs.altitude == rhs.altitude;
-    }
-
-    bool operator==(const openspace::Profile& lhs,
-                    const openspace::Profile& rhs) noexcept
-    {
-        return lhs.version == rhs.version &&
-               lhs.modules == rhs.modules &&
-               lhs.meta == rhs.meta &&
-               lhs.assets == rhs.assets &&
-               lhs.properties == rhs.properties &&
-               lhs.actions == rhs.actions &&
-               lhs.keybindings == rhs.keybindings &&
-               lhs.time == rhs.time &&
-               lhs.deltaTimes == rhs.deltaTimes &&
-               lhs.camera == rhs.camera &&
-               lhs.markNodes == rhs.markNodes &&
-               lhs.additionalScripts == rhs.additionalScripts &&
-               lhs.ignoreUpdates == rhs.ignoreUpdates;
-    }
-
-    std::ostream& operator<<(std::ostream& os, const openspace::Profile& profile) {
-        os << profile.serialize();
-        return os;
-    }
-} // namespace openspace
 
 using namespace openspace;
 
@@ -915,6 +807,7 @@ TEST_CASE("Removing non-exisiting asset (ignored)", "[profile]") {
 //
 TEST_CASE("Save settings to profile", "[profile]") {
     properties::PropertyOwner owner({ "base" });
+    global::rootPropertyOwner->addPropertySubOwner(owner);
     properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner.addProperty(p1);
     properties::StringProperty p2(properties::Property::PropertyInfo("p2", "c", "d"));
@@ -936,13 +829,15 @@ TEST_CASE("Save settings to profile", "[profile]") {
     profile.version = Profile::CurrentVersion;
     profile.saveCurrentSettingsToProfile(owner, "current-time", state);
 
+    global::rootPropertyOwner->removePropertySubOwner(owner);
+
     REQUIRE(profile.properties.size() == 2);
     CHECK(
         profile.properties[0].setType ==
         Profile::Property::SetType::SetPropertyValueSingle
     );
     CHECK(profile.properties[0].name == "base.p1");
-    CHECK(profile.properties[0].value == "2.000000");
+    CHECK(profile.properties[0].value == "2");
     CHECK(
         profile.properties[1].setType ==
         Profile::Property::SetType::SetPropertyValueSingle
@@ -965,6 +860,98 @@ TEST_CASE("Save settings to profile", "[profile]") {
     CHECK(profile.time->type == Profile::Time::Type::Absolute);
     CHECK(profile.time->value == "current-time");
 }
+
+TEST_CASE("Version 1.0 -> 1.1", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_10.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_11.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.0 -> 1.2", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_10.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_12.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.0 -> 1.3", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_10.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_13.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.0 -> 1.4", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_10.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_14.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.1 -> 1.2", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_11.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_12.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.1 -> 1.3", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_11.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_13.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.1 -> 1.4", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_11.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_14.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.2 -> 1.3", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_12.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_13.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.2 -> 1.4", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_12.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_14.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.3 -> 1.4", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_13.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_14.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+
 
 //
 // Error states

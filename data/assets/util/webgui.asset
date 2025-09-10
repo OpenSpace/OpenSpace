@@ -3,22 +3,49 @@ local guiCustomization = asset.require("customization/gui")
 
 
 
--- Select which commit hashes to use for the frontend and backend
-local frontendHash = "5a58a3ca0215b6dc264e985ab321a75d51e4a8e5"
+-- Select which commit hashes to use for the UI frontend
+local frontendHash = "baabd171ecbe61b2758970a2cdafb43fbcd1a23b"
+
+-- The name of the file to download from the server
+local frontendFile = "frontend.zip"
 
 local frontend = asset.resource({
   Identifier = "WebGuiFrontend",
   Name = "Web Gui Frontend",
   Type = "UrlSynchronization",
-  Url = "http://data.openspaceproject.com/files/webgui/frontend/" ..  frontendHash .. "/frontend.zip"
+  Url = "http://data.openspaceproject.com/files/webgui/frontend/" ..  frontendHash .. "/" .. frontendFile
+})
+
+
+local showcomposerHash = "9071d8bc80d16dc1e081017e02297915563f0a64"
+local showcomposerFile = "showcomposer.zip"
+
+local showcomposer = asset.resource({
+  Identifier = "WebGuiShowComposer",
+  Name = "Web Gui ShowComposer",
+  Type = "UrlSynchronization",
+  Url = "http://data.openspaceproject.com/files/webgui/showcomposer/" ..  showcomposerHash .. "/" .. showcomposerFile
+})
+
+
+local maps = asset.resource({
+  Identifier = "userinterface_maps",
+  Name = "Userinterface Maps",
+  Type = "HttpSynchronization",
+  Version = 1
 })
 
 
 asset.onInitialize(function()
   -- Unzip the frontend bundle
-  local dest = frontend .. "frontend"
-  if not openspace.directoryExists(dest) then
-    openspace.unzipFile(frontend .. "frontend.zip", dest, true)
+  local destFrontend = frontend .. "frontend"
+  if not openspace.directoryExists(destFrontend) then
+    openspace.unzipFile(frontend .. frontendFile, destFrontend, true)
+  end
+
+  local destShowcomposer = showcomposer .. "showcomposer"
+  if not openspace.directoryExists(destShowcomposer) then
+    openspace.unzipFile(showcomposer .. showcomposerFile, destShowcomposer, true)
   end
 
   -- Disable the server, add production gui endpoint, and restart server.
@@ -31,14 +58,28 @@ asset.onInitialize(function()
   openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", false)
 
   local directories = openspace.propertyValue("Modules.WebGui.Directories")
-  directories[#directories + 1] = "frontend"
+  directories[#directories + 1] = "gui"
   directories[#directories + 1] = frontend .. "frontend"
   -- Add user directory for webpanels
   directories[#directories + 1] = "webpanels"
   directories[#directories + 1] = openspace.absPath("${USER_WEBPANELS}")
 
+  -- Add user directories for showcompower
+  directories[#directories + 1] = "showcomposer"
+  directories[#directories + 1] = showcomposer .. "showcomposer"
+  directories[#directories + 1] = "showcomposer/hub"
+  directories[#directories + 1] = showcomposer .. "showcomposer"
+  directories[#directories + 1] = "showcomposer/uploads"
+  directories[#directories + 1] = openspace.absPath("${USER_SHOWCOMPOSER_UPLOADS}")
+  directories[#directories + 1] = "showcomposer/projects"
+  directories[#directories + 1] = openspace.absPath("${USER_SHOWCOMPOSER_PROJECTS}")
+
+  -- Add asset folders
+  directories[#directories + 1] = "assets/maps"
+  directories[#directories + 1] = maps
+
   openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
-  openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "frontend")
+  openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "gui")
   openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", enabled)
 
   -- The GUI contains date and simulation increment,
@@ -51,6 +92,18 @@ asset.onInitialize(function()
       openspace.setPropertyValueSingle("Dashboard.SimulationIncrement.Enabled", false)
     end
   end
+
+  -- Set the GUI default endpoint
+  local port = openspace.propertyValue("Modules.WebGui.Port")
+  -- As a developer, you can manually serve the webgui from port 4690
+  -- with the command `npm start` in the web gui repository
+  if guiCustomization.webguiDevelopmentMode then
+    port = 4690
+  end
+  openspace.setPropertyValueSingle(
+    "Modules.CefWebGui.GuiUrl",
+    "http://127.0.0.1:" .. port .. "/gui"
+  )
 end)
 
 asset.onDeinitialize(function()
@@ -74,23 +127,6 @@ asset.onDeinitialize(function()
   -- need to address in webguimodule.cpp
   --openspace.setPropertyValueSingle("Modules.WebGui.Directories", newDirectories)
 end)
-
-function setCefRoute(route)
-  local port = openspace.propertyValue("Modules.WebGui.Port")
-  -- As a developer, you can manually serve the webgui from port 4690
-  -- with the command `npm start` in the web gui repository
-  if guiCustomization.webguiDevelopmentMode then
-    port = 4690
-  end
-  openspace.setPropertyValueSingle(
-    "Modules.CefWebGui.GuiUrl",
-    "http://127.0.0.1:" .. port .. "/frontend/#/" .. route
-  )
-end
-
-asset.export("setCefRoute", setCefRoute)
-
-
 
 asset.meta = {
   Name = "WebGUI",

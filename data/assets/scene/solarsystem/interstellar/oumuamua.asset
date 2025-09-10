@@ -24,14 +24,15 @@ local OumuamuaTrail = {
       -- End time: 2050-Jan-01 00:00:00 (last data point)
       -- Step size: 1 day
     },
-    Color = { 0.9, 0.9, 0.0 },
+    Color = { 0.85, 0.1, 0.85 },
     StartTime = "2014 JAN 01 00:00:00",
     EndTime = "2050 JAN 01 00:00:00",
     SampleInterval = openspace.time.secondsPerDay()
   },
   GUI = {
-    Name = "'Oumuamua Trail",
-    Path = "/Solar System/Interstellar",
+    Name = "1I/'Oumuamua Trail",
+    Path = "/Solar System/Interstellar/'Oumuamua",
+    Focusable = false,
     Description = [[Trail of 'Oumuamua from 2014 JAN 01 00:00:00 to 2050 JAN 01 00:00:00.
       Data from JPL Horizons]]
   }
@@ -47,10 +48,35 @@ local OumuamuaPosition = {
     }
   },
   GUI = {
-    Name = "'Oumuamua",
-    Path = "/Solar System/Interstellar",
+    Name = "1I/'Oumuamua",
+    Path = "/Solar System/Interstellar/'Oumuamua",
     Description = [[Position of 'Oumuamua from 2014 JAN 01 00:00:00 to 2050 JAN 01
       00:00:00. Data from JPL Horizons]]
+  }
+}
+
+local OumuamuaLabel = {
+  Identifier = "OumuamuaLabel",
+  Parent = OumuamuaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "1I/'Oumuamua",
+    FontSize = 70.0,
+    Size = 8.50,
+    MinMaxSize = { 1, 50 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 1.5, 50.0 },
+    FadeWidths = { 1.0, 40.0 }
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "1I/'Oumuamua Label",
+    Path = "/Solar System/Interstellar/'Oumuamua",
+    Focusable = false
   }
 }
 
@@ -58,15 +84,18 @@ local OumuamuaPosition = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(OumuamuaPosition)
   openspace.addSceneGraphNode(OumuamuaTrail)
+  openspace.addSceneGraphNode(OumuamuaLabel)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(OumuamuaLabel)
   openspace.removeSceneGraphNode(OumuamuaTrail)
   openspace.removeSceneGraphNode(OumuamuaPosition)
 end)
 
 asset.export(OumuamuaPosition)
 asset.export(OumuamuaTrail)
+asset.export(OumuamuaLabel)
 
 
 

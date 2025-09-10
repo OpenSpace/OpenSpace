@@ -1,0 +1,18 @@
+-- Degree/Minute/Seconds
+-- This example adds a dashboard item that shows the position of the camera relative to
+-- the focus node, if that focus node is a globe. The longitude and latitude of the camera
+-- is provided in the sexagesimal system (degrees, minutes, seconds).
+
+local Item = {
+  Identifier = "DashboardItemGlobeLocation_Example",
+  Type = "DashboardItemGlobeLocation",
+  DisplayFormat = "DegreeMinuteSeconds"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

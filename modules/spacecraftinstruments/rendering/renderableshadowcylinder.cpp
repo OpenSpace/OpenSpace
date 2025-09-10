@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,7 +45,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShadowLengthInfo = {
         "ShadowLength",
-        "Shadow Length",
+        "Shadow length",
         "A factor that controls the length of the shadow that is cast by the target "
         "object. The total length of the shadow is equal to the distance from the "
         "target to the light source multiplied with this value.",
@@ -54,21 +54,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShadowColorInfo = {
         "ShadowColor",
-        "Shadow Color",
+        "Shadow color",
         "The color used for the shadow cylinder.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo TerminatorTypeInfo = {
         "TerminatorType",
-        "Terminator Type",
+        "Terminator type",
         "Determines the type of terminator to use for calculating the shadow eclipse.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourceInfo = {
         "LightSource",
-        "Light Source",
+        "Light source",
         "The SPICE name of the object that is used as the illuminator for computing the "
         "shadow cylinder.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -83,14 +83,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BodyInfo = {
         "Body",
-        "Target Body",
+        "Target body",
         "The SPICE name of target body that is used as the shadow caster.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BodyFrameInfo = {
         "BodyFrame",
-        "Body Frame",
+        "Body frame",
         "The SPICE name of the reference frame in which the shadow cylinder is "
         "expressed.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -105,6 +105,12 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This Renderable displays the shadow cylinder behind a planetary body. Given the
+    // SPICE name of a planetary body and an observer, it will show a cylinder extending
+    // behind the body away from the observer to highlight the areas of space from which
+    // the observer is occluded by the body. A concrete example is using the Sun as the
+    // observer, in which case the shadow cylinder indicates the areas in which there is
+    // darkness.
     struct [[codegen::Dictionary(RenderableShadowCylinder)]] Parameters {
         // [[codegen::verbatim(NumberPointsInfo.description)]]
         std::optional<int> numberOfPoints;
@@ -151,10 +157,7 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
     , _numberOfPoints(NumberPointsInfo, 190, 1, 300)
     , _shadowLength(ShadowLengthInfo, 0.1f, 0.f, 0.5f)
     , _shadowColor(ShadowColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _terminatorType(
-        TerminatorTypeInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _terminatorType(TerminatorTypeInfo)
     , _lightSource(LightSourceInfo)
     , _observer(ObserverInfo)
     , _body(BodyInfo)
@@ -251,7 +254,7 @@ void RenderableShadowCylinder::deinitializeGL() {
 }
 
 bool RenderableShadowCylinder::isReady() const {
-    return _shader;
+    return _shader != nullptr;
 }
 
 void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
@@ -331,7 +334,7 @@ void RenderableShadowCylinder::createCylinder(double time) {
 
     vecLightSource = glm::inverse(_stateMatrix) * vecLightSource;
 
-    vecLightSource *= _shadowLength;
+    vecLightSource *= _shadowLength.value();
     _vertices.clear();
 
     for (const glm::vec3& v : terminatorPoints) {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -174,7 +174,7 @@ HorizonsResultCode isValidHorizonsAnswer(const json& answer) {
 
         if (auto version = signature->find("version");  version != signature->end()) {
             // Extract the major version from the version string
-            std::string v = *version;
+            std::string v = version->get<std::string>();
             v = v.substr(0, v.find('.'));
 
             if (v != CurrentMajorVersion) {
@@ -197,7 +197,7 @@ HorizonsResultCode isValidHorizonsAnswer(const json& answer) {
     // Errors
     if (auto it = answer.find("error");  it != answer.end()) {
         // There was an error
-        const std::string errorMsg = *it;
+        const std::string errorMsg = it->get<std::string>();
 
         // @CPP23 (malej, 2022-04-08) In all cases below, the string function contains
         // should be used instead of find
@@ -236,6 +236,10 @@ HorizonsResultCode isValidHorizonsAnswer(const json& answer) {
         else if (errorMsg.find("Multiple matching stations found") != std::string::npos) {
             return HorizonsResultCode::MultipleObserverStations;
         }
+        // News instead of request results
+        else if (errorMsg.find("Horizons On-Line System News") != std::string::npos) {
+            return HorizonsResultCode::News;
+        }
         // Unknown error
         else {
             LERROR(errorMsg);
@@ -248,7 +252,7 @@ HorizonsResultCode isValidHorizonsAnswer(const json& answer) {
 // Check whether the given Horizons file is valid or not
 // Return an error code with what is the problem if there was one
 HorizonsResultCode isValidHorizonsFile(const std::filesystem::path& file) {
-    std::ifstream fileStream(file);
+    std::ifstream fileStream = std::ifstream(file);
     if (!fileStream.good()) {
         return HorizonsResultCode::Empty;
     }
@@ -492,7 +496,7 @@ HorizonsResult readHorizonsFile(std::filesystem::path file) {
         return result;
     }
 
-    std::ifstream fileStream(file);
+    std::ifstream fileStream = std::ifstream(file);
 
     if (!fileStream.good()) {
         LERROR(std::format("Failed to open Horizons file '{}'", file));
@@ -525,7 +529,7 @@ HorizonsResult readHorizonsVectorFile(std::filesystem::path file) {
     result.errorCode = HorizonsResultCode::Valid;
     std::vector<HorizonsKeyframe> data;
 
-    std::ifstream fileStream(file);
+    std::ifstream fileStream = std::ifstream(file);
     if (!fileStream.good()) {
         LERROR(std::format("Failed to open Horizons text file {}", file));
         return HorizonsResult();
@@ -594,7 +598,7 @@ HorizonsResult readHorizonsObserverFile(std::filesystem::path file) {
     result.errorCode = HorizonsResultCode::Valid;
     std::vector<HorizonsKeyframe> data;
 
-    std::ifstream fileStream(file);
+    std::ifstream fileStream = std::ifstream(file);
     if (!fileStream.good()) {
         LERROR(std::format("Failed to open Horizons text file '{}'", file));
         return HorizonsResult();
@@ -658,7 +662,7 @@ std::vector<std::string> HorizonsFile::parseMatches(const std::string& startPhra
                                                     const std::string& endPhrase,
                                                   const std::string& altStartPhrase) const
 {
-    std::ifstream fileStream(_file);
+    std::ifstream fileStream = std::ifstream(_file);
     std::vector<std::string> matches;
 
     if (!fileStream.good()) {
@@ -743,7 +747,7 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
                                                         const std::string& altStartPhrase,
                                                                       bool hasTime) const
 {
-    std::ifstream fileStream(_file);
+    std::ifstream fileStream = std::ifstream(_file);
 
     if (!fileStream.good()) {
         return { "", "" };
@@ -800,7 +804,7 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
                 "{} T {}", words[words.size() - 2], words[words.size() - 1]
             );
         }
-        else if (words.size() > 2){
+        else if (words.size() > 2) {
             // Sometimes the format can be yyyy-mon-dd without time
             startTime = words[words.size() - 2];
             endTime = words[words.size() - 1];
@@ -821,7 +825,7 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
         }
 
         // Read and save each word.
-        std::stringstream str(line);
+        std::stringstream str = std::stringstream(line);
         std::vector<std::string> words;
         std::string word;
         while (str >> word) {

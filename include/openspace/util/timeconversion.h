@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,26 +25,15 @@
 #ifndef __OPENSPACE_CORE___TIMECONVERSION___H__
 #define __OPENSPACE_CORE___TIMECONVERSION___H__
 
+#include <openspace/util/timeconstants.h>
+
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/constexpr.h>
-
+#include <algorithm>
 #include <array>
-#include <chrono>
 #include <string>
 
 namespace openspace {
-
-constexpr double SecondsPerYear = 31556952; // seconds in average Gregorian year
-constexpr double SecondsPerMonth = SecondsPerYear / 12;
-constexpr double SecondsPerDay = static_cast<double>(
-    std::chrono::seconds(std::chrono::hours(24)).count()
-);
-constexpr double SecondsPerHour = static_cast<double>(
-    std::chrono::seconds(std::chrono::hours(1)).count()
-);
-constexpr double SecondsPerMinute = static_cast<double>(
-    std::chrono::seconds(std::chrono::minutes(1)).count()
-);
 
 // Assumption:  static_cast<int>(TimeUnit) == position in the list
 enum class TimeUnit {
@@ -59,27 +48,11 @@ enum class TimeUnit {
     Year
 };
 
-// Assumption:  Unit names are sequential in memory
-constexpr std::string_view TimeUnitNanosecond   = "nanosecond";
-constexpr std::string_view TimeUnitMicrosecond  = "microsecond";
-constexpr std::string_view TimeUnitMillisecond  = "millisecond";
-constexpr std::string_view TimeUnitSecond       = "second";
-constexpr std::string_view TimeUnitMinute       = "minute";
-constexpr std::string_view TimeUnitHour         = "hour";
-constexpr std::string_view TimeUnitDay          = "day";
-constexpr std::string_view TimeUnitMonth        = "month";
-constexpr std::string_view TimeUnitYear         = "year";
-
-// Assumption:  Unit names are sequential in memory
-constexpr std::string_view TimeUnitNanoseconds = "nanoseconds";
-constexpr std::string_view TimeUnitMicroseconds = "microseconds";
-constexpr std::string_view TimeUnitMilliseconds = "milliseconds";
-constexpr std::string_view TimeUnitSeconds = "seconds";
-constexpr std::string_view TimeUnitMinutes = "minutes";
-constexpr std::string_view TimeUnitHours = "hours";
-constexpr std::string_view TimeUnitDays = "days";
-constexpr std::string_view TimeUnitMonths = "months";
-constexpr std::string_view TimeUnitYears = "years";
+struct TimeUnitName {
+    std::string_view singular;
+    std::string_view plural;
+    std::string_view abbreviation;
+};
 
 constexpr std::array<TimeUnit, static_cast<int>(TimeUnit::Year) + 1> TimeUnits = {
     TimeUnit::Nanosecond, TimeUnit::Microsecond, TimeUnit::Millisecond,
@@ -87,81 +60,68 @@ constexpr std::array<TimeUnit, static_cast<int>(TimeUnit::Year) + 1> TimeUnits =
     TimeUnit::Month, TimeUnit::Year
 };
 
-constexpr std::array<std::string_view, static_cast<int>(TimeUnit::Year) + 1>
-TimeUnitNamesSingular = {
-    TimeUnitNanosecond, TimeUnitMicrosecond, TimeUnitMillisecond, TimeUnitSecond,
-    TimeUnitMinute, TimeUnitHour, TimeUnitDay, TimeUnitMonth, TimeUnitYear
-};
-
-constexpr std::array<std::string_view, static_cast<int>(TimeUnit::Year) + 1>
-TimeUnitNamesPlural = {
-    TimeUnitNanoseconds, TimeUnitMicroseconds, TimeUnitMilliseconds, TimeUnitSeconds,
-    TimeUnitMinutes, TimeUnitHours, TimeUnitDays, TimeUnitMonths, TimeUnitYears
-};
+// Note that the syntax here is required when initializing constexpr std::arrays
+// with structs
+constexpr std::array<TimeUnitName, static_cast<int>(TimeUnit::Year) + 1>
+TimeUnitNames { {
+    { "Nanosecond", "Nanoseconds", "ns" },
+    { "Microsecond", "Microseconds", "us" },
+    { "Millisecond", "Milliseconds", "ms" },
+    { "Second", "Seconds", "s" },
+    { "Minute", "Minutes", "m" },
+    { "Hour", "Hours", "h" },
+    { "Day", "Days", "d" },
+    { "Month", "Months", "M" },
+    { "Year", "Years", "Y" }
+} };
 
 constexpr bool isValidTimeUnitName(std::string_view name) {
-    for (std::string_view val : TimeUnitNamesSingular) {
-        if (val == name) {
-            return true;
-        }
-    }
-
-    for (std::string_view val : TimeUnitNamesPlural) {
-        if (val == name) {
+    for (TimeUnit unit : TimeUnits) {
+        const TimeUnitName unitName = TimeUnitNames[static_cast<int>(unit)];
+        if (name == unitName.singular || name == unitName.plural ||
+            name == unitName.abbreviation)
+        {
             return true;
         }
     }
     return false;
 }
 
-constexpr std::string_view nameForTimeUnit(TimeUnit unit, bool pluralForm = false) {
-    switch (unit) {
-        case TimeUnit::Nanosecond:
-        case TimeUnit::Microsecond:
-        case TimeUnit::Millisecond:
-        case TimeUnit::Second:
-        case TimeUnit::Minute:
-        case TimeUnit::Hour:
-        case TimeUnit::Day:
-        case TimeUnit::Month:
-        case TimeUnit::Year:
-            if (pluralForm) {
-                return TimeUnitNamesPlural[static_cast<int>(unit)];
-            }
-            else {
-                return TimeUnitNamesSingular[static_cast<int>(unit)];
-            }
-        default:
-            throw ghoul::MissingCaseException();
-    }
+constexpr std::string_view nameForTimeUnit(TimeUnit unit, bool usePluralForm = false) {
+    const TimeUnitName unitName = TimeUnitNames[static_cast<int>(unit)];
+    return usePluralForm ? unitName.plural : unitName.singular;
+}
+
+constexpr std::string_view abbreviationForDistanceUnit(TimeUnit unit) {
+    return TimeUnitNames[static_cast<int>(unit)].abbreviation;
 }
 
 constexpr TimeUnit timeUnitFromString(std::string_view unitName) {
-    int found = -1;
     int i = 0;
-    for (std::string_view val : TimeUnitNamesSingular) {
-        if (val == unitName) {
-            found = i;
-            break;
+    for (TimeUnit unit : TimeUnits) {
+        const TimeUnitName name = TimeUnitNames[static_cast<int>(unit)];
+        if (name.singular == unitName || name.plural == unitName ||
+            name.abbreviation == unitName)
+        {
+            return static_cast<TimeUnit>(i);
         }
         i++;
     }
 
-    i = 0;
-    for (std::string_view val : TimeUnitNamesPlural) {
-        if (val == unitName) {
-            found = i;
-            break;
-        }
-        i++;
-    }
+    throw ghoul::MissingCaseException();
+}
 
-    if (found != -1) {
-        return static_cast<TimeUnit>(found);
-    }
-    else {
-        throw ghoul::MissingCaseException();
-    }
+constexpr std::vector<std::string> timeUnitList() {
+    std::vector<std::string> res(TimeUnits.size());
+    std::transform(
+        TimeUnits.begin(),
+        TimeUnits.end(),
+        res.begin(),
+        [](TimeUnit unit) {
+            return std::string(nameForTimeUnit(unit));
+        }
+    );
+    return res;
 }
 
 std::pair<double, std::string_view> simplifyTime(double seconds,
@@ -170,38 +130,8 @@ std::pair<double, std::string_view> simplifyTime(double seconds,
 std::vector<std::pair<double, std::string_view>> splitTime(double seconds,
     bool forceSingularForm = false);
 
-constexpr double convertTime(double t, TimeUnit sourceUnit, TimeUnit destinationUnit) {
-    double seconds = t;
-    switch (sourceUnit) {
-        case TimeUnit::Nanosecond:
-            seconds = t * 1e-9;
-            break;
-        case TimeUnit::Microsecond:
-            seconds = t * 1e-6;
-            break;
-        case TimeUnit::Millisecond:
-            seconds = t * 1e-3;
-            break;
-        case TimeUnit::Minute:
-            seconds = t * SecondsPerMinute;
-            break;
-        case TimeUnit::Hour:
-            seconds  = t * SecondsPerHour;
-            break;
-        case TimeUnit::Day:
-            seconds  = t * SecondsPerDay;
-            break;
-        case TimeUnit::Month:
-            seconds  = t * SecondsPerMonth;
-            break;
-        case TimeUnit::Year:
-            seconds  = t * SecondsPerYear;
-            break;
-        default:
-            break;
-    }
-
-    switch (destinationUnit) {
+constexpr double convertSeconds(double seconds, TimeUnit requestedUnit) {
+    switch (requestedUnit) {
         case TimeUnit::Nanosecond:
             return seconds / 1e-9;
         case TimeUnit::Microsecond:
@@ -211,18 +141,51 @@ constexpr double convertTime(double t, TimeUnit sourceUnit, TimeUnit destination
         case TimeUnit::Second:
             return seconds;
         case TimeUnit::Minute:
-            return seconds / SecondsPerMinute;
+            return seconds / timeconstants::SecondsPerMinute;
         case TimeUnit::Hour:
-            return seconds / SecondsPerHour;
+            return seconds / timeconstants::SecondsPerHour;
         case TimeUnit::Day:
-            return seconds / SecondsPerDay;
+            return seconds / timeconstants::SecondsPerDay;
         case TimeUnit::Month:
-            return seconds / SecondsPerMonth;
+            return seconds / timeconstants::SecondsPerMonth;
         case TimeUnit::Year:
-            return seconds / SecondsPerYear;
+            return seconds / timeconstants::SecondsPerYear;
         default:
             throw ghoul::MissingCaseException();
     }
+}
+
+constexpr double toSecond(TimeUnit unit) {
+    switch (unit) {
+        case TimeUnit::Nanosecond:
+            return 1e-9;
+        case TimeUnit::Microsecond:
+            return 1e-6;
+        case TimeUnit::Millisecond:
+            return 1e-3;
+        case TimeUnit::Second:
+            return 1.0;
+        case TimeUnit::Minute:
+            return timeconstants::SecondsPerMinute;
+        case TimeUnit::Hour:
+            return timeconstants::SecondsPerHour;
+        case TimeUnit::Day:
+            return timeconstants::SecondsPerDay;
+        case TimeUnit::Month:
+            return timeconstants::SecondsPerMonth;
+        case TimeUnit::Year:
+            return timeconstants::SecondsPerYear;
+        default:
+            throw ghoul::MissingCaseException();
+    }
+}
+
+constexpr double convertUnit(TimeUnit fromUnit, TimeUnit toUnit) {
+    return convertSeconds(toSecond(fromUnit), toUnit);
+}
+
+constexpr double convertTime(double time, TimeUnit fromUnit, TimeUnit toUnit) {
+    return time * convertUnit(fromUnit, toUnit);
 }
 
 } // namespace openspace

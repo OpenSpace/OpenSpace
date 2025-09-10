@@ -1,0 +1,37 @@
+-- Basic
+-- This asset creates a set of coordinate axes that are offset from their original
+-- position by applying multiple individual translations.
+
+local Node = {
+  Identifier = "MultiTranslation_Example",
+  Transform = {
+    Translation = {
+      Type = "MultiTranslation",
+      Translations = {
+        {
+          Type = "StaticTranslation",
+          Position = { 0.0, 50.0, -10.0 }
+        },
+        {
+          Type = "StaticTranslation",
+          Position = { -25.0, 0.0, -1.0 }
+        }
+      }
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "MultiTranslation - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

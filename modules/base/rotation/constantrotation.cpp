@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,23 +33,25 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
         "RotationAxis",
-        "Rotation Axis",
+        "Rotation axis",
         "This value is the rotation axis around which the object will rotate.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationRateInfo = {
         "RotationRate",
-        "Rotation Rate",
+        "Rotation rate",
         "This value determines the number of revolutions per in-game second.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This rotation type will cause a scene graph node to rotate about the provided axis
+    // at a fixed and constant rotation speed.
     struct [[codegen::Dictionary(ConstantRotation)]] Parameters {
         // [[codegen::verbatim(RotationInfo.description)]]
         std::optional<glm::dvec3> rotationAxis
             [[codegen::inrange(glm::dvec3(-1.0), glm::dvec3(1.0))]];
-            
+
         // [[codegen::verbatim(RotationRateInfo.description)]]
         std::optional<float> rotationRate;
     };
@@ -63,7 +65,8 @@ documentation::Documentation ConstantRotation::Documentation() {
 }
 
 ConstantRotation::ConstantRotation(const ghoul::Dictionary& dictionary)
-    : _rotationAxis(
+    : Rotation(dictionary)
+    , _rotationAxis(
         RotationInfo,
         glm::dvec3(0.0, 0.0, 1.0),
         glm::dvec3(-1.0),

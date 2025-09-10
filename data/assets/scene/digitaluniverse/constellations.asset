@@ -10,10 +10,6 @@ local speck = asset.resource({
 })
 
 
-local zodiacs = {
-  "CNC", "TAU", "PSC", "ARI", "LIB", "AQR", "CAP", "SCO", "VIR", "SGR", "GEM", "LEO"
-}
-
 local function zodiacsString(zodiacsList)
   local zodiacsString = "{"
   local isFirst = true
@@ -60,6 +56,7 @@ local Constellations = {
   GUI = {
     Name = "Constellation Lines",
     Path = "/Milky Way/Constellations",
+    Focusable = false,
     Description = [[Lines connecting the stars that make up the constellation figures.
       We represent the constellations by connecting the main stars that make up the
       constellation "stick figures," as seen from Earth. Colors: most constellations
@@ -68,8 +65,6 @@ local Constellations = {
       constellations.]]
   }
 }
-
-local zodiacsString = zodiacsString(zodiacs)
 
 -- Actions
 local ShowConstellations = {
@@ -95,20 +90,29 @@ local HideConstellations = {
   IsLocal = false
 }
 
-local ShowZodiacs = {
-  Identifier = "os.constellation.ShowZodiacs",
-  Name = "Show zodiac",
-  Command = [[
-    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.ConstellationSelection", ]] .. zodiacsString .. [[)
-    openspace.fadeIn("Scene.Constellations.Renderable")
-  ]],
-  Documentation = "Shows the zodiac constellations lines",
-  GuiPath = "/Constellations/Lines",
-  IsLocal = false
-}
+local ShowZodiacsIdentifier = "os.constellation.ShowZodiacs"
+
 
 
 asset.onInitialize(function()
+  -- Defining this in here as the zodiacsString function requires the file synchronization
+  -- to be completed
+
+  local zodiacsString = zodiacsString({
+    "CNC", "TAU", "PSC", "ARI", "LIB", "AQR", "CAP", "SCO", "VIR", "SGR", "GEM", "LEO"
+  })
+  local ShowZodiacs = {
+    Identifier = ShowZodiacsIdentifier,
+    Name = "Show zodiac",
+    Command = [[
+      openspace.setPropertyValueSingle("Scene.Constellations.Renderable.ConstellationSelection", ]] .. zodiacsString .. [[)
+      openspace.fadeIn("Scene.Constellations.Renderable")
+    ]],
+    Documentation = "Shows the zodiac constellations lines",
+    GuiPath = "/Constellations/Lines",
+    IsLocal = false
+  }
+
   openspace.addSceneGraphNode(Constellations)
 
   openspace.action.registerAction(ShowConstellations)
@@ -117,7 +121,7 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(ShowZodiacs)
+  openspace.action.removeAction(ShowZodiacsIdentifier)
   openspace.action.removeAction(HideConstellations)
   openspace.action.removeAction(ShowConstellations)
 
@@ -127,7 +131,7 @@ end)
 asset.export(Constellations)
 asset.export("ShowConstellations", ShowConstellations.Identifier)
 asset.export("HideConstellations", HideConstellations.Identifier)
-asset.export("ShowZodiacs", ShowZodiacs.Identifier)
+asset.export("ShowZodiacs", ShowZodiacsIdentifier)
 
 
 

@@ -1,0 +1,31 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderablenodearrow/nodearrow_appearance.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Root",
+        "position": [
+          -3621202.2451755735,
+          27912491.334173832,
+          -24605728.56037892
+        ],
+        "pitch": -0.158852633368192,
+        "up": [
+          0.20576397045617906,
+          0.6620107049043098,
+          0.7206962016371441
+        ],
+        "yaw": -0.39454759928317873,
+        "timestamp": "2025 AUG 30 12:43:15"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

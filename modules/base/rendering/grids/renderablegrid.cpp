@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,21 +45,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo HighlightColorInfo = {
         "HighlightColor",
-        "Highlight Color",
+        "Highlight color",
         "The color of the highlighted lines in the grid.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
-        "Number of Segments",
+        "Number of segments",
         "The number of segments to split the grid into, in each direction (x and y).",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo HighlightRateInfo = {
         "HighlightRate",
-        "Highlight Rate",
+        "Highlight rate",
         "The rate that the columns and rows are highlighted, counted with respect to the "
         "center of the grid. If the number of segments in the grid is odd, the "
         "highlighting might be offset from the center.",
@@ -68,14 +68,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
+        "Line width",
         "The width of the grid lines. The larger number, the thicker the lines.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HighlightLineWidthInfo = {
         "HighlightLineWidth",
-        "Highlight Line Width",
+        "Highlight line width",
         "The width of the highlighted grid lines. The larger number, the thicker the "
         "lines.",
         openspace::properties::Property::Visibility::User
@@ -83,7 +83,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
-        "Grid Size",
+        "Grid size",
         "The size of the grid (in the x and y direction), given in meters.",
         openspace::properties::Property::Visibility::User
     };
@@ -94,6 +94,12 @@ namespace {
         "The labels for the grid."
     };
 
+    // This `Renderable` can be used to create a planar grid, to for example illustrate
+    // distances in 3D space.
+    //
+    // The grid is created by specifying a size and how many segments to split each
+    // dimension into. A secondary color can be used to highlight grid lines with a
+    // given interval.
     struct [[codegen::Dictionary(RenderableGrid)]] Parameters {
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
@@ -117,8 +123,7 @@ namespace {
         std::optional<glm::vec2> size;
 
         // [[codegen::verbatim(LabelsInfo.description)]]
-        std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("labelscomponent")]];
+        std::optional<ghoul::Dictionary> labels [[codegen::reference("labelscomponent")]];
     };
 #include "renderablegrid_codegen.cpp"
 } // namespace
@@ -182,7 +187,7 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderableGrid::isReady() const {
-    return _hasLabels ? _gridProgram && _labels->isReady() : _gridProgram != nullptr;
+    return _gridProgram && (_hasLabels ? _labels->isReady() : true);
 }
 
 void RenderableGrid::initialize() {
@@ -237,7 +242,7 @@ void RenderableGrid::deinitializeGL() {
     _gridProgram = nullptr;
 }
 
-void RenderableGrid::render(const RenderData& data, RendererTasks&){
+void RenderableGrid::render(const RenderData& data, RendererTasks&) {
     _gridProgram->activate();
 
     const glm::dmat4 modelTransform = calcModelTransform(data);
@@ -273,9 +278,9 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
     // Change GL state:
 #ifndef __APPLE__
     glLineWidth(_lineWidth);
-#else
+#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
     glLineWidth(1.f);
-#endif
+#endif // __APPLE__
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
@@ -288,9 +293,9 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
     // Render major grid
 #ifndef __APPLE__
     glLineWidth(_highlightLineWidth);
-#else
+#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
     glLineWidth(1.f);
-#endif
+#endif // __APPLE__
     _gridProgram->setUniform("gridColor", _highlightColor);
 
     glBindVertexArray(_highlightVaoID);
@@ -313,7 +318,7 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
 }
 
 void RenderableGrid::update(const UpdateData&) {
-    if (!_gridIsDirty) {
+    if (!_gridIsDirty) [[likely]] {
         return;
     }
 

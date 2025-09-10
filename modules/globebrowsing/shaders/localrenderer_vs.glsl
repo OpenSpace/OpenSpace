@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,24 +37,21 @@ out vec4 fs_position;
 out vec3 ellipsoidNormalCameraSpace;
 out vec3 levelWeights;
 out vec3 positionCameraSpace;
+out vec3 posObjSpace;
+out vec3 normalObjSpace;
 
 #if USE_ACCURATE_NORMALS
   out vec3 ellipsoidTangentThetaCameraSpace;
   out vec3 ellipsoidTangentPhiCameraSpace;
 #endif // USE_ACCURATE_NORMALS
 
-#if USE_ECLIPSE_SHADOWS
-out vec3 positionWorldSpace;
 uniform dmat4 inverseViewTransform;
-#endif // USE_ECLIPSE_SHADOWS
+uniform dmat4 modelTransform;
 
-#if SHADOW_MAPPING_ENABLED
-  // ShadowMatrix is the matrix defined by:
-  // textureCoordsMatrix * projectionMatrix * combinedViewMatrix * modelMatrix
-  // where textureCoordsMatrix is just a scale and bias computation: [-1,1] to [0,1]
-  uniform dmat4 shadowMatrix;
-  out vec4 shadowCoords;
-#endif // SHADOW_MAPPING_ENABLED
+#if USE_ECLIPSE_SHADOWS
+  // Position in world space
+  out vec3 positionWorldSpace;
+#endif // USE_ECLIPSE_SHADOWS
 
 uniform mat4 projectionTransform;
 // Input points in camera space
@@ -125,9 +122,10 @@ void main() {
   gl_Position = fs_position;
   ellipsoidNormalCameraSpace = patchNormalCameraSpace;
   positionCameraSpace = p;
+  posObjSpace = vec3(inverseViewTransform * dvec4(p, 1.0));
 
 #if USE_ECLIPSE_SHADOWS
-  positionWorldSpace = vec3(inverseViewTransform * dvec4(p, 1.0));
+  positionWorldSpace = vec3(modelTransform * dvec4(p, 1.0));
 #endif // USE_ECLIPSE_SHADOWS
 
 #if SHADOW_MAPPING_ENABLED

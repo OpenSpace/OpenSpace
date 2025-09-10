@@ -4,32 +4,33 @@ openspace.documentation = {
     Arguments = {{ "sceneGraphNodes", "String[]" }},
     Documentation = [[This function marks the scene graph nodes identified by name as
       interesting, which will provide shortcut access to focus buttons and featured
-      properties]]
+      properties.]]
   },
   {
     Name = "markInterestingTimes",
     Arguments = {{ "times", "Table[]" }},
     Documentation = [[This function marks interesting times for the current scene, which
-      will create shortcuts for a quick access]]
+      will create shortcuts for a quick access.]]
   },
   {
     Name = "removeInterestingNodes",
     Arguments = {{ "sceneGraphNodes", "String[]" }},
     Documentation = [[This function removes unmarks the scene graph nodes identified by
-      name as interesting, thus removing the shortcuts from the features properties list]]
+      name as interesting, thus removing the shortcuts from the features properties list.
+    ]]
   },
   {
     Name = "setDefaultDashboard",
     Arguments = {},
     Documentation = [[This function sets the default values for the dashboard consisting
       of 'DashboardItemDate', 'DashboardItemSimulationIncrement', 'DashboardItemDistance',
-      'DashboardItemFramerate', and 'DashboardItemParallelConnection']]
+      'DashboardItemFramerate', and 'DashboardItemParallelConnection'.]]
   },
   {
     Name = "rebindKey",
     Arguments = {{ "oldKey", "String" }, { "newKey", "String" }},
     Documentation = [[Rebinds all scripts from the old key (first argument) to the new
-      key (second argument)]]
+      key (second argument).]]
   },
   {
     Name = "appendToListProperty",
@@ -48,7 +49,7 @@ openspace.documentation = {
   {
     Name = "invertBooleanProperty",
     Arguments = {{ "identifier", "String" }},
-    Documentation = "Inverts the value of a boolean property with the given identifier"
+    Documentation = "Inverts the value of a boolean property with the given identifier."
   },
   {
     Name = "fadeIn",
@@ -88,6 +89,38 @@ openspace.documentation = {
       target several nodes. If the fade time is not provided then the
       "OpenSpaceEngine.FadeDuration" property will be used instead. If the third argument
       (endScript) is provided then that script will be run after the fade is finished.]]
+  },
+  {
+    Name = "ternary",
+    Arguments = {
+      { "condition", "Boolean" },
+      { "trueValue", "any" },
+      { "falseValue", "any" }
+    },
+    Return = "any",
+    Documentation = [[
+      A utility function to return a specific value based on a True/False condition.
+
+      \\param condition The condition to check against
+      \\param trueValue The value to return if the condition is True
+      \\param falseValue The value to return if the condition is False
+      \\return Either the trueValue of falseValue, depending on if the condition is true
+               or not
+    ]]
+  },
+  {
+    Name = "isEmpty",
+    Arguments = {
+      { "object", "any" }
+    },
+    Return = "Boolean",
+    Documentation = [[
+      A utility function to check whether an object is empty or not. Identifies `nil`
+      objects, Tables without any keys, and empty strings.
+
+      \\param object The object to check
+      \\return A Boolean that specifies if the object is empty or not
+    ]]
   }
 }
 
@@ -173,47 +206,43 @@ openspace.fadeIn = function(identifier, fadeTime, endScript)
   local hasTag, _ = identifier:find("{")
   local hasWild, _ = identifier:find("*")
 
+  -- Check if the properties exist
+  local hasEnabled = true
+  local hasFade = true
   if hasTag ~= nil or hasWild ~= nil then
     -- Regex, several nodes
     local enabledPropertyList = openspace.property(enabledProperty)
     if next(enabledPropertyList) == nil then
       -- List is empty, no matches found
-      openspace.printError(
-        "Error when calling script 'openspace.fadeIn': " ..
-        "Could not find any property matching '" .. enabledProperty .. "'"
-      )
-      return
+      hasEnabled = false
     end
 
     local fadePropertyList = openspace.property(fadeProperty)
     if next(fadePropertyList) == nil then
       -- List is empty, no matches found
-      openspace.printError(
-        "Error when calling script 'openspace.fadeIn': " ..
-        "Could not find any property matching '" .. fadeProperty .. "'"
-      )
-      return
+      hasFade = false
     end
   else
     -- Literal, single node
-    local hasEnabled = openspace.hasProperty(enabledProperty)
-    local hasFade = openspace.hasProperty(fadeProperty)
-
-    if not hasEnabled then
-      openspace.printError(
-        "Error when calling script 'openspace.fadeIn': " ..
-        "Could not find property '" .. enabledProperty .. "'"
-      )
-      return
-    elseif not hasFade then
-      openspace.printError(
-        "Error when calling script 'openspace.fadeIn': " ..
-        "Could not find property '" .. fadeProperty .. "'"
-      )
-      return
-    else
+    hasEnabled = openspace.hasProperty(enabledProperty)
+    hasFade = openspace.hasProperty(fadeProperty)
+    if hasEnabled then
       isEnabled = openspace.propertyValue(enabledProperty)
     end
+  end
+
+  if not hasEnabled then
+    openspace.printError(
+      "Error when calling script 'openspace.fadeIn': " ..
+      "Could not find property '" .. enabledProperty .. "'"
+    )
+    return
+  elseif not hasFade then
+    openspace.printError(
+      "Error when calling script 'openspace.fadeIn': " ..
+      "Could not find property '" .. fadeProperty .. "'"
+    )
+    return
   end
 
   -- If node is already enabled we only have to fade it
@@ -240,68 +269,100 @@ openspace.fadeOut = function(identifier, fadeTime, endScript)
   local hasTag, _ = identifier:find("{")
   local hasWild, _ = identifier:find("*")
 
+  -- Check if the properties exist
+  local hasEnabled = true
+  local hasFade = true
   if hasTag ~= nil or hasWild ~= nil then
     -- Regex, several nodes
     local enabledPropertyList = openspace.property(enabledProperty)
     if next(enabledPropertyList) == nil then
       -- List is empty, no matches found
-      openspace.printError(
-        "Error when calling script 'openspace.fadeIn': " ..
-        "Could not find any property matching '" .. enabledProperty .. "'"
-      )
-      return
+      hasEnabled = false
     end
 
     local fadePropertyList = openspace.property(fadeProperty)
     if next(fadePropertyList) == nil then
       -- List is empty, no matches found
-      openspace.printError(
-        "Error when calling script 'openspace.fadeIn': " ..
-        "Could not find any property matching '" .. fadeProperty .. "'"
-      )
-      return
+      hasFade = false
     end
   else
     -- Literal, single node
-    local hasEnabled = openspace.hasProperty(enabledProperty)
-    local hasFade = openspace.hasProperty(fadeProperty)
-
-    if not hasEnabled then
-      openspace.printError(
-        "Error when calling script 'openspace.fadeIn': " ..
-        "Could not find property '" .. enabledProperty .. "'"
-      )
-      return
-    elseif not hasFade then
-      openspace.printError(
-        "Error when calling script 'openspace.fadeIn': " ..
-        "Could not find property '" .. fadeProperty .. "'"
-      )
-      return
-    else
+    hasEnabled = openspace.hasProperty(enabledProperty)
+    hasFade = openspace.hasProperty(fadeProperty)
+    if hasEnabled then
       isEnabled = openspace.propertyValue(enabledProperty)
     end
   end
 
+  if not hasEnabled then
+    openspace.printError(
+      "Error when calling script 'openspace.fadeIn': " ..
+      "Could not find property '" .. enabledProperty .. "'"
+    )
+    return
+  elseif not hasFade then
+    openspace.printError(
+      "Error when calling script 'openspace.fadeIn': " ..
+      "Could not find property '" .. fadeProperty .. "'"
+    )
+    return
+  end
+
   -- If node is already disabled we don't have to do anything
   if isEnabled then
-    openspace.setPropertyValue(fadeProperty, 0.0, fadeTime, "Linear", endScript)
-    end
+    local disableScript = "openspace.setPropertyValue('" .. enabledProperty .. "', false)"
+    openspace.setPropertyValue(
+      fadeProperty,
+      0.0,
+      fadeTime,
+      "Linear",
+      disableScript .. endScript
+    )
+  end
 end
 
 openspace.toggleFade = function(renderable, fadeTime, endScript)
   if (fadeTime == nil) then
     fadeTime = openspace.propertyValue("OpenSpaceEngine.FadeDuration")
   end
-  local enabled = openspace.propertyValue(renderable .. ".Enabled")
-  local fadeState = openspace.propertyValue(renderable .. ".Fade")
-  if (enabled) then
-    if (fadeState < 0.5) then
-      openspace.fadeIn(renderable, fadeTime-(fadeTime*fadeState), endScript)
-    else
-      openspace.fadeOut(renderable, fadeTime*fadeState, endScript)
+
+  local renderablesList = openspace.propertyOwner(renderable)
+
+  if next(renderablesList) == nil then
+    return
+  end
+
+  for i = 1, #renderablesList do
+    local renderable = renderablesList[i]
+
+    -- Skip any matches that do not have the properties we need
+    if openspace.hasProperty(renderable .. ".Enabled") and
+       openspace.hasProperty(renderable .. ".Fade")
+    then
+      local enabled = openspace.propertyValue(renderable .. ".Enabled")
+      local fadeState = openspace.propertyValue(renderable .. ".Fade")
+
+      if (enabled) then
+        if (fadeState < 0.5) then
+          openspace.fadeIn(renderable, fadeTime-(fadeTime*fadeState), endScript)
+        else
+          openspace.fadeOut(renderable, fadeTime*fadeState, endScript)
+        end
+      else
+        openspace.fadeIn(renderable, fadeTime, endScript)
+      end
     end
+  end
+end
+
+openspace.ternary = function(condition, trueValue, falseValue)
+  if condition then return trueValue else return falseValue end
+end
+
+openspace.isEmpty = function(v)
+  if type(v) == "table" then
+    return next(v) == nil
   else
-    openspace.fadeIn(renderable, fadeTime, endScript)
+    return v == nil or v == ''
   end
 end

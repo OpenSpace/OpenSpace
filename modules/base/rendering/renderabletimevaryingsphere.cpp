@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,7 +52,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TextureSourceInfo = {
         "TextureSource",
-        "Texture Source",
+        "Texture source",
         "A directory containing images that are loaded from disk and used for texturing "
         "the sphere. The images are expected to be equirectangular projections.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -68,7 +68,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableTimeVaryingSphere::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_time_varying_sphere");
+    return codegen::doc<Parameters>(
+        "base_renderable_time_varying_sphere",
+        RenderableSphere::Documentation()
+    );
 }
 
 RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
@@ -79,18 +82,13 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _textureSourcePath = p.textureSource.string();
+    extractMandatoryInfoFromSourceFolder();
+    computeSequenceEndTime();
+    loadTexture();
 }
 
 bool RenderableTimeVaryingSphere::isReady() const {
     return RenderableSphere::isReady() && _texture;
-}
-
-void RenderableTimeVaryingSphere::initializeGL() {
-    RenderableSphere::initializeGL();
-
-    extractMandatoryInfoFromSourceFolder();
-    computeSequenceEndTime();
-    loadTexture();
 }
 
 void RenderableTimeVaryingSphere::deinitializeGL() {
@@ -148,9 +146,14 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
 void RenderableTimeVaryingSphere::update(const UpdateData& data) {
     RenderableSphere::update(data);
 
+    if (_files.empty()) {
+        return;
+    }
+
     const double currentTime = data.time.j2000Seconds();
     const bool isInInterval = (currentTime >= _files[0].time) &&
         (currentTime < _sequenceEndTime);
+
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
         if (
@@ -167,7 +170,8 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
         // not in interval => set everything to false
         _activeTriggerTimeIndex = 0;
     }
-    if (_textureIsDirty) {
+
+    if (_textureIsDirty) [[unlikely]] {
         loadTexture();
         _textureIsDirty = false;
     }
@@ -184,16 +188,14 @@ void RenderableTimeVaryingSphere::bindTexture() {
 
 void RenderableTimeVaryingSphere::updateActiveTriggerTimeIndex(double currentTime) {
     auto iter = std::upper_bound(
-        _files.begin(),
-        _files.end(),
+        _files.cbegin(),
+        _files.cend(),
         currentTime,
-        [](double value, const FileData& f) {
-            return value < f.time;
-        }
+        [](double value, const FileData& f) { return value < f.time; }
     );
-    if (iter != _files.end()) {
-        if (iter != _files.begin()) {
-            const ptrdiff_t idx = std::distance(_files.begin(), iter);
+    if (iter != _files.cend()) {
+        if (iter != _files.cbegin()) {
+            const ptrdiff_t idx = std::distance(_files.cbegin(), iter);
             _activeTriggerTimeIndex = static_cast<int>(idx - 1);
         }
         else {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,7 @@
 #include <openspace/events/eventengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/ellipsoid.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
@@ -51,7 +52,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
         "Type",
-        "Renderable Type",
+        "Renderable type",
         "The type of the renderable.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -59,7 +60,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderableRenderBinModeInfo =
     {
         "RenderBinMode",
-        "Render Bin Mode",
+        "Render bin mode",
         "A value that specifies if the renderable should be rendered in the Background, "
         "Opaque, Pre-/PostDeferredTransparency, Overlay, or Sticker rendering step.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -67,22 +68,33 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DimInAtmosphereInfo = {
         "DimInAtmosphere",
-        "Dim In Atmosphere",
+        "Dim in atmosphere",
         "Decides if the object should be dimmed (i.e. faded out) when the camera is in "
         "the sunny part of an atmosphere.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This is the base class for all `Renderable` types. These objects are responsible
+    // for rendering the visuals for scene graph nodes in the 3D rendering. Different
+    // `Renderable` types create various kinds of visuals, sometimes based on external
+    // data files or resources (such as images, 3D models, color maps, or datasets).
+    //
+    // A `Renderable` is created by adding it to a scene graph node in an asset. In
+    // general, this places the rendered object at the position of that scene graph node,
+    // unless otherwise specified by the specific `Renderable` type.
+    //
+    // Each `Renderable` type typically also includes a number of settings to alter its
+    // appearance. See the documentation for the individual types for more details.
     struct [[codegen::Dictionary(Renderable)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
 
         // This value determines the opacity of this renderable. A value of 0 means
-        // completely transparent
+        // completely transparent.
         std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
 
         // A single tag or a list of tags that this renderable will respond to when
-        // setting properties
+        // setting properties.
         std::optional<std::variant<std::vector<std::string>, std::string>> tag;
 
         // [[codegen::verbatim(RenderableTypeInfo.description)]]
@@ -93,8 +105,9 @@ namespace {
             Background,
             Opaque,
             PreDeferredTransparent,
+            Overlay,
             PostDeferredTransparent,
-            Overlay
+            Sticker
         };
 
         // [[codegen::verbatim(RenderableRenderBinModeInfo.description)]]
@@ -245,6 +258,10 @@ SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
         directionFromCenterToTarget,
         0.0
     };
+}
+
+Ellipsoid Renderable::ellipsoid() const {
+    return Ellipsoid(glm::dvec3(_interactionSphere));
 }
 
 bool Renderable::renderedWithDesiredData() const {

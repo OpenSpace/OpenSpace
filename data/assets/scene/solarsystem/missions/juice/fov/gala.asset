@@ -27,18 +27,22 @@ local Gala = {
   GUI = {
     Name = "Gala FOV",
     Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false,
     Description = "The field-of-view for the Ganymede Laster Altimeter (GALA) instrument"
   }
 }
 
 
 asset.onInitialize(function()
+  openspace.printWarning([[The Gala instruments use a circular field-of-view that is
+    currently not supported in OpenSpace]])
+
   -- Circle shapes are currently not supported
-  openspace.addSceneGraphNode(Gala)
+  -- openspace.addSceneGraphNode(Gala)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Gala)
+  -- openspace.removeSceneGraphNode(Gala)
 end)
 
 asset.export(Gala)

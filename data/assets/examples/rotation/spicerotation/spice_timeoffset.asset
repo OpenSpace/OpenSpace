@@ -1,0 +1,37 @@
+-- Time offset
+-- This asset creates a rotation provided by a SPICE kernel and applies it to a scene
+-- graph node that only displays coordinate axes. The rotation of the coordinate axes are
+-- determined by SPICE, in this case pretending that the coordinate axes are rotating at
+-- the same rate as Earth. In this specific example, the orientation is offset 8h back
+-- compared to the actual in-game time in OpenSpace.
+
+-- Load the default SPICE kernels, which is the planetary constants and the DE430 kernel
+asset.require("spice/core")
+
+local Node = {
+  Identifier = "SpiceRotation_Example_TimeOffset",
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_EARTH",
+      DestinationFrame = "GALACTIC",
+      TimeOffset = -8 * 60 * 60
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "SpiceRotation - Time Offset",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
+

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,7 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDialogButtonBox>
+#include <QErrorMessage>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -85,7 +86,7 @@ void ActionDialog::createWidgets() {
     //  |                      | Is Local      | []  [choosescr] |    Row 5
     //  |                      | Script        | [ooooooooooooo] |    Row 6
     //  *----------------------*---------------*-----------------*
-    //  | [+] [-]              |               | <Save> <Cancel> |    Row 7
+    //  | [+] [-] [D]          |               | <Save> <Cancel> |    Row 7
     //  *----------------------*---------------*-----------------*
     //  |========================================================|    Row 8
     //  | Keybindings                                            |    Row 9
@@ -103,7 +104,7 @@ void ActionDialog::createWidgets() {
     //  *----------------------*---------------*-----------------*
 
     QGridLayout* layout = new QGridLayout(this);
-    
+
     createActionWidgets(layout);
     clearActionFields();
 
@@ -161,25 +162,17 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
         [this]() {
             // Check if the identifier is legal
             const std::string id = _actionWidgets.identifier->text().toStdString();
-            const bool isLegal = id.find_first_of("\t\n. ") == std::string::npos;
-            if (isLegal) {
-                _actionWidgets.infoText->clear();
-                _actionWidgets.infoText->setHidden(true);
-            }
-            else {
-                _actionWidgets.infoText->setText(
-                    "Identifier must not contain whitespace or ."
+            const bool isLegal = id.find_first_of("\t\n ") == std::string::npos;
+            if (!isLegal) {
+                _actionWidgets.infoText->showMessage(
+                    "Identifier must not contain whitespace"
                 );
-                _actionWidgets.infoText->setHidden(false);
             }
         }
     );
     layout->addWidget(_actionWidgets.identifier, 1, 2);
 
-    _actionWidgets.infoText = new QLabel;
-    _actionWidgets.infoText->setHidden(true);
-    _actionWidgets.infoText->setObjectName("error-message");
-    layout->addWidget(_actionWidgets.infoText, 1, 3);
+    _actionWidgets.infoText = new QErrorMessage(this);
 
     layout->addWidget(new QLabel("Name"), 2, 1);
     _actionWidgets.name = new QLineEdit;
@@ -243,6 +236,7 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
         "`args` variable when this script executes. If no arguments are passed, this "
         "variable does not exist"
     );
+    _actionWidgets.script->setTabChangesFocus(true);
     _actionWidgets.script->setEnabled(false);
     layout->addWidget(_actionWidgets.script, 6, 2, 1, 2);
 
@@ -270,6 +264,15 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
     containerLayout->addWidget(_actionWidgets.removeButton);
     layout->addWidget(container, 7, 0, Qt::AlignLeft);
 
+    _actionWidgets.duplicateButton = new QPushButton("Duplicate");
+    _actionWidgets.duplicateButton->setObjectName("duplicate-button");
+    _actionWidgets.duplicateButton->setToolTip("Duplicate the currently selected action");
+    _actionWidgets.duplicateButton->setEnabled(false);
+    QObject::connect(
+        _actionWidgets.duplicateButton, &QPushButton::clicked,
+        this, &ActionDialog::actionDuplicate
+    );
+    containerLayout->addWidget(_actionWidgets.duplicateButton);
 
     // Save / Cancel buttons
     _actionWidgets.saveButtons = new QDialogButtonBox;
@@ -487,7 +490,7 @@ void ActionDialog::actionRemove() {
             _keybindingsData.erase(_keybindingsData.begin() + i);
             delete _keybindingWidgets.list->takeItem(static_cast<int>(i));
             i--;
-            //Save the updated keybindings to the profile
+            // Save the updated keybindings to the profile
             if (_keybindings) {
                 *_keybindings = _keybindingsData;
             }
@@ -520,6 +523,22 @@ void ActionDialog::actionRemove() {
     ghoul_assert(false, "We shouldn't be able to get here");
 }
 
+void ActionDialog::actionDuplicate() {
+    const openspace::Profile::Action* action = selectedAction();
+    ghoul_assert(action, "An action must exist at this point");
+
+    ghoul_assert(
+        _actionWidgets.list->count() == static_cast<int>(_actionData.size()),
+        "Action list and data has desynced"
+    );
+    const openspace::Profile::Action act = *action;
+
+    _actionData.push_back(act);
+    _actionWidgets.list->addItem("");
+    _actionWidgets.list->setCurrentRow(_actionWidgets.list->count() - 1);
+    updateListItem(_actionWidgets.list->currentItem(), act);
+}
+
 void ActionDialog::actionSelected() {
     const Profile::Action* action = selectedAction();
     if (action) {
@@ -541,6 +560,7 @@ void ActionDialog::actionSelected() {
         _actionWidgets.script->setEnabled(true);
         _actionWidgets.addButton->setEnabled(false);
         _actionWidgets.removeButton->setEnabled(true);
+        _actionWidgets.duplicateButton->setEnabled(true);
         _actionWidgets.saveButtons->setEnabled(true);
         if (_mainButton) {
             _mainButton->setEnabled(false);
@@ -551,6 +571,7 @@ void ActionDialog::actionSelected() {
         // No action selected
         _actionWidgets.addButton->setEnabled(true);
         _actionWidgets.removeButton->setEnabled(false);
+        _actionWidgets.duplicateButton->setEnabled(false);
         _actionWidgets.saveButtons->setEnabled(false);
         //Keybinding panel must also be in valid state to re-enable main start button
         if (_mainButton && !_keybindingWidgets.saveButtons->isEnabled()) {
@@ -612,7 +633,6 @@ void ActionDialog::actionSaved() {
         }
         action->identifier = newIdentifier;
     }
-    
 
     action->name = _actionWidgets.name->text().toStdString();
     std::string guiPath = _actionWidgets.guiPath->text().toStdString();
@@ -643,8 +663,6 @@ void ActionDialog::clearActionFields() const {
     _actionWidgets.list->setCurrentRow(-1);
     _actionWidgets.identifier->clear();
     _actionWidgets.identifier->setEnabled(false);
-    _actionWidgets.infoText->clear();
-    _actionWidgets.infoText->setHidden(true);
     _actionWidgets.name->clear();
     _actionWidgets.name->setEnabled(false);
     _actionWidgets.guiPath->clear();
@@ -701,7 +719,7 @@ void ActionDialog::keybindingAdd() {
 void ActionDialog::keybindingRemove() {
     const Profile::Keybinding* keybinding = selectedKeybinding();
     ghoul_assert(keybinding, "A keybinding must be selected at this point");
-    
+
     for (size_t i = 0; i < _keybindingsData.size(); i++) {
         if (_keybindingsData[i].key == keybinding->key &&
             _keybindingsData[i].action == keybinding->action)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -105,7 +105,7 @@ double scaleForDistanceModulus(float absMag) {
 void main() {
   vec3 pos = gl_in[0].gl_Position.xyz;
   vs_position = pos; // in object space
-  dvec4 dpos  = modelMatrix * dvec4(pos, 1.0);
+  dvec4 dpos = modelMatrix * dvec4(pos, 1.0);
 
   ge_bv = vs_bvLumAbsMag[0].x;
   ge_velocity = vs_velocity[0];

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,12 +33,6 @@ namespace openspace::volume {
 enum class VolumeGridType : int {
     Cartesian = 0,
     Spherical = 1
-};
-
-struct InvalidGridTypeError : public ghoul::RuntimeError {
-    explicit InvalidGridTypeError(std::string gridType_);
-
-    std::string gridType;
 };
 
 VolumeGridType parseGridType(const std::string& gridType);

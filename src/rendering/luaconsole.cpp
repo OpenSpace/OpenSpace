@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -71,7 +71,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo VisibleInfo = {
         "IsVisible",
-        "Is Visible",
+        "Is visible",
         "Determines whether the Lua console is shown on the screen or not. Toggling it "
         "will fade the console in and out.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -79,7 +79,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShouldBeSynchronizedInfo = {
        "ShouldBeSynchronized",
-       "Should Be Synchronized",
+       "Should be synchronized",
        "Determines whether the entered commands will only be executed locally (if this "
        "is disabled), or whether they will be send to other connected nodes, for "
        "example in a cluster environment.",
@@ -88,7 +88,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShouldSendToRemoteInfo = {
         "ShouldSendToRemote",
-        "Should Send To Remote",
+        "Should send to remote",
         "Determines whether the entered commands will only be executed locally (if this "
         "is disabled), or whether they will be send to connected remote instances (other "
         "peers through a parallel connection).",
@@ -97,47 +97,63 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BackgroundColorInfo = {
         "BackgroundColor",
-        "Background Color",
+        "Background color",
         "Sets the background color of the console.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EntryTextColorInfo = {
         "EntryTextColor",
-        "Entry Text Color",
+        "Entry text color",
         "Sets the text color of the entry area of the console.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HistoryTextColorInfo = {
         "HistoryTextColor",
-        "History Text Color",
+        "History text color",
         "Sets the text color of the history area of the console.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HistoryLengthInfo = {
         "HistoryLength",
-        "History Length",
+        "History length",
         "Determines the length of the history in number of lines.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     std::string sanitizeInput(std::string str) {
-        // Remove carriage returns.
+        // Remove carriage returns
         str.erase(std::remove(str.begin(), str.end(), '\r'), str.end());
 
-        // Replace newlines with spaces.
         std::transform(
             str.begin(),
             str.end(),
             str.begin(),
-            [](char c) { return c == '\n' ? ' ' : c; }
+            [](char c) {
+                // Replace newlines with spaces
+                if (c == '\n') {
+                    return ' ';
+                }
+
+                // The documentation contains “ and ” which we convert to " to make them
+                // copy-and-pastable
+                if (c == -109 || c == -108) {
+                    return '"';
+                }
+
+                // Convert \ into / to make paths pastable
+                if (c == '\\') {
+                    return '/';
+                }
+
+                return c;
+            }
         );
 
         return str;
     }
-
 } // namespace
 
 namespace openspace {
@@ -455,11 +471,12 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     if (key == Key::Enter || key == Key::KeypadEnter) {
         const std::string cmd = _commands.at(_activeCommand);
         if (!cmd.empty()) {
-            global::scriptEngine->queueScript(
-                cmd,
-                scripting::ScriptEngine::ShouldBeSynchronized(_shouldBeSynchronized),
-                scripting::ScriptEngine::ShouldSendToRemote(_shouldSendToRemote)
-            );
+            using Script = scripting::ScriptEngine::Script;
+            global::scriptEngine->queueScript({
+                .code = cmd,
+                .synchronized = Script::ShouldBeSynchronized(_shouldBeSynchronized),
+                .sendToRemote = Script::ShouldSendToRemote(_shouldSendToRemote)
+            });
 
             // Only add the current command to the history if it hasn't been
             // executed before. We don't want two of the same commands in a row
@@ -717,7 +734,8 @@ void LuaConsole::render() {
 
         // Compute the overflow in pixels
         const float overflow = currentWidth - res.x * 0.995f;
-        if (overflow <= 0.f) {
+        if (res.x == 1 || overflow <= 0.f) {
+            // The resolution might be equal 1 pixel if the windows was minimized
             break;
         }
 

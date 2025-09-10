@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -67,64 +67,12 @@ public:
     TemplateProperty(Property::PropertyInfo info, T value);
 
     /**
-     * Returns the class name for this TemplateProperty. This method has to be specialized
-     * for each new type.
-     *
-     * \return The class name for the TemplateProperty
-     */
-    virtual std::string_view className() const override = 0;
-
-    /**
-     * Returns the stored value packed into a `std::any` object.
-     *
-     * \return The stored value packed into a `std::any` object
-     */
-    virtual std::any get() const override;
-
-    /**
-     * Sets the value from the provided ghoul::any object. If the types between `T` and
-     * `value` disagree, an error is logged and the stored value remains unchanged.
-     *
-     * \param value The value that is used to set this Property
-     */
-    virtual void set(std::any value) final;
-
-    /**
      * Returns the `std::type_info` describing the template parameter `T`. It can be used
      * to test against a ghoul::any value before trying to assign it.
      *
      * \return The type info object describing the template parameter `T`
      */
     virtual const std::type_info& type() const override;
-
-    /**
-     * This method encodes the stored value into a Lua object and pushes that object onto
-     * the stack.
-     *
-     * \param state The Lua state onto which the encoded object will be pushed
-     * \return `true` if the encoding succeeded; `false` otherwise
-     */
-    virtual bool getLuaValue(lua_State* state) const override;
-
-    /**
-     * Sets the value of this TemplateProperty by decoding the object at the top of the
-     * stack and, if successful, assigning it using the Property::set method. If the
-     * decoding is successful, the new value is set, otherwise it remains unchanged.
-     *
-     * \param state The Lua state from which the value will be decoded
-     */
-    virtual void setLuaValue(lua_State* state) override;
-
-    /// \see Property::typeLua
-    virtual int typeLua() const override = 0;
-
-    /**
-     * This method encodes the stored value into a std::string object. The resulting
-     * encoding must also be a valid JSON representation fo the property.
-     *
-     * \return The string representation of the stored property value
-     */
-    virtual std::string stringValue() const override;
 
     /**
      * This operator allows the TemplateProperty to be used almost transparently as if it
@@ -172,32 +120,10 @@ public:
      */
     T value() const;
 
+    void setLuaValue(lua_State* state) override;
+
 protected:
-    /**
-     * Decodes the object at the top of the stack to a value of the type `T` and returns
-     * it. This method has to be specialized for each new type.
-     *
-     * \param state The Lua state from which the value will be decoded
-     * \return The decoded value
-     */
-    virtual T fromLuaConversion(lua_State* state) const = 0;
-
-    /**
-     * Encodes the stored value into a Lua object and pushes that object onto the stack.
-     * This method has to be specialized for each new type.
-     *
-     * \param state The Lua state onto which the encoded object will be pushed
-     */
-    virtual void toLuaConversion(lua_State* state) const = 0;
-
-    /**
-     * Encodes the stored value into a std::string object, in a format that is a valid
-     * JSON representation of the property. This method has to be specialized for each new
-     * type.
-     *
-     * \return The resulting encoding
-     */
-    virtual std::string toStringConversion() const = 0;
+    virtual T toValue(lua_State* state) const = 0;
 
     /// The value that this TemplateProperty currently stores
     T _value;

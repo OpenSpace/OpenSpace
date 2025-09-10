@@ -11,2262 +11,2262 @@ local Timeline = {
     {
       Name = "Total Eclipse",
       Date = "1901 May 18 05:33:48",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1901-05-18.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1901-05-18.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1901 Nov 11 07:28:21",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1901-11-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1901-11-11.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1902 Apr 08 14:05:06",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1902-04-08.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1902-04-08.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1902 May 07 22:34:16",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1902-05-07.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1902-05-07.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1902 Oct 31 08:00:18",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1902-10-31.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1902-10-31.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1903 Mar 29 01:35:2",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1903-03-29.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1903-03-29.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1903 Sep 21 04:39:52",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1903-09-21.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1903-09-21.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1904 Mar 17 05:40:44",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1904-03-17.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1904-03-17.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1904 Sep 09 20:44:21",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1904-09-09.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1904-09-09.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1905 Mar 06 05:12:26",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1905-03-06.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1905-03-06.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1905 Aug 30 13:07:26",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1905-08-30.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1905-08-30.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1906 Feb 23 07:43:20",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1906-02-23.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1906-02-23.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1906 Jul 21 13:14:19",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1906-07-21.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1906-07-21.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1906 Aug 20 01:12:50",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1906-08-20.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1906-08-20.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1907 Jan 14 06:05:43",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1907-01-14.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1907-01-14.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1907 Jul 10 15:24:32",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1907-07-10.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1907-07-10.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1908 Jan 03 21:45:22",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1908-01-03.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1908-01-03.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1908 Jun 28 16:29:51",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1908-06-28.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1908-06-28.gif"
     },
     {
       Name = "Hybrid Eclipse",
       Date = "1908 Dec 23 11:44:28",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1908-12-23.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1908-12-23.gif"
     },
     {
       Name = "Hybrid Eclipse",
       Date = "1909 Jun 17 23:18:38",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1909-06-17.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1909-06-17.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1909 Dec 12 19:44:48",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1909-12-12.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1909-12-12.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1910 May 09 05:42:13",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1910-05-09.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1910-05-09.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1910 Nov 02 02:08:32",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1910-11-02.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1910-11-02.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1911 Apr 28 22:27:22",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1911-04-28.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1911-04-28.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1911 Oct 22 04:13:02",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1911-10-22.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1911-10-22.gif"
     },
     {
       Name = "Hybrid Eclipse",
       Date = "1912 Apr 17 11:34:22",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1912-04-17.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1912-04-17.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1912 Oct 10 13:36:14",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1912-10-10.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1912-10-10.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1913 Apr 06 17:33:07",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1913-04-06.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1913-04-06.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1913 Aug 31 20:52:12",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1913-08-31.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1913-08-31.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1913 Sep 30 04:45:49",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1913-09-30.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1913-09-30.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1914 Feb 25 00:13:01",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1914-02-25.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1914-02-25.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1914 Aug 21 12:34:27",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1914-08-21.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1914-08-21.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1915 Feb 14 04:33:20",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1915-02-14.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1915-02-14.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1915 Aug 10 22:52:25",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1915-08-10.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1915-08-10.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1916 Feb 03 16:00:21",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1916-02-03.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1916-02-03.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1916 Jul 30 02:06:10",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1916-07-30.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1916-07-30.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1916 Dec 24 20:46:22",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1916-12-24.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1916-12-24.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1917 Jan 23 07:28:31",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1917-01-23.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1917-01-23.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1917 Jun 19 13:16:21",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1917-06-19.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1917-06-19.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1917 Jul 19 02:42:42",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1917-07-19.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1917-07-19.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1917 Dec 14 09:27:20",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1917-12-14.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1917-12-14.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1918 Jun 08 22:07:43",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1918-06-08.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1918-06-08.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1918 Dec 03 15:22:02",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1918-12-03.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1918-12-03.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1919 May 29 13:08:55",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1919-05-29.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1919-05-29.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1919 Nov 22 15:14:12",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1919-11-22.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1919-11-22.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1920 May 18 06:14:55",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1920-05-18.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1920-05-18.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1920 Nov 10 15:52:15",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1920-11-10.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1920-11-10.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1921 Apr 08 09:15:01",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1921-04-08.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1921-04-08.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1921 Oct 01 12:35:58",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1921-10-01.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1921-10-01.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1922 Mar 28 13:05:26",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1922-03-28.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1922-03-28.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1922 Sep 21 04:40:31",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1922-09-21.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1922-09-21.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1923 Mar 17 12:44:58",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1923-03-17.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1923-03-17.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1923 Sep 10 20:47:29",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1923-09-10.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1923-09-10.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1924 Mar 05 15:44:20",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1924-03-05.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1924-03-05.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1924 Jul 31 19:58:20",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1924-07-31.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1924-07-31.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1924 Aug 30 08:23:00",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1924-08-30.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1924-08-30.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1925 Jan 24 14:54:03",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1925-01-24.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1925-01-24.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1925 Jul 20 21:48:42",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1925-07-20.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1925-07-20.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1926 Jan 14 06:36:58",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1926-01-14.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1926-01-14.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1926 Jul 09 23:06:02",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1926-07-09.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1926-07-09.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1927 Jan 03 20:22:53",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1927-01-03.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1927-01-03.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1927 Jun 29 06:23:27",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1927-06-29.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1927-06-29.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1927 Dec 24 03:59:41",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1927-12-24.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1927-12-24.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1928 May 19 13:24:20",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1928-05-19.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1928-05-19.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1928 Jun 17 20:27:28",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1928-06-17.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1928-06-17.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1928 Nov 12 09:48:24",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1928-11-12.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1928-11-12.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1929 May 09 06:10:34",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1929-05-09.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1929-05-09.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1929 Nov 01 12:05:10",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1929-11-01.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1929-11-01.gif"
     },
     {
       Name = "Hybrid Eclipse",
       Date = "1930 Apr 28 19:03:34",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1930-04-28.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1930-04-28.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1930 Oct 21 21:43:53",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1930-10-21.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1930-10-21.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1931 Apr 18 00:45:35",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1931-04-18.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1931-04-18.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1931 Sep 12 04:41:25",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1931-09-12.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1931-09-12.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1931 Oct 11 12:55:40",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1931-10-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1931-10-11.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1932 Mar 07 07:55:50",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1932-03-07.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1932-03-07.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1932 Aug 31 20:03:41",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1932-08-31.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1932-08-31.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1933 Feb 24 12:46:39",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1933-02-24.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1933-02-24.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1933 Aug 21 05:49:11",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1933-08-21.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1933-08-21.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1934 Feb 14 00:38:41",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1934-02-14.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1934-02-14.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1934 Aug 10 08:37:48",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1934-08-10.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1934-08-10.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1935 Jan 05 05:35:46",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1935-01-05.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1935-01-05.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1935 Feb 03 16:16:20",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1935-02-03.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1935-02-03.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1935 Jun 30 19:59:46",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1935-06-30.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1935-06-30.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1935 Jul 30 09:16:28",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1935-07-30.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1935-07-30.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1935 Dec 25 17:59:52",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1935-12-25.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1935-12-25.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1936 Jun 19 05:20:31",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1936-06-19.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1936-06-19.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1936 Dec 13 23:28:12",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1936-12-13.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1936-12-13.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1937 Jun 08 20:41:02",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1937-06-08.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1937-06-08.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1937 Dec 02 23:05:45",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1937-12-02.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1937-12-02.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1938 May 29 13:50:19",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1938-05-29.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1938-05-29.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1938 Nov 21 23:52:25",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1938-11-21.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1938-11-21.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1939 Apr 19 16:45:53",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1939-04-19.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1939-04-19.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1939 Oct 12 20:40:23",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1939-10-12.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1939-10-12.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1940 Apr 07 20:21:21",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1940-04-07.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1940-04-07.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1940 Oct 01 12:44:06",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1940-10-01.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1940-10-01.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1941 Mar 27 20:08:08",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1941-03-27.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1941-03-27.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1941 Sep 21 04:34:03",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1941-09-21.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1941-09-21.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1942 Mar 16 23:37:07",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1942-03-16.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1942-03-16.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1942 Aug 12 02:45:12",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1942-08-12.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1942-08-12.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1942 Sep 10 15:39:32",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1942-09-10.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1942-09-10.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1943 Feb 04 23:38:10",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1943-02-04.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1943-02-04.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1943 Aug 01 04:16:13",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1943-08-01.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1943-08-01.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1944 Jan 25 15:26:42",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1944-01-25.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1944-01-25.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1944 Jul 20 05:43:13",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1944-07-20.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1944-07-20.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1945 Jan 14 05:01:43",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1945-01-14.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1945-01-14.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1945 Jul 09 13:27:45",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1945-07-09.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1945-07-09.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1946 Jan 03 12:16:11",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1946-01-03.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1946-01-03.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1946 May 30 21:00:24",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1946-05-30.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1946-05-30.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1946 Jun 29 03:51:58",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1946-06-29.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1946-06-29.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1946 Nov 23 17:37:12",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1946-11-23.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1946-11-23.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1947 May 20 13:47:47",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1947-05-20.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1947-05-20.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1947 Nov 12 20:05:37",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1947-11-12.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1947-11-12.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1948 May 09 02:26:04",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1948-05-09.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1948-05-09.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1948 Nov 01 05:59:18",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1948-11-01.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1948-11-01.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1949 Apr 28 07:48:53",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1949-04-28.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1949-04-28.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1949 Oct 21 21:13:01",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1949-10-21.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1949-10-21.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1950 Mar 18 15:32:01",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1950-03-18.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1950-03-18.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1950 Sep 12 03:38:47",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1950-09-12.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1950-09-12.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1951 Mar 07 20:53:40",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1951-03-07.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1951-03-07.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1951 Sep 01 12:51:51",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1951-09-01.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1951-09-01.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1952 Feb 25 09:11:35",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1952-02-25.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1952-02-25.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1952 Aug 20 15:13:35",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1952-08-20.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1952-08-20.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1953 Feb 14 00:59:30",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1953-02-14.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1953-02-14.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1953 Jul 11 02:44:14",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1953-07-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1953-07-11.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1953 Aug 09 15:55:03",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1953-08-09.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1953-08-09.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1954 Jan 05 02:32:01",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1954-01-05.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1954-01-05.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1954 Jun 30 12:32:38",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1954-06-30.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1954-06-30.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1954 Dec 25 07:36:42",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1954-12-25.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1954-12-25.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1955 Jun 20 04:10:42",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1955-06-20.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1955-06-20.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1955 Dec 14 07:02:25",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1955-12-14.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1955-12-14.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1956 Jun 08 21:20:39",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1956-06-08.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1956-06-08.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1956 Dec 02 08:00:35",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1956-12-02.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1956-12-02.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1957 Apr 30 00:05:28",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1957-04-30.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1957-04-30.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1957 Oct 23 04:54:02",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1957-10-23.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1957-10-23.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1958 Apr 19 03:27:17",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1958-04-19.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1958-04-19.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1958 Oct 12 20:55:28",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1958-10-12.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1958-10-12.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1959 Apr 08 03:24:08",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1959-04-08.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1959-04-08.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1959 Oct 02 12:27:00",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1959-10-02.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1959-10-02.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1960 Mar 27 07:25:07",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1960-03-27.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1960-03-27.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1960 Sep 20 22:59:56",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1960-09-20.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1960-09-20.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1961 Feb 15 08:19:48",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1961-02-15.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1961-02-15.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1961 Aug 11 10:46:47",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1961-08-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1961-08-11.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1962 Feb 05 00:12:38",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1962-02-05.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1962-02-05.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1962 Jul 31 12:25:33",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1962-07-31.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1962-07-31.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1963 Jan 25 13:37:12",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1963-01-25.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1963-01-25.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1963 Jul 20 20:36:13",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1963-07-20.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1963-07-20.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1964 Jan 14 20:30:08",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1964-01-14.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1964-01-14.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1964 Jun 10 04:34:07",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1964-06-10.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1964-06-10.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1964 Jul 09 11:17:53",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1964-07-09.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1964-07-09.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1964 Dec 04 01:31:54",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1964-12-04.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1964-12-04.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1965 May 30 21:17:31",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1965-05-30.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1965-05-30.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1965 Nov 23 04:14:51",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1965-11-23.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1965-11-23.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1966 May 20 09:39:02",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1966-05-20.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1966-05-20.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1966 Nov 12 14:23:28",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1966-11-12.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1966-11-12.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1967 May 09 14:42:48",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1967-05-09.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1967-05-09.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1967 Nov 02 05:38:56",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1967-11-02.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1967-11-02.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1968 Mar 28 23:00:30",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1968-03-28.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1968-03-28.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1968 Sep 22 11:18:46",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1968-09-22.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1968-09-22.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1969 Mar 18 04:54:57",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1969-03-18.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1969-03-18.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1969 Sep 11 19:58:59",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1969-09-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1969-09-11.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1970 Mar 07 17:38:30",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1970-03-07.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1970-03-07.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1970 Aug 31 21:55:30",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1970-08-31.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1970-08-31.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1971 Feb 25 09:38:07",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1971-02-25.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1971-02-25.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1971 Jul 22 09:31:55",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1971-07-22.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1971-07-22.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1971 Aug 20 22:39:31",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1971-08-20.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1971-08-20.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1972 Jan 16 11:03:22",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1972-01-16.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1972-01-16.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1972 Jul 10 19:46:38",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1972-07-10.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1972-07-10.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1973 Jan 04 15:46:21",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1973-01-04.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1973-01-04.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1973 Jun 30 11:38:41",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1973-06-30.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1973-06-30.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1973 Dec 24 15:02:44",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1973-12-24.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1973-12-24.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1974 Jun 20 04:48:04",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1974-06-20.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1974-06-20.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1974 Dec 13 16:13:13",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1974-12-13.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1974-12-13.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1975 May 11 07:17:33",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1975-05-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1975-05-11.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1975 Nov 03 13:15:54",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1975-11-03.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1975-11-03.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1976 Apr 29 10:24:18",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1976-04-29.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1976-04-29.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1976 Oct 23 05:13:45",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1976-10-23.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1976-10-23.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1977 Apr 18 10:31:30",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1977-04-18.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1977-04-18.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1977 Oct 12 20:27:27",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1977-10-12.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1977-10-12.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1978 Apr 07 15:03:47",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1978-04-07.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1978-04-07.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1978 Oct 02 06:28:43",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1978-10-02.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1978-10-02.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1979 Feb 26 16:55:06",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1979-02-26.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1979-02-26.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1979 Aug 22 17:22:38",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1979-08-22.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1979-08-22.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1980 Feb 16 08:54:01",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1980-02-16.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1980-02-16.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1980 Aug 10 19:12:21",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1980-08-10.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1980-08-10.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1981 Feb 04 22:09:24",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1981-02-04.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1981-02-04.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1981 Jul 31 03:46:37",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1981-07-31.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1981-07-31.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1982 Jan 25 04:42:53",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1982-01-25.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1982-01-25.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1982 Jun 21 12:04:33",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1982-06-21.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1982-06-21.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1982 Jul 20 18:44:44",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1982-07-20.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1982-07-20.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1982 Dec 15 09:32:09",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1982-12-15.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1982-12-15.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1983 Jun 11 04:43:33",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1983-06-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1983-06-11.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1983 Dec 04 12:31:15",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1983-12-04.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1983-12-04.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1984 May 30 16:45:41",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1984-05-30.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1984-05-30.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1984 Nov 22 22:54:17",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1984-11-22.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1984-11-22.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1985 May 19 21:29:38",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1985-05-19.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1985-05-19.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1985 Nov 12 14:11:27",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1985-11-12.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1985-11-12.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1986 Apr 09 06:21:22",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1986-04-09.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1986-04-09.gif"
     },
     {
       Name = "Hybrid Eclipse",
       Date = "1986 Oct 03 19:06:15",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1986-10-03.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1986-10-03.gif"
     },
     {
       Name = "Hybrid Eclipse",
       Date = "1987 Mar 29 12:49:47",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1987-03-29.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1987-03-29.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1987 Sep 23 03:12:22",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1987-09-23.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1987-09-23.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1988 Mar 18 01:58:56",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1988-03-18.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1988-03-18.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1988 Sep 11 04:44:29",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1988-09-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1988-09-11.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1989 Mar 07 18:08:41",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1989-03-07.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1989-03-07.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1989 Aug 31 05:31:47",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1989-08-31.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1989-08-31.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1990 Jan 26 19:31:24",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1990-01-26.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1990-01-26.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1990 Jul 22 03:03:07",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1990-07-22.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1990-07-22.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1991 Jan 15 23:53:51",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1991-01-15.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1991-01-15.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1991 Jul 11 19:07:01",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1991-07-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1991-07-11.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1992 Jan 04 23:05:37",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1992-01-04.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1992-01-04.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1992 Jun 30 12:11:22",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1992-06-30.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1992-06-30.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1992 Dec 24 00:31:41",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1992-12-24.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1992-12-24.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1993 May 21 14:20:15",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1993-05-21.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1993-05-21.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1993 Nov 13 21:45:51",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1993-11-13.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1993-11-13.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1994 May 10 17:12:26",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1994-05-10.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1994-05-10.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1994 Nov 03 13:40:06",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1994-11-03.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1994-11-03.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1995 Apr 29 17:33:21",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1995-04-29.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1995-04-29.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1995 Oct 24 04:33:30",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1995-10-24.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1995-10-24.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1996 Apr 17 22:38:12",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1996-04-17.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1996-04-17.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1996 Oct 12 14:03:04",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1996-10-12.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1996-10-12.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1997 Mar 09 01:24:51",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1997-03-09.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1997-03-09.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "1997 Sep 02 00:04:48",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1997-09-02.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1997-09-02.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1998 Feb 26 17:29:27",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1998-02-26.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1998-02-26.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1998 Aug 22 02:07:11",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1998-08-22.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1998-08-22.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "1999 Feb 16 06:34:38",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1999-02-16.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1999-02-16.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "1999 Aug 11 11:04:09",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/1999-08-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/1999-08-11.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2000 Feb 05 12:50:27",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/2000-02-05.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2000-02-05.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2000 Jul 01 19:33:34",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/2000-07-01.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2000-07-01.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2000 Jul 31 02:14:08",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/2000-07-31.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2000-07-31.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2000 Dec 25 17:35:57",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/1901-2000/2000-12-25.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2000-12-25.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2001 Jun 21 12:04:46",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2001-06-21.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2001-06-21.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2001 Dec 14 20:53:01",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2001-12-14.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2001-12-14.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2002 Jun 10 23:45:22",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2002-06-10.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2002-06-10.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2002 Dec 04 07:32:16",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2002-12-04.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2002-12-04.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2003 May 31 04:09:22",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2003-05-31.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2003-05-31.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2003 Nov 23 22:50:22",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2003-11-23.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2003-11-23.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2004 Apr 19 13:35:05",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2004-04-19.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2004-04-19.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2004 Oct 14 03:00:23",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2004-10-14.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2004-10-14.gif"
     },
     {
       Name = "Hybrid Eclipse",
       Date = "2005 Apr 08 20:36:51",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2005-04-08.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2005-04-08.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2005 Oct 03 10:32:47",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2005-10-03.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2005-10-03.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2006 Mar 29 10:12:23",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2006-03-29.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2006-03-29.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2006 Sep 22 11:41:16",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2006-09-22.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2006-09-22.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2007 Mar 19 02:32:57",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2007-03-19.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2007-03-19.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2007 Sep 11 12:32:24",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2007-09-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2007-09-11.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2008 Feb 07 03:56:10",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2008-02-07.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2008-02-07.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2008 Aug 01 10:22:12",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2008-08-01.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2008-08-01.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2009 Jan 26 07:59:45",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2009-01-26.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2009-01-26.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2009 Jul 22 02:36:25",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2009-07-22.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2009-07-22.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2010 Jan 15 07:07:39",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2010-01-15.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2010-01-15.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2010 Jul 11 19:34:38",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2010-07-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2010-07-11.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2011 Jan 04 08:51:4",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2011-01-04.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2011-01-04.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2011 Jun 01 21:17:18",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2011-06-01.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2011-06-01.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2011 Jul 01 08:39:30",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2011-07-01.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2011-07-01.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2011 Nov 25 06:21:24",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2011-11-25.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2011-11-25.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2012 May 20 23:53:54",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2012-05-20.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2012-05-20.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2012 Nov 13 22:12:55",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2012-11-13.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2012-11-13.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2013 May 10 00:26:20",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2013-05-10.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2013-05-10.gif"
     },
     {
       Name = "Hybrid Eclipse",
       Date = "2013 Nov 03 12:47:36",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2013-11-03.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2013-11-03.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2014 Apr 29 06:04:33",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2014-04-29.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2014-04-29.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2014 Oct 23 21:45:39",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2014-10-23.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2014-10-23.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2015 Mar 20 09:46:47",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2015-03-20.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2015-03-20.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2015 Sep 13 06:55:19",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2015-09-13.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2015-09-13.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2016 Mar 09 01:58:19",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2016-03-09.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2016-03-09.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2016 Sep 01 09:08:02",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2016-09-01.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2016-09-01.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2017 Feb 26 14:54:33",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2017-02-26.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2017-02-26.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2017 Aug 21 18:26:40",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2017-08-21.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2017-08-21.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2018 Feb 15 20:52:33",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2018-02-15.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2018-02-15.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2018 Jul 13 03:02:16",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2018-07-13.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2018-07-13.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2018 Aug 11 09:47:28",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2018-08-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2018-08-11.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2019 Jan 06 01:42:38",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2019-01-06.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2019-01-06.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2019 Jul 02 19:24:07",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2019-07-02.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2019-07-02.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2019 Dec 26 05:18:53",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2019-12-26.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2019-12-26.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2020 Jun 21 06:41:15",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2020-06-21.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2020-06-21.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2020 Dec 14 16:14:39",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2020-12-14.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2020-12-14.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2021 Jun 10 10:43:07",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2021-06-10.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2021-06-10.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2021 Dec 04 07:34:38",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2021-12-04.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2021-12-04.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2022 Apr 30 20:42:36",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2022-04-30.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2022-04-30.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2022 Oct 25 11:01:20",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2022-10-25.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2022-10-25.gif"
     },
     {
       Name = "Hybrid Eclipse",
       Date = "2023 Apr 20 04:17:56",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2023-04-20.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2023-04-20.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2023 Oct 14 18:00:41",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2023-10-14.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2023-10-14.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2024 Apr 08 18:18:29",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2024-04-08.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2024-04-08.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2024 Oct 02 18:46:13",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2024-10-02.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2024-10-02.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2025 Mar 29 10:48:36",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2025-03-29.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2025-03-29.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2025 Sep 21 19:43:04",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2025-09-21.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2025-09-21.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2026 Feb 17 12:13:06",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2026-02-17.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2026-02-17.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2026 Aug 12 17:47:06",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2026-08-12.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2026-08-12.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2027 Feb 06 16:00:48",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2027-02-06.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2027-02-06.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2027 Aug 02 10:07:50",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2027-08-02.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2027-08-02.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2028 Jan 26 15:08:59",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2028-01-26.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2028-01-26.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2028 Jul 22 02:56:40",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2028-07-22.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2028-07-22.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2029 Jan 14 17:13:48",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2029-01-14.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2029-01-14.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2029 Jun 12 04:06:13",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2029-06-12.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2029-06-12.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2029 Jul 11 15:37:19",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2029-07-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2029-07-11.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2029 Dec 05 15:03:58",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2029-12-05.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2029-12-05.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2030 Jun 01 06:29:13",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2030-06-01.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2030-06-01.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2030 Nov 25 06:51:37",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2030-11-25.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2030-11-25.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2031 May 21 07:16:04",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2031-05-21.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2031-05-21.gif"
     },
     {
       Name = "Hybrid Eclipse",
       Date = "2031 Nov 14 21:07:31",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2031-11-14.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2031-11-14.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2032 May 09 13:26:42",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2032-05-09.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2032-05-09.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2032 Nov 03 05:34:13",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2032-11-03.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2032-11-03.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2033 Mar 30 18:02:36",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2033-03-30.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2033-03-30.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2033 Sep 23 13:54:31",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2033-09-23.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2033-09-23.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2034 Mar 20 10:18:45",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2034-03-20.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2034-03-20.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2034 Sep 12 16:19:28",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2034-09-12.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2034-09-12.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2035 Mar 09 23:05:54",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2035-03-09.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2035-03-09.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2035 Sep 02 01:56:46",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2035-09-02.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2035-09-02.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2036 Feb 27 04:46:49",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2036-02-27.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2036-02-27.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2036 Jul 23 10:32:06",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2036-07-23.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2036-07-23.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2036 Aug 21 17:25:45",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2036-08-21.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2036-08-21.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2037 Jan 16 09:48:55",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2037-01-16.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2037-01-16.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2037 Jul 13 02:40:36",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2037-07-13.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2037-07-13.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2038 Jan 05 13:47:11",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2038-01-05.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2038-01-05.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2038 Jul 02 13:32:55",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2038-07-02.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2038-07-02.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2038 Dec 26 01:00:10",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2038-12-26.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2038-12-26.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2039 Jun 21 17:12:54",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2039-06-21.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2039-06-21.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2039 Dec 15 16:23:46",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2039-12-15.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2039-12-15.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2040 May 11 03:43:02",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2040-05-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2040-05-11.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2040 Nov 04 19:09:02",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2040-11-04.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2040-11-04.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2041 Apr 30 11:52:21",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2041-04-30.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2041-04-30.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2041 Oct 25 01:36:22",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2041-10-25.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2041-10-25.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2042 Apr 20 02:17:30",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2042-04-20.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2042-04-20.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2042 Oct 14 02:00:42",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2042-10-14.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2042-10-14.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2043 Apr 09 18:57:49",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2043-04-09.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2043-04-09.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2043 Oct 03 03:01:49",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2043-10-03.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2043-10-03.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2044 Feb 28 20:24:39",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2044-02-28.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2044-02-28.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2044 Aug 23 01:17:02",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2044-08-23.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2044-08-23.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2045 Feb 16 23:56:07",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2045-02-16.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2045-02-16.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2045 Aug 12 17:42:39",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2045-08-12.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2045-08-12.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2046 Feb 05 23:06:26",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2046-02-05.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2046-02-05.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2046 Aug 02 10:21:13",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2046-08-02.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2046-08-02.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2047 Jan 26 01:33:18",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2047-01-26.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2047-01-26.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2047 Jun 23 10:52:31",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2047-06-23.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2047-06-23.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2047 Jul 22 22:36:17",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2047-07-22.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2047-07-22.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2047 Dec 16 23:50:12",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2047-12-16.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2047-12-16.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2048 Jun 11 12:58:53",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2048-06-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2048-06-11.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2048 Dec 05 15:35:27",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2048-12-05.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2048-12-05.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2049 May 31 13:59:59",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2049-05-31.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2049-05-31.gif"
     },
     {
       Name = "Hybrid Eclipse",
       Date = "2049 Nov 25 05:33:48",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2049-11-25.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2049-11-25.gif"
     },
     {
       Name = "Hybrid Eclipse",
       Date = "2050 May 20 20:42:50",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2050-05-20.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2050-05-20.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2050 Nov 14 13:30:53",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2050-11-14.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2050-11-14.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2051 Apr 11 02:10:39",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2051-04-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2051-04-11.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2051 Oct 04 21:02:14",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2051-10-04.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2051-10-04.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2052 Mar 30 18:31:53",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2052-03-30.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2052-03-30.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2052 Sep 22 23:39:10",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2052-09-22.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2052-09-22.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2053 Mar 20 07:08:19",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2053-03-20.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2053-03-20.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2053 Sep 12 09:34:09",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2053-09-12.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2053-09-12.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2054 Mar 09 12:33:40",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2054-03-09.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2054-03-09.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2054 Aug 03 18:04:02",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2054-08-03.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2054-08-03.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2054 Sep 02 01:09:34",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2054-09-02.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2054-09-02.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2055 Jan 27 17:54:05",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2055-01-27.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2055-01-27.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2055 Jul 24 09:57:50",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2055-07-24.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2055-07-24.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2056 Jan 16 22:16:45",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2056-01-16.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2056-01-16.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2056 Jul 12 20:21:59",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2056-07-12.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2056-07-12.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2057 Jan 05 09:47:52",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2057-01-05.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2057-01-05.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2057 Jul 01 23:40:15",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2057-07-01.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2057-07-01.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2057 Dec 26 01:14:35",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2057-12-26.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2057-12-26.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2058 May 22 10:39:25",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2058-05-22.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2058-05-22.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2058 Jun 21 00:19:35",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2058-06-21.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2058-06-21.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2058 Nov 16 03:23:07",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2058-11-16.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2058-11-16.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2059 May 11 19:22:16",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2059-05-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2059-05-11.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2059 Nov 05 09:18:15",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2059-11-05.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2059-11-05.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2060 Apr 30 10:10:00",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2060-04-30.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2060-04-30.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2060 Oct 24 09:24:10",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2060-10-24.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2060-10-24.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2061 Apr 20 02:56:49",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2061-04-20.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2061-04-20.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2061 Oct 13 10:32:10",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2061-10-13.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2061-10-13.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2062 Mar 11 04:26:16",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2062-03-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2062-03-11.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2062 Sep 03 08:54:27",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2062-09-03.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2062-09-03.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2063 Feb 28 07:43:30",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2063-02-28.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2063-02-28.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2063 Aug 24 01:22:11",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2063-08-24.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2063-08-24.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2064 Feb 17 07:00:23",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2064-02-17.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2064-02-17.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2064 Aug 12 17:46:06",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2064-08-12.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2064-08-12.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2065 Feb 05 09:52:26",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2065-02-05.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2065-02-05.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2065 Jul 03 17:33:52",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2065-07-03.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2065-07-03.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2065 Aug 02 05:34:17",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2065-08-02.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2065-08-02.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2065 Dec 27 08:39:56",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2065-12-27.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2065-12-27.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2066 Jun 22 19:25:48",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2066-06-22.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2066-06-22.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2066 Dec 17 00:23:40",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2066-12-17.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2066-12-17.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2067 Jun 11 20:42:26",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2067-06-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2067-06-11.gif"
     },
     {
       Name = "Hybrid Eclipse",
       Date = "2067 Dec 06 14:03:43",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2067-12-06.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2067-12-06.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2068 May 31 03:56:39",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2068-05-31.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2068-05-31.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2068 Nov 24 21:32:30",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2068-11-24.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2068-11-24.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2069 Apr 21 10:11:09",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2069-04-21.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2069-04-21.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2069 May 20 17:53:18",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2069-05-20.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2069-05-20.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2069 Oct 15 04:19:56",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2069-10-15.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2069-10-15.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2070 Apr 11 02:36:09",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2070-04-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2070-04-11.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2070 Oct 04 07:08:57",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2070-10-04.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2070-10-04.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2071 Mar 31 15:01:06",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2071-03-31.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2071-03-31.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2071 Sep 23 17:20:28",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2071-09-23.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2071-09-23.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2072 Mar 19 20:10:31",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2072-03-19.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2072-03-19.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2072 Sep 12 08:59:20",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2072-09-12.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2072-09-12.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2073 Feb 07 01:55:59",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2073-02-07.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2073-02-07.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2073 Aug 03 17:15:23",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2073-08-03.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2073-08-03.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2074 Jan 27 06:44:15",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2074-01-27.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2074-01-27.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2074 Jul 24 03:10:32",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2074-07-24.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2074-07-24.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2075 Jan 16 18:36:04",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2075-01-16.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2075-01-16.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2075 Jul 13 06:05:44",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2075-07-13.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2075-07-13.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2076 Jan 06 10:07:27",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2076-01-06.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2076-01-06.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2076 Jun 01 17:31:22",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2076-06-01.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2076-06-01.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2076 Jul 01 06:50:43",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2076-07-01.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2076-07-01.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2076 Nov 26 11:43:01",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2076-11-26.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2076-11-26.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2077 May 22 02:46:05",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2077-05-22.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2077-05-22.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2077 Nov 15 17:07:56",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2077-11-15.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2077-11-15.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2078 May 11 17:56:55",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2078-05-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2078-05-11.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2078 Nov 04 16:55:44",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2078-11-04.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2078-11-04.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2079 May 01 10:50:13",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2079-05-01.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2079-05-01.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2079 Oct 24 18:11:21",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2079-10-24.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2079-10-24.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2080 Mar 21 12:20:15",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2080-03-21.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2080-03-21.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2080 Sep 13 16:38:09",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2080-09-13.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2080-09-13.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2081 Mar 10 15:23:31",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2081-03-10.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2081-03-10.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2081 Sep 03 09:07:31",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2081-09-03.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2081-09-03.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2082 Feb 27 14:47:00",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2082-02-27.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2082-02-27.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2082 Aug 24 01:16:21",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2082-08-24.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2082-08-24.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2083 Feb 16 18:06:36",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2083-02-16.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2083-02-16.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2083 Jul 15 00:14:23",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2083-07-15.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2083-07-15.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2083 Aug 13 12:34:41",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2083-08-13.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2083-08-13.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2084 Jan 07 17:30:24",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2084-01-07.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2084-01-07.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2084 Jul 03 01:50:26",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2084-07-03.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2084-07-03.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2084 Dec 27 09:13:48",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2084-12-27.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2084-12-27.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2085 Jun 22 03:21:16",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2085-06-22.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2085-06-22.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2085 Dec 16 22:37:48",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2085-12-16.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2085-12-16.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2086 Jun 11 11:07:14",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2086-06-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2086-06-11.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2086 Dec 06 05:38:55",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2086-12-06.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2086-12-06.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2087 May 02 18:04:42",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2087-05-02.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2087-05-02.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2087 Jun 01 01:27:14",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2087-06-01.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2087-06-01.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2087 Oct 26 11:46:57",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2087-10-26.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2087-10-26.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2088 Apr 21 10:31:49",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2088-04-21.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2088-04-21.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2088 Oct 14 14:48:05",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2088-10-14.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2088-10-14.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2089 Apr 10 22:44:42",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2089-04-10.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2089-04-10.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2089 Oct 04 01:15:23",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2089-10-04.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2089-10-04.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2090 Mar 31 03:38:08",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2090-03-31.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2090-03-31.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2090 Sep 23 16:56:36",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2090-09-23.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2090-09-23.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2091 Feb 18 09:54:40",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2091-02-18.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2091-02-18.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2091 Aug 15 00:34:43",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2091-08-15.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2091-08-15.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2092 Feb 07 15:10:20",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2092-02-07.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2092-02-07.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2092 Aug 03 09:59:33",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2092-08-03.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2092-08-03.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2093 Jan 27 03:22:16",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2093-01-27.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2093-01-27.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2093 Jul 23 12:32:04",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2093-07-23.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2093-07-23.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2094 Jan 16 18:59:03",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2094-01-16.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2094-01-16.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2094 Jun 13 00:22:11",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2094-06-13.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2094-06-13.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2094 Jul 12 13:24:35",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2094-07-12.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2094-07-12.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2094 Dec 07 20:05:56",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2094-12-07.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2094-12-07.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2095 Jun 02 10:07:40",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2095-06-02.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2095-06-02.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2095 Nov 27 01:02:57",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2095-11-27.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2095-11-27.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2096 May 22 01:37:14",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2096-05-22.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2096-05-22.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2096 Nov 15 00:36:15",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2096-11-15.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2096-11-15.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2097 May 11 18:34:31",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2097-05-11.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2097-05-11.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2097 Nov 04 02:01:25",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2097-11-04.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2097-11-04.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2098 Apr 01 20:02:31",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2098-04-01.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2098-04-01.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2098 Sep 25 00:31:16",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2098-09-25.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2098-09-25.gif"
     },
     {
       Name = "Partial Eclipse",
       Date = "2098 Oct 24 10:36:11",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2098-10-24.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2098-10-24.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2099 Mar 21 22:54:32",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2099-03-21.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2099-03-21.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2099 Sep 14 16:57:53",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2099-09-14.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2099-09-14.gif"
     },
     {
       Name = "Annular Eclipse",
       Date = "2100 Mar 10 22:28:11",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2100-03-10.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2100-03-10.gif"
     },
     {
       Name = "Total Eclipse",
       Date = "2100 Sep 04 08:49:20",
-      Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2100-09-04.gif"
+      Image = "https://data.openspaceproject.com/missions/eclipses/2100-09-04.gif"
     }
   }
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -71,7 +71,9 @@ bool TransferFunction::setEnvelopesFromLua(lua_State* state) {
             //    lua_pushnil(state);
             //    while (lua_next(state, -2)) {
             //        PrintTable(state);
-            //        std::string color = static_cast<std::string>(lua_tostring(state, -1));
+            //        std::string color = static_cast<std::string>(
+            //            lua_tostring(state, -1)
+            //        );
             //        lua_pop(state, 1);
             //        lua_pushnil(state);
             //        lua_next(state, -2);
@@ -182,7 +184,7 @@ std::string TransferFunction::serializedToString() const {
         return "";
     }
     json j;
-    for (auto envIter = _envelopes.begin(); envIter != _envelopes.end(); ++envIter) {
+    for (auto envIter = _envelopes.begin(); envIter != _envelopes.end(); envIter++) {
         j[std::distance(_envelopes.begin(), envIter)] = { envIter->jsonEnvelope() };
     }
     return j.dump();
@@ -192,37 +194,36 @@ bool TransferFunction::createTexture(ghoul::opengl::Texture& ptr) {
     if (_envelopes.empty()) {
         return false;
     }
-    else {
-        float* transferFunction = new float[_width * 4];
-        std::memset(transferFunction, 0, _width * 4 * sizeof(float));
 
-        for (int i = 0; i < _width ; i++) {
-            const float position = static_cast<float>(i) / static_cast<float>(_width);
-            int count = 0;
-            glm::vec4 rgbFromEnvelopes(0.f);
-            float alpha = 0.f;
-            for (const Envelope& env : _envelopes) {
-                if (env.isValueInEnvelope(position) && env.isEnvelopeValid()) {
-                    count++;
-                    const glm::vec4 tmp = env.valueAtPosition(position);
-                    rgbFromEnvelopes.r += tmp.r * tmp.a;
-                    rgbFromEnvelopes.g += tmp.g * tmp.a;
-                    rgbFromEnvelopes.b += tmp.b * tmp.a;
-                    alpha = std::min(alpha, tmp.a);
-                }
-            }
-            rgbFromEnvelopes /= (count == 0) ? 1.f : static_cast<float>(count);
-            rgbFromEnvelopes.w = alpha;
+    float* transferFunction = new float[_width * 4];
+    std::memset(transferFunction, 0, _width * 4 * sizeof(float));
 
-            for (int channel = 0; channel < 4; ++channel) {
-                const int p = 4 * i + channel;
-                const float value = rgbFromEnvelopes[channel];
-                transferFunction[p] = value;
+    for (int i = 0; i < _width ; i++) {
+        const float position = static_cast<float>(i) / static_cast<float>(_width);
+        int count = 0;
+        glm::vec4 rgbFromEnvelopes(0.f);
+        float alpha = 0.f;
+        for (const Envelope& env : _envelopes) {
+            if (env.isValueInEnvelope(position) && env.isEnvelopeValid()) {
+                count++;
+                const glm::vec4 tmp = env.valueAtPosition(position);
+                rgbFromEnvelopes.r += tmp.r * tmp.a;
+                rgbFromEnvelopes.g += tmp.g * tmp.a;
+                rgbFromEnvelopes.b += tmp.b * tmp.a;
+                alpha = std::min(alpha, tmp.a);
             }
         }
-        ptr.setPixelData(transferFunction);
-        return true;
+        rgbFromEnvelopes /= (count == 0) ? 1.f : static_cast<float>(count);
+        rgbFromEnvelopes.w = alpha;
+
+        for (int channel = 0; channel < 4; channel++) {
+            const int p = 4 * i + channel;
+            const float value = rgbFromEnvelopes[channel];
+            transferFunction[p] = value;
+        }
     }
+    ptr.setPixelData(transferFunction);
+    return true;
 }
 
 } // namespace openspace::volume

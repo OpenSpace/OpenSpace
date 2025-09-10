@@ -41,12 +41,13 @@ local Object = {
   GUI = {
     Name = "Open Star Clusters",
     Path = "/Milky Way/Star Clusters",
+    Focusable = false,
     Description = [[An open star cluster is a loose assemblage of stars numbering from
       hundreds to thousands that are bound by their mutual gravitation. Because these are
       young stars, we expect to see them in the star-forming regions of our Galaxy, namely
       in the spiral arms. For this reason, open clusters exist, for the most part, in the
-      plane of the Galaxy and indicate relatively recent star formation. Census: 1,867 star
-      clusters.]]
+      plane of the Galaxy and indicate relatively recent star formation. Census: 1,867
+      star clusters.]]
   }
 }
 

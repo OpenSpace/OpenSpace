@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,13 +42,13 @@
 #include <optional>
 
 namespace {
-    constexpr std::string_view placeholderFile = "${DATA}/placeholder.png";
+    constexpr std::string_view PlaceholderFile = "${DATA}/placeholder.png";
 
     constexpr std::string_view _loggerCat = "ProjectionComponent";
 
     constexpr openspace::properties::Property::PropertyInfo ProjectionInfo = {
         "PerformProjection",
-        "Perform Projections",
+        "Perform projections",
         "If this value is enabled, this ProjectionComponent will perform projections. If "
         "it is disabled, projections will be ignored.",
         openspace::properties::Property::Visibility::User
@@ -56,7 +56,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ClearProjectionInfo = {
         "ClearAllProjections",
-        "Clear Projections",
+        "Clear projections",
         "If this property is triggered, it will remove all the projections that have "
         "already been applied.",
         openspace::properties::Property::Visibility::User
@@ -64,7 +64,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FadingInfo = {
         "ProjectionFading",
-        "Projection Fading",
+        "Projection fading",
         "This value fades the previously performed projections in or out. If this value "
         "is equal to '1', the projections are fully visible, if the value is equal to "
         "'0', the performed projections are completely invisible.",
@@ -73,7 +73,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TextureSizeInfo = {
         "TextureSize",
-        "Texture Size",
+        "Texture size",
         "This value determines the size of the texture into which the images are "
         "projected and thus provides the limit to the resolution of projections that can "
         "be applied. Changing this value will not cause the texture to be automatically "
@@ -83,7 +83,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ApplyTextureSizeInfo = {
         "ApplyTextureSize",
-        "Apply Texture Size",
+        "Apply texture size",
         "Triggering this property applies a new size to the underlying projection "
         "texture. The old texture is resized and interpolated to fit the new size.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -175,12 +175,13 @@ documentation::Documentation ProjectionComponent::Documentation() {
 ProjectionComponent::ProjectionComponent()
     : properties::PropertyOwner({ "ProjectionComponent", "Projection Component" })
     , _performProjection(ProjectionInfo, true)
-    , _clearAllProjections(ClearProjectionInfo, false)
+    , _clearAllProjections(ClearProjectionInfo)
     , _projectionFading(FadingInfo, 1.f, 0.f, 1.f)
     , _textureSize(TextureSizeInfo, glm::ivec2(16), glm::ivec2(16), glm::ivec2(32768))
     , _applyTextureSize(ApplyTextureSizeInfo)
 {
     addProperty(_performProjection);
+    _clearAllProjections.onChange([this]() { _needsClearProjection = true; });
     addProperty(_clearAllProjections);
     addProperty(_projectionFading);
 
@@ -355,7 +356,7 @@ bool ProjectionComponent::initializeGL() {
     using ghoul::opengl::Texture;
 
     std::unique_ptr<Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
-        absPath(placeholderFile),
+        absPath(PlaceholderFile),
         2
     );
     if (texture) {
@@ -418,7 +419,7 @@ void ProjectionComponent::imageProjectBegin() {
     // keep handle to the current bound FBO
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 
-    if (_textureSizeDirty) {
+    if (_textureSizeDirty) [[unlikely]] {
         glm::ivec2 size = _textureSize;
         LDEBUG(std::format("Changing texture size to ({}, {})", size.x, size.y));
 
@@ -790,7 +791,7 @@ bool ProjectionComponent::doesPerformProjection() const {
 }
 
 bool ProjectionComponent::needsClearProjection() const {
-    return _clearAllProjections;
+    return _needsClearProjection;
 }
 
 bool ProjectionComponent::needsMipMapGeneration() const {
@@ -802,12 +803,7 @@ float ProjectionComponent::projectionFading() const {
 }
 
 ghoul::opengl::Texture& ProjectionComponent::projectionTexture() const {
-    if (_dilation.isEnabled) {
-        return *_dilation.texture;
-    }
-    else {
-        return *_projectionTexture;
-    }
+    return _dilation.isEnabled ? *_dilation.texture : *_projectionTexture;
 }
 
 std::string ProjectionComponent::projectorId() const {
@@ -862,7 +858,7 @@ void ProjectionComponent::clearAllProjections() {
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
-    _clearAllProjections = false;
+    _needsClearProjection = false;
     _mipMapDirty = true;
 }
 
@@ -873,7 +869,7 @@ void ProjectionComponent::generateMipMap() {
 
 std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTexture(
                                                  const std::filesystem::path& texturePath,
-                                                           bool isPlaceholder)
+                                                                       bool isPlaceholder)
 {
     using ghoul::opengl::Texture;
 

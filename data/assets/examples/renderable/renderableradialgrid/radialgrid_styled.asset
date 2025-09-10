@@ -1,0 +1,24 @@
+-- Styled
+-- This example adds a circular grid with a specific color and line width. Note that we
+-- keep the size at its default value.
+
+local Node = {
+  Identifier = "RenderableRadialGrid_Example_Styled",
+  Renderable = {
+    Type = "RenderableRadialGrid",
+    Color = { 1.0, 0.0, 0.0 },
+    LineWidth = 2.0
+  },
+  GUI = {
+    Name = "RenderableRadialGrid - Styled",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

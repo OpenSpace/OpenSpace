@@ -27,9 +27,10 @@ local EquatorialLine = {
     Opacity = 0.8,
     Color = { 0.6, 0.6, 0.2 },
     LineWidth = 4.0,
-    GridSegments = { 1, 1 },
+    GridSegments = {1, 1},
     Enabled = asset.enabled
   },
+  Tag = { "nightsky_marking" },
   GUI = {
     Name = "Celestial Equator",
     Description = "A line representation of the Equatorial plane.",

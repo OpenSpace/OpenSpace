@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,7 +34,7 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
         "FilePath",
-        "File Path",
+        "File path",
         "The path of the GDAL file or the image file that is to be used in this tile "
         "provider.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -42,7 +42,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TilePixelSizeInfo = {
         "TilePixelSize",
-        "Tile Pixel Size",
+        "Tile pixel size",
         "This value is the preferred size (in pixels) for each tile. Choosing the right "
         "value is a tradeoff between more efficiency (larger images) and better quality "
         "(smaller images). The tile pixel size has to be smaller than the size of the "

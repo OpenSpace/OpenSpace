@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -355,8 +355,8 @@ glm::dquat Path::linearPathRotation(double) const {
     //const double tHalf = 0.5;
     //if (t < tHalf) {
     //    // Interpolate to look at target
-    //    const glm::dvec3 halfWayPosition = _curve->positionAt(tHalf);
-    //    const glm::dquat q = ghoul::lookAtQuaternion(halfWayPosition, endNodePos, endUp);
+    //    const glm::dvec3 halfWayPos = _curve->positionAt(tHalf);
+    //    const glm::dquat q = ghoul::lookAtQuaternion(halfWayPos, endNodePos, endUp);
 
     //    const double tScaled = ghoul::sineEaseInOut(t / tHalf);
     //    return glm::slerp(_start.rotation(), q, tScaled);
@@ -375,13 +375,18 @@ glm::dquat Path::linearPathRotation(double) const {
 
     //if (distanceToEnd < closingUpDistance) {
     //    // Interpolate to target rotation
-    //    const double tScaled = ghoul::sineEaseInOut(1.0 - distanceToEnd / closingUpDistance);
+    //    const double tScaled =
+    //        ghoul::sineEaseInOut(1.0 - distanceToEnd / closingUpDistance);
 
     //    // Compute a position in front of the camera at the end orientation
     //    const double inFrontDistance = glm::distance(_end.position(), endNodePos);
     //    const glm::dvec3 viewDir = ghoul::viewDirection(_end.rotation());
     //    const glm::dvec3 inFrontOfEnd = _end.position() + inFrontDistance * viewDir;
-    //    const glm::dvec3 lookAtPos = ghoul::interpolateLinear(tScaled, endNodePos, inFrontOfEnd);
+    //    const glm::dvec3 lookAtPos = ghoul::interpolateLinear(
+    //        tScaled,
+    //        endNodePos,
+    //        inFrontOfEnd
+    //    );
     //    return ghoul::lookAtQuaternion(_prevPose.position, lookAtPos, endUp);
     //}
 
@@ -508,8 +513,11 @@ double Path::speedAlongPath(double traveledDistance) const {
 
 void checkVisibilityAndShowMessage(const SceneGraphNode* node) {
     auto isEnabled = [](const Renderable* r) {
-        std::any propertyValueAny = r->property("Enabled")->get();
-        return std::any_cast<bool>(propertyValueAny);
+        properties::Property* prop = r->property("Enabled");
+        properties::BoolProperty* boolProp =
+            dynamic_cast<properties::BoolProperty*>(prop);
+        ghoul_assert(boolProp, "Enabled is not a boolean property");
+        return boolProp;
     };
 
     // Show some info related to the visiblity of the object

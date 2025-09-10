@@ -1,4 +1,5 @@
-Copyright (c) 2014-2024
+# License
+Copyright (c) 2014-2025
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this
 software and associated documentation files (the "Software"), to deal in the Software
@@ -17,5 +18,4 @@ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTIO
 CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
 OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-See the THIRD_PARTY_LICENSES.md for a list an acknowledgement of all external libraries that
-SGCT uses.
+See the THIRD_PARTY_LICENSES.md for a list an acknowledgement of all external libraries.

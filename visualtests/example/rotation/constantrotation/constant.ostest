@@ -1,0 +1,38 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/rotation/constantrotation/constant.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "ConstantRotation_Example",
+        "position": [
+          0.265863249593815,
+          -1.006726689094225,
+          1.8204064909399365
+        ],
+        "pitch": 0.005038942674599358,
+        "up": [
+          0.22314223630308,
+          -0.4817832470456189,
+          -0.8474033545153344
+        ],
+        "yaw": 0.004635536562583947,
+        "timestamp": "2000 JAN 01 12:00:00"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

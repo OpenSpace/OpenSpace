@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -60,7 +60,7 @@ IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
     , _enabled(EnabledInfo, true)
     , _alpha(AlphaInfo, 0.9f, 0.f, 1.f)
     , _delete(DeleteInfo)
-    , _type(std::move(type))
+    , _iswaType(std::move(type))
 {
     addProperty(_enabled);
     addProperty(_alpha);
@@ -72,7 +72,7 @@ IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
 IswaBaseGroup::~IswaBaseGroup() {}
 
 bool IswaBaseGroup::isType(const std::string& type) const {
-    return (_type == type);
+    return (_iswaType == type);
 }
 
 void IswaBaseGroup::updateGroup() {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,10 +30,13 @@
 #include <openspace/openspace.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/json_helper.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
 #include <ghoul/io/texture/texturewriter.h>
+#include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/base64.h>
 #include <ghoul/misc/csvreader.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
@@ -197,6 +200,23 @@ namespace {
 }
 
 /**
+ * This function takes a base64 encoded data string, decodes it and saves the resulting
+ * data to the provided filepath.
+ *
+ * \param filePath The location where the data will be saved. Any file that already exists
+ *        in that location will be overwritten
+ * \param base64Data The base64 encoded data that should be saved to the provided file
+ */
+[[codegen::luawrap]] void saveBase64File(std::filesystem::path filePath,
+                                         std::string base64Data)
+{
+    std::vector<uint8_t> data = ghoul::decodeBase64(base64Data);
+
+    std::ofstream file = std::ofstream(filePath, std::ofstream::binary);
+    file.write(reinterpret_cast<char*>(data.data()), data.size());
+}
+
+/**
  * Returns whether the current OpenSpace instance is the master node of a cluster
  * configuration. If this instance is not part of a cluster, this function also returns
  * 'true'.
@@ -306,6 +326,22 @@ namespace {
         "Tried to resolve shortcut file '{}' on unsupported non-Windows platform", path
     ));
 #endif // WIN32
+}
+
+/**
+ * Returns the number of bytes of video memory that is currently being used. This function
+ * only works on Windows.
+ */
+[[codegen::luawrap]] double vramInUse() {
+    return static_cast<double>(openspace::global::openSpaceEngine->vramInUse());
+}
+
+/**
+ * Returns the number of bytes of system memory that is currently being used. This
+ * function only works on Windows.
+ */
+[[codegen::luawrap]] double ramInUse() {
+    return static_cast<double>(openspace::global::openSpaceEngine->ramInUse());
 }
 
 #include "openspaceengine_lua_codegen.cpp"
