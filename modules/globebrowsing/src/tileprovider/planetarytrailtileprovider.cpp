@@ -214,12 +214,8 @@ PlanetaryTrailTileProvider::PlanetaryTrailTileProvider(const ghoul::Dictionary& 
     _cutoff(CutoffInfo, 30.f, 0.f, 3600.f, 1.f),
     _cutahead(CutaheadInfo, 10.f, 0.f, 60.f, 1.f),
     _renderFullTrail(RenderFullTrailInfo, false),
-    _kernelSize(KernelSizeInfo,
-        openspace::properties::OptionProperty::DisplayType::Dropdown),
-    _renderingMode(
-        RenderingModeInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    ),
+    _kernelSize(KernelSizeInfo),
+    _renderingMode(RenderingModeInfo),
     _start(0.0),
     _fbo(0),
     _vao(0),
@@ -303,9 +299,10 @@ void PlanetaryTrailTileProvider::internalInitialize() {
     double maxLat = -std::numeric_limits<double>::max();
     for (const auto feature : content.at("features")) {
         try {
-            const int time = feature.at("properties").at("surface_seconds");
+            const int time = feature.at("properties").at("surface_seconds").get<int>();
 
-            const std::array<double, 2> lonlat = feature.at("geometry").at("coordinates");
+            const auto coords = feature.at("geometry").at("coordinates");
+            const std::array<double, 2> lonlat = {coords[0].get<double>(), coords[1].get<double>()};
             const double lon = glm::radians(lonlat[0]);
             const double lat = glm::radians(lonlat[1]);
 

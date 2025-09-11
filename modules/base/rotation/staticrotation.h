@@ -28,7 +28,7 @@
 #include <openspace/scene/rotation.h>
 
 #include <openspace/properties/vector/vec3property.h>
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
 
 namespace openspace {
 

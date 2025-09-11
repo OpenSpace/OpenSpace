@@ -33,6 +33,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
@@ -607,22 +609,18 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _currentLodScaleFactor(CurrentLodScaleFactorInfo, 15.f, 1.f, 50.f)
     , _orenNayarRoughness(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f)
     , _nActiveLayers(NActiveLayersInfo, 0, 0, OpenGLCap.maxTextureUnits() / 3)
-    , _debugProperties({
-        BoolProperty(ShowChunkEdgeInfo, false),
-        BoolProperty(LevelProjectedAreaInfo, true),
-        TriggerProperty(ResetTileProviderInfo),
-        BoolProperty(PerformFrustumCullingInfo, true),
-        BoolProperty(PerformHorizonCullingInfo, true),
-        IntProperty(ModelSpaceRenderingInfo, 14, 1, 22),
-        IntProperty(DynamicLodIterationCountInfo, 16, 4, 128)
-    })
+    , _showChunkEdges(ShowChunkEdgeInfo, false)
+    , _levelByProjectedAreaElseDistance(LevelProjectedAreaInfo, true)
+    , _resetTileProviders(ResetTileProviderInfo, false)
+    , _performFrustumCulling(PerformFrustumCullingInfo, true)
+    , _performHorizonCulling(PerformHorizonCullingInfo, true)
+    , _modelSpaceRenderingCutoffLevel(ModelSpaceRenderingInfo, 14, 1, 22)
+    , _dynamicLodIterationCount(DynamicLodIterationCountInfo, 16, 4, 128)
+    , _shadowMapping(ShadowMappingInfo, false)
+    , _zFightingPercentage(ZFightingPercentageInfo, 0.995f, 0.000001f, 1.f)
+    , _nShadowSamples(NumberShadowSamplesInfo, 4, 1, 256)
     , _debugPropertyOwner({ "Debug" })
-    , _shadowMappingProperties({
-        BoolProperty(ShadowMappingInfo, false),
-        FloatProperty(ZFightingPercentageInfo, 0.995f, 0.000001f, 1.f),
-        IntProperty(NumberShadowSamplesInfo, 5, 1, 7)
-    })
-    , _shadowMappingPropertyOwner({ "ShadowMapping", "Shadow Mapping"})
+    , _shadowMappingPropertyOwner({ "ShadowMapping", "Shadow Mapping" })
     , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
     , _leftRoot(Chunk(LeftHemisphereIndex))
     , _rightRoot(Chunk(RightHemisphereIndex))
@@ -630,6 +628,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _currentLodScaleFactor.setReadOnly(true);
+
 
     // Read the radii in to its own dictionary
     if (p.radii.has_value()) {
@@ -710,10 +709,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         addProperty(_eclipseHardShadows);
     }
 
-    _shadowMappingPropertyOwner.addProperty(_shadowMappingProperties.shadowMapping);
-    _shadowMappingPropertyOwner.addProperty(_shadowMappingProperties.zFightingPercentage);
-    _shadowMappingPropertyOwner.addProperty(_shadowMappingProperties.nShadowSamples);
-    _shadowMappingProperties.nShadowSamples.onChange([this]() {
+    _shadowMappingPropertyOwner.addProperty(_shadowMapping);
+    _shadowMappingPropertyOwner.addProperty(_zFightingPercentage);
+    _shadowMappingPropertyOwner.addProperty(_nShadowSamples);
+    _nShadowSamples.onChange([this]() {
         _shadersNeedRecompilation = true;
     });
     addPropertySubOwner(_shadowMappingPropertyOwner);
@@ -733,14 +732,14 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _nActiveLayers.setReadOnly(true);
     addProperty(_nActiveLayers);
 
-    _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);
-    _debugPropertyOwner.addProperty(_debugProperties.levelByProjectedAreaElseDistance);
-    _debugProperties.resetTileProviders.onChange([&]() { _resetTileProviders = true; });
-    _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
-    _debugPropertyOwner.addProperty(_debugProperties.performFrustumCulling);
-    _debugPropertyOwner.addProperty(_debugProperties.performHorizonCulling);
-    _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
-    _debugPropertyOwner.addProperty(_debugProperties.dynamicLodIterationCount);
+    _debugPropertyOwner.addProperty(_showChunkEdges);
+    _debugPropertyOwner.addProperty(_levelByProjectedAreaElseDistance);
+    _resetTileProviders.onChange([&]() { _resetTileProviders = true; });
+    _debugPropertyOwner.addProperty(_resetTileProviders);
+    _debugPropertyOwner.addProperty(_performFrustumCulling);
+    _debugPropertyOwner.addProperty(_performHorizonCulling);
+    _debugPropertyOwner.addProperty(_modelSpaceRenderingCutoffLevel);
+    _debugPropertyOwner.addProperty(_dynamicLodIterationCount);
     addPropertySubOwner(_debugPropertyOwner);
 
     auto notifyShaderRecompilation = [this]() {
@@ -750,8 +749,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _eclipseShadowsEnabled.onChange(notifyShaderRecompilation);
     _eclipseHardShadows.onChange(notifyShaderRecompilation);
     _performShading.onChange(notifyShaderRecompilation);
-    _debugProperties.showChunkEdges.onChange(notifyShaderRecompilation);
-    _shadowMappingProperties.shadowMapping.onChange(notifyShaderRecompilation);
+    _showChunkEdges.onChange(notifyShaderRecompilation);
+    _shadowMapping.onChange(notifyShaderRecompilation);
 
     _layerManager.onChange([this](Layer* l) {
         _shadersNeedRecompilation = true;
@@ -800,7 +799,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         _shadowComponent = std::make_unique<ShadowComponent>(*p.shadows);
         _shadowComponent->initialize();
         addPropertySubOwner(_shadowComponent.get());
-        _shadowMappingProperties.shadowMapping = true;
+        _shadowMapping = true;
     }
 
     // Use a secondary renderbin for labels, and other things that we want to be able to
@@ -1406,7 +1405,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
         globalCount,
         _localChunkBuffer,
         localCount,
-        _debugProperties.modelSpaceRenderingCutoffLevel,
+        _modelSpaceRenderingCutoffLevel,
         _traversalMemory
     );
     traversal(
@@ -1415,7 +1414,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
         globalCount,
         _localChunkBuffer,
         localCount,
-        _debugProperties.modelSpaceRenderingCutoffLevel,
+        _modelSpaceRenderingCutoffLevel,
         _traversalMemory
     );
 
@@ -1429,7 +1428,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
     // Render all chunks that need to be rendered locally
     _localRenderer.program->activate();
     for (int i = 0; i < localCount; i++) {
-        renderChunkLocally(*_localChunkBuffer[i], data, renderGeomOnly);
+        renderChunkLocally(*_localChunkBuffer[i], data, {}, renderGeomOnly);
     }
     _localRenderer.program->deactivate();
 
@@ -1440,7 +1439,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
         // dynamically to not keep rendering frames with unavailable data
         // After certain number of iterations(_debugProperties.dynamicLodIterationCount)
         // of unavailable/available data in a row, we assume that a change could be made.
-        const int iterCount = _debugProperties.dynamicLodIterationCount;
+        const int iterCount = _dynamicLodIterationCount;
         const bool exceededIterations =
             static_cast<int>(_iterationsOfUnavailableData) > iterCount;
         const float clf = _currentLodScaleFactor;
@@ -1520,7 +1519,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     }
 
     // Shadow Mapping
-    if (_shadowMappingProperties.shadowMapping && _performShading) {
+    if (_shadowMapping && _performShading) {
         // Bind ring textures for direct projection when rings component is available
         if (_ringsComponent && _ringsComponent->isEnabled()) {
             ghoul::opengl::TextureUnit ringTextureColorUnit;
@@ -1657,7 +1656,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     }
     
     // Shadow Mapping
-    if (_shadowMappingProperties.shadowMapping) {
+    if (_shadowMapping) {
         // Bind ring textures for direct projection when rings component is available
         if (_ringsComponent && _ringsComponent->isEnabled()) {
             ghoul::opengl::TextureUnit ringTextureColorUnit;
@@ -1874,14 +1873,14 @@ void RenderableGlobe::recompileShaders() {
     pairs.emplace_back("useEclipseHardShadows", std::to_string(_eclipseHardShadows));
     pairs.emplace_back(
         "enableShadowMapping",
-        std::to_string(_shadowMappingProperties.shadowMapping && _shadowComponent)
+        std::to_string(_shadowMapping && _shadowComponent)
     );
     pairs.emplace_back(
         "useRingShadows", 
-        std::to_string(_shadowMappingProperties.shadowMapping && _ringsComponent && 
+        std::to_string(_shadowMapping && _ringsComponent && 
                        _ringsComponent->isEnabled())
     );
-    pairs.emplace_back("showChunkEdges", std::to_string(_debugProperties.showChunkEdges));
+    pairs.emplace_back("showChunkEdges", std::to_string(_showChunkEdges));
     pairs.emplace_back("showHeightResolution", "0");
     pairs.emplace_back("showHeightIntensities", "0");
     pairs.emplace_back("defaultHeight", std::to_string(DefaultHeight));
@@ -1975,7 +1974,7 @@ void RenderableGlobe::recompileShaders() {
     // Shadow Mapping Samples
     shaderDictionary.setValue(
         "nShadowSamples",
-        _shadowMappingProperties.nShadowSamples - 1
+        _nShadowSamples - 1
     );
 
     // Exclise Shadow Samples
@@ -2082,8 +2081,8 @@ bool RenderableGlobe::testIfCullable(const Chunk& chunk,
 {
     ZoneScoped;
 
-    return (_debugProperties.performHorizonCulling && isCullableByHorizon(chunk, renderData, heights)) ||
-           (_debugProperties.performFrustumCulling && isCullableByFrustum(chunk, renderData, mvp));
+    return (_performHorizonCulling && isCullableByHorizon(chunk, renderData, heights)) ||
+           (_performFrustumCulling && isCullableByFrustum(chunk, renderData, mvp));
 }
 
 int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderData,
@@ -2091,7 +2090,7 @@ int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderDa
 {
     ZoneScoped;
 
-    const int desiredLevel = _debugProperties.levelByProjectedAreaElseDistance ?
+    const int desiredLevel = _levelByProjectedAreaElseDistance ?
         desiredLevelByProjectedArea(chunk, renderData, heights) :
         desiredLevelByDistance(chunk, renderData, heights);
     const int levelByAvailableData = desiredLevelByAvailableTileData(chunk);

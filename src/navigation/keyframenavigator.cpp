@@ -27,7 +27,7 @@
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/time.h>
@@ -149,7 +149,7 @@ void KeyframeNavigator::updateCamera(Camera* camera, const CameraPose& prevPose,
     // We want to affect view scaling, such that we achieve
     // logarithmic interpolation of distance to an imagined focus node.
     // To do this, we interpolate the scale reciprocal logarithmically.
-    if (!ignoreFutureKeyframes && !global::sessionRecording->shouldOverrideRecordingStereoDepth()) {
+    if (!ignoreFutureKeyframes) {
         const float prevInvScaleExp = glm::log(1.f / prevPose.scale);
         const float nextInvScaleExp = glm::log(1.f / nextPose.scale);
         const float interpolatedInvScaleExp = static_cast<float>(

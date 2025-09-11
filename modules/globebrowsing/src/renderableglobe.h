@@ -29,7 +29,7 @@
 
 #include <modules/base/rendering/renderablemodel.h>
 #include <modules/base/rendering/directionallightsource.h>
-#include <modules/globebrowsing/src/ellipsoid.h>
+#include <openspace/util/ellipsoid.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
 #include <modules/globebrowsing/src/geojson/geojsonmanager.h>
 #include <modules/globebrowsing/src/globelabelscomponent.h>
@@ -134,31 +134,14 @@ private:
     static constexpr int MinSplitDepth = 2;
     static constexpr int MaxSplitDepth = 22;
 
-    struct {
-        properties::BoolProperty showChunkEdges;
-        properties::BoolProperty levelByProjectedAreaElseDistance;
-        properties::BoolProperty resetTileProviders;
-        properties::BoolProperty performFrustumCulling;
-        properties::BoolProperty performHorizonCulling;
-        properties::IntProperty  modelSpaceRenderingCutoffLevel;
-        properties::IntProperty  dynamicLodIterationCount;
-    } _debugProperties;
+    properties::BoolProperty _showChunkEdges;
+    properties::BoolProperty _levelByProjectedAreaElseDistance;
+    properties::BoolProperty _resetTileProviders;
+    properties::BoolProperty _performFrustumCulling;
+    properties::BoolProperty _performHorizonCulling;
+    properties::IntProperty  _modelSpaceRenderingCutoffLevel;
+    properties::IntProperty  _dynamicLodIterationCount;
 
-    struct {
-        properties::BoolProperty  performShading;
-        properties::BoolProperty  useAccurateNormals;
-        properties::BoolProperty  eclipseShadowsEnabled;
-        properties::BoolProperty  eclipseHardShadows;
-        properties::BoolProperty  shadowMapping;
-        properties::BoolProperty  renderAtDistance;
-        properties::FloatProperty zFightingPercentage;
-        properties::IntProperty   nShadowSamples;
-        properties::FloatProperty targetLodScaleFactor;
-        properties::FloatProperty currentLodScaleFactor;
-        properties::FloatProperty orenNayarRoughness;
-        properties::FloatProperty ambientIntensity;
-        properties::IntProperty   nActiveLayers;
-    } _generalProperties;
 
     properties::PropertyOwner _debugPropertyOwner;
 
@@ -257,8 +240,6 @@ private:
     void freeChunkNode(Chunk* n);
 
     std::vector<const RenderableModel*> getShadowers(const SceneGraphNode* node);
-    static constexpr int MinSplitDepth = 2;
-    static constexpr int MaxSplitDepth = 22;
 
     properties::BoolProperty _performShading;
     properties::BoolProperty _useAccurateNormals;
@@ -273,24 +254,9 @@ private:
     properties::FloatProperty _orenNayarRoughness;
     properties::IntProperty _nActiveLayers;
 
-    struct {
-        properties::BoolProperty showChunkEdges;
-        properties::BoolProperty levelByProjectedAreaElseDistance;
-        properties::TriggerProperty resetTileProviders;
-        properties::BoolProperty performFrustumCulling;
-        properties::IntProperty  modelSpaceRenderingCutoffLevel;
-        properties::IntProperty  dynamicLodIterationCount;
-    } _debugProperties;
-
-    properties::PropertyOwner _debugPropertyOwner;
-
-    struct {
-        properties::BoolProperty shadowMapping;
-        properties::FloatProperty zFightingPercentage;
-        properties::IntProperty nShadowSamples;
-    } _shadowMappingProperties;
-
-    properties::PropertyOwner _shadowMappingPropertyOwner;
+    properties::BoolProperty _shadowMapping;
+    properties::FloatProperty _zFightingPercentage;
+    properties::IntProperty _nShadowSamples;
 
     Ellipsoid _ellipsoid;
     SkirtedGrid _grid;
@@ -336,7 +302,6 @@ private:
     bool _nLayersIsDirty = true;
     bool _allChunksAvailable = true;
     bool _layerManagerDirty = true;
-    bool _resetTileProviders = false;
     size_t _iterationsOfAvailableData = 0;
     size_t _iterationsOfUnavailableData = 0;
     Layer* _lastChangedLayer = nullptr;

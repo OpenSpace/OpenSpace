@@ -405,10 +405,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _frustumSize(FrustumSizeInfo, 1.f)
     , _useCache(UseCacheInfo, true)
     , _castShadow(CastShadowInfo, false)
-    , _blendingFuncOption(
-        BlendingOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
     , _useOverrideColor(UseOverrideColorInfo, false)
     , _overrideColor(OverrideColorInfo, glm::vec4(0, 0, 0, 1))
@@ -673,8 +669,7 @@ void RenderableModel::initializeGL() {
     _geometry = ghoul::io::ModelReader::ref().loadModel(
         _file,
         ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
-        ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped),
-        _useCache
+        ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
     );
     _modelHasAnimation = _geometry->hasAnimation();
 
@@ -1361,7 +1356,7 @@ glm::dvec3 RenderableModel::center() const {
     transform *= glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
     glm::dmat4 model = this->parent()->modelTransform() * transform;
     if (_modelHasAnimation) {
-        return model * glm::dvec4(_geometry->center(), 1.);
+        return model * glm::dvec4(0, 0, 0, 1.);
     }
 
     return model * glm::dvec4(0, 0, 0, 1);

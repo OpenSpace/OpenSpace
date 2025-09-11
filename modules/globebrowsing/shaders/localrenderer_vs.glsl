@@ -53,6 +53,11 @@ uniform dmat4 modelTransform;
   out vec3 positionWorldSpace;
 #endif // USE_ECLIPSE_SHADOWS
 
+#if SHADOW_MAPPING_ENABLED
+  out vec4 shadowCoords;
+  uniform dmat4 shadowMatrix;
+#endif // SHADOW_MAPPING_ENABLED
+
 uniform mat4 projectionTransform;
 // Input points in camera space
 uniform vec3 p00;
