@@ -292,48 +292,44 @@ Fragment getFragment() {
   }
 #endif // SHOW_CHUNK_EDGES
 
-#if SHADOW_MAPPING_ENABLED
+#if (SHADOW_MAPPING_ENABLED && PERFORM_SHADING && USE_RING_SHADOWS)
   // 0.0 is full shadow, 1.0 is no shadow
   float shadow = 1.0;
   // Light through rings is colored, default full white
   vec3 lightColor = vec3(1.0);
+  // Calculate ring shadow by projecting ring texture directly onto surface
+  // Assume ring lies in the XZ plane (Y=0) in object space
+  vec3 surfaceToSun = -normalize(lightDirectionObjSpace); // Use world coordinates
+  vec3 p = posObjSpace;
+  vec3 ringPlaneNormal = vec3(0.0, 0.0, 1.0);
   
-  #if USE_RING_SHADOWS
-    // Calculate ring shadow by projecting ring texture directly onto surface
-    // Assume ring lies in the XZ plane (Y=0) in object space
-    vec3 surfaceToSun = -normalize(lightDirectionObjSpace); // Use world coordinates
-    vec3 p = posObjSpace;
-    vec3 ringPlaneNormal = vec3(0.0, 0.0, 1.0);
+  if (abs(surfaceToSun.y) > 1e-8 && dot(normalObjSpace, lightDirectionObjSpace) < 0.0) {
+    float t = rayPlaneIntersection(p, surfaceToSun, vec3(0.0), ringPlaneNormal);
     
-    if (abs(surfaceToSun.y) > 1e-8 && dot(normalObjSpace, lightDirectionObjSpace) < 0.0) {
-      float t = rayPlaneIntersection(p, surfaceToSun, vec3(0.0), ringPlaneNormal);
+    vec3 ringIntersection = p + t * surfaceToSun;
       
-      vec3 ringIntersection = p + t * surfaceToSun;
-        
-      // Calculate distance from ring center
-      float tx = length(ringIntersection.xy) / ringSize;
-      // See advanced_rings_fs.glsl for explanation of textureOffset
-      float texCoord = (tx - textureOffset.x) / (textureOffset.y - textureOffset.x);
+    // Calculate distance from ring center
+    float tx = length(ringIntersection.xy) / ringSize;
+    // See advanced_rings_fs.glsl for explanation of textureOffset
+    float texCoord = (tx - textureOffset.x) / (textureOffset.y - textureOffset.x);
 
-      if (texCoord >= 0.0 && texCoord <= 1.0) {
-        // Sample ring transparency texture
-        float ringOpacity = texture(ringTextureTransparency, texCoord).r;
-        
-        // Increase the shadow darkness factor with low angle to simulate the light having
-        // to pass through more material
-        float angleFactor = clamp(abs(-dot(ringPlaneNormal, surfaceToSun)) / 2.0, 0.0, 0.3);
-        // Calculate shadow factor based on ring opacity
-        shadow = clamp(ringOpacity + angleFactor, 0.05, 1.0);
-        lightColor = texture(ringTextureColor, texCoord).rgb;
-      }
+    if (texCoord >= 0.0 && texCoord <= 1.0) {
+      // Sample ring transparency texture
+      float ringOpacity = texture(ringTextureTransparency, texCoord).r;
+      
+      // Increase the shadow darkness factor with low angle to simulate the light having
+      // to pass through more material
+      float angleFactor = clamp(abs(-dot(ringPlaneNormal, surfaceToSun)) / 2.0, 0.0, 0.3);
+      // Calculate shadow factor based on ring opacity
+      shadow = clamp(ringOpacity + angleFactor, 0.05, 1.0);
+      lightColor = texture(ringTextureColor, texCoord).rgb;
     }
-
-  #endif // USE_RING_SHADOWS
+  }
 
   // Blend the light color passing through the rings with the pre-shaded color
   frag.color.rgb = mix(preShadedColor * lightColor * ambientIntensity, frag.color.rgb, shadow);
 
-#endif // SHADOW_MAPPING_ENABLED
+#endif // (SHADOW_MAPPING_ENABLED && PERFORM_SHADING && USE_RING_SHADOWS)
 
   frag.color.a *= opacity;
   frag.color = clamp(frag.color, 0.0, 1.0);
