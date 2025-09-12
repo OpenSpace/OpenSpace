@@ -514,22 +514,35 @@ void LuaConsole::render() {
     // If the characters fit on one line we should not add any extra rows
     nCommandRows = nCommandRows > 1 ? nCommandRows - 1 : 0;
 
-    // The command is split in 3 parts to render the suggestion in a different color
-    std::string firstPart = _autoCompleteState.insertPosition != 0 ?
-        currentCommand.substr(0, _autoCompleteState.insertPosition) : currentCommand;
-    std::string secondPart = _autoCompleteState.insertPosition != 0 ?
-        currentCommand.substr(_autoCompleteState.insertPosition) : "";
+    // The command is split in 3 parts to render the suggestion in a different color:
+    // the part before the suggestion, the suggestion, and the part after the suggestion
+    std::string beforeSuggestion =  currentCommand;
+    std::string afterSuggestion = "";
+
+    if (_autoCompleteState.insertPosition != 0) {
+        beforeSuggestion = currentCommand.substr(0, _autoCompleteState.insertPosition);
+        afterSuggestion = currentCommand.substr(_autoCompleteState.insertPosition);
+    }
 
     // We pad the strings with empty spaces so that each part is rendered in their correct
     // positions, even if linebreaks are added
     // Pad suggestion before and after with ' '
-    const std::string suggestion = std::string(firstPart.size() + 2, ' ') +
-        _autoCompleteState.suggestion + std::string(secondPart.size(), ' ');
+    const std::string suggestion = std::string(beforeSuggestion.size() + 2, ' ') +
+        _autoCompleteState.suggestion + std::string(afterSuggestion.size(), ' ');
     // Pad first part at the end with ' '
-    firstPart.insert(firstPart.end(), totalCommandSize - firstPart.size(), ' ');
+    beforeSuggestion.insert(
+        beforeSuggestion.end(),
+        totalCommandSize - beforeSuggestion.size(),
+        ' '
+    );
     // Pad second part in the beginning with ' '
-    secondPart.insert(secondPart.begin(), totalCommandSize - secondPart.size(), ' ');
+    afterSuggestion.insert(
+        afterSuggestion.begin(),
+        totalCommandSize - afterSuggestion.size(),
+        ' '
+    );
 
+    // Adds newline character to command whenever it reaches the max width of the window
     auto linebreakCommand = [nCharactersPerRow](const std::string& s) {
         const bool requiresSplitting = s.size() > nCharactersPerRow;
 
@@ -565,7 +578,7 @@ void LuaConsole::render() {
     RenderFont(
         *_font,
         inputLocation,
-        linebreakCommand("> " + firstPart),
+        linebreakCommand("> " + beforeSuggestion),
         _entryTextColor
     );
 
@@ -580,7 +593,7 @@ void LuaConsole::render() {
     RenderFont(
         *_font,
         inputLocation,
-        linebreakCommand(secondPart),
+        linebreakCommand(afterSuggestion),
         _entryTextColor,
         ghoul::fontrendering::CrDirection::Down
     );
@@ -892,7 +905,7 @@ void LuaConsole::registerKeyHandlers() {
 
             // Find the position of the last JumpCharacter before _inputPosition
             size_t start = 0;
-            for (size_t i = _inputPosition; i > 0; --i) {
+            for (size_t i = _inputPosition; i > 0; i--) {
                 if (JumpCharacters.find(command[i - 1]) != std::string::npos) {
                     start = i;
                     break;
@@ -1055,7 +1068,7 @@ void LuaConsole::autoCompleteCommand() {
 size_t LuaConsole::detectContext(std::string_view command) {
     // Find the path starting point which can start with either " ' or [
     size_t pathStartIndex = 0;
-    for (size_t i = _inputPosition; i > 0; --i) {
+    for (size_t i = _inputPosition; i > 0; i--) {
         if (PathStartIdentifier.find(command[i - 1]) != std::string::npos) {
             pathStartIndex = i;
             break;
@@ -1196,12 +1209,10 @@ void LuaConsole::filterSuggestions() {
         return out;
     };
 
-    // We're only interested in unique matches
-    std::set<std::string> results;
+    std::vector<std::string> results;
+    results.reserve(_autoCompleteState.suggestions.size());
 
-    std::string input = _autoCompleteState.input;
-
-    input = normalize(input);
+    std::string input = normalize(_autoCompleteState.input);
 
     for (const std::string& suggestion : _autoCompleteState.suggestions) {
         std::string suggestionNormalized = normalize(suggestion);
@@ -1218,12 +1229,17 @@ void LuaConsole::filterSuggestions() {
         }
 
         if (suggestionNormalized.starts_with(input)) {
-            results.insert(result);
+            results.push_back(result);
         }
     }
 
-    _autoCompleteState.suggestions =
-        std::vector<std::string>(results.begin(), results.end());
+    results.shrink_to_fit();
+
+    // We're only interested in unique matches, and want them sorted alphabetically
+    std::sort(results.begin(), results.end());
+    results.erase(std::unique(results.begin(), results.end()), results.end());
+
+    _autoCompleteState.suggestions = std::move(results);
 }
 
 void LuaConsole::cycleSuggestion() {
@@ -1263,7 +1279,7 @@ void LuaConsole::applySuggestion() {
     if (_autoCompleteState.context == Context::Function &&
         !_autoCompleteState.suggestion.ends_with('.'))
     {
-        // We're in a leaf function add paranthesis
+        // We're in a leaf function => add parantheses
         currentCommand.insert(_inputPosition, "()");
         // Set the cursor position to be between the brackets
         _inputPosition++;
