@@ -803,7 +803,7 @@ void LuaConsole::registerKeyHandlers() {
         KeyModifier::None,
         [this]() {
             if (_inputPosition > 0) {
-                --_inputPosition;
+                _inputPosition--;
             }
         }
     );
@@ -814,7 +814,7 @@ void LuaConsole::registerKeyHandlers() {
         KeyModifier::Control,
             [this]() {
             if (_inputPosition > 0) {
-                --_inputPosition;
+                _inputPosition--;
             }
         }
     );
@@ -854,7 +854,7 @@ void LuaConsole::registerKeyHandlers() {
         KeyModifier::None,
         [this]() {
             if (_activeCommand > 0) {
-                --_activeCommand;
+                _activeCommand--;
             }
             _inputPosition = _commands[_activeCommand].length();
         }
@@ -866,7 +866,7 @@ void LuaConsole::registerKeyHandlers() {
         KeyModifier::None,
         [this]() {
             if (_activeCommand < _commands.size() - 1) {
-                ++_activeCommand;
+                _activeCommand++;
             }
             _inputPosition = _commands[_activeCommand].length();
         }
@@ -879,7 +879,7 @@ void LuaConsole::registerKeyHandlers() {
         [this]() {
             if (_inputPosition > 0) {
                 _commands[_activeCommand].erase(_inputPosition - 1, 1);
-                --_inputPosition;
+                _inputPosition--;
             }
         }
     );
@@ -899,7 +899,7 @@ void LuaConsole::registerKeyHandlers() {
             // behavior results in abc.de -> abc. -> abc -> 'empty string'
             if (JumpCharacters.find(command[_inputPosition - 1]) != std::string::npos) {
                 command.erase(_inputPosition - 1, 1);
-                --_inputPosition;
+                _inputPosition--;
                 return;
             }
 
