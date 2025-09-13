@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/screenspaceframebuffer.h>
+#include <openspace/rendering/screenspaceframebuffer.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
@@ -133,10 +133,6 @@ void ScreenSpaceFramebuffer::render(const RenderData& renderData) {
 
 bool ScreenSpaceFramebuffer::isReady() const {
     return _shader && _texture;
-}
-
-void ScreenSpaceFramebuffer::setSize(glm::vec2 size) {
-    _size = std::move(size);
 }
 
 void ScreenSpaceFramebuffer::addRenderFunction(RenderFunction renderFunction) {

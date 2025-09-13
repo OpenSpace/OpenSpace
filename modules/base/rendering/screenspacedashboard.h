@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
 #define __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
 
-#include <modules/base/rendering/screenspaceframebuffer.h>
+#include <openspace/rendering/screenspaceframebuffer.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/rendering/dashboard.h>

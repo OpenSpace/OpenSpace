@@ -22,58 +22,56 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACERENDERABLERENDERABLE___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACERENDERABLERENDERABLE___H__
+#ifndef __OPENSPACE_CORE___SCREENSPACETEXT___H__
+#define __OPENSPACE_CORE___SCREENSPACETEXT___H__
 
-#include <openspace/rendering/screenspaceframebuffer.h>
+#include <openspace/rendering/screenspacerenderable.h>
 
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec3property.h>
+#include <ghoul/font/fontrenderer.h>
+
+namespace ghoul { class Dictionary; }
+namespace ghoul::opengl {
+    class FramebufferObject;
+    class Texture;
+} // namespace ghoul::opengl
+namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
 
-namespace properties { class PropertyOwner; }
-
-class Renderable;
-class Rotation;
-class Scale;
-class Translation;
-
 namespace documentation { struct Documentation; }
 
-class ScreenSpaceRenderableRenderable : public ScreenSpaceFramebuffer {
+class ScreenSpaceText : public ScreenSpaceRenderable {
 public:
-    using RenderFunction = std::function<void()>;
+    explicit ScreenSpaceText(const ghoul::Dictionary& dictionary);
 
-    explicit ScreenSpaceRenderableRenderable(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceRenderableRenderable() override;
-
-    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
+    bool isReady() const override;
+
     void update() override;
+    void render(const RenderData& renderData) override;
 
     static documentation::Documentation Documentation();
 
-private:
-    struct {
-        ghoul::mm_unique_ptr<properties::PropertyOwner> parent = nullptr;
-        ghoul::mm_unique_ptr<Translation> translation = nullptr;
-        ghoul::mm_unique_ptr<Rotation> rotation = nullptr;
-        ghoul::mm_unique_ptr<Scale> scale = nullptr;
-    } _transform;
-    ghoul::mm_unique_ptr<Renderable> _renderable = nullptr;
+protected:
+    std::string _buffer;
 
-    double _previousTime = 0.0;
-    properties::DoubleProperty _time;
-    properties::Vec3Property _cameraPosition;
-    properties::Vec3Property _cameraCenter;
-    properties::Vec3Property _cameraUp;
-    properties::FloatProperty _cameraFov;
+private:
+    void updateFramebuffer();
+    void bindTexture() override;
+
+    properties::StringProperty _fontName;
+    properties::FloatProperty _fontSize;
+
+    std::shared_ptr<ghoul::fontrendering::Font> _font;
+    std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
+
+    std::unique_ptr<ghoul::opengl::FramebufferObject> _framebuffer;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
 };
 
 } //namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACERENDERABLERENDERABLE___H__
+#endif // __OPENSPACE_CORE___SCREENSPACETEXT___H__
