@@ -35,6 +35,8 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // This `ScreenSpaceRenderable` shows a static text that can be changed via a
+    // property.
     struct [[codegen::Dictionary(DashboardItemText)]] Parameters {
         // [[codegen::verbatim(TextInfo.description)]]
         std::optional<std::string> text;
