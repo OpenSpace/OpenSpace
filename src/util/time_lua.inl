@@ -349,13 +349,18 @@ namespace {
 
 
 /**
- * Returns the current time as an date string of the form
- * (YYYY MON DDTHR:MN:SC.### ::RND) as returned by SPICE.
+ * Returns the current time as an date string. The format of the returned string can be
+ * adjusted by providing the format picture. The default picture that is used will be
+ * (YYYY MON DDTHR:MN:SC.### ::RND). See
+ * https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html
+ * for documentation on how the format string can be formatted
  *
  * \return The current time, in the format used by SPICE (YYYY MON DDTHR:MN:SC.### ::RND)
  */
-[[codegen::luawrap("SPICE")]] std::string currentTimeSpice() {
-    return std::string(openspace::global::timeManager->time().UTC());
+[[codegen::luawrap("SPICE")]] std::string currentTimeSpice(
+                                    std::string format = "YYYY MON DDTHR:MN:SC.### ::RND")
+{
+    return std::string(openspace::global::timeManager->time().string(format));
 }
 
 /**

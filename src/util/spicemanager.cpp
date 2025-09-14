@@ -637,8 +637,24 @@ std::string SpiceManager::dateFromEphemerisTime(double ephemerisTime, const char
         et2utc_c(ephemerisTime, "C", SecondsPrecision, BufferSize, Buffer.data());
     }
 
-
     return std::string(Buffer.data());
+}
+
+void SpiceManager::dateFromEphemerisTime(double ephemerisTime, char* outBuf,
+                                         int bufferSize, const std::string& format) const
+{
+    timout_c(ephemerisTime, format.c_str(), bufferSize, outBuf);
+    if (failed_c()) {
+        throwSpiceError(std::format(
+            "Error converting ephemeris time '{}' to date with format '{}'",
+            ephemerisTime, format
+        ));
+    }
+    if (outBuf[0] == '*') {
+        // The conversion failed and we need to use et2utc
+        constexpr int SecondsPrecision = 3;
+        et2utc_c(ephemerisTime, "C", SecondsPrecision, bufferSize, outBuf);
+    }
 }
 
 glm::dvec3 SpiceManager::targetPosition(const std::string& target,

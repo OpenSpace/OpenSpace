@@ -39,8 +39,7 @@ namespace documentation { struct Documentation; }
 
 class DashboardTextItem : public DashboardItem {
 public:
-    explicit DashboardTextItem(const ghoul::Dictionary& dictionary, float fontSize = 10.f,
-        const std::string& fontName = "Mono");
+    explicit DashboardTextItem(const ghoul::Dictionary& dictionary);
 
     void render(glm::vec2& penPosition) override;
 

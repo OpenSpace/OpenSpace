@@ -79,7 +79,7 @@ documentation::Documentation DashboardItemDate::Documentation() {
 }
 
 DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
-    : DashboardTextItem(dictionary, 15.f)
+    : DashboardTextItem(dictionary)
     , _formatString(FormatStringInfo, "Date: {}")
     , _timeFormat(TimeFormatInfo, "YYYY MON DD HR:MN:SC.### UTC ::RND")
 {

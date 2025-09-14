@@ -69,7 +69,7 @@ documentation::Documentation DashboardItemMission::Documentation() {
 }
 
 DashboardItemMission::DashboardItemMission(const ghoul::Dictionary& dictionary)
-    : DashboardTextItem(dictionary, 15.f)
+    : DashboardTextItem(dictionary)
 {}
 
 void DashboardItemMission::update() {}

@@ -64,11 +64,10 @@ documentation::Documentation DashboardTextItem::Documentation() {
     return codegen::doc<Parameters>("dashboardtextitem");
 }
 
-DashboardTextItem::DashboardTextItem(const ghoul::Dictionary& dictionary, float fontSize,
-                                     const std::string& fontName)
+DashboardTextItem::DashboardTextItem(const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, fontName)
-    , _fontSize(FontSizeInfo, fontSize, 6.f, 144.f, 1.f)
+    , _fontName(FontNameInfo, "Mono")
+    , _fontSize(FontSizeInfo, 10.f, 6.f, 144.f, 1.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
